@@ -17,10 +17,10 @@ def get_long_desc():
     return open(os.path.join(root_dir, 'README.md')).read()
 
 install_requires = [
-    'pycrunch'
 ]
 
 test_requires = [
+    'py.test'
 ]
 
 setup(
