@@ -7,7 +7,7 @@ import os
 thisdir = os.path.abspath(os.path.dirname(__file__))
 
 
-version = '1.0'
+version = '0.1'
 
 
 def get_long_desc():
