@@ -257,4 +257,4 @@ class TestDimension(TestCase):
         with self.assertRaises(ValueError) as ctx:
             Dimension._get_data_type(data)
         error = 'Could not extract data type from: {}'.format(data)
-        self.assertEqual(ctx.exception.message, error)
+        self.assertEqual(str(ctx.exception), error)
