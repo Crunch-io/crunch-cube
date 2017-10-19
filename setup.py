@@ -34,7 +34,7 @@ setup(
         "Programming Language :: Python",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
-    author=u'Crunch.io',
+    author='Crunch.io',
     author_email='dev@crunch.io',
     license='Proprietary',
     install_requires=install_requires,
