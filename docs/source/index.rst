@@ -6,9 +6,12 @@
 Welcome to Crunch Cube's documentation!
 =======================================
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+
+..
+   this should be commented for now
+   .. toctree::
+      :maxdepth: 2
+      :caption: Contents:
 
 
 
