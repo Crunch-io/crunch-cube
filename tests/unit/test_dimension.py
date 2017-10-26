@@ -4,5 +4,6 @@ from cr.cube.dimension import Dimension
 
 
 class TestDimension(TestCase):
-    def test_init(self):
-        assert 1 == 2
+    def test_dimension_raises_not_implemented(self):
+        with self.assertRaises(NotImplementedError):
+            Dimension(Mock())
