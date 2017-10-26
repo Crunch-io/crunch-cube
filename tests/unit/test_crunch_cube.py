@@ -14,16 +14,18 @@ class TestCrunchCube(TestCase):
             'Unsupported type provided: {}. '
             'A `cube` must be JSON or `dict`.'
         ).format(type(Mock()))
-        self.assertEqual(ctx.exception.message, expected)
+        self.assertEqual(str(ctx.exception), expected)
 
     @patch('cr.cube.crunch_cube.json.loads')
     def test_init_invokes_json_loads_for_string_input(self, mock_loads):
         mock_loads.return_value = {'value': {'result': {'dimensions': []}}}
         fake_json = 'fake cube json'
         CrunchCube(fake_json)
-        mock_loads.assert_called_once_witih(fake_json)
+        mock_loads.assert_called_once_with(fake_json)
 
     @patch('cr.cube.crunch_cube.CrunchCube._get_dimensions')
     def test_init_invokes_get_dimensions(self, mock_get_dimensions):
-        fake_cube_dict = {}
-        mock_get_dimensions.assert_called_once_witih(fake_cube_dict)
+        mock_get_dimensions.return_value = None
+        fake_cube_dict = {'value': Mock()}
+        CrunchCube(fake_cube_dict)
+        mock_get_dimensions.assert_called_once_with(fake_cube_dict['value'])

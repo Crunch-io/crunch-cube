@@ -24,7 +24,7 @@ class CrunchCube(object):
 
         cube = response['value']
         self._cube = cube
-        self._dimensions = self._get_dimensions(cube)
+        self._dims = self._get_dimensions(cube)
 
     @classmethod
     def _get_dimensions(cls, cube):
