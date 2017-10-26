@@ -18,7 +18,7 @@ class TestCrunchCube(TestCase):
 
     @patch('cr.cube.crunch_cube.json.loads')
     def test_init_invokes_json_loads_for_string_input(self, mock_loads):
-        mock_loads.return_value = {'result': {'dimensions': []}}
+        mock_loads.return_value = {'value': {'result': {'dimensions': []}}}
         fake_json = 'fake cube json'
         CrunchCube(fake_json)
         mock_loads.assert_called_once_witih(fake_json)
