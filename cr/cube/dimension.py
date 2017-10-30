@@ -1,6 +1,6 @@
 class Dimension(object):
     def __init__(self, dim):
-        self._name = self._var_references(dim)
+        self._dim = dim
 
     @classmethod
     def _get_type(cls, dim):
@@ -16,3 +16,21 @@ class Dimension(object):
             'type': cls._get_type(dim),
             'categories': dim['type']['categories'],
         }
+
+    # API methods
+
+    @property
+    def type(self):
+        return self._get_type(self._dim)
+
+    @property
+    def categories(self):
+        return self._dim['type']['categories']
+
+    @property
+    def references(self):
+        return self._dim['references']
+
+    def valid_indices(self):
+        return [i for (i, cat) in enumerate(self.categories)
+                if not cat['missing']]

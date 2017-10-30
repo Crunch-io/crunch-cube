@@ -1,5 +1,7 @@
 import json
 
+import numpy as np
+
 from cr.cube.dimension import Dimension
 
 
@@ -22,9 +24,7 @@ class CrunchCube(object):
                 'A `cube` must be JSON or `dict`.'
             ).format(type(response)))
 
-        cube = response['value']
-        self._cube = cube
-        self._dims = self._get_dimensions(cube)
+        self._cube = response['value']
 
     @classmethod
     def _get_dimensions(cls, cube):
@@ -32,3 +32,14 @@ class CrunchCube(object):
         return [Dimension(entry) for entry in cube['result']['dimensions']]
 
     # API Functions
+
+    @property
+    def dimensions(self):
+        return self._get_dimensions(self._cube)
+
+    def as_array(self):
+        counts = self._cube['result']['counts']
+        shape = [len(dim.categories) for dim in self.dimensions]
+        valid_indices = [dim.valid_indices() for dim in self.dimensions]
+        res = np.array(counts).reshape(shape)[np.ix_(*valid_indices)]
+        return res

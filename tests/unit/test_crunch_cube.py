@@ -22,10 +22,3 @@ class TestCrunchCube(TestCase):
         fake_json = 'fake cube json'
         CrunchCube(fake_json)
         mock_loads.assert_called_once_with(fake_json)
-
-    @patch('cr.cube.crunch_cube.CrunchCube._get_dimensions')
-    def test_init_invokes_get_dimensions(self, mock_get_dimensions):
-        mock_get_dimensions.return_value = None
-        fake_cube_dict = {'value': Mock()}
-        CrunchCube(fake_cube_dict)
-        mock_get_dimensions.assert_called_once_with(fake_cube_dict['value'])
