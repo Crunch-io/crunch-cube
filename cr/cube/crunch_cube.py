@@ -1,3 +1,4 @@
+from __future__ import division
 import json
 
 import numpy as np
@@ -44,3 +45,12 @@ class CrunchCube(object):
                          for dim in self.dimensions]
         res = np.array(counts).reshape(shape)[np.ix_(*valid_indices)]
         return res
+
+    def margins(self, dimension=None):
+        return np.sum(self.as_array(), dimension)
+
+    def proportions(self, dimension=None):
+        margins = self.margins(dimension)
+        if dimension == 1:
+            margins = margins[:, np.newaxis]
+        return self.as_array() / margins
