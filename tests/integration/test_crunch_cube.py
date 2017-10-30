@@ -103,3 +103,36 @@ class TestCrunchCube(TestCase):
         ])
         actual = cube.proportions(dimension=1)
         np.testing.assert_almost_equal(actual, expected)
+
+    def test_percentages_univariate_cat_din_none(self):
+        cube = CrunchCube(fixt_univariate_categorical)
+        expected = np.array([66.6666667, 33.3333333])
+        actual = cube.percentages()
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_percentages_bivariate_cat_din_none(self):
+        cube = CrunchCube(fixt_cat_x_cat)
+        expected = np.array([
+            [33.3333333, 13.3333333],
+            [33.3333333, 20.],
+        ])
+        actual = cube.percentages()
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_percentages_bivariate_cat_din_0(self):
+        cube = CrunchCube(fixt_cat_x_cat)
+        expected = np.array([
+            [50, 40],
+            [50, 60],
+        ])
+        actual = cube.percentages(dimension=0)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_percentages_bivariate_cat_din_1(self):
+        cube = CrunchCube(fixt_cat_x_cat)
+        expected = np.array([
+            [71.4285714, 28.5714286],
+            [62.50000, 37.50000],
+        ])
+        actual = cube.percentages(dimension=1)
+        np.testing.assert_almost_equal(actual, expected)

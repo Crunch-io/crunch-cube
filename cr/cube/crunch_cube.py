@@ -54,3 +54,6 @@ class CrunchCube(object):
         if dimension == 1:
             margins = margins[:, np.newaxis]
         return self.as_array() / margins
+
+    def percentages(self, dimension=None):
+        return self.proportions(dimension) * 100
