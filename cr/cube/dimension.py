@@ -31,6 +31,9 @@ class Dimension(object):
     def references(self):
         return self._dim['references']
 
-    def valid_indices(self):
-        return [i for (i, cat) in enumerate(self.categories)
-                if not cat['missing']]
+    def valid_indices(self, include_missing):
+        if include_missing:
+            return [i for (i, cat) in enumerate(self.categories)]
+        else:
+            return [i for (i, cat) in enumerate(self.categories)
+                    if not cat['missing']]

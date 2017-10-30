@@ -37,9 +37,10 @@ class CrunchCube(object):
     def dimensions(self):
         return self._get_dimensions(self._cube)
 
-    def as_array(self):
+    def as_array(self, include_missing=False):
         counts = self._cube['result']['counts']
         shape = [len(dim.categories) for dim in self.dimensions]
-        valid_indices = [dim.valid_indices() for dim in self.dimensions]
+        valid_indices = [dim.valid_indices(include_missing)
+                         for dim in self.dimensions]
         res = np.array(counts).reshape(shape)[np.ix_(*valid_indices)]
         return res
