@@ -6,9 +6,13 @@ python:
   - "3.4"
   - "3.5"
   - "3.6"
+before_install:
+    - pip install pytest pytest-cov
+    - pip install coveralls
 # command to install dependencies
 install:
-  - pip install -e .
-# command to run tests
+    - pip install -e .
 script:
-  - py.test tests
+    - py.test tests --cov cr.cube
+after_success:
+    - coveralls 
