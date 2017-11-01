@@ -1,0 +1,311 @@
+{
+    "element": "shoji:view",
+    "value": {
+        "result": {
+            "dimensions": [
+                {
+                    "derived": true,
+                    "references": {
+                        "alias": "categorical_array",
+                        "subreferences": [
+                            {
+                                "alias": "ca_subvar_1",
+                                "name": "ca_subvar_1",
+                                "description": null
+                            },
+                            {
+                                "alias": "ca_subvar_2",
+                                "name": "ca_subvar_2",
+                                "description": null
+                            },
+                            {
+                                "alias": "ca_subvar_3",
+                                "name": "ca_subvar_3",
+                                "description": null
+                            }
+                        ],
+                        "is_dichotomous": false,
+                        "description": null,
+                        "name": "categorical_array"
+                    },
+                    "type": {
+                        "subtype": {
+                            "class": "variable"
+                        },
+                        "elements": [
+                            {
+                                "id": 1,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "ca_subvar_1",
+                                        "name": "ca_subvar_1",
+                                        "description": null
+                                    },
+                                    "id": "0007",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": null,
+                                                "missing": false,
+                                                "id": 1,
+                                                "name": "a"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": false,
+                                                "id": 2,
+                                                "name": "b"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": false,
+                                                "id": 3,
+                                                "name": "c"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": false,
+                                                "id": 4,
+                                                "name": "d"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 2,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "ca_subvar_2",
+                                        "name": "ca_subvar_2",
+                                        "description": null
+                                    },
+                                    "id": "0008",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": null,
+                                                "missing": false,
+                                                "id": 1,
+                                                "name": "a"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": false,
+                                                "id": 2,
+                                                "name": "b"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": false,
+                                                "id": 3,
+                                                "name": "c"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": false,
+                                                "id": 4,
+                                                "name": "d"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 3,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "ca_subvar_3",
+                                        "name": "ca_subvar_3",
+                                        "description": null
+                                    },
+                                    "id": "0009",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": null,
+                                                "missing": false,
+                                                "id": 1,
+                                                "name": "a"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": false,
+                                                "id": 2,
+                                                "name": "b"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": false,
+                                                "id": 3,
+                                                "name": "c"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": false,
+                                                "id": 4,
+                                                "name": "d"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            }
+                        ],
+                        "class": "enum"
+                    }
+                },
+                {
+                    "derived": false,
+                    "references": {
+                        "alias": "categorical_array",
+                        "is_dichotomous": false,
+                        "description": null,
+                        "name": "categorical_array",
+                        "subreferences": [
+                            {
+                                "alias": "ca_subvar_1",
+                                "name": "ca_subvar_1",
+                                "description": null
+                            },
+                            {
+                                "alias": "ca_subvar_2",
+                                "name": "ca_subvar_2",
+                                "description": null
+                            },
+                            {
+                                "alias": "ca_subvar_3",
+                                "name": "ca_subvar_3",
+                                "description": null
+                            }
+                        ]
+                    },
+                    "type": {
+                        "ordinal": false,
+                        "subvariables": [
+                            "0007",
+                            "0008",
+                            "0009"
+                        ],
+                        "class": "categorical",
+                        "categories": [
+                            {
+                                "numeric_value": null,
+                                "missing": false,
+                                "id": 1,
+                                "name": "a"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": false,
+                                "id": 2,
+                                "name": "b"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": false,
+                                "id": 3,
+                                "name": "c"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": false,
+                                "id": 4,
+                                "name": "d"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": true,
+                                "id": -1,
+                                "name": "No Data"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "missing": 0,
+            "measures": {
+                "count": {
+                    "data": [
+                        3,
+                        3,
+                        0,
+                        0,
+                        0,
+                        1,
+                        3,
+                        2,
+                        0,
+                        0,
+                        0,
+                        2,
+                        1,
+                        3,
+                        0
+                    ],
+                    "n_missing": 0,
+                    "metadata": {
+                        "references": {},
+                        "derived": true,
+                        "type": {
+                            "integer": true,
+                            "missing_rules": {},
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "class": "numeric"
+                        }
+                    }
+                }
+            },
+            "element": "crunch:cube",
+            "counts": [
+                3,
+                3,
+                0,
+                0,
+                0,
+                1,
+                3,
+                2,
+                0,
+                0,
+                0,
+                2,
+                1,
+                3,
+                0
+            ],
+            "n": 6
+        }
+    }
+}

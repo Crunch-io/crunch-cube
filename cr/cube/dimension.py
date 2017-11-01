@@ -26,11 +26,18 @@ class Dimension(object):
     def _get_name(cls, element):
         name = element.get('name')
 
+        # For categorical variables
         if name:
             return name
 
+        # For numerical, datetime and text variables
         name = element.get('value')
         if isinstance(name, (str, unicode)):
+            return name
+
+        # For categorical array variables
+        name = name.get('references', {}).get('name')
+        if name:
             return name
 
         return '<NA>'

@@ -80,7 +80,7 @@ class TestDimension(TestCase):
     def test_labels_for_numericals(self):
         val_num_1 = 'fake val 1'
         val_num_2 = 'fake val 2'
-        val_num_3 = Mock()
+        val_num_3 = {}
         dim = {
             'type': {
                 "subtype": {

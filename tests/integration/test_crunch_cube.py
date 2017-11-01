@@ -9,6 +9,7 @@ from .fixtures import (
     fixt_voter_registration,
     fixt_simple_datetime,
     fixt_simple_text,
+    fixt_simple_cat_array,
 )
 from cr.cube.crunch_cube import CrunchCube
 
@@ -348,4 +349,22 @@ class TestCrunchCube(TestCase):
             ],
         ]
         actual = [dim.labels(include_missing=True) for dim in cube.dimensions]
+        self.assertEqual(actual, expected)
+
+    def test_labels_simple_cat_array_include_missing(self):
+        cube = CrunchCube(fixt_simple_cat_array)
+        expected = [
+            ['ca_subvar_1', 'ca_subvar_2', 'ca_subvar_3'],
+            ['a', 'b', 'c', 'd', 'No Data'],
+        ]
+        actual = [dim.labels(include_missing=True) for dim in cube.dimensions]
+        self.assertEqual(actual, expected)
+
+    def test_labels_simple_cat_array_exclude_missing(self):
+        cube = CrunchCube(fixt_simple_cat_array)
+        expected = [
+            ['ca_subvar_1', 'ca_subvar_2', 'ca_subvar_3'],
+            ['a', 'b', 'c', 'd'],
+        ]
+        actual = [dim.labels() for dim in cube.dimensions]
         self.assertEqual(actual, expected)
