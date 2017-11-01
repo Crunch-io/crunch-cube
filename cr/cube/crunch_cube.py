@@ -47,14 +47,14 @@ class CrunchCube(object):
         res = np.array(counts).reshape(shape)[np.ix_(*valid_indices)]
         return res
 
-    def margins(self, dimension=None):
-        return np.sum(self.as_array(), dimension)
+    def margin(self, axis=None):
+        return np.sum(self.as_array(), axis)
 
-    def proportions(self, dimension=None):
-        margins = self.margins(dimension)
-        if dimension == 1:
-            margins = margins[:, np.newaxis]
-        return self.as_array() / margins
+    def proportions(self, axis=None):
+        margin = self.margin(axis)
+        if axis == 1:
+            margin = margin[:, np.newaxis]
+        return self.as_array() / margin
 
-    def percentages(self, dimension=None):
-        return self.proportions(dimension) * 100
+    def percentages(self, axis=None):
+        return self.proportions(axis) * 100
