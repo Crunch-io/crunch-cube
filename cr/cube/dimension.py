@@ -32,7 +32,7 @@ class Dimension(object):
 
         # For numerical, datetime and text variables
         name = element.get('value')
-        if isinstance(name, (str, unicode)):
+        if isinstance(name, basestring):
             return name
 
         # For categorical array variables
