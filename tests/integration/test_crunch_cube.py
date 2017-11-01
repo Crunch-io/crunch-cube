@@ -7,6 +7,7 @@ from .fixtures import (
     fixt_univariate_categorical,
     fixt_voter_registration,
     fixt_simple_datetime,
+    fixt_simple_text,
 )
 from cr.cube.crunch_cube import CrunchCube
 
@@ -33,6 +34,12 @@ class TestCrunchCube(TestCase):
     def test_as_array_datetime(self):
         cube = CrunchCube(fixt_simple_datetime)
         expected = np.array([1, 1, 1, 1])
+        actual = cube.as_array()
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_as_array_text(self):
+        cube = CrunchCube(fixt_simple_text)
+        expected = np.array([1, 1, 1, 1, 1, 1])
         actual = cube.as_array()
         np.testing.assert_array_equal(actual, expected)
 
@@ -79,6 +86,12 @@ class TestCrunchCube(TestCase):
         actual = cube.margin()
         np.testing.assert_array_equal(actual, expected)
 
+    def test_margins_text(self):
+        cube = CrunchCube(fixt_simple_text)
+        expected = np.array([6])
+        actual = cube.margin()
+        np.testing.assert_array_equal(actual, expected)
+
     def test_margins_bivariate_cat_dim_none(self):
         cube = CrunchCube(fixt_cat_x_cat)
         expected = np.array([15])
@@ -114,6 +127,15 @@ class TestCrunchCube(TestCase):
         expected = np.array([0.25, 0.25, 0.25, 0.25])
         actual = cube.proportions()
         np.testing.assert_almost_equal(actual, expected)
+
+    def test_proportions_text(self):
+        cube = CrunchCube(fixt_simple_text)
+        expected = np.array([
+            0.1666667, 0.1666667, 0.1666667, 0.1666667, 0.1666667, 0.1666667]
+        )
+        actual = cube.proportions()
+        np.testing.assert_almost_equal(actual, expected)
+
 
     def test_proportions_bivariate_cat_din_none(self):
         cube = CrunchCube(fixt_cat_x_cat)
@@ -157,6 +179,19 @@ class TestCrunchCube(TestCase):
     def test_percentages_datetime(self):
         cube = CrunchCube(fixt_simple_datetime)
         expected = np.array([25., 25., 25., 25.])
+        actual = cube.percentages()
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_percentages_text(self):
+        cube = CrunchCube(fixt_simple_text)
+        expected = np.array([
+            16.6666667,
+            16.6666667,
+            16.6666667,
+            16.6666667,
+            16.6666667,
+            16.6666667,
+        ])
         actual = cube.percentages()
         np.testing.assert_almost_equal(actual, expected)
 

@@ -36,3 +36,11 @@ class TestDimension(TestCase):
         expected = 'datetime'
         actual = Dimension._get_type(dim)
         self.assertEqual(actual, expected)
+
+    def test_get_type_text(self):
+        dim = {
+            'type': {'subtype': {'class': 'text'}},
+        }
+        expected = 'text'
+        actual = Dimension._get_type(dim)
+        self.assertEqual(actual, expected)

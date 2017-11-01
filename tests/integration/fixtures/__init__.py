@@ -10,3 +10,5 @@ with open(os.path.join(thisdir, 'cubes', 'voter-registration.json')) as f:
     fixt_voter_registration = json.load(f)
 with open(os.path.join(thisdir, 'cubes', 'simple-datetime.json')) as f:
     fixt_simple_datetime = json.load(f)
+with open(os.path.join(thisdir, 'cubes', 'simple-text.json')) as f:
+    fixt_simple_text = json.load(f)

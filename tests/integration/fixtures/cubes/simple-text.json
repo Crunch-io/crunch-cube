@@ -1,0 +1,112 @@
+{
+    "element": "shoji:view",
+    "value": {
+        "query": {
+            "measures": {
+                "count": {
+                    "function": "cube_count",
+                    "args": []
+                }
+            },
+            "dimensions": [
+                {
+                    "variable": "https://alpha.crunch.io/api/datasets/75ff860fd8b643c3a4fcdea0300cc727/variables/000003/"
+                }
+            ],
+            "weight": null
+        },
+        "query_environment": {
+            "filter": []
+        },
+        "result": {
+            "dimensions": [
+                {
+                    "references": {
+                        "alias": "str",
+                        "name": "str",
+                        "description": "40 character string"
+                    },
+                    "derived": true,
+                    "type": {
+                        "subtype": {
+                            "class": "text",
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "missing_rules": {}
+                        },
+                        "elements": [
+                            {
+                                "id": 0,
+                                "value": "",
+                                "missing": false
+                            },
+                            {
+                                "id": 1,
+                                "value": "MORE JUNK",
+                                "missing": false
+                            },
+                            {
+                                "id": 2,
+                                "value": "NA",
+                                "missing": false
+                            },
+                            {
+                                "id": 3,
+                                "value": "green",
+                                "missing": false
+                            },
+                            {
+                                "id": 4,
+                                "value": "red",
+                                "missing": false
+                            },
+                            {
+                                "id": 5,
+                                "value": "reg-green-blue-whatever",
+                                "missing": false
+                            }
+                        ],
+                        "class": "enum"
+                    }
+                }
+            ],
+            "missing": 0,
+            "measures": {
+                "count": {
+                    "data": [
+                        1,
+                        1,
+                        1,
+                        1,
+                        1,
+                        1
+                    ],
+                    "n_missing": 0,
+                    "metadata": {
+                        "references": {},
+                        "derived": true,
+                        "type": {
+                            "integer": true,
+                            "missing_rules": {},
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "class": "numeric"
+                        }
+                    }
+                }
+            },
+            "element": "crunch:cube",
+            "counts": [
+                1,
+                1,
+                1,
+                1,
+                1,
+                1
+            ],
+            "n": 6
+        }
+    }
+}
