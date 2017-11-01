@@ -368,3 +368,23 @@ class TestCrunchCube(TestCase):
         ]
         actual = [dim.labels() for dim in cube.dimensions]
         self.assertEqual(actual, expected)
+
+    def test_as_array_simple_cat_array_exclude_missing(self):
+        cube = CrunchCube(fixt_simple_cat_array)
+        expected = np.array([
+            [3, 3, 0, 0],
+            [1, 3, 2, 0],
+            [0, 2, 1, 3],
+        ])
+        actual = cube.as_array()
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_as_array_simple_cat_array_include_missing(self):
+        cube = CrunchCube(fixt_simple_cat_array)
+        expected = np.array([
+            [3, 3, 0, 0, 0],
+            [1, 3, 2, 0, 0],
+            [0, 2, 1, 3, 0],
+        ])
+        actual = cube.as_array(include_missing=True)
+        np.testing.assert_array_equal(actual, expected)
