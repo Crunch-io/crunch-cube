@@ -1,0 +1,82 @@
+{
+    "element": "shoji:view",
+    "value": {
+        "result": {
+            "dimensions": [
+                {
+                    "references": {
+                        "alias": "VoterRegistration",
+                        "description": "Are you registered to vote?",
+                        "name": "VoterRegistration",
+                        "format": {
+                            "data": {
+                                "digits": 2
+                            },
+                            "summary": {
+                                "digits": 2
+                            }
+                        }
+                    },
+                    "derived": true,
+                    "type": {
+                        "subtype": {
+                            "missing_rules": {},
+                            "class": "numeric",
+                            "missing_reasons": {
+                                "No Data": -1
+                            }
+                        },
+                        "elements": [
+                            {
+                                "id": 0,
+                                "value": 1,
+                                "missing": false
+                            },
+                            {
+                                "id": 1,
+                                "value": 2,
+                                "missing": false
+                            },
+                            {
+                                "id": 2,
+                                "value": 3,
+                                "missing": false
+                            }
+                        ],
+                        "class": "enum"
+                    }
+                }
+            ],
+            "missing": 0,
+            "measures": {
+                "count": {
+                    "data": [
+                        885,
+                        105,
+                        10
+                    ],
+                    "n_missing": 0,
+                    "metadata": {
+                        "references": {},
+                        "derived": true,
+                        "type": {
+                            "integer": true,
+                            "missing_rules": {},
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "class": "numeric"
+                        }
+                    }
+                }
+            },
+            "element": "crunch:cube",
+            "counts": [
+                885,
+                105,
+                10
+            ],
+            "n": 1000
+        }
+    }
+}

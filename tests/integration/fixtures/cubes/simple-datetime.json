@@ -1,0 +1,91 @@
+{
+    "element": "shoji:view",
+    "value": {
+        "result": {
+            "dimensions": [
+                {
+                    "references": {
+                        "alias": "y",
+                        "name": "y",
+                        "description": "Date variable"
+                    },
+                    "derived": true,
+                    "type": {
+                        "subtype": {
+                            "resolution": "s",
+                            "class": "datetime",
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "missing_rules": {}
+                        },
+                        "elements": [
+                            {
+                                "id": 0,
+                                "value": "1776-07-04T00:00:00",
+                                "missing": false
+                            },
+                            {
+                                "id": 1,
+                                "value": "1950-12-24T00:00:00",
+                                "missing": false
+                            },
+                            {
+                                "id": 2,
+                                "value": "2000-01-01T00:00:00",
+                                "missing": false
+                            },
+                            {
+                                "id": 3,
+                                "value": "2000-01-02T00:00:00",
+                                "missing": false
+                            },
+                            {
+                                "id": 4,
+                                "value": {
+                                    "?": -1
+                                },
+                                "missing": true
+                            }
+                        ],
+                        "class": "enum"
+                    }
+                }
+            ],
+            "missing": 2,
+            "measures": {
+                "count": {
+                    "data": [
+                        1,
+                        1,
+                        1,
+                        1,
+                        2
+                    ],
+                    "n_missing": 2,
+                    "metadata": {
+                        "references": {},
+                        "derived": true,
+                        "type": {
+                            "integer": true,
+                            "missing_rules": {},
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "class": "numeric"
+                        }
+                    }
+                }
+            },
+            "element": "crunch:cube",
+            "counts": [
+                1,
+                1,
+                1,
+                1,
+                2
+            ],
+            "n": 6
+        }
+    }
+}

@@ -6,3 +6,7 @@ with open(os.path.join(thisdir, 'cubes', 'cat-x-cat.json')) as f:
     fixt_cat_x_cat = json.load(f)
 with open(os.path.join(thisdir, 'cubes', 'univariate-categorical.json')) as f:
     fixt_univariate_categorical = json.load(f)
+with open(os.path.join(thisdir, 'cubes', 'voter-registration.json')) as f:
+    fixt_voter_registration = json.load(f)
+with open(os.path.join(thisdir, 'cubes', 'simple-datetime.json')) as f:
+    fixt_simple_datetime = json.load(f)

@@ -32,6 +32,7 @@ class CrunchCube(object):
         '''Gets the dimensions of the crunch cube.'''
         return [Dimension(entry) for entry in cube['result']['dimensions']]
 
+
     # API Functions
 
     @property
@@ -40,7 +41,7 @@ class CrunchCube(object):
 
     def as_array(self, include_missing=False):
         counts = self._cube['result']['counts']
-        shape = [len(dim.categories) for dim in self.dimensions]
+        shape = [len(dim.elements) for dim in self.dimensions]
         valid_indices = [dim.valid_indices(include_missing)
                          for dim in self.dimensions]
         res = np.array(counts).reshape(shape)[np.ix_(*valid_indices)]

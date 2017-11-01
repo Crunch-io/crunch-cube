@@ -4,7 +4,9 @@ import numpy as np
 
 from .fixtures import (
     fixt_cat_x_cat,
-    fixt_univariate_categorical
+    fixt_univariate_categorical,
+    fixt_voter_registration,
+    fixt_simple_datetime,
 )
 from cr.cube.crunch_cube import CrunchCube
 
@@ -19,6 +21,18 @@ class TestCrunchCube(TestCase):
     def test_as_array_univariate_cat_exclude_missing(self):
         cube = CrunchCube(fixt_univariate_categorical)
         expected = np.array([10, 5])
+        actual = cube.as_array()
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_as_array_numeric(self):
+        cube = CrunchCube(fixt_voter_registration)
+        expected = np.array([885, 105, 10])
+        actual = cube.as_array()
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_as_array_datetime(self):
+        cube = CrunchCube(fixt_simple_datetime)
+        expected = np.array([1, 1, 1, 1])
         actual = cube.as_array()
         np.testing.assert_array_equal(actual, expected)
 
@@ -53,6 +67,18 @@ class TestCrunchCube(TestCase):
         actual = cube.margins()
         np.testing.assert_array_equal(actual, expected)
 
+    def test_margins_numeric(self):
+        cube = CrunchCube(fixt_voter_registration)
+        expected = np.array([1000])
+        actual = cube.margins()
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_margins_datetime(self):
+        cube = CrunchCube(fixt_simple_datetime)
+        expected = np.array([4])
+        actual = cube.margins()
+        np.testing.assert_array_equal(actual, expected)
+
     def test_margins_bivariate_cat_dim_none(self):
         cube = CrunchCube(fixt_cat_x_cat)
         expected = np.array([15])
@@ -74,6 +100,18 @@ class TestCrunchCube(TestCase):
     def test_proportions_univariate_cat_din_none(self):
         cube = CrunchCube(fixt_univariate_categorical)
         expected = np.array([0.6666667, 0.3333333])
+        actual = cube.proportions()
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_proportions_numeric(self):
+        cube = CrunchCube(fixt_voter_registration)
+        expected = np.array([0.885, 0.105, 0.010])
+        actual = cube.proportions()
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_proportions_datetime(self):
+        cube = CrunchCube(fixt_simple_datetime)
+        expected = np.array([0.25, 0.25, 0.25, 0.25])
         actual = cube.proportions()
         np.testing.assert_almost_equal(actual, expected)
 
@@ -107,6 +145,18 @@ class TestCrunchCube(TestCase):
     def test_percentages_univariate_cat_din_none(self):
         cube = CrunchCube(fixt_univariate_categorical)
         expected = np.array([66.6666667, 33.3333333])
+        actual = cube.percentages()
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_percentages_numeric(self):
+        cube = CrunchCube(fixt_voter_registration)
+        expected = np.array([88.5, 10.5, 1.0])
+        actual = cube.percentages()
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_percentages_datetime(self):
+        cube = CrunchCube(fixt_simple_datetime)
+        expected = np.array([25., 25., 25., 25.])
         actual = cube.percentages()
         np.testing.assert_almost_equal(actual, expected)
 
