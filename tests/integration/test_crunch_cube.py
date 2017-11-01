@@ -95,61 +95,61 @@ class TestCrunchCube(TestCase):
         actual = cube.as_array(include_missing=True)
         np.testing.assert_array_equal(actual, expected)
 
-    def test_margins_univariate_cat_axis_none(self):
+    def test_margin_univariate_cat_axis_none(self):
         cube = CrunchCube(fixt_univariate_categorical)
         expected = np.array([15])
         actual = cube.margin()
         np.testing.assert_array_equal(actual, expected)
 
-    def test_margins_numeric(self):
+    def test_margin_numeric(self):
         cube = CrunchCube(fixt_voter_registration)
         expected = np.array([1000])
         actual = cube.margin()
         np.testing.assert_array_equal(actual, expected)
 
-    def test_margins_datetime(self):
+    def test_margin_datetime(self):
         cube = CrunchCube(fixt_simple_datetime)
         expected = np.array([4])
         actual = cube.margin()
         np.testing.assert_array_equal(actual, expected)
 
-    def test_margins_text(self):
+    def test_margin_text(self):
         cube = CrunchCube(fixt_simple_text)
         expected = np.array([6])
         actual = cube.margin()
         np.testing.assert_array_equal(actual, expected)
 
-    def test_margins_cat_x_cat_axis_none(self):
+    def test_margin_cat_x_cat_axis_none(self):
         cube = CrunchCube(fixt_cat_x_cat)
         expected = np.array([15])
         actual = cube.margin()
         np.testing.assert_array_equal(actual, expected)
 
-    def test_margins_cat_x_datetime_axis_none(self):
+    def test_margin_cat_x_datetime_axis_none(self):
         cube = CrunchCube(fixt_cat_x_datetime)
         expected = np.array([4])
         actual = cube.margin()
         np.testing.assert_array_equal(actual, expected)
 
-    def test_margins_cat_x_cat_axis_0(self):
+    def test_margin_cat_x_cat_axis_0(self):
         cube = CrunchCube(fixt_cat_x_cat)
         expected = np.array([10, 5])
         actual = cube.margin(axis=0)
         np.testing.assert_array_equal(actual, expected)
 
-    def test_margins_cat_x_datetime_axis_0(self):
+    def test_margin_cat_x_datetime_axis_0(self):
         cube = CrunchCube(fixt_cat_x_datetime)
         expected = np.array([1, 1, 1, 1])
         actual = cube.margin(axis=0)
         np.testing.assert_array_equal(actual, expected)
 
-    def test_margins_cat_x_cat_axis_1(self):
+    def test_margin_cat_x_cat_axis_1(self):
         cube = CrunchCube(fixt_cat_x_cat)
         expected = np.array([7, 8])
         actual = cube.margin(axis=1)
         np.testing.assert_array_equal(actual, expected)
 
-    def test_margins_cat_x_datetime_axis_1(self):
+    def test_margin_cat_x_datetime_axis_1(self):
         cube = CrunchCube(fixt_cat_x_datetime)
         expected = np.array([1, 1, 1, 1, 0])
         actual = cube.margin(axis=1)
@@ -302,3 +302,50 @@ class TestCrunchCube(TestCase):
         ])
         actual = cube.percentages(axis=1)
         np.testing.assert_almost_equal(actual, expected)
+
+    def test_labels_cat_x_cat_exclude_missing(self):
+        cube = CrunchCube(fixt_cat_x_cat)
+        expected = [
+            ['B', 'C'],
+            ['C', 'E'],
+        ]
+        actual = [dim.labels() for dim in cube.dimensions]
+        self.assertEqual(actual, expected)
+
+    def test_labels_cat_x_cat_include_missing(self):
+        cube = CrunchCube(fixt_cat_x_cat)
+        expected = [
+            ['B', 'C', 'No Data'],
+            ['C', 'D', 'E', 'No Data'],
+        ]
+        actual = [dim.labels(include_missing=True) for dim in cube.dimensions]
+        self.assertEqual(actual, expected)
+
+    def test_labels_cat_x_datetime_exclude_missing(self):
+        cube = CrunchCube(fixt_cat_x_datetime)
+        expected = [
+            ['red', 'green', 'blue', '4', '9'],
+            [
+                '1776-07-04T00:00:00',
+                '1950-12-24T00:00:00',
+                '2000-01-01T00:00:00',
+                '2000-01-02T00:00:00'
+            ],
+        ]
+        actual = [dim.labels() for dim in cube.dimensions]
+        self.assertEqual(actual, expected)
+
+    def test_labels_cat_x_datetime_include_missing(self):
+        cube = CrunchCube(fixt_cat_x_datetime)
+        expected = [
+            ['red', 'green', 'blue', '4', '8', '9', 'No Data'],
+            [
+                '1776-07-04T00:00:00',
+                '1950-12-24T00:00:00',
+                '2000-01-01T00:00:00',
+                '2000-01-02T00:00:00',
+                '<NA>',
+            ],
+        ]
+        actual = [dim.labels(include_missing=True) for dim in cube.dimensions]
+        self.assertEqual(actual, expected)

@@ -22,25 +22,37 @@ class Dimension(object):
             'categories': dim['type']['categories'],
         }
 
+    @classmethod
+    def _get_name(cls, element):
+        name = element.get('name')
+
+        if name:
+            return name
+
+        name = element.get('value')
+        if isinstance(name, (str, unicode)):
+            return name
+
+        return '<NA>'
+
     # API methods
 
     @property
     def type(self):
         return self._get_type(self._dim)
 
-    @property
-    def categories(self):
-        return self._dim['type']['categories']
+    def labels(self, include_missing=False):
+        valid_indices = self.valid_indices(include_missing)
+        return [
+            self._get_name(el) for (i, el) in enumerate(self.elements)
+            if i in valid_indices
+        ]
 
     @property
     def elements(self):
         if self.type == 'categorical':
             return self._dim['type']['categories']
         return self._dim['type']['elements']
-
-    @property
-    def references(self):
-        return self._dim['references']
 
     def valid_indices(self, include_missing):
         if include_missing:

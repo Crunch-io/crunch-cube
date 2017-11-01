@@ -44,3 +44,35 @@ class TestDimension(TestCase):
         expected = 'text'
         actual = Dimension._get_type(dim)
         self.assertEqual(actual, expected)
+
+    def test_labels(self):
+        name_cat_1 = Mock()
+        name_cat_2 = Mock()
+        name_cat_3 = Mock()
+        dim = {
+            'type': {
+                'class': 'categorical',
+                'categories': [
+                    {
+                        'name': name_cat_1,
+                        'missing': False,
+                    },
+                    {
+                        'name': name_cat_2,
+                        'missing': False,
+                    },
+                    {
+                        'name': name_cat_3,
+                        'missing': True,
+                    },
+                ]
+            }
+        }
+        # Get only non-missing
+        expected = [name_cat_1, name_cat_2]
+        actual = Dimension(dim).labels()
+        self.assertEqual(actual, expected)
+        # Get all
+        expected = [name_cat_1, name_cat_2, name_cat_3]
+        actual = Dimension(dim).labels(include_missing=True)
+        self.assertEqual(actual, expected)
