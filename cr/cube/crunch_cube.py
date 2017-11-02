@@ -62,16 +62,21 @@ class CrunchCube(object):
         return [i + 1 for i in mr_dimensions_indices]
 
     @classmethod
-    def _get_valid_indices(cls, dimensions, include_missing):
+    def _get_valid_indices(cls, dimensions, include_missing, get_non_selected):
         valid_indices = [dim.valid_indices(include_missing)
                          for dim in dimensions]
 
         mr_selections_indices = cls._get_mr_selections_indices(dimensions)
+        mr_slice = [1] if get_non_selected else [0]
         if mr_selections_indices:
             # In the case of MR variables, we only need to select the
             # 'selected' slice of the 'selections' dimension.
             valid_indices = [
-                (valid_indices[i] if i not in mr_selections_indices else [0])
+                (
+                    valid_indices[i]
+                    if i not in mr_selections_indices
+                    else mr_slice
+                )
                 for (i, _) in enumerate(valid_indices)
             ]
 
@@ -96,17 +101,26 @@ class CrunchCube(object):
             if i not in mr_selections
         ]
 
-    def as_array(self, include_missing=False):
+    def as_array(self, include_missing=False, get_non_selected=False):
         counts = self._cube['result']['counts']
         all_dimensions = self._get_dimensions(self._cube)
         shape = [len(dim.elements) for dim in all_dimensions]
-        valid_indices = self._get_valid_indices(all_dimensions,
-                                                include_missing)
+        valid_indices = self._get_valid_indices(
+            all_dimensions,
+            include_missing,
+            get_non_selected
+        )
         res = np.array(counts).reshape(shape)[np.ix_(*valid_indices)]
         return self._fix_shape(res)
 
     def margin(self, axis=None):
-        return np.sum(self.as_array(), axis)
+        array = self.as_array()
+
+        all_dimensions = self._get_dimensions(self._cube)
+        if self._get_mr_selections_indices(all_dimensions):
+            return array + self.as_array(get_non_selected=True)
+
+        return np.sum(array, axis)
 
     def proportions(self, axis=None):
         margin = self.margin(axis)
