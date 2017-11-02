@@ -520,3 +520,9 @@ class TestCrunchCube(TestCase):
         expected = np.array([5, 6, 6])
         actual = cube.margin()
         np.testing.assert_array_equal(actual, expected)
+
+    def test_proportions_simple_mr(self):
+        cube = CrunchCube(fixt_simple_mr)
+        expected = np.array([0.6, 0.6666667, 0.])
+        actual = cube.proportions()
+        np.testing.assert_almost_equal(actual, expected)
