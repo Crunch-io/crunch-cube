@@ -11,6 +11,7 @@ from .fixtures import (
     fixt_simple_datetime,
     fixt_simple_text,
     fixt_simple_cat_array,
+    fixt_simple_mr,
 )
 from cr.cube.crunch_cube import CrunchCube
 
@@ -311,7 +312,7 @@ class TestCrunchCube(TestCase):
             ['B', 'C'],
             ['C', 'E'],
         ]
-        actual = [dim.labels() for dim in cube.dimensions]
+        actual = cube.labels()
         self.assertEqual(actual, expected)
 
     def test_labels_cat_x_cat_include_missing(self):
@@ -320,7 +321,7 @@ class TestCrunchCube(TestCase):
             ['B', 'C', 'No Data'],
             ['C', 'D', 'E', 'No Data'],
         ]
-        actual = [dim.labels(include_missing=True) for dim in cube.dimensions]
+        actual = cube.labels(include_missing=True)
         self.assertEqual(actual, expected)
 
     def test_labels_cat_x_datetime_exclude_missing(self):
@@ -334,7 +335,7 @@ class TestCrunchCube(TestCase):
                 '2000-01-02T00:00:00'
             ],
         ]
-        actual = [dim.labels() for dim in cube.dimensions]
+        actual = cube.labels()
         self.assertEqual(actual, expected)
 
     def test_labels_cat_x_datetime_include_missing(self):
@@ -349,7 +350,7 @@ class TestCrunchCube(TestCase):
                 None,
             ],
         ]
-        actual = [dim.labels(include_missing=True) for dim in cube.dimensions]
+        actual = cube.labels(include_missing=True)
         self.assertEqual(actual, expected)
 
     def test_labels_simple_cat_array_include_missing(self):
@@ -358,7 +359,7 @@ class TestCrunchCube(TestCase):
             ['ca_subvar_1', 'ca_subvar_2', 'ca_subvar_3'],
             ['a', 'b', 'c', 'd', 'No Data'],
         ]
-        actual = [dim.labels(include_missing=True) for dim in cube.dimensions]
+        actual = cube.labels(include_missing=True)
         self.assertEqual(actual, expected)
 
     def test_labels_simple_cat_array_exclude_missing(self):
@@ -367,7 +368,7 @@ class TestCrunchCube(TestCase):
             ['ca_subvar_1', 'ca_subvar_2', 'ca_subvar_3'],
             ['a', 'b', 'c', 'd'],
         ]
-        actual = [dim.labels() for dim in cube.dimensions]
+        actual = cube.labels()
         self.assertEqual(actual, expected)
 
     def test_as_array_simple_cat_array_exclude_missing(self):
@@ -390,7 +391,7 @@ class TestCrunchCube(TestCase):
         actual = cube.as_array(include_missing=True)
         np.testing.assert_array_equal(actual, expected)
 
-    def test_labels_cat_x_num_x_datetime(self):
+    def test_as_array_cat_x_num_x_datetime(self):
         '''Test 3D cube, slicing accross first (numerical) variable.'''
         cube = CrunchCube(fixt_cat_x_num_x_datetime)
         expected = np.array([
@@ -492,4 +493,24 @@ class TestCrunchCube(TestCase):
             [0, 0, 2, 1],
         ])
         actual = cube.margin(axis=2)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_labels_simple_mr_exclude_missing(self):
+        cube = CrunchCube(fixt_simple_mr)
+        expected = [['Response #1', 'Response #2', 'Response #3']]
+        actual = cube.labels()
+        self.assertEqual(actual, expected)
+
+    def test_labels_simple_mr_include_missing(self):
+        cube = CrunchCube(fixt_simple_mr)
+        expected = [
+            ['Response #1', 'Response #2', 'Response #3']
+        ]
+        actual = cube.labels(include_missing=True)
+        self.assertEqual(actual, expected)
+
+    def test_as_array_simple_mr_exclude_missing(self):
+        cube = CrunchCube(fixt_simple_mr)
+        expected = np.array([3, 4, 0])
+        actual = cube.as_array()
         np.testing.assert_array_equal(actual, expected)

@@ -4,12 +4,12 @@ from cr.cube.dimension import Dimension
 
 
 class TestDimension(TestCase):
-    def test_get_type_multiple_response(self):
+    def test_get_type_categorical_array(self):
         dim = {
             'references': {'subreferences': []},
             'type': {'class': 'enum'},
         }
-        expected = 'multiple_response'
+        expected = 'categorical_array'
         actual = Dimension._get_type(dim)
         self.assertEqual(actual, expected)
 

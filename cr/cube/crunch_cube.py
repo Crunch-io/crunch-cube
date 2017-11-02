@@ -30,21 +30,80 @@ class CrunchCube(object):
     @classmethod
     def _get_dimensions(cls, cube):
         '''Gets the dimensions of the crunch cube.'''
-        return [Dimension(entry) for entry in cube['result']['dimensions']]
+        entries = cube['result']['dimensions']
+        return [
+            (
+                # Multiple Response and Categorical Array variables have
+                # two subsequent dimensions (elements and selections). For
+                # this reason it's necessary to pass in both of them in the
+                # Dimension class init method. This is needed in order to
+                # determine the correct type (CA or MR). We only skip the
+                # two-argument constructor for the last dimension in the list
+                # (where it's not possible to fetch the subsequent one).
+                Dimension(entry)
+                if i + 1 >= len(entries)
+                else Dimension(entry, entries[i + 1])
+            )
+            for (i, entry) in enumerate(entries)
+        ]
+
+    @classmethod
+    def _get_mr_selections_indices(cls, dimensions):
+        '''Get indices of each 'selection' dim, for corresponding MR dim.'''
+        mr_dimensions_indices = [
+            i for (i, dim) in enumerate(dimensions)
+            if (i + 1 < len(dimensions) and
+                dim.type == 'multiple_response')
+        ]
+        # For each MR and CA dimension, the 'selections' dimension
+        # follows right after it (in the originating cube).
+        # Here we increase the MR index by 1, which gives us
+        # the index of the corresponding 'selections' dimension.
+        return [i + 1 for i in mr_dimensions_indices]
+
+    @classmethod
+    def _get_valid_indices(cls, dimensions, include_missing):
+        valid_indices = [dim.valid_indices(include_missing)
+                         for dim in dimensions]
+
+        mr_selections_indices = cls._get_mr_selections_indices(dimensions)
+        if mr_selections_indices:
+            # In the case of MR variables, we only need to select the
+            # 'selected' slice of the 'selections' dimension.
+            valid_indices = [
+                (valid_indices[i] if i not in mr_selections_indices else [0])
+                for (i, _) in enumerate(valid_indices)
+            ]
+
+        return valid_indices
+
+    @classmethod
+    def _fix_shape(cls, array):
+        '''Fixes shape of MR variables, where 'selections' dims are dropped.'''
+        new_shape = [dim for dim in array.shape if dim != 1]
+        return array.reshape(new_shape)
 
     # API Functions
+    def labels(self, include_missing=False):
+        return [dim.labels(include_missing) for dim in self.dimensions]
 
     @property
     def dimensions(self):
-        return self._get_dimensions(self._cube)
+        all_dimensions = self._get_dimensions(self._cube)
+        mr_selections = self._get_mr_selections_indices(all_dimensions)
+        return [
+            dim for (i, dim) in enumerate(all_dimensions)
+            if i not in mr_selections
+        ]
 
     def as_array(self, include_missing=False):
         counts = self._cube['result']['counts']
-        shape = [len(dim.elements) for dim in self.dimensions]
-        valid_indices = [dim.valid_indices(include_missing)
-                         for dim in self.dimensions]
+        all_dimensions = self._get_dimensions(self._cube)
+        shape = [len(dim.elements) for dim in all_dimensions]
+        valid_indices = self._get_valid_indices(all_dimensions,
+                                                include_missing)
         res = np.array(counts).reshape(shape)[np.ix_(*valid_indices)]
-        return res
+        return self._fix_shape(res)
 
     def margin(self, axis=None):
         return np.sum(self.as_array(), axis)
