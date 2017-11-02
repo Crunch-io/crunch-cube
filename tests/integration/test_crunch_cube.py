@@ -452,3 +452,44 @@ class TestCrunchCube(TestCase):
         ])
         actual = cube.proportions()
         np.testing.assert_array_equal(actual, expected)
+
+    def test_margin_cat_x_num_x_datetime_axis_none(self):
+        cube = CrunchCube(fixt_cat_x_num_x_datetime)
+        expected = np.array([20])
+        actual = cube.margin()
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_margin_cat_x_num_x_datetime_axis_0(self):
+        cube = CrunchCube(fixt_cat_x_num_x_datetime)
+        expected = np.array([
+            [3, 2],
+            [3, 4],
+            [4, 3],
+            [0, 1],
+        ])
+        actual = cube.margin(axis=0)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_margin_cat_x_num_x_datetime_axis_1(self):
+        cube = CrunchCube(fixt_cat_x_num_x_datetime)
+        expected = np.array([
+            [1, 1],
+            [3, 2],
+            [2, 3],
+            [3, 2],
+            [1, 2],
+        ])
+        actual = cube.margin(axis=1)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_margin_cat_x_num_x_datetime_axis_2(self):
+        cube = CrunchCube(fixt_cat_x_num_x_datetime)
+        expected = np.array([
+            [2, 0, 0, 0],
+            [3, 2, 0, 0],
+            [0, 5, 0, 0],
+            [0, 0, 5, 0],
+            [0, 0, 2, 1],
+        ])
+        actual = cube.margin(axis=2)
+        np.testing.assert_array_equal(actual, expected)
