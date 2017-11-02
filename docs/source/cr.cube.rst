@@ -12,6 +12,13 @@ cr\.cube\.dimension module
     :undoc-members:
     :show-inheritance:
 
+cr\.cube\.crunch_cube module
+----------------------------
+
+.. automodule:: cr.cube.crunch_cube
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 Module contents
 ---------------
