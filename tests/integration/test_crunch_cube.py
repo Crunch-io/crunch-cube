@@ -6,6 +6,7 @@ from .fixtures import (
     fixt_cat_x_cat,
     fixt_cat_x_datetime,
     fixt_cat_x_num_x_datetime,
+    fixt_cat_x_mr,
     fixt_univariate_categorical,
     fixt_voter_registration,
     fixt_simple_datetime,
@@ -526,3 +527,21 @@ class TestCrunchCube(TestCase):
         expected = np.array([0.6, 0.6666667, 0.])
         actual = cube.proportions()
         np.testing.assert_almost_equal(actual, expected)
+
+    def test_labels_cat_x_mr_exclude_missing(self):
+        cube = CrunchCube(fixt_cat_x_mr)
+        expected = [
+            ['rambutan', 'satsuma'],
+            ['dog', 'cat', 'wombat'],
+        ]
+        actual = cube.labels()
+        self.assertEqual(actual, expected)
+
+    def test_labels_cat_x_mr_include_missing(self):
+        cube = CrunchCube(fixt_cat_x_mr)
+        expected = [
+            ['rambutan', 'satsuma', 'No Data'],
+            ['dog', 'cat', 'wombat'],
+        ]
+        actual = cube.labels(include_missing=True)
+        self.assertEqual(actual, expected)
