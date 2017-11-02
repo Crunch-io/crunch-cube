@@ -32,7 +32,6 @@ class CrunchCube(object):
         '''Gets the dimensions of the crunch cube.'''
         return [Dimension(entry) for entry in cube['result']['dimensions']]
 
-
     # API Functions
 
     @property

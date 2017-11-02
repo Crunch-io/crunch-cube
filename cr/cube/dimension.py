@@ -45,7 +45,7 @@ class Dimension(object):
         if name:
             return name
 
-        return '<NA>'
+        return None
 
     # API methods
 

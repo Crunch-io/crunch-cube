@@ -20,3 +20,5 @@ with open(os.path.join(thisdir, 'cubes', 'simple-text.json')) as f:
     fixt_simple_text = json.load(f)
 with open(os.path.join(thisdir, 'cubes', 'simple-cat-array.json')) as f:
     fixt_simple_cat_array = json.load(f)
+with open(os.path.join(thisdir, 'cubes', 'cat-x-num-x-datetime.json')) as f:
+    fixt_cat_x_num_x_datetime = json.load(f)

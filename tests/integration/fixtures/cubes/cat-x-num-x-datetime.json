@@ -1,0 +1,238 @@
+{
+    "element": "shoji:view",
+    "value": {
+        "result": {
+            "dimensions": [
+                {
+                    "references": {
+                        "alias": "bin(v3)",
+                        "name": "bin(v3)"
+                    },
+                    "derived": true,
+                    "type": {
+                        "subtype": {
+                            "missing_rules": {},
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "class": "numeric"
+                        },
+                        "elements": [
+                            {
+                                "id": 1,
+                                "value": [
+                                    5,
+                                    10
+                                ],
+                                "missing": false
+                            },
+                            {
+                                "id": 2,
+                                "value": [
+                                    10,
+                                    15
+                                ],
+                                "missing": false
+                            },
+                            {
+                                "id": 3,
+                                "value": [
+                                    15,
+                                    20
+                                ],
+                                "missing": false
+                            },
+                            {
+                                "id": 4,
+                                "value": [
+                                    20,
+                                    25
+                                ],
+                                "missing": false
+                            },
+                            {
+                                "id": 5,
+                                "value": [
+                                    25,
+                                    30
+                                ],
+                                "missing": false
+                            }
+                        ],
+                        "class": "enum"
+                    }
+                },
+                {
+                    "references": {
+                        "alias": "rollup(v5, NULL)",
+                        "name": "rollup(v5, NULL)"
+                    },
+                    "derived": true,
+                    "type": {
+                        "subtype": {
+                            "resolution": "W",
+                            "class": "datetime",
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "missing_rules": {}
+                        },
+                        "elements": [
+                            {
+                                "id": 0,
+                                "value": "1955-11-03",
+                                "missing": false
+                            },
+                            {
+                                "id": 1,
+                                "value": "1955-11-10",
+                                "missing": false
+                            },
+                            {
+                                "id": 2,
+                                "value": "1955-11-17",
+                                "missing": false
+                            },
+                            {
+                                "id": 3,
+                                "value": "1955-11-24",
+                                "missing": false
+                            }
+                        ],
+                        "class": "enum"
+                    }
+                },
+                {
+                    "derived": false,
+                    "references": {
+                        "alias": "v4",
+                        "name": "v4"
+                    },
+                    "type": {
+                        "ordinal": false,
+                        "class": "categorical",
+                        "categories": [
+                            {
+                                "numeric_value": 1,
+                                "id": 1,
+                                "name": "B",
+                                "missing": false
+                            },
+                            {
+                                "numeric_value": 2,
+                                "id": 2,
+                                "name": "C",
+                                "missing": false
+                            },
+                            {
+                                "numeric_value": null,
+                                "id": -1,
+                                "name": "No Data",
+                                "missing": true
+                            }
+                        ]
+                    }
+                }
+            ],
+            "missing": 0,
+            "measures": {
+                "count": {
+                    "data": [
+                        1, 1, 0, 0,
+                        0, 0, 0, 0,
+                        0, 0, 0, 0,
+                        2, 1, 0, 1,
+                        1, 0, 0, 0,
+                        0, 0, 0, 0,
+                        0, 0, 0, 2,
+                        3, 0, 0, 0,
+                        0, 0, 0, 0,
+                        0, 0, 0, 0,
+                        0, 0, 3, 2,
+                        0, 0, 0, 0,
+                        0, 0, 0, 0,
+                        0, 0, 1, 1,
+                        0, 0, 1, 0
+                    ],
+                    "n_missing": 0,
+                    "metadata": {
+                        "references": {},
+                        "derived": true,
+                        "type": {
+                            "integer": true,
+                            "missing_rules": {},
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "class": "numeric"
+                        }
+                    }
+                }
+            },
+            "element": "crunch:cube",
+            "counts": [
+                1,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                2,
+                1,
+                0,
+                1,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                2,
+                3,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                3,
+                2,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1,
+                1,
+                0,
+                0,
+                1,
+                0
+            ],
+            "n": 20
+        }
+    }
+}

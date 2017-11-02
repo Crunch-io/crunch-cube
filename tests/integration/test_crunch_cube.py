@@ -5,6 +5,7 @@ import numpy as np
 from .fixtures import (
     fixt_cat_x_cat,
     fixt_cat_x_datetime,
+    fixt_cat_x_num_x_datetime,
     fixt_univariate_categorical,
     fixt_voter_registration,
     fixt_simple_datetime,
@@ -345,7 +346,7 @@ class TestCrunchCube(TestCase):
                 '1950-12-24T00:00:00',
                 '2000-01-01T00:00:00',
                 '2000-01-02T00:00:00',
-                '<NA>',
+                None,
             ],
         ]
         actual = [dim.labels(include_missing=True) for dim in cube.dimensions]
@@ -387,4 +388,36 @@ class TestCrunchCube(TestCase):
             [0, 2, 1, 3, 0],
         ])
         actual = cube.as_array(include_missing=True)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_labels_cat_x_num_x_datetime_slice_accross_0(self):
+        '''Test 3D cube, slicing accross first (numerical) variable.'''
+        cube = CrunchCube(fixt_cat_x_num_x_datetime)
+        expected = np.array([
+            [[1, 1],
+             [0, 0],
+             [0, 0],
+             [0, 0]],
+
+            [[2, 1],
+             [1, 1],
+             [0, 0],
+             [0, 0]],
+
+            [[0, 0],
+             [2, 3],
+             [0, 0],
+             [0, 0]],
+
+            [[0, 0],
+             [0, 0],
+             [3, 2],
+             [0, 0]],
+
+            [[0, 0],
+             [0, 0],
+             [1, 1],
+             [0, 1]]
+        ])
+        actual = cube.as_array()
         np.testing.assert_array_equal(actual, expected)

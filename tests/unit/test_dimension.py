@@ -110,6 +110,6 @@ class TestDimension(TestCase):
         actual = Dimension(dim).labels()
         self.assertEqual(actual, expected)
         # Get all
-        expected = [val_num_1, val_num_2, '<NA>']
+        expected = [val_num_1, val_num_2, None]
         actual = Dimension(dim).labels(include_missing=True)
         self.assertEqual(actual, expected)
