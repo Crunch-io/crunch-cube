@@ -390,7 +390,7 @@ class TestCrunchCube(TestCase):
         actual = cube.as_array(include_missing=True)
         np.testing.assert_array_equal(actual, expected)
 
-    def test_labels_cat_x_num_x_datetime_slice_accross_0(self):
+    def test_labels_cat_x_num_x_datetime(self):
         '''Test 3D cube, slicing accross first (numerical) variable.'''
         cube = CrunchCube(fixt_cat_x_num_x_datetime)
         expected = np.array([
@@ -420,4 +420,35 @@ class TestCrunchCube(TestCase):
              [0, 1]]
         ])
         actual = cube.as_array()
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_proportions_cat_x_num_datetime(self):
+        cube = CrunchCube(fixt_cat_x_num_x_datetime)
+        expected = np.array([
+            [[0.05, 0.05],
+             [0., 0.],
+             [0., 0.],
+             [0., 0.]],
+
+            [[0.1, 0.05],
+             [0.05, 0.05],
+             [0., 0.],
+             [0., 0.]],
+
+            [[0., 0.],
+             [0.1, 0.15],
+             [0., 0.],
+             [0., 0.]],
+
+            [[0., 0.],
+             [0., 0.],
+             [0.15, 0.1],
+             [0., 0.]],
+
+            [[0., 0.],
+             [0., 0.],
+             [0.05, 0.05],
+             [0., 0.05]],
+        ])
+        actual = cube.proportions()
         np.testing.assert_array_equal(actual, expected)
