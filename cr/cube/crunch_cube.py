@@ -104,6 +104,13 @@ class CrunchCube(object):
 
     @classmethod
     def _get_valid_indices(cls, dimensions, include_missing, get_non_selected):
+        '''Gets valid indices for each dimension.
+
+        Main criterion for a valid index is most often the information about whether the
+        corresponding value of the dimension is missing or not. For MR variables, since
+        they use two dimensions, the valid index for the 'selections' dimensions is [0],
+        except in the case of non-selected slices calculation, where it needs to be [1].
+        '''
         valid_indices = [dim.valid_indices(include_missing)
                          for dim in dimensions]
 
@@ -125,24 +132,22 @@ class CrunchCube(object):
 
     @classmethod
     def _fix_shape(cls, array):
-        '''Fixes shape of MR variables, where 'selections' dims are dropped.'''
+        '''Fixes shape of MR variables.
+        For MR variables, where 'selections' dims are dropped, the ndarray
+        needs to be reshaped, in order to seem as if those dims never existed.
+        '''
         new_shape = [dim for dim in array.shape if dim != 1]
         return array.reshape(new_shape)
 
-    # API Functions
-    def labels(self, include_missing=False):
-        return [dim.labels(include_missing) for dim in self.dimensions]
+    def _as_array(self, include_missing=False, get_non_selected=False):
+        '''Get crunch cube as ndarray.
 
-    @property
-    def dimensions(self):
-        all_dimensions = self._get_dimensions(self._cube)
-        mr_selections = self._get_mr_selections_indices(all_dimensions)
-        return [
-            dim for (i, dim) in enumerate(all_dimensions)
-            if i not in mr_selections
-        ]
-
-    def as_array(self, include_missing=False, get_non_selected=False):
+        Args
+            include_missing (bool): Include rows/cols for missing values
+            get_non_selected (bool): Get non-selected slices for MR vars
+        Returns
+            res (ndarray): Tabular representation of crunch cube
+        '''
         counts = self._cube['result']['counts']
         all_dimensions = self._get_dimensions(self._cube)
         shape = [len(dim.elements) for dim in all_dimensions]
@@ -153,6 +158,65 @@ class CrunchCube(object):
         )
         res = np.array(counts).reshape(shape)[np.ix_(*valid_indices)]
         return self._fix_shape(res)
+
+    # API Functions
+
+    def labels(self, include_missing=False):
+        '''Gets labels for each cube's dimension.
+
+        Args
+            include_missing (bool): Include labels for missing values
+
+        Returns
+            labels (list of lists): Labels for each dimension
+        '''
+        return [dim.labels(include_missing) for dim in self.dimensions]
+
+    @property
+    def dimensions(self):
+        '''Dimensions of the crunch cube.'''
+        all_dimensions = self._get_dimensions(self._cube)
+        mr_selections = self._get_mr_selections_indices(all_dimensions)
+        return [
+            dim for (i, dim) in enumerate(all_dimensions)
+            if i not in mr_selections
+        ]
+
+    def as_array(self, include_missing=False):
+        '''Get crunch cube as ndarray.
+
+        Returns the tabular representation of the crunch cube. The returning
+        value has as many dimensions, as there are dimensions in the crunch
+        cube itself. E.g. for a cross-tab representation of a categorical and
+        numerical variable, the resulting cube will have two dimensions.
+
+        Args
+            include_missing (bool): Include rows/cols for missing values
+        Returns
+            (ndarray): Tabular representation of the crunch cube
+
+        Example 1 (Categorical x Categorical):
+            cube = CrunchCube(response)
+            cube.as_array()
+
+            Output:
+                np.array([
+                    [5, 2],
+                    [5, 3],
+                ])
+
+        Example 2 (Categorical x Categorical, include missing values):
+            cube = CrunchCube(response)
+            cube.as_array(include_missing=True)
+
+            Output:
+                np.array([
+                    [5, 3, 2, 0],
+                    [5, 2, 3, 0],
+                    [0, 0, 0, 0],
+                ])
+        '''
+        return self._as_array(include_missing)
 
     def margin(self, axis=None):
         array = self.as_array()
