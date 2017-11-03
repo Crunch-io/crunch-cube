@@ -545,3 +545,45 @@ class TestCrunchCube(TestCase):
         ]
         actual = cube.labels(include_missing=True)
         self.assertEqual(actual, expected)
+
+    def test_as_array_cat_x_mr(self):
+        cube = CrunchCube(fixt_cat_x_mr)
+        expected = np.array([
+            [12, 12, 12],
+            [28, 22, 26],
+        ])
+        actual = cube.as_array()
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_margin_cat_x_mr_axis_none(self):
+        cube = CrunchCube(fixt_cat_x_mr)
+        expected = np.array([80, 79, 70])
+        actual = cube.margin()
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_margin_cat_x_mr_axis_0(self):
+        cube = CrunchCube(fixt_cat_x_mr)
+        expected = np.array([
+            [28, 25, 23],
+            [52, 54, 47]
+        ])
+        actual = cube.margin(axis=0)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_proportions_cat_x_mr_axis_none(self):
+        cube = CrunchCube(fixt_cat_x_mr)
+        expected = np.array([
+            [0.15, 0.1518987, 0.1714286],
+            [0.35, 0.2784810, 0.3714286],
+        ])
+        actual = cube.proportions()
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_proportions_cat_x_mr_axis_0(self):
+        cube = CrunchCube(fixt_cat_x_mr)
+        expected = np.array([
+            [0.4285714, 0.4800000, 0.5217391],
+            [0.5384615, 0.4074074, 0.5531915],
+        ])
+        actual = cube.proportions(axis=0)
+        np.testing.assert_almost_equal(actual, expected)
