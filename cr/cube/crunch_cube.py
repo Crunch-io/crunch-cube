@@ -219,6 +219,22 @@ class CrunchCube(object):
         return self._as_array(include_missing)
 
     def margin(self, axis=None):
+        '''Margin for the selected axis.
+
+        This function calculates the margin across the selected axis of the
+        crunch cube. For most variable types, this translates to the sum across
+        the selected axis. For MR variables, this is the sum of the selected
+        and non-selected slices.
+
+        Args
+            axis (int): Axis across the margin is calculated. If no axis is
+                        provided the margin is calculated across all axis.
+                        For Categoricals, Num, Datetime, and Text, this
+                        translates to sumation of all elements.
+        Returns
+        Example 1:
+        Example 2:
+        '''
         array = self.as_array()
 
         all_dimensions = self._get_dimensions(self._cube)
