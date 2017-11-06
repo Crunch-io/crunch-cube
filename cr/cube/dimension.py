@@ -1,4 +1,13 @@
+'''Contains implementation of the Dimension class, for Crunch Cubes.'''
+
+
 class Dimension(object):
+    '''Implementation of the Dimension class for Crunch Cubes.
+
+    This class contains all the utility functions for working with
+    Crunch Cube dimensions. It also hides some of the internal implementation
+    detail from the user, especially for Multiple response variables.
+    '''
     def __init__(self, dim, selections=None):
         self._dim = dim
         self._type = self._get_type(dim, selections)
@@ -31,14 +40,6 @@ class Dimension(object):
         return ids == [1, 0, -1]
 
     @classmethod
-    def _var_references(cls, dim):
-        return {
-            'refs': dim['references'],
-            'type': cls._get_type(dim),
-            'categories': dim['type']['categories'],
-        }
-
-    @classmethod
     def _get_name(cls, element):
         name = element.get('name')
 
@@ -56,7 +57,7 @@ class Dimension(object):
         # is not defined. So, if the value is textual, in python 3 the first
         # part of the 'or' statement should short-circuit to 'True'.
         type_ = type(value)
-        if not type_ == dict and (type_ == str or type_ == unicode):
+        if type_ != dict and (type_ == str or type_ == unicode):
             return value
 
         # For categorical array variables
@@ -70,9 +71,11 @@ class Dimension(object):
 
     @property
     def type(self):
+        '''Get type of the Crunch Dimension.'''
         return self._type
 
     def labels(self, include_missing=False):
+        '''Get labels of the Crunch Dimension.'''
         valid_indices = self.valid_indices(include_missing)
         return [
             self._get_name(el) for (i, el) in enumerate(self.elements)
@@ -81,11 +84,24 @@ class Dimension(object):
 
     @property
     def elements(self):
+        '''Get elements of the crunch Dimension.
+
+        For categorical variables, the elements are represented by categories
+        internally. For other variable types, actual 'elements' of the
+        Crunch Cube JSON response are returned.
+        '''
         if self.type == 'categorical':
             return self._dim['type']['categories']
         return self._dim['type']['elements']
 
     def valid_indices(self, include_missing):
+        '''Gets valid indices of Crunch Cube Dimension's elements.
+
+        This function needs to be used by CrunchCube class, in order to
+        correctly calculate the indices of the result that needs to be
+        returned to the user. In most cases, the non-valid indices are
+        those of the missing values.
+        '''
         if include_missing:
             return [i for (i, el) in enumerate(self.elements)]
         else:
