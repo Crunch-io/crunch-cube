@@ -45,16 +45,16 @@ cube.as_array()
 
 ## API
 ### `as_array`
-Tabular, or matrix, representation of the _cube_. The detailed description can be found here.
+Tabular, or matrix, representation of the _cube_. The detailed description can be found [here](http://crunch-cube.readthedocs.io/en/latest/cr.cube.html#cr-cube-crunch-cube-module).
 
 ### `margin`
-Calculates margins of the _cube_. The detailed description can be found here.
+Calculates margins of the _cube_. The detailed description can be found [here](http://crunch-cube.readthedocs.io/en/latest/cr.cube.html#cr-cube-crunch-cube-module).
 
 ### `proportions`
-Calculates proportions of single variable elements to the whole sample size. The detailed description can be found here.
+Calculates proportions of single variable elements to the whole sample size. The detailed description can be found [here](http://crunch-cube.readthedocs.io/en/latest/cr.cube.html#cr-cube-crunch-cube-module).
 
 ### `percentages`
-Calculates percentages of single variable elements to the whole sample size. The detailed description can be found here.
+Calculates percentages of single variable elements to the whole sample size. The detailed description can be found [here](http://crunch-cube.readthedocs.io/en/latest/cr.cube.html#cr-cube-crunch-cube-module).
 
 [![Build Status](https://travis-ci.org/Crunch-io/crunch-cube.png?branch=master)](https://travis-ci.org/Crunch-io/crunch-cube)
 [![Coverage Status](https://coveralls.io/repos/github/Crunch-io/crunch-cube/badge.svg?branch=master)](https://coveralls.io/github/Crunch-io/crunch-cube?branch=master)
