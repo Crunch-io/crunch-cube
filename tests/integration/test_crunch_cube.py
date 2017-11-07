@@ -615,3 +615,29 @@ class TestCrunchCube(TestCase):
         ])
         actual = cube.as_array()
         np.testing.assert_array_equal(actual, expected)
+
+    def test_margin_weighted_gender_x_ideology_axis_0(self):
+        cube = CrunchCube(fixt_econ_gender_x_ideology_weighted)
+        expected = np.array(
+            [71.8247, 181.8037, 375.3178, 220.4384, 110.99990, 39.6157]
+        )
+        actual = cube.margin(axis=0)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_margin_unweighted_gender_x_ideology_axis_0(self):
+        cube = CrunchCube(fixt_econ_gender_x_ideology_weighted)
+        expected = np.array([72, 182, 376, 220, 110, 40])
+        actual = cube.margin(axis=0, unweighted=True)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_margin_unweighted_gender_x_ideology_axis_1(self):
+        cube = CrunchCube(fixt_econ_gender_x_ideology_weighted)
+        expected = np.array([485, 515])
+        actual = cube.margin(axis=1, unweighted=True)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_margin_weighted_gender_x_ideology_axis_1(self):
+        cube = CrunchCube(fixt_econ_gender_x_ideology_weighted)
+        expected = np.array([500, 500])
+        actual = cube.margin(axis=1)
+        np.testing.assert_almost_equal(actual, expected, decimal=4)

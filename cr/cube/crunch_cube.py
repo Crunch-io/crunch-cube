@@ -239,7 +239,7 @@ class CrunchCube(object):
             unweighted=unweighted
         )
 
-    def margin(self, axis=None):
+    def margin(self, axis=None, unweighted=False):
         '''Get margin for the selected axis.
 
         the selected axis. For MR variables, this is the sum of the selected
@@ -296,11 +296,12 @@ class CrunchCube(object):
                 [0, 1],
             ])
         '''
-        array = self.as_array()
+        array = self.as_array(unweighted=unweighted)
 
         all_dimensions = self._get_dimensions(self._cube)
         if self._get_mr_selections_indices(all_dimensions):
-            margin = array + self._as_array(get_non_selected=True)
+            margin = array + self._as_array(get_non_selected=True,
+                                            unweighted=unweighted)
             if axis is None and len(margin.shape) > 1:
                 return np.sum(margin, 0)
             return margin
