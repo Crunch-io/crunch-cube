@@ -5,113 +5,113 @@
         "result": {
             "dimensions": [
                 {
-                    "derived": false,
                     "references": {
                         "alias": "Gender",
                         "name": "Gender",
                         "description": "Are you male or female?"
                     },
+                    "derived": false,
                     "type": {
                         "ordinal": false,
                         "class": "categorical",
                         "categories": [
                             {
                                 "numeric_value": 1,
-                                "missing": false,
                                 "id": 1,
-                                "name": "Male"
+                                "name": "Male",
+                                "missing": false
                             },
                             {
                                 "numeric_value": 2,
-                                "missing": false,
                                 "id": 2,
-                                "name": "Female"
+                                "name": "Female",
+                                "missing": false
                             },
                             {
                                 "numeric_value": 8,
-                                "missing": true,
                                 "id": 8,
-                                "name": "Skipped"
+                                "name": "Skipped",
+                                "missing": true
                             },
                             {
                                 "numeric_value": 9,
-                                "missing": true,
                                 "id": 9,
-                                "name": "Not Asked"
+                                "name": "Not Asked",
+                                "missing": true
                             },
                             {
                                 "numeric_value": null,
-                                "missing": true,
                                 "id": -1,
-                                "name": "No Data"
+                                "name": "No Data",
+                                "missing": true
                             }
                         ]
                     }
                 },
                 {
-                    "derived": false,
                     "references": {
                         "alias": "RespondentIdeology",
                         "name": "RespondentIdeology",
                         "description": "In general, how would you describe your own political viewpoint?"
                     },
+                    "derived": false,
                     "type": {
                         "ordinal": false,
                         "class": "categorical",
                         "categories": [
                             {
                                 "numeric_value": 1,
-                                "missing": false,
                                 "id": 1,
-                                "name": "Very liberal"
+                                "name": "Very liberal",
+                                "missing": false
                             },
                             {
                                 "numeric_value": 2,
-                                "missing": false,
                                 "id": 2,
-                                "name": "Liberal"
+                                "name": "Liberal",
+                                "missing": false
                             },
                             {
                                 "numeric_value": 3,
-                                "missing": false,
                                 "id": 3,
-                                "name": "Moderate"
+                                "name": "Moderate",
+                                "missing": false
                             },
                             {
                                 "numeric_value": 4,
-                                "missing": false,
                                 "id": 4,
-                                "name": "Conservative"
+                                "name": "Conservative",
+                                "missing": false
                             },
                             {
                                 "numeric_value": 5,
-                                "missing": false,
                                 "id": 5,
-                                "name": "Very Conservative"
+                                "name": "Very Conservative",
+                                "missing": false
                             },
                             {
                                 "numeric_value": 6,
-                                "missing": false,
                                 "id": 6,
-                                "name": "Not sure"
+                                "name": "Not sure",
+                                "missing": false
                             },
                             {
                                 "numeric_value": 8,
-                                "missing": true,
                                 "id": 8,
-                                "name": "Skipped"
+                                "name": "Skipped",
+                                "missing": true
                             },
                             {
                                 "numeric_value": 9,
-                                "missing": true,
                                 "id": 9,
-                                "name": "Not Asked"
+                                "name": "Not Asked",
+                                "missing": true
                             },
                             {
                                 "numeric_value": null,
-                                "missing": true,
                                 "id": -1,
-                                "name": "No Data"
+                                "name": "No Data",
+                                "missing": true
                             }
                         ]
                     }
@@ -120,7 +120,53 @@
             "missing": 0,
             "measures": {
                 "count": {
-                    "data": [32.9897, 87.6289, 176.2887, 117.5258, 72.1649, 13.4021, 0, 0, 0, 38.835, 94.1748, 199.0291, 102.9126, 38.835, 26.2136, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    "data": [
+                        32.98969072164949,
+                        87.62886597938147,
+                        176.28865979381482,
+                        117.52577319587621,
+                        72.16494845360833,
+                        13.402061855670103,
+                        0,
+                        0,
+                        0,
+                        38.83495145631068,
+                        94.17475728155327,
+                        199.02912621359187,
+                        102.91262135922315,
+                        38.83495145631068,
+                        26.213592233009717,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                    ],
                     "n_missing": 0,
                     "metadata": {
                         "references": {},
@@ -137,7 +183,53 @@
                 }
             },
             "element": "crunch:cube",
-            "counts": [32, 85, 171, 114, 70, 13, 0, 0, 0, 40, 97, 205, 106, 40, 27, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            "counts": [
+                32,
+                85,
+                171,
+                114,
+                70,
+                13,
+                0,
+                0,
+                0,
+                40,
+                97,
+                205,
+                106,
+                40,
+                27,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
             "n": 1000
         }
     }

@@ -157,7 +157,7 @@ class CrunchCube(object):
         pass
 
     def _as_array(self, include_missing=False, get_non_selected=False,
-                  unweighted=False):
+                  weighted=True):
         '''Get crunch cube as ndarray.
 
         Args
@@ -167,9 +167,9 @@ class CrunchCube(object):
             res (ndarray): Tabular representation of crunch cube
         '''
         counts = (
-            self._cube['result']['counts']
-            if unweighted
-            else self._cube['result']['measures']['count']['data']
+            self._cube['result']['measures']['count']['data']
+            if weighted
+            else self._cube['result']['counts']
         )
         all_dimensions = self._get_dimensions(self._cube)
         shape = [len(dim.elements) for dim in all_dimensions]
@@ -204,7 +204,7 @@ class CrunchCube(object):
             if i not in mr_selections
         ]
 
-    def as_array(self, include_missing=False, unweighted=False):
+    def as_array(self, include_missing=False, weighted=True):
         '''Get crunch cube as ndarray.
 
         Returns the tabular representation of the crunch cube. The returning
@@ -236,10 +236,10 @@ class CrunchCube(object):
         '''
         return self._as_array(
             include_missing=include_missing,
-            unweighted=unweighted
+            weighted=weighted
         )
 
-    def margin(self, axis=None, unweighted=False):
+    def margin(self, axis=None, weighted=True):
         '''Get margin for the selected axis.
 
         the selected axis. For MR variables, this is the sum of the selected
@@ -296,12 +296,12 @@ class CrunchCube(object):
                 [0, 1],
             ])
         '''
-        array = self.as_array(unweighted=unweighted)
+        array = self.as_array(weighted=weighted)
 
         all_dimensions = self._get_dimensions(self._cube)
         if self._get_mr_selections_indices(all_dimensions):
             margin = array + self._as_array(get_non_selected=True,
-                                            unweighted=unweighted)
+                                            weighted=weighted)
             if axis is None and len(margin.shape) > 1:
                 return np.sum(margin, 0)
             return margin
