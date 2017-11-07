@@ -153,7 +153,11 @@ class CrunchCube(object):
         new_shape = [dim for dim in array.shape if dim != 1]
         return array.reshape(new_shape)
 
-    def _as_array(self, include_missing=False, get_non_selected=False):
+    def _non_weighted_counts(self):
+        pass
+
+    def _as_array(self, include_missing=False, get_non_selected=False,
+                  unweighted=False):
         '''Get crunch cube as ndarray.
 
         Args
@@ -162,7 +166,11 @@ class CrunchCube(object):
         Returns
             res (ndarray): Tabular representation of crunch cube
         '''
-        counts = self._cube['result']['counts']
+        counts = (
+            self._cube['result']['counts']
+            if unweighted
+            else self._cube['result']['measures']['count']['data']
+        )
         all_dimensions = self._get_dimensions(self._cube)
         shape = [len(dim.elements) for dim in all_dimensions]
         valid_indices = self._get_valid_indices(
@@ -196,7 +204,7 @@ class CrunchCube(object):
             if i not in mr_selections
         ]
 
-    def as_array(self, include_missing=False):
+    def as_array(self, include_missing=False, unweighted=False):
         '''Get crunch cube as ndarray.
 
         Returns the tabular representation of the crunch cube. The returning
@@ -226,13 +234,14 @@ class CrunchCube(object):
                 [0, 0, 0, 0],
             ])
         '''
-        return self._as_array(include_missing)
+        return self._as_array(
+            include_missing=include_missing,
+            unweighted=unweighted
+        )
 
     def margin(self, axis=None):
         '''Get margin for the selected axis.
 
-        This function calculates the margin across the selected axis of the
-        crunch cube. For most variable types, this translates to the sum across
         the selected axis. For MR variables, this is the sum of the selected
         and non-selected slices.
 

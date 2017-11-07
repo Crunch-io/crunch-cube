@@ -1,0 +1,144 @@
+{
+    "element": "shoji:view",
+    "self": "https://stable.crunch.io/api/datasets/ab64eee04efb43d4ae9c13e0e71468c4/cube/?query=%7B%22dimensions%22%3A%5B%7B%22variable%22%3A%22https%3A%2F%2Fstable.crunch.io%2Fapi%2Fdatasets%2Fab64eee04efb43d4ae9c13e0e71468c4%2Fvariables%2F000003%2F%22%7D%2C%7B%22variable%22%3A%22https%3A%2F%2Fstable.crunch.io%2Fapi%2Fdatasets%2Fab64eee04efb43d4ae9c13e0e71468c4%2Fvariables%2F000006%2F%22%7D%5D%2C%22measures%22%3A%7B%22count%22%3A%7B%22function%22%3A%22cube_count%22%2C%22args%22%3A%5B%5D%7D%7D%2C%22weight%22%3Anull%7D&filter=%7B%7D",
+    "value": {
+        "result": {
+            "dimensions": [
+                {
+                    "derived": false,
+                    "references": {
+                        "alias": "Gender",
+                        "name": "Gender",
+                        "description": "Are you male or female?"
+                    },
+                    "type": {
+                        "ordinal": false,
+                        "class": "categorical",
+                        "categories": [
+                            {
+                                "numeric_value": 1,
+                                "missing": false,
+                                "id": 1,
+                                "name": "Male"
+                            },
+                            {
+                                "numeric_value": 2,
+                                "missing": false,
+                                "id": 2,
+                                "name": "Female"
+                            },
+                            {
+                                "numeric_value": 8,
+                                "missing": true,
+                                "id": 8,
+                                "name": "Skipped"
+                            },
+                            {
+                                "numeric_value": 9,
+                                "missing": true,
+                                "id": 9,
+                                "name": "Not Asked"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": true,
+                                "id": -1,
+                                "name": "No Data"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "derived": false,
+                    "references": {
+                        "alias": "RespondentIdeology",
+                        "name": "RespondentIdeology",
+                        "description": "In general, how would you describe your own political viewpoint?"
+                    },
+                    "type": {
+                        "ordinal": false,
+                        "class": "categorical",
+                        "categories": [
+                            {
+                                "numeric_value": 1,
+                                "missing": false,
+                                "id": 1,
+                                "name": "Very liberal"
+                            },
+                            {
+                                "numeric_value": 2,
+                                "missing": false,
+                                "id": 2,
+                                "name": "Liberal"
+                            },
+                            {
+                                "numeric_value": 3,
+                                "missing": false,
+                                "id": 3,
+                                "name": "Moderate"
+                            },
+                            {
+                                "numeric_value": 4,
+                                "missing": false,
+                                "id": 4,
+                                "name": "Conservative"
+                            },
+                            {
+                                "numeric_value": 5,
+                                "missing": false,
+                                "id": 5,
+                                "name": "Very Conservative"
+                            },
+                            {
+                                "numeric_value": 6,
+                                "missing": false,
+                                "id": 6,
+                                "name": "Not sure"
+                            },
+                            {
+                                "numeric_value": 8,
+                                "missing": true,
+                                "id": 8,
+                                "name": "Skipped"
+                            },
+                            {
+                                "numeric_value": 9,
+                                "missing": true,
+                                "id": 9,
+                                "name": "Not Asked"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": true,
+                                "id": -1,
+                                "name": "No Data"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "missing": 0,
+            "measures": {
+                "count": {
+                    "data": [32.9897, 87.6289, 176.2887, 117.5258, 72.1649, 13.4021, 0, 0, 0, 38.835, 94.1748, 199.0291, 102.9126, 38.835, 26.2136, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    "n_missing": 0,
+                    "metadata": {
+                        "references": {},
+                        "derived": true,
+                        "type": {
+                            "integer": false,
+                            "missing_rules": {},
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "class": "numeric"
+                        }
+                    }
+                }
+            },
+            "element": "crunch:cube",
+            "counts": [32, 85, 171, 114, 70, 13, 0, 0, 0, 40, 97, 205, 106, 40, 27, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            "n": 1000
+        }
+    }
+}

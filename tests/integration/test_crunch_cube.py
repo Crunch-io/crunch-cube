@@ -7,6 +7,7 @@ from .fixtures import (
     fixt_cat_x_datetime,
     fixt_cat_x_num_x_datetime,
     fixt_cat_x_mr,
+    fixt_econ_gender_x_ideology_weighted,
     fixt_univariate_categorical,
     fixt_voter_registration,
     fixt_simple_datetime,
@@ -61,6 +62,15 @@ class TestCrunchCube(TestCase):
             [5, 3],
         ])
         actual = cube.as_array()
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_as_array_cat_x_cat_unweighted(self):
+        cube = CrunchCube(fixt_cat_x_cat)
+        expected = np.array([
+            [5, 2],
+            [5, 3],
+        ])
+        actual = cube._as_array(unweighted=True)
         np.testing.assert_array_equal(actual, expected)
 
     def test_as_array_cat_x_datetime_exclude_missing(self):
@@ -587,3 +597,21 @@ class TestCrunchCube(TestCase):
         ])
         actual = cube.proportions(axis=0)
         np.testing.assert_almost_equal(actual, expected)
+
+    def test_as_array_unweighted_gender_x_ideology(self):
+        cube = CrunchCube(fixt_econ_gender_x_ideology_weighted)
+        expected = np.array([
+            [32, 85, 171, 114, 70, 13],
+            [40, 97, 205, 106, 40, 27]
+        ])
+        actual = cube.as_array(unweighted=True)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_as_array_weighted_gender_x_ideology(self):
+        cube = CrunchCube(fixt_econ_gender_x_ideology_weighted)
+        expected = np.array([
+            [32.9897, 87.6289, 176.2887, 117.5258, 72.1649, 13.4021],
+            [38.835, 94.1748, 199.0291, 102.9126, 38.835, 26.2136],
+        ])
+        actual = cube.as_array()
+        np.testing.assert_array_equal(actual, expected)
