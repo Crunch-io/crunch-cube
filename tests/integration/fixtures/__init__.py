@@ -37,3 +37,6 @@ with open(os.path.join(cubes_directory, 'cat-x-mr.json')) as f:
 with open(os.path.join(cubes_directory,
                        'econ-gender-x-ideology-weighted.json')) as f:
     fixt_econ_gender_x_ideology_weighted = json.load(f)
+with open(os.path.join(cubes_directory,
+                       'cat-x-cat-german-weighted.json')) as f:
+    fixt_cat_x_cat_german_weighted = json.load(f)

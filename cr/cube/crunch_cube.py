@@ -8,6 +8,7 @@ from __future__ import division
 import json
 
 import numpy as np
+from scipy.stats import norm
 
 from cr.cube.dimension import Dimension
 
@@ -157,7 +158,7 @@ class CrunchCube(object):
         pass
 
     def _as_array(self, include_missing=False, get_non_selected=False,
-                  weighted=True):
+                  weighted=True, adjusted=False):
         '''Get crunch cube as ndarray.
 
         Args
@@ -179,7 +180,9 @@ class CrunchCube(object):
             get_non_selected
         )
         res = np.array(counts).reshape(shape)[np.ix_(*valid_indices)]
-        return self._fix_shape(res)
+
+        adjustment = 1 if adjusted else 0
+        return self._fix_shape(res) + adjustment
 
     @classmethod
     def _calculate_constraints_sum(cls, prop_table, prop_margin, axis):
@@ -207,10 +210,12 @@ class CrunchCube(object):
             return np.dot(prop_margin, V)
 
     def _calculate_standard_error(self, axis):
-        total = self.margin()
+        total = self.margin(adjusted=True)
         # Calculate margin across axis, as percentages of the total count
-        margin = self.margin(axis=axis) / total
-        props = self.proportions(axis=axis)
+        margin = self.margin(axis=axis, weighted=False, adjusted=True) / total
+        # Adjusted proportions table, necessary for the standard error,
+        # because of the division by it.
+        props = self.proportions(axis=axis, weighted=False, adjusted=True)
 
         constraints = self._calculate_constraints_sum(props, margin, axis)
         if axis == 0:
@@ -229,6 +234,28 @@ class CrunchCube(object):
             d = d[:, np.newaxis]
 
         return np.sqrt((d * props * (1 - props) + constraints) / total)
+
+    def _calculate_statistics(self, axis):
+        if axis not in [0, 1]:
+            raise ValueError('Unexpected value for `axis`: {}'.format(axis))
+
+        props = self.proportions(axis=axis)
+
+        # Statistics are calculated by operating on both axes' margins. In this
+        # function, we need to determine the cross-axis (other than the one
+        # we're doing the calculation for), in order to be able to calculate
+        # *that* margin, which will serve as the basis for the
+        # statistics calculation.
+        cross_axis = 0 if axis == 1 else 1
+        cross_margin = self.margin(axis=cross_axis) / self.margin()
+
+        if cross_axis == 1:
+            # If the row proportional margins are required, they also need to
+            # be broadcast into the vector column shape, in order to be able to
+            # perform the subtration from the matrix.
+            cross_margin = cross_margin[:, np.newaxis]
+
+        return (props - cross_margin) / self._calculate_standard_error(axis)
 
     # API Functions
 
@@ -253,7 +280,7 @@ class CrunchCube(object):
             if i not in mr_selections
         ]
 
-    def as_array(self, include_missing=False, weighted=True):
+    def as_array(self, include_missing=False, weighted=True, adjusted=False):
         '''Get crunch cube as ndarray.
 
         Returns the tabular representation of the crunch cube. The returning
@@ -285,10 +312,11 @@ class CrunchCube(object):
         '''
         return self._as_array(
             include_missing=include_missing,
-            weighted=weighted
+            weighted=weighted,
+            adjusted=adjusted
         )
 
-    def margin(self, axis=None, weighted=True):
+    def margin(self, axis=None, weighted=True, adjusted=False):
         '''Get margin for the selected axis.
 
         the selected axis. For MR variables, this is the sum of the selected
@@ -345,19 +373,22 @@ class CrunchCube(object):
                 [0, 1],
             ])
         '''
-        array = self.as_array(weighted=weighted)
+        array = self.as_array(weighted=weighted, adjusted=adjusted)
 
         all_dimensions = self._get_dimensions(self._cube)
         if self._get_mr_selections_indices(all_dimensions):
-            margin = array + self._as_array(get_non_selected=True,
-                                            weighted=weighted)
+            margin = array + self._as_array(
+                get_non_selected=True,
+                weighted=weighted,
+                adjusted=adjusted
+            )
             if axis is None and len(margin.shape) > 1:
                 return np.sum(margin, 0)
             return margin
 
         return np.sum(array, axis)
 
-    def proportions(self, axis=None):
+    def proportions(self, axis=None, weighted=True, adjusted=False):
         '''Get proportions of a crunch cube.
 
         This function calculates the proportions across the selected axis
@@ -398,10 +429,10 @@ class CrunchCube(object):
                 [0.5, 0.6],
             ])
         '''
-        margin = self.margin(axis)
+        margin = self.margin(axis=axis, weighted=weighted, adjusted=adjusted)
         if axis == 1:
             margin = margin[:, np.newaxis]
-        return self.as_array() / margin
+        return self.as_array(weighted=weighted, adjusted=adjusted) / margin
 
     def percentages(self, axis=None):
         '''Get the percentages for crunch cube values.
@@ -443,3 +474,27 @@ class CrunchCube(object):
             ])
         '''
         return self.proportions(axis) * 100
+
+    def pvals(self, axis):
+        '''Calculate p-vals.
+
+        This function calculates statistically signifficant results for
+        categorical contingency tables. The values can be calculated across
+        columns (axis = 0), or across rows (axis = 1).
+
+        Args
+            axis (int): Dimension across which to calculate the p-values.
+                        0 - calculate across columns
+                        1 - calculate across rows
+        Returns
+            (ndarray): 2-Dimensional array, representing the p-values for each
+                       cell of the table-like representation of the
+                       crunch cube.
+        '''
+        stats = self._calculate_statistics(axis)
+        sign = np.sign(stats)
+
+        p_values = 2 * (1 - norm.cdf(np.abs(stats)))
+        p_values *= sign
+
+        return p_values
