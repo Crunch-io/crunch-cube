@@ -99,10 +99,10 @@ class CrunchCube(object):
     def _get_mr_selections_indices(cls, dimensions):
         '''Gets indices of each 'selection' dim, for corresponding MR dim.
 
-        MR and CA variables are represented by two dimensions each. These
-        dimensions can be thought of as 'elements' and 'selections'.
-        This function returns the indices of the 'selections'
-        dimension for each MR variable.
+        Multiple Response (MR) and Categorical Array (CA) variables are
+        represented by two dimensions each. These dimensions can be thought of
+        as 'elements' and 'selections'. This function returns the indices of
+        the 'selections' dimension for each MR variable.
         '''
         mr_dimensions_indices = [
             i for (i, dim) in enumerate(dimensions)
@@ -180,6 +180,55 @@ class CrunchCube(object):
         )
         res = np.array(counts).reshape(shape)[np.ix_(*valid_indices)]
         return self._fix_shape(res)
+
+    @classmethod
+    def _calculate_constraints_sum(cls, prop_table, prop_margin, axis):
+        '''Calculate sum of constraints (part of the standard error equation).
+
+        This method calculates the sum of the cell proportions multiplied by
+        row (or column) marginal proportions (margins divide by the total
+        count). It does this by utilizing the matrix multiplication, which
+        directly translates to the mathematical definition (the sum
+        across i and j indices).
+        '''
+        if axis not in [0, 1]:
+            raise ValueError('Unexpected value for `axis`: {}'.format(axis))
+
+        V = prop_table * (1 - prop_table)
+        if axis == 0:
+            # If axis is 0, sumation is performed across the 'i' index, which
+            # requires the matrix to be multiplied from the right
+            # (because of the inner matrix dimensions).
+            return np.dot(V, prop_margin)
+        elif axis == 1:
+            # If axis is 1, sumation is performed across the 'j' index, which
+            # requires the matrix to be multiplied from the left
+            # (because of the inner matrix dimensions).
+            return np.dot(prop_margin, V)
+
+    def _calculate_standard_error(self, axis):
+        total = self.margin()
+        # Calculate margin across axis, as percentages of the total count
+        margin = self.margin(axis=axis) / total
+        props = self.proportions(axis=axis)
+
+        constraints = self._calculate_constraints_sum(props, margin, axis)
+        if axis == 0:
+            # If the s.e. is calculated across rows, the addition of the
+            # 'constraints' member must be done element-wise, for 'd' and for
+            # each column of the props variance matrix, thus the transformation
+            # to the column vector.
+            constraints = constraints[:, np.newaxis]
+
+        d = (1 - 2 * margin) / margin
+        if axis == 1:
+            # If the s.e. is calculated across rows, the multiplication of
+            # the 'd' member must be done element-wise, for 'd' and for each
+            # row of the props variance matrix, thus the transformation to
+            # the column vector.
+            d = d[:, np.newaxis]
+
+        return np.sqrt((d * props * (1 - props) + constraints) / total)
 
     # API Functions
 

@@ -654,3 +654,51 @@ class TestCrunchCube(TestCase):
         expected = np.array([500, 500])
         actual = cube.margin(axis=1)
         np.testing.assert_almost_equal(actual, expected)
+
+    def test_calculate_standard_error_axis_0(self):
+        '''Calculate standard error across columns.'''
+        cube = CrunchCube(fixt_econ_gender_x_ideology_weighted)
+        expected = np.array([
+            [
+                0.0566273415723,
+                0.0334615203051,
+                0.0202778232899,
+                0.0296144360169,
+                0.0428948082269,
+                0.0738148387071,
+            ],
+            [
+                0.0566273415723,
+                0.0334615203051,
+                0.0202778232899,
+                0.0296144360169,
+                0.0428948082269,
+                0.0738148387071,
+            ],
+        ])
+        actual = cube._calculate_standard_error(axis=0)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_calculate_standard_error_axis_1(self):
+        '''Calculate standard error across rows.'''
+        cube = CrunchCube(fixt_econ_gender_x_ideology_weighted)
+        expected = np.array([
+            [
+                0.00816282401384,
+                0.012194597867,
+                0.0152950062668,
+                0.0131008306818,
+                0.00987765323496,
+                0.00615484514258,
+            ],
+            [
+                0.00816282401384,
+                0.012194597867,
+                0.0152950062668,
+                0.0131008306818,
+                0.00987765323496,
+                0.00615484514258,
+            ],
+        ])
+        actual = cube._calculate_standard_error(axis=1)
+        np.testing.assert_almost_equal(actual, expected)
