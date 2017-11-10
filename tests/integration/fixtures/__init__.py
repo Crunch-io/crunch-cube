@@ -8,35 +8,32 @@ source files relatively clean.
 import os
 import json
 
-cubes_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                               'cubes')
+
+def load_fixture(filename):
+    '''Loads fixtures for CrunchCube integration tests.'''
+    cubes_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                   'cubes')
+    with open(os.path.join(cubes_directory, filename)) as ctx_file:
+        fixture = json.load(ctx_file)
+    return fixture
+
 
 # Bivariate Cubes
-with open(os.path.join(cubes_directory, 'cat-x-cat.json')) as f:
-    fixt_cat_x_cat = json.load(f)
-with open(os.path.join(cubes_directory, 'cat-x-datetime.json')) as f:
-    fixt_cat_x_datetime = json.load(f)
+FIXT_CAT_X_CAT = load_fixture('cat-x-cat.json')
+FIXT_CAT_X_DATETIME = load_fixture('cat-x-datetime.json')
 
 # Univariate Cubes
-with open(os.path.join(cubes_directory, 'univariate-categorical.json')) as f:
-    fixt_univariate_categorical = json.load(f)
-with open(os.path.join(cubes_directory, 'voter-registration.json')) as f:
-    fixt_voter_registration = json.load(f)
-with open(os.path.join(cubes_directory, 'simple-datetime.json')) as f:
-    fixt_simple_datetime = json.load(f)
-with open(os.path.join(cubes_directory, 'simple-text.json')) as f:
-    fixt_simple_text = json.load(f)
-with open(os.path.join(cubes_directory, 'simple-cat-array.json')) as f:
-    fixt_simple_cat_array = json.load(f)
-with open(os.path.join(cubes_directory, 'cat-x-num-x-datetime.json')) as f:
-    fixt_cat_x_num_x_datetime = json.load(f)
-with open(os.path.join(cubes_directory, 'simple-mr.json')) as f:
-    fixt_simple_mr = json.load(f)
-with open(os.path.join(cubes_directory, 'cat-x-mr.json')) as f:
-    fixt_cat_x_mr = json.load(f)
-with open(os.path.join(cubes_directory,
-                       'econ-gender-x-ideology-weighted.json')) as f:
-    fixt_econ_gender_x_ideology_weighted = json.load(f)
-with open(os.path.join(cubes_directory,
-                       'cat-x-cat-german-weighted.json')) as f:
-    fixt_cat_x_cat_german_weighted = json.load(f)
+FIXT_UNIVARIATE_CATEGORICAL = load_fixture('univariate-categorical.json')
+FIXT_VOTER_REGISTRATION = load_fixture('voter-registration.json')
+FIXT_SIMPLE_DATETIME = load_fixture('simple-datetime.json')
+FIXT_SIMPLE_TEXT = load_fixture('simple-text.json')
+FIXT_SIMPLE_CAT_ARRAY = load_fixture('simple-cat-array.json')
+
+# Various other Cubes
+FIXT_CAT_X_NUM_X_DATETIME = load_fixture('cat-x-num-x-datetime.json')
+FIXT_SIMPLE_MR = load_fixture('simple-mr.json')
+FIXT_CAT_X_MR = load_fixture('cat-x-mr.json')
+FIXT_ECON_GENDER_X_IDEOLOGY_WEIGHTED = load_fixture(
+    'econ-gender-x-ideology-weighted.json')
+FIXT_CAT_X_CAT_GERMAN_WEIGHTED = load_fixture('cat-x-cat-german-weighted.json')
+FIXT_STATS_TEST = load_fixture('stats_test.json')
