@@ -154,8 +154,18 @@ class CrunchCube(object):
         new_shape = [dim for dim in array.shape if dim != 1]
         return array.reshape(new_shape)
 
-    def _non_weighted_counts(self):
-        pass
+    @property
+    def _has_means(self):
+        return self._cube['result']['measures'].get('mean', False)
+
+    def _get_values(self, weighted):
+        if not weighted:
+            return self._cube['result']['counts']
+
+        if self._has_means:
+            return self._cube['result']['measures']['mean']['data']
+
+        return self._cube['result']['measures']['count']['data']
 
     def _as_array(self, include_missing=False, get_non_selected=False,
                   weighted=True, adjusted=False):
@@ -167,11 +177,7 @@ class CrunchCube(object):
         Returns
             res (ndarray): Tabular representation of crunch cube
         '''
-        counts = (
-            self._cube['result']['measures']['count']['data']
-            if weighted
-            else self._cube['result']['counts']
-        )
+        values = self._get_values(weighted)
         all_dimensions = self._get_dimensions(self._cube)
         shape = [len(dim.elements) for dim in all_dimensions]
         valid_indices = self._get_valid_indices(
@@ -179,7 +185,7 @@ class CrunchCube(object):
             include_missing,
             get_non_selected
         )
-        res = np.array(counts).reshape(shape)[np.ix_(*valid_indices)]
+        res = np.array(values).reshape(shape)[np.ix_(*valid_indices)]
 
         adjustment = 1 if adjusted else 0
         return self._fix_shape(res) + adjustment

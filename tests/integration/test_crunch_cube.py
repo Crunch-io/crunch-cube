@@ -15,6 +15,8 @@ from .fixtures import (
     FIXT_SIMPLE_TEXT,
     FIXT_SIMPLE_CAT_ARRAY,
     FIXT_SIMPLE_MR,
+    FIXT_STATS_TEST,
+    FIXT_ECON_MEAN_AGE_BLAME_X_GENDER,
 )
 from cr.cube.crunch_cube import CrunchCube
 
@@ -837,4 +839,61 @@ class TestCrunchCube(TestCase):
             ]
         ])
         actual = cube.pvals(axis=1)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_pvals_stats(self):
+        cube = CrunchCube(FIXT_STATS_TEST)
+
+        expected_axis_0 = np.array([
+            [
+                0.021992266759100376,
+                0.00011398387657313158,
+                0.08710488165760855,
+                -0.6809458435023874,
+                -0.4639470201751028,
+                -5.861367553539054e-7,
+            ],
+            [
+                -0.021992266759100376,
+                -0.00011398387657313158,
+                -0.08710488165760855,
+                0.6809458435023874,
+                0.4639470201751028,
+                5.861367553539054e-7,
+            ]
+        ])
+        actual = cube.pvals(0)
+        np.testing.assert_almost_equal(actual, expected_axis_0)
+
+        expected_axis_1 = np.array([
+            [
+                0.04565813781439898,
+                0.00019875030267102467,
+                0.0881878053993032,
+                -0.682332970015509,
+                -0.4667738621549087,
+                -0.0000011049984953714898,
+            ],
+            [
+                -0.04544250237653502,
+                -0.0001958471500445036,
+                -0.08787083482608415,
+                0.6820331877195527,
+                0.46632917677948105,
+                0.000001078109930885418,
+            ]
+        ])
+        actual = cube.pvals(1)
+        np.testing.assert_almost_equal(actual, expected_axis_1)
+
+    def test_mean_age_for_blame_x_gender(self):
+        cube = CrunchCube(FIXT_ECON_MEAN_AGE_BLAME_X_GENDER)
+        expected = np.array([
+            [52.78205128205122, 49.9069767441861],
+            [50.43654822335009, 48.20100502512572],
+            [51.5643564356436, 47.602836879432715],
+            [58, 29],
+            [37.53846153846155, 39.45238095238095],
+        ])
+        actual = cube.as_array()
         np.testing.assert_almost_equal(actual, expected)
