@@ -9,7 +9,7 @@ matrix:
         - python: 3.5
         - python: 3.6
         - python: 3.6
-          env: TOXENV=py27,py36,coverage
+          env: TOXENV=py27,py36,coverage,coveralls
         - python: nightly
           env: TOXENV=py37
         - python: 3.6
