@@ -2,14 +2,13 @@
 # coding: utf-8
 
 from setuptools import setup, find_packages
-import os
 
-thisdir = os.path.abspath(os.path.dirname(__file__))
 version = '0.1'
 
 
 def get_long_desc():
-    return open(os.path.join(thisdir, 'README.md')).read()
+    with open('README.md') as f:
+        return f.read()
 
 
 install_requires = [
