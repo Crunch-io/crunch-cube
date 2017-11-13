@@ -17,6 +17,7 @@ from .fixtures import (
     FIXT_SIMPLE_MR,
     FIXT_STATS_TEST,
     FIXT_ECON_MEAN_AGE_BLAME_X_GENDER,
+    FIXT_ECON_MEAN_NO_DIMS,
 )
 from cr.cube.crunch_cube import CrunchCube
 
@@ -895,5 +896,11 @@ class TestCrunchCube(TestCase):
             [58, 29],
             [37.53846153846155, 39.45238095238095],
         ])
+        actual = cube.as_array()
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_mean_no_dims(self):
+        cube = CrunchCube(FIXT_ECON_MEAN_NO_DIMS)
+        expected = np.array([49.095])
         actual = cube.as_array()
         np.testing.assert_almost_equal(actual, expected)

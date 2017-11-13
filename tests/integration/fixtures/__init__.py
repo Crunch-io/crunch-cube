@@ -39,3 +39,4 @@ FIXT_STATS_TEST = load_fixture(CUBES_DIR, 'stats_test.json')
 FIXT_ECON_MEAN_AGE_BLAME_X_GENDER = load_fixture(
     CUBES_DIR, 'econ-mean-age-blame-x-gender.json'
 )
+FIXT_ECON_MEAN_NO_DIMS = load_fixture(CUBES_DIR, 'econ-mean-no-dims.json')
