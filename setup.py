@@ -2,25 +2,23 @@
 # coding: utf-8
 
 from setuptools import setup, find_packages
-
 import os
+
 thisdir = os.path.abspath(os.path.dirname(__file__))
-
-
 version = '0.1'
 
 
 def get_long_desc():
-    root_dir = os.path.dirname(__file__)
-    if not root_dir:
-        root_dir = '.'
-    return open(os.path.join(root_dir, 'README.md')).read()
+    return open(os.path.join(thisdir, 'README.md')).read()
+
 
 install_requires = [
+    'scipy',
 ]
 
 test_requires = [
-    'py.test'
+    'pytest',
+    'pytest-cov',
 ]
 
 setup(
