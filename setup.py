@@ -18,6 +18,7 @@ install_requires = [
 test_requires = [
     'pytest',
     'pytest-cov',
+    'mock',
 ]
 
 setup(
