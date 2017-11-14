@@ -1,0 +1,14 @@
+[run]
+parallel = true
+source =
+    cr
+omit =
+
+[paths]
+source =
+    src/cr/
+    */site-packages/cr/
+
+[report]
+show_missing = true
+precision = 2

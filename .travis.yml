@@ -1,16 +1,25 @@
+# Wire up travis
 language: python
-python:
-  - "2.7"
-  - "3.4"
-  - "3.5"
-  - "3.6"
-before_install:
-    - pip install -r requirements.txt
-    - pip install -r test_requirements.txt
-# command to install dependencies
+sudo: false
+
+matrix:
+    include:
+        - python: 2.7
+        - python: 3.4
+        - python: 3.5
+        - python: 3.6
+        - python: 3.6
+          env: TOXENV=py27,py36,coverage,coveralls
+        - python: nightly
+          env: TOXENV=py37
+        - python: 3.6
+          env: TOXENV=lint
+    allow_failures:
+        - env: TOXENV=py37
+        - env: TOXENV=lint
+
 install:
-    - pip install -e .
+  - travis_retry pip install tox tox-travis
+
 script:
-    - py.test tests --cov cr.cube
-after_success:
-    - coveralls 
+  - travis_retry tox
