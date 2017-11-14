@@ -40,3 +40,11 @@ FIXT_ECON_MEAN_AGE_BLAME_X_GENDER = load_fixture(
     CUBES_DIR, 'econ-mean-age-blame-x-gender.json'
 )
 FIXT_ECON_MEAN_NO_DIMS = load_fixture(CUBES_DIR, 'econ-mean-no-dims.json')
+FIXT_MR_BY_CAT_PROFILES_STATS_WEIGHTED = load_fixture(
+    CUBES_DIR,
+    'mr-by-cat-profiles-stats-weighted.json'
+)
+FIXT_ADMIT_BY_DEPT_UNWEIGHTED = load_fixture(CUBES_DIR,
+                                             'admit-by-dept-unweighted.json')
+FIXT_ADMIT_BY_GENDER_WEIGHTED = load_fixture(CUBES_DIR,
+                                             'admit-by-gender-weighted.json')

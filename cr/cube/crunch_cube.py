@@ -216,7 +216,7 @@ class CrunchCube(object):
             return np.dot(prop_margin, V)
 
     def _calculate_standard_error(self, axis):
-        total = self.margin(adjusted=True)
+        total = self.margin(weighted=False, adjusted=True)
         # Calculate margin across axis, as percentages of the total count
         margin = self.margin(axis=axis, weighted=False, adjusted=True) / total
         # Adjusted proportions table, necessary for the standard error,

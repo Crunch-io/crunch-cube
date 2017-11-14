@@ -18,6 +18,9 @@ from .fixtures import (
     FIXT_STATS_TEST,
     FIXT_ECON_MEAN_AGE_BLAME_X_GENDER,
     FIXT_ECON_MEAN_NO_DIMS,
+    FIXT_MR_BY_CAT_PROFILES_STATS_WEIGHTED,
+    FIXT_ADMIT_BY_DEPT_UNWEIGHTED,
+    FIXT_ADMIT_BY_GENDER_WEIGHTED,
 )
 from cr.cube.crunch_cube import CrunchCube
 
@@ -792,24 +795,24 @@ class TestCrunchCube(TestCase):
         cube = CrunchCube(FIXT_CAT_X_CAT_GERMAN_WEIGHTED)
         expected = np.array([
             [
-                -0.18420272141763716,
-                0.000664966346674678,
-                0.00037716285275513073,
-                0.15399832449651685,
-                0.015829610375772907,
-                -8.697487174913476e-12,
-                -0.8252001781531713,
-                0.46978876911573253,
+                -0.182449424191072,
+                0.000632923708704169,
+                0.000367602277025753,
+                0.153659627087918,
+                0.0157593386530601,
+                -7.31288611096873e-12,
+                -0.825177717845072,
+                0.469687167401825
             ],
             [
-                0.1842027214176405,
-                -0.000664966346674678,
-                -0.00037716285275513073,
-                -0.15399832449651685,
-                -0.01582961037577313,
-                8.697487174913476e-12,
-                0.8252001781531728,
-                -0.46978876911573697
+                0.182449424191079,
+                -0.000632923708704146,
+                -0.000367602277025734,
+                -0.153659627087916,
+                -0.0157593386530601,
+                7.31288611096927e-12,
+                0.825177717845075,
+                -0.469687167401828
             ]
         ])
         actual = cube.pvals(axis=0)
@@ -819,24 +822,24 @@ class TestCrunchCube(TestCase):
         cube = CrunchCube(FIXT_CAT_X_CAT_GERMAN_WEIGHTED)
         expected = np.array([
             [
-                -0.178514305553791,
-                0.0008140062811921034,
-                0.0006341605404542872,
-                0.1684165900623824,
-                0.021308763357477334,
-                -5.784706047506916e-12,
-                -0.8138010875690975,
-                0.4674522428169867,
+                -0.174780896035399,
+                0.00067832739208794,
+                0.000508330650039071,
+                0.161553975907204,
+                0.0193301356937216,
+                -4.33199265948476e-12,
+                -0.812304843861103,
+                0.46145538258239,
             ],
             [
-                0.1829786364352084,
-                -0.0007866365804722886,
-                -0.0005731511734761163,
-                -0.16600295360474404,
-                -0.02070272847943566,
-                1.226752033289813e-11,
-                0.8158409095455534,
-                -0.4675571877257023,
+                0.176109557731585,
+                -0.0007046838390719,
+                -0.000528959758456953,
+                -0.162846203806368,
+                -0.0197051728937385,
+                5.03371135873422e-12,
+                0.812870881353903,
+                -0.462833246125983,
             ]
         ])
         actual = cube.pvals(axis=1)
@@ -903,4 +906,122 @@ class TestCrunchCube(TestCase):
         cube = CrunchCube(FIXT_ECON_MEAN_NO_DIMS)
         expected = np.array([49.095])
         actual = cube.as_array()
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_z_scores_from_r_row_margin(self):
+        cube = CrunchCube(FIXT_MR_BY_CAT_PROFILES_STATS_WEIGHTED)
+        expected = np.array([
+            [
+                -1.35700098973668,
+                3.39819222765456,
+                3.47632774910236,
+                1.39986424142017,
+                2.33910237706402,
+                -6.92590429515317,
+                -0.237453687452224,
+                0.736452470486666
+            ],
+            [
+                1.3528312160513,
+                -3.38775031004662,
+                -3.4656457377556,
+                -1.39556275813377,
+                -2.33191481595459,
+                6.90462247318263,
+                0.236724043078395,
+                -0.734189509622821,
+            ],
+        ])
+        actual = cube._calculate_statistics(axis=1)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_z_scores_from_r_col_margin(self):
+        cube = CrunchCube(FIXT_MR_BY_CAT_PROFILES_STATS_WEIGHTED)
+        expected = np.array([
+            [
+                -1.33325107235154,
+                3.4170985193131,
+                3.56231261682056,
+                1.42672343792323,
+                2.41444184160409,
+                -6.85140362038577,
+                -0.220890470186746,
+                0.722988145330955,
+            ],
+            [
+                1.33325107235152,
+                -3.41709851931311,
+                -3.56231261682057,
+                -1.42672343792324,
+                -2.41444184160409,
+                6.85140362038576,
+                0.220890470186742,
+                -0.72298814533095,
+            ],
+        ])
+        actual = cube._calculate_statistics(axis=0)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_z_scores_admit_by_dept_unweighted_rows(self):
+        cube = CrunchCube(FIXT_ADMIT_BY_DEPT_UNWEIGHTED)
+        expected = np.array([
+            [
+                17.3006739150679,
+                12.1555052876046,
+                -2.61883165552036,
+                -3.12585957287982,
+                -7.73178794867428,
+                -23.9433203846143,
+            ],
+            [
+                -17.2790610621901,
+                -12.1403200324679,
+                2.6155600821955,
+                3.12195459533981,
+                7.72212901884083,
+                23.9134092110139,
+            ]
+        ])
+        actual = cube._calculate_statistics(axis=1)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_z_scores_admit_by_dept_unweighted_cols(self):
+        cube = CrunchCube(FIXT_ADMIT_BY_DEPT_UNWEIGHTED)
+        expected = np.array([
+            [
+                18.7216214725448,
+                13.3291986335621,
+                -2.67980030430232,
+                -3.19261047229265,
+                -8.09694682104735,
+                -32.0139892315214,
+            ],
+            [
+                -18.7216214725448,
+                -13.3291986335621,
+                2.67980030430231,
+                3.19261047229265,
+                8.09694682104735,
+                32.0139892315214,
+            ],
+        ])
+        actual = cube._calculate_statistics(axis=0)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_z_scores_admit_by_gender_weighted_rows(self):
+        cube = CrunchCube(FIXT_ADMIT_BY_GENDER_WEIGHTED)
+        expected = np.array([
+            [9.80281743121017, -9.80281743121017],
+            [-9.71107624617507, 9.71107624617506],
+        ])
+        actual = cube._calculate_statistics(axis=1)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_z_scores_admit_by_gender_weighted_cols(self):
+        cube = CrunchCube(FIXT_ADMIT_BY_GENDER_WEIGHTED)
+        expected = np.array([
+            [9.75089877074671, -9.72361434000118],
+            [-9.75089877074672, 9.72361434000117],
+        ])
+        actual = cube._calculate_statistics(axis=0)
         np.testing.assert_almost_equal(actual, expected)
