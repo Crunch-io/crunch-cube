@@ -5,12 +5,13 @@ the open-source library used for manipulating the crunch cubes (JSON responses
 from the Crunch.io platform).
 '''
 from __future__ import division
+
 import json
 
 import numpy as np
 from scipy.stats import norm
 
-from cr.cube.dimension import Dimension
+from .dimension import Dimension
 
 
 class CrunchCube(object):

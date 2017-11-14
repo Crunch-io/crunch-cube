@@ -3,24 +3,22 @@
 
 from setuptools import setup, find_packages
 
-import os
-thisdir = os.path.abspath(os.path.dirname(__file__))
-
-
 version = '0.1'
 
 
 def get_long_desc():
-    root_dir = os.path.dirname(__file__)
-    if not root_dir:
-        root_dir = '.'
-    return open(os.path.join(root_dir, 'README.md')).read()
+    with open('README.md') as f:
+        return f.read()
+
 
 install_requires = [
+    'scipy',
 ]
 
 test_requires = [
-    'py.test'
+    'pytest',
+    'pytest-cov',
+    'mock',
 ]
 
 setup(
@@ -36,15 +34,16 @@ setup(
     ],
     author='Crunch.io',
     author_email='dev@crunch.io',
-    license='Proprietary',
+    license='MIT License',
     install_requires=install_requires,
     tests_require=test_requires,
     extras_require={
         'testing': test_requires,
     },
-    packages=find_packages(),
-    namespace_packages=['cr'],
+    packages=find_packages('src', exclude=['tests']),
+    package_dir={'': 'src'},
     include_package_data=True,
-    package_data={},
+    entry_points={},
+    namespace_packages=['cr'],
     zip_safe=True,
 )
