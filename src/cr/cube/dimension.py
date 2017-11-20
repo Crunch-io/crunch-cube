@@ -70,6 +70,24 @@ class Dimension(object):
     # API methods
 
     @property
+    def name(self):
+        '''Name of a cube's dimension.'''
+        refs = self._dim['references']
+        return refs.get('name', refs.get('alias'))
+
+    @property
+    def description(self):
+        '''Description of a cube's dimension.'''
+        refs = self._dim['references']
+        return refs.get('description')
+
+    @property
+    def alias(self):
+        '''Alias of a cube's dimension.'''
+        refs = self._dim['references']
+        return refs.get('alias')
+
+    @property
     def type(self):
         '''Get type of the Crunch Dimension.'''
         return self._type
@@ -106,4 +124,4 @@ class Dimension(object):
             return [i for (i, el) in enumerate(self.elements)]
         else:
             return [i for (i, el) in enumerate(self.elements)
-                    if not el['missing']]
+                    if not el.get('missing')]

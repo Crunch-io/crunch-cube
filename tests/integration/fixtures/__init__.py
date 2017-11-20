@@ -48,3 +48,5 @@ FIXT_ADMIT_BY_DEPT_UNWEIGHTED = load_fixture(CUBES_DIR,
                                              'admit-by-dept-unweighted.json')
 FIXT_ADMIT_BY_GENDER_WEIGHTED = load_fixture(CUBES_DIR,
                                              'admit-by-gender-weighted.json')
+FIXT_SELECTED_CROSSTAB_4 = load_fixture(CUBES_DIR, 'selected-crosstab-4.json')
+FIXT_PETS_BY_PETS = load_fixture(CUBES_DIR, 'pets-by-pets.json')

@@ -21,6 +21,8 @@ from .fixtures import (
     FIXT_MR_BY_CAT_PROFILES_STATS_WEIGHTED,
     FIXT_ADMIT_BY_DEPT_UNWEIGHTED,
     FIXT_ADMIT_BY_GENDER_WEIGHTED,
+    FIXT_SELECTED_CROSSTAB_4,
+    FIXT_PETS_BY_PETS,
 )
 from cr.cube.crunch_cube import CrunchCube
 
@@ -1024,4 +1026,147 @@ class TestCrunchCube(TestCase):
             [-9.75089877074672, 9.72361434000117],
         ])
         actual = cube._calculate_statistics(axis=0)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_selected_crosstab_dim_names(self):
+        cube = CrunchCube(FIXT_SELECTED_CROSSTAB_4)
+        expected = ['Statements agreed with about Climate', 'Gender']
+        actual = [dim.name for dim in cube.dimensions]
+        self.assertEqual(actual, expected)
+
+    def test_selected_crosstab_dim_aliases(self):
+        cube = CrunchCube(FIXT_SELECTED_CROSSTAB_4)
+        expected = ['attitudes_recoded_klima_2', 'pdl_gender']
+        actual = [dim.alias for dim in cube.dimensions]
+        self.assertEqual(actual, expected)
+
+    def test_selected_crosstab_as_array(self):
+        cube = CrunchCube(FIXT_SELECTED_CROSSTAB_4)
+        expected = np.array([
+            [9928.20954289002, 11524.821237084192],
+            [9588.843313998908, 9801.254016136965],
+            [11697.435357575358, 13095.670425525452],
+            [9782.8995547749, 10531.918128023966],
+            [4417.596222134318, 3448.380316269752],
+            [6179.175512581436, 6490.427474934746],
+        ])
+        actual = cube.as_array()
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_selected_crosstab_margin_by_rows(self):
+        cube = CrunchCube(FIXT_SELECTED_CROSSTAB_4)
+        expected = np.array([
+            21453.03077997421,
+            19390.097330135875,
+            24793.105783100807,
+            20314.817682798865,
+            7865.976538404069,
+            12669.602987516182,
+        ])
+        actual = cube.margin(axis=1)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_selected_crosstab_margin_by_cols(self):
+        cube = CrunchCube(FIXT_SELECTED_CROSSTAB_4)
+        expected = np.array([
+            [14566.261567907562, 15607.301233922663],
+            [14456.513325488017, 15450.609903833058],
+            [14415.136475733132, 15405.898678070093],
+            [11485.661204663904, 11912.588886491172],
+            [11664.69933815247, 12110.196347286023],
+            [11547.413553551738, 11961.575582997419],
+        ])
+        actual = cube.margin(axis=0)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_selected_crosstab_margin_total(self):
+        cube = CrunchCube(FIXT_SELECTED_CROSSTAB_4)
+        expected = np.array([
+            [30173.5628018302],
+            [29907.1232293211],
+            [29821.0351538032],
+            [23398.2500911551],
+            [23774.8956854385],
+            [23508.9891365492],
+        ])
+        actual = cube.margin()
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_selected_crosstab_proportions_by_rows(self):
+        cube = CrunchCube(FIXT_SELECTED_CROSSTAB_4)
+        expected = np.array([
+            [0.4627882020361299, 0.5372117979638701],
+            [0.4945227014975337, 0.5054772985024663],
+            [0.47180193800279874, 0.5281980619972013],
+            [0.481564723224583, 0.5184352767754171],
+            [0.5616081106479636, 0.4383918893520365],
+            [0.48771658580541166, 0.5122834141945883],
+        ])
+        actual = cube.proportions(axis=1)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_selected_crosstab_proportions_by_cols(self):
+        cube = CrunchCube(FIXT_SELECTED_CROSSTAB_4)
+        expected = np.array([
+            [0.6815894041587091, 0.7384249886863752],
+            [0.6632887957217867, 0.6343603312193796],
+            [0.8114689290154947, 0.8500426167391849],
+            [0.8517489224566737, 0.8840998567462627],
+            [0.3787149667617584, 0.28475015741941767],
+            [0.535113381358101, 0.5426064007955989],
+        ])
+        actual = cube.proportions(axis=0)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_selected_crosstab_proportions_total(self):
+        cube = CrunchCube(FIXT_SELECTED_CROSSTAB_4)
+        expected = np.array([
+            [0.329036700375595, 0.381950958618156],
+            [0.320620717695708,  0.327723062528721],
+            [0.392254504152701, 0.439142047148397],
+            [0.418103897371069,  0.450115632023491],
+            [0.185809278853744, 0.14504292098248],
+            [0.262843097025161,  0.27608279697761],
+        ])
+        actual = cube.proportions()
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_pets_x_pets_as_array(self):
+        cube = CrunchCube(FIXT_PETS_BY_PETS)
+        expected = np.array([
+            [40, 14, 18],
+            [14, 34, 16],
+            [18, 16, 38],
+        ])
+        actual = cube.as_array()
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_pets_x_pets_proportions_by_cell(self):
+        cube = CrunchCube(FIXT_PETS_BY_PETS)
+        expected = np.array([
+            [.5, .4, .5294118],
+            [.4, .4303797, .4571429],
+            [.5294118, .4571429, .5428571],
+        ])
+        actual = cube.proportions()
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_pets_x_pets_proportions_by_col(self):
+        cube = CrunchCube(FIXT_PETS_BY_PETS)
+        expected = np.array([
+            [1., .4827586, .4736842],
+            [.4117647, 1., 0.4210526],
+            [.5294118, .5517241, 1.],
+        ])
+        actual = cube.proportions(axis=0)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_pets_x_pets_proportions_by_row(self):
+        cube = CrunchCube(FIXT_PETS_BY_PETS)
+        expected = np.array([
+            [1., .4117647, .5294118],
+            [.4827586, 1., .5517241],
+            [.4736842, .4210526, 1.],
+        ])
+        actual = cube.proportions(axis=1)
         np.testing.assert_almost_equal(actual, expected)

@@ -1,3 +1,4 @@
+from __future__ import division
 '''Home of the CrunchCube class.
 
 This module contains the definition of the CrunchCube class. It represents
@@ -53,7 +54,8 @@ class CrunchCube(object):
 
         # Cube can come in as a JSON or as a dictionary, So we need to check
         # its type, and convert it to a dictionary if it's JSON, if possible.
-        if isinstance(response, str):
+        type_ = type(response)
+        if type_ != dict and (type_ == str or type_ == unicode):  # noqa: F821
             response = json.loads(response)
 
         # If conversion to dict is not possible, or an unexpected type is
@@ -64,7 +66,7 @@ class CrunchCube(object):
                 'A `cube` must be JSON or `dict`.'
             ).format(type(response)))
 
-        self._cube = response['value']
+        self._cube = response.get('value', response)
 
     @classmethod
     def _get_dimensions(cls, cube):
@@ -264,7 +266,41 @@ class CrunchCube(object):
 
         return (props - cross_margin) / self._calculate_standard_error(axis)
 
+    def _double_mr_proportions(self, axis, weighted):
+        if axis is None:
+            ind_sel, ind_non = 1, 1
+        else:
+            ind_sel, ind_non = 1 - axis, axis
+
+        all_dimensions = self._get_dimensions(self._cube)
+        shape = [len(dim.elements) for dim in all_dimensions]
+        values = np.array(self._get_values(weighted)).reshape(shape)
+
+        return (
+            values[:, 0, :, 0] /
+            (values[:, 0, :, 0] + values[:, ind_sel, :, ind_non])
+        )
+
     # API Functions
+
+    @property
+    def name(self):
+        '''Return the name of the cube.
+
+        If the cube has 2 diensions, return the name of the second one. In case
+        of a different number of dimensions, default to returning the name of
+        the last one. In case of no dimensions, return the empty string.
+        '''
+        if not self.dimensions:
+            return None
+        return self.dimensions[0].name
+
+    @property
+    def description(self):
+        '''Return the description of the cube.'''
+        if not self.dimensions:
+            return None
+        return self.dimensions[0].description
 
     def labels(self, include_missing=False):
         '''Gets labels for each cube's dimension.
@@ -383,14 +419,28 @@ class CrunchCube(object):
         array = self.as_array(weighted=weighted, adjusted=adjusted)
 
         all_dimensions = self._get_dimensions(self._cube)
-        if self._get_mr_selections_indices(all_dimensions):
+        mr_indices = self._get_mr_selections_indices(all_dimensions)
+        if mr_indices:
+            # Special case treatment for MR variables, that are set as the
+            # first dimension of a cube.
             margin = array + self._as_array(
                 get_non_selected=True,
                 weighted=weighted,
                 adjusted=adjusted
             )
+            if axis is None and len(margin.shape) > 1 and 1 in mr_indices:
+                # If MR margin is being calculated as total, we need the
+                # combination of selected + non-selected, and that's why
+                # we're using margin and not array.
+                return np.sum(margin, 1)[:, np.newaxis]
             if axis is None and len(margin.shape) > 1:
+                # This covers the case when there's a MR variable, but
+                # not as a first dimension.
                 return np.sum(margin, 0)
+            if axis == 1:
+                # If MR margin is calculated by rows, we only need the counts
+                # and that's why we use array and not margin.
+                return np.sum(array, axis)
             return margin
 
         return np.sum(array, axis)
@@ -436,6 +486,12 @@ class CrunchCube(object):
                 [0.5, 0.6],
             ])
         '''
+        types = [dim.type for dim in self.dimensions]
+        if types == ['multiple_response', 'multiple_response']:
+            # For the case of MR x MR cube, proportions are calculated in a
+            # specific way, which needs to be handled speparately.
+            return self._double_mr_proportions(axis, weighted)
+
         margin = self.margin(axis=axis, weighted=weighted, adjusted=adjusted)
         if axis == 1:
             margin = margin[:, np.newaxis]
