@@ -1,4 +1,3 @@
-from __future__ import division
 '''Home of the CrunchCube class.
 
 This module contains the definition of the CrunchCube class. It represents
