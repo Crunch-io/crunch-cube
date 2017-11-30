@@ -53,8 +53,9 @@ class CrunchCube(object):
 
         # Cube can come in as a JSON or as a dictionary, So we need to check
         # its type, and convert it to a dictionary if it's JSON, if possible.
-        type_ = type(response)
-        if type_ != dict and (type_ == str or type_ == unicode):  # noqa: F821
+        #type_ = type(response)
+        #if type_ != dict and (type_ == str or type_ == unicode):  # noqa: F821
+        if isinstance(response, str):
             response = json.loads(response)
 
         # If conversion to dict is not possible, or an unexpected type is
@@ -598,7 +599,6 @@ class CrunchCube(object):
             self._cube['result']['counts'] !=
             self._cube['result']['measures'].get('count', {}).get('data')
         )
-
         return weighted
 
     @property
