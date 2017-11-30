@@ -32,6 +32,7 @@ class TestDimension(TestCase):
     def test_get_type_datetime(self):
         dim = {
             'type': {'subtype': {'class': 'datetime'}},
+            'class': 'enum',
         }
         expected = 'datetime'
         actual = Dimension._get_type(dim)

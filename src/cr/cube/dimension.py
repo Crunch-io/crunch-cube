@@ -27,6 +27,9 @@ class Dimension(object):
                     if cls._is_multiple_response(selections)
                     else 'categorical_array')
 
+        if type_ and type_ == 'enum' and 'subtype' in dim['type']:
+            return dim['type']['subtype']['class']
+
         if type_:
             return type_
 
@@ -36,7 +39,12 @@ class Dimension(object):
     def _is_multiple_response(cls, dim):
         if not dim:
             return False
-        ids = [cat['id'] for cat in dim['type']['categories']]
+
+        categories = dim['type'].get('categories')
+        if not categories:
+            return False
+
+        ids = [cat['id'] for cat in categories]
         return ids == [1, 0, -1]
 
     @classmethod
@@ -59,6 +67,8 @@ class Dimension(object):
         type_ = type(value)
         if type_ != dict and (type_ == str or type_ == unicode):  # noqa: F821
             return value
+        elif type_ == list:
+            return '-'.join([str(el) for el in value])
 
         # For categorical array variables
         name = value.get('references', {}).get('name')
