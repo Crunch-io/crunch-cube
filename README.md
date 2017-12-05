@@ -97,4 +97,7 @@ The detailed description can be found
 ## Changes
 
 1.0 Initial release
+
 1.1 *Fix stray ipdb.
+
+1.2 Support exporter
