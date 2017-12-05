@@ -77,6 +77,12 @@ class Dimension(object):
 
         return None
 
+    @property
+    def _elements(self):
+        if self.type == 'categorical':
+            return self._dim['type']['categories']
+        return self._dim['type']['elements']
+
     # API methods
 
     @property
@@ -106,21 +112,22 @@ class Dimension(object):
         '''Get labels of the Crunch Dimension.'''
         valid_indices = self.valid_indices(include_missing)
         return [
-            self._get_name(el) for (i, el) in enumerate(self.elements)
+            self._get_name(el) for (i, el) in enumerate(self._elements)
             if i in valid_indices
         ]
 
-    @property
-    def elements(self):
+    def elements(self, include_missing=False):
         '''Get elements of the crunch Dimension.
 
         For categorical variables, the elements are represented by categories
         internally. For other variable types, actual 'elements' of the
         Crunch Cube JSON response are returned.
         '''
-        if self.type == 'categorical':
-            return self._dim['type']['categories']
-        return self._dim['type']['elements']
+        valid_indices = self.valid_indices(include_missing)
+        return [
+            el for (i, el) in enumerate(self._elements)
+            if i in valid_indices
+        ]
 
     def valid_indices(self, include_missing):
         '''Gets valid indices of Crunch Cube Dimension's elements.
@@ -131,7 +138,7 @@ class Dimension(object):
         those of the missing values.
         '''
         if include_missing:
-            return [i for (i, el) in enumerate(self.elements)]
+            return [i for (i, el) in enumerate(self._elements)]
         else:
-            return [i for (i, el) in enumerate(self.elements)
+            return [i for (i, el) in enumerate(self._elements)
                     if not el.get('missing')]

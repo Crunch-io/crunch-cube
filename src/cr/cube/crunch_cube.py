@@ -185,7 +185,7 @@ class CrunchCube(object):
         '''
         values = self._get_values(weighted)
         all_dimensions = self._get_dimensions(self._cube)
-        shape = [len(dim.elements) for dim in all_dimensions]
+        shape = [len(dim.elements(include_missing=True)) for dim in all_dimensions]
         valid_indices = self._get_valid_indices(
             all_dimensions,
             include_missing,
@@ -282,7 +282,7 @@ class CrunchCube(object):
             ind_sel, ind_non = 1 - axis, axis
 
         all_dimensions = self._get_dimensions(self._cube)
-        shape = [len(dim.elements) for dim in all_dimensions]
+        shape = [len(dim.elements(include_missing=True)) for dim in all_dimensions]
         values = np.array(self._get_values(weighted)).reshape(shape)
 
         return (
