@@ -83,6 +83,37 @@ class Dimension(object):
             return self._dim['type']['categories']
         return self._dim['type']['elements']
 
+    def _subtotals_names(self):
+        insertions = self._dim['references'].get('view', {}) \
+                .get('transform', {}) \
+                .get('insertions')
+        if not insertions:
+            return None
+        return [
+            insertion
+            for insertion in insertions
+            if insertion['function'] == 'subtotal'
+        ]
+
+    def _subtotals_indices(self):
+        insertions = self._dim['references'].get('view', {}) \
+                .get('transform', {}) \
+                .get('insertions')
+        if not insertions:
+            return None
+        indices = [{
+            'anchor_ind': [i for (i, el) in enumerate(self._elements) if el['id'] == insertion['anchor']][0],
+            'inds': [i for (i, el) in enumerate(self._elements) if el['id'] in insertion['args']],
+        } for insertion in insertions]
+        return indices
+
+    @property
+    def _has_transforms(self):
+        insertions = self._dim['references'].get('view', {}) \
+                .get('transform', {}) \
+                .get('insertions')
+        return insertions is not None
+
     # API methods
 
     @property
@@ -108,12 +139,34 @@ class Dimension(object):
         '''Get type of the Crunch Dimension.'''
         return self._type
 
-    def labels(self, include_missing=False):
+    def labels(self, include_missing=False, include_transforms=False):
         '''Get labels of the Crunch Dimension.'''
         valid_indices = self.valid_indices(include_missing)
+        if not (include_transforms and self._has_transforms):
+            return [
+                self._get_name(el) for (i, el) in enumerate(self._elements)
+                if i in valid_indices
+            ]
+
+        # Create subtotals names and insert them in labels after
+        # appropriate anchors
+        labels_with_cat_ids = [{
+            'ind': i,
+            'id': el['id'],
+            'name': self._get_name(el),
+        } for (i, el) in enumerate(self._elements)]
+        subtotals_names = self._subtotals_names()
+        for subtotal_name in subtotals_names:
+            ind_insert = next((
+                i for (i, x) in enumerate(labels_with_cat_ids)
+                if x.get('id') == subtotal_name['anchor']
+            ), None) + 1
+            labels_with_cat_ids.insert(ind_insert, subtotal_name)
+
         return [
-            self._get_name(el) for (i, el) in enumerate(self._elements)
-            if i in valid_indices
+            label['name']
+            for label in labels_with_cat_ids
+            if not label.get('ind') or label['ind'] in valid_indices
         ]
 
     def elements(self, include_missing=False):

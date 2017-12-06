@@ -174,7 +174,7 @@ class CrunchCube(object):
         return values
 
     def _as_array(self, include_missing=False, get_non_selected=False,
-                  weighted=True, adjusted=False):
+                  weighted=True, adjusted=False, include_transforms_for_dims=False):
         '''Get crunch cube as ndarray.
 
         Args
@@ -191,10 +191,38 @@ class CrunchCube(object):
             include_missing,
             get_non_selected
         )
-        res = np.array(values).reshape(shape)[np.ix_(*valid_indices)]
+        res = np.array(values).reshape(shape)
+        if include_transforms_for_dims:
+            for (i, dim) in enumerate(all_dimensions):
+                if not (dim._has_transforms and i in include_transforms_for_dims):
+                    continue
+                ind_offset = 0
+                for indices in dim._subtotals_indices():
+                    ind_subtotal_elements = np.array(indices['inds'])
+                    ind_insertion = indices['anchor_ind'] + ind_offset
+                    ind_subtotal_elements = np.array(ind_subtotal_elements) + ind_offset
+                    if i == 0:
+                        value = sum(res[ind_subtotal_elements])
+                        res = np.insert(res, ind_insertion + 1, value, axis=i)
+                    else:
+                        value = np.sum(res[:, ind_subtotal_elements], axis=1)
+                        res = np.insert(res, ind_insertion + 1, value, axis=i)
+                    valid_indices = self._fix_valid_indices(valid_indices, ind_insertion, i)
+                    ind_offset += 1
+
+        res = res[np.ix_(*valid_indices)]
 
         adjustment = 1 if adjusted else 0
         return self._fix_shape(res) + adjustment
+
+    @classmethod
+    def _fix_valid_indices(cls, valid_indices, insertion_index, dim):
+        indices = np.array(sorted(valid_indices[dim]))
+        slice_index = np.sum(indices <= insertion_index)
+        indices[slice_index:] += 1
+        indices = np.insert(indices, slice_index, insertion_index + 1)
+        valid_indices[dim] = indices.tolist()
+        return valid_indices
 
     @classmethod
     def _calculate_constraints_sum(cls, prop_table, prop_margin, axis):
@@ -311,7 +339,7 @@ class CrunchCube(object):
             return None
         return self.dimensions[0].description
 
-    def labels(self, include_missing=False):
+    def labels(self, include_missing=False, include_transforms_for_dims=False):
         '''Gets labels for each cube's dimension.
 
         Args
@@ -320,7 +348,7 @@ class CrunchCube(object):
         Returns
             labels (list of lists): Labels for each dimension
         '''
-        return [dim.labels(include_missing) for dim in self.dimensions]
+        return [dim.labels(include_missing, include_transforms_for_dims) for dim in self.dimensions]
 
     @property
     def dimensions(self):
@@ -332,7 +360,8 @@ class CrunchCube(object):
             if i not in mr_selections
         ]
 
-    def as_array(self, include_missing=False, weighted=True, adjusted=False):
+    def as_array(self, include_missing=False, weighted=True, adjusted=False,
+                 include_transforms_for_dims=None):
         '''Get crunch cube as ndarray.
 
         Returns the tabular representation of the crunch cube. The returning
@@ -365,10 +394,12 @@ class CrunchCube(object):
         return self._as_array(
             include_missing=include_missing,
             weighted=weighted,
-            adjusted=adjusted
+            adjusted=adjusted,
+            include_transforms_for_dims=include_transforms_for_dims,
         )
 
-    def margin(self, axis=None, weighted=True, adjusted=False):
+    def margin(self, axis=None, weighted=True, adjusted=False,
+               include_transforms_for_dims=None):
         '''Get margin for the selected axis.
 
         the selected axis. For MR variables, this is the sum of the selected
@@ -425,7 +456,11 @@ class CrunchCube(object):
                 [0, 1],
             ])
         '''
-        array = self.as_array(weighted=weighted, adjusted=adjusted)
+        array = self.as_array(
+            weighted=weighted,
+            adjusted=adjusted,
+            include_transforms_for_dims=(axis is not None and [(1 - axis)])
+        )
 
         all_dimensions = self._get_dimensions(self._cube)
         mr_indices = self._get_mr_selections_indices(all_dimensions)
@@ -454,7 +489,8 @@ class CrunchCube(object):
 
         return np.sum(array, axis)
 
-    def proportions(self, axis=None, weighted=True, adjusted=False):
+    def proportions(self, axis=None, weighted=True, adjusted=False,
+                    include_transforms_for_dims=None, include_missing=False):
         '''Get proportions of a crunch cube.
 
         This function calculates the proportions across the selected axis
@@ -505,7 +541,12 @@ class CrunchCube(object):
         if axis == 1:
             margin = margin[:, np.newaxis]
 
-        return self.as_array(weighted=weighted, adjusted=adjusted) / margin
+        return self.as_array(
+            include_missing=include_missing,
+            weighted=weighted,
+            adjusted=adjusted,
+            include_transforms_for_dims=include_transforms_for_dims,
+        ) / margin
 
     def percentages(self, axis=None):
         '''Get the percentages for crunch cube values.
