@@ -7,6 +7,7 @@ import numpy as np
 from cr.cube.crunch_cube import CrunchCube
 
 
+#pylint: disable=invalid-name
 class TestCrunchCube(TestCase):
     '''Test class for the CrunchCube unit tests.
 
@@ -56,3 +57,81 @@ class TestCrunchCube(TestCase):
     def test_calculate_constraints_sum_raises_value_error_for_bad_axis(self):
         with self.assertRaises(ValueError):
             CrunchCube._calculate_constraints_sum(Mock(), Mock(), 2)
+
+    @patch('cr.cube.crunch_cube.CrunchCube.dimensions', None)
+    def test_name_with_no_dimensions(self):
+        fake_cube = {}
+        cube = CrunchCube(fake_cube)
+        expected = None
+        actual = cube.name
+        self.assertEqual(actual, expected)
+
+    @patch('cr.cube.crunch_cube.CrunchCube.dimensions')
+    def test_name_with_one_dimension(self, mock_dims):
+        fake_cube = {}
+        cube = CrunchCube(fake_cube)
+        mock_dims[0].name = 'test'
+        expected = 'test'
+        actual = cube.name
+        self.assertEqual(actual, expected)
+
+    @patch('cr.cube.crunch_cube.CrunchCube.dimensions', None)
+    def test_description_with_no_dimensions(self):
+        fake_cube = {}
+        cube = CrunchCube(fake_cube)
+        expected = None
+        actual = cube.name
+        self.assertEqual(actual, expected)
+
+    @patch('cr.cube.crunch_cube.CrunchCube.dimensions')
+    def test_description_with_one_dimension(self, mock_dims):
+        fake_cube = {}
+        cube = CrunchCube(fake_cube)
+        mock_dims[0].description = 'test'
+        expected = 'test'
+        actual = cube.description
+        self.assertEqual(actual, expected)
+
+    @patch('cr.cube.crunch_cube.CrunchCube._has_means', False)
+    def test_missing_when_there_are_none(self):
+        fake_cube = {'result': {}}
+        cube = CrunchCube(fake_cube)
+        expected = None
+        actual = cube.missing
+        self.assertEqual(actual, expected)
+
+    def test_fix_valid_indices_subsequent(self):
+        initial_indices = [[1, 2, 3]]
+        insertion_index = 2
+        expected = [[1, 2, 3, 4]]
+        dimension = 0
+        actual = CrunchCube._fix_valid_indices(
+            initial_indices,
+            insertion_index,
+            dimension
+        )
+        self.assertEqual(actual, expected)
+
+    def test_fix_valid_indices_with_gap(self):
+        initial_indices = [[0, 1, 2, 5, 6]]
+        insertion_index = 2
+        expected = [[0, 1, 2, 3, 6, 7]]
+        dimension = 0
+        actual = CrunchCube._fix_valid_indices(
+            initial_indices,
+            insertion_index,
+            dimension
+        )
+        self.assertEqual(actual, expected)
+
+    def test_fix_valid_indices_zero_position(self):
+        initial_indices = [[0, 1, 2, 5, 6]]
+        insertion_index = -1
+        expected = [[0, 1, 2, 3, 6, 7]]
+        dimension = 0
+        actual = CrunchCube._fix_valid_indices(
+            initial_indices,
+            insertion_index,
+            dimension
+        )
+        self.assertEqual(actual, expected)

@@ -1,0 +1,379 @@
+{
+    "element": "shoji:view",
+    "self": "http://local.crunch.io:8080/api/datasets/53434aae61864813abb2a736e3e44ccb/cube/?filter=%5B%5D&query=%7B%22dimensions%22:%5B%7B%22variable%22:%22http:%2F%2Flocal.crunch.io:8080%2Fapi%2Fdatasets%2F53434aae61864813abb2a736e3e44ccb%2Fvariables%2F000000%2F%22%7D,%7B%22variable%22:%22http:%2F%2Flocal.crunch.io:8080%2Fapi%2Fdatasets%2F53434aae61864813abb2a736e3e44ccb%2Fvariables%2F000001%2F%22%7D%5D,%22measures%22:%7B%22count%22:%7B%22function%22:%22cube_count%22,%22args%22:%5B%5D%7D%7D,%22weight%22:null%7D",
+    "value": {
+        "query": {
+            "measures": {
+                "count": {
+                    "function": "cube_count",
+                    "args": []
+                }
+            },
+            "dimensions": [
+                {
+                    "variable": "http://local.crunch.io:8080/api/datasets/53434aae61864813abb2a736e3e44ccb/variables/000000/"
+                },
+                {
+                    "variable": "http://local.crunch.io:8080/api/datasets/53434aae61864813abb2a736e3e44ccb/variables/000001/"
+                }
+            ],
+            "weight": null
+        },
+        "query_environment": {
+            "filter": []
+        },
+        "result": {
+            "dimensions": [
+                {
+                    "derived": false,
+                    "references": {
+                        "alias": "ShutdownBlame",
+                        "description": "If President Obama and the Republicans in Congress do not reach a budget agreement in time to avoid a shutdown of the federal government, who do you think will more to blame--President Obama or the Republican Congress?",
+                        "name": "ShutdownBlame",
+                        "view": {
+                            "show_numeric_values": false,
+                            "transform": {
+                                "insertions": [
+                                    {
+                                        "function": "subtotal",
+                                        "args": [
+                                            1,
+                                            2
+                                        ],
+                                        "name": "Test New Heading (Obama and Republicans)",
+                                        "anchor": 2
+                                    }
+                                ]
+                            },
+                            "include_missing": false,
+                            "show_counts": false,
+                            "transforms": {
+                                "insertions": [
+                                    {
+                                        "function": "subtotal",
+                                        "args": [
+                                            1,
+                                            2
+                                        ],
+                                        "anchor": 1,
+                                        "name": "test new heading"
+                                    }
+                                ]
+                            },
+                            "column_width": null
+                        }
+                    },
+                    "type": {
+                        "ordinal": false,
+                        "class": "categorical",
+                        "categories": [
+                            {
+                                "numeric_value": 1,
+                                "missing": false,
+                                "id": 1,
+                                "name": "President Obama"
+                            },
+                            {
+                                "numeric_value": 2,
+                                "missing": false,
+                                "id": 2,
+                                "name": "Republicans in Congress"
+                            },
+                            {
+                                "numeric_value": 3,
+                                "missing": false,
+                                "id": 3,
+                                "name": "Both"
+                            },
+                            {
+                                "numeric_value": 4,
+                                "missing": false,
+                                "id": 4,
+                                "name": "Neither"
+                            },
+                            {
+                                "numeric_value": 5,
+                                "missing": false,
+                                "id": 5,
+                                "name": "Not sure"
+                            },
+                            {
+                                "numeric_value": 8,
+                                "missing": true,
+                                "id": 8,
+                                "name": "Skipped"
+                            },
+                            {
+                                "numeric_value": 9,
+                                "missing": true,
+                                "id": 9,
+                                "name": "Not Asked"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": true,
+                                "id": -1,
+                                "name": "No Data"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "derived": false,
+                    "references": {
+                        "alias": "RespondentIdeology",
+                        "view": {
+                            "show_counts": false,
+                            "show_numeric_values": false,
+                            "transform": {
+                                "insertions": [
+                                    {
+                                        "function": "subtotal",
+                                        "args": [
+                                            3,
+                                            2
+                                        ],
+                                        "name": "Test 2nd dim Heading",
+                                        "anchor": 3
+                                    }
+                                ]
+                            },
+                            "include_missing": false,
+                            "column_width": null
+                        },
+                        "description": "In general, how would you describe your own political viewpoint?",
+                        "name": "RespondentIdeology"
+                    },
+                    "type": {
+                        "ordinal": false,
+                        "class": "categorical",
+                        "categories": [
+                            {
+                                "numeric_value": 1,
+                                "missing": false,
+                                "id": 1,
+                                "name": "Very liberal"
+                            },
+                            {
+                                "numeric_value": 2,
+                                "missing": false,
+                                "id": 2,
+                                "name": "Liberal"
+                            },
+                            {
+                                "numeric_value": 3,
+                                "missing": false,
+                                "id": 3,
+                                "name": "Moderate"
+                            },
+                            {
+                                "numeric_value": 4,
+                                "missing": false,
+                                "id": 4,
+                                "name": "Conservative"
+                            },
+                            {
+                                "numeric_value": 5,
+                                "missing": false,
+                                "id": 5,
+                                "name": "Very Conservative"
+                            },
+                            {
+                                "numeric_value": 6,
+                                "missing": false,
+                                "id": 6,
+                                "name": "Not sure"
+                            },
+                            {
+                                "numeric_value": 8,
+                                "missing": true,
+                                "id": 8,
+                                "name": "Skipped"
+                            },
+                            {
+                                "numeric_value": 9,
+                                "missing": true,
+                                "id": 9,
+                                "name": "Not Asked"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": true,
+                                "id": -1,
+                                "name": "No Data"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "missing": 3,
+            "measures": {
+                "count": {
+                    "data": [
+                        3,
+                        14,
+                        80,
+                        114,
+                        67,
+                        7,
+                        0,
+                        0,
+                        0,
+                        59,
+                        132,
+                        162,
+                        29,
+                        12,
+                        2,
+                        0,
+                        0,
+                        0,
+                        6,
+                        29,
+                        109,
+                        67,
+                        26,
+                        5,
+                        0,
+                        0,
+                        0,
+                        1,
+                        1,
+                        1,
+                        1,
+                        0,
+                        2,
+                        0,
+                        0,
+                        0,
+                        3,
+                        6,
+                        23,
+                        7,
+                        5,
+                        24,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        2,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                    ],
+                    "n_missing": 3,
+                    "metadata": {
+                        "references": {},
+                        "derived": true,
+                        "type": {
+                            "integer": true,
+                            "missing_rules": {},
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "class": "numeric"
+                        }
+                    }
+                }
+            },
+            "element": "crunch:cube",
+            "counts": [
+                3,
+                14,
+                80,
+                114,
+                67,
+                7,
+                0,
+                0,
+                0,
+                59,
+                132,
+                162,
+                29,
+                12,
+                2,
+                0,
+                0,
+                0,
+                6,
+                29,
+                109,
+                67,
+                26,
+                5,
+                0,
+                0,
+                0,
+                1,
+                1,
+                1,
+                1,
+                0,
+                2,
+                0,
+                0,
+                0,
+                3,
+                6,
+                23,
+                7,
+                5,
+                24,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1,
+                2,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "n": 1000
+        }
+    }
+}

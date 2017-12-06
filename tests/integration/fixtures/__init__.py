@@ -53,3 +53,15 @@ FIXT_PETS_X_PETS = load_fixture(CUBES_DIR, 'pets-x-pets.json')
 FIXT_PETS_X_FRUIT = load_fixture(CUBES_DIR, 'pets-x-fruit.json')
 FIXT_PETS_ARRAY = load_fixture(CUBES_DIR, 'pets-array.json')
 FIXT_ECON_BLAME_WITH_HS = load_fixture(CUBES_DIR, 'econ-blame-with-hs.json')
+FIXT_ECON_BLAME_WITH_HS_MISSING = load_fixture(
+    CUBES_DIR,
+    'econ-blame-with-hs-missing.json'
+)
+FIXT_ECON_BLAME_X_IDEOLOGY_ONE_DIM_HS = load_fixture(
+    CUBES_DIR,
+    'econ-blame-x-ideology-one-dim-hs.json'
+)
+FIXT_ECON_BLAME_X_IDEOLOGY_TWO_DIM_HS = load_fixture(
+    CUBES_DIR,
+    'econ-blame-x-ideology-two-dim-hs.json'
+)
