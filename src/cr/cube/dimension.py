@@ -109,9 +109,10 @@ class Dimension(object):
 
     @property
     def _has_transforms(self):
-        insertions = self._dim['references'].get('view', {}) \
-                .get('transform', {}) \
-                .get('insertions')
+        view = self._dim['references'].get('view')
+        if not view:
+            return False
+        insertions = view.get('transform', {}).get('insertions')
         return insertions is not None
 
     # API methods
@@ -142,7 +143,8 @@ class Dimension(object):
     def labels(self, include_missing=False, include_transforms=False):
         '''Get labels of the Crunch Dimension.'''
         valid_indices = self.valid_indices(include_missing)
-        if not (include_transforms and self._has_transforms):
+        if (not (include_transforms and self._has_transforms) or
+                self.type == 'categorical_array'):
             return [
                 self._get_name(el) for (i, el) in enumerate(self._elements)
                 if i in valid_indices

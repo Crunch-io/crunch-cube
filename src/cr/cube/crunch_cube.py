@@ -194,7 +194,8 @@ class CrunchCube(object):
         res = np.array(values).reshape(shape)
         if include_transforms_for_dims:
             for (i, dim) in enumerate(all_dimensions):
-                if not (dim._has_transforms and i in include_transforms_for_dims):
+                if (not (dim._has_transforms and i in include_transforms_for_dims) or
+                        dim.type == 'categorical_array'):
                     continue
                 ind_offset = 0
                 for indices in dim._subtotals_indices():
@@ -456,10 +457,15 @@ class CrunchCube(object):
                 [0, 1],
             ])
         '''
+        transform_dims = (
+            [(1 - axis)]
+            if axis is not None and isinstance(axis, int)
+            else None
+        )
         array = self.as_array(
             weighted=weighted,
             adjusted=adjusted,
-            include_transforms_for_dims=(axis is not None and [(1 - axis)])
+            include_transforms_for_dims=transform_dims,
         )
 
         all_dimensions = self._get_dimensions(self._cube)
