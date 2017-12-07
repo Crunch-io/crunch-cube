@@ -65,3 +65,4 @@ FIXT_ECON_BLAME_X_IDEOLOGY_TWO_DIM_HS = load_fixture(
     CUBES_DIR,
     'econ-blame-x-ideology-two-dim-hs.json'
 )
+FIXT_SIMPLE_CA_HS = load_fixture(CUBES_DIR, 'simple-ca-hs.json')
