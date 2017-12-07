@@ -101,3 +101,5 @@ The detailed description can be found
 1.1 *Fix stray ipdb.
 
 1.2 Support exporter
+
+1.3 Implement Headers & Subtotals
