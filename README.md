@@ -103,3 +103,5 @@ The detailed description can be found
 1.2 Support exporter
 
 1.3 Implement Headers & Subtotals
+
+1.4 Update based on tabbook tests from `cr.lib`

@@ -155,7 +155,11 @@ class CrunchCube(object):
         For MR variables, where 'selections' dims are dropped, the ndarray
         needs to be reshaped, in order to seem as if those dims never existed.
         '''
-        new_shape = [dim for dim in array.shape if dim != 1]
+
+        # If a first dimension only has one element, we don't want to
+        # remove it. Hence the i == 0 part.
+        new_shape = [dim for (i, dim) in enumerate(array.shape)
+                     if dim != 1 or i == 0]
         return array.reshape(new_shape)
 
     @property
@@ -320,6 +324,13 @@ class CrunchCube(object):
         )
 
     # API Functions
+
+    @property
+    def has_multiple_response(self):
+        '''Determines if a cube has MR dimensions.'''
+        all_dimensions = self._get_dimensions(self._cube)
+        mr_indices = self._get_mr_selections_indices(all_dimensions)
+        return bool(mr_indices)
 
     @property
     def name(self):
@@ -626,14 +637,27 @@ class CrunchCube(object):
             return self._cube['result']['measures']['mean']['n_missing']
         return self._cube['result'].get('missing')
 
-    @property
-    def y_offset(self):
-        '''Gets y offset for sheet manipulation.'''
+    def y_offset(self, expand=False):
+        '''Gets y offset for sheet manipulation.
+
+        Args:
+            - expand (bool): If a cube is a categorical array, and it's also a
+                0-index cube of multiple cube sequence, it needs to be
+                displayed in a specific manner (sliced across categories
+                dimension). This argument enables such behavior. If a CA cube
+                is the only one (not a part of the multitable), it is output
+                normally, without expansion.
+        '''
         if not self.dimensions:
             return 4
 
         first_dim_length = self.as_array().shape[0]
-        if len(self.dimensions) <= 2:
+
+        # Special case of CA as a 0-ind cube
+        if expand and self.dimensions[0].type == 'categorical_array':
+            return first_dim_length * (len(self.dimensions[1].elements()) + 4)
+
+        if len(self.dimensions) <= 2 and self.dimensions[0].type:
             return first_dim_length + 4
         return first_dim_length * (self.as_array().shape[1] + 4)
 
