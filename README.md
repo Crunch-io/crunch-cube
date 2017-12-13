@@ -105,3 +105,5 @@ The detailed description can be found
 1.3 Implement Headers & Subtotals
 
 1.4 Update based on tabbook tests from `cr.lib`
+
+1.4.1 Update based on deck tests from `cr.server`

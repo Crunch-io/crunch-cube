@@ -57,7 +57,7 @@ class Dimension(object):
 
         # For numerical, datetime and text variables
         value = element.get('value')
-        if not value:
+        if value is None:
             return None
 
         # The following statement is used for compatibility between
@@ -69,6 +69,8 @@ class Dimension(object):
             return value
         elif type_ == list:
             return '-'.join([str(el) for el in value])
+        elif type_ in [float, int]:
+            return str(value)
 
         # For categorical array variables
         name = value.get('references', {}).get('name')
