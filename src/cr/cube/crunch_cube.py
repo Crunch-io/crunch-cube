@@ -468,7 +468,7 @@ class CrunchCube(object):
                 [0, 1],
             ])
         '''
-        transform_dims = (
+        transform_dims = include_transforms_for_dims and (
             [(1 - axis)]
             if axis is not None and isinstance(axis, int)
             else None
@@ -554,7 +554,12 @@ class CrunchCube(object):
             # specific way, which needs to be handled speparately.
             return self._double_mr_proportions(axis, weighted)
 
-        margin = self.margin(axis=axis, weighted=weighted, adjusted=adjusted)
+        margin = self.margin(
+            axis=axis,
+            weighted=weighted,
+            adjusted=adjusted,
+            include_transforms_for_dims=include_transforms_for_dims
+        )
         if axis == 1:
             margin = margin[:, np.newaxis]
 
