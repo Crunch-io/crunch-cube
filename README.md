@@ -109,3 +109,5 @@ The detailed description can be found
 1.4.1 Update based on deck tests from `cr.server`
 
 1.4.2 Fix bugs discovered by first `cr.exporter` deploy to alpha
+
+1.4.3 Fix bug (exporting 2D crtab with H&S on row only)
