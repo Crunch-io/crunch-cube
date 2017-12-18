@@ -27,8 +27,9 @@ from .fixtures import (
     FIXT_PETS_ARRAY,
     FIXT_ECON_BLAME_WITH_HS,
     FIXT_ECON_BLAME_WITH_HS_MISSING,
-    FIXT_ECON_BLAME_X_IDEOLOGY_ONE_DIM_HS,
-    FIXT_ECON_BLAME_X_IDEOLOGY_TWO_DIM_HS,
+    FIXT_ECON_BLAME_X_IDEOLOGY_ROW_HS,
+    FIXT_ECON_BLAME_X_IDEOLOGY_COL_HS,
+    FIXT_ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS,
     FIXT_SIMPLE_CA_HS,
 )
 from cr.cube.crunch_cube import CrunchCube
@@ -1405,7 +1406,7 @@ class TestCrunchCube(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_labels_on_2d_cube_with_hs_on_1st_dim(self):
-        cube = CrunchCube(FIXT_ECON_BLAME_X_IDEOLOGY_ONE_DIM_HS)
+        cube = CrunchCube(FIXT_ECON_BLAME_X_IDEOLOGY_ROW_HS)
         expected = [[
             'President Obama',
             'Republicans in Congress',
@@ -1425,7 +1426,7 @@ class TestCrunchCube(TestCase):
         self.assertEqual(actual, expected)
 
     def test_labels_on_2d_cube_with_hs_on_both_dim(self):
-        cube = CrunchCube(FIXT_ECON_BLAME_X_IDEOLOGY_TWO_DIM_HS)
+        cube = CrunchCube(FIXT_ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS)
         expected = [[
             'President Obama',
             'Republicans in Congress',
@@ -1446,7 +1447,7 @@ class TestCrunchCube(TestCase):
         self.assertEqual(actual, expected)
 
     def test_labels_on_2d_cube_with_hs_on_both_dim_do_not_fetch(self):
-        cube = CrunchCube(FIXT_ECON_BLAME_X_IDEOLOGY_TWO_DIM_HS)
+        cube = CrunchCube(FIXT_ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS)
         expected = [[
             'President Obama',
             'Republicans in Congress',
@@ -1464,8 +1465,8 @@ class TestCrunchCube(TestCase):
         actual = cube.labels(include_transforms_for_dims=None)
         self.assertEqual(actual, expected)
 
-    def test_subtotals_as_array_2d_cube_with_hs_on_one_dim(self):
-        cube = CrunchCube(FIXT_ECON_BLAME_X_IDEOLOGY_ONE_DIM_HS)
+    def test_subtotals_as_array_2d_cube_with_hs_on_row(self):
+        cube = CrunchCube(FIXT_ECON_BLAME_X_IDEOLOGY_ROW_HS)
         expected = np.array([
             [3,  14,  80,  114, 67, 7],
             [59, 132, 162, 29,  12, 2],
@@ -1477,8 +1478,20 @@ class TestCrunchCube(TestCase):
         actual = cube.as_array(include_transforms_for_dims=[0, 1])
         np.testing.assert_array_equal(actual, expected)
 
+    def test_subtotals_as_array_2d_cube_with_hs_on_col(self):
+        cube = CrunchCube(FIXT_ECON_BLAME_X_IDEOLOGY_COL_HS)
+        expected = np.array([
+            [3,  14,  80,  94,  114, 67, 7],
+            [59, 132, 162, 294, 29,  12, 2],
+            [6,  29,  109, 138, 67,  26, 5],
+            [1,  1,   1,   2,   1,   0,  2],
+            [3,  6,   23,  29,  7,   5,  24],
+        ])
+        actual = cube.as_array(include_transforms_for_dims=[0, 1])
+        np.testing.assert_array_equal(actual, expected)
+
     def test_subtotals_as_array_2d_cube_with_hs_on_both_dim(self):
-        cube = CrunchCube(FIXT_ECON_BLAME_X_IDEOLOGY_TWO_DIM_HS)
+        cube = CrunchCube(FIXT_ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS)
         expected = np.array([
             [3,  14,  80,  94,  114, 67, 7],
             [59, 132, 162, 294, 29,  12, 2],
@@ -1491,7 +1504,7 @@ class TestCrunchCube(TestCase):
         np.testing.assert_array_equal(actual, expected)
 
     def test_subtotals_as_array_2d_cube_with_hs_on_both_dim_do_not_fetch(self):
-        cube = CrunchCube(FIXT_ECON_BLAME_X_IDEOLOGY_TWO_DIM_HS)
+        cube = CrunchCube(FIXT_ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS)
         expected = np.array([
             [3,  14,  80,  114, 67, 7],
             [59, 132, 162, 29,  12, 2],
@@ -1502,32 +1515,32 @@ class TestCrunchCube(TestCase):
         actual = cube.as_array(include_transforms_for_dims=None)
         np.testing.assert_array_equal(actual, expected)
 
-    def test_subtotals_margin_2d_cube_with_hs_on_one_dim_by_col(self):
-        cube = CrunchCube(FIXT_ECON_BLAME_X_IDEOLOGY_ONE_DIM_HS)
+    def test_subtotals_margin_2d_cube_with_hs_on_row_by_col(self):
+        cube = CrunchCube(FIXT_ECON_BLAME_X_IDEOLOGY_ROW_HS)
         expected = np.array([72, 182, 375, 218, 110, 40])
         actual = cube.margin(axis=0, include_transforms_for_dims=[0, 1])
         np.testing.assert_almost_equal(actual, expected)
 
-    def test_subtotals_margin_2d_cube_with_hs_on_one_dim_by_row(self):
-        cube = CrunchCube(FIXT_ECON_BLAME_X_IDEOLOGY_ONE_DIM_HS)
+    def test_subtotals_margin_2d_cube_with_hs_on_row_by_row(self):
+        cube = CrunchCube(FIXT_ECON_BLAME_X_IDEOLOGY_ROW_HS)
         expected = np.array([285, 396, 681, 242, 6, 68])
         actual = cube.margin(axis=1, include_transforms_for_dims=[0, 1])
         np.testing.assert_almost_equal(actual, expected)
 
     def test_subtotals_margin_2d_cube_with_hs_on_two_dim_by_col(self):
-        cube = CrunchCube(FIXT_ECON_BLAME_X_IDEOLOGY_TWO_DIM_HS)
+        cube = CrunchCube(FIXT_ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS)
         expected = np.array([72, 182, 375, 557, 218, 110, 40])
         actual = cube.margin(axis=0, include_transforms_for_dims=[0, 1])
         np.testing.assert_almost_equal(actual, expected)
 
     def test_subtotals_margin_2d_cube_with_hs_on_two_dim_by_row(self):
-        cube = CrunchCube(FIXT_ECON_BLAME_X_IDEOLOGY_TWO_DIM_HS)
+        cube = CrunchCube(FIXT_ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS)
         expected = np.array([285, 396, 681, 242, 6, 68])
         actual = cube.margin(axis=1, include_transforms_for_dims=[0, 1])
         np.testing.assert_almost_equal(actual, expected)
 
-    def test_subtotals_proportions_2d_cube_with_hs_on_one_dim_by_cell(self):
-        cube = CrunchCube(FIXT_ECON_BLAME_X_IDEOLOGY_ONE_DIM_HS)
+    def test_subtotals_proportions_2d_cube_with_hs_on_row_by_cell(self):
+        cube = CrunchCube(FIXT_ECON_BLAME_X_IDEOLOGY_ROW_HS)
         expected = np.array([
             [.00300903, .01404213, .08024072, .11434303, .0672016,  .00702106],
             [.05917753, .13239719, .16248746, .02908726, .01203611, .00200602],
@@ -1539,8 +1552,8 @@ class TestCrunchCube(TestCase):
         actual = cube.proportions(include_transforms_for_dims=[0, 1])
         np.testing.assert_almost_equal(actual, expected)
 
-    def test_subtotals_proportions_2d_cube_with_hs_on_one_dim_by_col(self):
-        cube = CrunchCube(FIXT_ECON_BLAME_X_IDEOLOGY_ONE_DIM_HS)
+    def test_subtotals_proportions_2d_cube_with_hs_on_row_by_col(self):
+        cube = CrunchCube(FIXT_ECON_BLAME_X_IDEOLOGY_ROW_HS)
         expected = np.array([
             [.04166667, .07692308, .21333333, .52293578, .60909091, .175],
             [.81944444, .72527473, .432,      .13302752, .10909091, .05],
@@ -1552,8 +1565,8 @@ class TestCrunchCube(TestCase):
         actual = cube.proportions(include_transforms_for_dims=[0, 1], axis=0)
         np.testing.assert_almost_equal(actual, expected)
 
-    def test_subtotals_proportions_2d_cube_with_hs_on_one_dim_by_row(self):
-        cube = CrunchCube(FIXT_ECON_BLAME_X_IDEOLOGY_ONE_DIM_HS)
+    def test_subtotals_proportions_2d_cube_with_hs_on_row_by_row(self):
+        cube = CrunchCube(FIXT_ECON_BLAME_X_IDEOLOGY_ROW_HS)
         expected = np.array([
             [.01052632, .04912281, .28070175, .4,        .23508772, .0245614],
             [.1489899,  .33333333, .40909091, .07323232, .03030303, .00505051],
@@ -1566,7 +1579,7 @@ class TestCrunchCube(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_subtotals_proportions_2d_cube_with_hs_on_two_dim_by_cell(self):
-        cube = CrunchCube(FIXT_ECON_BLAME_X_IDEOLOGY_TWO_DIM_HS)
+        cube = CrunchCube(FIXT_ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS)
         expected = np.array([
             [
                 .00300903,

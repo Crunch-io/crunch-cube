@@ -90,7 +90,7 @@ class Dimension(object):
                 .get('transform', {}) \
                 .get('insertions')
         if not insertions:
-            return None
+            return []
         return [
             insertion
             for insertion in insertions
@@ -102,7 +102,7 @@ class Dimension(object):
                 .get('transform', {}) \
                 .get('insertions')
         if not insertions:
-            return None
+            return []
         indices = [{
             'anchor_ind': [i for (i, el) in enumerate(self._elements) if el['id'] == insertion['anchor']][0],
             'inds': [i for (i, el) in enumerate(self._elements) if el['id'] in insertion['args']],

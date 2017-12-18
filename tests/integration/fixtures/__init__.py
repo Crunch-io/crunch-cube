@@ -57,12 +57,16 @@ FIXT_ECON_BLAME_WITH_HS_MISSING = load_fixture(
     CUBES_DIR,
     'econ-blame-with-hs-missing.json'
 )
-FIXT_ECON_BLAME_X_IDEOLOGY_ONE_DIM_HS = load_fixture(
+FIXT_ECON_BLAME_X_IDEOLOGY_ROW_HS = load_fixture(
     CUBES_DIR,
-    'econ-blame-x-ideology-one-dim-hs.json'
+    'econ-blame-x-ideology-row-hs.json'
 )
-FIXT_ECON_BLAME_X_IDEOLOGY_TWO_DIM_HS = load_fixture(
+FIXT_ECON_BLAME_X_IDEOLOGY_COL_HS = load_fixture(
     CUBES_DIR,
-    'econ-blame-x-ideology-two-dim-hs.json'
+    'econ-blame-x-ideology-col-hs.json'
+)
+FIXT_ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS = load_fixture(
+    CUBES_DIR,
+    'econ-blame-x-ideology-row-and-col-hs.json'
 )
 FIXT_SIMPLE_CA_HS = load_fixture(CUBES_DIR, 'simple-ca-hs.json')

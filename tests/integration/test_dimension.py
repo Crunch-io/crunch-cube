@@ -3,7 +3,7 @@ from unittest import TestCase
 from .fixtures import (
     FIXT_ECON_BLAME_WITH_HS,
     FIXT_ECON_BLAME_WITH_HS_MISSING,
-    FIXT_ECON_BLAME_X_IDEOLOGY_ONE_DIM_HS,
+    FIXT_ECON_BLAME_X_IDEOLOGY_ROW_HS,
 )
 from cr.cube.crunch_cube import CrunchCube
 
@@ -43,7 +43,7 @@ class TestDimension(TestCase):
 
     def test_has_transforms_false(self):
         dimension = CrunchCube(
-            FIXT_ECON_BLAME_X_IDEOLOGY_ONE_DIM_HS
+            FIXT_ECON_BLAME_X_IDEOLOGY_ROW_HS
         ).dimensions[1]
         expected = False
         actual = dimension._has_transforms
@@ -51,7 +51,7 @@ class TestDimension(TestCase):
 
     def test_has_transforms_true(self):
         dimension = CrunchCube(
-            FIXT_ECON_BLAME_X_IDEOLOGY_ONE_DIM_HS
+            FIXT_ECON_BLAME_X_IDEOLOGY_ROW_HS
         ).dimensions[0]
         expected = True
         actual = dimension._has_transforms
