@@ -7,7 +7,7 @@ import numpy as np
 from cr.cube.crunch_cube import CrunchCube
 
 
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name
 class TestCrunchCube(TestCase):
     '''Test class for the CrunchCube unit tests.
 
@@ -165,3 +165,62 @@ class TestCrunchCube(TestCase):
             adjusted=fake_adjusted,
             include_transforms_for_dims=fake_dims,
         )
+
+    @patch('cr.cube.crunch_cube.CrunchCube._get_dimensions')
+    @patch('cr.cube.crunch_cube.CrunchCube._get_mr_selections_indices')
+    def test_does_not_have_multiple_response(self, mock_mr_indices, mock_dims):
+        mock_mr_indices.return_value = []
+        expected = False
+        actual = CrunchCube({}).has_multiple_response
+        self.assertEqual(actual, expected)
+
+    @patch('cr.cube.crunch_cube.CrunchCube._get_dimensions')
+    @patch('cr.cube.crunch_cube.CrunchCube._get_mr_selections_indices')
+    def test_has_multiple_response(self, mock_mr_indices, mock_dims):
+        mock_mr_indices.return_value = [Mock()]
+        expected = True
+        actual = CrunchCube({}).has_multiple_response
+        assert actual == expected
+
+    @patch('cr.cube.crunch_cube.CrunchCube.dimensions', [])
+    def test_does_not_have_description(self):
+        expected = None
+        actual = CrunchCube({}).description
+        self.assertEqual(actual, expected)
+
+    @patch('cr.cube.crunch_cube.CrunchCube.dimensions')
+    def test_has_description(self, mock_dims):
+        dims = [Mock(), Mock()]
+        mock_dims.__get__ = Mock(return_value=dims)
+        expected = dims[0].description
+        actual = CrunchCube({}).description
+        self.assertEqual(actual, expected)
+
+    @patch('cr.cube.crunch_cube.CrunchCube._has_means', False)
+    def test_missing(self):
+        missing = Mock()
+        fake_cube = {'result': {'missing': missing}}
+        expected = missing
+        actual = CrunchCube(fake_cube).missing
+        self.assertEqual(actual, expected)
+
+    @patch('cr.cube.crunch_cube.CrunchCube._has_means', True)
+    def test_missing_with_means(self):
+        missing = Mock()
+        fake_cube = {'result': {'measures': {'mean': {'n_missing': missing}}}}
+        expected = missing
+        actual = CrunchCube(fake_cube).missing
+        self.assertEqual(actual, expected)
+
+    def test_has_means(self):
+        has_means = Mock()
+        with patch('cr.cube.crunch_cube.CrunchCube._has_means', has_means):
+            expected = has_means
+            actual = CrunchCube({}).has_means
+            self.assertEqual(actual, expected)
+
+    def test_test_filter_annotation(self):
+        mock_cube = {'filter_names': Mock()}
+        expected = mock_cube['filter_names']
+        actual = CrunchCube(mock_cube).filter_annotation
+        self.assertEqual(actual, expected)
