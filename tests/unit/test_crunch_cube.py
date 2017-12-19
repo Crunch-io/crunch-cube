@@ -138,7 +138,7 @@ class TestCrunchCube(TestCase):
 
     @patch('cr.cube.crunch_cube.CrunchCube.as_array')
     @patch('cr.cube.crunch_cube.CrunchCube._is_double_multiple_response')
-    @patch('cr.cube.crunch_cube.CrunchCube.margin')
+    @patch('cr.cube.crunch_cube.CrunchCube._margin')
     def test_transform_param_propagation(self, mock_margin,
                                          mock_is_double_mr, mock_as_array):
         mock_margin.return_value = 1  # Prevent 'proportions' from crashing
@@ -150,19 +150,17 @@ class TestCrunchCube(TestCase):
         fake_dims = Mock()
         fake_axis = Mock()
         fake_weighted = Mock()
-        fake_adjusted = Mock()
         # Make the call
         cube.proportions(
             axis=fake_axis,
             weighted=fake_weighted,
-            adjusted=fake_adjusted,
             include_transforms_for_dims=fake_dims
         )
         # Assert parameter propagation
         mock_margin.assert_called_once_with(
             axis=fake_axis,
             weighted=fake_weighted,
-            adjusted=fake_adjusted,
+            adjusted=False,
             include_transforms_for_dims=fake_dims,
         )
 

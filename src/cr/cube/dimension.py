@@ -104,13 +104,21 @@ class Dimension(object):
         if not insertions:
             return []
         indices = [{
-            'anchor_ind': [i for (i, el) in enumerate(self._elements) if el['id'] == insertion['anchor']][0],
-            'inds': [i for (i, el) in enumerate(self._elements) if el['id'] in insertion['args']],
+            'anchor_ind': [
+                i
+                for (i, el) in enumerate(self._elements)
+                if el['id'] == insertion['anchor']
+            ][0],
+            'inds': [
+                i
+                for (i, el) in enumerate(self._elements)
+                if el['id'] in insertion['args']
+            ],
         } for insertion in insertions]
         return indices
 
     @property
-    def _has_transforms(self):
+    def has_transforms(self):
         view = self._dim['references'].get('view')
         if not view:
             return False
@@ -145,7 +153,7 @@ class Dimension(object):
     def labels(self, include_missing=False, include_transforms=False):
         '''Get labels of the Crunch Dimension.'''
         valid_indices = self.valid_indices(include_missing)
-        if (not (include_transforms and self._has_transforms) or
+        if (not (include_transforms and self.has_transforms) or
                 self.type == 'categorical_array'):
             return [
                 self._get_name(el) for (i, el) in enumerate(self._elements)

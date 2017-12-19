@@ -174,11 +174,13 @@ class CrunchCube(object):
         else:
             values = self._cube['result']['measures']['count']['data']
 
-        values = [(val if type(val) != dict else np.nan) for val in values]
+        values = [(val if not isinstance(val, dict) else np.nan)
+                  for val in values]
         return values
 
     def _as_array(self, include_missing=False, get_non_selected=False,
-                  weighted=True, adjusted=False, include_transforms_for_dims=False):
+                  weighted=True, adjusted=False,
+                  include_transforms_for_dims=False):
         '''Get crunch cube as ndarray.
 
         Args
@@ -189,7 +191,8 @@ class CrunchCube(object):
         '''
         values = self._get_values(weighted)
         all_dimensions = self._get_dimensions(self._cube)
-        shape = [len(dim.elements(include_missing=True)) for dim in all_dimensions]
+        shape = [len(dim.elements(include_missing=True))
+                 for dim in all_dimensions]
         valid_indices = self._get_valid_indices(
             all_dimensions,
             include_missing,
@@ -198,21 +201,28 @@ class CrunchCube(object):
         res = np.array(values).reshape(shape)
         if include_transforms_for_dims:
             for (i, dim) in enumerate(all_dimensions):
-                if (not (dim._has_transforms and i in include_transforms_for_dims) or
-                        dim.type == 'categorical_array'):
+
+                # Check if transformations can/need to be performed
+                transform = (dim.has_transforms and
+                             i in include_transforms_for_dims)
+                if not transform or dim.type == 'categorical_array':
                     continue
+
+                # Perform transformations
                 ind_offset = 0
                 for indices in dim._subtotals_indices():
                     ind_subtotal_elements = np.array(indices['inds'])
                     ind_insertion = indices['anchor_ind'] + ind_offset
-                    ind_subtotal_elements = np.array(ind_subtotal_elements) + ind_offset
+                    ind_subtotal_elements = (np.array(ind_subtotal_elements) +
+                                             ind_offset)
                     if i == 0:
                         value = sum(res[ind_subtotal_elements])
                         res = np.insert(res, ind_insertion + 1, value, axis=i)
                     else:
                         value = np.sum(res[:, ind_subtotal_elements], axis=1)
                         res = np.insert(res, ind_insertion + 1, value, axis=i)
-                    valid_indices = self._fix_valid_indices(valid_indices, ind_insertion, i)
+                    valid_indices = self._fix_valid_indices(valid_indices,
+                                                            ind_insertion, i)
                     ind_offset += 1
 
         res = res[np.ix_(*valid_indices)]
@@ -255,12 +265,12 @@ class CrunchCube(object):
             return np.dot(prop_margin, V)
 
     def _calculate_standard_error(self, axis):
-        total = self.margin(weighted=False, adjusted=True)
+        total = self._margin(weighted=False, adjusted=True)
         # Calculate margin across axis, as percentages of the total count
-        margin = self.margin(axis=axis, weighted=False, adjusted=True) / total
+        margin = self._margin(axis=axis, weighted=False, adjusted=True) / total
         # Adjusted proportions table, necessary for the standard error,
         # because of the division by it.
-        props = self.proportions(axis=axis, weighted=False, adjusted=True)
+        props = self._proportions(axis=axis, weighted=False, adjusted=True)
 
         constraints = self._calculate_constraints_sum(props, margin, axis)
         if axis == 0:
@@ -315,13 +325,77 @@ class CrunchCube(object):
             ind_sel, ind_non = 1 - axis, axis
 
         all_dimensions = self._get_dimensions(self._cube)
-        shape = [len(dim.elements(include_missing=True)) for dim in all_dimensions]
+        shape = [len(dim.elements(include_missing=True))
+                 for dim in all_dimensions]
         values = np.array(self._get_values(weighted)).reshape(shape)
 
         return (
             values[:, 0, :, 0] /
             (values[:, 0, :, 0] + values[:, ind_sel, :, ind_non])
         )
+
+    def _margin(self, axis=None, weighted=True, adjusted=False,
+                include_transforms_for_dims=None):
+        transform_dims = include_transforms_for_dims and (
+            [(1 - axis)]
+            if axis is not None and isinstance(axis, int)
+            else None
+        )
+        array = self.as_array(
+            weighted=weighted,
+            adjusted=adjusted,
+            include_transforms_for_dims=transform_dims,
+        )
+
+        all_dimensions = self._get_dimensions(self._cube)
+        mr_indices = self._get_mr_selections_indices(all_dimensions)
+        if mr_indices:
+            # Special case treatment for MR variables, that are set as the
+            # first dimension of a cube.
+            margin = array + self._as_array(
+                get_non_selected=True,
+                weighted=weighted,
+                adjusted=adjusted
+            )
+            if axis is None and len(margin.shape) > 1 and 1 in mr_indices:
+                # If MR margin is being calculated as total, we need the
+                # combination of selected + non-selected, and that's why
+                # we're using margin and not array.
+                return np.sum(margin, 1)[:, np.newaxis]
+            if axis is None and len(margin.shape) > 1:
+                # This covers the case when there's a MR variable, but
+                # not as a first dimension.
+                return np.sum(margin, 0)
+            if axis == 1:
+                # If MR margin is calculated by rows, we only need the counts
+                # and that's why we use array and not margin.
+                return np.sum(array, axis)
+            return margin
+
+        return np.sum(array, axis)
+
+    def _proportions(self, axis=None, weighted=True, adjusted=False,
+                     include_transforms_for_dims=None, include_missing=False):
+        if self._is_double_multiple_response():
+            # For the case of MR x MR cube, proportions are calculated in a
+            # specific way, which needs to be handled speparately.
+            return self._double_mr_proportions(axis, weighted)
+
+        margin = self._margin(
+            axis=axis,
+            weighted=weighted,
+            adjusted=adjusted,
+            include_transforms_for_dims=include_transforms_for_dims
+        )
+        if axis == 1:
+            margin = margin[:, np.newaxis]
+
+        return self.as_array(
+            include_missing=include_missing,
+            weighted=weighted,
+            adjusted=adjusted,
+            include_transforms_for_dims=include_transforms_for_dims,
+        ) / margin
 
     # API Functions
 
@@ -360,7 +434,8 @@ class CrunchCube(object):
         Returns
             labels (list of lists): Labels for each dimension
         '''
-        return [dim.labels(include_missing, include_transforms_for_dims) for dim in self.dimensions]
+        return [dim.labels(include_missing, include_transforms_for_dims)
+                for dim in self.dimensions]
 
     @property
     def dimensions(self):
@@ -410,7 +485,7 @@ class CrunchCube(object):
             include_transforms_for_dims=include_transforms_for_dims,
         )
 
-    def margin(self, axis=None, weighted=True, adjusted=False,
+    def margin(self, axis=None, weighted=True,
                include_transforms_for_dims=None):
         '''Get margin for the selected axis.
 
@@ -468,45 +543,14 @@ class CrunchCube(object):
                 [0, 1],
             ])
         '''
-        transform_dims = include_transforms_for_dims and (
-            [(1 - axis)]
-            if axis is not None and isinstance(axis, int)
-            else None
-        )
-        array = self.as_array(
+        return self._margin(
+            axis=axis,
             weighted=weighted,
-            adjusted=adjusted,
-            include_transforms_for_dims=transform_dims,
+            adjusted=False,
+            include_transforms_for_dims=include_transforms_for_dims,
         )
 
-        all_dimensions = self._get_dimensions(self._cube)
-        mr_indices = self._get_mr_selections_indices(all_dimensions)
-        if mr_indices:
-            # Special case treatment for MR variables, that are set as the
-            # first dimension of a cube.
-            margin = array + self._as_array(
-                get_non_selected=True,
-                weighted=weighted,
-                adjusted=adjusted
-            )
-            if axis is None and len(margin.shape) > 1 and 1 in mr_indices:
-                # If MR margin is being calculated as total, we need the
-                # combination of selected + non-selected, and that's why
-                # we're using margin and not array.
-                return np.sum(margin, 1)[:, np.newaxis]
-            if axis is None and len(margin.shape) > 1:
-                # This covers the case when there's a MR variable, but
-                # not as a first dimension.
-                return np.sum(margin, 0)
-            if axis == 1:
-                # If MR margin is calculated by rows, we only need the counts
-                # and that's why we use array and not margin.
-                return np.sum(array, axis)
-            return margin
-
-        return np.sum(array, axis)
-
-    def proportions(self, axis=None, weighted=True, adjusted=False,
+    def proportions(self, axis=None, weighted=True,
                     include_transforms_for_dims=None, include_missing=False):
         '''Get proportions of a crunch cube.
 
@@ -518,6 +562,15 @@ class CrunchCube(object):
         Args
             axis (int): Base axis of proportions calculation. If no axis is
                         provided, calculations are done accros entire table.
+            weighted (bool): Do weighted or non-weighted proportions.
+            include_transforms_for_dims (list): Also include headings and
+                        subtotals transformations for the provided dimensions.
+                        If the dimensions have the transformations, they'll be
+                        included in the resulting numpy array. If the
+                        dimensions don't have the transformations, nothing will
+                        happen (the result will be the same as if the argument
+                        weren't provided).
+            include_missing (bool): Include missing categories
 
         Returns
             (nparray): Calculated array of crunch cube proportions.
@@ -549,26 +602,13 @@ class CrunchCube(object):
             ])
         '''
 
-        if self._is_double_multiple_response():
-            # For the case of MR x MR cube, proportions are calculated in a
-            # specific way, which needs to be handled speparately.
-            return self._double_mr_proportions(axis, weighted)
-
-        margin = self.margin(
+        return self._proportions(
             axis=axis,
             weighted=weighted,
-            adjusted=adjusted,
-            include_transforms_for_dims=include_transforms_for_dims
-        )
-        if axis == 1:
-            margin = margin[:, np.newaxis]
-
-        return self.as_array(
-            include_missing=include_missing,
-            weighted=weighted,
-            adjusted=adjusted,
+            adjusted=False,
             include_transforms_for_dims=include_transforms_for_dims,
-        ) / margin
+            include_missing=include_missing,
+        )
 
     def percentages(self, axis=None):
         '''Get the percentages for crunch cube values.

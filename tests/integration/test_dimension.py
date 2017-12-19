@@ -46,7 +46,7 @@ class TestDimension(TestCase):
             FIXT_ECON_BLAME_X_IDEOLOGY_ROW_HS
         ).dimensions[1]
         expected = False
-        actual = dimension._has_transforms
+        actual = dimension.has_transforms
         self.assertEqual(actual, expected)
 
     def test_has_transforms_true(self):
@@ -54,5 +54,5 @@ class TestDimension(TestCase):
             FIXT_ECON_BLAME_X_IDEOLOGY_ROW_HS
         ).dimensions[0]
         expected = True
-        actual = dimension._has_transforms
+        actual = dimension.has_transforms
         self.assertEqual(actual, expected)
