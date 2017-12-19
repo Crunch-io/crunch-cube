@@ -727,3 +727,11 @@ class CrunchCube(object):
     def filter_annotation(self):
         '''Get cube's filter annotation.'''
         return self._cube.get('filter_names', [])
+
+    def count(self, weighted=True):
+        '''Get cube's count with automatic weighted/unweighted selection.'''
+        if weighted and self.is_weighted:
+            return sum(
+                self._cube['result']['measures'].get('count', {}).get('data')
+            )
+        return self._cube['result']['n']

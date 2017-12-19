@@ -275,3 +275,75 @@ class TestCrunchCube(TestCase):
         # 'expand' argument expands the CA dim as slices
         actual = CrunchCube({}).y_offset(expand=True)
         self.assertEqual(actual, expected)
+
+    @patch('cr.cube.crunch_cube.CrunchCube.is_weighted', False)
+    def test_n_unweighted_and_has_no_weight(self):
+        unweighted_count = Mock()
+        weighted_counts = Mock()
+        actual = CrunchCube({
+            'result': {
+                'n': unweighted_count,
+                'measures': {
+                    'count': {
+                        'data': weighted_counts,
+                    },
+                },
+            },
+        }).count(weighted=False)
+
+        expected = unweighted_count
+        self.assertEqual(actual, expected)
+
+    @patch('cr.cube.crunch_cube.CrunchCube.is_weighted', True)
+    def test_n_unweighted_and_has_weight(self):
+        unweighted_count = Mock()
+        weighted_counts = Mock()
+        actual = CrunchCube({
+            'result': {
+                'n': unweighted_count,
+                'measures': {
+                    'count': {
+                        'data': weighted_counts,
+                    },
+                },
+            },
+        }).count(weighted=False)
+
+        expected = unweighted_count
+        self.assertEqual(actual, expected)
+
+    @patch('cr.cube.crunch_cube.CrunchCube.is_weighted', False)
+    def test_n_weighted_and_has_no_weight(self):
+        unweighted_count = Mock()
+        weighted_counts = Mock()
+        actual = CrunchCube({
+            'result': {
+                'n': unweighted_count,
+                'measures': {
+                    'count': {
+                        'data': weighted_counts,
+                    },
+                },
+            },
+        }).count(weighted=True)
+
+        expected = unweighted_count
+        self.assertEqual(actual, expected)
+
+    @patch('cr.cube.crunch_cube.CrunchCube.is_weighted', True)
+    def test_n_weighted_and_has_weight(self):
+        unweighted_count = Mock()
+        weighted_counts = [1, 2, 3, 4]
+        actual = CrunchCube({
+            'result': {
+                'n': unweighted_count,
+                'measures': {
+                    'count': {
+                        'data': weighted_counts,
+                    },
+                },
+            },
+        }).count(weighted=True)
+
+        expected = sum(weighted_counts)
+        self.assertEqual(actual, expected)
