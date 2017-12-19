@@ -1673,3 +1673,15 @@ class TestCrunchCube(TestCase):
         expected = np.array([6, 6, 6])
         actual = cube.margin(include_transforms_for_dims=[0, 1], axis=1)
         np.testing.assert_almost_equal(actual, expected)
+
+    def test_count_unweighted(self):
+        cube = CrunchCube(FIXT_ADMIT_X_GENDER_WEIGHTED)
+        expected = 4526
+        actual = cube.count(weighted=False)
+        self.assertEqual(actual, expected)
+
+    def test_count_weighted(self):
+        cube = CrunchCube(FIXT_ADMIT_X_GENDER_WEIGHTED)
+        expected = 4451.955438803242
+        actual = cube.count(weighted=True)
+        self.assertEqual(actual, expected)
