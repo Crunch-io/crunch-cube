@@ -224,3 +224,56 @@ class TestCrunchCube(TestCase):
         expected = mock_cube['filter_names']
         actual = CrunchCube(mock_cube).filter_annotation
         self.assertEqual(actual, expected)
+
+    @patch('cr.cube.crunch_cube.CrunchCube.dimensions')
+    def test_y_offset_no_dimensions(self, mock_dims):
+        dims = []
+        mock_dims.__get__ = Mock(return_value=dims)
+        expected = 4
+        actual = CrunchCube({}).y_offset()
+        self.assertEqual(actual, expected)
+
+    @patch('cr.cube.crunch_cube.CrunchCube.as_array')
+    @patch('cr.cube.crunch_cube.CrunchCube.dimensions')
+    def test_y_offset_two_dimensions(self, mock_dims, mock_as_array):
+        dims = [Mock(), Mock()]
+        mock_dims.__get__ = Mock(return_value=dims)
+        mock_as_array.return_value = np.arange(12).reshape(3, 4)
+
+        # Expected is the first dim length + offset of 4
+        expected = 3 + 4
+        actual = CrunchCube({}).y_offset()
+        self.assertEqual(actual, expected)
+
+    @patch('cr.cube.crunch_cube.CrunchCube.as_array')
+    @patch('cr.cube.crunch_cube.CrunchCube.dimensions')
+    def test_y_offset_three_dimensions(self, mock_dims, mock_as_array):
+        dims = [Mock(), Mock(), Mock()]
+        mock_dims.__get__ = Mock(return_value=dims)
+        mock_as_array.return_value = np.arange(24).reshape(3, 4, 2)
+
+        # Expected is the first dim len * (sedond dim len + offset of 4)
+        # The first dim is used as a slice, while the second is the number
+        # of rows of each subtable. Offset is space between tables
+        expected = 3 * (4 + 4)
+        actual = CrunchCube({}).y_offset()
+        self.assertEqual(actual, expected)
+
+    @patch('cr.cube.crunch_cube.CrunchCube.as_array')
+    @patch('cr.cube.crunch_cube.CrunchCube.dimensions')
+    def test_y_offset_ca_as_zero_index_cube(self, mock_dims, mock_as_array):
+        dims = [Mock(), Mock()]
+        dims[0].type = 'categorical_array'
+
+        # Second dim has total length of 3
+        dims[1].elements.return_value = [Mock(), Mock(), Mock()]
+        mock_dims.__get__ = Mock(return_value=dims)
+        mock_as_array.return_value = np.arange(12).reshape(3, 4)
+
+        # Expected is the first dim len * (sedond dim len + offset of 4)
+        # The first dim is used as a slice, while the second is the number
+        # of rows of each subtable. Offset is space between tables
+        expected = 3 * (3 + 4)
+        # 'expand' argument expands the CA dim as slices
+        actual = CrunchCube({}).y_offset(expand=True)
+        self.assertEqual(actual, expected)

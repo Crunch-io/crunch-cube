@@ -65,12 +65,12 @@ class Dimension(object):
         # is not defined. So, if the value is textual, in python 3 the first
         # part of the 'or' statement should short-circuit to 'True'.
         type_ = type(value)
-        if type_ != dict and (type_ == str or type_ == unicode):  # noqa: F821
-            return value
-        elif type_ == list:
+        if type_ == list:
             return '-'.join([str(el) for el in value])
         elif type_ in [float, int]:
             return str(value)
+        elif type_ != dict and (type_ == str or type_ == unicode):  # noqa: F821
+            return value
 
         # For categorical array variables
         name = value.get('references', {}).get('name')
