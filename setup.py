@@ -12,8 +12,8 @@ def get_long_desc():
 
 
 install_requires = [
-    'numpy',
     'scipy',
+    'numpy',
 ]
 
 test_requires = [
