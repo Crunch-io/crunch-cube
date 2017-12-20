@@ -150,13 +150,19 @@ class Dimension(object):
         '''Get type of the Crunch Dimension.'''
         return self._type
 
-    def labels(self, include_missing=False, include_transforms=False):
+    def labels(self, include_missing=False, include_transforms=False,
+               include_cat_ids=False):
         '''Get labels of the Crunch Dimension.'''
         valid_indices = self.valid_indices(include_missing)
         if (not (include_transforms and self.has_transforms) or
                 self.type == 'categorical_array'):
             return [
-                self._get_name(el) for (i, el) in enumerate(self._elements)
+                (
+                    self._get_name(el)
+                    if not include_cat_ids else
+                    (self._get_name(el), el.get('id', -1))
+                )
+                for (i, el) in enumerate(self._elements)
                 if i in valid_indices
             ]
 
@@ -176,7 +182,11 @@ class Dimension(object):
             labels_with_cat_ids.insert(ind_insert, subtotal_name)
 
         return [
-            label['name']
+            (
+                label['name']
+                if not include_cat_ids else
+                (label['name'], label.get('id', -1))
+            )
             for label in labels_with_cat_ids
             if not label.get('ind') or label['ind'] in valid_indices
         ]
