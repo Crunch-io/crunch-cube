@@ -111,3 +111,5 @@ The detailed description can be found
 1.4.2 Fix bugs discovered by first `cr.exporter` deploy to alpha
 
 1.4.3 Fix bug (exporting 2D crtab with H&S on row only)
+
+1.4.4 Implement obtaining labels with category ids (useful for H&S in exporter)
