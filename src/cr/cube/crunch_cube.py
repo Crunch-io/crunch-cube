@@ -319,20 +319,20 @@ class CrunchCube(object):
         return False
 
     def _double_mr_proportions(self, axis, weighted):
-        if axis is None:
-            ind_sel, ind_non = 1, 1
-        else:
-            ind_sel, ind_non = 1 - axis, axis
-
         all_dimensions = self._get_dimensions(self._cube)
         shape = [len(dim.elements(include_missing=True))
                  for dim in all_dimensions]
         values = np.array(self._get_values(weighted)).reshape(shape)
+        selected = values[:, 0, :, 0]
 
-        return (
-            values[:, 0, :, 0] /
-            (values[:, 0, :, 0] + values[:, ind_sel, :, ind_non])
-        )
+        if axis is None:
+            non_selected = (values[:, 0, :, 1] + values[:, 1, :, 0] +
+                            values[:, 1, :, 1])
+        else:
+            ind_sel, ind_non = 1 - axis, axis
+            non_selected = values[:, ind_sel, :, ind_non]
+
+        return selected / (selected + non_selected)
 
     def _margin(self, axis=None, weighted=True, adjusted=False,
                 include_transforms_for_dims=None):

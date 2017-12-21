@@ -1164,9 +1164,9 @@ class TestCrunchCube(TestCase):
     def test_pets_x_pets_proportions_by_cell(self):
         cube = CrunchCube(FIXT_PETS_X_PETS)
         expected = np.array([
-            [.5, .4, .5294118],
-            [.4, .4303797, .4571429],
-            [.5294118, .4571429, .5428571],
+            [.5, .2, .2571429],
+            [.2, .4303797, .2285714],
+            [.2571429, .2285714, .5428571],
         ])
         actual = cube.proportions()
         np.testing.assert_almost_equal(actual, expected)
