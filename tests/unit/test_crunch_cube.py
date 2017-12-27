@@ -136,6 +136,7 @@ class TestCrunchCube(TestCase):
         )
         self.assertEqual(actual, expected)
 
+    @patch('cr.cube.crunch_cube.CrunchCube.has_multiple_response', False)
     @patch('cr.cube.crunch_cube.CrunchCube.as_array')
     @patch('cr.cube.crunch_cube.CrunchCube._is_double_multiple_response')
     @patch('cr.cube.crunch_cube.CrunchCube._margin')

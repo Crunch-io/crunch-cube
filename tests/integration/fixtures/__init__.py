@@ -70,3 +70,4 @@ FIXT_ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS = load_fixture(
     'econ-blame-x-ideology-row-and-col-hs.json'
 )
 FIXT_SIMPLE_CA_HS = load_fixture(CUBES_DIR, 'simple-ca-hs.json')
+FIXT_FRUIT_X_PETS = load_fixture(CUBES_DIR, 'fruit-x-pets.json')

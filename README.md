@@ -115,3 +115,5 @@ The detailed description can be found
 1.4.4 Implement obtaining labels with category ids (useful for H&S in exporter)
 
 1.4.5 Fix MR x MR proportions calculation
+
+1.5.0 Start implementing index table functionality

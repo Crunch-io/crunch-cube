@@ -31,6 +31,7 @@ from .fixtures import (
     FIXT_ECON_BLAME_X_IDEOLOGY_COL_HS,
     FIXT_ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS,
     FIXT_SIMPLE_CA_HS,
+    FIXT_FRUIT_X_PETS,
 )
 from cr.cube.crunch_cube import CrunchCube
 
@@ -627,8 +628,8 @@ class TestCrunchCube(TestCase):
     def test_proportions_cat_x_mr_axis_none(self):
         cube = CrunchCube(FIXT_CAT_X_MR)
         expected = np.array([
-            [0.15, 0.1518987, 0.1714286],
-            [0.35, 0.2784810, 0.3714286],
+            [.42857143, .48,       .52173913],
+            [.53846154, .40740741, .55319149],
         ])
         actual = cube.proportions()
         np.testing.assert_almost_equal(actual, expected)
@@ -636,8 +637,8 @@ class TestCrunchCube(TestCase):
     def test_proportions_cat_x_mr_axis_0(self):
         cube = CrunchCube(FIXT_CAT_X_MR)
         expected = np.array([
-            [0.4285714, 0.4800000, 0.5217391],
-            [0.5384615, 0.4074074, 0.5531915],
+            [.3, .3529412, .3157895],
+            [.7, .6470588, .6842105],
         ])
         actual = cube.proportions(axis=0)
         np.testing.assert_almost_equal(actual, expected)
@@ -1129,12 +1130,12 @@ class TestCrunchCube(TestCase):
     def test_selected_crosstab_proportions_total(self):
         cube = CrunchCube(FIXT_SELECTED_CROSSTAB_4)
         expected = np.array([
-            [0.329036700375595, 0.381950958618156],
-            [0.320620717695708,  0.327723062528721],
-            [0.392254504152701, 0.439142047148397],
-            [0.418103897371069,  0.450115632023491],
-            [0.185809278853744, 0.14504292098248],
-            [0.262843097025161,  0.27608279697761],
+            [.6815894,  .73842499],
+            [.6632888,  .63436033],
+            [.81146893, .85004262],
+            [.85174892, .88409986],
+            [.37871497, .28475016],
+            [.53511338, .5426064],
         ])
         actual = cube.proportions()
         np.testing.assert_almost_equal(actual, expected)
@@ -1685,3 +1686,155 @@ class TestCrunchCube(TestCase):
         expected = 4451.955438803242
         actual = cube.count(weighted=True)
         self.assertEqual(actual, expected)
+
+    def test_econ_x_ideology_index_by_col(self):
+        cube = CrunchCube(FIXT_ECON_GENDER_X_IDEOLOGY_WEIGHTED)
+        expected = np.array([
+            [
+                .91861761,
+                .96399471,
+                .9394101,
+                1.06629132,
+                1.30027051,
+                .67660435,
+            ],
+            [
+                1.08138239,
+                1.03600529,
+                1.0605899,
+                .93370868,
+                .69972949,
+                1.32339565,
+            ],
+        ])
+        actual = cube.index(axis=0)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_econ_x_ideology_index_by_row(self):
+        cube = CrunchCube(FIXT_ECON_GENDER_X_IDEOLOGY_WEIGHTED)
+        expected = np.array([
+            [
+                .91861761,
+                .96399471,
+                .9394101,
+                1.06629132,
+                1.30027051,
+                .67660435,
+            ],
+            [
+                1.08138239,
+                1.03600529,
+                1.0605899,
+                .93370868,
+                .69972949,
+                1.32339565,
+            ],
+        ])
+        actual = cube.index(axis=1)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_fruit_x_pets_proportions_by_cell(self):
+        cube = CrunchCube(FIXT_FRUIT_X_PETS)
+        expected = np.array([
+            [.4285714, .48, .5217391],
+            [.5384615, .4074074, .5531915],
+        ])
+        actual = cube.proportions(axis=None)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_pets_x_fruit_proportions_by_cell(self):
+        cube = CrunchCube(FIXT_PETS_X_FRUIT)
+        expected = np.array([
+            [.4285714, .5384615],
+            [.48, .4074074],
+            [.5217391, .5531915],
+        ])
+        actual = cube.proportions(axis=None)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_pets_x_fruit_proportions_by_col(self):
+        cube = CrunchCube(FIXT_PETS_X_FRUIT)
+        expected = np.array([
+            [.4285714, .5384615],
+            [.48, .4074074],
+            [.5217391, .5531915],
+        ])
+        actual = cube.proportions(axis=0)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_pets_x_fruit_proportions_by_row(self):
+        cube = CrunchCube(FIXT_PETS_X_FRUIT)
+        expected = np.array([
+            [.3, .7],
+            [.3529412, .6470588],
+            [.3157895, .6842105],
+        ])
+        actual = cube.proportions(axis=1)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_fruit_x_pets_proportions_by_row(self):
+        cube = CrunchCube(FIXT_FRUIT_X_PETS)
+        expected = np.array([
+            [.4285714, .48, .5217391],
+            [.5384615, .4074074, .5531915],
+        ])
+        actual = cube.proportions(axis=1)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_fruit_x_pets_proportions_by_col(self):
+        cube = CrunchCube(FIXT_FRUIT_X_PETS)
+        expected = np.array([
+            [.3, .3529412, .3157895],
+            [.7, .6470588, .6842105],
+        ])
+        actual = cube.proportions(axis=0)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_cat_x_mr_index_by_row(self):
+        cube = CrunchCube(FIXT_CAT_X_MR)
+        expected = np.array([
+            [.8571429,  1.1152941, .9610984],
+            [1.0769231, .9466231,  1.019037],
+        ])
+        actual = cube.index(axis=1)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_cat_x_mr_index_by_cell(self):
+        cube = CrunchCube(FIXT_CAT_X_MR)
+        expected = np.array([
+            [.8571429,  1.1152941, .9610984],
+            [1.0769231, .9466231,  1.019037],
+        ])
+        actual = cube.index(axis=None)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_cat_x_mr_index_by_col(self):
+        cube = CrunchCube(FIXT_CAT_X_MR)
+        with self.assertRaises(ValueError) as ctx:
+            cube.index(axis=0)
+        expected = 'CAT x MR index table not defined for column direction'
+        self.assertEqual(ctx.exception.args[0], expected)
+
+    def test_mr_x_cat_index_by_col(self):
+        cube = CrunchCube(FIXT_PETS_X_FRUIT)
+        expected = np.array([
+            [.8571429,  1.0769231],
+            [1.1152941, .9466231],
+            [.9610984,  1.019037],
+        ])
+        actual = cube.index(axis=0)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_mr_x_cat_index_by_row(self):
+        cube = CrunchCube(FIXT_PETS_X_FRUIT)
+        with self.assertRaises(ValueError) as ctx:
+            cube.index(axis=1)
+        expected = 'MR x CAT index table only defined for column direction'
+        self.assertEqual(ctx.exception.args[0], expected)
+
+    def test_mr_x_cat_index_by_cell(self):
+        cube = CrunchCube(FIXT_PETS_X_FRUIT)
+        with self.assertRaises(ValueError) as ctx:
+            cube.index(axis=None)
+        expected = 'MR x CAT index table only defined for column direction'
+        self.assertEqual(ctx.exception.args[0], expected)

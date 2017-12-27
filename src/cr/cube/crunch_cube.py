@@ -178,6 +178,13 @@ class CrunchCube(object):
                   for val in values]
         return values
 
+    def _get_table(self, weighted):
+        values = self._get_values(weighted)
+        all_dimensions = self._get_dimensions(self._cube)
+        shape = [len(dim.elements(include_missing=True))
+                 for dim in all_dimensions]
+        return np.array(values).reshape(shape)
+
     def _as_array(self, include_missing=False, get_non_selected=False,
                   weighted=True, adjusted=False,
                   include_transforms_for_dims=False):
@@ -275,20 +282,20 @@ class CrunchCube(object):
         constraints = self._calculate_constraints_sum(props, margin, axis)
         if axis == 0:
             # If the s.e. is calculated across rows, the addition of the
-            # 'constraints' member must be done element-wise, for 'd' and for
-            # each column of the props variance matrix, thus the transformation
-            # to the column vector.
+            # 'constraints' member must be done element-wise, for 'magic_d' and
+            # for each column of the props variance matrix, thus the
+            # transformation to the column vector.
             constraints = constraints[:, np.newaxis]
 
-        d = (1 - 2 * margin) / margin
+        magic_d = (1 - 2 * margin) / margin
         if axis == 1:
             # If the s.e. is calculated across rows, the multiplication of
-            # the 'd' member must be done element-wise, for 'd' and for each
-            # row of the props variance matrix, thus the transformation to
-            # the column vector.
-            d = d[:, np.newaxis]
+            # the 'magic_d' member must be done element-wise, for 'magic_d' and
+            # for each row of the props variance matrix, thus the
+            # transformation to the column vector.
+            magic_d = magic_d[:, np.newaxis]
 
-        return np.sqrt((d * props * (1 - props) + constraints) / total)
+        return np.sqrt((magic_d * props * (1 - props) + constraints) / total)
 
     def _calculate_statistics(self, axis):
         if axis not in [0, 1]:
@@ -334,8 +341,47 @@ class CrunchCube(object):
 
         return selected / (selected + non_selected)
 
+    def _mr_margin(self, axis, weighted, adjusted):
+        all_dimensions = self._get_dimensions(self._cube)
+        mr_indices = self._get_mr_selections_indices(all_dimensions)
+        array = self.as_array(
+            weighted=weighted,
+            adjusted=adjusted,
+        )
+        margin = array + self._as_array(
+            get_non_selected=True,
+            weighted=weighted,
+            adjusted=adjusted
+        )
+
+        if axis is None and len(margin.shape) > 1 and 1 in mr_indices:
+            # If MR margin is being calculated as total, we need the
+            # combination of selected + non-selected, and that's why
+            # we're using margin and not array.
+            return np.sum(margin, 1)[:, np.newaxis]
+
+        if axis is None and len(margin.shape) > 1:
+            # This covers the case when there's a MR variable, but
+            # not as a first dimension.
+            return np.sum(margin, 0)
+
+        if axis == 1:
+            # If MR margin is calculated by rows, we only need the counts
+            # and that's why we use array and not margin.
+            return np.sum(array, axis)
+
+        return margin
+
     def _margin(self, axis=None, weighted=True, adjusted=False,
                 include_transforms_for_dims=None):
+
+        # MR margins are calculated differently, so they need a separate method
+        # for them. A good example of this is the rcrunch functionality.
+        if self.has_multiple_response:
+            return self._mr_margin(axis, weighted, adjusted)
+
+        # If there are no MR variables, the margins are mostly sums across
+        # appropriate dimensions.
         transform_dims = include_transforms_for_dims and (
             [(1 - axis)]
             if axis is not None and isinstance(axis, int)
@@ -346,40 +392,39 @@ class CrunchCube(object):
             adjusted=adjusted,
             include_transforms_for_dims=transform_dims,
         )
-
-        all_dimensions = self._get_dimensions(self._cube)
-        mr_indices = self._get_mr_selections_indices(all_dimensions)
-        if mr_indices:
-            # Special case treatment for MR variables, that are set as the
-            # first dimension of a cube.
-            margin = array + self._as_array(
-                get_non_selected=True,
-                weighted=weighted,
-                adjusted=adjusted
-            )
-            if axis is None and len(margin.shape) > 1 and 1 in mr_indices:
-                # If MR margin is being calculated as total, we need the
-                # combination of selected + non-selected, and that's why
-                # we're using margin and not array.
-                return np.sum(margin, 1)[:, np.newaxis]
-            if axis is None and len(margin.shape) > 1:
-                # This covers the case when there's a MR variable, but
-                # not as a first dimension.
-                return np.sum(margin, 0)
-            if axis == 1:
-                # If MR margin is calculated by rows, we only need the counts
-                # and that's why we use array and not margin.
-                return np.sum(array, axis)
-            return margin
-
         return np.sum(array, axis)
 
-    def _proportions(self, axis=None, weighted=True, adjusted=False,
-                     include_transforms_for_dims=None, include_missing=False):
+    def _mr_proportions(self, axis, weighted):
         if self._is_double_multiple_response():
             # For the case of MR x MR cube, proportions are calculated in a
             # specific way, which needs to be handled speparately.
             return self._double_mr_proportions(axis, weighted)
+
+        table = self._get_table(weighted)
+        valid_indices = [dim.valid_indices(False) for dim in self.dimensions]
+
+        if len(self.dimensions) == 1:
+            res = table[:, 0] / (table[:, 0] + table[:, 1])
+            return res[np.ix_(*valid_indices)]
+
+        if self.dimensions[0].type == 'multiple_response':
+            if axis == 1:
+                res = table[:, 0, :] / np.sum(table[:, 0, :], 1)[:, np.newaxis]
+            else:
+                res = table[:, 0, :] / (table[:, 0, :] + table[:, 1, :])
+            return res[np.ix_(*valid_indices)]
+
+        if self.dimensions[1].type == 'multiple_response':
+            if axis == 0:
+                res = table[:, :, 0] / np.sum(table[:, :, 0], 0)
+            else:
+                res = table[:, :, 0] / (table[:, :, 0] + table[:, :, 1])
+            return res[np.ix_(*valid_indices)]
+
+    def _proportions(self, axis=None, weighted=True, adjusted=False,
+                     include_transforms_for_dims=None, include_missing=False):
+        if self.has_multiple_response:
+            return self._mr_proportions(axis, weighted)
 
         margin = self._margin(
             axis=axis,
@@ -735,3 +780,48 @@ class CrunchCube(object):
                 self._cube['result']['measures'].get('count', {}).get('data')
             )
         return self._cube['result']['n']
+
+    def _mr_index(self, axis, weighted):
+        table = self._get_table(weighted)
+
+        if self.dimensions[0].type == 'multiple_response':
+            if axis != 0:
+                raise ValueError(
+                    'MR x CAT index table only defined for column direction'
+                )
+            selected = table[:, 0, :]
+            non_selected = table[:, 1, :]
+            margin = np.sum(selected, 1) / np.sum(selected + non_selected, 1)
+            return self.proportions(weighted=weighted) / margin[:, np.newaxis]
+
+        if self.dimensions[1].type == 'multiple_response':
+            if axis == 0:
+                raise ValueError(
+                    'CAT x MR index table not defined for column direction'
+                )
+            selected = table[:, :, 0]
+            non_selected = table[:, :, 1]
+            margin = np.sum(selected, 0) / np.sum(selected + non_selected, 0)
+            return self.proportions(weighted=weighted) / margin
+
+        raise ValueError('Unexpected dimension types for cube with MR.')
+
+    def index(self, axis, weighted=True):
+        '''Return table index by margin.'''
+
+        if self.has_multiple_response:
+            return self._mr_index(axis, weighted)
+
+        margin = np.true_divide(
+            self.margin(axis=axis, weighted=weighted),
+            self.margin(weighted=weighted),
+        )
+        props = self.proportions(
+            axis=(1 - axis),
+            weighted=weighted,
+        )
+
+        if axis == 1:
+            margin = margin[:, np.newaxis]
+
+        return np.true_divide(props, margin)
