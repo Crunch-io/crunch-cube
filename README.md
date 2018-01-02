@@ -117,3 +117,5 @@ The detailed description can be found
 1.4.5 Fix MR x MR proportions calculation
 
 1.5.0 Start implementing index table functionality
+
+1.5.1 Implement index for MR x MR

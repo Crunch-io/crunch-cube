@@ -162,12 +162,8 @@ class CrunchCube(object):
                      if dim != 1 or i == 0]
         return array.reshape(new_shape)
 
-    @property
-    def _has_means(self):
-        return self._cube['result']['measures'].get('mean', None) is not None
-
     def _get_values(self, weighted):
-        if self._has_means:
+        if self.has_means:
             values = self._cube['result']['measures']['mean']['data']
         elif not weighted or not self.is_weighted:
             values = self._cube['result']['counts']
@@ -319,12 +315,6 @@ class CrunchCube(object):
 
         return (props - cross_margin) / self._calculate_standard_error(axis)
 
-    def _is_double_multiple_response(self):
-        types = [dim.type for dim in self.dimensions]
-        if types == ['multiple_response', 'multiple_response']:
-            return True
-        return False
-
     def _double_mr_proportions(self, axis, weighted):
         all_dimensions = self._get_dimensions(self._cube)
         shape = [len(dim.elements(include_missing=True))
@@ -377,7 +367,7 @@ class CrunchCube(object):
 
         # MR margins are calculated differently, so they need a separate method
         # for them. A good example of this is the rcrunch functionality.
-        if self.has_multiple_response:
+        if self.has_mr:
             return self._mr_margin(axis, weighted, adjusted)
 
         # If there are no MR variables, the margins are mostly sums across
@@ -395,7 +385,7 @@ class CrunchCube(object):
         return np.sum(array, axis)
 
     def _mr_proportions(self, axis, weighted):
-        if self._is_double_multiple_response():
+        if self.is_double_mr:
             # For the case of MR x MR cube, proportions are calculated in a
             # specific way, which needs to be handled speparately.
             return self._double_mr_proportions(axis, weighted)
@@ -423,7 +413,7 @@ class CrunchCube(object):
 
     def _proportions(self, axis=None, weighted=True, adjusted=False,
                      include_transforms_for_dims=None, include_missing=False):
-        if self.has_multiple_response:
+        if self.has_mr:
             return self._mr_proportions(axis, weighted)
 
         margin = self._margin(
@@ -442,10 +432,10 @@ class CrunchCube(object):
             include_transforms_for_dims=include_transforms_for_dims,
         ) / margin
 
-    # API Functions
+    # Properties
 
     @property
-    def has_multiple_response(self):
+    def has_mr(self):
         '''Determines if a cube has MR dimensions.'''
         all_dimensions = self._get_dimensions(self._cube)
         mr_indices = self._get_mr_selections_indices(all_dimensions)
@@ -470,6 +460,58 @@ class CrunchCube(object):
             return None
         return self.dimensions[0].description
 
+    @property
+    def dimensions(self):
+        '''Dimensions of the crunch cube.'''
+        all_dimensions = self._get_dimensions(self._cube)
+        mr_selections = self._get_mr_selections_indices(all_dimensions)
+        return [
+            dim for (i, dim) in enumerate(all_dimensions)
+            if i not in mr_selections
+        ]
+
+    @property
+    def missing(self):
+        '''Get missing count of a cube.'''
+        if self.has_means:
+            return self._cube['result']['measures']['mean']['n_missing']
+        return self._cube['result'].get('missing')
+
+    @property
+    def is_weighted(self):
+        '''Check if the cube dataset is weighted.'''
+        weighted = self._cube.get('query', {}).get('weight', None) is not None
+        weighted = weighted or self._cube.get('weight_var', None) is not None
+        weighted = weighted or self._cube.get('weight_url', None) is not None
+        weighted = weighted or (
+            self._cube['result']['counts'] !=
+            self._cube['result']['measures'].get('count', {}).get('data')
+        )
+        return weighted
+
+    @property
+    def has_means(self):
+        '''Check if cube has means.'''
+        return self.has_means
+
+    @property
+    def filter_annotation(self):
+        '''Get cube's filter annotation.'''
+        return self._cube.get('filter_names', [])
+
+    @property
+    def has_means(self):
+        return self._cube['result']['measures'].get('mean', None) is not None
+
+    @property
+    def is_double_mr(self):
+        types = [dim.type for dim in self.dimensions]
+        if types == ['multiple_response', 'multiple_response']:
+            return True
+        return False
+
+    # API Functions
+
     def labels(self, include_missing=False, include_transforms_for_dims=False):
         '''Gets labels for each cube's dimension.
 
@@ -481,16 +523,6 @@ class CrunchCube(object):
         '''
         return [dim.labels(include_missing, include_transforms_for_dims)
                 for dim in self.dimensions]
-
-    @property
-    def dimensions(self):
-        '''Dimensions of the crunch cube.'''
-        all_dimensions = self._get_dimensions(self._cube)
-        mr_selections = self._get_mr_selections_indices(all_dimensions)
-        return [
-            dim for (i, dim) in enumerate(all_dimensions)
-            if i not in mr_selections
-        ]
 
     def as_array(self, include_missing=False, weighted=True, adjusted=False,
                  include_transforms_for_dims=None):
@@ -720,13 +752,6 @@ class CrunchCube(object):
 
         return p_values
 
-    @property
-    def missing(self):
-        '''Get missing count of a cube.'''
-        if self._has_means:
-            return self._cube['result']['measures']['mean']['n_missing']
-        return self._cube['result'].get('missing')
-
     def y_offset(self, expand=False):
         '''Gets y offset for sheet manipulation.
 
@@ -751,28 +776,6 @@ class CrunchCube(object):
             return first_dim_length + 4
         return first_dim_length * (self.as_array().shape[1] + 4)
 
-    @property
-    def is_weighted(self):
-        '''Check if the cube dataset is weighted.'''
-        weighted = self._cube.get('query', {}).get('weight', None) is not None
-        weighted = weighted or self._cube.get('weight_var', None) is not None
-        weighted = weighted or self._cube.get('weight_url', None) is not None
-        weighted = weighted or (
-            self._cube['result']['counts'] !=
-            self._cube['result']['measures'].get('count', {}).get('data')
-        )
-        return weighted
-
-    @property
-    def has_means(self):
-        '''Check if cube has means.'''
-        return self._has_means
-
-    @property
-    def filter_annotation(self):
-        '''Get cube's filter annotation.'''
-        return self._cube.get('filter_names', [])
-
     def count(self, weighted=True):
         '''Get cube's count with automatic weighted/unweighted selection.'''
         if weighted and self.is_weighted:
@@ -789,10 +792,19 @@ class CrunchCube(object):
                 raise ValueError(
                     'MR x CAT index table only defined for column direction'
                 )
-            selected = table[:, 0, :]
-            non_selected = table[:, 1, :]
+            selected = (
+                table[:, 0, :, 0]
+                if self.is_double_mr else
+                table[:, 0, :]
+            )
+            non_selected = (
+                table[:, 1, :, 1]
+                if self.is_double_mr else
+                table[:, 1, :]
+            )
             margin = np.sum(selected, 1) / np.sum(selected + non_selected, 1)
-            return self.proportions(weighted=weighted) / margin[:, np.newaxis]
+            return (self.proportions(axis=axis, weighted=weighted) /
+                    margin[:, np.newaxis])
 
         if self.dimensions[1].type == 'multiple_response':
             if axis == 0:
@@ -809,7 +821,7 @@ class CrunchCube(object):
     def index(self, axis, weighted=True):
         '''Return table index by margin.'''
 
-        if self.has_multiple_response:
+        if self.has_mr:
             return self._mr_index(axis, weighted)
 
         margin = np.true_divide(

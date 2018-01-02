@@ -1143,13 +1143,13 @@ class TestCrunchCube(TestCase):
     def test_selected_crosstab_is_double_mr(self):
         cube = CrunchCube(FIXT_SELECTED_CROSSTAB_4)
         expected = False
-        actual = cube._is_double_multiple_response()
+        actual = cube.is_double_mr
         self.assertEqual(actual, expected)
 
     def test_pets_x_pets_is_double_mr(self):
         cube = CrunchCube(FIXT_PETS_X_PETS)
         expected = True
-        actual = cube._is_double_multiple_response()
+        actual = cube.is_double_mr
         self.assertEqual(actual, expected)
 
     def test_pets_x_pets_as_array(self):
@@ -1838,3 +1838,13 @@ class TestCrunchCube(TestCase):
             cube.index(axis=None)
         expected = 'MR x CAT index table only defined for column direction'
         self.assertEqual(ctx.exception.args[0], expected)
+
+    def test_mr_x_mr_index_by_col(self):
+        cube = CrunchCube(FIXT_PETS_X_PETS)
+        expected = np.array([
+            [2.06944444, .99904215, .98026316],
+            [.95863971,  2.328125,  .98026316],
+            [1.02205882, 1.0651341, 1.93055556],
+        ])
+        actual = cube.index(axis=0)
+        np.testing.assert_almost_equal(actual, expected)

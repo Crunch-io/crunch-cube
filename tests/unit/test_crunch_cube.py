@@ -92,7 +92,7 @@ class TestCrunchCube(TestCase):
         actual = cube.description
         self.assertEqual(actual, expected)
 
-    @patch('cr.cube.crunch_cube.CrunchCube._has_means', False)
+    @patch('cr.cube.crunch_cube.CrunchCube.has_means', False)
     def test_missing_when_there_are_none(self):
         fake_cube = {'result': {}}
         cube = CrunchCube(fake_cube)
@@ -136,9 +136,9 @@ class TestCrunchCube(TestCase):
         )
         self.assertEqual(actual, expected)
 
-    @patch('cr.cube.crunch_cube.CrunchCube.has_multiple_response', False)
+    @patch('cr.cube.crunch_cube.CrunchCube.has_mr', False)
     @patch('cr.cube.crunch_cube.CrunchCube.as_array')
-    @patch('cr.cube.crunch_cube.CrunchCube._is_double_multiple_response')
+    @patch('cr.cube.crunch_cube.CrunchCube.is_double_mr')
     @patch('cr.cube.crunch_cube.CrunchCube._margin')
     def test_transform_param_propagation(self, mock_margin,
                                          mock_is_double_mr, mock_as_array):
@@ -170,7 +170,7 @@ class TestCrunchCube(TestCase):
     def test_does_not_have_multiple_response(self, mock_mr_indices, mock_dims):
         mock_mr_indices.return_value = []
         expected = False
-        actual = CrunchCube({}).has_multiple_response
+        actual = CrunchCube({}).has_mr
         self.assertEqual(actual, expected)
 
     @patch('cr.cube.crunch_cube.CrunchCube._get_dimensions')
@@ -178,7 +178,7 @@ class TestCrunchCube(TestCase):
     def test_has_multiple_response(self, mock_mr_indices, mock_dims):
         mock_mr_indices.return_value = [Mock()]
         expected = True
-        actual = CrunchCube({}).has_multiple_response
+        actual = CrunchCube({}).has_mr
         assert actual == expected
 
     @patch('cr.cube.crunch_cube.CrunchCube.dimensions', [])
@@ -195,7 +195,7 @@ class TestCrunchCube(TestCase):
         actual = CrunchCube({}).description
         self.assertEqual(actual, expected)
 
-    @patch('cr.cube.crunch_cube.CrunchCube._has_means', False)
+    @patch('cr.cube.crunch_cube.CrunchCube.has_means', False)
     def test_missing(self):
         missing = Mock()
         fake_cube = {'result': {'missing': missing}}
@@ -203,7 +203,7 @@ class TestCrunchCube(TestCase):
         actual = CrunchCube(fake_cube).missing
         self.assertEqual(actual, expected)
 
-    @patch('cr.cube.crunch_cube.CrunchCube._has_means', True)
+    @patch('cr.cube.crunch_cube.CrunchCube.has_means', True)
     def test_missing_with_means(self):
         missing = Mock()
         fake_cube = {'result': {'measures': {'mean': {'n_missing': missing}}}}
@@ -213,7 +213,7 @@ class TestCrunchCube(TestCase):
 
     def test_has_means(self):
         has_means = Mock()
-        with patch('cr.cube.crunch_cube.CrunchCube._has_means', has_means):
+        with patch('cr.cube.crunch_cube.CrunchCube.has_means', has_means):
             expected = has_means
             actual = CrunchCube({}).has_means
             self.assertEqual(actual, expected)
