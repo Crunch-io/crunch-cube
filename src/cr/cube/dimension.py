@@ -99,8 +99,8 @@ class Dimension(object):
 
     def _subtotals_indices(self):
         insertions = self._dim['references'].get('view', {}) \
-                .get('transform', {}) \
-                .get('insertions')
+            .get('transform', {}) \
+            .get('insertions')
         if not insertions:
             return []
         indices = [{
@@ -108,7 +108,7 @@ class Dimension(object):
                 i
                 for (i, el) in enumerate(self._elements)
                 if el['id'] == insertion['anchor']
-            ][0],
+            ][0] if insertion['anchor'] != 0 else -1,
             'inds': [
                 i
                 for (i, el) in enumerate(self._elements)
@@ -175,10 +175,13 @@ class Dimension(object):
         } for (i, el) in enumerate(self._elements)]
         subtotals_names = self._subtotals_names()
         for subtotal_name in subtotals_names:
+            # If anchor is 0, the default value of 'next' (which is -1) will
+            # add with 1, and amount to the total of 0, which will be the
+            # correct index value for the new subtotal.
             ind_insert = next((
                 i for (i, x) in enumerate(labels_with_cat_ids)
                 if x.get('id') == subtotal_name['anchor']
-            ), None) + 1
+            ), -1) + 1
             labels_with_cat_ids.insert(ind_insert, subtotal_name)
 
         return [

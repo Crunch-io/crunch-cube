@@ -1,0 +1,259 @@
+{
+    "element": "shoji:view",
+    "self": "https://alpha.crunch.io/api/datasets/a7b5b1f1e3b24585b89f20f2351661eb/cube/?filter=%5B%5D&query=%7B%22dimensions%22:%5B%7B%22variable%22:%22https:%2F%2Falpha.crunch.io%2Fapi%2Fdatasets%2Fa7b5b1f1e3b24585b89f20f2351661eb%2Fvariables%2F000755%2F%22%7D,%7B%22variable%22:%22https:%2F%2Falpha.crunch.io%2Fapi%2Fdatasets%2Fa7b5b1f1e3b24585b89f20f2351661eb%2Fvariables%2F000708%2F%22%7D%5D,%22measures%22:%7B%22count%22:%7B%22function%22:%22cube_count%22,%22args%22:%5B%5D%7D%7D,%22weight%22:null%7D",
+    "value": {
+        "query": {
+            "measures": {
+                "count": {
+                    "function": "cube_count",
+                    "args": []
+                }
+            },
+            "dimensions": [
+                {
+                    "variable": "https://alpha.crunch.io/api/datasets/a7b5b1f1e3b24585b89f20f2351661eb/variables/000755/"
+                },
+                {
+                    "variable": "https://alpha.crunch.io/api/datasets/a7b5b1f1e3b24585b89f20f2351661eb/variables/000708/"
+                }
+            ],
+            "weight": null
+        },
+        "query_environment": {
+            "filter": []
+        },
+        "result": {
+            "dimensions": [
+                {
+                    "references": {
+                        "alias": "harass_us",
+                        "view": {
+                            "show_counts": false,
+                            "show_numeric_values": false,
+                            "transform": {
+                                "insertions": [
+                                    {
+                                        "function": "subtotal",
+                                        "args": [
+                                            1,
+                                            2
+                                        ],
+                                        "name": "Serious net",
+                                        "anchor": 0
+                                    }
+                                ]
+                            },
+                            "include_missing": false,
+                            "column_width": null
+                        },
+                        "description": "How serious of a problem do you think sexual harassment is in the United States?",
+                        "name": "U.S. problem"
+                    },
+                    "derived": false,
+                    "type": {
+                        "ordinal": false,
+                        "class": "categorical",
+                        "categories": [
+                            {
+                                "numeric_value": 1,
+                                "missing": false,
+                                "id": 1,
+                                "name": "Very serious"
+                            },
+                            {
+                                "numeric_value": 2,
+                                "missing": false,
+                                "id": 2,
+                                "name": "Somewhat serious"
+                            },
+                            {
+                                "numeric_value": 3,
+                                "missing": false,
+                                "id": 3,
+                                "name": "Not very serious"
+                            },
+                            {
+                                "numeric_value": 4,
+                                "missing": false,
+                                "id": 4,
+                                "name": "Not at all serious"
+                            },
+                            {
+                                "numeric_value": 5,
+                                "missing": false,
+                                "id": 5,
+                                "name": "Not sure"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": true,
+                                "id": 32766,
+                                "name": "skipped"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": true,
+                                "id": 32767,
+                                "name": "not asked"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": true,
+                                "id": -1,
+                                "name": "No Data"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "references": {
+                        "alias": "harass_problem2",
+                        "name": "Bigger problem",
+                        "description": "Which do you think is the bigger problem?"
+                    },
+                    "derived": false,
+                    "type": {
+                        "ordinal": false,
+                        "class": "categorical",
+                        "categories": [
+                            {
+                                "numeric_value": 1,
+                                "missing": false,
+                                "id": 1,
+                                "name": "Sexual assaults that go unreported or unpunished"
+                            },
+                            {
+                                "numeric_value": 2,
+                                "missing": false,
+                                "id": 2,
+                                "name": "False accusations of sexual assault"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": true,
+                                "id": 32766,
+                                "name": "skipped"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": true,
+                                "id": 32767,
+                                "name": "not asked"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": true,
+                                "id": -1,
+                                "name": "No Data"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "missing": 5,
+            "measures": {
+                "count": {
+                    "data": [
+                        622,
+                        120,
+                        2,
+                        0,
+                        0,
+                        289,
+                        222,
+                        2,
+                        0,
+                        0,
+                        43,
+                        111,
+                        0,
+                        0,
+                        0,
+                        3,
+                        32,
+                        0,
+                        0,
+                        0,
+                        20,
+                        33,
+                        0,
+                        0,
+                        0,
+                        1,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                    ],
+                    "n_missing": 5,
+                    "metadata": {
+                        "references": {},
+                        "derived": true,
+                        "type": {
+                            "integer": true,
+                            "missing_rules": {},
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "class": "numeric"
+                        }
+                    }
+                }
+            },
+            "element": "crunch:cube",
+            "counts": [
+                622,
+                120,
+                2,
+                0,
+                0,
+                289,
+                222,
+                2,
+                0,
+                0,
+                43,
+                111,
+                0,
+                0,
+                0,
+                3,
+                32,
+                0,
+                0,
+                0,
+                20,
+                33,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "n": 1500
+        }
+    }
+}

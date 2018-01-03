@@ -119,3 +119,5 @@ The detailed description can be found
 1.5.0 Start implementing index table functionality
 
 1.5.1 Implement index for MR x MR
+
+1.5.2 Fix bugs with `anchor: 0` for H&S

@@ -32,6 +32,7 @@ from .fixtures import (
     FIXT_ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS,
     FIXT_SIMPLE_CA_HS,
     FIXT_FRUIT_X_PETS,
+    FIXT_ECON_US_PROBLEM_X_BIGGER_PROBLEM,
 )
 from cr.cube.crunch_cube import CrunchCube
 
@@ -1847,4 +1848,62 @@ class TestCrunchCube(TestCase):
             [1.02205882, 1.0651341, 1.93055556],
         ])
         actual = cube.index(axis=0)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_hs_with_anchor_on_zero_position_labels(self):
+        cube = CrunchCube(FIXT_ECON_US_PROBLEM_X_BIGGER_PROBLEM)
+        expected = [
+            [
+                'Serious net',
+                'Very serious',
+                'Somewhat serious',
+                'Not very serious',
+                'Not at all serious',
+                'Not sure',
+            ],
+            [
+                'Sexual assaults that go unreported or unpunished',
+                'False accusations of sexual assault',
+            ],
+        ]
+        actual = cube.labels(include_transforms_for_dims=[0, 1])
+        self.assertEqual(actual, expected)
+
+    def test_hs_with_anchor_on_zero_position_as_props_by_col(self):
+        cube = CrunchCube(FIXT_ECON_US_PROBLEM_X_BIGGER_PROBLEM)
+        expected = np.array([
+            [0.93244626, 0.66023166],
+            [0.63664278, 0.23166023],
+            [0.29580348, 0.42857143],
+            [0.04401228, 0.21428571],
+            [0.00307062, 0.06177606],
+            [0.02047083, 0.06370656],
+        ])
+        actual = cube.proportions(axis=0, include_transforms_for_dims=[0, 1])
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_hs_with_anchor_on_zero_position_as_props_by_row(self):
+        cube = CrunchCube(FIXT_ECON_US_PROBLEM_X_BIGGER_PROBLEM)
+        expected = np.array([
+            [0.72705507, 0.27294493],
+            [0.83827493, 0.16172507],
+            [0.56555773, 0.43444227],
+            [0.27922078, 0.72077922],
+            [0.08571429, 0.91428571],
+            [0.37735849, 0.62264151],
+        ])
+        actual = cube.proportions(axis=1, include_transforms_for_dims=[0, 1])
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_hs_with_anchor_on_zero_position_as_props_by_cell(self):
+        cube = CrunchCube(FIXT_ECON_US_PROBLEM_X_BIGGER_PROBLEM)
+        expected = np.array([
+            [0.60936455, 0.22876254],
+            [0.41605351, 0.08026756],
+            [0.19331104, 0.14849498],
+            [0.02876254, 0.07424749],
+            [0.00200669, 0.02140468],
+            [0.01337793, 0.02207358],
+        ])
+        actual = cube.proportions(include_transforms_for_dims=[0, 1])
         np.testing.assert_almost_equal(actual, expected)
