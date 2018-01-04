@@ -10,6 +10,7 @@ import json
 
 import numpy as np
 from scipy.stats import norm
+from scipy.stats import chi2_contingency
 
 from .dimension import Dimension
 
@@ -962,3 +963,35 @@ class CrunchCube(object):
             margin = margin[:, np.newaxis]
 
         return props / margin
+
+    @property
+    def z_scores(self):
+
+        if self.has_mr:
+            return self._mr_z_scores
+
+        counts = self.as_array()
+        total = self.margin()
+        p_col = self.margin(axis=0) / total
+        p_row = self.margin(axis=1) / total
+        expected_counts = chi2_contingency(counts)[3]
+        residuals = counts - expected_counts
+        V = expected_counts * ((1 - p_row[:, np.newaxis]) * (1 - p_col))
+        return residuals / np.sqrt(V)
+
+    @property
+    def _mr_z_scores(self):
+        counts = self.as_array()
+        total = self.margin()
+
+        if self.dimensions[0].type == 'multiple_response':
+            p_col = self.margin(axis=0)
+            p_row = self.margin(axis=1)[:, np.newaxis]
+        elif self.dimensions[1].type == 'multiple_response':
+            p_row = self.margin(axis=0)
+            p_col = np.sum(counts, 0)
+
+        expected = p_row * p_col / total
+        variance = p_row * p_col * (total - p_row) * (total - p_col) / total**3
+
+        return (counts - expected) / np.sqrt(variance)

@@ -112,5 +112,6 @@ FIXT_SINGLE_COL_MARGIN_NOT_ITERABLE = load_fixture(
     'single-col-margin-not-iterable.json'
 )
 FIXT_GENDER_PARTY_RACE = load_fixture(CUBES_DIR, 'gender-party-race.json')
-FIXT_MR_X_CAT = load_fixture(CUBES_DIR, 'selected-crosstab-array-first.json')
-FIXT_CAT_X_MR = load_fixture(CUBES_DIR, 'selected-crosstab-array-last.json')
+FIXT_SEL_ARR_FIRST = load_fixture(CUBES_DIR,
+                                  'selected-crosstab-array-first.json')
+FIXT_SEL_ARR_LAST = load_fixture(CUBES_DIR, 'selected-crosstab-array-last.json')

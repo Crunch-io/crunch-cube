@@ -5,8 +5,8 @@ import numpy as np
 from .fixtures import FIXT_ADMIT_X_DEPT_UNWEIGHTED
 from .fixtures import FIXT_ADMIT_X_GENDER_WEIGHTED
 from .fixtures import FIXT_SELECTED_CROSSTAB_4
-from .fixtures import FIXT_MR_X_CAT
-from .fixtures import FIXT_CAT_X_MR
+from .fixtures import FIXT_SEL_ARR_FIRST
+from .fixtures import FIXT_SEL_ARR_LAST
 
 from cr.cube.crunch_cube import CrunchCube
 
@@ -64,7 +64,7 @@ class TestZScores(TestCase):
 
     def test_z_scores_mr_x_cat(self):
         '''Residuals for MR x CAT from app.'''
-        cube = CrunchCube(FIXT_MR_X_CAT)
+        cube = CrunchCube(FIXT_SEL_ARR_FIRST)
         expected = np.array([
             [0.80134191, -0.80134191],
             [0.60455606, -0.60455606],
@@ -79,7 +79,7 @@ class TestZScores(TestCase):
         The results should be the exact transsposition of the results from
         'test_z_scores_mr_x_cat' test.
         '''
-        cube = CrunchCube(FIXT_CAT_X_MR)
+        cube = CrunchCube(FIXT_SEL_ARR_LAST)
         expected = np.array([
             [0.80134191, 0.60455606, -0.30884247],
             [-0.80134191, -0.60455606, 0.30884247],
