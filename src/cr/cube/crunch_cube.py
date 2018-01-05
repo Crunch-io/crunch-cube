@@ -669,11 +669,6 @@ class CrunchCube(object):
         )
         return weighted
 
-    # @property
-    # def has_means(self):
-    #     '''Check if cube has means.'''
-    #     return self.has_means
-
     @property
     def filter_annotation(self):
         '''Get cube's filter annotation.'''
@@ -686,6 +681,7 @@ class CrunchCube(object):
 
     @property
     def is_double_mr(self):
+        '''Check if cube is MR x MR.'''
         types = [dim.type for dim in self.dimensions]
         if types == ['multiple_response', 'multiple_response']:
             return True

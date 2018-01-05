@@ -1974,3 +1974,15 @@ class TestCrunchCube(TestCase):
         axis = (1, 2)
         actual = cube.proportions(axis=axis)
         np.testing.assert_almost_equal(actual, expected)
+
+    def test_mr_dim_ind_for_cat_cube(self):
+        cube = CrunchCube(FIXT_CAT_X_CAT)
+        expected = None
+        actual = cube.mr_dim_ind
+        self.assertEqual(actual, expected)
+
+    def test_simple_mr_margin_by_col(self):
+        cube = CrunchCube(FIXT_SIMPLE_MR)
+        expected = np.array([3, 4, 0])
+        actual = cube.margin(axis=0)
+        np.testing.assert_array_equal(actual, expected)
