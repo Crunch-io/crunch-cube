@@ -9,6 +9,7 @@ from .fixtures import FIXT_SEL_ARR_FIRST
 from .fixtures import FIXT_SEL_ARR_LAST
 from .fixtures import FIXT_MR_X_MR
 from .fixtures import FIXT_MR_X_MR_HETEROGENOUS
+from .fixtures import FIXT_CAT_ARRAY
 
 from cr.cube.crunch_cube import CrunchCube
 
@@ -96,6 +97,28 @@ class TestZScores(TestCase):
             [-0.17238393, 38.51646532],
             [0.10271174, -39.11229693],
             [-0.26443564, -39.67503947],
+        ])
+        actual = cube.z_scores
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_z_scores_cat_array(self):
+        '''Residuals for CAT array.'''
+        cube = CrunchCube(FIXT_CAT_ARRAY)
+        expected = np.array([
+            [
+                -34.15208766,
+                29.53343598,
+                27.22210201,
+                28.64461125,
+                -34.32237933
+            ],
+            [
+                34.15208766,
+                -29.53343598,
+                -27.22210201,
+                -28.64461125,
+                34.32237933
+            ],
         ])
         actual = cube.z_scores
         np.testing.assert_almost_equal(actual, expected)
