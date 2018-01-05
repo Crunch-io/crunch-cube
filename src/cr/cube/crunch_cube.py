@@ -10,7 +10,7 @@ import json
 
 import numpy as np
 from scipy.stats import norm
-from scipy.stats import chi2_contingency
+from scipy.stats.contingency import expected_freq
 
 from .dimension import Dimension
 
@@ -1042,7 +1042,10 @@ class CrunchCube(object):
         total = self.margin()
         colsum = self.margin(axis=0) / total
         rowsum = self.margin(axis=1) / total
-        expected_counts = chi2_contingency(counts)[3]
+        expected_counts = expected_freq(counts)
         residuals = counts - expected_counts
-        V = expected_counts * ((1 - rowsum[:, np.newaxis]) * (1 - colsum))
-        return residuals / np.sqrt(V)
+        variance = (
+            expected_counts *
+            ((1 - rowsum[:, np.newaxis]) * (1 - colsum))
+        )
+        return residuals / np.sqrt(variance)
