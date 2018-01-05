@@ -9,15 +9,14 @@ from .fixtures import FIXT_SEL_ARR_FIRST
 from .fixtures import FIXT_SEL_ARR_LAST
 from .fixtures import FIXT_MR_X_MR
 from .fixtures import FIXT_MR_X_MR_HETEROGENOUS
-from .fixtures import FIXT_CAT_ARRAY
 
 from cr.cube.crunch_cube import CrunchCube
 
 
-class TestZScores(TestCase):
+class TestStandardizedResiduals(TestCase):
     '''Test cr.cube implementation of Z-Scores.'''
 
-    def test_z_scores_admit_x_dept_unweighted(self):
+    def test_standardized_residuals_admit_x_dept_unweighted(self):
         '''Z-Scores for normal unweighted crosstab.'''
         cube = CrunchCube(FIXT_ADMIT_X_DEPT_UNWEIGHTED)
         expected = np.array([
@@ -38,20 +37,20 @@ class TestZScores(TestCase):
                 19.32141026,
             ],
         ])
-        actual = cube.z_scores
+        actual = cube.standardized_residuals
         np.testing.assert_almost_equal(actual, expected)
 
-    def test_z_scores_admit_x_gender_weighted(self):
+    def test_standardized_residuals_admit_x_gender_weighted(self):
         '''Z-Scores for normal weighted crosstab.'''
         cube = CrunchCube(FIXT_ADMIT_X_GENDER_WEIGHTED)
         expected = np.array([
             [9.42561985, -9.42561985],
             [-9.42561985, 9.42561985],
         ])
-        actual = cube.z_scores
+        actual = cube.standardized_residuals
         np.testing.assert_almost_equal(actual, expected)
 
-    def test_z_scores_selected_crosstab(self):
+    def test_standardized_residuals_selected_crosstab(self):
         '''Residuals for MR x CAT unweighted.'''
         cube = CrunchCube(FIXT_SELECTED_CROSSTAB_4)
         expected = np.array([
@@ -62,10 +61,10 @@ class TestZScores(TestCase):
             [15.39360198, -15.39360198],
             [-1.15219648, 1.15219648],
         ])
-        actual = cube.z_scores
+        actual = cube.standardized_residuals
         np.testing.assert_almost_equal(actual, expected)
 
-    def test_z_scores_mr_x_cat(self):
+    def test_standardized_residuals_mr_x_cat(self):
         '''Residuals for MR x CAT from app.'''
         cube = CrunchCube(FIXT_SEL_ARR_FIRST)
         expected = np.array([
@@ -73,24 +72,36 @@ class TestZScores(TestCase):
             [0.60455606, -0.60455606],
             [-0.30884247, 0.30884247],
         ])
-        actual = cube.z_scores
+        actual = cube.standardized_residuals
         np.testing.assert_almost_equal(actual, expected)
 
-    def test_z_scores_cat_x_mr(self):
+    def test_standardized_residuals_cat_x_mr(self):
         '''Residuals for CAT x MR from app.
 
         The results should be the exact transsposition of the results from
-        'test_z_scores_mr_x_cat' test.
+        'test_standardized_residuals_mr_x_cat' test.
         '''
         cube = CrunchCube(FIXT_SEL_ARR_LAST)
         expected = np.array([
             [0.80134191, 0.60455606, -0.30884247],
             [-0.80134191, -0.60455606, 0.30884247],
         ])
-        actual = cube.z_scores
+        actual = cube.standardized_residuals
         np.testing.assert_almost_equal(actual, expected)
 
-    def test_z_scores_mr_x_mr_heterogenous(self):
+    def test_standardized_residuals_mr_x_mr(self):
+        '''Residuals for MR x MR.'''
+        cube = CrunchCube(FIXT_MR_X_MR)
+        expected = np.array([
+            [12.88418373, 0.1781302, -1.21901758, 4.15682487],
+            [0.1781302, 11.910822, -2.70033782, 5.69476817],
+            [-1.21901758, -2.70033782, 13.45338666, 9.29294984],
+            [4.15682487, 5.69476817, 9.29294984, 15.37981857],
+        ])
+        actual = cube.standardized_residuals
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_standardized_residuals_mr_x_mr_heterogenous(self):
         '''Residuals for MR x MR (disparate MRs).'''
         cube = CrunchCube(FIXT_MR_X_MR_HETEROGENOUS)
         expected = np.array([
@@ -98,27 +109,5 @@ class TestZScores(TestCase):
             [0.10271174, -39.11229693],
             [-0.26443564, -39.67503947],
         ])
-        actual = cube.z_scores
-        np.testing.assert_almost_equal(actual, expected)
-
-    def test_z_scores_cat_array(self):
-        '''Residuals for CAT array.'''
-        cube = CrunchCube(FIXT_CAT_ARRAY)
-        expected = np.array([
-            [
-                -34.15208766,
-                29.53343598,
-                27.22210201,
-                28.64461125,
-                -34.32237933
-            ],
-            [
-                34.15208766,
-                -29.53343598,
-                -27.22210201,
-                -28.64461125,
-                34.32237933
-            ],
-        ])
-        actual = cube.z_scores
+        actual = cube.standardized_residuals
         np.testing.assert_almost_equal(actual, expected)

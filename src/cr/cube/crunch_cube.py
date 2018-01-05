@@ -598,6 +598,23 @@ class CrunchCube(object):
     # Properties
 
     @property
+    def _mr_std_residuals(self):
+        counts = self.as_array()
+        total = self.margin()
+        colsum = self.margin(axis=0)
+        rowsum = self.margin(axis=1)
+
+        if not self.is_double_mr and self.mr_dim_ind == 0:
+            total = total[:, np.newaxis]
+            rowsum = rowsum[:, np.newaxis]
+
+        expected = rowsum * colsum / total
+        variance = (
+            rowsum * colsum * (total - rowsum) * (total - colsum) / total**3
+        )
+        return (counts - expected) / np.sqrt(variance)
+
+    @property
     def has_mr(self):
         '''Determines if a cube has MR dimensions.'''
         all_dimensions = self._get_dimensions(self._cube)
@@ -1019,32 +1036,17 @@ class CrunchCube(object):
         return props / margin
 
     @property
-    def z_scores(self):
+    def standardized_residuals(self):
+        '''Calculate residuals based on Chi-squared.'''
 
         if self.has_mr:
-            return self._mr_z_scores
+            return self._mr_std_residuals
 
         counts = self.as_array()
         total = self.margin()
-        p_col = self.margin(axis=0) / total
-        p_row = self.margin(axis=1) / total
+        colsum = self.margin(axis=0) / total
+        rowsum = self.margin(axis=1) / total
         expected_counts = chi2_contingency(counts)[3]
         residuals = counts - expected_counts
-        V = expected_counts * ((1 - p_row[:, np.newaxis]) * (1 - p_col))
+        V = expected_counts * ((1 - rowsum[:, np.newaxis]) * (1 - colsum))
         return residuals / np.sqrt(V)
-
-    @property
-    def _mr_z_scores(self):
-        counts = self.as_array()
-        total = self.margin()
-        p_col = self.margin(axis=0)
-        p_row = self.margin(axis=1)
-
-        if not self.is_double_mr and self.mr_dim_ind == 0:
-            total = total[:, np.newaxis]
-            p_row = p_row[:, np.newaxis]
-
-        expected = p_row * p_col / total
-        variance = p_row * p_col * (total - p_row) * (total - p_col) / total**3
-
-        return (counts - expected) / np.sqrt(variance)
