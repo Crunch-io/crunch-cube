@@ -8,6 +8,7 @@ from .fixtures import FIXT_SELECTED_CROSSTAB_4
 from .fixtures import FIXT_SEL_ARR_FIRST
 from .fixtures import FIXT_SEL_ARR_LAST
 from .fixtures import FIXT_MR_X_MR
+from .fixtures import FIXT_MR_X_MR_HETEROGENOUS
 
 from cr.cube.crunch_cube import CrunchCube
 
@@ -84,6 +85,17 @@ class TestZScores(TestCase):
         expected = np.array([
             [0.80134191, 0.60455606, -0.30884247],
             [-0.80134191, -0.60455606, 0.30884247],
+        ])
+        actual = cube.z_scores
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_z_scores_mr_x_mr_heterogenous(self):
+        '''Residuals for MR x MR (disparate MRs).'''
+        cube = CrunchCube(FIXT_MR_X_MR_HETEROGENOUS)
+        expected = np.array([
+            [-0.17238393, 38.51646532],
+            [0.10271174, -39.11229693],
+            [-0.26443564, -39.67503947],
         ])
         actual = cube.z_scores
         np.testing.assert_almost_equal(actual, expected)

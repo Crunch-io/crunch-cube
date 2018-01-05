@@ -116,3 +116,5 @@ FIXT_SEL_ARR_FIRST = load_fixture(CUBES_DIR,
                                   'selected-crosstab-array-first.json')
 FIXT_SEL_ARR_LAST = load_fixture(CUBES_DIR, 'selected-crosstab-array-last.json')
 FIXT_MR_X_MR = load_fixture(CUBES_DIR, 'selected-by-selected.json')
+FIXT_MR_X_MR_HETEROGENOUS = load_fixture(CUBES_DIR,
+                                         'mr-by-mr-different-mrs.json')

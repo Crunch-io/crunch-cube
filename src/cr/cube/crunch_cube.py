@@ -1040,7 +1040,7 @@ class CrunchCube(object):
         p_col = self.margin(axis=0)
         p_row = self.margin(axis=1)
 
-        if self.mr_dim_ind == 0:
+        if not self.is_double_mr and self.mr_dim_ind == 0:
             total = total[:, np.newaxis]
             p_row = p_row[:, np.newaxis]
 
