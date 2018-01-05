@@ -7,6 +7,7 @@ from .fixtures import FIXT_ADMIT_X_GENDER_WEIGHTED
 from .fixtures import FIXT_SELECTED_CROSSTAB_4
 from .fixtures import FIXT_SEL_ARR_FIRST
 from .fixtures import FIXT_SEL_ARR_LAST
+from .fixtures import FIXT_MR_X_MR
 
 from cr.cube.crunch_cube import CrunchCube
 

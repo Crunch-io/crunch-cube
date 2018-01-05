@@ -6,7 +6,7 @@ from .fixtures import FIXT_CAT_X_CAT
 from .fixtures import FIXT_CAT_X_CAT_GERMAN_WEIGHTED
 from .fixtures import FIXT_CAT_X_DATETIME
 from .fixtures import FIXT_CAT_X_NUM_X_DATETIME
-from .fixtures import FIXT_CAT_X_MR
+from .fixtures import FIXT_CAT_X_MR_SIMPLE
 from .fixtures import FIXT_ECON_GENDER_X_IDEOLOGY_WEIGHTED
 from .fixtures import FIXT_UNIVARIATE_CATEGORICAL
 from .fixtures import FIXT_VOTER_REGISTRATION
@@ -597,7 +597,7 @@ class TestCrunchCube(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_labels_cat_x_mr_exclude_missing(self):
-        cube = CrunchCube(FIXT_CAT_X_MR)
+        cube = CrunchCube(FIXT_CAT_X_MR_SIMPLE)
         expected = [
             ['rambutan', 'satsuma'],
             ['dog', 'cat', 'wombat'],
@@ -606,7 +606,7 @@ class TestCrunchCube(TestCase):
         self.assertEqual(actual, expected)
 
     def test_labels_cat_x_mr_include_missing(self):
-        cube = CrunchCube(FIXT_CAT_X_MR)
+        cube = CrunchCube(FIXT_CAT_X_MR_SIMPLE)
         expected = [
             ['rambutan', 'satsuma', 'No Data'],
             ['dog', 'cat', 'wombat'],
@@ -615,7 +615,7 @@ class TestCrunchCube(TestCase):
         self.assertEqual(actual, expected)
 
     def test_as_array_cat_x_mr(self):
-        cube = CrunchCube(FIXT_CAT_X_MR)
+        cube = CrunchCube(FIXT_CAT_X_MR_SIMPLE)
         expected = np.array([
             [12, 12, 12],
             [28, 22, 26],
@@ -624,22 +624,19 @@ class TestCrunchCube(TestCase):
         np.testing.assert_array_equal(actual, expected)
 
     def test_margin_cat_x_mr_axis_none(self):
-        cube = CrunchCube(FIXT_CAT_X_MR)
+        cube = CrunchCube(FIXT_CAT_X_MR_SIMPLE)
         expected = np.array([80, 79, 70])
         actual = cube.margin()
         np.testing.assert_array_equal(actual, expected)
 
-    def test_margin_cat_x_mr_axis_0(self):
-        cube = CrunchCube(FIXT_CAT_X_MR)
-        expected = np.array([
-            [28, 25, 23],
-            [52, 54, 47]
-        ])
+    def test_margin_cat_x_mr_by_col(self):
+        cube = CrunchCube(FIXT_CAT_X_MR_SIMPLE)
+        expected = np.array([40, 34, 38])
         actual = cube.margin(axis=0)
         np.testing.assert_array_equal(actual, expected)
 
     def test_proportions_cat_x_mr_axis_none(self):
-        cube = CrunchCube(FIXT_CAT_X_MR)
+        cube = CrunchCube(FIXT_CAT_X_MR_SIMPLE)
         expected = np.array([
             [.42857143, .48,       .52173913],
             [.53846154, .40740741, .55319149],
@@ -648,7 +645,7 @@ class TestCrunchCube(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_proportions_cat_x_mr_axis_0(self):
-        cube = CrunchCube(FIXT_CAT_X_MR)
+        cube = CrunchCube(FIXT_CAT_X_MR_SIMPLE)
         expected = np.array([
             [.3, .3529412, .3157895],
             [.7, .6470588, .6842105],
@@ -1104,12 +1101,12 @@ class TestCrunchCube(TestCase):
     def test_selected_crosstab_margin_total(self):
         cube = CrunchCube(FIXT_SELECTED_CROSSTAB_4)
         expected = np.array([
-            [30173.5628018302],
-            [29907.1232293211],
-            [29821.0351538032],
-            [23398.2500911551],
-            [23774.8956854385],
-            [23508.9891365492],
+            30173.5628018302,
+            29907.1232293211,
+            29821.0351538032,
+            23398.2500911551,
+            23774.8956854385,
+            23508.9891365492
         ])
         actual = cube.margin()
         np.testing.assert_almost_equal(actual, expected)
@@ -1535,7 +1532,7 @@ class TestCrunchCube(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_cat_x_mr_index_by_row(self):
-        cube = CrunchCube(FIXT_CAT_X_MR)
+        cube = CrunchCube(FIXT_CAT_X_MR_SIMPLE)
         expected = np.array([
             [.8571429,  1.1152941, .9610984],
             [1.0769231, .9466231,  1.019037],
@@ -1544,7 +1541,7 @@ class TestCrunchCube(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_cat_x_mr_index_by_cell(self):
-        cube = CrunchCube(FIXT_CAT_X_MR)
+        cube = CrunchCube(FIXT_CAT_X_MR_SIMPLE)
         expected = np.array([
             [.8571429,  1.1152941, .9610984],
             [1.0769231, .9466231,  1.019037],
@@ -1553,7 +1550,7 @@ class TestCrunchCube(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_cat_x_mr_index_by_col(self):
-        cube = CrunchCube(FIXT_CAT_X_MR)
+        cube = CrunchCube(FIXT_CAT_X_MR_SIMPLE)
         expected = np.full(cube.as_array().shape, np.nan)
         actual = cube.index(axis=0)
         np.testing.assert_array_equal(actual, expected)
@@ -1632,8 +1629,8 @@ class TestCrunchCube(TestCase):
         expected = np.array([
             308.32755712, 187.06825269, 424.82328071, 72.68885079,
             273.15993803, 467.62527785, 62.183386, 442.80441811,
-            281.57825919, 0., 237.35065847,  233.19692455, 0., 0., 0., 0.,
-            0., 0., 0., 38.05075633, 90.93234493,  123.22747266,  142.42909713,
+            281.57825919, 0., 237.35065847, 233.19692455, 0., 0., 0., 0.,
+            0., 0., 0., 38.05075633, 90.93234493, 123.22747266, 142.42909713,
         ])
         actual = cube.margin(axis=1)
         np.testing.assert_almost_equal(actual, expected)
@@ -1943,7 +1940,7 @@ class TestCrunchCube(TestCase):
 
     def test_cat_x_mr_with_hs_and_prune_params(self):
         '''Test that HS and prune params don't break CAT x MR.'''
-        cube = CrunchCube(FIXT_CAT_X_MR)
+        cube = CrunchCube(FIXT_CAT_X_MR_SIMPLE)
         # Only ensure that the call doesn't break
         cube.as_array(
             include_transforms_for_dims=[0, 1],
