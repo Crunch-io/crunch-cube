@@ -1,9 +1,37 @@
 from mock import Mock
+from mock import patch
 from unittest import TestCase
 from cr.cube.dimension import Dimension
+from cr.cube.subtotal import Subtotal
 
 
 class TestDimension(TestCase):
+
+    insertions_with_bad_data = [
+        {
+            u'anchor': 0,
+            u'name': u'This is respondent ideology',
+        },
+        {
+            u'anchor': 2,
+            u'args': [1, 2],
+            u'function': u'subtotal',
+            u'name': u'Liberal net',
+        },
+        {
+            u'anchor': 5,
+            u'args': [5, 4],
+            u'function': u'subtotal',
+            u'name': u'Conservative net',
+        },
+        {
+            u'anchor': 'fake anchor',
+            u'args': ['fake_arg_1', 'fake_arg_2'],
+            u'function': u'fake_fcn_name_not_subtotal',
+            u'name': u'Fake Name',
+        }
+    ]
+
     def test_get_type_categorical_array(self):
         dim = {
             'references': {'subreferences': []},
@@ -143,15 +171,93 @@ class TestDimension(TestCase):
         actual = Dimension._get_name({})
         self.assertEqual(actual, expected)
 
-    def test_get_empty_subtotals_names(self):
-        dim = Dimension({'type': Mock(), 'references': {}})
-        expected = []
-        actual = dim._subtotals_names()
-        self.assertEqual(actual, expected)
-
     def test_dimension_description(self):
         desc = Mock()
         dim = Dimension({'type': Mock(), 'references': {'description': desc}})
         expected = desc
         actual = dim.description
         self.assertEqual(actual, expected)
+
+    @patch('cr.cube.dimension.Dimension._get_type')
+    def test_hs_names_with_bad_data(self, mock_type):
+        '''Test H&S names with bad input data.
+
+        This test ensures that H&S functionality doesn't break if it encounters
+        bad transformations data, as is possible with some of the leftovers in
+        the variables.
+        '''
+        mock_type.return_value = None
+        insertions_with_bad_data = [
+            {
+                u'anchor': 0,
+                u'name': u'This is respondent ideology',
+            },
+            {
+                u'anchor': 2,
+                u'args': [1, 2],
+                u'function': u'subtotal',
+                u'name': u'Liberal net',
+            },
+            {
+                u'anchor': 5,
+                u'args': [5, 4],
+                u'function': u'subtotal',
+                u'name': u'Conservative net',
+            }
+        ]
+        transform_data = {
+            'references': {
+                'view': {
+                    'transform': {'insertions': insertions_with_bad_data}
+                }
+            }
+        }
+        dim = Dimension(transform_data)
+        actual = dim.subtotals
+        actual_anchors = [st.anchor for st in actual]
+        self.assertEqual(actual_anchors, [2, 5])
+
+    @patch('cr.cube.dimension.Dimension._elements', [
+        {'id': 1}, {'id': 2}, {'id': 5}, {'id': 4}
+    ])
+    @patch('cr.cube.dimension.Dimension._get_type')
+    def test_hs_indices_with_bad_data(self, mock_type):
+        '''Test H&S indices with bad input data.
+
+        This test ensures that H&S functionality doesn't break if it encounters
+        bad transformations data, as is possible with some of the leftovers in
+        the variables.
+        '''
+        mock_type.return_value = None
+        dim_data = {
+            'references': {
+                'view': {
+                    'transform': {'insertions': self.insertions_with_bad_data}
+                }
+            }
+        }
+        dim = Dimension(dim_data)
+        expected = [
+            {'anchor_ind': 1, 'inds': [0, 1]},
+            {'anchor_ind': 2, 'inds': [2, 3]}
+        ]
+        actual = dim.hs_indices
+        self.assertEqual(actual, expected)
+
+    @patch('cr.cube.dimension.Dimension._get_type')
+    def test_subtotals(self, mock_type):
+        mock_type.return_value = None
+        dim_data = {
+            'references': {
+                'view': {
+                    'transform': {'insertions': self.insertions_with_bad_data}
+                }
+            }
+        }
+        dim = Dimension(dim_data)
+        actual = dim.subtotals
+        self.assertEqual(len(actual), 2)
+        self.assertEqual(type(actual[0]), Subtotal)
+        self.assertEqual(actual[0]._data, self.insertions_with_bad_data[1])
+        self.assertEqual(type(actual[1]), Subtotal)
+        self.assertEqual(actual[1]._data, self.insertions_with_bad_data[2])

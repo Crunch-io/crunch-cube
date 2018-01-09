@@ -213,7 +213,7 @@ class CrunchCube(object):
 
                 # Perform transformations
                 ind_offset = 0
-                for indices in dim._subtotals_indices():
+                for indices in dim.hs_indices:
                     ind_subtotal_elements = np.array(indices['inds'])
                     ind_insertion = indices['anchor_ind'] + ind_offset
                     ind_subtotal_elements = (np.array(ind_subtotal_elements) +

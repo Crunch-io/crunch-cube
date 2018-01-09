@@ -9,24 +9,13 @@ from cr.cube.crunch_cube import CrunchCube
 
 
 class TestDimension(TestCase):
-    def test_get_subtotals_names_single_subtotal(self):
-        dimension = CrunchCube(FIXT_ECON_BLAME_WITH_HS).dimensions[0]
-        expected = [{
-            'function': 'subtotal',
-            'args': [1, 2],
-            'name': 'Test New Heading (Obama and Republicans)',
-            'anchor': 2
-        }]
-        actual = dimension._subtotals_names()
-        self.assertEqual(actual, expected)
-
     def test_subtotals_indices_single_subtotal(self):
         dimension = CrunchCube(FIXT_ECON_BLAME_WITH_HS).dimensions[0]
         expected = [{
             'anchor_ind': 1,
             'inds': [0, 1]
         }]
-        actual = dimension._subtotals_indices()
+        actual = dimension.hs_indices
         self.assertEqual(actual, expected)
 
     def test_subtotals_indices_two_subtotals(self):
@@ -38,7 +27,7 @@ class TestDimension(TestCase):
             'anchor_ind': 5,
             'inds': [3, 4, 5]
         }]
-        actual = dimension._subtotals_indices()
+        actual = dimension.hs_indices
         self.assertEqual(actual, expected)
 
     def test_has_transforms_false(self):

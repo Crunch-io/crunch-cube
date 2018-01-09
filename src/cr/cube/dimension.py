@@ -1,5 +1,7 @@
 '''Contains implementation of the Dimension class, for Crunch Cubes.'''
 
+from cr.cube.subtotal import Subtotal
+
 
 class Dimension(object):
     '''Implementation of the Dimension class for Crunch Cubes.
@@ -11,6 +13,15 @@ class Dimension(object):
     def __init__(self, dim, selections=None):
         self._dim = dim
         self._type = self._get_type(dim, selections)
+
+    @property
+    def subtotals(self):
+        insertions_data = self._dim.get('references', {}) \
+                .get('view', {}) \
+                .get('transform', {}) \
+                .get('insertions', [])
+        subtotals = [Subtotal(data) for data in insertions_data]
+        return [subtotal for subtotal in subtotals if subtotal.is_valid]
 
     @classmethod
     def _get_type(cls, dim, selections=None):
@@ -85,36 +96,23 @@ class Dimension(object):
             return self._dim['type']['categories']
         return self._dim['type']['elements']
 
-    def _subtotals_names(self):
-        insertions = self._dim['references'].get('view', {}) \
-                .get('transform', {}) \
-                .get('insertions')
-        if not insertions:
-            return []
-        return [
-            insertion
-            for insertion in insertions
-            if insertion['function'] == 'subtotal'
-        ]
-
-    def _subtotals_indices(self):
-        insertions = self._dim['references'].get('view', {}) \
-            .get('transform', {}) \
-            .get('insertions')
-        if not insertions:
-            return []
+    @property
+    def hs_indices(self):
+        '''Headers and Subtotals indices.'''
         indices = [{
             'anchor_ind': [
                 i
                 for (i, el) in enumerate(self._elements)
-                if el['id'] == insertion['anchor']
-            ][0] if insertion['anchor'] != 0 else -1,
+                if el['id'] == subtotal.anchor
+            ][0]
+            if (subtotal.anchor in [el['id'] for el in self._elements]) else
+            -1,
             'inds': [
                 i
                 for (i, el) in enumerate(self._elements)
-                if el['id'] in insertion['args']
+                if el['id'] in subtotal.args
             ],
-        } for insertion in insertions]
+        } for subtotal in self.subtotals]
         return indices
 
     @property
@@ -173,16 +171,15 @@ class Dimension(object):
             'id': el['id'],
             'name': self._get_name(el),
         } for (i, el) in enumerate(self._elements)]
-        subtotals_names = self._subtotals_names()
-        for subtotal_name in subtotals_names:
+        for subtotal in self.subtotals:
             # If anchor is 0, the default value of 'next' (which is -1) will
             # add with 1, and amount to the total of 0, which will be the
             # correct index value for the new subtotal.
             ind_insert = next((
                 i for (i, x) in enumerate(labels_with_cat_ids)
-                if x.get('id') == subtotal_name['anchor']
+                if x.get('id') == subtotal.anchor
             ), -1) + 1
-            labels_with_cat_ids.insert(ind_insert, subtotal_name)
+            labels_with_cat_ids.insert(ind_insert, subtotal.data)
 
         return [
             (
