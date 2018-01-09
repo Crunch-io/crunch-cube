@@ -121,3 +121,5 @@ The detailed description can be found
 1.5.1 Implement index for MR x MR
 
 1.5.2 Fix bugs with `anchor: 0` for H&S
+
+1.5.3 Fix bugs with invalid input data for H&S
