@@ -411,18 +411,37 @@ class CrunchCube(object):
             return res[np.ix_(*valid_indices)]
 
         if self.dimensions[0].type == 'multiple_response':
+            if len(table.shape) == 4:
+                # This is the case of MR x CA, special treatment
+                # Still haven'f figured out the percentages
+                if axis == 1:
+                    res = (table[:, 0, :, :] /
+                           np.sum(table[:, 0, :, :], 1))
+                else:
+                    res = (table[:, 0, :, :] /
+                           (table[:, 0, :, :] + table[:, 1, :, :]))
+
+            # The following are normal MR x something (not CA)
             if axis == 1:
                 res = table[:, 0, :] / np.sum(table[:, 0, :], 1)[:, np.newaxis]
             else:
                 res = table[:, 0, :] / (table[:, 0, :] + table[:, 1, :])
-            return res[np.ix_(*valid_indices)]
-
-        if self.dimensions[1].type == 'multiple_response':
+        elif self.dimensions[1].type == 'multiple_response':
             if axis == 0:
                 res = table[:, :, 0] / np.sum(table[:, :, 0], 0)
             else:
                 res = table[:, :, 0] / (table[:, :, 0] + table[:, :, 1])
-            return res[np.ix_(*valid_indices)]
+        elif self.dimensions[2].type == 'multiple_response':
+            # This is the case of CA x MR, should work fine, but please check
+            # slight mismatch between this and whaam
+            if axis == 1:
+                res = (table[:, :, :, 0] /
+                       np.sum(table[:, :, :, 0], 1))
+            else:
+                res = (table[:, :, :, 0] /
+                       (table[:, :, :, 0] + table[:, :, :, 1]))
+
+        return res[np.ix_(*valid_indices)]
 
     def _proportions(self, axis=None, weighted=True, adjusted=False,
                      include_transforms_for_dims=None, include_missing=False):
