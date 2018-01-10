@@ -75,3 +75,7 @@ FIXT_ECON_US_PROBLEM_X_BIGGER_PROBLEM = load_fixture(
     CUBES_DIR,
     'econ-us-problem-x-bigger-problem.json'
 )
+FIXT_FRUIT_X_PETS_ARRAY = load_fixture(
+    CUBES_DIR,
+    'fruit-x-pets-array.json'
+)

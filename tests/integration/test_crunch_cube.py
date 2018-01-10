@@ -33,6 +33,7 @@ from .fixtures import (
     FIXT_SIMPLE_CA_HS,
     FIXT_FRUIT_X_PETS,
     FIXT_ECON_US_PROBLEM_X_BIGGER_PROBLEM,
+    FIXT_FRUIT_X_PETS_ARRAY,
 )
 from cr.cube.crunch_cube import CrunchCube
 
@@ -1906,4 +1907,22 @@ class TestCrunchCube(TestCase):
             [0.01337793, 0.02207358],
         ])
         actual = cube.proportions(include_transforms_for_dims=[0, 1])
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_cat_x_cat_array_proportions_by_row(self):
+        '''Get the proportions for each slice of the 3D cube.
+
+        The axis is equal to 2, since this is the dimensions across which
+        we have to calculate the margin.
+        '''
+        cube = CrunchCube(FIXT_FRUIT_X_PETS_ARRAY)
+        expected = ([[
+            [0.52,       0.48],
+            [0.57142857, 0.42857143],
+            [0.47826087, 0.52173913]],
+
+           [[0.59259259, 0.40740741],
+            [0.46153846, 0.53846154],
+            [0.44680851, 0.55319149]]])
+        actual = cube.proportions(axis=2)
         np.testing.assert_almost_equal(actual, expected)
