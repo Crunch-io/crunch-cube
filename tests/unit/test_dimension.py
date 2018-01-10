@@ -261,3 +261,17 @@ class TestDimension(TestCase):
         self.assertEqual(actual[0]._data, self.insertions_with_bad_data[1])
         self.assertEqual(type(actual[1]), Subtotal)
         self.assertEqual(actual[1]._data, self.insertions_with_bad_data[2])
+
+    @patch('cr.cube.dimension.Dimension._elements', [
+        {'numeric_value': 1},
+        {'numeric_value': 2, 'missing': False},
+        {'numeric_value': 3, 'missing': True},
+        {'numeric_value': None},
+    ])
+    @patch('cr.cube.dimension.Dimension._get_type')
+    def test_values(self, mock_type):
+        dim = Dimension({})
+        mock_type.return_value = None
+        expected = [1, 2]
+        actual = dim.values
+        self.assertEqual(actual, expected)

@@ -753,6 +753,14 @@ class CrunchCube(object):
         return self.mr_dim_ind is not None
 
     @property
+    def ca_dim_ind(self):
+        for (i, dim) in enumerate(self.dimensions):
+            if dim.type == 'categorical_array':
+                return i
+        else:
+            return None
+
+    @property
     def name(self):
         '''Return the name of the cube.
 
@@ -1189,3 +1197,30 @@ class CrunchCube(object):
             margin = margin[:, np.newaxis]
 
         return props / margin
+
+    def means(self):
+        '''Get cube means.'''
+
+        if not self.dimensions:
+            return None
+
+        contents = self.as_array()
+        values = np.array([
+            dim.values
+            for dim in self.dimensions
+            if dim.values
+        ][0])
+        if (len(contents.shape) > 1 and self.mr_dim_ind != 0 and
+                self.ca_dim_ind != 0):
+            values = values[:, np.newaxis]
+
+        if self.has_mr and not self.is_double_mr:
+            axis = 1 - self.mr_dim_ind
+            return (
+                np.sum(contents * values, axis) / np.sum(self.as_array(), axis)
+            )
+
+        if self.ca_dim_ind == 0:
+            return np.sum(contents * values, 1) / self.margin(1)
+
+        return np.sum(contents * values, 0) / self.margin(0)

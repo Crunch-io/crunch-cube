@@ -15,6 +15,15 @@ class Dimension(object):
         self._type = self._get_type(dim, selections)
 
     @property
+    def values(self):
+        return [
+            el['numeric_value']
+            for el in self._elements
+            if (el.get('numeric_value', None) is not None and
+                not el.get('missing'))
+        ]
+
+    @property
     def subtotals(self):
         view = self._dim.get('references', {}).get('view', {})
 

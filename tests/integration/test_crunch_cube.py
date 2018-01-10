@@ -45,6 +45,9 @@ from .fixtures import FIXT_SINGLE_CAT_MEANS
 from .fixtures import FIXT_CA_X_SINGLE_CAT
 from .fixtures import FIXT_CA_SUBVAR_X_CAT_HS
 from .fixtures import FIXT_CAT_X_MR_X_MR
+from .fixtures import FIXT_ECON_BLAME_WITH_HS
+from .fixtures import FIXT_FRUIT_X_LANGUAGES
+from .fixtures import FIXT_ECON_BLAME_X_IDEOLOGY_ROW_HS
 
 
 class TestCrunchCube(TestCase):
@@ -1950,3 +1953,47 @@ class TestCrunchCube(TestCase):
              [0.0571, 0.03115]],
         ])
         np.testing.assert_almost_equal(actual, expected)
+
+    def test_means_univariate_cat(self):
+        cube = CrunchCube(FIXT_ECON_BLAME_WITH_HS)
+        expected = 2.1735205616850553
+        actual = cube.means()
+        self.assertEqual(actual, expected)
+
+    def test_means_bivariate_cat(self):
+        cube = CrunchCube(FIXT_ECON_BLAME_X_IDEOLOGY_ROW_HS)
+        expected = np.array([
+            2.19444444,
+            2.19230769,
+            2.26666667,
+            1.88990826,
+            1.76363636,
+            3.85,
+        ])
+        actual = cube.means()
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_means_cat_x_mr(self):
+        cube = CrunchCube(FIXT_FRUIT_X_PETS)
+        expected = np.array([1.7, 1.6470588, 1.6842105])
+        actual = cube.means()
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_means_mr_x_cat(self):
+        cube = CrunchCube(FIXT_PETS_X_FRUIT)
+        expected = np.array([1.7, 1.6470588, 1.6842105])
+        actual = cube.means()
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_means_cat_array(self):
+        cube = CrunchCube(FIXT_PETS_ARRAY)
+        expected = np.array([1.4303797, 1.5, 1.5428571])
+        actual = cube.means()
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_means_cat_x_cat_arr(self):
+        cube = CrunchCube(FIXT_FRUIT_X_LANGUAGES)
+        cube.dimensions
+        #expected = None
+        #actual = cube.means()
+        #np.testing.assert_almost_equal(actual, expected)
