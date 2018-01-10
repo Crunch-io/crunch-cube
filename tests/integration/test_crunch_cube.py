@@ -37,6 +37,8 @@ from .fixtures import (
     FIXT_IDENTITY_X_PERIOD,
     FIXT_CA_SINGLE_CAT,
     FIXT_MR_X_SINGLE_WAVE,
+    FIXT_PETS_ARRAY_X_PETS,
+    FIXT_PETS_X_PETS_ARRAY,
 )
 from cr.cube.crunch_cube import CrunchCube
 
@@ -1956,4 +1958,42 @@ class TestCrunchCube(TestCase):
             0., 0., 0., 38.05075633, 90.93234493,  123.22747266,  142.42909713,
         ])
         actual = cube.margin(axis=1)
+
+    def test_pets_array_x_pets_by_col(self):
+        cube = CrunchCube(FIXT_PETS_ARRAY_X_PETS)
+        expected = np.array([
+           [[0.5, 0., 0.55956679],
+            [0.34606481, 1., 0.44043321]],
+           [[0., 0.45686275, 0.5198556],
+            [1., 0.39084967, 0.4801444]],
+           [[0.38425926, 0.36928105, 0.],
+            [0.46180556, 0.47843137, 1.]],
+        ])
+        # Since cube is 3D, col dim is 1 (instead of 0)
+        actual = cube.proportions(axis=1)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_pets_array_x_pets_by_row(self):
+        cube = CrunchCube(FIXT_PETS_ARRAY_X_PETS)
+        expected = np.array([
+           [[0.44836533, 0., 0.48261546],
+            [0.39084967, 1., 0.47843137]],
+           [[0., 0.375, 0.46351931],
+            [1., 0.34606481, 0.46180556]],
+           [[0.46433566, 0.3951049, 0.],
+            [0.4801444, 0.44043321, 1.]],
+        ])
+        actual = cube.proportions(axis=2)
+        # Since cube is 3D, row dim is 2 (instead of 1)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_pets_x_pets_array_by_col(self):
+        # This test is work in progress and will fail
+        # There are 2 more of these that need to be written,
+        # one for row, and one for cell direction
+        cube = CrunchCube(FIXT_PETS_X_PETS_ARRAY)
+        expected = np.array([
+        ])
+        actual = cube.proportions(axis=1)
+        # Since cube is 3D, col dim is 1 (instead of 0)
         np.testing.assert_almost_equal(actual, expected)
