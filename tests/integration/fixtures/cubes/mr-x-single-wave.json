@@ -1,0 +1,1412 @@
+{
+    "value": {
+        "query": {
+            "measures": {
+                "count": {
+                    "function": "cube_count",
+                    "args": []
+                }
+            },
+            "dimensions": [
+                {
+                    "each": 1
+                },
+                {
+                    "function": "as_selected",
+                    "args": [
+                        {
+                            "variable": "000000"
+                        }
+                    ]
+                },
+                {
+                    "function": "rollup",
+                    "args": [
+                        {
+                            "variable": "da69e9d19ef348efa4f07c3522f9fbc9"
+                        },
+                        {
+                            "value": "D"
+                        }
+                    ]
+                }
+            ],
+            "weight": "http://127.0.0.1:8080/datasets/e5285bd9e9db4feabee7f9cb1665db75/variables/aa28c3f215574dc0969e19f90eaa6a5a/"
+        },
+        "query_environment": {
+            "filter": [
+                {
+                    "function": "in",
+                    "args": [
+                        {
+                            "variable": "http://127.0.0.1:8080/datasets/e5285bd9e9db4feabee7f9cb1665db75/variables/0e785b41e57c4ce7a195a4bf7b0685b4/"
+                        },
+                        {
+                            "column": [
+                                1
+                            ],
+                            "type": {
+                                "function": "typeof",
+                                "args": [
+                                    {
+                                        "variable": "http://127.0.0.1:8080/datasets/e5285bd9e9db4feabee7f9cb1665db75/variables/0e785b41e57c4ce7a195a4bf7b0685b4/"
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "function": "in",
+                    "args": [
+                        {
+                            "variable": "http://127.0.0.1:8080/datasets/e5285bd9e9db4feabee7f9cb1665db75/variables/da69e9d19ef348efa4f07c3522f9fbc9/"
+                        },
+                        {
+                            "column": [
+                                "2017-12-15"
+                            ],
+                            "type": {
+                                "function": "typeof",
+                                "args": [
+                                    {
+                                        "variable": "http://127.0.0.1:8080/datasets/e5285bd9e9db4feabee7f9cb1665db75/variables/da69e9d19ef348efa4f07c3522f9fbc9/"
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "function": "in",
+                    "args": [
+                        {
+                            "variable": "http://127.0.0.1:8080/datasets/e5285bd9e9db4feabee7f9cb1665db75/variables/a046c03af167459b995e9726b12e3d67/"
+                        },
+                        {
+                            "column": [
+                                2
+                            ],
+                            "type": {
+                                "function": "typeof",
+                                "args": [
+                                    {
+                                        "variable": "http://127.0.0.1:8080/datasets/e5285bd9e9db4feabee7f9cb1665db75/variables/a046c03af167459b995e9726b12e3d67/"
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        "result": {
+            "dimensions": [
+                {
+                    "derived": true,
+                    "references": {
+                        "subreferences": [
+                            {
+                                "alias": "aided_1",
+                                "name": "Google Home"
+                            },
+                            {
+                                "alias": "aided_17",
+                                "name": "Google Home Mini"
+                            },
+                            {
+                                "alias": "aided_2",
+                                "name": "Amazon Echo"
+                            },
+                            {
+                                "alias": "aided_18",
+                                "name": "Google Home Max"
+                            },
+                            {
+                                "alias": "aided_13",
+                                "name": "Amazon Echo Dot"
+                            },
+                            {
+                                "alias": "aided_12",
+                                "name": "Alexa"
+                            },
+                            {
+                                "alias": "aided_16",
+                                "name": "Apple HomePod"
+                            },
+                            {
+                                "alias": "aided_5",
+                                "name": "Siri"
+                            },
+                            {
+                                "alias": "aided_8",
+                                "name": "Cortana"
+                            },
+                            {
+                                "alias": "aided_15",
+                                "name": "Telstra Smart Home"
+                            },
+                            {
+                                "alias": "aided_11",
+                                "name": "OK Google"
+                            },
+                            {
+                                "alias": "aided_10",
+                                "name": "Google Assistant"
+                            },
+                            {
+                                "alias": "aided_14",
+                                "name": "Bixby"
+                            },
+                            {
+                                "alias": "aided_3",
+                                "name": "Cubic"
+                            },
+                            {
+                                "alias": "aided_4",
+                                "name": "Jibo"
+                            },
+                            {
+                                "alias": "aided_6",
+                                "name": "Google Now"
+                            },
+                            {
+                                "alias": "aided_7",
+                                "name": "Hound"
+                            },
+                            {
+                                "alias": "aided_19",
+                                "name": "Clova (LINE)"
+                            },
+                            {
+                                "alias": "aided_20",
+                                "name": "LINE WAVE"
+                            },
+                            {
+                                "alias": "aided_99",
+                                "name": "None of the above"
+                            },
+                            {
+                                "alias": "aided_21",
+                                "name": "Amazon Echo Show"
+                            },
+                            {
+                                "alias": "aided_22",
+                                "name": "Amazon Echo Spot"
+                            },
+                            {
+                                "alias": "aided_23",
+                                "name": "Amazon Echo Plus"
+                            }
+                        ],
+                        "alias": "aided",
+                        "description": "When you think of voice-activated speakers, which of the following have you heard of?",
+                        "name": "Aided awareness"
+                    },
+                    "type": {
+                        "subtype": {
+                            "class": "variable"
+                        },
+                        "elements": [
+                            {
+                                "id": 1,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "aided_1",
+                                        "name": "Google Home"
+                                    },
+                                    "id": "0001",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 2,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "aided_17",
+                                        "name": "Google Home Mini"
+                                    },
+                                    "id": "0863",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 3,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "aided_2",
+                                        "name": "Amazon Echo"
+                                    },
+                                    "id": "0002",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 4,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "aided_18",
+                                        "name": "Google Home Max"
+                                    },
+                                    "id": "0877",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 5,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "aided_13",
+                                        "name": "Amazon Echo Dot"
+                                    },
+                                    "id": "0012",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 6,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "aided_12",
+                                        "name": "Alexa"
+                                    },
+                                    "id": "0011",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 7,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "aided_16",
+                                        "name": "Apple HomePod"
+                                    },
+                                    "id": "0819",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 8,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "aided_5",
+                                        "name": "Siri"
+                                    },
+                                    "id": "0005",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 9,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "aided_8",
+                                        "name": "Cortana"
+                                    },
+                                    "id": "0008",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 10,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "aided_15",
+                                        "name": "Telstra Smart Home"
+                                    },
+                                    "id": "0692",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 11,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "aided_11",
+                                        "name": "OK Google"
+                                    },
+                                    "id": "0010",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 12,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "aided_10",
+                                        "name": "Google Assistant"
+                                    },
+                                    "id": "0459",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 13,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "aided_14",
+                                        "name": "Bixby"
+                                    },
+                                    "id": "0691",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 14,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "aided_3",
+                                        "name": "Cubic"
+                                    },
+                                    "id": "0003",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 15,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "aided_4",
+                                        "name": "Jibo"
+                                    },
+                                    "id": "0004",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 16,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "aided_6",
+                                        "name": "Google Now"
+                                    },
+                                    "id": "0006",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 17,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "aided_7",
+                                        "name": "Hound"
+                                    },
+                                    "id": "0007",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 18,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "aided_19",
+                                        "name": "Clova (LINE)"
+                                    },
+                                    "id": "0928",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 19,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "aided_20",
+                                        "name": "LINE WAVE"
+                                    },
+                                    "id": "0929",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 20,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "aided_99",
+                                        "name": "None of the above"
+                                    },
+                                    "id": "0009",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 21,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "aided_21",
+                                        "name": "Amazon Echo Show"
+                                    },
+                                    "id": "1193",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 22,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "aided_22",
+                                        "name": "Amazon Echo Spot"
+                                    },
+                                    "id": "0013",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 23,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "aided_23",
+                                        "name": "Amazon Echo Plus"
+                                    },
+                                    "id": "0014",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            }
+                        ],
+                        "class": "enum"
+                    }
+                },
+                {
+                    "references": {
+                        "subreferences": [
+                            {
+                                "alias": "aided_1",
+                                "name": "Google Home"
+                            },
+                            {
+                                "alias": "aided_17",
+                                "name": "Google Home Mini"
+                            },
+                            {
+                                "alias": "aided_2",
+                                "name": "Amazon Echo"
+                            },
+                            {
+                                "alias": "aided_18",
+                                "name": "Google Home Max"
+                            },
+                            {
+                                "alias": "aided_13",
+                                "name": "Amazon Echo Dot"
+                            },
+                            {
+                                "alias": "aided_12",
+                                "name": "Alexa"
+                            },
+                            {
+                                "alias": "aided_16",
+                                "name": "Apple HomePod"
+                            },
+                            {
+                                "alias": "aided_5",
+                                "name": "Siri"
+                            },
+                            {
+                                "alias": "aided_8",
+                                "name": "Cortana"
+                            },
+                            {
+                                "alias": "aided_15",
+                                "name": "Telstra Smart Home"
+                            },
+                            {
+                                "alias": "aided_11",
+                                "name": "OK Google"
+                            },
+                            {
+                                "alias": "aided_10",
+                                "name": "Google Assistant"
+                            },
+                            {
+                                "alias": "aided_14",
+                                "name": "Bixby"
+                            },
+                            {
+                                "alias": "aided_3",
+                                "name": "Cubic"
+                            },
+                            {
+                                "alias": "aided_4",
+                                "name": "Jibo"
+                            },
+                            {
+                                "alias": "aided_6",
+                                "name": "Google Now"
+                            },
+                            {
+                                "alias": "aided_7",
+                                "name": "Hound"
+                            },
+                            {
+                                "alias": "aided_19",
+                                "name": "Clova (LINE)"
+                            },
+                            {
+                                "alias": "aided_20",
+                                "name": "LINE WAVE"
+                            },
+                            {
+                                "alias": "aided_99",
+                                "name": "None of the above"
+                            },
+                            {
+                                "alias": "aided_21",
+                                "name": "Amazon Echo Show"
+                            },
+                            {
+                                "alias": "aided_22",
+                                "name": "Amazon Echo Spot"
+                            },
+                            {
+                                "alias": "aided_23",
+                                "name": "Amazon Echo Plus"
+                            }
+                        ],
+                        "description": "When you think of voice-activated speakers, which of the following have you heard of?",
+                        "name": "Aided awareness",
+                        "alias": "aided"
+                    },
+                    "derived": true,
+                    "type": {
+                        "ordinal": false,
+                        "subvariables": [
+                            "0001",
+                            "0863",
+                            "0002",
+                            "0877",
+                            "0012",
+                            "0011",
+                            "0819",
+                            "0005",
+                            "0008",
+                            "0692",
+                            "0010",
+                            "0459",
+                            "0691",
+                            "0003",
+                            "0004",
+                            "0006",
+                            "0007",
+                            "0928",
+                            "0929",
+                            "0009",
+                            "1193",
+                            "0013",
+                            "0014"
+                        ],
+                        "class": "categorical",
+                        "categories": [
+                            {
+                                "numeric_value": 1,
+                                "selected": true,
+                                "id": 1,
+                                "missing": false,
+                                "name": "Selected"
+                            },
+                            {
+                                "numeric_value": 0,
+                                "missing": false,
+                                "id": 0,
+                                "name": "Not Selected"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": true,
+                                "id": -1,
+                                "name": "No Data"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "references": {
+                        "alias": "wave",
+                        "name": "Wave",
+                        "view": {
+                            "rollup_resolution": "D",
+                            "column_width": null
+                        }
+                    },
+                    "derived": true,
+                    "type": {
+                        "subtype": {
+                            "resolution": "D",
+                            "class": "datetime",
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "missing_rules": {}
+                        },
+                        "elements": [
+                            {
+                                "id": 0,
+                                "value": "2017-12-15",
+                                "missing": false
+                            }
+                        ],
+                        "class": "enum"
+                    }
+                }
+            ],
+            "missing": 0,
+            "measures": {
+                "count": {
+                    "data": [
+                        308.32755711522964,
+                        341.67244288477,
+                        0,
+                        187.06825268727977,
+                        462.9317473127201,
+                        0,
+                        424.82328070644144,
+                        225.17671929355808,
+                        0,
+                        72.68885078967783,
+                        577.3111492103212,
+                        0,
+                        273.15993803147586,
+                        376.840061968524,
+                        0,
+                        467.62527785109177,
+                        182.37472214890818,
+                        0,
+                        62.18338600156008,
+                        587.8166139984388,
+                        0,
+                        442.80441810866375,
+                        207.19558189133613,
+                        0,
+                        281.5782591869191,
+                        368.4217408130805,
+                        0,
+                        0,
+                        649.9999999999991,
+                        0,
+                        237.3506584747095,
+                        412.6493415252903,
+                        0,
+                        233.1969245514129,
+                        416.803075448587,
+                        0,
+                        0,
+                        649.9999999999991,
+                        0,
+                        0,
+                        649.9999999999991,
+                        0,
+                        0,
+                        649.9999999999991,
+                        0,
+                        0,
+                        649.9999999999991,
+                        0,
+                        0,
+                        649.9999999999991,
+                        0,
+                        0,
+                        649.9999999999991,
+                        0,
+                        0,
+                        649.9999999999991,
+                        0,
+                        38.05075633241613,
+                        611.9492436675828,
+                        0,
+                        90.93234492830953,
+                        559.06765507169,
+                        0,
+                        123.2274726602146,
+                        526.7725273397851,
+                        0,
+                        142.42909712948875,
+                        507.5709028705112,
+                        0
+                    ],
+                    "n_missing": 0,
+                    "metadata": {
+                        "references": {},
+                        "derived": true,
+                        "type": {
+                            "integer": false,
+                            "missing_rules": {},
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "class": "numeric"
+                        }
+                    }
+                }
+            },
+            "element": "crunch:cube",
+            "counts": [
+                316,
+                334,
+                0,
+                204,
+                446,
+                0,
+                431,
+                219,
+                0,
+                71,
+                579,
+                0,
+                272,
+                378,
+                0,
+                496,
+                154,
+                0,
+                67,
+                583,
+                0,
+                464,
+                186,
+                0,
+                292,
+                358,
+                0,
+                0,
+                650,
+                0,
+                231,
+                419,
+                0,
+                241,
+                409,
+                0,
+                0,
+                650,
+                0,
+                0,
+                650,
+                0,
+                0,
+                650,
+                0,
+                0,
+                650,
+                0,
+                0,
+                650,
+                0,
+                0,
+                650,
+                0,
+                0,
+                650,
+                0,
+                38,
+                612,
+                0,
+                105,
+                545,
+                0,
+                132,
+                518,
+                0,
+                147,
+                503,
+                0
+            ],
+            "n": 650
+        }
+    }
+}
