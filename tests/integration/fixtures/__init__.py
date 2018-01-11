@@ -84,3 +84,4 @@ FIXT_IDENTITY_X_PERIOD = load_fixture(
     'econ-identity-x-period.json'
 )
 FIXT_CA_SINGLE_CAT = load_fixture(CUBES_DIR, 'cat-arr-with-single-cat.json')
+FIXT_MR_X_SINGLE_WAVE = load_fixture(CUBES_DIR, 'mr-x-single-wave.json')
