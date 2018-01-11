@@ -424,6 +424,8 @@ class CrunchCube(object):
         )
         if axis == 1:
             margin = margin[:, np.newaxis]
+        elif axis == 2:
+            margin = margin[:, :, np.newaxis]
 
         return self.as_array(
             include_missing=include_missing,
