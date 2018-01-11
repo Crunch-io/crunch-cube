@@ -34,6 +34,7 @@ from .fixtures import (
     FIXT_FRUIT_X_PETS,
     FIXT_ECON_US_PROBLEM_X_BIGGER_PROBLEM,
     FIXT_FRUIT_X_PETS_ARRAY,
+    FIXT_IDENTITY_X_PERIOD,
 )
 from cr.cube.crunch_cube import CrunchCube
 
@@ -1925,4 +1926,13 @@ class TestCrunchCube(TestCase):
             [0.46153846, 0.53846154],
             [0.44680851, 0.55319149]]])
         actual = cube.proportions(axis=2)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_identity_x_period_axis_out_of_bounds(self):
+        cube = CrunchCube(FIXT_IDENTITY_X_PERIOD)
+        # There are margins that have 0 value in this cube. In whaam, they're
+        # pruned, so they're not shown. CrunchCube is not responsible for
+        # pruning (cr.exporter is).
+        expected = np.array([94, 0, 248, 210, 102, 0, 0, 0, 286, 60])
+        actual = cube.margin(1)
         np.testing.assert_almost_equal(actual, expected)

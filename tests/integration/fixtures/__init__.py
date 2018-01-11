@@ -79,3 +79,7 @@ FIXT_FRUIT_X_PETS_ARRAY = load_fixture(
     CUBES_DIR,
     'fruit-x-pets-array.json'
 )
+FIXT_IDENTITY_X_PERIOD = load_fixture(
+    CUBES_DIR,
+    'econ-identity-x-period.json'
+)
