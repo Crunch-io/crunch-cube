@@ -34,6 +34,9 @@ from .fixtures import (
     FIXT_FRUIT_X_PETS,
     FIXT_ECON_US_PROBLEM_X_BIGGER_PROBLEM,
     FIXT_FRUIT_X_PETS_ARRAY,
+    FIXT_IDENTITY_X_PERIOD,
+    FIXT_CA_SINGLE_CAT,
+    FIXT_MR_X_SINGLE_WAVE,
 )
 from cr.cube.crunch_cube import CrunchCube
 
@@ -1925,4 +1928,32 @@ class TestCrunchCube(TestCase):
             [0.46153846, 0.53846154],
             [0.44680851, 0.55319149]]])
         actual = cube.proportions(axis=2)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_identity_x_period_axis_out_of_bounds(self):
+        cube = CrunchCube(FIXT_IDENTITY_X_PERIOD)
+        # There are margins that have 0 value in this cube. In whaam, they're
+        # pruned, so they're not shown. CrunchCube is not responsible for
+        # pruning (cr.exporter is).
+        expected = np.array([94, 0, 248, 210, 102, 0, 0, 0, 286, 60])
+        actual = cube.margin(axis=1)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_ca_with_single_cat(self):
+        cube = CrunchCube(FIXT_CA_SINGLE_CAT)
+        # The last 0 of the expectation is not visible in whaam because of
+        # pruning, which is not the responsibility of cr.cube.
+        expected = np.array([79, 80, 70, 0])
+        actual = cube.margin(axis=1, weighted=False)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_mr_x_single_wave(self):
+        cube = CrunchCube(FIXT_MR_X_SINGLE_WAVE)
+        expected = np.array([
+            308.32755712, 187.06825269, 424.82328071, 72.68885079,
+            273.15993803, 467.62527785, 62.183386, 442.80441811,
+            281.57825919, 0., 237.35065847,  233.19692455, 0., 0., 0., 0.,
+            0., 0., 0., 38.05075633, 90.93234493,  123.22747266,  142.42909713,
+        ])
+        actual = cube.margin(axis=1)
         np.testing.assert_almost_equal(actual, expected)

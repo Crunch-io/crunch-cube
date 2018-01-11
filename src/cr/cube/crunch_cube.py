@@ -356,6 +356,11 @@ class CrunchCube(object):
             return np.sum(margin, 0)
 
         if axis == 1:
+            if len(array.shape) == 1:
+                # In case of a flattened array (which happens with MR x CAT
+                # (single element)), restore the flattened dimension.
+                array = array[:, np.newaxis]
+
             # If MR margin is calculated by rows, we only need the counts
             # and that's why we use array and not margin.
             return np.sum(array, axis)
@@ -382,6 +387,14 @@ class CrunchCube(object):
             adjusted=adjusted,
             include_transforms_for_dims=transform_dims,
         )
+
+        if axis and axis > 0 and len(array.shape) == 1:
+            # If any of the dimensions has only one element, it's flattened
+            # from the resulting array (as a part of the MR pre-processing).
+            # This can lead to a potential inconsistency between dimensions
+            # and axes, and we need to restore one dimension in this case.
+            array = array[:, np.newaxis]
+
         return np.sum(array, axis)
 
     def _mr_proportions(self, axis, weighted):
