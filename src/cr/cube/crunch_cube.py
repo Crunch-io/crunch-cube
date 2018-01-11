@@ -382,6 +382,14 @@ class CrunchCube(object):
             adjusted=adjusted,
             include_transforms_for_dims=transform_dims,
         )
+
+        if axis > 0 and len(array.shape) == 1:
+            # If any of the dimensions has only one element, it's flattened
+            # from the resulting array (as a part of the MR pre-processing).
+            # This can lead to a potential inconsistency between dimensions
+            # and axes, and we need to restore one dimension in this case.
+            array = array[:, np.newaxis]
+
         return np.sum(array, axis)
 
     def _mr_proportions(self, axis, weighted):
