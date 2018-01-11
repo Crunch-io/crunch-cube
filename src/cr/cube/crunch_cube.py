@@ -356,6 +356,11 @@ class CrunchCube(object):
             return np.sum(margin, 0)
 
         if axis == 1:
+            if len(array.shape) == 1:
+                # In case of a flattened array (which happens with MR x CAT
+                # (single element)), restore the flattened dimension.
+                array = array[:, np.newaxis]
+
             # If MR margin is calculated by rows, we only need the counts
             # and that's why we use array and not margin.
             return np.sum(array, axis)
