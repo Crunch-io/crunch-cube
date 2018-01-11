@@ -35,6 +35,7 @@ from .fixtures import (
     FIXT_ECON_US_PROBLEM_X_BIGGER_PROBLEM,
     FIXT_FRUIT_X_PETS_ARRAY,
     FIXT_IDENTITY_X_PERIOD,
+    FIXT_CA_SINGLE_CAT,
 )
 from cr.cube.crunch_cube import CrunchCube
 
@@ -1935,4 +1936,12 @@ class TestCrunchCube(TestCase):
         # pruning (cr.exporter is).
         expected = np.array([94, 0, 248, 210, 102, 0, 0, 0, 286, 60])
         actual = cube.margin(1)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_ca_with_single_cat(self):
+        cube = CrunchCube(FIXT_CA_SINGLE_CAT)
+        # The last 0 of the expectation is not visible in whaam because of
+        # pruning, which is not the responsibility of cr.cube.
+        expected = np.array([79, 80, 70, 0])
+        actual = cube.margin(1, weighted=False)
         np.testing.assert_almost_equal(actual, expected)
