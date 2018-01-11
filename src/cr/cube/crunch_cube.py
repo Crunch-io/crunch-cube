@@ -383,7 +383,7 @@ class CrunchCube(object):
             include_transforms_for_dims=transform_dims,
         )
 
-        if axis > 0 and len(array.shape) == 1:
+        if axis and axis > 0 and len(array.shape) == 1:
             # If any of the dimensions has only one element, it's flattened
             # from the resulting array (as a part of the MR pre-processing).
             # This can lead to a potential inconsistency between dimensions
