@@ -93,3 +93,12 @@ FIXT_IDENTITY_X_PERIOD = load_fixture(
 )
 FIXT_CA_SINGLE_CAT = load_fixture(CUBES_DIR, 'cat-arr-with-single-cat.json')
 FIXT_MR_X_SINGLE_WAVE = load_fixture(CUBES_DIR, 'mr-x-single-wave.json')
+FIXT_SELECTED_3_WAY_2 = load_fixture(
+    CUBES_DIR,
+    'selected-3way-2-filledmissing.json'
+)
+FIXT_SELECTED_3_WAY = load_fixture(
+    CUBES_DIR,
+    'selected-3way-filledmissing.json'
+)
+FIXT_ARRAY_X_MR = load_fixture(CUBES_DIR, 'array-by-mr.json')

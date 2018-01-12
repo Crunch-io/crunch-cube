@@ -39,6 +39,9 @@ from .fixtures import (
     FIXT_MR_X_SINGLE_WAVE,
     FIXT_PETS_ARRAY_X_PETS,
     FIXT_PETS_X_PETS_ARRAY,
+    FIXT_SELECTED_3_WAY_2,
+    FIXT_SELECTED_3_WAY,
+    FIXT_ARRAY_X_MR,
 )
 from cr.cube.crunch_cube import CrunchCube
 
@@ -246,7 +249,6 @@ class TestCrunchCube(TestCase):
         )
         actual = cube.proportions()
         np.testing.assert_almost_equal(actual, expected)
-
 
     def test_proportions_cat_x_cat_axis_none(self):
         cube = CrunchCube(FIXT_CAT_X_CAT)
@@ -1958,42 +1960,143 @@ class TestCrunchCube(TestCase):
             0., 0., 0., 38.05075633, 90.93234493,  123.22747266,  142.42909713,
         ])
         actual = cube.margin(axis=1)
+        np.testing.assert_almost_equal(actual, expected)
 
     def test_pets_array_x_pets_by_col(self):
         cube = CrunchCube(FIXT_PETS_ARRAY_X_PETS)
         expected = np.array([
-           [[0.5, 0., 0.55956679],
-            [0.34606481, 1., 0.44043321]],
-           [[0., 0.45686275, 0.5198556],
-            [1., 0.39084967, 0.4801444]],
-           [[0.38425926, 0.36928105, 0.],
-            [0.46180556, 0.47843137, 1.]],
+            [0.59097127, 0., 0.55956679],
+            [0.40902873, 1., 0.44043321],
         ])
         # Since cube is 3D, col dim is 1 (instead of 0)
-        actual = cube.proportions(axis=1)
+        actual = cube.proportions(axis=1)[0]
         np.testing.assert_almost_equal(actual, expected)
 
-    def test_pets_array_x_pets_by_row(self):
+    def test_pets_array_x_pets_row(self):
         cube = CrunchCube(FIXT_PETS_ARRAY_X_PETS)
         expected = np.array([
-           [[0.44836533, 0., 0.48261546],
-            [0.39084967, 1., 0.47843137]],
-           [[0., 0.375, 0.46351931],
-            [1., 0.34606481, 0.46180556]],
-           [[0.46433566, 0.3951049, 0.],
-            [0.4801444, 0.44043321, 1.]],
+            [0.44836533, 0., 0.48261546],
+            [0.39084967, 1., 0.47843137],
         ])
-        actual = cube.proportions(axis=2)
-        # Since cube is 3D, row dim is 2 (instead of 1)
+        # Since cube is 3D, row dim is 2 (instead of 0)
+        actual = cube.proportions(axis=2)[0]
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_pets_array_x_pets_cell(self):
+        cube = CrunchCube(FIXT_PETS_ARRAY_X_PETS)
+        expected = np.array([
+            [0.44836533, 0., 0.48261546],
+            [0.39084967, 1., 0.47843137],
+        ])
+        actual = cube.proportions(axis=None)[0]
         np.testing.assert_almost_equal(actual, expected)
 
     def test_pets_x_pets_array_by_col(self):
-        # This test is work in progress and will fail
-        # There are 2 more of these that need to be written,
-        # one for row, and one for cell direction
         cube = CrunchCube(FIXT_PETS_X_PETS_ARRAY)
         expected = np.array([
+            [0.55555556, 0.19444444],
+            [0., 0.55555556],
+            [0.44444444, 0.25],
         ])
-        actual = cube.proportions(axis=1)
+        actual = cube.proportions(axis=1)[0]
         # Since cube is 3D, col dim is 1 (instead of 0)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_pets_x_pets_array_by_row(self):
+        cube = CrunchCube(FIXT_PETS_X_PETS_ARRAY)
+        expected = np.array([
+            [0.44444444, 0.41176471],
+            [0., 1.],
+            [0.5, 0.47368421],
+        ])
+        actual = cube.proportions(axis=2)[0]
+        # Since cube is 3D, col dim is 1 (instead of 0)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_pets_x_pets_array_by_cell(self):
+        cube = CrunchCube(FIXT_PETS_X_PETS_ARRAY)
+        expected = np.array([
+            [0.44444444, 0.41176471],
+            [0., 1.],
+            [0.5, 0.47368421],
+        ])
+        actual = cube.proportions(axis=None)[0]
+        # Since cube is 3D, col dim is 1 (instead of 0)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_mr_x_cat_x_cat_by_row(self):
+        cube = CrunchCube(FIXT_SELECTED_3_WAY_2)
+        # Only compare 0 slice (parity with whaam tests)
+        expected = np.array([
+            [0.5923110874002918, 0.3758961399306439],
+            [0, 0],
+            [0.49431928922535223, 0.6091963925363675]
+        ])
+        actual = cube.proportions(axis=2)[0]
+        # Since cube is 3D, row dim is 2 (instead of 1)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_cat_x_mr_x_cat_by_col(self):
+        cube = CrunchCube(FIXT_SELECTED_3_WAY)
+        # Only take first slice (parity with whaam tests).
+        expected = np.array([[1, 0], [1, 0], [1, 0]])
+        # Since MR is 2nd dim, the cube is considered 2 dimensional,
+        # and the axis 0 represents column direction.
+        actual = cube.proportions(axis=0)[0]
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_cat_x_mr_x_cat_by_row(self):
+        cube = CrunchCube(FIXT_SELECTED_3_WAY)
+        # Only take first slice (parity with whaam tests).
+        expected = np.array([
+            [0.0997975162008577, np.nan],
+            [0.20327963774693497, np.nan],
+            [0.3113417143573762, np.nan],
+        ])
+        # Since MR is 2nd dim, the cube is considered 2 dimensional,
+        # and the axis 1 represents row direction.
+        actual = cube.proportions(axis=1)[0]
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_cat_x_mr_x_cat_by_cell(self):
+        cube = CrunchCube(FIXT_SELECTED_3_WAY)
+        # Only take first slice (parity with whaam tests).
+        expected = np.array([
+            [0.0997975162008577, np.nan],
+            [0.20327963774693497, np.nan],
+            [0.3113417143573762, np.nan],
+        ])
+        # Since MR is 2nd dim, the cube is considered 2 dimensional,
+        # and the axis None represents cell direction.
+        actual = cube.proportions(axis=None)[0]
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_array_x_mr_by_col(self):
+        cube = CrunchCube(FIXT_ARRAY_X_MR)
+        expected = np.array([
+            [0.5146153267487166, 0.04320534228100489, 0.5933354514113938],
+            [0.4853846732512835, 0.9567946577189951, 0.4066645485886063],
+        ])
+        # Only compare the first slice (parity with whaam tests)
+        actual = cube.proportions(axis=1)[0]
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_array_x_mr_by_row(self):
+        cube = CrunchCube(FIXT_ARRAY_X_MR)
+        expected = np.array([
+            [0.41922353375674093, 0.03471395310157275, 0.5832027484767315],
+            [0.5143557893611596, 1, 0.5199603338915276],
+        ])
+        # Only compare the first slice (parity with whaam tests)
+        actual = cube.proportions(axis=2)[0]
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_array_x_mr_by_cell(self):
+        cube = CrunchCube(FIXT_ARRAY_X_MR)
+        expected = np.array([
+            [0.41922353375674093, 0.03471395310157275, 0.5832027484767315],
+            [0.5143557893611596, 1, 0.5199603338915276],
+        ])
+        # Only compare the first slice (parity with whaam tests)
+        actual = cube.proportions(axis=None)[0]
         np.testing.assert_almost_equal(actual, expected)
