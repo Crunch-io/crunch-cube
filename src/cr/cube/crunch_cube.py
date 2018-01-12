@@ -432,14 +432,12 @@ class CrunchCube(object):
             else:
                 res = table[:, :, 0] / (table[:, :, 0] + table[:, :, 1])
         elif self.dimensions[2].type == 'multiple_response':
-            # This is the case of CA x MR, should work fine, but please check
-            # slight mismatch between this and whaam
-            if axis == 1:
-                res = (table[:, :, :, 0] /
-                       np.sum(table[:, :, :, 0], 1))
-            else:
-                res = (table[:, :, :, 0] /
-                       (table[:, :, :, 0] + table[:, :, :, 1]))
+            margin = (
+                self.margin(axis=axis)[:, np.newaxis]
+                if axis == 1 else
+                self.margin(axis=0)
+            )
+            return self.as_array() / margin
 
         return res[np.ix_(*valid_indices)]
 
