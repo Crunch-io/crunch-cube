@@ -42,6 +42,7 @@ from .fixtures import (
     FIXT_SELECTED_3_WAY_2,
     FIXT_SELECTED_3_WAY,
     FIXT_ARRAY_X_MR,
+    FIXT_PROFILES_PERCENTS,
 )
 from cr.cube.crunch_cube import CrunchCube
 
@@ -2100,3 +2101,10 @@ class TestCrunchCube(TestCase):
         # Only compare the first slice (parity with whaam tests)
         actual = cube.proportions(axis=None)[0]
         np.testing.assert_almost_equal(actual, expected)
+
+    def test_profiles_percentages_add_up_to_100(self):
+        cube = CrunchCube(FIXT_PROFILES_PERCENTS)
+        props = cube.percentages(axis=1)
+        actual_sum = np.sum(props, axis=1)
+        expected_sum = np.ones(props.shape[0]) * 100
+        np.testing.assert_almost_equal(actual_sum, expected_sum)

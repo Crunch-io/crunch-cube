@@ -423,7 +423,7 @@ class CrunchCube(object):
 
             # The following are normal MR x something (not CA)
             if axis == 1:
-                res = table[:, 0, :] / np.sum(table[:, 0, :], 1)[:, np.newaxis]
+                return self.as_array() / self.margin(axis=1)[:, np.newaxis]
             else:
                 res = table[:, 0, :] / (table[:, 0, :] + table[:, 1, :])
         elif self.dimensions[1].type == 'multiple_response':
