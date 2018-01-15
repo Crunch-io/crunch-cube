@@ -1819,10 +1819,9 @@ class TestCrunchCube(TestCase):
 
     def test_cat_x_mr_index_by_col(self):
         cube = CrunchCube(FIXT_CAT_X_MR)
-        with self.assertRaises(ValueError) as ctx:
-            cube.index(axis=0)
-        expected = 'CAT x MR index table not defined for column direction'
-        self.assertEqual(ctx.exception.args[0], expected)
+        expected = np.full(cube.as_array().shape, np.nan)
+        actual = cube.index(axis=0)
+        np.testing.assert_array_equal(actual, expected)
 
     def test_mr_x_cat_index_by_col(self):
         cube = CrunchCube(FIXT_PETS_X_FRUIT)
@@ -1836,17 +1835,17 @@ class TestCrunchCube(TestCase):
 
     def test_mr_x_cat_index_by_row(self):
         cube = CrunchCube(FIXT_PETS_X_FRUIT)
-        with self.assertRaises(ValueError) as ctx:
-            cube.index(axis=1)
-        expected = 'MR x CAT index table only defined for column direction'
-        self.assertEqual(ctx.exception.args[0], expected)
+        expected = np.full(cube.as_array().shape, np.nan)
+        # with self.assertRaises(ValueError) as ctx:
+        actual = cube.index(axis=1)
+        np.testing.assert_array_equal(actual, expected)
 
     def test_mr_x_cat_index_by_cell(self):
         cube = CrunchCube(FIXT_PETS_X_FRUIT)
-        with self.assertRaises(ValueError) as ctx:
-            cube.index(axis=None)
-        expected = 'MR x CAT index table only defined for column direction'
-        self.assertEqual(ctx.exception.args[0], expected)
+        expected = np.full(cube.as_array().shape, np.nan)
+        # with self.assertRaises(ValueError) as ctx:
+        actual = cube.index(axis=None)
+        np.testing.assert_array_equal(actual, expected)
 
     def test_mr_x_mr_index_by_col(self):
         cube = CrunchCube(FIXT_PETS_X_PETS)
