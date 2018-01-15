@@ -102,3 +102,5 @@ FIXT_SELECTED_3_WAY = load_fixture(
     'selected-3way-filledmissing.json'
 )
 FIXT_ARRAY_X_MR = load_fixture(CUBES_DIR, 'array-by-mr.json')
+FIXT_PROFILES_PERCENTS = load_fixture(CUBES_DIR,
+                                      'test-profiles-percentages.json')
