@@ -43,6 +43,8 @@ from .fixtures import (
     FIXT_SELECTED_3_WAY,
     FIXT_ARRAY_X_MR,
     FIXT_PROFILES_PERCENTS,
+    FIXT_CAT_X_CAT_WITH_EMPTY_COLS,
+    FIXT_BINNED,
 )
 from cr.cube.crunch_cube import CrunchCube
 
@@ -2108,3 +2110,170 @@ class TestCrunchCube(TestCase):
         actual_sum = np.sum(props, axis=1)
         expected_sum = np.ones(props.shape[0]) * 100
         np.testing.assert_almost_equal(actual_sum, expected_sum)
+
+    def test_cat_x_cat_as_array_prune_cols(self):
+        cube = CrunchCube(FIXT_CAT_X_CAT_WITH_EMPTY_COLS)
+        expected = np.array([
+            [2, 2, 0, 1],
+            [0, 0, 0, 0],
+            [0, 1, 0, 2],
+            [0, 2, 0, 0],
+            [0, 2, 0, 1],
+            [0, 1, 0, 0],
+        ])
+        actual = cube.as_array(prune=False)
+        expected = np.array([
+            [2, 2, 1],
+            [0, 1, 2],
+            [0, 2, 0],
+            [0, 2, 1],
+            [0, 1, 0],
+        ])
+        actual = cube.as_array(prune=True)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_cat_x_cat_props_by_col_prune_cols(self):
+        cube = CrunchCube(FIXT_CAT_X_CAT_WITH_EMPTY_COLS)
+        expected = np.array([
+            [1., 0.25, np.nan, 0.25],
+            [0., 0., np.nan, 0.],
+            [0., 0.125, np.nan, 0.5],
+            [0., 0.25, np.nan, 0.],
+            [0., 0.25, np.nan, 0.25],
+            [0., 0.125, np.nan, 0.]
+        ])
+        actual = cube.proportions(axis=0, prune=False)
+        expected = np.array([
+            [1., 0.25, 0.25],
+            [0., 0.125, 0.5],
+            [0., 0.25, 0.],
+            [0., 0.25, 0.25],
+            [0., 0.125, 0.]
+        ])
+        actual = cube.proportions(axis=0, prune=True)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_cat_x_cat_props_by_row_prune_cols(self):
+        cube = CrunchCube(FIXT_CAT_X_CAT_WITH_EMPTY_COLS)
+        expected = np.array([
+            [0.4, 0.4, 0., 0.2],
+            [np.nan, np.nan, np.nan, np.nan],
+            [0., 0.33333333, 0., 0.66666667],
+            [0., 1., 0., 0.],
+            [0., 0.66666667, 0., 0.33333333],
+            [0., 1., 0., 0.],
+        ])
+        actual = cube.proportions(axis=1, prune=False)
+        expected = np.array([
+            [0.4, 0.4, 0.2],
+            [0., 0.33333333, 0.66666667],
+            [0., 1., 0.],
+            [0., 0.66666667, 0.33333333],
+            [0., 1., 0.]
+        ])
+        actual = cube.proportions(axis=1, prune=True)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_cat_x_cat_props_by_cell_prune_cols(self):
+        cube = CrunchCube(FIXT_CAT_X_CAT_WITH_EMPTY_COLS)
+        expected = np.array([
+            [0.14285714, 0.14285714, 0., 0.07142857],
+            [0., 0., 0., 0.],
+            [0., 0.07142857, 0., 0.14285714],
+            [0., 0.14285714, 0., 0.],
+            [0., 0.14285714, 0., 0.07142857],
+            [0., 0.07142857, 0., 0.],
+        ])
+        actual = cube.proportions(axis=None, prune=False)
+        expected = np.array([
+            [0.14285714, 0.14285714, 0.07142857],
+            [0., 0.07142857, 0.14285714],
+            [0., 0.14285714, 0.],
+            [0., 0.14285714, 0.07142857],
+            [0., 0.07142857, 0.],
+        ])
+        actual = cube.proportions(axis=None, prune=True)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_cat_x_cat_index_by_col_prune_cols(self):
+        cube = CrunchCube(FIXT_CAT_X_CAT_WITH_EMPTY_COLS)
+        expected = np.array([
+            [2.8, 0.7, np.nan, 0.7],
+            [np.nan, np.nan, np.nan, np.nan],
+            [0., 0.58333333, np.nan, 2.33333333],
+            [0., 1.75, np.nan, 0.],
+            [0., 1.16666667, np.nan, 1.16666667],
+            [0., 1.75, np.nan, 0.]
+        ])
+        actual = cube.index(axis=0, prune=False)
+        expected = np.array([
+            [2.8, 0.7, 0.7],
+            [0., 0.58333333, 2.33333333],
+            [0., 1.75, 0.],
+            [0., 1.16666667, 1.16666667],
+            [0., 1.75, 0.]
+        ])
+        actual = cube.index(axis=0, prune=True)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_hs_as_props_by_col_not_affected_by_prune(self):
+        cube = CrunchCube(FIXT_ECON_US_PROBLEM_X_BIGGER_PROBLEM)
+        expected = np.array([
+            [0.93244626, 0.66023166],
+            [0.63664278, 0.23166023],
+            [0.29580348, 0.42857143],
+            [0.04401228, 0.21428571],
+            [0.00307062, 0.06177606],
+            [0.02047083, 0.06370656],
+        ])
+        actual = cube.proportions(axis=0, include_transforms_for_dims=[0, 1],
+                                  prune=True)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_hs_as_props_by_row_not_affected_by_prune(self):
+        cube = CrunchCube(FIXT_ECON_US_PROBLEM_X_BIGGER_PROBLEM)
+        expected = np.array([
+            [0.72705507, 0.27294493],
+            [0.83827493, 0.16172507],
+            [0.56555773, 0.43444227],
+            [0.27922078, 0.72077922],
+            [0.08571429, 0.91428571],
+            [0.37735849, 0.62264151],
+        ])
+        actual = cube.proportions(axis=1, include_transforms_for_dims=[0, 1],
+                                  prune=True)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_hs_as_props_by_cell_not_affected_by_prune(self):
+        cube = CrunchCube(FIXT_ECON_US_PROBLEM_X_BIGGER_PROBLEM)
+        expected = np.array([
+            [0.60936455, 0.22876254],
+            [0.41605351, 0.08026756],
+            [0.19331104, 0.14849498],
+            [0.02876254, 0.07424749],
+            [0.00200669, 0.02140468],
+            [0.01337793, 0.02207358],
+        ])
+        actual = cube.proportions(include_transforms_for_dims=[0, 1],
+                                  prune=True)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_prune_univariate_cat(self):
+        cube = CrunchCube(FIXT_BINNED)
+        expected = np.array([
+            118504.40402204,
+            155261.2723631,
+            182923.95470245,
+        ])
+        actual = cube.as_array(prune=True)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_cat_x_mr_with_hs_and_prune_params(self):
+        '''Test that HS and prune params don't break CAT x MR.'''
+        cube = CrunchCube(FIXT_CAT_X_MR)
+        # Only ensure that the call doesn't break
+        cube.as_array(
+            include_transforms_for_dims=[0, 1],
+            prune=True,
+        )
+        assert True
