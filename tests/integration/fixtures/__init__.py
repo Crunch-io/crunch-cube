@@ -107,3 +107,7 @@ FIXT_PROFILES_PERCENTS = load_fixture(CUBES_DIR,
 FIXT_CAT_X_CAT_WITH_EMPTY_COLS = load_fixture(CUBES_DIR,
                                               'cat-x-cat-with-empty-cols.json')
 FIXT_BINNED = load_fixture(CUBES_DIR, 'binned.json')
+FIXT_SINGLE_COL_MARGIN_NOT_ITERABLE = load_fixture(
+    CUBES_DIR,
+    'single-col-margin-not-iterable.json'
+)

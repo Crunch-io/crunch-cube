@@ -1,0 +1,241 @@
+{
+    "query": {
+        "measures": {
+            "count": {
+                "function": "cube_count",
+                "args": []
+            }
+        },
+        "dimensions": [
+            {
+                "variable": "001008"
+            },
+            {
+                "variable": "6c1f8df434d54f0a96dcbce56959b21b"
+            }
+        ],
+        "weight": null
+    },
+    "query_environment": {
+        "filter": []
+    },
+    "result": {
+        "dimensions": [
+            {
+                "derived": false,
+                "references": {
+                    "alias": "qcountry",
+                    "name": "qcountry",
+                    "description": "VISIBLE IN TESTING MODE Country"
+                },
+                "type": {
+                    "ordinal": false,
+                    "class": "categorical",
+                    "categories": [
+                        {
+                            "numeric_value": 1,
+                            "missing": false,
+                            "id": 1,
+                            "name": "US"
+                        },
+                        {
+                            "numeric_value": 2,
+                            "missing": false,
+                            "id": 2,
+                            "name": "UK"
+                        },
+                        {
+                            "numeric_value": 3,
+                            "missing": false,
+                            "id": 3,
+                            "name": "France"
+                        },
+                        {
+                            "numeric_value": 4,
+                            "missing": false,
+                            "id": 4,
+                            "name": "Germany"
+                        },
+                        {
+                            "numeric_value": 5,
+                            "missing": false,
+                            "id": 5,
+                            "name": "Saudi Arabia"
+                        },
+                        {
+                            "numeric_value": 6,
+                            "missing": false,
+                            "id": 6,
+                            "name": "Mexico"
+                        },
+                        {
+                            "numeric_value": 7,
+                            "missing": false,
+                            "id": 7,
+                            "name": "Brazil"
+                        },
+                        {
+                            "numeric_value": null,
+                            "missing": true,
+                            "id": 32767,
+                            "name": "not asked"
+                        },
+                        {
+                            "numeric_value": null,
+                            "missing": true,
+                            "id": 32766,
+                            "name": "skipped"
+                        },
+                        {
+                            "numeric_value": null,
+                            "missing": true,
+                            "id": -1,
+                            "name": "No Data"
+                        }
+                    ]
+                }
+            },
+            {
+                "references": {
+                    "alias": "Q10b -- Call of Duty Combined",
+                    "name": "Q10b -- Call of Duty Combined"
+                },
+                "derived": true,
+                "type": {
+                    "ordinal": false,
+                    "class": "categorical",
+                    "categories": [
+                        {
+                            "numeric_value": null,
+                            "id": 1,
+                            "name": "Much better each year, A little better each year, No Change, A little worse each year, Much worse each year",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": null,
+                            "id": 32767,
+                            "name": "not asked",
+                            "missing": true
+                        },
+                        {
+                            "numeric_value": null,
+                            "id": 32766,
+                            "name": "skipped",
+                            "missing": true
+                        },
+                        {
+                            "numeric_value": null,
+                            "id": -1,
+                            "name": "No Data",
+                            "missing": true
+                        }
+                    ]
+                }
+            }
+        ],
+        "missing": 1076,
+        "measures": {
+            "count": {
+                "data": [
+                    734,
+                    435,
+                    0,
+                    0,
+                    350,
+                    247,
+                    0,
+                    0,
+                    468,
+                    308,
+                    0,
+                    0,
+                    12,
+                    8,
+                    0,
+                    0,
+                    13,
+                    12,
+                    0,
+                    0,
+                    37,
+                    34,
+                    0,
+                    0,
+                    20,
+                    31,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "n_missing": 1076,
+                "metadata": {
+                    "references": {},
+                    "derived": true,
+                    "type": {
+                        "integer": true,
+                        "missing_rules": {},
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "class": "numeric"
+                    }
+                }
+            }
+        },
+        "element": "crunch:cube",
+        "counts": [
+            734,
+            435,
+            0,
+            0,
+            350,
+            247,
+            0,
+            0,
+            468,
+            308,
+            0,
+            0,
+            12,
+            8,
+            0,
+            0,
+            13,
+            12,
+            0,
+            0,
+            37,
+            34,
+            0,
+            0,
+            20,
+            31,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ],
+        "n": 2710
+    }
+}
