@@ -151,11 +151,13 @@ class TestCrunchCube(TestCase):
         fake_dims = Mock()
         fake_axis = Mock()
         fake_weighted = Mock()
+        fake_prune = Mock()
         # Make the call
         cube.proportions(
             axis=fake_axis,
             weighted=fake_weighted,
-            include_transforms_for_dims=fake_dims
+            include_transforms_for_dims=fake_dims,
+            prune=fake_prune,
         )
         # Assert parameter propagation
         mock_margin.assert_called_once_with(
@@ -163,6 +165,7 @@ class TestCrunchCube(TestCase):
             weighted=fake_weighted,
             adjusted=False,
             include_transforms_for_dims=fake_dims,
+            prune=fake_prune,
         )
 
     @patch('cr.cube.crunch_cube.CrunchCube._get_dimensions')

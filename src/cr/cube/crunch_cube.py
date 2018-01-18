@@ -183,7 +183,8 @@ class CrunchCube(object):
 
     def _as_array(self, include_missing=False, get_non_selected=False,
                   weighted=True, adjusted=False,
-                  include_transforms_for_dims=False):
+                  include_transforms_for_dims=False,
+                  prune=False):
         '''Get crunch cube as ndarray.
 
         Args
@@ -231,7 +232,32 @@ class CrunchCube(object):
         res = res[np.ix_(*valid_indices)]
 
         adjustment = 1 if adjusted else 0
-        return self._fix_shape(res) + adjustment
+        res = self._fix_shape(res) + adjustment
+
+        if prune and not self.has_mr:
+            # Remove columns and rows where marginal value is 0 or np.nan
+            if len(self.dimensions) == 1:
+                margin = self.margin(
+                    include_transforms_for_dims=include_transforms_for_dims,
+                    axis=1,
+                )
+                ind_prune = np.logical_or(margin == 0, np.isnan(margin))
+                return res[~ind_prune]
+
+            col_margin = self.margin(
+                include_transforms_for_dims=include_transforms_for_dims,
+                axis=0,
+            )
+            ind_prune = np.logical_or(col_margin == 0, np.isnan(col_margin))
+            res = res[:, ~ind_prune]
+            row_margin = self.margin(
+                include_transforms_for_dims=include_transforms_for_dims,
+                axis=1
+            )
+            ind_prune = np.logical_or(row_margin == 0, np.isnan(row_margin))
+            return res[~ind_prune, :]
+
+        return res
 
     @classmethod
     def _fix_valid_indices(cls, valid_indices, insertion_index, dim):
@@ -368,7 +394,7 @@ class CrunchCube(object):
         return margin
 
     def _margin(self, axis=None, weighted=True, adjusted=False,
-                include_transforms_for_dims=None):
+                include_transforms_for_dims=None, prune=False):
 
         # MR margins are calculated differently, so they need a separate method
         # for them. A good example of this is the rcrunch functionality.
@@ -386,6 +412,7 @@ class CrunchCube(object):
             weighted=weighted,
             adjusted=adjusted,
             include_transforms_for_dims=transform_dims,
+            # prune=prune,
         )
 
         if axis and axis > 0 and len(array.shape) == 1:
@@ -395,7 +422,14 @@ class CrunchCube(object):
             # and axes, and we need to restore one dimension in this case.
             array = array[:, np.newaxis]
 
-        return np.sum(array, axis)
+        res = np.sum(array, axis)
+
+        if prune:
+            # Remove values if 0 or np.nan
+            ind_prune = np.logical_or(res == 0, np.isnan(res))
+            res = res[~ind_prune]
+
+        return res
 
     def _mr_proportions(self, axis, weighted):
         if self.is_double_mr:
@@ -442,7 +476,8 @@ class CrunchCube(object):
         return res[np.ix_(*valid_indices)]
 
     def _proportions(self, axis=None, weighted=True, adjusted=False,
-                     include_transforms_for_dims=None, include_missing=False):
+                     include_transforms_for_dims=None, include_missing=False,
+                     prune=False):
         if self.has_mr:
             return self._mr_proportions(axis, weighted)
 
@@ -450,7 +485,8 @@ class CrunchCube(object):
             axis=axis,
             weighted=weighted,
             adjusted=adjusted,
-            include_transforms_for_dims=include_transforms_for_dims
+            include_transforms_for_dims=include_transforms_for_dims,
+            prune=prune,
         )
         if axis == 1:
             margin = margin[:, np.newaxis]
@@ -462,6 +498,7 @@ class CrunchCube(object):
             weighted=weighted,
             adjusted=adjusted,
             include_transforms_for_dims=include_transforms_for_dims,
+            prune=prune,
         ) / margin
 
     # Properties
@@ -521,10 +558,10 @@ class CrunchCube(object):
         )
         return weighted
 
-    @property
-    def has_means(self):
-        '''Check if cube has means.'''
-        return self.has_means
+    # @property
+    # def has_means(self):
+    #     '''Check if cube has means.'''
+    #     return self.has_means
 
     @property
     def filter_annotation(self):
@@ -533,6 +570,7 @@ class CrunchCube(object):
 
     @property
     def has_means(self):
+        '''Check if cube has means.'''
         return self._cube['result']['measures'].get('mean', None) is not None
 
     @property
@@ -553,11 +591,13 @@ class CrunchCube(object):
         Returns
             labels (list of lists): Labels for each dimension
         '''
-        return [dim.labels(include_missing, include_transforms_for_dims)
-                for dim in self.dimensions]
+        return [
+            dim.labels(include_missing, include_transforms_for_dims)
+            for dim in self.dimensions
+        ]
 
     def as_array(self, include_missing=False, weighted=True, adjusted=False,
-                 include_transforms_for_dims=None):
+                 include_transforms_for_dims=None, prune=False):
         '''Get crunch cube as ndarray.
 
         Returns the tabular representation of the crunch cube. The returning
@@ -592,10 +632,11 @@ class CrunchCube(object):
             weighted=weighted,
             adjusted=adjusted,
             include_transforms_for_dims=include_transforms_for_dims,
+            prune=prune,
         )
 
     def margin(self, axis=None, weighted=True,
-               include_transforms_for_dims=None):
+               include_transforms_for_dims=None, prune=False):
         '''Get margin for the selected axis.
 
         the selected axis. For MR variables, this is the sum of the selected
@@ -657,10 +698,12 @@ class CrunchCube(object):
             weighted=weighted,
             adjusted=False,
             include_transforms_for_dims=include_transforms_for_dims,
+            prune=prune,
         )
 
     def proportions(self, axis=None, weighted=True,
-                    include_transforms_for_dims=None, include_missing=False):
+                    include_transforms_for_dims=None, include_missing=False,
+                    prune=False):
         '''Get proportions of a crunch cube.
 
         This function calculates the proportions across the selected axis
@@ -717,6 +760,7 @@ class CrunchCube(object):
             adjusted=False,
             include_transforms_for_dims=include_transforms_for_dims,
             include_missing=include_missing,
+            prune=prune,
         )
 
     def percentages(self, axis=None):
@@ -850,22 +894,23 @@ class CrunchCube(object):
 
         raise ValueError('Unexpected dimension types for cube with MR.')
 
-    def index(self, axis, weighted=True):
+    def index(self, axis, weighted=True, prune=False):
         '''Return table index by margin.'''
 
         if self.has_mr:
             return self._mr_index(axis, weighted)
 
-        margin = np.true_divide(
-            self.margin(axis=axis, weighted=weighted),
-            self.margin(weighted=weighted),
+        margin = (
+            self.margin(axis=axis, weighted=weighted, prune=prune) /
+            self.margin(weighted=weighted, prune=prune)
         )
         props = self.proportions(
             axis=(1 - axis),
             weighted=weighted,
+            prune=prune,
         )
 
         if axis == 1:
             margin = margin[:, np.newaxis]
 
-        return np.true_divide(props, margin)
+        return props / margin
