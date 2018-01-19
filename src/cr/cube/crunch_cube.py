@@ -429,6 +429,11 @@ class CrunchCube(object):
             ind_prune = np.logical_or(res == 0, np.isnan(res))
             res = res[~ind_prune]
 
+        if len(res.shape) == 0:
+            # Each margin needs to be iterable, even if it only has
+            # a single element.
+            res = res[np.newaxis]
+
         return res
 
     def _mr_proportions(self, axis, weighted):
