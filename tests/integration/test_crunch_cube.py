@@ -45,6 +45,7 @@ from .fixtures import (
     FIXT_PROFILES_PERCENTS,
     FIXT_CAT_X_CAT_WITH_EMPTY_COLS,
     FIXT_BINNED,
+    FIXT_SINGLE_COL_MARGIN_NOT_ITERABLE,
 )
 from cr.cube.crunch_cube import CrunchCube
 
@@ -2277,3 +2278,9 @@ class TestCrunchCube(TestCase):
             prune=True,
         )
         assert True
+
+    def test_single_col_margin_not_iterable(self):
+        cube = CrunchCube(FIXT_SINGLE_COL_MARGIN_NOT_ITERABLE)
+        expected = (1,)
+        actual = cube.margin(axis=0).shape
+        self.assertEqual(actual, expected)
