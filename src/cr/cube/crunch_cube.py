@@ -870,9 +870,8 @@ class CrunchCube(object):
 
         if self.dimensions[0].type == 'multiple_response':
             if axis != 0:
-                raise ValueError(
-                    'MR x CAT index table only defined for column direction'
-                )
+                # MR x CAT index table only defined for column direction.
+                return np.full(self.as_array().shape, np.nan)
             selected = (
                 table[:, 0, :, 0]
                 if self.is_double_mr else
@@ -889,9 +888,9 @@ class CrunchCube(object):
 
         if self.dimensions[1].type == 'multiple_response':
             if axis == 0:
-                raise ValueError(
-                    'CAT x MR index table not defined for column direction'
-                )
+                # CAT x MR index table not defined for column direction.
+                return np.full(self.as_array().shape, np.nan)
+
             selected = table[:, :, 0]
             non_selected = table[:, :, 1]
             margin = np.sum(selected, 0) / np.sum(selected + non_selected, 0)
