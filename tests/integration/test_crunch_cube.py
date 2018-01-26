@@ -46,6 +46,7 @@ from .fixtures import (
     FIXT_CAT_X_CAT_WITH_EMPTY_COLS,
     FIXT_BINNED,
     FIXT_SINGLE_COL_MARGIN_NOT_ITERABLE,
+    FIXT_GENDER_PARTY_RACE,
 )
 from cr.cube.crunch_cube import CrunchCube
 
@@ -495,33 +496,37 @@ class TestCrunchCube(TestCase):
     def test_proportions_cat_x_num_datetime(self):
         cube = CrunchCube(FIXT_CAT_X_NUM_X_DATETIME)
         expected = np.array([
-            [[0.05, 0.05],
+            [[0.5, 0.5],
              [0., 0.],
              [0., 0.],
              [0., 0.]],
 
-            [[0.1, 0.05],
-             [0.05, 0.05],
-             [0., 0.],
-             [0., 0.]],
-
-            [[0., 0.],
-             [0.1, 0.15],
+            [[0.4, 0.2],
+             [0.2, 0.2],
              [0., 0.],
              [0., 0.]],
 
             [[0., 0.],
+             [0.4, 0.6],
              [0., 0.],
-             [0.15, 0.1],
              [0., 0.]],
 
             [[0., 0.],
              [0., 0.],
-             [0.05, 0.05],
-             [0., 0.05]],
+             [0.6, 0.4],
+             [0., 0.]],
+
+            [[0., 0.],
+             [0., 0.],
+             [0.33333333, 0.33333333],
+             [0., 0.33333333]],
         ])
-        actual = cube.proportions()
-        np.testing.assert_array_equal(actual, expected)
+        # Set axis to tuple (1, 2), since we want to do a total for each slice
+        # of the 3D cube. This is consistent with how the np.sum works
+        # (axis parameter), which is used internally in
+        # 'proportions' calculation.
+        actual = cube.proportions((1, 2))
+        np.testing.assert_almost_equal(actual, expected)
 
     def test_margin_cat_x_num_x_datetime_axis_none(self):
         cube = CrunchCube(FIXT_CAT_X_NUM_X_DATETIME)
@@ -1492,6 +1497,17 @@ class TestCrunchCube(TestCase):
         actual = cube.as_array(include_transforms_for_dims=[0, 1])
         np.testing.assert_array_equal(actual, expected)
 
+    def test_subtotals_pvals_2d_cube_with_hs_on_row(self):
+        '''Ensure that pvals shape is the same as table shape with H%S'''
+        cube = CrunchCube(FIXT_ECON_BLAME_X_IDEOLOGY_ROW_HS)
+        expected = 6, 6
+        actual = cube.pvals(axis=0, include_transforms_for_dims=[0, 1]).shape
+
+        # Only assert the shape of the table, as the pvals are going to be
+        # rewritten soon.
+        # TODO: Change assertion after merging new Z-scores.
+        np.testing.assert_array_equal(actual, expected)
+
     def test_subtotals_as_array_2d_cube_with_hs_on_col(self):
         cube = CrunchCube(FIXT_ECON_BLAME_X_IDEOLOGY_COL_HS)
         expected = np.array([
@@ -2283,3 +2299,24 @@ class TestCrunchCube(TestCase):
         expected = (1,)
         actual = cube.margin(axis=0).shape
         self.assertEqual(actual, expected)
+
+    def test_3d_percentages_by_col(self):
+        cube = CrunchCube(FIXT_GENDER_PARTY_RACE)
+        expected = np.array([
+            [[.17647059, 0., 0., 0., 0., 0., 0., 0.],
+             [.17647059, .05882353, 0., 0., 0., 0., 0., 0.],
+             [.23529412, 0., 0., 0., 0., 0.05882353, 0., 0.],
+             [.11764706, .05882353, 0., 0.05882353, 0., 0.05882353, 0., 0.]],
+
+            [[.04761905, 0., 0., 0.04761905, 0., 0., 0., 0.],
+             [.14285714, .04761905, .0952381, .04761905, 0., .04761905, 0., 0.],
+             [.23809524, 0., 0.04761905, 0., 0., 0., 0., 0.],
+             [.19047619, 0., 0.04761905, 0., 0., 0., 0., 0.]]
+        ])
+        # Set axis to tuple (1, 2), since we want to do a total for each slice
+        # of the 3D cube. This is consistent with how the np.sum works
+        # (axis parameter), which is used internally in
+        # 'proportions' calculation.
+        axis = (1, 2)
+        actual = cube.proportions(axis=axis)
+        np.testing.assert_almost_equal(actual, expected)

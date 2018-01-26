@@ -111,3 +111,4 @@ FIXT_SINGLE_COL_MARGIN_NOT_ITERABLE = load_fixture(
     CUBES_DIR,
     'single-col-margin-not-iterable.json'
 )
+FIXT_GENDER_PARTY_RACE = load_fixture(CUBES_DIR, 'gender-party-race.json')

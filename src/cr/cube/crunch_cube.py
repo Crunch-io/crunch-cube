@@ -293,13 +293,27 @@ class CrunchCube(object):
             # (because of the inner matrix dimensions).
             return np.dot(prop_margin, V)
 
-    def _calculate_standard_error(self, axis):
-        total = self._margin(weighted=False, adjusted=True)
+    def _calculate_standard_error(self, axis, include_transforms_for_dims=None):
+        total = self._margin(
+            weighted=False,
+            adjusted=True,
+            include_transforms_for_dims=include_transforms_for_dims,
+        )
         # Calculate margin across axis, as percentages of the total count
-        margin = self._margin(axis=axis, weighted=False, adjusted=True) / total
+        margin = self._margin(
+            axis=axis,
+            weighted=False,
+            adjusted=True,
+            include_transforms_for_dims=include_transforms_for_dims
+        ) / total
         # Adjusted proportions table, necessary for the standard error,
         # because of the division by it.
-        props = self._proportions(axis=axis, weighted=False, adjusted=True)
+        props = self._proportions(
+            axis=axis,
+            weighted=False,
+            adjusted=True,
+            include_transforms_for_dims=include_transforms_for_dims
+        )
 
         constraints = self._calculate_constraints_sum(props, margin, axis)
         if axis == 0:
@@ -319,11 +333,11 @@ class CrunchCube(object):
 
         return np.sqrt((magic_d * props * (1 - props) + constraints) / total)
 
-    def _calculate_statistics(self, axis):
+    def _calculate_statistics(self, axis, include_transforms_for_dims=None):
         if axis not in [0, 1]:
             raise ValueError('Unexpected value for `axis`: {}'.format(axis))
 
-        props = self.proportions(axis=axis)
+        props = self.proportions(axis=axis, include_transforms_for_dims=include_transforms_for_dims)
 
         # Statistics are calculated by operating on both axes' margins. In this
         # function, we need to determine the cross-axis (other than the one
@@ -331,7 +345,10 @@ class CrunchCube(object):
         # *that* margin, which will serve as the basis for the
         # statistics calculation.
         cross_axis = 0 if axis == 1 else 1
-        cross_margin = self.margin(axis=cross_axis) / self.margin()
+        cross_margin = self.margin(
+            axis=cross_axis,
+            include_transforms_for_dims=include_transforms_for_dims
+        ) / self.margin(include_transforms_for_dims=include_transforms_for_dims)
 
         if cross_axis == 1:
             # If the row proportional margins are required, they also need to
@@ -339,7 +356,10 @@ class CrunchCube(object):
             # perform the subtration from the matrix.
             cross_margin = cross_margin[:, np.newaxis]
 
-        return (props - cross_margin) / self._calculate_standard_error(axis)
+        return (
+            (props - cross_margin) /
+            self._calculate_standard_error(axis, include_transforms_for_dims)
+        )
 
     def _double_mr_proportions(self, axis, weighted):
         all_dimensions = self._get_dimensions(self._cube)
@@ -415,7 +435,12 @@ class CrunchCube(object):
             # prune=prune,
         )
 
-        if axis and axis > 0 and len(array.shape) == 1:
+        # Explicitly check if axis is tuple (which could be the case for doing
+        # cell percentages across 3D cube, when the axis is set to (1, 2)).
+        # Python 3 doesn't support tuple to int conversion, and we have to
+        # check it manually.
+        if (axis and not isinstance(axis, tuple) and
+                axis > 0 and len(array.shape) == 1):
             # If any of the dimensions has only one element, it's flattened
             # from the resulting array (as a part of the MR pre-processing).
             # This can lead to a potential inconsistency between dimensions
@@ -498,13 +523,22 @@ class CrunchCube(object):
         elif axis == 2:
             margin = margin[:, :, np.newaxis]
 
-        return self.as_array(
+        array = self.as_array(
             include_missing=include_missing,
             weighted=weighted,
             adjusted=adjusted,
             include_transforms_for_dims=include_transforms_for_dims,
             prune=prune,
-        ) / margin
+        )
+
+        # In case of 3D cube, where each slice needs to be divided by a total
+        # (margin) of each slice, we need to restore two dimensions of the
+        # margin, to enable broadcasting and thus division.
+        if (len(getattr(array, 'shape', [])) == 3 and
+                len(getattr(margin, 'shape', [])) == 1):
+            margin = margin[:, np.newaxis, np.newaxis]
+
+        return array / margin
 
     # Properties
 
@@ -727,7 +761,17 @@ class CrunchCube(object):
                         dimensions don't have the transformations, nothing will
                         happen (the result will be the same as if the argument
                         weren't provided).
+            include_transforms_for_dims (list): Include headers and subtotals
+                        across various dimensions. The dimensions are provided
+                        as list elements. For example:
+                        "include_transforms_for_dims=[0, 1]" instructs the
+                        CrunchCube to return H&S for both rows and columns
+                        (if it's a 2D cube).
             include_missing (bool): Include missing categories
+            prune (bool): Instructs the CrunchCube to prune empty rows/cols.
+                        Emptiness is determined by the state of the margin
+                        (if it's either 0 or nan at certain index). If it is,
+                        the corresponding row/col is not included in the result.
 
         Returns
             (nparray): Calculated array of crunch cube proportions.
@@ -809,7 +853,7 @@ class CrunchCube(object):
         '''
         return self.proportions(axis) * 100
 
-    def pvals(self, axis):
+    def pvals(self, axis, include_transforms_for_dims=None):
         '''Calculate p-vals.
 
         This function calculates statistically signifficant results for
@@ -825,7 +869,7 @@ class CrunchCube(object):
                        cell of the table-like representation of the
                        crunch cube.
         '''
-        stats = self._calculate_statistics(axis)
+        stats = self._calculate_statistics(axis, include_transforms_for_dims)
         sign = np.sign(stats)
 
         p_values = 2 * (1 - norm.cdf(np.abs(stats)))
