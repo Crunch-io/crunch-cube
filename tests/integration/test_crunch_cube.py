@@ -1492,6 +1492,17 @@ class TestCrunchCube(TestCase):
         actual = cube.as_array(include_transforms_for_dims=[0, 1])
         np.testing.assert_array_equal(actual, expected)
 
+    def test_subtotals_pvals_2d_cube_with_hs_on_row(self):
+        '''Ensure that pvals shape is the same as table shape with H%S'''
+        cube = CrunchCube(FIXT_ECON_BLAME_X_IDEOLOGY_ROW_HS)
+        expected = 6, 6
+        actual = cube.pvals(axis=0, include_transforms_for_dims=[0, 1]).shape
+
+        # Only assert the shape of the table, as the pvals are going to be
+        # rewritten soon.
+        # TODO: Change assertion after merging new Z-scores.
+        np.testing.assert_array_equal(actual, expected)
+
     def test_subtotals_as_array_2d_cube_with_hs_on_col(self):
         cube = CrunchCube(FIXT_ECON_BLAME_X_IDEOLOGY_COL_HS)
         expected = np.array([
