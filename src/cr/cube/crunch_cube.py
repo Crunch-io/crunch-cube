@@ -415,7 +415,12 @@ class CrunchCube(object):
             # prune=prune,
         )
 
-        if axis and axis > 0 and len(array.shape) == 1:
+        # Explicitly check if axis is tuple (which could be the case for doing
+        # cell percentages across 3D cube, when the axis is set to (1, 2)).
+        # Python 3 doesn't support tuple to int conversion, and we have to
+        # check it manually.
+        if (axis and not isinstance(axis, tuple) and
+                axis > 0 and len(array.shape) == 1):
             # If any of the dimensions has only one element, it's flattened
             # from the resulting array (as a part of the MR pre-processing).
             # This can lead to a potential inconsistency between dimensions
@@ -498,13 +503,22 @@ class CrunchCube(object):
         elif axis == 2:
             margin = margin[:, :, np.newaxis]
 
-        return self.as_array(
+        array = self.as_array(
             include_missing=include_missing,
             weighted=weighted,
             adjusted=adjusted,
             include_transforms_for_dims=include_transforms_for_dims,
             prune=prune,
-        ) / margin
+        )
+
+        # In case of 3D cube, where each slice needs to be divided by a total
+        # (margin) of each slice, we need to restore two dimensions of the
+        # margin, to enable broadcasting and thus division.
+        if (len(getattr(array, 'shape', [])) == 3 and
+                len(getattr(margin, 'shape', [])) == 1):
+            margin = margin[:, np.newaxis, np.newaxis]
+
+        return array / margin
 
     # Properties
 
@@ -727,7 +741,17 @@ class CrunchCube(object):
                         dimensions don't have the transformations, nothing will
                         happen (the result will be the same as if the argument
                         weren't provided).
+            include_transforms_for_dims (list): Include headers and subtotals
+                        across various dimensions. The dimensions are provided
+                        as list elements. For example:
+                        "include_transforms_for_dims=[0, 1]" instructs the
+                        CrunchCube to return H&S for both rows and columns
+                        (if it's a 2D cube).
             include_missing (bool): Include missing categories
+            prune (bool): Instructs the CrunchCube to prune empty rows/cols.
+                        Emptiness is determined by the state of the margin
+                        (if it's either 0 or nan at certain index). If it is,
+                        the corresponding row/col is not included in the result.
 
         Returns
             (nparray): Calculated array of crunch cube proportions.
