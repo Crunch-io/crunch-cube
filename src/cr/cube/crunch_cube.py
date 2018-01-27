@@ -10,6 +10,7 @@ import json
 
 import numpy as np
 from scipy.stats import norm
+from scipy.stats.contingency import expected_freq
 
 from .dimension import Dimension
 
@@ -377,41 +378,80 @@ class CrunchCube(object):
 
         return selected / (selected + non_selected)
 
+    @property
+    def mr_dim_ind(self):
+        for i, dim in enumerate(self.dimensions):
+            if dim.type == 'multiple_response':
+                return i
+        return None
+
+    @property
+    def valid_indices(self):
+        return [dim.valid_indices(False) for dim in self.dimensions]
+
+    def _double_mr_margin(self, axis, weighted):
+        table = self._get_table(weighted)
+        selected = table[:, 0, :, 0]
+
+        if axis is None:
+            non_selected = (
+                table[:, 1, :, 1] + table[:, 1, :, 0] + table[:, 0, :, 1]
+            )
+        elif axis == 0:
+            non_selected = table[:, 1, :, 0]
+        elif axis == 1:
+            non_selected = table[:, 0, :, 1]
+
+        return (selected + non_selected)[np.ix_(*self.valid_indices)]
+
     def _mr_margin(self, axis, weighted, adjusted):
-        all_dimensions = self._get_dimensions(self._cube)
-        mr_indices = self._get_mr_selections_indices(all_dimensions)
-        array = self.as_array(
-            weighted=weighted,
-            adjusted=adjusted,
+        if self.is_double_mr:
+            return self._double_mr_margin(axis, weighted)
+
+        table = self._get_table(weighted)
+
+        # In case of 1-D MR cube, we have reduced number of slices,
+        # and separate 'if' is needed
+        if len(self.dimensions) == 1:
+            if axis == 0:
+                return self.as_array(weighted=weighted)
+            return table[:, 0] + table[:, 1]
+
+        # For cases when margin is calculated along the axis which is not MR,
+        # we need to perform sumation along that axis, on the tabular
+        # representation of the cube (which is obtained with 'as_array').
+        calculate_along_non_mr = (
+            self.mr_dim_ind in [0, 2] and axis == 1 or
+            self.mr_dim_ind == 1 and axis == 0 or
+            self.mr_dim_ind == 1 and axis == 1 and len(self.dimensions) > 2
         )
-        margin = array + self._as_array(
-            get_non_selected=True,
-            weighted=weighted,
-            adjusted=adjusted
-        )
+        if calculate_along_non_mr:
+            array = self.as_array(weighted=weighted)
 
-        if axis is None and len(margin.shape) > 1 and 1 in mr_indices:
-            # If MR margin is being calculated as total, we need the
-            # combination of selected + non-selected, and that's why
-            # we're using margin and not array.
-            return np.sum(margin, 1)[:, np.newaxis]
+            if axis == 1 and len(array.shape) == 1:
+                # If array representation of the cube has less dimensions than
+                # supposed (by the 'axis' argument), return the array. This
+                # condition may arise if one of the cross variables of the cube
+                # has only one element (e.g. in MR x CAT cube).
+                return array
 
-        if axis is None and len(margin.shape) > 1:
-            # This covers the case when there's a MR variable, but
-            # not as a first dimension.
-            return np.sum(margin, 0)
-
-        if axis == 1:
-            if len(array.shape) == 1:
-                # In case of a flattened array (which happens with MR x CAT
-                # (single element)), restore the flattened dimension.
-                array = array[:, np.newaxis]
-
-            # If MR margin is calculated by rows, we only need the counts
-            # and that's why we use array and not margin.
             return np.sum(array, axis)
 
-        return margin
+        # For cases when the margin is calculated for the MR dimension, we need
+        # the sum of selected and non-selected slices (if axis is None), or the
+        # sublimated version (another sum along the axis), if axis is defined.
+        ind_selected = tuple(
+            0 if i - 1 == self.mr_dim_ind else slice(None)
+            for (i, _) in enumerate(table.shape)
+        )
+        ind_non_selected = tuple(
+            1 if i - 1 == self.mr_dim_ind else slice(None)
+            for (i, _) in enumerate(table.shape)
+        )
+        margin = table[ind_selected] + table[ind_non_selected]
+        margin = margin[np.ix_(*self.valid_indices)]
+
+        return np.sum(margin, 1 - self.mr_dim_ind) if axis is None else margin
 
     def _margin(self, axis=None, weighted=True, adjusted=False,
                 include_transforms_for_dims=None, prune=False):
@@ -543,6 +583,23 @@ class CrunchCube(object):
     # Properties
 
     @property
+    def _mr_std_residuals(self):
+        counts = self.as_array()
+        total = self.margin()
+        colsum = self.margin(axis=0)
+        rowsum = self.margin(axis=1)
+
+        if not self.is_double_mr and self.mr_dim_ind == 0:
+            total = total[:, np.newaxis]
+            rowsum = rowsum[:, np.newaxis]
+
+        expected = rowsum * colsum / total
+        variance = (
+            rowsum * colsum * (total - rowsum) * (total - colsum) / total**3
+        )
+        return (counts - expected) / np.sqrt(variance)
+
+    @property
     def has_mr(self):
         '''Determines if a cube has MR dimensions.'''
         all_dimensions = self._get_dimensions(self._cube)
@@ -597,11 +654,6 @@ class CrunchCube(object):
         )
         return weighted
 
-    # @property
-    # def has_means(self):
-    #     '''Check if cube has means.'''
-    #     return self.has_means
-
     @property
     def filter_annotation(self):
         '''Get cube's filter annotation.'''
@@ -614,6 +666,7 @@ class CrunchCube(object):
 
     @property
     def is_double_mr(self):
+        '''Check if cube is MR x MR.'''
         types = [dim.type for dim in self.dimensions]
         if types == ['multiple_response', 'multiple_response']:
             return True
@@ -962,3 +1015,22 @@ class CrunchCube(object):
             margin = margin[:, np.newaxis]
 
         return props / margin
+
+    @property
+    def standardized_residuals(self):
+        '''Calculate residuals based on Chi-squared.'''
+
+        if self.has_mr:
+            return self._mr_std_residuals
+
+        counts = self.as_array()
+        total = self.margin()
+        colsum = self.margin(axis=0) / total
+        rowsum = self.margin(axis=1) / total
+        expected_counts = expected_freq(counts)
+        residuals = counts - expected_counts
+        variance = (
+            expected_counts *
+            ((1 - rowsum[:, np.newaxis]) * (1 - colsum))
+        )
+        return residuals / np.sqrt(variance)
