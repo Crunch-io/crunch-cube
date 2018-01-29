@@ -28,7 +28,7 @@ FIXT_SIMPLE_CAT_ARRAY = load_fixture(CUBES_DIR, 'simple-cat-array.json')
 FIXT_CAT_X_NUM_X_DATETIME = load_fixture(CUBES_DIR,
                                          'cat-x-num-x-datetime.json')
 FIXT_SIMPLE_MR = load_fixture(CUBES_DIR, 'simple-mr.json')
-FIXT_CAT_X_MR = load_fixture(CUBES_DIR, 'cat-x-mr.json')
+FIXT_CAT_X_MR_SIMPLE = load_fixture(CUBES_DIR, 'cat-x-mr.json')
 FIXT_ECON_GENDER_X_IDEOLOGY_WEIGHTED = load_fixture(
     CUBES_DIR,
     'econ-gender-x-ideology-weighted.json',
@@ -112,3 +112,9 @@ FIXT_SINGLE_COL_MARGIN_NOT_ITERABLE = load_fixture(
     'single-col-margin-not-iterable.json'
 )
 FIXT_GENDER_PARTY_RACE = load_fixture(CUBES_DIR, 'gender-party-race.json')
+FIXT_SEL_ARR_FIRST = load_fixture(CUBES_DIR,
+                                  'selected-crosstab-array-first.json')
+FIXT_SEL_ARR_LAST = load_fixture(CUBES_DIR, 'selected-crosstab-array-last.json')
+FIXT_MR_X_MR = load_fixture(CUBES_DIR, 'selected-by-selected.json')
+FIXT_MR_X_MR_HETEROGENOUS = load_fixture(CUBES_DIR,
+                                         'mr-by-mr-different-mrs.json')
