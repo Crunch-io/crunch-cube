@@ -123,3 +123,7 @@ The detailed description can be found
 1.5.2 Fix bugs with `anchor: 0` for H&S
 
 1.5.3 Fix bugs with invalid input data for H&S
+
+1.6.0 Z-Score and bug fixes.
+
+1.6.1 standardized_residuals are now included.
