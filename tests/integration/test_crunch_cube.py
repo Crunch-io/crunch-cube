@@ -2032,3 +2032,10 @@ class TestCrunchCube(TestCase):
         # dimension of the cube).
         actual = cube.margin(axis=2)
         np.testing.assert_array_equal(actual, expected)
+
+    def test_ca_x_single_cat_cell_margins(test):
+        cube = CrunchCube(FIXT_CA_X_SINGLE_CAT)
+        expected = np.array([25, 28, 23])
+        # Axis equals to (1, 2), because the total is calculated for each slice.
+        actual = cube.margin(axis=(1, 2))
+        np.testing.assert_array_equal(actual, expected)
