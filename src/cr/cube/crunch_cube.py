@@ -570,6 +570,8 @@ class CrunchCube(object):
             # Handle special case when a dimension is lost due to a
             # single element.
             res = array
+        elif axis == (1, 2) and len(array.shape) <= 2:
+            res = np.sum(array, 1)
         else:
             res = np.sum(array, axis)
 
