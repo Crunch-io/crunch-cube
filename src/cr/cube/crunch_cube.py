@@ -163,20 +163,20 @@ class CrunchCube(object):
                      if dim != 1 or i == 0]
         return array.reshape(new_shape)
 
-    def _get_values(self, weighted):
-        if self.has_means:
-            values = self._cube['result']['measures']['mean']['data']
-        elif not weighted or not self.is_weighted:
-            values = self._cube['result']['counts']
-        else:
-            values = self._cube['result']['measures']['count']['data']
-
+    def _get_values(self, weighted, margin=False):
+        values = self._cube['result']['counts']
+        if self.has_means and not margin:
+            mean = self._cube['result']['measures'].get('mean', {})
+            values = mean.get('data', values)
+        elif weighted and self.is_weighted:
+            count = self._cube['result']['measures'].get('count', {})
+            values = count.get('data', values)
         values = [(val if not isinstance(val, dict) else np.nan)
                   for val in values]
         return values
 
-    def _get_table(self, weighted):
-        values = self._get_values(weighted)
+    def _get_table(self, weighted, margin=False):
+        values = self._get_values(weighted, margin)
         all_dimensions = self._get_dimensions(self._cube)
         shape = [len(dim.elements(include_missing=True))
                  for dim in all_dimensions]
@@ -185,7 +185,7 @@ class CrunchCube(object):
     def _as_array(self, include_missing=False, get_non_selected=False,
                   weighted=True, adjusted=False,
                   include_transforms_for_dims=False,
-                  prune=False):
+                  prune=False, margin=False):
         '''Get crunch cube as ndarray.
 
         Args
@@ -194,7 +194,7 @@ class CrunchCube(object):
         Returns
             res (ndarray): Tabular representation of crunch cube
         '''
-        values = self._get_values(weighted)
+        values = self._get_values(weighted, margin)
         all_dimensions = self._get_dimensions(self._cube)
         shape = [len(dim.elements(include_missing=True))
                  for dim in all_dimensions]
@@ -468,11 +468,11 @@ class CrunchCube(object):
             if axis is not None and isinstance(axis, int)
             else None
         )
-        array = self.as_array(
+        array = self._as_array(
             weighted=weighted,
             adjusted=adjusted,
             include_transforms_for_dims=transform_dims,
-            # prune=prune,
+            margin=True,
         )
 
         # Explicitly check if axis is tuple (which could be the case for doing

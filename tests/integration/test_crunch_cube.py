@@ -42,6 +42,7 @@ from .fixtures import FIXT_PETS_ARRAY_X_PETS
 from .fixtures import FIXT_PETS_X_PETS_ARRAY
 from .fixtures import FIXT_SELECTED_3_WAY_2
 from .fixtures import FIXT_SELECTED_3_WAY
+from .fixtures import FIXT_SINGLE_CAT_MEANS
 
 from cr.cube.crunch_cube import CrunchCube
 
@@ -1985,4 +1986,22 @@ class TestCrunchCube(TestCase):
         cube = CrunchCube(FIXT_SIMPLE_MR)
         expected = np.array([3, 4, 0])
         actual = cube.margin(axis=0)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_total_unweighted_margin_when_has_means(self):
+        '''Tests that total margin is Unweighted N, when cube has means.'''
+        cube = CrunchCube(FIXT_SINGLE_CAT_MEANS)
+        expected = 17615
+        actual = cube.margin(weighted=False)
+        assert actual == expected
+
+    def test_row_unweighted_margin_when_has_means(self):
+        '''Tests that total margin is Unweighted N, when cube has means.'''
+        cube = CrunchCube(FIXT_SINGLE_CAT_MEANS)
+        expected = np.array([
+            806, 14, 14, 28, 780, 42, 1114, 28, 24, 746, 2, 12, 6, 2178, 2026,
+            571, 136, 16, 14, 1334, 1950, 26, 128, 4, 28, 3520, 1082, 36, 56,
+            556, 38, 146, 114, 28, 12,
+        ])
+        actual = cube.margin(axis=1, weighted=False, prune=True)
         np.testing.assert_array_equal(actual, expected)
