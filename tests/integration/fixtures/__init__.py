@@ -125,3 +125,4 @@ FIXT_FRUIT_HS_TOP_BOTTOM = load_fixture(CUBES_DIR, 'fruit-hs-top-bottom.json')
 FIXT_FRUIT_X_PETS_HS_TOP_BOTTOM = load_fixture(
     CUBES_DIR, 'fruit-x-pets-hs-top-bottom.json'
 )
+FIXT_CA_X_SINGLE_CAT = load_fixture(CUBES_DIR, 'ca-x-single-cat.json')

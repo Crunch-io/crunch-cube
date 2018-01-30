@@ -43,6 +43,7 @@ from .fixtures import FIXT_PETS_X_PETS_ARRAY
 from .fixtures import FIXT_SELECTED_3_WAY_2
 from .fixtures import FIXT_SELECTED_3_WAY
 from .fixtures import FIXT_SINGLE_CAT_MEANS
+from .fixtures import FIXT_CA_X_SINGLE_CAT
 
 from cr.cube.crunch_cube import CrunchCube
 
@@ -2013,3 +2014,21 @@ class TestCrunchCube(TestCase):
         expected = np.array([79, 80, 70])
         actual = cube.as_array(weighted=False, prune=True)
         np.testing.assert_almost_equal(actual, expected)
+
+    def test_ca_x_single_cat_col_margins(test):
+        cube = CrunchCube(FIXT_CA_X_SINGLE_CAT)
+        expected = np.array([25, 28, 23])
+        # Axis equals to 1, because col direction in 3D cube is 1 (and not 0).
+        # It operates on the 0th dimension of each slice (which is 1st
+        # dimension of the cube).
+        actual = cube.margin(axis=1)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_ca_x_single_cat_row_margins(test):
+        cube = CrunchCube(FIXT_CA_X_SINGLE_CAT)
+        expected = np.array([[13, 12], [16, 12], [11, 12]])
+        # Axis equals to 2, because col direction in 3D cube is 2 (and not 1).
+        # It operates on the 1st dimension of each slice (which is 2nd
+        # dimension of the cube).
+        actual = cube.margin(axis=2)
+        np.testing.assert_array_equal(actual, expected)

@@ -566,7 +566,12 @@ class CrunchCube(object):
         )
         array = self._inflate_dim(array, axis)
 
-        res = np.sum(array, axis)
+        if axis and not isinstance(axis, tuple) and axis > len(array.shape) - 1:
+            # Handle special case when a dimension is lost due to a
+            # single element.
+            res = array
+        else:
+            res = np.sum(array, axis)
 
         if prune:
             # Remove values if 0 or np.nan
