@@ -797,13 +797,14 @@ class CrunchCube(object):
                 [0, 0, 0, 0],
             ])
         '''
-        return self._as_array(
+        array = self._as_array(
             include_missing=include_missing,
             weighted=weighted,
             adjusted=adjusted,
             include_transforms_for_dims=include_transforms_for_dims,
             prune=prune,
         )
+        return self._fix_shape(array)
 
     def margin(self, axis=None, weighted=True,
                include_transforms_for_dims=None, prune=False):
