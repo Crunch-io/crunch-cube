@@ -2005,3 +2005,11 @@ class TestCrunchCube(TestCase):
         ])
         actual = cube.margin(axis=1, weighted=False, prune=True)
         np.testing.assert_array_equal(actual, expected)
+
+    def test_ca_with_single_cat_pruning(self):
+        cube = CrunchCube(FIXT_CA_SINGLE_CAT)
+        # The last 0 of the expectation is not visible in whaam because of
+        # pruning, which is not the responsibility of cr.cube.
+        expected = np.array([79, 80, 70])
+        actual = cube.as_array(weighted=False, prune=True)
+        np.testing.assert_almost_equal(actual, expected)

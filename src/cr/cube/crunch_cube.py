@@ -237,7 +237,7 @@ class CrunchCube(object):
 
         if prune and not self.has_mr:
             # Remove columns and rows where marginal value is 0 or np.nan
-            if len(self.dimensions) == 1:
+            if len(self.dimensions) == 1 or len(res.shape) == 1:
                 margin = self.margin(
                     include_transforms_for_dims=include_transforms_for_dims,
                     axis=1,
