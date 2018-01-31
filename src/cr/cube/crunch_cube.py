@@ -204,6 +204,7 @@ class CrunchCube(object):
             get_non_selected
         )
         res = np.array(values).reshape(shape)
+        # res = res[np.ix_(*valid_indices)]
         if include_transforms_for_dims:
             for (i, dim) in enumerate(all_dimensions):
 
@@ -215,20 +216,38 @@ class CrunchCube(object):
 
                 # Perform transformations
                 ind_offset = 0
+                insertions = []
                 for indices in dim.hs_indices:
                     ind_subtotal_elements = np.array(indices['inds'])
-                    ind_insertion = indices['anchor_ind'] + ind_offset
-                    ind_subtotal_elements = (np.array(ind_subtotal_elements) +
-                                             ind_offset)
+                    if indices['anchor_ind'] == 'top':
+                        ind_insertion = -1
+                    elif indices['anchor_ind'] == 'bottom':
+                        ind_insertion = res.shape[i] - 1
+                    else:
+                        ind_insertion = indices['anchor_ind'] + ind_offset
+                    # ind_insertion = indices['anchor_ind'] + ind_offset
+                    # ind_subtotal_elements = (np.array(ind_subtotal_elements) +
+                    #                          ind_offset)
                     if i == 0:
                         value = sum(res[ind_subtotal_elements])
-                        res = np.insert(res, ind_insertion + 1, value, axis=i)
+                        # res = np.insert(res, ind_insertion + 1, value, axis=i)
                     else:
                         value = np.sum(res[:, ind_subtotal_elements], axis=1)
-                        res = np.insert(res, ind_insertion + 1, value, axis=i)
-                    valid_indices = self._fix_valid_indices(valid_indices,
-                                                            ind_insertion, i)
-                    ind_offset += 1
+                        # res = np.insert(res, ind_insertion + 1, value, axis=i)
+                    insertions.append((ind_insertion, value))
+
+                for j, (ind_insertion, value) in enumerate(insertions):
+                    if i == 0:
+                        res = np.insert(res, ind_insertion + j + 1, value,
+                                        axis=i)
+                    else:
+                        res = np.insert(res, ind_insertion + j + 1, value,
+                                        axis=i)
+
+                    valid_indices = self._fix_valid_indices(
+                        valid_indices, ind_insertion + j, i
+                    )
+                    # ind_offset += 1
 
         res = res[np.ix_(*valid_indices)]
 

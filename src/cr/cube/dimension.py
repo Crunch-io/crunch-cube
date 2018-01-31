@@ -106,7 +106,8 @@ class Dimension(object):
                 if el['id'] == subtotal.anchor
             ][0]
             if (subtotal.anchor in [el['id'] for el in self._elements]) else
-            -1,
+            subtotal.anchor,
+            # -1,
             'inds': [
                 i
                 for (i, el) in enumerate(self._elements)
@@ -178,7 +179,14 @@ class Dimension(object):
             ind_insert = next((
                 i for (i, x) in enumerate(labels_with_cat_ids)
                 if x.get('id') == subtotal.anchor
-            ), -1) + 1
+            # ), -1) + 1
+            ), subtotal.anchor)
+            if ind_insert == 'top':
+                ind_insert = 0
+            elif ind_insert == 'bottom':
+                ind_insert = len(labels_with_cat_ids)
+            else:
+                ind_insert += 1
             labels_with_cat_ids.insert(ind_insert, subtotal.data)
 
         return [
