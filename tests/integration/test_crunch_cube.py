@@ -2013,11 +2013,54 @@ class TestCrunchCube(TestCase):
         # pruning, which is not the responsibility of cr.cube.
         expected = np.array([79, 80, 70])
         actual = cube.as_array(weighted=False, prune=True)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_ca_x_single_cat_counts(test):
+        cube = CrunchCube(FIXT_CA_X_SINGLE_CAT)
+        expected = np.array([[13, 12], [16, 12], [11, 12]])
+        actual = cube.as_array()
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_ca_x_single_cat_props_by_col(test):
+        cube = CrunchCube(FIXT_CA_X_SINGLE_CAT)
+        expected = np.array([
+            [0.52, 0.48],
+            [0.57142857, 0.42857143],
+            [0.47826087, 0.52173913],
+        ])
+        # Col direction is 1 (and not 0) because of 3D cube.
+        actual = cube.proportions(axis=1)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_ca_x_single_cat_props_by_row(test):
+        cube = CrunchCube(FIXT_CA_X_SINGLE_CAT)
+        expected = np.array([
+            [1., 1.],
+            [1., 1.],
+            [1., 1.],
+        ])
+        # Col direction is 2 (and not 1) because of 3D cube.
+        actual = cube.proportions(axis=2)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_ca_x_single_cat_props_by_cell(test):
+        cube = CrunchCube(FIXT_CA_X_SINGLE_CAT)
+        expected = np.array([
+            [0.52, 0.48],
+            [0.57142857, 0.42857143],
+            [0.47826087, 0.52173913],
+        ])
+        # Col direction is (1, 2) because 3D cube (total per slice).
+        actual = cube.proportions(axis=(1, 2))
         np.testing.assert_almost_equal(actual, expected)
 
     def test_ca_x_single_cat_col_margins(test):
         cube = CrunchCube(FIXT_CA_X_SINGLE_CAT)
-        expected = np.array([25, 28, 23])
+        expected = np.array([
+            [25],
+            [28],
+            [23],
+        ])
         # Axis equals to 1, because col direction in 3D cube is 1 (and not 0).
         # It operates on the 0th dimension of each slice (which is 1st
         # dimension of the cube).

@@ -649,8 +649,9 @@ class CrunchCube(object):
         elif axis == 2:
             margin = margin[:, :, np.newaxis]
 
-        array = self.as_array(
-            include_missing=include_missing, weighted=weighted,
+        array = self._as_array(
+            include_missing=include_missing,
+            weighted=weighted,
             adjusted=adjusted,
             include_transforms_for_dims=include_transforms_for_dims,
             prune=prune,
@@ -663,7 +664,7 @@ class CrunchCube(object):
                 len(getattr(margin, 'shape', [])) == 1):
             margin = margin[:, np.newaxis, np.newaxis]
 
-        return array / margin
+        return self._fix_shape(array / margin)
 
     # Properties
 
