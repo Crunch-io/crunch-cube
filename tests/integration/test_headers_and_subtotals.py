@@ -10,6 +10,8 @@ from .fixtures import FIXT_ECON_BLAME_X_IDEOLOGY_COL_HS
 from .fixtures import FIXT_ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS
 from .fixtures import FIXT_SIMPLE_CA_HS
 from .fixtures import FIXT_ECON_US_PROBLEM_X_BIGGER_PROBLEM
+from .fixtures import FIXT_FRUIT_HS_TOP_BOTTOM
+from .fixtures import FIXT_FRUIT_X_PETS_HS_TOP_BOTTOM
 
 from cr.cube.crunch_cube import CrunchCube
 
@@ -503,4 +505,28 @@ class TestHeadersAndSubtotals(TestCase):
         # Only assert the shape of the table, as the pvals are going to be
         # rewritten soon.
         # TODO: Change assertion after merging new Z-scores.
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_fruit_hs_top_bottom_labels(self):
+        cube = CrunchCube(FIXT_FRUIT_HS_TOP_BOTTOM)
+        expected = [['TOP', 'rambutan', 'MIDDLE', 'satsuma', 'BOTTOM']]
+        actual = cube.labels(include_transforms_for_dims=[0])
+        assert actual == expected
+
+    def test_fruit_hs_top_bottom_counts(self):
+        cube = CrunchCube(FIXT_FRUIT_HS_TOP_BOTTOM)
+        expected = np.array([100, 33, 100, 67, 100])
+        actual = cube.as_array(include_transforms_for_dims=[0])
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_fruit_x_pets_hs_top_bottom_middle_counts(self):
+        cube = CrunchCube(FIXT_FRUIT_X_PETS_HS_TOP_BOTTOM)
+        expected = np.array([
+            [40, 34, 38],
+            [12, 12, 12],
+            [40, 34, 38],
+            [28, 22, 26],
+            [40, 34, 38],
+        ])
+        actual = cube.as_array(include_transforms_for_dims=[0])
         np.testing.assert_array_equal(actual, expected)
