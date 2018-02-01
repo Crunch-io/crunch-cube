@@ -290,7 +290,7 @@ class CrunchCube(object):
                                                 get_non_selected)
         res = np.array(values).reshape(shape)
         res = self._transform(res, include_transforms_for_dims, valid_indices)
-        res = self._fix_shape(res) + (1 if adjusted else 0)
+        res = res + adjusted
 
         if prune and not self.has_mr:
             return self._prune(res, include_transforms_for_dims)
