@@ -1008,7 +1008,7 @@ class CrunchCube(object):
 
         return p_values
 
-    def y_offset(self, expand=False):
+    def y_offset(self, expand=False, include_transforms_for_dims=None):
         '''Gets y offset for sheet manipulation.
 
         Args:
@@ -1022,7 +1022,9 @@ class CrunchCube(object):
         if not self.dimensions:
             return 4
 
-        first_dim_length = self.as_array().shape[0]
+        first_dim_length = self.as_array(
+            include_transforms_for_dims=include_transforms_for_dims
+        ).shape[0]
 
         # Special case of CA as a 0-ind cube
         if expand and self.dimensions[0].type == 'categorical_array':
@@ -1030,7 +1032,9 @@ class CrunchCube(object):
 
         if len(self.dimensions) <= 2 and self.dimensions[0].type:
             return first_dim_length + 4
-        return first_dim_length * (self.as_array().shape[1] + 4)
+        return first_dim_length * (self.as_array(
+            include_transforms_for_dims=include_transforms_for_dims
+        ).shape[1] + 4)
 
     def count(self, weighted=True):
         '''Get cube's count with automatic weighted/unweighted selection.'''
