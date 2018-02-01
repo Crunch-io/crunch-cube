@@ -16,10 +16,13 @@ class Dimension(object):
 
     @property
     def subtotals(self):
-        insertions_data = self._dim.get('references', {}) \
-                .get('view', {}) \
-                .get('transform', {}) \
-                .get('insertions', [])
+        view = self._dim.get('references', {}).get('view', {})
+
+        if not view:
+            # View can be both None and {}, thus the edge case.
+            return []
+
+        insertions_data = view.get('transform', {}).get('insertions', [])
         subtotals = [Subtotal(data) for data in insertions_data]
         return [subtotal for subtotal in subtotals if subtotal.is_valid]
 
