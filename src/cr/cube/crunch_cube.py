@@ -240,10 +240,8 @@ class CrunchCube(object):
                     ind_insertion = indices['anchor_ind'] + ind_offset
                 if i == 0:
                     value = sum(res[ind_subtotal_elements])
-                    # res = np.insert(res, ind_insertion + 1, value, axis=i)
                 else:
                     value = np.sum(res[:, ind_subtotal_elements], axis=1)
-                    # res = np.insert(res, ind_insertion + 1, value, axis=i)
                 insertions.append((ind_insertion, value))
 
             for j, (ind_insertion, value) in enumerate(insertions):
@@ -290,7 +288,7 @@ class CrunchCube(object):
                                                 get_non_selected)
         res = np.array(values).reshape(shape)
         res = self._transform(res, include_transforms_for_dims, valid_indices)
-        res = self._fix_shape(res) + (1 if adjusted else 0)
+        res = res + adjusted
 
         if prune and not self.has_mr:
             return self._prune(res, include_transforms_for_dims)
@@ -548,7 +546,6 @@ class CrunchCube(object):
 
     def _margin(self, axis=None, weighted=True, adjusted=False,
                 include_transforms_for_dims=None, prune=False):
-        '''Calculate cube margin.'''
 
         # MR margins are calculated differently, so they need a separate method
         # for them. A good example of this is the rcrunch functionality.
@@ -566,7 +563,14 @@ class CrunchCube(object):
         )
         array = self._inflate_dim(array, axis)
 
-        res = np.sum(array, axis)
+        if axis and not isinstance(axis, tuple) and axis > len(array.shape) - 1:
+            # Handle special case when a dimension is lost due to a
+            # single element.
+            res = array
+        elif axis == (1, 2) and len(array.shape) <= 2:
+            res = np.sum(array, 1)
+        else:
+            res = np.sum(array, axis)
 
         if prune:
             # Remove values if 0 or np.nan
@@ -642,8 +646,9 @@ class CrunchCube(object):
         elif axis == 2:
             margin = margin[:, :, np.newaxis]
 
-        array = self.as_array(
-            include_missing=include_missing, weighted=weighted,
+        array = self._as_array(
+            include_missing=include_missing,
+            weighted=weighted,
             adjusted=adjusted,
             include_transforms_for_dims=include_transforms_for_dims,
             prune=prune,
@@ -656,7 +661,7 @@ class CrunchCube(object):
                 len(getattr(margin, 'shape', [])) == 1):
             margin = margin[:, np.newaxis, np.newaxis]
 
-        return array / margin
+        return self._fix_shape(array / margin)
 
     # Properties
 
@@ -797,13 +802,14 @@ class CrunchCube(object):
                 [0, 0, 0, 0],
             ])
         '''
-        return self._as_array(
+        array = self._as_array(
             include_missing=include_missing,
             weighted=weighted,
             adjusted=adjusted,
             include_transforms_for_dims=include_transforms_for_dims,
             prune=prune,
         )
+        return self._fix_shape(array)
 
     def margin(self, axis=None, weighted=True,
                include_transforms_for_dims=None, prune=False):
