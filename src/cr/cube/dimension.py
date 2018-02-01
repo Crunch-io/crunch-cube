@@ -99,21 +99,17 @@ class Dimension(object):
     @property
     def hs_indices(self):
         '''Headers and Subtotals indices.'''
+        elms = self._elements
+
         indices = [{
-            'anchor_ind': [
-                i
-                for (i, el) in enumerate(self._elements)
-                if el['id'] == subtotal.anchor
-            ][0]
-            if (subtotal.anchor in [el['id'] for el in self._elements]) else
-            subtotal.anchor,
-            # -1,
-            'inds': [
-                i
-                for (i, el) in enumerate(self._elements)
-                if el['id'] in subtotal.args
-            ],
-        } for subtotal in self.subtotals]
+            'anchor_ind': (
+                [i for (i, el) in enumerate(elms) if el['id'] == st.anchor][0]
+                if (st.anchor in [el['id'] for el in elms]) else
+                st.anchor
+            ),
+            'inds': [i for (i, el) in enumerate(elms) if el['id'] in st.args],
+        } for st in self.subtotals]
+
         return indices
 
     @property
@@ -179,7 +175,6 @@ class Dimension(object):
             ind_insert = next((
                 i for (i, x) in enumerate(labels_with_cat_ids)
                 if x.get('id') == subtotal.anchor
-            # ), -1) + 1
             ), subtotal.anchor)
             if ind_insert == 'top':
                 ind_insert = 0

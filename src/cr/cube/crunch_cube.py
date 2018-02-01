@@ -240,10 +240,8 @@ class CrunchCube(object):
                     ind_insertion = indices['anchor_ind'] + ind_offset
                 if i == 0:
                     value = sum(res[ind_subtotal_elements])
-                    # res = np.insert(res, ind_insertion + 1, value, axis=i)
                 else:
                     value = np.sum(res[:, ind_subtotal_elements], axis=1)
-                    # res = np.insert(res, ind_insertion + 1, value, axis=i)
                 insertions.append((ind_insertion, value))
 
             for j, (ind_insertion, value) in enumerate(insertions):
@@ -548,7 +546,6 @@ class CrunchCube(object):
 
     def _margin(self, axis=None, weighted=True, adjusted=False,
                 include_transforms_for_dims=None, prune=False):
-        '''Calculate cube margin.'''
 
         # MR margins are calculated differently, so they need a separate method
         # for them. A good example of this is the rcrunch functionality.
