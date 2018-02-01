@@ -97,6 +97,18 @@ class Dimension(object):
         return self._dim['type']['elements']
 
     @property
+    def inserted_hs_indices(self):
+        tops = [st for st in self.subtotals if st.anchor == 'top']
+        bottoms = [st for st in self.subtotals if st.anchor == 'bottom']
+        middles = [st for st in self.subtotals if st.anchor not in ['top', 'bottom']]
+
+        top_inds = [i for i, _ in enumerate(tops)]
+        middle_inds = [i + m.anchor + len(tops) for i, m in enumerate(middles)]
+        bottom_inds = [i + len(tops) + len(middles) + len(self.elements())
+                       for i, _ in enumerate(bottoms)]
+        return top_inds + middle_inds + bottom_inds
+
+    @property
     def hs_indices(self):
         '''Headers and Subtotals indices.'''
         elms = self._elements
