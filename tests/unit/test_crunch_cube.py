@@ -137,13 +137,20 @@ class TestCrunchCube(TestCase):
         self.assertEqual(actual, expected)
 
     @patch('cr.cube.crunch_cube.CrunchCube.has_mr', False)
-    @patch('cr.cube.crunch_cube.CrunchCube.as_array')
+    @patch('cr.cube.crunch_cube.CrunchCube._fix_shape')
+    @patch('cr.cube.crunch_cube.CrunchCube._as_array')
     @patch('cr.cube.crunch_cube.CrunchCube.is_double_mr')
     @patch('cr.cube.crunch_cube.CrunchCube._margin')
-    def test_transform_param_propagation(self, mock_margin,
-                                         mock_is_double_mr, mock_as_array):
+    def test_transform_param_propagation(
+            self,
+            mock_margin,
+            mock_is_double_mr,
+            mock_as_array,
+            mock_fix_shape
+    ):
         mock_margin.return_value = 1  # Prevent 'proportions' from crashing
         mock_is_double_mr.return_value = False
+        mock_fix_shape.return_value = False
         mock_as_array.return_value = 0
         cube = CrunchCube({})
 

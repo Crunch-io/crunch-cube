@@ -39,7 +39,7 @@
                                             2
                                         ],
                                         "name": "Serious net",
-                                        "anchor": 0
+                                        "anchor": "top"
                                     }
                                 ]
                             },

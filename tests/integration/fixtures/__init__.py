@@ -112,10 +112,17 @@ FIXT_SINGLE_COL_MARGIN_NOT_ITERABLE = load_fixture(
     'single-col-margin-not-iterable.json'
 )
 FIXT_GENDER_PARTY_RACE = load_fixture(CUBES_DIR, 'gender-party-race.json')
-FIXT_SEL_ARR_FIRST = load_fixture(CUBES_DIR,
-                                  'selected-crosstab-array-first.json')
+FIXT_SEL_ARR_FIRST = load_fixture(
+    CUBES_DIR, 'selected-crosstab-array-first.json'
+)
 FIXT_SEL_ARR_LAST = load_fixture(CUBES_DIR, 'selected-crosstab-array-last.json')
 FIXT_MR_X_MR = load_fixture(CUBES_DIR, 'selected-by-selected.json')
-FIXT_MR_X_MR_HETEROGENOUS = load_fixture(CUBES_DIR,
-                                         'mr-by-mr-different-mrs.json')
+FIXT_MR_X_MR_HETEROGENOUS = load_fixture(
+    CUBES_DIR, 'mr-by-mr-different-mrs.json'
+)
 FIXT_SINGLE_CAT_MEANS = load_fixture(CUBES_DIR, 'means-with-single-cat.json')
+FIXT_FRUIT_HS_TOP_BOTTOM = load_fixture(CUBES_DIR, 'fruit-hs-top-bottom.json')
+FIXT_FRUIT_X_PETS_HS_TOP_BOTTOM = load_fixture(
+    CUBES_DIR, 'fruit-x-pets-hs-top-bottom.json'
+)
+FIXT_CA_X_SINGLE_CAT = load_fixture(CUBES_DIR, 'ca-x-single-cat.json')
