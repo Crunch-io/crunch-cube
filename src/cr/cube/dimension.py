@@ -16,10 +16,13 @@ class Dimension(object):
 
     @property
     def subtotals(self):
-        insertions_data = self._dim.get('references', {}) \
-                .get('view', {}) \
-                .get('transform', {}) \
-                .get('insertions', [])
+        view = self._dim.get('references', {}).get('view', {})
+
+        if not view:
+            # View can be both None and {}, thus the edge case.
+            return []
+
+        insertions_data = view.get('transform', {}).get('insertions', [])
         subtotals = [Subtotal(data) for data in insertions_data]
         return [subtotal for subtotal in subtotals if subtotal.is_valid]
 
@@ -95,6 +98,18 @@ class Dimension(object):
         if self.type == 'categorical':
             return self._dim['type']['categories']
         return self._dim['type']['elements']
+
+    @property
+    def inserted_hs_indices(self):
+        tops = [st for st in self.subtotals if st.anchor == 'top']
+        bottoms = [st for st in self.subtotals if st.anchor == 'bottom']
+        middles = [st for st in self.subtotals if st.anchor not in ['top', 'bottom']]
+
+        top_inds = [i for i, _ in enumerate(tops)]
+        middle_inds = [i + m.anchor + len(tops) for i, m in enumerate(middles)]
+        bottom_inds = [i + len(tops) + len(middles) + len(self.elements())
+                       for i, _ in enumerate(bottoms)]
+        return top_inds + middle_inds + bottom_inds
 
     @property
     def hs_indices(self):

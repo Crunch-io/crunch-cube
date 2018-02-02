@@ -78,9 +78,9 @@ class TestHeadersAndSubtotals(TestCase):
             'Neither',
             'Not sure',
             'Skipped',
-            'Test Heading with Skipped',
             'Not Asked',
             'No Data',
+            'Test Heading with Skipped',
         ]
         actual = cube.labels(include_missing=True, include_transforms_for_dims=[0])[0]
         self.assertEqual(actual, expected)
@@ -105,8 +105,9 @@ class TestHeadersAndSubtotals(TestCase):
 
     def test_subtotals_as_array_two_transforms_missing_included(self):
         cube = CrunchCube(FIXT_ECON_BLAME_WITH_HS_MISSING)
-        expected = np.array([285, 396, 681, 242, 6, 68, 3, 77, 0, 0])
-        actual = cube.as_array(include_missing=True, include_transforms_for_dims=[0])
+        expected = np.array([285, 396, 681, 242, 6, 68, 3, 0, 0, 77])
+        actual = cube.as_array(include_missing=True,
+                               include_transforms_for_dims=[0])
         np.testing.assert_array_equal(actual, expected)
 
     def test_subtotals_proportions_one_transform(self):
@@ -142,16 +143,16 @@ class TestHeadersAndSubtotals(TestCase):
     def test_subtotals_proportions_two_transforms_missing_included(self):
         cube = CrunchCube(FIXT_ECON_BLAME_WITH_HS_MISSING)
         expected = np.array([
-            .2858576,
-            .3971916,
-            .6830491,
-            .2427282,
-            .0060181,
-            .0682046,
-            .003009,
+            .28585757,
+            .39719157,
+            .68304915,
+            .24272818,
+            .00601805,
+            .06820461,
+            .00300903,
+            0,
+            0,
             .0772317,
-            0,
-            0,
         ])
         actual = cube.proportions(include_missing=True,
                                   include_transforms_for_dims=[0])
@@ -511,6 +512,12 @@ class TestHeadersAndSubtotals(TestCase):
         cube = CrunchCube(FIXT_FRUIT_HS_TOP_BOTTOM)
         expected = [['TOP', 'rambutan', 'MIDDLE', 'satsuma', 'BOTTOM']]
         actual = cube.labels(include_transforms_for_dims=[0])
+        assert actual == expected
+
+    def test_fruit_hs_top_bottom_inserted_indices(self):
+        cube = CrunchCube(FIXT_FRUIT_HS_TOP_BOTTOM)
+        expected = [[0, 2, 4]]
+        actual = cube.inserted_hs_indices
         assert actual == expected
 
     def test_fruit_hs_top_bottom_counts(self):

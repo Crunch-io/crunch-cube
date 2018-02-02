@@ -755,6 +755,11 @@ class CrunchCube(object):
             return True
         return False
 
+    @property
+    def inserted_hs_indices(self):
+        '''Get indices of the inserted H&S (for formatting purposes).'''
+        return [dim.inserted_hs_indices for dim in self.dimensions]
+
     # API Functions
 
     def labels(self, include_missing=False, include_transforms_for_dims=False):
