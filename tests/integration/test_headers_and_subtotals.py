@@ -12,6 +12,8 @@ from .fixtures import FIXT_SIMPLE_CA_HS
 from .fixtures import FIXT_ECON_US_PROBLEM_X_BIGGER_PROBLEM
 from .fixtures import FIXT_FRUIT_HS_TOP_BOTTOM
 from .fixtures import FIXT_FRUIT_X_PETS_HS_TOP_BOTTOM
+from .fixtures import FIXT_CAT_X_DATE_HS_PRUNE
+from .fixtures import FIXT_CAT_X_NUM_HS_PRUNE
 
 from cr.cube.crunch_cube import CrunchCube
 
@@ -517,7 +519,7 @@ class TestHeadersAndSubtotals(TestCase):
     def test_fruit_hs_top_bottom_inserted_indices(self):
         cube = CrunchCube(FIXT_FRUIT_HS_TOP_BOTTOM)
         expected = [[0, 2, 4]]
-        actual = cube.inserted_hs_indices
+        actual = cube.inserted_hs_indices(prune=True)
         assert actual == expected
 
     def test_fruit_hs_top_bottom_counts(self):
@@ -537,3 +539,15 @@ class TestHeadersAndSubtotals(TestCase):
         ])
         actual = cube.as_array(include_transforms_for_dims=[0])
         np.testing.assert_array_equal(actual, expected)
+
+    def test_hs_indices_pruned_cat_x_date(self):
+        cube = CrunchCube(FIXT_CAT_X_DATE_HS_PRUNE)
+        expected = [0, 3, 6]
+        actual = cube.inserted_hs_indices(prune=True)[0]
+        assert actual == expected
+
+    def test_hs_indices_pruned_cat_x_num(self):
+        cube = CrunchCube(FIXT_CAT_X_NUM_HS_PRUNE)
+        expected = [0, 1, 3]
+        actual = cube.inserted_hs_indices(prune=True)[0]
+        assert actual == expected

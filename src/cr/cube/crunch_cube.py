@@ -755,12 +755,35 @@ class CrunchCube(object):
             return True
         return False
 
-    @property
-    def inserted_hs_indices(self):
-        '''Get indices of the inserted H&S (for formatting purposes).'''
-        return [dim.inserted_hs_indices for dim in self.dimensions]
-
     # API Functions
+
+    def inserted_hs_indices(self, prune=False):
+        '''Get indices of the inserted H&S (for formatting purposes).'''
+
+        if len(self.dimensions) == 2 and prune:
+            # If pruning is applied, we need to subtract from the H&S indes
+            # the number of pruned rows (cols) that come before that index.
+            margins = [
+                self.margin(axis=i, include_transforms_for_dims=[0, 1])
+                for i in [1, 0]
+            ]
+            prune_inds_list = [
+                np.logical_or(margin == 0, np.isnan(margin))
+                for margin in margins
+            ]
+            ins_inds_list = [dim.inserted_hs_indices for dim in self.dimensions]
+            for prune_inds, ins_inds in zip(prune_inds_list, ins_inds_list):
+                # Convert to subscript
+                if not ins_inds:
+                    continue
+                prune_inds = np.arange(max(ins_inds) + 1)[prune_inds]
+                prune_inds = prune_inds[~np.in1d(prune_inds, ins_inds)]
+                for i, ind in enumerate(ins_inds):
+                    ind -= np.sum(prune_inds < ind)
+                    ins_inds[i] = ind
+            return ins_inds_list
+
+        return [dim.inserted_hs_indices for dim in self.dimensions]
 
     def labels(self, include_missing=False, include_transforms_for_dims=False):
         '''Gets labels for each cube's dimension.
