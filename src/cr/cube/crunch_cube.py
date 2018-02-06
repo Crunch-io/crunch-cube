@@ -302,21 +302,30 @@ class CrunchCube(object):
         marginal elements are either 0 or not defined (np.nan).
         '''
 
+        # Note: If the cube contains transforms (H&S), and they happen to
+        # have the marginal value 0 (or NaN), they're NOT pruned. This is
+        # done to achieve parity with how the front end client works (whaam).
+
+        inserted_inds = self.inserted_hs_indices()
+        inserted_rows = np.array(inserted_inds[0] if len(inserted_inds) else [])
+        row_margin = self.margin(include_transforms_for_dims=transforms, axis=1)
+        ind_inserted = np.zeros(row_margin.shape, dtype=bool)
+        if any(inserted_rows):
+            ind_inserted[inserted_rows] = True
+        row_prune = np.logical_or(row_margin == 0, np.isnan(row_margin))
+        row_prune = np.logical_and(row_prune, ~ind_inserted)
+
         if len(self.dimensions) == 1 or len(res.shape) == 1:
             # For 1D, margin is calculated as the row margin.
-            margin = self.margin(include_transforms_for_dims=transforms, axis=1)
-            ind_prune = np.logical_or(margin == 0, np.isnan(margin))
-            return res[~ind_prune]
+            return res[~row_prune]
 
         # Prune columns by column margin values.
         col_margin = self.margin(include_transforms_for_dims=transforms, axis=0)
-        ind_prune = np.logical_or(col_margin == 0, np.isnan(col_margin))
-        res = res[:, ~ind_prune]
+        col_prune = np.logical_or(col_margin == 0, np.isnan(col_margin))
+        res = res[:, ~col_prune]
 
         # Prune rows by row margin values.
-        row_margin = self.margin(include_transforms_for_dims=transforms, axis=1)
-        ind_prune = np.logical_or(row_margin == 0, np.isnan(row_margin))
-        return res[~ind_prune, :]
+        return res[~row_prune, :]
 
     @classmethod
     def _fix_valid_indices(cls, valid_indices, insertion_index, dim):

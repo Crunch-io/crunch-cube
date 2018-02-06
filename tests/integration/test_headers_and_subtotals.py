@@ -551,3 +551,9 @@ class TestHeadersAndSubtotals(TestCase):
         expected = [0, 1, 3]
         actual = cube.inserted_hs_indices(prune=True)[0]
         assert actual == expected
+
+    def test_cat_x_num_hs_counts_pruned(self):
+        cube = CrunchCube(FIXT_CAT_X_NUM_HS_PRUNE)
+        expected = np.array([0, 1, 1, 0])
+        actual = cube.as_array(include_transforms_for_dims=[0], prune=True)
+        np.testing.assert_array_equal(actual, expected)
