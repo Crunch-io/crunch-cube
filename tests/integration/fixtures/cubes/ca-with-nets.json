@@ -1,0 +1,959 @@
+{
+    "query": {
+        "measures": {
+            "count": {
+                "function": "cube_count",
+                "args": []
+            }
+        },
+        "dimensions": [
+            {
+                "each": 1
+            },
+            {
+                "variable": "001216"
+            }
+        ],
+        "weight": "http://127.0.0.1:8080/datasets/be20e95c608e4f62b6d13c594f087c9d/variables/081824906f3f4d59892ad4be8ba3bad9/"
+    },
+    "query_environment": {
+        "filter": []
+    },
+    "result": {
+        "dimensions": [
+            {
+                "derived": true,
+                "references": {
+                    "alias": "Q8_BBCThree",
+                    "subreferences": [
+                        {
+                            "alias": "Q8_BBCThree_1",
+                            "name": "It makes content that people want to talk about and share"
+                        },
+                        {
+                            "alias": "Q8_BBCThree_2",
+                            "name": "It speaks for young people"
+                        },
+                        {
+                            "alias": "Q8_BBCThree_3",
+                            "name": "It brings me the best new talent"
+                        },
+                        {
+                            "alias": "Q8_BBCThree_4",
+                            "name": "It makes a difference to my every day life"
+                        },
+                        {
+                            "alias": "Q8_BBCThree_5",
+                            "name": "It is easy to use"
+                        },
+                        {
+                            "alias": "Q8_BBCThree_6",
+                            "name": "I like the way it looks"
+                        },
+                        {
+                            "alias": "Q8_BBCThree_7",
+                            "name": "It is a good use of my time"
+                        }
+                    ],
+                    "description": "Please state, to what extent, if at all, you agree with the following statements regarding BBC Three. Please select one option per row.",
+                    "name": "Mission Statements - BBC Three",
+                    "view": {
+                        "show_counts": false,
+                        "transform": {
+                            "insertions": [
+                                {
+                                    "function": "subtotal",
+                                    "args": [
+                                        1,
+                                        2
+                                    ],
+                                    "anchor": 100,
+                                    "name": "Net: Agree"
+                                },
+                                {
+                                    "function": "subtotal",
+                                    "args": [
+                                        4,
+                                        5
+                                    ],
+                                    "anchor": 100,
+                                    "name": "Net: Disagree"
+                                }
+                            ]
+                        },
+                        "include_missing": false,
+                        "column_width": null
+                    }
+                },
+                "type": {
+                    "subtype": {
+                        "class": "variable"
+                    },
+                    "elements": [
+                        {
+                            "id": 1,
+                            "value": {
+                                "derived": false,
+                                "references": {
+                                    "alias": "Q8_BBCThree_1",
+                                    "name": "It makes content that people want to talk about and share"
+                                },
+                                "id": "0001",
+                                "type": {
+                                    "ordinal": false,
+                                    "class": "categorical",
+                                    "categories": [
+                                        {
+                                            "numeric_value": 2,
+                                            "selected": false,
+                                            "id": 1,
+                                            "name": "Strongly agree",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": 1,
+                                            "selected": false,
+                                            "id": 2,
+                                            "name": "Somewhat agree",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": 0,
+                                            "selected": false,
+                                            "id": 3,
+                                            "name": "Neither agree nor disagree",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": -1,
+                                            "selected": false,
+                                            "id": 4,
+                                            "name": "Somewhat disagree",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": -2,
+                                            "selected": false,
+                                            "id": 5,
+                                            "name": "Strongly disagree",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": null,
+                                            "selected": false,
+                                            "id": 98,
+                                            "name": "Don’t know",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": null,
+                                            "selected": false,
+                                            "id": 998,
+                                            "name": "skipped",
+                                            "missing": true
+                                        },
+                                        {
+                                            "numeric_value": null,
+                                            "selected": false,
+                                            "id": 999,
+                                            "name": "not asked",
+                                            "missing": true
+                                        },
+                                        {
+                                            "numeric_value": null,
+                                            "selected": false,
+                                            "id": -1,
+                                            "name": "No Data",
+                                            "missing": true
+                                        }
+                                    ]
+                                }
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "derived": false,
+                                "references": {
+                                    "alias": "Q8_BBCThree_2",
+                                    "name": "It speaks for young people"
+                                },
+                                "id": "0002",
+                                "type": {
+                                    "ordinal": false,
+                                    "class": "categorical",
+                                    "categories": [
+                                        {
+                                            "numeric_value": 2,
+                                            "selected": false,
+                                            "id": 1,
+                                            "name": "Strongly agree",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": 1,
+                                            "selected": false,
+                                            "id": 2,
+                                            "name": "Somewhat agree",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": 0,
+                                            "selected": false,
+                                            "id": 3,
+                                            "name": "Neither agree nor disagree",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": -1,
+                                            "selected": false,
+                                            "id": 4,
+                                            "name": "Somewhat disagree",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": -2,
+                                            "selected": false,
+                                            "id": 5,
+                                            "name": "Strongly disagree",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": null,
+                                            "selected": false,
+                                            "id": 98,
+                                            "name": "Don’t know",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": null,
+                                            "selected": false,
+                                            "id": 998,
+                                            "name": "skipped",
+                                            "missing": true
+                                        },
+                                        {
+                                            "numeric_value": null,
+                                            "selected": false,
+                                            "id": 999,
+                                            "name": "not asked",
+                                            "missing": true
+                                        },
+                                        {
+                                            "numeric_value": null,
+                                            "selected": false,
+                                            "id": -1,
+                                            "name": "No Data",
+                                            "missing": true
+                                        }
+                                    ]
+                                }
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 3,
+                            "value": {
+                                "derived": false,
+                                "references": {
+                                    "alias": "Q8_BBCThree_3",
+                                    "name": "It brings me the best new talent"
+                                },
+                                "id": "0003",
+                                "type": {
+                                    "ordinal": false,
+                                    "class": "categorical",
+                                    "categories": [
+                                        {
+                                            "numeric_value": 2,
+                                            "selected": false,
+                                            "id": 1,
+                                            "name": "Strongly agree",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": 1,
+                                            "selected": false,
+                                            "id": 2,
+                                            "name": "Somewhat agree",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": 0,
+                                            "selected": false,
+                                            "id": 3,
+                                            "name": "Neither agree nor disagree",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": -1,
+                                            "selected": false,
+                                            "id": 4,
+                                            "name": "Somewhat disagree",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": -2,
+                                            "selected": false,
+                                            "id": 5,
+                                            "name": "Strongly disagree",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": null,
+                                            "selected": false,
+                                            "id": 98,
+                                            "name": "Don’t know",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": null,
+                                            "selected": false,
+                                            "id": 998,
+                                            "name": "skipped",
+                                            "missing": true
+                                        },
+                                        {
+                                            "numeric_value": null,
+                                            "selected": false,
+                                            "id": 999,
+                                            "name": "not asked",
+                                            "missing": true
+                                        },
+                                        {
+                                            "numeric_value": null,
+                                            "selected": false,
+                                            "id": -1,
+                                            "name": "No Data",
+                                            "missing": true
+                                        }
+                                    ]
+                                }
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 4,
+                            "value": {
+                                "derived": false,
+                                "references": {
+                                    "alias": "Q8_BBCThree_4",
+                                    "name": "It makes a difference to my every day life"
+                                },
+                                "id": "0004",
+                                "type": {
+                                    "ordinal": false,
+                                    "class": "categorical",
+                                    "categories": [
+                                        {
+                                            "numeric_value": 2,
+                                            "selected": false,
+                                            "id": 1,
+                                            "name": "Strongly agree",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": 1,
+                                            "selected": false,
+                                            "id": 2,
+                                            "name": "Somewhat agree",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": 0,
+                                            "selected": false,
+                                            "id": 3,
+                                            "name": "Neither agree nor disagree",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": -1,
+                                            "selected": false,
+                                            "id": 4,
+                                            "name": "Somewhat disagree",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": -2,
+                                            "selected": false,
+                                            "id": 5,
+                                            "name": "Strongly disagree",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": null,
+                                            "selected": false,
+                                            "id": 98,
+                                            "name": "Don’t know",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": null,
+                                            "selected": false,
+                                            "id": 998,
+                                            "name": "skipped",
+                                            "missing": true
+                                        },
+                                        {
+                                            "numeric_value": null,
+                                            "selected": false,
+                                            "id": 999,
+                                            "name": "not asked",
+                                            "missing": true
+                                        },
+                                        {
+                                            "numeric_value": null,
+                                            "selected": false,
+                                            "id": -1,
+                                            "name": "No Data",
+                                            "missing": true
+                                        }
+                                    ]
+                                }
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 5,
+                            "value": {
+                                "derived": false,
+                                "references": {
+                                    "alias": "Q8_BBCThree_5",
+                                    "name": "It is easy to use"
+                                },
+                                "id": "0005",
+                                "type": {
+                                    "ordinal": false,
+                                    "class": "categorical",
+                                    "categories": [
+                                        {
+                                            "numeric_value": 2,
+                                            "selected": false,
+                                            "id": 1,
+                                            "name": "Strongly agree",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": 1,
+                                            "selected": false,
+                                            "id": 2,
+                                            "name": "Somewhat agree",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": 0,
+                                            "selected": false,
+                                            "id": 3,
+                                            "name": "Neither agree nor disagree",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": -1,
+                                            "selected": false,
+                                            "id": 4,
+                                            "name": "Somewhat disagree",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": -2,
+                                            "selected": false,
+                                            "id": 5,
+                                            "name": "Strongly disagree",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": null,
+                                            "selected": false,
+                                            "id": 98,
+                                            "name": "Don’t know",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": null,
+                                            "selected": false,
+                                            "id": 998,
+                                            "name": "skipped",
+                                            "missing": true
+                                        },
+                                        {
+                                            "numeric_value": null,
+                                            "selected": false,
+                                            "id": 999,
+                                            "name": "not asked",
+                                            "missing": true
+                                        },
+                                        {
+                                            "numeric_value": null,
+                                            "selected": false,
+                                            "id": -1,
+                                            "name": "No Data",
+                                            "missing": true
+                                        }
+                                    ]
+                                }
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 6,
+                            "value": {
+                                "derived": false,
+                                "references": {
+                                    "alias": "Q8_BBCThree_6",
+                                    "name": "I like the way it looks"
+                                },
+                                "id": "0006",
+                                "type": {
+                                    "ordinal": false,
+                                    "class": "categorical",
+                                    "categories": [
+                                        {
+                                            "numeric_value": 2,
+                                            "selected": false,
+                                            "id": 1,
+                                            "name": "Strongly agree",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": 1,
+                                            "selected": false,
+                                            "id": 2,
+                                            "name": "Somewhat agree",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": 0,
+                                            "selected": false,
+                                            "id": 3,
+                                            "name": "Neither agree nor disagree",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": -1,
+                                            "selected": false,
+                                            "id": 4,
+                                            "name": "Somewhat disagree",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": -2,
+                                            "selected": false,
+                                            "id": 5,
+                                            "name": "Strongly disagree",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": null,
+                                            "selected": false,
+                                            "id": 98,
+                                            "name": "Don’t know",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": null,
+                                            "selected": false,
+                                            "id": 998,
+                                            "name": "skipped",
+                                            "missing": true
+                                        },
+                                        {
+                                            "numeric_value": null,
+                                            "selected": false,
+                                            "id": 999,
+                                            "name": "not asked",
+                                            "missing": true
+                                        },
+                                        {
+                                            "numeric_value": null,
+                                            "selected": false,
+                                            "id": -1,
+                                            "name": "No Data",
+                                            "missing": true
+                                        }
+                                    ]
+                                }
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 7,
+                            "value": {
+                                "derived": false,
+                                "references": {
+                                    "alias": "Q8_BBCThree_7",
+                                    "name": "It is a good use of my time"
+                                },
+                                "id": "0007",
+                                "type": {
+                                    "ordinal": false,
+                                    "class": "categorical",
+                                    "categories": [
+                                        {
+                                            "numeric_value": 2,
+                                            "selected": false,
+                                            "id": 1,
+                                            "name": "Strongly agree",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": 1,
+                                            "selected": false,
+                                            "id": 2,
+                                            "name": "Somewhat agree",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": 0,
+                                            "selected": false,
+                                            "id": 3,
+                                            "name": "Neither agree nor disagree",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": -1,
+                                            "selected": false,
+                                            "id": 4,
+                                            "name": "Somewhat disagree",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": -2,
+                                            "selected": false,
+                                            "id": 5,
+                                            "name": "Strongly disagree",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": null,
+                                            "selected": false,
+                                            "id": 98,
+                                            "name": "Don’t know",
+                                            "missing": false
+                                        },
+                                        {
+                                            "numeric_value": null,
+                                            "selected": false,
+                                            "id": 998,
+                                            "name": "skipped",
+                                            "missing": true
+                                        },
+                                        {
+                                            "numeric_value": null,
+                                            "selected": false,
+                                            "id": 999,
+                                            "name": "not asked",
+                                            "missing": true
+                                        },
+                                        {
+                                            "numeric_value": null,
+                                            "selected": false,
+                                            "id": -1,
+                                            "name": "No Data",
+                                            "missing": true
+                                        }
+                                    ]
+                                }
+                            },
+                            "missing": false
+                        }
+                    ],
+                    "class": "enum"
+                }
+            },
+            {
+                "derived": false,
+                "references": {
+                    "alias": "Q8_BBCThree",
+                    "view": {
+                        "show_counts": false,
+                        "transform": {
+                            "insertions": [
+                                {
+                                    "function": "subtotal",
+                                    "args": [
+                                        1,
+                                        2
+                                    ],
+                                    "anchor": 100,
+                                    "name": "Net: Agree"
+                                },
+                                {
+                                    "function": "subtotal",
+                                    "args": [
+                                        4,
+                                        5
+                                    ],
+                                    "anchor": 100,
+                                    "name": "Net: Disagree"
+                                }
+                            ]
+                        },
+                        "include_missing": false,
+                        "column_width": null
+                    },
+                    "description": "Please state, to what extent, if at all, you agree with the following statements regarding BBC Three. Please select one option per row.",
+                    "name": "Mission Statements - BBC Three",
+                    "subreferences": [
+                        {
+                            "alias": "Q8_BBCThree_1",
+                            "name": "It makes content that people want to talk about and share"
+                        },
+                        {
+                            "alias": "Q8_BBCThree_2",
+                            "name": "It speaks for young people"
+                        },
+                        {
+                            "alias": "Q8_BBCThree_3",
+                            "name": "It brings me the best new talent"
+                        },
+                        {
+                            "alias": "Q8_BBCThree_4",
+                            "name": "It makes a difference to my every day life"
+                        },
+                        {
+                            "alias": "Q8_BBCThree_5",
+                            "name": "It is easy to use"
+                        },
+                        {
+                            "alias": "Q8_BBCThree_6",
+                            "name": "I like the way it looks"
+                        },
+                        {
+                            "alias": "Q8_BBCThree_7",
+                            "name": "It is a good use of my time"
+                        }
+                    ]
+                },
+                "type": {
+                    "ordinal": false,
+                    "subvariables": [
+                        "0001",
+                        "0002",
+                        "0003",
+                        "0004",
+                        "0005",
+                        "0006",
+                        "0007"
+                    ],
+                    "class": "categorical",
+                    "categories": [
+                        {
+                            "numeric_value": 2,
+                            "selected": false,
+                            "id": 1,
+                            "name": "Strongly agree",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 1,
+                            "selected": false,
+                            "id": 2,
+                            "name": "Somewhat agree",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 0,
+                            "selected": false,
+                            "id": 3,
+                            "name": "Neither agree nor disagree",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": -1,
+                            "selected": false,
+                            "id": 4,
+                            "name": "Somewhat disagree",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": -2,
+                            "selected": false,
+                            "id": 5,
+                            "name": "Strongly disagree",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": null,
+                            "selected": false,
+                            "id": 98,
+                            "name": "Don’t know",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": null,
+                            "selected": false,
+                            "id": 998,
+                            "name": "skipped",
+                            "missing": true
+                        },
+                        {
+                            "numeric_value": null,
+                            "selected": false,
+                            "id": 999,
+                            "name": "not asked",
+                            "missing": true
+                        },
+                        {
+                            "numeric_value": null,
+                            "selected": false,
+                            "id": -1,
+                            "name": "No Data",
+                            "missing": true
+                        }
+                    ]
+                }
+            }
+        ],
+        "missing": 17179,
+        "measures": {
+            "count": {
+                "data": [
+                    289.7689082364068,
+                    710.0228210740539,
+                    697.345954747196,
+                    173.449799266376,
+                    63.781086159511275,
+                    209.77918315874672,
+                    0,
+                    17224.847747357653,
+                    0,
+                    315.16982657882187,
+                    668.3415006892083,
+                    671.937843573082,
+                    158.38261590573592,
+                    48.18480114784169,
+                    282.1311647476012,
+                    0,
+                    17224.847747357653,
+                    0,
+                    212.44626153851542,
+                    604.6912755358225,
+                    772.801468556275,
+                    238.78279523984298,
+                    78.49711324300881,
+                    236.92883852882662,
+                    0,
+                    17224.847747357653,
+                    0,
+                    135.26444614107984,
+                    300.3798091938073,
+                    718.1746230435031,
+                    479.52759751325,
+                    366.26106510657877,
+                    144.54021164407146,
+                    0,
+                    17224.847747357653,
+                    0,
+                    523.7147775649399,
+                    917.7050550471059,
+                    440.14889123294563,
+                    71.17373189178898,
+                    30.706924117080696,
+                    160.69837278842843,
+                    0,
+                    17224.847747357653,
+                    0,
+                    353.54807128716817,
+                    784.9454640087222,
+                    701.8191879886684,
+                    98.95195639942015,
+                    42.30520013971288,
+                    162.57787281859834,
+                    0,
+                    17224.847747357653,
+                    0,
+                    250.65161681045257,
+                    710.568706052007,
+                    748.0166595675471,
+                    205.49479286610725,
+                    86.34683147124836,
+                    143.06914587492815,
+                    0,
+                    17224.847747357653,
+                    0
+                ],
+                "n_missing": 17179,
+                "metadata": {
+                    "references": {},
+                    "derived": true,
+                    "type": {
+                        "integer": false,
+                        "missing_rules": {},
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "class": "numeric"
+                    }
+                }
+            }
+        },
+        "element": "crunch:cube",
+        "counts": [
+            304,
+            732,
+            701,
+            178,
+            64,
+            211,
+            0,
+            17179,
+            0,
+            333,
+            692,
+            672,
+            162,
+            49,
+            282,
+            0,
+            17179,
+            0,
+            214,
+            621,
+            783,
+            251,
+            80,
+            241,
+            0,
+            17179,
+            0,
+            137,
+            307,
+            724,
+            498,
+            378,
+            146,
+            0,
+            17179,
+            0,
+            543,
+            943,
+            439,
+            72,
+            30,
+            163,
+            0,
+            17179,
+            0,
+            364,
+            813,
+            706,
+            100,
+            41,
+            166,
+            0,
+            17179,
+            0,
+            256,
+            734,
+            751,
+            216,
+            87,
+            146,
+            0,
+            17179,
+            0
+        ],
+        "n": 19369
+    }
+}
