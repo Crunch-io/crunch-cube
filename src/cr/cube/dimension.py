@@ -111,19 +111,35 @@ class Dimension(object):
                        for i, _ in enumerate(bottoms)]
         return top_inds + middle_inds + bottom_inds
 
+    def _transform_anchor(self, subtotal):
+
+        if subtotal.anchor in ['top', 'bottom']:
+            return subtotal.anchor
+
+        element_ids = [el['id'] for el in self._elements]
+        if subtotal.anchor not in element_ids:
+            # In case of numeric value which is not a category ID, return
+            # default value 'bottom'
+            return 'bottom'
+
+        contiguous_anchors = [
+            i for (i, id_) in enumerate(element_ids)
+            if id_ == subtotal.anchor
+        ]
+        # In case of more matches, return the first one (although there
+        # shouldn't be any)
+        return contiguous_anchors[0]
+
     @property
     def hs_indices(self):
         '''Headers and Subtotals indices.'''
-        elms = self._elements
+        elements = self._elements
 
         indices = [{
-            'anchor_ind': (
-                [i for (i, el) in enumerate(elms) if el['id'] == st.anchor][0]
-                if (st.anchor in [el['id'] for el in elms]) else
-                st.anchor
-            ),
-            'inds': [i for (i, el) in enumerate(elms) if el['id'] in st.args],
-        } for st in self.subtotals]
+            'anchor_ind': self._transform_anchor(subtotal),
+            'inds': [i for (i, el) in enumerate(elements)
+                     if el['id'] in subtotal.args],
+        } for subtotal in self.subtotals]
 
         return indices
 

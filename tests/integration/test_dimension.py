@@ -1,10 +1,10 @@
 from unittest import TestCase
 
-from .fixtures import (
-    FIXT_ECON_BLAME_WITH_HS,
-    FIXT_ECON_BLAME_WITH_HS_MISSING,
-    FIXT_ECON_BLAME_X_IDEOLOGY_ROW_HS,
-)
+from .fixtures import FIXT_ECON_BLAME_WITH_HS
+from .fixtures import FIXT_ECON_BLAME_WITH_HS_MISSING
+from .fixtures import FIXT_ECON_BLAME_X_IDEOLOGY_ROW_HS
+from .fixtures import FIXT_CA_WITH_NETS
+
 from cr.cube.crunch_cube import CrunchCube
 
 
@@ -61,3 +61,15 @@ class TestDimension(TestCase):
         expected = True
         actual = dimension.has_transforms
         self.assertEqual(actual, expected)
+
+    def test_hs_indices_with_bad_data(self):
+        cube = CrunchCube(FIXT_CA_WITH_NETS)
+        expected = ['bottom', 'bottom']
+
+        ca_dim = cube.dimensions[0]
+        actual = [entry['anchor_ind'] for entry in ca_dim.hs_indices]
+        assert actual == expected
+
+        cat_dim = cube.dimensions[1]
+        actual = [entry['anchor_ind'] for entry in cat_dim.hs_indices]
+        assert actual == expected
