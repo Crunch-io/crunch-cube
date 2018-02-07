@@ -14,6 +14,8 @@ from scipy.stats.contingency import expected_freq
 
 from .dimension import Dimension
 
+np.seterr(divide='ignore', invalid='ignore')
+
 
 class CrunchCube(object):
     '''Implementation of the CrunchCube API class.
