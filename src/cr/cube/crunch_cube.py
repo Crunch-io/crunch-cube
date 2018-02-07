@@ -213,6 +213,43 @@ class CrunchCube(object):
                  for dim in all_dimensions]
         return np.array(values).reshape(shape)
 
+    @staticmethod
+    def _insertions(result, dimension, dimension_index):
+        insertions = []
+
+        for indices in dimension.hs_indices:
+            ind_subtotal_elements = np.array(indices['inds'])
+            if indices['anchor_ind'] == 'top':
+                ind_insertion = -1
+            elif indices['anchor_ind'] == 'bottom':
+                ind_insertion = result.shape[dimension_index] - 1
+            else:
+                ind_insertion = indices['anchor_ind']
+            if dimension_index == 0:
+                value = sum(result[ind_subtotal_elements])
+            else:
+                value = np.sum(result[:, ind_subtotal_elements], axis=1)
+            insertions.append((ind_insertion, value))
+
+        return insertions
+
+    def _update_result(self, result, insertions, dimension_index,
+                       valid_indices):
+        '''Actually insert subtotals into resulting ndarray.'''
+        for j, (ind_insertion, value) in enumerate(insertions):
+            if dimension_index == 0:
+                result = np.insert(
+                    result, ind_insertion + j + 1, value, axis=dimension_index
+                )
+            else:
+                result = np.insert(
+                    result, ind_insertion + j + 1, value, axis=dimension_index
+                )
+            valid_indices = self._fix_valid_indices(
+                valid_indices, ind_insertion + j, dimension_index
+            )
+        return result, valid_indices
+
     def _transform(self, res, include_transforms_for_dims, valid_indices):
         '''Transform the shape of the resulting ndarray.'''
 
@@ -222,42 +259,15 @@ class CrunchCube(object):
             return res[np.ix_(*valid_indices)]
 
         for (i, dim) in enumerate(all_dimensions):
-
             # Check if transformations can/need to be performed
             transform = (dim.has_transforms and
                          i in include_transforms_for_dims)
             if not transform or dim.type == 'categorical_array':
                 continue
-
             # Perform transformations
-            ind_offset = 0
-            insertions = []
-            for indices in dim.hs_indices:
-                ind_subtotal_elements = np.array(indices['inds'])
-                if indices['anchor_ind'] == 'top':
-                    ind_insertion = -1
-                elif indices['anchor_ind'] == 'bottom':
-                    ind_insertion = res.shape[i] - 1
-                else:
-                    ind_insertion = indices['anchor_ind'] + ind_offset
-                if i == 0:
-                    value = sum(res[ind_subtotal_elements])
-                else:
-                    value = np.sum(res[:, ind_subtotal_elements], axis=1)
-                insertions.append((ind_insertion, value))
-
-            for j, (ind_insertion, value) in enumerate(insertions):
-                if i == 0:
-                    res = np.insert(res, ind_insertion + j + 1, value,
-                                    axis=i)
-                else:
-                    res = np.insert(res, ind_insertion + j + 1, value,
-                                    axis=i)
-
-                valid_indices = self._fix_valid_indices(
-                    valid_indices, ind_insertion + j, i
-                )
-
+            insertions = self._insertions(res, dim, i)
+            res, valid_indices = self._update_result(res, insertions, i,
+                                                     valid_indices)
         return res[np.ix_(*valid_indices)]
 
     def _as_array(self, include_missing=False, get_non_selected=False,
@@ -452,19 +462,6 @@ class CrunchCube(object):
             non_selected = values[:, ind_sel, :, ind_non]
 
         return selected / (selected + non_selected)
-
-    @property
-    def mr_dim_ind(self):
-        '''Indices of MR dimensions.'''
-        for i, dim in enumerate(self.dimensions):
-            if dim.type == 'multiple_response':
-                return i
-        return None
-
-    @property
-    def valid_indices(self):
-        '''Valid indices of all dimensions (exclude missing).'''
-        return [dim.valid_indices(False) for dim in self.dimensions]
 
     def _double_mr_margin(self, axis, weighted):
         '''Margin for MR x MR cube (they're specific, thus separate method).'''
@@ -667,6 +664,38 @@ class CrunchCube(object):
         return self._fix_shape(array / margin)
 
     # Properties
+
+    @property
+    def mr_dim_ind(self):
+        '''Indices of MR dimensions.'''
+        for i, dim in enumerate(self.dimensions):
+            if dim.type == 'multiple_response':
+                return i
+        return None
+
+    @property
+    def standardized_residuals(self):
+        '''Calculate residuals based on Chi-squared.'''
+
+        if self.has_mr:
+            return self._mr_std_residuals
+
+        counts = self.as_array()
+        total = self.margin()
+        colsum = self.margin(axis=0) / total
+        rowsum = self.margin(axis=1) / total
+        expected_counts = expected_freq(counts)
+        residuals = counts - expected_counts
+        variance = (
+            expected_counts *
+            ((1 - rowsum[:, np.newaxis]) * (1 - colsum))
+        )
+        return residuals / np.sqrt(variance)
+
+    @property
+    def valid_indices(self):
+        '''Valid indices of all dimensions (exclude missing).'''
+        return [dim.valid_indices(False) for dim in self.dimensions]
 
     @property
     def _mr_std_residuals(self):
@@ -1143,22 +1172,3 @@ class CrunchCube(object):
             margin = margin[:, np.newaxis]
 
         return props / margin
-
-    @property
-    def standardized_residuals(self):
-        '''Calculate residuals based on Chi-squared.'''
-
-        if self.has_mr:
-            return self._mr_std_residuals
-
-        counts = self.as_array()
-        total = self.margin()
-        colsum = self.margin(axis=0) / total
-        rowsum = self.margin(axis=1) / total
-        expected_counts = expected_freq(counts)
-        residuals = counts - expected_counts
-        variance = (
-            expected_counts *
-            ((1 - rowsum[:, np.newaxis]) * (1 - colsum))
-        )
-        return residuals / np.sqrt(variance)
