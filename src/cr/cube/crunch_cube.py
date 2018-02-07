@@ -764,6 +764,18 @@ class CrunchCube(object):
             return True
         return False
 
+    @staticmethod
+    def _adjust_inserted_indices(inserted_indices_list, prune_indices_list):
+        '''Adjust inserted indices, if there are pruned elements.'''
+        pruned_and_inserted = zip(prune_indices_list, inserted_indices_list)
+        for prune_inds, inserted_inds in pruned_and_inserted:
+            # Only prune indices if they're not H&S (inserted)
+            prune_inds = prune_inds[~np.in1d(prune_inds, inserted_inds)]
+            for i, ind in enumerate(inserted_inds):
+                ind -= np.sum(prune_inds < ind)
+                inserted_inds[i] = ind
+        return inserted_indices_list
+
     # API Functions
 
     def inserted_hs_indices(self, prune=False):
@@ -776,21 +788,18 @@ class CrunchCube(object):
                 self.margin(axis=i, include_transforms_for_dims=[0, 1])
                 for i in [1, 0]
             ]
-            prune_inds_list = [
-                np.logical_or(margin == 0, np.isnan(margin))
+            # Obtain prune indices as subscripts
+            prune_indices_list = [
+                np.arange(len(margin))[
+                    np.logical_or(margin == 0, np.isnan(margin))
+                ]
                 for margin in margins
             ]
-            ins_inds_list = [dim.inserted_hs_indices for dim in self.dimensions]
-            for prune_inds, ins_inds in zip(prune_inds_list, ins_inds_list):
-                # Convert to subscript
-                if not ins_inds:
-                    continue
-                prune_inds = np.arange(max(ins_inds) + 1)[prune_inds]
-                prune_inds = prune_inds[~np.in1d(prune_inds, ins_inds)]
-                for i, ind in enumerate(ins_inds):
-                    ind -= np.sum(prune_inds < ind)
-                    ins_inds[i] = ind
-            return ins_inds_list
+            inserted_indices_list = [
+                dim.inserted_hs_indices for dim in self.dimensions
+            ]
+            return self._adjust_inserted_indices(inserted_indices_list,
+                                                 prune_indices_list)
 
         return [dim.inserted_hs_indices for dim in self.dimensions]
 
