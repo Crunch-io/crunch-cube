@@ -1,6 +1,8 @@
 from unittest import TestCase
-
+from mock import patch
 import numpy as np
+
+from cr.cube.crunch_cube import CrunchCube
 
 from .fixtures import FIXT_CAT_X_CAT
 from .fixtures import FIXT_CAT_X_CAT_GERMAN_WEIGHTED
@@ -24,14 +26,11 @@ from .fixtures import FIXT_SELECTED_CROSSTAB_4
 from .fixtures import FIXT_PETS_X_PETS
 from .fixtures import FIXT_PETS_X_FRUIT
 from .fixtures import FIXT_PETS_ARRAY
-from .fixtures import FIXT_ECON_BLAME_WITH_HS
-from .fixtures import FIXT_ECON_BLAME_WITH_HS_MISSING
 from .fixtures import FIXT_FRUIT_X_PETS
 from .fixtures import FIXT_FRUIT_X_PETS_ARRAY
 from .fixtures import FIXT_GENDER_PARTY_RACE
 from .fixtures import FIXT_SINGLE_COL_MARGIN_NOT_ITERABLE
 from .fixtures import FIXT_BINNED
-from .fixtures import FIXT_ECON_US_PROBLEM_X_BIGGER_PROBLEM
 from .fixtures import FIXT_CAT_X_CAT_WITH_EMPTY_COLS
 from .fixtures import FIXT_ARRAY_X_MR
 from .fixtures import FIXT_PROFILES_PERCENTS
@@ -44,8 +43,7 @@ from .fixtures import FIXT_SELECTED_3_WAY_2
 from .fixtures import FIXT_SELECTED_3_WAY
 from .fixtures import FIXT_SINGLE_CAT_MEANS
 from .fixtures import FIXT_CA_X_SINGLE_CAT
-
-from cr.cube.crunch_cube import CrunchCube
+from .fixtures import FIXT_CA_SUBVAR_X_CAT_HS
 
 
 class TestCrunchCube(TestCase):
@@ -1396,8 +1394,8 @@ class TestCrunchCube(TestCase):
     def test_cat_x_mr_index_by_row(self):
         cube = CrunchCube(FIXT_CAT_X_MR_SIMPLE)
         expected = np.array([
-            [.8571429,  1.1152941, .9610984],
-            [1.0769231, .9466231,  1.019037],
+            [.8571429, 1.1152941, .9610984],
+            [1.0769231, .9466231, 1.019037],
         ])
         actual = cube.index(axis=1)
         np.testing.assert_almost_equal(actual, expected)
@@ -1405,8 +1403,8 @@ class TestCrunchCube(TestCase):
     def test_cat_x_mr_index_by_cell(self):
         cube = CrunchCube(FIXT_CAT_X_MR_SIMPLE)
         expected = np.array([
-            [.8571429,  1.1152941, .9610984],
-            [1.0769231, .9466231,  1.019037],
+            [.8571429, 1.1152941, .9610984],
+            [1.0769231, .9466231, 1.019037],
         ])
         actual = cube.index(axis=None)
         np.testing.assert_almost_equal(actual, expected)
@@ -1417,12 +1415,18 @@ class TestCrunchCube(TestCase):
         actual = cube.index(axis=0)
         np.testing.assert_array_equal(actual, expected)
 
+    @patch('cr.cube.crunch_cube.CrunchCube.mr_dim_ind', 2)
+    def test_cat_x_mr_index_bad_direction(self):
+        cube = CrunchCube(FIXT_CAT_X_MR_SIMPLE)
+        with self.assertRaises(ValueError):
+            cube.index(axis=1)
+
     def test_mr_x_cat_index_by_col(self):
         cube = CrunchCube(FIXT_PETS_X_FRUIT)
         expected = np.array([
-            [.8571429,  1.0769231],
+            [.8571429, 1.0769231],
             [1.1152941, .9466231],
-            [.9610984,  1.019037],
+            [.9610984, 1.019037],
         ])
         actual = cube.index(axis=0)
         np.testing.assert_almost_equal(actual, expected)
@@ -1889,4 +1893,14 @@ class TestCrunchCube(TestCase):
         expected = np.array([25, 28, 23])
         # Axis equals to (1, 2), because the total is calculated for each slice.
         actual = cube.margin(axis=(1, 2))
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_ca_subvar_x_cat_hs_counts_prune(test):
+        cube = CrunchCube(FIXT_CA_SUBVAR_X_CAT_HS)
+        expected = np.array([
+            [3, 3, 0, 0, 6],
+            [1, 3, 2, 0, 4],
+            [0, 2, 1, 3, 2],
+        ])
+        actual = cube.as_array(include_transforms_for_dims=[0, 1], prune=True)
         np.testing.assert_array_equal(actual, expected)

@@ -14,6 +14,8 @@ from scipy.stats.contingency import expected_freq
 
 from .dimension import Dimension
 
+np.seterr(divide='ignore', invalid='ignore')
+
 
 class CrunchCube(object):
     '''Implementation of the CrunchCube API class.
@@ -211,6 +213,43 @@ class CrunchCube(object):
                  for dim in all_dimensions]
         return np.array(values).reshape(shape)
 
+    @staticmethod
+    def _insertions(result, dimension, dimension_index):
+        insertions = []
+
+        for indices in dimension.hs_indices:
+            ind_subtotal_elements = np.array(indices['inds'])
+            if indices['anchor_ind'] == 'top':
+                ind_insertion = -1
+            elif indices['anchor_ind'] == 'bottom':
+                ind_insertion = result.shape[dimension_index] - 1
+            else:
+                ind_insertion = indices['anchor_ind']
+            if dimension_index == 0:
+                value = sum(result[ind_subtotal_elements])
+            else:
+                value = np.sum(result[:, ind_subtotal_elements], axis=1)
+            insertions.append((ind_insertion, value))
+
+        return insertions
+
+    def _update_result(self, result, insertions, dimension_index,
+                       valid_indices):
+        '''Actually insert subtotals into resulting ndarray.'''
+        for j, (ind_insertion, value) in enumerate(insertions):
+            if dimension_index == 0:
+                result = np.insert(
+                    result, ind_insertion + j + 1, value, axis=dimension_index
+                )
+            else:
+                result = np.insert(
+                    result, ind_insertion + j + 1, value, axis=dimension_index
+                )
+            valid_indices = self._fix_valid_indices(
+                valid_indices, ind_insertion + j, dimension_index
+            )
+        return result, valid_indices
+
     def _transform(self, res, include_transforms_for_dims, valid_indices):
         '''Transform the shape of the resulting ndarray.'''
 
@@ -220,42 +259,15 @@ class CrunchCube(object):
             return res[np.ix_(*valid_indices)]
 
         for (i, dim) in enumerate(all_dimensions):
-
             # Check if transformations can/need to be performed
             transform = (dim.has_transforms and
                          i in include_transforms_for_dims)
             if not transform or dim.type == 'categorical_array':
                 continue
-
             # Perform transformations
-            ind_offset = 0
-            insertions = []
-            for indices in dim.hs_indices:
-                ind_subtotal_elements = np.array(indices['inds'])
-                if indices['anchor_ind'] == 'top':
-                    ind_insertion = -1
-                elif indices['anchor_ind'] == 'bottom':
-                    ind_insertion = res.shape[i] - 1
-                else:
-                    ind_insertion = indices['anchor_ind'] + ind_offset
-                if i == 0:
-                    value = sum(res[ind_subtotal_elements])
-                else:
-                    value = np.sum(res[:, ind_subtotal_elements], axis=1)
-                insertions.append((ind_insertion, value))
-
-            for j, (ind_insertion, value) in enumerate(insertions):
-                if i == 0:
-                    res = np.insert(res, ind_insertion + j + 1, value,
-                                    axis=i)
-                else:
-                    res = np.insert(res, ind_insertion + j + 1, value,
-                                    axis=i)
-
-                valid_indices = self._fix_valid_indices(
-                    valid_indices, ind_insertion + j, i
-                )
-
+            insertions = self._insertions(res, dim, i)
+            res, valid_indices = self._update_result(res, insertions, i,
+                                                     valid_indices)
         return res[np.ix_(*valid_indices)]
 
     def _as_array(self, include_missing=False, get_non_selected=False,
@@ -302,21 +314,30 @@ class CrunchCube(object):
         marginal elements are either 0 or not defined (np.nan).
         '''
 
+        # Note: If the cube contains transforms (H&S), and they happen to
+        # have the marginal value 0 (or NaN), they're NOT pruned. This is
+        # done to achieve parity with how the front end client works (whaam).
+
+        inserted_inds = self.inserted_hs_indices()
+        inserted_rows = np.array(inserted_inds[0] if len(inserted_inds) else [])
+        row_margin = self.margin(include_transforms_for_dims=transforms, axis=1)
+        ind_inserted = np.zeros(row_margin.shape, dtype=bool)
+        if any(inserted_rows):
+            ind_inserted[inserted_rows] = True
+        row_prune = np.logical_or(row_margin == 0, np.isnan(row_margin))
+        row_prune = np.logical_and(row_prune, ~ind_inserted)
+
         if len(self.dimensions) == 1 or len(res.shape) == 1:
             # For 1D, margin is calculated as the row margin.
-            margin = self.margin(include_transforms_for_dims=transforms, axis=1)
-            ind_prune = np.logical_or(margin == 0, np.isnan(margin))
-            return res[~ind_prune]
+            return res[~row_prune]
 
         # Prune columns by column margin values.
         col_margin = self.margin(include_transforms_for_dims=transforms, axis=0)
-        ind_prune = np.logical_or(col_margin == 0, np.isnan(col_margin))
-        res = res[:, ~ind_prune]
+        col_prune = np.logical_or(col_margin == 0, np.isnan(col_margin))
+        res = res[:, ~col_prune]
 
         # Prune rows by row margin values.
-        row_margin = self.margin(include_transforms_for_dims=transforms, axis=1)
-        ind_prune = np.logical_or(row_margin == 0, np.isnan(row_margin))
-        return res[~ind_prune, :]
+        return res[~row_prune, :]
 
     @classmethod
     def _fix_valid_indices(cls, valid_indices, insertion_index, dim):
@@ -442,19 +463,6 @@ class CrunchCube(object):
 
         return selected / (selected + non_selected)
 
-    @property
-    def mr_dim_ind(self):
-        '''Indices of MR dimensions.'''
-        for i, dim in enumerate(self.dimensions):
-            if dim.type == 'multiple_response':
-                return i
-        return None
-
-    @property
-    def valid_indices(self):
-        '''Valid indices of all dimensions (exclude missing).'''
-        return [dim.valid_indices(False) for dim in self.dimensions]
-
     def _double_mr_margin(self, axis, weighted):
         '''Margin for MR x MR cube (they're specific, thus separate method).'''
         table = self._get_table(weighted)
@@ -562,15 +570,7 @@ class CrunchCube(object):
             include_transforms_for_dims=transform_dims, margin=True,
         )
         array = self._inflate_dim(array, axis)
-
-        if axis and not isinstance(axis, tuple) and axis > len(array.shape) - 1:
-            # Handle special case when a dimension is lost due to a
-            # single element.
-            res = array
-        elif axis == (1, 2) and len(array.shape) <= 2:
-            res = np.sum(array, 1)
-        else:
-            res = np.sum(array, axis)
+        res = np.sum(array, axis)
 
         if prune:
             # Remove values if 0 or np.nan
@@ -666,6 +666,38 @@ class CrunchCube(object):
     # Properties
 
     @property
+    def mr_dim_ind(self):
+        '''Indices of MR dimensions.'''
+        for i, dim in enumerate(self.dimensions):
+            if dim.type == 'multiple_response':
+                return i
+        return None
+
+    @property
+    def standardized_residuals(self):
+        '''Calculate residuals based on Chi-squared.'''
+
+        if self.has_mr:
+            return self._mr_std_residuals
+
+        counts = self.as_array()
+        total = self.margin()
+        colsum = self.margin(axis=0) / total
+        rowsum = self.margin(axis=1) / total
+        expected_counts = expected_freq(counts)
+        residuals = counts - expected_counts
+        variance = (
+            expected_counts *
+            ((1 - rowsum[:, np.newaxis]) * (1 - colsum))
+        )
+        return residuals / np.sqrt(variance)
+
+    @property
+    def valid_indices(self):
+        '''Valid indices of all dimensions (exclude missing).'''
+        return [dim.valid_indices(False) for dim in self.dimensions]
+
+    @property
     def _mr_std_residuals(self):
         counts = self.as_array()
         total = self.margin()
@@ -755,12 +787,44 @@ class CrunchCube(object):
             return True
         return False
 
-    @property
-    def inserted_hs_indices(self):
-        '''Get indices of the inserted H&S (for formatting purposes).'''
-        return [dim.inserted_hs_indices for dim in self.dimensions]
+    @staticmethod
+    def _adjust_inserted_indices(inserted_indices_list, prune_indices_list):
+        '''Adjust inserted indices, if there are pruned elements.'''
+        pruned_and_inserted = zip(prune_indices_list, inserted_indices_list)
+        for prune_inds, inserted_inds in pruned_and_inserted:
+            # Only prune indices if they're not H&S (inserted)
+            prune_inds = prune_inds[~np.in1d(prune_inds, inserted_inds)]
+            for i, ind in enumerate(inserted_inds):
+                ind -= np.sum(prune_inds < ind)
+                inserted_inds[i] = ind
+        return inserted_indices_list
 
     # API Functions
+
+    def inserted_hs_indices(self, prune=False):
+        '''Get indices of the inserted H&S (for formatting purposes).'''
+
+        if len(self.dimensions) == 2 and prune:
+            # If pruning is applied, we need to subtract from the H&S indes
+            # the number of pruned rows (cols) that come before that index.
+            margins = [
+                self.margin(axis=i, include_transforms_for_dims=[0, 1])
+                for i in [1, 0]
+            ]
+            # Obtain prune indices as subscripts
+            prune_indices_list = [
+                np.arange(len(margin))[
+                    np.logical_or(margin == 0, np.isnan(margin))
+                ]
+                for margin in margins
+            ]
+            inserted_indices_list = [
+                dim.inserted_hs_indices for dim in self.dimensions
+            ]
+            return self._adjust_inserted_indices(inserted_indices_list,
+                                                 prune_indices_list)
+
+        return [dim.inserted_hs_indices for dim in self.dimensions]
 
     def labels(self, include_missing=False, include_transforms_for_dims=False):
         '''Gets labels for each cube's dimension.
@@ -1108,22 +1172,3 @@ class CrunchCube(object):
             margin = margin[:, np.newaxis]
 
         return props / margin
-
-    @property
-    def standardized_residuals(self):
-        '''Calculate residuals based on Chi-squared.'''
-
-        if self.has_mr:
-            return self._mr_std_residuals
-
-        counts = self.as_array()
-        total = self.margin()
-        colsum = self.margin(axis=0) / total
-        rowsum = self.margin(axis=1) / total
-        expected_counts = expected_freq(counts)
-        residuals = counts - expected_counts
-        variance = (
-            expected_counts *
-            ((1 - rowsum[:, np.newaxis]) * (1 - colsum))
-        )
-        return residuals / np.sqrt(variance)
