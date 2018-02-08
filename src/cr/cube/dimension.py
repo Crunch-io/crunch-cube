@@ -101,6 +101,10 @@ class Dimension(object):
 
     @property
     def inserted_hs_indices(self):
+        if self.type == 'categorical_array':
+            # For CA subvariables, we don't do H&S insertions.
+            return []
+
         tops = [st for st in self.subtotals if st.anchor == 'top']
         bottoms = [st for st in self.subtotals if st.anchor == 'bottom']
         middles = [st for st in self.subtotals if st.anchor not in ['top', 'bottom']]

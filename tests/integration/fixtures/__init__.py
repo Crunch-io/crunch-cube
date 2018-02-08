@@ -127,3 +127,6 @@ FIXT_FRUIT_X_PETS_HS_TOP_BOTTOM = load_fixture(
 )
 FIXT_CA_X_SINGLE_CAT = load_fixture(CUBES_DIR, 'ca-x-single-cat.json')
 FIXT_CA_WITH_NETS = load_fixture(CUBES_DIR, 'ca-with-nets.json')
+FIXT_CAT_X_DATE_HS_PRUNE = load_fixture(CUBES_DIR, 'cat-x-date-hs-prune.json')
+FIXT_CAT_X_NUM_HS_PRUNE = load_fixture(CUBES_DIR, 'cat-x-num-hs-prune.json')
+FIXT_CA_SUBVAR_X_CAT_HS = load_fixture(CUBES_DIR, 'ca-subvar-x-cat-hs.json')
