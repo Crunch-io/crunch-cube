@@ -1,7 +1,8 @@
 from unittest import TestCase
 from mock import patch
-
 import numpy as np
+
+from cr.cube.crunch_cube import CrunchCube
 
 from .fixtures import FIXT_CAT_X_CAT
 from .fixtures import FIXT_CAT_X_CAT_GERMAN_WEIGHTED
@@ -42,8 +43,7 @@ from .fixtures import FIXT_SELECTED_3_WAY_2
 from .fixtures import FIXT_SELECTED_3_WAY
 from .fixtures import FIXT_SINGLE_CAT_MEANS
 from .fixtures import FIXT_CA_X_SINGLE_CAT
-
-from cr.cube.crunch_cube import CrunchCube
+from .fixtures import FIXT_CA_SUBVAR_X_CAT_HS
 
 
 class TestCrunchCube(TestCase):
@@ -1893,4 +1893,14 @@ class TestCrunchCube(TestCase):
         expected = np.array([25, 28, 23])
         # Axis equals to (1, 2), because the total is calculated for each slice.
         actual = cube.margin(axis=(1, 2))
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_ca_subvar_x_cat_hs_counts_prune(test):
+        cube = CrunchCube(FIXT_CA_SUBVAR_X_CAT_HS)
+        expected = np.array([
+            [3, 3, 0, 0, 6],
+            [1, 3, 2, 0, 4],
+            [0, 2, 1, 3, 2],
+        ])
+        actual = cube.as_array(include_transforms_for_dims=[0, 1], prune=True)
         np.testing.assert_array_equal(actual, expected)
