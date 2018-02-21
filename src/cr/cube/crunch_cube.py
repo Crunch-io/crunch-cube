@@ -796,11 +796,8 @@ class CrunchCube(object):
 
     @property
     def is_double_mr(self):
-        '''Check if cube is MR x MR.'''
-        types = [dim.type for dim in self.dimensions]
-        if types == ['multiple_response', 'multiple_response']:
-            return True
-        return False
+        '''Check if cube has 2 MR dimensions.'''
+        return True if isinstance(self.mr_dim_ind, tuple) else False
 
     @staticmethod
     def _adjust_inserted_indices(inserted_indices_list, prune_indices_list):
