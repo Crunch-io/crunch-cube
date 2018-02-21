@@ -674,9 +674,12 @@ class CrunchCube(object):
     @property
     def mr_dim_ind(self):
         '''Indices of MR dimensions.'''
-        for i, dim in enumerate(self.dimensions):
-            if dim.type == 'multiple_response':
-                return i
+        indices = [
+            i for i, dim in enumerate(self.dimensions)
+            if dim.type == 'multiple_response'
+        ]
+        if indices:
+            return indices[0] if len(indices) == 1 else tuple(indices)
         return None
 
     @property
@@ -1128,7 +1131,7 @@ class CrunchCube(object):
     def _mr_index(self, axis, weighted):
         table = self._get_table(weighted)
 
-        if self.mr_dim_ind == 0:
+        if self.mr_dim_ind == 0 or self.mr_dim_ind == (0, 1):
             if axis != 0:
                 # MR x CAT index table only defined for column direction.
                 return np.full(self.as_array().shape, np.nan)
