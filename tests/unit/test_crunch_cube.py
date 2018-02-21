@@ -183,10 +183,8 @@ class TestCrunchCube(TestCase):
         actual = CrunchCube({}).has_mr
         self.assertEqual(actual, expected)
 
-    @patch('cr.cube.crunch_cube.CrunchCube._get_dimensions')
-    @patch('cr.cube.crunch_cube.CrunchCube._get_mr_selections_indices')
-    def test_has_multiple_response(self, mock_mr_indices, mock_dims):
-        mock_mr_indices.return_value = [Mock()]
+    @patch('cr.cube.crunch_cube.CrunchCube.mr_dim_ind', 0)
+    def test_has_multiple_response(self):
         expected = True
         actual = CrunchCube({}).has_mr
         assert actual == expected

@@ -510,22 +510,12 @@ class CrunchCube(object):
 
         return np.sum(array, axis)
 
-    @property
-    def ind_selected(self):
+    def _get_mr_slice(self, selected=True):
+        index = 0 if selected else 1
         indices = []
         for dim in self.dimensions:
             if dim.type == 'multiple_response':
-                indices.extend([slice(None), 0])
-            else:
-                indices.append(slice(None))
-        return tuple(indices)
-
-    @property
-    def ind_non_selected(self):
-        indices = []
-        for dim in self.dimensions:
-            if dim.type == 'multiple_response':
-                indices.extend([slice(None), 1])
+                indices.extend([slice(None), index])
             else:
                 indices.append(slice(None))
         return tuple(indices)
@@ -675,18 +665,34 @@ class CrunchCube(object):
 
         return self._fix_shape(array / margin)
 
-    # Properties
-
-    @property
-    def mr_dim_ind(self):
-        '''Indices of MR dimensions.'''
+    def _mr_dim_ind(self, include_selections=False):
+        dimensions = (
+            self._get_dimensions(self._cube)
+            if include_selections else
+            self.dimensions
+        )
         indices = [
-            i for i, dim in enumerate(self.dimensions)
+            i for i, dim in enumerate(dimensions)
             if dim.type == 'multiple_response'
         ]
         if indices:
             return indices[0] if len(indices) == 1 else tuple(indices)
         return None
+
+    # Properties
+
+    @property
+    def ind_selected(self):
+        return self._get_mr_slice()
+
+    @property
+    def ind_non_selected(self):
+        return self._get_mr_slice(selected=False)
+
+    @property
+    def mr_dim_ind(self):
+        '''Indices of MR dimensions.'''
+        return self._mr_dim_ind()
 
     @property
     def standardized_residuals(self):
@@ -732,9 +738,7 @@ class CrunchCube(object):
     @property
     def has_mr(self):
         '''Determines if a cube has MR dimensions.'''
-        all_dimensions = self._get_dimensions(self._cube)
-        mr_indices = self._get_mr_selections_indices(all_dimensions)
-        return bool(mr_indices)
+        return self.mr_dim_ind is not None
 
     @property
     def name(self):
