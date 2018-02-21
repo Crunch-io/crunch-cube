@@ -510,6 +510,20 @@ class CrunchCube(object):
 
         return np.sum(array, axis)
 
+    @property
+    def ind_selected(self):
+        return tuple(
+            0 if i - 1 == self.mr_dim_ind else slice(None)
+            for (i, _) in enumerate(self._get_table(False).shape)
+        )
+
+    @property
+    def ind_non_selected(self):
+        return tuple(
+            1 if i - 1 == self.mr_dim_ind else slice(None)
+            for (i, _) in enumerate(self._get_table(False).shape)
+        )
+
     def _mr_margin(self, axis, weighted, adjusted):
         '''Margin for cube that contains MR.'''
         if self.is_double_mr:
@@ -524,15 +538,7 @@ class CrunchCube(object):
         # For cases when the margin is calculated for the MR dimension, we need
         # the sum of selected and non-selected slices (if axis is None), or the
         # sublimated version (another sum along the axis), if axis is defined.
-        ind_selected = tuple(
-            0 if i - 1 == self.mr_dim_ind else slice(None)
-            for (i, _) in enumerate(table.shape)
-        )
-        ind_non_selected = tuple(
-            1 if i - 1 == self.mr_dim_ind else slice(None)
-            for (i, _) in enumerate(table.shape)
-        )
-        margin = table[ind_selected] + table[ind_non_selected]
+        margin = table[self.ind_selected] + table[self.ind_non_selected]
         margin = margin[np.ix_(*self.valid_indices)]
 
         return np.sum(margin, 1 - self.mr_dim_ind) if axis is None else margin
