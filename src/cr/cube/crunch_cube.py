@@ -452,7 +452,7 @@ class CrunchCube(object):
         shape = [len(dim.elements(include_missing=True))
                  for dim in all_dimensions]
         values = np.array(self._get_values(weighted)).reshape(shape)
-        selected = values[:, 0, :, 0]
+        selected = values[self.ind_selected]
 
         if axis is None:
             non_selected = (values[:, 0, :, 1] + values[:, 1, :, 0] +
@@ -512,17 +512,23 @@ class CrunchCube(object):
 
     @property
     def ind_selected(self):
-        return tuple(
-            0 if i - 1 == self.mr_dim_ind else slice(None)
-            for (i, _) in enumerate(self._get_table(False).shape)
-        )
+        indices = []
+        for dim in self.dimensions:
+            if dim.type == 'multiple_response':
+                indices.extend([slice(None), 0])
+            else:
+                indices.append(slice(None))
+        return tuple(indices)
 
     @property
     def ind_non_selected(self):
-        return tuple(
-            1 if i - 1 == self.mr_dim_ind else slice(None)
-            for (i, _) in enumerate(self._get_table(False).shape)
-        )
+        indices = []
+        for dim in self.dimensions:
+            if dim.type == 'multiple_response':
+                indices.extend([slice(None), 1])
+            else:
+                indices.append(slice(None))
+        return tuple(indices)
 
     def _mr_margin(self, axis, weighted, adjusted):
         '''Margin for cube that contains MR.'''
@@ -1130,21 +1136,13 @@ class CrunchCube(object):
 
     def _mr_index(self, axis, weighted):
         table = self._get_table(weighted)
+        selected = table[self.ind_selected]
+        non_selected = table[self.ind_non_selected]
 
         if self.mr_dim_ind == 0 or self.mr_dim_ind == (0, 1):
             if axis != 0:
                 # MR x CAT index table only defined for column direction.
                 return np.full(self.as_array().shape, np.nan)
-            selected = (
-                table[:, 0, :, 0]
-                if self.is_double_mr else
-                table[:, 0, :]
-            )
-            non_selected = (
-                table[:, 1, :, 1]
-                if self.is_double_mr else
-                table[:, 1, :]
-            )
             margin = np.sum(selected, 1) / np.sum(selected + non_selected, 1)
             return (self.proportions(axis=axis, weighted=weighted) /
                     margin[:, np.newaxis])
@@ -1153,9 +1151,6 @@ class CrunchCube(object):
             if axis == 0:
                 # CAT x MR index table not defined for column direction.
                 return np.full(self.as_array().shape, np.nan)
-
-            selected = table[:, :, 0]
-            non_selected = table[:, :, 1]
             margin = np.sum(selected, 0) / np.sum(selected + non_selected, 0)
             return self.proportions(weighted=weighted) / margin
 
