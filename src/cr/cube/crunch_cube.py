@@ -466,16 +466,24 @@ class CrunchCube(object):
     def _double_mr_margin(self, axis, weighted):
         '''Margin for MR x MR cube (they're specific, thus separate method).'''
         table = self._get_table(weighted)
-        selected = table[:, 0, :, 0]
+        ind_selected = self.ind_selected
+        ind_ns = self.ind_non_selected
+        # This represents an index in between MR dimensions (at this point we
+        # know there are two). It's used subsequently, for creating the
+        # combined conditional slices, where we have to take 'selected' for
+        # one MR, and selected AND non-selected for the other.
+        inflect = self.mr_dim_ind[1] + 1
+        ind_ns_0 = ind_selected[:inflect] + ind_ns[inflect:]
+        ind_ns_1 = ind_ns[:inflect] + ind_selected[inflect:]
+        selected = table[self.ind_selected]
+        non_selected = table[self.ind_non_selected]
 
         if axis is None:
-            non_selected = (
-                table[:, 1, :, 1] + table[:, 1, :, 0] + table[:, 0, :, 1]
-            )
+            non_selected += table[ind_ns_1] + table[ind_ns_0]
         elif axis == 0:
-            non_selected = table[:, 1, :, 0]
+            non_selected = table[ind_ns_1]
         elif axis == 1:
-            non_selected = table[:, 0, :, 1]
+            non_selected = table[ind_ns_0]
 
         return (selected + non_selected)[np.ix_(*self.valid_indices)]
 
