@@ -453,30 +453,41 @@ class CrunchCube(object):
                  for dim in all_dimensions]
         values = np.array(self._get_values(weighted)).reshape(shape)
         selected = values[self.ind_selected]
+        ind_ns, ind_ns_0, ind_ns_1 = self.double_mr_non_selected_inds
+        non_selected = values[ind_ns]
 
         if axis is None:
-            non_selected = (values[:, 0, :, 1] + values[:, 1, :, 0] +
-                            values[:, 1, :, 1])
-        else:
-            ind_sel, ind_non = 1 - axis, axis
-            non_selected = values[:, ind_sel, :, ind_non]
+            non_selected += values[ind_ns_0] + values[ind_ns_1]
+        elif axis == 0:
+            non_selected = values[ind_ns_1]
+        elif axis == 1:
+            non_selected = values[ind_ns_0]
 
         return selected / (selected + non_selected)
 
-    def _double_mr_margin(self, axis, weighted):
-        '''Margin for MR x MR cube (they're specific, thus separate method).'''
-        table = self._get_table(weighted)
-        ind_selected = self.ind_selected
-        ind_ns = self.ind_non_selected
+    @property
+    def double_mr_non_selected_inds(self):
+        '''Gets all combinations of non-selected slices for any double MR cube.
+
+        For double MR cubes, we need combinations of (selected) with
+        (selected + non_selected) for all combinations of MR x MR, but we also
+        need other potential dimensions included
+        '''
         # This represents an index in between MR dimensions (at this point we
         # know there are two). It's used subsequently, for creating the
         # combined conditional slices, where we have to take 'selected' for
         # one MR, and selected AND non-selected for the other.
         inflect = self.mr_dim_ind[1] + 1
-        ind_ns_0 = ind_selected[:inflect] + ind_ns[inflect:]
-        ind_ns_1 = ind_ns[:inflect] + ind_selected[inflect:]
+        ind_ns_0 = self.ind_selected[:inflect] + self.ind_non_selected[inflect:]
+        ind_ns_1 = self.ind_non_selected[:inflect] + self.ind_selected[inflect:]
+        return self.ind_non_selected, ind_ns_0, ind_ns_1
+
+    def _double_mr_margin(self, axis, weighted):
+        '''Margin for MR x MR cube (they're specific, thus separate method).'''
+        table = self._get_table(weighted)
+        ind_ns, ind_ns_0, ind_ns_1 = self.double_mr_non_selected_inds
         selected = table[self.ind_selected]
-        non_selected = table[self.ind_non_selected]
+        non_selected = table[ind_ns]
 
         if axis is None:
             non_selected += table[ind_ns_1] + table[ind_ns_0]
