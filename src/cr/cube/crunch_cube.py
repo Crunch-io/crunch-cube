@@ -463,7 +463,9 @@ class CrunchCube(object):
         elif axis == 1:
             non_selected = values[ind_ns_0]
 
-        return selected / (selected + non_selected)
+        return (
+            selected / (selected + non_selected)
+        )[np.ix_(*self.valid_indices)]
 
     @property
     def double_mr_non_selected_inds(self):

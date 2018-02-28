@@ -130,5 +130,4 @@ FIXT_CA_WITH_NETS = load_fixture(CUBES_DIR, 'ca-with-nets.json')
 FIXT_CAT_X_DATE_HS_PRUNE = load_fixture(CUBES_DIR, 'cat-x-date-hs-prune.json')
 FIXT_CAT_X_NUM_HS_PRUNE = load_fixture(CUBES_DIR, 'cat-x-num-hs-prune.json')
 FIXT_CA_SUBVAR_X_CAT_HS = load_fixture(CUBES_DIR, 'ca-subvar-x-cat-hs.json')
-FIXT_CAT_X_MR_X_MR_SINGAPORE = load_fixture(CUBES_DIR,
-                                            'cat-x-mr-x-mr-singapore.json')
+FIXT_CAT_X_MR_X_MR = load_fixture(CUBES_DIR, 'cat-x-mr-x-mr.json')
