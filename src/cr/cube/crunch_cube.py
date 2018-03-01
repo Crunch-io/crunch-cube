@@ -448,24 +448,15 @@ class CrunchCube(object):
         Double MR cubes internally have 4 dimensions, and they're quite specific
         in how they output their values. Thus the separate method.
         '''
-        all_dimensions = self._get_dimensions(self._cube)
-        shape = [len(dim.elements(include_missing=True))
-                 for dim in all_dimensions]
-        values = np.array(self._get_values(weighted)).reshape(shape)
-        selected = values[self.ind_selected]
-        ind_ns, ind_ns_0, ind_ns_1 = self.double_mr_non_selected_inds
-        non_selected = values[ind_ns]
+        num = self.as_array()
+        den = self.margin(axis=axis if axis != 2 else None)
 
-        if axis is None:
-            non_selected += values[ind_ns_0] + values[ind_ns_1]
-        elif axis == 0:
-            non_selected = values[ind_ns_1]
-        elif axis == 1:
-            non_selected = values[ind_ns_0]
+        if axis == 1 and len(self.dimensions) > 2:
+            den = np.sum(den, 0)
+        elif axis != 2 and len(self.dimensions) > 2:
+            den = np.sum(self.margin(), 0)
 
-        return (
-            selected / (selected + non_selected)
-        )[np.ix_(*self.valid_indices)]
+        return num / den
 
     @property
     def double_mr_non_selected_inds(self):
