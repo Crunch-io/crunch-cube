@@ -44,6 +44,7 @@ from .fixtures import FIXT_SELECTED_3_WAY
 from .fixtures import FIXT_SINGLE_CAT_MEANS
 from .fixtures import FIXT_CA_X_SINGLE_CAT
 from .fixtures import FIXT_CA_SUBVAR_X_CAT_HS
+from .fixtures import FIXT_CAT_X_MR_X_MR
 
 
 class TestCrunchCube(TestCase):
@@ -1904,3 +1905,48 @@ class TestCrunchCube(TestCase):
         ])
         actual = cube.as_array(include_transforms_for_dims=[0, 1], prune=True)
         np.testing.assert_array_equal(actual, expected)
+
+    def test_cat_x_mr_x_mr_proportions_by_row(test):
+        cube = CrunchCube(FIXT_CAT_X_MR_X_MR)
+        # Set axis to 2 (and not 1), since 3D cube
+        actual = cube.proportions(axis=2)
+        expected = np.array([
+            [[0.1159, 0.3597],
+             [0.0197, 0.0604],
+             [0.0192, 0.0582]],
+
+            [[0.0159, 0.0094],
+             [0.1182, 0.0625],
+             [0.1142, 0.0623]],
+        ])
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_cat_x_mr_x_mr_proportions_by_col(test):
+        cube = CrunchCube(FIXT_CAT_X_MR_X_MR)
+        # Set axis to 1 (and not 0), since 3D cube
+        actual = cube.proportions(axis=1, weighted=False)
+        expected = np.array([
+            [[0.166284074605452, 0.516068866571019],
+             [0.0280267463366055, 0.0859297197325366],
+             [0.0276657060518732, 0.0838616714697406]],
+
+            [[0.0228120516499283, 0.0134863701578192],
+             [0.168160478019633, 0.0889173424384692],
+             [0.164553314121037, 0.0897694524495677]],
+        ])
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_cat_x_mr_x_mr_proportions_by_cell(test):
+        cube = CrunchCube(FIXT_CAT_X_MR_X_MR)
+        # Set axis to (1, 2) (and not None), since 3D cube
+        actual = cube.proportions(axis=(1, 2), weighted=False)
+        expected = np.array([
+            [[0.05795, 0.17985],
+             [0.00985, 0.0302],
+             [0.0096, 0.0291]],
+
+            [[0.00795, 0.0047],
+             [0.0591, 0.03125],
+             [0.0571, 0.03115]],
+        ])
+        np.testing.assert_almost_equal(actual, expected)

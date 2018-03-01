@@ -448,34 +448,46 @@ class CrunchCube(object):
         Double MR cubes internally have 4 dimensions, and they're quite specific
         in how they output their values. Thus the separate method.
         '''
-        all_dimensions = self._get_dimensions(self._cube)
-        shape = [len(dim.elements(include_missing=True))
-                 for dim in all_dimensions]
-        values = np.array(self._get_values(weighted)).reshape(shape)
-        selected = values[:, 0, :, 0]
+        num = self.as_array()
+        den = self.margin(axis=axis if axis != 2 else None)
 
-        if axis is None:
-            non_selected = (values[:, 0, :, 1] + values[:, 1, :, 0] +
-                            values[:, 1, :, 1])
-        else:
-            ind_sel, ind_non = 1 - axis, axis
-            non_selected = values[:, ind_sel, :, ind_non]
+        if axis == 1 and len(self.dimensions) > 2:
+            den = np.sum(den, 0)
+        elif axis != 2 and len(self.dimensions) > 2:
+            den = np.sum(self.margin(), 0)
 
-        return selected / (selected + non_selected)
+        return num / den
+
+    @property
+    def double_mr_non_selected_inds(self):
+        '''Gets all combinations of non-selected slices for any double MR cube.
+
+        For double MR cubes, we need combinations of (selected) with
+        (selected + non_selected) for all combinations of MR x MR, but we also
+        need other potential dimensions included
+        '''
+        # This represents an index in between MR dimensions (at this point we
+        # know there are two). It's used subsequently, for creating the
+        # combined conditional slices, where we have to take 'selected' for
+        # one MR, and selected AND non-selected for the other.
+        inflect = self.mr_dim_ind[1] + 1
+        ind_ns_0 = self.ind_selected[:inflect] + self.ind_non_selected[inflect:]
+        ind_ns_1 = self.ind_non_selected[:inflect] + self.ind_selected[inflect:]
+        return self.ind_non_selected, ind_ns_0, ind_ns_1
 
     def _double_mr_margin(self, axis, weighted):
         '''Margin for MR x MR cube (they're specific, thus separate method).'''
         table = self._get_table(weighted)
-        selected = table[:, 0, :, 0]
+        ind_ns, ind_ns_0, ind_ns_1 = self.double_mr_non_selected_inds
+        selected = table[self.ind_selected]
+        non_selected = table[ind_ns]
 
         if axis is None:
-            non_selected = (
-                table[:, 1, :, 1] + table[:, 1, :, 0] + table[:, 0, :, 1]
-            )
+            non_selected += table[ind_ns_1] + table[ind_ns_0]
         elif axis == 0:
-            non_selected = table[:, 1, :, 0]
+            non_selected = table[ind_ns_1]
         elif axis == 1:
-            non_selected = table[:, 0, :, 1]
+            non_selected = table[ind_ns_0]
 
         return (selected + non_selected)[np.ix_(*self.valid_indices)]
 
@@ -510,6 +522,16 @@ class CrunchCube(object):
 
         return np.sum(array, axis)
 
+    def _get_mr_slice(self, selected=True):
+        index = 0 if selected else 1
+        indices = []
+        for dim in self.dimensions:
+            if dim.type == 'multiple_response':
+                indices.extend([slice(None), index])
+            else:
+                indices.append(slice(None))
+        return tuple(indices)
+
     def _mr_margin(self, axis, weighted, adjusted):
         '''Margin for cube that contains MR.'''
         if self.is_double_mr:
@@ -524,15 +546,7 @@ class CrunchCube(object):
         # For cases when the margin is calculated for the MR dimension, we need
         # the sum of selected and non-selected slices (if axis is None), or the
         # sublimated version (another sum along the axis), if axis is defined.
-        ind_selected = tuple(
-            0 if i - 1 == self.mr_dim_ind else slice(None)
-            for (i, _) in enumerate(table.shape)
-        )
-        ind_non_selected = tuple(
-            1 if i - 1 == self.mr_dim_ind else slice(None)
-            for (i, _) in enumerate(table.shape)
-        )
-        margin = table[ind_selected] + table[ind_non_selected]
+        margin = table[self.ind_selected] + table[self.ind_non_selected]
         margin = margin[np.ix_(*self.valid_indices)]
 
         return np.sum(margin, 1 - self.mr_dim_ind) if axis is None else margin
@@ -663,15 +677,34 @@ class CrunchCube(object):
 
         return self._fix_shape(array / margin)
 
+    def _mr_dim_ind(self, include_selections=False):
+        dimensions = (
+            self._get_dimensions(self._cube)
+            if include_selections else
+            self.dimensions
+        )
+        indices = [
+            i for i, dim in enumerate(dimensions)
+            if dim.type == 'multiple_response'
+        ]
+        if indices:
+            return indices[0] if len(indices) == 1 else tuple(indices)
+        return None
+
     # Properties
+
+    @property
+    def ind_selected(self):
+        return self._get_mr_slice()
+
+    @property
+    def ind_non_selected(self):
+        return self._get_mr_slice(selected=False)
 
     @property
     def mr_dim_ind(self):
         '''Indices of MR dimensions.'''
-        for i, dim in enumerate(self.dimensions):
-            if dim.type == 'multiple_response':
-                return i
-        return None
+        return self._mr_dim_ind()
 
     @property
     def standardized_residuals(self):
@@ -717,9 +750,7 @@ class CrunchCube(object):
     @property
     def has_mr(self):
         '''Determines if a cube has MR dimensions.'''
-        all_dimensions = self._get_dimensions(self._cube)
-        mr_indices = self._get_mr_selections_indices(all_dimensions)
-        return bool(mr_indices)
+        return self.mr_dim_ind is not None
 
     @property
     def name(self):
@@ -781,11 +812,8 @@ class CrunchCube(object):
 
     @property
     def is_double_mr(self):
-        '''Check if cube is MR x MR.'''
-        types = [dim.type for dim in self.dimensions]
-        if types == ['multiple_response', 'multiple_response']:
-            return True
-        return False
+        '''Check if cube has 2 MR dimensions.'''
+        return True if isinstance(self.mr_dim_ind, tuple) else False
 
     @staticmethod
     def _adjust_inserted_indices(inserted_indices_list, prune_indices_list):
@@ -1121,21 +1149,13 @@ class CrunchCube(object):
 
     def _mr_index(self, axis, weighted):
         table = self._get_table(weighted)
+        selected = table[self.ind_selected]
+        non_selected = table[self.ind_non_selected]
 
-        if self.mr_dim_ind == 0:
+        if self.mr_dim_ind == 0 or self.mr_dim_ind == (0, 1):
             if axis != 0:
                 # MR x CAT index table only defined for column direction.
                 return np.full(self.as_array().shape, np.nan)
-            selected = (
-                table[:, 0, :, 0]
-                if self.is_double_mr else
-                table[:, 0, :]
-            )
-            non_selected = (
-                table[:, 1, :, 1]
-                if self.is_double_mr else
-                table[:, 1, :]
-            )
             margin = np.sum(selected, 1) / np.sum(selected + non_selected, 1)
             return (self.proportions(axis=axis, weighted=weighted) /
                     margin[:, np.newaxis])
@@ -1144,9 +1164,6 @@ class CrunchCube(object):
             if axis == 0:
                 # CAT x MR index table not defined for column direction.
                 return np.full(self.as_array().shape, np.nan)
-
-            selected = table[:, :, 0]
-            non_selected = table[:, :, 1]
             margin = np.sum(selected, 0) / np.sum(selected + non_selected, 0)
             return self.proportions(weighted=weighted) / margin
 
