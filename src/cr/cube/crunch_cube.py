@@ -12,7 +12,6 @@ import numpy as np
 from scipy.stats import norm
 from scipy.stats.contingency import expected_freq
 
-from .dimension import Dimension
 from .utils.table_helper import TableHelper
 
 np.seterr(divide='ignore', invalid='ignore')
@@ -76,29 +75,7 @@ class CrunchCube(object):
                     'A `cube` must be JSON or `dict`.'
                 ).format(type(response)))
 
-    @classmethod
-    def _get_mr_selections_indices(cls, dimensions):
-        '''Gets indices of each 'selection' dim, for corresponding MR dim.
-
-        Multiple Response (MR) and Categorical Array (CA) variables are
-        represented by two dimensions each. These dimensions can be thought of
-        as 'elements' and 'selections'. This function returns the indices of
-        the 'selections' dimension for each MR variable.
-        '''
-        mr_dimensions_indices = [
-            i for (i, dim) in enumerate(dimensions)
-            if (i + 1 < len(dimensions) and
-                dim.type == 'multiple_response')
-        ]
-
-        # For each MR and CA dimension, the 'selections' dimension
-        # follows right after it (in the originating cube).
-        # Here we increase the MR index by 1, which gives us
-        # the index of the corresponding 'selections' dimension.
-        return [i + 1 for i in mr_dimensions_indices]
-
-    @classmethod
-    def _get_valid_indices(cls, dimensions, include_missing, get_non_selected):
+    def _get_valid_indices(self, dimensions, include_missing, get_non_selected):
         '''Gets valid indices for each dimension.
 
         Main criterion for a valid index is most often the information about
@@ -110,7 +87,7 @@ class CrunchCube(object):
         valid_indices = [dim.valid_indices(include_missing)
                          for dim in dimensions]
 
-        mr_selections_indices = cls._get_mr_selections_indices(dimensions)
+        mr_selections_indices = self._table.mr_selections_indices
         mr_slice = [1] if get_non_selected else [0]
         if mr_selections_indices:
             # In the case of MR variables, we only need to select the
@@ -755,7 +732,7 @@ class CrunchCube(object):
     def dimensions(self):
         '''Dimensions of the crunch cube.'''
         all_dimensions = self._table.all_dimensions
-        mr_selections = self._get_mr_selections_indices(all_dimensions)
+        mr_selections = self._table.mr_selections_indices
         return [
             dim for (i, dim) in enumerate(all_dimensions)
             if i not in mr_selections
