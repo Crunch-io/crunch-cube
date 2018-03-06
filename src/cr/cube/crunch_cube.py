@@ -1201,26 +1201,27 @@ class CrunchCube(object):
     def means(self):
         '''Get cube means.'''
 
-        if not self.dimensions:
-            return None
+        def _inner_prod(contents, values):
+            if len(contents.shape) == 3 and self.ca_dim_ind == 0:
+                values = values[:, np.newaxis]
+            try:
+                return contents * values
+            except:
+                return contents * values[:, np.newaxis]
 
-        contents = self.as_array()
         values = np.array([
-            dim.values
-            for dim in self.dimensions
-            if dim.values
-        ][0])
-        if (len(contents.shape) > 1 and self.mr_dim_ind != 0 and
-                self.ca_dim_ind != 0):
-            values = values[:, np.newaxis]
+            dim.values for dim in self.dimensions if dim.values
+        ][int(len(self.dimensions) > 2)])
+        contents = _inner_prod(self.as_array(), values)
 
         if self.has_mr and not self.is_double_mr:
             axis = 1 - self.mr_dim_ind
-            return (
-                np.sum(contents * values, axis) / np.sum(self.as_array(), axis)
-            )
+            return np.sum(contents, axis) / np.sum(self.as_array(), axis)
 
-        if self.ca_dim_ind == 0:
-            return np.sum(contents * values, 1) / self.margin(1)
+        axis = 0
+        if self.ca_dim_ind == 0 or self.ca_dim_ind == 2:
+            axis = 1
+        elif len(self.dimensions) > 2 and self.ca_dim_ind == 1:
+            axis = 2
 
-        return np.sum(contents * values, 0) / self.margin(0)
+        return np.sum(contents, axis) / self.margin(axis)
