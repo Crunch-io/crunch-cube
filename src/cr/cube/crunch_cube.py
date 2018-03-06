@@ -13,6 +13,7 @@ from scipy.stats import norm
 from scipy.stats.contingency import expected_freq
 
 from .dimension import Dimension
+from .utils.table_helper import TableHelper
 
 np.seterr(divide='ignore', invalid='ignore')
 
@@ -60,11 +61,13 @@ class CrunchCube(object):
         # If the provided response is dict, create cube immediately
         if isinstance(response, dict):
             self._cube = response.get('value', response)
+            self._table = TableHelper(self._cube)
             return
 
         try:
             response = json.loads(response)
             self._cube = response.get('value', response)
+            self._table = TableHelper(self._cube)
         except TypeError:
             # If an unexpected type is provided raise descriptive exception.
             if not isinstance(response, dict):
@@ -72,37 +75,6 @@ class CrunchCube(object):
                     'Unsupported type provided: {}. '
                     'A `cube` must be JSON or `dict`.'
                 ).format(type(response)))
-
-    @classmethod
-    def _get_dimensions(cls, cube):
-        '''Gets the dimensions of the crunch cube.
-
-        This function is internal, and is not mean to be used by ouside users
-        of the CrunchCube class. The main reason for this is the internal
-        representation of the different variable types (namely the MR and the
-        CA). These types have two dimensions each, but in the case of MR, the
-        second dimensions shouldn't be visible to the user. This function
-        returns such dimensions as well, since they're necessary for the
-        correct implementation of the functionality for the MR type.
-        The version that is mentioned to be used by users is the
-        property 'dimensions'.
-        '''
-        entries = cube['result']['dimensions']
-        return [
-            (
-                # Multiple Response and Categorical Array variables have
-                # two subsequent dimensions (elements and selections). For
-                # this reason it's necessary to pass in both of them in the
-                # Dimension class init method. This is needed in order to
-                # determine the correct type (CA or MR). We only skip the
-                # two-argument constructor for the last dimension in the list
-                # (where it's not possible to fetch the subsequent one).
-                Dimension(entry)
-                if i + 1 >= len(entries)
-                else Dimension(entry, entries[i + 1])
-            )
-            for (i, entry) in enumerate(entries)
-        ]
 
     @classmethod
     def _get_mr_selections_indices(cls, dimensions):
@@ -208,7 +180,7 @@ class CrunchCube(object):
         a ndarray of shape (2, 2).
         '''
         values = self._get_values(weighted, margin)
-        all_dimensions = self._get_dimensions(self._cube)
+        all_dimensions = self._table.all_dimensions
         shape = [len(dim.elements(include_missing=True))
                  for dim in all_dimensions]
         return np.array(values).reshape(shape)
@@ -253,7 +225,7 @@ class CrunchCube(object):
     def _transform(self, res, include_transforms_for_dims, valid_indices):
         '''Transform the shape of the resulting ndarray.'''
 
-        all_dimensions = self._get_dimensions(self._cube)
+        all_dimensions = self._table.all_dimensions
 
         if not include_transforms_for_dims:
             return res[np.ix_(*valid_indices)]
@@ -294,7 +266,7 @@ class CrunchCube(object):
         '''
 
         values = self._get_values(weighted, margin)
-        dimensions = self._get_dimensions(self._cube)
+        dimensions = self._table.all_dimensions
         shape = [len(dim.elements(include_missing=True)) for dim in dimensions]
         valid_indices = self._get_valid_indices(dimensions, include_missing,
                                                 get_non_selected)
@@ -679,7 +651,7 @@ class CrunchCube(object):
 
     def _mr_dim_ind(self, include_selections=False):
         dimensions = (
-            self._get_dimensions(self._cube)
+            self._table.all_dimensions
             if include_selections else
             self.dimensions
         )
@@ -782,7 +754,7 @@ class CrunchCube(object):
     @property
     def dimensions(self):
         '''Dimensions of the crunch cube.'''
-        all_dimensions = self._get_dimensions(self._cube)
+        all_dimensions = self._table.all_dimensions
         mr_selections = self._get_mr_selections_indices(all_dimensions)
         return [
             dim for (i, dim) in enumerate(all_dimensions)

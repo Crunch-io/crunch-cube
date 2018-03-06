@@ -175,9 +175,9 @@ class TestCrunchCube(TestCase):
             prune=fake_prune,
         )
 
-    @patch('cr.cube.crunch_cube.CrunchCube._get_dimensions')
+    @patch('cr.cube.utils.table_helper.TableHelper.all_dimensions', [])
     @patch('cr.cube.crunch_cube.CrunchCube._get_mr_selections_indices')
-    def test_does_not_have_multiple_response(self, mock_mr_indices, mock_dims):
+    def test_does_not_have_multiple_response(self, mock_mr_indices):
         mock_mr_indices.return_value = []
         expected = False
         actual = CrunchCube({}).has_mr
