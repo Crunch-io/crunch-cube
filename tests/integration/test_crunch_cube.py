@@ -26,6 +26,8 @@ from .fixtures import FIXT_SELECTED_CROSSTAB_4
 from .fixtures import FIXT_PETS_X_PETS
 from .fixtures import FIXT_PETS_X_FRUIT
 from .fixtures import FIXT_PETS_ARRAY
+from .fixtures import FIXT_PETS_ARRAY_CAT_FIRST
+from .fixtures import FIXT_PETS_ARRAY_SUBVAR_FIRST
 from .fixtures import FIXT_FRUIT_X_PETS
 from .fixtures import FIXT_FRUIT_X_PETS_ARRAY
 from .fixtures import FIXT_GENDER_PARTY_RACE
@@ -46,8 +48,9 @@ from .fixtures import FIXT_CA_X_SINGLE_CAT
 from .fixtures import FIXT_CA_SUBVAR_X_CAT_HS
 from .fixtures import FIXT_CAT_X_MR_X_MR
 from .fixtures import FIXT_ECON_BLAME_WITH_HS
-from .fixtures import FIXT_FRUIT_X_LANGUAGES
 from .fixtures import FIXT_ECON_BLAME_X_IDEOLOGY_ROW_HS
+from .fixtures import FIXT_FRUIT_X_PETS_ARRAY_SUBVARS_FIRST
+from .fixtures import FIXT_FRUIT_X_PETS_ARRAY_PETS_FIRST
 
 
 class TestCrunchCube(TestCase):
@@ -1985,15 +1988,42 @@ class TestCrunchCube(TestCase):
         actual = cube.means()
         np.testing.assert_almost_equal(actual, expected)
 
-    def test_means_cat_array(self):
-        cube = CrunchCube(FIXT_PETS_ARRAY)
-        expected = np.array([1.4303797, 1.5, 1.5428571])
+    def test_means_cat_array_cat_dim_first(self):
+        cube = CrunchCube(FIXT_PETS_ARRAY_CAT_FIRST)
+        expected = np.array([1.44333002, 1.48049069, 1.57881177])
         actual = cube.means()
         np.testing.assert_almost_equal(actual, expected)
 
-    def test_means_cat_x_cat_arr(self):
-        cube = CrunchCube(FIXT_FRUIT_X_LANGUAGES)
-        cube.dimensions
-        #expected = None
-        #actual = cube.means()
-        #np.testing.assert_almost_equal(actual, expected)
+    def test_means_cat_array_subvar_dim_first(self):
+        cube = CrunchCube(FIXT_PETS_ARRAY_SUBVAR_FIRST)
+        expected = np.array([1.44333002, 1.48049069, 1.57881177])
+        actual = cube.means()
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_means_cat_x_cat_arr_fruit_first(self):
+        cube = CrunchCube(FIXT_FRUIT_X_PETS_ARRAY)
+        expected = np.array([
+            [1.48, 1.42857143, 1.52173913],
+            [1.40740741, 1.53846154, 1.55319149],
+        ])
+        actual = cube.means()
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_means_cat_x_cat_arr_subvars_first(self):
+        cube = CrunchCube(FIXT_FRUIT_X_PETS_ARRAY_SUBVARS_FIRST)
+        expected = np.array([
+            [1.71111111, 1.6, 1.65625],
+            [1.64705882, 1.7, 1.68421053],
+        ])
+        actual = cube.means()
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_means_cat_x_cat_arr_pets_first(self):
+        cube = CrunchCube(FIXT_FRUIT_X_PETS_ARRAY_PETS_FIRST)
+        expected = np.array([
+            [1.48, 1.40740741],
+            [1.42857143, 1.53846154],
+            [1.52173913, 1.55319149],
+        ])
+        actual = cube.means()
+        np.testing.assert_almost_equal(actual, expected)
