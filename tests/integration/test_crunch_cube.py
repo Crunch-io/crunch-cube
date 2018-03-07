@@ -51,6 +51,7 @@ from .fixtures import FIXT_ECON_BLAME_WITH_HS
 from .fixtures import FIXT_ECON_BLAME_X_IDEOLOGY_ROW_HS
 from .fixtures import FIXT_FRUIT_X_PETS_ARRAY_SUBVARS_FIRST
 from .fixtures import FIXT_FRUIT_X_PETS_ARRAY_PETS_FIRST
+from .fixtures import FIXT_SCALE_WITH_NULL_VALUES
 
 
 class TestCrunchCube(TestCase):
@@ -2025,5 +2026,11 @@ class TestCrunchCube(TestCase):
             [1.42857143, 1.53846154],
             [1.52173913, 1.55319149],
         ])
+        actual = cube.means()
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_means_with_null_values(self):
+        cube = CrunchCube(FIXT_SCALE_WITH_NULL_VALUES)
+        expected = np.array([1.2060688, 1.0669344, 1.023199])
         actual = cube.means()
         np.testing.assert_almost_equal(actual, expected)

@@ -1,0 +1,155 @@
+{
+    "element": "shoji:view",
+    "self": "/api/datasets/123/cube/?filter=%5B%5D&query=%7B%22dimensions%22:%5B%7B%22variable%22:%22/api/datasets/123%2Fvariables%2F000250%2Fsubvariables%2F0001%2F%22%7D,%7B%22variable%22:%22/api/datasets/123%2Fvariables%2F4f0096ef7e6e41e7a83cf93e5a6a7ac6%2F%22%7D%5D,%22measures%22:%7B%22count%22:%7B%22function%22:%22cube_count%22,%22args%22:%5B%5D%7D%7D,%22weight%22:%22/api/datasets/123%2Fvariables%2F081824906f3f4d59892ad4be8ba3bad9%2F%22%7D",
+    "value": {
+        "query": {
+            "measures": {
+                "count": {
+                    "function": "cube_count",
+                    "args": []
+                }
+            },
+            "dimensions": [{
+                "variable": "/api/datasets/123/variables/000250/subvariables/0001/"
+            }, {
+                "variable": "/api/datasets/123/variables/4f0096ef7e6e41e7a83cf93e5a6a7ac6/"
+            }],
+            "weight": "/api/datasets/123/variables/081824906f3f4d59892ad4be8ba3bad9/"
+        },
+        "query_environment": {
+            "filter": []
+        },
+        "result": {
+            "dimensions": [{
+                "derived": false,
+                "references": {
+                    "alias": "Q8_BBCNews_1",
+                    "name": "It is good for breaking news"
+                },
+                "type": {
+                    "ordinal": false,
+                    "class": "categorical",
+                    "categories": [{
+                        "numeric_value": 2,
+                        "selected": false,
+                        "id": 1,
+                        "name": "Strongly agree",
+                        "missing": false
+                    }, {
+                        "numeric_value": 1,
+                        "selected": false,
+                        "id": 2,
+                        "name": "Somewhat agree",
+                        "missing": false
+                    }, {
+                        "numeric_value": 0,
+                        "selected": false,
+                        "id": 3,
+                        "name": "Neither agree nor disagree",
+                        "missing": false
+                    }, {
+                        "numeric_value": -1,
+                        "selected": false,
+                        "id": 4,
+                        "name": "Somewhat disagree",
+                        "missing": false
+                    }, {
+                        "numeric_value": -2,
+                        "selected": false,
+                        "id": 5,
+                        "name": "Strongly disagree",
+                        "missing": false
+                    }, {
+                        "numeric_value": null,
+                        "selected": false,
+                        "id": 98,
+                        "name": "Don\u2019t know",
+                        "missing": false
+                    }, {
+                        "numeric_value": null,
+                        "selected": false,
+                        "id": 998,
+                        "name": "skipped",
+                        "missing": true
+                    }, {
+                        "numeric_value": null,
+                        "selected": false,
+                        "id": 999,
+                        "name": "not asked",
+                        "missing": true
+                    }, {
+                        "numeric_value": null,
+                        "selected": false,
+                        "id": -1,
+                        "name": "No Data",
+                        "missing": true
+                    }]
+                }
+            }, {
+                "references": {
+                    "alias": "Age3",
+                    "name": "Age 3-way",
+                    "description": "Age"
+                },
+                "derived": false,
+                "type": {
+                    "ordinal": false,
+                    "class": "categorical",
+                    "categories": [{
+                        "numeric_value": null,
+                        "missing": false,
+                        "id": 1,
+                        "name": "16-34"
+                    }, {
+                        "numeric_value": null,
+                        "missing": false,
+                        "id": 2,
+                        "name": "35-54"
+                    }, {
+                        "numeric_value": null,
+                        "missing": false,
+                        "id": 3,
+                        "name": "55+"
+                    }, {
+                        "numeric_value": null,
+                        "missing": true,
+                        "id": -1,
+                        "name": "No Data"
+                    }, {
+                        "numeric_value": null,
+                        "missing": true,
+                        "id": 32767,
+                        "name": "not asked"
+                    }, {
+                        "numeric_value": null,
+                        "missing": true,
+                        "id": 32766,
+                        "name": "skipped"
+                    }]
+                }
+            }],
+            "missing": 13655,
+            "measures": {
+                "count": {
+                    "data": [889.0949969409685, 888.3481746568469, 1076.7108237027824, 0.0, 0.0, 0.0, 805.3112918638684, 1150.0947793567373, 1245.529097348345, 0.0, 0.0, 0.0, 176.86943722832072, 340.95179608815306, 519.4600194335815, 0.0, 0.0, 0.0, 104.95754230158963, 122.65910180903195, 169.04578461369096, 0.0, 0.0, 0.0, 29.653259740107426, 43.88904382243804, 49.389047133224416, 0.0, 0.0, 0.0, 54.130528736926166, 42.20595372753049, 53.10313053136074, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 4251.2946128534795, 4546.529768620308, 4876.7673094906195, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                    "n_missing": 13655,
+                    "metadata": {
+                        "references": {},
+                        "derived": true,
+                        "type": {
+                            "integer": false,
+                            "missing_rules": {},
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "class": "numeric"
+                        }
+                    }
+                }
+            },
+            "element": "crunch:cube",
+            "counts": [985, 862, 1052, 0, 0, 0, 862, 1117, 1213, 0, 0, 0, 185, 330, 508, 0, 0, 0, 111, 119, 168, 0, 0, 0, 30, 41, 48, 0, 0, 0, 57, 41, 52, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4528, 4382, 4745, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            "n": 21436
+        }
+    }
+}

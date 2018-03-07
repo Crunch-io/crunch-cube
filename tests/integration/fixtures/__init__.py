@@ -142,3 +142,5 @@ FIXT_FRUIT_X_PETS_ARRAY_PETS_FIRST = load_fixture(
     CUBES_DIR,
     'fruit-x-pets-array-pets-first.json'
 )
+FIXT_SCALE_WITH_NULL_VALUES = load_fixture(CUBES_DIR,
+                                           'scale-with-null-values.json')
