@@ -102,3 +102,10 @@ class TableHelper(object):
             self._cube['result']['measures'].get('count', {}).get('data')
         )
         return weighted
+
+    @property
+    def missing(self):
+        '''Get missing count of a cube.'''
+        if self.has_means:
+            return self._cube['result']['measures']['mean']['n_missing']
+        return self._cube['result'].get('missing')

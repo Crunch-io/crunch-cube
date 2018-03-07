@@ -741,9 +741,7 @@ class CrunchCube(object):
     @property
     def missing(self):
         '''Get missing count of a cube.'''
-        if self.has_means:
-            return self._cube['result']['measures']['mean']['n_missing']
-        return self._cube['result'].get('missing')
+        return self._table.missing
 
     @property
     def is_weighted(self):

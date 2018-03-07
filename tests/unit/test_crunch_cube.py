@@ -92,7 +92,7 @@ class TestCrunchCube(TestCase):
         actual = cube.description
         self.assertEqual(actual, expected)
 
-    @patch('cr.cube.crunch_cube.CrunchCube.has_means', False)
+    @patch('cr.cube.utils.table_helper.TableHelper.has_means', False)
     def test_missing_when_there_are_none(self):
         fake_cube = {'result': {}}
         cube = CrunchCube(fake_cube)
@@ -203,7 +203,7 @@ class TestCrunchCube(TestCase):
         actual = CrunchCube({}).description
         self.assertEqual(actual, expected)
 
-    @patch('cr.cube.crunch_cube.CrunchCube.has_means', False)
+    @patch('cr.cube.utils.table_helper.TableHelper.has_means', False)
     def test_missing(self):
         missing = Mock()
         fake_cube = {'result': {'missing': missing}}
