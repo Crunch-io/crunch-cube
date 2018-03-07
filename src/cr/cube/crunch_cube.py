@@ -59,14 +59,12 @@ class CrunchCube(object):
 
         # If the provided response is dict, create cube immediately
         if isinstance(response, dict):
-            self._cube = response.get('value', response)
-            self._table = TableHelper(self._cube)
+            self._table = TableHelper(response.get('value', response))
             return
 
         try:
             response = json.loads(response)
-            self._cube = response.get('value', response)
-            self._table = TableHelper(self._cube)
+            self._table = TableHelper(response.get('value', response))
         except TypeError:
             # If an unexpected type is provided raise descriptive exception.
             if not isinstance(response, dict):
