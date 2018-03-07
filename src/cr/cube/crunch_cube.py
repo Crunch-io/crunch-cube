@@ -1119,10 +1119,12 @@ class CrunchCube(object):
             except:
                 return contents * values[:, np.newaxis]
 
+        table = self.as_array()
         values = np.array([
-            dim.values for dim in self.dimensions if dim.values
+            dim.values for dim in self.dimensions
+            if dim.values and any(~np.isnan(dim.values))
         ][int(len(self.dimensions) > 2)])
-        contents = _inner_prod(self.as_array(), values)
+        contents = _inner_prod(table, values)
 
         if self.has_mr and not self.is_double_mr:
             axis = 1 - self.mr_dim_ind
@@ -1134,4 +1136,14 @@ class CrunchCube(object):
         elif len(self.dimensions) > 2 and self.ca_dim_ind == 1:
             axis = 2
 
-        return np.sum(contents, axis) / self.margin(axis)
+        valid_inds = ~np.isnan(values)
+        if valid_inds.all():
+            return np.sum(contents, axis) / self.margin(axis)
+        else:
+            ind = [
+                slice(None) if i != axis else valid_inds
+                for i in range(len(table.shape))
+            ]
+            num = np.sum(contents[ind], axis)
+            den = np.sum(table[ind], axis)
+            return num / den

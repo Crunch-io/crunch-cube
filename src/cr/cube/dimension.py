@@ -1,5 +1,7 @@
 '''Contains implementation of the Dimension class, for Crunch Cubes.'''
 
+import numpy as np
+
 from cr.cube.subtotal import Subtotal
 
 
@@ -16,12 +18,12 @@ class Dimension(object):
 
     @property
     def values(self):
-        return [
-            el['numeric_value']
+        values = [
+            el.get('numeric_value', np.nan)
             for el in self._elements
-            if (el.get('numeric_value', None) is not None and
-                not el.get('missing'))
+            if not el.get('missing')
         ]
+        return [val if val is not None else np.nan for val in values]
 
     @property
     def subtotals(self):
