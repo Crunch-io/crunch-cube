@@ -1961,7 +1961,7 @@ class TestCrunchCube(TestCase):
     def test_means_univariate_cat(self):
         cube = CrunchCube(FIXT_ECON_BLAME_WITH_HS)
         expected = 2.1735205616850553
-        actual = cube.means()
+        actual = cube.scale_means()
         self.assertEqual(actual, expected)
 
     def test_means_bivariate_cat(self):
@@ -1974,31 +1974,31 @@ class TestCrunchCube(TestCase):
             1.76363636,
             3.85,
         ])
-        actual = cube.means()
+        actual = cube.scale_means()
         np.testing.assert_almost_equal(actual, expected)
 
     def test_means_cat_x_mr(self):
         cube = CrunchCube(FIXT_FRUIT_X_PETS)
         expected = np.array([1.7, 1.6470588, 1.6842105])
-        actual = cube.means()
+        actual = cube.scale_means()
         np.testing.assert_almost_equal(actual, expected)
 
     def test_means_mr_x_cat(self):
         cube = CrunchCube(FIXT_PETS_X_FRUIT)
         expected = np.array([1.7, 1.6470588, 1.6842105])
-        actual = cube.means()
+        actual = cube.scale_means()
         np.testing.assert_almost_equal(actual, expected)
 
     def test_means_cat_array_cat_dim_first(self):
         cube = CrunchCube(FIXT_PETS_ARRAY_CAT_FIRST)
         expected = np.array([1.44333002, 1.48049069, 1.57881177])
-        actual = cube.means()
+        actual = cube.scale_means()
         np.testing.assert_almost_equal(actual, expected)
 
     def test_means_cat_array_subvar_dim_first(self):
         cube = CrunchCube(FIXT_PETS_ARRAY_SUBVAR_FIRST)
         expected = np.array([1.44333002, 1.48049069, 1.57881177])
-        actual = cube.means()
+        actual = cube.scale_means()
         np.testing.assert_almost_equal(actual, expected)
 
     def test_means_cat_x_cat_arr_fruit_first(self):
@@ -2007,7 +2007,7 @@ class TestCrunchCube(TestCase):
             [1.48, 1.42857143, 1.52173913],
             [1.40740741, 1.53846154, 1.55319149],
         ])
-        actual = cube.means()
+        actual = cube.scale_means()
         np.testing.assert_almost_equal(actual, expected)
 
     def test_means_cat_x_cat_arr_subvars_first(self):
@@ -2016,7 +2016,7 @@ class TestCrunchCube(TestCase):
             [1.71111111, 1.6, 1.65625],
             [1.64705882, 1.7, 1.68421053],
         ])
-        actual = cube.means()
+        actual = cube.scale_means()
         np.testing.assert_almost_equal(actual, expected)
 
     def test_means_cat_x_cat_arr_pets_first(self):
@@ -2026,11 +2026,11 @@ class TestCrunchCube(TestCase):
             [1.42857143, 1.53846154],
             [1.52173913, 1.55319149],
         ])
-        actual = cube.means()
+        actual = cube.scale_means()
         np.testing.assert_almost_equal(actual, expected)
 
     def test_means_with_null_values(self):
         cube = CrunchCube(FIXT_SCALE_WITH_NULL_VALUES)
         expected = np.array([1.2060688, 1.0669344, 1.023199])
-        actual = cube.means()
+        actual = cube.scale_means()
         np.testing.assert_almost_equal(actual, expected)

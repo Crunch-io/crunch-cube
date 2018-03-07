@@ -13,7 +13,7 @@ from scipy.stats import norm
 from scipy.stats.contingency import expected_freq
 
 from .utils.table_helper import TableHelper
-from .services.means import Means
+from .services.scale_means import ScaleMeans
 
 np.seterr(divide='ignore', invalid='ignore')
 
@@ -1109,6 +1109,6 @@ class CrunchCube(object):
 
         return props / margin
 
-    def means(self):
+    def scale_means(self):
         '''Get cube means.'''
-        return Means(self).data
+        return ScaleMeans(self).data

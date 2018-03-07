@@ -1,7 +1,7 @@
 import numpy as np
 
 
-class Means(object):
+class ScaleMeans(object):
     '''Implementation of the Means service.'''
     def __init__(self, cube):
         self._cube = cube
