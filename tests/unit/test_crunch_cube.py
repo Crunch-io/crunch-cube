@@ -356,3 +356,15 @@ class TestCrunchCube(TestCase):
 
         expected = sum(weighted_counts)
         self.assertEqual(actual, expected)
+
+    @patch('cr.cube.utils.table_helper.TableHelper.is_weighted', 'fake_val')
+    def test_is_weighted_invoked(self):
+        cube = CrunchCube({})
+        actual = cube.is_weighted
+        assert actual == 'fake_val'
+
+    @patch('cr.cube.utils.table_helper.TableHelper.has_means', 'fake_val')
+    def test_has_means_invoked(self):
+        cube = CrunchCube({})
+        actual = cube.has_means
+        assert actual == 'fake_val'
