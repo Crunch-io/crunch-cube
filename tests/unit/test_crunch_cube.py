@@ -321,7 +321,7 @@ class TestCrunchCube(TestCase):
         expected = unweighted_count
         self.assertEqual(actual, expected)
 
-    @patch('cr.cube.crunch_cube.CrunchCube.is_weighted', False)
+    @patch('cr.cube.utils.table_helper.TableHelper.is_weighted', False)
     def test_n_weighted_and_has_no_weight(self):
         unweighted_count = Mock()
         weighted_counts = Mock()
@@ -339,7 +339,7 @@ class TestCrunchCube(TestCase):
         expected = unweighted_count
         self.assertEqual(actual, expected)
 
-    @patch('cr.cube.crunch_cube.CrunchCube.is_weighted', True)
+    @patch('cr.cube.utils.table_helper.TableHelper.is_weighted', True)
     def test_n_weighted_and_has_weight(self):
         unweighted_count = Mock()
         weighted_counts = [1, 2, 3, 4]
