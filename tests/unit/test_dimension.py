@@ -1,3 +1,5 @@
+import numpy as np
+
 from mock import Mock
 from mock import patch
 from unittest import TestCase
@@ -272,6 +274,6 @@ class TestDimension(TestCase):
     def test_values(self, mock_type):
         dim = Dimension({})
         mock_type.return_value = None
-        expected = [1, 2]
+        expected = [1, 2, np.nan]
         actual = dim.values
         self.assertEqual(actual, expected)
