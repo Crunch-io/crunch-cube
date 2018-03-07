@@ -124,29 +124,29 @@ class CrunchCube(object):
                      if dim != 1 or i == 0]
         return array.reshape(new_shape)
 
-    def _get_values(self, weighted, margin=False):
-        '''Gets the values from the original cube response.
+    # def _get_values(self, weighted, margin=False):
+    #     '''Gets the values from the original cube response.
 
-        Params
-            weighted (bool): Whether to get the unweighted or weighted counts
-            margin (bool): If we're doing the calculations for the margin, we
-                don't want any other measure (e.g. means), but only counts
-                (which may be weighted or unweighted, depending on the type
-                of the margin).
-        Returns
-            values (ndarray): The flattened array, which represents the result
-                of the cube computation.
-        '''
-        values = self._cube['result']['counts']
-        if self.has_means and not margin:
-            mean = self._cube['result']['measures'].get('mean', {})
-            values = mean.get('data', values)
-        elif weighted and self.is_weighted:
-            count = self._cube['result']['measures'].get('count', {})
-            values = count.get('data', values)
-        values = [(val if not isinstance(val, dict) else np.nan)
-                  for val in values]
-        return values
+    #     Params
+    #         weighted (bool): Whether to get the unweighted or weighted counts
+    #         margin (bool): If we're doing the calculations for the margin, we
+    #             don't want any other measure (e.g. means), but only counts
+    #             (which may be weighted or unweighted, depending on the type
+    #             of the margin).
+    #     Returns
+    #         values (ndarray): The flattened array, which represents the result
+    #             of the cube computation.
+    #     '''
+    #     values = self._cube['result']['counts']
+    #     if self.has_means and not margin:
+    #         mean = self._cube['result']['measures'].get('mean', {})
+    #         values = mean.get('data', values)
+    #     elif weighted and self.is_weighted:
+    #         count = self._cube['result']['measures'].get('count', {})
+    #         values = count.get('data', values)
+    #     values = [(val if not isinstance(val, dict) else np.nan)
+    #               for val in values]
+    #     return values
 
     def _get_table(self, weighted, margin=False):
         '''Get the data in non-flattened shape.
@@ -156,7 +156,7 @@ class CrunchCube(object):
         cube, with 2 categories in each dimension (variable), we end up with
         a ndarray of shape (2, 2).
         '''
-        values = self._get_values(weighted, margin)
+        values = self._table.get_values(weighted, margin)
         all_dimensions = self._table.all_dimensions
         shape = [len(dim.elements(include_missing=True))
                  for dim in all_dimensions]
@@ -242,7 +242,7 @@ class CrunchCube(object):
             res (ndarray): Tabular representation of crunch cube
         '''
 
-        values = self._get_values(weighted, margin)
+        values = self._table.get_values(weighted, margin)
         dimensions = self._table.all_dimensions
         shape = [len(dim.elements(include_missing=True)) for dim in dimensions]
         valid_indices = self._get_valid_indices(dimensions, include_missing,
@@ -748,14 +748,15 @@ class CrunchCube(object):
     @property
     def is_weighted(self):
         '''Check if the cube dataset is weighted.'''
-        weighted = self._cube.get('query', {}).get('weight', None) is not None
-        weighted = weighted or self._cube.get('weight_var', None) is not None
-        weighted = weighted or self._cube.get('weight_url', None) is not None
-        weighted = weighted or (
-            self._cube['result']['counts'] !=
-            self._cube['result']['measures'].get('count', {}).get('data')
-        )
-        return weighted
+        # weighted = self._cube.get('query', {}).get('weight', None) is not None
+        # weighted = weighted or self._cube.get('weight_var', None) is not None
+        # weighted = weighted or self._cube.get('weight_url', None) is not None
+        # weighted = weighted or (
+        #     self._cube['result']['counts'] !=
+        #     self._cube['result']['measures'].get('count', {}).get('data')
+        # )
+        # return weighted
+        return self._table.is_weighted
 
     @property
     def filter_annotation(self):
@@ -765,7 +766,8 @@ class CrunchCube(object):
     @property
     def has_means(self):
         '''Check if cube has means.'''
-        return self._cube['result']['measures'].get('mean', None) is not None
+        # return self._cube['result']['measures'].get('mean', None) is not None
+        return self._table.has_means
 
     @property
     def is_double_mr(self):

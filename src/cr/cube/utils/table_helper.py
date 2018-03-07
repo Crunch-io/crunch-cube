@@ -1,5 +1,7 @@
 '''Grouping of various cube methods'''
 
+import numpy as np
+
 from ..dimension import Dimension
 
 
@@ -59,3 +61,44 @@ class TableHelper(object):
         # Here we increase the MR index by 1, which gives us
         # the index of the corresponding 'selections' dimension.
         return [i + 1 for i in mr_dimensions_indices]
+
+    def get_values(self, weighted, margin=False):
+        '''Gets the values from the original cube response.
+
+        Params
+            weighted (bool): Whether to get the unweighted or weighted counts
+            margin (bool): If we're doing the calculations for the margin, we
+                don't want any other measure (e.g. means), but only counts
+                (which may be weighted or unweighted, depending on the type
+                of the margin).
+        Returns
+            values (ndarray): The flattened array, which represents the result
+                of the cube computation.
+        '''
+        values = self._cube['result']['counts']
+        if self.has_means and not margin:
+            mean = self._cube['result']['measures'].get('mean', {})
+            values = mean.get('data', values)
+        elif weighted and self.is_weighted:
+            count = self._cube['result']['measures'].get('count', {})
+            values = count.get('data', values)
+        values = [(val if not isinstance(val, dict) else np.nan)
+                  for val in values]
+        return values
+
+    @property
+    def has_means(self):
+        '''Check if cube has means.'''
+        return self._cube['result']['measures'].get('mean', None) is not None
+
+    @property
+    def is_weighted(self):
+        '''Check if the cube dataset is weighted.'''
+        weighted = self._cube.get('query', {}).get('weight', None) is not None
+        weighted = weighted or self._cube.get('weight_var', None) is not None
+        weighted = weighted or self._cube.get('weight_url', None) is not None
+        weighted = weighted or (
+            self._cube['result']['counts'] !=
+            self._cube['result']['measures'].get('count', {}).get('data')
+        )
+        return weighted
