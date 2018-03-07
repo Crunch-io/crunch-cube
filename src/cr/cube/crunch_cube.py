@@ -13,6 +13,7 @@ from scipy.stats import norm
 from scipy.stats.contingency import expected_freq
 
 from .utils.table_helper import TableHelper
+from .services.means import Means
 
 np.seterr(divide='ignore', invalid='ignore')
 
@@ -1110,40 +1111,4 @@ class CrunchCube(object):
 
     def means(self):
         '''Get cube means.'''
-
-        def _inner_prod(contents, values):
-            if len(contents.shape) == 3 and self.ca_dim_ind == 0:
-                values = values[:, np.newaxis]
-            try:
-                return contents * values
-            except:
-                return contents * values[:, np.newaxis]
-
-        table = self.as_array()
-        values = np.array([
-            dim.values for dim in self.dimensions
-            if dim.values and any(~np.isnan(dim.values))
-        ][int(len(self.dimensions) > 2)])
-        contents = _inner_prod(table, values)
-
-        if self.has_mr and not self.is_double_mr:
-            axis = 1 - self.mr_dim_ind
-            return np.sum(contents, axis) / np.sum(self.as_array(), axis)
-
-        axis = 0
-        if self.ca_dim_ind == 0 or self.ca_dim_ind == 2:
-            axis = 1
-        elif len(self.dimensions) > 2 and self.ca_dim_ind == 1:
-            axis = 2
-
-        valid_inds = ~np.isnan(values)
-        if valid_inds.all():
-            return np.sum(contents, axis) / self.margin(axis)
-        else:
-            ind = [
-                slice(None) if i != axis else valid_inds
-                for i in range(len(table.shape))
-            ]
-            num = np.sum(contents[ind], axis)
-            den = np.sum(table[ind], axis)
-            return num / den
+        return Means(self).data
