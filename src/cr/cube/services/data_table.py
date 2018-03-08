@@ -5,7 +5,7 @@ import numpy as np
 from ..dimension import Dimension
 
 
-class TableHelper(object):
+class DataTable(object):
     '''Groups together useful cube utility methods.'''
     def __init__(self, cube):
         self._cube = cube

@@ -12,7 +12,7 @@ import numpy as np
 from scipy.stats import norm
 from scipy.stats.contingency import expected_freq
 
-from .utils.table_helper import TableHelper
+from .services.data_table import DataTable
 from .services.scale_means import ScaleMeans
 
 np.seterr(divide='ignore', invalid='ignore')
@@ -60,12 +60,12 @@ class CrunchCube(object):
 
         # If the provided response is dict, create cube immediately
         if isinstance(response, dict):
-            self._table = TableHelper(response.get('value', response))
+            self._table = DataTable(response.get('value', response))
             return
 
         try:
             response = json.loads(response)
-            self._table = TableHelper(response.get('value', response))
+            self._table = DataTable(response.get('value', response))
         except TypeError:
             # If an unexpected type is provided raise descriptive exception.
             if not isinstance(response, dict):
@@ -86,7 +86,7 @@ class CrunchCube(object):
         valid_indices = [dim.valid_indices(include_missing)
                          for dim in dimensions]
 
-        mr_selections_indices = self._table.mr_selections_indices
+        mr_selections_indices = self.table.mr_selections_indices
         mr_slice = [1] if get_non_selected else [0]
         if mr_selections_indices:
             # In the case of MR variables, we only need to select the
@@ -131,8 +131,8 @@ class CrunchCube(object):
         cube, with 2 categories in each dimension (variable), we end up with
         a ndarray of shape (2, 2).
         '''
-        values = self._table.get_values(weighted, margin)
-        all_dimensions = self._table.all_dimensions
+        values = self.table.get_values(weighted, margin)
+        all_dimensions = self.table.all_dimensions
         shape = [len(dim.elements(include_missing=True))
                  for dim in all_dimensions]
         return np.array(values).reshape(shape)
@@ -177,7 +177,7 @@ class CrunchCube(object):
     def _transform(self, res, include_transforms_for_dims, valid_indices):
         '''Transform the shape of the resulting ndarray.'''
 
-        all_dimensions = self._table.all_dimensions
+        all_dimensions = self.table.all_dimensions
 
         if not include_transforms_for_dims:
             return res[np.ix_(*valid_indices)]
@@ -217,8 +217,8 @@ class CrunchCube(object):
             res (ndarray): Tabular representation of crunch cube
         '''
 
-        values = self._table.get_values(weighted, margin)
-        dimensions = self._table.all_dimensions
+        values = self.table.get_values(weighted, margin)
+        dimensions = self.table.all_dimensions
         shape = [len(dim.elements(include_missing=True)) for dim in dimensions]
         valid_indices = self._get_valid_indices(dimensions, include_missing,
                                                 get_non_selected)
@@ -603,7 +603,7 @@ class CrunchCube(object):
 
     def _mr_dim_ind(self, include_selections=False):
         dimensions = (
-            self._table.all_dimensions
+            self.table.all_dimensions
             if include_selections else
             self.dimensions
         )
@@ -616,6 +616,10 @@ class CrunchCube(object):
         return None
 
     # Properties
+
+    @property
+    def table(self):
+        return self._table
 
     @property
     def ind_selected(self):
@@ -706,8 +710,8 @@ class CrunchCube(object):
     @property
     def dimensions(self):
         '''Dimensions of the crunch cube.'''
-        all_dimensions = self._table.all_dimensions
-        mr_selections = self._table.mr_selections_indices
+        all_dimensions = self.table.all_dimensions
+        mr_selections = self.table.mr_selections_indices
         return [
             dim for (i, dim) in enumerate(all_dimensions)
             if i not in mr_selections
@@ -716,22 +720,22 @@ class CrunchCube(object):
     @property
     def missing(self):
         '''Get missing count of a cube.'''
-        return self._table.missing
+        return self.table.missing
 
     @property
     def is_weighted(self):
         '''Check if the cube dataset is weighted.'''
-        return self._table.is_weighted
+        return self.table.is_weighted
 
     @property
     def filter_annotation(self):
         '''Get cube's filter annotation.'''
-        return self._table.filter_annotation
+        return self.table.filter_annotation
 
     @property
     def has_means(self):
         '''Check if cube has means.'''
-        return self._table.has_means
+        return self.table.has_means
 
     @property
     def is_double_mr(self):
@@ -1064,7 +1068,7 @@ class CrunchCube(object):
 
     def count(self, weighted=True):
         '''Get cube's count with automatic weighted/unweighted selection.'''
-        return self._table.count(weighted)
+        return self.table.count(weighted)
 
     def _mr_index(self, axis, weighted):
         table = self._get_table(weighted)
