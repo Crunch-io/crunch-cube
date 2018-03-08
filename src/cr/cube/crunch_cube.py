@@ -74,6 +74,29 @@ class CrunchCube(object):
                     'A `cube` must be JSON or `dict`.'
                 ).format(type(response)))
 
+    def _mr_index(self, axis, weighted):
+        table = self._get_table(weighted)
+        selected = table[self.ind_selected]
+        non_selected = table[self.ind_non_selected]
+
+        if self.mr_dim_ind == 0 or self.mr_dim_ind == (0, 1):
+            if axis != 0:
+                # MR x CAT index table only defined for column direction.
+                return np.full(self.as_array().shape, np.nan)
+            margin = np.sum(selected, 1) / np.sum(selected + non_selected, 1)
+            return (self.proportions(axis=axis, weighted=weighted) /
+                    margin[:, np.newaxis])
+
+        if self.mr_dim_ind == 1:
+            if axis == 0:
+                # CAT x MR index table not defined for column direction.
+                return np.full(self.as_array().shape, np.nan)
+            margin = np.sum(selected, 0) / np.sum(selected + non_selected, 0)
+            return self.proportions(weighted=weighted) / margin
+
+        raise ValueError('Unexpected dimension types for cube with MR.')
+
+
     def _get_valid_indices(self, dimensions, include_missing, get_non_selected):
         '''Gets valid indices for each dimension.
 
@@ -136,26 +159,6 @@ class CrunchCube(object):
         shape = [len(dim.elements(include_missing=True))
                  for dim in all_dimensions]
         return np.array(values).reshape(shape)
-
-    @staticmethod
-    def _insertions(result, dimension, dimension_index):
-        insertions = []
-
-        for indices in dimension.hs_indices:
-            ind_subtotal_elements = np.array(indices['inds'])
-            if indices['anchor_ind'] == 'top':
-                ind_insertion = -1
-            elif indices['anchor_ind'] == 'bottom':
-                ind_insertion = result.shape[dimension_index] - 1
-            else:
-                ind_insertion = indices['anchor_ind']
-            if dimension_index == 0:
-                value = sum(result[ind_subtotal_elements])
-            else:
-                value = np.sum(result[:, ind_subtotal_elements], axis=1)
-            insertions.append((ind_insertion, value))
-
-        return insertions
 
     def _update_result(self, result, insertions, dimension_index,
                        valid_indices):
@@ -381,23 +384,6 @@ class CrunchCube(object):
             den = np.sum(self.margin(), 0)
 
         return num / den
-
-    @property
-    def double_mr_non_selected_inds(self):
-        '''Gets all combinations of non-selected slices for any double MR cube.
-
-        For double MR cubes, we need combinations of (selected) with
-        (selected + non_selected) for all combinations of MR x MR, but we also
-        need other potential dimensions included
-        '''
-        # This represents an index in between MR dimensions (at this point we
-        # know there are two). It's used subsequently, for creating the
-        # combined conditional slices, where we have to take 'selected' for
-        # one MR, and selected AND non-selected for the other.
-        inflect = self.mr_dim_ind[1] + 1
-        ind_ns_0 = self.ind_selected[:inflect] + self.ind_non_selected[inflect:]
-        ind_ns_1 = self.ind_non_selected[:inflect] + self.ind_selected[inflect:]
-        return self.ind_non_selected, ind_ns_0, ind_ns_1
 
     def _double_mr_margin(self, axis, weighted):
         '''Margin for MR x MR cube (they're specific, thus separate method).'''
@@ -639,7 +625,7 @@ class CrunchCube(object):
         '''Calculate residuals based on Chi-squared.'''
 
         if self.has_mr:
-            return self._mr_std_residuals
+            return self.mr_std_residuals
 
         counts = self.as_array()
         total = self.margin()
@@ -659,7 +645,7 @@ class CrunchCube(object):
         return [dim.valid_indices(False) for dim in self.dimensions]
 
     @property
-    def _mr_std_residuals(self):
+    def mr_std_residuals(self):
         counts = self.as_array()
         total = self.margin()
         colsum = self.margin(axis=0)
@@ -742,6 +728,25 @@ class CrunchCube(object):
         '''Check if cube has 2 MR dimensions.'''
         return True if isinstance(self.mr_dim_ind, tuple) else False
 
+    @property
+    def double_mr_non_selected_inds(self):
+        '''Gets all combinations of non-selected slices for any double MR cube.
+
+        For double MR cubes, we need combinations of (selected) with
+        (selected + non_selected) for all combinations of MR x MR, but we also
+        need other potential dimensions included
+        '''
+        # This represents an index in between MR dimensions (at this point we
+        # know there are two). It's used subsequently, for creating the
+        # combined conditional slices, where we have to take 'selected' for
+        # one MR, and selected AND non-selected for the other.
+        inflect = self.mr_dim_ind[1] + 1
+        ind_ns_0 = self.ind_selected[:inflect] + self.ind_non_selected[inflect:]
+        ind_ns_1 = self.ind_non_selected[:inflect] + self.ind_selected[inflect:]
+        return self.ind_non_selected, ind_ns_0, ind_ns_1
+
+    # Static methods
+
     @staticmethod
     def _adjust_inserted_indices(inserted_indices_list, prune_indices_list):
         '''Adjust inserted indices, if there are pruned elements.'''
@@ -753,6 +758,26 @@ class CrunchCube(object):
                 ind -= np.sum(prune_inds < ind)
                 inserted_inds[i] = ind
         return inserted_indices_list
+
+    @staticmethod
+    def _insertions(result, dimension, dimension_index):
+        insertions = []
+
+        for indices in dimension.hs_indices:
+            ind_subtotal_elements = np.array(indices['inds'])
+            if indices['anchor_ind'] == 'top':
+                ind_insertion = -1
+            elif indices['anchor_ind'] == 'bottom':
+                ind_insertion = result.shape[dimension_index] - 1
+            else:
+                ind_insertion = indices['anchor_ind']
+            if dimension_index == 0:
+                value = sum(result[ind_subtotal_elements])
+            else:
+                value = np.sum(result[:, ind_subtotal_elements], axis=1)
+            insertions.append((ind_insertion, value))
+
+        return insertions
 
     # API Functions
 
@@ -1069,28 +1094,6 @@ class CrunchCube(object):
     def count(self, weighted=True):
         '''Get cube's count with automatic weighted/unweighted selection.'''
         return self.table.count(weighted)
-
-    def _mr_index(self, axis, weighted):
-        table = self._get_table(weighted)
-        selected = table[self.ind_selected]
-        non_selected = table[self.ind_non_selected]
-
-        if self.mr_dim_ind == 0 or self.mr_dim_ind == (0, 1):
-            if axis != 0:
-                # MR x CAT index table only defined for column direction.
-                return np.full(self.as_array().shape, np.nan)
-            margin = np.sum(selected, 1) / np.sum(selected + non_selected, 1)
-            return (self.proportions(axis=axis, weighted=weighted) /
-                    margin[:, np.newaxis])
-
-        if self.mr_dim_ind == 1:
-            if axis == 0:
-                # CAT x MR index table not defined for column direction.
-                return np.full(self.as_array().shape, np.nan)
-            margin = np.sum(selected, 0) / np.sum(selected + non_selected, 0)
-            return self.proportions(weighted=weighted) / margin
-
-        raise ValueError('Unexpected dimension types for cube with MR.')
 
     def index(self, axis, weighted=True, prune=False):
         '''Return table index by margin.'''
