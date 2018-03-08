@@ -10,6 +10,8 @@ class DataTable(object):
     def __init__(self, cube):
         self._cube = cube
 
+    # Properties
+
     @property
     def all_dimensions(self):
         '''Gets the dimensions of the crunch cube.
@@ -62,30 +64,6 @@ class DataTable(object):
         # the index of the corresponding 'selections' dimension.
         return [i + 1 for i in mr_dimensions_indices]
 
-    def get_values(self, weighted, margin=False):
-        '''Gets the values from the original cube response.
-
-        Params
-            weighted (bool): Whether to get the unweighted or weighted counts
-            margin (bool): If we're doing the calculations for the margin, we
-                don't want any other measure (e.g. means), but only counts
-                (which may be weighted or unweighted, depending on the type
-                of the margin).
-        Returns
-            values (ndarray): The flattened array, which represents the result
-                of the cube computation.
-        '''
-        values = self._cube['result']['counts']
-        if self.has_means and not margin:
-            mean = self._cube['result']['measures'].get('mean', {})
-            values = mean.get('data', values)
-        elif weighted and self.is_weighted:
-            count = self._cube['result']['measures'].get('count', {})
-            values = count.get('data', values)
-        values = [(val if not isinstance(val, dict) else np.nan)
-                  for val in values]
-        return values
-
     @property
     def has_means(self):
         '''Check if cube has means.'''
@@ -110,6 +88,13 @@ class DataTable(object):
             return self._cube['result']['measures']['mean']['n_missing']
         return self._cube['result'].get('missing')
 
+    @property
+    def filter_annotation(self):
+        '''Get cube's filter annotation.'''
+        return self._cube.get('filter_names', [])
+
+    # API Methods
+
     def count(self, weighted=True):
         '''Get cube's count with automatic weighted/unweighted selection.'''
         if weighted and self.is_weighted:
@@ -118,7 +103,40 @@ class DataTable(object):
             )
         return self._cube['result']['n']
 
-    @property
-    def filter_annotation(self):
-        '''Get cube's filter annotation.'''
-        return self._cube.get('filter_names', [])
+    def flat_values(self, weighted, margin=False):
+        '''Gets the flat values from the original cube response.
+
+        Params
+            weighted (bool): Whether to get the unweighted or weighted counts
+            margin (bool): If we're doing the calculations for the margin, we
+                don't want any other measure (e.g. means), but only counts
+                (which may be weighted or unweighted, depending on the type
+                of the margin).
+        Returns
+            values (ndarray): The flattened array, which represents the result
+                of the cube computation.
+        '''
+        values = self._cube['result']['counts']
+        if self.has_means and not margin:
+            mean = self._cube['result']['measures'].get('mean', {})
+            values = mean.get('data', values)
+        elif weighted and self.is_weighted:
+            count = self._cube['result']['measures'].get('count', {})
+            values = count.get('data', values)
+        values = [(val if not isinstance(val, dict) else np.nan)
+                  for val in values]
+        return values
+
+    def data(self, weighted, margin=False):
+        '''Get the data in non-flattened shape.
+
+        Converts the flattened shape (original response) into non-flattened
+        shape (count of elements per cube dimension). E.g. for a CAT x CAT
+        cube, with 2 categories in each dimension (variable), we end up with
+        a ndarray of shape (2, 2).
+        '''
+        values = self.flat_values(weighted, margin)
+        all_dimensions = self.all_dimensions
+        shape = [len(dim.elements(include_missing=True))
+                 for dim in all_dimensions]
+        return np.array(values).reshape(shape)

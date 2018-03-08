@@ -13,6 +13,7 @@ from scipy.stats import norm
 from scipy.stats.contingency import expected_freq
 
 from .services.data_table import DataTable
+from .services.index import Index
 from .services.scale_means import ScaleMeans
 
 np.seterr(divide='ignore', invalid='ignore')
@@ -74,28 +75,6 @@ class CrunchCube(object):
                     'A `cube` must be JSON or `dict`.'
                 ).format(type(response)))
 
-    def _mr_index(self, axis, weighted):
-        table = self._get_table(weighted)
-        selected = table[self.ind_selected]
-        non_selected = table[self.ind_non_selected]
-
-        if self.mr_dim_ind == 0 or self.mr_dim_ind == (0, 1):
-            if axis != 0:
-                # MR x CAT index table only defined for column direction.
-                return np.full(self.as_array().shape, np.nan)
-            margin = np.sum(selected, 1) / np.sum(selected + non_selected, 1)
-            return (self.proportions(axis=axis, weighted=weighted) /
-                    margin[:, np.newaxis])
-
-        if self.mr_dim_ind == 1:
-            if axis == 0:
-                # CAT x MR index table not defined for column direction.
-                return np.full(self.as_array().shape, np.nan)
-            margin = np.sum(selected, 0) / np.sum(selected + non_selected, 0)
-            return self.proportions(weighted=weighted) / margin
-
-        raise ValueError('Unexpected dimension types for cube with MR.')
-
 
     def _get_valid_indices(self, dimensions, include_missing, get_non_selected):
         '''Gets valid indices for each dimension.
@@ -145,20 +124,6 @@ class CrunchCube(object):
         new_shape = [dim for (i, dim) in enumerate(array.shape)
                      if dim != 1 or i == 0]
         return array.reshape(new_shape)
-
-    def _get_table(self, weighted, margin=False):
-        '''Get the data in non-flattened shape.
-
-        Converts the flattened shape (original response) into non-flattened
-        shape (count of elements per cube dimension). E.g. for a CAT x CAT
-        cube, with 2 categories in each dimension (variable), we end up with
-        a ndarray of shape (2, 2).
-        '''
-        values = self.table.get_values(weighted, margin)
-        all_dimensions = self.table.all_dimensions
-        shape = [len(dim.elements(include_missing=True))
-                 for dim in all_dimensions]
-        return np.array(values).reshape(shape)
 
     def _update_result(self, result, insertions, dimension_index,
                        valid_indices):
@@ -220,7 +185,7 @@ class CrunchCube(object):
             res (ndarray): Tabular representation of crunch cube
         '''
 
-        values = self.table.get_values(weighted, margin)
+        values = self.table.flat_values(weighted, margin)
         dimensions = self.table.all_dimensions
         shape = [len(dim.elements(include_missing=True)) for dim in dimensions]
         valid_indices = self._get_valid_indices(dimensions, include_missing,
@@ -387,7 +352,7 @@ class CrunchCube(object):
 
     def _double_mr_margin(self, axis, weighted):
         '''Margin for MR x MR cube (they're specific, thus separate method).'''
-        table = self._get_table(weighted)
+        table = self.table.data(weighted)
         ind_ns, ind_ns_0, ind_ns_1 = self.double_mr_non_selected_inds
         selected = table[self.ind_selected]
         non_selected = table[ind_ns]
@@ -402,7 +367,7 @@ class CrunchCube(object):
         return (selected + non_selected)[np.ix_(*self.valid_indices)]
 
     def _1d_mr_margin(self, axis, weighted):
-        table = self._get_table(weighted)
+        table = self.table.data(weighted)
         if axis == 0:
             return self.as_array(weighted=weighted)
         return table[:, 0] + table[:, 1]
@@ -451,7 +416,7 @@ class CrunchCube(object):
         elif self._calculate_along_non_mr(axis):
             return self._mr_margin_along_non_mr_dim(axis, weighted)
 
-        table = self._get_table(weighted)
+        table = self.table.data(weighted)
 
         # For cases when the margin is calculated for the MR dimension, we need
         # the sum of selected and non-selected slices (if axis is None), or the
@@ -516,7 +481,7 @@ class CrunchCube(object):
             # specific way, which needs to be handled speparately.
             return self._double_mr_proportions(axis, weighted)
 
-        table = self._get_table(weighted)
+        table = self.table.data(weighted)
         valid_indices = [dim.valid_indices(False) for dim in self.dimensions]
 
         if len(self.dimensions) == 1:
@@ -1096,25 +1061,8 @@ class CrunchCube(object):
         return self.table.count(weighted)
 
     def index(self, axis, weighted=True, prune=False):
-        '''Return table index by margin.'''
-
-        if self.has_mr:
-            return self._mr_index(axis, weighted)
-
-        margin = (
-            self.margin(axis=axis, weighted=weighted, prune=prune) /
-            self.margin(weighted=weighted, prune=prune)
-        )
-        props = self.proportions(
-            axis=(1 - axis),
-            weighted=weighted,
-            prune=prune,
-        )
-
-        if axis == 1:
-            margin = margin[:, np.newaxis]
-
-        return props / margin
+        '''Get cube index measurement.'''
+        return Index(self, axis, weighted, prune).data
 
     def scale_means(self):
         '''Get cube means.'''
