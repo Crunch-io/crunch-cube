@@ -1,3 +1,7 @@
+'''Contains implementation of the Means service class.'''
+
+from __future__ import division
+
 import numpy as np
 
 
