@@ -505,10 +505,17 @@ class CrunchCube(object):
             else:
                 res = table[:, 0, :] / (table[:, 0, :] + table[:, 1, :])
         elif self.mr_dim_ind == 1:
+            num = table[self.ind_selected][np.ix_(*self.valid_indices)]
+            non_selected = table[self.ind_non_selected][np.ix_(*self.valid_indices)]
             if axis == 0:
-                res = table[:, :, 0] / np.sum(table[:, :, 0], 0)
+                den = np.sum(num, 0)
+            elif axis == 1 or axis == 2 and len(num.shape) >= 3:
+                den = num + non_selected
             else:
-                res = table[:, :, 0] / (table[:, :, 0] + table[:, :, 1])
+                axis = 0 if len(num.shape) < 3 else (1, 2)
+                # num[np.ix_(*self.valid_indices)] / np.sum(num[np.ix_(*self.valid_indices)] + non_selected[np.ix_(*valid_indices)], (1, 2))
+                den = np.sum(num + non_selected, axis)
+            return num / den
         elif self.mr_dim_ind == 2:
             margin = (
                 self.margin(axis=axis)[:, np.newaxis]
@@ -1060,9 +1067,9 @@ class CrunchCube(object):
         '''Get cube's count with automatic weighted/unweighted selection.'''
         return self.table.count(weighted)
 
-    def index(self, axis, weighted=True, prune=False):
+    def index(self, weighted=True, prune=False):
         '''Get cube index measurement.'''
-        return Index(self, axis, weighted, prune).data
+        return Index(self, weighted, prune).data
 
     def scale_means(self):
         '''Get cube means.'''
