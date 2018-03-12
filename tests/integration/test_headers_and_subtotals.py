@@ -503,7 +503,7 @@ class TestHeadersAndSubtotals(TestCase):
         '''Ensure that pvals shape is the same as table shape with H%S'''
         cube = CrunchCube(FIXT_ECON_BLAME_X_IDEOLOGY_ROW_HS)
         expected = 6, 6
-        actual = cube.pvals(axis=0, include_transforms_for_dims=[0, 1]).shape
+        actual = cube.pvals(include_transforms_for_dims=[0, 1]).shape
 
         # Only assert the shape of the table, as the pvals are going to be
         # rewritten soon.

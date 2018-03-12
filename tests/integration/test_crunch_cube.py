@@ -715,202 +715,80 @@ class TestCrunchCube(TestCase):
         '''Calculate standard error across columns.'''
         cube = CrunchCube(FIXT_ECON_GENDER_X_IDEOLOGY_WEIGHTED)
         axis = 0
+        np.set_printoptions(precision=15, suppress=True)
+        print np.array_repr(cube.standardized_residuals, precision=15)
+
         expected = np.array([
             [
-                0.0556176,
-                0.0332214,
-                0.0202155,
-                0.0295626,
-                0.0430823,
-                0.0713761
+                -0.715899626017458,
+                -0.536708837208206,
+                -1.485149675785275,
+                1.114743776586886,
+                3.355236023985286,
+                -2.077040949965248
             ],
             [
-                0.0556176,
-                0.0332214,
-                0.0202155,
-                0.0295626,
-                0.0430823,
-                0.0713761,
-            ],
-        ])
-        actual = cube._calculate_standard_error(axis=axis)
-        np.testing.assert_almost_equal(actual, expected)
-
-    def test_calculate_standard_error_axis_1(self):
-        '''Calculate standard error across rows.'''
-        cube = CrunchCube(FIXT_ECON_GENDER_X_IDEOLOGY_WEIGHTED)
-        axis = 1
-        expected = np.array([
-            [
-                0.0084098,
-                0.0124771,
-                0.0156354,
-                0.0134104,
-                0.010181,
-                0.0063893,
-            ],
-            [
-                0.0079255,
-                0.0117586,
-                0.0147351,
-                0.0126382,
-                0.0095947,
-                0.0060214,
-            ],
-        ])
-        actual = cube._calculate_standard_error(axis=axis)
-        np.testing.assert_almost_equal(actual, expected)
-
-    def test_calculate_statistics_raises_error_for_bad_axis(self):
-        cube = CrunchCube(FIXT_ECON_GENDER_X_IDEOLOGY_WEIGHTED)
-        axis = 2
-        with self.assertRaises(ValueError):
-            cube._calculate_statistics(axis)
-
-    def test_calculate_statistics_axis_0(self):
-        cube = CrunchCube(FIXT_ECON_GENDER_X_IDEOLOGY_WEIGHTED)
-        expected = np.array([
-            [
-                -0.7316249,
-                -0.5418986,
-                -1.4985995,
-                1.1212007,
-                3.4848471,
-                -2.265434,
-            ],
-            [
-                0.7316249,
-                0.5418986,
-                1.4985995,
-                -1.1212007,
-                -3.4848471,
-                2.265434,
+                0.715899626017462,
+                0.536708837208211,
+                1.485149675785279,
+                -1.114743776586884,
+                -3.355236023985284,
+                2.07704094996525
             ]
         ])
-        actual = cube._calculate_statistics(axis=0)
+        actual = cube.standardized_residuals
+
         np.testing.assert_almost_equal(actual, expected)
 
-    def test_calculate_statistics_axis_1(self):
-        cube = CrunchCube(FIXT_ECON_GENDER_X_IDEOLOGY_WEIGHTED)
-        expected = np.array([
-            [
-                -0.6950547,
-                -0.524633,
-                -1.454419,
-                1.0896893,
-                3.2737502,
-                -2.0051536,
-            ],
-            [
-                0.7375224,
-                0.556688,
-                1.5432837,
-                -1.1562691,
-                -3.4737757,
-                2.1276681,
-            ]
-        ])
-        actual = cube._calculate_statistics(axis=1)
-        np.testing.assert_almost_equal(actual, expected)
-
-    def test_pvals_axis_0(self):
+    def test_pvals(self):
         cube = CrunchCube(FIXT_CAT_X_CAT_GERMAN_WEIGHTED)
         expected = np.array([
             [
-                -0.182449424191072,
-                0.000632923708704169,
-                0.000367602277025753,
-                0.153659627087918,
-                0.0157593386530601,
-                -7.31288611096873e-12,
-                -0.825177717845072,
-                0.469687167401825
+                0.1427612835278633,
+                0.0002121209149277,
+                0.0001314694879104,
+                0.1241771485531613,
+                0.0097454103240531,
+                0.0000000000000699,
+                0.8033849539190183,
+                0.4271118723152929
             ],
             [
-                0.182449424191079,
-                -0.000632923708704146,
-                -0.000367602277025734,
-                -0.153659627087916,
-                -0.0157593386530601,
-                7.31288611096927e-12,
-                0.825177717845075,
-                -0.469687167401828
+                0.1427612835278667,
+                0.0002121209149277,
+                0.0001314694879104,
+                0.1241771485531642,
+                0.0097454103240533,
+                0.0000000000000699,
+                0.8033849539190183,
+                0.4271118723152956
             ]
         ])
-        actual = cube.pvals(axis=0)
-        np.testing.assert_almost_equal(actual, expected)
-
-    def test_pvals_axis_1(self):
-        cube = CrunchCube(FIXT_CAT_X_CAT_GERMAN_WEIGHTED)
-        expected = np.array([
-            [
-                -0.174780896035399,
-                0.00067832739208794,
-                0.000508330650039071,
-                0.161553975907204,
-                0.0193301356937216,
-                -4.33199265948476e-12,
-                -0.812304843861103,
-                0.46145538258239,
-            ],
-            [
-                0.176109557731585,
-                -0.0007046838390719,
-                -0.000528959758456953,
-                -0.162846203806368,
-                -0.0197051728937385,
-                5.03371135873422e-12,
-                0.812870881353903,
-                -0.462833246125983,
-            ]
-        ])
-        actual = cube.pvals(axis=1)
+        actual = cube.pvals()
         np.testing.assert_almost_equal(actual, expected)
 
     def test_pvals_stats(self):
         cube = CrunchCube(FIXT_STATS_TEST)
-
-        expected_axis_0 = np.array([
+        expected = np.array([
             [
-                0.021992266759100376,
-                0.00011398387657313158,
-                0.08710488165760855,
-                -0.6809458435023874,
-                -0.4639470201751028,
-                -5.861367553539054e-7,
+                0.0436818197570077,
+                0.0002697141695955,
+                0.0913940671748992,
+                0.6836420776424197,
+                0.4681291494279529,
+                0.0000013632752629
             ],
             [
-                -0.021992266759100376,
-                -0.00011398387657313158,
-                -0.08710488165760855,
-                0.6809458435023874,
-                0.4639470201751028,
-                5.861367553539054e-7,
+                0.0436818197570077,
+                0.0002697141695955,
+                0.0913940671748992,
+                0.6836420776424197,
+                0.4681291494279529,
+                0.0000013632752629
             ]
         ])
-        actual = cube.pvals(0)
-        np.testing.assert_almost_equal(actual, expected_axis_0)
-
-        expected_axis_1 = np.array([
-            [
-                0.04565813781439898,
-                0.00019875030267102467,
-                0.0881878053993032,
-                -0.682332970015509,
-                -0.4667738621549087,
-                -0.0000011049984953714898,
-            ],
-            [
-                -0.04544250237653502,
-                -0.0001958471500445036,
-                -0.08787083482608415,
-                0.6820331877195527,
-                0.46632917677948105,
-                0.000001078109930885418,
-            ]
-        ])
-        actual = cube.pvals(1)
-        np.testing.assert_almost_equal(actual, expected_axis_1)
+        actual = cube.pvals()
+        np.testing.assert_almost_equal(actual, expected)
 
     def test_mean_age_for_blame_x_gender(self):
         cube = CrunchCube(FIXT_ECON_MEAN_AGE_BLAME_X_GENDER)
@@ -934,119 +812,67 @@ class TestCrunchCube(TestCase):
         cube = CrunchCube(FIXT_MR_X_CAT_PROFILES_STATS_WEIGHTED)
         expected = np.array([
             [
-                -1.35700098973668,
-                3.39819222765456,
-                3.47632774910236,
-                1.39986424142017,
-                2.33910237706402,
-                -6.92590429515317,
-                -0.237453687452224,
-                0.736452470486666
+                -1.465585354569577,
+                3.704125875262655,
+                3.823689449491973,
+                1.53747452587281 ,
+                2.584734165643072,
+                -7.488143461076757,
+                -0.248968750486873,
+                0.794143540856786
             ],
             [
-                1.3528312160513,
-                -3.38775031004662,
-                -3.4656457377556,
-                -1.39556275813377,
-                -2.33191481595459,
-                6.90462247318263,
-                0.236724043078395,
-                -0.734189509622821,
-            ],
+                1.465585354569564,
+                -3.704125875262655,
+                -3.823689449491981,
+                -1.537474525872799,
+                -2.584734165643066,
+                7.488143461076757,
+                 0.248968750486873,
+                 -0.794143540856781
+             ]
         ])
-        actual = cube._calculate_statistics(axis=1)
-        np.testing.assert_almost_equal(actual, expected)
-
-    def test_z_scores_from_r_col_margin(self):
-        cube = CrunchCube(FIXT_MR_X_CAT_PROFILES_STATS_WEIGHTED)
-        expected = np.array([
-            [
-                -1.33325107235154,
-                3.4170985193131,
-                3.56231261682056,
-                1.42672343792323,
-                2.41444184160409,
-                -6.85140362038577,
-                -0.220890470186746,
-                0.722988145330955,
-            ],
-            [
-                1.33325107235152,
-                -3.41709851931311,
-                -3.56231261682057,
-                -1.42672343792324,
-                -2.41444184160409,
-                6.85140362038576,
-                0.220890470186742,
-                -0.72298814533095,
-            ],
-        ])
-        actual = cube._calculate_statistics(axis=0)
+        actual = cube.standardized_residuals
         np.testing.assert_almost_equal(actual, expected)
 
     def test_z_scores_admit_by_dept_unweighted_rows(self):
+        """see
+        https://github.com/Crunch-io/whaam/blob/master/base/stats/tests/zvalues-spec.js#L42
+        """
         cube = CrunchCube(FIXT_ADMIT_X_DEPT_UNWEIGHTED)
         expected = np.array([
             [
-                17.3006739150679,
-                12.1555052876046,
-                -2.61883165552036,
-                -3.12585957287982,
-                -7.73178794867428,
-                -23.9433203846143,
+                18.04029230689576 ,
+                13.018394979149804,
+                -2.576739836814013,
+                -3.059526328377408,
+                -7.230244530709987,
+                -19.321410263144653
             ],
             [
-                -17.2790610621901,
-                -12.1403200324679,
-                2.6155600821955,
-                3.12195459533981,
-                7.72212901884083,
-                23.9134092110139,
+                -18.040292306895765,
+                -13.018394979149804,
+                2.576739836814013,
+                3.059526328377408,
+                7.230244530709987,
+                19.321410263144653
             ]
         ])
-        actual = cube._calculate_statistics(axis=1)
-        np.testing.assert_almost_equal(actual, expected)
-
-    def test_z_scores_admit_by_dept_unweighted_cols(self):
-        cube = CrunchCube(FIXT_ADMIT_X_DEPT_UNWEIGHTED)
-        expected = np.array([
-            [
-                18.7216214725448,
-                13.3291986335621,
-                -2.67980030430232,
-                -3.19261047229265,
-                -8.09694682104735,
-                -32.0139892315214,
-            ],
-            [
-                -18.7216214725448,
-                -13.3291986335621,
-                2.67980030430231,
-                3.19261047229265,
-                8.09694682104735,
-                32.0139892315214,
-            ],
-        ])
-        actual = cube._calculate_statistics(axis=0)
+        actual = cube.standardized_residuals
         np.testing.assert_almost_equal(actual, expected)
 
     def test_z_scores_admit_by_gender_weighted_rows(self):
+        """ see
+        https://github.com/Crunch-io/whaam/blob/master/base/stats/tests/zvalues-spec.js#L67
+        """
         cube = CrunchCube(FIXT_ADMIT_X_GENDER_WEIGHTED)
         expected = np.array([
-            [9.80281743121017, -9.80281743121017],
-            [-9.71107624617507, 9.71107624617506],
+            [9.42561984520692 , -9.425619845206922],
+            [-9.425619845206922,  9.42561984520692 ]
         ])
-        actual = cube._calculate_statistics(axis=1)
+        actual = cube.standardized_residuals
         np.testing.assert_almost_equal(actual, expected)
 
-    def test_z_scores_admit_by_gender_weighted_cols(self):
-        cube = CrunchCube(FIXT_ADMIT_X_GENDER_WEIGHTED)
-        expected = np.array([
-            [9.75089877074671, -9.72361434000118],
-            [-9.75089877074672, 9.72361434000117],
-        ])
-        actual = cube._calculate_statistics(axis=0)
-        np.testing.assert_almost_equal(actual, expected)
 
     def test_selected_crosstab_dim_names(self):
         cube = CrunchCube(FIXT_SELECTED_CROSSTAB_4)
