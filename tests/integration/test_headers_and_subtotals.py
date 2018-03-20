@@ -502,13 +502,15 @@ class TestHeadersAndSubtotals(TestCase):
     def test_subtotals_pvals_2d_cube_with_hs_on_row(self):
         '''Ensure that pvals shape is the same as table shape with H%S'''
         cube = CrunchCube(FIXT_ECON_BLAME_X_IDEOLOGY_ROW_HS)
-        expected = 6, 6
-        actual = cube.pvals(include_transforms_for_dims=[0, 1]).shape
-
-        # Only assert the shape of the table, as the pvals are going to be
-        # rewritten soon.
-        # TODO: Change assertion after merging new Z-scores.
-        np.testing.assert_array_equal(actual, expected)
+        expected = np.array([
+            [1.92562832e-06, 5.20117283e-12, 8.30737469e-05, 0.00000000e+00, 1.77635684e-15, 1.13223165e-01],  # noqa
+            [2.90878432e-14, 0.00000000e+00, 8.11477145e-02, 0.00000000e+00, 5.87376814e-11, 4.64141147e-06],  # noqa
+            [1.05605732e-03, 3.70613426e-03, 6.11851617e-03, 1.18269053e-02, 8.68890220e-01, 7.62914197e-02],  # noqa
+            [3.69990005e-01, 9.19546240e-01, 2.88068221e-01, 7.57299844e-01, 3.86924216e-01, 2.41648361e-04],  # noqa
+            [3.53745446e-01, 3.70094812e-02, 5.03974440e-01, 1.67769523e-02, 3.15641644e-01, 0.00000000e+00],  # noqa
+        ])
+        actual = cube.pvals
+        np.testing.assert_almost_equal(actual, expected)
 
     def test_fruit_hs_top_bottom_labels(self):
         cube = CrunchCube(FIXT_FRUIT_HS_TOP_BOTTOM)

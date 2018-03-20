@@ -714,10 +714,6 @@ class TestCrunchCube(TestCase):
     def test_calculate_standard_error_axis_0(self):
         '''Calculate standard error across columns.'''
         cube = CrunchCube(FIXT_ECON_GENDER_X_IDEOLOGY_WEIGHTED)
-        axis = 0
-        np.set_printoptions(precision=15, suppress=True)
-        print np.array_repr(cube.standardized_residuals, precision=15)
-
         expected = np.array([
             [
                 -0.715899626017458,
@@ -764,7 +760,7 @@ class TestCrunchCube(TestCase):
                 0.4271118723152956
             ]
         ])
-        actual = cube.pvals()
+        actual = cube.pvals
         np.testing.assert_almost_equal(actual, expected)
 
     def test_pvals_stats(self):
@@ -787,7 +783,7 @@ class TestCrunchCube(TestCase):
                 0.0000013632752629
             ]
         ])
-        actual = cube.pvals()
+        actual = cube.pvals
         np.testing.assert_almost_equal(actual, expected)
 
     def test_mean_age_for_blame_x_gender(self):

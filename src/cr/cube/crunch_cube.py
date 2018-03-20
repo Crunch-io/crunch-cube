@@ -1018,17 +1018,14 @@ class CrunchCube(object):
         '''
         return self.proportions(axis) * 100
 
-    def pvals(self, include_transforms_for_dims=None):
+    @property
+    def pvals(self):
         '''Calculate p-vals.
 
         This function calculates statistically significant results for
         categorical contingency tables. The values can be calculated across
         columns (axis = 0), or across rows (axis = 1).
 
-        Args
-            axis (int): Dimension across which to calculate the p-values.
-                        0 - calculate across columns
-                        1 - calculate across rows
         Returns
             (ndarray): 2-Dimensional array, representing the p-values for each
                        cell of the table-like representation of the
