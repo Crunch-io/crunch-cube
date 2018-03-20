@@ -127,3 +127,5 @@ The detailed description can be found
 1.6.0 Z-Score and bug fixes.
 
 1.6.1 standardized_residuals are now included.
+
+1.6.2 support "Before" and "After" in variable transformations since they exist in zz9 data.

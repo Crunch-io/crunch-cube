@@ -21,6 +21,13 @@ class TestSubtotal(TestCase):
         u'name': u'Conservative net',
     }
 
+    valid_subtotal_anchor_bottom = {
+        u'anchor': 'Bottom',
+        u'args': [5, 4],
+        u'function': u'subtotal',
+        u'name': u'Conservative net',
+    }
+
     def test_data(self):
         subtotal = Subtotal(self.valid_subtotal)
         expected = self.valid_subtotal
@@ -80,3 +87,9 @@ class TestSubtotal(TestCase):
         expected = [5, 4]
         actual = subtotal.args
         self.assertEqual(actual, expected)
+
+    def test_anchor_on_uppercased_bottom(self):
+        subtotal = Subtotal(self.valid_subtotal_anchor_bottom)
+        anchor = subtotal.anchor
+        assert anchor == 'bottom'
+
