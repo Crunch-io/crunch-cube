@@ -52,6 +52,9 @@ FIXT_SELECTED_CROSSTAB_4 = load_fixture(CUBES_DIR, 'selected-crosstab-4.json')
 FIXT_PETS_X_PETS = load_fixture(CUBES_DIR, 'pets-x-pets.json')
 FIXT_PETS_X_FRUIT = load_fixture(CUBES_DIR, 'pets-x-fruit.json')
 FIXT_PETS_ARRAY = load_fixture(CUBES_DIR, 'pets-array.json')
+FIXT_PETS_ARRAY_CAT_FIRST = load_fixture(CUBES_DIR, 'pets-array-cat-first.json')
+FIXT_PETS_ARRAY_SUBVAR_FIRST = load_fixture(CUBES_DIR,
+                                            'pets-array-subvar-first.json')
 FIXT_ECON_BLAME_WITH_HS = load_fixture(CUBES_DIR, 'econ-blame-with-hs.json')
 FIXT_ECON_BLAME_WITH_HS_MISSING = load_fixture(
     CUBES_DIR,
@@ -131,3 +134,13 @@ FIXT_CAT_X_DATE_HS_PRUNE = load_fixture(CUBES_DIR, 'cat-x-date-hs-prune.json')
 FIXT_CAT_X_NUM_HS_PRUNE = load_fixture(CUBES_DIR, 'cat-x-num-hs-prune.json')
 FIXT_CA_SUBVAR_X_CAT_HS = load_fixture(CUBES_DIR, 'ca-subvar-x-cat-hs.json')
 FIXT_CAT_X_MR_X_MR = load_fixture(CUBES_DIR, 'cat-x-mr-x-mr.json')
+FIXT_FRUIT_X_PETS_ARRAY_SUBVARS_FIRST = load_fixture(
+    CUBES_DIR,
+    'fruit-x-pets-array-subvars-first.json'
+)
+FIXT_FRUIT_X_PETS_ARRAY_PETS_FIRST = load_fixture(
+    CUBES_DIR,
+    'fruit-x-pets-array-pets-first.json'
+)
+FIXT_SCALE_WITH_NULL_VALUES = load_fixture(CUBES_DIR,
+                                           'scale-with-null-values.json')
