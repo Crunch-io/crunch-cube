@@ -26,12 +26,12 @@ class Subtotal(object):
         '''Get the anchor of the subtotal (if it's valid).'''
         if not self.is_valid:
             return None
+
         anchor = self._data['anchor']
         try:
             return int(anchor)
         except (TypeError, ValueError):
             return anchor.lower()
-        return None
 
     @property
     def args(self):
