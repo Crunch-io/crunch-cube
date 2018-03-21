@@ -56,5 +56,3 @@ class Index(object):
             return self.cube.proportions(axis=1, weighted=weighted) / margin
 
         raise ValueError('Unexpected dimension types for cube with MR.')
-
-        raise ValueError('Unexpected dimension types for cube with MR.')
