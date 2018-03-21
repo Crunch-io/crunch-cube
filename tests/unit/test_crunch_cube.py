@@ -92,7 +92,7 @@ class TestCrunchCube(TestCase):
         actual = cube.description
         self.assertEqual(actual, expected)
 
-    @patch('cr.cube.services.data_table.DataTable.has_means', False)
+    @patch('cr.cube.measures.data_table.DataTable.has_means', False)
     def test_missing_when_there_are_none(self):
         fake_cube = {'result': {}}
         cube = CrunchCube(fake_cube)
@@ -175,8 +175,8 @@ class TestCrunchCube(TestCase):
             prune=fake_prune,
         )
 
-    @patch('cr.cube.services.data_table.DataTable.all_dimensions', [])
-    @patch('cr.cube.services.data_table.DataTable.mr_selections_indices')
+    @patch('cr.cube.measures.data_table.DataTable.all_dimensions', [])
+    @patch('cr.cube.measures.data_table.DataTable.mr_selections_indices')
     def test_does_not_have_multiple_response(self, mock_mr_indices):
         mock_mr_indices.return_value = []
         expected = False
@@ -203,7 +203,7 @@ class TestCrunchCube(TestCase):
         actual = CrunchCube({}).description
         self.assertEqual(actual, expected)
 
-    @patch('cr.cube.services.data_table.DataTable.has_means', False)
+    @patch('cr.cube.measures.data_table.DataTable.has_means', False)
     def test_missing(self):
         missing = Mock()
         fake_cube = {'result': {'missing': missing}}
@@ -321,7 +321,7 @@ class TestCrunchCube(TestCase):
         expected = unweighted_count
         self.assertEqual(actual, expected)
 
-    @patch('cr.cube.services.data_table.DataTable.is_weighted', False)
+    @patch('cr.cube.measures.data_table.DataTable.is_weighted', False)
     def test_n_weighted_and_has_no_weight(self):
         unweighted_count = Mock()
         weighted_counts = Mock()
@@ -339,7 +339,7 @@ class TestCrunchCube(TestCase):
         expected = unweighted_count
         self.assertEqual(actual, expected)
 
-    @patch('cr.cube.services.data_table.DataTable.is_weighted', True)
+    @patch('cr.cube.measures.data_table.DataTable.is_weighted', True)
     def test_n_weighted_and_has_weight(self):
         unweighted_count = Mock()
         weighted_counts = [1, 2, 3, 4]
@@ -357,13 +357,13 @@ class TestCrunchCube(TestCase):
         expected = sum(weighted_counts)
         self.assertEqual(actual, expected)
 
-    @patch('cr.cube.services.data_table.DataTable.is_weighted', 'fake_val')
+    @patch('cr.cube.measures.data_table.DataTable.is_weighted', 'fake_val')
     def test_is_weighted_invoked(self):
         cube = CrunchCube({})
         actual = cube.is_weighted
         assert actual == 'fake_val'
 
-    @patch('cr.cube.services.data_table.DataTable.has_means', 'fake_val')
+    @patch('cr.cube.measures.data_table.DataTable.has_means', 'fake_val')
     def test_has_means_invoked(self):
         cube = CrunchCube({})
         actual = cube.has_means

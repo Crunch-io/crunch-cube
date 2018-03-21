@@ -12,9 +12,9 @@ import numpy as np
 from scipy.stats import norm
 from scipy.stats.contingency import expected_freq
 
-from .services.data_table import DataTable
-from .services.index import Index
-from .services.scale_means import ScaleMeans
+from .measures.data_table import DataTable
+from .measures.index import Index
+from .measures.scale_means import ScaleMeans
 
 np.seterr(divide='ignore', invalid='ignore')
 
