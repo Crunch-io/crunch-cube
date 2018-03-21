@@ -1946,8 +1946,7 @@ class TestCrunchCube(TestCase):
 
     def test_cat_x_mr_x_mr_proportions_by_cell(test):
         cube = CrunchCube(FIXT_CAT_X_MR_X_MR)
-        # Set axis to (1, 2) (and not None), since 3D cube
-        actual = cube.proportions(axis=(1, 2), weighted=False)
+        actual = cube.proportions()
         expected = np.array([
             [[0.05795, 0.17985],
              [0.00985, 0.0302],
