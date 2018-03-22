@@ -195,10 +195,15 @@ class CrunchCube(object):
         )
         res = res + adjusted
 
-        if prune and not self.has_mr:
+        if prune:
             return self._prune(res, include_transforms_for_dims)
 
         return res
+
+    def _mr_prune(self, res):
+        margin = self.margin(axis=0)
+        ind_prune = margin == 0
+        return res[~ind_prune]
 
     def _prune(self, res, transforms=None):
         '''Prune the result based on margins content.
@@ -206,6 +211,9 @@ class CrunchCube(object):
         Pruning is the removal of rows or columns, whose corresponding
         marginal elements are either 0 or not defined (np.nan).
         '''
+
+        if self.has_mr:
+            return self._mr_prune(res)
 
         # Note: If the cube contains transforms (H&S), and they happen to
         # have the marginal value 0 (or NaN), they're NOT pruned. This is
