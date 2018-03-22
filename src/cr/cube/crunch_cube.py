@@ -266,74 +266,6 @@ class CrunchCube(object):
             # (because of the inner matrix dimensions).
             return np.dot(prop_margin, V)
 
-    def _calculate_standard_error(self, axis, include_transforms_for_dims=None):
-        total = self._margin(
-            weighted=False,
-            adjusted=True,
-            include_transforms_for_dims=include_transforms_for_dims,
-        )
-        # Calculate margin across axis, as percentages of the total count
-        margin = self._margin(
-            axis=axis,
-            weighted=False,
-            adjusted=True,
-            include_transforms_for_dims=include_transforms_for_dims
-        ) / total
-        # Adjusted proportions table, necessary for the standard error,
-        # because of the division by it.
-        props = self._proportions(
-            axis=axis,
-            weighted=False,
-            adjusted=True,
-            include_transforms_for_dims=include_transforms_for_dims
-        )
-
-        constraints = self._calculate_constraints_sum(props, margin, axis)
-        if axis == 0:
-            # If the s.e. is calculated across rows, the addition of the
-            # 'constraints' member must be done element-wise, for 'magic_d' and
-            # for each column of the props variance matrix, thus the
-            # transformation to the column vector.
-            constraints = constraints[:, np.newaxis]
-
-        magic_d = (1 - 2 * margin) / margin
-        if axis == 1:
-            # If the s.e. is calculated across rows, the multiplication of
-            # the 'magic_d' member must be done element-wise, for 'magic_d' and
-            # for each row of the props variance matrix, thus the
-            # transformation to the column vector.
-            magic_d = magic_d[:, np.newaxis]
-
-        return np.sqrt((magic_d * props * (1 - props) + constraints) / total)
-
-    def _calculate_statistics(self, axis, include_transforms_for_dims=None):
-        if axis not in [0, 1]:
-            raise ValueError('Unexpected value for `axis`: {}'.format(axis))
-
-        props = self.proportions(axis=axis, include_transforms_for_dims=include_transforms_for_dims)
-
-        # Statistics are calculated by operating on both axes' margins. In this
-        # function, we need to determine the cross-axis (other than the one
-        # we're doing the calculation for), in order to be able to calculate
-        # *that* margin, which will serve as the basis for the
-        # statistics calculation.
-        cross_axis = 0 if axis == 1 else 1
-        cross_margin = self.margin(
-            axis=cross_axis,
-            include_transforms_for_dims=include_transforms_for_dims
-        ) / self.margin(include_transforms_for_dims=include_transforms_for_dims)
-
-        if cross_axis == 1:
-            # If the row proportional margins are required, they also need to
-            # be broadcast into the vector column shape, in order to be able to
-            # perform the subtration from the matrix.
-            cross_margin = cross_margin[:, np.newaxis]
-
-        return (
-            (props - cross_margin) /
-            self._calculate_standard_error(axis, include_transforms_for_dims)
-        )
-
     def _double_mr_proportions(self, axis, weighted):
         '''Return proportions for MR x MR cube.
 
@@ -601,13 +533,12 @@ class CrunchCube(object):
 
         counts = self.as_array()
         total = self.margin()
-        colsum = self.margin(axis=0) / total
-        rowsum = self.margin(axis=1) / total
+        colsum = self.margin(axis=0)
+        rowsum = self.margin(axis=1)
         expected_counts = expected_freq(counts)
         residuals = counts - expected_counts
         variance = (
-            expected_counts *
-            ((1 - rowsum[:, np.newaxis]) * (1 - colsum))
+            np.outer(rowsum, colsum) * np.outer(total - rowsum, total - colsum) / total**3
         )
         return residuals / np.sqrt(variance)
 
@@ -1011,29 +942,21 @@ class CrunchCube(object):
         '''
         return self.proportions(axis) * 100
 
-    def pvals(self, axis, include_transforms_for_dims=None):
+    @property
+    def pvals(self):
         '''Calculate p-vals.
 
-        This function calculates statistically signifficant results for
+        This function calculates statistically significant results for
         categorical contingency tables. The values can be calculated across
         columns (axis = 0), or across rows (axis = 1).
 
-        Args
-            axis (int): Dimension across which to calculate the p-values.
-                        0 - calculate across columns
-                        1 - calculate across rows
         Returns
             (ndarray): 2-Dimensional array, representing the p-values for each
                        cell of the table-like representation of the
                        crunch cube.
         '''
-        stats = self._calculate_statistics(axis, include_transforms_for_dims)
-        sign = np.sign(stats)
-
-        p_values = 2 * (1 - norm.cdf(np.abs(stats)))
-        p_values *= sign
-
-        return p_values
+        stats = self.standardized_residuals
+        return 2 * (1 - norm.cdf(np.abs(stats)))
 
     def y_offset(self, expand=False, include_transforms_for_dims=None):
         '''Gets y offset for sheet manipulation.
