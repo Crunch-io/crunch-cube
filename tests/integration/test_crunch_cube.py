@@ -52,6 +52,7 @@ from .fixtures import FIXT_ECON_BLAME_X_IDEOLOGY_ROW_HS
 from .fixtures import FIXT_FRUIT_X_PETS_ARRAY_SUBVARS_FIRST
 from .fixtures import FIXT_FRUIT_X_PETS_ARRAY_PETS_FIRST
 from .fixtures import FIXT_SCALE_WITH_NULL_VALUES
+from .fixtures import PROMPTED_AWARENESS
 
 
 class TestCrunchCube(TestCase):
@@ -1854,3 +1855,31 @@ class TestCrunchCube(TestCase):
         expected = np.array([1.2060688, 1.0669344, 1.023199])
         actual = cube.scale_means()
         np.testing.assert_almost_equal(actual, expected)
+
+    def test_mr_counts_not_pruned(self):
+        cube = CrunchCube(PROMPTED_AWARENESS)
+        expected = np.array([
+            224833, 221990, 223560, 222923, 217586, 206164, 183147, 167720,
+            209355, 201847, 193826, 198744, 180015, 174349, 200050, 160769,
+            167969, 43193, 44339, 207539, 135973, 146002, 146789, 160692,
+            53995, 95741, 135700, 91878, 48465, 48929, 35189, 42764,
+            21194, 41422, 167652, 95676, 111961, 26137, 0, 0, 111760, 60761,
+            87645, 85306, 18873, 178, 30461, 42843,
+        ])
+        # Use unweighted, because of the whole numbers (for comparison)
+        actual = cube.as_array(weighted=False)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_mr_counts_pruned(self):
+        cube = CrunchCube(PROMPTED_AWARENESS)
+        expected = np.array([
+            224833, 221990, 223560, 222923, 217586, 206164, 183147, 167720,
+            209355, 201847, 193826, 198744, 180015, 174349, 200050, 160769,
+            167969, 43193, 44339, 207539, 135973, 146002, 146789, 160692,
+            53995, 95741, 135700, 91878, 48465, 48929, 35189, 42764,
+            21194, 41422, 167652, 95676, 111961, 26137, 111760, 60761,
+            87645, 85306, 18873, 178, 30461, 42843,
+        ])
+        # Use unweighted, because of the whole numbers (for comparison)
+        actual = cube.as_array(weighted=False, prune=True)
+        np.testing.assert_array_equal(actual, expected)
