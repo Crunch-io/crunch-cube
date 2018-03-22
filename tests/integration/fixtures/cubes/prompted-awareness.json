@@ -1,0 +1,2758 @@
+{
+    "element": "shoji:view",
+    "self": "https://app.crunch.io/api/datasets/ca9246f55480476ebb6f56a2091d7d3d/cube/?filter=%5B%5D&query=%7B%22dimensions%22:%5B%7B%22each%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2Fca9246f55480476ebb6f56a2091d7d3d%2Fvariables%2F8bd2bd38f11b4374be70ab14ab59f081%2F%22%7D,%7B%22function%22:%22as_selected%22,%22args%22:%5B%7B%22variable%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2Fca9246f55480476ebb6f56a2091d7d3d%2Fvariables%2F8bd2bd38f11b4374be70ab14ab59f081%2F%22%7D%5D%7D%5D,%22measures%22:%7B%22count%22:%7B%22function%22:%22cube_count%22,%22args%22:%5B%5D%7D%7D,%22weight%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2Fca9246f55480476ebb6f56a2091d7d3d%2Fvariables%2F006564%2F%22%7D",
+    "value": {
+        "query": {
+            "measures": {
+                "count": {
+                    "function": "cube_count",
+                    "args": []
+                }
+            },
+            "dimensions": [
+                {
+                    "each": "https://app.crunch.io/api/datasets/ca9246f55480476ebb6f56a2091d7d3d/variables/8bd2bd38f11b4374be70ab14ab59f081/"
+                },
+                {
+                    "function": "as_selected",
+                    "args": [
+                        {
+                            "variable": "https://app.crunch.io/api/datasets/ca9246f55480476ebb6f56a2091d7d3d/variables/8bd2bd38f11b4374be70ab14ab59f081/"
+                        }
+                    ]
+                }
+            ],
+            "weight": "https://app.crunch.io/api/datasets/ca9246f55480476ebb6f56a2091d7d3d/variables/006564/"
+        },
+        "query_environment": {
+            "filter": []
+        },
+        "result": {
+            "dimensions": [
+                {
+                    "derived": true,
+                    "references": {
+                        "description": "Which of these TV channels have you heard of? Please look at all the logos, and select those that apply. (A3)",
+                        "subreferences": [
+                            {
+                                "alias": "A3_1",
+                                "is_subvar": true,
+                                "name": "BBC One"
+                            },
+                            {
+                                "alias": "A3_2",
+                                "is_subvar": true,
+                                "name": "BBC Two"
+                            },
+                            {
+                                "alias": "A3_3",
+                                "is_subvar": true,
+                                "name": "ITV"
+                            },
+                            {
+                                "alias": "A3_4",
+                                "is_subvar": true,
+                                "name": "Channel 4"
+                            },
+                            {
+                                "alias": "A3_5",
+                                "is_subvar": true,
+                                "name": "Five"
+                            },
+                            {
+                                "alias": "A3_6",
+                                "is_subvar": true,
+                                "name": "BBC Three"
+                            },
+                            {
+                                "alias": "A3_7",
+                                "is_subvar": true,
+                                "name": "BBC Four"
+                            },
+                            {
+                                "alias": "A3_8",
+                                "is_subvar": true,
+                                "name": "BBC News"
+                            },
+                            {
+                                "alias": "A3_9",
+                                "is_subvar": true,
+                                "name": "ITV2"
+                            },
+                            {
+                                "alias": "A3_10",
+                                "is_subvar": true,
+                                "name": "ITV3"
+                            },
+                            {
+                                "alias": "A3_11",
+                                "is_subvar": true,
+                                "name": "ITV4"
+                            },
+                            {
+                                "alias": "A3_12",
+                                "is_subvar": true,
+                                "name": "E4"
+                            },
+                            {
+                                "alias": "A3_13",
+                                "is_subvar": true,
+                                "name": "4More"
+                            },
+                            {
+                                "alias": "A3_14",
+                                "is_subvar": true,
+                                "name": "Sky One"
+                            },
+                            {
+                                "alias": "A3_15",
+                                "is_subvar": true,
+                                "name": "Sky Sports"
+                            },
+                            {
+                                "alias": "A3_16",
+                                "is_subvar": true,
+                                "name": "Sky News"
+                            },
+                            {
+                                "alias": "A3_17",
+                                "is_subvar": true,
+                                "name": "Sky Atlantic"
+                            },
+                            {
+                                "alias": "A3_18",
+                                "is_subvar": true,
+                                "name": "5USA"
+                            },
+                            {
+                                "alias": "A3_19",
+                                "is_subvar": true,
+                                "name": "5*"
+                            },
+                            {
+                                "alias": "A3_20",
+                                "is_subvar": true,
+                                "name": "Dave"
+                            },
+                            {
+                                "alias": "A3_21",
+                                "is_subvar": true,
+                                "name": "Alibi"
+                            },
+                            {
+                                "alias": "A3_22",
+                                "is_subvar": true,
+                                "name": "GOLD"
+                            },
+                            {
+                                "alias": "A3_23",
+                                "is_subvar": true,
+                                "name": "Sky Living"
+                            },
+                            {
+                                "alias": "A3_24",
+                                "is_subvar": true,
+                                "name": "Film4"
+                            },
+                            {
+                                "alias": "A3_25",
+                                "is_subvar": true,
+                                "name": "Sky Movies"
+                            },
+                            {
+                                "alias": "A3_26",
+                                "is_subvar": true,
+                                "name": "Watch"
+                            },
+                            {
+                                "alias": "A3_27",
+                                "is_subvar": true,
+                                "name": "ESPN"
+                            },
+                            {
+                                "alias": "A3_28",
+                                "is_subvar": true,
+                                "name": "4seven"
+                            },
+                            {
+                                "alias": "A3_29",
+                                "is_subvar": true,
+                                "name": "CBBC"
+                            },
+                            {
+                                "alias": "A3_30",
+                                "is_subvar": true,
+                                "name": "Cbeebies"
+                            },
+                            {
+                                "alias": "A3_31",
+                                "is_subvar": true,
+                                "name": "CiTV"
+                            },
+                            {
+                                "alias": "A3_32",
+                                "is_subvar": true,
+                                "name": "Disney Channel"
+                            },
+                            {
+                                "alias": "A3_33",
+                                "is_subvar": true,
+                                "name": "Disney Junior"
+                            },
+                            {
+                                "alias": "A3_34",
+                                "is_subvar": true,
+                                "name": "Nickelodeon"
+                            },
+                            {
+                                "alias": "A3_35",
+                                "is_subvar": true,
+                                "name": "BT Sport"
+                            },
+                            {
+                                "alias": "A3_36",
+                                "is_subvar": true,
+                                "name": "TLC"
+                            },
+                            {
+                                "alias": "A3_37",
+                                "is_subvar": true,
+                                "name": "Drama"
+                            },
+                            {
+                                "alias": "A3_38",
+                                "is_subvar": true,
+                                "name": "Lifetime"
+                            },
+                            {
+                                "alias": "A3_42",
+                                "is_subvar": true,
+                                "name": "Blank"
+                            },
+                            {
+                                "alias": "A3_43",
+                                "is_subvar": true,
+                                "name": "Blank 2"
+                            },
+                            {
+                                "alias": "A3_39",
+                                "is_subvar": true,
+                                "name": "Fox"
+                            },
+                            {
+                                "alias": "A3_40",
+                                "is_subvar": true,
+                                "name": "Universal Channel"
+                            },
+                            {
+                                "alias": "A3_41",
+                                "is_subvar": true,
+                                "name": "ITV Encore"
+                            },
+                            {
+                                "alias": "A3_44",
+                                "is_subvar": true,
+                                "name": "ITVBe"
+                            },
+                            {
+                                "alias": "A3_45",
+                                "is_subvar": true,
+                                "name": "SpikeTV"
+                            },
+                            {
+                                "alias": "A3_99",
+                                "is_subvar": true,
+                                "name": "None of these"
+                            },
+                            {
+                                "alias": "A3_47",
+                                "is_subvar": true,
+                                "name": "Amazon Prime Instant Video"
+                            },
+                            {
+                                "alias": "A3_46",
+                                "is_subvar": true,
+                                "name": "Netflix"
+                            }
+                        ],
+                        "discarded": false,
+                        "alias": "A3",
+                        "is_subvar": false,
+                        "name": "Prompted awareness"
+                    },
+                    "type": {
+                        "subtype": {
+                            "class": "variable"
+                        },
+                        "elements": [
+                            {
+                                "id": 1,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_1",
+                                        "is_subvar": true,
+                                        "name": "BBC One"
+                                    },
+                                    "id": "009246",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 2,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_2",
+                                        "is_subvar": true,
+                                        "name": "BBC Two"
+                                    },
+                                    "id": "009247",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 3,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_3",
+                                        "is_subvar": true,
+                                        "name": "ITV"
+                                    },
+                                    "id": "009248",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 4,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_4",
+                                        "is_subvar": true,
+                                        "name": "Channel 4"
+                                    },
+                                    "id": "009249",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 5,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_5",
+                                        "is_subvar": true,
+                                        "name": "Five"
+                                    },
+                                    "id": "009250",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 6,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_6",
+                                        "is_subvar": true,
+                                        "name": "BBC Three"
+                                    },
+                                    "id": "009251",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 7,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_7",
+                                        "is_subvar": true,
+                                        "name": "BBC Four"
+                                    },
+                                    "id": "009252",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 8,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_8",
+                                        "is_subvar": true,
+                                        "name": "BBC News"
+                                    },
+                                    "id": "009253",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 9,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_9",
+                                        "is_subvar": true,
+                                        "name": "ITV2"
+                                    },
+                                    "id": "009254",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 10,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_10",
+                                        "is_subvar": true,
+                                        "name": "ITV3"
+                                    },
+                                    "id": "009255",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 11,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_11",
+                                        "is_subvar": true,
+                                        "name": "ITV4"
+                                    },
+                                    "id": "009256",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 12,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_12",
+                                        "is_subvar": true,
+                                        "name": "E4"
+                                    },
+                                    "id": "009257",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 13,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_13",
+                                        "is_subvar": true,
+                                        "name": "4More"
+                                    },
+                                    "id": "009258",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 14,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_14",
+                                        "is_subvar": true,
+                                        "name": "Sky One"
+                                    },
+                                    "id": "009259",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 15,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_15",
+                                        "is_subvar": true,
+                                        "name": "Sky Sports"
+                                    },
+                                    "id": "009260",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 16,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_16",
+                                        "is_subvar": true,
+                                        "name": "Sky News"
+                                    },
+                                    "id": "009261",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 17,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_17",
+                                        "is_subvar": true,
+                                        "name": "Sky Atlantic"
+                                    },
+                                    "id": "009262",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 18,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_18",
+                                        "is_subvar": true,
+                                        "name": "5USA"
+                                    },
+                                    "id": "009263",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 19,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_19",
+                                        "is_subvar": true,
+                                        "name": "5*"
+                                    },
+                                    "id": "009264",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 20,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_20",
+                                        "is_subvar": true,
+                                        "name": "Dave"
+                                    },
+                                    "id": "009265",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 21,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_21",
+                                        "is_subvar": true,
+                                        "name": "Alibi"
+                                    },
+                                    "id": "009266",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 22,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_22",
+                                        "is_subvar": true,
+                                        "name": "GOLD"
+                                    },
+                                    "id": "009267",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 23,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_23",
+                                        "is_subvar": true,
+                                        "name": "Sky Living"
+                                    },
+                                    "id": "009268",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 24,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_24",
+                                        "is_subvar": true,
+                                        "name": "Film4"
+                                    },
+                                    "id": "009269",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 25,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_25",
+                                        "is_subvar": true,
+                                        "name": "Sky Movies"
+                                    },
+                                    "id": "009270",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 26,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_26",
+                                        "is_subvar": true,
+                                        "name": "Watch"
+                                    },
+                                    "id": "009271",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 27,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_27",
+                                        "is_subvar": true,
+                                        "name": "ESPN"
+                                    },
+                                    "id": "009272",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 28,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_28",
+                                        "is_subvar": true,
+                                        "name": "4seven"
+                                    },
+                                    "id": "009273",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 29,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_29",
+                                        "is_subvar": true,
+                                        "name": "CBBC"
+                                    },
+                                    "id": "009274",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 30,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_30",
+                                        "is_subvar": true,
+                                        "name": "Cbeebies"
+                                    },
+                                    "id": "009275",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 31,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_31",
+                                        "is_subvar": true,
+                                        "name": "CiTV"
+                                    },
+                                    "id": "009276",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 32,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_32",
+                                        "is_subvar": true,
+                                        "name": "Disney Channel"
+                                    },
+                                    "id": "009277",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 33,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_33",
+                                        "is_subvar": true,
+                                        "name": "Disney Junior"
+                                    },
+                                    "id": "009278",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 34,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_34",
+                                        "is_subvar": true,
+                                        "name": "Nickelodeon"
+                                    },
+                                    "id": "009279",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 35,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_35",
+                                        "is_subvar": true,
+                                        "name": "BT Sport"
+                                    },
+                                    "id": "009280",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 36,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_36",
+                                        "is_subvar": true,
+                                        "name": "TLC"
+                                    },
+                                    "id": "009281",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 37,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_37",
+                                        "is_subvar": true,
+                                        "name": "Drama"
+                                    },
+                                    "id": "009282",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 38,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_38",
+                                        "is_subvar": true,
+                                        "name": "Lifetime"
+                                    },
+                                    "id": "009283",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 39,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_42",
+                                        "is_subvar": true,
+                                        "name": "Blank"
+                                    },
+                                    "id": "009284",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 40,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_43",
+                                        "is_subvar": true,
+                                        "name": "Blank 2"
+                                    },
+                                    "id": "009285",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 41,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_39",
+                                        "is_subvar": true,
+                                        "name": "Fox"
+                                    },
+                                    "id": "009286",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 42,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_40",
+                                        "is_subvar": true,
+                                        "name": "Universal Channel"
+                                    },
+                                    "id": "009287",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 43,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_41",
+                                        "is_subvar": true,
+                                        "name": "ITV Encore"
+                                    },
+                                    "id": "009288",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 44,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_44",
+                                        "is_subvar": true,
+                                        "name": "ITVBe"
+                                    },
+                                    "id": "009289",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 45,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_45",
+                                        "is_subvar": true,
+                                        "name": "SpikeTV"
+                                    },
+                                    "id": "009290",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 46,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_99",
+                                        "is_subvar": true,
+                                        "name": "None of these"
+                                    },
+                                    "id": "009291",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 47,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_47",
+                                        "is_subvar": true,
+                                        "name": "Amazon Prime Instant Video"
+                                    },
+                                    "id": "022327",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 48,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "A3_46",
+                                        "is_subvar": true,
+                                        "name": "Netflix"
+                                    },
+                                    "id": "022328",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            }
+                        ],
+                        "class": "enum"
+                    }
+                },
+                {
+                    "references": {
+                        "description": "Which of these TV channels have you heard of? Please look at all the logos, and select those that apply. (A3)",
+                        "subreferences": [
+                            {
+                                "alias": "A3_1",
+                                "is_subvar": true,
+                                "name": "BBC One"
+                            },
+                            {
+                                "alias": "A3_2",
+                                "is_subvar": true,
+                                "name": "BBC Two"
+                            },
+                            {
+                                "alias": "A3_3",
+                                "is_subvar": true,
+                                "name": "ITV"
+                            },
+                            {
+                                "alias": "A3_4",
+                                "is_subvar": true,
+                                "name": "Channel 4"
+                            },
+                            {
+                                "alias": "A3_5",
+                                "is_subvar": true,
+                                "name": "Five"
+                            },
+                            {
+                                "alias": "A3_6",
+                                "is_subvar": true,
+                                "name": "BBC Three"
+                            },
+                            {
+                                "alias": "A3_7",
+                                "is_subvar": true,
+                                "name": "BBC Four"
+                            },
+                            {
+                                "alias": "A3_8",
+                                "is_subvar": true,
+                                "name": "BBC News"
+                            },
+                            {
+                                "alias": "A3_9",
+                                "is_subvar": true,
+                                "name": "ITV2"
+                            },
+                            {
+                                "alias": "A3_10",
+                                "is_subvar": true,
+                                "name": "ITV3"
+                            },
+                            {
+                                "alias": "A3_11",
+                                "is_subvar": true,
+                                "name": "ITV4"
+                            },
+                            {
+                                "alias": "A3_12",
+                                "is_subvar": true,
+                                "name": "E4"
+                            },
+                            {
+                                "alias": "A3_13",
+                                "is_subvar": true,
+                                "name": "4More"
+                            },
+                            {
+                                "alias": "A3_14",
+                                "is_subvar": true,
+                                "name": "Sky One"
+                            },
+                            {
+                                "alias": "A3_15",
+                                "is_subvar": true,
+                                "name": "Sky Sports"
+                            },
+                            {
+                                "alias": "A3_16",
+                                "is_subvar": true,
+                                "name": "Sky News"
+                            },
+                            {
+                                "alias": "A3_17",
+                                "is_subvar": true,
+                                "name": "Sky Atlantic"
+                            },
+                            {
+                                "alias": "A3_18",
+                                "is_subvar": true,
+                                "name": "5USA"
+                            },
+                            {
+                                "alias": "A3_19",
+                                "is_subvar": true,
+                                "name": "5*"
+                            },
+                            {
+                                "alias": "A3_20",
+                                "is_subvar": true,
+                                "name": "Dave"
+                            },
+                            {
+                                "alias": "A3_21",
+                                "is_subvar": true,
+                                "name": "Alibi"
+                            },
+                            {
+                                "alias": "A3_22",
+                                "is_subvar": true,
+                                "name": "GOLD"
+                            },
+                            {
+                                "alias": "A3_23",
+                                "is_subvar": true,
+                                "name": "Sky Living"
+                            },
+                            {
+                                "alias": "A3_24",
+                                "is_subvar": true,
+                                "name": "Film4"
+                            },
+                            {
+                                "alias": "A3_25",
+                                "is_subvar": true,
+                                "name": "Sky Movies"
+                            },
+                            {
+                                "alias": "A3_26",
+                                "is_subvar": true,
+                                "name": "Watch"
+                            },
+                            {
+                                "alias": "A3_27",
+                                "is_subvar": true,
+                                "name": "ESPN"
+                            },
+                            {
+                                "alias": "A3_28",
+                                "is_subvar": true,
+                                "name": "4seven"
+                            },
+                            {
+                                "alias": "A3_29",
+                                "is_subvar": true,
+                                "name": "CBBC"
+                            },
+                            {
+                                "alias": "A3_30",
+                                "is_subvar": true,
+                                "name": "Cbeebies"
+                            },
+                            {
+                                "alias": "A3_31",
+                                "is_subvar": true,
+                                "name": "CiTV"
+                            },
+                            {
+                                "alias": "A3_32",
+                                "is_subvar": true,
+                                "name": "Disney Channel"
+                            },
+                            {
+                                "alias": "A3_33",
+                                "is_subvar": true,
+                                "name": "Disney Junior"
+                            },
+                            {
+                                "alias": "A3_34",
+                                "is_subvar": true,
+                                "name": "Nickelodeon"
+                            },
+                            {
+                                "alias": "A3_35",
+                                "is_subvar": true,
+                                "name": "BT Sport"
+                            },
+                            {
+                                "alias": "A3_36",
+                                "is_subvar": true,
+                                "name": "TLC"
+                            },
+                            {
+                                "alias": "A3_37",
+                                "is_subvar": true,
+                                "name": "Drama"
+                            },
+                            {
+                                "alias": "A3_38",
+                                "is_subvar": true,
+                                "name": "Lifetime"
+                            },
+                            {
+                                "alias": "A3_42",
+                                "is_subvar": true,
+                                "name": "Blank"
+                            },
+                            {
+                                "alias": "A3_43",
+                                "is_subvar": true,
+                                "name": "Blank 2"
+                            },
+                            {
+                                "alias": "A3_39",
+                                "is_subvar": true,
+                                "name": "Fox"
+                            },
+                            {
+                                "alias": "A3_40",
+                                "is_subvar": true,
+                                "name": "Universal Channel"
+                            },
+                            {
+                                "alias": "A3_41",
+                                "is_subvar": true,
+                                "name": "ITV Encore"
+                            },
+                            {
+                                "alias": "A3_44",
+                                "is_subvar": true,
+                                "name": "ITVBe"
+                            },
+                            {
+                                "alias": "A3_45",
+                                "is_subvar": true,
+                                "name": "SpikeTV"
+                            },
+                            {
+                                "alias": "A3_99",
+                                "is_subvar": true,
+                                "name": "None of these"
+                            },
+                            {
+                                "alias": "A3_47",
+                                "is_subvar": true,
+                                "name": "Amazon Prime Instant Video"
+                            },
+                            {
+                                "alias": "A3_46",
+                                "is_subvar": true,
+                                "name": "Netflix"
+                            }
+                        ],
+                        "discarded": false,
+                        "alias": "A3",
+                        "is_subvar": false,
+                        "name": "Prompted awareness"
+                    },
+                    "derived": true,
+                    "type": {
+                        "ordinal": false,
+                        "subvariables": [
+                            "009246",
+                            "009247",
+                            "009248",
+                            "009249",
+                            "009250",
+                            "009251",
+                            "009252",
+                            "009253",
+                            "009254",
+                            "009255",
+                            "009256",
+                            "009257",
+                            "009258",
+                            "009259",
+                            "009260",
+                            "009261",
+                            "009262",
+                            "009263",
+                            "009264",
+                            "009265",
+                            "009266",
+                            "009267",
+                            "009268",
+                            "009269",
+                            "009270",
+                            "009271",
+                            "009272",
+                            "009273",
+                            "009274",
+                            "009275",
+                            "009276",
+                            "009277",
+                            "009278",
+                            "009279",
+                            "009280",
+                            "009281",
+                            "009282",
+                            "009283",
+                            "009284",
+                            "009285",
+                            "009286",
+                            "009287",
+                            "009288",
+                            "009289",
+                            "009290",
+                            "009291",
+                            "022327",
+                            "022328"
+                        ],
+                        "class": "categorical",
+                        "categories": [
+                            {
+                                "numeric_value": 1,
+                                "selected": true,
+                                "id": 1,
+                                "missing": false,
+                                "name": "Selected"
+                            },
+                            {
+                                "numeric_value": 0,
+                                "missing": false,
+                                "id": 0,
+                                "name": "Not Selected"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": true,
+                                "id": -1,
+                                "name": "No Data"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "missing": 3,
+            "measures": {
+                "count": {
+                    "data": [
+                        221568.54042522385,
+                        6833.018050060263,
+                        3.109062390134831,
+                        217696.79890438615,
+                        10704.759570898257,
+                        3.109062390134831,
+                        220339.8775299025,
+                        8061.680945382331,
+                        3.109062390134831,
+                        219197.70776679885,
+                        9203.850708485472,
+                        3.109062390134831,
+                        214215.86804595016,
+                        14185.690429334412,
+                        3.109062390134831,
+                        201938.47957422808,
+                        26463.07890105674,
+                        3.109062390134831,
+                        177481.0108861966,
+                        50920.54758908717,
+                        3.109062390134831,
+                        163338.0160475376,
+                        65063.54242774826,
+                        3.109062390134831,
+                        206259.77617259012,
+                        22141.78230269392,
+                        3.109062390134831,
+                        198047.85535605694,
+                        30353.70311922667,
+                        3.109062390134831,
+                        191403.1825895667,
+                        36998.37588571688,
+                        3.109062390134831,
+                        196630.26985571644,
+                        31771.288619565392,
+                        3.109062390134831,
+                        175435.48145011067,
+                        52966.07702517199,
+                        3.109062390134831,
+                        173363.74398573168,
+                        55037.81448955136,
+                        3.109062390134831,
+                        197824.96934165442,
+                        30576.58913362799,
+                        3.109062390134831,
+                        157394.03528834178,
+                        71007.52318694284,
+                        3.109062390134831,
+                        168866.0211740983,
+                        59535.53730118197,
+                        3.109062390134831,
+                        43372.44777624729,
+                        185029.1106990315,
+                        3.109062390134831,
+                        44736.14241812771,
+                        183665.4160571516,
+                        3.109062390134831,
+                        203380.8182077443,
+                        25020.740267539306,
+                        3.109062390134831,
+                        139388.47910974643,
+                        89013.07936553344,
+                        3.109062390134831,
+                        145089.21861409477,
+                        83312.33986118792,
+                        3.109062390134831,
+                        149574.28127310186,
+                        78827.27720217845,
+                        3.109062390134831,
+                        157536.99372619216,
+                        70864.5647490927,
+                        3.109062390134831,
+                        52899.496446393096,
+                        175502.06202888687,
+                        3.109062390134831,
+                        101549.24595229859,
+                        126852.31252298056,
+                        3.109062390134831,
+                        138636.86542589092,
+                        89764.69304939067,
+                        3.109062390134831,
+                        95052.90489630299,
+                        133348.65357897658,
+                        3.109062390134831,
+                        47110.57844055663,
+                        181290.9800347224,
+                        3.109062390134831,
+                        47624.584263080884,
+                        180776.9742121984,
+                        3.109062390134831,
+                        36437.615364501275,
+                        191963.94311077814,
+                        3.109062390134831,
+                        42538.683332794404,
+                        185862.87514248476,
+                        3.109062390134831,
+                        23219.607210415565,
+                        205181.9512648665,
+                        3.109062390134831,
+                        41622.91202924152,
+                        186778.64644603763,
+                        3.109062390134831,
+                        166747.05553743857,
+                        61654.50293784143,
+                        3.109062390134831,
+                        101847.08495908028,
+                        126554.47351619892,
+                        3.109062390134831,
+                        111240.11079439268,
+                        117161.44768088598,
+                        3.109062390134831,
+                        29584.35464336265,
+                        198817.2038319192,
+                        3.109062390134831,
+                        0,
+                        228401.55847528495,
+                        3.109062390134831,
+                        0,
+                        228401.55847528495,
+                        3.109062390134831,
+                        113169.9997193799,
+                        115231.55875590075,
+                        3.109062390134831,
+                        64955.673542729586,
+                        163445.8849325514,
+                        3.109062390134831,
+                        89981.55342952607,
+                        138420.00504575524,
+                        3.109062390134831,
+                        89368.9544190549,
+                        139032.60405622653,
+                        3.109062390134831,
+                        20479.394461712243,
+                        207922.1640135697,
+                        3.109062390134831,
+                        217.20662405707216,
+                        228184.35185122798,
+                        3.109062390134831,
+                        30943.370052278595,
+                        197458.1884230077,
+                        3.109062390134831,
+                        42604.02027459081,
+                        185797.53820069451,
+                        3.109062390134831
+                    ],
+                    "n_missing": 3,
+                    "metadata": {
+                        "references": {},
+                        "derived": true,
+                        "type": {
+                            "integer": false,
+                            "missing_rules": {},
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "class": "numeric"
+                        }
+                    }
+                }
+            },
+            "element": "crunch:cube",
+            "counts": [
+                224833,
+                5951,
+                3,
+                221990,
+                8794,
+                3,
+                223560,
+                7224,
+                3,
+                222923,
+                7861,
+                3,
+                217586,
+                13198,
+                3,
+                206164,
+                24620,
+                3,
+                183147,
+                47637,
+                3,
+                167720,
+                63064,
+                3,
+                209355,
+                21429,
+                3,
+                201847,
+                28937,
+                3,
+                193826,
+                36958,
+                3,
+                198744,
+                32040,
+                3,
+                180015,
+                50769,
+                3,
+                174349,
+                56435,
+                3,
+                200050,
+                30734,
+                3,
+                160769,
+                70015,
+                3,
+                167969,
+                62815,
+                3,
+                43193,
+                187591,
+                3,
+                44339,
+                186445,
+                3,
+                207539,
+                23245,
+                3,
+                135973,
+                94811,
+                3,
+                146002,
+                84782,
+                3,
+                146789,
+                83995,
+                3,
+                160692,
+                70092,
+                3,
+                53995,
+                176789,
+                3,
+                95741,
+                135043,
+                3,
+                135700,
+                95084,
+                3,
+                91878,
+                138906,
+                3,
+                48465,
+                182319,
+                3,
+                48929,
+                181855,
+                3,
+                35189,
+                195595,
+                3,
+                42764,
+                188020,
+                3,
+                21194,
+                209590,
+                3,
+                41422,
+                189362,
+                3,
+                167652,
+                63132,
+                3,
+                95676,
+                135108,
+                3,
+                111961,
+                118823,
+                3,
+                26137,
+                204647,
+                3,
+                0,
+                230784,
+                3,
+                0,
+                230784,
+                3,
+                111760,
+                119024,
+                3,
+                60761,
+                170023,
+                3,
+                87645,
+                143139,
+                3,
+                85306,
+                145478,
+                3,
+                18873,
+                211911,
+                3,
+                178,
+                230606,
+                3,
+                30461,
+                200323,
+                3,
+                42843,
+                187941,
+                3
+            ],
+            "n": 230787
+        }
+    }
+}
