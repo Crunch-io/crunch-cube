@@ -136,6 +136,7 @@ class TestCrunchCube(TestCase):
         )
         self.assertEqual(actual, expected)
 
+    @patch('cr.cube.crunch_cube.CrunchCube.is_univariate_ca', False)
     @patch('cr.cube.crunch_cube.CrunchCube.has_mr', False)
     @patch('cr.cube.crunch_cube.CrunchCube._fix_shape')
     @patch('cr.cube.crunch_cube.CrunchCube._as_array')
