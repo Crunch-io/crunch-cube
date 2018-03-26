@@ -127,39 +127,38 @@ class CrunchCube(object):
 
     def _update_result(self, result, insertions, dimension_index,
                        valid_indices):
-        '''Actually insert subtotals into resulting ndarray.'''
+        '''Insert subtotals into resulting ndarray.'''
         for j, (ind_insertion, value) in enumerate(insertions):
-            if dimension_index == 0:
-                result = np.insert(
-                    result, ind_insertion + j + 1, value, axis=dimension_index
-                )
-            else:
-                result = np.insert(
-                    result, ind_insertion + j + 1, value, axis=dimension_index
-                )
+            result = np.insert(
+                result, ind_insertion + j + 1, value, axis=dimension_index
+            )
             valid_indices = self._fix_valid_indices(
                 valid_indices, ind_insertion + j, dimension_index
             )
         return result, valid_indices
 
-    def _transform(self, res, include_transforms_for_dims, valid_indices):
+    def _transform(self, res, include_transforms_for_dims, valid_indices,
+                   inflate=False):
         '''Transform the shape of the resulting ndarray.'''
-
-        all_dimensions = self.table.all_dimensions
-
         if not include_transforms_for_dims:
             return res[np.ix_(*valid_indices)]
 
-        for (i, dim) in enumerate(all_dimensions):
+        dim_offset = 0
+        dims = self.table.all_dimensions if self.has_mr else self.dimensions
+        for (i, dim) in enumerate(dims):
             # Check if transformations can/need to be performed
             transform = (dim.has_transforms and
-                         i in include_transforms_for_dims)
+                         i - dim_offset in include_transforms_for_dims)
+            if dim.type == 'multiple_response':
+                dim_offset += 1
             if not transform or dim.type == 'categorical_array':
                 continue
             # Perform transformations
             insertions = self._insertions(res, dim, i)
-            res, valid_indices = self._update_result(res, insertions, i,
-                                                     valid_indices)
+            ind = i if inflate else i - dim_offset
+            res, valid_indices = self._update_result(
+                res, insertions, ind, valid_indices
+            )
         return res[np.ix_(*valid_indices)]
 
     def _as_array(self, include_missing=False, get_non_selected=False,
@@ -191,7 +190,9 @@ class CrunchCube(object):
         valid_indices = self._get_valid_indices(dimensions, include_missing,
                                                 get_non_selected)
         res = np.array(values).reshape(shape)
-        res = self._transform(res, include_transforms_for_dims, valid_indices)
+        res = self._transform(
+            res, include_transforms_for_dims, valid_indices, inflate=True
+        )
         res = res + adjusted
 
         if prune and not self.has_mr:
@@ -405,7 +406,7 @@ class CrunchCube(object):
 
         return res
 
-    def _mr_proportions(self, axis, weighted):
+    def _mr_proportions(self, axis, weighted, include_transforms_for_dims=None):
         '''Calculate MR proportions.'''
 
         if self.is_double_mr:
@@ -445,9 +446,11 @@ class CrunchCube(object):
                 den = num + non_selected
             else:
                 axis = 0 if len(num.shape) < 3 else (1, 2)
-                # num[np.ix_(*self.valid_indices)] / np.sum(num[np.ix_(*self.valid_indices)] + non_selected[np.ix_(*valid_indices)], (1, 2))
                 den = np.sum(num + non_selected, axis)
-            return num / den
+            res = num / den
+            return self._transform(
+                res, include_transforms_for_dims, self.valid_indices
+            )
         elif self.mr_dim_ind == 2:
             margin = (
                 self.margin(axis=axis)[:, np.newaxis]
@@ -456,7 +459,8 @@ class CrunchCube(object):
             )
             return self.as_array() / margin
 
-        return res[np.ix_(*valid_indices)]
+        return self._transform(res, include_transforms_for_dims, valid_indices)
+        # return res[np.ix_(*valid_indices)]
 
     @property
     def is_univariate_ca(self):
@@ -467,7 +471,10 @@ class CrunchCube(object):
                      include_transforms_for_dims=None, include_missing=False,
                      prune=False):
         if self.has_mr:
-            return self._mr_proportions(axis, weighted)
+            return self._mr_proportions(
+                axis, weighted,
+                include_transforms_for_dims=include_transforms_for_dims
+            )
 
         if self.is_univariate_ca and axis != 1:
             raise ValueError('CA props only defined for row direction.')
