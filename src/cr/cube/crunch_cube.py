@@ -434,7 +434,11 @@ class CrunchCube(object):
 
             # The following are normal MR x something (not CA)
             if axis == 1:
-                return self.as_array() / self.margin(axis=1)[:, np.newaxis]
+                num = self.as_array(
+                    include_transforms_for_dims=include_transforms_for_dims
+                )
+                den = self.margin(axis=1)[:, np.newaxis]
+                return num / den
             else:
                 res = table[:, 0, :] / (table[:, 0, :] + table[:, 1, :])
         elif self.mr_dim_ind == 1:

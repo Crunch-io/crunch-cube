@@ -581,11 +581,29 @@ class TestHeadersAndSubtotals(TestCase):
         actual = cube.as_array(include_transforms_for_dims=[0, 1])
         np.testing.assert_array_equal(actual, expected)
 
-    def test_mr_x_cat_hs_props(self):
+    def test_mr_x_cat_hs_props_by_cell(self):
         cube = CrunchCube(PETS_X_FRUIT_HS)
         # TODO: Change expectation once the MR cell props are fixed.
         expected = (3, 3)
         actual = cube.proportions(
             axis=None, include_transforms_for_dims=[0, 1]
+        ).shape
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_mr_x_cat_hs_props_by_row(self):
+        cube = CrunchCube(PETS_X_FRUIT_HS)
+        # TODO: Change expectation once the MR cell props are fixed.
+        expected = (3, 3)
+        actual = cube.proportions(
+            axis=0, include_transforms_for_dims=[0, 1]
+        ).shape
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_mr_x_cat_hs_props_by_col(self):
+        cube = CrunchCube(PETS_X_FRUIT_HS)
+        # TODO: Change expectation once the MR cell props are fixed.
+        expected = (3, 3)
+        actual = cube.proportions(
+            axis=1, include_transforms_for_dims=[0, 1]
         ).shape
         np.testing.assert_array_equal(actual, expected)
