@@ -357,7 +357,13 @@ class CrunchCube(object):
         margin = table[self.ind_selected] + table[self.ind_non_selected]
         margin = margin[np.ix_(*self.valid_indices)]
 
-        return np.sum(margin, 1 - self.mr_dim_ind) if axis is None else margin
+        if axis is None:
+            axis = tuple([
+                i for i, _ in enumerate(self.dimensions) if i != self.mr_dim_ind
+            ])
+            return np.sum(margin, axis)
+
+        return margin
 
     def _inflate_dim(self, array, axis):
         # Explicitly check if axis is tuple (which could be the case for doing
@@ -433,14 +439,15 @@ class CrunchCube(object):
                            (table[:, 0, :, :] + table[:, 1, :, :]))
 
             # The following are normal MR x something (not CA)
-            if axis == 1:
+            if axis == 0:
+                res = table[:, 0, :] / (table[:, 0, :] + table[:, 1, :])
+            else:
                 num = self.as_array(
                     include_transforms_for_dims=include_transforms_for_dims
                 )
-                den = self.margin(axis=1)[:, np.newaxis]
+                den = self.margin(axis=axis)[:, np.newaxis]
                 return num / den
-            else:
-                res = table[:, 0, :] / (table[:, 0, :] + table[:, 1, :])
+
         elif self.mr_dim_ind == 1:
             num = table[self.ind_selected][np.ix_(*self.valid_indices)]
             non_selected = table[self.ind_non_selected][np.ix_(*self.valid_indices)]
