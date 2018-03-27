@@ -475,8 +475,9 @@ class CrunchCube(object):
 
     @property
     def is_univariate_ca(self):
-        types = [d.type for d in self.dimensions]
-        return types == ['categorical_array', 'categorical']
+        types = {d.type for d in self.dimensions}
+        ca_types = {'categorical_array', 'categorical'}
+        return len(self.dimensions) == 2 and types == ca_types
 
     def _proportions(self, axis=None, weighted=True, adjusted=False,
                      include_transforms_for_dims=None, include_missing=False,
