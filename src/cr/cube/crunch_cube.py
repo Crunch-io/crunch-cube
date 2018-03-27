@@ -420,7 +420,8 @@ class CrunchCube(object):
 
         return res
 
-    def _mr_proportions(self, axis, weighted, include_transforms_for_dims=None):
+    def _mr_proportions(self, axis, weighted, prune,
+                        include_transforms_for_dims=None):
         '''Calculate MR proportions.'''
 
         if self.is_double_mr:
@@ -433,7 +434,10 @@ class CrunchCube(object):
 
         if len(self.dimensions) == 1:
             res = table[:, 0] / (table[:, 0] + table[:, 1])
-            return res[np.ix_(*valid_indices)]
+            res = res[np.ix_(*valid_indices)]
+            if prune:
+                res = res[res != 0]
+            return res
 
         if self.mr_dim_ind == 0:
             if len(table.shape) == 4:
@@ -499,7 +503,7 @@ class CrunchCube(object):
                      prune=False):
         if self.has_mr:
             return self._mr_proportions(
-                axis, weighted,
+                axis, weighted, prune,
                 include_transforms_for_dims=include_transforms_for_dims
             )
 
