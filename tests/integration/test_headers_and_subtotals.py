@@ -14,6 +14,7 @@ from .fixtures import FIXT_FRUIT_HS_TOP_BOTTOM
 from .fixtures import FIXT_FRUIT_X_PETS_HS_TOP_BOTTOM
 from .fixtures import FIXT_CAT_X_DATE_HS_PRUNE
 from .fixtures import FIXT_CAT_X_NUM_HS_PRUNE
+from .fixtures import PETS_X_FRUIT_HS
 
 from cr.cube.crunch_cube import CrunchCube
 
@@ -530,6 +531,18 @@ class TestHeadersAndSubtotals(TestCase):
         actual = cube.as_array(include_transforms_for_dims=[0])
         np.testing.assert_array_equal(actual, expected)
 
+    def test_fruit_x_pets_hs_top_bottom_middle_props(self):
+        cube = CrunchCube(FIXT_FRUIT_X_PETS_HS_TOP_BOTTOM)
+        expected = np.array([
+            [1., 1., 1.],
+            [0.3, 0.35294118, 0.31578947],
+            [1., 1., 1.],
+            [0.7, 0.64705882, 0.68421053],
+            [1., 1., 1.],
+        ])
+        actual = cube.proportions(axis=0, include_transforms_for_dims=[0])
+        np.testing.assert_almost_equal(actual, expected)
+
     def test_fruit_x_pets_hs_top_bottom_middle_counts(self):
         cube = CrunchCube(FIXT_FRUIT_X_PETS_HS_TOP_BOTTOM)
         expected = np.array([
@@ -558,4 +571,39 @@ class TestHeadersAndSubtotals(TestCase):
         cube = CrunchCube(FIXT_CAT_X_NUM_HS_PRUNE)
         expected = np.array([0, 1, 1, 0])
         actual = cube.as_array(include_transforms_for_dims=[0], prune=True)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_mr_x_cat_hs_counts(self):
+        cube = CrunchCube(PETS_X_FRUIT_HS)
+        expected = np.array([[12, 28, 30],
+                             [12, 22, 30],
+                             [12, 26, 30]])
+        actual = cube.as_array(include_transforms_for_dims=[0, 1])
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_mr_x_cat_hs_props_by_cell(self):
+        cube = CrunchCube(PETS_X_FRUIT_HS)
+        # TODO: Change expectation once the MR cell props are fixed.
+        expected = (3, 3)
+        actual = cube.proportions(
+            axis=None, include_transforms_for_dims=[0, 1]
+        ).shape
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_mr_x_cat_hs_props_by_row(self):
+        cube = CrunchCube(PETS_X_FRUIT_HS)
+        # TODO: Change expectation once the MR cell props are fixed.
+        expected = (3, 3)
+        actual = cube.proportions(
+            axis=0, include_transforms_for_dims=[0, 1]
+        ).shape
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_mr_x_cat_hs_props_by_col(self):
+        cube = CrunchCube(PETS_X_FRUIT_HS)
+        # TODO: Change expectation once the MR cell props are fixed.
+        expected = (3, 3)
+        actual = cube.proportions(
+            axis=1, include_transforms_for_dims=[0, 1]
+        ).shape
         np.testing.assert_array_equal(actual, expected)
