@@ -475,13 +475,14 @@ class CrunchCube(object):
 
     @property
     def is_univariate_ca(self):
+        '''Check if cube is a just the CA ("ca x cat" or "cat x ca" dims)'''
         types = {d.type for d in self.dimensions}
         ca_types = {'categorical_array', 'categorical'}
         return len(self.dimensions) == 2 and types == ca_types
 
     @property
     def univariate_ca_main_axis(self):
-        # for univariate CA, the main axis is the categorical axis
+        '''For univariate CA, the main axis is the categorical axis'''
         dim_types = [dim.type for dim in self.dimensions]
         return dim_types.index('categorical')
 
