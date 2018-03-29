@@ -475,8 +475,16 @@ class CrunchCube(object):
 
     @property
     def is_univariate_ca(self):
-        types = [d.type for d in self.dimensions]
-        return types == ['categorical_array', 'categorical']
+        '''Check if cube is a just the CA ("ca x cat" or "cat x ca" dims)'''
+        types = {d.type for d in self.dimensions}
+        ca_types = {'categorical_array', 'categorical'}
+        return len(self.dimensions) == 2 and types == ca_types
+
+    @property
+    def univariate_ca_main_axis(self):
+        '''For univariate CA, the main axis is the categorical axis'''
+        dim_types = [dim.type for dim in self.dimensions]
+        return dim_types.index('categorical')
 
     def _proportions(self, axis=None, weighted=True, adjusted=False,
                      include_transforms_for_dims=None, include_missing=False,
@@ -487,8 +495,8 @@ class CrunchCube(object):
                 include_transforms_for_dims=include_transforms_for_dims
             )
 
-        if self.is_univariate_ca and axis != 1:
-            raise ValueError('CA props only defined for row direction.')
+        if self.is_univariate_ca and axis != self.univariate_ca_main_axis:
+            raise ValueError('CA props only defined for main axis direction.')
 
         margin = self._margin(
             axis=axis, weighted=weighted, adjusted=adjusted,
