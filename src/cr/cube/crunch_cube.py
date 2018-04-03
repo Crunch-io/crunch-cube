@@ -201,6 +201,9 @@ class CrunchCube(object):
         return res
 
     def _mr_prune(self, res):
+        if len(res.shape) > 2:
+            # Only perform pruning for 1-D MR cubes.
+            return res
         margin = self.margin(axis=0)
         ind_prune = margin == 0
         return res[~ind_prune]
