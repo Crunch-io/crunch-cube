@@ -195,10 +195,18 @@ class CrunchCube(object):
         )
         res = res + adjusted
 
-        if prune and not self.has_mr:
+        if prune:
             return self._prune(res, include_transforms_for_dims)
 
         return res
+
+    def _mr_prune(self, res):
+        if len(res.shape) > 2:
+            # Only perform pruning for 1-D MR cubes.
+            return res
+        margin = self.margin(axis=0)
+        ind_prune = margin == 0
+        return res[~ind_prune]
 
     def _prune(self, res, transforms=None):
         '''Prune the result based on margins content.
@@ -206,6 +214,9 @@ class CrunchCube(object):
         Pruning is the removal of rows or columns, whose corresponding
         marginal elements are either 0 or not defined (np.nan).
         '''
+
+        if self.has_mr:
+            return self._mr_prune(res)
 
         # Note: If the cube contains transforms (H&S), and they happen to
         # have the marginal value 0 (or NaN), they're NOT pruned. This is
@@ -412,7 +423,8 @@ class CrunchCube(object):
 
         return res
 
-    def _mr_proportions(self, axis, weighted, include_transforms_for_dims=None):
+    def _mr_proportions(self, axis, weighted, prune,
+                        include_transforms_for_dims=None):
         '''Calculate MR proportions.'''
 
         if self.is_double_mr:
@@ -425,7 +437,10 @@ class CrunchCube(object):
 
         if len(self.dimensions) == 1:
             res = table[:, 0] / (table[:, 0] + table[:, 1])
-            return res[np.ix_(*valid_indices)]
+            res = res[np.ix_(*valid_indices)]
+            if prune:
+                res = res[res != 0]
+            return res
 
         if self.mr_dim_ind == 0:
             if len(table.shape) == 4:
@@ -491,7 +506,7 @@ class CrunchCube(object):
                      prune=False):
         if self.has_mr:
             return self._mr_proportions(
-                axis, weighted,
+                axis, weighted, prune,
                 include_transforms_for_dims=include_transforms_for_dims
             )
 
