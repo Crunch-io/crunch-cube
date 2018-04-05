@@ -75,7 +75,6 @@ class CrunchCube(object):
                     'A `cube` must be JSON or `dict`.'
                 ).format(type(response)))
 
-
     def _get_valid_indices(self, dimensions, include_missing,
                            get_non_selected=False, get_all_mr=False):
         '''Gets valid indices for each dimension.
@@ -95,7 +94,7 @@ class CrunchCube(object):
             mr_slice = [0, 1, 2]
         elif get_non_selected:
             mr_slice = [1]
-        # mr_slice = [1] if get_non_selected else [0]
+
         if mr_selections_indices:
             # In the case of MR variables, we only need to select the
             # 'selected' slice of the 'selections' dimension.
@@ -513,21 +512,17 @@ class CrunchCube(object):
                 return num / den
 
             # The following are normal MR x something (not CA)
-            elif axis == 0:
-                num = self.as_array(
-                    include_transforms_for_dims=include_transforms_for_dims
-                )
+            num = self.as_array(
+                include_transforms_for_dims=include_transforms_for_dims
+            )
+            if axis == 0:
                 den = self.margin(
-                    axis=0,
+                    axis=axis,
                     include_transforms_for_dims=include_transforms_for_dims
                 )
-                return num / den
             else:
-                num = self.as_array(
-                    include_transforms_for_dims=include_transforms_for_dims
-                )
                 den = self.margin(axis=axis)[:, np.newaxis]
-                return num / den
+            return num / den
 
         elif self.mr_dim_ind == 1:
             num = table[self.ind_selected][np.ix_(*self.valid_indices)]
