@@ -76,7 +76,8 @@ class CrunchCube(object):
                 ).format(type(response)))
 
 
-    def _get_valid_indices(self, dimensions, include_missing, get_non_selected):
+    def _get_valid_indices(self, dimensions, include_missing,
+                           get_non_selected=False, get_all_mr=False):
         '''Gets valid indices for each dimension.
 
         Main criterion for a valid index is most often the information about
@@ -89,7 +90,12 @@ class CrunchCube(object):
                          for dim in dimensions]
 
         mr_selections_indices = self.table.mr_selections_indices
-        mr_slice = [1] if get_non_selected else [0]
+        mr_slice = [0]
+        if get_all_mr:
+            mr_slice = [0, 1, 2]
+        elif get_non_selected:
+            mr_slice = [1]
+        # mr_slice = [1] if get_non_selected else [0]
         if mr_selections_indices:
             # In the case of MR variables, we only need to select the
             # 'selected' slice of the 'selections' dimension.
@@ -348,14 +354,18 @@ class CrunchCube(object):
             self.mr_dim_ind == 1 and axis == 1 and len(self.dimensions) > 2
         )
 
-    def _mr_margin_along_non_mr_dim(self, axis, weighted):
+    def _mr_margin_along_non_mr_dim(self, axis, weighted,
+                                    include_transforms_for_dims=None):
         '''Calculate MR margin along non-MR dimension.
 
         For cases when margin is calculated along the axis which is not MR,
         we need to perform sumation along that axis, on the tabular
         representation of the cube (which is obtained with 'as_array').
         '''
-        array = self.as_array(weighted=weighted)
+        array = self.as_array(
+            weighted=weighted,
+            include_transforms_for_dims=include_transforms_for_dims
+        )
 
         if axis == 1 and len(array.shape) == 1:
             # If array representation of the cube has less dimensions than
@@ -376,22 +386,45 @@ class CrunchCube(object):
                 indices.append(slice(None))
         return tuple(indices)
 
-    def _mr_margin(self, axis, weighted, adjusted):
+    def _transform_table(self, table, include_transforms_for_dims):
+        valid_indices = self._get_valid_indices(
+            self.table.all_dimensions,
+            include_missing=False,
+            get_all_mr=True
+        )
+        table = self._transform(
+            table,
+            include_transforms_for_dims,
+            valid_indices,
+            inflate=True
+        )
+        return table
+
+    def _mr_margin(self, axis, weighted, adjusted,
+                   include_transforms_for_dims=None):
         '''Margin for cube that contains MR.'''
         if self.is_double_mr:
             return self._double_mr_margin(axis, weighted)
         elif len(self.dimensions) == 1:
             return self._1d_mr_margin(axis, weighted)
         elif self._calculate_along_non_mr(axis):
-            return self._mr_margin_along_non_mr_dim(axis, weighted)
+            return self._mr_margin_along_non_mr_dim(axis, weighted,
+                                                    include_transforms_for_dims)
 
         table = self.table.data(weighted)
+        if include_transforms_for_dims:
+            # In case of H&S the entire table needs to be
+            # transformed (with selections).
+            table = self._transform_table(table, include_transforms_for_dims)
 
         # For cases when the margin is calculated for the MR dimension, we need
         # the sum of selected and non-selected slices (if axis is None), or the
         # sublimated version (another sum along the axis), if axis is defined.
         margin = table[self.ind_selected] + table[self.ind_non_selected]
-        margin = margin[np.ix_(*self.valid_indices)]
+        if not include_transforms_for_dims:
+            # If entire table was transformed, we already have it with all the
+            # valid indices. If not, we need to apply valid indices.
+            margin = margin[np.ix_(*self.valid_indices)]
 
         if axis is None:
             axis = tuple([
@@ -422,8 +455,8 @@ class CrunchCube(object):
         # MR margins are calculated differently, so they need a separate method
         # for them. A good example of this is the rcrunch functionality.
         if self.has_mr:
-            return self._mr_margin(axis, weighted, adjusted)
-
+            return self._mr_margin(axis, weighted, adjusted,
+                                   include_transforms_for_dims)
         # If there are no MR variables, the margins are mostly sums across
         # appropriate dimensions.
         transform_dims = include_transforms_for_dims and (
@@ -481,7 +514,14 @@ class CrunchCube(object):
 
             # The following are normal MR x something (not CA)
             elif axis == 0:
-                res = table[:, 0, :] / (table[:, 0, :] + table[:, 1, :])
+                num = self.as_array(
+                    include_transforms_for_dims=include_transforms_for_dims
+                )
+                den = self.margin(
+                    axis=0,
+                    include_transforms_for_dims=include_transforms_for_dims
+                )
+                return num / den
             else:
                 num = self.as_array(
                     include_transforms_for_dims=include_transforms_for_dims
@@ -512,7 +552,6 @@ class CrunchCube(object):
             return self.as_array() / margin
 
         return self._transform(res, include_transforms_for_dims, valid_indices)
-        # return res[np.ix_(*valid_indices)]
 
     @property
     def is_univariate_ca(self):
@@ -737,8 +776,7 @@ class CrunchCube(object):
                 inserted_inds[i] = ind
         return inserted_indices_list
 
-    @staticmethod
-    def _insertions(result, dimension, dimension_index):
+    def _insertions(self, result, dimension, dimension_index):
         insertions = []
 
         for indices in dimension.hs_indices:
@@ -752,7 +790,12 @@ class CrunchCube(object):
             if dimension_index == 0:
                 value = sum(result[ind_subtotal_elements])
             else:
-                value = np.sum(result[:, ind_subtotal_elements], axis=1)
+                ind = [slice(None), ind_subtotal_elements]
+                axis = 1
+                if self.has_mr:
+                    ind = [slice(None)] + ind
+                    axis = 2
+                value = np.sum(result[ind], axis=axis)
             insertions.append((ind_insertion, value))
 
         return insertions
