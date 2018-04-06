@@ -53,6 +53,7 @@ from .fixtures import FRUIT_X_PETS_ARRAY_SUBVARS_FIRST
 from .fixtures import FRUIT_X_PETS_ARRAY_PETS_FIRST
 from .fixtures import SCALE_WITH_NULL_VALUES
 from .fixtures import PROMPTED_AWARENESS
+from .fixtures import VALUE_SERVICES
 
 
 class TestCrunchCube(TestCase):
@@ -1352,7 +1353,12 @@ class TestCrunchCube(TestCase):
         actual = cube.margin()
         np.testing.assert_almost_equal(actual, expected)
 
-    def test_pets_x_pets_array_by_col(self):
+    def test_pets_x_pets_array_percentages(self):
+        '''All directions need to return same percentages.
+
+        The only direction that makes sense is across categories, and this is
+        handled automatically by the cube.
+        '''
         cube = CrunchCube(PETS_X_PETS_ARRAY)
         expected = np.array([
             [0.55555556, 0.19444444],
@@ -1363,32 +1369,10 @@ class TestCrunchCube(TestCase):
         # Since cube is 3D, col dim is 1 (instead of 0)
         np.testing.assert_almost_equal(actual, expected)
 
-    def test_pets_x_pets_array_by_row(self):
-        cube = CrunchCube(PETS_X_PETS_ARRAY)
-        expected = np.array([
-            [0.55555556, 0.19444444],
-            [0., 0.55555556],
-            [0.44444444, 0.25],
-        ])
-        actual = cube.proportions(axis=1)[0]
+        actual = cube.proportions()[0]
         np.testing.assert_almost_equal(actual, expected)
 
-    def test_pets_x_pets_array_by_cell(self):
-        cube = CrunchCube(PETS_X_PETS_ARRAY)
-        expected = np.array([
-            [[0.08733624, 0.06113537],
-             [0., 0.17467249],
-             [0.069869, 0.07860262]],
-
-            [[0., 0.14847162],
-             [0.06550218, 0.06113537],
-             [0.05676856, 0.069869]],
-
-            [[0.09606987, 0.069869],
-             [0.08733624, 0.07860262],
-             [0., 0.16593886]]
-        ])
-        actual = cube.proportions()
+        actual = cube.proportions(axis=2)[0]
         np.testing.assert_almost_equal(actual, expected)
 
     def test_mr_x_cat_x_cat_by_row(self):
@@ -1928,4 +1912,22 @@ class TestCrunchCube(TestCase):
             1.86531215e-01,
         ])
         actual = cube.proportions(prune=True)
+
+    def test_values_services(self):
+        cube = CrunchCube(VALUE_SERVICES)
+        # Axis is 1, which is 'col' direction, since 3D cube.
+        actual = cube.proportions(axis=1)[0]
+        expected = np.array([
+            [0.14285714, 0.10204082, 0.20512821, 0.16363636, 0.16438356, 0.1372549, 0.18181818, 0.2991453, 0.32, 0.44776119],  # noqa
+            [0.07142857, 0.23469388, 0.17948718, 0.14545455, 0.20547945, 0.09803922, 0.27272727, 0.11111111, 0.352, 0.23880597],  # noqa
+            [0.12857143, 0.19387755, 0.1025641, 0.16363636, 0.1369863, 0.15686275, 0.25, 0.17094017, 0.136, 0.14925373],  # noqa
+            [0.15714286, 0.15306122, 0.14102564, 0.05454545, 0.17808219, 0.09803922, 0.18181818, 0.20512821, 0.064, 0.05223881],  # noqa
+            [0.12857143, 0.12244898, 0.1025641, 0.05454545, 0.15068493, 0.07843137, 0.06060606, 0.1025641, 0.064, 0.05970149],  # noqa
+            [0.05714286, 0.09183673, 0.20512821, 0.09090909, 0.09589041, 0.11764706, 0.03030303, 0.02564103, 0.032, 0.01492537],  # noqa
+            [0.08571429, 0.04081633, 0.05128205, 0.07272727, 0.01369863, 0.11764706, 0.01515152, 0.05128205, 0.024, 0.02238806],  # noqa
+            [0.17142857, 0.04081633, 0.01282051, 0.03636364, 0.02739726, 0.01960784, 0.00757576, 0.00854701, 0.008, 0.00746269],  # noqa
+            [0.01428571, 0.02040816, 0., 0.14545455, 0.01369863, 0.11764706, 0., 0., 0., 0.00746269],  # noqa
+            [0.04285714, 0., 0., 0.07272727, 0.01369863, 0.05882353, 0., 0.02564103, 0., 0.],  # noqa
+            [0., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
+        ])
         np.testing.assert_almost_equal(actual, expected)
