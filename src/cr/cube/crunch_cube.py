@@ -445,16 +445,18 @@ class CrunchCube(object):
         if self.mr_dim_ind == 0:
             if len(table.shape) == 4:
                 # This is the case of MR x CA, special treatment
-                # Still haven'f figured out the percentages
-                if axis == 1:
-                    res = (table[:, 0, :, :] /
-                           np.sum(table[:, 0, :, :], 1))
-                else:
-                    res = (table[:, 0, :, :] /
-                           (table[:, 0, :, :] + table[:, 1, :, :]))
+                # Always return only the column direction (across CATs).
+                num = self.as_array(
+                    include_transforms_for_dims=include_transforms_for_dims
+                )
+                den = self.margin(
+                    axis=1,
+                    include_transforms_for_dims=include_transforms_for_dims
+                )[:, None, :]
+                return num / den
 
             # The following are normal MR x something (not CA)
-            if axis == 0:
+            elif axis == 0:
                 res = table[:, 0, :] / (table[:, 0, :] + table[:, 1, :])
             else:
                 num = self.as_array(
