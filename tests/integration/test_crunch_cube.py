@@ -1912,6 +1912,7 @@ class TestCrunchCube(TestCase):
             1.86531215e-01,
         ])
         actual = cube.proportions(prune=True)
+        np.testing.assert_almost_equal(actual, expected)
 
     def test_values_services(self):
         cube = CrunchCube(VALUE_SERVICES)
