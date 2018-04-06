@@ -7,142 +7,99 @@ source files relatively clean.
 '''
 
 import os
+from functools import partial
+
 from cr.cube.utils import load_fixture
 
 CUBES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cubes')
 
 
+def _load(cube_file):
+    load = partial(load_fixture, CUBES_DIR)
+    return load(cube_file)
+
+
 # Bivariate Cubes
-FIXT_CAT_X_CAT = load_fixture(CUBES_DIR, 'cat-x-cat.json')
-FIXT_CAT_X_DATETIME = load_fixture(CUBES_DIR, 'cat-x-datetime.json')
+CAT_X_CAT = _load('cat-x-cat.json')
+CAT_X_DATETIME = _load('cat-x-datetime.json')
 
 # Univariate Cubes
-FIXT_UNIVARIATE_CATEGORICAL = load_fixture(CUBES_DIR,
-                                           'univariate-categorical.json')
-FIXT_VOTER_REGISTRATION = load_fixture(CUBES_DIR, 'voter-registration.json')
-FIXT_SIMPLE_DATETIME = load_fixture(CUBES_DIR, 'simple-datetime.json')
-FIXT_SIMPLE_TEXT = load_fixture(CUBES_DIR, 'simple-text.json')
-FIXT_SIMPLE_CAT_ARRAY = load_fixture(CUBES_DIR, 'simple-cat-array.json')
+UNIVARIATE_CATEGORICAL = _load('univariate-categorical.json')
+VOTER_REGISTRATION = _load('voter-registration.json')
+SIMPLE_DATETIME = _load('simple-datetime.json')
+SIMPLE_TEXT = _load('simple-text.json')
+SIMPLE_CAT_ARRAY = _load('simple-cat-array.json')
 
 # Various other Cubes
-FIXT_CAT_X_NUM_X_DATETIME = load_fixture(CUBES_DIR,
-                                         'cat-x-num-x-datetime.json')
-FIXT_SIMPLE_MR = load_fixture(CUBES_DIR, 'simple-mr.json')
-FIXT_CAT_X_MR_SIMPLE = load_fixture(CUBES_DIR, 'cat-x-mr.json')
-FIXT_ECON_GENDER_X_IDEOLOGY_WEIGHTED = load_fixture(
-    CUBES_DIR,
-    'econ-gender-x-ideology-weighted.json',
+CAT_X_NUM_X_DATETIME = _load('cat-x-num-x-datetime.json')
+SIMPLE_MR = _load('simple-mr.json')
+CAT_X_MR_SIMPLE = _load('cat-x-mr.json')
+ECON_GENDER_X_IDEOLOGY_WEIGHTED = _load('econ-gender-x-ideology-weighted.json')
+CAT_X_CAT_GERMAN_WEIGHTED = _load('cat-x-cat-german-weighted.json')
+STATS_TEST = _load('stats_test.json')
+ECON_MEAN_AGE_BLAME_X_GENDER = _load(
+    'econ-mean-age-blame-x-gender.json',
 )
-FIXT_CAT_X_CAT_GERMAN_WEIGHTED = load_fixture(CUBES_DIR,
-                                              'cat-x-cat-german-weighted.json')
-FIXT_STATS_TEST = load_fixture(CUBES_DIR, 'stats_test.json')
-FIXT_ECON_MEAN_AGE_BLAME_X_GENDER = load_fixture(
-    CUBES_DIR, 'econ-mean-age-blame-x-gender.json',
-)
-FIXT_ECON_MEAN_NO_DIMS = load_fixture(CUBES_DIR, 'econ-mean-no-dims.json')
-FIXT_MR_X_CAT_PROFILES_STATS_WEIGHTED = load_fixture(
-    CUBES_DIR,
+ECON_MEAN_NO_DIMS = _load('econ-mean-no-dims.json')
+MR_X_CAT_PROFILES_STATS_WEIGHTED = _load(
     'mr-x-cat-profiles-stats-weighted.json',
 )
-FIXT_ADMIT_X_DEPT_UNWEIGHTED = load_fixture(CUBES_DIR,
-                                            'admit-x-dept-unweighted.json')
-FIXT_ADMIT_X_GENDER_WEIGHTED = load_fixture(CUBES_DIR,
-                                            'admit-x-gender-weighted.json')
-FIXT_SELECTED_CROSSTAB_4 = load_fixture(CUBES_DIR, 'selected-crosstab-4.json')
-FIXT_PETS_X_PETS = load_fixture(CUBES_DIR, 'pets-x-pets.json')
-FIXT_PETS_X_FRUIT = load_fixture(CUBES_DIR, 'pets-x-fruit.json')
-FIXT_PETS_ARRAY = load_fixture(CUBES_DIR, 'pets-array.json')
-FIXT_PETS_ARRAY_CAT_FIRST = load_fixture(CUBES_DIR, 'pets-array-cat-first.json')
-FIXT_PETS_ARRAY_SUBVAR_FIRST = load_fixture(CUBES_DIR,
-                                            'pets-array-subvar-first.json')
-FIXT_ECON_BLAME_WITH_HS = load_fixture(CUBES_DIR, 'econ-blame-with-hs.json')
-FIXT_ECON_BLAME_WITH_HS_MISSING = load_fixture(
-    CUBES_DIR,
-    'econ-blame-with-hs-missing.json',
+ADMIT_X_DEPT_UNWEIGHTED = _load('admit-x-dept-unweighted.json')
+ADMIT_X_GENDER_WEIGHTED = _load('admit-x-gender-weighted.json')
+SELECTED_CROSSTAB_4 = _load('selected-crosstab-4.json')
+PETS_X_PETS = _load('pets-x-pets.json')
+PETS_X_FRUIT = _load('pets-x-fruit.json')
+PETS_ARRAY = _load('pets-array.json')
+PETS_ARRAY_CAT_FIRST = _load('pets-array-cat-first.json')
+PETS_ARRAY_SUBVAR_FIRST = _load('pets-array-subvar-first.json')
+ECON_BLAME_WITH_HS = _load('econ-blame-with-hs.json')
+ECON_BLAME_WITH_HS_MISSING = _load('econ-blame-with-hs-missing.json')
+ECON_BLAME_X_IDEOLOGY_ROW_HS = _load('econ-blame-x-ideology-row-hs.json')
+ECON_BLAME_X_IDEOLOGY_COL_HS = _load('econ-blame-x-ideology-col-hs.json')
+ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS = _load(
+    'econ-blame-x-ideology-row-and-col-hs.json'
 )
-FIXT_ECON_BLAME_X_IDEOLOGY_ROW_HS = load_fixture(
-    CUBES_DIR,
-    'econ-blame-x-ideology-row-hs.json',
+SIMPLE_CA_HS = _load('simple-ca-hs.json')
+FRUIT_X_PETS = _load('fruit-x-pets.json')
+ECON_US_PROBLEM_X_BIGGER_PROBLEM = _load(
+    'econ-us-problem-x-bigger-problem.json'
 )
-FIXT_ECON_BLAME_X_IDEOLOGY_COL_HS = load_fixture(
-    CUBES_DIR,
-    'econ-blame-x-ideology-col-hs.json',
-)
-FIXT_ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS = load_fixture(
-    CUBES_DIR,
-    'econ-blame-x-ideology-row-and-col-hs.json',
-)
-FIXT_SIMPLE_CA_HS = load_fixture(CUBES_DIR, 'simple-ca-hs.json')
-FIXT_FRUIT_X_PETS = load_fixture(CUBES_DIR, 'fruit-x-pets.json')
-FIXT_ECON_US_PROBLEM_X_BIGGER_PROBLEM = load_fixture(
-    CUBES_DIR,
-    'econ-us-problem-x-bigger-problem.json',
-)
-FIXT_PETS_ARRAY_X_PETS = load_fixture(
-    CUBES_DIR,
-    'pets-array-x-pets.json',
-)
-FIXT_PETS_X_PETS_ARRAY = load_fixture(
-    CUBES_DIR,
-    'pets-x-pets-array.json',
-)
-FIXT_FRUIT_X_PETS_ARRAY = load_fixture(
-    CUBES_DIR,
-    'fruit-x-pets-array.json'
-)
-FIXT_IDENTITY_X_PERIOD = load_fixture(
-    CUBES_DIR,
-    'econ-identity-x-period.json'
-)
-FIXT_CA_SINGLE_CAT = load_fixture(CUBES_DIR, 'cat-arr-with-single-cat.json')
-FIXT_MR_X_SINGLE_WAVE = load_fixture(CUBES_DIR, 'mr-x-single-wave.json')
-FIXT_SELECTED_3_WAY_2 = load_fixture(
-    CUBES_DIR,
-    'selected-3way-2-filledmissing.json'
-)
-FIXT_SELECTED_3_WAY = load_fixture(
-    CUBES_DIR,
-    'selected-3way-filledmissing.json'
-)
-FIXT_ARRAY_X_MR = load_fixture(CUBES_DIR, 'array-by-mr.json')
-FIXT_PROFILES_PERCENTS = load_fixture(CUBES_DIR,
-                                      'test-profiles-percentages.json')
-FIXT_CAT_X_CAT_WITH_EMPTY_COLS = load_fixture(CUBES_DIR,
-                                              'cat-x-cat-with-empty-cols.json')
-FIXT_BINNED = load_fixture(CUBES_DIR, 'binned.json')
-FIXT_SINGLE_COL_MARGIN_NOT_ITERABLE = load_fixture(
-    CUBES_DIR,
+PETS_ARRAY_X_PETS = _load('pets-array-x-pets.json')
+PETS_X_PETS_ARRAY = _load('pets-x-pets-array.json')
+FRUIT_X_PETS_ARRAY = _load('fruit-x-pets-array.json')
+IDENTITY_X_PERIOD = _load('econ-identity-x-period.json')
+CA_SINGLE_CAT = _load('cat-arr-with-single-cat.json')
+MR_X_SINGLE_WAVE = _load('mr-x-single-wave.json')
+SELECTED_3_WAY_2 = _load('selected-3way-2-filledmissing.json')
+SELECTED_3_WAY = _load('selected-3way-filledmissing.json')
+ARRAY_X_MR = _load('array-by-mr.json')
+PROFILES_PERCENTS = _load('test-profiles-percentages.json')
+CAT_X_CAT_WITH_EMPTY_COLS = _load('cat-x-cat-with-empty-cols.json')
+BINNED = _load('binned.json')
+SINGLE_COL_MARGIN_NOT_ITERABLE = _load(
     'single-col-margin-not-iterable.json'
 )
-FIXT_GENDER_PARTY_RACE = load_fixture(CUBES_DIR, 'gender-party-race.json')
-FIXT_SEL_ARR_FIRST = load_fixture(
-    CUBES_DIR, 'selected-crosstab-array-first.json'
-)
-FIXT_SEL_ARR_LAST = load_fixture(CUBES_DIR, 'selected-crosstab-array-last.json')
-FIXT_MR_X_MR = load_fixture(CUBES_DIR, 'selected-by-selected.json')
-FIXT_MR_X_MR_HETEROGENOUS = load_fixture(
-    CUBES_DIR, 'mr-by-mr-different-mrs.json'
-)
-FIXT_SINGLE_CAT_MEANS = load_fixture(CUBES_DIR, 'means-with-single-cat.json')
-FIXT_FRUIT_HS_TOP_BOTTOM = load_fixture(CUBES_DIR, 'fruit-hs-top-bottom.json')
-FIXT_FRUIT_X_PETS_HS_TOP_BOTTOM = load_fixture(
-    CUBES_DIR, 'fruit-x-pets-hs-top-bottom.json'
-)
-FIXT_CA_X_SINGLE_CAT = load_fixture(CUBES_DIR, 'ca-x-single-cat.json')
-FIXT_CA_WITH_NETS = load_fixture(CUBES_DIR, 'ca-with-nets.json')
-FIXT_CAT_X_DATE_HS_PRUNE = load_fixture(CUBES_DIR, 'cat-x-date-hs-prune.json')
-FIXT_CAT_X_NUM_HS_PRUNE = load_fixture(CUBES_DIR, 'cat-x-num-hs-prune.json')
-FIXT_CA_SUBVAR_X_CAT_HS = load_fixture(CUBES_DIR, 'ca-subvar-x-cat-hs.json')
-FIXT_CAT_X_MR_X_MR = load_fixture(CUBES_DIR, 'cat-x-mr-x-mr.json')
-FIXT_FRUIT_X_PETS_ARRAY_SUBVARS_FIRST = load_fixture(
-    CUBES_DIR,
+GENDER_PARTY_RACE = _load('gender-party-race.json')
+SEL_ARR_FIRST = _load('selected-crosstab-array-first.json')
+SEL_ARR_LAST = _load('selected-crosstab-array-last.json')
+MR_X_MR = _load('selected-by-selected.json')
+MR_X_MR_HETEROGENOUS = _load('mr-by-mr-different-mrs.json')
+SINGLE_CAT_MEANS = _load('means-with-single-cat.json')
+FRUIT_HS_TOP_BOTTOM = _load('fruit-hs-top-bottom.json')
+FRUIT_X_PETS_HS_TOP_BOTTOM = _load('fruit-x-pets-hs-top-bottom.json')
+CA_X_SINGLE_CAT = _load('ca-x-single-cat.json')
+CA_WITH_NETS = _load('ca-with-nets.json')
+CAT_X_DATE_HS_PRUNE = _load('cat-x-date-hs-prune.json')
+CAT_X_NUM_HS_PRUNE = _load('cat-x-num-hs-prune.json')
+CA_SUBVAR_X_CAT_HS = _load('ca-subvar-x-cat-hs.json')
+CAT_X_MR_X_MR = _load('cat-x-mr-x-mr.json')
+FRUIT_X_PETS_ARRAY_SUBVARS_FIRST = _load(
     'fruit-x-pets-array-subvars-first.json'
 )
-FIXT_FRUIT_X_PETS_ARRAY_PETS_FIRST = load_fixture(
-    CUBES_DIR,
+FRUIT_X_PETS_ARRAY_PETS_FIRST = _load(
     'fruit-x-pets-array-pets-first.json'
 )
-FIXT_SCALE_WITH_NULL_VALUES = load_fixture(CUBES_DIR,
-                                           'scale-with-null-values.json')
-PETS_X_FRUIT_HS = load_fixture(CUBES_DIR, 'pets-x-fruit-hs.json')
-PROMPTED_AWARENESS = load_fixture(CUBES_DIR, 'prompted-awareness.json')
+PROMPTED_AWARENESS = _load('prompted-awareness.json')
+SCALE_WITH_NULL_VALUES = _load('scale-with-null-values.json')
+PETS_X_FRUIT_HS = _load('pets-x-fruit-hs.json')
+VALUE_SERVICES = _load('value-added-services.json')
