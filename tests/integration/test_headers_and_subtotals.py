@@ -575,9 +575,9 @@ class TestHeadersAndSubtotals(TestCase):
 
     def test_mr_x_cat_hs_counts(self):
         cube = CrunchCube(PETS_X_FRUIT_HS)
-        expected = np.array([[12, 28, 30],
-                             [12, 22, 30],
-                             [12, 26, 30]])
+        expected = np.array([[12, 28, 40],
+                             [12, 22, 34],
+                             [12, 26, 38]])
         actual = cube.as_array(include_transforms_for_dims=[0, 1])
         np.testing.assert_array_equal(actual, expected)
 

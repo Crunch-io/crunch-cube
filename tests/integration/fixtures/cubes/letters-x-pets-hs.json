@@ -1,0 +1,567 @@
+{
+    "element": "shoji:view",
+    "self": "https://app.crunch.io/api/datasets/bade499146984fca881b719aea4eaa1d/cube/?filter=%5B%5D&query=%7B%22dimensions%22:%5B%7B%22each%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2Fbade499146984fca881b719aea4eaa1d%2Fvariables%2F8491742e69ec45b0ab407c2c00f9074d%2F%22%7D,%7B%22function%22:%22as_selected%22,%22args%22:%5B%7B%22variable%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2Fbade499146984fca881b719aea4eaa1d%2Fvariables%2F8491742e69ec45b0ab407c2c00f9074d%2F%22%7D%5D%7D,%7B%22variable%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2Fbade499146984fca881b719aea4eaa1d%2Fvariables%2F000001%2F%22%7D%5D,%22measures%22:%7B%22count%22:%7B%22function%22:%22cube_count%22,%22args%22:%5B%5D%7D%7D,%22weight%22:null%7D",
+    "value": {
+        "query": {
+            "measures": {
+                "count": {
+                    "function": "cube_count",
+                    "args": []
+                }
+            },
+            "dimensions": [
+                {
+                    "each": "https://app.crunch.io/api/datasets/bade499146984fca881b719aea4eaa1d/variables/8491742e69ec45b0ab407c2c00f9074d/"
+                },
+                {
+                    "function": "as_selected",
+                    "args": [
+                        {
+                            "variable": "https://app.crunch.io/api/datasets/bade499146984fca881b719aea4eaa1d/variables/8491742e69ec45b0ab407c2c00f9074d/"
+                        }
+                    ]
+                },
+                {
+                    "variable": "https://app.crunch.io/api/datasets/bade499146984fca881b719aea4eaa1d/variables/000001/"
+                }
+            ],
+            "weight": null
+        },
+        "query_environment": {
+            "filter": []
+        },
+        "result": {
+            "dimensions": [
+                {
+                    "derived": true,
+                    "references": {
+                        "subreferences": [
+                            {
+                                "alias": "Question1",
+                                "name": "Question1"
+                            },
+                            {
+                                "alias": "Question2",
+                                "name": "Question2"
+                            },
+                            {
+                                "alias": "Question3",
+                                "name": "Question3"
+                            },
+                            {
+                                "alias": "Question4",
+                                "name": "Question4"
+                            },
+                            {
+                                "alias": "Question5",
+                                "name": "Question5"
+                            }
+                        ],
+                        "uniform_basis": false,
+                        "name": "Letters MR",
+                        "alias": "mr"
+                    },
+                    "type": {
+                        "subtype": {
+                            "class": "variable"
+                        },
+                        "elements": [
+                            {
+                                "id": 1,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "Question1",
+                                        "name": "Question1"
+                                    },
+                                    "id": "000004",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 2,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "Question2",
+                                        "name": "Question2"
+                                    },
+                                    "id": "000006",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 3,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "Question3",
+                                        "name": "Question3"
+                                    },
+                                    "id": "000005",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 4,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "Question4",
+                                        "name": "Question4"
+                                    },
+                                    "id": "000003",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 5,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "Question5",
+                                        "name": "Question5"
+                                    },
+                                    "id": "000002",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            }
+                        ],
+                        "class": "enum"
+                    }
+                },
+                {
+                    "references": {
+                        "subreferences": [
+                            {
+                                "alias": "Question1",
+                                "name": "Question1"
+                            },
+                            {
+                                "alias": "Question2",
+                                "name": "Question2"
+                            },
+                            {
+                                "alias": "Question3",
+                                "name": "Question3"
+                            },
+                            {
+                                "alias": "Question4",
+                                "name": "Question4"
+                            },
+                            {
+                                "alias": "Question5",
+                                "name": "Question5"
+                            }
+                        ],
+                        "uniform_basis": false,
+                        "name": "Letters MR",
+                        "alias": "mr"
+                    },
+                    "derived": true,
+                    "type": {
+                        "ordinal": false,
+                        "subvariables": [
+                            "000004",
+                            "000006",
+                            "000005",
+                            "000003",
+                            "000002"
+                        ],
+                        "class": "categorical",
+                        "categories": [
+                            {
+                                "numeric_value": 1,
+                                "selected": true,
+                                "id": 1,
+                                "missing": false,
+                                "name": "Selected"
+                            },
+                            {
+                                "numeric_value": 0,
+                                "missing": false,
+                                "id": 0,
+                                "name": "Not Selected"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": true,
+                                "id": -1,
+                                "name": "No Data"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "references": {
+                        "alias": "pet",
+                        "name": "pet",
+                        "view": {
+                            "show_counts": false,
+                            "show_numeric_values": false,
+                            "transform": {
+                                "insertions": [
+                                    {
+                                        "function": "subtotal",
+                                        "args": [
+                                            2,
+                                            1
+                                        ],
+                                        "name": "house pets",
+                                        "anchor": 2
+                                    },
+                                    {
+                                        "function": "subtotal",
+                                        "args": [
+                                            4
+                                        ],
+                                        "name": "mythical",
+                                        "anchor": 4
+                                    }
+                                ]
+                            },
+                            "include_missing": false,
+                            "column_width": null
+                        }
+                    },
+                    "derived": false,
+                    "type": {
+                        "ordinal": false,
+                        "class": "categorical",
+                        "categories": [
+                            {
+                                "numeric_value": 1,
+                                "missing": false,
+                                "id": 1,
+                                "name": "cat"
+                            },
+                            {
+                                "numeric_value": 2,
+                                "missing": false,
+                                "id": 2,
+                                "name": "dog"
+                            },
+                            {
+                                "numeric_value": 3,
+                                "missing": false,
+                                "id": 3,
+                                "name": "lizard"
+                            },
+                            {
+                                "numeric_value": 4,
+                                "missing": false,
+                                "id": 4,
+                                "name": "unicorn"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": true,
+                                "id": -1,
+                                "name": "No Data"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "missing": 14,
+            "measures": {
+                "count": {
+                    "data": [
+                        7,
+                        11,
+                        17,
+                        10,
+                        8,
+                        6,
+                        5,
+                        1,
+                        8,
+                        3,
+                        4,
+                        7,
+                        7,
+                        3,
+                        3,
+                        7,
+                        13,
+                        12,
+                        10,
+                        10,
+                        5,
+                        6,
+                        6,
+                        4,
+                        2,
+                        5,
+                        4,
+                        7,
+                        7,
+                        2,
+                        6,
+                        15,
+                        16,
+                        8,
+                        9,
+                        6,
+                        4,
+                        5,
+                        6,
+                        1,
+                        5,
+                        4,
+                        4,
+                        7,
+                        4,
+                        7,
+                        10,
+                        9,
+                        12,
+                        9,
+                        6,
+                        7,
+                        9,
+                        7,
+                        1,
+                        4,
+                        6,
+                        7,
+                        2,
+                        4,
+                        5,
+                        8,
+                        16,
+                        11,
+                        7,
+                        6,
+                        9,
+                        5,
+                        7,
+                        1,
+                        6,
+                        6,
+                        4,
+                        3,
+                        6
+                    ],
+                    "n_missing": 14,
+                    "metadata": {
+                        "references": {},
+                        "derived": true,
+                        "type": {
+                            "integer": true,
+                            "missing_rules": {},
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "class": "numeric"
+                        }
+                    }
+                }
+            },
+            "element": "crunch:cube",
+            "counts": [
+                7,
+                11,
+                17,
+                10,
+                8,
+                6,
+                5,
+                1,
+                8,
+                3,
+                4,
+                7,
+                7,
+                3,
+                3,
+                7,
+                13,
+                12,
+                10,
+                10,
+                5,
+                6,
+                6,
+                4,
+                2,
+                5,
+                4,
+                7,
+                7,
+                2,
+                6,
+                15,
+                16,
+                8,
+                9,
+                6,
+                4,
+                5,
+                6,
+                1,
+                5,
+                4,
+                4,
+                7,
+                4,
+                7,
+                10,
+                9,
+                12,
+                9,
+                6,
+                7,
+                9,
+                7,
+                1,
+                4,
+                6,
+                7,
+                2,
+                4,
+                5,
+                8,
+                16,
+                11,
+                7,
+                6,
+                9,
+                5,
+                7,
+                1,
+                6,
+                6,
+                4,
+                3,
+                6
+            ],
+            "n": 100
+        }
+    }
+}
