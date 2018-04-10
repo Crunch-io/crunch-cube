@@ -2029,9 +2029,3 @@ class TestCrunchCube(TestCase):
             [0., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
         ])
         np.testing.assert_almost_equal(actual, expected)
-
-    def test_mr_x_mr_range_labels(self):
-        cube = CrunchCube(PETS_X_PETS)
-        actual = cube.range_labels(axis=1, sum_axis=0)
-        expected = ['29-40', '34-38', '29-38']
-        assert actual == expected

@@ -14,7 +14,6 @@ from scipy.stats.contingency import expected_freq
 
 from .measures.data_table import DataTable
 from .measures.index import Index
-from .measures.range import Range
 from .measures.scale_means import ScaleMeans
 
 np.seterr(divide='ignore', invalid='ignore')
@@ -1077,6 +1076,3 @@ class CrunchCube(object):
     def scale_means(self):
         '''Get cube means.'''
         return ScaleMeans(self).data
-
-    def range_labels(self, axis=1, sum_axis=0):
-        return Range(self, axis, sum_axis).data
