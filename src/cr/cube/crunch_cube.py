@@ -215,63 +215,82 @@ class CrunchCube(object):
         # Note: If the cube contains transforms (H&S), and they happen to
         # have the marginal value 0 (or NaN), they're NOT pruned. This is
         # done to achieve parity with how the front end client works (whaam).
-        row_prune = self._row_prune_indices(transforms)
+        row_margin = self.margin(
+            include_transforms_for_dims=transforms,
+            axis=self.row_direction_axis
+        )
+        row_prune = self._table_pruned_indices(row_margin, self.inserted_rows_inds)
 
         if len(self.dimensions) == 1 or len(res.shape) == 1:
             # For 1D, margin is calculated as the row margin.
             return res[~row_prune]
 
         # Prune columns by column margin values.
-        col_prune = self._col_prune_indices(transforms)
+        col_margin = self.margin(
+            include_transforms_for_dims=transforms,
+            axis=self.col_direction_axis,
+        )
+        col_prune = self._table_pruned_indices(col_margin, self.inserted_col_inds)
         res = res[:, ~col_prune]
 
         # Prune rows by row margin values.
         return res[~row_prune, :]
 
     def prune_indices(self, transforms=None):
-        row_indices = self._row_prune_indices(transforms)
+        # if len(self.dimensions) == 3:
+        #     pass
+
+        row_margin = self.margin(
+            include_transforms_for_dims=transforms,
+            axis=self.row_direction_axis
+        )
+        row_indices = self._table_pruned_indices(row_margin, self.inserted_rows_inds)
 
         if len(self.dimensions) == 1:
             return [row_indices]
 
-        col_indices = self._col_prune_indices(transforms)
+        col_margin = self.margin(
+            include_transforms_for_dims=transforms,
+            axis=self.col_direction_axis,
+        )
+        col_indices = self._table_pruned_indices(col_margin, self.inserted_col_inds)
 
         return [row_indices, col_indices]
 
-    def _row_prune_indices(self, transforms=None):
-        def _get_axis_for_margin_calculations():
-            # when dealing with 1D MR cubes, axis for margin should be 0
-            if len(self.dimensions) == 1 and self.has_mr:
-                return 0
-            # when dealing with 3D cubes, axis should be 3
-            elif len(self.dimensions) == 3:
-                return 2
-            return 1
+    @property
+    def row_direction_axis(self):
+        # when dealing with 1D MR cubes, axis for margin should be 0
+        if len(self.dimensions) == 1 and self.has_mr:
+            return 0
+        elif len(self.dimensions) == 3:
+            return 2
+        return 1
 
-        inserted_inds = self.inserted_hs_indices() if transforms else []
-        inserted_rows = np.array(inserted_inds[0] if len(inserted_inds) else [])
-        axis = _get_axis_for_margin_calculations()
-        row_margin = self.margin(include_transforms_for_dims=transforms, axis=axis)
-        ind_inserted = np.zeros(row_margin.shape, dtype=bool)
-        if any(inserted_rows):
-            ind_inserted[inserted_rows] = True
-        row_prune = np.logical_or(row_margin == 0, np.isnan(row_margin))
+    @property
+    def inserted_rows_inds(self):
+        inserted_inds = self.inserted_hs_indices()
+        row_dim_ind = 0 if len(self.dimensions) < 3 else 1
+        return np.array(
+            inserted_inds[row_dim_ind] if len(inserted_inds) else []
+        )
+
+    def _table_pruned_indices(self, table, insertions):
+        ind_inserted = np.zeros(table.shape, dtype=bool)
+        if any(insertions):
+            ind_inserted[insertions] = True
+        row_prune = np.logical_or(table == 0, np.isnan(table))
         row_prune = np.logical_and(row_prune, ~ind_inserted)
 
         return row_prune
 
-    def _col_prune_indices(self, transforms=None):
-        inserted_inds = self.inserted_hs_indices() if transforms else []
-        inserted_cols = np.array(inserted_inds[1] if len(inserted_inds) > 1 else [])
-        axis = 0 if len(self.dimensions) < 3 else 1
-        col_margin = self.margin(include_transforms_for_dims=transforms, axis=axis)
-        ind_inserted = np.zeros(col_margin.shape, dtype=bool)
-        if any(inserted_cols):
-            ind_inserted[inserted_cols] = True
-        col_prune = np.logical_or(col_margin == 0, np.isnan(col_margin))
-        col_prune = np.logical_and(col_prune, ~ind_inserted)
+    @property
+    def col_direction_axis(self):
+        return 0 if len(self.dimensions) < 3 else 1
 
-        return col_prune
+    @property
+    def inserted_col_inds(self):
+        inserted_inds = self.inserted_hs_indices()
+        return np.array(inserted_inds[1] if len(inserted_inds) > 1 else [])
 
     @classmethod
     def _fix_valid_indices(cls, valid_indices, insertion_index, dim):
