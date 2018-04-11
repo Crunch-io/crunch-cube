@@ -265,6 +265,10 @@ class CrunchCube(object):
         inserted_cols = np.array(inserted_inds[1] if len(inserted_inds) > 1 else [])
         axis = 0 if len(self.dimensions) < 3 else 1
         col_margin = self.margin(include_transforms_for_dims=transforms, axis=axis)
+
+        # don't consider insertions outside the scope of the columns
+        inserted_cols = inserted_cols[inserted_cols < len(col_margin)]
+
         ind_inserted = np.zeros(col_margin.shape, dtype=bool)
         if any(inserted_cols):
             ind_inserted[inserted_cols] = True
