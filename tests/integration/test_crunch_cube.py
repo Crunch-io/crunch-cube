@@ -1365,7 +1365,7 @@ class TestCrunchCube(TestCase):
             182923.95470245,
         ])
         actual = cube.as_array(prune=True)
-        np.testing.assert_almost_equal(actual, expected)
+        np.testing.assert_almost_equal(actual[~actual.mask], expected)
 
         pruned_expected = [
             np.array([False, True, True, True, True, True, True, True, True,
@@ -1632,7 +1632,7 @@ class TestCrunchCube(TestCase):
         ])
         # Use unweighted, because of the whole numbers (for comparison)
         actual = cube.as_array(weighted=False, prune=True)
-        np.testing.assert_array_equal(actual, expected)
+        np.testing.assert_array_equal(actual[~actual.mask], expected)
 
         pruned_expected = [
             np.array(

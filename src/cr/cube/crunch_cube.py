@@ -230,22 +230,36 @@ class CrunchCube(object):
             include_transforms_for_dims=transforms,
             axis=self.row_direction_axis
         )
-        row_prune = self._margin_pruned_indices(row_margin, self.inserted_rows_inds)
+        row_prune_inds = self._margin_pruned_indices(
+            row_margin,
+            self.inserted_rows_inds,
+        )
 
         if len(self.dimensions) == 1 or len(res.shape) == 1:
             # For 1D, margin is calculated as the row margin.
-            return res[~row_prune]
+            return np.ma.masked_array(res, mask=row_prune_inds)
+            # return res[~row_prune_inds]
 
         # Prune columns by column margin values.
         col_margin = self.margin(
             include_transforms_for_dims=transforms,
             axis=self.col_direction_axis,
         )
-        col_prune = self._margin_pruned_indices(col_margin, self.inserted_col_inds)
-        res = res[:, ~col_prune]
+        col_prune_inds = self._margin_pruned_indices(
+            col_margin,
+            self.inserted_col_inds,
+        )
+        mask = np.zeros(res.shape, dtype=bool)
+        mask[:, 0] = row_prune_inds
+        mask[0, :] = col_prune_inds
+        res = np.ma.masked_array(res, mask=mask)
+        import ipdb
+        ipdb.set_trace()
+        return np.ma.mask_rowcols(res)
+        # res = res[:, ~col_prune_inds]
 
         # Prune rows by row margin values.
-        return res[~row_prune, :]
+        # return res[~row_prune_inds, :]
 
     def prune_indices(self, transforms=None):
         if len(self.dimensions) >= 3:
@@ -938,6 +952,7 @@ class CrunchCube(object):
             include_transforms_for_dims=include_transforms_for_dims,
             prune=prune,
         )
+        # return self._fix_shape(array)
         return self._fix_shape(array)
 
     def margin(self, axis=None, weighted=True,
