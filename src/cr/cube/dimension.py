@@ -214,6 +214,19 @@ class Dimension(object):
             'id': el['id'],
             'name': self._get_name(el),
         } for (i, el) in enumerate(self._elements)]
+        labels_with_cat_ids = self._update_with_subtotals(labels_with_cat_ids)
+
+        return [
+            (
+                label['name']
+                if not include_cat_ids else
+                (label['name'], label.get('id', -1))
+            )
+            for label in labels_with_cat_ids
+            if self._include_in_labels(label, valid_indices)
+        ]
+
+    def _update_with_subtotals(self, labels_with_cat_ids):
         for subtotal in self.subtotals:
             # If anchor is 0, the default value of 'next' (which is -1) will
             # add with 1, and amount to the total of 0, which will be the
@@ -230,15 +243,16 @@ class Dimension(object):
                 ind_insert += 1
             labels_with_cat_ids.insert(ind_insert, subtotal.data)
 
-        return [
-            (
-                label['name']
-                if not include_cat_ids else
-                (label['name'], label.get('id', -1))
-            )
-            for label in labels_with_cat_ids
-            if not label.get('ind') or label['ind'] in valid_indices
-        ]
+        return labels_with_cat_ids
+
+    @staticmethod
+    def _include_in_labels(label_with_ind, valid_indices):
+        if label_with_ind.get('ind') is None:
+            # In this case, it's a transformation and not an element of the
+            # cube. Thus, needs to be included in resulting labels.
+            return True
+
+        return label_with_ind['ind'] in valid_indices
 
     def elements(self, include_missing=False):
         '''Get elements of the crunch Dimension.
