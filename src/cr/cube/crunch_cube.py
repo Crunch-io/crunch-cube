@@ -200,7 +200,7 @@ class CrunchCube(object):
         )
         res = res + adjusted
 
-        if prune:
+        if prune and self.ndim < 3:
             return self._prune_body(res, include_transforms_for_dims)
 
         return res
@@ -219,7 +219,7 @@ class CrunchCube(object):
             include_transforms_for_dims=transforms,
             axis=self.row_direction_axis
         )
-        row_prune = self._table_pruned_indices(row_margin, self.inserted_rows_inds)
+        row_prune = self._margin_pruned_indices(row_margin, self.inserted_rows_inds)
 
         if len(self.dimensions) == 1 or len(res.shape) == 1:
             # For 1D, margin is calculated as the row margin.
@@ -230,21 +230,24 @@ class CrunchCube(object):
             include_transforms_for_dims=transforms,
             axis=self.col_direction_axis,
         )
-        col_prune = self._table_pruned_indices(col_margin, self.inserted_col_inds)
+        col_prune = self._margin_pruned_indices(col_margin, self.inserted_col_inds)
         res = res[:, ~col_prune]
 
         # Prune rows by row margin values.
         return res[~row_prune, :]
 
     def prune_indices(self, transforms=None):
-        # if len(self.dimensions) == 3:
-        #     pass
+        if len(self.dimensions) >= 3:
+            return self._prune_3d_indices(transforms)
 
         row_margin = self.margin(
             include_transforms_for_dims=transforms,
             axis=self.row_direction_axis
         )
-        row_indices = self._table_pruned_indices(row_margin, self.inserted_rows_inds)
+        row_indices = self._margin_pruned_indices(
+            row_margin,
+            self.inserted_rows_inds,
+        )
 
         if len(self.dimensions) == 1:
             return [row_indices]
@@ -253,9 +256,35 @@ class CrunchCube(object):
             include_transforms_for_dims=transforms,
             axis=self.col_direction_axis,
         )
-        col_indices = self._table_pruned_indices(col_margin, self.inserted_col_inds)
+        col_indices = self._margin_pruned_indices(
+            col_margin,
+            self.inserted_col_inds,
+        )
 
         return [row_indices, col_indices]
+
+    def _prune_3d_indices(self, transforms=None):
+        row_margin = self.margin(
+            include_transforms_for_dims=transforms,
+            axis=self.row_direction_axis
+        )
+        col_margin = self.margin(
+            include_transforms_for_dims=transforms,
+            axis=self.col_direction_axis,
+        )
+        row_inserted_indices = (
+            self.inserted_rows_indices()[1] if transforms else []
+        )
+        col_inserted_indices = (
+            self.inserted_rows_indices()[2] if transforms else []
+        )
+        return [
+            (
+                self._margin_pruned_indices(rm, row_inserted_indices),
+                self._margin_pruned_indices(cm, col_inserted_indices),
+            )
+            for rm, cm in zip(row_margin, col_margin)
+        ]
 
     @property
     def row_direction_axis(self):
@@ -274,14 +303,15 @@ class CrunchCube(object):
             inserted_inds[row_dim_ind] if len(inserted_inds) else []
         )
 
-    def _table_pruned_indices(self, table, insertions):
+    @staticmethod
+    def _margin_pruned_indices(table, insertions):
         ind_inserted = np.zeros(table.shape, dtype=bool)
         if any(insertions):
             ind_inserted[insertions] = True
-        row_prune = np.logical_or(table == 0, np.isnan(table))
-        row_prune = np.logical_and(row_prune, ~ind_inserted)
+        pruned_ind = np.logical_or(table == 0, np.isnan(table))
+        pruned_ind = np.logical_and(pruned_ind, ~ind_inserted)
 
-        return row_prune
+        return pruned_ind
 
     @property
     def col_direction_axis(self):
@@ -634,6 +664,10 @@ class CrunchCube(object):
         return None
 
     # Properties
+
+    @property
+    def ndim(self):
+        return len(self.dimensions)
 
     @property
     def table(self):
