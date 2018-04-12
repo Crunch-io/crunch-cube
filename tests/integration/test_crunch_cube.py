@@ -55,6 +55,7 @@ from .fixtures import SCALE_WITH_NULL_VALUES
 from .fixtures import PROMPTED_AWARENESS
 from .fixtures import VALUE_SERVICES
 from .fixtures import LETTERS_X_PETS_HS
+from .fixtures import XYZ_SIMPLE_ALLTYPES
 
 
 class TestCrunchCube(TestCase):
@@ -2067,3 +2068,30 @@ class TestCrunchCube(TestCase):
         ])
         actual = cube.proportions(axis=0, include_transforms_for_dims=[0, 1])
         np.testing.assert_almost_equal(actual, expected)
+
+    def test_3d_pruning_indices(self):
+        '''Test pruning indices for a simple XYZ cube.'''
+        cube = CrunchCube(XYZ_SIMPLE_ALLTYPES)
+
+        # Zeroth slice of the XYZ array:
+        #
+        # +----+-----+----+
+        # |  0 |  0  | 0  | True
+        # +----+-----+----+
+        # |  0 |  0  | 0  | True
+        # +----+-----+----+
+        # |  0 |  1  | 0  | False
+        # +----+-----+----+
+        # |  0 |  0  | 0  | True
+        # +----+-----+----+
+        # |  0 |  0  | 0  | True
+        # +----+-----+----+
+        #  True False True
+
+        expected = (
+            np.array([True, True, False, True, True]),
+            np.array([True, False, True]),
+        )
+        actual = cube.prune_indices()[0]
+        np.testing.assert_array_equal(actual[0], expected[0])
+        np.testing.assert_array_equal(actual[1], expected[1])
