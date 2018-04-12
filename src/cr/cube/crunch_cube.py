@@ -200,9 +200,17 @@ class CrunchCube(object):
         )
         res = res + adjusted
 
-        if prune and self.ndim < 3:
+        # if prune and self.ndim < 3:
+        if prune:
             return self._prune_body(res, include_transforms_for_dims)
 
+        return res
+
+    def _prune_3d_body(self, res, transforms):
+        mask = np.zeros(res.shape)
+        for i, prune_inds in enumerate(self.prune_indices(transforms)):
+            mask[i][np.ix_(*prune_inds)] = True
+        res = np.ma.masked_array(res, mask=mask)
         return res
 
     def _prune_body(self, res, transforms=None):
@@ -211,6 +219,9 @@ class CrunchCube(object):
         Pruning is the removal of rows or columns, whose corresponding
         marginal elements are either 0 or not defined (np.nan).
         '''
+
+        if self.ndim > 2:
+            return self._prune_3d_body(res, transforms)
 
         # Note: If the cube contains transforms (H&S), and they happen to
         # have the marginal value 0 (or NaN), they're NOT pruned. This is
@@ -273,10 +284,10 @@ class CrunchCube(object):
             axis=self.col_direction_axis,
         )
         row_inserted_indices = (
-            self.inserted_rows_indices()[1] if transforms else []
+            self.inserted_rows_inds if transforms else []
         )
         col_inserted_indices = (
-            self.inserted_rows_indices()[2] if transforms else []
+            self.inserted_col_inds if transforms else []
         )
         return [
             (
