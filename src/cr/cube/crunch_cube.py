@@ -249,16 +249,10 @@ class CrunchCube(object):
             col_margin,
             self.inserted_col_inds,
         )
-        mask = np.zeros(res.shape, dtype=bool)
-        mask[:, 0] = row_prune_inds
-        mask[0, :] = col_prune_inds
+        mask = row_prune_inds[:, np.newaxis] * col_prune_inds
         res = np.ma.masked_array(res, mask=mask)
-        import ipdb
-        ipdb.set_trace()
-        return np.ma.mask_rowcols(res)
+        return res
         # res = res[:, ~col_prune_inds]
-
-        # Prune rows by row margin values.
         # return res[~row_prune_inds, :]
 
     def prune_indices(self, transforms=None):
@@ -544,7 +538,8 @@ class CrunchCube(object):
 
         if prune and axis is not None and type(res) is np.ndarray:
             prune_indices = self.prune_indices(include_transforms_for_dims)
-            res = res[~prune_indices[1 - axis]]
+            # res = res[~prune_indices[1 - axis]]
+            res = np.ma.masked_array(res, mask=prune_indices[1 - axis])
 
         if len(res.shape) == 0:
             # Each margin needs to be iterable, even if it only has
@@ -672,6 +667,8 @@ class CrunchCube(object):
                 len(getattr(margin, 'shape', [])) == 1):
             margin = margin[:, np.newaxis, np.newaxis]
 
+        import ipdb
+        ipdb.set_trace()
         return self._fix_shape(array / margin)
 
     def _mr_dim_ind(self, include_selections=False):
