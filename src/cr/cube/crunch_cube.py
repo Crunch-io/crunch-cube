@@ -230,6 +230,9 @@ class CrunchCube(object):
             include_transforms_for_dims=transforms,
             axis=self.row_direction_axis
         )
+        if row_margin.ndim > 1:
+            # In case of CAT x MR, we have 2D margin
+            row_margin = np.sum(row_margin, axis=1)
         row_prune_inds = self._margin_pruned_indices(
             row_margin,
             self.inserted_rows_inds if transforms else [],
@@ -575,7 +578,7 @@ class CrunchCube(object):
             res = table[:, 0] / (table[:, 0] + table[:, 1])
             res = res[np.ix_(*valid_indices)]
             if prune:
-                res = res[res != 0]
+                res = np.ma.masked_array(res, mask=(res == 0))
             return res
 
         if self.mr_dim_ind == 0:
