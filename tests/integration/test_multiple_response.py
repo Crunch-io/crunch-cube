@@ -16,6 +16,7 @@ from .fixtures import MR_X_CAT_PROFILES_STATS_WEIGHTED
 from .fixtures import ARRAY_X_MR
 from .fixtures import MR_X_SINGLE_WAVE
 from .fixtures import CAT_X_MR_X_MR
+from .fixtures import CAT_X_MR_X_MR_PRUNED_ROWS
 from .fixtures import SELECTED_3_WAY_2
 from .fixtures import SELECTED_3_WAY
 from .fixtures import PROMPTED_AWARENESS
@@ -363,9 +364,36 @@ class TestMultipleResponse(TestCase):
         ])
         np.testing.assert_almost_equal(actual, expected)
 
-    def test_cat_x_mr_x_mr_counts_pruned(self):
-        cube = CrunchCube(CAT_X_MR_X_MR)
-        cube.margin()
+    def test_cat_x_mr_x_mr_pruned_rows(self):
+        cube = CrunchCube(CAT_X_MR_X_MR_PRUNED_ROWS)
+
+        # Not pruned
+        expected = np.array([
+            [[0, 2, 2],
+             [1, 3, 2],
+             [0, 0, 0]],
+
+            [[3, 3, 6],
+             [0, 3, 4],
+             [0, 0, 0]],
+        ])
+        actual = cube.as_array()
+        np.testing.assert_array_equal(actual, expected)
+
+        # Pruned
+        expected_0th_tab = np.array([
+            [0, 2, 2],
+            [1, 3, 2],
+        ])
+        expected_1st_tab = np.array([
+            [3, 3, 6],
+            [0, 3, 4],
+        ])
+        actual_0th_tab = np.ma.compress_rows(cube.as_array(prune=True)[0])
+        np.testing.assert_array_equal(actual_0th_tab, expected_0th_tab)
+
+        actual_1st_tab = np.ma.compress_rows(cube.as_array(prune=True)[1])
+        np.testing.assert_array_equal(actual_1st_tab, expected_1st_tab)
         # FIXME pruning doesn't work for 3d cubes, these expectations are wrong
         # FIXME (prune indices arrays should be vectors of scalars)
         # pruned_expected = [
