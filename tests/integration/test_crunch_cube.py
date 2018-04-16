@@ -44,7 +44,6 @@ from .fixtures import ECON_BLAME_X_IDEOLOGY_ROW_HS
 from .fixtures import FRUIT_X_PETS_ARRAY_SUBVARS_FIRST
 from .fixtures import FRUIT_X_PETS_ARRAY_PETS_FIRST
 from .fixtures import SCALE_WITH_NULL_VALUES
-from .fixtures import PROMPTED_AWARENESS
 from .fixtures import VALUE_SERVICES
 from .fixtures import LETTERS_X_PETS_HS
 from .fixtures import XYZ_SIMPLE_ALLTYPES
@@ -1610,94 +1609,6 @@ class TestCrunchCube(TestCase):
         cube = CrunchCube(SCALE_WITH_NULL_VALUES)
         expected = np.array([1.2060688, 1.0669344, 1.023199])
         actual = cube.scale_means()
-        np.testing.assert_almost_equal(actual, expected)
-
-    def test_mr_counts_not_pruned(self):
-        cube = CrunchCube(PROMPTED_AWARENESS)
-        expected = np.array([
-            224833, 221990, 223560, 222923, 217586, 206164, 183147, 167720,
-            209355, 201847, 193826, 198744, 180015, 174349, 200050, 160769,
-            167969, 43193, 44339, 207539, 135973, 146002, 146789, 160692,
-            53995, 95741, 135700, 91878, 48465, 48929, 35189, 42764,
-            21194, 41422, 167652, 95676, 111961, 26137, 0, 0, 111760, 60761,
-            87645, 85306, 18873, 178, 30461, 42843,
-        ])
-        # Use unweighted, because of the whole numbers (for comparison)
-        actual = cube.as_array(weighted=False)
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_mr_counts_pruned(self):
-        cube = CrunchCube(PROMPTED_AWARENESS)
-        expected = np.array([
-            224833, 221990, 223560, 222923, 217586, 206164, 183147, 167720,
-            209355, 201847, 193826, 198744, 180015, 174349, 200050, 160769,
-            167969, 43193, 44339, 207539, 135973, 146002, 146789, 160692,
-            53995, 95741, 135700, 91878, 48465, 48929, 35189, 42764,
-            21194, 41422, 167652, 95676, 111961, 26137, 111760, 60761,
-            87645, 85306, 18873, 178, 30461, 42843,
-        ])
-        # Use unweighted, because of the whole numbers (for comparison)
-        actual = cube.as_array(weighted=False, prune=True)
-        np.testing.assert_array_equal(actual[~actual.mask], expected)
-
-        pruned_expected = [
-            np.array(
-                [False, False, False, False, False, False, False, False, False,
-                 False, False, False, False, False, False, False, False, False,
-                 False, False, False, False, False, False, False, False, False,
-                 False, False, False, False, False, False, False, False, False,
-                 False, False, True, True, False, False, False, False, False,
-                 False, False, False])
-        ]
-        pruned = cube.prune_indices()
-        self.assertEqual(len(pruned), len(pruned_expected))
-        for i, actual in enumerate(pruned):
-            np.testing.assert_array_equal(pruned[i], pruned_expected[i])
-
-    def test_mr_props_not_pruned(self):
-        cube = CrunchCube(PROMPTED_AWARENESS)
-        expected = np.array([
-            9.70083312e-01, 9.53131845e-01, 9.64703914e-01,
-            9.59703205e-01, 9.37891446e-01, 8.84137923e-01,
-            7.77056917e-01, 7.15135296e-01, 9.03057657e-01,
-            8.67103783e-01, 8.38011719e-01, 8.60897234e-01,
-            7.68101070e-01, 7.59030477e-01, 8.66127931e-01,
-            6.89111039e-01, 7.39338305e-01, 1.89895586e-01,
-            1.95866187e-01, 8.90452848e-01, 6.10278144e-01,
-            6.35237428e-01, 6.54874171e-01, 6.89736947e-01,
-            2.31607423e-01, 4.44608376e-01, 6.06987388e-01,
-            4.16165746e-01, 2.06262071e-01, 2.08512519e-01,
-            1.59533129e-01, 1.86245154e-01, 1.01661334e-01,
-            1.82235674e-01, 7.30060936e-01, 4.45912391e-01,
-            4.87037442e-01, 1.29527814e-01, 0.00000000e+00,
-            0.00000000e+00, 4.95486986e-01, 2.84392427e-01,
-            3.93962082e-01, 3.91279968e-01, 8.96639874e-02,
-            9.50985735e-04, 1.35477929e-01, 1.86531215e-01,
-        ])
-        actual = cube.proportions()
-        np.testing.assert_almost_equal(actual, expected)
-
-    def test_mr_props_pruned(self):
-        cube = CrunchCube(PROMPTED_AWARENESS)
-        expected = np.array([
-            9.70083312e-01, 9.53131845e-01, 9.64703914e-01,
-            9.59703205e-01, 9.37891446e-01, 8.84137923e-01,
-            7.77056917e-01, 7.15135296e-01, 9.03057657e-01,
-            8.67103783e-01, 8.38011719e-01, 8.60897234e-01,
-            7.68101070e-01, 7.59030477e-01, 8.66127931e-01,
-            6.89111039e-01, 7.39338305e-01, 1.89895586e-01,
-            1.95866187e-01, 8.90452848e-01, 6.10278144e-01,
-            6.35237428e-01, 6.54874171e-01, 6.89736947e-01,
-            2.31607423e-01, 4.44608376e-01, 6.06987388e-01,
-            4.16165746e-01, 2.06262071e-01, 2.08512519e-01,
-            1.59533129e-01, 1.86245154e-01, 1.01661334e-01,
-            1.82235674e-01, 7.30060936e-01, 4.45912391e-01,
-            4.87037442e-01, 1.29527814e-01, 4.95486986e-01,
-            2.84392427e-01, 3.93962082e-01, 3.91279968e-01,
-            8.96639874e-02, 9.50985735e-04, 1.35477929e-01,
-            1.86531215e-01,
-        ])
-        actual = cube.proportions(prune=True)
         np.testing.assert_almost_equal(actual, expected)
 
     def test_values_services(self):
