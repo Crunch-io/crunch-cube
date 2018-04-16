@@ -39,7 +39,11 @@ class Index(object):
         )
         props = self.cube.proportions(axis=1, weighted=self.weighted, prune=self.prune)
 
-        return props / margin
+        res = props / margin
+        if isinstance(res, np.ma.core.MaskedArray):
+            res.mask = props.mask
+        return res
+        # return props / margin
 
     def _mr_index(self, weighted):
         table = self.cube.table.data(weighted)

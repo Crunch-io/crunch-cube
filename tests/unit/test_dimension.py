@@ -180,6 +180,7 @@ class TestDimension(TestCase):
         actual = dim.description
         self.assertEqual(actual, expected)
 
+    @patch('cr.cube.subtotal.Subtotal._all_dim_ids', [1, 2, 4, 5])
     @patch('cr.cube.dimension.Dimension._get_type')
     def test_hs_names_with_bad_data(self, mock_type):
         '''Test H&S names with bad input data.

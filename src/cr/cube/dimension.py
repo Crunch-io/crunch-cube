@@ -34,7 +34,7 @@ class Dimension(object):
             return []
 
         insertions_data = view.get('transform', {}).get('insertions', [])
-        subtotals = [Subtotal(data) for data in insertions_data]
+        subtotals = [Subtotal(data, self) for data in insertions_data]
         return [subtotal for subtotal in subtotals if subtotal.is_valid]
 
     @classmethod
