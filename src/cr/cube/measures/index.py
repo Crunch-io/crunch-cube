@@ -46,13 +46,30 @@ class Index(object):
         selected = table[self.cube.ind_selected]
         non_selected = table[self.cube.ind_non_selected]
 
-        if self.cube.mr_dim_ind == 0 or self.cube.mr_dim_ind == (0, 1):
-            margin = np.sum(selected, 1) / np.sum(selected + non_selected, 1)
-            return (self.cube.proportions(axis=0, weighted=weighted) /
-                    margin[:, np.newaxis])
+        # mr by mr
+        if self.cube.mr_dim_ind == (0, 1) or self.cube.mr_dim_ind == (1, 2):
+            row_proportions = self.cube.proportions(axis=0,
+                                                    weighted=self.weighted,
+                                                    prune=self.prune)
+            col_proportions = self.cube.proportions(axis=1,
+                                                    weighted=self.weighted,
+                                                    prune=self.prune)
+            return col_proportions / row_proportions
 
+        # mr by cat
+        if self.cube.mr_dim_ind == 0:
+            proportions = self.cube.proportions(axis=0,
+                                                weighted=weighted,
+                                                prune=self.prune)
+            margin = np.sum(selected, 1) / np.sum(selected + non_selected, 1)
+            return proportions / margin[:, np.newaxis]
+
+        # cat by mr
         if self.cube.mr_dim_ind == 1:
+            proportions = self.cube.proportions(axis=1,
+                                                weighted=weighted,
+                                                prune=self.prune)
             margin = np.sum(selected, 0) / np.sum(selected + non_selected, 0)
-            return self.cube.proportions(axis=1, weighted=weighted) / margin
+            return proportions / margin
 
         raise ValueError('Unexpected dimension types for cube with MR.')
