@@ -236,6 +236,9 @@ class TestMultipleResponse(TestCase):
         ])
         np.testing.assert_almost_equal(actual, expected)
 
+    def test_cat_x_mr_x_mr_counts_pruned(self):
+        pass
+        # cube = CrunchCube(CAT_X_MR_X_MR)
         # FIXME pruning doesn't work for 3d cubes, these expectations are wrong
         # FIXME (prune indices arrays should be vectors of scalars)
         # pruned_expected = [
