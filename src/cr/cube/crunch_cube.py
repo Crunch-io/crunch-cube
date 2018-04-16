@@ -232,7 +232,7 @@ class CrunchCube(object):
         )
         row_prune_inds = self._margin_pruned_indices(
             row_margin,
-            self.inserted_rows_inds,
+            self.inserted_rows_inds if transforms else [],
         )
 
         if len(self.dimensions) == 1 or len(res.shape) == 1:
@@ -247,13 +247,24 @@ class CrunchCube(object):
         )
         col_prune_inds = self._margin_pruned_indices(
             col_margin,
-            self.inserted_col_inds,
+            self.inserted_col_inds if transforms else [],
         )
-        mask = row_prune_inds[:, np.newaxis] * col_prune_inds
+        # mask = row_prune_inds[:, np.newaxis] * col_prune_inds
+        mask = self._create_mask(res, row_prune_inds, col_prune_inds)
         res = np.ma.masked_array(res, mask=mask)
         return res
         # res = res[:, ~col_prune_inds]
         # return res[~row_prune_inds, :]
+
+    @staticmethod
+    def _create_mask(res, row_prune_inds, col_prune_inds):
+        mask_rows = np.repeat(
+            row_prune_inds[:, None], len(col_prune_inds), axis=1
+        )
+        mask_cols = np.repeat(
+            col_prune_inds[None, :], len(row_prune_inds), axis=0
+        )
+        return np.logical_or(mask_rows, mask_cols)
 
     def prune_indices(self, transforms=None):
         if len(self.dimensions) >= 3:
@@ -667,9 +678,11 @@ class CrunchCube(object):
                 len(getattr(margin, 'shape', [])) == 1):
             margin = margin[:, np.newaxis, np.newaxis]
 
-        import ipdb
-        ipdb.set_trace()
-        return self._fix_shape(array / margin)
+        res = array / margin
+        if isinstance(array, np.ma.core.MaskedArray):
+            res.mask = array.mask
+        return self._fix_shape(res)
+        # return self._fix_shape(array / margin)
 
     def _mr_dim_ind(self, include_selections=False):
         dimensions = (

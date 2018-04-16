@@ -8,8 +8,9 @@ class Subtotal(object):
     for subtotals. This functionality is used in the context
     of headers and subtotals.
     '''
-    def __init__(self, data):
+    def __init__(self, data, dim):
         self._data = data
+        self._dim = dim
 
     @property
     def is_valid(self):
@@ -29,9 +30,16 @@ class Subtotal(object):
 
         anchor = self._data['anchor']
         try:
-            return int(anchor)
+            anchor = int(anchor)
+            if anchor not in self._all_dim_ids:
+                return 'bottom'
+            return anchor
         except (TypeError, ValueError):
             return anchor.lower()
+
+    @property
+    def _all_dim_ids(self):
+        return [el.get('id') for el in self._dim.elements(include_missing=True)]
 
     @property
     def args(self):
