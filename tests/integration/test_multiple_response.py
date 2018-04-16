@@ -8,6 +8,9 @@ from .fixtures import CAT_X_MR_SIMPLE
 from .fixtures import CAT_X_MR_PRUNED_ROW
 from .fixtures import CAT_X_MR_PRUNED_COL
 from .fixtures import CAT_X_MR_PRUNED_ROW_COL
+from .fixtures import MR_X_CAT_PRUNED_COL
+from .fixtures import MR_X_CAT_PRUNED_ROW
+from .fixtures import MR_X_CAT_PRUNED_ROW_COL
 from .fixtures import SIMPLE_MR
 from .fixtures import MR_X_CAT_PROFILES_STATS_WEIGHTED
 from .fixtures import ARRAY_X_MR
@@ -133,6 +136,68 @@ class TestMultipleResponse(TestCase):
 
         # Pruned
         expected = np.array([[6, 6]])
+        table = cube.as_array(prune=True)
+        actual = table[:, ~table.mask.all(axis=0)][~table.mask.all(axis=1), :]
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_as_array_mr_x_cat_pruned_col(self):
+        cube = CrunchCube(MR_X_CAT_PRUNED_COL)
+
+        # Not pruned
+        actual = cube.as_array()
+        expected = np.array([
+            [12, 0],
+            [12, 0],
+            [12, 0],
+        ])
+        np.testing.assert_array_equal(actual, expected)
+
+        # Pruned
+        expected = np.array([
+            [12],
+            [12],
+            [12],
+        ])
+        actual = np.ma.compress_cols(cube.as_array(prune=True))
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_as_array_mr_x_cat_pruned_row(self):
+        cube = CrunchCube(MR_X_CAT_PRUNED_ROW)
+
+        # Not pruned
+        actual = cube.as_array()
+        expected = np.array([
+            [6, 16],
+            [6, 12],
+            [0, 0],
+        ])
+        np.testing.assert_array_equal(actual, expected)
+
+        # Pruned
+        expected = np.array([
+            [6, 16],
+            [6, 12],
+        ])
+        actual = np.ma.compress_rows(cube.as_array(prune=True))
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_as_array_mr_x_cat_pruned_row_col(self):
+        cube = CrunchCube(MR_X_CAT_PRUNED_ROW_COL)
+
+        # Not pruned
+        actual = cube.as_array()
+        expected = np.array([
+            [6, 0],
+            [6, 0],
+            [0, 0],
+        ])
+        np.testing.assert_array_equal(actual, expected)
+
+        # Pruned
+        expected = np.array([
+            [6],
+            [6],
+        ])
         table = cube.as_array(prune=True)
         actual = table[:, ~table.mask.all(axis=0)][~table.mask.all(axis=1), :]
         np.testing.assert_array_equal(actual, expected)
