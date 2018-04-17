@@ -16,6 +16,7 @@ from .fixtures import CAT_X_DATE_HS_PRUNE
 from .fixtures import CAT_X_NUM_HS_PRUNE
 from .fixtures import PETS_X_FRUIT_HS
 from .fixtures import MISSING_CAT_HS
+from .fixtures import CA_X_CAT_HS
 
 from cr.cube.crunch_cube import CrunchCube
 
@@ -639,3 +640,58 @@ class TestHeadersAndSubtotals(TestCase):
         ]]
         actual = cube.labels(include_transforms_for_dims=[0])
         assert actual == expected
+
+    def test_ca_x_cat_counts_with_hs(self):
+        cube = CrunchCube(CA_X_CAT_HS)
+
+        # Assert counts without H&S
+        expected = np.array([
+            [[1, 1, 0, 0, 0],
+             [0, 0, 1, 1, 1],
+             [0, 0, 0, 0, 0],
+             [0, 0, 0, 0, 0]],
+
+            [[1, 0, 0, 0, 0],
+             [0, 1, 0, 1, 0],
+             [0, 0, 1, 0, 1],
+             [0, 0, 0, 0, 0]],
+
+            [[0, 0, 0, 0, 0],
+             [1, 0, 0, 1, 0],
+             [0, 1, 0, 0, 0],
+             [0, 0, 1, 0, 1]]])
+        actual = cube.as_array()
+        np.testing.assert_array_equal(actual, expected)
+
+        # Assert counts with H&S
+        expected = np.array([
+            [[1, 1, 0, 2, 0, 0, 0],
+             [0, 0, 1, 1, 1, 1, 2],
+             [0, 0, 0, 0, 0, 0, 0],
+             [0, 0, 0, 0, 0, 0, 0]],
+
+            [[1, 0, 0, 1, 0, 0, 0],
+             [0, 1, 0, 1, 1, 0, 1],
+             [0, 0, 1, 1, 0, 1, 1],
+             [0, 0, 0, 0, 0, 0, 0]],
+
+            [[0, 0, 0, 0, 0, 0, 0],
+             [1, 0, 0, 1, 1, 0, 1],
+             [0, 1, 0, 1, 0, 0, 0],
+             [0, 0, 1, 1, 0, 1, 1]]])
+
+        # Include transforms for all CA and CAT dims (hence 0, 1 and 2)
+        actual = cube.as_array(include_transforms_for_dims=[0, 1, 2])
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_ca_x_cat_margin_with_hs(self):
+        cube = CrunchCube(CA_X_CAT_HS)
+
+        # Assert counts without H&S
+        expected = np.array([
+            [1, 1, 1, 3, 1, 1, 2],
+            [1, 1, 1, 3, 1, 1, 2],
+            [1, 1, 1, 3, 1, 1, 2],
+        ])
+        actual = cube.margin(axis=1, include_transforms_for_dims=[2])
+        np.testing.assert_array_equal(actual, expected)
