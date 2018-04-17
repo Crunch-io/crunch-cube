@@ -31,19 +31,19 @@ class Index(object):
     def data(self):
         '''Return table index by margin.'''
         if self.cube.has_mr:
-            return self._mr_index(self.weighted)
+            return self._mr_index()
 
         margin = (
             self.cube.margin(axis=0, weighted=self.weighted, prune=self.prune) /
             self.cube.margin(weighted=self.weighted, prune=self.prune)
         )
-        props = self.cube.proportions(axis=1, weighted=self.weighted, prune=self.prune)
+        proportions = self.cube.proportions(axis=1, weighted=self.weighted, prune=self.prune)
 
-        return props / margin
+        return proportions / margin
 
-    def _mr_index(self, weighted):
+    def _mr_index(self):
         # mr by mr
-        if self.cube.mr_dim_ind == (0, 1):
+        if len(self.cube.dimensions) == 2 and self.cube.mr_dim_ind == (0, 1):
             col_proportions = self.cube.proportions(axis=0,
                                                     weighted=self.weighted,
                                                     prune=self.prune)
@@ -55,15 +55,11 @@ class Index(object):
         # mr by cat and cat by mr
         if self.cube.mr_dim_ind == 0 or self.cube.mr_dim_ind == 1:
             axis = self.cube.mr_dim_ind
-            proportions = self.cube.proportions(axis=axis,
-                                                weighted=weighted,
-                                                prune=self.prune)
-            mr_margin = self.cube.margin(axis=1 - axis,
-                                         weighted=self.weighted,
-                                         prune=self.prune)
-            cell_margin = self.cube.margin(weighted=self.weighted,
-                                           prune=self.prune)
-            margin = mr_margin / cell_margin
+            margin = (
+                self.cube.margin(axis=1 - axis, weighted=self.weighted, prune=self.prune) /
+                self.cube.margin(weighted=self.weighted, prune=self.prune)
+            )
+            proportions = self.cube.proportions(axis=axis, weighted=self.weighted, prune=self.prune)
             if self.cube.mr_dim_ind == 0:
                 margin = margin[:, np.newaxis]  # pivot
             return proportions / margin
