@@ -1086,26 +1086,6 @@ class TestCrunchCube(TestCase):
         actual = cube.proportions(axis=1)
         np.testing.assert_almost_equal(actual, expected)
 
-    def test_mr_x_cat_index(self):
-        cube = CrunchCube(PETS_X_FRUIT)
-        expected = np.array([
-            [.8571429, 1.0769231],
-            [1.1152941, .9466231],
-            [.9610984, 1.019037],
-        ])
-        actual = cube.index()
-        np.testing.assert_almost_equal(actual, expected)
-
-    def test_mr_x_mr_index_by_col(self):
-        cube = CrunchCube(PETS_X_PETS)
-        expected = np.array([
-            [2.06944444, .99904215, .98026316],
-            [.95863971, 2.328125, .98026316],
-            [1.02205882, 1.0651341, 1.93055556],
-        ])
-        actual = cube.index()
-        np.testing.assert_almost_equal(actual, expected)
-
     def test_cat_x_cat_array_proportions_by_row(self):
         '''Get the proportions for each slice of the 3D cube.
 

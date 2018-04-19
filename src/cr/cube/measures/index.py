@@ -31,32 +31,45 @@ class Index(object):
     def data(self):
         '''Return table index by margin.'''
         if self.cube.has_mr:
-            return self._mr_index(self.weighted)
+            return self._mr_index()
 
         margin = (
             self.cube.margin(axis=0, weighted=self.weighted, prune=self.prune) /
             self.cube.margin(weighted=self.weighted, prune=self.prune)
         )
-        props = self.cube.proportions(axis=1, weighted=self.weighted, prune=self.prune)
+        proportions = self.cube.proportions(axis=1, weighted=self.weighted, prune=self.prune)
 
-        res = props / margin
-        if isinstance(res, np.ma.core.MaskedArray):
-            res.mask = props.mask
-        return res
-        # return props / margin
+# <<<<<<< HEAD
+#         res = props / margin
+#         if isinstance(res, np.ma.core.MaskedArray):
+#             res.mask = props.mask
+#         return res
+#         # return props / margin
+# =======
+        return proportions / margin
+# >>>>>>> master
 
-    def _mr_index(self, weighted):
-        table = self.cube.table.data(weighted)
-        selected = table[self.cube.ind_selected]
-        non_selected = table[self.cube.ind_non_selected]
+    def _mr_index(self):
+        # mr by mr
+        if len(self.cube.dimensions) == 2 and self.cube.mr_dim_ind == (0, 1):
+            col_proportions = self.cube.proportions(axis=0,
+                                                    weighted=self.weighted,
+                                                    prune=self.prune)
+            row_proportions = self.cube.proportions(axis=1,
+                                                    weighted=self.weighted,
+                                                    prune=self.prune)
+            return col_proportions / row_proportions
 
-        if self.cube.mr_dim_ind == 0 or self.cube.mr_dim_ind == (0, 1):
-            margin = np.sum(selected, 1) / np.sum(selected + non_selected, 1)
-            return (self.cube.proportions(axis=0, weighted=weighted) /
-                    margin[:, np.newaxis])
-
-        if self.cube.mr_dim_ind == 1:
-            margin = np.sum(selected, 0) / np.sum(selected + non_selected, 0)
-            return self.cube.proportions(axis=1, weighted=weighted) / margin
+        # mr by cat and cat by mr
+        if self.cube.mr_dim_ind == 0 or self.cube.mr_dim_ind == 1:
+            axis = self.cube.mr_dim_ind
+            margin = (
+                self.cube.margin(axis=1 - axis, weighted=self.weighted, prune=self.prune) /
+                self.cube.margin(weighted=self.weighted, prune=self.prune)
+            )
+            proportions = self.cube.proportions(axis=axis, weighted=self.weighted, prune=self.prune)
+            if self.cube.mr_dim_ind == 0:
+                margin = margin[:, np.newaxis]  # pivot
+            return proportions / margin
 
         raise ValueError('Unexpected dimension types for cube with MR.')
