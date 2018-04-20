@@ -269,12 +269,9 @@ class CrunchCube(object):
             col_margin,
             self.inserted_col_inds if transforms else [],
         )
-        # mask = row_prune_inds[:, np.newaxis] * col_prune_inds
         mask = self._create_mask(res, row_prune_inds, col_prune_inds)
         res = np.ma.masked_array(res, mask=mask)
         return res
-        # res = res[:, ~col_prune_inds]
-        # return res[~row_prune_inds, :]
 
     @staticmethod
     def _create_mask(res, row_prune_inds, col_prune_inds):
@@ -298,6 +295,9 @@ class CrunchCube(object):
             row_margin,
             self.inserted_rows_inds,
         )
+        if row_indices.ndim > 1:
+            # In case of MR, we'd have 2D prune indices
+            row_indices = row_indices.all(axis=1)
 
         if len(self.dimensions) == 1:
             return [row_indices]
@@ -310,6 +310,9 @@ class CrunchCube(object):
             col_margin,
             self.inserted_col_inds,
         )
+        if col_indices.ndim > 1:
+            # In case of MR, we'd have 2D prune indices
+            col_indices = col_indices.all(axis=0)
 
         return [row_indices, col_indices]
 
@@ -577,9 +580,14 @@ class CrunchCube(object):
         res = np.sum(array, axis)
 
         if prune and axis is not None and type(res) is np.ndarray:
-            prune_indices = self.prune_indices(include_transforms_for_dims)
-            # res = res[~prune_indices[1 - axis]]
-            res = np.ma.masked_array(res, mask=prune_indices[1 - axis])
+            table = self.as_array(
+                include_transforms_for_dims=include_transforms_for_dims,
+                prune=True,
+            )
+            mask = table.mask
+            if isinstance(axis, tuple) or axis < mask.ndim:
+                mask = mask.all(axis=axis)
+            res = np.ma.masked_array(res, mask=mask)
 
         if len(res.shape) == 0:
             # Each margin needs to be iterable, even if it only has
@@ -612,7 +620,8 @@ class CrunchCube(object):
                 # This is the case of MR x CA, special treatment
                 # Always return only the column direction (across CATs).
                 num = self.as_array(
-                    include_transforms_for_dims=include_transforms_for_dims
+                    include_transforms_for_dims=include_transforms_for_dims,
+                    prune=prune,
                 )
                 den = self.margin(
                     axis=1,
@@ -644,9 +653,15 @@ class CrunchCube(object):
                 axis = 0 if len(num.shape) < 3 else (1, 2)
                 den = np.sum(num + non_selected, axis)
             res = num / den
-            return self._transform(
+            res = self._transform(
                 res, include_transforms_for_dims, self.valid_indices
             )
+            if prune:
+                res = np.ma.masked_array(
+                    res,
+                    mask=self.as_array(prune=prune).mask,
+                )
+            return res
         elif self.mr_dim_ind == 2:
             margin = (
                 self.margin(axis=axis)[:, np.newaxis]
@@ -923,6 +938,10 @@ class CrunchCube(object):
             margins = [
                 self.margin(axis=i, include_transforms_for_dims=[0, 1])
                 for i in [1, 0]
+            ]
+            margins = [
+                margin if margin.ndim == 1 else np.sum(margin, axis=(1 - i))
+                for i, margin in enumerate(margins)
             ]
             # Obtain prune indices as subscripts
             prune_indices_list = [
