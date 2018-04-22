@@ -57,16 +57,16 @@ is as simple as:
 For developers
 ---------------
 
-For development mode, Crunch Cube needs to be installed from the local checkout of the `crunch-cube` repository.
- Navigate to the top-level folder of the repo, on the local file system, and run:
+For development mode, Crunch Cube needs to be installed from the local
+checkout of the `crunch-cube` repository.  Navigate to the top-level
+folder of the repo, on the local file system, and run::
 
-```
-$ python setup.py develop
-$ py.test tests -cov=cr.cube
-```
+  $ python setup.py develop
+  $ py.test tests -cov=cr.cube
 
-Note that we are happy to accept pull requests, please be certain that your code has proper coverage before submitting.
-All pull requests will be tested by travis.
+Note that we are happy to accept pull requests, please be certain that
+your code has proper coverage before submitting.  All pull requests
+will be tested by travis.
 
 
 .. toctree::
