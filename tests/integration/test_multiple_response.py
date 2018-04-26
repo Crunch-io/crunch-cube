@@ -22,7 +22,7 @@ from .fixtures import SELECTED_3_WAY
 from .fixtures import PROMPTED_AWARENESS
 
 
-# pylint: disable=invalid-name
+# pylint: disable=invalid-name,missing-docstring,too-many-public-methods,no-self-use
 class TestMultipleResponse(TestCase):
     def test_labels_simple_mr_exclude_missing(self):
         cube = CrunchCube(SIMPLE_MR)
@@ -30,11 +30,9 @@ class TestMultipleResponse(TestCase):
         actual = cube.labels()
         self.assertEqual(actual, expected)
 
-    def test_labels_simple_mr_include_missing(self):
+    def test_labels_simple_mr_include_missing_does_not_break(self):
         cube = CrunchCube(SIMPLE_MR)
-        expected = [
-            ['Response #1', 'Response #2', 'Response #3']
-        ]
+        expected = [['Response #1', 'Response #2', 'Response #3']]
         actual = cube.labels(include_missing=True)
         self.assertEqual(actual, expected)
 
@@ -394,18 +392,6 @@ class TestMultipleResponse(TestCase):
 
         actual_1st_tab = np.ma.compress_rows(cube.as_array(prune=True)[1])
         np.testing.assert_array_equal(actual_1st_tab, expected_1st_tab)
-        # FIXME pruning doesn't work for 3d cubes, these expectations are wrong
-        # FIXME (prune indices arrays should be vectors of scalars)
-        # pruned_expected = [
-        #     np.array([[[False, False], [False, False], [False, False]],
-        #               [[False, False], [False, False], [False, False]]]),
-        #     np.array([[[False, False], [False, False], [False, False]],
-        #               [[False, False], [False, False], [False, False]]])
-        # ]
-        # pruned = cube.prune_indices()
-        # self.assertEqual(len(pruned), len(pruned_expected))
-        # for i, actual in enumerate(pruned):
-        #     np.testing.assert_array_equal(pruned[i], pruned_expected[i])
 
     def test_cat_x_mr_x_mr_proportions_by_col(self):
         cube = CrunchCube(CAT_X_MR_X_MR)

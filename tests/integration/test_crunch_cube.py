@@ -1321,6 +1321,9 @@ class TestCrunchCube(TestCase):
             [0., 1.75, np.nan, 0.]
         ])
         actual = cube.index(prune=False)
+        # Assert index without pruning
+        np.testing.assert_almost_equal(actual, expected)
+
         expected = np.array([
             [2.8, 0.7, 0.7],
             [0., 0.58333333, 2.33333333],
@@ -1329,6 +1332,7 @@ class TestCrunchCube(TestCase):
             [0., 1.75, 0.]
         ])
         table = cube.index(prune=True)
+        # Assert index witih pruning
         actual = table[:, ~table.mask.all(axis=0)][~table.mask.all(axis=1), :]
         np.testing.assert_almost_equal(actual, expected)
 
