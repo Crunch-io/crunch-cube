@@ -218,9 +218,13 @@ class CrunchCube(object):
             )
             slice_mask = np.logical_or(rows_pruned, cols_pruned)
 
+            # In case of MRs we need to "inflate" mask
             if self.mr_dim_ind == (1, 2):
-                # In case of MR we need to "inflate" mask
                 slice_mask = slice_mask[:, np.newaxis, :, np.newaxis]
+            elif self.mr_dim_ind == (0, 1):
+                slice_mask = slice_mask[np.newaxis, :, np.newaxis, :]
+            elif self.mr_dim_ind == (0, 2):
+                slice_mask = slice_mask[np.newaxis, :, :, np.newaxis]
 
             mask[i] = slice_mask
         res = np.ma.masked_array(res, mask=mask)

@@ -20,6 +20,8 @@ from .fixtures import CAT_X_MR_X_MR_PRUNED_ROWS
 from .fixtures import SELECTED_3_WAY_2
 from .fixtures import SELECTED_3_WAY
 from .fixtures import PROMPTED_AWARENESS
+from .fixtures import MR_X_MR_X_CAT
+from .fixtures import MR_X_CAT_X_MR
 
 
 # pylint: disable=invalid-name,missing-docstring,too-many-public-methods,no-self-use
@@ -557,4 +559,44 @@ class TestMultipleResponse(TestCase):
             9.50985735e-04, 1.35477929e-01, 1.86531215e-01,
         ])
         actual = cube.proportions()
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_mr_x_mr_x_cat_pruned_rows(self):
+        cube = CrunchCube(MR_X_MR_X_CAT)
+
+        # Not pruned
+        expected = np.array([
+            [1.42180119,    4.25185485,    0.        ,    5.74429468],  # noqa
+            [5.67259693,    5.45876073,    0.79046382,    3.48601721],  # noqa
+            [0.        ,    7.317747  ,    4.03587681,    2.98691172],  # noqa
+            [0.        ,    0.        ,    0.        ,    0.        ],  # noqa
+        ])
+        actual = cube.as_array()[0]
+        np.testing.assert_almost_equal(actual, expected)
+
+        # Pruned
+        expected = np.array([
+            [1.42180119,    4.25185485,    0.        ,    5.74429468],  # noqa
+            [5.67259693,    5.45876073,    0.79046382,    3.48601721],  # noqa
+            [0.        ,    7.317747  ,    4.03587681,    2.98691172],  # noqa
+        ])
+        actual = np.ma.compress_rows(cube.as_array(prune=True)[0])
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_mr_x_cat_x_mr_pruned_rows(self):
+        cube = CrunchCube(MR_X_CAT_X_MR)
+
+        # Not pruned
+        expected = np.array([
+            [0., 0., 0., 0., 0.],
+            [0., 0., 0., 0., 0.],
+            [0., 0., 0., 0., 0.],
+            [0., 0., 0., 0., 0.],
+        ])
+        actual = cube.as_array()[3]
+        np.testing.assert_almost_equal(actual, expected)
+
+        # Pruned
+        expected = np.array([])
+        actual = np.ma.compress_rows(cube.as_array(prune=True)[3])
         np.testing.assert_almost_equal(actual, expected)
