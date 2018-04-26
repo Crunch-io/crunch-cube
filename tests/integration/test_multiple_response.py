@@ -566,21 +566,24 @@ class TestMultipleResponse(TestCase):
 
         # Not pruned
         expected = np.array([
-            [1.42180119,    4.25185485,    0.        ,    5.74429468],  # noqa
-            [5.67259693,    5.45876073,    0.79046382,    3.48601721],  # noqa
-            [0.        ,    7.317747  ,    4.03587681,    2.98691172],  # noqa
-            [0.        ,    0.        ,    0.        ,    0.        ],  # noqa
+            [ 1.42180119, 5.67259693,  0.        , 0.],  # noqa
+            [ 5.96105631, 1.4647935 , 22.51724162, 0.],  # noqa
+            [ 1.79182255, 1.19879791, 23.60391651, 0.],  # noqa
+            [ 4.67364825, 8.0212401 , 93.6564386 , 0.],  # noqa
+            [16.0107376 ,13.06260544,206.93592858, 0.],  # noqa
         ])
         actual = cube.as_array()[0]
         np.testing.assert_almost_equal(actual, expected)
 
         # Pruned
         expected = np.array([
-            [1.42180119,    4.25185485,    0.        ,    5.74429468],  # noqa
-            [5.67259693,    5.45876073,    0.79046382,    3.48601721],  # noqa
-            [0.        ,    7.317747  ,    4.03587681,    2.98691172],  # noqa
+            [   1.42180119,    5.67259693,    0.        ],  # noqa
+            [   5.96105631,    1.4647935 ,   22.51724162],  # noqa
+            [   1.79182255,    1.19879791,   23.60391651],  # noqa
+            [   4.67364825,    8.0212401 ,   93.6564386 ],  # noqa
+            [  16.0107376 ,   13.06260544,  206.93592858],  # noqa
         ])
-        actual = np.ma.compress_rows(cube.as_array(prune=True)[0])
+        actual = np.ma.compress_cols(cube.as_array(prune=True)[0])
         np.testing.assert_almost_equal(actual, expected)
 
     def test_mr_x_cat_x_mr_pruned_rows(self):
@@ -588,15 +591,19 @@ class TestMultipleResponse(TestCase):
 
         # Not pruned
         expected = np.array([
-            [0., 0., 0., 0., 0.],
-            [0., 0., 0., 0., 0.],
-            [0., 0., 0., 0., 0.],
-            [0., 0., 0., 0., 0.],
+            [   4.67364825,   18.28952353,    8.07855047,   14.86987594],  # noqa
+            [   8.0212401 ,   17.29617716,    7.15665312,   15.44355489],  # noqa
+            [  93.6564386 ,  150.46443416,   96.56536588,  188.31770695],  # noqa
+            [   0.        ,    0.        ,    0.        ,    0.        ],  # noqa
         ])
         actual = cube.as_array()[3]
         np.testing.assert_almost_equal(actual, expected)
 
         # Pruned
-        expected = np.array([])
+        expected = np.array([
+            [   4.67364825,   18.28952353,    8.07855047,   14.86987594],  # noqa
+            [   8.0212401 ,   17.29617716,    7.15665312,   15.44355489],  # noqa
+            [  93.6564386 ,  150.46443416,   96.56536588,  188.31770695],  # noqa
+        ])
         actual = np.ma.compress_rows(cube.as_array(prune=True)[3])
         np.testing.assert_almost_equal(actual, expected)
