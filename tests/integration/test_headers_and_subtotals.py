@@ -568,10 +568,25 @@ class TestHeadersAndSubtotals(TestCase):
         actual = cube.inserted_hs_indices(prune=True)[0]
         assert actual == expected
 
-    def test_cat_x_num_hs_counts_pruned(self):
+    def test_cat_x_num_counts_pruned_with_hs(self):
         cube = CrunchCube(CAT_X_NUM_HS_PRUNE)
-        expected = np.array([0, 1, 1, 0])
-        actual = cube.as_array(include_transforms_for_dims=[0], prune=True)
+        expected = np.array([
+            [0],
+            [1],
+            [1],
+            [0],
+        ])
+        # Extract only non-masked (pruned) values
+        table = cube.as_array(include_transforms_for_dims=[0], prune=True)
+        actual = table[:, ~table.mask.all(axis=0)][~table.mask.all(axis=1), :]
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_cat_x_num_counts_pruned_without_hs(self):
+        cube = CrunchCube(CAT_X_NUM_HS_PRUNE)
+        expected = np.array([[1]])
+        table = cube.as_array(prune=True)
+        # Extract only non-masked (pruned) values
+        actual = table[:, ~table.mask.all(axis=0)][~table.mask.all(axis=1), :]
         np.testing.assert_array_equal(actual, expected)
 
     def test_mr_x_cat_hs_counts(self):

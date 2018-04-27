@@ -205,6 +205,31 @@ class CrunchCube(object):
 
         return res
 
+    def _prune_3d_body(self, res, transforms):
+        mask = np.zeros(res.shape)
+        for i, prune_inds in enumerate(self.prune_indices(transforms)):
+            rows_pruned = prune_inds[0]
+            cols_pruned = prune_inds[1]
+            rows_pruned = np.repeat(
+                rows_pruned[:, None], len(cols_pruned), axis=1
+            )
+            cols_pruned = np.repeat(
+                cols_pruned[None, :], len(rows_pruned), axis=0
+            )
+            slice_mask = np.logical_or(rows_pruned, cols_pruned)
+
+            # In case of MRs we need to "inflate" mask
+            if self.mr_dim_ind == (1, 2):
+                slice_mask = slice_mask[:, np.newaxis, :, np.newaxis]
+            elif self.mr_dim_ind == (0, 1):
+                slice_mask = slice_mask[np.newaxis, :, np.newaxis, :]
+            elif self.mr_dim_ind == (0, 2):
+                slice_mask = slice_mask[np.newaxis, :, :, np.newaxis]
+
+            mask[i] = slice_mask
+        res = np.ma.masked_array(res, mask=mask)
+        return res
+
     def _prune_body(self, res, transforms=None):
         '''Prune the result based on margins content.
 
@@ -212,70 +237,174 @@ class CrunchCube(object):
         marginal elements are either 0 or not defined (np.nan).
         '''
 
+        if self.ndim > 2:
+            return self._prune_3d_body(res, transforms)
+
         # Note: If the cube contains transforms (H&S), and they happen to
         # have the marginal value 0 (or NaN), they're NOT pruned. This is
         # done to achieve parity with how the front end client works (whaam).
-        row_prune = self._row_prune_indices(transforms)
+        row_margin = self.margin(
+            include_transforms_for_dims=transforms,
+            axis=self.row_direction_axis
+        )
+        if row_margin.ndim > 1:
+            # In case of CAT x MR, we have 2D margin
+            row_margin = np.sum(row_margin, axis=1)
+        row_prune_inds = self._margin_pruned_indices(
+            row_margin,
+            self.inserted_rows_inds if transforms else [],
+        )
 
-        if len(self.dimensions) == 1 or len(res.shape) == 1:
+        if self.ndim == 1 or len(res.shape) == 1:
             # For 1D, margin is calculated as the row margin.
-            return res[~row_prune]
+            return np.ma.masked_array(res, mask=row_prune_inds)
 
         # Prune columns by column margin values.
-        col_prune = self._col_prune_indices(transforms)
-        res = res[:, ~col_prune]
+        col_margin = self.margin(
+            include_transforms_for_dims=transforms,
+            axis=self.col_direction_axis,
+        )
+        if col_margin.ndim > 1:
+            # In case of MR x CAT, we have 2D margin
+            col_margin = np.sum(col_margin, axis=0)
+        col_prune_inds = self._margin_pruned_indices(
+            col_margin,
+            self.inserted_col_inds if transforms else [],
+        )
+        mask = self._create_mask(res, row_prune_inds, col_prune_inds)
+        res = np.ma.masked_array(res, mask=mask)
+        return res
 
-        # Prune rows by row margin values.
-        return res[~row_prune, :]
+    @staticmethod
+    def _create_mask(res, row_prune_inds, col_prune_inds):
+        mask_rows = np.repeat(
+            row_prune_inds[:, None], len(col_prune_inds), axis=1
+        )
+        mask_cols = np.repeat(
+            col_prune_inds[None, :], len(row_prune_inds), axis=0
+        )
+        return np.logical_or(mask_rows, mask_cols)
 
     def prune_indices(self, transforms=None):
-        row_indices = self._row_prune_indices(transforms)
+        '''Indices of pruned rows and columns.
 
-        if len(self.dimensions) == 1:
+        Returns:
+            (list) One of the possible lists:
+
+            - 1-element list of row indices (in case of 1D cube)
+            - 2-element list of row and col indices (in case of 2D cube)
+            - n-element list of tuples of 2 elements (if it's 3D cube).
+            For each case, the 2 elements are the ROW and COL indices of the
+            elements that need to be pruned. If it's a 3D cube, these indices
+            are calculated "per slice", that is NOT on the 0th dimension
+            (as the 0th dimension represents the slices).
+        '''
+        if self.ndim >= 3:
+            # In case of a 3D cube, return list of tuples
+            # (of row and col pruned indices).
+            return self._prune_3d_indices(transforms)
+
+        # In case of 1 or 2 D cubes, return a list of
+        # row indices (or row and col indices)
+        return self._prune_indices(transforms)
+
+    def _prune_indices(self, transforms):
+        row_margin = self.margin(
+            include_transforms_for_dims=transforms,
+            axis=self.row_direction_axis
+        )
+        row_indices = self._margin_pruned_indices(
+            row_margin,
+            self.inserted_rows_inds,
+        )
+        if row_indices.ndim > 1:
+            # In case of MR, we'd have 2D prune indices
+            row_indices = row_indices.all(axis=1)
+
+        if self.ndim == 1:
             return [row_indices]
 
-        col_indices = self._col_prune_indices(transforms)
+        col_margin = self.margin(
+            include_transforms_for_dims=transforms,
+            axis=self.col_direction_axis,
+        )
+        col_indices = self._margin_pruned_indices(
+            col_margin,
+            self.inserted_col_inds,
+        )
+        if col_indices.ndim > 1:
+            # In case of MR, we'd have 2D prune indices
+            col_indices = col_indices.all(axis=0)
 
         return [row_indices, col_indices]
 
-    def _row_prune_indices(self, transforms=None):
-        def _get_axis_for_margin_calculations():
-            # when dealing with 1D MR cubes, axis for margin should be 0
-            if len(self.dimensions) == 1 and self.has_mr:
-                return 0
-            # when dealing with 3D cubes, axis should be 3
-            elif len(self.dimensions) == 3:
-                return 2
-            return 1
+    def _prune_3d_indices(self, transforms):
+        row_margin = self.margin(
+            include_transforms_for_dims=transforms,
+            axis=self.row_direction_axis
+        )
+        col_margin = self.margin(
+            include_transforms_for_dims=transforms,
+            axis=self.col_direction_axis,
+        )
+        return [
+            self._prune_indices_tuple(rm, cm, transforms)
+            for rm, cm in zip(row_margin, col_margin)
+        ]
 
-        inserted_inds = self.inserted_hs_indices() if transforms else []
-        inserted_rows = np.array(inserted_inds[0] if len(inserted_inds) else [])
-        axis = _get_axis_for_margin_calculations()
-        row_margin = self.margin(include_transforms_for_dims=transforms, axis=axis)
-        ind_inserted = np.zeros(row_margin.shape, dtype=bool)
-        if any(inserted_rows):
-            ind_inserted[inserted_rows] = True
-        row_prune = np.logical_or(row_margin == 0, np.isnan(row_margin))
-        row_prune = np.logical_and(row_prune, ~ind_inserted)
+    def _prune_indices_tuple(self, row_margin, column_margin, transforms):
+        if row_margin.ndim > 1:
+            row_margin = np.sum(row_margin, axis=1)
+        if column_margin.ndim > 1:
+            column_margin = np.sum(column_margin, axis=0)
 
-        return row_prune
+        row_inserted_indices = (
+            self.inserted_rows_inds if transforms else []
+        )
+        col_inserted_indices = (
+            self.inserted_col_inds if transforms else []
+        )
 
-    def _col_prune_indices(self, transforms=None):
-        inserted_inds = self.inserted_hs_indices() if transforms else []
-        inserted_cols = np.array(inserted_inds[1] if len(inserted_inds) > 1 else [])
-        axis = 0 if len(self.dimensions) < 3 else 1
-        col_margin = self.margin(include_transforms_for_dims=transforms, axis=axis)
+        return (
+            self._margin_pruned_indices(row_margin, row_inserted_indices),
+            self._margin_pruned_indices(column_margin, col_inserted_indices),
+        )
 
-        # don't consider insertions outside the scope of the columns
-        inserted_cols = inserted_cols[inserted_cols < len(col_margin)]
+    @property
+    def row_direction_axis(self):
+        # when dealing with 1D MR cubes, axis for margin should be 0
+        if self.ndim == 1 and self.has_mr:
+            return 0
+        elif self.ndim == 3 and not self.is_double_mr:
+            return 2
+        return 1
 
-        ind_inserted = np.zeros(col_margin.shape, dtype=bool)
-        if any(inserted_cols):
-            ind_inserted[inserted_cols] = True
-        col_prune = np.logical_or(col_margin == 0, np.isnan(col_margin))
-        col_prune = np.logical_and(col_prune, ~ind_inserted)
+    @property
+    def inserted_rows_inds(self):
+        inserted_inds = self.inserted_hs_indices()
+        row_dim_ind = 0 if self.ndim < 3 else 1
+        return np.array(
+            inserted_inds[row_dim_ind] if len(inserted_inds) else []
+        )
 
-        return col_prune
+    @staticmethod
+    def _margin_pruned_indices(margin, insertions):
+        ind_inserted = np.zeros(margin.shape, dtype=bool)
+        if any(insertions):
+            ind_inserted[insertions] = True
+        pruned_ind = np.logical_or(margin == 0, np.isnan(margin))
+        pruned_ind = np.logical_and(pruned_ind, ~ind_inserted)
+
+        return pruned_ind
+
+    @property
+    def col_direction_axis(self):
+        return self.ndim - 2
+
+    @property
+    def inserted_col_inds(self):
+        inserted_inds = self.inserted_hs_indices()
+        return np.array(inserted_inds[1] if len(inserted_inds) > 1 else [])
 
     @classmethod
     def _fix_valid_indices(cls, valid_indices, insertion_index, dim):
@@ -321,9 +450,9 @@ class CrunchCube(object):
         num = self.as_array()
         den = self.margin(axis=axis if axis != 2 else None)
 
-        if axis == 1 and len(self.dimensions) > 2:
+        if axis == 1 and self.ndim > 2:
             den = np.sum(den, 0)
-        elif axis != 2 and len(self.dimensions) > 2:
+        elif axis != 2 and self.ndim > 2:
             den = np.sum(self.margin(), 0)
 
         return num / den
@@ -354,7 +483,7 @@ class CrunchCube(object):
         return (
             self.mr_dim_ind in [0, 2] and axis == 1 or
             self.mr_dim_ind == 1 and axis == 0 or
-            self.mr_dim_ind == 1 and axis == 1 and len(self.dimensions) > 2
+            self.mr_dim_ind == 1 and axis == 1 and self.ndim > 2
         )
 
     def _mr_margin_along_non_mr_dim(self, axis, weighted,
@@ -408,7 +537,7 @@ class CrunchCube(object):
         '''Margin for cube that contains MR.'''
         if self.is_double_mr:
             return self._double_mr_margin(axis, weighted)
-        elif len(self.dimensions) == 1:
+        elif self.ndim == 1:
             return self._1d_mr_margin(axis, weighted)
         elif self._calculate_along_non_mr(axis):
             return self._mr_margin_along_non_mr_dim(axis, weighted,
@@ -473,8 +602,14 @@ class CrunchCube(object):
         res = np.sum(array, axis)
 
         if prune and axis is not None and type(res) is np.ndarray:
-            prune_indices = self.prune_indices(include_transforms_for_dims)
-            res = res[~prune_indices[1 - axis]]
+            table = self.as_array(
+                include_transforms_for_dims=include_transforms_for_dims,
+                prune=prune,
+            )
+            mask = table.mask
+            if isinstance(axis, tuple) or axis < mask.ndim:
+                mask = mask.all(axis=axis)
+            res = np.ma.masked_array(res, mask=mask)
 
         if len(res.shape) == 0:
             # Each margin needs to be iterable, even if it only has
@@ -495,11 +630,11 @@ class CrunchCube(object):
         table = self.table.data(weighted)
         valid_indices = [dim.valid_indices(False) for dim in self.dimensions]
 
-        if len(self.dimensions) == 1:
+        if self.ndim == 1:
             res = table[:, 0] / (table[:, 0] + table[:, 1])
             res = res[np.ix_(*valid_indices)]
             if prune:
-                res = res[res != 0]
+                res = np.ma.masked_array(res, mask=(res == 0))
             return res
 
         if self.mr_dim_ind == 0:
@@ -507,7 +642,8 @@ class CrunchCube(object):
                 # This is the case of MR x CA, special treatment
                 # Always return only the column direction (across CATs).
                 num = self.as_array(
-                    include_transforms_for_dims=include_transforms_for_dims
+                    include_transforms_for_dims=include_transforms_for_dims,
+                    prune=prune,
                 )
                 den = self.margin(
                     axis=1,
@@ -539,9 +675,15 @@ class CrunchCube(object):
                 axis = 0 if len(num.shape) < 3 else (1, 2)
                 den = np.sum(num + non_selected, axis)
             res = num / den
-            return self._transform(
+            res = self._transform(
                 res, include_transforms_for_dims, self.valid_indices
             )
+            if prune:
+                res = np.ma.masked_array(
+                    res,
+                    mask=self.as_array(prune=prune).mask,
+                )
+            return res
         elif self.mr_dim_ind == 2:
             margin = (
                 self.margin(axis=axis)[:, np.newaxis]
@@ -557,7 +699,7 @@ class CrunchCube(object):
         '''Check if cube is a just the CA ("ca x cat" or "cat x ca" dims)'''
         types = {d.type for d in self.dimensions}
         ca_types = {'categorical_array', 'categorical'}
-        return len(self.dimensions) == 2 and types == ca_types
+        return self.ndim == 2 and types == ca_types
 
     @property
     def univariate_ca_main_axis(self):
@@ -602,7 +744,10 @@ class CrunchCube(object):
                 len(getattr(margin, 'shape', [])) == 1):
             margin = margin[:, np.newaxis, np.newaxis]
 
-        return self._fix_shape(array / margin)
+        res = array / margin
+        if isinstance(array, np.ma.core.MaskedArray):
+            res.mask = array.mask
+        return self._fix_shape(res)
 
     def _mr_dim_ind(self, include_selections=False):
         dimensions = (
@@ -619,6 +764,10 @@ class CrunchCube(object):
         return None
 
     # Properties
+
+    @property
+    def ndim(self):
+        return len(self.dimensions)
 
     @property
     def table(self):
@@ -804,12 +953,16 @@ class CrunchCube(object):
     def inserted_hs_indices(self, prune=False):
         '''Get indices of the inserted H&S (for formatting purposes).'''
 
-        if len(self.dimensions) == 2 and prune:
+        if self.ndim == 2 and prune:
             # If pruning is applied, we need to subtract from the H&S indes
             # the number of pruned rows (cols) that come before that index.
             margins = [
                 self.margin(axis=i, include_transforms_for_dims=[0, 1])
                 for i in [1, 0]
+            ]
+            margins = [
+                margin if margin.ndim == 1 else np.sum(margin, axis=(1 - i))
+                for i, margin in enumerate(margins)
             ]
             # Obtain prune indices as subscripts
             prune_indices_list = [
@@ -1097,7 +1250,7 @@ class CrunchCube(object):
         if expand and self.dimensions[0].type == 'categorical_array':
             return first_dim_length * (len(self.dimensions[1].elements()) + 4)
 
-        if len(self.dimensions) <= 2 and self.dimensions[0].type:
+        if self.ndim <= 2 and self.dimensions[0].type:
             return first_dim_length + 4
         return first_dim_length * (self.as_array(
             include_transforms_for_dims=include_transforms_for_dims
