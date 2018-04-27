@@ -374,6 +374,46 @@ class TestCrunchCube(TestCase):
         actual = cube.percentages(axis=1)
         np.testing.assert_almost_equal(actual, expected)
 
+    def test_population_counts_univariate_cat(self):
+        cube = CrunchCube(UNIVARIATE_CATEGORICAL)
+        expected = np.array([6000.6666667, 3000.3333333])
+        actual = cube.population_counts(9001)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_population_counts_numeric(self):
+        cube = CrunchCube(VOTER_REGISTRATION)
+        expected = np.array([7965.885, 945.105, 90.01])
+        actual = cube.population_counts(9001)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_population_counts_datetime(self):
+        cube = CrunchCube(SIMPLE_DATETIME)
+        expected = np.array([2250.25, 2250.25, 2250.25, 2250.25])
+        actual = cube.population_counts(9001)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_population_counts_text(self):
+        cube = CrunchCube(SIMPLE_TEXT)
+        expected = np.array([
+            1500.1666667,
+            1500.1666667,
+            1500.1666667,
+            1500.1666667,
+            1500.1666667,
+            1500.1666667,
+        ])
+        actual = cube.population_counts(9001)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_population_counts_cat_x_cat(self):
+        cube = CrunchCube(CAT_X_CAT)
+        expected = np.array([
+            [3000.3333333, 1200.1333333],
+            [3000.3333333, 1800.2],
+        ])
+        actual = cube.population_counts(9001)
+        np.testing.assert_almost_equal(actual, expected)
+
     def test_labels_cat_x_cat_exclude_missing(self):
         cube = CrunchCube(CAT_X_CAT)
         expected = [

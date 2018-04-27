@@ -1236,6 +1236,41 @@ class CrunchCube(object):
         '''
         return self.proportions(axis) * 100
 
+    def population_counts(self, population_size, weighted=True,
+                          include_missing=False,
+                          include_transforms_for_dims=None, prune=False):
+        '''Get population counts relative to the total population size estimate.
+        This function calculates the population counts for crunch cube values.
+        The population counts are based on the values of the 'proportions'.
+        Args
+            population_size (int): Estimated total population size
+            weighted (bool): see proportions method
+            include_missing (bool): see proportions  method
+            include_transforms_for_dims (list): see proportions method
+            prune (bool): see proportions method
+        Returns
+            (nparray): Calculated array of crunch cube population counts.
+        Example:
+            >>> cube = CrunchCube(fixt_cat_x_cat)
+            >>> cube.as_array()
+            np.array([
+               [5, 2],
+               [5, 3],
+            ])
+            >>> cube.population_counts(9000)
+            np.array([
+                [3000, 1200],
+                [3000, 1800],
+            ])
+        '''
+        return self._proportions(
+            adjusted=False,
+            weighted=weighted,
+            include_missing=include_missing,
+            include_transforms_for_dims=include_transforms_for_dims,
+            prune=prune
+        ) * population_size
+
     @property
     def pvals(self):
         '''Calculate p-vals.
