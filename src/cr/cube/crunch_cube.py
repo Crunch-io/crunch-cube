@@ -581,6 +581,22 @@ class CrunchCube(object):
 
         return array
 
+    def _margin_transform_dims(self, axis, include_transforms_for_dims):
+        # FIXME
+        # This is an uglu hack and needs to be refactored. The issue is that
+        # when calculating margins for some cases, we mustn't include _all_
+        # transformations, because the numbers would be wrong. We then need a
+        # smart way to figure out _only_ those transformations that need to be
+        # included in the margin calculation.
+
+        if len(self.dimensions) <= 2:
+            return include_transforms_for_dims and (
+                [(1 - axis)]
+                if axis is not None and isinstance(axis, int) else
+                None
+            )
+        return include_transforms_for_dims
+
     def _margin(self, axis=None, weighted=True, adjusted=False,
                 include_transforms_for_dims=None, prune=False):
 
@@ -591,12 +607,13 @@ class CrunchCube(object):
                                    include_transforms_for_dims)
         # If there are no MR variables, the margins are mostly sums across
         # appropriate dimensions.
-        transform_dims = include_transforms_for_dims and (
-            [(1 - axis)] if axis is not None and isinstance(axis, int) else None
+        transform_dims = self._margin_transform_dims(
+            axis, include_transforms_for_dims,
         )
         array = self._as_array(
             weighted=weighted, adjusted=adjusted,
-            include_transforms_for_dims=transform_dims, margin=True,
+            include_transforms_for_dims=transform_dims,
+            margin=True,
         )
         array = self._inflate_dim(array, axis)
         res = np.sum(array, axis)
@@ -929,21 +946,20 @@ class CrunchCube(object):
 
         for indices in dimension.hs_indices:
             ind_subtotal_elements = np.array(indices['inds'])
+
             if indices['anchor_ind'] == 'top':
                 ind_insertion = -1
             elif indices['anchor_ind'] == 'bottom':
                 ind_insertion = result.shape[dimension_index] - 1
             else:
                 ind_insertion = indices['anchor_ind']
-            if dimension_index == 0:
-                value = sum(result[ind_subtotal_elements])
-            else:
-                ind = [slice(None), ind_subtotal_elements]
-                axis = 1
-                if self.has_mr:
-                    ind = [slice(None)] + ind
-                    axis = 2
-                value = np.sum(result[ind], axis=axis)
+
+            ind = (
+                [slice(None) for _ in range(dimension_index)] +
+                [ind_subtotal_elements]
+            )
+            axis = dimension_index
+            value = np.sum(result[ind], axis=axis)
             insertions.append((ind_insertion, value))
 
         return insertions
