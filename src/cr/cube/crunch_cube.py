@@ -496,7 +496,8 @@ class CrunchCube(object):
         '''
         array = self.as_array(
             weighted=weighted,
-            include_transforms_for_dims=include_transforms_for_dims
+            include_transforms_for_dims=include_transforms_for_dims,
+            margin=True,
         )
 
         if axis == 1 and len(array.shape) == 1:
@@ -1010,7 +1011,7 @@ class CrunchCube(object):
         ]
 
     def as_array(self, include_missing=False, weighted=True, adjusted=False,
-                 include_transforms_for_dims=None, prune=False):
+                 include_transforms_for_dims=None, prune=False, margin=False):
         '''Get crunch cube as ndarray.
 
         Returns the tabular representation of the crunch cube. The returning
@@ -1046,6 +1047,7 @@ class CrunchCube(object):
             adjusted=adjusted,
             include_transforms_for_dims=include_transforms_for_dims,
             prune=prune,
+            margin=margin,
         )
         return self._fix_shape(array)
 
