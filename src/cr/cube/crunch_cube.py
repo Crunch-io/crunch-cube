@@ -534,7 +534,7 @@ class CrunchCube(object):
         return table
 
     def _mr_margin(self, axis, weighted, adjusted,
-                   include_transforms_for_dims=None):
+                   include_transforms_for_dims=None, prune=False):
         '''Margin for cube that contains MR.'''
         if self.is_double_mr:
             return self._double_mr_margin(axis, weighted)
@@ -544,7 +544,7 @@ class CrunchCube(object):
             return self._mr_margin_along_non_mr_dim(axis, weighted,
                                                     include_transforms_for_dims)
 
-        table = self.table.data(weighted)
+        table = self.table.data(weighted, margin=True)
         if include_transforms_for_dims:
             # In case of H&S the entire table needs to be
             # transformed (with selections).
@@ -564,6 +564,10 @@ class CrunchCube(object):
                 i for i, _ in enumerate(self.dimensions) if i != self.mr_dim_ind
             ])
             return np.sum(margin, axis)
+
+        if prune:
+            mask = self.as_array(prune=True).mask
+            margin = np.ma.masked_array(margin, mask=mask)
 
         return margin
 
@@ -604,8 +608,10 @@ class CrunchCube(object):
         # MR margins are calculated differently, so they need a separate method
         # for them. A good example of this is the rcrunch functionality.
         if self.has_mr:
-            return self._mr_margin(axis, weighted, adjusted,
-                                   include_transforms_for_dims)
+            return self._mr_margin(
+                axis, weighted, adjusted, include_transforms_for_dims,
+                prune=prune,
+            )
         # If there are no MR variables, the margins are mostly sums across
         # appropriate dimensions.
         transform_dims = self._margin_transform_dims(

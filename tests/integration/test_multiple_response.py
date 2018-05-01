@@ -641,8 +641,26 @@ class TestMultipleResponse(TestCase):
         actual = cube.as_array()
         np.testing.assert_almost_equal(actual, expected)
 
-    def test_mr_x_num_row_margin(self):
+    def test_mr_x_num_rows_margin(self):
         cube = CrunchCube(BBC_NEWS)
         expected = np.array([4805, 3614, 1156, 1200, 644, 258, 167, 170, 11419])  # noqa
         actual = cube.margin(axis=1, weighted=False)
         np.testing.assert_array_equal(actual, expected)
+
+    def test_mr_x_num_cols_margin_not_pruned(self):
+        cube = CrunchCube(BBC_NEWS)
+        expected = np.array(
+            [1728, 1523, 1570, 1434, 1459, 1429, 1461, 1432, 0, 0, 0, 0]
+        )
+        margin = cube.margin(axis=0, weighted=False)
+        for actual in margin:
+            np.testing.assert_array_equal(actual, expected)
+
+    def test_mr_x_num_cols_margin_pruned(self):
+        cube = CrunchCube(BBC_NEWS)
+        expected = np.array([1728, 1523, 1570, 1434])
+        margin = np.ma.compress_cols(
+            cube.margin(axis=0, weighted=False, prune=True)
+        )
+        for actual in margin:
+            np.testing.assert_array_equal(actual, expected)
