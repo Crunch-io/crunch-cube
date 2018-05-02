@@ -28,7 +28,7 @@ from cr.cube.crunch_cube import CrunchCube
 
 class TestHeadersAndSubtotals(TestCase):
     def test_headings_econ_blame_one_subtotal(self):
-        cube = CrunchCube(ECON_BLAME_WITH_HS)
+        cube = CrunchCube(ECON_BLAME_WITH_HS, include_hs=True)
         expected = [
             'President Obama',
             'Republicans in Congress',
@@ -37,7 +37,7 @@ class TestHeadersAndSubtotals(TestCase):
             'Neither',
             'Not sure',
         ]
-        actual = cube.labels(include_transforms_for_dims=[0])[0]
+        actual = cube.labels()[0]
         self.assertEqual(actual, expected)
 
     def test_headings_econ_blame_one_subtotal_do_not_fetch(self):
@@ -49,11 +49,11 @@ class TestHeadersAndSubtotals(TestCase):
             'Neither',
             'Not sure',
         ]
-        actual = cube.labels(include_transforms_for_dims=None)[0]
+        actual = cube.labels()[0]
         self.assertEqual(actual, expected)
 
     def test_headings_econ_blame_two_subtotal_without_missing(self):
-        cube = CrunchCube(ECON_BLAME_WITH_HS_MISSING)
+        cube = CrunchCube(ECON_BLAME_WITH_HS_MISSING, include_hs=True)
         expected = [
             'President Obama',
             'Republicans in Congress',
@@ -63,7 +63,7 @@ class TestHeadersAndSubtotals(TestCase):
             'Not sure',
             'Test Heading with Skipped',
         ]
-        actual = cube.labels(include_transforms_for_dims=[0])[0]
+        actual = cube.labels()[0]
         self.assertEqual(actual, expected)
 
     def test_headings_two_subtotal_without_missing_do_not_fetch(self):
@@ -75,11 +75,11 @@ class TestHeadersAndSubtotals(TestCase):
             'Neither',
             'Not sure',
         ]
-        actual = cube.labels(include_transforms_for_dims=None)[0]
+        actual = cube.labels()[0]
         self.assertEqual(actual, expected)
 
     def test_headings_econ_blame_two_subtotal_with_missing(self):
-        cube = CrunchCube(ECON_BLAME_WITH_HS_MISSING)
+        cube = CrunchCube(ECON_BLAME_WITH_HS_MISSING, include_hs=True)
         expected = [
             'President Obama',
             'Republicans in Congress',
@@ -92,7 +92,7 @@ class TestHeadersAndSubtotals(TestCase):
             'No Data',
             'Test Heading with Skipped',
         ]
-        actual = cube.labels(include_missing=True, include_transforms_for_dims=[0])[0]
+        actual = cube.labels(include_missing=True)[0]
         self.assertEqual(actual, expected)
 
     def test_subtotals_as_array_one_transform(self):
@@ -167,7 +167,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_labels_on_2d_cube_with_hs_on_1st_dim(self):
-        cube = CrunchCube(ECON_BLAME_X_IDEOLOGY_ROW_HS)
+        cube = CrunchCube(ECON_BLAME_X_IDEOLOGY_ROW_HS, include_hs=True)
         expected = [[
             'President Obama',
             'Republicans in Congress',
@@ -183,11 +183,11 @@ class TestHeadersAndSubtotals(TestCase):
             'Very Conservative',
             'Not sure',
         ]]
-        actual = cube.labels(include_transforms_for_dims=[0, 1])
+        actual = cube.labels()
         self.assertEqual(actual, expected)
 
     def test_labels_on_2d_cube_with_hs_on_both_dim(self):
-        cube = CrunchCube(ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS)
+        cube = CrunchCube(ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS, include_hs=True)
         expected = [[
             'President Obama',
             'Republicans in Congress',
@@ -204,7 +204,7 @@ class TestHeadersAndSubtotals(TestCase):
             'Very Conservative',
             'Not sure',
         ]]
-        actual = cube.labels(include_transforms_for_dims=[0, 1])
+        actual = cube.labels()
         self.assertEqual(actual, expected)
 
     def test_labels_on_2d_cube_with_hs_on_both_dim_do_not_fetch(self):
@@ -223,7 +223,7 @@ class TestHeadersAndSubtotals(TestCase):
             'Very Conservative',
             'Not sure',
         ]]
-        actual = cube.labels(include_transforms_for_dims=None)
+        actual = cube.labels()
         self.assertEqual(actual, expected)
 
     def test_subtotals_as_array_2d_cube_with_hs_on_row(self):
@@ -401,12 +401,12 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_ca_labels_with_hs(self):
-        cube = CrunchCube(SIMPLE_CA_HS)
+        cube = CrunchCube(SIMPLE_CA_HS, include_hs=True)
         expected = [
             ['ca_subvar_1', 'ca_subvar_2', 'ca_subvar_3'],
             ['a', 'b', 'Test A and B combined', 'c', 'd']
         ]
-        actual = cube.labels(include_transforms_for_dims=[0])
+        actual = cube.labels()
         self.assertEqual(actual, expected)
 
     def test_ca_as_array_with_hs(self):
@@ -448,7 +448,7 @@ class TestHeadersAndSubtotals(TestCase):
         self.assertEqual(actual, expected)
 
     def test_hs_with_anchor_on_zero_position_labels(self):
-        cube = CrunchCube(ECON_US_PROBLEM_X_BIGGER_PROBLEM)
+        cube = CrunchCube(ECON_US_PROBLEM_X_BIGGER_PROBLEM, include_hs=True)
         expected = [
             [
                 'Serious net',
@@ -463,7 +463,7 @@ class TestHeadersAndSubtotals(TestCase):
                 'False accusations of sexual assault',
             ],
         ]
-        actual = cube.labels(include_transforms_for_dims=[0, 1])
+        actual = cube.labels()
         self.assertEqual(actual, expected)
 
     def test_hs_with_anchor_on_zero_position_as_props_by_col(self):
@@ -519,9 +519,9 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_fruit_hs_top_bottom_labels(self):
-        cube = CrunchCube(FRUIT_HS_TOP_BOTTOM)
+        cube = CrunchCube(FRUIT_HS_TOP_BOTTOM, include_hs=True)
         expected = [['TOP', 'rambutan', 'MIDDLE', 'satsuma', 'BOTTOM']]
-        actual = cube.labels(include_transforms_for_dims=[0])
+        actual = cube.labels()
         assert actual == expected
 
     def test_fruit_hs_top_bottom_inserted_indices(self):
@@ -623,7 +623,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_array_equal(actual, expected)
 
     def test_missing_cat_hs_labels(self):
-        cube = CrunchCube(MISSING_CAT_HS)
+        cube = CrunchCube(MISSING_CAT_HS, include_hs=True)
 
         # Don't expect the missing category "Non voters"
         expected = [[
@@ -635,7 +635,7 @@ class TestHeadersAndSubtotals(TestCase):
             'Black voters',
             'Latino and other voters',
         ]]
-        actual = cube.labels(include_transforms_for_dims=[0])
+        actual = cube.labels()
         assert actual == expected
 
     def test_ca_x_cat_counts_with_hs(self):
