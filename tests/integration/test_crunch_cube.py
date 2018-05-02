@@ -1509,13 +1509,13 @@ class TestCrunchCube(TestCase):
         np.testing.assert_array_equal(actual, expected)
 
     def test_ca_subvar_x_cat_hs_counts_prune(self):
-        cube = CrunchCube(CA_SUBVAR_X_CAT_HS)
+        cube = CrunchCube(CA_SUBVAR_X_CAT_HS, include_hs=True)
         expected = np.array([
             [3, 3, 0, 0, 6],
             [1, 3, 2, 0, 4],
             [0, 2, 1, 3, 2],
         ])
-        actual = cube.as_array(include_transforms_for_dims=[0, 1], prune=True)
+        actual = cube.as_array(prune=True)
         np.testing.assert_array_equal(actual, expected)
 
     def test_means_univariate_cat(self):
@@ -1616,7 +1616,7 @@ class TestCrunchCube(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_mr_props_with_hs_by_cell(self):
-        cube = CrunchCube(LETTERS_X_PETS_HS)
+        cube = CrunchCube(LETTERS_X_PETS_HS, include_hs=True)
         expected = np.array([
             [0.10769231, 0.16923077, 0.27692308, 0.26153846, 0.15384615, 0.15384615],  # noqa
             [0.11111111, 0.20634921, 0.31746032, 0.19047619, 0.15873016, 0.15873016],  # noqa
@@ -1628,7 +1628,8 @@ class TestCrunchCube(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_mr_props_with_hs_by_row(self):
-        cube = CrunchCube(LETTERS_X_PETS_HS)
+        cube = CrunchCube(LETTERS_X_PETS_HS, include_hs=True)
+        # cube = CrunchCube(LETTERS_X_PETS_HS)
         expected = np.array([
             [0.15555556, 0.24444444, 0.4, 0.37777778, 0.22222222, 0.22222222],
             [0.16666667, 0.30952381, 0.47619048, 0.28571429, 0.23809524, 0.23809524],  # noqa
@@ -1640,7 +1641,7 @@ class TestCrunchCube(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_mr_props_with_hs_by_col(self):
-        cube = CrunchCube(LETTERS_X_PETS_HS)
+        cube = CrunchCube(LETTERS_X_PETS_HS, include_hs=True)
         expected = np.array([
             [0.53846154, 0.6875, 0.62068966, 0.94444444, 0.55555556, 0.55555556],  # noqa
             [0.58333333, 0.68421053, 0.64516129, 0.66666667, 0.71428571, 0.71428571],  # noqa
