@@ -1181,8 +1181,7 @@ class CrunchCube(object):
         )
 
     def proportions(self, axis=None, weighted=True,
-                    include_transforms_for_dims=None, include_missing=False,
-                    prune=False):
+                    include_missing=False, prune=False):
         '''Get proportions of a crunch cube.
 
         This function calculates the proportions across the selected axis
@@ -1247,7 +1246,7 @@ class CrunchCube(object):
             axis=axis,
             weighted=weighted,
             adjusted=False,
-            include_transforms_for_dims=include_transforms_for_dims,
+            include_transforms_for_dims=self.hs_dims,
             include_missing=include_missing,
             prune=prune,
         )
