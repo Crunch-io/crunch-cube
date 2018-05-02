@@ -214,7 +214,7 @@ class CrunchCube(object):
 
     def _prune_3d_body(self, res, transforms):
         mask = np.zeros(res.shape)
-        for i, prune_inds in enumerate(self.prune_indices(transforms)):
+        for i, prune_inds in enumerate(self.prune_indices):
             rows_pruned = prune_inds[0]
             cols_pruned = prune_inds[1]
             rows_pruned = np.repeat(
@@ -286,7 +286,8 @@ class CrunchCube(object):
         )
         return np.logical_or(mask_rows, mask_cols)
 
-    def prune_indices(self, transforms=None):
+    @property
+    def prune_indices(self):
         '''Indices of pruned rows and columns.
 
         Returns:
@@ -303,11 +304,13 @@ class CrunchCube(object):
         if self.ndim >= 3:
             # In case of a 3D cube, return list of tuples
             # (of row and col pruned indices).
-            return self._prune_3d_indices(transforms)
+            return self._prune_3d_indices(self.hs_dims)
+            # return self._prune_3d_indices(transforms)
 
         # In case of 1 or 2 D cubes, return a list of
         # row indices (or row and col indices)
-        return self._prune_indices(transforms)
+        return self._prune_indices(self.hs_dims)
+        # return self._prune_indices(transforms)
 
     def _prune_indices(self, transforms):
         row_margin = self.margin(axis=self.row_direction_axis)
