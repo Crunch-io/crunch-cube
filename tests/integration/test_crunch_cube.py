@@ -47,6 +47,7 @@ from .fixtures import SCALE_WITH_NULL_VALUES
 from .fixtures import VALUE_SERVICES
 from .fixtures import LETTERS_X_PETS_HS
 from .fixtures import XYZ_SIMPLE_ALLTYPES
+from .fixtures import CAT_X_MR_X_CAT_MISSING
 
 
 class TestCrunchCube(TestCase):
@@ -1717,3 +1718,9 @@ class TestCrunchCube(TestCase):
         actual = cube.prune_indices()[0]
         np.testing.assert_array_equal(actual[0], expected[0])
         np.testing.assert_array_equal(actual[1], expected[1])
+
+    def test_cat_x_mr_x_cat_missing_proportions(self):
+        cube = CrunchCube(CAT_X_MR_X_CAT_MISSING)
+        expected = np.array([])
+        actual = cube.proportions()
+        np.testing.assert_almost_equal(actual, expected)
