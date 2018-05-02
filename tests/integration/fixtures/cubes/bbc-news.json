@@ -76,7 +76,7 @@
                             },
                             {
                                 "alias": "Q5news_1_rc_98",
-                                "name": "Don’t know"
+                                "name": "Don't know"
                             },
                             {
                                 "alias": "Q5news_1_rc_1_2_3_4_5",
@@ -356,7 +356,7 @@
                                     "derived": false,
                                     "references": {
                                         "alias": "Q5news_1_rc_98",
-                                        "name": "Don’t know"
+                                        "name": "Don't know"
                                     },
                                     "id": "0008",
                                     "type": {
@@ -465,7 +465,7 @@
                             },
                             {
                                 "alias": "Q5news_1_rc_98",
-                                "name": "Don’t know"
+                                "name": "Don't know"
                             },
                             {
                                 "alias": "Q5news_1_rc_1_2_3_4_5",
