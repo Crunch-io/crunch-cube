@@ -45,7 +45,7 @@ class CrunchCube(object):
     percentages off of them.
     '''
 
-    def __init__(self, response):
+    def __init__(self, response, include_hs=False):
         '''Initializes the CrunchCube class with the cube JSON response.
 
         Class can be initialized with both JSON string, and dict types.
@@ -62,7 +62,6 @@ class CrunchCube(object):
         # If the provided response is dict, create cube immediately
         if isinstance(response, dict):
             self._table = DataTable(response.get('value', response))
-            return
 
         try:
             response = json.loads(response)
@@ -74,6 +73,14 @@ class CrunchCube(object):
                     'Unsupported type provided: {}. '
                     'A `cube` must be JSON or `dict`.'
                 ).format(type(response)))
+
+        self._include_hs = include_hs
+
+    @property
+    def hs_dims(self):
+        if not self._include_hs:
+            return None
+        return [i for i in range(self.ndim)]
 
     def _get_valid_indices(self, dimensions, include_missing,
                            get_non_selected=False, get_all_mr=False):
@@ -642,10 +649,7 @@ class CrunchCube(object):
         res = np.sum(array, axis)
 
         if prune and axis is not None and type(res) is np.ndarray:
-            table = self.as_array(
-                include_transforms_for_dims=include_transforms_for_dims,
-                prune=prune,
-            )
+            table = self.as_array(prune=prune)
             mask = table.mask
             if isinstance(axis, tuple) or axis < mask.ndim:
                 mask = mask.all(axis=axis)
@@ -1095,11 +1099,12 @@ class CrunchCube(object):
                 [0, 0, 0, 0],
             ])
         '''
+        hs_dims = not margin and self.hs_dims
         array = self._as_array(
             include_missing=include_missing,
             weighted=weighted,
             adjusted=adjusted,
-            include_transforms_for_dims=include_transforms_for_dims,
+            include_transforms_for_dims=hs_dims,
             prune=prune,
             margin=margin,
         )
@@ -1349,9 +1354,7 @@ class CrunchCube(object):
         if not self.dimensions:
             return 4
 
-        first_dim_length = self.as_array(
-            include_transforms_for_dims=include_transforms_for_dims
-        ).shape[0]
+        first_dim_length = self.as_array().shape[0]
 
         # Special case of CA as a 0-ind cube
         if expand and self.dimensions[0].type == 'categorical_array':
@@ -1359,9 +1362,7 @@ class CrunchCube(object):
 
         if self.ndim <= 2 and self.dimensions[0].type:
             return first_dim_length + 4
-        return first_dim_length * (self.as_array(
-            include_transforms_for_dims=include_transforms_for_dims
-        ).shape[1] + 4)
+        return first_dim_length * (self.as_array().shape[1] + 4)
 
     def count(self, weighted=True):
         '''Get cube's count with automatic weighted/unweighted selection.'''
