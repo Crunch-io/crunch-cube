@@ -964,7 +964,7 @@ class CrunchCube(object):
 
         return [dim.inserted_hs_indices for dim in self.dimensions]
 
-    def labels(self, include_missing=False, include_transforms_for_dims=False):
+    def labels(self, include_missing=False):
         '''Gets labels for each cube's dimension.
 
         Args
@@ -974,7 +974,7 @@ class CrunchCube(object):
             labels (list of lists): Labels for each dimension
         '''
         return [
-            dim.labels(include_missing, include_transforms_for_dims)
+            dim.labels(include_missing, self.hs_dims)
             for dim in self.dimensions
         ]
 
