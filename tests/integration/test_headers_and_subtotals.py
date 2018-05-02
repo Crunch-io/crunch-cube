@@ -278,25 +278,25 @@ class TestHeadersAndSubtotals(TestCase):
     def test_subtotals_margin_2d_cube_with_hs_on_row_by_col(self):
         cube = CrunchCube(ECON_BLAME_X_IDEOLOGY_ROW_HS)
         expected = np.array([72, 182, 375, 218, 110, 40])
-        actual = cube.margin(axis=0, include_transforms_for_dims=[0, 1])
+        actual = cube.margin(axis=0)
         np.testing.assert_almost_equal(actual, expected)
 
     def test_subtotals_margin_2d_cube_with_hs_on_row_by_row(self):
-        cube = CrunchCube(ECON_BLAME_X_IDEOLOGY_ROW_HS)
+        cube = CrunchCube(ECON_BLAME_X_IDEOLOGY_ROW_HS, include_hs=True)
         expected = np.array([285, 396, 681, 242, 6, 68])
-        actual = cube.margin(axis=1, include_transforms_for_dims=[0, 1])
+        actual = cube.margin(axis=1)
         np.testing.assert_almost_equal(actual, expected)
 
     def test_subtotals_margin_2d_cube_with_hs_on_two_dim_by_col(self):
-        cube = CrunchCube(ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS)
+        cube = CrunchCube(ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS, include_hs=True)
         expected = np.array([72, 182, 375, 557, 218, 110, 40])
-        actual = cube.margin(axis=0, include_transforms_for_dims=[0, 1])
+        actual = cube.margin(axis=0)
         np.testing.assert_almost_equal(actual, expected)
 
     def test_subtotals_margin_2d_cube_with_hs_on_two_dim_by_row(self):
-        cube = CrunchCube(ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS)
+        cube = CrunchCube(ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS, include_hs=True)
         expected = np.array([285, 396, 681, 242, 6, 68])
-        actual = cube.margin(axis=1, include_transforms_for_dims=[0, 1])
+        actual = cube.margin(axis=1)
         np.testing.assert_almost_equal(actual, expected)
 
     def test_subtotals_proportions_2d_cube_with_hs_on_row_by_cell(self):
@@ -429,9 +429,9 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_ca_margin_with_hs(self):
-        cube = CrunchCube(SIMPLE_CA_HS)
+        cube = CrunchCube(SIMPLE_CA_HS, include_hs=True)
         expected = np.array([6, 6, 6])
-        actual = cube.margin(include_transforms_for_dims=[0, 1], axis=1)
+        actual = cube.margin(axis=1)
         np.testing.assert_almost_equal(actual, expected)
 
     def test_count_unweighted(self):
@@ -566,7 +566,7 @@ class TestHeadersAndSubtotals(TestCase):
         assert actual == expected
 
     def test_hs_indices_pruned_cat_x_num(self):
-        cube = CrunchCube(CAT_X_NUM_HS_PRUNE)
+        cube = CrunchCube(CAT_X_NUM_HS_PRUNE, include_hs=True)
         expected = [0, 1, 3]
         actual = cube.inserted_hs_indices(prune=True)[0]
         assert actual == expected
@@ -681,7 +681,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_array_equal(actual, expected)
 
     def test_ca_x_cat_margin_with_hs(self):
-        cube = CrunchCube(CA_X_CAT_HS)
+        cube = CrunchCube(CA_X_CAT_HS, include_hs=True)
 
         # Assert counts without H&S
         expected = np.array([
@@ -689,7 +689,7 @@ class TestHeadersAndSubtotals(TestCase):
             [1, 1, 1, 3, 1, 1, 2],
             [1, 1, 1, 3, 1, 1, 2],
         ])
-        actual = cube.margin(axis=1, include_transforms_for_dims=[2])
+        actual = cube.margin(axis=1)
         np.testing.assert_array_equal(actual, expected)
 
     def test_cat_x_mr_weighted_with_hs(self):
