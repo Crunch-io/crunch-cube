@@ -250,10 +250,7 @@ class CrunchCube(object):
         # Note: If the cube contains transforms (H&S), and they happen to
         # have the marginal value 0 (or NaN), they're NOT pruned. This is
         # done to achieve parity with how the front end client works (whaam).
-        row_margin = self.margin(
-            include_transforms_for_dims=transforms,
-            axis=self.row_direction_axis
-        )
+        row_margin = self.margin(axis=self.row_direction_axis)
         if row_margin.ndim > 1:
             # In case of CAT x MR, we have 2D margin
             row_margin = np.sum(row_margin, axis=1)
@@ -267,10 +264,7 @@ class CrunchCube(object):
             return np.ma.masked_array(res, mask=row_prune_inds)
 
         # Prune columns by column margin values.
-        col_margin = self.margin(
-            include_transforms_for_dims=transforms,
-            axis=self.col_direction_axis,
-        )
+        col_margin = self.margin(axis=self.col_direction_axis)
         if col_margin.ndim > 1:
             # In case of MR x CAT, we have 2D margin
             col_margin = np.sum(col_margin, axis=0)
@@ -316,10 +310,7 @@ class CrunchCube(object):
         return self._prune_indices(transforms)
 
     def _prune_indices(self, transforms):
-        row_margin = self.margin(
-            include_transforms_for_dims=transforms,
-            axis=self.row_direction_axis
-        )
+        row_margin = self.margin(axis=self.row_direction_axis)
         row_indices = self._margin_pruned_indices(
             row_margin,
             self.inserted_rows_inds,
@@ -331,10 +322,7 @@ class CrunchCube(object):
         if self.ndim == 1:
             return [row_indices]
 
-        col_margin = self.margin(
-            include_transforms_for_dims=transforms,
-            axis=self.col_direction_axis,
-        )
+        col_margin = self.margin(axis=self.col_direction_axis)
         col_indices = self._margin_pruned_indices(
             col_margin,
             self.inserted_col_inds,
@@ -346,14 +334,8 @@ class CrunchCube(object):
         return [row_indices, col_indices]
 
     def _prune_3d_indices(self, transforms):
-        row_margin = self.margin(
-            include_transforms_for_dims=transforms,
-            axis=self.row_direction_axis
-        )
-        col_margin = self.margin(
-            include_transforms_for_dims=transforms,
-            axis=self.col_direction_axis,
-        )
+        row_margin = self.margin(axis=self.row_direction_axis)
+        col_margin = self.margin(axis=self.col_direction_axis)
         return [
             self._prune_indices_tuple(rm, cm, transforms)
             for rm, cm in zip(row_margin, col_margin)
@@ -660,21 +642,15 @@ class CrunchCube(object):
                 # This is the case of MR x CA, special treatment
                 # Always return only the column direction (across CATs).
                 num = self.as_array(prune=prune)
-                den = self.margin(
-                    axis=1,
-                    include_transforms_for_dims=include_transforms_for_dims
-                )[:, None, :]
+                den = self._margin(axis=1)[:, None, :]
                 return num / den
 
             # The following are normal MR x something (not CA)
             num = self.as_array()
             if axis == 0:
-                den = self.margin(
-                    axis=axis,
-                    include_transforms_for_dims=include_transforms_for_dims
-                )
+                den = self.margin(axis=axis)
             else:
-                den = self.margin(axis=axis)[:, np.newaxis]
+                den = self._margin(axis=axis)[:, np.newaxis]
             return num / den
 
         elif self.mr_dim_ind == 1:
@@ -968,10 +944,7 @@ class CrunchCube(object):
         if self.ndim == 2 and prune:
             # If pruning is applied, we need to subtract from the H&S indes
             # the number of pruned rows (cols) that come before that index.
-            margins = [
-                self.margin(axis=i, include_transforms_for_dims=[0, 1])
-                for i in [1, 0]
-            ]
+            margins = [self.margin(axis=i) for i in [1, 0]]
             margins = [
                 margin if margin.ndim == 1 else np.sum(margin, axis=(1 - i))
                 for i, margin in enumerate(margins)
@@ -1046,8 +1019,7 @@ class CrunchCube(object):
         )
         return self._fix_shape(array)
 
-    def margin(self, axis=None, weighted=True,
-               include_transforms_for_dims=None, prune=False):
+    def margin(self, axis=None, weighted=True, prune=False, include_hs=True):
         '''Get margin for the selected axis.
 
         the selected axis. For MR variables, this is the sum of the selected
@@ -1104,16 +1076,17 @@ class CrunchCube(object):
                 [0, 1],
             ])
         '''
+        include_hs = include_hs and self.hs_dims
         return self._margin(
             axis=axis,
             weighted=weighted,
             adjusted=False,
-            include_transforms_for_dims=include_transforms_for_dims,
+            include_transforms_for_dims=include_hs,
             prune=prune,
         )
 
-    def proportions(self, axis=None, weighted=True,
-                    include_missing=False, prune=False):
+    def proportions(self, axis=None, weighted=True, include_missing=False,
+                    prune=False):
         '''Get proportions of a crunch cube.
 
         This function calculates the proportions across the selected axis
