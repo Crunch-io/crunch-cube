@@ -1624,7 +1624,7 @@ class TestCrunchCube(TestCase):
             [0.10447761, 0.14925373, 0.25373134, 0.13432836, 0.17910448, 0.17910448],  # noqa
             [0.07462687, 0.11940299, 0.19402985, 0.23880597, 0.1641791, 0.1641791],  # noqa
         ])
-        actual = cube.proportions(include_transforms_for_dims=[0, 1])
+        actual = cube.proportions()
         np.testing.assert_almost_equal(actual, expected)
 
     def test_mr_props_with_hs_by_row(self):
@@ -1637,7 +1637,7 @@ class TestCrunchCube(TestCase):
             [0.18421053, 0.26315789, 0.44736842, 0.23684211, 0.31578947, 0.31578947],  # noqa
             [0.125, 0.2, 0.325, 0.4, 0.275, 0.275],
         ])
-        actual = cube.proportions(axis=1, include_transforms_for_dims=[0, 1])
+        actual = cube.proportions(axis=1)
         np.testing.assert_almost_equal(actual, expected)
 
     def test_mr_props_with_hs_by_col(self):
@@ -1649,7 +1649,7 @@ class TestCrunchCube(TestCase):
             [0.53846154, 0.58823529, 0.56666667, 0.5, 0.63157895, 0.63157895],
             [0.45454545, 0.47058824, 0.46428571, 0.76190476, 0.61111111, 0.61111111],  # noqa
         ])
-        actual = cube.proportions(axis=0, include_transforms_for_dims=[0, 1])
+        actual = cube.proportions(axis=0)
         np.testing.assert_almost_equal(actual, expected)
 
     def test_3d_pruning_indices(self):
