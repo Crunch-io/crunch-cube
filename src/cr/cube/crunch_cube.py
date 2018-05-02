@@ -1318,7 +1318,7 @@ class CrunchCube(object):
         stats = self.standardized_residuals
         return 2 * (1 - norm.cdf(np.abs(stats)))
 
-    def y_offset(self, expand=False, include_transforms_for_dims=None):
+    def y_offset(self, expand=False):
         '''Gets y offset for sheet manipulation.
 
         Args:
