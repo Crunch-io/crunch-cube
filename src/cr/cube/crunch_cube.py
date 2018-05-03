@@ -966,8 +966,13 @@ class CrunchCube(object):
                 [ind_subtotal_elements]
             )
             axis = dimension_index
-            value = np.sum(result[ind], axis=axis)
-            insertions.append((ind_insertion, value))
+
+            # no indices are provided (should never get here)
+            if len(indices['inds']) == 0:
+                value = 0
+            else:
+                value = np.sum(result[ind], axis=axis)
+                insertions.append((ind_insertion, value))
 
         return insertions
 
