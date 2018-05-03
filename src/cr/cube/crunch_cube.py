@@ -673,7 +673,7 @@ class CrunchCube(object):
         num = table[self.ind_selected][np.ix_(*self.valid_indices)]
         non_selected = table[self.ind_non_selected][np.ix_(*self.valid_indices)]
         if num.ndim >= 3:
-            if axis is None:
+            if axis == (1, 2) or axis is None:
                 den = np.sum(num + non_selected, 2)[:, :, None]
             elif axis == 2:
                 den = np.sum(num, 2)[:, :, None]
