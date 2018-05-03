@@ -247,6 +247,36 @@ class TestDimension(TestCase):
         actual = dim.hs_indices
         self.assertEqual(actual, expected)
 
+    @patch('cr.cube.dimension.Dimension._elements', [
+        {'id': 1}, {'id': 2}, {'id': 5}, {'id': 4}
+    ])
+    @patch('cr.cube.dimension.Dimension._get_type')
+    def test_hs_indices_with_empty_indices(self, mock_type):
+
+        mock_type.return_value = None
+        dim_data = {
+            'references': {
+                'view': {
+                    'transform': {'insertions': [{
+                                                "function": "subtotal",
+                                                "args": [
+                                                    7,
+                                                    8,
+                                                    9,
+                                                    10,
+                                                    11
+                                                ],
+                                                "anchor": "bottom",
+                                                "name": "test subtotal"
+                                            }]}
+                }
+            }
+        }
+        dim = Dimension(dim_data)
+        expected = []
+        actual = dim.hs_indices
+        self.assertEqual(actual, expected)
+
     @patch('cr.cube.dimension.Dimension._get_type')
     def test_subtotals(self, mock_type):
         mock_type.return_value = None

@@ -156,6 +156,9 @@ class Dimension(object):
                      if el['id'] in subtotal.args],
         } for subtotal in self.subtotals]
 
+        # filter where indices aren't available to sum
+        indices = [ind for ind in indices if len(ind['inds']) > 0]
+
         return indices
 
     @property
