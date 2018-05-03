@@ -427,7 +427,8 @@ class TestMultipleResponse(TestCase):
         ])
         np.testing.assert_almost_equal(actual, expected)
 
-    def test_mr_x_cat_x_cat_by_row(self):
+    def test_mr_x_cat_x_cat_by_col(self):
+        # TODO: Check expectations with Mike and Jon
         cube = CrunchCube(SELECTED_3_WAY_2)
         # Only compare 0 slice (parity with whaam tests)
         expected = np.array([
@@ -435,19 +436,12 @@ class TestMultipleResponse(TestCase):
             [0, 0],
             [0.49431928922535223, 0.6091963925363675]
         ])
-        actual = cube.proportions(axis=2)[0]
-        # Since cube is 3D, row dim is 2 (instead of 1)
-        np.testing.assert_almost_equal(actual, expected)
-
-    def test_cat_x_mr_x_cat_by_col(self):
-        cube = CrunchCube(SELECTED_3_WAY)
-        # Only take first slice (parity with whaam tests).
-        expected = np.array([[1, 0], [1, 0], [1, 0]])
         # 3D cube => col == 1
         actual = cube.proportions(axis=1)[0]
         np.testing.assert_almost_equal(actual, expected)
 
-    def test_cat_x_mr_x_cat_by_row(self):
+    def test_cat_x_mr_x_cat_by_col(self):
+        # TODO: Check expectations with Mike and Jon
         cube = CrunchCube(SELECTED_3_WAY)
         # Only take first slice (parity with whaam tests).
         expected = np.array([
@@ -455,20 +449,36 @@ class TestMultipleResponse(TestCase):
             [0.20327963774693497, np.nan],
             [0.3113417143573762, np.nan],
         ])
+        # 3D cube => col == 1
+        actual = cube.proportions(axis=1)[0]
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_cat_x_mr_x_cat_by_row(self):
+        # TODO: Check expectations with Mike and Jon
+        cube = CrunchCube(SELECTED_3_WAY)
+        # Only take first slice (parity with whaam tests).
+        expected = np.array([[1, 0], [1, 0], [1, 0]])
         # 3D cube => row == 2
         actual = cube.proportions(axis=2)[0]
         np.testing.assert_almost_equal(actual, expected)
 
     def test_cat_x_mr_x_cat_by_cell(self):
+        # TODO: Check expectations with Mike and Jon
         cube = CrunchCube(SELECTED_3_WAY)
         # Only take first slice (parity with whaam tests).
         # TODO: Check with @jonkeane, since R results are slightly
         # different. (It's using (0, 2) rather than (1, 2) axis).
         expected = np.array([
-            [0.03326584, 0],
-            [0.06775988, 0],
-            [0.10378057, 0],
+            [0.0997975162008577, 0],
+            [0.20327963774693497, 0],
+            [0.3113417143573762, 0],
         ])
+        # Old expectation:
+        # expected = np.array([
+        #     [0.03326584, 0],
+        #     [0.06775988, 0],
+        #     [0.10378057, 0],
+        # ])
         actual = cube.proportions(axis=None)[0]
         np.testing.assert_almost_equal(actual, expected)
 
@@ -741,7 +751,7 @@ class TestMultipleResponse(TestCase):
             [0.03084476, 0.06828734, 0.06462713, 0.0958332 , 0.09698609, 0.09569622, 0.03095693, 0.06498843, 0.06309156, 0.0651006 , 0.06462713, 0.06602916, 0.0322468 ],  # noqa
             [0.06891722, 0.03807479, 0.03767189, 0.11014275, 0.03452115, 0.06904229, 0.03452115, 0.03452115, 0.10631513, 0.03452115, 0.03767189, 0.07363141, 0.03439607],  # noqa
         ])
-        actual = cube.proportions()[0]
+        actual = cube.proportions(axis=None)[0]
         np.testing.assert_almost_equal(actual, expected)
 
     def test_cat_x_mr_x_cat_missing_proportions_by_row(self):
@@ -767,5 +777,5 @@ class TestMultipleResponse(TestCase):
             [0.64413423, 1.        , 1.        , 0.61554653, 0.47817837, 1. , 1., 0.5       , 1.        , 0.47552448, 0.52272727, 1., 0.49909256],  # noqa
         ])
         # 3D cube - hence col == 1
-        actual = cube.proportions(axis=0)[0]
+        actual = cube.proportions(axis=1)[0]
         np.testing.assert_almost_equal(actual, expected)
