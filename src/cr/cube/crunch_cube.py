@@ -714,7 +714,9 @@ class CrunchCube(object):
                 if axis == 1 else
                 self.margin(axis=0)
             )
-            return self.as_array() / margin
+            return self.as_array(
+                include_transforms_for_dims=include_transforms_for_dims
+            ) / margin
 
         return self._transform(res, include_transforms_for_dims, valid_indices)
 
