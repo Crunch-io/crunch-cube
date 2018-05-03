@@ -157,7 +157,7 @@ class Dimension(object):
         } for subtotal in self.subtotals]
 
         # filter where indices aren't available to sum
-        indices = filter(lambda x: len(x['inds']) > 0, indices)
+        indices = [ind for ind in indices if len(ind['inds']) > 0]
 
         return indices
 
