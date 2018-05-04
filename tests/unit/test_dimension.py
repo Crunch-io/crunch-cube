@@ -296,6 +296,43 @@ class TestDimension(TestCase):
         self.assertEqual(actual[1]._data, self.insertions_with_bad_data[2])
 
     @patch('cr.cube.dimension.Dimension._elements', [
+        {'id': 111}, {'id': 222}, {'id': 333}, {'id': 444}, {'id': 555}
+    ])
+    @patch('cr.cube.dimension.Dimension._get_type')
+    def test_inserted_hs_indices(self, mock_type):
+        mock_type.return_value = None
+        dim_data = {
+            'references': {
+                'view': {
+                    'transform': {
+                        'insertions': [
+                            {
+                                u'anchor': u'bottom',
+                                u'args': [],
+                                u'function': u'subtotal',
+                                u'name': u'bottoms up',
+                            },
+                            {
+                                u'anchor': u'top',
+                                u'args': [],
+                                u'function': u'subtotal',
+                                u'name': u'on top',
+                            },
+                            {
+                                u'anchor': 333,
+                                u'args': [],
+                                u'function': u'subtotal',
+                                u'name': u'in the middle',
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+        dim = Dimension(dim_data)
+        self.assertEqual(dim.inserted_hs_indices, [0, 4, 7])
+
+    @patch('cr.cube.dimension.Dimension._elements', [
         {'numeric_value': 1},
         {'numeric_value': 2, 'missing': False},
         {'numeric_value': 3, 'missing': True},
