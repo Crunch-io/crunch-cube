@@ -137,8 +137,11 @@ class CrunchCube(object):
             result = np.insert(
                 result, ind_insertion + j + 1, value, axis=dimension_index
             )
-            valid_indices = self._fix_valid_indices(
-                valid_indices, ind_insertion + j, dimension_index
+            valid_indices = (
+                valid_indices and
+                self._fix_valid_indices(
+                    valid_indices, ind_insertion + j, dimension_index
+                )
             )
         return result, valid_indices
 
@@ -146,7 +149,7 @@ class CrunchCube(object):
                    inflate=False):
         '''Transform the shape of the resulting ndarray.'''
         if not include_transforms_for_dims:
-            return res[np.ix_(*valid_indices)]
+            return res[np.ix_(*valid_indices)] if valid_indices else res
 
         dim_offset = 0
         dims = self.table.all_dimensions if self.has_mr else self.dimensions
@@ -164,7 +167,7 @@ class CrunchCube(object):
             res, valid_indices = self._update_result(
                 res, insertions, ind, valid_indices
             )
-        return res[np.ix_(*valid_indices)]
+        return res[np.ix_(*valid_indices)] if valid_indices else res
 
     def _as_array(self, include_missing=False, get_non_selected=False,
                   weighted=True, adjusted=False,
@@ -699,7 +702,8 @@ class CrunchCube(object):
                 den = np.sum(num + non_selected, axis)
             res = num / den
             res = self._transform(
-                res, include_transforms_for_dims, self.valid_indices
+                # res, include_transforms_for_dims, self.valid_indices
+                res, include_transforms_for_dims, None
             )
             if prune:
                 res = np.ma.masked_array(
