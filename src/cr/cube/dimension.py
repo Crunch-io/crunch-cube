@@ -113,18 +113,27 @@ class Dimension(object):
     @property
     def inserted_hs_indices(self):
         if self.type == 'categorical_array':
-            # For CA subvariables, we don't do H&S insertions.
-            return []
+            return []  # For CA subvariables, we don't do H&S insertions
+
+        element_ids = [element['id'] for element in self.elements()]
 
         tops = [st for st in self.subtotals if st.anchor == 'top']
         bottoms = [st for st in self.subtotals if st.anchor == 'bottom']
         middles = [st for st in self.subtotals if st.anchor not in ['top', 'bottom']]
 
-        top_inds = [i for i, _ in enumerate(tops)]
-        middle_inds = [i + m.anchor + len(tops) for i, m in enumerate(middles)]
-        bottom_inds = [i + len(tops) + len(middles) + len(self.elements())
-                       for i, _ in enumerate(bottoms)]
-        return top_inds + middle_inds + bottom_inds
+        top_indexes = [
+            index for index, insertion in enumerate(tops)
+        ]
+        middle_indexes = [
+            index + element_ids.index(insertion.anchor) + len(tops) + 1
+            for index, insertion in enumerate(middles)
+        ]
+        bottom_indexes = [
+            index + len(tops) + len(middles) + len(self.elements())
+            for index, insertion in enumerate(bottoms)
+        ]
+
+        return top_indexes + middle_indexes + bottom_indexes
 
     def _transform_anchor(self, subtotal):
 
