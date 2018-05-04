@@ -315,7 +315,7 @@ class CrunchCube(object):
         )
         row_indices = self._margin_pruned_indices(
             row_margin,
-            self.inserted_rows_inds,
+            self.inserted_rows_inds if transforms else None,
         )
         if row_indices.ndim > 1:
             # In case of MR, we'd have 2D prune indices
@@ -330,7 +330,7 @@ class CrunchCube(object):
         )
         col_indices = self._margin_pruned_indices(
             col_margin,
-            self.inserted_col_inds,
+            self.inserted_col_inds if transforms else None,
         )
         if col_indices.ndim > 1:
             # In case of MR, we'd have 2D prune indices
@@ -390,7 +390,7 @@ class CrunchCube(object):
     @staticmethod
     def _margin_pruned_indices(margin, insertions):
         ind_inserted = np.zeros(margin.shape, dtype=bool)
-        if any(insertions):
+        if insertions is not None and any(insertions):
             ind_inserted[insertions] = True
         pruned_ind = np.logical_or(margin == 0, np.isnan(margin))
         pruned_ind = np.logical_and(pruned_ind, ~ind_inserted)
