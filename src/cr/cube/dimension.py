@@ -121,7 +121,7 @@ class Dimension(object):
         bottoms = [st for st in self.subtotals if st.anchor == 'bottom']
         middles = [st for st in self.subtotals if st.anchor not in ['top', 'bottom']]
 
-        top_indexes = range(len(tops))
+        top_indexes = list(range(len(tops)))
         middle_indexes = [
             index + element_ids.index(insertion.anchor) + len(tops) + 1
             for index, insertion in enumerate(middles)
