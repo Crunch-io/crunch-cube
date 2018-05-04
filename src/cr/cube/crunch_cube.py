@@ -522,7 +522,7 @@ class CrunchCube(object):
         return table
 
     def _mr_margin(self, axis, weighted, adjusted,
-                   include_transforms_for_dims=None):
+                   include_transforms_for_dims=None, prune=False):
         '''Margin for cube that contains MR.'''
         if self.is_double_mr:
             return self._double_mr_margin(axis, weighted)
@@ -532,7 +532,7 @@ class CrunchCube(object):
             return self._mr_margin_along_non_mr_dim(axis, weighted,
                                                     include_transforms_for_dims)
 
-        table = self.table.data(weighted)
+        table = self.table.data(weighted, margin=True)
         if include_transforms_for_dims:
             # In case of H&S the entire table needs to be
             # transformed (with selections).
@@ -552,6 +552,10 @@ class CrunchCube(object):
                 i for i, _ in enumerate(self.dimensions) if i != self.mr_dim_ind
             ])
             return np.sum(margin, axis)
+
+        if prune:
+            mask = self.as_array(prune=True).mask
+            margin = np.ma.masked_array(margin, mask=mask)
 
         return margin
 
@@ -592,8 +596,10 @@ class CrunchCube(object):
         # MR margins are calculated differently, so they need a separate method
         # for them. A good example of this is the rcrunch functionality.
         if self.has_mr:
-            return self._mr_margin(axis, weighted, adjusted,
-                                   include_transforms_for_dims)
+            return self._mr_margin(
+                axis, weighted, adjusted, include_transforms_for_dims,
+                prune=prune,
+            )
         # If there are no MR variables, the margins are mostly sums across
         # appropriate dimensions.
         transform_dims = self._margin_transform_dims(
@@ -934,8 +940,13 @@ class CrunchCube(object):
                 [ind_subtotal_elements]
             )
             axis = dimension_index
-            value = np.sum(result[ind], axis=axis)
-            insertions.append((ind_insertion, value))
+
+            # no indices are provided (should never get here)
+            if len(indices['inds']) == 0:
+                value = 0
+            else:
+                value = np.sum(result[ind], axis=axis)
+                insertions.append((ind_insertion, value))
 
         return insertions
 
@@ -1019,6 +1030,7 @@ class CrunchCube(object):
             adjusted=adjusted,
             include_transforms_for_dims=hs_dims,
             prune=prune,
+            margin=margin,
         )
         return self._fix_shape(array)
 
@@ -1199,6 +1211,41 @@ class CrunchCube(object):
             ])
         '''
         return self.proportions(axis) * 100
+
+    def population_counts(self, population_size, weighted=True,
+                          include_missing=False,
+                          include_transforms_for_dims=None, prune=False):
+        '''Get population counts relative to the total population size estimate.
+        This function calculates the population counts for crunch cube values.
+        The population counts are based on the values of the 'proportions'.
+        Args
+            population_size (int): Estimated total population size
+            weighted (bool): see proportions method
+            include_missing (bool): see proportions  method
+            include_transforms_for_dims (list): see proportions method
+            prune (bool): see proportions method
+        Returns
+            (nparray): Calculated array of crunch cube population counts.
+        Example:
+            >>> cube = CrunchCube(fixt_cat_x_cat)
+            >>> cube.as_array()
+            np.array([
+               [5, 2],
+               [5, 3],
+            ])
+            >>> cube.population_counts(9000)
+            np.array([
+                [3000, 1200],
+                [3000, 1800],
+            ])
+        '''
+        return self._proportions(
+            adjusted=False,
+            weighted=weighted,
+            include_missing=include_missing,
+            include_transforms_for_dims=include_transforms_for_dims,
+            prune=prune
+        ) * population_size
 
     @property
     def pvals(self):

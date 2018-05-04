@@ -22,6 +22,7 @@ from .fixtures import SELECTED_3_WAY
 from .fixtures import PROMPTED_AWARENESS
 from .fixtures import MR_X_MR_X_CAT
 from .fixtures import MR_X_CAT_X_MR
+from .fixtures import BBC_NEWS
 
 
 # pylint: disable=invalid-name,missing-docstring,too-many-public-methods,no-self-use
@@ -607,3 +608,59 @@ class TestMultipleResponse(TestCase):
         ])
         actual = np.ma.compress_rows(cube.as_array(prune=True)[3])
         np.testing.assert_almost_equal(actual, expected)
+
+    def test_mr_x_num_with_means_pruned(self):
+        cube = CrunchCube(BBC_NEWS)
+        expected = np.array([
+            [ 38.79868092,  37.91146097,  21.56682623,  28.90316683],  # noqa
+            [ 12.36141735,  10.91788449,   8.55836344,  -9.23336151],  # noqa
+            [ 25.35566536,  -1.87323918, -10.45832265, -19.00932593],  # noqa
+            [ -1.22773321,  -7.99671664, -30.95431483, -18.03417097],  # noqa
+            [-23.80382413, -26.69728288, -61.23218388, -48.49820981],  # noqa
+            [ 19.6045351 , -24.87663078, -52.08108014,   7.63833075],  # noqa
+            [-26.98268155,  -9.66231773, -90.91475189, -46.92610738],  # noqa
+            [ 19.45552783, -27.48308453, -62.33543385, -39.83388919],  # noqa
+            [ 20.59956268,  17.49911157,   6.29951372,   2.28572239],  # noqa
+        ])
+        actual = np.ma.compress_cols(cube.as_array(prune=True))
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_mr_x_num_with_means_not_pruned(self):
+        cube = CrunchCube(BBC_NEWS)
+        expected = np.array([
+            [ 38.79868092, 37.91146097,  21.56682623,  28.90316683, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],  # noqa
+            [ 12.36141735, 10.91788449,   8.55836344,  -9.23336151, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],  # noqa
+            [ 25.35566536, -1.87323918, -10.45832265, -19.00932593, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],  # noqa
+            [ -1.22773321, -7.99671664, -30.95431483, -18.03417097, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],  # noqa
+            [-23.80382413,-26.69728288, -61.23218388, -48.49820981, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],  # noqa
+            [ 19.6045351 ,-24.87663078, -52.08108014,   7.63833075, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],  # noqa
+            [-26.98268155, -9.66231773, -90.91475189, -46.92610738, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],  # noqa
+            [ 19.45552783,-27.48308453, -62.33543385, -39.83388919, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],  # noqa
+            [ 20.59956268, 17.49911157,   6.29951372,   2.28572239, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],  # noqa
+        ])
+        actual = cube.as_array()
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_mr_x_num_rows_margin(self):
+        cube = CrunchCube(BBC_NEWS)
+        expected = np.array([4805, 3614, 1156, 1200, 644, 258, 167, 170, 11419])  # noqa
+        actual = cube.margin(axis=1, weighted=False)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_mr_x_num_cols_margin_not_pruned(self):
+        cube = CrunchCube(BBC_NEWS)
+        expected = np.array(
+            [1728, 1523, 1570, 1434, 1459, 1429, 1461, 1432, 0, 0, 0, 0]
+        )
+        margin = cube.margin(axis=0, weighted=False)
+        for actual in margin:
+            np.testing.assert_array_equal(actual, expected)
+
+    def test_mr_x_num_cols_margin_pruned(self):
+        cube = CrunchCube(BBC_NEWS)
+        expected = np.array([1728, 1523, 1570, 1434])
+        margin = np.ma.compress_cols(
+            cube.margin(axis=0, weighted=False, prune=True)
+        )
+        for actual in margin:
+            np.testing.assert_array_equal(actual, expected)

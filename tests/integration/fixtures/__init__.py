@@ -100,6 +100,7 @@ CAT_X_NUM_HS_PRUNE = _load('cat-x-num-hs-prune.json')
 CA_SUBVAR_X_CAT_HS = _load('ca-subvar-x-cat-hs.json')
 CAT_X_MR_X_MR = _load('cat-x-mr-x-mr.json')
 CAT_X_MR_X_MR_PRUNED_ROWS = _load('cat-x-mr-x-mr-pruned-rows.json')
+CAT_X_MR_WEIGHTED_HS = _load('cat-x-mr-weighted-hs.json')
 FRUIT_X_PETS_ARRAY_SUBVARS_FIRST = _load(
     'fruit-x-pets-array-subvars-first.json'
 )
@@ -116,3 +117,4 @@ XYZ_SIMPLE_ALLTYPES = _load('xyz-simple-alltypes.json')
 MR_X_MR_X_CAT = _load('mr-mr-cat.json')
 MR_X_CAT_X_MR = _load('mr-cat-mr.json')
 CA_X_CAT_HS = _load('ca-x-cat-hs.json')
+BBC_NEWS = _load('bbc-news.json')

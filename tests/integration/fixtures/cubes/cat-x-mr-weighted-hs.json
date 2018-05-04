@@ -1,0 +1,1673 @@
+{
+  "query": {
+    "measures": {
+      "count": {
+        "function": "cube_count",
+        "args": []
+      }
+    },
+    "dimensions": [
+      {
+        "each": "1"
+      },
+      {
+        "variable": "000195"
+      },
+      {
+        "each": "3"
+      },
+      {
+        "function": "as_selected",
+        "args": [
+          {
+            "variable": "00004e"
+          }
+        ]
+      }
+    ],
+    "weight": "/datasets/bbc5f535373843a982f9ed5b82940975/variables/000049X/"
+  },
+  "query_environment": {
+    "filter": []
+  },
+  "result": {
+    "dimensions": [
+      {
+        "derived": true,
+        "references": {
+          "alias": "q1",
+          "subreferences": [
+            {
+              "alias": "q1_1",
+              "name": "K\u00f8d (svin/lam/okse)"
+            },
+            {
+              "alias": "q1_2",
+              "name": "Fjerkr\u00e6 (kylling/and/kalkun/g\u00e5s)"
+            },
+            {
+              "alias": "q1_3",
+              "name": "Fisk/skaldyr"
+            }
+          ],
+          "description": "Hvor ofte spiser du normalt f\u00f8lgende til aftensmad?",
+          "name": "q1. Aftensmad",
+          "view": {
+            "show_counts": false,
+            "transform": {
+              "insertions": [
+                {
+                  "function": "subtotal",
+                  "args": [
+                    1,
+                    2
+                  ],
+                  "anchor": 977,
+                  "name": "Net: 4-7 gange om ugen"
+                },
+                {
+                  "function": "subtotal",
+                  "args": [
+                    1,
+                    2,
+                    3
+                  ],
+                  "anchor": 977,
+                  "name": "Net: Ugentligt"
+                }
+              ]
+            },
+            "include_missing": false,
+            "column_width": null
+          }
+        },
+        "type": {
+          "subtype": {
+            "class": "variable"
+          },
+          "elements": [
+            {
+              "id": 1,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "q1_1",
+                  "name": "K\u00f8d (svin/lam/okse)"
+                },
+                "id": "0001",
+                "type": {
+                  "ordinal": false,
+                  "class": "categorical",
+                  "categories": [
+                    {
+                      "numeric_value": 6.5,
+                      "selected": false,
+                      "id": 1,
+                      "missing": false,
+                      "name": "6-7 gange om ugen"
+                    },
+                    {
+                      "numeric_value": 4.5,
+                      "selected": false,
+                      "id": 2,
+                      "missing": false,
+                      "name": "4-5 gange om ugen"
+                    },
+                    {
+                      "numeric_value": 2,
+                      "selected": false,
+                      "id": 3,
+                      "missing": false,
+                      "name": "1-3 gange om ugen"
+                    },
+                    {
+                      "numeric_value": 0.5,
+                      "selected": false,
+                      "id": 4,
+                      "missing": false,
+                      "name": "Sj\u00e6ldnere"
+                    },
+                    {
+                      "numeric_value": 0,
+                      "selected": false,
+                      "id": 5,
+                      "missing": false,
+                      "name": "Aldrig"
+                    },
+                    {
+                      "numeric_value": null,
+                      "selected": false,
+                      "id": 977,
+                      "missing": false,
+                      "name": "Ved ikke"
+                    },
+                    {
+                      "numeric_value": null,
+                      "selected": false,
+                      "id": 998,
+                      "missing": true,
+                      "name": "skipped"
+                    },
+                    {
+                      "numeric_value": null,
+                      "selected": false,
+                      "id": 999,
+                      "missing": true,
+                      "name": "not asked"
+                    }
+                  ]
+                }
+              },
+              "missing": false
+            },
+            {
+              "id": 2,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "q1_2",
+                  "name": "Fjerkr\u00e6 (kylling/and/kalkun/g\u00e5s)"
+                },
+                "id": "0002",
+                "type": {
+                  "ordinal": false,
+                  "class": "categorical",
+                  "categories": [
+                    {
+                      "numeric_value": 6.5,
+                      "selected": false,
+                      "id": 1,
+                      "missing": false,
+                      "name": "6-7 gange om ugen"
+                    },
+                    {
+                      "numeric_value": 4.5,
+                      "selected": false,
+                      "id": 2,
+                      "missing": false,
+                      "name": "4-5 gange om ugen"
+                    },
+                    {
+                      "numeric_value": 2,
+                      "selected": false,
+                      "id": 3,
+                      "missing": false,
+                      "name": "1-3 gange om ugen"
+                    },
+                    {
+                      "numeric_value": 0.5,
+                      "selected": false,
+                      "id": 4,
+                      "missing": false,
+                      "name": "Sj\u00e6ldnere"
+                    },
+                    {
+                      "numeric_value": 0,
+                      "selected": false,
+                      "id": 5,
+                      "missing": false,
+                      "name": "Aldrig"
+                    },
+                    {
+                      "numeric_value": null,
+                      "selected": false,
+                      "id": 977,
+                      "missing": false,
+                      "name": "Ved ikke"
+                    },
+                    {
+                      "numeric_value": null,
+                      "selected": false,
+                      "id": 998,
+                      "missing": true,
+                      "name": "skipped"
+                    },
+                    {
+                      "numeric_value": null,
+                      "selected": false,
+                      "id": 999,
+                      "missing": true,
+                      "name": "not asked"
+                    }
+                  ]
+                }
+              },
+              "missing": false
+            },
+            {
+              "id": 3,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "q1_3",
+                  "name": "Fisk/skaldyr"
+                },
+                "id": "0003",
+                "type": {
+                  "ordinal": false,
+                  "class": "categorical",
+                  "categories": [
+                    {
+                      "numeric_value": 6.5,
+                      "selected": false,
+                      "id": 1,
+                      "missing": false,
+                      "name": "6-7 gange om ugen"
+                    },
+                    {
+                      "numeric_value": 4.5,
+                      "selected": false,
+                      "id": 2,
+                      "missing": false,
+                      "name": "4-5 gange om ugen"
+                    },
+                    {
+                      "numeric_value": 2,
+                      "selected": false,
+                      "id": 3,
+                      "missing": false,
+                      "name": "1-3 gange om ugen"
+                    },
+                    {
+                      "numeric_value": 0.5,
+                      "selected": false,
+                      "id": 4,
+                      "missing": false,
+                      "name": "Sj\u00e6ldnere"
+                    },
+                    {
+                      "numeric_value": 0,
+                      "selected": false,
+                      "id": 5,
+                      "missing": false,
+                      "name": "Aldrig"
+                    },
+                    {
+                      "numeric_value": null,
+                      "selected": false,
+                      "id": 977,
+                      "missing": false,
+                      "name": "Ved ikke"
+                    },
+                    {
+                      "numeric_value": null,
+                      "selected": false,
+                      "id": 998,
+                      "missing": true,
+                      "name": "skipped"
+                    },
+                    {
+                      "numeric_value": null,
+                      "selected": false,
+                      "id": 999,
+                      "missing": true,
+                      "name": "not asked"
+                    }
+                  ]
+                }
+              },
+              "missing": false
+            }
+          ],
+          "class": "enum"
+        }
+      },
+      {
+        "references": {
+          "alias": "q1",
+          "view": {
+            "show_counts": false,
+            "transform": {
+              "insertions": [
+                {
+                  "function": "subtotal",
+                  "args": [
+                    1,
+                    2
+                  ],
+                  "anchor": 977,
+                  "name": "Net: 4-7 gange om ugen"
+                },
+                {
+                  "function": "subtotal",
+                  "args": [
+                    1,
+                    2,
+                    3
+                  ],
+                  "anchor": 977,
+                  "name": "Net: Ugentligt"
+                }
+              ]
+            },
+            "include_missing": false,
+            "column_width": null
+          },
+          "description": "Hvor ofte spiser du normalt f\u00f8lgende til aftensmad?",
+          "name": "q1. Aftensmad",
+          "subreferences": [
+            {
+              "alias": "q1_1",
+              "name": "K\u00f8d (svin/lam/okse)"
+            },
+            {
+              "alias": "q1_2",
+              "name": "Fjerkr\u00e6 (kylling/and/kalkun/g\u00e5s)"
+            },
+            {
+              "alias": "q1_3",
+              "name": "Fisk/skaldyr"
+            }
+          ]
+        },
+        "derived": false,
+        "type": {
+          "ordinal": false,
+          "subvariables": [
+            "0001",
+            "0002",
+            "0003"
+          ],
+          "class": "categorical",
+          "categories": [
+            {
+              "numeric_value": 6.5,
+              "selected": false,
+              "id": 1,
+              "missing": false,
+              "name": "6-7 gange om ugen"
+            },
+            {
+              "numeric_value": 4.5,
+              "selected": false,
+              "id": 2,
+              "missing": false,
+              "name": "4-5 gange om ugen"
+            },
+            {
+              "numeric_value": 2,
+              "selected": false,
+              "id": 3,
+              "missing": false,
+              "name": "1-3 gange om ugen"
+            },
+            {
+              "numeric_value": 0.5,
+              "selected": false,
+              "id": 4,
+              "missing": false,
+              "name": "Sj\u00e6ldnere"
+            },
+            {
+              "numeric_value": 0,
+              "selected": false,
+              "id": 5,
+              "missing": false,
+              "name": "Aldrig"
+            },
+            {
+              "numeric_value": null,
+              "selected": false,
+              "id": 977,
+              "missing": false,
+              "name": "Ved ikke"
+            },
+            {
+              "numeric_value": null,
+              "selected": false,
+              "id": 998,
+              "missing": true,
+              "name": "skipped"
+            },
+            {
+              "numeric_value": null,
+              "selected": false,
+              "id": 999,
+              "missing": true,
+              "name": "not asked"
+            }
+          ]
+        }
+      },
+      {
+        "derived": true,
+        "references": {
+          "alias": "FamilyLifeCycle",
+          "subreferences": [
+            {
+              "alias": "FamilyLifeCycle_1",
+              "name": "Pre family",
+              "description": "FamilyLifeCycle_1"
+            },
+            {
+              "alias": "FamilyLifeCycle_2",
+              "name": "Young family",
+              "description": "FamilyLifeCycle_2"
+            },
+            {
+              "alias": "FamilyLifeCycle_3",
+              "name": "Adult family",
+              "description": "FamilyLifeCycle_3"
+            },
+            {
+              "alias": "FamilyLifeCycle_4",
+              "name": "Active Empty Nest'ers",
+              "description": "FamilyLifeCycle_4"
+            },
+            {
+              "alias": "FamilyLifeCycle_5",
+              "name": "Senior Citizens/ In-active Empty Nest'ers",
+              "description": "FamilyLifeCycle_5"
+            },
+            {
+              "alias": "FamilyLifeCycle_99",
+              "name": "Har hjemmeboende b\u00f8rn",
+              "description": "FamilyLifeCycle_99"
+            }
+          ],
+          "is_dichotomous": true,
+          "description": "Family Life Cycle",
+          "name": "Family Life Cycle"
+        },
+        "type": {
+          "subtype": {
+            "class": "variable"
+          },
+          "elements": [
+            {
+              "id": 1,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "FamilyLifeCycle_1",
+                  "name": "Pre family",
+                  "description": "FamilyLifeCycle_1"
+                },
+                "id": "0033",
+                "type": {
+                  "ordinal": false,
+                  "class": "categorical",
+                  "categories": [
+                    {
+                      "numeric_value": 1,
+                      "selected": true,
+                      "id": 1,
+                      "missing": false,
+                      "name": "Selected"
+                    },
+                    {
+                      "numeric_value": 0,
+                      "missing": false,
+                      "id": 0,
+                      "name": "Not Selected"
+                    },
+                    {
+                      "numeric_value": null,
+                      "missing": true,
+                      "id": -1,
+                      "name": "No Data"
+                    }
+                  ]
+                }
+              },
+              "missing": false
+            },
+            {
+              "id": 2,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "FamilyLifeCycle_2",
+                  "name": "Young family",
+                  "description": "FamilyLifeCycle_2"
+                },
+                "id": "0034",
+                "type": {
+                  "ordinal": false,
+                  "class": "categorical",
+                  "categories": [
+                    {
+                      "numeric_value": 1,
+                      "selected": true,
+                      "id": 1,
+                      "missing": false,
+                      "name": "Selected"
+                    },
+                    {
+                      "numeric_value": 0,
+                      "missing": false,
+                      "id": 0,
+                      "name": "Not Selected"
+                    },
+                    {
+                      "numeric_value": null,
+                      "missing": true,
+                      "id": -1,
+                      "name": "No Data"
+                    }
+                  ]
+                }
+              },
+              "missing": false
+            },
+            {
+              "id": 3,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "FamilyLifeCycle_3",
+                  "name": "Adult family",
+                  "description": "FamilyLifeCycle_3"
+                },
+                "id": "0035",
+                "type": {
+                  "ordinal": false,
+                  "class": "categorical",
+                  "categories": [
+                    {
+                      "numeric_value": 1,
+                      "selected": true,
+                      "id": 1,
+                      "missing": false,
+                      "name": "Selected"
+                    },
+                    {
+                      "numeric_value": 0,
+                      "missing": false,
+                      "id": 0,
+                      "name": "Not Selected"
+                    },
+                    {
+                      "numeric_value": null,
+                      "missing": true,
+                      "id": -1,
+                      "name": "No Data"
+                    }
+                  ]
+                }
+              },
+              "missing": false
+            },
+            {
+              "id": 4,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "FamilyLifeCycle_4",
+                  "name": "Active Empty Nest'ers",
+                  "description": "FamilyLifeCycle_4"
+                },
+                "id": "0036",
+                "type": {
+                  "ordinal": false,
+                  "class": "categorical",
+                  "categories": [
+                    {
+                      "numeric_value": 1,
+                      "selected": true,
+                      "id": 1,
+                      "missing": false,
+                      "name": "Selected"
+                    },
+                    {
+                      "numeric_value": 0,
+                      "missing": false,
+                      "id": 0,
+                      "name": "Not Selected"
+                    },
+                    {
+                      "numeric_value": null,
+                      "missing": true,
+                      "id": -1,
+                      "name": "No Data"
+                    }
+                  ]
+                }
+              },
+              "missing": false
+            },
+            {
+              "id": 5,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "FamilyLifeCycle_5",
+                  "name": "Senior Citizens/ In-active Empty Nest'ers",
+                  "description": "FamilyLifeCycle_5"
+                },
+                "id": "0037",
+                "type": {
+                  "ordinal": false,
+                  "class": "categorical",
+                  "categories": [
+                    {
+                      "numeric_value": 1,
+                      "selected": true,
+                      "id": 1,
+                      "missing": false,
+                      "name": "Selected"
+                    },
+                    {
+                      "numeric_value": 0,
+                      "missing": false,
+                      "id": 0,
+                      "name": "Not Selected"
+                    },
+                    {
+                      "numeric_value": null,
+                      "missing": true,
+                      "id": -1,
+                      "name": "No Data"
+                    }
+                  ]
+                }
+              },
+              "missing": false
+            },
+            {
+              "id": 6,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "FamilyLifeCycle_99",
+                  "name": "Har hjemmeboende b\u00f8rn",
+                  "description": "FamilyLifeCycle_99"
+                },
+                "id": "0038",
+                "type": {
+                  "ordinal": false,
+                  "class": "categorical",
+                  "categories": [
+                    {
+                      "numeric_value": 1,
+                      "selected": true,
+                      "id": 1,
+                      "missing": false,
+                      "name": "Selected"
+                    },
+                    {
+                      "numeric_value": 0,
+                      "missing": false,
+                      "id": 0,
+                      "name": "Not Selected"
+                    },
+                    {
+                      "numeric_value": null,
+                      "missing": true,
+                      "id": -1,
+                      "name": "No Data"
+                    }
+                  ]
+                }
+              },
+              "missing": false
+            }
+          ],
+          "class": "enum"
+        }
+      },
+      {
+        "references": {
+          "alias": "FamilyLifeCycle",
+          "is_dichotomous": true,
+          "description": "Family Life Cycle",
+          "name": "Family Life Cycle",
+          "subreferences": [
+            {
+              "alias": "FamilyLifeCycle_1",
+              "name": "Pre family",
+              "description": "FamilyLifeCycle_1"
+            },
+            {
+              "alias": "FamilyLifeCycle_2",
+              "name": "Young family",
+              "description": "FamilyLifeCycle_2"
+            },
+            {
+              "alias": "FamilyLifeCycle_3",
+              "name": "Adult family",
+              "description": "FamilyLifeCycle_3"
+            },
+            {
+              "alias": "FamilyLifeCycle_4",
+              "name": "Active Empty Nest'ers",
+              "description": "FamilyLifeCycle_4"
+            },
+            {
+              "alias": "FamilyLifeCycle_5",
+              "name": "Senior Citizens/ In-active Empty Nest'ers",
+              "description": "FamilyLifeCycle_5"
+            },
+            {
+              "alias": "FamilyLifeCycle_99",
+              "name": "Har hjemmeboende b\u00f8rn",
+              "description": "FamilyLifeCycle_99"
+            }
+          ]
+        },
+        "derived": true,
+        "type": {
+          "ordinal": false,
+          "subvariables": [
+            "0033",
+            "0034",
+            "0035",
+            "0036",
+            "0037",
+            "0038"
+          ],
+          "class": "categorical",
+          "categories": [
+            {
+              "numeric_value": 1,
+              "selected": true,
+              "id": 1,
+              "missing": false,
+              "name": "Selected"
+            },
+            {
+              "numeric_value": 0,
+              "missing": false,
+              "id": 0,
+              "name": "Not Selected"
+            },
+            {
+              "numeric_value": null,
+              "missing": true,
+              "id": -1,
+              "name": "No Data"
+            }
+          ]
+        }
+      }
+    ],
+    "missing": 0,
+    "measures": {
+      "count": {
+        "data": [
+          30.573254176107557,
+          40.06963120435376,
+          0.0,
+          19.271005311018854,
+          51.37188006944246,
+          0.0,
+          15.74842605853463,
+          54.894459321926696,
+          0.0,
+          5.050199834800287,
+          65.59268554566103,
+          0.0,
+          0.0,
+          70.64288538046131,
+          0.0,
+          35.01943136955348,
+          35.62345401090784,
+          0.0,
+          105.53898910350073,
+          165.08208116664272,
+          0.0,
+          73.50990523859025,
+          197.11116503155318,
+          0.0,
+          69.78653702583696,
+          200.8345332443064,
+          0.0,
+          19.132424050133544,
+          251.4886462200098,
+          0.0,
+          2.653214852081793,
+          267.96785541806156,
+          0.0,
+          143.2964422644273,
+          127.32462800571608,
+          0.0,
+          284.57103419562196,
+          242.46059893577316,
+          0.0,
+          100.91265026874618,
+          426.11898286264915,
+          0.0,
+          104.75817923680638,
+          422.2734538945887,
+          0.0,
+          33.04480251910953,
+          493.98683061228576,
+          0.0,
+          3.7449669111111112,
+          523.2866662202842,
+          0.0,
+          205.67082950555252,
+          321.36080362584266,
+          0.0,
+          54.788148549157576,
+          39.60208615557106,
+          0.0,
+          14.762980447497434,
+          79.62725425723123,
+          0.0,
+          15.42296237478852,
+          78.96727232994014,
+          0.0,
+          8.507077166618462,
+          85.8831575381102,
+          0.0,
+          0.9090661666666671,
+          93.48116853806201,
+          0.0,
+          30.185942822285945,
+          64.2042918824427,
+          0.0,
+          28.712762182589085,
+          14.794901027713797,
+          0.0,
+          10.019265296855394,
+          33.48839791344748,
+          0.0,
+          2.902022665509258,
+          40.60564054479363,
+          0.0,
+          1.8736130653491432,
+          41.63405014495375,
+          0.0,
+          0.0,
+          43.50766321030289,
+          0.0,
+          12.921287962364653,
+          30.586375247938225,
+          0.0,
+          17.08447300523341,
+          3.7220402977355076,
+          0.0,
+          0.9542434687499993,
+          19.852269834218912,
+          0.0,
+          1.7294998289855086,
+          19.077013473983406,
+          0.0,
+          1.0382969999999998,
+          19.768216302968913,
+          0.0,
+          0.0,
+          20.806513302968913,
+          0.0,
+          2.683743297735508,
+          18.122770005233406,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.2295830857142864,
+          6.613711183615141,
+          0.0,
+          2.987706559259259,
+          4.855587710070167,
+          0.0,
+          2.7938815953703724,
+          5.049412673959054,
+          0.0,
+          0.832123028985508,
+          7.011171240343918,
+          0.0,
+          0.0,
+          7.8432942693294265,
+          0.0,
+          5.781588154629633,
+          2.0617061146997946,
+          0.0,
+          67.77702347587466,
+          37.18655519602563,
+          0.0,
+          12.981218317481396,
+          91.98236035441889,
+          0.0,
+          20.73433156131396,
+          84.22924711058633,
+          0.0,
+          3.4710053172302757,
+          101.49257335467001,
+          0.0,
+          0.0,
+          104.9635786719003,
+          0.0,
+          33.71554987879535,
+          71.24802879310494,
+          0.0,
+          341.0658293102905,
+          377.0968083091426,
+          0.0,
+          170.9693482091858,
+          547.1932894102475,
+          0.0,
+          156.57696548747106,
+          561.5856721319612,
+          0.0,
+          42.24324668262628,
+          675.9193909368059,
+          0.0,
+          7.307247929859572,
+          710.8553896895725,
+          0.0,
+          327.5463136966567,
+          390.61632392277636,
+          0.0,
+          71.5721574620849,
+          68.02985295685063,
+          0.0,
+          24.513471594650802,
+          115.08853882428478,
+          0.0,
+          25.160375849365604,
+          114.44163456956997,
+          0.0,
+          18.356005512834248,
+          121.24600490610135,
+          0.0,
+          0.0,
+          139.60201041893566,
+          0.0,
+          49.6738474440164,
+          89.92816297491915,
+          0.0,
+          22.539594873012636,
+          10.934969127042066,
+          0.0,
+          5.708783193738012,
+          27.765780806316684,
+          0.0,
+          3.352572867954909,
+          30.121991132099787,
+          0.0,
+          1.8736130653491432,
+          31.600950934705548,
+          0.0,
+          0.0,
+          33.47456400005469,
+          0.0,
+          9.061356061692921,
+          24.413207938361776,
+          0.0,
+          17.08447300523341,
+          5.869442015113875,
+          0.0,
+          2.2695221571428577,
+          20.68439286320442,
+          0.0,
+          1.7294998289855086,
+          21.224415191361768,
+          0.0,
+          1.870420028985508,
+          21.083494991361768,
+          0.0,
+          0.0,
+          22.953915020347274,
+          0.0,
+          3.999021986128366,
+          18.954893034218912,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.9161820793078574,
+          3.6297979505636073,
+          0.0,
+          1.068175092592591,
+          4.477804937278874,
+          0.0,
+          1.7294998289855086,
+          3.8164802008859566,
+          0.0,
+          0.832123028985508,
+          4.713857000885957,
+          0.0,
+          0.0,
+          5.545980029871465,
+          0.0,
+          2.7976749215780994,
+          2.7483051082933656,
+          0.0,
+          20.24703815540594,
+          10.31583051409632,
+          0.0,
+          1.3721453571428572,
+          29.190723312359395,
+          0.0,
+          6.161005924937652,
+          24.401862744564596,
+          0.0,
+          1.8736130653491432,
+          28.689255604153107,
+          0.0,
+          0.9090661666666671,
+          29.653802502835582,
+          0.0,
+          7.533151282080509,
+          23.029717387421748,
+          0.0,
+          206.5544558615485,
+          232.63616660848558,
+          0.0,
+          103.52545189457872,
+          335.66517057545565,
+          0.0,
+          94.48552048056868,
+          344.70510198946585,
+          0.0,
+          31.662575174752295,
+          407.52804729528253,
+          0.0,
+          2.962619058585858,
+          436.2280034114491,
+          0.0,
+          198.01097237514753,
+          241.17965009488668,
+          0.0,
+          221.81363151990183,
+          219.03808655873925,
+          0.0,
+          97.15169957542106,
+          343.70001850322006,
+          0.0,
+          88.748843736143,
+          352.102874342498,
+          0.0,
+          29.701980542568133,
+          411.1497375360727,
+          0.0,
+          3.4355627046070465,
+          437.4161553740338,
+          0.0,
+          185.90054331156406,
+          254.95117476707702,
+          0.0,
+          54.9607966761665,
+          37.343660326919675,
+          0.0,
+          16.31257811172289,
+          75.99187889136329,
+          0.0,
+          17.493257390840913,
+          74.81119961224525,
+          0.0,
+          3.5378248243558796,
+          88.76663217873029,
+          0.0,
+          0.0,
+          92.30445700308617,
+          0.0,
+          33.8058355025638,
+          58.49862150052238,
+          0.0,
+          15.77655691987961,
+          2.7677968289855084,
+          0.0,
+          0.0,
+          18.544353748865113,
+          0.0,
+          1.7294998289855086,
+          16.81485391987961,
+          0.0,
+          1.0382969999999998,
+          17.506056748865117,
+          0.0,
+          0.0,
+          18.544353748865113,
+          0.0,
+          1.7294998289855086,
+          16.81485391987961,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "n_missing": 0,
+        "metadata": {
+          "references": {},
+          "derived": true,
+          "type": {
+            "integer": false,
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "class": "numeric"
+          }
+        }
+      }
+    },
+    "element": "crunch:cube",
+    "counts": [
+      28,
+      41,
+      0,
+      18,
+      51,
+      0,
+      17,
+      52,
+      0,
+      6,
+      63,
+      0,
+      0,
+      69,
+      0,
+      35,
+      34,
+      0,
+      104,
+      172,
+      0,
+      74,
+      202,
+      0,
+      74,
+      202,
+      0,
+      21,
+      255,
+      0,
+      3,
+      273,
+      0,
+      148,
+      128,
+      0,
+      273,
+      252,
+      0,
+      98,
+      427,
+      0,
+      113,
+      412,
+      0,
+      37,
+      488,
+      0,
+      4,
+      521,
+      0,
+      211,
+      314,
+      0,
+      53,
+      39,
+      0,
+      14,
+      78,
+      0,
+      15,
+      77,
+      0,
+      9,
+      83,
+      0,
+      1,
+      91,
+      0,
+      29,
+      63,
+      0,
+      30,
+      15,
+      0,
+      10,
+      35,
+      0,
+      3,
+      42,
+      0,
+      2,
+      43,
+      0,
+      0,
+      45,
+      0,
+      13,
+      32,
+      0,
+      16,
+      4,
+      0,
+      1,
+      19,
+      0,
+      2,
+      18,
+      0,
+      1,
+      19,
+      0,
+      0,
+      20,
+      0,
+      3,
+      17,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      7,
+      0,
+      3,
+      5,
+      0,
+      3,
+      5,
+      0,
+      1,
+      7,
+      0,
+      0,
+      8,
+      0,
+      6,
+      2,
+      0,
+      63,
+      38,
+      0,
+      12,
+      89,
+      0,
+      22,
+      79,
+      0,
+      4,
+      97,
+      0,
+      0,
+      101,
+      0,
+      34,
+      67,
+      0,
+      333,
+      390,
+      0,
+      167,
+      556,
+      0,
+      168,
+      555,
+      0,
+      47,
+      676,
+      0,
+      8,
+      715,
+      0,
+      335,
+      388,
+      0,
+      68,
+      71,
+      0,
+      25,
+      114,
+      0,
+      26,
+      113,
+      0,
+      20,
+      119,
+      0,
+      0,
+      139,
+      0,
+      51,
+      88,
+      0,
+      23,
+      11,
+      0,
+      6,
+      28,
+      0,
+      3,
+      31,
+      0,
+      2,
+      32,
+      0,
+      0,
+      34,
+      0,
+      9,
+      25,
+      0,
+      16,
+      6,
+      0,
+      2,
+      20,
+      0,
+      2,
+      20,
+      0,
+      2,
+      20,
+      0,
+      0,
+      22,
+      0,
+      4,
+      18,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      2,
+      4,
+      0,
+      1,
+      5,
+      0,
+      2,
+      4,
+      0,
+      1,
+      5,
+      0,
+      0,
+      6,
+      0,
+      3,
+      3,
+      0,
+      19,
+      10,
+      0,
+      1,
+      28,
+      0,
+      6,
+      23,
+      0,
+      2,
+      27,
+      0,
+      1,
+      28,
+      0,
+      7,
+      22,
+      0,
+      199,
+      240,
+      0,
+      102,
+      337,
+      0,
+      100,
+      339,
+      0,
+      35,
+      404,
+      0,
+      3,
+      436,
+      0,
+      202,
+      237,
+      0,
+      216,
+      227,
+      0,
+      95,
+      348,
+      0,
+      95,
+      348,
+      0,
+      33,
+      410,
+      0,
+      4,
+      439,
+      0,
+      190,
+      253,
+      0,
+      53,
+      39,
+      0,
+      16,
+      76,
+      0,
+      19,
+      73,
+      0,
+      4,
+      88,
+      0,
+      0,
+      92,
+      0,
+      35,
+      57,
+      0,
+      15,
+      3,
+      0,
+      0,
+      18,
+      0,
+      2,
+      16,
+      0,
+      1,
+      17,
+      0,
+      0,
+      18,
+      0,
+      2,
+      16,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "n": 1027
+  }
+}
