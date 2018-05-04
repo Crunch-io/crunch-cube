@@ -310,19 +310,37 @@ class TestDimension(TestCase):
                                 u'anchor': u'bottom',
                                 u'args': [],
                                 u'function': u'subtotal',
-                                u'name': u'bottoms up',
+                                u'name': u'bottoms up one',
+                            },
+                            {
+                                u'anchor': u'bottom',
+                                u'args': [],
+                                u'function': u'subtotal',
+                                u'name': u'bottoms up two',
                             },
                             {
                                 u'anchor': u'top',
                                 u'args': [],
                                 u'function': u'subtotal',
-                                u'name': u'on top',
+                                u'name': u'on top one',
+                            },
+                            {
+                                u'anchor': u'top',
+                                u'args': [],
+                                u'function': u'subtotal',
+                                u'name': u'on top two',
                             },
                             {
                                 u'anchor': 333,
                                 u'args': [],
                                 u'function': u'subtotal',
-                                u'name': u'in the middle',
+                                u'name': u'in the middle one',
+                            },
+                            {
+                                u'anchor': 333,
+                                u'args': [],
+                                u'function': u'subtotal',
+                                u'name': u'in the middle two',
                             }
                         ]
                     }
@@ -330,7 +348,7 @@ class TestDimension(TestCase):
             }
         }
         dim = Dimension(dim_data)
-        self.assertEqual(dim.inserted_hs_indices, [0, 4, 7])
+        self.assertEqual(dim.inserted_hs_indices, [0, 1, 5, 6, 9, 10])
 
     @patch('cr.cube.dimension.Dimension._elements', [
         {'numeric_value': 1},

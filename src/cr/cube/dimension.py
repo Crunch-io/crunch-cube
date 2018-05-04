@@ -121,9 +121,7 @@ class Dimension(object):
         bottoms = [st for st in self.subtotals if st.anchor == 'bottom']
         middles = [st for st in self.subtotals if st.anchor not in ['top', 'bottom']]
 
-        top_indexes = [
-            index for index, insertion in enumerate(tops)
-        ]
+        top_indexes = range(len(tops))
         middle_indexes = [
             index + element_ids.index(insertion.anchor) + len(tops) + 1
             for index, insertion in enumerate(middles)
@@ -132,7 +130,6 @@ class Dimension(object):
             index + len(tops) + len(middles) + len(self.elements())
             for index, insertion in enumerate(bottoms)
         ]
-
         return top_indexes + middle_indexes + bottom_indexes
 
     def _transform_anchor(self, subtotal):
