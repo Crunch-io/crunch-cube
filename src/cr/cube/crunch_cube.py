@@ -1204,7 +1204,7 @@ class CrunchCube(DataTable):
         '''Get cube index measurement.'''
         return Index(self, weighted, prune).data
 
-    def zscore(self, weighted=True, prune=False):
+    def zscore(self, weighted=True, prune=False, hs_dims=None):
         '''Get cube zscore measurement.'''
         counts = self.as_array(weighted=weighted, prune=prune)
         total = self.margin(weighted=weighted, prune=prune)
@@ -1220,14 +1220,28 @@ class CrunchCube(DataTable):
             variance = (
                 rowsum * colsum * (total - rowsum) * (total - colsum) / total**3
             )
-            return (counts - expected) / np.sqrt(variance)
+            res = (counts - expected) / np.sqrt(variance)
+        else:
+            expected_counts = expected_freq(counts)
+            residuals = counts - expected_counts
+            variance = (
+                np.outer(rowsum, colsum) *
+                np.outer(total - rowsum, total - colsum) / total**3
+            )
+            res = residuals / np.sqrt(variance)
 
-        expected_counts = expected_freq(counts)
-        residuals = counts - expected_counts
-        variance = (
-            np.outer(rowsum, colsum) * np.outer(total - rowsum, total - colsum) / total**3
-        )
-        return residuals / np.sqrt(variance)
+        if hs_dims:
+            res = self._intersperse_hs_in_std_res(hs_dims, res)
+
+        return res
+
+    def _intersperse_hs_in_std_res(self, hs_dims, res):
+        for dim, inds in enumerate(self.inserted_hs_indices()):
+            for i in inds:
+                if dim not in hs_dims:
+                    continue
+                res = np.insert(res, i, 0, axis=(dim - self.ndim))
+        return res
 
     def pvals(self, weighted=True, prune=False):
         '''Calculate p-vals.

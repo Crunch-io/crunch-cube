@@ -615,7 +615,6 @@ class TestCrunchCube(TestCase):
             ]
         ])
         actual = cube.zscore()
-
         np.testing.assert_almost_equal(actual, expected)
 
     def test_pvals(self):
