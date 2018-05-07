@@ -252,7 +252,7 @@ class CrunchCube(object):
             row_margin = np.sum(row_margin, axis=1)
         row_prune_inds = self._margin_pruned_indices(
             row_margin,
-            self.inserted_rows_inds(transforms)
+            self.inserted_dim_inds(transforms, 0)
         )
 
         if self.ndim == 1 or len(res.shape) == 1:
@@ -269,7 +269,7 @@ class CrunchCube(object):
             col_margin = np.sum(col_margin, axis=0)
         col_prune_inds = self._margin_pruned_indices(
             col_margin,
-            self.inserted_col_inds(transforms)
+            self.inserted_dim_inds(transforms, 1)
         )
         mask = self._create_mask(res, row_prune_inds, col_prune_inds)
         res = np.ma.masked_array(res, mask=mask)
@@ -315,7 +315,7 @@ class CrunchCube(object):
         )
         row_indices = self._margin_pruned_indices(
             row_margin,
-            self.inserted_rows_inds(transforms)
+            self.inserted_dim_inds(transforms, 0)
         )
         if row_indices.ndim > 1:
             # In case of MR, we'd have 2D prune indices
@@ -330,7 +330,7 @@ class CrunchCube(object):
         )
         col_indices = self._margin_pruned_indices(
             col_margin,
-            self.inserted_col_inds(transforms)
+            self.inserted_dim_inds(transforms, 1)
         )
         if col_indices.ndim > 1:
             # In case of MR, we'd have 2D prune indices
@@ -359,10 +359,10 @@ class CrunchCube(object):
             column_margin = np.sum(column_margin, axis=0)
 
         row_inserted_indices = (
-            self.inserted_rows_inds(transforms)
+            self.inserted_dim_inds(transforms, 0)
         )
         col_inserted_indices = (
-            self.inserted_col_inds(transforms)
+            self.inserted_dim_inds(transforms, 1)
         )
 
         return (
@@ -379,13 +379,16 @@ class CrunchCube(object):
             return 2
         return 1
 
-    def inserted_rows_inds(self, transforms):
+    def inserted_dim_inds(self, transforms, dim):
         if not transforms:
             return []
         inserted_inds = self.inserted_hs_indices()
-        row_dim_ind = 0 if self.ndim < 3 else 1
+        if dim == 0:  # In case of row
+            dim_ind = 0 if self.ndim < 3 else 1
+        elif dim == 1:
+            dim_ind = 1
         return np.array(
-            inserted_inds[row_dim_ind] if len(inserted_inds) else []
+            inserted_inds[dim_ind] if len(inserted_inds) else []
         )
 
     @staticmethod
@@ -401,12 +404,6 @@ class CrunchCube(object):
     @property
     def col_direction_axis(self):
         return self.ndim - 2
-
-    def inserted_col_inds(self, transforms):
-        if not transforms:
-            return []
-        inserted_inds = self.inserted_hs_indices()
-        return np.array(inserted_inds[1] if len(inserted_inds) > 1 else [])
 
     @classmethod
     def _fix_valid_indices(cls, valid_indices, insertion_index, dim):

@@ -416,35 +416,17 @@ class TestCrunchCube(TestCase):
     @patch('numpy.array')
     @patch('cr.cube.crunch_cube.CrunchCube.inserted_hs_indices')
     @patch('cr.cube.crunch_cube.CrunchCube.ndim', 1)
-    def test_inserted_row_inds(self, mock_inserted_hs_indices,
-                               mock_np_array):
+    def test_inserted_inds(self, mock_inserted_hs_indices,
+                           mock_np_array):
         mock_np_array.return_value = Mock()
 
         cc = CrunchCube({})
         expected = []
 
         # Assert indices are not fetched without trasforms
-        actual = cc.inserted_rows_inds(None)
+        actual = cc.inserted_dim_inds(None, 0)
         assert actual == expected
 
         # Assert indices are fetch with transforms
-        actual = cc.inserted_rows_inds(Mock())
-        mock_inserted_hs_indices.assert_called_once()
-
-    @patch('numpy.array')
-    @patch('cr.cube.crunch_cube.CrunchCube.inserted_hs_indices')
-    @patch('cr.cube.crunch_cube.CrunchCube.ndim', 1)
-    def test_inserted_col_inds(self, mock_inserted_hs_indices,
-                               mock_np_array):
-        mock_np_array.return_value = Mock()
-
-        cc = CrunchCube({})
-        expected = []
-
-        # Assert indices are not fetched without trasforms
-        actual = cc.inserted_col_inds(None)
-        assert actual == expected
-
-        # Assert indices are fetch with transforms
-        actual = cc.inserted_rows_inds(Mock())
+        actual = cc.inserted_dim_inds(Mock(), 0)
         mock_inserted_hs_indices.assert_called_once()
