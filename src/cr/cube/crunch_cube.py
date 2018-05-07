@@ -269,7 +269,7 @@ class CrunchCube(object):
             col_margin = np.sum(col_margin, axis=0)
         col_prune_inds = self._margin_pruned_indices(
             col_margin,
-            self.inserted_col_inds if transforms else [],
+            self.inserted_col_inds(transforms)
         )
         mask = self._create_mask(res, row_prune_inds, col_prune_inds)
         res = np.ma.masked_array(res, mask=mask)
@@ -330,7 +330,7 @@ class CrunchCube(object):
         )
         col_indices = self._margin_pruned_indices(
             col_margin,
-            self.inserted_col_inds if transforms else None,
+            self.inserted_col_inds(transforms)
         )
         if col_indices.ndim > 1:
             # In case of MR, we'd have 2D prune indices
@@ -362,7 +362,7 @@ class CrunchCube(object):
             self.inserted_rows_inds(transforms)
         )
         col_inserted_indices = (
-            self.inserted_col_inds if transforms else []
+            self.inserted_col_inds(transforms)
         )
 
         return (
@@ -402,8 +402,9 @@ class CrunchCube(object):
     def col_direction_axis(self):
         return self.ndim - 2
 
-    @property
-    def inserted_col_inds(self):
+    def inserted_col_inds(self, transforms):
+        if not transforms:
+            return []
         inserted_inds = self.inserted_hs_indices()
         return np.array(inserted_inds[1] if len(inserted_inds) > 1 else [])
 
