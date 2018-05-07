@@ -534,7 +534,7 @@ class TestMultipleResponse(TestCase):
                  False, False, True, True, False, False, False, False, False,
                  False, False, False])
         ]
-        pruned = cube.prune_indices
+        pruned = cube.prune_indices()
         self.assertEqual(len(pruned), len(pruned_expected))
         for i, actual in enumerate(pruned):
             np.testing.assert_array_equal(pruned[i], pruned_expected[i])
