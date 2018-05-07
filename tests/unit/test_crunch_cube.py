@@ -400,8 +400,8 @@ class TestCrunchCube(TestCase):
 
     def test_insertions_with_empty_indices(self):
         cc = CrunchCube({})
-        class DummyDimension:
 
+        class DummyDimension:
             @property
             def hs_indices(self):
                 return [{'anchor_ind': 0, 'inds': []}]
@@ -413,3 +413,20 @@ class TestCrunchCube(TestCase):
         insertions = cc._insertions(result, dimension, dimension_index)
         assert insertions == [], insertions
 
+    @patch('numpy.array')
+    @patch('cr.cube.crunch_cube.CrunchCube.inserted_hs_indices')
+    @patch('cr.cube.crunch_cube.CrunchCube.ndim', 1)
+    def test_inserted_row_inds(self, mock_inserted_hs_indices,
+                               mock_np_array):
+        mock_np_array.return_value = Mock()
+
+        cc = CrunchCube({})
+        expected = []
+
+        # Assert indices are not fetched without trasforms
+        actual = cc.inserted_rows_inds(None)
+        assert actual == expected
+
+        # Assert indices are fetch with transforms
+        actual = cc.inserted_rows_inds(Mock())
+        mock_inserted_hs_indices.assert_called_once()
