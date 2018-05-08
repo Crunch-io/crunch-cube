@@ -1321,11 +1321,16 @@ class CrunchCube(object):
                 [3000, 1800],
             ])
         '''
+        hs_dims = (
+            include_transforms_for_dims
+            if include_transforms_for_dims else
+            self.hs_dims
+        )
         return self._proportions(
             adjusted=False,
             weighted=weighted,
             include_missing=include_missing,
-            include_transforms_for_dims=include_transforms_for_dims,
+            include_transforms_for_dims=hs_dims,
             prune=prune
         ) * population_size
 
