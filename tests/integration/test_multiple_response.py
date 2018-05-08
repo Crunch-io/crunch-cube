@@ -23,6 +23,8 @@ from .fixtures import PROMPTED_AWARENESS
 from .fixtures import MR_X_MR_X_CAT
 from .fixtures import MR_X_CAT_X_MR
 from .fixtures import BBC_NEWS
+from .fixtures import AGE_X_ACCRPIPE
+from .fixtures import CAT_X_MR_X_CAT_MISSING
 
 
 # pylint: disable=invalid-name,missing-docstring,too-many-public-methods,no-self-use
@@ -425,7 +427,8 @@ class TestMultipleResponse(TestCase):
         ])
         np.testing.assert_almost_equal(actual, expected)
 
-    def test_mr_x_cat_x_cat_by_row(self):
+    def test_mr_x_cat_x_cat_by_col(self):
+        # TODO: Check expectations with Mike and Jon
         cube = CrunchCube(SELECTED_3_WAY_2)
         # Only compare 0 slice (parity with whaam tests)
         expected = np.array([
@@ -433,20 +436,12 @@ class TestMultipleResponse(TestCase):
             [0, 0],
             [0.49431928922535223, 0.6091963925363675]
         ])
-        actual = cube.proportions(axis=2)[0]
-        # Since cube is 3D, row dim is 2 (instead of 1)
+        # 3D cube => col == 1
+        actual = cube.proportions(axis=1)[0]
         np.testing.assert_almost_equal(actual, expected)
 
     def test_cat_x_mr_x_cat_by_col(self):
-        cube = CrunchCube(SELECTED_3_WAY)
-        # Only take first slice (parity with whaam tests).
-        expected = np.array([[1, 0], [1, 0], [1, 0]])
-        # Since MR is 2nd dim, the cube is considered 2 dimensional,
-        # and the axis 0 represents column direction.
-        actual = cube.proportions(axis=0)[0]
-        np.testing.assert_almost_equal(actual, expected)
-
-    def test_cat_x_mr_x_cat_by_row(self):
+        # TODO: Check expectations with Mike and Jon
         cube = CrunchCube(SELECTED_3_WAY)
         # Only take first slice (parity with whaam tests).
         expected = np.array([
@@ -454,23 +449,36 @@ class TestMultipleResponse(TestCase):
             [0.20327963774693497, np.nan],
             [0.3113417143573762, np.nan],
         ])
-        # Since MR is 2nd dim, the cube is considered 2 dimensional,
-        # and the axis 1 represents row direction.
+        # 3D cube => col == 1
         actual = cube.proportions(axis=1)[0]
         np.testing.assert_almost_equal(actual, expected)
 
+    def test_cat_x_mr_x_cat_by_row(self):
+        # TODO: Check expectations with Mike and Jon
+        cube = CrunchCube(SELECTED_3_WAY)
+        # Only take first slice (parity with whaam tests).
+        expected = np.array([[1, 0], [1, 0], [1, 0]])
+        # 3D cube => row == 2
+        actual = cube.proportions(axis=2)[0]
+        np.testing.assert_almost_equal(actual, expected)
+
     def test_cat_x_mr_x_cat_by_cell(self):
+        # TODO: Check expectations with Mike and Jon
         cube = CrunchCube(SELECTED_3_WAY)
         # Only take first slice (parity with whaam tests).
         # TODO: Check with @jonkeane, since R results are slightly
         # different. (It's using (0, 2) rather than (1, 2) axis).
         expected = np.array([
-            [0.03326584, 0],
-            [0.06775988, 0],
-            [0.10378057, 0],
+            [0.0997975162008577, 0],
+            [0.20327963774693497, 0],
+            [0.3113417143573762, 0],
         ])
-        # Since MR is 2nd dim, the cube is considered 2 dimensional,
-        # and the axis None represents cell direction.
+        # Old expectation:
+        # expected = np.array([
+        #     [0.03326584, 0],
+        #     [0.06775988, 0],
+        #     [0.10378057, 0],
+        # ])
         actual = cube.proportions(axis=None)[0]
         np.testing.assert_almost_equal(actual, expected)
 
@@ -664,3 +672,110 @@ class TestMultipleResponse(TestCase):
         )
         for actual in margin:
             np.testing.assert_array_equal(actual, expected)
+
+    def test_num_x_mr_props_by_row(self):
+        cube = CrunchCube(AGE_X_ACCRPIPE)
+        expected = np.array([
+            [ 0.33333333,  0.44444444,  0.18518519,  0.03703704],  # noqa
+            [ 0.512     ,  0.24      ,  0.208     ,  0.04      ],  # noqa
+            [ 0.37234043,  0.35106383,  0.21276596,  0.06382979],  # noqa
+            [ 0.36956522,  0.36141304,  0.22826087,  0.04076087],  # noqa
+            [ 0.32666667,  0.40888889,  0.22666667,  0.03777778],  # noqa
+            [ 0.29718004,  0.42516269,  0.23210412,  0.04555315],  # noqa
+            [ 0.2633833 ,  0.41541756,  0.27623126,  0.04496788],  # noqa
+            [ 0.23193916,  0.42205323,  0.26996198,  0.07604563],  # noqa
+            [ 0.25373134,  0.4212272 ,  0.24378109,  0.08126036],  # noqa
+            [ 0.26359833,  0.41004184,  0.28242678,  0.04393305],  # noqa
+            [ 0.27687296,  0.44625407,  0.21824104,  0.05863192],  # noqa
+            [ 0.28571429,  0.4516129 ,  0.21198157,  0.05069124],  # noqa
+            [ 0.29166667,  0.39583333,  0.23958333,  0.07291667],  # noqa
+            [ 0.25925926,  0.40740741,  0.18518519,  0.14814815],  # noqa
+            [ 0.5       ,  0.33333333,  0.16666667,  0.        ],  # noqa
+            [ 0.        ,  1.        ,  0.        ,  0.        ],  # noqa
+        ])
+        actual = np.ma.compress_rows(cube.proportions(axis=1, prune=True))
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_num_x_mr_props_by_col(self):
+        cube = CrunchCube(AGE_X_ACCRPIPE)
+        expected = np.array([
+            [ 0.00707547,  0.00676437,  0.00472144,  0.00413223],  # noqa
+            [ 0.05031447,  0.01691094,  0.02455146,  0.02066116],  # noqa
+            [ 0.05503145,  0.03720406,  0.03777148,  0.04958678],  # noqa
+            [ 0.10691824,  0.07497182,  0.07932011,  0.06198347],  # noqa
+            [ 0.11556604,  0.10372041,  0.09631728,  0.07024793],  # noqa
+            [ 0.1077044 ,  0.11048478,  0.10103872,  0.08677686],  # noqa
+            [ 0.09669811,  0.10935738,  0.12181303,  0.08677686],  # noqa
+            [ 0.09591195,  0.12514092,  0.13408876,  0.16528926],  # noqa
+            [ 0.12028302,  0.14317926,  0.1388102 ,  0.20247934],  # noqa
+            [ 0.0990566 ,  0.11048478,  0.12747875,  0.08677686],  # noqa
+            [ 0.0668239 ,  0.07722661,  0.06326723,  0.07438017],  # noqa
+            [ 0.04874214,  0.05524239,  0.0434372 ,  0.04545455],  # noqa
+            [ 0.02201258,  0.02142052,  0.0217186 ,  0.02892562],  # noqa
+            [ 0.00550314,  0.00620068,  0.00472144,  0.01652893],  # noqa
+            [ 0.00235849,  0.0011274 ,  0.00094429,  0.        ],  # noqa
+            [ 0.        ,  0.0005637 ,  0.        ,  0.        ],  # noqa
+        ])
+        actual = np.ma.compress_rows(cube.proportions(axis=0, prune=True))
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_num_x_mr_props_by_cell(self):
+        cube = CrunchCube(AGE_X_ACCRPIPE)
+        expected = np.array([
+            [ 0.00207039,  0.00276052,  0.00115022,  0.00023004],  # noqa
+            [ 0.0147228 ,  0.00690131,  0.00598114,  0.00115022],  # noqa
+            [ 0.01610306,  0.01518288,  0.00920175,  0.00276052],  # noqa
+            [ 0.03128594,  0.03059581,  0.01932367,  0.00345066],  # noqa
+            [ 0.03381643,  0.04232804,  0.02346446,  0.00391074],  # noqa
+            [ 0.03151599,  0.04508857,  0.02461468,  0.00483092],  # noqa
+            [ 0.02829538,  0.04462848,  0.02967564,  0.00483092],  # noqa
+            [ 0.02806533,  0.0510697 ,  0.03266621,  0.00920175],  # noqa
+            [ 0.03519669,  0.0584311 ,  0.03381643,  0.01127214],  # noqa
+            [ 0.02898551,  0.04508857,  0.0310559 ,  0.00483092],  # noqa
+            [ 0.01955372,  0.03151599,  0.01541293,  0.00414079],  # noqa
+            [ 0.01426271,  0.02254428,  0.01058201,  0.00253048],  # noqa
+            [ 0.00644122,  0.00874166,  0.00529101,  0.00161031],  # noqa
+            [ 0.00161031,  0.00253048,  0.00115022,  0.00092017],  # noqa
+            [ 0.00069013,  0.00046009,  0.00023004,  0.        ],  # noqa
+            [ 0.        ,  0.00023004,  0.        ,  0.        ],  # noqa
+        ])
+        actual = np.ma.compress_rows(cube.proportions(axis=None, prune=True))
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_cat_x_mr_x_cat_missing_proportions_by_cell(self):
+        cube = CrunchCube(CAT_X_MR_X_CAT_MISSING)
+        expected = np.array([
+            [0.07211986, 0.        , 0.03422948, 0.10268843, 0.        , 0.07184337, 0.03435395, 0.10659828, 0.07013931, 0.03422948, 0.0717189 , 0.03578536, 0.07224433],  # noqa
+            [0.09633168, 0.07100362, 0.        , 0.06757349, 0.03352949, 0.06731444, 0.03218831, 0.06425999, 0.06705898, 0.0997618 , 0.03512613, 0.03352949, 0.06757349],  # noqa
+            [0.0322399 , 0.03555871, 0.03212309, 0.0676818 , 0.10100556, 0.0322399 , 0.0322399 , 0.0322399 , 0.09794622, 0.0322399 , 0.03212309, 0.03358323, 0.03212309],  # noqa
+            [0.03084476, 0.06828734, 0.06462713, 0.0958332 , 0.09698609, 0.09569622, 0.03095693, 0.06498843, 0.06309156, 0.0651006 , 0.06462713, 0.06602916, 0.0322468 ],  # noqa
+            [0.06891722, 0.03807479, 0.03767189, 0.11014275, 0.03452115, 0.06904229, 0.03452115, 0.03452115, 0.10631513, 0.03452115, 0.03767189, 0.07363141, 0.03439607],  # noqa
+        ])
+        actual = cube.proportions(axis=None)[0]
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_cat_x_mr_x_cat_missing_proportions_by_row(self):
+        cube = CrunchCube(CAT_X_MR_X_CAT_MISSING)
+        expected = np.array([
+            [0.1021599 , 0.        , 0.04848706, 0.14546118, 0.        , 0.10176825, 0.04866338, 0.1509996 , 0.09935439, 0.04848706, 0.10159194, 0.05069102, 0.10233622],  # noqa
+            [0.13101878, 0.0965706 , 0.        , 0.09190535, 0.04560278, 0.09155302, 0.04377867, 0.08739873, 0.09120557, 0.13568403, 0.04777434, 0.04560278, 0.09190535],  # noqa
+            [0.05433591, 0.05992931, 0.05413904, 0.11406835, 0.17023095, 0.05433591, 0.05433591, 0.05433591, 0.16507485, 0.05433591, 0.05413904, 0.0565999 , 0.05413904],  # noqa
+            [0.03674991, 0.08136077, 0.07699981, 0.11418021, 0.11555381, 0.114017  , 0.03688355, 0.07743029, 0.07517027, 0.07756393, 0.07699981, 0.07867027, 0.03842036],  # noqa
+            [0.09652974, 0.05332992, 0.05276559, 0.15427279, 0.04835246, 0.09670493, 0.04835246, 0.04835246, 0.14891158, 0.04835246, 0.05276559, 0.10313274, 0.04817727],  # noqa
+        ])
+        # 3D cube - hence row == 2
+        actual = cube.proportions(axis=2)[0]
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_cat_x_mr_x_cat_missing_proportions_by_col(self):
+        cube = CrunchCube(CAT_X_MR_X_CAT_MISSING)
+        expected = np.array([
+            [0.67814114,     np.nan, 0.47727273, 0.57668021, 0.        , 1. , 1., 1.        , 1.        , 0.47461929, 1.        , 1., 0.66874513],  # noqa
+            [1.        , 1.        , 0.        , 0.50139377, 1.        , 1. , 1., 0.64413423, 0.67567568, 1.        , 0.52272727, 1., 0.50696106],  # noqa
+            [0.24415882, 1.        , 0.47727273, 0.50139377, 1.        , 0.5, 1., 0.47552448, 1.        , 1.        , 0.47727273, 1., 0.2406135 ],  # noqa
+            [0.49909256, 1.        , 1.        , 0.73936493, 1.        , 1. , 1., 1.        , 1.        , 1.        , 1.        , 1., 0.25155048],  # noqa
+            [0.64413423, 1.        , 1.        , 0.61554653, 0.47817837, 1. , 1., 0.5       , 1.        , 0.47552448, 0.52272727, 1., 0.49909256],  # noqa
+        ])
+        # 3D cube - hence col == 1
+        actual = cube.proportions(axis=1)[0]
+        np.testing.assert_almost_equal(actual, expected)

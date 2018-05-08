@@ -1,0 +1,997 @@
+{
+    "element": "shoji:view",
+    "self": "https://app.crunch.io/api/datasets/6c4c11f05eae4fc693cc66f4eab79da8/cube/?filter=%5B%5D&query=%7B%22dimensions%22:%5B%7B%22function%22:%22bin%22,%22args%22:%5B%7B%22variable%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2F6c4c11f05eae4fc693cc66f4eab79da8%2Fvariables%2F001430%2F%22%7D%5D%7D,%7B%22each%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2F6c4c11f05eae4fc693cc66f4eab79da8%2Fvariables%2F001634%2F%22%7D,%7B%22function%22:%22as_selected%22,%22args%22:%5B%7B%22variable%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2F6c4c11f05eae4fc693cc66f4eab79da8%2Fvariables%2F001634%2F%22%7D%5D%7D%5D,%22measures%22:%7B%22count%22:%7B%22function%22:%22cube_count%22,%22args%22:%5B%5D%7D%7D,%22weight%22:null%7D",
+    "value": {
+        "query": {
+            "measures": {
+                "count": {
+                    "function": "cube_count",
+                    "args": []
+                }
+            },
+            "dimensions": [
+                {
+                    "function": "bin",
+                    "args": [
+                        {
+                            "variable": "https://app.crunch.io/api/datasets/6c4c11f05eae4fc693cc66f4eab79da8/variables/001430/"
+                        }
+                    ]
+                },
+                {
+                    "each": "https://app.crunch.io/api/datasets/6c4c11f05eae4fc693cc66f4eab79da8/variables/001634/"
+                },
+                {
+                    "function": "as_selected",
+                    "args": [
+                        {
+                            "variable": "https://app.crunch.io/api/datasets/6c4c11f05eae4fc693cc66f4eab79da8/variables/001634/"
+                        }
+                    ]
+                }
+            ],
+            "weight": null
+        },
+        "query_environment": {
+            "filter": []
+        },
+        "result": {
+            "dimensions": [
+                {
+                    "references": {
+                        "alias": "SCR1",
+                        "name": "SCR1. Age Mean",
+                        "description": "What is your age? Please input your age in whole numbers in the space provided."
+                    },
+                    "derived": true,
+                    "type": {
+                        "subtype": {
+                            "missing_rules": {},
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "class": "numeric"
+                        },
+                        "elements": [
+                            {
+                                "id": -1,
+                                "value": {
+                                    "?": -1
+                                },
+                                "missing": true
+                            },
+                            {
+                                "id": 1,
+                                "value": [
+                                    0.0,
+                                    5.0
+                                ],
+                                "missing": false
+                            },
+                            {
+                                "id": 2,
+                                "value": [
+                                    5.0,
+                                    10.0
+                                ],
+                                "missing": false
+                            },
+                            {
+                                "id": 3,
+                                "value": [
+                                    10.0,
+                                    15.0
+                                ],
+                                "missing": false
+                            },
+                            {
+                                "id": 4,
+                                "value": [
+                                    15.0,
+                                    20.0
+                                ],
+                                "missing": false
+                            },
+                            {
+                                "id": 5,
+                                "value": [
+                                    20.0,
+                                    25.0
+                                ],
+                                "missing": false
+                            },
+                            {
+                                "id": 6,
+                                "value": [
+                                    25.0,
+                                    30.0
+                                ],
+                                "missing": false
+                            },
+                            {
+                                "id": 7,
+                                "value": [
+                                    30.0,
+                                    35.0
+                                ],
+                                "missing": false
+                            },
+                            {
+                                "id": 8,
+                                "value": [
+                                    35.0,
+                                    40.0
+                                ],
+                                "missing": false
+                            },
+                            {
+                                "id": 9,
+                                "value": [
+                                    40.0,
+                                    45.0
+                                ],
+                                "missing": false
+                            },
+                            {
+                                "id": 10,
+                                "value": [
+                                    45.0,
+                                    50.0
+                                ],
+                                "missing": false
+                            },
+                            {
+                                "id": 11,
+                                "value": [
+                                    50.0,
+                                    55.0
+                                ],
+                                "missing": false
+                            },
+                            {
+                                "id": 12,
+                                "value": [
+                                    55.0,
+                                    60.0
+                                ],
+                                "missing": false
+                            },
+                            {
+                                "id": 13,
+                                "value": [
+                                    60.0,
+                                    65.0
+                                ],
+                                "missing": false
+                            },
+                            {
+                                "id": 14,
+                                "value": [
+                                    65.0,
+                                    70.0
+                                ],
+                                "missing": false
+                            },
+                            {
+                                "id": 15,
+                                "value": [
+                                    70.0,
+                                    75.0
+                                ],
+                                "missing": false
+                            },
+                            {
+                                "id": 16,
+                                "value": [
+                                    75.0,
+                                    80.0
+                                ],
+                                "missing": false
+                            },
+                            {
+                                "id": 17,
+                                "value": [
+                                    80.0,
+                                    85.0
+                                ],
+                                "missing": false
+                            },
+                            {
+                                "id": 18,
+                                "value": [
+                                    85.0,
+                                    90.0
+                                ],
+                                "missing": false
+                            },
+                            {
+                                "id": 19,
+                                "value": [
+                                    90.0,
+                                    95.0
+                                ],
+                                "missing": false
+                            },
+                            {
+                                "id": 20,
+                                "value": [
+                                    95.0,
+                                    100.0
+                                ],
+                                "missing": false
+                            }
+                        ],
+                        "class": "enum"
+                    }
+                },
+                {
+                    "derived": true,
+                    "references": {
+                        "alias": "ACCRPIPE_second",
+                        "subreferences": [
+                            {
+                                "alias": "ACCRPIPE_second_1",
+                                "name": "Luxury hotel"
+                            },
+                            {
+                                "alias": "ACCRPIPE_second_2",
+                                "name": "Upscale hotel"
+                            },
+                            {
+                                "alias": "ACCRPIPE_second_3",
+                                "name": "Mid-scale hotel"
+                            },
+                            {
+                                "alias": "ACCRPIPE_second_4",
+                                "name": "Limited service hotel"
+                            }
+                        ],
+                        "description": " THIS IS SHOWN ONLY IN TEST MODE HIDDEN QUESTION  - ACCRPIPE_second",
+                        "name": "ACCRPIPE_second"
+                    },
+                    "type": {
+                        "subtype": {
+                            "class": "variable"
+                        },
+                        "elements": [
+                            {
+                                "id": 1,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "ACCRPIPE_second_1",
+                                        "name": "Luxury hotel"
+                                    },
+                                    "id": "0001",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 2,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "ACCRPIPE_second_2",
+                                        "name": "Upscale hotel"
+                                    },
+                                    "id": "0002",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 3,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "ACCRPIPE_second_3",
+                                        "name": "Mid-scale hotel"
+                                    },
+                                    "id": "0003",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 4,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "ACCRPIPE_second_4",
+                                        "name": "Limited service hotel"
+                                    },
+                                    "id": "0004",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            }
+                        ],
+                        "class": "enum"
+                    }
+                },
+                {
+                    "references": {
+                        "alias": "ACCRPIPE_second",
+                        "description": " THIS IS SHOWN ONLY IN TEST MODE HIDDEN QUESTION  - ACCRPIPE_second",
+                        "name": "ACCRPIPE_second",
+                        "subreferences": [
+                            {
+                                "alias": "ACCRPIPE_second_1",
+                                "name": "Luxury hotel"
+                            },
+                            {
+                                "alias": "ACCRPIPE_second_2",
+                                "name": "Upscale hotel"
+                            },
+                            {
+                                "alias": "ACCRPIPE_second_3",
+                                "name": "Mid-scale hotel"
+                            },
+                            {
+                                "alias": "ACCRPIPE_second_4",
+                                "name": "Limited service hotel"
+                            }
+                        ]
+                    },
+                    "derived": true,
+                    "type": {
+                        "ordinal": false,
+                        "subvariables": [
+                            "0001",
+                            "0002",
+                            "0003",
+                            "0004"
+                        ],
+                        "class": "categorical",
+                        "categories": [
+                            {
+                                "numeric_value": 1,
+                                "selected": true,
+                                "id": 1,
+                                "missing": false,
+                                "name": "Selected"
+                            },
+                            {
+                                "numeric_value": 0,
+                                "missing": false,
+                                "id": 0,
+                                "name": "Not Selected"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": true,
+                                "id": -1,
+                                "name": "No Data"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "missing": 4332,
+            "measures": {
+                "count": {
+                    "data": [
+                        0,
+                        0,
+                        386,
+                        0,
+                        0,
+                        386,
+                        0,
+                        0,
+                        386,
+                        0,
+                        0,
+                        386,
+                        0,
+                        0,
+                        6,
+                        0,
+                        0,
+                        6,
+                        0,
+                        0,
+                        6,
+                        0,
+                        0,
+                        6,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        21,
+                        0,
+                        0,
+                        21,
+                        0,
+                        0,
+                        21,
+                        0,
+                        0,
+                        21,
+                        9,
+                        18,
+                        62,
+                        12,
+                        15,
+                        62,
+                        5,
+                        22,
+                        62,
+                        1,
+                        26,
+                        62,
+                        64,
+                        61,
+                        167,
+                        30,
+                        95,
+                        167,
+                        26,
+                        99,
+                        167,
+                        5,
+                        120,
+                        167,
+                        70,
+                        118,
+                        282,
+                        66,
+                        122,
+                        282,
+                        40,
+                        148,
+                        282,
+                        12,
+                        176,
+                        282,
+                        136,
+                        232,
+                        540,
+                        133,
+                        235,
+                        540,
+                        84,
+                        284,
+                        540,
+                        15,
+                        353,
+                        540,
+                        147,
+                        303,
+                        442,
+                        184,
+                        266,
+                        442,
+                        102,
+                        348,
+                        442,
+                        17,
+                        433,
+                        442,
+                        137,
+                        324,
+                        369,
+                        196,
+                        265,
+                        369,
+                        107,
+                        354,
+                        369,
+                        21,
+                        440,
+                        369,
+                        123,
+                        344,
+                        355,
+                        194,
+                        273,
+                        355,
+                        129,
+                        338,
+                        355,
+                        21,
+                        446,
+                        355,
+                        122,
+                        404,
+                        352,
+                        222,
+                        304,
+                        352,
+                        142,
+                        384,
+                        352,
+                        40,
+                        486,
+                        352,
+                        153,
+                        450,
+                        392,
+                        254,
+                        349,
+                        392,
+                        147,
+                        456,
+                        392,
+                        49,
+                        554,
+                        392,
+                        126,
+                        352,
+                        353,
+                        196,
+                        282,
+                        353,
+                        135,
+                        343,
+                        353,
+                        21,
+                        457,
+                        353,
+                        85,
+                        222,
+                        268,
+                        137,
+                        170,
+                        268,
+                        67,
+                        240,
+                        268,
+                        18,
+                        289,
+                        268,
+                        62,
+                        155,
+                        193,
+                        98,
+                        119,
+                        193,
+                        46,
+                        171,
+                        193,
+                        11,
+                        206,
+                        193,
+                        28,
+                        68,
+                        83,
+                        38,
+                        58,
+                        83,
+                        23,
+                        73,
+                        83,
+                        7,
+                        89,
+                        83,
+                        7,
+                        20,
+                        29,
+                        11,
+                        16,
+                        29,
+                        5,
+                        22,
+                        29,
+                        4,
+                        23,
+                        29,
+                        3,
+                        3,
+                        23,
+                        2,
+                        4,
+                        23,
+                        1,
+                        5,
+                        23,
+                        0,
+                        6,
+                        23,
+                        0,
+                        0,
+                        8,
+                        0,
+                        0,
+                        8,
+                        0,
+                        0,
+                        8,
+                        0,
+                        0,
+                        8,
+                        0,
+                        1,
+                        1,
+                        1,
+                        0,
+                        1,
+                        0,
+                        1,
+                        1,
+                        0,
+                        1,
+                        1
+                    ],
+                    "n_missing": 4332,
+                    "metadata": {
+                        "references": {},
+                        "derived": true,
+                        "type": {
+                            "integer": true,
+                            "missing_rules": {},
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "class": "numeric"
+                        }
+                    }
+                }
+            },
+            "element": "crunch:cube",
+            "counts": [
+                0,
+                0,
+                386,
+                0,
+                0,
+                386,
+                0,
+                0,
+                386,
+                0,
+                0,
+                386,
+                0,
+                0,
+                6,
+                0,
+                0,
+                6,
+                0,
+                0,
+                6,
+                0,
+                0,
+                6,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                21,
+                0,
+                0,
+                21,
+                0,
+                0,
+                21,
+                0,
+                0,
+                21,
+                9,
+                18,
+                62,
+                12,
+                15,
+                62,
+                5,
+                22,
+                62,
+                1,
+                26,
+                62,
+                64,
+                61,
+                167,
+                30,
+                95,
+                167,
+                26,
+                99,
+                167,
+                5,
+                120,
+                167,
+                70,
+                118,
+                282,
+                66,
+                122,
+                282,
+                40,
+                148,
+                282,
+                12,
+                176,
+                282,
+                136,
+                232,
+                540,
+                133,
+                235,
+                540,
+                84,
+                284,
+                540,
+                15,
+                353,
+                540,
+                147,
+                303,
+                442,
+                184,
+                266,
+                442,
+                102,
+                348,
+                442,
+                17,
+                433,
+                442,
+                137,
+                324,
+                369,
+                196,
+                265,
+                369,
+                107,
+                354,
+                369,
+                21,
+                440,
+                369,
+                123,
+                344,
+                355,
+                194,
+                273,
+                355,
+                129,
+                338,
+                355,
+                21,
+                446,
+                355,
+                122,
+                404,
+                352,
+                222,
+                304,
+                352,
+                142,
+                384,
+                352,
+                40,
+                486,
+                352,
+                153,
+                450,
+                392,
+                254,
+                349,
+                392,
+                147,
+                456,
+                392,
+                49,
+                554,
+                392,
+                126,
+                352,
+                353,
+                196,
+                282,
+                353,
+                135,
+                343,
+                353,
+                21,
+                457,
+                353,
+                85,
+                222,
+                268,
+                137,
+                170,
+                268,
+                67,
+                240,
+                268,
+                18,
+                289,
+                268,
+                62,
+                155,
+                193,
+                98,
+                119,
+                193,
+                46,
+                171,
+                193,
+                11,
+                206,
+                193,
+                28,
+                68,
+                83,
+                38,
+                58,
+                83,
+                23,
+                73,
+                83,
+                7,
+                89,
+                83,
+                7,
+                20,
+                29,
+                11,
+                16,
+                29,
+                5,
+                22,
+                29,
+                4,
+                23,
+                29,
+                3,
+                3,
+                23,
+                2,
+                4,
+                23,
+                1,
+                5,
+                23,
+                0,
+                6,
+                23,
+                0,
+                0,
+                8,
+                0,
+                0,
+                8,
+                0,
+                0,
+                8,
+                0,
+                0,
+                8,
+                0,
+                1,
+                1,
+                1,
+                0,
+                1,
+                0,
+                1,
+                1,
+                0,
+                1,
+                1
+            ],
+            "n": 8679
+        }
+    }
+}
