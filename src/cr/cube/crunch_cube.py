@@ -496,11 +496,7 @@ class CrunchCube(object):
         we need to perform sumation along that axis, on the tabular
         representation of the cube (which is obtained with 'as_array').
         '''
-        array = self.as_array(
-            weighted=weighted,
-            include_transforms_for_dims=include_transforms_for_dims,
-            margin=True,
-        )
+        array = self.as_array(weighted=weighted, margin=True)
 
         if axis == 1 and len(array.shape) == 1:
             # If array representation of the cube has less dimensions than
