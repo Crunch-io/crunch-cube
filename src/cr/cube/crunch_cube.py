@@ -501,7 +501,6 @@ class CrunchCube(object):
             margin=True,
             include_transforms_for_dims=include_transforms_for_dims,
         )
-        # array = self.as_array(weighted=weighted, margin=True)
 
         if axis == 1 and len(array.shape) == 1:
             # If array representation of the cube has less dimensions than
@@ -543,6 +542,9 @@ class CrunchCube(object):
         elif self.ndim == 1:
             return self._1d_mr_margin(axis, weighted)
         elif self._calculate_along_non_mr(axis):
+            # Only take dims not calculated across (don't include
+            # H&S in margin calculation)
+            hs_dims = hs_dims and [dim for dim in hs_dims if dim != axis]
             return self._mr_margin_along_non_mr_dim(axis, weighted, hs_dims)
 
         is_ca_row_margin = (

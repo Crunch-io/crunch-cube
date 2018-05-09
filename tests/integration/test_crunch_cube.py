@@ -47,6 +47,8 @@ from .fixtures import SCALE_WITH_NULL_VALUES
 from .fixtures import VALUE_SERVICES
 from .fixtures import LETTERS_X_PETS_HS
 from .fixtures import XYZ_SIMPLE_ALLTYPES
+from .fixtures import MR_X_CA_HS
+from .fixtures import CA_X_MR_WEIGHTED_HS
 
 
 class TestCrunchCube(TestCase):
@@ -1724,3 +1726,21 @@ class TestCrunchCube(TestCase):
         actual = cube.prune_indices()[0]
         np.testing.assert_array_equal(actual[0], expected[0])
         np.testing.assert_array_equal(actual[1], expected[1])
+
+    def test_mr_x_ca_rows_margin(self):
+        cube = CrunchCube(MR_X_CA_HS)
+        actual = cube.margin(axis=2)
+        expected = np.array([
+            [3, 3, 3],
+            [4, 4, 4],
+            [0, 0, 0],
+        ])
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_ca_x_mr_margin(self):
+        cube = CrunchCube(CA_X_MR_WEIGHTED_HS)
+        expected = np.array([504, 215, 224, 76, 8, 439])
+        actual = cube.margin(
+            axis=1, weighted=False, include_transforms_for_dims=[0, 1, 2]
+        )[0]
+        np.testing.assert_array_equal(actual, expected)
