@@ -498,8 +498,8 @@ class CrunchCube(object):
         '''
         array = self.as_array(
             weighted=weighted,
-            include_transforms_for_dims=include_transforms_for_dims,
             margin=True,
+            include_transforms_for_dims=include_transforms_for_dims,
         )
 
         if axis == 1 and len(array.shape) == 1:
@@ -535,28 +535,38 @@ class CrunchCube(object):
         )
         return table
 
-    def _mr_margin(self, axis, weighted, adjusted,
-                   include_transforms_for_dims=None, prune=False):
+    def _mr_margin(self, axis, weighted, adjusted, hs_dims=None, prune=False):
         '''Margin for cube that contains MR.'''
         if self.is_double_mr:
             return self._double_mr_margin(axis, weighted)
         elif self.ndim == 1:
             return self._1d_mr_margin(axis, weighted)
         elif self._calculate_along_non_mr(axis):
-            return self._mr_margin_along_non_mr_dim(axis, weighted,
-                                                    include_transforms_for_dims)
+            # Only take dims not calculated across (don't include
+            # H&S in margin calculation)
+            hs_dims = hs_dims and [dim for dim in hs_dims if dim != axis]
+            return self._mr_margin_along_non_mr_dim(axis, weighted, hs_dims)
+
+        is_ca_row_margin = (
+            self.ndim == 3 and
+            self.dimensions[1].type == 'categorical_array' and
+            axis is not None
+        )
+        if is_ca_row_margin:
+            # For MR x CA always return row margin (only one that makes sense)
+            return np.sum(self.as_array(), axis=2)
 
         table = self.table.data(weighted, margin=True)
-        if include_transforms_for_dims:
+        if hs_dims:
             # In case of H&S the entire table needs to be
             # transformed (with selections).
-            table = self._transform_table(table, include_transforms_for_dims)
+            table = self._transform_table(table, hs_dims)
 
         # For cases when the margin is calculated for the MR dimension, we need
         # the sum of selected and non-selected slices (if axis is None), or the
         # sublimated version (another sum along the axis), if axis is defined.
         margin = table[self.ind_selected] + table[self.ind_non_selected]
-        if not include_transforms_for_dims:
+        if not hs_dims:
             # If entire table was transformed, we already have it with all the
             # valid indices. If not, we need to apply valid indices.
             margin = margin[np.ix_(*self.valid_indices)]
@@ -647,15 +657,15 @@ class CrunchCube(object):
     def _mr_props_as_0th(self, axis, table, hs_dims, prune):
         if len(table.shape) == 4:
             # This is the case of MR x CA, special treatment
-            # Always return only the column direction (across CATs).
+            # Always return only the row direction (across CATs).
             num = self.as_array(
                 include_transforms_for_dims=hs_dims,
                 prune=prune,
             )
-            den = self.margin(
-                axis=1,
-                include_transforms_for_dims=hs_dims
-            )[:, None, :]
+            if self.dimensions[1].type == 'categorical_array':
+                den = self.margin(axis=2)[:, :, None]
+            else:
+                den = self.margin(axis=1)[:, None, :]
             return num / den
 
         # The following are normal MR x something (not CA)
