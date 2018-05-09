@@ -770,3 +770,13 @@ class TestHeadersAndSubtotals(TestCase):
         ])
         actual = cube.proportions(include_transforms_for_dims=[0, 1, 2])
         np.testing.assert_almost_equal(actual, expected)
+
+    def test_mr_x_ca_rows_margin(self):
+        cube = CrunchCube(MR_X_CA_HS)
+        actual = cube.margin(axis=2)
+        expected = np.array([
+            [3, 3, 3],
+            [4, 4, 4],
+            [0, 0, 0],
+        ])
+        np.testing.assert_array_equal(actual, expected)
