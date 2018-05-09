@@ -496,7 +496,12 @@ class CrunchCube(object):
         we need to perform sumation along that axis, on the tabular
         representation of the cube (which is obtained with 'as_array').
         '''
-        array = self.as_array(weighted=weighted, margin=True)
+        array = self.as_array(
+            weighted=weighted,
+            margin=True,
+            include_transforms_for_dims=include_transforms_for_dims,
+        )
+        # array = self.as_array(weighted=weighted, margin=True)
 
         if axis == 1 and len(array.shape) == 1:
             # If array representation of the cube has less dimensions than
@@ -643,15 +648,15 @@ class CrunchCube(object):
     def _mr_props_as_0th(self, axis, table, hs_dims, prune):
         if len(table.shape) == 4:
             # This is the case of MR x CA, special treatment
-            # Always return only the column direction (across CATs).
+            # Always return only the row direction (across CATs).
             num = self.as_array(
                 include_transforms_for_dims=hs_dims,
                 prune=prune,
             )
-            den = self.margin(
-                axis=1,
-                include_transforms_for_dims=hs_dims
-            )[:, None, :]
+            if self.dimensions[1].type == 'categorical_array':
+                den = np.sum(self.as_array(), axis=2)[:, :, None]
+            else:
+                den = self.margin(axis=1)[:, None, :]
             return num / den
 
         # The following are normal MR x something (not CA)

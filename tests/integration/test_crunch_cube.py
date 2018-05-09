@@ -1205,10 +1205,17 @@ class TestCrunchCube(TestCase):
         '''
         cube = CrunchCube(PETS_X_PETS_ARRAY)
         expected = np.array([
-            [0.55555556, 0.19444444],
-            [0., 0.55555556],
-            [0.44444444, 0.25],
+            [0.58823529, 0.41176471],  # noqa
+            [0.        , 1.        ],  # noqa
+            [0.47058824, 0.52941176],  # noqa
         ])
+        # TODO: Consult with jon and Mike. The new expectation is closer to what
+        # whaam displays, but diverges from R.
+        # expected = np.array([
+        #     [0.55555556, 0.19444444],
+        #     [0., 0.55555556],
+        #     [0.44444444, 0.25],
+        # ])
         actual = cube.proportions(axis=1)[0]
         # Since cube is 3D, col dim is 1 (instead of 0)
         np.testing.assert_almost_equal(actual, expected)
