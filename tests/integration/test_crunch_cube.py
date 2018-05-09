@@ -1458,7 +1458,7 @@ class TestCrunchCube(TestCase):
             cube.margin(axis=1, weighted=False, prune=True)
         )
         np.testing.assert_array_equal(actual, expected)
-        # not testing cube.prune_indices() because the margin has 6367 cells
+        # not testing cube.prune_indices because the margin has 6367 cells
 
     def test_ca_with_single_cat_pruning(self):
         cube = CrunchCube(CA_SINGLE_CAT)
@@ -1549,13 +1549,13 @@ class TestCrunchCube(TestCase):
         np.testing.assert_array_equal(actual, expected)
 
     def test_ca_subvar_x_cat_hs_counts_prune(self):
-        cube = CrunchCube(CA_SUBVAR_X_CAT_HS)
+        cube = CrunchCube(CA_SUBVAR_X_CAT_HS, include_hs=True)
         expected = np.array([
             [3, 3, 0, 0, 6],
             [1, 3, 2, 0, 4],
             [0, 2, 1, 3, 2],
         ])
-        actual = cube.as_array(include_transforms_for_dims=[0, 1], prune=True)
+        actual = cube.as_array(prune=True)
         np.testing.assert_array_equal(actual, expected)
 
     def test_means_univariate_cat(self):
@@ -1656,7 +1656,7 @@ class TestCrunchCube(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_mr_props_with_hs_by_cell(self):
-        cube = CrunchCube(LETTERS_X_PETS_HS)
+        cube = CrunchCube(LETTERS_X_PETS_HS, include_hs=True)
         expected = np.array([
             [0.10769231, 0.16923077, 0.27692308, 0.26153846, 0.15384615, 0.15384615],  # noqa
             [0.11111111, 0.20634921, 0.31746032, 0.19047619, 0.15873016, 0.15873016],  # noqa
@@ -1664,11 +1664,12 @@ class TestCrunchCube(TestCase):
             [0.10447761, 0.14925373, 0.25373134, 0.13432836, 0.17910448, 0.17910448],  # noqa
             [0.07462687, 0.11940299, 0.19402985, 0.23880597, 0.1641791, 0.1641791],  # noqa
         ])
-        actual = cube.proportions(include_transforms_for_dims=[0, 1])
+        actual = cube.proportions()
         np.testing.assert_almost_equal(actual, expected)
 
     def test_mr_props_with_hs_by_row(self):
-        cube = CrunchCube(LETTERS_X_PETS_HS)
+        cube = CrunchCube(LETTERS_X_PETS_HS, include_hs=True)
+        # cube = CrunchCube(LETTERS_X_PETS_HS)
         expected = np.array([
             [0.15555556, 0.24444444, 0.4, 0.37777778, 0.22222222, 0.22222222],
             [0.16666667, 0.30952381, 0.47619048, 0.28571429, 0.23809524, 0.23809524],  # noqa
@@ -1676,11 +1677,11 @@ class TestCrunchCube(TestCase):
             [0.18421053, 0.26315789, 0.44736842, 0.23684211, 0.31578947, 0.31578947],  # noqa
             [0.125, 0.2, 0.325, 0.4, 0.275, 0.275],
         ])
-        actual = cube.proportions(axis=1, include_transforms_for_dims=[0, 1])
+        actual = cube.proportions(axis=1)
         np.testing.assert_almost_equal(actual, expected)
 
     def test_mr_props_with_hs_by_col(self):
-        cube = CrunchCube(LETTERS_X_PETS_HS)
+        cube = CrunchCube(LETTERS_X_PETS_HS, include_hs=True)
         expected = np.array([
             [0.53846154, 0.6875, 0.62068966, 0.94444444, 0.55555556, 0.55555556],  # noqa
             [0.58333333, 0.68421053, 0.64516129, 0.66666667, 0.71428571, 0.71428571],  # noqa
@@ -1688,7 +1689,7 @@ class TestCrunchCube(TestCase):
             [0.53846154, 0.58823529, 0.56666667, 0.5, 0.63157895, 0.63157895],
             [0.45454545, 0.47058824, 0.46428571, 0.76190476, 0.61111111, 0.61111111],  # noqa
         ])
-        actual = cube.proportions(axis=0, include_transforms_for_dims=[0, 1])
+        actual = cube.proportions(axis=0)
         np.testing.assert_almost_equal(actual, expected)
 
     def test_3d_pruning_indices(self):
