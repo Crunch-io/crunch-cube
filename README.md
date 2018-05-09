@@ -131,3 +131,7 @@ The detailed description can be found
 1.6.2 support "Before" and "After" in variable transformations since they exist in zz9 data.
 
 1.6.4 Fixes for 3d Pruning.
+
+1.6.5 Fixes for Pruning and Headers and subtotals.
+      Population size support.
+      Fx various calculations in 3d cubes.
