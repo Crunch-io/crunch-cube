@@ -18,6 +18,7 @@ from .fixtures import PETS_X_FRUIT_HS
 from .fixtures import MISSING_CAT_HS
 from .fixtures import CA_X_CAT_HS
 from .fixtures import CAT_X_MR_WEIGHTED_HS
+from .fixtures import MR_X_CA_HS
 
 from cr.cube.crunch_cube import CrunchCube
 
@@ -724,4 +725,40 @@ class TestHeadersAndSubtotals(TestCase):
             ]
         ])
         actual = cube.proportions(axis=1)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_mr_x_ca_props_by_row_without_hs(self):
+        cube = CrunchCube(MR_X_CA_HS)
+        expected = np.array([
+            [[0.66666667, 0.33333333, 0.        , 0.        ],  # noqa
+             [0.33333333, 0.33333333, 0.33333333, 0.        ],  # noqa
+             [0.        , 0.33333333, 0.33333333, 0.33333333]],   # noqa
+
+            [[0.5       , 0.5       , 0.        , 0.        ],  # noqa
+             [0.25      , 0.25      , 0.5       , 0.        ],  # noqa
+             [0.        , 0.25      , 0.        , 0.75      ]],   # noqa
+
+            [[    np.nan,     np.nan,     np.nan,     np.nan],  # noqa
+             [    np.nan,     np.nan,     np.nan,     np.nan],  # noqa
+             [    np.nan,     np.nan,     np.nan,     np.nan]],  # noqa
+        ])
+        actual = cube.proportions()
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_mr_x_ca_props_by_row_with_hs(self):
+        cube = CrunchCube(MR_X_CA_HS)
+        expected = np.array([
+            [[0.66666667, 0.33333333, 1.        , 0.        , 0.        , 0.        , 1.        ],  # noqa
+             [0.33333333, 0.33333333, 0.66666667, 0.33333333, 0.        , 0.33333333, 1.        ],  # noqa
+             [0.        , 0.33333333, 0.33333333, 0.33333333, 0.33333333, 0.66666667, 1.        ]],  # noqa
+
+            [[0.5       , 0.5       , 1.        , 0.        , 0.        , 0.        , 1.        ],  # noqa
+             [0.25      , 0.25      , 0.5       , 0.5       , 0.        , 0.5       , 1.        ],  # noqa
+             [0.        , 0.25      , 0.25      , 0.        , 0.75      , 0.75      , 1.        ]],  # noqa
+
+            [[    np.nan,     np.nan,     np.nan,     np.nan,     np.nan,     np.nan,     np.nan],  # noqa
+             [    np.nan,     np.nan,     np.nan,     np.nan,     np.nan,     np.nan,     np.nan],  # noqa
+             [    np.nan,     np.nan,     np.nan,     np.nan,     np.nan,     np.nan,     np.nan]],  # noqa
+        ])
+        actual = cube.proportions(include_transforms_for_dims=[0, 1, 2])
         np.testing.assert_almost_equal(actual, expected)
