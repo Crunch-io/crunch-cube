@@ -512,7 +512,12 @@ class CrunchCube(object):
         we need to perform sumation along that axis, on the tabular
         representation of the cube (which is obtained with 'as_array').
         '''
-        array = self.as_array(weighted=weighted, margin=True)
+        array = self._as_array(
+            weighted=weighted,
+            margin=True,
+            include_transforms_for_dims=include_transforms_for_dims,
+        )
+        array = self._fix_shape(array)
 
         if axis == 1 and len(array.shape) == 1:
             # If array representation of the cube has less dimensions than
@@ -566,7 +571,7 @@ class CrunchCube(object):
         )
         if is_ca_row_margin:
             # For MR x CA always return row margin (only one that makes sense)
-            return np.sum(self.as_array(), axis=2)
+            return np.sum(self.as_array(margin=True), axis=2)
 
         table = self.table.data(weighted, margin=True)
         if hs_dims:
