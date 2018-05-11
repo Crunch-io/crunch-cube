@@ -299,7 +299,7 @@ class TestDimension(TestCase):
         {'id': 111}, {'id': 222}, {'id': 333}, {'id': 444}, {'id': 555}
     ])
     @patch('cr.cube.dimension.Dimension._get_type')
-    def test_inserted_hs_indices(self, mock_type):
+    def test_inserted_hs_indices_and_order(self, mock_type):
         mock_type.return_value = None
         dim_data = {
             'references': {
@@ -317,6 +317,12 @@ class TestDimension(TestCase):
                                 u'args': [],
                                 u'function': u'subtotal',
                                 u'name': u'bottoms up two',
+                            },
+                            {
+                                u'anchor': u'bottom',
+                                u'args': [],
+                                u'function': u'subtotal',
+                                u'name': u'bottoms up three',
                             },
                             {
                                 u'anchor': u'top',
@@ -348,7 +354,13 @@ class TestDimension(TestCase):
             }
         }
         dim = Dimension(dim_data)
-        self.assertEqual(dim.inserted_hs_indices, [0, 1, 5, 6, 9, 10])
+        self.assertEqual(dim.inserted_hs_indices, [0, 1, 5, 6, 9, 10, 11])
+        labels = [
+            u'on top one', u'on top two', None, None, None,
+            u'in the middle one', u'in the middle two', None, None,
+            u'bottoms up one', u'bottoms up two', u'bottoms up three'
+        ]
+        self.assertEqual(labels, dim.labels(include_transforms=True))
 
     @patch('cr.cube.dimension.Dimension._elements', [
         {'numeric_value': 1},

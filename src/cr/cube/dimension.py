@@ -237,19 +237,23 @@ class Dimension(object):
 
     def _update_with_subtotals(self, labels_with_cat_ids):
         for subtotal in self.subtotals:
-            # If anchor is 0, the default value of 'next' (which is -1) will
-            # add with 1, and amount to the total of 0, which will be the
-            # correct index value for the new subtotal.
-            ind_insert = next((
-                i for (i, x) in enumerate(labels_with_cat_ids)
-                if x.get('id') == subtotal.anchor
-            ), subtotal.anchor)
-            if ind_insert == 'top':
+            already_inserted_with_the_same_anchor = [
+                index for (index, item) in enumerate(labels_with_cat_ids)
+                if 'anchor' in item and item['anchor'] == subtotal.anchor
+            ]
+
+            if len(already_inserted_with_the_same_anchor):
+                ind_insert = already_inserted_with_the_same_anchor[-1] + 1
+            elif subtotal.anchor == 'top':
                 ind_insert = 0
-            elif ind_insert == 'bottom':
+            elif subtotal.anchor == 'bottom':
                 ind_insert = len(labels_with_cat_ids)
             else:
-                ind_insert += 1
+                ind_insert = next(
+                    index for (index, item) in enumerate(labels_with_cat_ids)
+                    if item.get('id') == subtotal.anchor
+                ) + 1
+
             labels_with_cat_ids.insert(ind_insert, subtotal.data)
 
         return labels_with_cat_ids
