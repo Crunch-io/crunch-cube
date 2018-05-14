@@ -45,7 +45,7 @@ class CrunchCube(object):
     percentages off of them.
     '''
 
-    def __init__(self, response):
+    def __init__(self, response, include_hs=False):
         '''Initializes the CrunchCube class with the cube JSON response.
 
         Class can be initialized with both JSON string, and dict types.
@@ -62,7 +62,6 @@ class CrunchCube(object):
         # If the provided response is dict, create cube immediately
         if isinstance(response, dict):
             self._table = DataTable(response.get('value', response))
-            return
 
         try:
             response = json.loads(response)
@@ -74,6 +73,14 @@ class CrunchCube(object):
                     'Unsupported type provided: {}. '
                     'A `cube` must be JSON or `dict`.'
                 ).format(type(response)))
+
+        self._include_hs = include_hs
+
+    @property
+    def hs_dims(self):
+        if not self._include_hs:
+            return None
+        return [i for i in range(self.ndim)]
 
     def _get_valid_indices(self, dimensions, include_missing,
                            get_non_selected=False, get_all_mr=False):
@@ -210,6 +217,7 @@ class CrunchCube(object):
 
     def _prune_3d_body(self, res, transforms):
         mask = np.zeros(res.shape)
+        # for i, prune_inds in enumerate(self.prune_indices):
         for i, prune_inds in enumerate(self.prune_indices(transforms)):
             rows_pruned = prune_inds[0]
             cols_pruned = prune_inds[1]
@@ -247,8 +255,8 @@ class CrunchCube(object):
         # have the marginal value 0 (or NaN), they're NOT pruned. This is
         # done to achieve parity with how the front end client works (whaam).
         row_margin = self.margin(
+            axis=self.row_direction_axis,
             include_transforms_for_dims=transforms,
-            axis=self.row_direction_axis
         )
         if row_margin.ndim > 1:
             # In case of CAT x MR, we have 2D margin
@@ -264,8 +272,8 @@ class CrunchCube(object):
 
         # Prune columns by column margin values.
         col_margin = self.margin(
-            include_transforms_for_dims=transforms,
             axis=self.col_direction_axis,
+            include_transforms_for_dims=transforms,
         )
         if col_margin.ndim > 1:
             # In case of MR x CAT, we have 2D margin
@@ -288,6 +296,7 @@ class CrunchCube(object):
         )
         return np.logical_or(mask_rows, mask_cols)
 
+    # @property
     def prune_indices(self, transforms=None):
         '''Indices of pruned rows and columns.
 
@@ -302,19 +311,26 @@ class CrunchCube(object):
             are calculated "per slice", that is NOT on the 0th dimension
             (as the 0th dimension represents the slices).
         '''
+        transforms = (
+            transforms
+            if transforms else
+            self.hs_dims
+        )
         if self.ndim >= 3:
             # In case of a 3D cube, return list of tuples
             # (of row and col pruned indices).
+            # return self._prune_3d_indices(self.hs_dims)
             return self._prune_3d_indices(transforms)
 
         # In case of 1 or 2 D cubes, return a list of
         # row indices (or row and col indices)
+        # return self._prune_indices(self.hs_dims)
         return self._prune_indices(transforms)
 
     def _prune_indices(self, transforms):
         row_margin = self.margin(
+            axis=self.row_direction_axis,
             include_transforms_for_dims=transforms,
-            axis=self.row_direction_axis
         )
         row_indices = self._margin_pruned_indices(
             row_margin,
@@ -328,8 +344,8 @@ class CrunchCube(object):
             return [row_indices]
 
         col_margin = self.margin(
-            include_transforms_for_dims=transforms,
             axis=self.col_direction_axis,
+            include_transforms_for_dims=transforms,
         )
         col_indices = self._margin_pruned_indices(
             col_margin,
@@ -343,12 +359,12 @@ class CrunchCube(object):
 
     def _prune_3d_indices(self, transforms):
         row_margin = self.margin(
+            axis=self.row_direction_axis,
             include_transforms_for_dims=transforms,
-            axis=self.row_direction_axis
         )
         col_margin = self.margin(
-            include_transforms_for_dims=transforms,
             axis=self.col_direction_axis,
+            include_transforms_for_dims=transforms,
         )
         return [
             self._prune_indices_tuple(rm, cm, transforms)
@@ -496,11 +512,12 @@ class CrunchCube(object):
         we need to perform sumation along that axis, on the tabular
         representation of the cube (which is obtained with 'as_array').
         '''
-        array = self.as_array(
+        array = self._as_array(
             weighted=weighted,
             margin=True,
             include_transforms_for_dims=include_transforms_for_dims,
         )
+        array = self._fix_shape(array)
 
         if axis == 1 and len(array.shape) == 1:
             # If array representation of the cube has less dimensions than
@@ -554,7 +571,7 @@ class CrunchCube(object):
         )
         if is_ca_row_margin:
             # For MR x CA always return row margin (only one that makes sense)
-            return np.sum(self.as_array(), axis=2)
+            return np.sum(self.as_array(margin=True), axis=2)
 
         table = self.table.data(weighted, margin=True)
         if hs_dims:
@@ -639,8 +656,8 @@ class CrunchCube(object):
 
         if prune and axis is not None and type(res) is np.ndarray:
             table = self.as_array(
-                include_transforms_for_dims=include_transforms_for_dims,
                 prune=prune,
+                include_transforms_for_dims=include_transforms_for_dims,
             )
             mask = table.mask
             if isinstance(axis, tuple) or axis < mask.ndim:
@@ -676,7 +693,7 @@ class CrunchCube(object):
                 include_transforms_for_dims=hs_dims
             )
         else:
-            den = self.margin(axis=axis)[:, np.newaxis]
+            den = self._margin(axis=axis)[:, np.newaxis]
         return num / den
 
     def _mr_props_as_1st(self, axis, table, hs_dims, prune):
@@ -735,6 +752,8 @@ class CrunchCube(object):
 
         if self.ndim == 1:
             return self._mr_props_single_dim(table, valid_indices, prune)
+
+        hs_dims = hs_dims if hs_dims else self.hs_dims
 
         if self.mr_dim_ind == 0:
             return self._mr_props_as_0th(axis, table, hs_dims, prune)
@@ -1032,7 +1051,7 @@ class CrunchCube(object):
 
         return [dim.inserted_hs_indices for dim in self.dimensions]
 
-    def labels(self, include_missing=False, include_transforms_for_dims=False):
+    def labels(self, include_missing=False, include_transforms_for_dims=None):
         '''Gets labels for each cube's dimension.
 
         Args
@@ -1041,13 +1060,19 @@ class CrunchCube(object):
         Returns
             labels (list of lists): Labels for each dimension
         '''
+        hs_dims = (
+            include_transforms_for_dims
+            if include_transforms_for_dims else
+            self.hs_dims
+        )
         return [
-            dim.labels(include_missing, include_transforms_for_dims)
+            dim.labels(include_missing, hs_dims)
             for dim in self.dimensions
         ]
 
-    def as_array(self, include_missing=False, weighted=True, adjusted=False,
-                 include_transforms_for_dims=None, prune=False, margin=False):
+    def as_array(self, include_missing=False, weighted=True,
+                 adjusted=False, prune=False, margin=False,
+                 include_transforms_for_dims=None):
         '''Get crunch cube as ndarray.
 
         Returns the tabular representation of the crunch cube. The returning
@@ -1077,18 +1102,25 @@ class CrunchCube(object):
                 [0, 0, 0, 0],
             ])
         '''
+        hs_dims = (
+            include_transforms_for_dims
+            if include_transforms_for_dims else
+            self.hs_dims
+        )
+        hs_dims = not margin and hs_dims
+        # hs_dims = not margin and self.hs_dims
         array = self._as_array(
             include_missing=include_missing,
             weighted=weighted,
             adjusted=adjusted,
-            include_transforms_for_dims=include_transforms_for_dims,
+            include_transforms_for_dims=hs_dims,
             prune=prune,
             margin=margin,
         )
         return self._fix_shape(array)
 
-    def margin(self, axis=None, weighted=True,
-               include_transforms_for_dims=None, prune=False):
+    def margin(self, axis=None, weighted=True, prune=False, include_hs=True,
+               include_transforms_for_dims=None):
         '''Get margin for the selected axis.
 
         the selected axis. For MR variables, this is the sum of the selected
@@ -1145,17 +1177,23 @@ class CrunchCube(object):
                 [0, 1],
             ])
         '''
+        hs_dims = (
+            include_transforms_for_dims
+            if include_transforms_for_dims else
+            self.hs_dims
+        )
+        include_hs = include_hs and hs_dims
+        # include_hs = include_hs and self.hs_dims
         return self._margin(
             axis=axis,
             weighted=weighted,
             adjusted=False,
-            include_transforms_for_dims=include_transforms_for_dims,
+            include_transforms_for_dims=include_hs,
             prune=prune,
         )
 
-    def proportions(self, axis=None, weighted=True,
-                    include_transforms_for_dims=None, include_missing=False,
-                    prune=False):
+    def proportions(self, axis=None, weighted=True, include_missing=False,
+                    prune=False, include_transforms_for_dims=None):
         '''Get proportions of a crunch cube.
 
         This function calculates the proportions across the selected axis
@@ -1216,11 +1254,16 @@ class CrunchCube(object):
             ])
         '''
 
+        hs_dims = (
+            include_transforms_for_dims
+            if include_transforms_for_dims else
+            self.hs_dims
+        )
         return self._proportions(
             axis=axis,
             weighted=weighted,
             adjusted=False,
-            include_transforms_for_dims=include_transforms_for_dims,
+            include_transforms_for_dims=hs_dims,
             include_missing=include_missing,
             prune=prune,
         )
@@ -1293,11 +1336,16 @@ class CrunchCube(object):
                 [3000, 1800],
             ])
         '''
+        hs_dims = (
+            include_transforms_for_dims
+            if include_transforms_for_dims else
+            self.hs_dims
+        )
         return self._proportions(
             adjusted=False,
             weighted=weighted,
             include_missing=include_missing,
-            include_transforms_for_dims=include_transforms_for_dims,
+            include_transforms_for_dims=hs_dims,
             prune=prune
         ) * population_size
 
@@ -1331,8 +1379,14 @@ class CrunchCube(object):
         if not self.dimensions:
             return 4
 
+        hs_dims = (
+            include_transforms_for_dims
+            if include_transforms_for_dims else
+            self.hs_dims
+        )
+
         first_dim_length = self.as_array(
-            include_transforms_for_dims=include_transforms_for_dims
+            include_transforms_for_dims=hs_dims
         ).shape[0]
 
         # Special case of CA as a 0-ind cube
@@ -1342,7 +1396,7 @@ class CrunchCube(object):
         if self.ndim <= 2 and self.dimensions[0].type:
             return first_dim_length + 4
         return first_dim_length * (self.as_array(
-            include_transforms_for_dims=include_transforms_for_dims
+            include_transforms_for_dims=hs_dims
         ).shape[1] + 4)
 
     def count(self, weighted=True):
