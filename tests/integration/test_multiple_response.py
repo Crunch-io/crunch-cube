@@ -338,9 +338,13 @@ class TestMultipleResponse(TestCase):
 
     def test_array_x_mr_by_cell(self):
         cube = CrunchCube(ARRAY_X_MR)
+        # expected = np.array([
+        #     [0.41922353375674093, 0.03471395310157275, 0.5832027484767315],
+        #     [0.5143557893611596, 1, 0.5199603338915276],
+        # ])
         expected = np.array([
-            [0.41922353375674093, 0.03471395310157275, 0.5832027484767315],
-            [0.5143557893611596, 1, 0.5199603338915276],
+            [0.23701678, 0.01962626, 0.32972586],
+            [0.223554, 0.43462911, 0.2259899],
         ])
         # Only compare the first slice (parity with whaam tests)
         actual = cube.proportions(axis=None)[0]
