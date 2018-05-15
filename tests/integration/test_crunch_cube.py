@@ -1190,6 +1190,10 @@ class TestCrunchCube(TestCase):
             [0.44836533, 0., 0.48261546],
             [0.39084967, 1., 0.47843137],
         ])
+        expected = np.array([
+            [0.24992768, 0.        , 0.26901938],  # noqa
+            [0.17298235, 0.44258027, 0.21174429],
+        ])
         actual = cube.proportions(axis=None)[0]
         np.testing.assert_almost_equal(actual, expected)
 

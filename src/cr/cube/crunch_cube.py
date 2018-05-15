@@ -722,6 +722,8 @@ class CrunchCube(object):
             if axis == 1 else
             self.margin(axis=0)
         )
+        if self.ndim == 3 and axis is None:
+            margin = np.sum(margin, axis=1)[:, np.newaxis, :]
         return self.as_array(
             include_transforms_for_dims=hs_dims
         ) / margin
