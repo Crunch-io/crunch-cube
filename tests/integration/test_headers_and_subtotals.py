@@ -19,6 +19,7 @@ from .fixtures import MISSING_CAT_HS
 from .fixtures import CA_X_CAT_HS
 from .fixtures import CAT_X_MR_WEIGHTED_HS
 from .fixtures import MR_X_CA_HS
+from .fixtures import CA_X_MR_HS
 
 from cr.cube.crunch_cube import CrunchCube
 
@@ -770,3 +771,14 @@ class TestHeadersAndSubtotals(TestCase):
         ])
         actual = cube.proportions(include_transforms_for_dims=[0, 1, 2])
         np.testing.assert_almost_equal(actual, expected)
+
+    def test_ca_x_mr_as_array_pruning(self):
+        cube = CrunchCube(CA_X_MR_HS)
+        expected = np.array([
+            [False, False, True],
+            [False, False, True],
+            [False, False, True],
+            [True, True, True],
+        ])
+        actual = cube.as_array(prune=True)[0].mask
+        np.testing.assert_array_equal(actual, expected)

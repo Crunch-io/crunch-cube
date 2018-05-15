@@ -228,6 +228,8 @@ class CrunchCube(object):
                 slice_mask = slice_mask[np.newaxis, :, np.newaxis, :]
             elif self.mr_dim_ind == (0, 2):
                 slice_mask = slice_mask[np.newaxis, :, :, np.newaxis]
+            elif self.mr_dim_ind == 1 and self.ndim == 3:
+                slice_mask = slice_mask[:, np.newaxis, :]
 
             mask[i] = slice_mask
         res = np.ma.masked_array(res, mask=mask)
