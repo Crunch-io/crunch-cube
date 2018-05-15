@@ -228,6 +228,10 @@ class CrunchCube(object):
                 slice_mask = slice_mask[np.newaxis, :, np.newaxis, :]
             elif self.mr_dim_ind == (0, 2):
                 slice_mask = slice_mask[np.newaxis, :, :, np.newaxis]
+            elif self.mr_dim_ind == 1 and self.ndim == 3:
+                slice_mask = slice_mask[:, np.newaxis, :]
+            elif self.mr_dim_ind == 2 and self.ndim == 3:
+                slice_mask = slice_mask[:, :, np.newaxis]
 
             mask[i] = slice_mask
         res = np.ma.masked_array(res, mask=mask)
@@ -682,6 +686,7 @@ class CrunchCube(object):
     def _mr_props_as_1st(self, axis, table, hs_dims, prune):
         num = table[self.ind_selected][np.ix_(*self.valid_indices)]
         non_selected = table[self.ind_non_selected][np.ix_(*self.valid_indices)]
+
         if num.ndim >= 3:
             if axis == (1, 2) or axis is None:
                 den = np.sum(num + non_selected, 2)[:, :, None]
@@ -691,7 +696,11 @@ class CrunchCube(object):
                 den = num + non_selected
             res = num / den
             res = self._transform(res, hs_dims, None)
+            if prune:
+                res = np.ma.masked_array(res,
+                                         mask=self.as_array(prune=prune).mask)
             return res
+
         if axis == 0:
             den = np.sum(num, 0)
         elif axis == 1 or axis == 2 and len(num.shape) >= 3:
@@ -699,8 +708,10 @@ class CrunchCube(object):
         else:
             axis = 0 if len(num.shape) < 3 else (1, 2)
             den = np.sum(num + non_selected, axis)
+
         res = num / den
         res = self._transform(res, hs_dims, None)
+
         if prune:
             res = np.ma.masked_array(res, mask=self.as_array(prune=prune).mask)
         return res
@@ -711,6 +722,8 @@ class CrunchCube(object):
             if axis == 1 else
             self.margin(axis=0)
         )
+        if self.ndim == 3 and axis is None:
+            margin = np.sum(margin, axis=1)[:, np.newaxis, :]
         return self.as_array(
             include_transforms_for_dims=hs_dims
         ) / margin
