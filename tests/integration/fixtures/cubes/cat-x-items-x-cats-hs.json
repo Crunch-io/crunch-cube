@@ -1,0 +1,1920 @@
+{
+  "element": "shoji:view",
+  "self": "/api/datasets/0433fddc8c944fc79c2185791ae638b0/cube/?filter=%7B%22filter%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2F0433fddc8c944fc79c2185791ae638b0%2Ffilters%2F740d256b2e36482f8f62d3ded18f02bf%2F%22%7D&query=%7B%22dimensions%22:%5B%7B%22variable%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2F0433fddc8c944fc79c2185791ae638b0%2Fvariables%2F1a70edc2c0424f47a73b05ae0e1b0119%2F%22%7D,%7B%22each%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2F0433fddc8c944fc79c2185791ae638b0%2Fvariables%2F000178%2F%22%7D,%7B%22variable%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2F0433fddc8c944fc79c2185791ae638b0%2Fvariables%2F000178%2F%22%7D%5D,%22measures%22:%7B%22count%22:%7B%22function%22:%22cube_count%22,%22args%22:%5B%5D%7D%7D,%22weight%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2F0433fddc8c944fc79c2185791ae638b0%2Fvariables%2F774ca1bd8a1248bfaea7b7b3667b948b%2F%22%7D",
+  "value": {
+    "query": {
+      "measures": {
+        "count": {
+          "function": "cube_count",
+          "args": []
+        }
+      },
+      "dimensions": [
+        {
+          "variable": "1a70edc2c0424f47a73b05ae0e1b0119"
+        },
+        {
+          "each": 2
+        },
+        {
+          "variable": "000178"
+        }
+      ],
+      "weight": "/api/datasets/0433fddc8c944fc79c2185791ae638b0/variables/774ca1bd8a1248bfaea7b7b3667b948b/"
+    },
+    "query_environment": {
+      "filter": [
+        "/api/datasets/0433fddc8c944fc79c2185791ae638b0/filters/3eefc0f091814a6daf3ed91b9d073a56/"
+      ]
+    },
+    "result": {
+      "dimensions": [
+        {
+          "derived": true,
+          "references": {
+            "alias": "Age (3-way)",
+            "name": "Age (3-way)"
+          },
+          "type": {
+            "ordinal": false,
+            "class": "categorical",
+            "categories": [
+              {
+                "numeric_value": null,
+                "id": 0,
+                "name": "16-34",
+                "missing": false
+              },
+              {
+                "numeric_value": null,
+                "id": 1,
+                "name": "35-54",
+                "missing": false
+              },
+              {
+                "numeric_value": null,
+                "id": 2,
+                "name": "55+",
+                "missing": false
+              },
+              {
+                "numeric_value": null,
+                "missing": true,
+                "id": 3,
+                "name": "Other"
+              }
+            ]
+          }
+        },
+        {
+          "derived": true,
+          "references": {
+            "alias": "Q3",
+            "view": {
+              "show_counts": false,
+              "transform": {
+                "insertions": [
+                  {
+                    "function": "subtotal",
+                    "args": [
+                      10,
+                      9,
+                      8
+                    ],
+                    "name": "Net: Satisfied",
+                    "anchor": "bottom"
+                  }
+                ]
+              },
+              "include_missing": false,
+              "column_width": null
+            },
+            "description": "For the next question, we would like you to think specifically about the overall service(s) below, and not the programme / content you watched. Overall, how satisfied were you with your experience of each of the following services?",
+            "name": "Satisfaction with services",
+            "subreferences": [
+              {
+                "alias": "Q3_1",
+                "name": "Q3 -- All 4"
+              },
+              {
+                "alias": "Q3_2",
+                "name": "Q3 -- BBCiPlayer"
+              },
+              {
+                "alias": "Q3_3",
+                "name": "Q3 -- ITV Hub"
+              },
+              {
+                "alias": "Q3_4",
+                "name": "Q3 -- My5"
+              },
+              {
+                "alias": "Q3_5",
+                "name": "Q3 -- Netflix"
+              },
+              {
+                "alias": "Q3_6",
+                "name": "Q3 -- Amazon Video"
+              },
+              {
+                "alias": "Q3_7",
+                "name": "Q3 -- Now TV"
+              },
+              {
+                "alias": "Q3_8",
+                "name": "Q3 -- SkyGo"
+              }
+            ]
+          },
+          "type": {
+            "subtype": {
+              "class": "variable"
+            },
+            "elements": [
+              {
+                "id": 1,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "Q3_1",
+                    "name": "Q3 -- All 4"
+                  },
+                  "id": "0001",
+                  "type": {
+                    "ordinal": false,
+                    "class": "categorical",
+                    "categories": [
+                      {
+                        "numeric_value": 1,
+                        "missing": false,
+                        "id": 1,
+                        "name": "1 - Very dissatisfied"
+                      },
+                      {
+                        "numeric_value": 2,
+                        "missing": false,
+                        "id": 2,
+                        "name": "2"
+                      },
+                      {
+                        "numeric_value": 3,
+                        "missing": false,
+                        "id": 3,
+                        "name": "3"
+                      },
+                      {
+                        "numeric_value": 4,
+                        "missing": false,
+                        "id": 4,
+                        "name": "4"
+                      },
+                      {
+                        "numeric_value": 5,
+                        "missing": false,
+                        "id": 5,
+                        "name": "5"
+                      },
+                      {
+                        "numeric_value": 6,
+                        "missing": false,
+                        "id": 6,
+                        "name": "6"
+                      },
+                      {
+                        "numeric_value": 7,
+                        "missing": false,
+                        "id": 7,
+                        "name": "7"
+                      },
+                      {
+                        "numeric_value": 8,
+                        "missing": false,
+                        "id": 8,
+                        "name": "8"
+                      },
+                      {
+                        "numeric_value": 9,
+                        "missing": false,
+                        "id": 9,
+                        "name": "9"
+                      },
+                      {
+                        "numeric_value": 10,
+                        "missing": false,
+                        "id": 10,
+                        "name": "10 - Very satisfied"
+                      },
+                      {
+                        "numeric_value": null,
+                        "missing": true,
+                        "id": 32766,
+                        "name": "skipped"
+                      },
+                      {
+                        "numeric_value": null,
+                        "missing": true,
+                        "id": 32767,
+                        "name": "not asked"
+                      },
+                      {
+                        "numeric_value": null,
+                        "missing": true,
+                        "id": -1,
+                        "name": "No Data"
+                      }
+                    ]
+                  }
+                },
+                "missing": false
+              },
+              {
+                "id": 2,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "Q3_2",
+                    "name": "Q3 -- BBCiPlayer"
+                  },
+                  "id": "0002",
+                  "type": {
+                    "ordinal": false,
+                    "class": "categorical",
+                    "categories": [
+                      {
+                        "numeric_value": 1,
+                        "missing": false,
+                        "id": 1,
+                        "name": "1 - Very dissatisfied"
+                      },
+                      {
+                        "numeric_value": 2,
+                        "missing": false,
+                        "id": 2,
+                        "name": "2"
+                      },
+                      {
+                        "numeric_value": 3,
+                        "missing": false,
+                        "id": 3,
+                        "name": "3"
+                      },
+                      {
+                        "numeric_value": 4,
+                        "missing": false,
+                        "id": 4,
+                        "name": "4"
+                      },
+                      {
+                        "numeric_value": 5,
+                        "missing": false,
+                        "id": 5,
+                        "name": "5"
+                      },
+                      {
+                        "numeric_value": 6,
+                        "missing": false,
+                        "id": 6,
+                        "name": "6"
+                      },
+                      {
+                        "numeric_value": 7,
+                        "missing": false,
+                        "id": 7,
+                        "name": "7"
+                      },
+                      {
+                        "numeric_value": 8,
+                        "missing": false,
+                        "id": 8,
+                        "name": "8"
+                      },
+                      {
+                        "numeric_value": 9,
+                        "missing": false,
+                        "id": 9,
+                        "name": "9"
+                      },
+                      {
+                        "numeric_value": 10,
+                        "missing": false,
+                        "id": 10,
+                        "name": "10 - Very satisfied"
+                      },
+                      {
+                        "numeric_value": null,
+                        "missing": true,
+                        "id": 32766,
+                        "name": "skipped"
+                      },
+                      {
+                        "numeric_value": null,
+                        "missing": true,
+                        "id": 32767,
+                        "name": "not asked"
+                      },
+                      {
+                        "numeric_value": null,
+                        "missing": true,
+                        "id": -1,
+                        "name": "No Data"
+                      }
+                    ]
+                  }
+                },
+                "missing": false
+              },
+              {
+                "id": 3,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "Q3_3",
+                    "name": "Q3 -- ITV Hub"
+                  },
+                  "id": "0003",
+                  "type": {
+                    "ordinal": false,
+                    "class": "categorical",
+                    "categories": [
+                      {
+                        "numeric_value": 1,
+                        "missing": false,
+                        "id": 1,
+                        "name": "1 - Very dissatisfied"
+                      },
+                      {
+                        "numeric_value": 2,
+                        "missing": false,
+                        "id": 2,
+                        "name": "2"
+                      },
+                      {
+                        "numeric_value": 3,
+                        "missing": false,
+                        "id": 3,
+                        "name": "3"
+                      },
+                      {
+                        "numeric_value": 4,
+                        "missing": false,
+                        "id": 4,
+                        "name": "4"
+                      },
+                      {
+                        "numeric_value": 5,
+                        "missing": false,
+                        "id": 5,
+                        "name": "5"
+                      },
+                      {
+                        "numeric_value": 6,
+                        "missing": false,
+                        "id": 6,
+                        "name": "6"
+                      },
+                      {
+                        "numeric_value": 7,
+                        "missing": false,
+                        "id": 7,
+                        "name": "7"
+                      },
+                      {
+                        "numeric_value": 8,
+                        "missing": false,
+                        "id": 8,
+                        "name": "8"
+                      },
+                      {
+                        "numeric_value": 9,
+                        "missing": false,
+                        "id": 9,
+                        "name": "9"
+                      },
+                      {
+                        "numeric_value": 10,
+                        "missing": false,
+                        "id": 10,
+                        "name": "10 - Very satisfied"
+                      },
+                      {
+                        "numeric_value": null,
+                        "missing": true,
+                        "id": 32766,
+                        "name": "skipped"
+                      },
+                      {
+                        "numeric_value": null,
+                        "missing": true,
+                        "id": 32767,
+                        "name": "not asked"
+                      },
+                      {
+                        "numeric_value": null,
+                        "missing": true,
+                        "id": -1,
+                        "name": "No Data"
+                      }
+                    ]
+                  }
+                },
+                "missing": false
+              },
+              {
+                "id": 4,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "Q3_4",
+                    "name": "Q3 -- My5"
+                  },
+                  "id": "0004",
+                  "type": {
+                    "ordinal": false,
+                    "class": "categorical",
+                    "categories": [
+                      {
+                        "numeric_value": 1,
+                        "missing": false,
+                        "id": 1,
+                        "name": "1 - Very dissatisfied"
+                      },
+                      {
+                        "numeric_value": 2,
+                        "missing": false,
+                        "id": 2,
+                        "name": "2"
+                      },
+                      {
+                        "numeric_value": 3,
+                        "missing": false,
+                        "id": 3,
+                        "name": "3"
+                      },
+                      {
+                        "numeric_value": 4,
+                        "missing": false,
+                        "id": 4,
+                        "name": "4"
+                      },
+                      {
+                        "numeric_value": 5,
+                        "missing": false,
+                        "id": 5,
+                        "name": "5"
+                      },
+                      {
+                        "numeric_value": 6,
+                        "missing": false,
+                        "id": 6,
+                        "name": "6"
+                      },
+                      {
+                        "numeric_value": 7,
+                        "missing": false,
+                        "id": 7,
+                        "name": "7"
+                      },
+                      {
+                        "numeric_value": 8,
+                        "missing": false,
+                        "id": 8,
+                        "name": "8"
+                      },
+                      {
+                        "numeric_value": 9,
+                        "missing": false,
+                        "id": 9,
+                        "name": "9"
+                      },
+                      {
+                        "numeric_value": 10,
+                        "missing": false,
+                        "id": 10,
+                        "name": "10 - Very satisfied"
+                      },
+                      {
+                        "numeric_value": null,
+                        "missing": true,
+                        "id": 32766,
+                        "name": "skipped"
+                      },
+                      {
+                        "numeric_value": null,
+                        "missing": true,
+                        "id": 32767,
+                        "name": "not asked"
+                      },
+                      {
+                        "numeric_value": null,
+                        "missing": true,
+                        "id": -1,
+                        "name": "No Data"
+                      }
+                    ]
+                  }
+                },
+                "missing": false
+              },
+              {
+                "id": 5,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "Q3_5",
+                    "name": "Q3 -- Netflix"
+                  },
+                  "id": "0005",
+                  "type": {
+                    "ordinal": false,
+                    "class": "categorical",
+                    "categories": [
+                      {
+                        "numeric_value": 1,
+                        "missing": false,
+                        "id": 1,
+                        "name": "1 - Very dissatisfied"
+                      },
+                      {
+                        "numeric_value": 2,
+                        "missing": false,
+                        "id": 2,
+                        "name": "2"
+                      },
+                      {
+                        "numeric_value": 3,
+                        "missing": false,
+                        "id": 3,
+                        "name": "3"
+                      },
+                      {
+                        "numeric_value": 4,
+                        "missing": false,
+                        "id": 4,
+                        "name": "4"
+                      },
+                      {
+                        "numeric_value": 5,
+                        "missing": false,
+                        "id": 5,
+                        "name": "5"
+                      },
+                      {
+                        "numeric_value": 6,
+                        "missing": false,
+                        "id": 6,
+                        "name": "6"
+                      },
+                      {
+                        "numeric_value": 7,
+                        "missing": false,
+                        "id": 7,
+                        "name": "7"
+                      },
+                      {
+                        "numeric_value": 8,
+                        "missing": false,
+                        "id": 8,
+                        "name": "8"
+                      },
+                      {
+                        "numeric_value": 9,
+                        "missing": false,
+                        "id": 9,
+                        "name": "9"
+                      },
+                      {
+                        "numeric_value": 10,
+                        "missing": false,
+                        "id": 10,
+                        "name": "10 - Very satisfied"
+                      },
+                      {
+                        "numeric_value": null,
+                        "missing": true,
+                        "id": 32766,
+                        "name": "skipped"
+                      },
+                      {
+                        "numeric_value": null,
+                        "missing": true,
+                        "id": 32767,
+                        "name": "not asked"
+                      },
+                      {
+                        "numeric_value": null,
+                        "missing": true,
+                        "id": -1,
+                        "name": "No Data"
+                      }
+                    ]
+                  }
+                },
+                "missing": false
+              },
+              {
+                "id": 6,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "Q3_6",
+                    "name": "Q3 -- Amazon Video"
+                  },
+                  "id": "0006",
+                  "type": {
+                    "ordinal": false,
+                    "class": "categorical",
+                    "categories": [
+                      {
+                        "numeric_value": 1,
+                        "missing": false,
+                        "id": 1,
+                        "name": "1 - Very dissatisfied"
+                      },
+                      {
+                        "numeric_value": 2,
+                        "missing": false,
+                        "id": 2,
+                        "name": "2"
+                      },
+                      {
+                        "numeric_value": 3,
+                        "missing": false,
+                        "id": 3,
+                        "name": "3"
+                      },
+                      {
+                        "numeric_value": 4,
+                        "missing": false,
+                        "id": 4,
+                        "name": "4"
+                      },
+                      {
+                        "numeric_value": 5,
+                        "missing": false,
+                        "id": 5,
+                        "name": "5"
+                      },
+                      {
+                        "numeric_value": 6,
+                        "missing": false,
+                        "id": 6,
+                        "name": "6"
+                      },
+                      {
+                        "numeric_value": 7,
+                        "missing": false,
+                        "id": 7,
+                        "name": "7"
+                      },
+                      {
+                        "numeric_value": 8,
+                        "missing": false,
+                        "id": 8,
+                        "name": "8"
+                      },
+                      {
+                        "numeric_value": 9,
+                        "missing": false,
+                        "id": 9,
+                        "name": "9"
+                      },
+                      {
+                        "numeric_value": 10,
+                        "missing": false,
+                        "id": 10,
+                        "name": "10 - Very satisfied"
+                      },
+                      {
+                        "numeric_value": null,
+                        "missing": true,
+                        "id": 32766,
+                        "name": "skipped"
+                      },
+                      {
+                        "numeric_value": null,
+                        "missing": true,
+                        "id": 32767,
+                        "name": "not asked"
+                      },
+                      {
+                        "numeric_value": null,
+                        "missing": true,
+                        "id": -1,
+                        "name": "No Data"
+                      }
+                    ]
+                  }
+                },
+                "missing": false
+              },
+              {
+                "id": 7,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "Q3_7",
+                    "name": "Q3 -- Now TV"
+                  },
+                  "id": "0007",
+                  "type": {
+                    "ordinal": false,
+                    "class": "categorical",
+                    "categories": [
+                      {
+                        "numeric_value": 1,
+                        "missing": false,
+                        "id": 1,
+                        "name": "1 - Very dissatisfied"
+                      },
+                      {
+                        "numeric_value": 2,
+                        "missing": false,
+                        "id": 2,
+                        "name": "2"
+                      },
+                      {
+                        "numeric_value": 3,
+                        "missing": false,
+                        "id": 3,
+                        "name": "3"
+                      },
+                      {
+                        "numeric_value": 4,
+                        "missing": false,
+                        "id": 4,
+                        "name": "4"
+                      },
+                      {
+                        "numeric_value": 5,
+                        "missing": false,
+                        "id": 5,
+                        "name": "5"
+                      },
+                      {
+                        "numeric_value": 6,
+                        "missing": false,
+                        "id": 6,
+                        "name": "6"
+                      },
+                      {
+                        "numeric_value": 7,
+                        "missing": false,
+                        "id": 7,
+                        "name": "7"
+                      },
+                      {
+                        "numeric_value": 8,
+                        "missing": false,
+                        "id": 8,
+                        "name": "8"
+                      },
+                      {
+                        "numeric_value": 9,
+                        "missing": false,
+                        "id": 9,
+                        "name": "9"
+                      },
+                      {
+                        "numeric_value": 10,
+                        "missing": false,
+                        "id": 10,
+                        "name": "10 - Very satisfied"
+                      },
+                      {
+                        "numeric_value": null,
+                        "missing": true,
+                        "id": 32766,
+                        "name": "skipped"
+                      },
+                      {
+                        "numeric_value": null,
+                        "missing": true,
+                        "id": 32767,
+                        "name": "not asked"
+                      },
+                      {
+                        "numeric_value": null,
+                        "missing": true,
+                        "id": -1,
+                        "name": "No Data"
+                      }
+                    ]
+                  }
+                },
+                "missing": false
+              },
+              {
+                "id": 8,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "Q3_8",
+                    "name": "Q3 -- SkyGo"
+                  },
+                  "id": "0008",
+                  "type": {
+                    "ordinal": false,
+                    "class": "categorical",
+                    "categories": [
+                      {
+                        "numeric_value": 1,
+                        "missing": false,
+                        "id": 1,
+                        "name": "1 - Very dissatisfied"
+                      },
+                      {
+                        "numeric_value": 2,
+                        "missing": false,
+                        "id": 2,
+                        "name": "2"
+                      },
+                      {
+                        "numeric_value": 3,
+                        "missing": false,
+                        "id": 3,
+                        "name": "3"
+                      },
+                      {
+                        "numeric_value": 4,
+                        "missing": false,
+                        "id": 4,
+                        "name": "4"
+                      },
+                      {
+                        "numeric_value": 5,
+                        "missing": false,
+                        "id": 5,
+                        "name": "5"
+                      },
+                      {
+                        "numeric_value": 6,
+                        "missing": false,
+                        "id": 6,
+                        "name": "6"
+                      },
+                      {
+                        "numeric_value": 7,
+                        "missing": false,
+                        "id": 7,
+                        "name": "7"
+                      },
+                      {
+                        "numeric_value": 8,
+                        "missing": false,
+                        "id": 8,
+                        "name": "8"
+                      },
+                      {
+                        "numeric_value": 9,
+                        "missing": false,
+                        "id": 9,
+                        "name": "9"
+                      },
+                      {
+                        "numeric_value": 10,
+                        "missing": false,
+                        "id": 10,
+                        "name": "10 - Very satisfied"
+                      },
+                      {
+                        "numeric_value": null,
+                        "missing": true,
+                        "id": 32766,
+                        "name": "skipped"
+                      },
+                      {
+                        "numeric_value": null,
+                        "missing": true,
+                        "id": 32767,
+                        "name": "not asked"
+                      },
+                      {
+                        "numeric_value": null,
+                        "missing": true,
+                        "id": -1,
+                        "name": "No Data"
+                      }
+                    ]
+                  }
+                },
+                "missing": false
+              }
+            ],
+            "class": "enum"
+          }
+        },
+        {
+          "references": {
+            "alias": "Q3",
+            "subreferences": [
+              {
+                "alias": "Q3_1",
+                "name": "Q3 -- All 4"
+              },
+              {
+                "alias": "Q3_2",
+                "name": "Q3 -- BBCiPlayer"
+              },
+              {
+                "alias": "Q3_3",
+                "name": "Q3 -- ITV Hub"
+              },
+              {
+                "alias": "Q3_4",
+                "name": "Q3 -- My5"
+              },
+              {
+                "alias": "Q3_5",
+                "name": "Q3 -- Netflix"
+              },
+              {
+                "alias": "Q3_6",
+                "name": "Q3 -- Amazon Video"
+              },
+              {
+                "alias": "Q3_7",
+                "name": "Q3 -- Now TV"
+              },
+              {
+                "alias": "Q3_8",
+                "name": "Q3 -- SkyGo"
+              }
+            ],
+            "description": "For the next question, we would like you to think specifically about the overall service(s) below, and not the programme / content you watched. Overall, how satisfied were you with your experience of each of the following services?",
+            "name": "Satisfaction with services",
+            "view": {
+              "show_counts": false,
+              "transform": {
+                "insertions": [
+                  {
+                    "function": "subtotal",
+                    "args": [
+                      10,
+                      9,
+                      8
+                    ],
+                    "name": "Net: Satisfied",
+                    "anchor": "bottom"
+                  }
+                ]
+              },
+              "include_missing": false,
+              "column_width": null
+            }
+          },
+          "derived": false,
+          "type": {
+            "ordinal": false,
+            "subvariables": [
+              "0001",
+              "0002",
+              "0003",
+              "0004",
+              "0005",
+              "0006",
+              "0007",
+              "0008"
+            ],
+            "class": "categorical",
+            "categories": [
+              {
+                "numeric_value": 1,
+                "missing": false,
+                "id": 1,
+                "name": "1 - Very dissatisfied"
+              },
+              {
+                "numeric_value": 2,
+                "missing": false,
+                "id": 2,
+                "name": "2"
+              },
+              {
+                "numeric_value": 3,
+                "missing": false,
+                "id": 3,
+                "name": "3"
+              },
+              {
+                "numeric_value": 4,
+                "missing": false,
+                "id": 4,
+                "name": "4"
+              },
+              {
+                "numeric_value": 5,
+                "missing": false,
+                "id": 5,
+                "name": "5"
+              },
+              {
+                "numeric_value": 6,
+                "missing": false,
+                "id": 6,
+                "name": "6"
+              },
+              {
+                "numeric_value": 7,
+                "missing": false,
+                "id": 7,
+                "name": "7"
+              },
+              {
+                "numeric_value": 8,
+                "missing": false,
+                "id": 8,
+                "name": "8"
+              },
+              {
+                "numeric_value": 9,
+                "missing": false,
+                "id": 9,
+                "name": "9"
+              },
+              {
+                "numeric_value": 10,
+                "missing": false,
+                "id": 10,
+                "name": "10 - Very satisfied"
+              },
+              {
+                "numeric_value": null,
+                "missing": true,
+                "id": 32766,
+                "name": "skipped"
+              },
+              {
+                "numeric_value": null,
+                "missing": true,
+                "id": 32767,
+                "name": "not asked"
+              },
+              {
+                "numeric_value": null,
+                "missing": true,
+                "id": -1,
+                "name": "No Data"
+              }
+            ]
+          }
+        }
+      ],
+      "missing": 3758,
+      "measures": {
+        "count": {
+          "data": [
+            5.955224982020013,
+            10.92441920112693,
+            23.62716028748992,
+            33.705125706097085,
+            84.31539109259666,
+            123.69014775143337,
+            301.1619851610711,
+            314.3176563854322,
+            155.89895801870247,
+            234.34039082157707,
+            0,
+            3104.6627651682115,
+            0,
+            3.65972031180723,
+            12.012771242048402,
+            20.91761183066991,
+            31.109117497713648,
+            81.24166189014011,
+            140.74761159894956,
+            359.27688173822304,
+            525.9325777844692,
+            384.65082090437375,
+            490.5084178355939,
+            0,
+            2342.5420319417694,
+            0,
+            5.520715684632007,
+            4.062406575259406,
+            7.991092468057216,
+            17.83876321991497,
+            58.1186124741662,
+            93.92619016321288,
+            180.44874208396803,
+            170.06623963599225,
+            92.47472272420588,
+            152.49290417035297,
+            0,
+            3609.658835376003,
+            0,
+            0.70969088265203,
+            0,
+            5.271314043356604,
+            2.466444784606355,
+            30.6212238356808,
+            28.777661084619943,
+            41.01326421502641,
+            53.51486936070829,
+            20.805577534230007,
+            42.22661500123967,
+            0,
+            4167.192563833657,
+            0,
+            11.050707235260003,
+            6.2622387035939235,
+            6.977767706197051,
+            14.499962626537481,
+            54.73066159549397,
+            105.88395546596274,
+            305.9852028722154,
+            730.2333853401014,
+            571.9100760863876,
+            815.269727906711,
+            0,
+            1769.7955390373072,
+            0,
+            8.488861876675898,
+            10.235611766235138,
+            6.097905883659586,
+            19.381423719737725,
+            42.82421698877975,
+            100.29536034097504,
+            211.32865053900937,
+            250.4869577815295,
+            139.15825993649105,
+            186.29170488124714,
+            0,
+            3418.0102708614163,
+            0,
+            2.9582317401637193,
+            1.344274770149552,
+            6.697156323953501,
+            10.92141037833833,
+            29.896702643751116,
+            51.54541277972033,
+            77.32150783107762,
+            123.34320520036736,
+            75.74799535671822,
+            110.7277739072643,
+            0,
+            3902.0955536442643,
+            0,
+            2.84065500365224,
+            2.571251064605872,
+            5.228308630005165,
+            8.93936717478244,
+            20.83526340133889,
+            42.39527642406901,
+            81.8817548843658,
+            74.6197644217766,
+            52.43806364894693,
+            82.07243109849455,
+            0,
+            4018.7770888237346,
+            0,
+            11.867668024391739,
+            7.521168057190301,
+            11.871046831361246,
+            28.251331269216514,
+            67.67812331057932,
+            84.6527072754466,
+            231.48689279529077,
+            290.8318444312363,
+            148.77533611674593,
+            264.4336402139864,
+            0,
+            3830.9098353532977,
+            0,
+            11.652210531560236,
+            8.611466143069011,
+            22.233361236781843,
+            32.90661455489638,
+            106.26273975221301,
+            154.10537016602265,
+            365.89596514848154,
+            691.4594244997928,
+            476.5255578385383,
+            688.2332080965296,
+            0,
+            2420.393675710882,
+            0,
+            9.026309482199034,
+            3.26401975534288,
+            11.071863012961735,
+            19.381326618192602,
+            78.23091879685812,
+            111.32950297344138,
+            198.70454016742144,
+            261.4070923121164,
+            157.018327449856,
+            247.35029063508452,
+            0,
+            3881.495402475269,
+            0,
+            3.751260523091686,
+            1.7144352547144899,
+            3.5283363644479646,
+            17.89646712717882,
+            30.046062446512206,
+            32.08666611787198,
+            66.26333792929691,
+            92.2274054706968,
+            43.428129733402486,
+            83.0990461692206,
+            0,
+            4604.238446542309,
+            0,
+            6.077828397825795,
+            4.76200162633222,
+            8.059474902122092,
+            8.471316369727587,
+            55.41471342867599,
+            80.56326621434654,
+            239.75706705294917,
+            494.15827885526465,
+            387.4549852300085,
+            591.621095365899,
+            0,
+            3101.939566235605,
+            0,
+            3.7916679705440415,
+            3.7712981957083125,
+            8.968248064467184,
+            17.819388469382563,
+            55.810719258827966,
+            87.17369674017826,
+            180.76375824319808,
+            251.7526204772995,
+            169.34056314496803,
+            223.0479425316395,
+            0,
+            3976.0396905825314,
+            0,
+            4.096478300833521,
+            1.794871687869279,
+            3.002845850181483,
+            8.761240571215112,
+            18.172612256023477,
+            44.989475198983484,
+            73.83142379249946,
+            112.59307055482155,
+            88.98958580322066,
+            101.690684966651,
+            0,
+            4520.357304696446,
+            0,
+            6.421168974489485,
+            0,
+            6.995614556438641,
+            8.849617095649531,
+            20.385865358070074,
+            23.45680939403536,
+            67.59478843961625,
+            93.81322063345036,
+            89.4547755425947,
+            102.53919272592097,
+            0,
+            4558.76854095848,
+            0,
+            7.005717661329275,
+            7.832050552898757,
+            18.16541802392675,
+            17.377993327120294,
+            62.07728959979663,
+            82.82147893676145,
+            182.9089330877004,
+            258.1460030336205,
+            141.693174671854,
+            275.82701668614004,
+            0,
+            4217.266106164252,
+            0,
+            27.34834011490626,
+            14.288197406067907,
+            18.740979075973105,
+            42.98535701257673,
+            107.85396914048482,
+            153.81687651316736,
+            334.14455981229094,
+            689.1960888578242,
+            503.73180433629295,
+            807.5066689404047,
+            0,
+            2571.5083405354717,
+            0,
+            15.655951980082248,
+            9.551069578010454,
+            14.398294429625953,
+            25.728539577164874,
+            72.58466708741832,
+            102.23191678872604,
+            207.2967693653186,
+            339.542817750248,
+            227.34766432433472,
+            413.4022265342503,
+            0,
+            3843.3812643302335,
+            0,
+            3.080163269342877,
+            3.886298249924188,
+            2.537617363829245,
+            2.670844923658498,
+            25.579128901687174,
+            27.887052821176873,
+            66.95125298638692,
+            83.80094951443154,
+            64.46770022458739,
+            99.95950090371194,
+            0,
+            4890.300672586641,
+            0,
+            12.82395709317947,
+            4.218398344883015,
+            3.618703515480874,
+            4.555581655411033,
+            37.191148457685756,
+            64.37608255001223,
+            141.3499570826591,
+            215.8828391264228,
+            208.37040203481888,
+            335.39113130110036,
+            0,
+            4243.3429805837495,
+            0,
+            9.782801772835494,
+            1.6877477168535302,
+            3.2702451077993544,
+            8.885600110843333,
+            22.52804003936744,
+            42.142819170373656,
+            80.99792485270629,
+            141.88539289358607,
+            130.70429147381034,
+            164.8251651646821,
+            0,
+            4664.411153442531,
+            0,
+            4.552570560271945,
+            1.704871859299063,
+            1.82542202057615,
+            4.979435019644534,
+            17.939925089819923,
+            17.691746758276334,
+            31.58108577777599,
+            55.83417266333884,
+            30.518200674410025,
+            51.799926766255396,
+            0,
+            5052.6938245557085,
+            0,
+            2.9531878935675717,
+            1.84135466429196,
+            2.794016888074708,
+            3.9251606816352513,
+            16.562186385650396,
+            13.491359936003736,
+            40.75750007862036,
+            65.86356547036995,
+            48.90733941858335,
+            68.19795570732808,
+            0,
+            5005.827554621248,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "n_missing": 3758,
+          "metadata": {
+            "references": {},
+            "derived": true,
+            "type": {
+              "integer": false,
+              "missing_rules": {},
+              "missing_reasons": {
+                "No Data": -1
+              },
+              "class": "numeric"
+            }
+          }
+        }
+      },
+      "element": "crunch:cube",
+      "counts": [
+        6,
+        7,
+        20,
+        37,
+        77,
+        126,
+        278,
+        315,
+        159,
+        242,
+        0,
+        2810,
+        0,
+        3,
+        9,
+        19,
+        28,
+        79,
+        135,
+        333,
+        503,
+        359,
+        500,
+        0,
+        2109,
+        0,
+        6,
+        4,
+        8,
+        18,
+        59,
+        93,
+        175,
+        181,
+        89,
+        163,
+        0,
+        3281,
+        0,
+        1,
+        0,
+        5,
+        3,
+        28,
+        28,
+        40,
+        60,
+        25,
+        47,
+        0,
+        3840,
+        0,
+        6,
+        4,
+        7,
+        12,
+        56,
+        100,
+        293,
+        675,
+        539,
+        809,
+        0,
+        1576,
+        0,
+        5,
+        8,
+        7,
+        18,
+        40,
+        96,
+        185,
+        255,
+        135,
+        185,
+        0,
+        3143,
+        0,
+        3,
+        2,
+        5,
+        11,
+        30,
+        45,
+        72,
+        125,
+        79,
+        115,
+        0,
+        3590,
+        0,
+        3,
+        3,
+        3,
+        10,
+        18,
+        36,
+        72,
+        69,
+        44,
+        83,
+        0,
+        3736,
+        0,
+        12,
+        8,
+        12,
+        31,
+        69,
+        91,
+        244,
+        314,
+        147,
+        274,
+        0,
+        3969,
+        0,
+        11,
+        9,
+        24,
+        32,
+        114,
+        159,
+        390,
+        741,
+        501,
+        728,
+        0,
+        2462,
+        0,
+        9,
+        3,
+        11,
+        20,
+        79,
+        115,
+        207,
+        278,
+        161,
+        254,
+        0,
+        4034,
+        0,
+        4,
+        2,
+        4,
+        17,
+        31,
+        31,
+        69,
+        93,
+        43,
+        81,
+        0,
+        4796,
+        0,
+        6,
+        5,
+        9,
+        10,
+        59,
+        83,
+        261,
+        522,
+        409,
+        625,
+        0,
+        3182,
+        0,
+        4,
+        4,
+        9,
+        18,
+        58,
+        91,
+        195,
+        267,
+        180,
+        244,
+        0,
+        4101,
+        0,
+        4,
+        2,
+        3,
+        9,
+        20,
+        44,
+        82,
+        118,
+        91,
+        104,
+        0,
+        4694,
+        0,
+        5,
+        0,
+        7,
+        8,
+        22,
+        25,
+        73,
+        103,
+        92,
+        107,
+        0,
+        4729,
+        0,
+        7,
+        8,
+        19,
+        18,
+        66,
+        83,
+        187,
+        275,
+        149,
+        278,
+        0,
+        4304,
+        0,
+        29,
+        15,
+        20,
+        44,
+        114,
+        163,
+        351,
+        726,
+        531,
+        829,
+        0,
+        2572,
+        0,
+        16,
+        10,
+        14,
+        26,
+        73,
+        104,
+        214,
+        353,
+        230,
+        410,
+        0,
+        3944,
+        0,
+        3,
+        4,
+        3,
+        3,
+        27,
+        29,
+        65,
+        88,
+        67,
+        102,
+        0,
+        5003,
+        0,
+        14,
+        4,
+        4,
+        5,
+        40,
+        70,
+        147,
+        228,
+        223,
+        338,
+        0,
+        4321,
+        0,
+        10,
+        2,
+        4,
+        10,
+        24,
+        45,
+        85,
+        149,
+        139,
+        164,
+        0,
+        4762,
+        0,
+        5,
+        2,
+        2,
+        5,
+        20,
+        17,
+        33,
+        61,
+        33,
+        55,
+        0,
+        5161,
+        0,
+        3,
+        2,
+        2,
+        4,
+        18,
+        15,
+        42,
+        71,
+        50,
+        72,
+        0,
+        5115,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "n": 14642
+    }
+  }
+}

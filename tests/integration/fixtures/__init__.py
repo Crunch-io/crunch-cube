@@ -86,6 +86,7 @@ SINGLE_COL_MARGIN_NOT_ITERABLE = _load(
     'single-col-margin-not-iterable.json'
 )
 GENDER_PARTY_RACE = _load('gender-party-race.json')
+CAT_X_ITEMS_X_CATS_HS = _load('cat-x-items-x-cats-hs.json')
 SEL_ARR_FIRST = _load('selected-crosstab-array-first.json')
 SEL_ARR_LAST = _load('selected-crosstab-array-last.json')
 MR_X_MR = _load('selected-by-selected.json')

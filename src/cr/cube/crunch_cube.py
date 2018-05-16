@@ -603,20 +603,17 @@ class CrunchCube(object):
         return array
 
     def _margin_transform_dims(self, axis, include_transforms_for_dims):
-        # FIXME
-        # This is an uglu hack and needs to be refactored. The issue is that
-        # when calculating margins for some cases, we mustn't include _all_
-        # transformations, because the numbers would be wrong. We then need a
-        # smart way to figure out _only_ those transformations that need to be
-        # included in the margin calculation.
+        """When calculating a margin that needs to sum up counts, make sure
+        we do not include subtotals if they are on the opposite axis
+        of the one we are calculating, otherwise they will be summed up
+        with the counts and the values will be wrong."""
 
-        if len(self.dimensions) <= 2:
-            return include_transforms_for_dims and (
-                [(1 - axis)]
-                if axis is not None and isinstance(axis, int) else
-                None
-            )
-        return include_transforms_for_dims
+        dim_offset = 1 if len(self.dimensions) == 3 else 0
+        return include_transforms_for_dims and (
+            [(1 - axis - dim_offset)]
+            if axis is not None and isinstance(axis, int) else
+            None
+        )
 
     def _margin(self, axis=None, weighted=True, adjusted=False,
                 include_transforms_for_dims=None, prune=False):
