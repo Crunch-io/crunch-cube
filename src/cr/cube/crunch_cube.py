@@ -608,7 +608,7 @@ class CrunchCube(object):
         of the one we are calculating, otherwise they will be summed up
         with the counts and the values will be wrong."""
 
-        dim_offset = 1 if len(self.dimensions) == 3 else 0
+        dim_offset = 1 if self.ndim == 3 else 0
         return include_transforms_for_dims and (
             [(1 - axis - dim_offset)]
             if axis is not None and isinstance(axis, int) else
