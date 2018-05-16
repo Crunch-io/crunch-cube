@@ -393,7 +393,7 @@ class CrunchCube(object):
         if dim == 0:  # In case of row
             dim_ind = 0 if self.ndim < 3 else 1
         elif dim == 1:
-            dim_ind = 1
+            dim_ind = 1 if self.ndim < 3 else 2
         return np.array(
             inserted_inds[dim_ind] if len(inserted_inds) else []
         )
@@ -716,7 +716,7 @@ class CrunchCube(object):
             res = np.ma.masked_array(res, mask=self.as_array(prune=prune).mask)
         return res
 
-    def _mr_props_as_2nd(self, axis, hs_dims):
+    def _mr_props_as_2nd(self, axis, hs_dims, prune):
         if axis == 1:
             margin = self.margin(axis=axis)[:, np.newaxis]
         elif axis == 2:
@@ -724,7 +724,14 @@ class CrunchCube(object):
         else:
             margin = np.sum(self.margin(axis=0), axis=1)[:, np.newaxis, :]
 
-        return self.as_array(include_transforms_for_dims=hs_dims) / margin
+        res = self.as_array(include_transforms_for_dims=hs_dims) / margin
+        if prune:
+            mask = self.as_array(
+                prune=True,
+                include_transforms_for_dims=hs_dims,
+            ).mask
+            res = np.ma.masked_array(res, mask=mask)
+        return res
 
     def _mr_props_single_dim(self, table, valid_indices, prune):
         res = table[:, 0] / (table[:, 0] + table[:, 1])
@@ -752,7 +759,7 @@ class CrunchCube(object):
         elif self.mr_dim_ind == 1:
             return self._mr_props_as_1st(axis, table, hs_dims, prune)
         else:
-            return self._mr_props_as_2nd(axis, hs_dims)
+            return self._mr_props_as_2nd(axis, hs_dims, prune)
 
     @property
     def is_univariate_ca(self):
