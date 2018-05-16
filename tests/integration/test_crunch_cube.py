@@ -1187,10 +1187,6 @@ class TestCrunchCube(TestCase):
     def test_pets_array_x_pets_cell(self):
         cube = CrunchCube(PETS_ARRAY_X_PETS)
         expected = np.array([
-            [0.44836533, 0., 0.48261546],
-            [0.39084967, 1., 0.47843137],
-        ])
-        expected = np.array([
             [0.24992768, 0.        , 0.26901938],  # noqa
             [0.17298235, 0.44258027, 0.21174429],
         ])

@@ -717,16 +717,14 @@ class CrunchCube(object):
         return res
 
     def _mr_props_as_2nd(self, axis, hs_dims):
-        margin = (
-            self.margin(axis=axis)[:, np.newaxis]
-            if axis == 1 else
-            self.margin(axis=0)
-        )
-        if self.ndim == 3 and axis is None:
-            margin = np.sum(margin, axis=1)[:, np.newaxis, :]
-        return self.as_array(
-            include_transforms_for_dims=hs_dims
-        ) / margin
+        if axis == 1:
+            margin = self.margin(axis=axis)[:, np.newaxis]
+        elif axis == 2:
+            margin = self.margin(axis=0, include_transforms_for_dims=hs_dims)
+        else:
+            margin = np.sum(self.margin(axis=0), axis=1)[:, np.newaxis, :]
+
+        return self.as_array(include_transforms_for_dims=hs_dims) / margin
 
     def _mr_props_single_dim(self, table, valid_indices, prune):
         res = table[:, 0] / (table[:, 0] + table[:, 1])
