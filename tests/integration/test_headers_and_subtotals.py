@@ -19,8 +19,8 @@ from .fixtures import MISSING_CAT_HS
 from .fixtures import CA_X_CAT_HS
 from .fixtures import CAT_X_MR_WEIGHTED_HS
 from .fixtures import MR_X_CA_HS
-from .fixtures import CA_X_MR_HS
 from .fixtures import CA_CAT_X_MR_X_CA_SUBVAR_HS
+from .fixtures import CA_X_MR_HS
 
 from cr.cube.crunch_cube import CrunchCube
 
@@ -774,7 +774,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_ca_cat_x_mr_x_ca_subvar_as_array_pruning(self):
-        cube = CrunchCube(CA_X_MR_HS)
+        cube = CrunchCube(CA_CAT_X_MR_X_CA_SUBVAR_HS)
         expected = np.array([
             [False, False, True],
             [False, False, True],
@@ -785,7 +785,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_array_equal(actual, expected)
 
     def test_ca_cat_x_mr_x_ca_subvar_proportions_pruning(self):
-        cube = CrunchCube(CA_X_MR_HS)
+        cube = CrunchCube(CA_CAT_X_MR_X_CA_SUBVAR_HS)
         expected = np.array([
             [False, False, True],
             [False, False, True],
@@ -796,7 +796,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_array_equal(actual, expected)
 
     def test_ca_x_mr_counts_pruning(self):
-        cube = CrunchCube(CA_CAT_X_MR_X_CA_SUBVAR_HS)
+        cube = CrunchCube(CA_X_MR_HS)
         actual = cube.as_array(prune=True)[0].mask
         expected = np.array([
             [False, False, False, True],
