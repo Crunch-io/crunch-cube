@@ -80,7 +80,7 @@ class CrunchCube(object):
     def hs_dims(self):
         if not self._include_hs:
             return None
-        return [i for i in range(self.ndim)]
+        return [i for i in range(self.ndim)][-2:]
 
     def _get_valid_indices(self, dimensions, include_missing,
                            get_non_selected=False, get_all_mr=False):
@@ -742,7 +742,7 @@ class CrunchCube(object):
         elif axis == 2:
             margin = self.margin(axis=0, include_transforms_for_dims=hs_dims)
         else:
-            margin = np.sum(self.margin(axis=0), axis=1)[:, np.newaxis, :]
+            margin = np.sum(self._margin(axis=0), axis=1)[:, np.newaxis, :]
 
         res = self.as_array(include_transforms_for_dims=hs_dims) / margin
         if prune:
@@ -1091,8 +1091,8 @@ class CrunchCube(object):
             self.hs_dims
         )
         return [
-            dim.labels(include_missing, hs_dims)
-            for dim in self.dimensions
+            dim.labels(include_missing, hs_dims and i in hs_dims)
+            for i, dim in enumerate(self.dimensions)
         ]
 
     def as_array(self, include_missing=False, weighted=True, adjusted=False,
