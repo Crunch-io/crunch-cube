@@ -698,7 +698,7 @@ class TestHeadersAndSubtotals(TestCase):
             [1, 1, 1, 1, 1],
             [1, 1, 1, 1, 1],
         ])
-        actual = cube.margin(axis=1, include_transforms_for_dims=[2])
+        actual = cube.margin(axis=1, include_transforms_for_dims=[1])
         np.testing.assert_array_equal(actual, expected)
 
     def test_cat_x_items_x_cats_margin_with_hs(self):

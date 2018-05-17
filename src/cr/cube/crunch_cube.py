@@ -608,12 +608,19 @@ class CrunchCube(object):
         of the one we are calculating, otherwise they will be summed up
         with the counts and the values will be wrong."""
 
-        dim_offset = 1 if self.ndim == 3 else 0
-        return include_transforms_for_dims and (
-            [(1 - axis - dim_offset)]
-            if axis is not None and isinstance(axis, int) else
-            None
-        )
+        if not include_transforms_for_dims:
+            return include_transforms_for_dims
+        if axis is None:
+            return None
+        # if self.ndim == 3 and axis + 1 in include_transforms_for_dims:
+        #     transforms = include_transforms_for_dims[:]
+        #     transforms.remove(axis + 1)
+        #     return transforms
+        if axis in include_transforms_for_dims:
+            transforms = include_transforms_for_dims[:]
+            transforms.remove(axis)
+            return transforms
+        return include_transforms_for_dims
 
     def _margin(self, axis=None, weighted=True, adjusted=False,
                 include_transforms_for_dims=None, prune=False):
