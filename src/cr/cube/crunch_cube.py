@@ -370,7 +370,7 @@ class CrunchCube(object):
         )
         col_inserted_indices = (
             self.inserted_dim_inds(transforms, 1)
-        )
+        ) if np.any(row_margin) else []
 
         return (
             self._margin_pruned_indices(row_margin, row_inserted_indices),
