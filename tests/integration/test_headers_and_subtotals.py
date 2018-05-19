@@ -584,10 +584,31 @@ class TestHeadersAndSubtotals(TestCase):
         actual = table[:, ~table.mask.all(axis=0)][~table.mask.all(axis=1), :]
         np.testing.assert_array_equal(actual, expected)
 
+    def test_cat_x_num_counts_pruned_with_hs_on_construction_time(self):
+        cube = CrunchCube(CAT_X_NUM_HS_PRUNE, include_hs=True, prune=True)
+        expected = np.array([
+            [0],
+            [1],
+            [1],
+            [0],
+        ])
+        # Extract only non-masked (pruned) values
+        table = cube.as_array()
+        actual = table[:, ~table.mask.all(axis=0)][~table.mask.all(axis=1), :]
+        np.testing.assert_array_equal(actual, expected)
+
     def test_cat_x_num_counts_pruned_without_hs(self):
         cube = CrunchCube(CAT_X_NUM_HS_PRUNE)
         expected = np.array([[1]])
         table = cube.as_array(prune=True)
+        # Extract only non-masked (pruned) values
+        actual = table[:, ~table.mask.all(axis=0)][~table.mask.all(axis=1), :]
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_cat_x_num_counts_pruned_without_hs_on_construction_time(self):
+        cube = CrunchCube(CAT_X_NUM_HS_PRUNE, prune=True)
+        expected = np.array([[1]])
+        table = cube.as_array()
         # Extract only non-masked (pruned) values
         actual = table[:, ~table.mask.all(axis=0)][~table.mask.all(axis=1), :]
         np.testing.assert_array_equal(actual, expected)
@@ -776,6 +797,17 @@ class TestHeadersAndSubtotals(TestCase):
         actual = cube.as_array(prune=True)[0].mask
         np.testing.assert_array_equal(actual, expected)
 
+    def test_ca_cat_x_mr_x_ca_subvar_counts_pruning_on_construction_time(self):
+        cube = CrunchCube(CA_CAT_X_MR_X_CA_SUBVAR_HS, prune=True)
+        expected = np.array([
+            [False, False, True],
+            [False, False, True],
+            [False, False, True],
+            [True, True, True],
+        ])
+        actual = cube.as_array()[0].mask
+        np.testing.assert_array_equal(actual, expected)
+
     def test_ca_cat_x_mr_x_ca_subvar_proportions_pruning(self):
         cube = CrunchCube(CA_CAT_X_MR_X_CA_SUBVAR_HS)
         expected = np.array([
@@ -790,6 +822,18 @@ class TestHeadersAndSubtotals(TestCase):
     def test_ca_x_mr_counts_pruning(self):
         cube = CrunchCube(CA_X_MR_HS)
         actual = cube.as_array(prune=True)[0].mask
+        expected = np.array([
+            [False, False, False, True],
+            [False, False, False, True],
+            [False, False, False, True],
+            [False, False, False, True],
+            [False, False, False, True]
+        ])
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_ca_x_mr_counts_pruning_on_construction_time(self):
+        cube = CrunchCube(CA_X_MR_HS, prune=True)
+        actual = cube.as_array()[0].mask
         expected = np.array([
             [False, False, False, True],
             [False, False, False, True],
