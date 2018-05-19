@@ -45,7 +45,7 @@ class CrunchCube(object):
     percentages off of them.
     '''
 
-    def __init__(self, response, include_hs=False):
+    def __init__(self, response, include_hs=False, prune=False):
         '''Initializes the CrunchCube class with the cube JSON response.
 
         Class can be initialized with both JSON string, and dict types.
@@ -75,12 +75,17 @@ class CrunchCube(object):
                 ).format(type(response)))
 
         self._include_hs = include_hs
+        self._prune = prune
 
     @property
     def hs_dims(self):
         if not self._include_hs:
             return None
         return [i for i in range(self.ndim)][-2:]
+
+    @property
+    def prune(self):
+        return self._prune
 
     def _get_valid_indices(self, dimensions, include_missing,
                            get_non_selected=False, get_all_mr=False):
@@ -498,7 +503,12 @@ class CrunchCube(object):
     def _1d_mr_margin(self, axis, weighted):
         table = self.table.data(weighted)
         if axis == 0:
-            return self.as_array(weighted=weighted)
+            # We need internal method here (_as_array), because we don't want
+            # to include the construction time information about 'prune'
+            # (which would cause infinite recursion). In general, we should
+            # use internal calls as much as possible, from the cr.cube methods.
+            return self._fix_shape(self._as_array(weighted=weighted))
+
         return table[:, 0] + table[:, 1]
 
     def _calculate_along_non_mr(self, axis):
@@ -1126,13 +1136,18 @@ class CrunchCube(object):
                 [0, 0, 0, 0],
             ])
         '''
+
+        # Prepare H&S dims (either from construction time of from argument)
         hs_dims = (
             include_transforms_for_dims
             if include_transforms_for_dims else
             self.hs_dims
         )
         hs_dims = not margin and hs_dims
-        # hs_dims = not margin and self.hs_dims
+
+        # Prepare pruning (either from construction time of from argument)
+        prune = prune or self.prune
+
         array = self._as_array(
             include_missing=include_missing,
             weighted=weighted,

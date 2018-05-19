@@ -1246,6 +1246,7 @@ class TestCrunchCube(TestCase):
             [0, 1, 0, 0],
         ])
         actual = cube.as_array(prune=False)
+        np.testing.assert_array_equal(actual, expected)
         expected = np.array([
             [2, 2, 1],
             [0, 1, 2],
@@ -1254,6 +1255,40 @@ class TestCrunchCube(TestCase):
             [0, 1, 0],
         ])
         table = cube.as_array(prune=True)
+        actual = table[:, ~table.mask.all(axis=0)][~table.mask.all(axis=1), :]
+        np.testing.assert_array_equal(actual, expected)
+
+        pruned_expected = [
+            np.array([False, True, False, False, False, False]),
+            np.array([False, False, True, False])
+        ]
+        pruned = cube.prune_indices()
+        self.assertEqual(len(pruned), len(pruned_expected))
+        for i, actual in enumerate(pruned):
+            np.testing.assert_array_equal(pruned[i], pruned_expected[i])
+
+    def test_cat_x_cat_as_array_prune_cols_on_construction_time(self):
+        cube = CrunchCube(CAT_X_CAT_WITH_EMPTY_COLS, prune=False)
+        expected = np.array([
+            [2, 2, 0, 1],
+            [0, 0, 0, 0],
+            [0, 1, 0, 2],
+            [0, 2, 0, 0],
+            [0, 2, 0, 1],
+            [0, 1, 0, 0],
+        ])
+        actual = cube.as_array()
+        np.testing.assert_array_equal(actual, expected)
+
+        cube = CrunchCube(CAT_X_CAT_WITH_EMPTY_COLS, prune=True)
+        expected = np.array([
+            [2, 2, 1],
+            [0, 1, 2],
+            [0, 2, 0],
+            [0, 2, 1],
+            [0, 1, 0],
+        ])
+        table = cube.as_array()
         actual = table[:, ~table.mask.all(axis=0)][~table.mask.all(axis=1), :]
         np.testing.assert_array_equal(actual, expected)
 
@@ -1414,6 +1449,26 @@ class TestCrunchCube(TestCase):
         for i, actual in enumerate(pruned):
             np.testing.assert_array_equal(pruned[i], pruned_expected[i])
 
+    def test_prune_univariate_cat_on_construction_time(self):
+        cube = CrunchCube(BINNED, prune=True)
+        expected = np.array([
+            118504.40402204,
+            155261.2723631,
+            182923.95470245,
+        ])
+        actual = cube.as_array()
+        np.testing.assert_almost_equal(actual[~actual.mask], expected)
+
+        pruned_expected = [
+            np.array([False, True, True, True, True, True, True, True, True,
+                      True, False, True, True, True, True, True, True, True,
+                      True, False])
+        ]
+        pruned = cube.prune_indices()
+        self.assertEqual(len(pruned), len(pruned_expected))
+        for i, actual in enumerate(pruned):
+            np.testing.assert_array_equal(pruned[i], pruned_expected[i])
+
     def test_single_col_margin_not_iterable(self):
         cube = CrunchCube(SINGLE_COL_MARGIN_NOT_ITERABLE)
         expected = (1,)
@@ -1475,6 +1530,14 @@ class TestCrunchCube(TestCase):
         # pruning, which is not the responsibility of cr.cube.
         expected = np.array([79, 80, 70])
         actual = np.ma.compressed(cube.as_array(weighted=False, prune=True))
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_ca_with_single_cat_pruning_on_construction_time(self):
+        cube = CrunchCube(CA_SINGLE_CAT, prune=True)
+        # The last 0 of the expectation is not visible in whaam because of
+        # pruning, which is not the responsibility of cr.cube.
+        expected = np.array([79, 80, 70])
+        actual = np.ma.compressed(cube.as_array(weighted=False))
         np.testing.assert_array_equal(actual, expected)
 
     def test_ca_x_single_cat_counts(self):
@@ -1565,6 +1628,16 @@ class TestCrunchCube(TestCase):
             [0, 2, 1, 3, 2],
         ])
         actual = cube.as_array(prune=True)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_ca_subvar_x_cat_hs_counts_prune_on_construction_time(self):
+        cube = CrunchCube(CA_SUBVAR_X_CAT_HS, include_hs=True, prune=True)
+        expected = np.array([
+            [3, 3, 0, 0, 6],
+            [1, 3, 2, 0, 4],
+            [0, 2, 1, 3, 2],
+        ])
+        actual = cube.as_array()
         np.testing.assert_array_equal(actual, expected)
 
     def test_means_univariate_cat(self):
