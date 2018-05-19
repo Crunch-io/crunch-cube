@@ -1448,6 +1448,7 @@ class CrunchCube(object):
 
     def index(self, weighted=True, prune=False):
         '''Get cube index measurement.'''
+        prune = prune or self.prune
         return Index(self, weighted, prune).data
 
     def scale_means(self):
