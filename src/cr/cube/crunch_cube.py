@@ -1292,11 +1292,16 @@ class CrunchCube(object):
             ])
         '''
 
+        # Prepare H&S dims (either from construction time of from argument)
         hs_dims = (
             include_transforms_for_dims
             if include_transforms_for_dims else
             self.hs_dims
         )
+
+        # Prepare pruning (either from construction time of from argument)
+        prune = prune or self.prune
+
         return self._proportions(
             axis=axis,
             weighted=weighted,
