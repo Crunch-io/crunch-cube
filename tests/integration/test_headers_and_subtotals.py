@@ -21,6 +21,7 @@ from .fixtures import CAT_X_MR_WEIGHTED_HS
 from .fixtures import MR_X_CA_HS
 from .fixtures import CA_CAT_X_MR_X_CA_SUBVAR_HS
 from .fixtures import CA_X_MR_HS
+from .fixtures import CAT_X_ITEMS_X_CATS_HS
 
 from cr.cube.crunch_cube import CrunchCube
 
@@ -693,11 +694,23 @@ class TestHeadersAndSubtotals(TestCase):
 
         # Assert counts without H&S
         expected = np.array([
-            [1, 1, 1, 3, 1, 1, 2],
-            [1, 1, 1, 3, 1, 1, 2],
-            [1, 1, 1, 3, 1, 1, 2],
+            [1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1],
         ])
-        actual = cube.margin(axis=1, include_transforms_for_dims=[2])
+        actual = cube.margin(axis=1, include_transforms_for_dims=[1])
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_cat_x_items_x_cats_margin_with_hs(self):
+        cube = CrunchCube(CAT_X_ITEMS_X_CATS_HS)
+
+        # Assert counts without H&S
+        expected = np.array([
+            [1287.9364594075469, 2050.0571926339885, 782.9403891997617, 225.4066607421201, 2622.8036855384603, 974.5889537143403, 490.5036709315041, 373.8221357520375],
+            [1147.3697583254452, 2557.8859179678857, 1096.7841912034742, 374.0411471364339, 1876.3400274431515, 1002.2399030962134, 457.92228898229905, 419.5110527202654],
+            [1053.855075581148, 2699.612841209989, 1427.7399174151794, 380.8205091587366, 1027.7782011616534, 606.7100283028576, 218.42735718966821, 265.29362712412535]
+        ])
+        actual = cube.margin(axis=2, include_transforms_for_dims=[1, 2])
         np.testing.assert_array_equal(actual, expected)
 
     def test_cat_x_mr_weighted_with_hs(self):
