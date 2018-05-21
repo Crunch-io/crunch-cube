@@ -370,7 +370,7 @@ class CrunchCube(object):
         )
         col_inserted_indices = (
             self.inserted_dim_inds(transforms, 1)
-        )
+        ) if np.any(row_margin) else []
 
         return (
             self._margin_pruned_indices(row_margin, row_inserted_indices),
@@ -603,19 +603,23 @@ class CrunchCube(object):
         return array
 
     def _margin_transform_dims(self, axis, include_transforms_for_dims):
-        # FIXME
-        # This is an uglu hack and needs to be refactored. The issue is that
-        # when calculating margins for some cases, we mustn't include _all_
-        # transformations, because the numbers would be wrong. We then need a
-        # smart way to figure out _only_ those transformations that need to be
-        # included in the margin calculation.
+        """When calculating a margin that needs to sum up counts, make sure
+        we do not include subtotals if they are on the opposite axis
+        of the one we are calculating, otherwise they will be summed up
+        with the counts and the values will be wrong."""
 
-        if len(self.dimensions) <= 2:
-            return include_transforms_for_dims and (
-                [(1 - axis)]
-                if axis is not None and isinstance(axis, int) else
-                None
-            )
+        if not include_transforms_for_dims:
+            return include_transforms_for_dims
+        if axis is None:
+            return None
+        # if self.ndim == 3 and axis + 1 in include_transforms_for_dims:
+        #     transforms = include_transforms_for_dims[:]
+        #     transforms.remove(axis + 1)
+        #     return transforms
+        if axis in include_transforms_for_dims:
+            transforms = include_transforms_for_dims[:]
+            transforms.remove(axis)
+            return transforms
         return include_transforms_for_dims
 
     def _margin(self, axis=None, weighted=True, adjusted=False,
