@@ -706,7 +706,7 @@ class CrunchCube(object):
                 include_transforms_for_dims=hs_dims
             )
         else:
-            den = self.margin(axis=axis)[:, np.newaxis]
+            den = self._margin(axis=axis)[:, np.newaxis]
         return num / den
 
     def _mr_props_as_1st(self, axis, table, hs_dims, prune):
@@ -780,11 +780,7 @@ class CrunchCube(object):
         if self.ndim == 1:
             return self._mr_props_single_dim(table, valid_indices, prune)
 
-        hs_dims = (
-            include_transforms_for_dims
-            if include_transforms_for_dims else
-            self.hs_dims
-        )
+        hs_dims = hs_dims if hs_dims else self.hs_dims
 
         if self.mr_dim_ind == 0:
             return self._mr_props_as_0th(axis, table, hs_dims, prune)
