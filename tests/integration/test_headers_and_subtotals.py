@@ -703,13 +703,22 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_array_equal(actual, expected)
 
     def test_ca_x_cat_margin_with_hs(self):
-        cube = CrunchCube(CA_X_CAT_HS, include_hs=True)
-
         # Assert counts without H&S
+        cube = CrunchCube(CA_X_CAT_HS, include_hs=False)
         expected = np.array([
             [1, 1, 1, 1, 1],
             [1, 1, 1, 1, 1],
             [1, 1, 1, 1, 1],
+        ])
+        actual = cube.margin(axis=1)
+        np.testing.assert_array_equal(actual, expected)
+
+        # Assert counts with H&S
+        cube = CrunchCube(CA_X_CAT_HS, include_hs=True)
+        expected = np.array([
+            [1, 1, 1, 3, 1, 1, 2],
+            [1, 1, 1, 3, 1, 1, 2],
+            [1, 1, 1, 3, 1, 1, 2],
         ])
         actual = cube.margin(axis=1)
         np.testing.assert_array_equal(actual, expected)
