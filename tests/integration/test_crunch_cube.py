@@ -1254,40 +1254,13 @@ class TestCrunchCube(TestCase):
             [0, 2, 1],
             [0, 1, 0],
         ])
+        # Use API method parameter to prune
         table = cube.as_array(prune=True)
         actual = table[:, ~table.mask.all(axis=0)][~table.mask.all(axis=1), :]
         np.testing.assert_array_equal(actual, expected)
 
-        pruned_expected = [
-            np.array([False, True, False, False, False, False]),
-            np.array([False, False, True, False])
-        ]
-        pruned = cube.prune_indices()
-        self.assertEqual(len(pruned), len(pruned_expected))
-        for i, actual in enumerate(pruned):
-            np.testing.assert_array_equal(pruned[i], pruned_expected[i])
-
-    def test_cat_x_cat_as_array_prune_cols_on_construction_time(self):
-        cube = CrunchCube(CAT_X_CAT_WITH_EMPTY_COLS, prune=False)
-        expected = np.array([
-            [2, 2, 0, 1],
-            [0, 0, 0, 0],
-            [0, 1, 0, 2],
-            [0, 2, 0, 0],
-            [0, 2, 0, 1],
-            [0, 1, 0, 0],
-        ])
-        actual = cube.as_array()
-        np.testing.assert_array_equal(actual, expected)
-
+        # Use construction arguments to prune
         cube = CrunchCube(CAT_X_CAT_WITH_EMPTY_COLS, prune=True)
-        expected = np.array([
-            [2, 2, 1],
-            [0, 1, 2],
-            [0, 2, 0],
-            [0, 2, 1],
-            [0, 1, 0],
-        ])
         table = cube.as_array()
         actual = table[:, ~table.mask.all(axis=0)][~table.mask.all(axis=1), :]
         np.testing.assert_array_equal(actual, expected)
@@ -1319,41 +1292,13 @@ class TestCrunchCube(TestCase):
             [0., 0.25, 0.25],
             [0., 0.125, 0.]
         ])
+        # Use API method parameter to prune
         table = cube.proportions(axis=0, prune=True)
         actual = table[:, ~table.mask.all(axis=0)][~table.mask.all(axis=1), :]
         np.testing.assert_array_equal(actual, expected)
 
-        pruned_expected = [
-            np.array([False, True, False, False, False, False]),
-            np.array([False, False, True, False])
-        ]
-        pruned = cube.prune_indices()
-        self.assertEqual(len(pruned), len(pruned_expected))
-        for i, actual in enumerate(pruned):
-            np.testing.assert_array_equal(pruned[i], pruned_expected[i])
-
-    def test_cat_x_cat_props_by_col_prune_cols_on_construction_time(self):
-        # Don't prune
-        cube = CrunchCube(CAT_X_CAT_WITH_EMPTY_COLS)
-        expected = np.array([
-            [1., 0.25, np.nan, 0.25],
-            [0., 0., np.nan, 0.],
-            [0., 0.125, np.nan, 0.5],
-            [0., 0.25, np.nan, 0.],
-            [0., 0.25, np.nan, 0.25],
-            [0., 0.125, np.nan, 0.]
-        ])
-        actual = cube.proportions(axis=0)
-
-        # Prune
+        # Use construction arguments to prune
         cube = CrunchCube(CAT_X_CAT_WITH_EMPTY_COLS, prune=True)
-        expected = np.array([
-            [1., 0.25, 0.25],
-            [0., 0.125, 0.5],
-            [0., 0.25, 0.],
-            [0., 0.25, 0.25],
-            [0., 0.125, 0.]
-        ])
         table = cube.proportions(axis=0)
         actual = table[:, ~table.mask.all(axis=0)][~table.mask.all(axis=1), :]
         np.testing.assert_array_equal(actual, expected)
@@ -1385,41 +1330,13 @@ class TestCrunchCube(TestCase):
             [0., 0.66666667, 0.33333333],
             [0., 1., 0.]
         ])
+        # Use API method parameter to prune
         table = cube.proportions(axis=1, prune=True)
         actual = table[:, ~table.mask.all(axis=0)][~table.mask.all(axis=1), :]
         np.testing.assert_almost_equal(actual, expected)
 
-        pruned_expected = [
-            np.array([False, True, False, False, False, False]),
-            np.array([False, False, True, False])
-        ]
-        pruned = cube.prune_indices()
-        self.assertEqual(len(pruned), len(pruned_expected))
-        for i, actual in enumerate(pruned):
-            np.testing.assert_array_equal(pruned[i], pruned_expected[i])
-
-    def test_cat_x_cat_props_by_row_prune_cols_on_construction_time(self):
-        # Don't prune
-        cube = CrunchCube(CAT_X_CAT_WITH_EMPTY_COLS)
-        expected = np.array([
-            [0.4, 0.4, 0., 0.2],
-            [np.nan, np.nan, np.nan, np.nan],
-            [0., 0.33333333, 0., 0.66666667],
-            [0., 1., 0., 0.],
-            [0., 0.66666667, 0., 0.33333333],
-            [0., 1., 0., 0.],
-        ])
-        actual = cube.proportions(axis=1)
-
-        # Prune
+        # Use construction arguments to prune
         cube = CrunchCube(CAT_X_CAT_WITH_EMPTY_COLS, prune=True)
-        expected = np.array([
-            [0.4, 0.4, 0.2],
-            [0., 0.33333333, 0.66666667],
-            [0., 1., 0.],
-            [0., 0.66666667, 0.33333333],
-            [0., 1., 0.]
-        ])
         table = cube.proportions(axis=1)
         actual = table[:, ~table.mask.all(axis=0)][~table.mask.all(axis=1), :]
         np.testing.assert_almost_equal(actual, expected)
@@ -1451,41 +1368,13 @@ class TestCrunchCube(TestCase):
             [0., 0.14285714, 0.07142857],
             [0., 0.07142857, 0.],
         ])
+        # Use API method parameter to prune
         table = cube.proportions(axis=None, prune=True)
         actual = table[:, ~table.mask.all(axis=0)][~table.mask.all(axis=1), :]
         np.testing.assert_almost_equal(actual, expected)
 
-        pruned_expected = [
-            np.array([False, True, False, False, False, False]),
-            np.array([False, False, True, False])
-        ]
-        pruned = cube.prune_indices()
-        self.assertEqual(len(pruned), len(pruned_expected))
-        for i, actual in enumerate(pruned):
-            np.testing.assert_array_equal(pruned[i], pruned_expected[i])
-
-    def test_cat_x_cat_props_by_cell_prune_cols_on_construction_time(self):
-        # Don't prune
-        cube = CrunchCube(CAT_X_CAT_WITH_EMPTY_COLS)
-        expected = np.array([
-            [0.14285714, 0.14285714, 0., 0.07142857],
-            [0., 0., 0., 0.],
-            [0., 0.07142857, 0., 0.14285714],
-            [0., 0.14285714, 0., 0.],
-            [0., 0.14285714, 0., 0.07142857],
-            [0., 0.07142857, 0., 0.],
-        ])
-        actual = cube.proportions(axis=None, prune=False)
-
-        # Prune
+        # Use construction arguments to prune
         cube = CrunchCube(CAT_X_CAT_WITH_EMPTY_COLS, prune=True)
-        expected = np.array([
-            [0.14285714, 0.14285714, 0.07142857],
-            [0., 0.07142857, 0.14285714],
-            [0., 0.14285714, 0.],
-            [0., 0.14285714, 0.07142857],
-            [0., 0.07142857, 0.],
-        ])
         table = cube.proportions(axis=None)
         actual = table[:, ~table.mask.all(axis=0)][~table.mask.all(axis=1), :]
         np.testing.assert_almost_equal(actual, expected)
@@ -1520,45 +1409,15 @@ class TestCrunchCube(TestCase):
             [0., 1.16666667, 1.16666667],
             [0., 1.75, 0.]
         ])
+        # Use API method parameter to prune
         table = cube.index(prune=True)
         # Assert index witih pruning
         actual = table[:, ~table.mask.all(axis=0)][~table.mask.all(axis=1), :]
         np.testing.assert_almost_equal(actual, expected)
 
-        pruned_expected = [
-            np.array([False, True, False, False, False, False]),
-            np.array([False, False, True, False])
-        ]
-        pruned = cube.prune_indices()
-        self.assertEqual(len(pruned), len(pruned_expected))
-        for i, actual in enumerate(pruned):
-            np.testing.assert_array_equal(pruned[i], pruned_expected[i])
-
-    def test_cat_x_cat_index_by_col_prune_cols_on_construction_time(self):
-        # Don't prune
+        # Use construction arguments to prune
         cube = CrunchCube(CAT_X_CAT_WITH_EMPTY_COLS)
-        expected = np.array([
-            [2.8, 0.7, np.nan, 0.7],
-            [np.nan, np.nan, np.nan, np.nan],
-            [0., 0.58333333, np.nan, 2.33333333],
-            [0., 1.75, np.nan, 0.],
-            [0., 1.16666667, np.nan, 1.16666667],
-            [0., 1.75, np.nan, 0.]
-        ])
-        actual = cube.index()
-        # Assert index without pruning
-        np.testing.assert_almost_equal(actual, expected)
-
-        # Prune
-        cube = CrunchCube(CAT_X_CAT_WITH_EMPTY_COLS, prune=True)
-        expected = np.array([
-            [2.8, 0.7, 0.7],
-            [0., 0.58333333, 2.33333333],
-            [0., 1.75, 0.],
-            [0., 1.16666667, 1.16666667],
-            [0., 1.75, 0.]
-        ])
-        table = cube.index()
+        table = cube.index(prune=True)
         # Assert index witih pruning
         actual = table[:, ~table.mask.all(axis=0)][~table.mask.all(axis=1), :]
         np.testing.assert_almost_equal(actual, expected)
@@ -1579,26 +1438,12 @@ class TestCrunchCube(TestCase):
             155261.2723631,
             182923.95470245,
         ])
+        # Use API method parameter to prune
         actual = cube.as_array(prune=True)
         np.testing.assert_almost_equal(actual[~actual.mask], expected)
 
-        pruned_expected = [
-            np.array([False, True, True, True, True, True, True, True, True,
-                      True, False, True, True, True, True, True, True, True,
-                      True, False])
-        ]
-        pruned = cube.prune_indices()
-        self.assertEqual(len(pruned), len(pruned_expected))
-        for i, actual in enumerate(pruned):
-            np.testing.assert_array_equal(pruned[i], pruned_expected[i])
-
-    def test_prune_univariate_cat_on_construction_time(self):
+        # Use construction arguments to prune
         cube = CrunchCube(BINNED, prune=True)
-        expected = np.array([
-            118504.40402204,
-            155261.2723631,
-            182923.95470245,
-        ])
         actual = cube.as_array()
         np.testing.assert_almost_equal(actual[~actual.mask], expected)
 
@@ -1672,14 +1517,12 @@ class TestCrunchCube(TestCase):
         # The last 0 of the expectation is not visible in whaam because of
         # pruning, which is not the responsibility of cr.cube.
         expected = np.array([79, 80, 70])
+        # Test pruning with API method parameter
         actual = np.ma.compressed(cube.as_array(weighted=False, prune=True))
         np.testing.assert_array_equal(actual, expected)
 
-    def test_ca_with_single_cat_pruning_on_construction_time(self):
+        # Test pruning with construction time parameter
         cube = CrunchCube(CA_SINGLE_CAT, prune=True)
-        # The last 0 of the expectation is not visible in whaam because of
-        # pruning, which is not the responsibility of cr.cube.
-        expected = np.array([79, 80, 70])
         actual = np.ma.compressed(cube.as_array(weighted=False))
         np.testing.assert_array_equal(actual, expected)
 
@@ -1770,16 +1613,12 @@ class TestCrunchCube(TestCase):
             [1, 3, 2, 0, 4],
             [0, 2, 1, 3, 2],
         ])
+        # Prune with API method argument
         actual = cube.as_array(prune=True)
         np.testing.assert_array_equal(actual, expected)
 
-    def test_ca_subvar_x_cat_hs_counts_prune_on_construction_time(self):
+        # Prune with construction time argument
         cube = CrunchCube(CA_SUBVAR_X_CAT_HS, include_hs=True, prune=True)
-        expected = np.array([
-            [3, 3, 0, 0, 6],
-            [1, 3, 2, 0, 4],
-            [0, 2, 1, 3, 2],
-        ])
         actual = cube.as_array()
         np.testing.assert_array_equal(actual, expected)
 
