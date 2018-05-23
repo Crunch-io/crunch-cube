@@ -2,6 +2,8 @@
 
 from __future__ import division
 
+import numpy as np
+
 
 class CubeSlice(object):
     '''Implementation of CubeSlice class.
@@ -11,7 +13,7 @@ class CubeSlice(object):
     achieved by slicing.
     '''
 
-    def __init__(self, cube, index=None):
+    def __init__(self, cube, index):
         self._cube = cube
         self._index = index
 
@@ -44,10 +46,30 @@ class CubeSlice(object):
         '''
         return self._cube.dimensions[1].name
 
+    @staticmethod
+    def _increment_axis(axis):
+        if axis is not None and not isinstance(axis, tuple):
+            axis += 1
+        return axis
+
     def as_array(self, *args, **kwargs):
         '''Call cube's as_array, and return correct slice.'''
         array = self._cube.as_array(*args, **kwargs)
-        return array if self._index is None else array[self._index]
+        return array[self._index]
+
+    def proportions(self, *args, **kwargs):
+        '''Call cube's proportions, and return correct slice.'''
+        kwargs['axis'] = self._increment_axis(kwargs.get('axis'))
+        array = self._cube.proportions(*args, **kwargs)
+        return array[self._index]
+
+    def margin(self, *args, **kwargs):
+        '''Call cube's margin, and return correct slice.'''
+        kwargs['axis'] = self._increment_axis(kwargs.get('axis'))
+        margin = self._cube.margin(*args, **kwargs)
+        if len(margin) > 1:
+            return margin[self._index]
+        return margin
 
     @property
     def inserted_rows_indices(self):
@@ -59,3 +81,20 @@ class CubeSlice(object):
         and return the 0th value (the one corresponding to the rows).
         '''
         return self._cube.inserted_hs_indices()[self._index][0]
+
+    def labels(self, *args, **kwargs):
+        '''Return correct labels for slice.'''
+        return self._cube.labels(*args, **kwargs)[-2:]
+
+    def prune_indices(self, *args, **kwargs):
+        '''Extract correct row/col prune indices from 3D cube.'''
+        return list(self._cube.prune_indices(*args, **kwargs)[self._index])
+
+    @property
+    def has_means(self):
+        '''Get has_means from cube.'''
+        return self._cube.has_means
+
+    @property
+    def dimensions(self):
+        return self._cube.dimensions[-2:]
