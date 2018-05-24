@@ -65,6 +65,11 @@ class TestMultipleResponse(TestCase):
         actual = np.ma.compressed(cube.proportions(prune=True))
         np.testing.assert_almost_equal(actual, expected)
 
+        # Prune using construction time argument
+        cube = CrunchCube(SIMPLE_MR, prune=True)
+        actual = np.ma.compressed(cube.proportions())
+        np.testing.assert_almost_equal(actual, expected)
+
     def test_labels_cat_x_mr_exclude_missing(self):
         cube = CrunchCube(CAT_X_MR_SIMPLE)
         expected = [
@@ -108,6 +113,11 @@ class TestMultipleResponse(TestCase):
         actual = np.ma.compress_rows(cube.as_array(prune=True))
         np.testing.assert_array_equal(actual, expected)
 
+        # Prune using construction time argument
+        cube = CrunchCube(CAT_X_MR_PRUNED_ROW, prune=True)
+        actual = np.ma.compress_rows(cube.as_array())
+        np.testing.assert_array_equal(actual, expected)
+
     def test_as_array_cat_x_mr_pruned_col(self):
         cube = CrunchCube(CAT_X_MR_PRUNED_COL)
 
@@ -127,6 +137,11 @@ class TestMultipleResponse(TestCase):
         actual = np.ma.compress_cols(cube.as_array(prune=True))
         np.testing.assert_array_equal(actual, expected)
 
+        # Prune using construction time argument
+        cube = CrunchCube(CAT_X_MR_PRUNED_COL, prune=True)
+        actual = np.ma.compress_cols(cube.as_array())
+        np.testing.assert_array_equal(actual, expected)
+
     def test_as_array_cat_x_mr_pruned_row_col(self):
         cube = CrunchCube(CAT_X_MR_PRUNED_ROW_COL)
 
@@ -141,6 +156,12 @@ class TestMultipleResponse(TestCase):
         # Pruned
         expected = np.array([[6, 6]])
         table = cube.as_array(prune=True)
+        actual = table[:, ~table.mask.all(axis=0)][~table.mask.all(axis=1), :]
+        np.testing.assert_array_equal(actual, expected)
+
+        # Prune using construction time argument
+        cube = CrunchCube(CAT_X_MR_PRUNED_ROW_COL, prune=True)
+        table = cube.as_array()
         actual = table[:, ~table.mask.all(axis=0)][~table.mask.all(axis=1), :]
         np.testing.assert_array_equal(actual, expected)
 
@@ -165,6 +186,11 @@ class TestMultipleResponse(TestCase):
         actual = np.ma.compress_cols(cube.as_array(prune=True))
         np.testing.assert_array_equal(actual, expected)
 
+        # Prune using construction time argument
+        cube = CrunchCube(MR_X_CAT_PRUNED_COL, prune=True)
+        actual = np.ma.compress_cols(cube.as_array())
+        np.testing.assert_array_equal(actual, expected)
+
     def test_as_array_mr_x_cat_pruned_row(self):
         cube = CrunchCube(MR_X_CAT_PRUNED_ROW)
 
@@ -185,6 +211,11 @@ class TestMultipleResponse(TestCase):
         actual = np.ma.compress_rows(cube.as_array(prune=True))
         np.testing.assert_array_equal(actual, expected)
 
+        # Prune using construction time argument
+        cube = CrunchCube(MR_X_CAT_PRUNED_ROW, prune=True)
+        actual = np.ma.compress_rows(cube.as_array())
+        np.testing.assert_array_equal(actual, expected)
+
     def test_as_array_mr_x_cat_pruned_row_col(self):
         cube = CrunchCube(MR_X_CAT_PRUNED_ROW_COL)
 
@@ -203,6 +234,12 @@ class TestMultipleResponse(TestCase):
             [6],
         ])
         table = cube.as_array(prune=True)
+        actual = table[:, ~table.mask.all(axis=0)][~table.mask.all(axis=1), :]
+        np.testing.assert_array_equal(actual, expected)
+
+        # Prune using construction time argument
+        cube = CrunchCube(MR_X_CAT_PRUNED_ROW_COL, prune=True)
+        table = cube.as_array()
         actual = table[:, ~table.mask.all(axis=0)][~table.mask.all(axis=1), :]
         np.testing.assert_array_equal(actual, expected)
 
@@ -402,6 +439,13 @@ class TestMultipleResponse(TestCase):
         actual_1st_tab = np.ma.compress_rows(cube.as_array(prune=True)[1])
         np.testing.assert_array_equal(actual_1st_tab, expected_1st_tab)
 
+        # Prune using construction time argument
+        cube = CrunchCube(CAT_X_MR_X_MR_PRUNED_ROWS, prune=True)
+        actual_0th_tab = np.ma.compress_rows(cube.as_array()[0])
+        np.testing.assert_array_equal(actual_0th_tab, expected_0th_tab)
+        actual_1st_tab = np.ma.compress_rows(cube.as_array()[1])
+        np.testing.assert_array_equal(actual_1st_tab, expected_1st_tab)
+
     def test_cat_x_mr_x_mr_proportions_by_col(self):
         cube = CrunchCube(CAT_X_MR_X_MR)
         # Set axis to 1 (and not 0), since 3D cube
@@ -509,6 +553,11 @@ class TestMultipleResponse(TestCase):
         actual = np.ma.compressed(cube.proportions(prune=True))
         np.testing.assert_almost_equal(actual, expected)
 
+        # Prune using construction time argument
+        cube = CrunchCube(PROMPTED_AWARENESS, prune=True)
+        actual = np.ma.compressed(cube.proportions())
+        np.testing.assert_almost_equal(actual, expected)
+
     def test_mr_counts_not_pruned(self):
         cube = CrunchCube(PROMPTED_AWARENESS)
         expected = np.array([
@@ -535,6 +584,11 @@ class TestMultipleResponse(TestCase):
         ])
         # Use unweighted, because of the whole numbers (for comparison)
         actual = cube.as_array(weighted=False, prune=True)
+        np.testing.assert_array_equal(actual[~actual.mask], expected)
+
+        # Prune using construction time argument
+        cube = CrunchCube(PROMPTED_AWARENESS, prune=True)
+        actual = cube.as_array(weighted=False)
         np.testing.assert_array_equal(actual[~actual.mask], expected)
 
         pruned_expected = [
@@ -599,6 +653,11 @@ class TestMultipleResponse(TestCase):
         actual = np.ma.compress_cols(cube.as_array(prune=True)[0])
         np.testing.assert_almost_equal(actual, expected)
 
+        # Prune using construction time argument
+        cube = CrunchCube(MR_X_MR_X_CAT, prune=True)
+        actual = np.ma.compress_cols(cube.as_array()[0])
+        np.testing.assert_almost_equal(actual, expected)
+
     def test_mr_x_cat_x_mr_pruned_rows(self):
         cube = CrunchCube(MR_X_CAT_X_MR)
 
@@ -621,6 +680,11 @@ class TestMultipleResponse(TestCase):
         actual = np.ma.compress_rows(cube.as_array(prune=True)[3])
         np.testing.assert_almost_equal(actual, expected)
 
+        # Prune using construction time argument
+        cube = CrunchCube(MR_X_CAT_X_MR, prune=True)
+        actual = np.ma.compress_rows(cube.as_array()[3])
+        np.testing.assert_almost_equal(actual, expected)
+
     def test_mr_x_num_with_means_pruned(self):
         cube = CrunchCube(BBC_NEWS)
         expected = np.array([
@@ -635,6 +699,11 @@ class TestMultipleResponse(TestCase):
             [ 20.59956268,  17.49911157,   6.29951372,   2.28572239],  # noqa
         ])
         actual = np.ma.compress_cols(cube.as_array(prune=True))
+        np.testing.assert_almost_equal(actual, expected)
+
+        # Prune using construction time argument
+        cube = CrunchCube(BBC_NEWS, prune=True)
+        actual = np.ma.compress_cols(cube.as_array())
         np.testing.assert_almost_equal(actual, expected)
 
     def test_mr_x_num_with_means_not_pruned(self):
@@ -700,6 +769,11 @@ class TestMultipleResponse(TestCase):
         actual = np.ma.compress_rows(cube.proportions(axis=1, prune=True))
         np.testing.assert_almost_equal(actual, expected)
 
+        # Prune using construction time argument
+        cube = CrunchCube(AGE_X_ACCRPIPE, prune=True)
+        actual = np.ma.compress_rows(cube.proportions(axis=1))
+        np.testing.assert_almost_equal(actual, expected)
+
     def test_num_x_mr_props_by_col(self):
         cube = CrunchCube(AGE_X_ACCRPIPE)
         expected = np.array([
@@ -721,6 +795,11 @@ class TestMultipleResponse(TestCase):
             [ 0.        ,  0.0005637 ,  0.        ,  0.        ],  # noqa
         ])
         actual = np.ma.compress_rows(cube.proportions(axis=0, prune=True))
+        np.testing.assert_almost_equal(actual, expected)
+
+        # Prune using construction time argument
+        cube = CrunchCube(AGE_X_ACCRPIPE, prune=True)
+        actual = np.ma.compress_rows(cube.proportions(axis=0))
         np.testing.assert_almost_equal(actual, expected)
 
     def test_num_x_mr_props_by_cell(self):
