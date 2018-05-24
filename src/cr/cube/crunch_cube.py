@@ -328,12 +328,10 @@ class CrunchCube(object):
         if self.ndim >= 3:
             # In case of a 3D cube, return list of tuples
             # (of row and col pruned indices).
-            # return self._prune_3d_indices(self.hs_dims)
             return self._prune_3d_indices(transforms)
 
         # In case of 1 or 2 D cubes, return a list of
         # row indices (or row and col indices)
-        # return self._prune_indices(self.hs_dims)
         return self._prune_indices(transforms)
 
     def _prune_indices(self, transforms):
