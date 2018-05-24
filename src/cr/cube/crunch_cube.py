@@ -754,6 +754,8 @@ class CrunchCube(object):
 
         table = self.table.data(weighted)
         valid_indices = [dim.valid_indices(False) for dim in self.dimensions]
+        if axis == self.mr_dim_ind:
+            table = self._transform(table, hs_dims, None, inflate=True)
 
         if self.ndim == 1:
             return self._mr_props_single_dim(table, valid_indices, prune)
