@@ -582,7 +582,7 @@ class CrunchCube(object):
             return np.sum(margin, axis)
 
         if prune:
-            mask = self.as_array(prune=True).mask
+            mask = self.as_array(prune=True, include_transforms_for_dims=hs_dims).mask
             margin = np.ma.masked_array(margin, mask=mask)
 
         return margin
@@ -685,7 +685,7 @@ class CrunchCube(object):
 
         # if the axis is across the mr dimension
         if axis == self.mr_dim_ind:
-            den = self.margin(axis=2)
+            den = self.margin(axis=2, include_transforms_for_dims=hs_dims)
 
         return num / den
 
