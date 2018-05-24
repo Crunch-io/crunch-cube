@@ -50,6 +50,7 @@ class CubeSlice(object):
     def _increment_axis(axis):
         if axis is not None and not isinstance(axis, tuple):
             axis += 1
+        # return (1, 2)
         return axis
 
     def as_array(self, *args, **kwargs):
