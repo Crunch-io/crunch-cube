@@ -257,9 +257,9 @@ class CrunchCube(object):
         if row_margin.ndim > 1:
             # In case of CAT x MR, we have 2D margin
             row_margin = np.sum(row_margin, axis=1)
+
         row_prune_inds = self._margin_pruned_indices(
-            row_margin,
-            self.inserted_dim_inds(transforms, 0)
+            row_margin, self._inserted_dim_inds(transforms, 0), 0
         )
 
         if self.ndim == 1 or len(res.shape) == 1:
@@ -275,8 +275,7 @@ class CrunchCube(object):
             # In case of MR x CAT, we have 2D margin
             col_margin = np.sum(col_margin, axis=0)
         col_prune_inds = self._margin_pruned_indices(
-            col_margin,
-            self.inserted_dim_inds(transforms, 1)
+            col_margin, self._inserted_dim_inds(transforms, 1), 1
         )
         mask = self._create_mask(res, row_prune_inds, col_prune_inds)
         res = np.ma.masked_array(res, mask=mask)
@@ -321,8 +320,7 @@ class CrunchCube(object):
             axis=self.row_direction_axis
         )
         row_indices = self._margin_pruned_indices(
-            row_margin,
-            self.inserted_dim_inds(transforms, 0)
+            row_margin, self._inserted_dim_inds(transforms, 0), 0
         )
         if row_indices.ndim > 1:
             # In case of MR, we'd have 2D prune indices
@@ -336,8 +334,7 @@ class CrunchCube(object):
             axis=self.col_direction_axis,
         )
         col_indices = self._margin_pruned_indices(
-            col_margin,
-            self.inserted_dim_inds(transforms, 1)
+            col_margin, self._inserted_dim_inds(transforms, 1), 1
         )
         if col_indices.ndim > 1:
             # In case of MR, we'd have 2D prune indices
@@ -365,16 +362,13 @@ class CrunchCube(object):
         if column_margin.ndim > 1:
             column_margin = np.sum(column_margin, axis=0)
 
-        row_inserted_indices = (
-            self.inserted_dim_inds(transforms, 0)
-        )
-        col_inserted_indices = (
-            self.inserted_dim_inds(transforms, 1)
-        ) if np.any(row_margin) else []
-
         return (
-            self._margin_pruned_indices(row_margin, row_inserted_indices),
-            self._margin_pruned_indices(column_margin, col_inserted_indices),
+            self._margin_pruned_indices(
+                row_margin, self._inserted_dim_inds(transforms, 0), 0
+            ),
+            self._margin_pruned_indices(
+                column_margin, self._inserted_dim_inds(transforms, 1), 1
+            ),
         )
 
     @property
@@ -386,25 +380,24 @@ class CrunchCube(object):
             return 2
         return 1
 
-    def inserted_dim_inds(self, transforms, dim):
-        if not transforms:
+    def _inserted_dim_inds(self, transform_dims, axis):
+        if not transform_dims:
             return []
         inserted_inds = self.inserted_hs_indices()
-        if dim == 0:  # In case of row
-            dim_ind = 0 if self.ndim < 3 else 1
-        elif dim == 1:
-            dim_ind = 1 if self.ndim < 3 else 2
-        return np.array(
-            inserted_inds[dim_ind] if len(inserted_inds) else []
-        )
+        dim_ind = axis if self.ndim < 3 else axis + 1
+        return np.array(inserted_inds[dim_ind] if len(inserted_inds) else [])
 
     @staticmethod
-    def _margin_pruned_indices(margin, insertions):
-        ind_inserted = np.zeros(margin.shape, dtype=bool)
-        if insertions is not None and any(insertions):
-            ind_inserted[insertions] = True
+    def _margin_pruned_indices(margin, inserted_ind, axis):
         pruned_ind = np.logical_or(margin == 0, np.isnan(margin))
-        pruned_ind = np.logical_and(pruned_ind, ~ind_inserted)
+
+        if np.any(margin) and inserted_ind is not None and any(inserted_ind):
+            ind_inserted = np.zeros(pruned_ind.shape, dtype=bool)
+            if len(pruned_ind.shape) == 2 and axis == 1:
+                ind_inserted[:, inserted_ind] = True
+            else:
+                ind_inserted[inserted_ind] = True
+            pruned_ind = np.logical_and(pruned_ind, ~ind_inserted)
 
         return pruned_ind
 
