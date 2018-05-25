@@ -447,7 +447,7 @@ class CrunchCube(object):
             # (because of the inner matrix dimensions).
             return np.dot(prop_margin, V)
 
-    def _double_mr_proportions(self, axis, weighted):
+    def _double_mr_proportions(self, axis):
         '''Return proportions for MR x MR cube.
 
         Double MR cubes internally have 4 dimensions, and they're quite specific
@@ -582,7 +582,7 @@ class CrunchCube(object):
             return np.sum(margin, axis)
 
         if prune:
-            mask = self.as_array(prune=True).mask
+            mask = self.as_array(prune=True, include_transforms_for_dims=hs_dims).mask
             margin = np.ma.masked_array(margin, mask=mask)
 
         return margin
@@ -662,108 +662,67 @@ class CrunchCube(object):
 
         return res
 
-    def _mr_props_as_0th(self, axis, table, hs_dims, prune):
-        if len(table.shape) == 4:
-            # This is the case of MR x CA, special treatment
-            # Always return only the row direction (across CATs).
-            num = self.as_array(
-                include_transforms_for_dims=hs_dims,
-                prune=prune,
-            )
+    def _mr_props_three_dim(self, axis, hs_dims, prune):
+        num = self.as_array(include_transforms_for_dims=hs_dims, prune=prune)
+
+        if self.mr_dim_ind == 0:
             if self.dimensions[1].type == 'categorical_array':
                 den = self.margin(axis=2)[:, :, None]
             else:
                 den = self.margin(axis=1)[:, None, :]
-            return num / den
 
-        # The following are normal MR x something (not CA)
-        num = self.as_array(include_transforms_for_dims=hs_dims)
-        if axis == 0:
-            den = self.margin(
-                axis=axis,
-                include_transforms_for_dims=hs_dims
-            )
-        else:
-            den = self.margin(axis=axis)[:, np.newaxis]
+        if self.mr_dim_ind == 1:
+            if axis == (1, 2) or axis is None:
+                den = np.sum(self.margin(axis=2), 2)[:, :, None]
+            elif axis != self.mr_dim_ind:
+                den = np.sum(num, 2)[:, :, None]
+
+        if self.mr_dim_ind == 2:
+            if axis == (1, 2) or axis is None:
+                den = np.sum(self.margin(axis=0), axis=1)[:, None, :]
+            elif axis != self.mr_dim_ind:
+                den = self.margin(axis=axis)[:, None]
+
+        # if the axis is across the mr dimension
+        if axis == self.mr_dim_ind:
+            den = self.margin(axis=2, include_transforms_for_dims=hs_dims)
+
         return num / den
 
-    def _mr_props_as_1st(self, axis, table, hs_dims, prune):
-        num = table[self.ind_selected][np.ix_(*self.valid_indices)]
-        non_selected = table[self.ind_non_selected][np.ix_(*self.valid_indices)]
-
-        if num.ndim >= 3:
-            if axis == (1, 2) or axis is None:
-                den = np.sum(num + non_selected, 2)[:, :, None]
-            elif axis == 2:
-                den = np.sum(num, 2)[:, :, None]
-            elif axis == 1:
-                den = num + non_selected
-            res = num / den
-            res = self._transform(res, hs_dims, None)
-            if prune:
-                res = np.ma.masked_array(res,
-                                         mask=self.as_array(prune=prune).mask)
-            return res
-
-        if axis == 0:
-            den = np.sum(num, 0)
-        elif axis == 1 or axis == 2 and len(num.shape) >= 3:
-            den = num + non_selected
-        else:
-            axis = 0 if len(num.shape) < 3 else (1, 2)
-            den = np.sum(num + non_selected, axis)
-
-        res = num / den
-        res = self._transform(res, hs_dims, None)
-
-        if prune:
-            res = np.ma.masked_array(res, mask=self.as_array(prune=prune).mask)
-        return res
-
-    def _mr_props_as_2nd(self, axis, hs_dims, prune):
-        if axis == 1:
-            margin = self.margin(axis=axis)[:, np.newaxis]
-        elif axis == 2:
-            margin = self.margin(axis=0, include_transforms_for_dims=hs_dims)
-        else:
-            margin = np.sum(self.margin(axis=0), axis=1)[:, np.newaxis, :]
-
-        res = self.as_array(include_transforms_for_dims=hs_dims) / margin
-        if prune:
-            mask = self.as_array(
-                prune=True,
-                include_transforms_for_dims=hs_dims,
-            ).mask
-            res = np.ma.masked_array(res, mask=mask)
-        return res
-
-    def _mr_props_single_dim(self, table, valid_indices, prune):
+    def _mr_props_single_dim(self, table, prune):
         res = table[:, 0] / (table[:, 0] + table[:, 1])
-        res = res[np.ix_(*valid_indices)]
+        res = res[np.ix_(*self.valid_indices)]
         if prune:
             res = np.ma.masked_array(res, mask=(res == 0))
         return res
+
+    def _mr_props_two_dim(self, axis, hs_dims, prune):
+        num = self.as_array(prune=prune, include_transforms_for_dims=hs_dims)
+        if axis == self.mr_dim_ind:
+            den = self.margin(
+                axis=axis,
+                include_transforms_for_dims=hs_dims,
+                prune=prune
+            )
+        else:
+            den = self.margin(axis=axis)
+            den = den[np.newaxis, :] if self.mr_dim_ind else den[:, np.newaxis]
+        return num / den
 
     def _mr_proportions(self, axis, weighted, prune, hs_dims=None):
         '''Calculate MR proportions.'''
 
         if self.is_double_mr:
-            # For the case of MR x MR cube, proportions are calculated in a
-            # specific way, which needs to be handled speparately.
-            return self._double_mr_proportions(axis, weighted)
-
-        table = self.table.data(weighted)
-        valid_indices = [dim.valid_indices(False) for dim in self.dimensions]
+            return self._double_mr_proportions(axis)
 
         if self.ndim == 1:
-            return self._mr_props_single_dim(table, valid_indices, prune)
+            return self._mr_props_single_dim(self.table.data(weighted), prune)
 
-        if self.mr_dim_ind == 0:
-            return self._mr_props_as_0th(axis, table, hs_dims, prune)
-        elif self.mr_dim_ind == 1:
-            return self._mr_props_as_1st(axis, table, hs_dims, prune)
-        else:
-            return self._mr_props_as_2nd(axis, hs_dims, prune)
+        if self.ndim == 2:
+            return self._mr_props_two_dim(axis, hs_dims, prune)
+
+        if self.ndim == 3:
+            return self._mr_props_three_dim(axis, hs_dims, prune)
 
     @property
     def is_univariate_ca(self):
