@@ -485,7 +485,7 @@ class CrunchCube(object):
             self.mr_dim_ind == 1 and axis == 1 and self.ndim > 2
         )
 
-    def _mr_margin_along_non_mr_dim(self, axis, weighted,
+    def _mr_margin_along_non_mr_dim(self, axis, weighted, prune=False,
                                     include_transforms_for_dims=None):
         '''Calculate MR margin along non-MR dimension.
 
@@ -496,6 +496,7 @@ class CrunchCube(object):
         array = self.as_array(
             weighted=weighted,
             margin=True,
+            prune=prune,
             include_transforms_for_dims=include_transforms_for_dims,
         )
 
@@ -542,7 +543,9 @@ class CrunchCube(object):
             # Only take dims not calculated across (don't include
             # H&S in margin calculation)
             hs_dims = hs_dims and [dim for dim in hs_dims if dim != axis]
-            return self._mr_margin_along_non_mr_dim(axis, weighted, hs_dims)
+            return self._mr_margin_along_non_mr_dim(
+                axis, weighted, prune, hs_dims
+            )
 
         is_ca_row_margin = (
             self.ndim == 3 and
