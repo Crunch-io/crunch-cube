@@ -7,7 +7,7 @@ import numpy as np
 from cr.cube.crunch_cube import CrunchCube
 
 
-# pylint: disable=invalid-name
+# pylint: disable=invalid-name, protected-access
 class TestCrunchCube(TestCase):
     '''Test class for the CrunchCube unit tests.
 
@@ -418,13 +418,15 @@ class TestCrunchCube(TestCase):
     @patch('cr.cube.crunch_cube.CrunchCube.ndim', 1)
     def test_inserted_inds(self, mock_inserted_hs_indices,
                            mock_np_array):
-        mock_np_array.return_value = Mock()
+        expected = Mock()
+        mock_np_array.return_value = expected
 
         cc = CrunchCube({})
-        expected = []
 
         # Assert indices are not fetched without trasforms
         actual = cc._inserted_dim_inds(None, 0)
+        # Assert np.array called with empty list as argument
+        mock_np_array.assert_called_once_with([])
         assert actual == expected
 
         # Assert indices are fetch with transforms
