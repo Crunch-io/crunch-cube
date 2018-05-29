@@ -822,6 +822,10 @@ class CrunchCube(object):
     # Properties
 
     @property
+    def dim_types(self):
+        return [dim.type for dim in self.dimensions]
+
+    @property
     def ndim(self):
         return len(self.dimensions)
 

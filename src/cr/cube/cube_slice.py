@@ -132,3 +132,14 @@ class CubeSlice(object):
     def index(self, *args, **kwargs):
         '''Get index.'''
         return self._call_cube_method('index', *args, **kwargs)
+
+    @property
+    def dim_types(self):
+        return self._cube.dim_types[-2:]
+
+    @property
+    def pvals(self):
+        return self._cube.pvals
+
+    def inserted_hs_indices(self, *args, **kwargs):
+        return self._cube.inserted_hs_indices(*args, **kwargs)[-2:]
