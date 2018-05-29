@@ -701,9 +701,14 @@ class CrunchCube(object):
                 prune=prune
             )
         else:
-            den = self.margin(axis=axis)
+            den = self.margin(axis=axis, prune=prune)
             den = den[np.newaxis, :] if self.mr_dim_ind else den[:, np.newaxis]
-        return num / den
+        props = num / den
+        # make sure that props retain a mask of the num
+        if hasattr(num, 'mask'):
+            props.mask = num.mask
+
+        return props
 
     def _mr_proportions(self, axis, weighted, prune, hs_dims=None):
         '''Calculate MR proportions.'''
