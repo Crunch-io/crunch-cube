@@ -813,44 +813,9 @@ class CrunchCube(object):
         return self._mr_dim_ind()
 
     @property
-    def standardized_residuals(self):
-        '''Calculate residuals based on Chi-squared.'''
-
-        if self.has_mr:
-            return self.mr_std_residuals
-
-        counts = self.as_array()
-        total = self.margin()
-        colsum = self.margin(axis=0)
-        rowsum = self.margin(axis=1)
-        expected_counts = expected_freq(counts)
-        residuals = counts - expected_counts
-        variance = (
-            np.outer(rowsum, colsum) * np.outer(total - rowsum, total - colsum) / total**3
-        )
-        return residuals / np.sqrt(variance)
-
-    @property
     def valid_indices(self):
         '''Valid indices of all dimensions (exclude missing).'''
         return [dim.valid_indices(False) for dim in self.dimensions]
-
-    @property
-    def mr_std_residuals(self):
-        counts = self.as_array()
-        total = self.margin()
-        colsum = self.margin(axis=0)
-        rowsum = self.margin(axis=1)
-
-        if not self.is_double_mr and self.mr_dim_ind == 0:
-            total = total[:, np.newaxis]
-            rowsum = rowsum[:, np.newaxis]
-
-        expected = rowsum * colsum / total
-        variance = (
-            rowsum * colsum * (total - rowsum) * (total - colsum) / total**3
-        )
-        return (counts - expected) / np.sqrt(variance)
 
     @property
     def has_mr(self):
@@ -1278,22 +1243,6 @@ class CrunchCube(object):
             prune=prune
         ) * population_size
 
-    @property
-    def pvals(self):
-        '''Calculate p-vals.
-
-        This function calculates statistically significant results for
-        categorical contingency tables. The values can be calculated across
-        columns (axis = 0), or across rows (axis = 1).
-
-        Returns
-            (ndarray): 2-Dimensional array, representing the p-values for each
-                       cell of the table-like representation of the
-                       crunch cube.
-        '''
-        stats = self.standardized_residuals
-        return 2 * (1 - norm.cdf(np.abs(stats)))
-
     def y_offset(self, expand=False, include_transforms_for_dims=None):
         '''Gets y offset for sheet manipulation.
 
@@ -1329,6 +1278,46 @@ class CrunchCube(object):
     def index(self, weighted=True, prune=False):
         '''Get cube index measurement.'''
         return Index(self, weighted, prune).data
+
+    def zscore(self, weighted=True, prune=False):
+        '''Get cube zscore measurement.'''
+        counts = self.as_array(weighted=weighted, prune=prune)
+        total = self.margin(weighted=weighted, prune=prune)
+        colsum = self.margin(axis=0, weighted=weighted, prune=prune)
+        rowsum = self.margin(axis=1, weighted=weighted, prune=prune)
+
+        if self.has_mr:
+            if not self.is_double_mr and self.mr_dim_ind == 0:
+                total = total[:, np.newaxis]
+                rowsum = rowsum[:, np.newaxis]
+
+            expected = rowsum * colsum / total
+            variance = (
+                rowsum * colsum * (total - rowsum) * (total - colsum) / total**3
+            )
+            return (counts - expected) / np.sqrt(variance)
+
+        expected_counts = expected_freq(counts)
+        residuals = counts - expected_counts
+        variance = (
+            np.outer(rowsum, colsum) * np.outer(total - rowsum, total - colsum) / total**3
+        )
+        return residuals / np.sqrt(variance)
+
+    def pvals(self, weighted=True, prune=False):
+        '''Calculate p-vals.
+
+        This function calculates statistically significant results for
+        categorical contingency tables. The values can be calculated across
+        columns (axis = 0), or across rows (axis = 1).
+
+        Returns
+            (ndarray): 2-Dimensional array, representing the p-values for each
+                       cell of the table-like representation of the
+                       crunch cube.
+        '''
+        stats = self.zscore(weighted=weighted, prune=prune)
+        return 2 * (1 - norm.cdf(np.abs(stats)))
 
     def scale_means(self):
         '''Get cube means.'''

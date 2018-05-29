@@ -271,7 +271,7 @@ class TestMultipleResponse(TestCase):
                 -0.794143540856781
             ]
         ])
-        actual = cube.standardized_residuals
+        actual = cube.zscore()
         np.testing.assert_almost_equal(actual, expected)
 
     def test_cat_x_mr_index_by_row(self):

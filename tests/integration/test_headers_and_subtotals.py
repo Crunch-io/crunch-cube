@@ -517,7 +517,7 @@ class TestHeadersAndSubtotals(TestCase):
             [3.69990005e-01, 9.19546240e-01, 2.88068221e-01, 7.57299844e-01, 3.86924216e-01, 2.41648361e-04],  # noqa
             [3.53745446e-01, 3.70094812e-02, 5.03974440e-01, 1.67769523e-02, 3.15641644e-01, 0.00000000e+00],  # noqa
         ])
-        actual = cube.pvals
+        actual = cube.pvals()
         np.testing.assert_almost_equal(actual, expected)
 
     def test_fruit_hs_top_bottom_labels(self):

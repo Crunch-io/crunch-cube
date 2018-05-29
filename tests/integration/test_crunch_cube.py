@@ -687,7 +687,7 @@ class TestCrunchCube(TestCase):
                 2.07704094996525
             ]
         ])
-        actual = cube.standardized_residuals
+        actual = cube.zscore()
 
         np.testing.assert_almost_equal(actual, expected)
 
@@ -715,7 +715,7 @@ class TestCrunchCube(TestCase):
                 0.4271118723152956
             ]
         ])
-        actual = cube.pvals
+        actual = cube.pvals()
         np.testing.assert_almost_equal(actual, expected)
 
     def test_pvals_stats(self):
@@ -738,7 +738,7 @@ class TestCrunchCube(TestCase):
                 0.0000013632752629
             ]
         ])
-        actual = cube.pvals
+        actual = cube.pvals()
         np.testing.assert_almost_equal(actual, expected)
 
     def test_mean_age_for_blame_x_gender(self):
@@ -782,7 +782,7 @@ class TestCrunchCube(TestCase):
                 19.321410263144653
             ]
         ])
-        actual = cube.standardized_residuals
+        actual = cube.zscore()
         np.testing.assert_almost_equal(actual, expected)
 
     def test_z_scores_admit_by_gender_weighted_rows(self):
@@ -794,7 +794,7 @@ class TestCrunchCube(TestCase):
             [9.42561984520692, -9.425619845206922],
             [-9.425619845206922, 9.42561984520692]
         ])
-        actual = cube.standardized_residuals
+        actual = cube.zscore()
         np.testing.assert_almost_equal(actual, expected)
 
     def test_selected_crosstab_dim_names(self):
