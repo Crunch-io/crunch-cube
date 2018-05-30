@@ -37,7 +37,7 @@ class TestStandardizedResiduals(TestCase):
                 19.32141026,
             ],
         ])
-        actual = cube.standardized_residuals
+        actual = cube.zscore()
         np.testing.assert_almost_equal(actual, expected)
 
     def test_standardized_residuals_admit_x_gender_weighted(self):
@@ -47,7 +47,7 @@ class TestStandardizedResiduals(TestCase):
             [9.42561985, -9.42561985],
             [-9.42561985, 9.42561985],
         ])
-        actual = cube.standardized_residuals
+        actual = cube.zscore()
         np.testing.assert_almost_equal(actual, expected)
 
     def test_standardized_residuals_selected_crosstab(self):
@@ -61,7 +61,7 @@ class TestStandardizedResiduals(TestCase):
             [15.39360198, -15.39360198],
             [-1.15219648, 1.15219648],
         ])
-        actual = cube.standardized_residuals
+        actual = cube.zscore()
         np.testing.assert_almost_equal(actual, expected)
 
     def test_standardized_residuals_mr_x_cat(self):
@@ -72,7 +72,7 @@ class TestStandardizedResiduals(TestCase):
             [0.60455606, -0.60455606],
             [-0.30884247, 0.30884247],
         ])
-        actual = cube.standardized_residuals
+        actual = cube.zscore()
         np.testing.assert_almost_equal(actual, expected)
 
     def test_standardized_residuals_cat_x_mr(self):
@@ -86,7 +86,7 @@ class TestStandardizedResiduals(TestCase):
             [0.80134191, 0.60455606, -0.30884247],
             [-0.80134191, -0.60455606, 0.30884247],
         ])
-        actual = cube.standardized_residuals
+        actual = cube.zscore()
         np.testing.assert_almost_equal(actual, expected)
 
     def test_standardized_residuals_mr_x_mr(self):
@@ -98,7 +98,7 @@ class TestStandardizedResiduals(TestCase):
             [-1.21901758, -2.70033782, 13.45338666, 9.29294984],
             [4.15682487, 5.69476817, 9.29294984, 15.37981857],
         ])
-        actual = cube.standardized_residuals
+        actual = cube.zscore()
         np.testing.assert_almost_equal(actual, expected)
 
     def test_standardized_residuals_mr_x_mr_heterogenous(self):
@@ -109,5 +109,5 @@ class TestStandardizedResiduals(TestCase):
             [0.10271174, -39.11229693],
             [-0.26443564, -39.67503947],
         ])
-        actual = cube.standardized_residuals
+        actual = cube.zscore()
         np.testing.assert_almost_equal(actual, expected)
