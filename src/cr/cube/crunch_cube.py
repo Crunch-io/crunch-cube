@@ -204,7 +204,7 @@ class CrunchCube(object):
         res = res + adjusted
 
         if prune:
-            return self._prune_body(res, include_transforms_for_dims)
+            return self._prune_body(res, weighted=weighted, transforms=include_transforms_for_dims)
 
         return res
 
@@ -237,7 +237,7 @@ class CrunchCube(object):
         res = np.ma.masked_array(res, mask=mask)
         return res
 
-    def _prune_body(self, res, transforms=None):
+    def _prune_body(self, res, weighted, transforms=None):
         '''Prune the result based on margins content.
 
         Pruning is the removal of rows or columns, whose corresponding
@@ -252,7 +252,8 @@ class CrunchCube(object):
         # done to achieve parity with how the front end client works (whaam).
         row_margin = self.margin(
             include_transforms_for_dims=transforms,
-            axis=self.row_direction_axis
+            axis=self.row_direction_axis,
+            weighted=weighted
         )
         if row_margin.ndim > 1:
             # In case of CAT x MR, we have 2D margin
@@ -270,6 +271,7 @@ class CrunchCube(object):
         col_margin = self.margin(
             include_transforms_for_dims=transforms,
             axis=self.col_direction_axis,
+            weighted=weighted
         )
         if col_margin.ndim > 1:
             # In case of MR x CAT, we have 2D margin
@@ -578,7 +580,11 @@ class CrunchCube(object):
             return np.sum(margin, axis)
 
         if prune:
-            mask = self.as_array(prune=True, include_transforms_for_dims=hs_dims).mask
+            mask = self.as_array(
+                prune=True,
+                include_transforms_for_dims=hs_dims,
+                weighted=weighted
+            ).mask
             margin = np.ma.masked_array(margin, mask=mask)
 
         return margin

@@ -672,7 +672,7 @@ class TestMultipleResponse(TestCase):
 
     def test_mr_x_num_cols_margin_pruned(self):
         cube = CrunchCube(BBC_NEWS)
-        expected = np.array([1728, 1523, 1570, 1434])
+        expected = np.array([1728, 1523, 1570, 1434, 1459, 1429, 1461, 1432])
         margin = np.ma.compress_cols(
             cube.margin(axis=0, weighted=False, prune=True)
         )
