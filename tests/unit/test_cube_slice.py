@@ -1,6 +1,7 @@
 '''Unit tests for the CubeSlice class.'''
 from unittest import TestCase
 from mock import Mock
+from mock import patch
 
 from cr.cube.cube_slice import CubeSlice
 
@@ -48,6 +49,7 @@ class TestCubeSlice(TestCase):
         cs = CubeSlice(cube, 1)
         assert cs.name == 'Cube Title: Analysis Slice XY'
 
+    @patch('cr.cube.cube_slice.CubeSlice.ndim', 3)
     def test_proportions(self):
         '''Test that proportions method delegetes its call to CrunchCube.
 
@@ -69,6 +71,7 @@ class TestCubeSlice(TestCase):
         cs = CubeSlice(cube, index=1)
         assert cs.proportions() == array[1]
 
+    @patch('cr.cube.cube_slice.CubeSlice.ndim', 3)
     def test_margin(self):
         '''Test that margin method delegetes its call to CrunchCube.
 
@@ -89,6 +92,7 @@ class TestCubeSlice(TestCase):
         # Assert correct slice is returned when index is set
         assert cs.margin() == array[1]
 
+    @patch('cr.cube.cube_slice.CubeSlice.ndim', 3)
     def test_as_array(self):
         '''Test that as_array method delegetes its call to CrunchCube.
 
@@ -140,6 +144,7 @@ class TestCubeSlice(TestCase):
         cs = CubeSlice(cube, 1)
         assert cs.labels() == all_labels[-2:]
 
+    @patch('cr.cube.cube_slice.CubeSlice.ndim', 3)
     def test_prune_indices(self):
         '''Assert that correct prune indices are extracted from 3D cube.'''
         cube = Mock()
