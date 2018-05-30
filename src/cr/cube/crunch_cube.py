@@ -204,7 +204,7 @@ class CrunchCube(object):
         res = res + adjusted
 
         if prune:
-            return self._prune_body(res, include_transforms_for_dims)
+            return self._prune_body(res, transforms=include_transforms_for_dims)
 
         return res
 
@@ -252,14 +252,15 @@ class CrunchCube(object):
         # done to achieve parity with how the front end client works (whaam).
         row_margin = self.margin(
             include_transforms_for_dims=transforms,
-            axis=self.row_direction_axis
+            axis=self.row_direction_axis,
+            weighted=False
         )
         if row_margin.ndim > 1:
             # In case of CAT x MR, we have 2D margin
             row_margin = np.sum(row_margin, axis=1)
+
         row_prune_inds = self._margin_pruned_indices(
-            row_margin,
-            self.inserted_dim_inds(transforms, 0)
+            row_margin, self._inserted_dim_inds(transforms, 0), 0
         )
 
         if self.ndim == 1 or len(res.shape) == 1:
@@ -270,13 +271,13 @@ class CrunchCube(object):
         col_margin = self.margin(
             include_transforms_for_dims=transforms,
             axis=self.col_direction_axis,
+            weighted=False
         )
         if col_margin.ndim > 1:
             # In case of MR x CAT, we have 2D margin
             col_margin = np.sum(col_margin, axis=0)
         col_prune_inds = self._margin_pruned_indices(
-            col_margin,
-            self.inserted_dim_inds(transforms, 1)
+            col_margin, self._inserted_dim_inds(transforms, 1), 1
         )
         mask = self._create_mask(res, row_prune_inds, col_prune_inds)
         res = np.ma.masked_array(res, mask=mask)
@@ -318,11 +319,11 @@ class CrunchCube(object):
     def _prune_indices(self, transforms):
         row_margin = self.margin(
             include_transforms_for_dims=transforms,
-            axis=self.row_direction_axis
+            axis=self.row_direction_axis,
+            weighted=False
         )
         row_indices = self._margin_pruned_indices(
-            row_margin,
-            self.inserted_dim_inds(transforms, 0)
+            row_margin, self._inserted_dim_inds(transforms, 0), 0
         )
         if row_indices.ndim > 1:
             # In case of MR, we'd have 2D prune indices
@@ -334,10 +335,10 @@ class CrunchCube(object):
         col_margin = self.margin(
             include_transforms_for_dims=transforms,
             axis=self.col_direction_axis,
+            weighted=False
         )
         col_indices = self._margin_pruned_indices(
-            col_margin,
-            self.inserted_dim_inds(transforms, 1)
+            col_margin, self._inserted_dim_inds(transforms, 1), 1
         )
         if col_indices.ndim > 1:
             # In case of MR, we'd have 2D prune indices
@@ -365,16 +366,13 @@ class CrunchCube(object):
         if column_margin.ndim > 1:
             column_margin = np.sum(column_margin, axis=0)
 
-        row_inserted_indices = (
-            self.inserted_dim_inds(transforms, 0)
-        )
-        col_inserted_indices = (
-            self.inserted_dim_inds(transforms, 1)
-        ) if np.any(row_margin) else []
-
         return (
-            self._margin_pruned_indices(row_margin, row_inserted_indices),
-            self._margin_pruned_indices(column_margin, col_inserted_indices),
+            self._margin_pruned_indices(
+                row_margin, self._inserted_dim_inds(transforms, 0), 0
+            ),
+            self._margin_pruned_indices(
+                column_margin, self._inserted_dim_inds(transforms, 1), 1
+            ),
         )
 
     @property
@@ -386,25 +384,24 @@ class CrunchCube(object):
             return 2
         return 1
 
-    def inserted_dim_inds(self, transforms, dim):
-        if not transforms:
+    def _inserted_dim_inds(self, transform_dims, axis):
+        if not transform_dims:
             return []
         inserted_inds = self.inserted_hs_indices()
-        if dim == 0:  # In case of row
-            dim_ind = 0 if self.ndim < 3 else 1
-        elif dim == 1:
-            dim_ind = 1 if self.ndim < 3 else 2
-        return np.array(
-            inserted_inds[dim_ind] if len(inserted_inds) else []
-        )
+        dim_ind = axis if self.ndim < 3 else axis + 1
+        return np.array(inserted_inds[dim_ind] if len(inserted_inds) else [])
 
     @staticmethod
-    def _margin_pruned_indices(margin, insertions):
-        ind_inserted = np.zeros(margin.shape, dtype=bool)
-        if insertions is not None and any(insertions):
-            ind_inserted[insertions] = True
+    def _margin_pruned_indices(margin, inserted_ind, axis):
         pruned_ind = np.logical_or(margin == 0, np.isnan(margin))
-        pruned_ind = np.logical_and(pruned_ind, ~ind_inserted)
+
+        if np.any(margin) and inserted_ind is not None and any(inserted_ind):
+            ind_inserted = np.zeros(pruned_ind.shape, dtype=bool)
+            if len(pruned_ind.shape) == 2 and axis == 1:
+                ind_inserted[:, inserted_ind] = True
+            else:
+                ind_inserted[inserted_ind] = True
+            pruned_ind = np.logical_and(pruned_ind, ~ind_inserted)
 
         return pruned_ind
 
@@ -492,7 +489,7 @@ class CrunchCube(object):
             self.mr_dim_ind == 1 and axis == 1 and self.ndim > 2
         )
 
-    def _mr_margin_along_non_mr_dim(self, axis, weighted,
+    def _mr_margin_along_non_mr_dim(self, axis, weighted, prune=False,
                                     include_transforms_for_dims=None):
         '''Calculate MR margin along non-MR dimension.
 
@@ -503,6 +500,7 @@ class CrunchCube(object):
         array = self.as_array(
             weighted=weighted,
             margin=True,
+            prune=prune,
             include_transforms_for_dims=include_transforms_for_dims,
         )
 
@@ -549,7 +547,9 @@ class CrunchCube(object):
             # Only take dims not calculated across (don't include
             # H&S in margin calculation)
             hs_dims = hs_dims and [dim for dim in hs_dims if dim != axis]
-            return self._mr_margin_along_non_mr_dim(axis, weighted, hs_dims)
+            return self._mr_margin_along_non_mr_dim(
+                axis, weighted, prune, hs_dims
+            )
 
         is_ca_row_margin = (
             self.ndim == 3 and
@@ -582,7 +582,11 @@ class CrunchCube(object):
             return np.sum(margin, axis)
 
         if prune:
-            mask = self.as_array(prune=True, include_transforms_for_dims=hs_dims).mask
+            mask = self.as_array(
+                prune=True,
+                include_transforms_for_dims=hs_dims,
+                weighted=False
+            ).mask
             margin = np.ma.masked_array(margin, mask=mask)
 
         return margin
@@ -646,11 +650,11 @@ class CrunchCube(object):
         res = np.sum(array, axis)
 
         if prune and axis is not None and type(res) is np.ndarray:
-            table = self.as_array(
+            mask = self.as_array(
                 include_transforms_for_dims=include_transforms_for_dims,
                 prune=prune,
-            )
-            mask = table.mask
+                weighted=False
+            ).mask
             if isinstance(axis, tuple) or axis < mask.ndim:
                 mask = mask.all(axis=axis)
             res = np.ma.masked_array(res, mask=mask)
@@ -705,9 +709,18 @@ class CrunchCube(object):
                 prune=prune
             )
         else:
-            den = self.margin(axis=axis)
+            den = self.margin(axis=axis, prune=prune)
             den = den[np.newaxis, :] if self.mr_dim_ind else den[:, np.newaxis]
-        return num / den
+        props = num / den
+        # make sure that props have mask from unweighted counts
+        if hasattr(num, 'mask'):
+            props.mask = self.as_array(
+                prune=prune,
+                include_transforms_for_dims=hs_dims,
+                weighted=False
+            ).mask
+
+        return props
 
     def _mr_proportions(self, axis, weighted, prune, hs_dims=None):
         '''Calculate MR proportions.'''
@@ -776,7 +789,13 @@ class CrunchCube(object):
 
         res = array / margin
         if isinstance(array, np.ma.core.MaskedArray):
-            res.mask = array.mask
+            res.mask = self._as_array(
+                include_missing=include_missing,
+                weighted=False,
+                adjusted=adjusted,
+                include_transforms_for_dims=include_transforms_for_dims,
+                prune=prune
+            ).mask
         return self._fix_shape(res)
 
     def _mr_dim_ind(self, include_selections=False):
@@ -817,44 +836,9 @@ class CrunchCube(object):
         return self._mr_dim_ind()
 
     @property
-    def standardized_residuals(self):
-        '''Calculate residuals based on Chi-squared.'''
-
-        if self.has_mr:
-            return self.mr_std_residuals
-
-        counts = self.as_array()
-        total = self.margin()
-        colsum = self.margin(axis=0)
-        rowsum = self.margin(axis=1)
-        expected_counts = expected_freq(counts)
-        residuals = counts - expected_counts
-        variance = (
-            np.outer(rowsum, colsum) * np.outer(total - rowsum, total - colsum) / total**3
-        )
-        return residuals / np.sqrt(variance)
-
-    @property
     def valid_indices(self):
         '''Valid indices of all dimensions (exclude missing).'''
         return [dim.valid_indices(False) for dim in self.dimensions]
-
-    @property
-    def mr_std_residuals(self):
-        counts = self.as_array()
-        total = self.margin()
-        colsum = self.margin(axis=0)
-        rowsum = self.margin(axis=1)
-
-        if not self.is_double_mr and self.mr_dim_ind == 0:
-            total = total[:, np.newaxis]
-            rowsum = rowsum[:, np.newaxis]
-
-        expected = rowsum * colsum / total
-        variance = (
-            rowsum * colsum * (total - rowsum) * (total - colsum) / total**3
-        )
-        return (counts - expected) / np.sqrt(variance)
 
     @property
     def has_mr(self):
@@ -1282,22 +1266,6 @@ class CrunchCube(object):
             prune=prune
         ) * population_size
 
-    @property
-    def pvals(self):
-        '''Calculate p-vals.
-
-        This function calculates statistically significant results for
-        categorical contingency tables. The values can be calculated across
-        columns (axis = 0), or across rows (axis = 1).
-
-        Returns
-            (ndarray): 2-Dimensional array, representing the p-values for each
-                       cell of the table-like representation of the
-                       crunch cube.
-        '''
-        stats = self.standardized_residuals
-        return 2 * (1 - norm.cdf(np.abs(stats)))
-
     def y_offset(self, expand=False, include_transforms_for_dims=None):
         '''Gets y offset for sheet manipulation.
 
@@ -1333,6 +1301,46 @@ class CrunchCube(object):
     def index(self, weighted=True, prune=False):
         '''Get cube index measurement.'''
         return Index(self, weighted, prune).data
+
+    def zscore(self, weighted=True, prune=False):
+        '''Get cube zscore measurement.'''
+        counts = self.as_array(weighted=weighted, prune=prune)
+        total = self.margin(weighted=weighted, prune=prune)
+        colsum = self.margin(axis=0, weighted=weighted, prune=prune)
+        rowsum = self.margin(axis=1, weighted=weighted, prune=prune)
+
+        if self.has_mr:
+            if not self.is_double_mr and self.mr_dim_ind == 0:
+                total = total[:, np.newaxis]
+                rowsum = rowsum[:, np.newaxis]
+
+            expected = rowsum * colsum / total
+            variance = (
+                rowsum * colsum * (total - rowsum) * (total - colsum) / total**3
+            )
+            return (counts - expected) / np.sqrt(variance)
+
+        expected_counts = expected_freq(counts)
+        residuals = counts - expected_counts
+        variance = (
+            np.outer(rowsum, colsum) * np.outer(total - rowsum, total - colsum) / total**3
+        )
+        return residuals / np.sqrt(variance)
+
+    def pvals(self, weighted=True, prune=False):
+        '''Calculate p-vals.
+
+        This function calculates statistically significant results for
+        categorical contingency tables. The values can be calculated across
+        columns (axis = 0), or across rows (axis = 1).
+
+        Returns
+            (ndarray): 2-Dimensional array, representing the p-values for each
+                       cell of the table-like representation of the
+                       crunch cube.
+        '''
+        stats = self.zscore(weighted=weighted, prune=prune)
+        return 2 * (1 - norm.cdf(np.abs(stats)))
 
     def scale_means(self):
         '''Get cube means.'''

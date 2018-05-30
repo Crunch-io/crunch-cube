@@ -271,7 +271,7 @@ class TestMultipleResponse(TestCase):
                 -0.794143540856781
             ]
         ])
-        actual = cube.standardized_residuals
+        actual = cube.zscore()
         np.testing.assert_almost_equal(actual, expected)
 
     def test_cat_x_mr_index_by_row(self):
@@ -626,15 +626,15 @@ class TestMultipleResponse(TestCase):
     def test_mr_x_num_with_means_pruned(self):
         cube = CrunchCube(BBC_NEWS)
         expected = np.array([
-            [ 38.79868092,  37.91146097,  21.56682623,  28.90316683],  # noqa
-            [ 12.36141735,  10.91788449,   8.55836344,  -9.23336151],  # noqa
-            [ 25.35566536,  -1.87323918, -10.45832265, -19.00932593],  # noqa
-            [ -1.22773321,  -7.99671664, -30.95431483, -18.03417097],  # noqa
-            [-23.80382413, -26.69728288, -61.23218388, -48.49820981],  # noqa
-            [ 19.6045351 , -24.87663078, -52.08108014,   7.63833075],  # noqa
-            [-26.98268155,  -9.66231773, -90.91475189, -46.92610738],  # noqa
-            [ 19.45552783, -27.48308453, -62.33543385, -39.83388919],  # noqa
-            [ 20.59956268,  17.49911157,   6.29951372,   2.28572239],  # noqa
+            [38.79868092168848,     37.911460968343384,     21.566826228784073,     28.903166828677023,     np.nan, np.nan, np.nan, np.nan],   #noqa
+            [12.361417346615546,    10.917884486901682,     8.55836343660059,       -9.233361511954936,     np.nan, np.nan, np.nan, np.nan],   #noqa
+            [25.355665361847333,    -1.8732391808022093,    -10.458322652141625,    -19.009325927555476,    np.nan, np.nan, np.nan, np.nan],   #noqa
+            [-1.227733208698524,    -7.996716641982194,     -30.95431482676578,     -18.03417096792156,     np.nan, np.nan, np.nan, np.nan],   #noqa
+            [-23.803824133140722,   -26.697282878138527,    -61.23218387646827,     -48.49820981263205,     np.nan, np.nan, np.nan, np.nan],   #noqa
+            [19.60453509722427,     -24.876630784866492,    -52.08108013616227,     7.638330747500843,      np.nan, np.nan, np.nan, np.nan],   #noqa
+            [-26.98268155304967,    -9.662317734860315,     -90.91475189122735,     -46.92610737983078,     np.nan, np.nan, np.nan, np.nan],   #noqa
+            [19.45552783488183,     -27.48308452819968,     -62.33543385309548,     -39.83388919377415,     np.nan, np.nan, np.nan, np.nan],   #noqa
+            [20.599562677755262,    17.499111571449458,     6.299513722727599,      2.285722391598358,      np.nan, np.nan, np.nan, np.nan],   #noqa
         ])
         actual = np.ma.compress_cols(cube.as_array(prune=True))
         np.testing.assert_almost_equal(actual, expected)
@@ -661,7 +661,7 @@ class TestMultipleResponse(TestCase):
         actual = cube.margin(axis=1, weighted=False)
         np.testing.assert_array_equal(actual, expected)
 
-    def test_mr_x_num_cols_margin_not_pruned(self):
+    def test_mr_x_num_cols_margin_not_pruned_unweighted(self):
         cube = CrunchCube(BBC_NEWS)
         expected = np.array(
             [1728, 1523, 1570, 1434, 1459, 1429, 1461, 1432, 0, 0, 0, 0]
@@ -670,14 +670,34 @@ class TestMultipleResponse(TestCase):
         for actual in margin:
             np.testing.assert_array_equal(actual, expected)
 
-    def test_mr_x_num_cols_margin_pruned(self):
+    def test_mr_x_num_cols_margin_not_pruned_weighted(self):
         cube = CrunchCube(BBC_NEWS)
-        expected = np.array([1728, 1523, 1570, 1434])
+        expected = np.array(
+            [1709.607711404295, 1438.5504956329391, 1556.0764946283794, 1419.8513591680107, 0, 0, 0, 0, 0, 0, 0, 0]
+        )
+        margin = cube.margin(axis=0, weighted=True)
+        for actual in margin:
+            np.testing.assert_array_almost_equal(actual, expected)
+
+    def test_mr_x_num_cols_margin_pruned_unweighted(self):
+        cube = CrunchCube(BBC_NEWS)
+        expected = np.array([1728, 1523, 1570, 1434, 1459, 1429, 1461, 1432])
         margin = np.ma.compress_cols(
             cube.margin(axis=0, weighted=False, prune=True)
         )
         for actual in margin:
             np.testing.assert_array_equal(actual, expected)
+
+    def test_mr_x_num_cols_margin_pruned_weighted(self):
+        cube = CrunchCube(BBC_NEWS)
+        expected = np.array(
+            [1709.607711404295, 1438.5504956329391, 1556.0764946283794, 1419.8513591680107, 0, 0, 0, 0]
+        )
+        margin = np.ma.compress_cols(
+            cube.margin(axis=0, weighted=True, prune=True)
+        )
+        for actual in margin:
+            np.testing.assert_array_almost_equal(actual, expected)
 
     def test_num_x_mr_props_by_row(self):
         cube = CrunchCube(AGE_X_ACCRPIPE)

@@ -373,13 +373,13 @@ class TestCrunchCube(TestCase):
     def test_margin_pruned_indices_without_insertions(self):
         table = np.array([0, 1, 0, 2, 3, 4])
         expected = np.array([True, False, True, False, False, False])
-        actual = CrunchCube._margin_pruned_indices(table, [])
+        actual = CrunchCube._margin_pruned_indices(table, [], 0)
         np.testing.assert_array_equal(actual, expected)
 
     def test_margin_pruned_indices_without_insertions_with_nans(self):
         table = np.array([0, 1, 0, 2, 3, np.nan])
         expected = np.array([True, False, True, False, False, True])
-        actual = CrunchCube._margin_pruned_indices(table, [])
+        actual = CrunchCube._margin_pruned_indices(table, [], 0)
         np.testing.assert_array_equal(actual, expected)
 
     def test_margin_pruned_indices_with_insertions(self):
@@ -387,7 +387,7 @@ class TestCrunchCube(TestCase):
         insertions = [0, 1]
         expected = np.array([False, False, True, False, False, False])
 
-        actual = CrunchCube._margin_pruned_indices(table, insertions)
+        actual = CrunchCube._margin_pruned_indices(table, insertions, 0)
         np.testing.assert_array_equal(actual, expected)
 
     def test_margin_pruned_indices_with_insertions_and_nans(self):
@@ -395,7 +395,7 @@ class TestCrunchCube(TestCase):
         insertions = [0, 1]
         expected = np.array([False, False, True, False, False, True])
 
-        actual = CrunchCube._margin_pruned_indices(table, insertions)
+        actual = CrunchCube._margin_pruned_indices(table, insertions, 0)
         np.testing.assert_array_equal(actual, expected)
 
     def test_insertions_with_empty_indices(self):
@@ -424,9 +424,9 @@ class TestCrunchCube(TestCase):
         expected = []
 
         # Assert indices are not fetched without trasforms
-        actual = cc.inserted_dim_inds(None, 0)
+        actual = cc._inserted_dim_inds(None, 0)
         assert actual == expected
 
         # Assert indices are fetch with transforms
-        actual = cc.inserted_dim_inds(Mock(), 0)
+        actual = cc._inserted_dim_inds(Mock(), 0)
         mock_inserted_hs_indices.assert_called_once()
