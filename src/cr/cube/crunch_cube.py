@@ -222,7 +222,7 @@ class CrunchCube(object):
             slice_mask = np.logical_or(rows_pruned, cols_pruned)
 
             # 0 stands for row dim (it's increased inside the method
-            inserted_rows_indices = self.inserted_dim_inds(transforms, 0)
+            inserted_rows_indices = self._inserted_dim_inds(transforms, 0)
             if inserted_rows_indices.any():
                 hs_pruned = slice_mask[inserted_rows_indices, :].all(axis=1)
                 # make sure we never prune H&S
