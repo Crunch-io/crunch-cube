@@ -204,7 +204,7 @@ class CrunchCube(object):
         res = res + adjusted
 
         if prune:
-            return self._prune_body(res, weighted=weighted, transforms=include_transforms_for_dims)
+            return self._prune_body(res, transforms=include_transforms_for_dims)
 
         return res
 
@@ -237,7 +237,7 @@ class CrunchCube(object):
         res = np.ma.masked_array(res, mask=mask)
         return res
 
-    def _prune_body(self, res, weighted, transforms=None):
+    def _prune_body(self, res, transforms=None):
         '''Prune the result based on margins content.
 
         Pruning is the removal of rows or columns, whose corresponding
@@ -253,7 +253,7 @@ class CrunchCube(object):
         row_margin = self.margin(
             include_transforms_for_dims=transforms,
             axis=self.row_direction_axis,
-            weighted=weighted
+            weighted=False
         )
         if row_margin.ndim > 1:
             # In case of CAT x MR, we have 2D margin
@@ -271,7 +271,7 @@ class CrunchCube(object):
         col_margin = self.margin(
             include_transforms_for_dims=transforms,
             axis=self.col_direction_axis,
-            weighted=weighted
+            weighted=False
         )
         if col_margin.ndim > 1:
             # In case of MR x CAT, we have 2D margin
@@ -319,7 +319,8 @@ class CrunchCube(object):
     def _prune_indices(self, transforms):
         row_margin = self.margin(
             include_transforms_for_dims=transforms,
-            axis=self.row_direction_axis
+            axis=self.row_direction_axis,
+            weighted=False
         )
         row_indices = self._margin_pruned_indices(
             row_margin, self._inserted_dim_inds(transforms, 0), 0
@@ -334,6 +335,7 @@ class CrunchCube(object):
         col_margin = self.margin(
             include_transforms_for_dims=transforms,
             axis=self.col_direction_axis,
+            weighted=False
         )
         col_indices = self._margin_pruned_indices(
             col_margin, self._inserted_dim_inds(transforms, 1), 1
@@ -648,12 +650,11 @@ class CrunchCube(object):
         res = np.sum(array, axis)
 
         if prune and axis is not None and type(res) is np.ndarray:
-            table = self.as_array(
+            mask = self.as_array(
                 include_transforms_for_dims=include_transforms_for_dims,
                 prune=prune,
                 weighted=False
-            )
-            mask = table.mask
+            ).mask
             if isinstance(axis, tuple) or axis < mask.ndim:
                 mask = mask.all(axis=axis)
             res = np.ma.masked_array(res, mask=mask)
@@ -711,9 +712,13 @@ class CrunchCube(object):
             den = self.margin(axis=axis, prune=prune)
             den = den[np.newaxis, :] if self.mr_dim_ind else den[:, np.newaxis]
         props = num / den
-        # make sure that props retain a mask of the num
+        # make sure that props have mask from unweighted counts
         if hasattr(num, 'mask'):
-            props.mask = num.mask
+            props.mask = self.as_array(
+                prune=prune,
+                include_transforms_for_dims=hs_dims,
+                weighted=False
+            ).mask
 
         return props
 
@@ -784,7 +789,13 @@ class CrunchCube(object):
 
         res = array / margin
         if isinstance(array, np.ma.core.MaskedArray):
-            res.mask = array.mask
+            res.mask = self._as_array(
+                include_missing=include_missing,
+                weighted=False,
+                adjusted=adjusted,
+                include_transforms_for_dims=include_transforms_for_dims,
+                prune=prune
+            ).mask
         return self._fix_shape(res)
 
     def _mr_dim_ind(self, include_selections=False):
