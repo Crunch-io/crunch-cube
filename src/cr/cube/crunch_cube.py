@@ -583,7 +583,7 @@ class CrunchCube(object):
             mask = self.as_array(
                 prune=True,
                 include_transforms_for_dims=hs_dims,
-                weighted=weighted
+                weighted=False
             ).mask
             margin = np.ma.masked_array(margin, mask=mask)
 
@@ -651,6 +651,7 @@ class CrunchCube(object):
             table = self.as_array(
                 include_transforms_for_dims=include_transforms_for_dims,
                 prune=prune,
+                weighted=False
             )
             mask = table.mask
             if isinstance(axis, tuple) or axis < mask.ndim:
