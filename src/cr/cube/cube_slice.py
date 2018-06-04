@@ -1,5 +1,7 @@
 '''Home of the CubeSlice class.'''
 
+import numpy as np
+
 
 class CubeSlice(object):
     '''Implementation of CubeSlice class.
@@ -33,7 +35,10 @@ class CubeSlice(object):
     def _update_result(self, result):
         if self.ndim < 3 or len(result) - 1 < self._index:
             return result
-        return result[self._index]
+        result = result[self._index]
+        if not isinstance(result, np.ndarray):
+            result = np.array([result])
+        return result
 
     def _call_cube_method(self, method, *args, **kwargs):
         kwargs = self._update_args(kwargs)
