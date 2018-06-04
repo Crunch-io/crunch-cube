@@ -15,6 +15,7 @@ from scipy.stats.contingency import expected_freq
 from .measures.data_table import DataTable
 from .measures.index import Index
 from .measures.scale_means import ScaleMeans
+from .utils import lazyproperty
 
 np.seterr(divide='ignore', invalid='ignore')
 
@@ -382,7 +383,7 @@ class CrunchCube(object):
             ),
         )
 
-    @property
+    @lazyproperty
     def row_direction_axis(self):
         # when dealing with 1D MR cubes, axis for margin should be 0
         if self.ndim == 1 and self.has_mr:
@@ -412,7 +413,7 @@ class CrunchCube(object):
 
         return pruned_ind
 
-    @property
+    @lazyproperty
     def col_direction_axis(self):
         return self.ndim - 2
 
@@ -744,14 +745,14 @@ class CrunchCube(object):
         if self.ndim == 3:
             return self._mr_props_three_dim(axis, hs_dims, prune)
 
-    @property
+    @lazyproperty
     def is_univariate_ca(self):
         '''Check if cube is a just the CA ("ca x cat" or "cat x ca" dims)'''
         types = {d.type for d in self.dimensions}
         ca_types = {'categorical_array', 'categorical'}
         return self.ndim == 2 and types == ca_types
 
-    @property
+    @lazyproperty
     def univariate_ca_main_axis(self):
         '''For univariate CA, the main axis is the categorical axis'''
         dim_types = [dim.type for dim in self.dimensions]
@@ -821,42 +822,42 @@ class CrunchCube(object):
 
     # Properties
 
-    @property
+    @lazyproperty
     def dim_types(self):
         return [dim.type for dim in self.dimensions]
 
-    @property
+    @lazyproperty
     def ndim(self):
         return len(self.dimensions)
 
-    @property
+    @lazyproperty
     def table(self):
         return self._table
 
-    @property
+    @lazyproperty
     def ind_selected(self):
         return self._get_mr_slice()
 
-    @property
+    @lazyproperty
     def ind_non_selected(self):
         return self._get_mr_slice(selected=False)
 
-    @property
+    @lazyproperty
     def mr_dim_ind(self):
         '''Indices of MR dimensions.'''
         return self._mr_dim_ind()
 
-    @property
+    @lazyproperty
     def valid_indices(self):
         '''Valid indices of all dimensions (exclude missing).'''
         return [dim.valid_indices(False) for dim in self.dimensions]
 
-    @property
+    @lazyproperty
     def has_mr(self):
         '''Determines if a cube has MR dimensions.'''
         return self.mr_dim_ind is not None
 
-    @property
+    @lazyproperty
     def ca_dim_ind(self):
         for (i, dim) in enumerate(self.dimensions):
             if dim.type == 'categorical_array':
@@ -864,7 +865,7 @@ class CrunchCube(object):
         else:
             return None
 
-    @property
+    @lazyproperty
     def name(self):
         '''Return the name of the cube.
 
@@ -876,14 +877,14 @@ class CrunchCube(object):
             return None
         return self.dimensions[0].name
 
-    @property
+    @lazyproperty
     def description(self):
         '''Return the description of the cube.'''
         if not self.dimensions:
             return None
         return self.dimensions[0].description
 
-    @property
+    @lazyproperty
     def dimensions(self):
         '''Dimensions of the crunch cube.'''
         all_dimensions = self.table.all_dimensions
@@ -893,32 +894,32 @@ class CrunchCube(object):
             if i not in mr_selections
         ]
 
-    @property
+    @lazyproperty
     def missing(self):
         '''Get missing count of a cube.'''
         return self.table.missing
 
-    @property
+    @lazyproperty
     def is_weighted(self):
         '''Check if the cube dataset is weighted.'''
         return self.table.is_weighted
 
-    @property
+    @lazyproperty
     def filter_annotation(self):
         '''Get cube's filter annotation.'''
         return self.table.filter_annotation
 
-    @property
+    @lazyproperty
     def has_means(self):
         '''Check if cube has means.'''
         return self.table.has_means
 
-    @property
+    @lazyproperty
     def is_double_mr(self):
         '''Check if cube has 2 MR dimensions.'''
         return True if isinstance(self.mr_dim_ind, tuple) else False
 
-    @property
+    @lazyproperty
     def double_mr_non_selected_inds(self):
         '''Gets all combinations of non-selected slices for any double MR cube.
 
