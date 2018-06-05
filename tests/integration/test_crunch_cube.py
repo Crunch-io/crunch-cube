@@ -55,7 +55,7 @@ class TestCrunchCube(TestCase):
     def test_crunch_cube_loads_data(self):
         cube = CrunchCube(CAT_X_CAT)
         expected = CAT_X_CAT['value']
-        actual = cube._table._cube
+        actual = cube._cube
         self.assertEqual(actual, expected)
 
     def test_as_array_univariate_cat_exclude_missing(self):

@@ -20,7 +20,8 @@ from .utils import lazyproperty
 np.seterr(divide='ignore', invalid='ignore')
 
 
-class CrunchCube(object):
+# class CrunchCube(object):
+class CrunchCube(DataTable):
     '''Implementation of the CrunchCube API class.
 
     Class is used for the implementation of the main API functions that are
@@ -62,12 +63,14 @@ class CrunchCube(object):
 
         # If the provided response is dict, create cube immediately
         if isinstance(response, dict):
-            self._table = DataTable(response.get('value', response))
+            super(CrunchCube, self).__init__(response.get('value', response))
+            # self._table = DataTable(response.get('value', response))
             return
 
         try:
             response = json.loads(response)
-            self._table = DataTable(response.get('value', response))
+            # self._table = DataTable(response.get('value', response))
+            super(CrunchCube, self).__init__(response.get('value', response))
         except TypeError:
             # If an unexpected type is provided raise descriptive exception.
             if not isinstance(response, dict):
@@ -89,7 +92,7 @@ class CrunchCube(object):
         valid_indices = [dim.valid_indices(include_missing)
                          for dim in dimensions]
 
-        mr_selections_indices = self.table.mr_selections_indices
+        mr_selections_indices = self.mr_selections_indices
         mr_slice = [0]
         if get_all_mr:
             mr_slice = [0, 1, 2]
@@ -153,7 +156,7 @@ class CrunchCube(object):
             return res[np.ix_(*valid_indices)] if valid_indices else res
 
         dim_offset = 0
-        dims = self.table.all_dimensions if self.has_mr else self.dimensions
+        dims = self.all_dimensions if self.has_mr else self.dimensions
         for (i, dim) in enumerate(dims):
             # Check if transformations can/need to be performed
             transform = (dim.has_transforms and
@@ -193,8 +196,9 @@ class CrunchCube(object):
             res (ndarray): Tabular representation of crunch cube
         '''
 
-        values = self.table.flat_values(weighted, margin)
-        dimensions = self.table.all_dimensions
+        # values = self.table.flat_values(weighted, margin)
+        values = self.flat_values(weighted, margin)
+        dimensions = self.all_dimensions
         shape = [len(dim.elements(include_missing=True)) for dim in dimensions]
         valid_indices = self._get_valid_indices(dimensions, include_missing,
                                                 get_non_selected)
@@ -470,7 +474,7 @@ class CrunchCube(object):
 
     def _double_mr_margin(self, axis, weighted):
         '''Margin for MR x MR cube (they're specific, thus separate method).'''
-        table = self.table.data(weighted)
+        table = self.data(weighted)
         ind_ns, ind_ns_0, ind_ns_1 = self.double_mr_non_selected_inds
         selected = table[self.ind_selected]
         non_selected = table[ind_ns]
@@ -485,7 +489,7 @@ class CrunchCube(object):
         return (selected + non_selected)[np.ix_(*self.valid_indices)]
 
     def _1d_mr_margin(self, axis, weighted):
-        table = self.table.data(weighted)
+        table = self.data(weighted)
         if axis == 0:
             return self.as_array(weighted=weighted)
         return table[:, 0] + table[:, 1]
@@ -533,7 +537,7 @@ class CrunchCube(object):
 
     def _transform_table(self, table, include_transforms_for_dims):
         valid_indices = self._get_valid_indices(
-            self.table.all_dimensions,
+            self.all_dimensions,
             include_missing=False,
             get_all_mr=True
         )
@@ -568,7 +572,7 @@ class CrunchCube(object):
             # For MR x CA always return row margin (only one that makes sense)
             return np.sum(self.as_array(), axis=2)
 
-        table = self.table.data(weighted, margin=True)
+        table = self.data(weighted, margin=True)
         if hs_dims:
             # In case of H&S the entire table needs to be
             # transformed (with selections).
@@ -737,7 +741,7 @@ class CrunchCube(object):
             return self._double_mr_proportions(axis)
 
         if self.ndim == 1:
-            return self._mr_props_single_dim(self.table.data(weighted), prune)
+            return self._mr_props_single_dim(self.data(weighted), prune)
 
         if self.ndim == 2:
             return self._mr_props_two_dim(axis, hs_dims, prune)
@@ -808,7 +812,7 @@ class CrunchCube(object):
 
     def _mr_dim_ind(self, include_selections=False):
         dimensions = (
-            self.table.all_dimensions
+            self.all_dimensions
             if include_selections else
             self.dimensions
         )
@@ -829,10 +833,6 @@ class CrunchCube(object):
     @lazyproperty
     def ndim(self):
         return len(self.dimensions)
-
-    @lazyproperty
-    def table(self):
-        return self._table
 
     @lazyproperty
     def ind_selected(self):
@@ -887,32 +887,12 @@ class CrunchCube(object):
     @lazyproperty
     def dimensions(self):
         '''Dimensions of the crunch cube.'''
-        all_dimensions = self.table.all_dimensions
-        mr_selections = self.table.mr_selections_indices
+        all_dimensions = self.all_dimensions
+        mr_selections = self.mr_selections_indices
         return [
             dim for (i, dim) in enumerate(all_dimensions)
             if i not in mr_selections
         ]
-
-    @lazyproperty
-    def missing(self):
-        '''Get missing count of a cube.'''
-        return self.table.missing
-
-    @lazyproperty
-    def is_weighted(self):
-        '''Check if the cube dataset is weighted.'''
-        return self.table.is_weighted
-
-    @lazyproperty
-    def filter_annotation(self):
-        '''Get cube's filter annotation.'''
-        return self.table.filter_annotation
-
-    @lazyproperty
-    def has_means(self):
-        '''Check if cube has means.'''
-        return self.table.has_means
 
     @lazyproperty
     def is_double_mr(self):
@@ -1305,10 +1285,6 @@ class CrunchCube(object):
         return first_dim_length * (self.as_array(
             include_transforms_for_dims=include_transforms_for_dims
         ).shape[1] + 4)
-
-    def count(self, weighted=True):
-        '''Get cube's count with automatic weighted/unweighted selection.'''
-        return self.table.count(weighted)
 
     def index(self, weighted=True, prune=False):
         '''Get cube index measurement.'''
