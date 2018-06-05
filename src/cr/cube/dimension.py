@@ -293,3 +293,7 @@ class Dimension(object):
         else:
             return [i for (i, el) in enumerate(self._elements)
                     if not el.get('missing')]
+
+    @property
+    def shape(self):
+        return len(self._elements)
