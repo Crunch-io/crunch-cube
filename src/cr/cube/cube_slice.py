@@ -32,6 +32,18 @@ class CubeSlice(object):
         kwargs['axis'] += 1
         return kwargs
 
+    # def _update_args(self, kwargs):
+    #     # if cube is 3D we need to adjust the axis:
+    #     # - if it was "None" we need to pass "(1, 2)"
+    #     # - if it was 0 or 1, we need to increment by one to adjust for tab dim
+    #     if self.ndim == 3 and 'axis' in kwargs:
+    #         if kwargs['axis'] is None:
+    #             kwargs['axis'] = (1, 2)
+    #         elif isinstance(kwargs['axis'], int):
+    #             kwargs['axis'] += 1
+    #
+    #     return kwargs
+
     def _update_result(self, result):
         if self.ndim < 3 or len(result) - 1 < self._index:
             return result
@@ -137,6 +149,10 @@ class CubeSlice(object):
     def index(self, *args, **kwargs):
         '''Get index.'''
         return self._call_cube_method('index', *args, **kwargs)
+
+    def zscore(self, *args, **kwargs):
+        '''Get index.'''
+        return self._call_cube_method('zscore', *args, **kwargs)
 
     @property
     def dim_types(self):
