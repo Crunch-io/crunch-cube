@@ -4,13 +4,15 @@ from __future__ import division
 
 import numpy as np
 
+from ..utils import lazyproperty
+
 
 class ScaleMeans(object):
     '''Implementation of the Means service.'''
     def __init__(self, cube):
         self._cube = cube
 
-    @property
+    @lazyproperty
     def data(self):
         '''Get the means calculation.'''
         table = self._cube.as_array()
@@ -27,7 +29,7 @@ class ScaleMeans(object):
             den = np.sum(table[self.contents_inds], self.axis)
             return num / den
 
-    @property
+    @lazyproperty
     def axis(self):
         '''Get axis for means calculation.'''
         axis = 0
@@ -37,7 +39,7 @@ class ScaleMeans(object):
             axis = 2
         return axis
 
-    @property
+    @lazyproperty
     def values(self):
         '''Get num values for means calculation.'''
         return np.array([
@@ -45,12 +47,12 @@ class ScaleMeans(object):
             if dim.values and any(~np.isnan(dim.values))
         ][int(len(self._cube.dimensions) > 2)])
 
-    @property
+    @lazyproperty
     def valid_inds(self):
         '''Valid indices for numerical values.'''
         return ~np.isnan(self.values)
 
-    @property
+    @lazyproperty
     def contents_inds(self):
         '''Create contents selection indices based on valid num vals.'''
         return [
