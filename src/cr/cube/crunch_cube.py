@@ -79,42 +79,7 @@ class CrunchCube(DataTable):
                     'A `cube` must be JSON or `dict`.'
                 ).format(type(response)))
 
-    def _get_valid_indices(self, dimensions, get_non_selected=False,
-                           get_all_mr=False):
-        '''Gets valid indices for each dimension.
-
-        Main criterion for a valid index is most often the information about
-        whether the corresponding value of the dimension is missing or not.
-        For MR variables, since they use two dimensions, the valid index
-        for the 'selections' dimensions is [0], except in the case of
-        non-selected slices calculation, where it needs to be [1].
-        '''
-        valid_indices = [dim.valid_indices(include_missing=False)
-                         for dim in dimensions]
-
-        mr_selections_indices = self.mr_selections_indices
-        mr_slice = [0]
-        if get_all_mr:
-            mr_slice = [0, 1, 2]
-        elif get_non_selected:
-            mr_slice = [1]
-
-        if mr_selections_indices:
-            # In the case of MR variables, we only need to select the
-            # 'selected' slice of the 'selections' dimension.
-            valid_indices = [
-                (
-                    valid_indices[i]
-                    if i not in mr_selections_indices
-                    else mr_slice
-                )
-                for (i, _) in enumerate(valid_indices)
-            ]
-
-        return valid_indices
-
-    @classmethod
-    def _fix_shape(cls, array):
+    def _fix_shape(self, array):
         '''Fixes shape of MR variables.
         For MR variables, where 'selections' dims are dropped, the ndarray
         needs to be reshaped, in order to seem as if those dims never existed.
@@ -128,8 +93,30 @@ class CrunchCube(DataTable):
         methods should only be used from outside CrunchCube.
         '''
 
+        if not array.shape or len(array.shape) != len(self.all_dimensions):
+            # This condition covers two cases:
+            # 1. In case of no dimensions, the shape of the array is empty
+            # 2. If the shape was already fixed, we don't need to fix it again.
+            # This might happen while constructing the masked arrays. In case
+            # of MR, we will have the selections dimension included thoughout
+            # the calculations, and will only remove it before returning the
+            # result to the user.
+            return array
+
+        # We keep MR selections dimensions included in the array, all the way
+        # up to here. At this point, we need to remove the non-selected part of
+        # selections dimension (and subsequently purge the dimension itself).
+
+        display_ind = [
+            0 if dim.is_selections else slice(None)
+            for dim in self.all_dimensions
+        ]
+        array = array[display_ind]
+
         # If a first dimension only has one element, we don't want to
-        # remove it from the shape. Hence the i == 0 part.
+        # remove it from the shape. Hence the i == 0 part. For other dimensions
+        # that have one element, it means that these are the remnants of the MR
+        # selections, which we don't need as separate dimensions.
         new_shape = [dim for (i, dim) in enumerate(array.shape)
                      if dim != 1 or i == 0]
         return array.reshape(new_shape)
@@ -149,8 +136,10 @@ class CrunchCube(DataTable):
             )
         return result, valid_indices
 
-    def _transform(self, res, include_transforms_for_dims, valid_indices,
+    def _transform(self, res, include_transforms_for_dims,
                    inflate=False):
+
+        valid_indices = self.valid_indices_with_selections
         '''Transform the shape of the resulting ndarray.'''
         if not include_transforms_for_dims:
             return res[np.ix_(*valid_indices)] if valid_indices else res
@@ -200,11 +189,8 @@ class CrunchCube(DataTable):
         values = self.flat_values(weighted, margin)
         dimensions = self.all_dimensions
         shape = [len(dim.elements(include_missing=True)) for dim in dimensions]
-        valid_indices = self._get_valid_indices(dimensions, get_non_selected)
         res = np.array(values).reshape(shape)
-        res = self._transform(
-            res, include_transforms_for_dims, valid_indices, inflate=True
-        )
+        res = self._transform(res, include_transforms_for_dims, inflate=True)
         res = res + adjusted
 
         if prune:
@@ -257,6 +243,8 @@ class CrunchCube(DataTable):
 
         if self.ndim > 2:
             return self._prune_3d_body(res, transforms)
+
+        res = self._fix_shape(res)
 
         # Note: If the cube contains transforms (H&S), and they happen to
         # have the marginal value 0 (or NaN), they're NOT pruned. This is
@@ -535,15 +523,10 @@ class CrunchCube(DataTable):
         return tuple(indices)
 
     def _transform_table(self, table, include_transforms_for_dims):
-        valid_indices = self._get_valid_indices(
-            self.all_dimensions,
-            get_all_mr=True
-        )
         table = self._transform(
             table,
             include_transforms_for_dims,
-            valid_indices,
-            inflate=True
+            inflate=True,
         )
         return table
 
@@ -808,14 +791,10 @@ class CrunchCube(DataTable):
             ).mask
         return self._fix_shape(res)
 
-    def _mr_dim_ind(self, include_selections=False):
-        dimensions = (
-            self.all_dimensions
-            if include_selections else
-            self.dimensions
-        )
+    @lazyproperty
+    def mr_dim_ind(self):
         indices = [
-            i for i, dim in enumerate(dimensions)
+            i for i, dim in enumerate(self.dimensions)
             if dim.type == 'multiple_response'
         ]
         if indices:
@@ -839,11 +818,6 @@ class CrunchCube(DataTable):
     @lazyproperty
     def ind_non_selected(self):
         return self._get_mr_slice(selected=False)
-
-    @lazyproperty
-    def mr_dim_ind(self):
-        '''Indices of MR dimensions.'''
-        return self._mr_dim_ind()
 
     @lazyproperty
     def valid_indices(self):

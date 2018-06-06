@@ -297,3 +297,10 @@ class Dimension(object):
     @property
     def shape(self):
         return len(self._elements)
+
+    @property
+    def is_selections(self):
+        category_ids = [el.get('id') for el in self._elements]
+        if category_ids == [1, 0, -1]:
+            return True
+        return False
