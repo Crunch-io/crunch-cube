@@ -79,8 +79,8 @@ class CrunchCube(DataTable):
                     'A `cube` must be JSON or `dict`.'
                 ).format(type(response)))
 
-    def _get_valid_indices(self, dimensions, include_missing,
-                           get_non_selected=False, get_all_mr=False):
+    def _get_valid_indices(self, dimensions, get_non_selected=False,
+                           get_all_mr=False):
         '''Gets valid indices for each dimension.
 
         Main criterion for a valid index is most often the information about
@@ -89,7 +89,7 @@ class CrunchCube(DataTable):
         for the 'selections' dimensions is [0], except in the case of
         non-selected slices calculation, where it needs to be [1].
         '''
-        valid_indices = [dim.valid_indices(include_missing)
+        valid_indices = [dim.valid_indices(include_missing=False)
                          for dim in dimensions]
 
         mr_selections_indices = self.mr_selections_indices
@@ -200,8 +200,7 @@ class CrunchCube(DataTable):
         values = self.flat_values(weighted, margin)
         dimensions = self.all_dimensions
         shape = [len(dim.elements(include_missing=True)) for dim in dimensions]
-        valid_indices = self._get_valid_indices(dimensions, include_missing,
-                                                get_non_selected)
+        valid_indices = self._get_valid_indices(dimensions, get_non_selected)
         res = np.array(values).reshape(shape)
         res = self._transform(
             res, include_transforms_for_dims, valid_indices, inflate=True
@@ -538,7 +537,6 @@ class CrunchCube(DataTable):
     def _transform_table(self, table, include_transforms_for_dims):
         valid_indices = self._get_valid_indices(
             self.all_dimensions,
-            include_missing=False,
             get_all_mr=True
         )
         table = self._transform(
@@ -852,7 +850,12 @@ class CrunchCube(DataTable):
         '''Valid indices of all dimensions (exclude missing).'''
         return [dim.valid_indices(False) for dim in self.dimensions]
 
-    @lazyproperty
+    @property
+    def valid_indices_with_selections(self):
+        '''Get all valid indices (including MR selections).'''
+        return [dim.valid_indices(False) for dim in self.all_dimensions]
+
+    @property
     def has_mr(self):
         '''Determines if a cube has MR dimensions.'''
         return self.mr_dim_ind is not None
@@ -887,11 +890,9 @@ class CrunchCube(DataTable):
     @lazyproperty
     def dimensions(self):
         '''Dimensions of the crunch cube.'''
-        all_dimensions = self.all_dimensions
-        mr_selections = self.mr_selections_indices
         return [
-            dim for (i, dim) in enumerate(all_dimensions)
-            if i not in mr_selections
+            dim for (i, dim) in enumerate(self.all_dimensions)
+            if i not in self.mr_selections_indices
         ]
 
     @lazyproperty
