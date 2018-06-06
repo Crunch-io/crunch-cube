@@ -2,6 +2,7 @@
 
 import numpy as np
 
+from ..utils import lazyproperty
 from ..dimension import Dimension
 
 
@@ -12,7 +13,7 @@ class DataTable(object):
 
     # Properties
 
-    @property
+    @lazyproperty
     def all_dimensions(self):
         '''Gets the dimensions of the crunch cube.
 
@@ -43,7 +44,7 @@ class DataTable(object):
             for (i, entry) in enumerate(entries)
         ]
 
-    @property
+    @lazyproperty
     def mr_selections_indices(self):
         '''Gets indices of each 'selection' dim, for corresponding MR dim.
 
@@ -64,12 +65,12 @@ class DataTable(object):
         # the index of the corresponding 'selections' dimension.
         return [i + 1 for i in mr_dimensions_indices]
 
-    @property
+    @lazyproperty
     def has_means(self):
         '''Check if cube has means.'''
         return self._cube['result']['measures'].get('mean', None) is not None
 
-    @property
+    @lazyproperty
     def is_weighted(self):
         '''Check if the cube dataset is weighted.'''
         weighted = self._cube.get('query', {}).get('weight', None) is not None
@@ -81,14 +82,14 @@ class DataTable(object):
         )
         return weighted
 
-    @property
+    @lazyproperty
     def missing(self):
         '''Get missing count of a cube.'''
         if self.has_means:
             return self._cube['result']['measures']['mean']['n_missing']
         return self._cube['result'].get('missing')
 
-    @property
+    @lazyproperty
     def filter_annotation(self):
         '''Get cube's filter annotation.'''
         return self._cube.get('filter_names', [])

@@ -4,6 +4,8 @@ from __future__ import division
 
 import numpy as np
 
+from ..utils import lazyproperty
+
 
 class Index(object):
     '''Implementation of the Index service class for Crunch Cubes.'''
@@ -12,22 +14,22 @@ class Index(object):
         self._weighted = weighted
         self._prune = prune
 
-    @property
+    @lazyproperty
     def cube(self):
         '''Get stored cube object.'''
         return self._cube
 
-    @property
+    @lazyproperty
     def weighted(self):
         '''Get weighted property.'''
         return self._weighted
 
-    @property
+    @lazyproperty
     def prune(self):
         '''Get prune property.'''
         return self._prune
 
-    @property
+    @lazyproperty
     def data(self):
         '''Return table index by margin.'''
         if self.cube.has_mr:
