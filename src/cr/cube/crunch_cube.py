@@ -12,7 +12,7 @@ import numpy as np
 from scipy.stats import norm
 from scipy.stats.contingency import expected_freq
 
-from .measures.data_table import DataTable
+from .mixins.data_table import DataTable
 from .measures.index import Index
 from .measures.scale_means import ScaleMeans
 from .utils import lazyproperty
