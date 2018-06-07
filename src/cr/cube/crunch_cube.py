@@ -443,26 +443,6 @@ class CrunchCube(DataTable):
             # (because of the inner matrix dimensions).
             return np.dot(prop_margin, V)
 
-    def _double_mr_proportions(self, axis):
-        '''Return proportions for MR x MR cube.
-
-        Double MR cubes internally have 4 dimensions, and they're quite specific
-        in how they output their values. Thus the separate method.
-        '''
-        num = self.as_array()
-        den = self.margin(axis=axis if axis != 2 else None)
-
-        if axis == 1 and self.ndim > 2:
-            den = np.sum(den, 0)
-        elif axis != 2 and self.ndim > 2:
-            den = np.sum(self.margin(), 0)
-
-        return num / den
-
-    @property
-    def dim_types(self):
-        return [dim.type for dim in self.dimensions]
-
     def _adjust_axes(self, axes):
         '''Adjust user provided axes.
 
@@ -718,77 +698,6 @@ class CrunchCube(DataTable):
 
         return res
 
-    def _mr_props_three_dim(self, axis, hs_dims, prune):
-        num = self.as_array(include_transforms_for_dims=hs_dims, prune=prune)
-
-        if self.mr_dim_ind == 0:
-            if self.dimensions[1].type == 'categorical_array':
-                den = self.margin(axis=2)[:, :, None]
-            else:
-                den = self.margin(axis=1)[:, None, :]
-
-        if self.mr_dim_ind == 1:
-            if axis == (1, 2) or axis is None:
-                den = np.sum(self.margin(axis=2), 2)[:, :, None]
-            elif axis != self.mr_dim_ind:
-                den = np.sum(num, 2)[:, :, None]
-
-        if self.mr_dim_ind == 2:
-            if axis == (1, 2) or axis is None:
-                den = np.sum(self.margin(axis=0), axis=1)[:, None, :]
-            elif axis != self.mr_dim_ind:
-                den = self.margin(axis=axis)[:, None]
-
-        # if the axis is across the mr dimension
-        if axis == self.mr_dim_ind:
-            den = self.margin(axis=2, include_transforms_for_dims=hs_dims)
-
-        return num / den
-
-    def _mr_props_single_dim(self, table, prune):
-        res = table[:, 0] / (table[:, 0] + table[:, 1])
-        res = res[np.ix_(*self.valid_indices)]
-        if prune:
-            res = np.ma.masked_array(res, mask=(res == 0))
-        return res
-
-    def _mr_props_two_dim(self, axis, hs_dims, prune):
-        num = self.as_array(prune=prune, include_transforms_for_dims=hs_dims)
-        if axis == self.mr_dim_ind:
-            den = self.margin(
-                axis=axis,
-                include_transforms_for_dims=hs_dims,
-                prune=prune
-            )
-        else:
-            den = self.margin(axis=axis, prune=prune)
-            den = den[np.newaxis, :] if self.mr_dim_ind else den[:, np.newaxis]
-        props = num / den
-        # make sure that props have mask from unweighted counts
-        if hasattr(num, 'mask'):
-            props.mask = self.as_array(
-                prune=prune,
-                include_transforms_for_dims=hs_dims,
-                weighted=False
-            ).mask
-
-        return props
-
-    def _mr_proportions(self, axis, weighted, prune, hs_dims=None):
-        '''Calculate MR proportions.'''
-
-        if self.is_double_mr:
-            return self._double_mr_proportions(axis)
-
-        if self.ndim == 1:
-            return self._mr_props_single_dim(self.data(weighted), prune)
-
-        if self.ndim == 2:
-            return self._mr_props_two_dim(axis, hs_dims, prune)
-
-        if self.ndim == 3:
-            return self._mr_props_three_dim(axis, hs_dims, prune)
-
     @lazyproperty
     def is_univariate_ca(self):
         '''Check if cube is a just the CA ("ca x cat" or "cat x ca" dims)'''
@@ -801,76 +710,6 @@ class CrunchCube(DataTable):
         '''For univariate CA, the main axis is the categorical axis'''
         dim_types = [dim.type for dim in self.dimensions]
         return dim_types.index('categorical')
-
-    def _proportions(self, axis=None, weighted=True, adjusted=False,
-                     include_transforms_for_dims=None, include_missing=False,
-                     prune=False):
-        def hs_dims_for_den(hs_dims, axis):
-            if axis is None or hs_dims is None:
-                return None
-            if isinstance(axis, int):
-                axis = [axis]
-            return [dim for dim in hs_dims if dim not in axis]
-
-        table = self.data(weighted)
-        new_axis = self._adjust_axes(axis)
-        index = [None if i in new_axis else slice(None) for i, _ in enumerate(table.shape)]
-        den = np.sum(table[np.ix_(*self.valid_indices_with_selections)], axis=new_axis)[index]
-        table = self._transform(table, include_transforms_for_dims, inflate=True)
-        hs_dims = hs_dims_for_den(include_transforms_for_dims, axis)
-        den = self._transform(den, hs_dims, inflate=True, fix=False)
-
-        res = table / den
-        res = self._fix_shape(res)
-        arr = self.as_array(prune=prune, include_transforms_for_dims=include_transforms_for_dims)
-        if isinstance(arr, np.ma.core.MaskedArray):
-            res = np.ma.masked_array(res, arr.mask)
-        return res
-
-        if self.has_mr:
-            return self._mr_proportions(
-                axis, weighted, prune,
-                hs_dims=include_transforms_for_dims
-            )
-
-        if self.is_univariate_ca and axis != self.univariate_ca_main_axis:
-            raise ValueError('CA props only defined for main axis direction.')
-
-        margin = self._margin(
-            axis=axis, weighted=weighted, adjusted=adjusted,
-            include_transforms_for_dims=include_transforms_for_dims,
-            prune=prune,
-        )
-        if axis == 1:
-            margin = margin[:, np.newaxis]
-        elif axis == 2:
-            margin = margin[:, :, np.newaxis]
-
-        array = self._as_array(
-            include_missing=include_missing,
-            weighted=weighted,
-            adjusted=adjusted,
-            include_transforms_for_dims=include_transforms_for_dims,
-            prune=prune,
-        )
-
-        # In case of 3D cube, where each slice needs to be divided by a total
-        # (margin) of each slice, we need to restore two dimensions of the
-        # margin, to enable broadcasting and thus division.
-        if (len(getattr(array, 'shape', [])) == 3 and
-                len(getattr(margin, 'shape', [])) == 1):
-            margin = margin[:, np.newaxis, np.newaxis]
-
-        res = array / margin
-        if isinstance(array, np.ma.core.MaskedArray):
-            res.mask = self._as_array(
-                include_missing=include_missing,
-                weighted=False,
-                adjusted=adjusted,
-                include_transforms_for_dims=include_transforms_for_dims,
-                prune=prune
-            ).mask
-        return self._fix_shape(res)
 
     @lazyproperty
     def mr_dim_ind(self):
@@ -1229,14 +1068,41 @@ class CrunchCube(DataTable):
             ])
         '''
 
-        return self._proportions(
-            axis=axis,
-            weighted=weighted,
-            adjusted=False,
-            include_transforms_for_dims=include_transforms_for_dims,
-            include_missing=include_missing,
-            prune=prune,
+        def hs_dims_for_den(hs_dims, axis):
+            if axis is None or hs_dims is None:
+                return None
+            if isinstance(axis, int):
+                axis = [axis]
+            return [dim for dim in hs_dims if dim not in axis]
+
+        table = self.data(weighted)
+        new_axis = self._adjust_axes(axis)
+        index = [
+            None if i in new_axis else slice(None)
+            for i, _ in enumerate(table.shape)
+        ]
+        den = np.sum(
+            table[np.ix_(*self.valid_indices_with_selections)],
+            axis=new_axis,
+        )[index]
+        table = self._transform(
+            table,
+            include_transforms_for_dims,
+            inflate=True,
         )
+        hs_dims = hs_dims_for_den(include_transforms_for_dims, axis)
+        den = self._transform(den, hs_dims, inflate=True, fix=False)
+
+        res = table / den
+        res = self._fix_shape(res)
+        arr = self.as_array(
+            prune=prune,
+            include_transforms_for_dims=include_transforms_for_dims,
+        )
+        if isinstance(arr, np.ma.core.MaskedArray):
+            res = np.ma.masked_array(res, arr.mask)
+
+        return res
 
     def percentages(self, axis=None):
         '''Get the percentages for crunch cube values.
@@ -1306,8 +1172,7 @@ class CrunchCube(DataTable):
                 [3000, 1800],
             ])
         '''
-        return self._proportions(
-            adjusted=False,
+        return self.proportions(
             weighted=weighted,
             include_missing=include_missing,
             include_transforms_for_dims=include_transforms_for_dims,
