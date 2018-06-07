@@ -459,6 +459,53 @@ class CrunchCube(DataTable):
 
         return num / den
 
+    def _adjust_axes(self, axes):
+        '''Adjust user provided axes.
+
+        This method adjusts user provided 'axis' parameter, for some of the
+        cube operations, mainly 'margin'. The user never sees the MR selections
+        dimension, and treats all MRs as single dimensions. Thus we need to
+        adjust the values of axes (to sum across) to what the user would've
+        specified if he were aware of the existence of the MR selections
+        dimension. The reason for this adjustment is that all of the operations
+        performed troughout the margin calculations will be carried on an
+        internal array, containing all the data (together with all selections).
+
+        For more info on how it needs to operate, check the unit tests.
+        '''
+        if isinstance(axes, int):
+            # If single axis was provided, create a list out of it, so that
+            # we can do the subsequent iteration.
+            axes = list([axes])
+        elif axes is None:
+            # If axis was None, create what user would expect in terms of
+            # finding out the Total(s). In case of 2D cube, this will be the
+            # axes of all the dimensions that the user can see, that is (0, 1),
+            # because the selections dimension is invisible to the user. In
+            # case of 3D cube, this will be the "total" across each slice, so
+            # we need to drop the 0th dimension, and only take last two (1, 2).
+            axes = range(self.ndim)[-2:]
+        else:
+            # In case of a tuple, just keep it as a list.
+            axes = list(axes)
+        axes = np.array(axes)
+
+        # Create new array for storing updated values of axes. It's necessary
+        # because it's hard to update the values in place.
+        new_axes = np.array(axes)
+
+        # Iterate over user-visible dimensions, and update axes when MR is
+        # detected. For each detected MR, we need to increment all subsequent
+        # axes (that were provided by the user). But we don't need to update
+        # the axes that are "behind" the current MR.
+        for i, dim in enumerate(self.dimensions):
+            if dim.type == 'multiple_response':
+                # This formula updates only the axes that come "after" the
+                # current MR dimension.
+                new_axes[axes >= i] += 1
+
+        return tuple(new_axes)
+
     def _double_mr_margin(self, axis, weighted):
         '''Margin for MR x MR cube (they're specific, thus separate method).'''
         table = self.data(weighted)

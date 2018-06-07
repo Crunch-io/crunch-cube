@@ -7,7 +7,7 @@ import numpy as np
 from cr.cube.crunch_cube import CrunchCube
 
 
-# pylint: disable=invalid-name, protected-access
+# pylint: disable=invalid-name, no-self-use, protected-access
 class TestCrunchCube(TestCase):
     '''Test class for the CrunchCube unit tests.
 
@@ -432,3 +432,264 @@ class TestCrunchCube(TestCase):
         # Assert indices are fetch with transforms
         actual = cc._inserted_dim_inds(Mock(), 0)
         mock_inserted_hs_indices.assert_called_once()
+
+    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+        Mock(type='categorical', is_selections=False),
+        Mock(type='categorical', is_selections=False),
+    ])
+    def test_adjust_axes_cat_x_cat(self):
+        '''Test if axes are unchanged for CAT x CAT.'''
+        cc = CrunchCube({})
+        adjust = cc._adjust_axes
+
+        # Test col direction
+        expected = (0,)
+        actual = adjust(0)
+        assert actual == expected
+
+        # Test row direction
+        expected = (1,)
+        actual = adjust(1)
+        assert actual == expected
+
+        # Test table direction both None and (0, 1)
+        expected = (0, 1)
+        actual = adjust(None)
+        assert actual == expected
+        actual = adjust((0, 1))
+        assert actual == expected
+
+    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+        Mock(type='categorical', is_selections=False),
+        Mock(type='categorical', is_selections=False),
+        Mock(type='categorical', is_selections=False),
+    ])
+    def test_adjust_axes_cat_x_cat_x_cat(self):
+        '''Test if axes are unchanged for CAT x CAT.'''
+        cc = CrunchCube({})
+        adjust = cc._adjust_axes
+
+        # Test 0th direction
+        expected = (0,)
+        actual = adjust(0)
+        assert actual == expected
+
+        # Test col direction (3D => col == 1)
+        expected = (1,)
+        actual = adjust(1)
+        assert actual == expected
+
+        # Test row direction (3D => row == 2)
+        expected = (2,)
+        actual = adjust(2)
+        assert actual == expected
+
+        # Test table direction both None and (1, 2)
+        expected = (1, 2)
+        actual = adjust(None)
+        assert actual == expected
+        actual = adjust((1, 2))
+        assert actual == expected
+
+    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+        Mock(type='multiple_response'),
+        Mock(type='categorical', is_selections=True),
+    ])
+    def test_adjust_axes_univariate_mr(self):
+        '''Test if axes are unchanged for univariate MR.'''
+        cc = CrunchCube({})
+        adjust = cc._adjust_axes
+
+        # Test col direction
+        expected = (1,)
+        actual = adjust(0)
+        assert actual == expected
+
+        # Test table direction
+        expected = (1,)
+        actual = adjust(None)
+        assert actual == expected
+
+    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+        Mock(type='categorical', is_selections=False),
+        Mock(type='multiple_response'),
+        Mock(type='categorical', is_selections=True),
+    ])
+    def test_adjust_axes_cat_x_mr(self):
+        '''Test if axes are unchanged for CAT x MR.'''
+        cc = CrunchCube({})
+        adjust = cc._adjust_axes
+
+        # Test col direction
+        expected = (0,)
+        actual = adjust(0)
+        assert actual == expected
+
+        # Test row direction
+        expected = (2,)
+        actual = adjust(1)
+        assert actual == expected
+
+        # Test table direction
+        expected = (0, 2)
+        actual = adjust(None)
+        assert actual == expected
+        actual = adjust((0, 1))
+        assert actual == expected
+
+    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+        Mock(type='multiple_response', is_selections=False),
+        Mock(type='categorical', is_selections=True),
+        Mock(type='categorical', is_selections=False),
+    ])
+    def test_adjust_axes_mr_x_cat(self):
+        '''Test if axes are unchanged for MR x CAT.'''
+        cc = CrunchCube({})
+        adjust = cc._adjust_axes
+
+        # Test col direction
+        expected = (1,)
+        actual = adjust(0)
+        assert actual == expected
+
+        # Test row direction
+        expected = (2,)
+        actual = adjust(1)
+        assert actual == expected
+
+        # Test table direction
+        expected = (1, 2)
+        actual = adjust(None)
+        assert actual == expected
+        actual = adjust((0, 1))
+        assert actual == expected
+
+    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+        Mock(type='multiple_response', is_selections=False),
+        Mock(type='categorical', is_selections=True),
+        Mock(type='multiple_response', is_selections=False),
+        Mock(type='categorical', is_selections=True),
+    ])
+    def test_adjust_axes_mr_x_mr(self):
+        '''Test if axes are unchanged for MR x MR.'''
+        cc = CrunchCube({})
+        adjust = cc._adjust_axes
+
+        # Test col direction
+        expected = (1,)
+        actual = adjust(0)
+        assert actual == expected
+
+        # Test row direction
+        expected = (3,)
+        actual = adjust(1)
+        assert actual == expected
+
+        # Test table direction
+        expected = (1, 3)
+        actual = adjust(None)
+        assert actual == expected
+        actual = adjust((0, 1))
+        assert actual == expected
+
+    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+        Mock(type='categorical', is_selections=False),
+        Mock(type='multiple_response', is_selections=False),
+        Mock(type='categorical', is_selections=True),
+        Mock(type='multiple_response', is_selections=False),
+        Mock(type='categorical', is_selections=True),
+    ])
+    def test_adjust_axes_cat_mr_x_mr(self):
+        '''Test if axes are unchanged for CAT x MR x MR.'''
+        cc = CrunchCube({})
+        adjust = cc._adjust_axes
+
+        # Test 0th direction (rarely used)
+        expected = (0,)
+        actual = adjust(0)
+        assert actual == expected
+
+        # Test col direction
+        expected = (2,)
+        actual = adjust(1)
+        assert actual == expected
+
+        # Test row direction
+        expected = (4,)
+        actual = adjust(2)
+        assert actual == expected
+
+        # Test table direction
+        expected = (2, 4)
+        actual = adjust(None)
+        assert actual == expected
+        actual = adjust((1, 2))
+        assert actual == expected
+
+    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+        Mock(type='multiple_response', is_selections=False),
+        Mock(type='categorical', is_selections=True),
+        Mock(type='categorical', is_selections=False),
+        Mock(type='multiple_response', is_selections=False),
+        Mock(type='categorical', is_selections=True),
+    ])
+    def test_adjust_axes_mr_x_cat_x_mr(self):
+        '''Test if axes are unchanged for MR x CAT x MR.'''
+        cc = CrunchCube({})
+        adjust = cc._adjust_axes
+
+        # Test 0th direction (rarely used)
+        expected = (1,)
+        actual = adjust(0)
+        assert actual == expected
+
+        # Test col direction
+        expected = (2,)
+        actual = adjust(1)
+        assert actual == expected
+
+        # Test row direction
+        expected = (4,)
+        actual = adjust(2)
+        assert actual == expected
+
+        # Test table direction
+        expected = (2, 4)
+        actual = adjust(None)
+        assert actual == expected
+        actual = adjust((1, 2))
+        assert actual == expected
+
+    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+        Mock(type='multiple_response', is_selections=False),
+        Mock(type='categorical', is_selections=True),
+        Mock(type='multiple_response', is_selections=False),
+        Mock(type='categorical', is_selections=True),
+        Mock(type='categorical', is_selections=False),
+    ])
+    def test_adjust_axes_mr_x_mr_cat(self):
+        '''Test if axes are unchanged for MR x MR x CAT.'''
+        cc = CrunchCube({})
+        adjust = cc._adjust_axes
+
+        # Test 0th direction (rarely used)
+        expected = (1,)
+        actual = adjust(0)
+        assert actual == expected
+
+        # Test col direction
+        expected = (3,)
+        actual = adjust(1)
+        assert actual == expected
+
+        # Test row direction
+        expected = (4,)
+        actual = adjust(2)
+        assert actual == expected
+
+        # Test table direction
+        expected = (3, 4)
+        actual = adjust(None)
+        assert actual == expected
+        actual = adjust((1, 2))
+        assert actual == expected
