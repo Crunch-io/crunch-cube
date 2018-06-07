@@ -1081,20 +1081,21 @@ class CrunchCube(DataTable):
             None if i in new_axis else slice(None)
             for i, _ in enumerate(table.shape)
         ]
-        den = np.sum(
-            table[np.ix_(*self.valid_indices_with_selections)],
-            axis=new_axis,
-        )[index]
-        table = self._transform(
-            table,
-            include_transforms_for_dims,
-            inflate=True,
-        )
-        hs_dims = hs_dims_for_den(include_transforms_for_dims, axis)
-        den = self._transform(den, hs_dims, inflate=True, fix=False)
 
-        res = table / den
-        res = self._fix_shape(res)
+        # Calculate denominator. Only include those H&S dimensions, across
+        # which we DON'T sum. These H&S are needed because of the shape, when
+        # dividing. Those across dims which are summed across MUST NOT be
+        # included, because they would change the result.
+        hs_dims = hs_dims_for_den(include_transforms_for_dims, axis)
+        den = self._transform(table, hs_dims, inflate=True, fix=True)
+        den = np.sum(den, axis=new_axis)[index]
+
+        # Calculate nominator from table (include all H&S dimensions).
+        num = self._transform(table, include_transforms_for_dims, inflate=True)
+
+        res = self._fix_shape(num / den)
+
+        # Apply correct mask (based on the as_array shape)
         arr = self.as_array(
             prune=prune,
             include_transforms_for_dims=include_transforms_for_dims,
