@@ -919,8 +919,11 @@ class TestCrunchCube(TestCase):
         cube = CrunchCube(PETS_ARRAY)
         with self.assertRaises(ValueError):
             cube.proportions(axis=0)
-        with self.assertRaises(ValueError):
-            cube.proportions(axis=None)
+
+        # This is not bad direction, because the 'None' always
+        # figures out what it needs to do
+        # with self.assertRaises(ValueError):
+        #     cube.proportions(axis=None)
 
     def test_pets_array_margin_total(self):
         cube = CrunchCube(PETS_ARRAY)
@@ -1138,6 +1141,7 @@ class TestCrunchCube(TestCase):
             [0.        , 1.        ],  # noqa
             [0.47058824, 0.52941176],  # noqa
         ])
+        # TODO: Remove this if not needed anymore...
         # TODO: Consult with jon and Mike. The new expectation is closer to what
         # whaam displays, but diverges from R.
         # expected = np.array([
@@ -1145,9 +1149,11 @@ class TestCrunchCube(TestCase):
         #     [0., 0.55555556],
         #     [0.44444444, 0.25],
         # ])
-        actual = cube.proportions(axis=1)[0]
-        # Since cube is 3D, col dim is 1 (instead of 0)
-        np.testing.assert_almost_equal(actual, expected)
+
+        # The direction 1 designates columns (for each slice). Since this is
+        # the subvar dimension, it needs to be treated as invalid direction
+        with self.assertRaises(ValueError):
+            cube.proportions(axis=1)
 
         actual = cube.proportions()[0]
         np.testing.assert_almost_equal(actual, expected)

@@ -137,9 +137,9 @@ class CrunchCube(DataTable):
         return result, valid_indices
 
     def _transform(self, res, include_transforms_for_dims,
-                   inflate=False):
+                   inflate=False, fix=True):
 
-        valid_indices = self.valid_indices_with_selections
+        valid_indices = self.valid_indices_with_selections if fix else None
         '''Transform the shape of the resulting ndarray.'''
         if not include_transforms_for_dims:
             return res[np.ix_(*valid_indices)] if valid_indices else res
@@ -459,6 +459,10 @@ class CrunchCube(DataTable):
 
         return num / den
 
+    @property
+    def dim_types(self):
+        return [dim.type for dim in self.dimensions]
+
     def _adjust_axes(self, axes):
         '''Adjust user provided axes.
 
@@ -474,6 +478,8 @@ class CrunchCube(DataTable):
         For more info on how it needs to operate, check the unit tests.
         '''
         if isinstance(axes, int):
+            if self.dim_types[axes] == 'categorical_array':
+                raise ValueError('Direction not allowed (items dimension)')
             # If single axis was provided, create a list out of it, so that
             # we can do the subsequent iteration.
             axes = list([axes])
@@ -487,6 +493,9 @@ class CrunchCube(DataTable):
             axes = range(self.ndim)[-2:]
         else:
             # In case of a tuple, just keep it as a list.
+            for val in axes:
+                if self.dim_types[val] == 'categorical_array':
+                    raise ValueError('Direction not allowed (items dimension)')
             axes = list(axes)
         axes = np.array(axes)
 
@@ -503,6 +512,9 @@ class CrunchCube(DataTable):
                 # This formula updates only the axes that come "after" the
                 # current MR dimension.
                 new_axes[axes >= i] += 1
+            elif dim.type == 'categorical_array':
+                # Remove axis if they want to sum across subvars dimension
+                new_axes = new_axes[axes != i]
 
         return tuple(new_axes)
 
@@ -793,6 +805,28 @@ class CrunchCube(DataTable):
     def _proportions(self, axis=None, weighted=True, adjusted=False,
                      include_transforms_for_dims=None, include_missing=False,
                      prune=False):
+        def hs_dims_for_den(hs_dims, axis):
+            if axis is None or hs_dims is None:
+                return None
+            if isinstance(axis, int):
+                axis = [axis]
+            return [dim for dim in hs_dims if dim not in axis]
+
+        table = self.data(weighted)
+        new_axis = self._adjust_axes(axis)
+        index = [None if i in new_axis else slice(None) for i, _ in enumerate(table.shape)]
+        den = np.sum(table[np.ix_(*self.valid_indices_with_selections)], axis=new_axis)[index]
+        table = self._transform(table, include_transforms_for_dims, inflate=True)
+        hs_dims = hs_dims_for_den(include_transforms_for_dims, axis)
+        den = self._transform(den, hs_dims, inflate=True, fix=False)
+
+        res = table / den
+        res = self._fix_shape(res)
+        arr = self.as_array(prune=prune, include_transforms_for_dims=include_transforms_for_dims)
+        if isinstance(arr, np.ma.core.MaskedArray):
+            res = np.ma.masked_array(res, arr.mask)
+        return res
+
         if self.has_mr:
             return self._mr_proportions(
                 axis, weighted, prune,
