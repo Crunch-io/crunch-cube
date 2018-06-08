@@ -2,7 +2,8 @@
 
 import numpy as np
 
-from cr.cube.subtotal import Subtotal
+from .subtotal import Subtotal
+from .utils import lazyproperty
 
 
 class Dimension(object):
@@ -16,7 +17,7 @@ class Dimension(object):
         self._dim = dim
         self._type = self._get_type(dim, selections)
 
-    @property
+    @lazyproperty
     def values(self):
         values = [
             el.get('numeric_value', np.nan)
@@ -25,7 +26,7 @@ class Dimension(object):
         ]
         return [val if val is not None else np.nan for val in values]
 
-    @property
+    @lazyproperty
     def subtotals(self):
         view = self._dim.get('references', {}).get('view', {})
 
@@ -104,13 +105,13 @@ class Dimension(object):
 
         return None
 
-    @property
+    @lazyproperty
     def _elements(self):
         if self.type == 'categorical':
             return self._dim['type']['categories']
         return self._dim['type']['elements']
 
-    @property
+    @lazyproperty
     def inserted_hs_indices(self):
         if self.type == 'categorical_array':
             return []  # For CA subvariables, we don't do H&S insertions
@@ -151,7 +152,7 @@ class Dimension(object):
         # shouldn't be any)
         return contiguous_anchors[0]
 
-    @property
+    @lazyproperty
     def hs_indices(self):
         '''Headers and Subtotals indices.'''
         elements = self._elements
@@ -167,7 +168,7 @@ class Dimension(object):
 
         return indices
 
-    @property
+    @lazyproperty
     def has_transforms(self):
         view = self._dim['references'].get('view')
         if not view:
@@ -177,25 +178,25 @@ class Dimension(object):
 
     # API methods
 
-    @property
+    @lazyproperty
     def name(self):
         '''Name of a cube's dimension.'''
         refs = self._dim['references']
         return refs.get('name', refs.get('alias'))
 
-    @property
+    @lazyproperty
     def description(self):
         '''Description of a cube's dimension.'''
         refs = self._dim['references']
         return refs.get('description')
 
-    @property
+    @lazyproperty
     def alias(self):
         '''Alias of a cube's dimension.'''
         refs = self._dim['references']
         return refs.get('alias')
 
-    @property
+    @lazyproperty
     def type(self):
         '''Get type of the Crunch Dimension.'''
         return self._type
@@ -294,11 +295,11 @@ class Dimension(object):
             return [i for (i, el) in enumerate(self._elements)
                     if not el.get('missing')]
 
-    @property
+    @lazyproperty
     def shape(self):
         return len(self._elements)
 
-    @property
+    @lazyproperty
     def is_selections(self):
         category_ids = [el.get('id') for el in self._elements]
         if category_ids == [1, 0, -1]:

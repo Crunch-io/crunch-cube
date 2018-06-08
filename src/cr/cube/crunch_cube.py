@@ -20,7 +20,6 @@ from .utils import lazyproperty
 np.seterr(divide='ignore', invalid='ignore')
 
 
-# class CrunchCube(object):
 class CrunchCube(DataTable):
     '''Implementation of the CrunchCube API class.
 
@@ -749,7 +748,7 @@ class CrunchCube(DataTable):
         '''Get all valid indices (including MR selections).'''
         return [dim.valid_indices(False) for dim in self.all_dimensions]
 
-    @property
+    @lazyproperty
     def has_mr(self):
         '''Determines if a cube has MR dimensions.'''
         return self.mr_dim_ind is not None

@@ -128,7 +128,7 @@ class DataTable(object):
                   for val in values]
         return values
 
-    @property
+    @lazyproperty
     def _shape(self):
         return tuple([dim.shape for dim in self.all_dimensions])
 
