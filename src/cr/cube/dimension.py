@@ -111,8 +111,10 @@ class Dimension(object):
             return self._dim['type']['categories']
         return self._dim['type']['elements']
 
-    @lazyproperty
+    # This needs to be computed each time. Don't use lazyproperty.
+    @property
     def inserted_hs_indices(self):
+        '''Returns inserted H&S indices for the dimension.'''
         if self.type == 'categorical_array':
             return []  # For CA subvariables, we don't do H&S insertions
 
