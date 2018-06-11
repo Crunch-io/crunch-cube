@@ -184,7 +184,6 @@ class CrunchCube(DataTable):
             res (ndarray): Tabular representation of crunch cube
         '''
 
-        # values = self.table.flat_values(weighted, margin)
         values = self.flat_values(weighted, margin)
         dimensions = self.all_dimensions
         shape = [len(dim.elements(include_missing=True)) for dim in dimensions]
@@ -376,7 +375,6 @@ class CrunchCube(DataTable):
         # when dealing with 1D MR cubes, axis for margin should be 0
         if self.ndim == 1 and self.has_mr:
             return 0
-        # elif self.ndim == 3 and not self.is_double_mr:
         elif self.ndim == 3 and not self.dim_types[2] == 'categorical_array':
             return 2
         return 1
@@ -493,13 +491,6 @@ class CrunchCube(DataTable):
             raise ValueError(ca_error_msg.format(axes))
 
         if isinstance(axes, int):
-            # if self.ndim == 1 and axes == 1:
-            #     # Special case of a 1D cube, where "row" directions is
-            #     # requested. In this case we diminish the axis by 0,
-            #     # defaulting to the single-dimension operation. Because numpy
-            #     # doesn't have the connotation of a row vs column vectors
-            #     # (just single-dim ones).
-            #     axes = 0
 
             # If single axis was provided, create a list out of it, so that
             # we can do the subsequent iteration.
@@ -531,75 +522,7 @@ class CrunchCube(DataTable):
                 # current MR (items) dimension.
                 new_axes[axes >= i] += 1
 
-            # TODO: This should never happen, because we need to fail sooner.
-            # elif dim.type == 'categorical_array':
-            #     # Remove axis if they want to sum across subvars dimension
-            #     new_axes = new_axes[axes != i]
-
         return tuple(new_axes)
-
-    def _double_mr_margin(self, axis, weighted):
-        '''Margin for MR x MR cube (they're specific, thus separate method).'''
-        table = self.data(weighted)
-        ind_ns, ind_ns_0, ind_ns_1 = self.double_mr_non_selected_inds
-        selected = table[self.ind_selected]
-        non_selected = table[ind_ns]
-
-        if axis is None:
-            non_selected += table[ind_ns_1] + table[ind_ns_0]
-        elif axis == 0:
-            non_selected = table[ind_ns_1]
-        elif axis == 1:
-            non_selected = table[ind_ns_0]
-
-        return (selected + non_selected)[np.ix_(*self.valid_indices)]
-
-    def _1d_mr_margin(self, axis, weighted):
-        table = self.data(weighted)
-        if axis == 0:
-            return self.as_array(weighted=weighted)
-        return table[:, 0] + table[:, 1]
-
-    def _calculate_along_non_mr(self, axis):
-        return (
-            self.mr_dim_ind in [0, 2] and axis == 1 or
-            self.mr_dim_ind == 1 and axis == 0 or
-            self.mr_dim_ind == 1 and axis == 1 and self.ndim > 2
-        )
-
-    def _mr_margin_along_non_mr_dim(self, axis, weighted, prune=False,
-                                    include_transforms_for_dims=None):
-        '''Calculate MR margin along non-MR dimension.
-
-        For cases when margin is calculated along the axis which is not MR,
-        we need to perform sumation along that axis, on the tabular
-        representation of the cube (which is obtained with 'as_array').
-        '''
-        array = self.as_array(
-            weighted=weighted,
-            margin=True,
-            prune=prune,
-            include_transforms_for_dims=include_transforms_for_dims,
-        )
-
-        if axis == 1 and len(array.shape) == 1:
-            # If array representation of the cube has less dimensions than
-            # supposed (by the 'axis' argument), return the array. This
-            # condition may arise if one of the cross variables of the cube
-            # has only one element (e.g. in MR x CAT cube).
-            return array
-
-        return np.sum(array, axis)
-
-    def _get_mr_slice(self, selected=True):
-        index = 0 if selected else 1
-        indices = []
-        for dim in self.dimensions:
-            if dim.type == 'multiple_response':
-                indices.extend([slice(None), index])
-            else:
-                indices.append(slice(None))
-        return tuple(indices)
 
     def _transform_table(self, table, include_transforms_for_dims):
         table = self._transform(
@@ -608,60 +531,6 @@ class CrunchCube(DataTable):
             inflate=True,
         )
         return table
-
-    def _mr_margin(self, axis, weighted, adjusted, hs_dims=None, prune=False):
-        '''Margin for cube that contains MR.'''
-        if self.is_double_mr:
-            return self._double_mr_margin(axis, weighted)
-        elif self.ndim == 1:
-            return self._1d_mr_margin(axis, weighted)
-        elif self._calculate_along_non_mr(axis):
-            # Only take dims not calculated across (don't include
-            # H&S in margin calculation)
-            hs_dims = hs_dims and [dim for dim in hs_dims if dim != axis]
-            return self._mr_margin_along_non_mr_dim(
-                axis, weighted, prune, hs_dims
-            )
-
-        is_ca_row_margin = (
-            self.ndim == 3 and
-            self.dimensions[1].type == 'categorical_array' and
-            axis is not None
-        )
-        if is_ca_row_margin:
-            # For MR x CA always return row margin (only one that makes sense)
-            return np.sum(self.as_array(), axis=2)
-
-        table = self.data(weighted, margin=True)
-        if hs_dims:
-            # In case of H&S the entire table needs to be
-            # transformed (with selections).
-            table = self._transform_table(table, hs_dims)
-
-        # For cases when the margin is calculated for the MR dimension, we need
-        # the sum of selected and non-selected slices (if axis is None), or the
-        # sublimated version (another sum along the axis), if axis is defined.
-        margin = table[self.ind_selected] + table[self.ind_non_selected]
-        if not hs_dims:
-            # If entire table was transformed, we already have it with all the
-            # valid indices. If not, we need to apply valid indices.
-            margin = margin[np.ix_(*self.valid_indices)]
-
-        if axis is None:
-            axis = tuple([
-                i for i, _ in enumerate(self.dimensions) if i != self.mr_dim_ind
-            ])
-            return np.sum(margin, axis)
-
-        if prune:
-            mask = self.as_array(
-                prune=True,
-                include_transforms_for_dims=hs_dims,
-                weighted=False
-            ).mask
-            margin = np.ma.masked_array(margin, mask=mask)
-
-        return margin
 
     def _inflate_dim(self, array, axis):
         # Explicitly check if axis is tuple (which could be the case for doing
@@ -677,66 +546,6 @@ class CrunchCube(DataTable):
             array = array[:, np.newaxis]
 
         return array
-
-    def _margin_transform_dims(self, axis, include_transforms_for_dims):
-        """When calculating a margin that needs to sum up counts, make sure
-        we do not include subtotals if they are on the opposite axis
-        of the one we are calculating, otherwise they will be summed up
-        with the counts and the values will be wrong."""
-
-        if not include_transforms_for_dims:
-            return include_transforms_for_dims
-        if axis is None:
-            return None
-        # if self.ndim == 3 and axis + 1 in include_transforms_for_dims:
-        #     transforms = include_transforms_for_dims[:]
-        #     transforms.remove(axis + 1)
-        #     return transforms
-        if axis in include_transforms_for_dims:
-            transforms = include_transforms_for_dims[:]
-            transforms.remove(axis)
-            return transforms
-        return include_transforms_for_dims
-
-    def _margin(self, axis=None, weighted=True, adjusted=False,
-                include_transforms_for_dims=None, prune=False):
-
-        # MR margins are calculated differently, so they need a separate method
-        # for them. A good example of this is the rcrunch functionality.
-        if self.has_mr:
-            return self._mr_margin(
-                axis, weighted, adjusted, include_transforms_for_dims,
-                prune=prune,
-            )
-        # If there are no MR variables, the margins are mostly sums across
-        # appropriate dimensions.
-        transform_dims = self._margin_transform_dims(
-            axis, include_transforms_for_dims,
-        )
-        array = self._as_array(
-            weighted=weighted, adjusted=adjusted,
-            include_transforms_for_dims=transform_dims,
-            margin=True,
-        )
-        array = self._inflate_dim(array, axis)
-        res = np.sum(array, axis)
-
-        if prune and axis is not None and type(res) is np.ndarray:
-            mask = self.as_array(
-                include_transforms_for_dims=include_transforms_for_dims,
-                prune=prune,
-                weighted=False
-            ).mask
-            if isinstance(axis, tuple) or axis < mask.ndim:
-                mask = mask.all(axis=axis)
-            res = np.ma.masked_array(res, mask=mask)
-
-        if len(res.shape) == 0:
-            # Each margin needs to be iterable, even if it only has
-            # a single element.
-            res = res[np.newaxis]
-
-        return res
 
     @lazyproperty
     def is_univariate_ca(self):
