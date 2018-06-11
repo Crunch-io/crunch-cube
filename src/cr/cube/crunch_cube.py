@@ -13,6 +13,7 @@ from scipy.stats import norm
 from scipy.stats.contingency import expected_freq
 
 from .mixins.data_table import DataTable
+from .cube_slice import CubeSlice
 from .measures.index import Index
 from .measures.scale_means import ScaleMeans
 from .utils import lazyproperty
@@ -59,16 +60,9 @@ class CrunchCube(DataTable):
             So we need to check its type, and convert it to a dictionary if
             it's JSON, if possible.
         '''
-
-        # If the provided response is dict, create cube immediately
-        if isinstance(response, dict):
-            super(CrunchCube, self).__init__(response.get('value', response))
-            # self._table = DataTable(response.get('value', response))
-            return
-
         try:
-            response = json.loads(response)
-            # self._table = DataTable(response.get('value', response))
+            if not isinstance(response, dict):
+                response = json.loads(response)
             super(CrunchCube, self).__init__(response.get('value', response))
         except TypeError:
             # If an unexpected type is provided raise descriptive exception.
@@ -77,6 +71,8 @@ class CrunchCube(DataTable):
                     'Unsupported type provided: {}. '
                     'A `cube` must be JSON or `dict`.'
                 ).format(type(response)))
+
+        self.slices = self._get_slices()
 
     def _fix_shape(self, array):
         '''Fixes shape of MR variables.
@@ -1198,3 +1194,9 @@ class CrunchCube(DataTable):
     def scale_means(self):
         '''Get cube means.'''
         return ScaleMeans(self).data
+
+    def _get_slices(self):
+        if self.ndim < 3:
+            return [CubeSlice(self, 0)]
+
+        return [CubeSlice(self, i) for i, _ in enumerate(self.as_array())]
