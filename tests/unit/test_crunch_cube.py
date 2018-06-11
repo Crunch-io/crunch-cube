@@ -672,10 +672,9 @@ class TestCrunchCube(TestCase):
         actual = adjust(1)
         assert actual == expected
 
-        # Test table direction
-        expected = (1,)
-        actual = adjust(None)
-        assert actual == expected
+        # Test table direction - not allowed since cube contains CA items
+        with self.assertRaises(ValueError):
+            actual = adjust(None)
         with self.assertRaises(ValueError):
             adjust((0, 1))
 
@@ -703,7 +702,8 @@ class TestCrunchCube(TestCase):
         actual = adjust(2)
         assert actual == expected
 
-        # Test table direction
+        # Test table direction - in this case table directions IS allowed,
+        # since the items dimension is TABs, and will never be summed across
         expected = (1, 2)
         actual = adjust(None)
         assert actual == expected
@@ -729,10 +729,9 @@ class TestCrunchCube(TestCase):
         actual = adjust(2)
         assert actual == expected
 
-        # Test table direction
-        expected = (2,)
-        actual = adjust(None)
-        assert actual == expected
+        # Test table direction - not allowed - cube has CA items
+        with self.assertRaises(ValueError):
+            adjust(None)
         with self.assertRaises(ValueError):
             adjust((1, 2))
 
@@ -762,11 +761,13 @@ class TestCrunchCube(TestCase):
         assert actual == expected
 
         # Test table direction
+        # In this case, table directions IS allowed, since it will never be
+        # summed across (since it's TABs dimension)
         expected = (1, 3)
         actual = adjust(None)
-        assert actual == expected
+        assert expected == actual
         actual = adjust((1, 2))
-        assert actual == expected
+        assert expected == actual
 
     @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
         Mock(type='multiple_response', is_selections=False),
@@ -794,11 +795,159 @@ class TestCrunchCube(TestCase):
         assert actual == expected
 
         # Test table direction (doesn't need MR, since it's tabs)
-        expected = (3,)
-        actual = adjust(None)
-        assert actual == expected
+        # Also: Not allowed for CA, since it has items dimension
+        with self.assertRaises(ValueError):
+            adjust(None)
         with self.assertRaises(ValueError):
             # If user wants to do the "table" direction by directly providing
             # both axes, he needs to know what he's doing. Otherwise, throw
             # and error, since adding across items (subvars) is not allowed.
             adjust((1, 2))
+
+    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+        Mock(type='categorical_array', is_selections=False),
+        Mock(type='categorical', is_selections=False),
+    ])
+    def test_axes_allowed_simple_ca(self):
+        cc = CrunchCube({})
+        is_allowed = cc._is_axes_allowed
+
+        assert is_allowed(0) is False
+        assert is_allowed(1)
+        assert is_allowed(None) is False
+
+    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+        Mock(type='categorical_array', is_selections=False),
+        Mock(type='categorical', is_selections=False),
+        Mock(type='categorical', is_selections=False),
+    ])
+    def test_axes_allowed_ca_x_cat(self):
+        cc = CrunchCube({})
+        is_allowed = cc._is_axes_allowed
+
+        assert is_allowed(0) is False
+        assert is_allowed(1)
+        assert is_allowed(2)
+        assert is_allowed(None)
+        assert is_allowed((1, 2))
+
+    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+        Mock(type='categorical', is_selections=False),
+        Mock(type='categorical_array', is_selections=False),
+        Mock(type='categorical', is_selections=False),
+    ])
+    def test_axes_allowed_cat_x_ca(self):
+        cc = CrunchCube({})
+        is_allowed = cc._is_axes_allowed
+
+        assert is_allowed(0)
+        assert is_allowed(1) is False
+        assert is_allowed(2)
+        assert is_allowed(None) is False
+        assert is_allowed((1, 2)) is False
+
+    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+        Mock(type='multiple_response', is_selections=False),
+        Mock(type='categorical', is_selections=True),
+        Mock(type='categorical_array', is_selections=False),
+        Mock(type='categorical', is_selections=False),
+    ])
+    def test_axes_allowed_mr_x_ca(self):
+        cc = CrunchCube({})
+        is_allowed = cc._is_axes_allowed
+
+        assert is_allowed(0)
+        assert is_allowed(1) is False
+        assert is_allowed(2)
+        assert is_allowed(None) is False
+        assert is_allowed((1, 2)) is False
+
+    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+        Mock(type='categorical_array', is_selections=False),
+        Mock(type='categorical', is_selections=False),
+        Mock(type='multiple_response', is_selections=False),
+        Mock(type='categorical', is_selections=True),
+    ])
+    def test_axes_allowed_ca_x_mr(self):
+        cc = CrunchCube({})
+        is_allowed = cc._is_axes_allowed
+
+        assert is_allowed(0) is False
+        assert is_allowed(1)
+        assert is_allowed(2)
+        assert is_allowed(None)
+        assert is_allowed((1, 2))
+
+    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+        Mock(type='categorical', is_selections=False),
+    ])
+    def test_axes_allowed_univ_cat(self):
+        cc = CrunchCube({})
+        is_allowed = cc._is_axes_allowed
+
+        assert is_allowed(0)
+        assert is_allowed(None)
+
+    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+        Mock(type='categorical', is_selections=False),
+        Mock(type='categorical', is_selections=False),
+    ])
+    def test_axes_allowed_cat_x_cat(self):
+        cc = CrunchCube({})
+        is_allowed = cc._is_axes_allowed
+
+        assert is_allowed(0)
+        assert is_allowed(1)
+        assert is_allowed(None)
+        assert is_allowed((0, 1))
+
+    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+        Mock(type='categorical', is_selections=False),
+        Mock(type='multiple_response', is_selections=False),
+        Mock(type='categorical', is_selections=True),
+        Mock(type='multiple_response', is_selections=False),
+        Mock(type='categorical', is_selections=True),
+    ])
+    def test_axes_allowed_cat_x_mr_x_mr(self):
+        cc = CrunchCube({})
+        is_allowed = cc._is_axes_allowed
+
+        assert is_allowed(0)
+        assert is_allowed(1)
+        assert is_allowed(2)
+        assert is_allowed(None)
+        assert is_allowed((1, 2))
+
+    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+        Mock(type='multiple_response', is_selections=False),
+        Mock(type='categorical', is_selections=True),
+        Mock(type='categorical', is_selections=False),
+        Mock(type='multiple_response', is_selections=False),
+        Mock(type='categorical', is_selections=True),
+    ])
+    def test_axes_allowed_mr_x_cat_x_mr(self):
+        cc = CrunchCube({})
+        is_allowed = cc._is_axes_allowed
+
+        assert is_allowed(0)
+        assert is_allowed(1)
+        assert is_allowed(2)
+        assert is_allowed(None)
+        assert is_allowed((1, 2))
+
+    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+        Mock(type='multiple_response', is_selections=False),
+        Mock(type='categorical', is_selections=True),
+        Mock(type='multiple_response', is_selections=False),
+        Mock(type='categorical', is_selections=True),
+        Mock(type='categorical', is_selections=False),
+    ])
+    def test_axes_allowed_mr_x_mr_x_cat(self):
+        cc = CrunchCube({})
+        is_allowed = cc._is_axes_allowed
+
+        assert is_allowed(0)
+        assert is_allowed(1)
+        assert is_allowed(2)
+        assert is_allowed(None)
+        assert is_allowed((1, 2))

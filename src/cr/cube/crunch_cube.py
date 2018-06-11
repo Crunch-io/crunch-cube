@@ -435,6 +435,34 @@ class CrunchCube(DataTable):
             # (because of the inner matrix dimensions).
             return np.dot(prop_margin, V)
 
+    def _is_axes_allowed(self, axes):
+        '''Check if axes are allowed.
+
+        In case the calculation is requested over CA items dimension, it is not
+        valid. It's valid in all other cases.
+        '''
+
+        if axes is None:
+            # If table direction was requested, we must ensure that each slice
+            # doesn't have the CA items dimension (thus the [-2:] part). It's
+            # OK for the 0th dimension to be items, since no calculation is
+            # performed over it.
+            if 'categorical_array' in self.dim_types[-2:]:
+                return False
+            return True
+
+        if isinstance(axes, int):
+            axes = [axes]
+
+        for axis in axes:
+            if self.dim_types[axis] == 'categorical_array':
+                # If any of the directions explicitly asked for directly
+                # corresponds to the CA items dimension, the requested
+                # calculation is not valid.
+                return False
+
+        return True
+
     def _adjust_axes(self, axes):
         '''Adjust user provided axes.
 
@@ -449,9 +477,12 @@ class CrunchCube(DataTable):
 
         For more info on how it needs to operate, check the unit tests.
         '''
+
+        if not self._is_axes_allowed(axes):
+            ca_error_msg = 'Direction {} not allowed (items dimension)'
+            raise ValueError(ca_error_msg.format(axes))
+
         if isinstance(axes, int):
-            if self.dim_types[axes] == 'categorical_array':
-                raise ValueError('Direction not allowed (items dimension)')
             # If single axis was provided, create a list out of it, so that
             # we can do the subsequent iteration.
             axes = list([axes])
@@ -465,9 +496,6 @@ class CrunchCube(DataTable):
             axes = range(self.ndim)[-2:]
         else:
             # In case of a tuple, just keep it as a list.
-            for val in axes:
-                if self.dim_types[val] == 'categorical_array':
-                    raise ValueError('Direction not allowed (items dimension)')
             axes = list(axes)
         axes = np.array(axes)
 
@@ -482,11 +510,13 @@ class CrunchCube(DataTable):
         for i, dim in enumerate(self.dimensions):
             if dim.type == 'multiple_response':
                 # This formula updates only the axes that come "after" the
-                # current MR dimension.
+                # current MR (items) dimension.
                 new_axes[axes >= i] += 1
-            elif dim.type == 'categorical_array':
-                # Remove axis if they want to sum across subvars dimension
-                new_axes = new_axes[axes != i]
+
+            # TODO: This should never happen, because we need to fail sooner.
+            # elif dim.type == 'categorical_array':
+            #     # Remove axis if they want to sum across subvars dimension
+            #     new_axes = new_axes[axes != i]
 
         return tuple(new_axes)
 

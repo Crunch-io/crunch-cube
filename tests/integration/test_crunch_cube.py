@@ -1154,8 +1154,11 @@ class TestCrunchCube(TestCase):
         with self.assertRaises(ValueError):
             cube.proportions(axis=1)
 
-        actual = cube.proportions()[0]
-        np.testing.assert_almost_equal(actual, expected)
+        # The direction None designates "table" (total for each slice). Since
+        # this would contain the subvar dimension, it needs to be treated as
+        # invalid direction
+        with self.assertRaises(ValueError):
+            cube.proportions()[0]
 
         actual = cube.proportions(axis=2)[0]
         np.testing.assert_almost_equal(actual, expected)
