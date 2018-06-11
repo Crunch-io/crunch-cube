@@ -259,11 +259,16 @@ class CrunchCube(DataTable):
             return np.ma.masked_array(res, mask=row_prune_inds)
 
         # Prune columns by column margin values.
-        col_margin = self.margin(
-            include_transforms_for_dims=transforms,
-            axis=self.col_direction_axis,
-            weighted=False
-        )
+        if self.dim_types[self.col_direction_axis] != 'categorical_array':
+            col_margin = self.margin(
+                include_transforms_for_dims=transforms,
+                axis=self.col_direction_axis,
+                weighted=False
+            )
+        else:
+            col_margin = self.as_array(
+                include_transforms_for_dims=transforms, weighted=False,
+            )
         if col_margin.ndim > 1:
             # In case of MR x CAT, we have 2D margin
             col_margin = np.sum(col_margin, axis=0)
@@ -371,7 +376,8 @@ class CrunchCube(DataTable):
         # when dealing with 1D MR cubes, axis for margin should be 0
         if self.ndim == 1 and self.has_mr:
             return 0
-        elif self.ndim == 3 and not self.is_double_mr:
+        # elif self.ndim == 3 and not self.is_double_mr:
+        elif self.ndim == 3 and not self.dim_types[2] == 'categorical_array':
             return 2
         return 1
 
@@ -452,6 +458,10 @@ class CrunchCube(DataTable):
             return True
 
         if isinstance(axes, int):
+            if self.ndim == 1 and axes == 1:
+                # Special allowed case of a 1D cube, where "row"
+                # directions is requested.
+                return True
             axes = [axes]
 
         for axis in axes:
@@ -483,6 +493,14 @@ class CrunchCube(DataTable):
             raise ValueError(ca_error_msg.format(axes))
 
         if isinstance(axes, int):
+            # if self.ndim == 1 and axes == 1:
+            #     # Special case of a 1D cube, where "row" directions is
+            #     # requested. In this case we diminish the axis by 0,
+            #     # defaulting to the single-dimension operation. Because numpy
+            #     # doesn't have the connotation of a row vs column vectors
+            #     # (just single-dim ones).
+            #     axes = 0
+
             # If single axis was provided, create a list out of it, so that
             # we can do the subsequent iteration.
             axes = list([axes])
@@ -1019,13 +1037,44 @@ class CrunchCube(DataTable):
                 [0, 1],
             ])
         '''
-        return self._margin(
-            axis=axis,
-            weighted=weighted,
-            adjusted=False,
-            include_transforms_for_dims=include_transforms_for_dims,
+        def hs_dims_for_den(hs_dims, axis):
+            if axis is None or hs_dims is None:
+                return None
+            if isinstance(axis, int):
+                axis = [axis]
+            return [dim for dim in hs_dims if dim not in axis]
+
+        table = self.data(weighted=weighted, margin=True)
+        new_axis = self._adjust_axes(axis)
+        index = [
+            None if i in new_axis else slice(None)
+            for i, _ in enumerate(table.shape)
+        ]
+
+        # Calculate denominator. Only include those H&S dimensions, across
+        # which we DON'T sum. These H&S are needed because of the shape, when
+        # dividing. Those across dims which are summed across MUST NOT be
+        # included, because they would change the result.
+        hs_dims = hs_dims_for_den(include_transforms_for_dims, axis)
+        den = self._transform(table, hs_dims, inflate=True, fix=True)
+
+        # Apply correct mask (based on the as_array shape)
+        arr = self.as_array(
             prune=prune,
+            include_transforms_for_dims=include_transforms_for_dims,
         )
+        if isinstance(arr, np.ma.core.MaskedArray):
+            den = np.ma.masked_array(den, np.zeros(den.shape, dtype=bool))
+            den.mask = arr.mask[index]
+
+        if self.ndim != 1 or axis is None or axis == 0 and len(self.all_dimensions) == 1:
+            # Special case for 1D cube wigh MR, for "Table" direction
+            den = np.sum(den, axis=new_axis)[index]
+
+        den = self._fix_shape(den)
+        if den.shape[0] == 1 and len(den.shape) > 1:
+            den = den.reshape(den.shape[1:])
+        return den
 
     def proportions(self, axis=None, weighted=True,
                     include_transforms_for_dims=None, include_missing=False,
