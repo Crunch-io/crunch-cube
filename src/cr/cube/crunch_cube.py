@@ -1204,7 +1204,7 @@ class CrunchCube(DataTable):
         '''Get cube index measurement.'''
         return Index(self, weighted, prune).data
 
-    def zscore(self, weighted=True, prune=False):
+    def zscore(self, weighted=True, prune=False, hs_dims=None):
         '''Get cube zscore measurement.'''
         counts = self.as_array(weighted=weighted, prune=prune)
         total = self.margin(weighted=weighted, prune=prune)
@@ -1220,16 +1220,35 @@ class CrunchCube(DataTable):
             variance = (
                 rowsum * colsum * (total - rowsum) * (total - colsum) / total**3
             )
-            return (counts - expected) / np.sqrt(variance)
+            res = (counts - expected) / np.sqrt(variance)
+        else:
+            expected_counts = expected_freq(counts)
+            residuals = counts - expected_counts
+            variance = (
+                np.outer(rowsum, colsum) *
+                np.outer(total - rowsum, total - colsum) / total**3
+            )
+            res = residuals / np.sqrt(variance)
 
-        expected_counts = expected_freq(counts)
-        residuals = counts - expected_counts
-        variance = (
-            np.outer(rowsum, colsum) * np.outer(total - rowsum, total - colsum) / total**3
-        )
-        return residuals / np.sqrt(variance)
+        if hs_dims:
+            res = self._intersperse_hs_in_std_res(hs_dims, res)
+            arr = self.as_array(
+                prune=prune, include_transforms_for_dims=hs_dims,
+            )
+            if isinstance(arr, np.ma.core.MaskedArray):
+                res = np.ma.masked_array(res, mask=arr.mask)
 
-    def pvals(self, weighted=True, prune=False):
+        return res
+
+    def _intersperse_hs_in_std_res(self, hs_dims, res):
+        for dim, inds in enumerate(self.inserted_hs_indices()):
+            for i in inds:
+                if dim not in hs_dims:
+                    continue
+                res = np.insert(res, i, np.nan, axis=(dim - self.ndim))
+        return res
+
+    def pvals(self, weighted=True, prune=False, hs_dims=None):
         '''Calculate p-vals.
 
         This function calculates statistically significant results for
@@ -1241,7 +1260,7 @@ class CrunchCube(DataTable):
                        cell of the table-like representation of the
                        crunch cube.
         '''
-        stats = self.zscore(weighted=weighted, prune=prune)
+        stats = self.zscore(weighted=weighted, prune=prune, hs_dims=hs_dims)
         return 2 * (1 - norm.cdf(np.abs(stats)))
 
     def scale_means(self):
