@@ -128,6 +128,10 @@ class DataTable(object):
                   for val in values]
         return values
 
+    @lazyproperty
+    def _shape(self):
+        return tuple([dim.shape for dim in self.all_dimensions])
+
     def data(self, weighted, margin=False):
         '''Get the data in non-flattened shape.
 
@@ -137,7 +141,4 @@ class DataTable(object):
         a ndarray of shape (2, 2).
         '''
         values = self.flat_values(weighted, margin)
-        all_dimensions = self.all_dimensions
-        shape = [len(dim.elements(include_missing=True))
-                 for dim in all_dimensions]
-        return np.array(values).reshape(shape)
+        return np.array(values).reshape(self._shape)

@@ -55,7 +55,7 @@ class TestCrunchCube(TestCase):
     def test_crunch_cube_loads_data(self):
         cube = CrunchCube(CAT_X_CAT)
         expected = CAT_X_CAT['value']
-        actual = cube._table._cube
+        actual = cube._cube
         self.assertEqual(actual, expected)
 
     def test_as_array_univariate_cat_exclude_missing(self):
@@ -100,12 +100,6 @@ class TestCrunchCube(TestCase):
         actual = cube.as_array()
         np.testing.assert_array_equal(actual, expected)
 
-    def test_as_array_univariate_cat_include_missing(self):
-        cube = CrunchCube(UNIVARIATE_CATEGORICAL)
-        expected = np.array([10, 5, 5, 0])
-        actual = cube.as_array(include_missing=True)
-        np.testing.assert_array_equal(actual, expected)
-
     def test_as_array_cat_x_cat_exclude_missing(self):
         cube = CrunchCube(CAT_X_CAT)
         expected = np.array([
@@ -143,30 +137,6 @@ class TestCrunchCube(TestCase):
             [0, 0, 0, 0],
         ])
         actual = cube.as_array()
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_as_array_cat_x_cat_include_missing(self):
-        cube = CrunchCube(CAT_X_CAT)
-        expected = np.array([
-            [5, 3, 2, 0],
-            [5, 2, 3, 0],
-            [0, 0, 0, 0],
-        ])
-        actual = cube.as_array(include_missing=True)
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_as_array_cat_x_datetime_include_missing(self):
-        cube = CrunchCube(CAT_X_DATETIME)
-        expected = np.array([
-            [0, 0, 1, 0, 0],
-            [0, 0, 0, 1, 0],
-            [0, 1, 0, 0, 0],
-            [1, 0, 0, 0, 0],
-            [0, 0, 0, 0, 1],
-            [0, 0, 0, 0, 1],
-            [0, 0, 0, 0, 0],
-        ])
-        actual = cube.as_array(include_missing=True)
         np.testing.assert_array_equal(actual, expected)
 
     def test_margin_univariate_cat_axis_none(self):
@@ -425,15 +395,6 @@ class TestCrunchCube(TestCase):
         actual = cube.labels()
         self.assertEqual(actual, expected)
 
-    def test_labels_cat_x_cat_include_missing(self):
-        cube = CrunchCube(CAT_X_CAT)
-        expected = [
-            ['B', 'C', 'No Data'],
-            ['C', 'D', 'E', 'No Data'],
-        ]
-        actual = cube.labels(include_missing=True)
-        self.assertEqual(actual, expected)
-
     def test_labels_cat_x_datetime_exclude_missing(self):
         cube = CrunchCube(CAT_X_DATETIME)
         expected = [
@@ -446,30 +407,6 @@ class TestCrunchCube(TestCase):
             ],
         ]
         actual = cube.labels()
-        self.assertEqual(actual, expected)
-
-    def test_labels_cat_x_datetime_include_missing(self):
-        cube = CrunchCube(CAT_X_DATETIME)
-        expected = [
-            ['red', 'green', 'blue', '4', '8', '9', 'No Data'],
-            [
-                '1776-07-04T00:00:00',
-                '1950-12-24T00:00:00',
-                '2000-01-01T00:00:00',
-                '2000-01-02T00:00:00',
-                None,
-            ],
-        ]
-        actual = cube.labels(include_missing=True)
-        self.assertEqual(actual, expected)
-
-    def test_labels_simple_cat_array_include_missing(self):
-        cube = CrunchCube(SIMPLE_CAT_ARRAY)
-        expected = [
-            ['ca_subvar_1', 'ca_subvar_2', 'ca_subvar_3'],
-            ['a', 'b', 'c', 'd', 'No Data'],
-        ]
-        actual = cube.labels(include_missing=True)
         self.assertEqual(actual, expected)
 
     def test_labels_simple_cat_array_exclude_missing(self):
@@ -489,16 +426,6 @@ class TestCrunchCube(TestCase):
             [0, 2, 1, 3],
         ])
         actual = cube.as_array()
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_as_array_simple_cat_array_include_missing(self):
-        cube = CrunchCube(SIMPLE_CAT_ARRAY)
-        expected = np.array([
-            [3, 3, 0, 0, 0],
-            [1, 3, 2, 0, 0],
-            [0, 2, 1, 3, 0],
-        ])
-        actual = cube.as_array(include_missing=True)
         np.testing.assert_array_equal(actual, expected)
 
     def test_as_array_cat_x_num_x_datetime(self):
@@ -992,8 +919,11 @@ class TestCrunchCube(TestCase):
         cube = CrunchCube(PETS_ARRAY)
         with self.assertRaises(ValueError):
             cube.proportions(axis=0)
-        with self.assertRaises(ValueError):
-            cube.proportions(axis=None)
+
+        # This is not bad direction, because the 'None' always
+        # figures out what it needs to do
+        # with self.assertRaises(ValueError):
+        #     cube.proportions(axis=None)
 
     def test_pets_array_margin_total(self):
         cube = CrunchCube(PETS_ARRAY)
@@ -1211,6 +1141,7 @@ class TestCrunchCube(TestCase):
             [0.        , 1.        ],  # noqa
             [0.47058824, 0.52941176],  # noqa
         ])
+        # TODO: Remove this if not needed anymore...
         # TODO: Consult with jon and Mike. The new expectation is closer to what
         # whaam displays, but diverges from R.
         # expected = np.array([
@@ -1218,9 +1149,11 @@ class TestCrunchCube(TestCase):
         #     [0., 0.55555556],
         #     [0.44444444, 0.25],
         # ])
-        actual = cube.proportions(axis=1)[0]
-        # Since cube is 3D, col dim is 1 (instead of 0)
-        np.testing.assert_almost_equal(actual, expected)
+
+        # The direction 1 designates columns (for each slice). Since this is
+        # the subvar dimension, it needs to be treated as invalid direction
+        with self.assertRaises(ValueError):
+            cube.proportions(axis=1)
 
         actual = cube.proportions()[0]
         np.testing.assert_almost_equal(actual, expected)

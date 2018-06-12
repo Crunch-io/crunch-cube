@@ -113,13 +113,6 @@ class TestHeadersAndSubtotals(TestCase):
         actual = cube.as_array(include_transforms_for_dims=[0])
         np.testing.assert_array_equal(actual, expected)
 
-    def test_subtotals_as_array_two_transforms_missing_included(self):
-        cube = CrunchCube(ECON_BLAME_WITH_HS_MISSING)
-        expected = np.array([285, 396, 681, 242, 6, 68, 3, 0, 0, 77])
-        actual = cube.as_array(include_missing=True,
-                               include_transforms_for_dims=[0])
-        np.testing.assert_array_equal(actual, expected)
-
     def test_subtotals_proportions_one_transform(self):
         cube = CrunchCube(ECON_BLAME_WITH_HS)
         expected = np.array([
@@ -148,24 +141,6 @@ class TestHeadersAndSubtotals(TestCase):
             .0772317,
         ])
         actual = cube.proportions(include_transforms_for_dims=[0])
-        np.testing.assert_almost_equal(actual, expected)
-
-    def test_subtotals_proportions_two_transforms_missing_included(self):
-        cube = CrunchCube(ECON_BLAME_WITH_HS_MISSING)
-        expected = np.array([
-            .28585757,
-            .39719157,
-            .68304915,
-            .24272818,
-            .00601805,
-            .06820461,
-            .00300903,
-            0,
-            0,
-            .0772317,
-        ])
-        actual = cube.proportions(include_missing=True,
-                                  include_transforms_for_dims=[0])
         np.testing.assert_almost_equal(actual, expected)
 
     def test_labels_on_2d_cube_with_hs_on_1st_dim(self):
