@@ -1,5 +1,7 @@
 '''Contains implementation of the Subtotal class, for Crunch Cubes.'''
 
+from .utils import lazyproperty
+
 
 class Subtotal(object):
     '''Implementation of the Insertion class for Crunch Cubes.
@@ -12,7 +14,7 @@ class Subtotal(object):
         self._data = data
         self._dim = dim
 
-    @property
+    @lazyproperty
     def is_valid(self):
         '''Test if the subtotal data is valid.'''
         if isinstance(self._data, dict):
@@ -22,7 +24,7 @@ class Subtotal(object):
                 return self._data['function'] == 'subtotal'
         return False
 
-    @property
+    @lazyproperty
     def anchor(self):
         '''Get the anchor of the subtotal (if it's valid).'''
         if not self.is_valid:
@@ -37,18 +39,18 @@ class Subtotal(object):
         except (TypeError, ValueError):
             return anchor.lower()
 
-    @property
+    @lazyproperty
     def _all_dim_ids(self):
         return [el.get('id') for el in self._dim.elements(include_missing=True)]
 
-    @property
+    @lazyproperty
     def args(self):
         '''Get H&S args.'''
         if self.is_valid:
             return self._data['args']
         return []
 
-    @property
+    @lazyproperty
     def data(self):
         '''Get data in JSON format.'''
         return self._data

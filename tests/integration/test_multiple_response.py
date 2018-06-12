@@ -362,14 +362,30 @@ class TestMultipleResponse(TestCase):
         cube = CrunchCube(CAT_X_MR_X_MR)
         # Set axis to 2 (and not 1), since 3D cube
         actual = cube.proportions(axis=2)
-        expected = np.array([
-            [[0.1159, 0.3597],
-             [0.0197, 0.0604],
-             [0.0192, 0.0582]],
 
-            [[0.0159, 0.0094],
-             [0.1182, 0.0625],
-             [0.1142, 0.0623]],
+        # TODO: Check with Jon and Mike. These numbers correspond to doing
+        # prop.table(cube, 1) in R
+
+        # expected = np.array([
+        #     [[0.1159, 0.3597],
+        #      [0.0197, 0.0604],
+        #      [0.0192, 0.0582]],
+
+        #     [[0.0159, 0.0094],
+        #      [0.1182, 0.0625],
+        #      [0.1142, 0.0623]],
+        # ])
+
+        # TODO: Check with Jon and Mike. This expectation is the same as doing
+        # prop.table(cube, c(1, 2)) in R (same numbers, different slicing).
+        expected = np.array([
+            [[0.19169699, 0.5949388],
+             [0.19543651, 0.59920635],
+             [0.19712526, 0.59753593]],
+
+            [[0.17207792, 0.1017316],
+             [0.1963129, 0.10380335],
+             [0.19141804, 0.10442508]],
         ])
         np.testing.assert_almost_equal(actual, expected)
 
@@ -408,28 +424,52 @@ class TestMultipleResponse(TestCase):
         cube = CrunchCube(CAT_X_MR_X_MR)
         # Set axis to 1 (and not 0), since 3D cube
         actual = cube.proportions(axis=1, weighted=False)
-        expected = np.array([
-            [[0.166284074605452, 0.516068866571019],
-             [0.0280267463366055, 0.0859297197325366],
-             [0.0276657060518732, 0.0838616714697406]],
+        # expected = np.array([
+        #     [[0.166284074605452, 0.516068866571019],
+        #      [0.0280267463366055, 0.0859297197325366],
+        #      [0.0276657060518732, 0.0838616714697406]],
 
-            [[0.0228120516499283, 0.0134863701578192],
-             [0.168160478019633, 0.0889173424384692],
-             [0.164553314121037, 0.0897694524495677]],
+        #     [[0.0228120516499283, 0.0134863701578192],
+        #      [0.168160478019633, 0.0889173424384692],
+        #      [0.164553314121037, 0.0897694524495677]],
+        # ])
+
+        # TODO: Check with Jon and Mike. Corresponds to
+        # R's prop.table(cube, c(1, 3))
+        expected = np.array([
+            [[0.60553814, 0.60372608],
+             [0.10292581, 0.1013763],
+             [0.10031348, 0.09768379]],
+
+            [[0.08141321, 0.09003831],
+             [0.60522273, 0.598659],
+             [0.58474142, 0.5967433]],
         ])
         np.testing.assert_almost_equal(actual, expected)
 
     def test_cat_x_mr_x_mr_proportions_by_cell(self):
         cube = CrunchCube(CAT_X_MR_X_MR)
         actual = cube.proportions()
-        expected = np.array([
-            [[0.05795, 0.17985],
-             [0.00985, 0.0302],
-             [0.0096, 0.0291]],
+        # expected = np.array([
+        #     [[0.05795, 0.17985],
+        #      [0.00985, 0.0302],
+        #      [0.0096, 0.0291]],
 
-            [[0.00795, 0.0047],
-             [0.0591, 0.03125],
-             [0.0571, 0.03115]],
+        #     [[0.00795, 0.0047],
+        #      [0.0591, 0.03125],
+        #      [0.0571, 0.03115]],
+        # ])
+
+        # TODO: Check w Jon/Mike
+        # Same as prop.table(cube, 1) in R
+        expected = np.array([
+            [[0.1159, 0.3597],
+             [0.0197, 0.0604],
+             [0.0192, 0.0582]],
+
+            [[0.0159, 0.0094],
+             [0.1182, 0.0625],
+             [0.1142, 0.0623]],
         ])
         np.testing.assert_almost_equal(actual, expected)
 
