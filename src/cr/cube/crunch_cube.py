@@ -1240,7 +1240,7 @@ class CrunchCube(DataTable):
             for i in inds:
                 if dim not in hs_dims:
                     continue
-                res = np.insert(res, i, 0, axis=(dim - self.ndim))
+                res = np.insert(res, i, np.nan, axis=(dim - self.ndim))
         return res
 
     def pvals(self, weighted=True, prune=False):
