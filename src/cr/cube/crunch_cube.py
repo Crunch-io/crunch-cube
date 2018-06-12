@@ -327,11 +327,17 @@ class CrunchCube(DataTable):
         if self.ndim == 1:
             return [row_indices]
 
-        col_margin = self.margin(
-            include_transforms_for_dims=transforms,
-            axis=self.col_direction_axis,
-            weighted=False
+        col_margin = (
+            self.margin(
+                include_transforms_for_dims=transforms,
+                axis=self.col_direction_axis,
+                weighted=False
+            ) if self.dim_types[self.col_direction_axis] != 'categorical_array' else
+            self.as_array(
+                include_transforms_for_dims=transforms, weighted=False,
+            )
         )
+
         col_indices = self._margin_pruned_indices(
             col_margin, self._inserted_dim_inds(transforms, 1), 1
         )
@@ -711,7 +717,11 @@ class CrunchCube(DataTable):
             # If pruning is applied, we need to subtract from the H&S indes
             # the number of pruned rows (cols) that come before that index.
             margins = [
-                self.margin(axis=i, include_transforms_for_dims=[0, 1])
+                (
+                    self.margin(axis=i, include_transforms_for_dims=[0, 1])
+                    if self.dim_types[i] != 'categorical_array' else
+                    self.as_array(include_transforms_for_dims=[0, 1])
+                )
                 for i in [1, 0]
             ]
             margins = [
@@ -873,8 +883,15 @@ class CrunchCube(DataTable):
             include_transforms_for_dims=include_transforms_for_dims,
         )
         if isinstance(arr, np.ma.core.MaskedArray):
-            den = np.ma.masked_array(den, np.zeros(den.shape, dtype=bool))
-            den.mask = arr.mask[index]
+            inflate_ind = [
+                None if d.is_selections else slice(None)
+                for i, d in enumerate(self.all_dimensions)
+            ]
+            mask = np.logical_or(
+                np.zeros(den.shape, dtype=bool),
+                arr.mask[inflate_ind],
+            )
+            den = np.ma.masked_array(den, mask)
 
         if self.ndim != 1 or axis is None or axis == 0 and len(self.all_dimensions) == 1:
             # Special case for 1D cube wigh MR, for "Table" direction
@@ -1098,6 +1115,8 @@ class CrunchCube(DataTable):
         total = self.margin(weighted=weighted, prune=prune)
         colsum = self.margin(axis=0, weighted=weighted, prune=prune)
         rowsum = self.margin(axis=1, weighted=weighted, prune=prune)
+        # colsum = self.margin(axis=0, weighted=weighted)
+        # rowsum = self.margin(axis=1, weighted=weighted)
 
         if self.has_mr:
             if not self.is_double_mr and self.mr_dim_ind == 0:
