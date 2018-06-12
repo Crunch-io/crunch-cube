@@ -880,7 +880,8 @@ class CrunchCube(DataTable):
         # Apply correct mask (based on the as_array shape)
         arr = self.as_array(
             prune=prune,
-            include_transforms_for_dims=include_transforms_for_dims,
+            # include_transforms_for_dims=include_transforms_for_dims,
+            include_transforms_for_dims=hs_dims,
         )
         if isinstance(arr, np.ma.core.MaskedArray):
             inflate_ind = [
