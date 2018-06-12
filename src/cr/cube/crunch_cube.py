@@ -1248,7 +1248,7 @@ class CrunchCube(DataTable):
                 res = np.insert(res, i, np.nan, axis=(dim - self.ndim))
         return res
 
-    def pvals(self, weighted=True, prune=False):
+    def pvals(self, weighted=True, prune=False, hs_dims=None):
         '''Calculate p-vals.
 
         This function calculates statistically significant results for
@@ -1260,7 +1260,7 @@ class CrunchCube(DataTable):
                        cell of the table-like representation of the
                        crunch cube.
         '''
-        stats = self.zscore(weighted=weighted, prune=prune)
+        stats = self.zscore(weighted=weighted, prune=prune, hs_dims=hs_dims)
         return 2 * (1 - norm.cdf(np.abs(stats)))
 
     def scale_means(self):
