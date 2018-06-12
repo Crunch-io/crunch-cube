@@ -1232,6 +1232,11 @@ class CrunchCube(DataTable):
 
         if hs_dims:
             res = self._intersperse_hs_in_std_res(hs_dims, res)
+            arr = self.as_array(
+                prune=prune, include_transforms_for_dims=hs_dims,
+            )
+            if isinstance(arr, np.ma.core.MaskedArray):
+                res = np.ma.masked_array(res, mask=arr.mask)
 
         return res
 
