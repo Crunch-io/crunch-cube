@@ -9,6 +9,7 @@ from .fixtures import SEL_ARR_FIRST
 from .fixtures import SEL_ARR_LAST
 from .fixtures import MR_X_MR
 from .fixtures import MR_X_MR_HETEROGENOUS
+from .fixtures import ECON_BLAME_X_IDEOLOGY_ROW_HS
 
 from cr.cube.crunch_cube import CrunchCube
 
@@ -110,4 +111,36 @@ class TestStandardizedResiduals(TestCase):
             [-0.26443564, -39.67503947],
         ])
         actual = cube.zscore()
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_std_res_with_hs(self):
+        cube = CrunchCube(ECON_BLAME_X_IDEOLOGY_ROW_HS)
+
+        # Don't include H&S dim (the one with transform)
+        expected = np.array([
+            [-4.76107671, -6.89997234, -3.93535518,  8.76458713, 7.95483156,  -1.58387062],  # noqa
+            [ 7.6019656 , 10.00457686,  1.74406524, -9.01760367, -6.54691501, -4.58037582],  # noqa
+            [-3.27515041, -2.90214798,  2.74136144,  2.51726734, -0.1650683 , -1.77262166],  # noqa
+            [ 0.89649209, -0.10100532, -1.06236896, -0.3090285 , -0.86520876,  3.67095238],  # noqa
+            [-0.92734884, -2.08565946, -0.66824935, -2.39155976, -1.00345445, 13.61755117],  # noqa
+        ])
+        actual = cube.zscore()
+        np.testing.assert_almost_equal(actual, expected)
+
+        actual = cube.zscore(hs_dims=[1])
+        np.testing.assert_almost_equal(actual, expected)
+
+        # Include H&S (expect additional row of all zeros)
+        expected = np.array([
+            [-4.76107671, -6.89997234, -3.93535518,  8.76458713, 7.95483156,  -1.58387062],  # noqa
+            [ 7.6019656 , 10.00457686,  1.74406524, -9.01760367, -6.54691501, -4.58037582],  # noqa
+            [     np.nan,      np.nan,      np.nan,      np.nan,      np.nan,      np.nan],  # noqa
+            [-3.27515041, -2.90214798,  2.74136144,  2.51726734, -0.1650683 , -1.77262166],  # noqa
+            [ 0.89649209, -0.10100532, -1.06236896, -0.3090285 , -0.86520876,  3.67095238],  # noqa
+            [-0.92734884, -2.08565946, -0.66824935, -2.39155976, -1.00345445, 13.61755117],  # noqa
+        ])
+        actual = cube.zscore(hs_dims=[0, 1])
+        np.testing.assert_almost_equal(actual, expected)
+
+        actual = cube.zscore(hs_dims=[0])
         np.testing.assert_almost_equal(actual, expected)
