@@ -390,7 +390,9 @@ class TestCrunchCube(TestCase):
         assert actual == expected
 
         # Assert indices are fetch with transforms
-        actual = cc._inserted_dim_inds(Mock(), 0)
+        actual = cc._inserted_dim_inds([1], 0)
+        mock_inserted_hs_indices.assert_not_called()
+        actual = cc._inserted_dim_inds([0], 0)
         mock_inserted_hs_indices.assert_called_once()
 
     @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
