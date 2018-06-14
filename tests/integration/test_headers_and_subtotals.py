@@ -740,7 +740,10 @@ class TestHeadersAndSubtotals(TestCase):
              [    np.nan,     np.nan,     np.nan,     np.nan],  # noqa
              [    np.nan,     np.nan,     np.nan,     np.nan]],  # noqa
         ])
-        actual = cube.proportions()
+        with self.assertRaises(ValueError):
+            # "Table" direction not allowed, because cube's rows are CA dim
+            actual = cube.proportions()
+        actual = cube.proportions(axis=2)
         np.testing.assert_almost_equal(actual, expected)
 
     def test_mr_x_ca_props_by_row_with_hs(self):
@@ -758,7 +761,12 @@ class TestHeadersAndSubtotals(TestCase):
              [    np.nan,     np.nan,     np.nan,     np.nan,     np.nan,     np.nan,     np.nan],  # noqa
              [    np.nan,     np.nan,     np.nan,     np.nan,     np.nan,     np.nan,     np.nan]],  # noqa
         ])
-        actual = cube.proportions(include_transforms_for_dims=[0, 1, 2])
+
+        with self.assertRaises(ValueError):
+            # "Table" direction not allowed, because cube's rows are CA dim
+            actual = cube.proportions(include_transforms_for_dims=[0, 1, 2])
+
+        actual = cube.proportions(axis=2, include_transforms_for_dims=[0, 1, 2])
         np.testing.assert_almost_equal(actual, expected)
 
     def test_ca_cat_x_mr_x_ca_subvar_counts_pruning(self):
@@ -780,7 +788,12 @@ class TestHeadersAndSubtotals(TestCase):
             [False, False, True],
             [True, True, True],
         ])
-        actual = cube.proportions(prune=True)[0].mask
+
+        with self.assertRaises(ValueError):
+            # "Table" direction not allowed cuz CA items
+            actual = cube.proportions(prune=True)[0].mask
+
+        actual = cube.proportions(axis=1, prune=True)[0].mask
         np.testing.assert_array_equal(actual, expected)
 
     def test_ca_x_mr_counts_pruning(self):
