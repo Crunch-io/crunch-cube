@@ -431,14 +431,14 @@ class CrunchCube(DataTable):
             # (because of the inner matrix dimensions).
             return np.dot(prop_margin, V)
 
-    def _is_axes_allowed(self, axes):
-        '''Check if axes are allowed.
+    def _is_axis_allowed(self, axis):
+        '''Check if axis are allowed.
 
         In case the calculation is requested over CA items dimension, it is not
         valid. It's valid in all other cases.
         '''
 
-        if axes is None:
+        if axis is None:
             # If table direction was requested, we must ensure that each slice
             # doesn't have the CA items dimension (thus the [-2:] part). It's
             # OK for the 0th dimension to be items, since no calculation is
@@ -447,15 +447,15 @@ class CrunchCube(DataTable):
                 return False
             return True
 
-        if isinstance(axes, int):
-            if self.ndim == 1 and axes == 1:
+        if isinstance(axis, int):
+            if self.ndim == 1 and axis == 1:
                 # Special allowed case of a 1D cube, where "row"
                 # directions is requested.
                 return True
-            axes = [axes]
+            axis = [axis]
 
-        for axis in axes:
-            if self.dim_types[axis] == 'categorical_array':
+        for el in axis:
+            if self.dim_types[el] == 'categorical_array':
                 # If any of the directions explicitly asked for directly
                 # corresponds to the CA items dimension, the requested
                 # calculation is not valid.
@@ -463,13 +463,13 @@ class CrunchCube(DataTable):
 
         return True
 
-    def _adjust_axes(self, axes):
-        '''Adjust user provided axes.
+    def _adjust_axis(self, axis):
+        '''Adjust user provided axis.
 
         This method adjusts user provided 'axis' parameter, for some of the
         cube operations, mainly 'margin'. The user never sees the MR selections
         dimension, and treats all MRs as single dimensions. Thus we need to
-        adjust the values of axes (to sum across) to what the user would've
+        adjust the values of axis (to sum across) to what the user would've
         specified if he were aware of the existence of the MR selections
         dimension. The reason for this adjustment is that all of the operations
         performed troughout the margin calculations will be carried on an
@@ -478,43 +478,43 @@ class CrunchCube(DataTable):
         For more info on how it needs to operate, check the unit tests.
         '''
 
-        if not self._is_axes_allowed(axes):
+        if not self._is_axis_allowed(axis):
             ca_error_msg = 'Direction {} not allowed (items dimension)'
-            raise ValueError(ca_error_msg.format(axes))
+            raise ValueError(ca_error_msg.format(axis))
 
-        if isinstance(axes, int):
+        if isinstance(axis, int):
 
             # If single axis was provided, create a list out of it, so that
             # we can do the subsequent iteration.
-            axes = list([axes])
-        elif axes is None:
+            axis = list([axis])
+        elif axis is None:
             # If axis was None, create what user would expect in terms of
             # finding out the Total(s). In case of 2D cube, this will be the
-            # axes of all the dimensions that the user can see, that is (0, 1),
+            # axis of all the dimensions that the user can see, that is (0, 1),
             # because the selections dimension is invisible to the user. In
             # case of 3D cube, this will be the "total" across each slice, so
             # we need to drop the 0th dimension, and only take last two (1, 2).
-            axes = range(self.ndim)[-2:]
+            axis = range(self.ndim)[-2:]
         else:
             # In case of a tuple, just keep it as a list.
-            axes = list(axes)
-        axes = np.array(axes)
+            axis = list(axis)
+        axis = np.array(axis)
 
-        # Create new array for storing updated values of axes. It's necessary
+        # Create new array for storing updated values of axis. It's necessary
         # because it's hard to update the values in place.
-        new_axes = np.array(axes)
+        new_axis = np.array(axis)
 
-        # Iterate over user-visible dimensions, and update axes when MR is
+        # Iterate over user-visible dimensions, and update axis when MR is
         # detected. For each detected MR, we need to increment all subsequent
-        # axes (that were provided by the user). But we don't need to update
-        # the axes that are "behind" the current MR.
+        # axis (that were provided by the user). But we don't need to update
+        # the axis that are "behind" the current MR.
         for i, dim in enumerate(self.dimensions):
             if dim.type == 'multiple_response':
-                # This formula updates only the axes that come "after" the
+                # This formula updates only the axis that come "after" the
                 # current MR (items) dimension.
-                new_axes[axes >= i] += 1
+                new_axis[axis >= i] += 1
 
-        return tuple(new_axes)
+        return tuple(new_axis)
 
     def _transform_table(self, table, include_transforms_for_dims):
         table = self._transform(
@@ -789,7 +789,7 @@ class CrunchCube(DataTable):
         of the corresponding row/column are all zero.
         '''
 
-        if not self._is_axes_allowed(axis):
+        if not self._is_axis_allowed(axis):
             # In case we encountered axis that would go across items dimension,
             # we need to return at least some result, to prevent explicitly
             # checking for this condition, wherever self._margin is used
@@ -873,7 +873,7 @@ class CrunchCube(DataTable):
             return [dim for dim in hs_dims if dim not in axis]
 
         table = self.data(weighted=weighted, margin=True)
-        new_axis = self._adjust_axes(axis)
+        new_axis = self._adjust_axis(axis)
         index = [
             None if i in new_axis else slice(None)
             for i, _ in enumerate(table.shape)
@@ -983,7 +983,7 @@ class CrunchCube(DataTable):
             return [dim for dim in hs_dims if dim not in axis]
 
         table = self.data(weighted)
-        new_axis = self._adjust_axes(axis)
+        new_axis = self._adjust_axis(axis)
         index = [
             None if i in new_axis else slice(None)
             for i, _ in enumerate(table.shape)
