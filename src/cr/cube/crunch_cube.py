@@ -237,10 +237,9 @@ class CrunchCube(DataTable):
 
         res = self._fix_shape(res)
 
-        row_margin = self._margin(
-            include_transforms_for_dims=transforms,
+        row_margin = self._pruning_base(
+            hs_dims=transforms,
             axis=self.row_direction_axis,
-            weighted=False
         )
         if row_margin.ndim > 1:
             # In case of CAT x MR, we have 2D margin
@@ -255,10 +254,9 @@ class CrunchCube(DataTable):
             return np.ma.masked_array(res, mask=row_prune_inds)
 
         # Prune columns by column margin values.
-        col_margin = self._margin(
-            include_transforms_for_dims=transforms,
+        col_margin = self._pruning_base(
+            hs_dims=transforms,
             axis=self.col_direction_axis,
-            weighted=False
         )
         if col_margin.ndim > 1:
             # In case of MR x CAT, we have 2D margin
@@ -304,10 +302,9 @@ class CrunchCube(DataTable):
         return self._prune_indices(transforms)
 
     def _prune_indices(self, transforms):
-        row_margin = self._margin(
-            include_transforms_for_dims=transforms,
+        row_margin = self._pruning_base(
+            hs_dims=transforms,
             axis=self.row_direction_axis,
-            weighted=False
         )
         row_indices = self._margin_pruned_indices(
             row_margin, self._inserted_dim_inds(transforms, 0), 0
@@ -319,10 +316,9 @@ class CrunchCube(DataTable):
         if self.ndim == 1:
             return [row_indices]
 
-        col_margin = self._margin(
-            include_transforms_for_dims=transforms,
+        col_margin = self._pruning_base(
+            hs_dims=transforms,
             axis=self.col_direction_axis,
-            weighted=False
         )
 
         col_indices = self._margin_pruned_indices(
@@ -335,12 +331,12 @@ class CrunchCube(DataTable):
         return [row_indices, col_indices]
 
     def _prune_3d_indices(self, transforms):
-        row_margin = self._margin(
-            include_transforms_for_dims=transforms,
+        row_margin = self._pruning_base(
+            hs_dims=transforms,
             axis=self.row_direction_axis
         )
-        col_margin = self._margin(
-            include_transforms_for_dims=transforms,
+        col_margin = self._pruning_base(
+            hs_dims=transforms,
             axis=self.col_direction_axis,
         )
         return [
@@ -706,20 +702,20 @@ class CrunchCube(DataTable):
         if self.ndim == 2 and prune:
             # If pruning is applied, we need to subtract from the H&S indes
             # the number of pruned rows (cols) that come before that index.
-            margins = [
-                self._margin(axis=i, include_transforms_for_dims=[0, 1])
+            pruning_bases = [
+                self._pruning_base(axis=i, hs_dims=[0, 1])
                 for i in [1, 0]
             ]
-            margins = [
-                margin if margin.ndim == 1 else np.sum(margin, axis=(1 - i))
-                for i, margin in enumerate(margins)
+            pruning_bases = [
+                base if base.ndim == 1 else np.sum(base, axis=(1 - i))
+                for i, base in enumerate(pruning_bases)
             ]
             # Obtain prune indices as subscripts
             prune_indices_list = [
-                np.arange(len(margin))[
-                    np.logical_or(margin == 0, np.isnan(margin))
+                np.arange(len(base))[
+                    np.logical_or(base == 0, np.isnan(base))
                 ]
-                for margin in margins
+                for base in pruning_bases
             ]
             inserted_indices_list = [
                 dim.inserted_hs_indices for dim in self.dimensions
@@ -784,17 +780,13 @@ class CrunchCube(DataTable):
         )
         return self._fix_shape(array)
 
-    def _margin(self, axis=None, weighted=True,
-                include_transforms_for_dims=None, prune=False):
-        '''Gets margin if possible, as_array otherwise.
+    def _pruning_base(self, axis=None, hs_dims=None):
+        '''Gets margin if across CAT dimension. Gets counts if across items.
 
-        If a margin is called internally across items dimension, we return
-        as_array(). This can happen when pruning indices, or when calculating
-        zscores. In those cases we need marginals by rows and cols. If any of
-        those happens to be across items dimension, we don't really need to
-        prune (because items will never be pruned). But we still need a result
-        to be able to perform subsequent operations, without explicitly
-        checking if the axes direction is across items dimension each time.
+        Categorical variables are pruned based on their marginal values. If the
+        marginal is a 0 or a NaN, the corresponding row/column is pruned. In
+        case of a subvars (items) dimension, we only prune if all the counts
+        of the corresponding row/column are all zero.
         '''
 
         if not self._is_axes_allowed(axis):
@@ -802,8 +794,8 @@ class CrunchCube(DataTable):
             # we need to return at least some result, to prevent explicitly
             # checking for this condition, wherever self._margin is used
             return self.as_array(
-                weighted=weighted, prune=prune,
-                include_transforms_for_dims=include_transforms_for_dims,
+                weighted=False,
+                include_transforms_for_dims=hs_dims,
             )
 
         # In case of allowed axis, just return the normal API margin. This call
@@ -811,8 +803,8 @@ class CrunchCube(DataTable):
         # intended, because we want to be as explicit as possible. Margins
         # across items are not allowed.
         return self.margin(
-            axis=axis, weighted=weighted, prune=prune,
-            include_transforms_for_dims=include_transforms_for_dims,
+            axis=axis, weighted=False,
+            include_transforms_for_dims=hs_dims,
         )
 
     def margin(self, axis=None, weighted=True,
@@ -1130,9 +1122,10 @@ class CrunchCube(DataTable):
     def zscore(self, weighted=True, prune=False, hs_dims=None):
         '''Get cube zscore measurement.'''
         counts = self.as_array(weighted=weighted, prune=prune)
-        total = self._margin(weighted=weighted, prune=prune)
-        colsum = self._margin(axis=0, weighted=weighted, prune=prune)
-        rowsum = self._margin(axis=1, weighted=weighted, prune=prune)
+
+        total = self.margin(weighted=weighted, prune=prune)
+        colsum = self.margin(axis=0, weighted=weighted, prune=prune)
+        rowsum = self.margin(axis=1, weighted=weighted, prune=prune)
 
         if self.has_mr or 'categorical_array' in self.dim_types:
             if not self.is_double_mr and self.mr_dim_ind == 0:
