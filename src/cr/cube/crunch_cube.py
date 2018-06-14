@@ -393,8 +393,7 @@ class CrunchCube(DataTable):
 
     @lazyproperty
     def col_direction_axis(self):
-        axis = self.ndim - 2
-        return axis
+        return self.ndim - 2
 
     @classmethod
     def _fix_valid_indices(cls, valid_indices, insertion_index, dim):
@@ -1127,7 +1126,7 @@ class CrunchCube(DataTable):
         colsum = self.margin(axis=0, weighted=weighted, prune=prune)
         rowsum = self.margin(axis=1, weighted=weighted, prune=prune)
 
-        if self.has_mr or 'categorical_array' in self.dim_types:
+        if self.has_mr or self.ca_dim_ind is not None:
             if not self.is_double_mr and self.mr_dim_ind == 0:
                 total = total[:, np.newaxis]
                 rowsum = rowsum[:, np.newaxis]
