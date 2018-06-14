@@ -1131,16 +1131,9 @@ class CrunchCube(DataTable):
         '''Get cube index measurement.'''
         return Index(self, weighted, prune).data
 
-    def zscore(self, weighted=True, prune=False, hs_dims=None):
-        '''Get cube zscore measurement.'''
-        counts = self.as_array(weighted=weighted, prune=prune)
-
-        total = self.margin(weighted=weighted, prune=prune)
-        colsum = self.margin(axis=0, weighted=weighted, prune=prune)
-        rowsum = self.margin(axis=1, weighted=weighted, prune=prune)
-
+    def _calculate_std_res(self, counts, total, colsum, rowsum):
         if self.has_mr or self.ca_dim_ind is not None:
-            if not self.is_double_mr and self.mr_dim_ind == 0:
+            if not self.is_double_mr and (self.mr_dim_ind == 0 or self.mr_dim_ind == 1 and self.ndim == 3):
                 total = total[:, np.newaxis]
                 rowsum = rowsum[:, np.newaxis]
 
@@ -1157,6 +1150,24 @@ class CrunchCube(DataTable):
                 np.outer(total - rowsum, total - colsum) / total**3
             )
             res = residuals / np.sqrt(variance)
+        return res
+
+    def zscore(self, weighted=True, prune=False, hs_dims=None):
+        '''Get cube zscore measurement.'''
+
+        res = []
+        for slice_ in self.slices:
+            counts = slice_.as_array(weighted=weighted, prune=prune)
+            total = slice_.margin(weighted=weighted, prune=prune)
+            colsum = slice_.margin(axis=0, weighted=weighted, prune=prune)
+            rowsum = slice_.margin(axis=1, weighted=weighted, prune=prune)
+            std_res = self._calculate_std_res(counts, total, colsum, rowsum)
+            res.append(std_res)
+
+        if len(res) == 1:
+            res = res[0]
+        else:
+            res = np.array(res)
 
         if hs_dims:
             res = self._intersperse_hs_in_std_res(hs_dims, res)
