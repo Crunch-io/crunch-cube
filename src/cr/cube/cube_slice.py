@@ -17,6 +17,14 @@ class CubeSlice(object):
         self._cube = cube
         self._index = index
 
+    def __getattr__(self, attr):
+        cube_attr = getattr(self._cube, attr)
+
+        if self._cube.ndim == 3 and hasattr(cube_attr, '__len__'):
+            return cube_attr[-2:]
+
+        return cube_attr
+
     def _update_args(self, kwargs):
 
         if self.ndim < 3:
@@ -49,12 +57,7 @@ class CubeSlice(object):
 
     # Properties
 
-    @lazyproperty
-    def ndim(self):
-        '''Get number of dimensions.'''
-        return self._cube.ndim
-
-    @lazyproperty
+    @property
     def name(self):
         '''Get slice name.
 
@@ -70,7 +73,7 @@ class CubeSlice(object):
         table_name = self._cube.labels()[0][self._index]
         return '%s: %s' % (title, table_name)
 
-    @lazyproperty
+    @property
     def rows_title(self):
         '''Get title of the rows dimension.
 
@@ -78,7 +81,7 @@ class CubeSlice(object):
         '''
         return self._cube.dimensions[1].name
 
-    @lazyproperty
+    @property
     def inserted_rows_indices(self):
         ''' Get correct inserted rows indices for the corresponding slice.
 
@@ -88,11 +91,6 @@ class CubeSlice(object):
         and return the 0th value (the one corresponding to the rows).
         '''
         return self._cube.inserted_hs_indices()[self._index][0]
-
-    @lazyproperty
-    def has_means(self):
-        '''Get has_means from cube.'''
-        return self._cube.has_means
 
     @lazyproperty
     def dimensions(self):
@@ -131,11 +129,6 @@ class CubeSlice(object):
         '''Get population counts.'''
         return self._call_cube_method('population_counts', *args, **kwargs)
 
-    @lazyproperty
-    def standardized_residuals(self):
-        '''Get cube's standardized residuals.'''
-        return self._cube.standardized_residuals
-
     def index(self, *args, **kwargs):
         '''Get index.'''
         return self._call_cube_method('index', *args, **kwargs)
@@ -144,10 +137,10 @@ class CubeSlice(object):
         '''Get index.'''
         return self._call_cube_method('zscore', *args, **kwargs)
 
-    @lazyproperty
-    def dim_types(self):
-        '''Get dimension types of the cube slice.'''
-        return self._cube.dim_types[-2:]
+    # @lazyproperty
+    # def dim_types(self):
+    #     '''Get dimension types of the cube slice.'''
+    #     return self._cube.dim_types[-2:]
 
     def pvals(self, *args, **kwargs):
         '''Get pvals of the cube.'''

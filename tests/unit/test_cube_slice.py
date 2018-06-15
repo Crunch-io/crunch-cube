@@ -49,7 +49,7 @@ class TestCubeSlice(TestCase):
         cs = CubeSlice(cube, 1)
         assert cs.name == 'Cube Title: Analysis Slice XY'
 
-    @patch('cr.cube.cube_slice.CubeSlice.ndim', 3)
+    @patch('cr.cube.crunch_cube.CrunchCube.ndim', 3)
     def test_proportions(self):
         '''Test that proportions method delegetes its call to CrunchCube.
 
@@ -71,7 +71,7 @@ class TestCubeSlice(TestCase):
         cs = CubeSlice(cube, index=1)
         assert cs.proportions() == array[1]
 
-    @patch('cr.cube.cube_slice.CubeSlice.ndim', 3)
+    @patch('cr.cube.crunch_cube.CrunchCube.ndim', 3)
     def test_margin(self):
         '''Test that margin method delegetes its call to CrunchCube.
 
@@ -92,7 +92,7 @@ class TestCubeSlice(TestCase):
         # Assert correct slice is returned when index is set
         assert cs.margin() == array[1]
 
-    @patch('cr.cube.cube_slice.CubeSlice.ndim', 3)
+    @patch('cr.cube.crunch_cube.CrunchCube.ndim', 3)
     def test_as_array(self):
         '''Test that as_array method delegetes its call to CrunchCube.
 
@@ -144,7 +144,7 @@ class TestCubeSlice(TestCase):
         cs = CubeSlice(cube, 1)
         assert cs.labels() == all_labels[-2:]
 
-    @patch('cr.cube.cube_slice.CubeSlice.ndim', 3)
+    @patch('cr.cube.crunch_cube.CrunchCube.ndim', 3)
     def test_prune_indices(self):
         '''Assert that correct prune indices are extracted from 3D cube.'''
         cube = Mock()
@@ -160,4 +160,14 @@ class TestCubeSlice(TestCase):
         expected = 'Test if has means'
         cube.has_means = expected
         actual = CubeSlice(cube, 1).has_means
+        assert actual == expected
+
+    def test_dim_types(self):
+        '''Test only last 2 dim types are returned.'''
+        cube = Mock()
+        all_dim_types = [Mock(), Mock(), Mock()]
+        expected = all_dim_types[-2:]
+        cube.dim_types = all_dim_types
+        cube.ndim = 3
+        actual = CubeSlice(cube, 0).dim_types
         assert actual == expected
