@@ -1210,4 +1210,4 @@ class CrunchCube(DataTable):
         if self.ndim < 3:
             return [CubeSlice(self, 0)]
 
-        return [CubeSlice(self, i) for i, _ in enumerate(self.as_array())]
+        return [CubeSlice(self, i) for i, _ in enumerate(self.labels()[0])]
