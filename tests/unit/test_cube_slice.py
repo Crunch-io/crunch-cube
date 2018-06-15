@@ -116,26 +116,6 @@ class TestCubeSlice(TestCase):
         cs = CubeSlice(cube, index=1)
         assert cs.as_array() == array[1]
 
-    def test_rows_title(self):
-        '''Assert correct rows title is returned.'''
-        cube = Mock()
-        cube.ndim = 3
-        cube.dimensions = [Mock(), Mock(), Mock()]
-        cube.dimensions[1].name = '1st Dimension Name'
-        cs = CubeSlice(cube, 1)
-        assert cs.rows_title == '1st Dimension Name'
-
-    def test_inserted_rows_indices(self):
-        '''Assert correct inserted row indices are returned.
-        '''
-        fake_indices = Mock()
-        cube = Mock()
-        cube.inserted_hs_indices.return_value = [
-            Mock(), (fake_indices, Mock()), Mock(),
-        ]
-        cs = CubeSlice(cube, 1)
-        assert cs.inserted_rows_indices == fake_indices
-
     def test_cube_slice_labels(self):
         '''Test correct labels are returned for row and col dimensions.'''
         cube = Mock()

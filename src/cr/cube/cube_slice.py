@@ -2,9 +2,8 @@
 
 import numpy as np
 
-from .utils import lazyproperty
 
-
+# pylint: disable=too-few-public-methods
 class CubeSlice(object):
     '''Implementation of CubeSlice class.
 
@@ -24,6 +23,27 @@ class CubeSlice(object):
             return cube_attr[-2:]
 
         return cube_attr
+
+    def __getattribute__(self, attr):
+
+        cube_methods = [
+            'as_array', 'margin', 'population_counts', 'proportions', 'index',
+            'zscore', 'pvals', 'prune_indices', 'labels', 'inserted_hs_indices',
+        ]
+
+        class CubeCaller(object):
+            '''Class used for self._cube method calls when not defined.'''
+            def __init__(self, cube):
+                self._cube = cube
+
+            # pylint: disable=protected-access
+            def __call__(self, *args, **kwargs):
+                return self._cube._call_cube_method(attr, *args, **kwargs)
+
+        if attr in cube_methods:
+            return CubeCaller(self)
+
+        return object.__getattribute__(self, attr)
 
     def _update_args(self, kwargs):
 
@@ -46,6 +66,8 @@ class CubeSlice(object):
         if self.ndim < 3 or len(result) - 1 < self._index:
             return result
         result = result[self._index]
+        if isinstance(result, tuple):
+            return list(result)
         if not isinstance(result, np.ndarray):
             result = np.array([result])
         return result
@@ -53,9 +75,9 @@ class CubeSlice(object):
     def _call_cube_method(self, method, *args, **kwargs):
         kwargs = self._update_args(kwargs)
         result = getattr(self._cube, method)(*args, **kwargs)
+        if method in ['labels', 'inserted_hs_indices']:
+            return result[-2:]
         return self._update_result(result)
-
-    # Properties
 
     @property
     def name(self):
@@ -72,80 +94,3 @@ class CubeSlice(object):
 
         table_name = self._cube.labels()[0][self._index]
         return '%s: %s' % (title, table_name)
-
-    @property
-    def rows_title(self):
-        '''Get title of the rows dimension.
-
-        For 3D it's the 1st dimension (0th dimension of the current slice).
-        '''
-        return self._cube.dimensions[1].name
-
-    @property
-    def inserted_rows_indices(self):
-        ''' Get correct inserted rows indices for the corresponding slice.
-
-        For 3D cubes, a list of tuples is returned from the cube, when invoking
-        the inserted_hs_indices method. The job of this property is to fetch
-        the correct tuple (the one corresponding to the current slice index),
-        and return the 0th value (the one corresponding to the rows).
-        '''
-        return self._cube.inserted_hs_indices()[self._index][0]
-
-    @lazyproperty
-    def dimensions(self):
-        '''Get slice dimensions.
-
-        For 2D cubes just get their dimensions. For 3D cubes, don't get the
-        first dimension (only take slice dimensions).
-        '''
-        return self._cube.dimensions[-2:]
-
-    # API Methods
-
-    def labels(self, *args, **kwargs):
-        '''Return correct labels for slice.'''
-        return self._cube.labels(*args, **kwargs)[-2:]
-
-    def prune_indices(self, *args, **kwargs):
-        '''Extract correct row/col prune indices from 3D cube.'''
-        if self.ndim < 3:
-            return self._cube.prune_indices(*args, **kwargs)
-        return list(self._cube.prune_indices(*args, **kwargs)[self._index])
-
-    def as_array(self, *args, **kwargs):
-        '''Call cube's as_array, and return correct slice.'''
-        return self._call_cube_method('as_array', *args, **kwargs)
-
-    def proportions(self, *args, **kwargs):
-        '''Call cube's proportions, and return correct slice.'''
-        return self._call_cube_method('proportions', *args, **kwargs)
-
-    def margin(self, *args, **kwargs):
-        '''Call cube's margin, and return correct slice.'''
-        return self._call_cube_method('margin', *args, **kwargs)
-
-    def population_counts(self, *args, **kwargs):
-        '''Get population counts.'''
-        return self._call_cube_method('population_counts', *args, **kwargs)
-
-    def index(self, *args, **kwargs):
-        '''Get index.'''
-        return self._call_cube_method('index', *args, **kwargs)
-
-    def zscore(self, *args, **kwargs):
-        '''Get index.'''
-        return self._call_cube_method('zscore', *args, **kwargs)
-
-    # @lazyproperty
-    # def dim_types(self):
-    #     '''Get dimension types of the cube slice.'''
-    #     return self._cube.dim_types[-2:]
-
-    def pvals(self, *args, **kwargs):
-        '''Get pvals of the cube.'''
-        return self._call_cube_method('pvals', *args, **kwargs)
-
-    def inserted_hs_indices(self, *args, **kwargs):
-        '''Get inserted H&S indices.'''
-        return self._cube.inserted_hs_indices(*args, **kwargs)[-2:]
