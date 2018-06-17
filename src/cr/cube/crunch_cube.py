@@ -107,7 +107,7 @@ class CrunchCube(DataTable):
         # selections dimension (and subsequently purge the dimension itself).
 
         display_ind = [
-            0 if dim.is_selections else slice(None)
+            0 if dim.is_mr_selections(self.all_dimensions) else slice(None)
             for dim in self.all_dimensions
         ]
         array = array[display_ind]
@@ -309,6 +309,7 @@ class CrunchCube(DataTable):
         row_indices = self._margin_pruned_indices(
             row_margin, self._inserted_dim_inds(transforms, 0), 0
         )
+
         if row_indices.ndim > 1:
             # In case of MR, we'd have 2D prune indices
             row_indices = row_indices.all(axis=1)
@@ -909,7 +910,7 @@ class CrunchCube(DataTable):
         )
         if isinstance(arr, np.ma.core.MaskedArray):
             inflate_ind = [
-                None if d.is_selections else slice(None)
+                None if d.is_mr_selections(self.all_dimensions) else slice(None)
                 for i, d in enumerate(self.all_dimensions)
             ]
             mask = np.logical_or(

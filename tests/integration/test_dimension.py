@@ -4,6 +4,7 @@ from .fixtures import ECON_BLAME_WITH_HS
 from .fixtures import ECON_BLAME_WITH_HS_MISSING
 from .fixtures import ECON_BLAME_X_IDEOLOGY_ROW_HS
 from .fixtures import CA_WITH_NETS
+from .fixtures import LOGICAL_UNIVARIATE, LOGICAL_X_CAT
 
 from cr.cube.crunch_cube import CrunchCube
 
@@ -73,3 +74,20 @@ class TestDimension(TestCase):
         cat_dim = cube.dimensions[1]
         actual = [entry['anchor_ind'] for entry in cat_dim.hs_indices]
         assert actual == expected
+
+    def test_logical_univariate_dim(self):
+        cube = CrunchCube(LOGICAL_UNIVARIATE)
+        dimension = cube.dimensions[0]
+        expected = 'categorical'
+        actual = dimension.type
+        self.assertEqual(expected, actual)
+        self.assertFalse(dimension.is_mr_selections(cube.all_dimensions))
+
+    def test_logical_x_cat_dims(self):
+        cube = CrunchCube(LOGICAL_X_CAT)
+        logical_dim = cube.dimensions[1]
+        self.assertEqual(cube.dimensions[0].type, 'categorical')
+        self.assertEqual(logical_dim.type, 'categorical')
+
+        self.assertTrue(logical_dim.is_selections)
+        self.assertFalse(logical_dim.is_mr_selections(cube.all_dimensions))

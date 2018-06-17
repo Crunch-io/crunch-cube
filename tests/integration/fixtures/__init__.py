@@ -22,6 +22,7 @@ def _load(cube_file):
 # Bivariate Cubes
 CAT_X_CAT = _load('cat-x-cat.json')
 CAT_X_DATETIME = _load('cat-x-datetime.json')
+LOGICAL_X_CAT = _load('logical-x-cat.json')
 
 # Univariate Cubes
 UNIVARIATE_CATEGORICAL = _load('univariate-categorical.json')
@@ -29,6 +30,7 @@ VOTER_REGISTRATION = _load('voter-registration.json')
 SIMPLE_DATETIME = _load('simple-datetime.json')
 SIMPLE_TEXT = _load('simple-text.json')
 SIMPLE_CAT_ARRAY = _load('simple-cat-array.json')
+LOGICAL_UNIVARIATE = _load('logical-univariate.json')
 
 # Various other Cubes
 CAT_X_NUM_X_DATETIME = _load('cat-x-num-x-datetime.json')
