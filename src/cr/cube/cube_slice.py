@@ -54,12 +54,18 @@ class CubeSlice(object):
             return kwargs
 
         axis = kwargs.get('axis')
-        if axis is None or isinstance(axis, tuple):
-            # If no axis was passed, we don't need to update anything. If axis
-            # was a tuple, it means that the caller was expecting a 3D cube.
-            return kwargs
+        if isinstance(axis, int):
+            kwargs['axis'] += 1
 
-        kwargs['axis'] += 1
+        hs_dims_key = (
+            'transforms'
+            if 'transforms' in kwargs else
+            'include_transforms_for_dims'
+        )
+        hs_dims = kwargs.get(hs_dims_key)
+        if isinstance(hs_dims, list):
+            kwargs[hs_dims_key] = [dim + 1 for dim in hs_dims]
+
         return kwargs
 
     def _update_result(self, result):
