@@ -27,7 +27,7 @@ class TestCubeSlice(TestCase):
         cs = CubeSlice(cube, 1)
         assert cs.ndim == fake_ndim
 
-    def test_name(self):
+    def test_table_name(self):
         '''Test correct name is returned.
 
         In case of 2D return cube name. In case of 3D, return the combination
@@ -47,7 +47,8 @@ class TestCubeSlice(TestCase):
         cube.labels.return_value = fake_labels
         cube.ndim = 3
         cs = CubeSlice(cube, 1)
-        assert cs.name == 'Cube Title: Analysis Slice XY'
+        assert cs.table_name == 'Cube Title: Analysis Slice XY'
+        assert cs.name == 'Cube Title'
 
     def test_proportions(self):
         '''Test that proportions method delegetes its call to CrunchCube.

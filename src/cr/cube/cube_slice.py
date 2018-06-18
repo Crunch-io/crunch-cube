@@ -19,7 +19,7 @@ class CubeSlice(object):
     def __getattr__(self, attr):
         cube_attr = getattr(self._cube, attr)
 
-        if self._cube.ndim == 3 and hasattr(cube_attr, '__len__'):
+        if self._cube.ndim == 3 and hasattr(cube_attr, '__len__') and attr != 'name':
             return cube_attr[-2:]
 
         return cube_attr
@@ -86,17 +86,56 @@ class CubeSlice(object):
         return self._update_result(result)
 
     @property
-    def name(self):
+    def table_name(self):
         '''Get slice name.
 
         In case of 2D return cube name. In case of 3D, return the combination
         of the cube name with the label of the corresponding slice
         (nth label of the 0th dimension).
         '''
-        title = self._cube.name
-
         if self.ndim < 3:
-            return title
+            return None
 
+        title = self._cube.name
         table_name = self._cube.labels()[0][self._index]
         return '%s: %s' % (title, table_name)
+
+    @property
+    def row_dim_ind(self):
+        """
+        Index of the row dimension in the cube
+        :rtype: int
+        """
+        return 0
+
+    @property
+    def col_dim_ind(self):
+        """
+        Index of the column dimension in the cube
+        :rtype: int
+        """
+        return 1
+
+    @property
+    def has_ca(self):
+        return 'categorical_array' in self.dim_types
+
+    @property
+    def mr_dim_ind(self):
+        mr_dim_ind = self._cube.mr_dim_ind
+        if self.ndim == 3:
+            if isinstance(mr_dim_ind, int):
+                return mr_dim_ind - 1
+            elif isinstance(mr_dim_ind, tuple):
+                return tuple([i - 1 for i in mr_dim_ind])
+
+        return mr_dim_ind
+
+    @property
+    def ca_main_axis(self):
+        '''For univariate CA, the main axis is the categorical axis'''
+        ca_ind = self.dim_types.index('categorical_array')
+        if ca_ind is not None:
+            return 1 - ca_ind
+        else:
+            return None
