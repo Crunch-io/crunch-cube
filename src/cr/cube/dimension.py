@@ -307,3 +307,17 @@ class Dimension(object):
         if category_ids == [1, 0, -1]:
             return True
         return False
+
+    def is_mr_selections(self, others):
+        '''Check whether a selections dimension has a corresponding items dim
+
+        Sometimes selections are used to in conjunction with another dim,
+        that knows where to find them (following it). Other times, they behave
+        as a normal categorical dimension. This checks against the aliases of
+        all other dims to see which is the case.
+        '''
+        if self.is_selections:
+            for dim in others:
+                if dim.alias == self.alias and not dim.is_selections:
+                    return True
+        return False
