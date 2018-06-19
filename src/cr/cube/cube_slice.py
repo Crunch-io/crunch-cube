@@ -149,10 +149,9 @@ class CubeSlice(object):
         '''Get dimension types of the cube slice.'''
         return self._cube.dim_types[-2:]
 
-    @lazyproperty
-    def pvals(self):
+    def pvals(self, *args, **kwargs):
         '''Get pvals of the cube.'''
-        return self._cube.pvals
+        return self._call_cube_method('pvals', *args, **kwargs)
 
     def inserted_hs_indices(self, *args, **kwargs):
         '''Get inserted H&S indices.'''
