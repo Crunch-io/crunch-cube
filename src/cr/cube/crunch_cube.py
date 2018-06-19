@@ -1131,8 +1131,11 @@ class CrunchCube(DataTable):
         '''Get cube index measurement.'''
         return Index(self, weighted, prune).data
 
-    def _calculate_std_res(self, counts, total, colsum, rowsum):
-        if self.has_mr or self.ca_dim_ind is not None:
+    def _calculate_std_res(self, counts, total, colsum, rowsum, slice_):
+        dim_types = slice_.dim_types
+        has_mr_or_ca = 'categorical_array' in dim_types or 'multiple_response' in dim_types
+        # if self.has_mr or self.ca_dim_ind is not None:
+        if has_mr_or_ca:
             if not self.is_double_mr and (self.mr_dim_ind == 0 or self.mr_dim_ind == 1 and self.ndim == 3):
                 total = total[:, np.newaxis]
                 rowsum = rowsum[:, np.newaxis]
@@ -1161,7 +1164,7 @@ class CrunchCube(DataTable):
             total = slice_.margin(weighted=weighted, prune=prune)
             colsum = slice_.margin(axis=0, weighted=weighted, prune=prune)
             rowsum = slice_.margin(axis=1, weighted=weighted, prune=prune)
-            std_res = self._calculate_std_res(counts, total, colsum, rowsum)
+            std_res = self._calculate_std_res(counts, total, colsum, rowsum, slice_)
             res.append(std_res)
 
         if len(res) == 1:
