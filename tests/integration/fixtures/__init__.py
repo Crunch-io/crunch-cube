@@ -129,3 +129,10 @@ CA_CAT_X_MR_X_CA_SUBVAR_HS = _load('ca-cat-x-mr-x-ca-subvar-hs.json')
 CA_X_MR_HS = _load('ca-x-mr-hs.json')
 MR_X_CAT_HS = _load('mr-x-cat-hs.json')
 CAT_X_MR_HS = _load('cat-x-mr-hs.json')
+CA_X_MR_SIG_TESTING_SUBTOTALS = _load('ca-x-mr-sig-testing-subtotals.json')
+STARTTIME_X_NORDIC_COUNTRIES_X_FOOD_GROOPS = _load(
+    'starttime-x-nordic-countries-x-food-groops.json',
+)
+FOOD_GROOPS_X_STARTTIME_X_NORDIC_COUNTRIES = _load(
+    'food-groops-x-starttime-x-nordic-countries.json',
+)

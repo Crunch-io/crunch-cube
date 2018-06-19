@@ -1,0 +1,1654 @@
+{
+    "value": {
+        "query": {
+            "measures": {
+                "count": {
+                    "function": "cube_count",
+                    "args": []
+                }
+            },
+            "dimensions": [
+                {
+                    "each": 1
+                },
+                {
+                    "variable": "0000d1"
+                },
+                {
+                    "each": 3
+                },
+                {
+                    "function": "as_selected",
+                    "args": [
+                        {
+                            "variable": "0000dc"
+                        }
+                    ]
+                }
+            ],
+            "weight": "http://127.0.0.1:8080/datasets/230d454e1b5942a99f870fdb0a31c8ca/variables/0000d0/"
+        },
+        "query_environment": {
+            "filter": []
+        },
+        "result": {
+            "dimensions": [
+                {
+                    "derived": true,
+                    "references": {
+                        "description": "In your opinion, each of these famous Bolshevik's facial hair is...",
+                        "subreferences": [
+                            {
+                                "alias": "stalin",
+                                "name": "იოსებ სტალინი (Stalin)",
+                                "description": "cabatt_1"
+                            },
+                            {
+                                "alias": "trotsky",
+                                "name": "Лев Троцкий (Trotsky)",
+                                "description": "cabatt_6"
+                            },
+                            {
+                                "alias": "kalinin",
+                                "name": "Михаи́л Ива́нович Кали́нин (Kalinin)",
+                                "description": "cabatt_3"
+                            },
+                            {
+                                "alias": "lenin",
+                                "name": "Владимир Ленин (Lenin)",
+                                "description": "cabatt_7"
+                            }
+                        ],
+                        "notes": "A categorical array variable where the missing categories are interspersed throughout the non-missing categories",
+                        "alias": "bolshevik_hair",
+                        "is_dichotomous": false,
+                        "name": "Bolshevik facial hair"
+                    },
+                    "type": {
+                        "subtype": {
+                            "class": "variable"
+                        },
+                        "elements": [
+                            {
+                                "id": 1,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "stalin",
+                                        "name": "იოსებ სტალინი (Stalin)",
+                                        "description": "cabatt_1"
+                                    },
+                                    "id": "0007",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 32766,
+                                                "selected": false,
+                                                "id": 32766,
+                                                "missing": true,
+                                                "name": "skipped"
+                                            },
+                                            {
+                                                "numeric_value": 32767,
+                                                "selected": false,
+                                                "id": 32767,
+                                                "missing": true,
+                                                "name": "not asked"
+                                            },
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": false,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Too much"
+                                            },
+                                            {
+                                                "numeric_value": 5,
+                                                "selected": false,
+                                                "id": 5,
+                                                "missing": false,
+                                                "name": "Too little"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "selected": false,
+                                                "id": 0,
+                                                "missing": false,
+                                                "name": "The right amount"
+                                            },
+                                            {
+                                                "numeric_value": 4,
+                                                "selected": false,
+                                                "id": 4,
+                                                "missing": false,
+                                                "name": "Not sure"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "selected": false,
+                                                "id": -1,
+                                                "missing": true,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 2,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "trotsky",
+                                        "name": "Лев Троцкий (Trotsky)",
+                                        "description": "cabatt_6"
+                                    },
+                                    "id": "0008",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 32766,
+                                                "selected": false,
+                                                "id": 32766,
+                                                "missing": true,
+                                                "name": "skipped"
+                                            },
+                                            {
+                                                "numeric_value": 32767,
+                                                "selected": false,
+                                                "id": 32767,
+                                                "missing": true,
+                                                "name": "not asked"
+                                            },
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": false,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Too much"
+                                            },
+                                            {
+                                                "numeric_value": 5,
+                                                "selected": false,
+                                                "id": 5,
+                                                "missing": false,
+                                                "name": "Too little"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "selected": false,
+                                                "id": 0,
+                                                "missing": false,
+                                                "name": "The right amount"
+                                            },
+                                            {
+                                                "numeric_value": 4,
+                                                "selected": false,
+                                                "id": 4,
+                                                "missing": false,
+                                                "name": "Not sure"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "selected": false,
+                                                "id": -1,
+                                                "missing": true,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 3,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "kalinin",
+                                        "name": "Михаи́л Ива́нович Кали́нин (Kalinin)",
+                                        "description": "cabatt_3"
+                                    },
+                                    "id": "0009",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 32766,
+                                                "selected": false,
+                                                "id": 32766,
+                                                "missing": true,
+                                                "name": "skipped"
+                                            },
+                                            {
+                                                "numeric_value": 32767,
+                                                "selected": false,
+                                                "id": 32767,
+                                                "missing": true,
+                                                "name": "not asked"
+                                            },
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": false,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Too much"
+                                            },
+                                            {
+                                                "numeric_value": 5,
+                                                "selected": false,
+                                                "id": 5,
+                                                "missing": false,
+                                                "name": "Too little"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "selected": false,
+                                                "id": 0,
+                                                "missing": false,
+                                                "name": "The right amount"
+                                            },
+                                            {
+                                                "numeric_value": 4,
+                                                "selected": false,
+                                                "id": 4,
+                                                "missing": false,
+                                                "name": "Not sure"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "selected": false,
+                                                "id": -1,
+                                                "missing": true,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 4,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "lenin",
+                                        "name": "Владимир Ленин (Lenin)",
+                                        "description": "cabatt_7"
+                                    },
+                                    "id": "000a",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 32766,
+                                                "selected": false,
+                                                "id": 32766,
+                                                "missing": true,
+                                                "name": "skipped"
+                                            },
+                                            {
+                                                "numeric_value": 32767,
+                                                "selected": false,
+                                                "id": 32767,
+                                                "missing": true,
+                                                "name": "not asked"
+                                            },
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": false,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Too much"
+                                            },
+                                            {
+                                                "numeric_value": 5,
+                                                "selected": false,
+                                                "id": 5,
+                                                "missing": false,
+                                                "name": "Too little"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "selected": false,
+                                                "id": 0,
+                                                "missing": false,
+                                                "name": "The right amount"
+                                            },
+                                            {
+                                                "numeric_value": 4,
+                                                "selected": false,
+                                                "id": 4,
+                                                "missing": false,
+                                                "name": "Not sure"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "selected": false,
+                                                "id": -1,
+                                                "missing": true,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            }
+                        ],
+                        "class": "enum"
+                    }
+                },
+                {
+                    "references": {
+                        "description": "In your opinion, each of these famous Bolshevik's facial hair is...",
+                        "subreferences": [
+                            {
+                                "alias": "stalin",
+                                "name": "იოსებ სტალინი (Stalin)",
+                                "description": "cabatt_1"
+                            },
+                            {
+                                "alias": "trotsky",
+                                "name": "Лев Троцкий (Trotsky)",
+                                "description": "cabatt_6"
+                            },
+                            {
+                                "alias": "kalinin",
+                                "name": "Михаи́л Ива́нович Кали́нин (Kalinin)",
+                                "description": "cabatt_3"
+                            },
+                            {
+                                "alias": "lenin",
+                                "name": "Владимир Ленин (Lenin)",
+                                "description": "cabatt_7"
+                            }
+                        ],
+                        "notes": "A categorical array variable where the missing categories are interspersed throughout the non-missing categories",
+                        "alias": "bolshevik_hair",
+                        "is_dichotomous": false,
+                        "name": "Bolshevik facial hair"
+                    },
+                    "derived": false,
+                    "type": {
+                        "ordinal": false,
+                        "subvariables": [
+                            "0007",
+                            "0008",
+                            "0009",
+                            "000a"
+                        ],
+                        "class": "categorical",
+                        "categories": [
+                            {
+                                "numeric_value": 32766,
+                                "selected": false,
+                                "id": 32766,
+                                "missing": true,
+                                "name": "skipped"
+                            },
+                            {
+                                "numeric_value": 32767,
+                                "selected": false,
+                                "id": 32767,
+                                "missing": true,
+                                "name": "not asked"
+                            },
+                            {
+                                "numeric_value": 1,
+                                "selected": false,
+                                "id": 1,
+                                "missing": false,
+                                "name": "Too much"
+                            },
+                            {
+                                "numeric_value": 5,
+                                "selected": false,
+                                "id": 5,
+                                "missing": false,
+                                "name": "Too little"
+                            },
+                            {
+                                "numeric_value": 0,
+                                "selected": false,
+                                "id": 0,
+                                "missing": false,
+                                "name": "The right amount"
+                            },
+                            {
+                                "numeric_value": 4,
+                                "selected": false,
+                                "id": 4,
+                                "missing": false,
+                                "name": "Not sure"
+                            },
+                            {
+                                "numeric_value": null,
+                                "selected": false,
+                                "id": -1,
+                                "missing": true,
+                                "name": "No Data"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "derived": true,
+                    "references": {
+                        "uniform_basis": false,
+                        "description": "Which of the following Nordic countries have you visited? (select all that apply)",
+                        "subreferences": [
+                            {
+                                "alias": "dk",
+                                "name": "Denmark",
+                                "description": "milstat_1"
+                            },
+                            {
+                                "alias": "fi",
+                                "name": "Finland",
+                                "description": "milstat_2"
+                            },
+                            {
+                                "alias": "is",
+                                "name": "Iceland",
+                                "description": "milstat_3"
+                            },
+                            {
+                                "alias": "no",
+                                "name": "Norway",
+                                "description": "milstat_4"
+                            },
+                            {
+                                "alias": "se",
+                                "name": "Sweden",
+                                "description": "milstat_5"
+                            }
+                        ],
+                        "notes": "A multiple response variable",
+                        "alias": "nordics",
+                        "is_dichotomous": true,
+                        "name": "Nordic countries"
+                    },
+                    "type": {
+                        "subtype": {
+                            "class": "variable"
+                        },
+                        "elements": [
+                            {
+                                "id": 1,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "dk",
+                                        "name": "Denmark",
+                                        "description": "milstat_1"
+                                    },
+                                    "id": "00c0",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Other"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 2,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "fi",
+                                        "name": "Finland",
+                                        "description": "milstat_2"
+                                    },
+                                    "id": "00c1",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Other"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 3,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "is",
+                                        "name": "Iceland",
+                                        "description": "milstat_3"
+                                    },
+                                    "id": "00c2",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Other"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 4,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "no",
+                                        "name": "Norway",
+                                        "description": "milstat_4"
+                                    },
+                                    "id": "00c3",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Other"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 5,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "se",
+                                        "name": "Sweden",
+                                        "description": "milstat_5"
+                                    },
+                                    "id": "00c4",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Other"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            }
+                        ],
+                        "class": "enum"
+                    }
+                },
+                {
+                    "references": {
+                        "uniform_basis": false,
+                        "description": "Which of the following Nordic countries have you visited? (select all that apply)",
+                        "subreferences": [
+                            {
+                                "alias": "dk",
+                                "name": "Denmark",
+                                "description": "milstat_1"
+                            },
+                            {
+                                "alias": "fi",
+                                "name": "Finland",
+                                "description": "milstat_2"
+                            },
+                            {
+                                "alias": "is",
+                                "name": "Iceland",
+                                "description": "milstat_3"
+                            },
+                            {
+                                "alias": "no",
+                                "name": "Norway",
+                                "description": "milstat_4"
+                            },
+                            {
+                                "alias": "se",
+                                "name": "Sweden",
+                                "description": "milstat_5"
+                            }
+                        ],
+                        "notes": "A multiple response variable",
+                        "alias": "nordics",
+                        "is_dichotomous": true,
+                        "name": "Nordic countries"
+                    },
+                    "derived": true,
+                    "type": {
+                        "ordinal": false,
+                        "subvariables": [
+                            "00c0",
+                            "00c1",
+                            "00c2",
+                            "00c3",
+                            "00c4"
+                        ],
+                        "class": "categorical",
+                        "categories": [
+                            {
+                                "numeric_value": 1,
+                                "selected": true,
+                                "id": 1,
+                                "missing": false,
+                                "name": "Selected"
+                            },
+                            {
+                                "numeric_value": 0,
+                                "missing": false,
+                                "id": 0,
+                                "name": "Other"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": true,
+                                "id": -1,
+                                "name": "No Data"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "missing": 2,
+            "measures": {
+                "count": {
+                    "data": [
+                        1.659797718191651,
+                        0,
+                        13.927027464700437,
+                        2.963445747163676,
+                        0.869333895168885,
+                        11.754045540559526,
+                        3.552852970137745,
+                        0.869333895168885,
+                        11.164638317585457,
+                        6.522771887788383,
+                        0.869333895168885,
+                        8.194719399934819,
+                        4.361939757602259,
+                        0.869333895168885,
+                        10.355551530120945,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        13.445092962525564,
+                        98.51361829131652,
+                        637.3572657306645,
+                        61.275457054890126,
+                        90.35759434147853,
+                        597.6829255881382,
+                        81.71709066359911,
+                        82.08620713096128,
+                        585.5126791899467,
+                        289.0021377680909,
+                        55.15056051391894,
+                        405.16327870249756,
+                        365.24289172374347,
+                        60.982614017616,
+                        323.0904712431483,
+                        17.066620933144325,
+                        21.09527796120991,
+                        85.31096931924594,
+                        7.593430814453088,
+                        28.822862878454842,
+                        87.05657452069224,
+                        9.538021712865413,
+                        26.933633593434923,
+                        87.00121290729983,
+                        26.869562322451312,
+                        25.10964903598577,
+                        71.49365685516312,
+                        71.11920392254912,
+                        14.578081330495133,
+                        37.77558296055595,
+                        8.438777132732724,
+                        53.10359172524768,
+                        375.38120004667707,
+                        40.73587494803321,
+                        46.79997140874353,
+                        349.3877225478807,
+                        77.12994166531733,
+                        43.310812035968866,
+                        316.482815203371,
+                        201.4183299554834,
+                        22.53621688139937,
+                        212.96902206777443,
+                        170.46821242912122,
+                        39.00553890375042,
+                        227.44981757178556,
+                        0,
+                        57.360052174494655,
+                        279.34070853985054,
+                        29.486604393153648,
+                        51.93148586127111,
+                        255.28267045992027,
+                        38.88088658284227,
+                        50.32003480738744,
+                        247.49983932411533,
+                        96.5965694508612,
+                        41.195851006618,
+                        198.90834025686587,
+                        191.9818406812264,
+                        30.831581606717517,
+                        113.88733842640119,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        9.920292975538693,
+                        19.74004833310643,
+                        100.38655809368639,
+                        15.40684008758124,
+                        18.356963906877063,
+                        96.2830954078732,
+                        16.962754226054024,
+                        18.0623538012876,
+                        95.02179137498986,
+                        38.20761072334307,
+                        16.492883808572707,
+                        75.34640487041572,
+                        62.32082397313815,
+                        11.273595228015061,
+                        56.4524802011783,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        9.875083279498359,
+                        14.319235396489171,
+                        59.14645145151023,
+                        11.267505643523467,
+                        14.812519175946878,
+                        57.260745308027424,
+                        4.147696655206725,
+                        15.871578469453828,
+                        63.321495002837224,
+                        29.529124425502367,
+                        11.39954242979819,
+                        42.41210327219723,
+                        40.17030432195862,
+                        6.024379112620298,
+                        37.14608669291886,
+                        8.266522167664407,
+                        92.11242893042422,
+                        583.8862809238367,
+                        44.763354231724435,
+                        89.21595852326861,
+                        550.2859192669326,
+                        72.9724640027403,
+                        80.86415305482413,
+                        530.428614964361,
+                        262.72583884051346,
+                        50.84392203261809,
+                        370.6954711487943,
+                        344.5097232551331,
+                        53.42968342780498,
+                        286.3258253389879,
+                        11.679056428723918,
+                        65.90427938686655,
+                        430.6128512242176,
+                        48.45282041807201,
+                        61.50988597519088,
+                        398.23348064654493,
+                        97.98310800921364,
+                        51.66303340938143,
+                        358.5500456212127,
+                        230.19565278810637,
+                        35.94055773377423,
+                        242.05997651792657,
+                        189.12089645577117,
+                        61.03215810818864,
+                        258.0431324758475,
+                        0.869333895168885,
+                        37.99654810538245,
+                        217.28502940788795,
+                        22.164292576792594,
+                        34.8859208038335,
+                        199.10069802781322,
+                        18.752770701547266,
+                        37.05890272797441,
+                        200.3392379789176,
+                        59.751144607209866,
+                        30.18470532832776,
+                        166.21506147290162,
+                        167.05234050824112,
+                        14.507333877118974,
+                        74.5912370230791,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        2.4293307800758797,
+                        5.732356175082014,
+                        15.67619029347508,
+                        1.49850936604462,
+                        5.732356175082014,
+                        16.607011707506338,
+                        1.17914212726958,
+                        4.553214047812434,
+                        18.10552107355096,
+                        6.303000520589567,
+                        3.668324935906694,
+                        13.866551792136713,
+                        12.427894454653327,
+                        3.2431733664449,
+                        8.166809427534748,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        8.395734806668942,
+                        15.49522981702328,
+                        52.21265082377055,
+                        9.637144240494694,
+                        13.52990572518831,
+                        52.93656548177978,
+                        9.447187152559426,
+                        16.42334808481796,
+                        50.2330802100854,
+                        20.272578835516498,
+                        15.51736196188453,
+                        40.31367465006175,
+                        38.29274971895881,
+                        11.782971535099524,
+                        26.02789419340443,
+                        19.87900718092169,
+                        101.46311656983261,
+                        690.602976143096,
+                        56.21632062849918,
+                        101.0792680649693,
+                        654.6495112003818,
+                        83.05359481650004,
+                        92.0948878952942,
+                        636.7966171820557,
+                        305.19337289476266,
+                        61.773592255213394,
+                        444.97813474387436,
+                        409.640858024675,
+                        58.41468935013781,
+                        343.88955251903775,
+                        9.90621597892775,
+                        55.027861029619395,
+                        373.3946593523809,
+                        47.52064993898394,
+                        49.79541538031783,
+                        341.01267104162616,
+                        87.61327855690476,
+                        44.54741740018366,
+                        306.16804040383937,
+                        195.20194217889954,
+                        28.533287182771026,
+                        214.59350699925687,
+                        161.14789827714273,
+                        46.10505266453402,
+                        231.07578541925085,
+                        0,
+                        52.35397656071153,
+                        259.4306944884164,
+                        27.182188783671315,
+                        48.64430303955949,
+                        235.95817922589714,
+                        29.525590941528115,
+                        45.90115403481312,
+                        236.35792607278665,
+                        93.43847695490709,
+                        35.369044997315335,
+                        182.97714909690552,
+                        181.6646880388122,
+                        26.721262837531704,
+                        103.3987201727841,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        2.4860246896254097,
+                        4.1919280471523495,
+                        29.297598826161064,
+                        3.357522765993547,
+                        4.402761913140311,
+                        28.21526688380496,
+                        2.4848812365410673,
+                        4.746845369251953,
+                        28.743824957145797,
+                        9.793149570869987,
+                        4.396063724506877,
+                        21.786338267561952,
+                        19.746702564698946,
+                        2.883692510295364,
+                        13.345156487944505,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        9.780301222256597,
+                        6.153399341560185,
+                        44.099985461212846,
+                        3.908928214130318,
+                        9.760287965417312,
+                        46.364469845482006,
+                        10.091470641019058,
+                        7.705742414524842,
+                        42.236472969485725,
+                        15.859766758228963,
+                        9.204251780569463,
+                        34.96966748623121,
+                        29.741505465944673,
+                        3.606888623857127,
+                        26.685291935227838,
+                        16.447990342180745,
+                        104.78007971100622,
+                        665.3007074511082,
+                        56.40116715340553,
+                        98.84469271489566,
+                        631.282917635994,
+                        69.50198381183141,
+                        90.48269174854732,
+                        626.5441019439165,
+                        302.81930772948436,
+                        57.26369754735413,
+                        426.4457722274572,
+                        393.9691963898269,
+                        65.63590154057822,
+                        326.92367957389064,
+                        11.895972492531513,
+                        68.1512334899437,
+                        387.5826115328599,
+                        46.42126283371033,
+                        59.426027891654485,
+                        361.7825267899702,
+                        94.53832317617474,
+                        56.95082768652979,
+                        316.1406666526304,
+                        199.684866385115,
+                        39.120667203427324,
+                        228.8242839267923,
+                        179.8472110229703,
+                        58.188413132531565,
+                        229.59419335983276,
+                        0,
+                        46.79589956260631,
+                        265.03626782979677,
+                        31.96593199045401,
+                        46.34747790000911,
+                        233.5187575019399,
+                        34.202134729195656,
+                        43.633914244067455,
+                        233.99611841913986,
+                        92.25228094097697,
+                        34.87693107723318,
+                        184.70295537419278,
+                        179.8694730708013,
+                        15.952253946485666,
+                        116.01044037511599,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                    ],
+                    "n_missing": 2,
+                    "metadata": {
+                        "references": {},
+                        "derived": true,
+                        "type": {
+                            "integer": false,
+                            "missing_rules": {},
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "class": "numeric"
+                        }
+                    }
+                }
+            },
+            "element": "crunch:cube",
+            "counts": [
+                2,
+                0,
+                11,
+                2,
+                1,
+                10,
+                2,
+                1,
+                10,
+                6,
+                1,
+                6,
+                3,
+                1,
+                9,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                11,
+                103,
+                727,
+                66,
+                98,
+                677,
+                87,
+                91,
+                663,
+                327,
+                55,
+                459,
+                411,
+                62,
+                368,
+                14,
+                21,
+                77,
+                12,
+                25,
+                75,
+                8,
+                25,
+                79,
+                26,
+                23,
+                63,
+                63,
+                12,
+                37,
+                6,
+                55,
+                365,
+                38,
+                49,
+                339,
+                72,
+                47,
+                307,
+                198,
+                24,
+                204,
+                168,
+                41,
+                217,
+                0,
+                43,
+                227,
+                25,
+                38,
+                207,
+                31,
+                38,
+                201,
+                80,
+                31,
+                159,
+                150,
+                22,
+                98,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                8,
+                20,
+                94,
+                13,
+                20,
+                89,
+                13,
+                18,
+                91,
+                37,
+                17,
+                68,
+                61,
+                11,
+                50,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                8,
+                13,
+                47,
+                10,
+                14,
+                44,
+                3,
+                15,
+                50,
+                19,
+                10,
+                39,
+                36,
+                7,
+                25,
+                7,
+                103,
+                675,
+                50,
+                98,
+                637,
+                80,
+                94,
+                611,
+                301,
+                57,
+                427,
+                396,
+                59,
+                330,
+                9,
+                60,
+                418,
+                50,
+                55,
+                382,
+                88,
+                50,
+                349,
+                226,
+                31,
+                230,
+                180,
+                50,
+                257,
+                1,
+                26,
+                173,
+                20,
+                24,
+                156,
+                16,
+                25,
+                159,
+                54,
+                19,
+                127,
+                122,
+                11,
+                67,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                2,
+                6,
+                11,
+                1,
+                6,
+                12,
+                1,
+                5,
+                13,
+                5,
+                4,
+                10,
+                10,
+                3,
+                6,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                10,
+                13,
+                44,
+                9,
+                15,
+                43,
+                10,
+                14,
+                43,
+                18,
+                12,
+                37,
+                32,
+                11,
+                24,
+                15,
+                113,
+                766,
+                61,
+                110,
+                723,
+                87,
+                106,
+                701,
+                337,
+                68,
+                489,
+                450,
+                64,
+                380,
+                6,
+                57,
+                374,
+                51,
+                49,
+                337,
+                79,
+                48,
+                310,
+                198,
+                28,
+                211,
+                165,
+                44,
+                228,
+                0,
+                33,
+                212,
+                21,
+                31,
+                193,
+                23,
+                29,
+                193,
+                79,
+                22,
+                144,
+                138,
+                16,
+                91,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                3,
+                5,
+                28,
+                4,
+                5,
+                27,
+                4,
+                5,
+                27,
+                12,
+                5,
+                19,
+                15,
+                4,
+                17,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                7,
+                6,
+                37,
+                6,
+                10,
+                34,
+                7,
+                8,
+                35,
+                12,
+                9,
+                29,
+                27,
+                4,
+                19,
+                13,
+                117,
+                743,
+                64,
+                110,
+                699,
+                75,
+                107,
+                691,
+                334,
+                65,
+                474,
+                442,
+                68,
+                363,
+                10,
+                61,
+                381,
+                43,
+                54,
+                355,
+                84,
+                52,
+                316,
+                198,
+                32,
+                222,
+                177,
+                49,
+                226,
+                0,
+                33,
+                218,
+                26,
+                32,
+                193,
+                30,
+                30,
+                191,
+                81,
+                23,
+                147,
+                134,
+                13,
+                104,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "n": 1662
+        }
+    },
+    "meta": {
+        "subtitle": "row %, sig testing",
+        "name": "Bolshevik facial hair row %, sig testing",
+        "weight": "weight",
+        "title": "Bolshevik facial hair",
+        "filters": [],
+        "table_title": "",
+        "display_settings": {
+            "percentageDirection": {
+                "value": "rowPct"
+            },
+            "showEmpty": {
+                "value": false
+            },
+            "vizType": {
+                "value": "table"
+            },
+            "countsOrPercents": {
+                "value": "percent"
+            },
+            "decimalPlaces": {
+                "value": 1
+            },
+            "populationMagnitude": {
+                "value": 3
+            },
+            "showSignif": {
+                "value": true
+            },
+            "currentTab": {
+                "value": 0
+            },
+            "uiView": {
+                "value": "app.datasets.analyze"
+            },
+            "showNotes": {
+                "value": false
+            }
+        }
+    }
+}
