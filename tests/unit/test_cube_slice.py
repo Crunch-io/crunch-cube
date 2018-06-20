@@ -20,12 +20,9 @@ class TestCubeSlice(TestCase):
 
     def test_ndim_invokes_ndim_from_cube(self):
         '''Test if ndim calls corresponding cube's method.'''
-        fake_ndim = Mock()
-        cube = Mock()
-        cube.ndim = fake_ndim
-
+        cube = Mock(ndim=3)
         cs = CubeSlice(cube, 1)
-        assert cs.ndim == fake_ndim
+        assert cs.ndim == 3
 
     def test_table_name(self):
         '''Test correct name is returned.

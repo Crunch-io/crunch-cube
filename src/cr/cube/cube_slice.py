@@ -19,31 +19,30 @@ class CubeSlice(object):
     def __getattr__(self, attr):
         cube_attr = getattr(self._cube, attr)
 
-        if self._cube.ndim == 3 and hasattr(cube_attr, '__len__') and attr != 'name':
-            return cube_attr[-2:]
-
-        return cube_attr
-
-    def __getattribute__(self, attr):
-
-        cube_methods = [
-            'as_array', 'margin', 'population_counts', 'proportions', 'index',
-            'zscore', 'pvals', 'prune_indices', 'labels', 'inserted_hs_indices',
-        ]
-
         class CubeCaller(object):
             '''Class used for self._cube method calls when not defined.'''
-            def __init__(self, cube):
-                self._cube = cube
+            def __init__(self, cube_slice):
+                self._cube_slice = cube_slice
 
             # pylint: disable=protected-access
             def __call__(self, *args, **kwargs):
-                return self._cube._call_cube_method(attr, *args, **kwargs)
+                return self._cube_slice._call_cube_method(attr, *args, **kwargs)
 
-        if attr in cube_methods:
+        # API Method calls
+        if callable(cube_attr):
             return CubeCaller(self)
 
-        return object.__getattribute__(self, attr)
+        # API properties
+        get_only_last_two = (
+            self._cube.ndim == 3 and
+            hasattr(cube_attr, '__len__') and
+            attr != 'name'
+        )
+        if get_only_last_two:
+            return cube_attr[-2:]
+
+        # If not defined on self._cube, return CubeSlice properties
+        return cube_attr
 
     def _update_args(self, kwargs):
 
