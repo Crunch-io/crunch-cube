@@ -44,10 +44,28 @@ class CubeSlice(object):
             # pass them to the underlying cube (which is the slice).
             return kwargs
 
+        # Handling API methods that include 'axis' parameter
+
         axis = kwargs.get('axis')
+        # Expected usage of the 'axis' parameter from CubeSlice is 0, 1, or
+        # None. CrunchCube handles all other logic. The only 'smart' thing
+        # about the handling here, is that the axes are increased for 3D cubes.
+        # This way the 3Dness is hidden from the user and he still sees 2D
+        # crosstabs, with col and row axes (0 and 1), which are transformed to
+        # corresponding numbers in case of 3D cubes (namely 1 and 2). In the
+        # case of None, we need to analyze across all valid dimensions, and the
+        # CrunchCube takes care of that (no need to update axis if it's None).
         if isinstance(axis, int):
             kwargs['axis'] += 1
 
+        # Handling API methods that include H&S parameter
+
+        # For most cr.cube methods, we use the 'include_transforms_for_dims'
+        # parameter name. For some, namely the prune_indices, we use the
+        # 'transforms'. These are parameters that tell to the cr.cube "which
+        # dimensions to include the H&S for". The only point of this parameter
+        # (from the perspective of the cr.exporter) is to exclude the 0th
+        # dimension's H&S in the case of 3D cubes.
         hs_dims_key = (
             'transforms'
             if 'transforms' in kwargs else
@@ -55,6 +73,11 @@ class CubeSlice(object):
         )
         hs_dims = kwargs.get(hs_dims_key)
         if isinstance(hs_dims, list):
+            # The point of this update is to keep the 2D illusion fot the user.
+            # If a user sees a 2D slice, he still needs to be able to address
+            # both dimensions (for which he wants the H&S included) as 0 and 1.
+            # Since these are offset by a 0 dimension in a 3D case, inside the
+            # cr.cube, we need to increase the indexes of the required dims.
             kwargs[hs_dims_key] = [dim + 1 for dim in hs_dims]
 
         return kwargs
