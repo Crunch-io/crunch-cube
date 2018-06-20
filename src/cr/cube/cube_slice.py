@@ -13,6 +13,9 @@ class CubeSlice(object):
     achieved by slicing.
     '''
 
+    row_dim_ind = 0
+    col_dim_ind = 1
+
     def __init__(self, cube, index):
         self._cube = cube
         self._index = index
@@ -87,8 +90,8 @@ class CubeSlice(object):
             return result
         result = result[self._index]
         if isinstance(result, tuple):
-            return list(result)
-        if not isinstance(result, np.ndarray):
+            return np.array(result)
+        elif not isinstance(result, np.ndarray):
             result = np.array([result])
         return result
 
@@ -115,33 +118,25 @@ class CubeSlice(object):
         return '%s: %s' % (title, table_name)
 
     @property
-    def row_dim_ind(self):
-        """
-        Index of the row dimension in the cube
-        :rtype: int
-        """
-        return 0
-
-    @property
-    def col_dim_ind(self):
-        """
-        Index of the column dimension in the cube
-        :rtype: int
-        """
-        return 1
-
-    @property
     def has_ca(self):
+        '''Check if the cube slice has the CA dimension.
+
+        This is used to distinguish between slices that are considered 'normal'
+        (like CAT x CAT), that might be a part of te 3D cube that has 0th dim
+        as the CA items (subvars). In such a case, we still need to process
+        the slices 'normally', and not address the CA items constraints.
+        '''
         return 'categorical_array' in self.dim_types
 
     @property
     def mr_dim_ind(self):
+        '''Get the correct index of the MR dimension in the cube slice.'''
         mr_dim_ind = self._cube.mr_dim_ind
         if self.ndim == 3:
             if isinstance(mr_dim_ind, int):
                 return mr_dim_ind - 1
             elif isinstance(mr_dim_ind, tuple):
-                return tuple([i - 1 for i in mr_dim_ind])
+                return tuple(i - 1 for i in mr_dim_ind)
 
         return mr_dim_ind
 

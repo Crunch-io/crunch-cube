@@ -1,7 +1,7 @@
 '''Unit tests for the CubeSlice class.'''
 from unittest import TestCase
 from mock import Mock
-from mock import patch
+import numpy as np
 
 from cr.cube.cube_slice import CubeSlice
 
@@ -131,7 +131,9 @@ class TestCubeSlice(TestCase):
         cube.prune_indices.return_value = all_prune_inds
         cs = CubeSlice(cube, 1)
         # Assert extracted indices tuple is converted to list
-        assert cs.prune_indices() == [1, 2]
+        actual = cs.prune_indices()
+        expected = np.array([1, 2])
+        np.testing.assert_array_equal(actual, expected)
 
     def test_has_means(self):
         '''Test that has_means invokes same method on CrunchCube.'''
