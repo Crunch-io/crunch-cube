@@ -1,5 +1,6 @@
 '''Home of the CubeSlice class.'''
 
+from functools import partial
 import numpy as np
 
 
@@ -19,18 +20,9 @@ class CubeSlice(object):
     def __getattr__(self, attr):
         cube_attr = getattr(self._cube, attr)
 
-        class CubeCaller(object):
-            '''Class used for self._cube method calls when not defined.'''
-            def __init__(self, cube_slice):
-                self._cube_slice = cube_slice
-
-            # pylint: disable=protected-access
-            def __call__(self, *args, **kwargs):
-                return self._cube_slice._call_cube_method(attr, *args, **kwargs)
-
         # API Method calls
         if callable(cube_attr):
-            return CubeCaller(self)
+            return partial(self._call_cube_method, attr)
 
         # API properties
         get_only_last_two = (
