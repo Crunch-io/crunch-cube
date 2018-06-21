@@ -569,22 +569,6 @@ class CrunchCube(DataTable):
         return len(self.dimensions)
 
     @lazyproperty
-    def row_dim_ind(self):
-        """
-        Index of the row dimension in the cube
-        :rtype: int
-        """
-        return 0 if self.ndim < 3 else 1
-
-    @lazyproperty
-    def col_dim_ind(self):
-        """
-        Index of the column dimension in the cube
-        :rtype: int
-        """
-        return 1 if self.ndim < 3 else 2
-
-    @lazyproperty
     def ind_selected(self):
         return self._get_mr_slice()
 
