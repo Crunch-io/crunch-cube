@@ -1,7 +1,7 @@
 '''Unit tests for the CubeSlice class.'''
 from unittest import TestCase
 from mock import Mock
-from mock import patch
+import numpy as np
 
 from cr.cube.cube_slice import CubeSlice
 
@@ -20,14 +20,11 @@ class TestCubeSlice(TestCase):
 
     def test_ndim_invokes_ndim_from_cube(self):
         '''Test if ndim calls corresponding cube's method.'''
-        fake_ndim = Mock()
-        cube = Mock()
-        cube.ndim = fake_ndim
-
+        cube = Mock(ndim=3)
         cs = CubeSlice(cube, 1)
-        assert cs.ndim == fake_ndim
+        assert cs.ndim == 3
 
-    def test_name(self):
+    def test_table_name(self):
         '''Test correct name is returned.
 
         In case of 2D return cube name. In case of 3D, return the combination
@@ -47,9 +44,9 @@ class TestCubeSlice(TestCase):
         cube.labels.return_value = fake_labels
         cube.ndim = 3
         cs = CubeSlice(cube, 1)
-        assert cs.name == 'Cube Title: Analysis Slice XY'
+        assert cs.table_name == 'Cube Title: Analysis Slice XY'
+        assert cs.name == 'Cube Title'
 
-    @patch('cr.cube.cube_slice.CubeSlice.ndim', 3)
     def test_proportions(self):
         '''Test that proportions method delegetes its call to CrunchCube.
 
@@ -58,6 +55,7 @@ class TestCubeSlice(TestCase):
         for row and column directions.
         '''
         cube = Mock()
+        cube.ndim = 3
         array = [Mock(), Mock(), Mock()]
         cube.proportions.return_value = array
 
@@ -71,7 +69,6 @@ class TestCubeSlice(TestCase):
         cs = CubeSlice(cube, index=1)
         assert cs.proportions() == array[1]
 
-    @patch('cr.cube.cube_slice.CubeSlice.ndim', 3)
     def test_margin(self):
         '''Test that margin method delegetes its call to CrunchCube.
 
@@ -80,6 +77,7 @@ class TestCubeSlice(TestCase):
         for row and column directions.
         '''
         cube = Mock()
+        cube.ndim = 3
         array = [Mock(), Mock(), Mock()]
         cube.margin.return_value = array
         cs = CubeSlice(cube, 1)
@@ -92,7 +90,6 @@ class TestCubeSlice(TestCase):
         # Assert correct slice is returned when index is set
         assert cs.margin() == array[1]
 
-    @patch('cr.cube.cube_slice.CubeSlice.ndim', 3)
     def test_as_array(self):
         '''Test that as_array method delegetes its call to CrunchCube.
 
@@ -102,6 +99,7 @@ class TestCubeSlice(TestCase):
         correct slice needs to be returned.
         '''
         cube = Mock()
+        cube.ndim = 3
         array = [Mock(), Mock(), Mock()]
         cube.as_array.return_value = array
 
@@ -116,43 +114,26 @@ class TestCubeSlice(TestCase):
         cs = CubeSlice(cube, index=1)
         assert cs.as_array() == array[1]
 
-    def test_rows_title(self):
-        '''Assert correct rows title is returned.'''
-        cube = Mock()
-        cube.ndim = 3
-        cube.dimensions = [Mock(), Mock(), Mock()]
-        cube.dimensions[1].name = '1st Dimension Name'
-        cs = CubeSlice(cube, 1)
-        assert cs.rows_title == '1st Dimension Name'
-
-    def test_inserted_rows_indices(self):
-        '''Assert correct inserted row indices are returned.
-        '''
-        fake_indices = Mock()
-        cube = Mock()
-        cube.inserted_hs_indices.return_value = [
-            Mock(), (fake_indices, Mock()), Mock(),
-        ]
-        cs = CubeSlice(cube, 1)
-        assert cs.inserted_rows_indices == fake_indices
-
     def test_cube_slice_labels(self):
         '''Test correct labels are returned for row and col dimensions.'''
         cube = Mock()
+        cube.ndim = 3
         all_labels = [Mock(), Mock(), Mock()]
         cube.labels.return_value = all_labels
         cs = CubeSlice(cube, 1)
         assert cs.labels() == all_labels[-2:]
 
-    @patch('cr.cube.cube_slice.CubeSlice.ndim', 3)
     def test_prune_indices(self):
         '''Assert that correct prune indices are extracted from 3D cube.'''
         cube = Mock()
+        cube.ndim = 3
         all_prune_inds = [Mock(), (1, 2), Mock()]
         cube.prune_indices.return_value = all_prune_inds
         cs = CubeSlice(cube, 1)
         # Assert extracted indices tuple is converted to list
-        assert cs.prune_indices() == [1, 2]
+        actual = cs.prune_indices()
+        expected = np.array([1, 2])
+        np.testing.assert_array_equal(actual, expected)
 
     def test_has_means(self):
         '''Test that has_means invokes same method on CrunchCube.'''
@@ -160,4 +141,14 @@ class TestCubeSlice(TestCase):
         expected = 'Test if has means'
         cube.has_means = expected
         actual = CubeSlice(cube, 1).has_means
+        assert actual == expected
+
+    def test_dim_types(self):
+        '''Test only last 2 dim types are returned.'''
+        cube = Mock()
+        all_dim_types = [Mock(), Mock(), Mock()]
+        expected = all_dim_types[-2:]
+        cube.dim_types = all_dim_types
+        cube.ndim = 3
+        actual = CubeSlice(cube, 0).dim_types
         assert actual == expected
