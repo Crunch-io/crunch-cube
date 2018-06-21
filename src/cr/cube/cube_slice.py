@@ -58,6 +58,8 @@ class CubeSlice(object):
         # corresponding numbers in case of 3D cubes (namely 1 and 2). In the
         # case of None, we need to analyze across all valid dimensions, and the
         # CrunchCube takes care of that (no need to update axis if it's None).
+        # If the user provides a tuple, it's considered that he "knows" what
+        # he's doing, and the axis argument is not updated in this case.
         if isinstance(axis, int):
             kwargs['axis'] += 1
 
