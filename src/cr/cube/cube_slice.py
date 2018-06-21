@@ -78,11 +78,11 @@ class CubeSlice(object):
         )
         hs_dims = kwargs.get(hs_dims_key)
         if isinstance(hs_dims, list):
-            # The point of this update is to keep the 2D illusion fot the user.
-            # If a user sees a 2D slice, he still needs to be able to address
-            # both dimensions (for which he wants the H&S included) as 0 and 1.
-            # Since these are offset by a 0 dimension in a 3D case, inside the
-            # cr.cube, we need to increase the indexes of the required dims.
+            # Keep the 2D illusion for the user. If a user sees a 2D slice, he
+            # still needs to be able to address both dimensions (for which he
+            # wants the H&S included) as 0 and 1. Since these are offset by a 0
+            # dimension in a 3D case, inside the cr.cube, we need to increase
+            # the indexes of the required dims.
             kwargs[hs_dims_key] = [dim + 1 for dim in hs_dims]
 
         return kwargs
@@ -100,7 +100,7 @@ class CubeSlice(object):
     def _call_cube_method(self, method, *args, **kwargs):
         kwargs = self._update_args(kwargs)
         result = getattr(self._cube, method)(*args, **kwargs)
-        if method in ['labels', 'inserted_hs_indices']:
+        if method in ('labels', 'inserted_hs_indices'):
             return result[-2:]
         return self._update_result(result)
 
