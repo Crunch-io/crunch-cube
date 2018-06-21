@@ -171,3 +171,12 @@ class CubeSlice(object):
             for dim_labels, dim_prune_inds in zip(labels, prune_indices)
         ]
         return labels
+
+    @property
+    def has_mr(self):
+        '''True if the slice has MR dimension.
+
+        This property needs to be overridden, because we don't care about the
+        0th dimension (and if it's an MR) in the case of a 3D cube.
+        '''
+        return 'multiple_response' in self.dim_types
