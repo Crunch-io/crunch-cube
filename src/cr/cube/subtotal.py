@@ -53,8 +53,8 @@ class Subtotal(object):
     @lazyproperty
     def args(self):
         '''Get H&S args.'''
-        hs_ids = self._data['args']
-        if self.is_valid and self._validate_hs_ids(hs_ids):
+        hs_ids = self._data.get('args', None)
+        if hs_ids and self.is_valid and self._validate_hs_ids(hs_ids):
             return self._data['args']
         return []
 
