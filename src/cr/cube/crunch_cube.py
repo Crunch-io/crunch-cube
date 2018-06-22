@@ -1083,34 +1083,6 @@ class CrunchCube(DataTable):
             prune=prune
         ) * population_size
 
-    def y_offset(self, expand=False, include_transforms_for_dims=None):
-        '''Gets y offset for sheet manipulation.
-
-        Args:
-            - expand (bool): If a cube is a categorical array, and it's also a
-                0-index cube of multiple cube sequence, it needs to be
-                displayed in a specific manner (sliced across categories
-                dimension). This argument enables such behavior. If a CA cube
-                is the only one (not a part of the multitable), it is output
-                normally, without expansion.
-        '''
-        if not self.dimensions:
-            return 4
-
-        first_dim_length = self.as_array(
-            include_transforms_for_dims=include_transforms_for_dims
-        ).shape[0]
-
-        # Special case of CA as a 0-ind cube
-        if expand and self.dimensions[0].type == 'categorical_array':
-            return first_dim_length * (len(self.dimensions[1].elements()) + 4)
-
-        if self.ndim <= 2 and self.dimensions[0].type:
-            return first_dim_length + 4
-        return first_dim_length * (self.as_array(
-            include_transforms_for_dims=include_transforms_for_dims
-        ).shape[1] + 4)
-
     def index(self, weighted=True, prune=False):
         '''Get cube index measurement.'''
         return Index(self, weighted, prune).data
