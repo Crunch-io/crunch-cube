@@ -20,11 +20,8 @@ class Subtotal(object):
         if isinstance(self._data, dict):
             required_keys = {'anchor', 'args', 'function', 'name'}
             has_keys = set(self._data.keys()) == required_keys
-            if has_keys:
-                is_subtotal = self._data['function'] == 'subtotal'
-                hs_ids = self._data['args']
-                are_hs_ids_valid = self._validate_hs_ids(hs_ids)
-                return is_subtotal and are_hs_ids_valid
+            if has_keys and self._data['function'] == 'subtotal':
+                return self._validate_hs_ids(self._data['args'])
         return False
 
     @lazyproperty
