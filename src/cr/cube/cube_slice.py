@@ -165,10 +165,10 @@ class CubeSlice(object):
             ]
             return labels
 
-        prune_indices = self.prune_indices(transforms=hs_dims)
         labels = [
             prune_dimension_labels(dim_labels, dim_prune_inds)
-            for dim_labels, dim_prune_inds in zip(labels, prune_indices)
+            for dim_labels, dim_prune_inds in
+            zip(labels, self.prune_indices(transforms=hs_dims))
         ]
         return labels
 
