@@ -21,7 +21,10 @@ class Subtotal(object):
             required_keys = {'anchor', 'args', 'function', 'name'}
             has_keys = set(self._data.keys()) == required_keys
             if has_keys and self._data['function'] == 'subtotal':
-                return self._validate_hs_ids(self._data['args'])
+                return any(
+                    element for element in self._dim.elements()
+                    if element['id'] in self._data['args']
+                )
         return False
 
     @lazyproperty
@@ -43,16 +46,12 @@ class Subtotal(object):
     def _all_dim_ids(self):
         return [el.get('id') for el in self._dim.elements(include_missing=True)]
 
-    def _validate_hs_ids(self, hs_ids):
-        element_ids = [el['id'] for el in self._dim.elements()]
-        return any(arg in element_ids for arg in hs_ids)
-
     @lazyproperty
     def args(self):
         '''Get H&S args.'''
         hs_ids = self._data.get('args', None)
-        if hs_ids and self.is_valid and self._validate_hs_ids(hs_ids):
-            return self._data['args']
+        if hs_ids and self.is_valid:
+            return hs_ids
         return []
 
     @lazyproperty
