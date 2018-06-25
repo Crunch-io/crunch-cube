@@ -14,7 +14,6 @@ class CubeSlice(object):
     '''
 
     row_dim_ind = 0
-    # col_dim_ind = 1
 
     def __init__(self, cube, index, ca_as_0th=False):
 
