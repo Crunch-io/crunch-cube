@@ -150,3 +150,33 @@ class CubeSlice(object):
             return 1 - ca_ind
         else:
             return None
+
+    def labels(self, hs_dims=None, prune=False):
+        '''Get labels for the cube slice, and perform pruning by slice.'''
+        labels = self._cube.labels(include_transforms_for_dims=hs_dims)[-2:]
+        if not prune:
+            return labels
+
+        def prune_dimension_labels(labels, prune_indices):
+            '''Get pruned labels for single dimension, besed on prune inds.'''
+            labels = [
+                label for label, prune in zip(labels, prune_indices)
+                if not prune
+            ]
+            return labels
+
+        labels = [
+            prune_dimension_labels(dim_labels, dim_prune_inds)
+            for dim_labels, dim_prune_inds in
+            zip(labels, self.prune_indices(transforms=hs_dims))
+        ]
+        return labels
+
+    @property
+    def has_mr(self):
+        '''True if the slice has MR dimension.
+
+        This property needs to be overridden, because we don't care about the
+        0th dimension (and if it's an MR) in the case of a 3D cube.
+        '''
+        return 'multiple_response' in self.dim_types
