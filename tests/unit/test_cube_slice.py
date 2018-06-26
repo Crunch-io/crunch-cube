@@ -152,3 +152,35 @@ class TestCubeSlice(TestCase):
         cube.ndim = 3
         actual = CubeSlice(cube, 0).dim_types
         assert actual == expected
+
+    def test_pruning_2d_labels(self):
+        '''Test that 2D labels are fetched from cr.cube, and pruned.'''
+        cube = Mock()
+        cube.ndim = 2
+        cube.prune_indices.return_value = [
+            np.array([True, False]), np.array([False, False, True]),
+        ]
+        cube.labels.return_value = [
+            [Mock(), 'fake_lbl_1'], ['fake_lbl_2', 'fake_lbl_3', Mock()],
+        ]
+        actual = CubeSlice(cube, 0).labels(prune=True)
+        expected = [['fake_lbl_1'], ['fake_lbl_2', 'fake_lbl_3']]
+        assert actual == expected
+
+    def test_pruning_3d_labels(self):
+        '''Test that 2D labels are fetched from cr.cube, and pruned.'''
+        cube = Mock()
+        cube.ndim = 3
+        cube.prune_indices.return_value = [
+            Mock(),
+            (np.array([True, False]), np.array([False, False, True])),
+            Mock(),
+        ]
+        cube.labels.return_value = [
+            Mock(),
+            [Mock(), 'fake_lbl_1'],
+            ['fake_lbl_2', 'fake_lbl_3', Mock()],
+        ]
+        actual = CubeSlice(cube, 1).labels(prune=True)
+        expected = [['fake_lbl_1'], ['fake_lbl_2', 'fake_lbl_3']]
+        assert actual == expected

@@ -180,6 +180,9 @@ class TestDimension(TestCase):
         actual = dim.description
         self.assertEqual(actual, expected)
 
+    @patch('cr.cube.dimension.Dimension._elements', [
+        {'id': 1}, {'id': 2}, {'id': 5}, {'id': 4}
+    ])
     @patch('cr.cube.subtotal.Subtotal._all_dim_ids', [1, 2, 4, 5])
     @patch('cr.cube.dimension.Dimension._get_type')
     def test_hs_names_with_bad_data(self, mock_type):
@@ -277,9 +280,11 @@ class TestDimension(TestCase):
         actual = dim.hs_indices
         self.assertEqual(actual, expected)
 
+    @patch('cr.cube.dimension.Dimension.elements')
     @patch('cr.cube.dimension.Dimension._get_type')
-    def test_subtotals(self, mock_type):
+    def test_subtotals(self, mock_type, mock_elements):
         mock_type.return_value = None
+        mock_elements.return_value = [{'id': 1}, {'id': 5}]
         dim_data = {
             'references': {
                 'view': {
@@ -308,43 +313,43 @@ class TestDimension(TestCase):
                         'insertions': [
                             {
                                 u'anchor': u'bottom',
-                                u'args': [],
+                                u'args': [111],
                                 u'function': u'subtotal',
                                 u'name': u'bottoms up one',
                             },
                             {
                                 u'anchor': u'bottom',
-                                u'args': [],
+                                u'args': [222],
                                 u'function': u'subtotal',
                                 u'name': u'bottoms up two',
                             },
                             {
                                 u'anchor': u'bottom',
-                                u'args': [],
+                                u'args': [333],
                                 u'function': u'subtotal',
                                 u'name': u'bottoms up three',
                             },
                             {
                                 u'anchor': u'top',
-                                u'args': [],
+                                u'args': [444],
                                 u'function': u'subtotal',
                                 u'name': u'on top one',
                             },
                             {
                                 u'anchor': u'top',
-                                u'args': [],
+                                u'args': [555],
                                 u'function': u'subtotal',
                                 u'name': u'on top two',
                             },
                             {
                                 u'anchor': 333,
-                                u'args': [],
+                                u'args': [555],
                                 u'function': u'subtotal',
                                 u'name': u'in the middle one',
                             },
                             {
                                 u'anchor': 333,
-                                u'args': [],
+                                u'args': [555],
                                 u'function': u'subtotal',
                                 u'name': u'in the middle two',
                             }
