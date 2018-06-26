@@ -1159,7 +1159,14 @@ class CrunchCube(DataTable):
                        crunch cube.
         '''
         stats = self.zscore(weighted=weighted, prune=prune, hs_dims=hs_dims)
-        return 2 * (1 - norm.cdf(np.abs(stats)))
+        res = 2 * (1 - norm.cdf(np.abs(stats)))
+
+        if isinstance(stats, np.ma.core.MaskedArray):
+            # Explicit setting of the mask is necessary, because the norm.cdf
+            # creates a non-masked version
+            res = np.ma.masked_array(res, stats.mask)
+
+        return res
 
     def scale_means(self):
         '''Get cube means.'''
