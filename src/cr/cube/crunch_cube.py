@@ -72,7 +72,7 @@ class CrunchCube(DataTable):
                     'A `cube` must be JSON or `dict`.'
                 ).format(type(response)))
 
-        self.slices = self._get_slices()
+        self.slices = self.get_slices()
 
     def _fix_shape(self, array):
         '''Fixes shape of MR variables.
@@ -1165,8 +1165,8 @@ class CrunchCube(DataTable):
         '''Get cube means.'''
         return ScaleMeans(self).data
 
-    def _get_slices(self):
-        if self.ndim < 3:
+    def get_slices(self, ca_as_0th=False):
+        if self.ndim < 3 and not ca_as_0th:
             return [CubeSlice(self, 0)]
 
-        return [CubeSlice(self, i) for i, _ in enumerate(self.labels()[0])]
+        return [CubeSlice(self, i, ca_as_0th) for i, _ in enumerate(self.labels()[0])]
