@@ -8,7 +8,7 @@ from cr.cube.crunch_cube import CrunchCube
 
 
 # pylint: disable=invalid-name, no-self-use, protected-access
-@patch('cr.cube.crunch_cube.CrunchCube._get_slices', lambda x: None)
+@patch('cr.cube.crunch_cube.CrunchCube.get_slices', lambda x: None)
 class TestCrunchCube(TestCase):
     '''Test class for the CrunchCube unit tests.
 
