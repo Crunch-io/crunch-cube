@@ -292,3 +292,16 @@ class TestCubeSlice(TestCase):
         assert cs.ca_main_axis == 0
         cube.dim_types = [Mock(), Mock()]
         assert cs.ca_main_axis is None
+
+    def test_has_mr(self):
+        '''Test if slice has MR dimension(s).'''
+        cube = Mock()
+        cube.dim_types = ['multiple_response', Mock()]
+        cs = CubeSlice(cube, 0)
+        assert cs.has_mr
+        cube.dim_types = [Mock(), 'multiple_response']
+        cs = CubeSlice(cube, 0)
+        assert cs.has_mr
+        cube.dim_types = [Mock(), Mock()]
+        cs = CubeSlice(cube, 0)
+        assert not cs.has_mr
