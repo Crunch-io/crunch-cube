@@ -412,6 +412,18 @@ class TestCrunchCube(TestCase):
         actual = cube.labels()
         self.assertEqual(actual, expected)
 
+    def test_is_simple_ca(self):
+        cube = CrunchCube(SIMPLE_CAT_ARRAY)
+        expected = True
+        actual = cube.is_univariate_ca
+        assert actual == expected
+
+    def test_simpla_ca_main_axis(self):
+        cube = CrunchCube(SIMPLE_CAT_ARRAY)
+        expected = 1
+        actual = cube.univariate_ca_main_axis
+        assert actual == expected
+
     def test_labels_simple_cat_array_exclude_missing(self):
         cube = CrunchCube(SIMPLE_CAT_ARRAY)
         expected = [
