@@ -134,6 +134,11 @@ class TestCubeSlice(TestCase):
         cs = CubeSlice(cube, 1)
         assert cs.labels() == all_labels[-2:]
 
+        cube.ndim = 2
+        cube.dim_types = ['categorical_array', Mock()]
+        cs = CubeSlice(cube, 1, ca_as_0th=True)
+        assert cs.labels() == all_labels[1:]
+
     def test_prune_indices(self):
         '''Assert that correct prune indices are extracted from 3D cube.'''
         cube = Mock()
