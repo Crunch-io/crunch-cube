@@ -194,3 +194,13 @@ class TestCubeSlice(TestCase):
         actual = CubeSlice(cube, 1).labels(prune=True)
         expected = [['fake_lbl_1'], ['fake_lbl_2', 'fake_lbl_3']]
         assert actual == expected
+
+    def test_col_dim_ind(self):
+        '''Test column dimension index for normal slice vs CA as 0th.'''
+        cube = Mock()
+        cube.dim_types = ['categorical_array', Mock()]
+        cc = CubeSlice(cube, 0, ca_as_0th=False)
+        assert cc.col_dim_ind == 1
+
+        cc = CubeSlice(cube, 0, ca_as_0th=True)
+        assert cc.col_dim_ind == 0
