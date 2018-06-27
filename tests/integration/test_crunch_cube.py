@@ -646,7 +646,16 @@ class TestCrunchCube(TestCase):
                 0.4271118723152956
             ]
         ])
+        # Test without pruning
         actual = cube.pvals()
+        np.testing.assert_almost_equal(actual, expected)
+
+        # Test with pruning
+        actual = cube.pvals(prune=True)
+        np.testing.assert_almost_equal(actual, expected)
+
+        # Test with pruning and H&S
+        actual = cube.pvals(prune=True, hs_dims=[0, 1])
         np.testing.assert_almost_equal(actual, expected)
 
     def test_pvals_stats(self):
@@ -669,7 +678,16 @@ class TestCrunchCube(TestCase):
                 0.0000013632752629
             ]
         ])
+        # Test without pruning
         actual = cube.pvals()
+        np.testing.assert_almost_equal(actual, expected)
+
+        # Test with pruning
+        actual = cube.pvals(prune=True)
+        np.testing.assert_almost_equal(actual, expected)
+
+        # Test with pruning and H&S
+        actual = cube.pvals(prune=True, hs_dims=[0, 1])
         np.testing.assert_almost_equal(actual, expected)
 
     def test_mean_age_for_blame_x_gender(self):
