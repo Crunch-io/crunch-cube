@@ -381,7 +381,8 @@ class CrunchCube(DataTable):
         if np.any(margin) and inserted_ind is not None and any(inserted_ind):
             ind_inserted = np.zeros(pruned_ind.shape, dtype=bool)
             if len(pruned_ind.shape) == 2 and axis == 1:
-                ind_inserted[:, inserted_ind] = True
+                pass
+                # ind_inserted[:, inserted_ind] = True
             else:
                 ind_inserted[inserted_ind] = True
             pruned_ind = np.logical_and(pruned_ind, ~ind_inserted)

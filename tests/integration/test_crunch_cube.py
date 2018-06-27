@@ -48,6 +48,7 @@ from .fixtures import VALUE_SERVICES
 from .fixtures import LETTERS_X_PETS_HS
 from .fixtures import XYZ_SIMPLE_ALLTYPES
 from .fixtures import MR_X_CA_HS
+from .fixtures import MR_X_CAT_HS
 from .fixtures import CA_X_MR_WEIGHTED_HS
 from .fixtures import MR_X_CAT_X_MR_PRUNE
 from .fixtures import HUFFPOST_ACTIONS_X_HOUSEHOLD
@@ -1704,5 +1705,15 @@ class TestCrunchCube(TestCase):
             np.array([False, False, False]),
         ]
         actual = cube.prune_indices()
+        np.testing.assert_array_equal(actual[0], expected[0])
+        np.testing.assert_array_equal(actual[1], expected[1])
+
+    def test_mr_x_cat_hs_prune_indices(self):
+        cube = CrunchCube(MR_X_CAT_HS)
+        expected = [
+            np.array([False, False, False, False, False]),
+            np.array([False, False, False, True, False, False, True, False]),
+        ]
+        actual = cube.prune_indices(transforms=[0, 1])
         np.testing.assert_array_equal(actual[0], expected[0])
         np.testing.assert_array_equal(actual[1], expected[1])
