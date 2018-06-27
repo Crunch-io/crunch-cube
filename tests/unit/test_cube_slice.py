@@ -214,3 +214,12 @@ class TestCubeSlice(TestCase):
         cc = CubeSlice(cube, 0, ca_as_0th=True)
         cc.margin(axis=None)
         cube.margin.assert_called_once_with(axis=1)
+
+    def test_update_hs_dims(self):
+        '''Test if H&S dims are updated for 3D cubes.'''
+        cube = Mock()
+        cube.ndim = 3
+        cc = CubeSlice(cube, 0)
+        expected = {'include_transforms_for_dims': [1, 2]}
+        actual = cc._update_args({'include_transforms_for_dims': [0, 1]})
+        assert actual == expected
