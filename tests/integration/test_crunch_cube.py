@@ -50,6 +50,7 @@ from .fixtures import XYZ_SIMPLE_ALLTYPES
 from .fixtures import MR_X_CA_HS
 from .fixtures import CA_X_MR_WEIGHTED_HS
 from .fixtures import MR_X_CAT_X_MR_PRUNE
+from .fixtures import HUFFPOST_ACTIONS_X_HOUSEHOLD
 
 
 class TestCrunchCube(TestCase):
@@ -1695,3 +1696,13 @@ class TestCrunchCube(TestCase):
         ])
         actual = cube.proportions(prune=True)[0].mask
         np.testing.assert_array_equal(actual, expected)
+
+    def test_mr_x_mr_prune_indices(self):
+        cube = CrunchCube(HUFFPOST_ACTIONS_X_HOUSEHOLD)
+        expected = [
+            np.array([False, False, False, False, False, False, False, False]),
+            np.array([False, False, False]),
+        ]
+        actual = cube.prune_indices()
+        np.testing.assert_array_equal(actual[0], expected[0])
+        np.testing.assert_array_equal(actual[1], expected[1])
