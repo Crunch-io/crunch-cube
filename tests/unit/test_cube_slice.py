@@ -199,11 +199,11 @@ class TestCubeSlice(TestCase):
         '''Test column dimension index for normal slice vs CA as 0th.'''
         cube = Mock()
         cube.dim_types = ['categorical_array', Mock()]
-        cc = CubeSlice(cube, 0, ca_as_0th=False)
-        assert cc.col_dim_ind == 1
+        cs = CubeSlice(cube, 0, ca_as_0th=False)
+        assert cs.col_dim_ind == 1
 
-        cc = CubeSlice(cube, 0, ca_as_0th=True)
-        assert cc.col_dim_ind == 0
+        cs = CubeSlice(cube, 0, ca_as_0th=True)
+        assert cs.col_dim_ind == 0
 
     def test_axis_for_ca_as_0th(self):
         '''Test if the axis parameter is updated correctly for the CA as 0th.'''
@@ -211,15 +211,27 @@ class TestCubeSlice(TestCase):
         cube.dim_types = ['categorical_array', Mock()]
         cube.ndim = 2
         cube.margin.return_value = np.array([0, 1, 2])
-        cc = CubeSlice(cube, 0, ca_as_0th=True)
-        cc.margin(axis=None)
+        cs = CubeSlice(cube, 0, ca_as_0th=True)
+        cs.margin(axis=None)
         cube.margin.assert_called_once_with(axis=1)
 
     def test_update_hs_dims(self):
         '''Test if H&S dims are updated for 3D cubes.'''
         cube = Mock()
         cube.ndim = 3
-        cc = CubeSlice(cube, 0)
+        cs = CubeSlice(cube, 0)
         expected = {'include_transforms_for_dims': [1, 2]}
-        actual = cc._update_args({'include_transforms_for_dims': [0, 1]})
+        actual = cs._update_args({'include_transforms_for_dims': [0, 1]})
         assert actual == expected
+
+    def test_inserted_hs_indices(self):
+        '''Test H&S indices for different slices.'''
+        cube = Mock()
+        cube.ndim = 3
+        cube.inserted_hs_indices.return_value = [1, 2, 3]
+        cs = CubeSlice(cube, 0)
+        assert cs.inserted_hs_indices() == [2, 3]
+
+        cube.dim_types = ['categorical_array', Mock()]
+        cs = CubeSlice(cube, 0, ca_as_0th=True)
+        assert cs.inserted_hs_indices() == [1, 2, 3]

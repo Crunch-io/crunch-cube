@@ -121,7 +121,7 @@ class CubeSlice(object):
     def _call_cube_method(self, method, *args, **kwargs):
         kwargs = self._update_args(kwargs)
         result = getattr(self._cube, method)(*args, **kwargs)
-        if method in ('labels', 'inserted_hs_indices'):
+        if method == 'inserted_hs_indices':
             if not self.ca_as_0th:
                 result = result[-2:]
             return result
