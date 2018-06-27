@@ -204,3 +204,13 @@ class TestCubeSlice(TestCase):
 
         cc = CubeSlice(cube, 0, ca_as_0th=True)
         assert cc.col_dim_ind == 0
+
+    def test_axis_for_ca_as_0th(self):
+        '''Test if the axis parameter is updated correctly for the CA as 0th.'''
+        cube = Mock()
+        cube.dim_types = ['categorical_array', Mock()]
+        cube.ndim = 2
+        cube.margin.return_value = np.array([0, 1, 2])
+        cc = CubeSlice(cube, 0, ca_as_0th=True)
+        cc.margin(axis=None)
+        cube.margin.assert_called_once_with(axis=1)

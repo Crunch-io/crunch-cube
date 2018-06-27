@@ -60,8 +60,11 @@ class CubeSlice(object):
             if self.ca_as_0th:
                 axis = kwargs.get('axis', False)
                 if axis is None:
-                    # TODO: Write detailed explanation here in comments.
-                    # Special case for CA slices (in multitables).
+                    # Special case for CA slices (in multitables). In this case,
+                    # we need to calculate a measurement across CA categories
+                    # dimension (and not across items, because it's not
+                    # allowed). The value for the axis parameter of None, would
+                    # incur the items dimension, and we don't want that.
                     kwargs['axis'] = 1
             return kwargs
 
