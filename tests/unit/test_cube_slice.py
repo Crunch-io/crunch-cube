@@ -238,6 +238,7 @@ class TestCubeSlice(TestCase):
         assert cs.inserted_hs_indices() == [1, 2, 3]
 
     def test_has_ca(self):
+        '''Test if slice has CA.'''
         cube = Mock()
         cube.ndim = 2
         cube.dim_types = ['categorical_array', Mock()]
@@ -249,3 +250,28 @@ class TestCubeSlice(TestCase):
         cube.dim_types = ['categorical_array', Mock(), Mock()]
         cs = CubeSlice(cube, 0)
         assert not cs.has_ca
+
+    def test_mr_dim_ind(self):
+        '''Test MR dimension index(indices).'''
+        cube = Mock()
+        cube.ndim = 2
+        cube.mr_dim_ind = 0
+
+        cs = CubeSlice(cube, 0)
+        assert cs.mr_dim_ind == 0
+
+        cube.mr_dim_ind = 1
+        cs = CubeSlice(cube, 0)
+        assert cs.mr_dim_ind == 1
+
+        cube.ndim = 3
+        cube.mr_dim_ind = 1
+        cs = CubeSlice(cube, 0)
+        assert cs.mr_dim_ind == 0
+        cube.mr_dim_ind = 0
+        cs = CubeSlice(cube, 0)
+        assert cs.mr_dim_ind is None
+        cube.mr_dim_ind = (1, 2)
+        assert cs.mr_dim_ind == (0, 1)
+        cube.mr_dim_ind = (0, 2)
+        assert cs.mr_dim_ind == 1
