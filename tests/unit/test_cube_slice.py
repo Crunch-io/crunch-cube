@@ -236,3 +236,16 @@ class TestCubeSlice(TestCase):
         cube.dim_types = ['categorical_array', Mock()]
         cs = CubeSlice(cube, 0, ca_as_0th=True)
         assert cs.inserted_hs_indices() == [1, 2, 3]
+
+    def test_has_ca(self):
+        cube = Mock()
+        cube.ndim = 2
+        cube.dim_types = ['categorical_array', Mock()]
+
+        cs = CubeSlice(cube, 0)
+        assert cs.has_ca
+
+        cube.ndim = 3
+        cube.dim_types = ['categorical_array', Mock(), Mock()]
+        cs = CubeSlice(cube, 0)
+        assert not cs.has_ca
