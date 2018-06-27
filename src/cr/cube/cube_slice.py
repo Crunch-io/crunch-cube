@@ -181,10 +181,10 @@ class CubeSlice(object):
     @property
     def ca_main_axis(self):
         '''For univariate CA, the main axis is the categorical axis'''
-        ca_ind = self.dim_types.index('categorical_array')
-        if ca_ind is not None:
+        try:
+            ca_ind = self.dim_types.index('categorical_array')
             return 1 - ca_ind
-        else:
+        except:
             return None
 
     def labels(self, hs_dims=None, prune=False):

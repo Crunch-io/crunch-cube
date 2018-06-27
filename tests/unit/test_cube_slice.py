@@ -275,3 +275,15 @@ class TestCubeSlice(TestCase):
         assert cs.mr_dim_ind == (0, 1)
         cube.mr_dim_ind = (0, 2)
         assert cs.mr_dim_ind == 1
+
+    def test_ca_main_axis(self):
+        '''Test interpretation of the main axis for CA cube.'''
+        cube = Mock()
+        cube.dim_types = ['categorical_array', Mock()]
+        cs = CubeSlice(cube, 0)
+        assert cs.ca_main_axis == 1
+        cube.dim_types = [Mock(), 'categorical_array']
+        cs = CubeSlice(cube, 0)
+        assert cs.ca_main_axis == 0
+        cube.dim_types = [Mock(), Mock()]
+        assert cs.ca_main_axis is None
