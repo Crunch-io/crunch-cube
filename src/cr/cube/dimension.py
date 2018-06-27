@@ -141,11 +141,6 @@ class Dimension(object):
             return subtotal.anchor
 
         element_ids = [el['id'] for el in self._elements]
-        if subtotal.anchor not in element_ids:
-            # In case of numeric value which is not a category ID, return
-            # default value 'bottom'
-            return 'bottom'
-
         contiguous_anchors = [
             i for (i, id_) in enumerate(element_ids)
             if id_ == subtotal.anchor
