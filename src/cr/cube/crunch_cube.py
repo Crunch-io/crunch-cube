@@ -381,8 +381,7 @@ class CrunchCube(DataTable):
         if np.any(margin) and inserted_ind is not None and any(inserted_ind):
             ind_inserted = np.zeros(pruned_ind.shape, dtype=bool)
             if len(pruned_ind.shape) == 2 and axis == 1:
-                pass
-                # ind_inserted[:, inserted_ind] = True
+                ind_inserted[:, inserted_ind] = True
             else:
                 ind_inserted[inserted_ind] = True
             pruned_ind = np.logical_and(pruned_ind, ~ind_inserted)
@@ -513,29 +512,6 @@ class CrunchCube(DataTable):
 
         return tuple(new_axis)
 
-    def _transform_table(self, table, include_transforms_for_dims):
-        table = self._transform(
-            table,
-            include_transforms_for_dims,
-            inflate=True,
-        )
-        return table
-
-    def _inflate_dim(self, array, axis):
-        # Explicitly check if axis is tuple (which could be the case for doing
-        # cell percentages across 3D cube, when the axis is set to (1, 2)).
-        # Python 3 doesn't support tuple to int conversion, and we have to
-        # check it manually.
-        if (axis and not isinstance(axis, tuple) and
-                axis > 0 and len(array.shape) == 1):
-            # If any of the dimensions has only one element, it's flattened
-            # from the resulting array (as a part of the MR pre-processing).
-            # This can lead to a potential inconsistency between dimensions
-            # and axes, and we need to restore one dimension in this case.
-            array = array[:, np.newaxis]
-
-        return array
-
     @lazyproperty
     def is_univariate_ca(self):
         '''Check if cube is a just the CA ("ca x cat" or "cat x ca" dims)'''
@@ -568,19 +544,6 @@ class CrunchCube(DataTable):
     @lazyproperty
     def ndim(self):
         return len(self.dimensions)
-
-    @lazyproperty
-    def ind_selected(self):
-        return self._get_mr_slice()
-
-    @lazyproperty
-    def ind_non_selected(self):
-        return self._get_mr_slice(selected=False)
-
-    @lazyproperty
-    def valid_indices(self):
-        '''Valid indices of all dimensions (exclude missing).'''
-        return [dim.valid_indices(False) for dim in self.dimensions]
 
     @property
     def valid_indices_with_selections(self):
@@ -631,23 +594,6 @@ class CrunchCube(DataTable):
     def is_double_mr(self):
         '''Check if cube has 2 MR dimensions.'''
         return True if isinstance(self.mr_dim_ind, tuple) else False
-
-    @lazyproperty
-    def double_mr_non_selected_inds(self):
-        '''Gets all combinations of non-selected slices for any double MR cube.
-
-        For double MR cubes, we need combinations of (selected) with
-        (selected + non_selected) for all combinations of MR x MR, but we also
-        need other potential dimensions included
-        '''
-        # This represents an index in between MR dimensions (at this point we
-        # know there are two). It's used subsequently, for creating the
-        # combined conditional slices, where we have to take 'selected' for
-        # one MR, and selected AND non-selected for the other.
-        inflect = self.mr_dim_ind[1] + 1
-        ind_ns_0 = self.ind_selected[:inflect] + self.ind_non_selected[inflect:]
-        ind_ns_1 = self.ind_non_selected[:inflect] + self.ind_selected[inflect:]
-        return self.ind_non_selected, ind_ns_0, ind_ns_1
 
     # Static methods
 
