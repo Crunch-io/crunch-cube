@@ -47,6 +47,7 @@ class TestCubeSlice(TestCase):
         cube.ndim = 2
         cube.name = fake_title
         cs = CubeSlice(cube, 1)
+        assert cs.table_name is None
         assert cs.name == fake_title
 
         # Assert name for 3D
