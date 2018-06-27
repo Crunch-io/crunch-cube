@@ -49,6 +49,7 @@ from .fixtures import LETTERS_X_PETS_HS
 from .fixtures import XYZ_SIMPLE_ALLTYPES
 from .fixtures import MR_X_CA_HS
 from .fixtures import CA_X_MR_WEIGHTED_HS
+from .fixtures import MR_X_CAT_X_MR_PRUNE
 
 
 class TestCrunchCube(TestCase):
@@ -1678,4 +1679,19 @@ class TestCrunchCube(TestCase):
         actual = cube.margin(
             axis=1, weighted=False, include_transforms_for_dims=[0, 1, 2]
         )[0]
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_mr_x_cat_x_mr_pruning(self):
+        cube = CrunchCube(MR_X_CAT_X_MR_PRUNE)
+        expected = np.array([
+            [False, False, False, True],
+            [False, False, False, True],
+            [True, True, True, True],
+            [False, False, False, True],
+            [False, False, False, True],
+            [False, False, False, True],
+            [True, True, True, True],
+            [True, True, True, True],
+        ])
+        actual = cube.proportions(prune=True)[0].mask
         np.testing.assert_array_equal(actual, expected)
