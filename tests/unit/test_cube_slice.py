@@ -18,6 +18,16 @@ class TestCubeSlice(TestCase):
         assert cs._cube == cube
         assert cs._index == index
 
+    def test_init_ca_as_0th(self):
+        '''Test creation of the 0th CA slice.'''
+        cube = Mock()
+        cube.dim_types = ['categorical_array', 'categorical']
+        assert CubeSlice(cube, 0, ca_as_0th=True)
+
+        cube.dim_types = ['categorical', 'categorical']
+        with self.assertRaises(ValueError):
+            CubeSlice(cube, 0, ca_as_0th=True)
+
     def test_ndim_invokes_ndim_from_cube(self):
         '''Test if ndim calls corresponding cube's method.'''
         cube = Mock(ndim=3)
