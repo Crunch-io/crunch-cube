@@ -11,7 +11,7 @@ class TestDimension(TestCase):
 
     insertions_with_bad_data = [
         {
-            u'anchor': 0,
+            u'anchor': 101,
             u'name': u'This is respondent ideology',
         },
         {
@@ -261,17 +261,17 @@ class TestDimension(TestCase):
             'references': {
                 'view': {
                     'transform': {'insertions': [{
-                                                "function": "subtotal",
-                                                "args": [
-                                                    7,
-                                                    8,
-                                                    9,
-                                                    10,
-                                                    11
-                                                ],
-                                                "anchor": "bottom",
-                                                "name": "test subtotal"
-                                            }]}
+                        "function": "subtotal",
+                        "args": [
+                            7,
+                            8,
+                            9,
+                            10,
+                            11
+                        ],
+                        "anchor": "bottom",
+                        "name": "test subtotal"
+                    }]}
                 }
             }
         }
@@ -280,6 +280,7 @@ class TestDimension(TestCase):
         actual = dim.hs_indices
         self.assertEqual(actual, expected)
 
+    # pylint: disable=protected-access, missing-docstring
     @patch('cr.cube.dimension.Dimension.elements')
     @patch('cr.cube.dimension.Dimension._get_type')
     def test_subtotals(self, mock_type, mock_elements):
@@ -294,11 +295,13 @@ class TestDimension(TestCase):
         }
         dim = Dimension(dim_data)
         actual = dim.subtotals
-        self.assertEqual(len(actual), 2)
-        self.assertEqual(type(actual[0]), Subtotal)
-        self.assertEqual(actual[0]._data, self.insertions_with_bad_data[1])
-        self.assertEqual(type(actual[1]), Subtotal)
-        self.assertEqual(actual[1]._data, self.insertions_with_bad_data[2])
+        assert len(actual) == 2
+        assert isinstance(actual[0], Subtotal)
+        assert actual[0]._data == self.insertions_with_bad_data[1]
+        assert isinstance(actual[1], Subtotal)
+        assert actual[1]._data == self.insertions_with_bad_data[2]
+        assert actual[0].anchor == 'bottom'
+        assert actual[1].anchor == 5
 
     @patch('cr.cube.dimension.Dimension._elements', [
         {'id': 111}, {'id': 222}, {'id': 333}, {'id': 444}, {'id': 555}

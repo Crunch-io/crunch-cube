@@ -1,0 +1,1118 @@
+{
+    "element": "shoji:view",
+    "self": "https://alpha.crunch.io/api/datasets/aa146404f1b742d3b84280b27a340990/cube/?filter=%5B%5D&query=%7B%22dimensions%22:%5B%7B%22each%22:%22https:%2F%2Falpha.crunch.io%2Fapi%2Fdatasets%2Faa146404f1b742d3b84280b27a340990%2Fvariables%2F000406%2F%22%7D,%7B%22function%22:%22as_selected%22,%22args%22:%5B%7B%22variable%22:%22https:%2F%2Falpha.crunch.io%2Fapi%2Fdatasets%2Faa146404f1b742d3b84280b27a340990%2Fvariables%2F000406%2F%22%7D%5D%7D,%7B%22each%22:%22https:%2F%2Falpha.crunch.io%2Fapi%2Fdatasets%2Faa146404f1b742d3b84280b27a340990%2Fvariables%2F000124%2F%22%7D,%7B%22function%22:%22as_selected%22,%22args%22:%5B%7B%22variable%22:%22https:%2F%2Falpha.crunch.io%2Fapi%2Fdatasets%2Faa146404f1b742d3b84280b27a340990%2Fvariables%2F000124%2F%22%7D%5D%7D%5D,%22measures%22:%7B%22count%22:%7B%22function%22:%22cube_count%22,%22args%22:%5B%5D%7D%7D,%22weight%22:null%7D",
+    "value": {
+        "query": {
+            "measures": {
+                "count": {
+                    "function": "cube_count",
+                    "args": []
+                }
+            },
+            "dimensions": [
+                {
+                    "each": "https://alpha.crunch.io/api/datasets/aa146404f1b742d3b84280b27a340990/variables/000406/"
+                },
+                {
+                    "function": "as_selected",
+                    "args": [
+                        {
+                            "variable": "https://alpha.crunch.io/api/datasets/aa146404f1b742d3b84280b27a340990/variables/000406/"
+                        }
+                    ]
+                },
+                {
+                    "each": "https://alpha.crunch.io/api/datasets/aa146404f1b742d3b84280b27a340990/variables/000124/"
+                },
+                {
+                    "function": "as_selected",
+                    "args": [
+                        {
+                            "variable": "https://alpha.crunch.io/api/datasets/aa146404f1b742d3b84280b27a340990/variables/000124/"
+                        }
+                    ]
+                }
+            ],
+            "weight": null
+        },
+        "query_environment": {
+            "filter": []
+        },
+        "result": {
+            "dimensions": [
+                {
+                    "derived": true,
+                    "references": {
+                        "alias": "HP_03",
+                        "description": "Which of these have you done this year? Select all that apply.",
+                        "name": "Political actions",
+                        "subreferences": [
+                            {
+                                "alias": "HP_03_1",
+                                "name": "Gone to a protest, political rally or demonstration"
+                            },
+                            {
+                                "alias": "HP_03_2",
+                                "name": "Volunteered for a political candidate or advocacy organization"
+                            },
+                            {
+                                "alias": "HP_03_3",
+                                "name": "Donated to a political candidate or advocacy organization"
+                            },
+                            {
+                                "alias": "HP_03_4",
+                                "name": "Called or written your representative in Congress"
+                            },
+                            {
+                                "alias": "HP_03_5",
+                                "name": "Signed a petition about a political issue"
+                            },
+                            {
+                                "alias": "HP_03_6",
+                                "name": "Posted on social media to advocate for a political position or opinion"
+                            },
+                            {
+                                "alias": "HP_03_7",
+                                "name": "Talked to your friends or family to advocate for a political position or opinion"
+                            },
+                            {
+                                "alias": "HP_03_8",
+                                "name": "None of the above"
+                            }
+                        ]
+                    },
+                    "type": {
+                        "subtype": {
+                            "class": "variable"
+                        },
+                        "elements": [
+                            {
+                                "id": 1,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "HP_03_1",
+                                        "name": "Gone to a protest, political rally or demonstration"
+                                    },
+                                    "id": "0001",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 2,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "HP_03_2",
+                                        "name": "Volunteered for a political candidate or advocacy organization"
+                                    },
+                                    "id": "0002",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 3,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "HP_03_3",
+                                        "name": "Donated to a political candidate or advocacy organization"
+                                    },
+                                    "id": "0003",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 4,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "HP_03_4",
+                                        "name": "Called or written your representative in Congress"
+                                    },
+                                    "id": "0004",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 5,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "HP_03_5",
+                                        "name": "Signed a petition about a political issue"
+                                    },
+                                    "id": "0005",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 6,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "HP_03_6",
+                                        "name": "Posted on social media to advocate for a political position or opinion"
+                                    },
+                                    "id": "0006",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 7,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "HP_03_7",
+                                        "name": "Talked to your friends or family to advocate for a political position or opinion"
+                                    },
+                                    "id": "0007",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 8,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "HP_03_8",
+                                        "name": "None of the above"
+                                    },
+                                    "id": "0008",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            }
+                        ],
+                        "class": "enum"
+                    }
+                },
+                {
+                    "references": {
+                        "alias": "HP_03",
+                        "subreferences": [
+                            {
+                                "alias": "HP_03_1",
+                                "name": "Gone to a protest, political rally or demonstration"
+                            },
+                            {
+                                "alias": "HP_03_2",
+                                "name": "Volunteered for a political candidate or advocacy organization"
+                            },
+                            {
+                                "alias": "HP_03_3",
+                                "name": "Donated to a political candidate or advocacy organization"
+                            },
+                            {
+                                "alias": "HP_03_4",
+                                "name": "Called or written your representative in Congress"
+                            },
+                            {
+                                "alias": "HP_03_5",
+                                "name": "Signed a petition about a political issue"
+                            },
+                            {
+                                "alias": "HP_03_6",
+                                "name": "Posted on social media to advocate for a political position or opinion"
+                            },
+                            {
+                                "alias": "HP_03_7",
+                                "name": "Talked to your friends or family to advocate for a political position or opinion"
+                            },
+                            {
+                                "alias": "HP_03_8",
+                                "name": "None of the above"
+                            }
+                        ],
+                        "description": "Which of these have you done this year? Select all that apply.",
+                        "name": "Political actions"
+                    },
+                    "derived": true,
+                    "type": {
+                        "ordinal": false,
+                        "subvariables": [
+                            "0001",
+                            "0002",
+                            "0003",
+                            "0004",
+                            "0005",
+                            "0006",
+                            "0007",
+                            "0008"
+                        ],
+                        "class": "categorical",
+                        "categories": [
+                            {
+                                "numeric_value": 1,
+                                "selected": true,
+                                "id": 1,
+                                "missing": false,
+                                "name": "Selected"
+                            },
+                            {
+                                "numeric_value": 0,
+                                "missing": false,
+                                "id": 0,
+                                "name": "Not Selected"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": true,
+                                "id": -1,
+                                "name": "No Data"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "derived": true,
+                    "references": {
+                        "alias": "union_hhold",
+                        "description": "Are you or is someone in your household a member of a labor union?",
+                        "name": "Union Household",
+                        "subreferences": [
+                            {
+                                "alias": "union_hhold_1",
+                                "name": "Yes, I am"
+                            },
+                            {
+                                "alias": "union_hhold_2",
+                                "name": "Yes, household member is"
+                            },
+                            {
+                                "alias": "union_hhold_3",
+                                "name": "No"
+                            }
+                        ]
+                    },
+                    "type": {
+                        "subtype": {
+                            "class": "variable"
+                        },
+                        "elements": [
+                            {
+                                "id": 1,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "union_hhold_1",
+                                        "name": "Yes, I am"
+                                    },
+                                    "id": "0001",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 2,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "union_hhold_2",
+                                        "name": "Yes, household member is"
+                                    },
+                                    "id": "0002",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 3,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "union_hhold_3",
+                                        "name": "No"
+                                    },
+                                    "id": "0003",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Not Selected"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            }
+                        ],
+                        "class": "enum"
+                    }
+                },
+                {
+                    "references": {
+                        "alias": "union_hhold",
+                        "subreferences": [
+                            {
+                                "alias": "union_hhold_1",
+                                "name": "Yes, I am"
+                            },
+                            {
+                                "alias": "union_hhold_2",
+                                "name": "Yes, household member is"
+                            },
+                            {
+                                "alias": "union_hhold_3",
+                                "name": "No"
+                            }
+                        ],
+                        "description": "Are you or is someone in your household a member of a labor union?",
+                        "name": "Union Household"
+                    },
+                    "derived": true,
+                    "type": {
+                        "ordinal": false,
+                        "subvariables": [
+                            "0001",
+                            "0002",
+                            "0003"
+                        ],
+                        "class": "categorical",
+                        "categories": [
+                            {
+                                "numeric_value": 1,
+                                "selected": true,
+                                "id": 1,
+                                "missing": false,
+                                "name": "Selected"
+                            },
+                            {
+                                "numeric_value": 0,
+                                "missing": false,
+                                "id": 0,
+                                "name": "Not Selected"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": true,
+                                "id": -1,
+                                "name": "No Data"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "missing": 0,
+            "measures": {
+                "count": {
+                    "data": [
+                        11,
+                        98,
+                        0,
+                        10,
+                        99,
+                        0,
+                        89,
+                        20,
+                        0,
+                        66,
+                        825,
+                        0,
+                        74,
+                        817,
+                        0,
+                        759,
+                        132,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        12,
+                        49,
+                        0,
+                        6,
+                        55,
+                        0,
+                        44,
+                        17,
+                        0,
+                        65,
+                        874,
+                        0,
+                        78,
+                        861,
+                        0,
+                        804,
+                        135,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        19,
+                        145,
+                        0,
+                        14,
+                        150,
+                        0,
+                        133,
+                        31,
+                        0,
+                        58,
+                        778,
+                        0,
+                        70,
+                        766,
+                        0,
+                        715,
+                        121,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        32,
+                        266,
+                        0,
+                        31,
+                        267,
+                        0,
+                        241,
+                        57,
+                        0,
+                        45,
+                        657,
+                        0,
+                        53,
+                        649,
+                        0,
+                        607,
+                        95,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        33,
+                        364,
+                        0,
+                        38,
+                        359,
+                        0,
+                        329,
+                        68,
+                        0,
+                        44,
+                        559,
+                        0,
+                        46,
+                        557,
+                        0,
+                        519,
+                        84,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        26,
+                        262,
+                        0,
+                        30,
+                        258,
+                        0,
+                        235,
+                        53,
+                        0,
+                        51,
+                        661,
+                        0,
+                        54,
+                        658,
+                        0,
+                        613,
+                        99,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        40,
+                        412,
+                        0,
+                        44,
+                        408,
+                        0,
+                        374,
+                        78,
+                        0,
+                        37,
+                        511,
+                        0,
+                        40,
+                        508,
+                        0,
+                        474,
+                        74,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        18,
+                        326,
+                        0,
+                        20,
+                        324,
+                        0,
+                        307,
+                        37,
+                        0,
+                        59,
+                        597,
+                        0,
+                        64,
+                        592,
+                        0,
+                        541,
+                        115,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                    ],
+                    "n_missing": 0,
+                    "metadata": {
+                        "references": {},
+                        "derived": true,
+                        "type": {
+                            "integer": true,
+                            "missing_rules": {},
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "class": "numeric"
+                        }
+                    }
+                }
+            },
+            "element": "crunch:cube",
+            "counts": [
+                11,
+                98,
+                0,
+                10,
+                99,
+                0,
+                89,
+                20,
+                0,
+                66,
+                825,
+                0,
+                74,
+                817,
+                0,
+                759,
+                132,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                12,
+                49,
+                0,
+                6,
+                55,
+                0,
+                44,
+                17,
+                0,
+                65,
+                874,
+                0,
+                78,
+                861,
+                0,
+                804,
+                135,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                19,
+                145,
+                0,
+                14,
+                150,
+                0,
+                133,
+                31,
+                0,
+                58,
+                778,
+                0,
+                70,
+                766,
+                0,
+                715,
+                121,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                32,
+                266,
+                0,
+                31,
+                267,
+                0,
+                241,
+                57,
+                0,
+                45,
+                657,
+                0,
+                53,
+                649,
+                0,
+                607,
+                95,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                33,
+                364,
+                0,
+                38,
+                359,
+                0,
+                329,
+                68,
+                0,
+                44,
+                559,
+                0,
+                46,
+                557,
+                0,
+                519,
+                84,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                26,
+                262,
+                0,
+                30,
+                258,
+                0,
+                235,
+                53,
+                0,
+                51,
+                661,
+                0,
+                54,
+                658,
+                0,
+                613,
+                99,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                40,
+                412,
+                0,
+                44,
+                408,
+                0,
+                374,
+                78,
+                0,
+                37,
+                511,
+                0,
+                40,
+                508,
+                0,
+                474,
+                74,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                18,
+                326,
+                0,
+                20,
+                324,
+                0,
+                307,
+                37,
+                0,
+                59,
+                597,
+                0,
+                64,
+                592,
+                0,
+                541,
+                115,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "n": 1000
+        }
+    }
+}

@@ -60,8 +60,11 @@ class CubeSlice(object):
             if self.ca_as_0th:
                 axis = kwargs.get('axis', False)
                 if axis is None:
-                    # TODO: Write detailed explanation here in comments.
-                    # Special case for CA slices (in multitables).
+                    # Special case for CA slices (in multitables). In this case,
+                    # we need to calculate a measurement across CA categories
+                    # dimension (and not across items, because it's not
+                    # allowed). The value for the axis parameter of None, would
+                    # incur the items dimension, and we don't want that.
                     kwargs['axis'] = 1
             return kwargs
 
@@ -118,7 +121,7 @@ class CubeSlice(object):
     def _call_cube_method(self, method, *args, **kwargs):
         kwargs = self._update_args(kwargs)
         result = getattr(self._cube, method)(*args, **kwargs)
-        if method in ('labels', 'inserted_hs_indices'):
+        if method == 'inserted_hs_indices':
             if not self.ca_as_0th:
                 result = result[-2:]
             return result
@@ -156,19 +159,32 @@ class CubeSlice(object):
         mr_dim_ind = self._cube.mr_dim_ind
         if self.ndim == 3:
             if isinstance(mr_dim_ind, int):
+                if mr_dim_ind == 0:
+                    # If only the 0th dimension of a 3D is an MR, the sliced
+                    # don't actuall have the MR... Thus return None.
+                    return None
                 return mr_dim_ind - 1
             elif isinstance(mr_dim_ind, tuple):
-                return tuple(i - 1 for i in mr_dim_ind)
+                # If MR dimension index is a tuple, that means that the cube
+                # (only a 3D one if it reached this path) has 2 MR dimensions.
+                # If any of those is 0 ind dimension we don't need to include
+                # in the slice dimension (because the slice doesn't see the tab
+                # that it's on). If it's 1st and 2nd dimension, then subtract 1
+                # from those, and present them as 0th and 1st dimension of the
+                # slice. This can happend e.g. in a CAT x MR x MR cube (which
+                # renders MR x MR slices).
+                mr_dim_ind = tuple(i - 1 for i in mr_dim_ind if i)
+                return mr_dim_ind if len(mr_dim_ind) > 1 else mr_dim_ind[0]
 
         return mr_dim_ind
 
     @property
     def ca_main_axis(self):
         '''For univariate CA, the main axis is the categorical axis'''
-        ca_ind = self.dim_types.index('categorical_array')
-        if ca_ind is not None:
+        try:
+            ca_ind = self.dim_types.index('categorical_array')
             return 1 - ca_ind
-        else:
+        except:
             return None
 
     def labels(self, hs_dims=None, prune=False):
