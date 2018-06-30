@@ -48,7 +48,10 @@ from .fixtures import VALUE_SERVICES
 from .fixtures import LETTERS_X_PETS_HS
 from .fixtures import XYZ_SIMPLE_ALLTYPES
 from .fixtures import MR_X_CA_HS
+from .fixtures import MR_X_CAT_HS
 from .fixtures import CA_X_MR_WEIGHTED_HS
+from .fixtures import MR_X_CAT_X_MR_PRUNE
+from .fixtures import HUFFPOST_ACTIONS_X_HOUSEHOLD
 
 
 class TestCrunchCube(TestCase):
@@ -409,6 +412,18 @@ class TestCrunchCube(TestCase):
         actual = cube.labels()
         self.assertEqual(actual, expected)
 
+    def test_is_simple_ca(self):
+        cube = CrunchCube(SIMPLE_CAT_ARRAY)
+        expected = True
+        actual = cube.is_univariate_ca
+        assert actual == expected
+
+    def test_simpla_ca_main_axis(self):
+        cube = CrunchCube(SIMPLE_CAT_ARRAY)
+        expected = 1
+        actual = cube.univariate_ca_main_axis
+        assert actual == expected
+
     def test_labels_simple_cat_array_exclude_missing(self):
         cube = CrunchCube(SIMPLE_CAT_ARRAY)
         expected = [
@@ -643,7 +658,16 @@ class TestCrunchCube(TestCase):
                 0.4271118723152956
             ]
         ])
+        # Test without pruning
         actual = cube.pvals()
+        np.testing.assert_almost_equal(actual, expected)
+
+        # Test with pruning
+        actual = cube.pvals(prune=True)
+        np.testing.assert_almost_equal(actual, expected)
+
+        # Test with pruning and H&S
+        actual = cube.pvals(prune=True, hs_dims=[0, 1])
         np.testing.assert_almost_equal(actual, expected)
 
     def test_pvals_stats(self):
@@ -666,7 +690,16 @@ class TestCrunchCube(TestCase):
                 0.0000013632752629
             ]
         ])
+        # Test without pruning
         actual = cube.pvals()
+        np.testing.assert_almost_equal(actual, expected)
+
+        # Test with pruning
+        actual = cube.pvals(prune=True)
+        np.testing.assert_almost_equal(actual, expected)
+
+        # Test with pruning and H&S
+        actual = cube.pvals(prune=True, hs_dims=[0, 1])
         np.testing.assert_almost_equal(actual, expected)
 
     def test_mean_age_for_blame_x_gender(self):
@@ -1679,3 +1712,38 @@ class TestCrunchCube(TestCase):
             axis=1, weighted=False, include_transforms_for_dims=[0, 1, 2]
         )[0]
         np.testing.assert_array_equal(actual, expected)
+
+    def test_mr_x_cat_x_mr_pruning(self):
+        cube = CrunchCube(MR_X_CAT_X_MR_PRUNE)
+        expected = np.array([
+            [False, False, False, True],
+            [False, False, False, True],
+            [True, True, True, True],
+            [False, False, False, True],
+            [False, False, False, True],
+            [False, False, False, True],
+            [True, True, True, True],
+            [True, True, True, True],
+        ])
+        actual = cube.proportions(prune=True)[0].mask
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_mr_x_mr_prune_indices(self):
+        cube = CrunchCube(HUFFPOST_ACTIONS_X_HOUSEHOLD)
+        expected = [
+            np.array([False, False, False, False, False, False, False, False]),
+            np.array([False, False, False]),
+        ]
+        actual = cube.prune_indices()
+        np.testing.assert_array_equal(actual[0], expected[0])
+        np.testing.assert_array_equal(actual[1], expected[1])
+
+    def test_mr_x_cat_hs_prune_indices(self):
+        cube = CrunchCube(MR_X_CAT_HS)
+        expected = [
+            np.array([False, False, False, False, False]),
+            np.array([False, False, False, True, False, False, True, False]),
+        ]
+        actual = cube.prune_indices(transforms=[0, 1])
+        np.testing.assert_array_equal(actual[0], expected[0])
+        np.testing.assert_array_equal(actual[1], expected[1])
