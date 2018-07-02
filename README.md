@@ -135,3 +135,7 @@ The detailed description can be found
 1.6.5 Fixes for Pruning and Headers and subtotals.
       Population size support.
       Fx various calculations in 3d cubes.
+
+1.6.6 Added support for CubeSlice, which always represents a
+      2D cube (even if they're the slices of a 3D cube).
+      Various fixes for support of wide-export
