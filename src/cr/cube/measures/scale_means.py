@@ -19,7 +19,8 @@ class ScaleMeans(object):
         contents = self._inner_prod(table, self.values)
 
         if self._cube.has_mr and not self._cube.is_double_mr:
-            axis = 1 - self._cube.mr_dim_ind
+            # axis = 1 - self._cube.mr_dim_ind
+            axis = self._cube.dim_types.index('categorical')
             return np.sum(contents, axis) / np.sum(table, axis)
 
         if self.valid_inds.all():
@@ -45,7 +46,9 @@ class ScaleMeans(object):
         return np.array([
             dim.values for dim in self._cube.dimensions
             if dim.values and any(~np.isnan(dim.values))
-        ][int(len(self._cube.dimensions) > 2)])
+        ][:1][-1])
+        # TODO: Refactor this indexing hack
+        # ][int(len(self._cube.dimensions) > 2)])
 
     @lazyproperty
     def valid_inds(self):
