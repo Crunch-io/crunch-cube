@@ -65,9 +65,9 @@ class ScaleMeans(object):
 
     def _inner_prod(self, contents, values):
         inflate_values = (
-            self._cube.ca_dim_ind == 0
-            if len(contents.shape) == 3 else
-            self._cube.mr_dim_ind == 1
+            self._cube.ca_dim_ind == 0 and len(contents.shape) == 3 or
+            self._cube.mr_dim_ind == 1 or
+            self._cube.ca_dim_ind == 1 and len(contents.shape) < 3
         )
         if inflate_values:
             values = values[:, np.newaxis]
