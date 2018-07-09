@@ -20,15 +20,16 @@ class ScaleMeans(object):
 
         if self._cube.has_mr and not self._cube.is_double_mr:
             # axis = 1 - self._cube.mr_dim_ind
+            # axis = self._cube.dim_types[-2:].index('categorical')
             axis = self._cube.dim_types.index('categorical')
             return np.sum(contents, axis) / np.sum(table, axis)
 
         if self.valid_inds.all():
             return np.sum(contents, self.axis) / self._cube.margin(self.axis)
-        else:
-            num = np.sum(contents[self.contents_inds], self.axis)
-            den = np.sum(table[self.contents_inds], self.axis)
-            return num / den
+
+        num = np.sum(contents[self.contents_inds], self.axis)
+        den = np.sum(table[self.contents_inds], self.axis)
+        return num / den
 
     @lazyproperty
     def axis(self):
@@ -44,11 +45,9 @@ class ScaleMeans(object):
     def values(self):
         '''Get num values for means calculation.'''
         return np.array([
-            dim.values for dim in self._cube.dimensions
+            dim.values for dim in self._cube.dimensions[-2:]
             if dim.values and any(~np.isnan(dim.values))
-        ][:1][-1])
-        # TODO: Refactor this indexing hack
-        # ][int(len(self._cube.dimensions) > 2)])
+        ][0])
 
     @lazyproperty
     def valid_inds(self):
@@ -67,7 +66,8 @@ class ScaleMeans(object):
         inflate_values = (
             self._cube.ca_dim_ind == 0 and len(contents.shape) == 3 or
             self._cube.mr_dim_ind == 1 or
-            self._cube.ca_dim_ind == 1 and len(contents.shape) < 3
+            self._cube.ca_dim_ind == 1 and len(contents.shape) < 3 or
+            self._cube.ca_dim_ind == 2 and len(contents.shape) == 3
         )
         if inflate_values:
             values = values[:, np.newaxis]
