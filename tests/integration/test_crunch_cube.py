@@ -520,12 +520,14 @@ class TestCrunchCube(TestCase):
 
     def test_margin_cat_x_num_x_datetime_axis_0(self):
         cube = CrunchCube(CAT_X_NUM_X_DATETIME)
-        expected = np.array([
+        # Expect resulting margin to have an additional dimension
+        # (tabs CAT, with only a single element)
+        expected = np.array([[
             [3, 2],
             [3, 4],
             [4, 3],
             [0, 1],
-        ])
+        ]])
         actual = cube.margin(axis=0)
         np.testing.assert_array_equal(actual, expected)
 

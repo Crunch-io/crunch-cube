@@ -851,7 +851,7 @@ class CrunchCube(DataTable):
             den = np.sum(den, axis=new_axis)[index]
 
         den = self._fix_shape(den)
-        if den.shape[0] == 1 and len(den.shape) > 1:
+        if den.shape[0] == 1 and len(den.shape) > 1 and self.ndim < 3:
             den = den.reshape(den.shape[1:])
         return den
 
