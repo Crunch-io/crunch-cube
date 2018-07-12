@@ -93,8 +93,8 @@ class CubeSlice(object):
         # (from the perspective of the cr.exporter) is to exclude the 0th
         # dimension's H&S in the case of 3D cubes.
         hs_dims_key = (
-            'transforms'
-            if 'transforms' in kwargs else
+            'transforms' in kwargs and 'transforms' or
+            'hs_dims' in kwargs and 'hs_dims' or
             'include_transforms_for_dims'
         )
         hs_dims = kwargs.get(hs_dims_key)
