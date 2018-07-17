@@ -1063,10 +1063,10 @@ class CrunchCube(DataTable):
 
         res = []
         for slice_ in self.slices:
-            counts = slice_.as_array(weighted=weighted, prune=prune)
-            total = slice_.margin(weighted=weighted, prune=prune)
-            colsum = slice_.margin(axis=0, weighted=weighted, prune=prune)
-            rowsum = slice_.margin(axis=1, weighted=weighted, prune=prune)
+            counts = slice_.as_array(weighted=weighted)
+            total = slice_.margin(weighted=weighted)
+            colsum = slice_.margin(axis=0, weighted=weighted)
+            rowsum = slice_.margin(axis=1, weighted=weighted)
             std_res = self._calculate_std_res(counts, total, colsum, rowsum, slice_)
             res.append(std_res)
 
@@ -1077,11 +1077,17 @@ class CrunchCube(DataTable):
 
         if hs_dims:
             res = self._intersperse_hs_in_std_res(hs_dims, res)
-            arr = self.as_array(
-                prune=prune, include_transforms_for_dims=hs_dims,
-            )
+            arr = self.as_array(include_transforms_for_dims=hs_dims)
             if isinstance(arr, np.ma.core.MaskedArray):
                 res = np.ma.masked_array(res, mask=arr.mask)
+
+        if prune:
+            arr = self.as_array(
+                prune=prune,
+                include_transforms_for_dims=hs_dims,
+            )
+            if isinstance(arr, np.ma.core.MaskedArray):
+                res = np.ma.masked_array(res, arr.mask)
 
         return res
 
