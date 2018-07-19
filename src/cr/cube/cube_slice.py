@@ -220,3 +220,13 @@ class CubeSlice(object):
         0th dimension (and if it's an MR) in the case of a 3D cube.
         '''
         return 'multiple_response' in self.dim_types
+
+    @property
+    def is_double_mr(self):
+        '''This has to be overridden from cr.cube.
+
+        If the underlying cube is 3D, the 0th dimension must not be taken into
+        account, since it's only the tabs dimension, and mustn't affect the
+        properties of the slices.
+        '''
+        return self.dim_types == ['multiple_response'] * 2

@@ -305,3 +305,45 @@ class TestCubeSlice(TestCase):
         cube.dim_types = [Mock(), Mock()]
         cs = CubeSlice(cube, 0)
         assert not cs.has_mr
+
+    def test_is_double_mr(self):
+        '''Test if slice are double MRs.'''
+        cube = Mock()
+        cube.dim_types = ['multiple_response', Mock()]
+        cs = CubeSlice(cube, 0)
+        assert not cs.is_double_mr
+
+        cube.dim_types = [Mock(), 'multiple_response']
+        cs = CubeSlice(cube, 0)
+        assert not cs.is_double_mr
+
+        cube.dim_types = [Mock(), Mock()]
+        cs = CubeSlice(cube, 0)
+        assert not cs.is_double_mr
+
+        cube.dim_types = ['multiple_response'] * 2
+        cs = CubeSlice(cube, 0)
+        assert cs.is_double_mr
+
+        cube.ndim = 3
+        cube.dim_types = ['multiple_response'] * 3
+        cs = CubeSlice(cube, 0)
+        # It is double MR because the last two are MRs
+        assert cs.is_double_mr
+
+        cube.ndim = 3
+        cube.dim_types = [Mock()] + ['multiple_response'] * 2
+        cs = CubeSlice(cube, 0)
+        assert cs.is_double_mr
+
+        cube.ndim = 3
+        cube.dim_types = ['multiple_response', Mock(), 'multiple_response']
+        cs = CubeSlice(cube, 0)
+        # Not double MR because the 0th dims is 'just' tabs
+        assert not cs.is_double_mr
+
+        cube.ndim = 3
+        cube.dim_types = ['multiple_response', 'multiple_response', Mock()]
+        cs = CubeSlice(cube, 0)
+        # Not double MR because the 0th dims is 'just' tabs
+        assert not cs.is_double_mr
