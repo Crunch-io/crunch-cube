@@ -1070,7 +1070,7 @@ class CrunchCube(DataTable):
             std_res = self._calculate_std_res(counts, total, colsum, rowsum, slice_)
             res.append(std_res)
 
-        if len(res) == 1:
+        if len(res) == 1 and self.ndim < 3:
             res = res[0]
         else:
             res = np.array(res)
