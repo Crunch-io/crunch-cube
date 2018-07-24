@@ -139,3 +139,4 @@ FOOD_GROOPS_X_STARTTIME_X_NORDIC_COUNTRIES = _load(
 MR_X_CAT_X_MR_PRUNE = _load('mr-x-cat-x-mr-prune.json')
 HUFFPOST_ACTIONS_X_HOUSEHOLD = _load('huffpost-actions-x-household.json')
 GENDER_X_WEIGHT = _load('gender-x-weight.json')
+CA_ITEMS_X_CA_CAT_X_CAT = _load('ca-items-x-ca-cat-x-cat.json')
