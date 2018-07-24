@@ -32,16 +32,25 @@ class Index(object):
     @lazyproperty
     def data(self):
         '''Return table index by margin.'''
-        if self.cube.has_mr:
-            return self._mr_index()
-        margin = (
-            self.cube.margin(axis=0, weighted=self.weighted, prune=self.prune) /
-            self.cube.margin(weighted=self.weighted, prune=self.prune)
-        )
-        proportions = self.cube.proportions(
-            axis=1, weighted=self.weighted, prune=self.prune
-        )
-        return proportions / margin
+        result = []
+        for slice_ in self.cube.slices:
+            if self.cube.has_mr:
+                return self._mr_index()
+            margin = (
+                slice_.margin(axis=0, weighted=self.weighted, prune=self.prune) /
+                slice_.margin(weighted=self.weighted, prune=self.prune)
+            )
+            proportions = slice_.proportions(
+                axis=1, weighted=self.weighted, prune=self.prune
+            )
+            result.append(proportions / margin)
+
+        if len(result) == 1 and self.cube.ndim < 3:
+            result = result[0]
+        else:
+            result = np.ma.masked_array(result) if self.prune else np.array(result)
+
+        return result
 
     def _mr_index(self):
         # mr by mr
