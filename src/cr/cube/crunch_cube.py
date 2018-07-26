@@ -836,9 +836,14 @@ class CrunchCube(DataTable):
             include_transforms_for_dims=hs_dims,
         )
         if isinstance(arr, np.ma.core.MaskedArray):
+
             inflate_ind = [
-                None if d.is_mr_selections(self.all_dimensions) else slice(None)
-                for i, d in enumerate(self.all_dimensions)
+                (
+                    None
+                    if d.is_mr_selections(self.all_dimensions) or n <= 1 else
+                    slice(None)
+                )
+                for d, n in zip(self.all_dimensions, table.shape)
             ]
             mask = np.logical_or(
                 np.zeros(den.shape, dtype=bool),
