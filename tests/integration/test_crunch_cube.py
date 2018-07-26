@@ -52,6 +52,7 @@ from .fixtures import MR_X_CAT_HS
 from .fixtures import CA_X_MR_WEIGHTED_HS
 from .fixtures import MR_X_CAT_X_MR_PRUNE
 from .fixtures import HUFFPOST_ACTIONS_X_HOUSEHOLD
+from .fixtures import GENDER_X_WEIGHT
 
 
 class TestCrunchCube(TestCase):
@@ -1749,3 +1750,9 @@ class TestCrunchCube(TestCase):
         actual = cube.prune_indices(transforms=[0, 1])
         np.testing.assert_array_equal(actual[0], expected[0])
         np.testing.assert_array_equal(actual[1], expected[1])
+
+    def test_gender_x_weight_pruning(self):
+        cube = CrunchCube(GENDER_X_WEIGHT)
+        expected = 208
+        actual = cube.margin(prune=True)
+        np.testing.assert_array_equal(actual, expected)
