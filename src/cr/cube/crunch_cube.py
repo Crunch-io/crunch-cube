@@ -1128,7 +1128,7 @@ class CrunchCube(DataTable):
 
     def scale_means(self):
         '''Get cube means.'''
-        return ScaleMeans(self).data
+        return [ScaleMeans(slice_).data for slice_ in self.slices]
 
     def get_slices(self, ca_as_0th=False):
         if self.ndim < 3 and not ca_as_0th:
