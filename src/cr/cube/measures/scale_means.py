@@ -24,20 +24,9 @@ class ScaleMeans(object):
                 means.append(product)
                 continue
 
-            # Eliminate missings
-            nans = np.isnan(product)
-            if len(product.shape) == 1:
-                product = product[~nans]
-                table = table[~nans]
-            else:
-                ind_rows = ~nans.any(axis=1)
-                ind_cols = ~nans[ind_rows].any(axis=0)
-                product = product[ind_rows][:, ind_cols]
-                table = table[ind_rows][:, ind_cols]
-
             # Calculate means
-            num = np.sum(product, axis)
-            den = np.sum(table, axis)
+            num = np.sum(product[self.valid_indices(axis)], axis)
+            den = np.sum(table[self.valid_indices(axis)], axis)
             mean = num / den
             if not isinstance(mean, np.ndarray):
                 mean = np.array([mean])
@@ -54,6 +43,16 @@ class ScaleMeans(object):
                 None
             )
             for dim in self._slice.dimensions
+        ]
+
+    def valid_indices(self, axis):
+        return [
+            (
+                ~np.isnan(np.array(dim.values))
+                if dim.values and any(~np.isnan(dim.values)) and axis == i else
+                slice(None)
+            )
+            for i, dim in enumerate(self._slice.dimensions)
         ]
 
     def _inner_prods(self, contents, values):
