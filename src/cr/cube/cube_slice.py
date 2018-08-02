@@ -245,3 +245,6 @@ class CubeSlice(object):
         properties of the slices.
         '''
         return self.dim_types == ['multiple_response'] * 2
+
+    def scale_means(self):
+        return self._cube.scale_means()[self._index]
