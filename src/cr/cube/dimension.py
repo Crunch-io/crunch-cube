@@ -135,14 +135,14 @@ class Dimension(object):
         len_top_indexes = len(top_indexes)
 
         # push all top indexes to the top
-        top_indexes = range(len_top_indexes)
+        top_indexes = list(range(len_top_indexes))
 
         # adjust the middle_indexes appropriately
         middle_indexes = [i + element_ids.index(index) + len_top_indexes + 1 for i, index in enumerate(middle_indexes)]
 
         # what remains is the bottom
         len_non_bottom_indexes = len_top_indexes + len(middle_indexes) + len(elements)
-        bottom_indexes = range(len_non_bottom_indexes, len_non_bottom_indexes + len(bottom_indexes))
+        bottom_indexes = list(range(len_non_bottom_indexes, len_non_bottom_indexes + len(bottom_indexes)))
 
         return top_indexes + middle_indexes + bottom_indexes
 
