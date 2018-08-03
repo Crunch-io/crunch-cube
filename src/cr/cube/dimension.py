@@ -115,7 +115,7 @@ class Dimension(object):
     @property
     def inserted_hs_indices(self):
         '''Returns inserted H&S indices for the dimension.'''
-        if self.type == 'categorical_array':
+        if (self.type == 'categorical_array' or not self.subtotals):
             return []  # For CA subvariables, we don't do H&S insertions
 
         elements = self.elements()
@@ -274,7 +274,6 @@ class Dimension(object):
         internally. For other variable types, actual 'elements' of the
         Crunch Cube JSON response are returned.
         '''
-
         if include_missing:
             return self._elements
 
@@ -297,14 +296,16 @@ class Dimension(object):
         else:
             return [
                 i for (i, el) in enumerate(self._elements)
-                    if not el.get('missing')
+                if not el.get('missing')
             ]
 
     @lazyproperty
     def invalid_indices(self):
-        return set([i for (i, el) in enumerate(self._elements)
-                   if el.get('missing')
-                  ])
+        return set([
+            i for (i, el) in enumerate(self._elements)
+            if el.get('missing')
+        ])
+
 
     @lazyproperty
     def shape(self):
