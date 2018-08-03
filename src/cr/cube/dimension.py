@@ -3,7 +3,7 @@
 import numpy as np
 
 from .subtotal import Subtotal
-from .utils import lazyproperty
+from .utils import lazyproperty, memoize
 
 
 class Dimension(object):
@@ -118,7 +118,8 @@ class Dimension(object):
         if self.type == 'categorical_array':
             return []  # For CA subvariables, we don't do H&S insertions
 
-        element_ids = [element['id'] for element in self.elements()]
+        elements = self.elements()
+        element_ids = [element['id'] for element in elements]
 
         tops = [st for st in self.subtotals if st.anchor == 'top']
         bottoms = [st for st in self.subtotals if st.anchor == 'bottom']
@@ -130,7 +131,7 @@ class Dimension(object):
             for index, insertion in enumerate(middles)
         ]
         bottom_indexes = [
-            index + len(tops) + len(middles) + len(self.elements())
+            index + len(tops) + len(middles) + len(elements)
             for index, insertion in enumerate(bottoms)
         ]
         return top_indexes + middle_indexes + bottom_indexes
@@ -211,7 +212,7 @@ class Dimension(object):
                     (self._get_name(el), el.get('id', -1))
                 )
                 for (i, el) in enumerate(self._elements)
-                if i in valid_indices
+                if include_missing or i not in self.invalid_indices
             ]
 
         # Create subtotals names and insert them in labels after
@@ -265,6 +266,7 @@ class Dimension(object):
 
         return label_with_ind['ind'] in valid_indices
 
+    @memoize
     def elements(self, include_missing=False):
         '''Get elements of the crunch Dimension.
 
@@ -272,12 +274,16 @@ class Dimension(object):
         internally. For other variable types, actual 'elements' of the
         Crunch Cube JSON response are returned.
         '''
-        valid_indices = self.valid_indices(include_missing)
+
+        if include_missing:
+            return self._elements
+
         return [
             el for (i, el) in enumerate(self._elements)
-            if i in valid_indices
+            if i not in self.invalid_indices
         ]
 
+    @memoize
     def valid_indices(self, include_missing):
         '''Gets valid indices of Crunch Cube Dimension's elements.
 
@@ -289,8 +295,16 @@ class Dimension(object):
         if include_missing:
             return [i for (i, el) in enumerate(self._elements)]
         else:
-            return [i for (i, el) in enumerate(self._elements)
-                    if not el.get('missing')]
+            return [
+                i for (i, el) in enumerate(self._elements)
+                    if not el.get('missing')
+            ]
+
+    @lazyproperty
+    def invalid_indices(self):
+        return set([i for (i, el) in enumerate(self._elements)
+                   if el.get('missing')
+                  ])
 
     @lazyproperty
     def shape(self):
