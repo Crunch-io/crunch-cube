@@ -3,7 +3,7 @@
 import numpy as np
 
 from .subtotal import Subtotal
-from .utils import lazyproperty
+from .utils import lazyproperty, memoize
 
 
 class Dimension(object):
@@ -48,15 +48,15 @@ class Dimension(object):
         '''
         type_ = dim['type'].get('class')
 
-        if type_ and type_ == 'enum' and 'subreferences' in dim['references']:
-            return ('multiple_response'
-                    if cls._is_multiple_response(selections)
-                    else 'categorical_array')
-
-        if type_ and type_ == 'enum' and 'subtype' in dim['type']:
-            return dim['type']['subtype']['class']
-
         if type_:
+            if type_ == 'enum':
+                if 'subreferences' in dim['references']:
+                    return ('multiple_response'
+                            if cls._is_multiple_response(selections)
+                            else 'categorical_array')
+                if 'subtype' in dim['type']:
+                    return dim['type']['subtype']['class']
+
             return type_
 
         return dim['type']['subtype']['class']
@@ -115,24 +115,35 @@ class Dimension(object):
     @property
     def inserted_hs_indices(self):
         '''Returns inserted H&S indices for the dimension.'''
-        if self.type == 'categorical_array':
+        if (self.type == 'categorical_array' or not self.subtotals):
             return []  # For CA subvariables, we don't do H&S insertions
 
-        element_ids = [element['id'] for element in self.elements()]
+        elements = self.elements()
+        element_ids = [element['id'] for element in elements]
 
-        tops = [st for st in self.subtotals if st.anchor == 'top']
-        bottoms = [st for st in self.subtotals if st.anchor == 'bottom']
-        middles = [st for st in self.subtotals if st.anchor not in ['top', 'bottom']]
+        top_indexes = []
+        middle_indexes = []
+        bottom_indexes = []
+        for i, st in enumerate(self.subtotals):
+            anchor = st.anchor
+            if anchor == 'top':
+                top_indexes.append(i)
+            elif anchor == 'bottom':
+                bottom_indexes.append(i)
+            else:
+                middle_indexes.append(anchor)
+        len_top_indexes = len(top_indexes)
 
-        top_indexes = list(range(len(tops)))
-        middle_indexes = [
-            index + element_ids.index(insertion.anchor) + len(tops) + 1
-            for index, insertion in enumerate(middles)
-        ]
-        bottom_indexes = [
-            index + len(tops) + len(middles) + len(self.elements())
-            for index, insertion in enumerate(bottoms)
-        ]
+        # push all top indexes to the top
+        top_indexes = list(range(len_top_indexes))
+
+        # adjust the middle_indexes appropriately
+        middle_indexes = [i + element_ids.index(index) + len_top_indexes + 1 for i, index in enumerate(middle_indexes)]
+
+        # what remains is the bottom
+        len_non_bottom_indexes = len_top_indexes + len(middle_indexes) + len(elements)
+        bottom_indexes = list(range(len_non_bottom_indexes, len_non_bottom_indexes + len(bottom_indexes)))
+
         return top_indexes + middle_indexes + bottom_indexes
 
     def _transform_anchor(self, subtotal):
@@ -211,7 +222,7 @@ class Dimension(object):
                     (self._get_name(el), el.get('id', -1))
                 )
                 for (i, el) in enumerate(self._elements)
-                if i in valid_indices
+                if include_missing or i not in self.invalid_indices
             ]
 
         # Create subtotals names and insert them in labels after
@@ -265,6 +276,7 @@ class Dimension(object):
 
         return label_with_ind['ind'] in valid_indices
 
+    @memoize
     def elements(self, include_missing=False):
         '''Get elements of the crunch Dimension.
 
@@ -272,12 +284,15 @@ class Dimension(object):
         internally. For other variable types, actual 'elements' of the
         Crunch Cube JSON response are returned.
         '''
-        valid_indices = self.valid_indices(include_missing)
+        if include_missing:
+            return self._elements
+
         return [
             el for (i, el) in enumerate(self._elements)
-            if i in valid_indices
+            if i not in self.invalid_indices
         ]
 
+    @memoize
     def valid_indices(self, include_missing):
         '''Gets valid indices of Crunch Cube Dimension's elements.
 
@@ -289,8 +304,18 @@ class Dimension(object):
         if include_missing:
             return [i for (i, el) in enumerate(self._elements)]
         else:
-            return [i for (i, el) in enumerate(self._elements)
-                    if not el.get('missing')]
+            return [
+                i for (i, el) in enumerate(self._elements)
+                if not el.get('missing')
+            ]
+
+    @lazyproperty
+    def invalid_indices(self):
+        return set([
+            i for (i, el) in enumerate(self._elements)
+            if el.get('missing')
+        ])
+
 
     @lazyproperty
     def shape(self):
