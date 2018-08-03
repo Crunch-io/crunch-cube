@@ -1126,9 +1126,21 @@ class CrunchCube(DataTable):
 
         return res
 
-    def scale_means(self):
+    def scale_means(self, hs_dims=None):
         '''Get cube means.'''
-        return [ScaleMeans(slice_).data for slice_ in self.slices]
+        inserted_indices = self.inserted_hs_indices()
+        slices_means = [ScaleMeans(slice_).data for slice_ in self.slices]
+        for scale_means in slices_means:
+            if scale_means[0] is not None and 0 in hs_dims and inserted_indices[0]:
+                for i in inserted_indices[0]:
+                    scale_means[0] = np.insert(scale_means[0], i, np.nan)
+            if len(scale_means) == 1 or len(inserted_indices) == 1:
+                continue
+            if scale_means[1] is not None and 1 in hs_dims and inserted_indices[1]:
+                for i in inserted_indices[1]:
+                    scale_means[1] = np.insert(scale_means[1], i, np.nan)
+
+        return slices_means
 
     def get_slices(self, ca_as_0th=False):
         if self.ndim < 3 and not ca_as_0th:
