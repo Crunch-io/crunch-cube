@@ -211,7 +211,7 @@ class Dimension(object):
                     (self._get_name(el), el.get('id', -1))
                 )
                 for (i, el) in enumerate(self._elements)
-                if i in valid_indices
+                if include_missing or i not in self.invalid_indices
             ]
 
         # Create subtotals names and insert them in labels after
@@ -272,10 +272,12 @@ class Dimension(object):
         internally. For other variable types, actual 'elements' of the
         Crunch Cube JSON response are returned.
         '''
-        valid_indices = self.valid_indices(include_missing)
+        if include_missing:
+            return self._elements
+
         return [
             el for (i, el) in enumerate(self._elements)
-            if i in valid_indices
+            if i not in self.invalid_indices
         ]
 
     def valid_indices(self, include_missing):
@@ -289,8 +291,18 @@ class Dimension(object):
         if include_missing:
             return [i for (i, el) in enumerate(self._elements)]
         else:
-            return [i for (i, el) in enumerate(self._elements)
-                    if not el.get('missing')]
+            return [
+                i for (i, el) in enumerate(self._elements)
+                if not el.get('missing')
+            ]
+
+    @lazyproperty
+    def invalid_indices(self):
+        return set([
+            i for (i, el) in enumerate(self._elements)
+            if el.get('missing')
+        ])
+
 
     @lazyproperty
     def shape(self):
