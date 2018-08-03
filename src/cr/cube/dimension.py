@@ -115,7 +115,7 @@ class Dimension(object):
     @property
     def inserted_hs_indices(self):
         '''Returns inserted H&S indices for the dimension.'''
-        if self.type == 'categorical_array':
+        if (self.type == 'categorical_array' or not self.subtotals):
             return []  # For CA subvariables, we don't do H&S insertions
 
         element_ids = [element['id'] for element in self.elements()]
