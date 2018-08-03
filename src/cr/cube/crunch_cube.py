@@ -1082,9 +1082,6 @@ class CrunchCube(DataTable):
 
         if hs_dims:
             res = self._intersperse_hs_in_std_res(hs_dims, res)
-            arr = self.as_array(include_transforms_for_dims=hs_dims)
-            if isinstance(arr, np.ma.core.MaskedArray):
-                res = np.ma.masked_array(res, mask=arr.mask)
 
         if prune:
             arr = self.as_array(
@@ -1130,7 +1127,7 @@ class CrunchCube(DataTable):
         '''Get cube means.'''
         slices_means = [ScaleMeans(slice_).data for slice_ in self.slices]
 
-        if not hs_dims:
+        if not hs_dims or self.ndim == 1:
             return slices_means
 
         inserted_indices = self.inserted_hs_indices()
@@ -1138,8 +1135,6 @@ class CrunchCube(DataTable):
             if scale_means[0] is not None and 0 in hs_dims and inserted_indices[0]:
                 for i in inserted_indices[0]:
                     scale_means[0] = np.insert(scale_means[0], i, np.nan)
-            if len(scale_means) == 1 or len(inserted_indices) == 1:
-                continue
             if scale_means[1] is not None and 1 in hs_dims and inserted_indices[1]:
                 for i in inserted_indices[1]:
                     scale_means[1] = np.insert(scale_means[1], i, np.nan)
