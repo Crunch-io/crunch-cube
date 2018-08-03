@@ -119,22 +119,31 @@ class Dimension(object):
             return []  # For CA subvariables, we don't do H&S insertions
 
         elements = self.elements()
-
         element_ids = [element['id'] for element in elements]
 
-        tops = [st for st in self.subtotals if st.anchor == 'top']
-        bottoms = [st for st in self.subtotals if st.anchor == 'bottom']
-        middles = [st for st in self.subtotals if st.anchor not in ['top', 'bottom']]
+        top_indexes = []
+        middle_indexes = []
+        bottom_indexes = []
+        for i, st in enumerate(self.subtotals):
+            anchor = st.anchor
+            if anchor == 'top':
+                top_indexes.append(i)
+            elif anchor == 'bottom':
+                bottom_indexes.append(i)
+            else:
+                middle_indexes.append(anchor)
+        len_top_indexes = len(top_indexes)
 
-        top_indexes = list(range(len(tops)))
-        middle_indexes = [
-            index + element_ids.index(insertion.anchor) + len(tops) + 1
-            for index, insertion in enumerate(middles)
-        ]
-        bottom_indexes = [
-            index + len(tops) + len(middles) + len(elements)
-            for index, insertion in enumerate(bottoms)
-        ]
+        # push all top indexes to the top
+        top_indexes = range(len_top_indexes)
+
+        # adjust the middle_indexes appropriately
+        middle_indexes = [i + element_ids.index(index) + len_top_indexes + 1 for i, index in enumerate(middle_indexes)]
+
+        # what remains is the bottom
+        len_non_bottom_indexes = len_top_indexes + len(middle_indexes) + len(elements)
+        bottom_indexes = range(len_non_bottom_indexes, len_non_bottom_indexes + len(bottom_indexes))
+
         return top_indexes + middle_indexes + bottom_indexes
 
     def _transform_anchor(self, subtotal):
