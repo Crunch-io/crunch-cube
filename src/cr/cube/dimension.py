@@ -3,7 +3,7 @@
 import numpy as np
 
 from .subtotal import Subtotal
-from .utils import lazyproperty
+from .utils import lazyproperty, memoize
 
 
 class Dimension(object):
@@ -48,15 +48,15 @@ class Dimension(object):
         '''
         type_ = dim['type'].get('class')
 
-        if type_ and type_ == 'enum' and 'subreferences' in dim['references']:
-            return ('multiple_response'
-                    if cls._is_multiple_response(selections)
-                    else 'categorical_array')
-
-        if type_ and type_ == 'enum' and 'subtype' in dim['type']:
-            return dim['type']['subtype']['class']
-
         if type_:
+            if type_ == 'enum':
+                if 'subreferences' in dim['references']:
+                    return ('multiple_response'
+                            if cls._is_multiple_response(selections)
+                            else 'categorical_array')
+                if 'subtype' in dim['type']:
+                    return dim['type']['subtype']['class']
+
             return type_
 
         return dim['type']['subtype']['class']
@@ -118,7 +118,9 @@ class Dimension(object):
         if (self.type == 'categorical_array' or not self.subtotals):
             return []  # For CA subvariables, we don't do H&S insertions
 
-        element_ids = [element['id'] for element in self.elements()]
+        elements = self.elements()
+
+        element_ids = [element['id'] for element in elements]
 
         tops = [st for st in self.subtotals if st.anchor == 'top']
         bottoms = [st for st in self.subtotals if st.anchor == 'bottom']
@@ -130,7 +132,7 @@ class Dimension(object):
             for index, insertion in enumerate(middles)
         ]
         bottom_indexes = [
-            index + len(tops) + len(middles) + len(self.elements())
+            index + len(tops) + len(middles) + len(elements)
             for index, insertion in enumerate(bottoms)
         ]
         return top_indexes + middle_indexes + bottom_indexes
@@ -265,6 +267,7 @@ class Dimension(object):
 
         return label_with_ind['ind'] in valid_indices
 
+    @memoize
     def elements(self, include_missing=False):
         '''Get elements of the crunch Dimension.
 
@@ -280,6 +283,7 @@ class Dimension(object):
             if i not in self.invalid_indices
         ]
 
+    @memoize
     def valid_indices(self, include_missing):
         '''Gets valid indices of Crunch Cube Dimension's elements.
 
