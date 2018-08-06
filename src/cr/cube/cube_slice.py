@@ -246,5 +246,5 @@ class CubeSlice(object):
         '''
         return self.dim_types == ['multiple_response'] * 2
 
-    def scale_means(self, hs_dims=None):
-        return self._cube.scale_means(hs_dims)[self._index]
+    def scale_means(self, hs_dims=None, prune=False):
+        return self._cube.scale_means(hs_dims, prune)[self._index]
