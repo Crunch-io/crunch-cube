@@ -14,6 +14,8 @@ from .fixtures.cubes.scale_means import UNIVARIATE_CAT
 from .fixtures import ECON_BLAME_X_IDEOLOGY_ROW_HS
 from .fixtures import ECON_BLAME_WITH_HS
 from .fixtures import ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS
+from .fixtures import CA_X_MR_HS
+from .fixtures import CAT_X_CAT_PRUNING_HS
 
 from . import assert_scale_means_equal
 
@@ -186,3 +188,56 @@ def test_cat_x_cat_with_hs_on_both_dims():
     # Test for cube slices
     actual = cube.slices[0].scale_means(hs_dims=[0, 1])
     assert_scale_means_equal(actual, expected[0])
+
+def test_ca_x_mr_with_hs_and_pruning():
+    cube = CrunchCube(CA_X_MR_HS)
+    expected = [
+        [np.array([2.50818336, 2.56844883, 2.90251939, np.nan]), None],
+        [np.array([2.78385708, 2.69292009, 3.11594714, np.nan]), None],
+        [np.array([np.nan, np.nan, np.nan, np.nan]), None],
+    ]
+    actual = cube.scale_means()
+    assert_scale_means_equal(actual, expected)
+    expected = [
+        [np.array([2.50818336, 2.56844883, 2.90251939]), None],
+        [np.array([2.78385708, 2.69292009, 3.11594714]), None],
+        [np.array([]), None],
+    ]
+    actual = cube.scale_means(prune=True)
+    assert_scale_means_equal(actual, expected)
+    actual = cube.scale_means(prune=True, hs_dims=[0, 1])
+    assert_scale_means_equal(actual, expected)
+
+def test_cat_x_cat_pruning_and_hs():
+    cube = CrunchCube(CAT_X_CAT_PRUNING_HS)
+    expected = [[
+        np.array([1.57933884, 2.10618401, 2.30460074, np.nan, 2.34680135]),
+        np.array([1.74213625, 1.97      , 2.45356177, 2.11838791, np.nan, 2.]),
+    ]]
+    actual = cube.scale_means()
+
+    # Just H&S
+    assert_scale_means_equal(actual, expected)
+    expected = [[
+        np.array([1.57933884, np.nan, 2.10618401, 2.30460074, np.nan, 2.34680135]),
+        np.array([1.74213625, np.nan, 1.97      , 2.45356177, 2.11838791, np.nan, 2.]),
+    ]]
+    actual = cube.scale_means(hs_dims=[0, 1])
+
+    # Just pruning
+    assert_scale_means_equal(actual, expected)
+    expected = [[
+        np.array([1.57933884, 2.10618401, 2.30460074, 2.34680135]),
+        np.array([1.74213625, 1.97      , 2.45356177, 2.11838791, 2.]),
+    ]]
+    actual = cube.scale_means(prune=True)
+    assert_scale_means_equal(actual, expected)
+
+    # Pruning and H&S
+    assert_scale_means_equal(actual, expected)
+    expected = [[
+        np.array([1.57933884, np.nan, 2.10618401, 2.30460074, 2.34680135]),
+        np.array([1.74213625, np.nan, 1.97      , 2.45356177, 2.11838791, 2.]),
+    ]]
+    actual = cube.scale_means(hs_dims=[0, 1], prune=True)
+    assert_scale_means_equal(actual, expected)
