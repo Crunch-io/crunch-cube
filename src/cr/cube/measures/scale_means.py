@@ -9,61 +9,60 @@ from ..utils import lazyproperty
 
 class ScaleMeans(object):
     '''Implementation of the Means service.'''
-    def __init__(self, cube):
-        self._cube = cube
+    def __init__(self, slice_):
+        self._slice = slice_
 
     @lazyproperty
     def data(self):
         '''Get the means calculation.'''
-        table = self._cube.as_array()
-        contents = self._inner_prod(table, self.values)
+        means = []
+        table = self._slice.as_array()
+        products = self._inner_prods(table, self.values)
 
-        if self._cube.has_mr and not self._cube.is_double_mr:
-            axis = 1 - self._cube.mr_dim_ind
-            return np.sum(contents, axis) / np.sum(table, axis)
+        for axis, product in enumerate(products):
+            if product is None:
+                means.append(product)
+                continue
 
-        if self.valid_inds.all():
-            return np.sum(contents, self.axis) / self._cube.margin(self.axis)
-        else:
-            num = np.sum(contents[self.contents_inds], self.axis)
-            den = np.sum(table[self.contents_inds], self.axis)
-            return num / den
-
-    @lazyproperty
-    def axis(self):
-        '''Get axis for means calculation.'''
-        axis = 0
-        if self._cube.ca_dim_ind == 0 or self._cube.ca_dim_ind == 2:
-            axis = 1
-        elif len(self._cube.dimensions) > 2 and self._cube.ca_dim_ind == 1:
-            axis = 2
-        return axis
+            # Calculate means
+            num = np.sum(product[self.valid_indices(axis)], axis)
+            den = np.sum(table[self.valid_indices(axis)], axis)
+            mean = num / den
+            if not isinstance(mean, np.ndarray):
+                mean = np.array([mean])
+            means.append(mean)
+        return means
 
     @lazyproperty
     def values(self):
         '''Get num values for means calculation.'''
-        return np.array([
-            dim.values for dim in self._cube.dimensions
-            if dim.values and any(~np.isnan(dim.values))
-        ][int(len(self._cube.dimensions) > 2)])
-
-    @lazyproperty
-    def valid_inds(self):
-        '''Valid indices for numerical values.'''
-        return ~np.isnan(self.values)
-
-    @lazyproperty
-    def contents_inds(self):
-        '''Create contents selection indices based on valid num vals.'''
         return [
-            slice(None) if i != self.axis else self.valid_inds
-            for i in range(len(self._cube.as_array().shape))
+            (
+                np.array(dim.values)
+                if dim.values and any(~np.isnan(dim.values)) else
+                None
+            )
+            for dim in self._slice.dimensions
         ]
 
-    def _inner_prod(self, contents, values):
-        if len(contents.shape) == 3 and self._cube.ca_dim_ind == 0:
-            values = values[:, np.newaxis]
-        try:
-            return contents * values
-        except:
-            return contents * values[:, np.newaxis]
+    def valid_indices(self, axis):
+        return [
+            (
+                ~np.isnan(np.array(dim.values))
+                if dim.values and any(~np.isnan(dim.values)) and axis == i else
+                slice(None)
+            )
+            for i, dim in enumerate(self._slice.dimensions)
+        ]
+
+    def _inner_prods(self, contents, values):
+        products = []
+        for i, numeric in enumerate(values):
+            if numeric is None:
+                products.append(numeric)
+                continue
+            inflate = self._slice.ndim > 1 and not i
+            numeric = numeric[:, None] if inflate else numeric
+            product = contents * numeric
+            products.append(product)
+        return products

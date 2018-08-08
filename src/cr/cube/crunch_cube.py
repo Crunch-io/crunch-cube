@@ -1082,9 +1082,6 @@ class CrunchCube(DataTable):
 
         if hs_dims:
             res = self._intersperse_hs_in_std_res(hs_dims, res)
-            arr = self.as_array(include_transforms_for_dims=hs_dims)
-            if isinstance(arr, np.ma.core.MaskedArray):
-                res = np.ma.masked_array(res, mask=arr.mask)
 
         if prune:
             arr = self.as_array(
@@ -1126,9 +1123,40 @@ class CrunchCube(DataTable):
 
         return res
 
-    def scale_means(self):
+    def scale_means(self, hs_dims=None, prune=False):
         '''Get cube means.'''
-        return ScaleMeans(self).data
+        slices_means = [ScaleMeans(slice_).data for slice_ in self.slices]
+
+        if  hs_dims and self.ndim > 1:
+            # Intersperse scale means with nans if H&S specified, and 2D. No
+            # need to modify 1D, as only one mean will ever be inserted.
+            inserted_indices = self.inserted_hs_indices()[-2:]
+            for scale_means in slices_means:
+                # Scale means 0 corresonds to the column dimension (is
+                # calculated by using its values). The result of it, however,
+                # is a row. That's why we need to check the insertions on the
+                # row dim (inserted columns).
+                if scale_means[0] is not None and 1 in hs_dims and inserted_indices[1]:
+                    for i in inserted_indices[1]:
+                        scale_means[0] = np.insert(scale_means[0], i, np.nan)
+                # Scale means 1 is a column, so we need to check for row insertions.
+                if scale_means[1] is not None and 0 in hs_dims and inserted_indices[0]:
+                    for i in inserted_indices[0]:
+                        scale_means[1] = np.insert(scale_means[1], i, np.nan)
+
+        if prune:
+            # Apply pruning
+            arr = self.as_array(include_transforms_for_dims=hs_dims, prune=True)
+            if isinstance(arr, np.ma.core.MaskedArray):
+                mask = arr.mask
+                for i, scale_means in enumerate(slices_means):
+                    if scale_means[0] is not None:
+                        row_mask = mask.all(axis=0) if self.ndim < 3 else mask.all(axis=1)[i]
+                        scale_means[0] = scale_means[0][~row_mask]
+                    if self.ndim > 1 and scale_means[1] is not None:
+                        col_mask = mask.all(axis=1) if self.ndim < 3 else mask.all(axis=2)[i]
+                        scale_means[1] = scale_means[1][~col_mask]
+        return slices_means
 
     def get_slices(self, ca_as_0th=False):
         if self.ndim < 3 and not ca_as_0th:

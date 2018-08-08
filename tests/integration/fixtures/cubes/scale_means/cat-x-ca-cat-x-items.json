@@ -1,0 +1,1033 @@
+{
+    "element": "shoji:view",
+    "self": "https://app.crunch.io/api/datasets/ddc1b8a25c454689911d3d7a59c97aee/cube/?filter=%5B%5D&query=%7B%22dimensions%22:%5B%7B%22variable%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2Fddc1b8a25c454689911d3d7a59c97aee%2Fvariables%2F000026%2F%22%7D,%7B%22variable%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2Fddc1b8a25c454689911d3d7a59c97aee%2Fvariables%2F0000d1%2F%22%7D,%7B%22each%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2Fddc1b8a25c454689911d3d7a59c97aee%2Fvariables%2F0000d1%2F%22%7D%5D,%22measures%22:%7B%22count%22:%7B%22function%22:%22cube_count%22,%22args%22:%5B%5D%7D%7D,%22weight%22:null%7D",
+    "value": {
+        "query": {
+            "measures": {
+                "count": {
+                    "function": "cube_count",
+                    "args": []
+                }
+            },
+            "dimensions": [
+                {
+                    "variable": "https://app.crunch.io/api/datasets/ddc1b8a25c454689911d3d7a59c97aee/variables/000026/"
+                },
+                {
+                    "variable": "https://app.crunch.io/api/datasets/ddc1b8a25c454689911d3d7a59c97aee/variables/0000d1/"
+                },
+                {
+                    "each": "https://app.crunch.io/api/datasets/ddc1b8a25c454689911d3d7a59c97aee/variables/0000d1/"
+                }
+            ],
+            "weight": null
+        },
+        "query_environment": {
+            "filter": []
+        },
+        "result": {
+            "dimensions": [
+                {
+                    "references": {
+                        "alias": "pasta",
+                        "notes": "A categorical variable",
+                        "name": "Shapes of pasta",
+                        "description": "The geometry of pasta"
+                    },
+                    "derived": false,
+                    "type": {
+                        "ordinal": false,
+                        "class": "categorical",
+                        "categories": [
+                            {
+                                "numeric_value": 1,
+                                "missing": false,
+                                "id": 1,
+                                "name": "Bucatini"
+                            },
+                            {
+                                "numeric_value": 2,
+                                "missing": false,
+                                "id": 2,
+                                "name": "Chitarra"
+                            },
+                            {
+                                "numeric_value": 0,
+                                "missing": false,
+                                "id": 0,
+                                "name": "Boccoli"
+                            },
+                            {
+                                "numeric_value": 4,
+                                "missing": false,
+                                "id": 4,
+                                "name": "Orecchiette"
+                            },
+                            {
+                                "numeric_value": 5,
+                                "missing": false,
+                                "id": 5,
+                                "name": "Quadrefiore"
+                            },
+                            {
+                                "numeric_value": 6,
+                                "missing": false,
+                                "id": 6,
+                                "name": "Fileja"
+                            },
+                            {
+                                "numeric_value": 32766,
+                                "missing": true,
+                                "id": 32766,
+                                "name": "Skipped"
+                            },
+                            {
+                                "numeric_value": 32767,
+                                "missing": true,
+                                "id": 32767,
+                                "name": "Not asked"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": true,
+                                "id": -1,
+                                "name": "No Data"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "references": {
+                        "subreferences": [
+                            {
+                                "alias": "stalin",
+                                "name": "იოსებ სტალინი (Stalin)",
+                                "description": "cabatt_1"
+                            },
+                            {
+                                "alias": "trotsky",
+                                "name": "Лев Троцкий (Trotsky)",
+                                "description": "cabatt_6"
+                            },
+                            {
+                                "alias": "kalinin",
+                                "name": "Михаи́л Ива́нович Кали́нин (Kalinin)",
+                                "description": "cabatt_3"
+                            },
+                            {
+                                "alias": "lenin",
+                                "name": "Владимир Ленин (Lenin)",
+                                "description": "cabatt_7"
+                            }
+                        ],
+                        "notes": "A categorical array variable where the missing categories are interspersed throughout the non-missing categories",
+                        "alias": "bolshevik_hair",
+                        "description": "In your opinion, each of these famous Bolshevik's facial hair is...",
+                        "name": "Bolshevik facial hair"
+                    },
+                    "derived": false,
+                    "type": {
+                        "ordinal": false,
+                        "subvariables": [
+                            "0007",
+                            "0008",
+                            "0009",
+                            "000a"
+                        ],
+                        "class": "categorical",
+                        "categories": [
+                            {
+                                "numeric_value": 32766,
+                                "selected": false,
+                                "id": 32766,
+                                "missing": true,
+                                "name": "skipped"
+                            },
+                            {
+                                "numeric_value": 32767,
+                                "selected": false,
+                                "id": 32767,
+                                "missing": true,
+                                "name": "not asked"
+                            },
+                            {
+                                "numeric_value": 1,
+                                "selected": false,
+                                "id": 1,
+                                "missing": false,
+                                "name": "Too much"
+                            },
+                            {
+                                "numeric_value": 5,
+                                "selected": false,
+                                "id": 5,
+                                "missing": false,
+                                "name": "Too little"
+                            },
+                            {
+                                "numeric_value": 0,
+                                "selected": false,
+                                "id": 0,
+                                "missing": false,
+                                "name": "The right amount"
+                            },
+                            {
+                                "numeric_value": 4,
+                                "selected": false,
+                                "id": 4,
+                                "missing": false,
+                                "name": "Not sure"
+                            },
+                            {
+                                "numeric_value": null,
+                                "selected": false,
+                                "id": -1,
+                                "missing": true,
+                                "name": "No Data"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "derived": true,
+                    "references": {
+                        "subreferences": [
+                            {
+                                "alias": "stalin",
+                                "name": "იოსებ სტალინი (Stalin)",
+                                "description": "cabatt_1"
+                            },
+                            {
+                                "alias": "trotsky",
+                                "name": "Лев Троцкий (Trotsky)",
+                                "description": "cabatt_6"
+                            },
+                            {
+                                "alias": "kalinin",
+                                "name": "Михаи́л Ива́нович Кали́нин (Kalinin)",
+                                "description": "cabatt_3"
+                            },
+                            {
+                                "alias": "lenin",
+                                "name": "Владимир Ленин (Lenin)",
+                                "description": "cabatt_7"
+                            }
+                        ],
+                        "notes": "A categorical array variable where the missing categories are interspersed throughout the non-missing categories",
+                        "description": "In your opinion, each of these famous Bolshevik's facial hair is...",
+                        "name": "Bolshevik facial hair",
+                        "alias": "bolshevik_hair"
+                    },
+                    "type": {
+                        "subtype": {
+                            "class": "variable"
+                        },
+                        "elements": [
+                            {
+                                "id": 1,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "stalin",
+                                        "name": "იოსებ სტალინი (Stalin)",
+                                        "description": "cabatt_1"
+                                    },
+                                    "id": "0007",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 32766,
+                                                "selected": false,
+                                                "id": 32766,
+                                                "missing": true,
+                                                "name": "skipped"
+                                            },
+                                            {
+                                                "numeric_value": 32767,
+                                                "selected": false,
+                                                "id": 32767,
+                                                "missing": true,
+                                                "name": "not asked"
+                                            },
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": false,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Too much"
+                                            },
+                                            {
+                                                "numeric_value": 5,
+                                                "selected": false,
+                                                "id": 5,
+                                                "missing": false,
+                                                "name": "Too little"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "selected": false,
+                                                "id": 0,
+                                                "missing": false,
+                                                "name": "The right amount"
+                                            },
+                                            {
+                                                "numeric_value": 4,
+                                                "selected": false,
+                                                "id": 4,
+                                                "missing": false,
+                                                "name": "Not sure"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "selected": false,
+                                                "id": -1,
+                                                "missing": true,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 2,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "trotsky",
+                                        "name": "Лев Троцкий (Trotsky)",
+                                        "description": "cabatt_6"
+                                    },
+                                    "id": "0008",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 32766,
+                                                "selected": false,
+                                                "id": 32766,
+                                                "missing": true,
+                                                "name": "skipped"
+                                            },
+                                            {
+                                                "numeric_value": 32767,
+                                                "selected": false,
+                                                "id": 32767,
+                                                "missing": true,
+                                                "name": "not asked"
+                                            },
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": false,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Too much"
+                                            },
+                                            {
+                                                "numeric_value": 5,
+                                                "selected": false,
+                                                "id": 5,
+                                                "missing": false,
+                                                "name": "Too little"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "selected": false,
+                                                "id": 0,
+                                                "missing": false,
+                                                "name": "The right amount"
+                                            },
+                                            {
+                                                "numeric_value": 4,
+                                                "selected": false,
+                                                "id": 4,
+                                                "missing": false,
+                                                "name": "Not sure"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "selected": false,
+                                                "id": -1,
+                                                "missing": true,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 3,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "kalinin",
+                                        "name": "Михаи́л Ива́нович Кали́нин (Kalinin)",
+                                        "description": "cabatt_3"
+                                    },
+                                    "id": "0009",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 32766,
+                                                "selected": false,
+                                                "id": 32766,
+                                                "missing": true,
+                                                "name": "skipped"
+                                            },
+                                            {
+                                                "numeric_value": 32767,
+                                                "selected": false,
+                                                "id": 32767,
+                                                "missing": true,
+                                                "name": "not asked"
+                                            },
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": false,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Too much"
+                                            },
+                                            {
+                                                "numeric_value": 5,
+                                                "selected": false,
+                                                "id": 5,
+                                                "missing": false,
+                                                "name": "Too little"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "selected": false,
+                                                "id": 0,
+                                                "missing": false,
+                                                "name": "The right amount"
+                                            },
+                                            {
+                                                "numeric_value": 4,
+                                                "selected": false,
+                                                "id": 4,
+                                                "missing": false,
+                                                "name": "Not sure"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "selected": false,
+                                                "id": -1,
+                                                "missing": true,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 4,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "lenin",
+                                        "name": "Владимир Ленин (Lenin)",
+                                        "description": "cabatt_7"
+                                    },
+                                    "id": "000a",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 32766,
+                                                "selected": false,
+                                                "id": 32766,
+                                                "missing": true,
+                                                "name": "skipped"
+                                            },
+                                            {
+                                                "numeric_value": 32767,
+                                                "selected": false,
+                                                "id": 32767,
+                                                "missing": true,
+                                                "name": "not asked"
+                                            },
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": false,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Too much"
+                                            },
+                                            {
+                                                "numeric_value": 5,
+                                                "selected": false,
+                                                "id": 5,
+                                                "missing": false,
+                                                "name": "Too little"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "selected": false,
+                                                "id": 0,
+                                                "missing": false,
+                                                "name": "The right amount"
+                                            },
+                                            {
+                                                "numeric_value": 4,
+                                                "selected": false,
+                                                "id": 4,
+                                                "missing": false,
+                                                "name": "Not sure"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "selected": false,
+                                                "id": -1,
+                                                "missing": true,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            }
+                        ],
+                        "class": "enum"
+                    }
+                }
+            ],
+            "missing": 6,
+            "measures": {
+                "count": {
+                    "data": [
+                        0,
+                        6,
+                        1,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        28,
+                        13,
+                        14,
+                        13,
+                        6,
+                        20,
+                        24,
+                        25,
+                        17,
+                        14,
+                        13,
+                        15,
+                        4,
+                        2,
+                        3,
+                        2,
+                        0,
+                        0,
+                        0,
+                        0,
+                        2,
+                        13,
+                        1,
+                        3,
+                        0,
+                        0,
+                        0,
+                        0,
+                        64,
+                        9,
+                        10,
+                        6,
+                        16,
+                        63,
+                        73,
+                        75,
+                        36,
+                        30,
+                        27,
+                        27,
+                        8,
+                        11,
+                        15,
+                        15,
+                        0,
+                        0,
+                        0,
+                        0,
+                        3,
+                        37,
+                        6,
+                        10,
+                        0,
+                        0,
+                        0,
+                        0,
+                        350,
+                        19,
+                        16,
+                        11,
+                        38,
+                        338,
+                        372,
+                        348,
+                        131,
+                        150,
+                        143,
+                        149,
+                        94,
+                        72,
+                        79,
+                        98,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        26,
+                        2,
+                        11,
+                        0,
+                        0,
+                        0,
+                        0,
+                        163,
+                        11,
+                        13,
+                        6,
+                        24,
+                        149,
+                        176,
+                        175,
+                        82,
+                        98,
+                        82,
+                        90,
+                        40,
+                        26,
+                        37,
+                        28,
+                        0,
+                        0,
+                        0,
+                        0,
+                        4,
+                        21,
+                        4,
+                        6,
+                        0,
+                        0,
+                        0,
+                        0,
+                        177,
+                        11,
+                        9,
+                        10,
+                        22,
+                        169,
+                        194,
+                        192,
+                        148,
+                        177,
+                        161,
+                        160,
+                        50,
+                        23,
+                        33,
+                        33,
+                        0,
+                        0,
+                        0,
+                        0,
+                        3,
+                        17,
+                        5,
+                        6,
+                        0,
+                        0,
+                        0,
+                        0,
+                        58,
+                        5,
+                        5,
+                        4,
+                        6,
+                        45,
+                        53,
+                        57,
+                        12,
+                        18,
+                        10,
+                        10,
+                        71,
+                        65,
+                        77,
+                        73,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        2,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        2,
+                        1,
+                        0,
+                        0,
+                        1,
+                        1,
+                        3,
+                        1,
+                        1,
+                        2,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                    ],
+                    "n_missing": 6,
+                    "metadata": {
+                        "references": {},
+                        "derived": true,
+                        "type": {
+                            "integer": true,
+                            "missing_rules": {},
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "class": "numeric"
+                        }
+                    }
+                }
+            },
+            "element": "crunch:cube",
+            "counts": [
+                0,
+                6,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                28,
+                13,
+                14,
+                13,
+                6,
+                20,
+                24,
+                25,
+                17,
+                14,
+                13,
+                15,
+                4,
+                2,
+                3,
+                2,
+                0,
+                0,
+                0,
+                0,
+                2,
+                13,
+                1,
+                3,
+                0,
+                0,
+                0,
+                0,
+                64,
+                9,
+                10,
+                6,
+                16,
+                63,
+                73,
+                75,
+                36,
+                30,
+                27,
+                27,
+                8,
+                11,
+                15,
+                15,
+                0,
+                0,
+                0,
+                0,
+                3,
+                37,
+                6,
+                10,
+                0,
+                0,
+                0,
+                0,
+                350,
+                19,
+                16,
+                11,
+                38,
+                338,
+                372,
+                348,
+                131,
+                150,
+                143,
+                149,
+                94,
+                72,
+                79,
+                98,
+                0,
+                0,
+                0,
+                0,
+                1,
+                26,
+                2,
+                11,
+                0,
+                0,
+                0,
+                0,
+                163,
+                11,
+                13,
+                6,
+                24,
+                149,
+                176,
+                175,
+                82,
+                98,
+                82,
+                90,
+                40,
+                26,
+                37,
+                28,
+                0,
+                0,
+                0,
+                0,
+                4,
+                21,
+                4,
+                6,
+                0,
+                0,
+                0,
+                0,
+                177,
+                11,
+                9,
+                10,
+                22,
+                169,
+                194,
+                192,
+                148,
+                177,
+                161,
+                160,
+                50,
+                23,
+                33,
+                33,
+                0,
+                0,
+                0,
+                0,
+                3,
+                17,
+                5,
+                6,
+                0,
+                0,
+                0,
+                0,
+                58,
+                5,
+                5,
+                4,
+                6,
+                45,
+                53,
+                57,
+                12,
+                18,
+                10,
+                10,
+                71,
+                65,
+                77,
+                73,
+                0,
+                0,
+                0,
+                0,
+                0,
+                2,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                2,
+                1,
+                0,
+                0,
+                1,
+                1,
+                3,
+                1,
+                1,
+                2,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "n": 1662
+        }
+    }
+}
