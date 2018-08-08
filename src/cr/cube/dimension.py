@@ -223,7 +223,6 @@ class Dimension(object):
     def labels(self, include_missing=False, include_transforms=False,
                include_cat_ids=False):
         '''Get labels of the Crunch Dimension.'''
-        valid_indices = self.valid_indices(include_missing)
         if (not (include_transforms and self.has_transforms) or
                 self.type == 'categorical_array'):
             return [
@@ -245,6 +244,7 @@ class Dimension(object):
         } for (i, el) in enumerate(self._elements)]
         labels_with_cat_ids = self._update_with_subtotals(labels_with_cat_ids)
 
+        valid_indices = self.valid_indices(include_missing)
         return [
             (
                 label['name']
