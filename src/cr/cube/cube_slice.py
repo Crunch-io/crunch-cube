@@ -154,6 +154,21 @@ class CubeSlice(object):
         return 'categorical_array' in self.dim_types
 
     @property
+    def ca_dim_ind(self):
+        index = self._cube.ca_dim_ind
+        if index is None:
+            return None
+
+        if self.ndim == 3:
+            if index == 0:
+                # If tab dim is items, slices are not
+                return None
+            return index - 1
+
+        # If 2D - just return it
+        return index
+
+    @property
     def mr_dim_ind(self):
         '''Get the correct index of the MR dimension in the cube slice.'''
         mr_dim_ind = self._cube.mr_dim_ind
@@ -230,3 +245,6 @@ class CubeSlice(object):
         properties of the slices.
         '''
         return self.dim_types == ['multiple_response'] * 2
+
+    def scale_means(self, hs_dims=None, prune=False):
+        return self._cube.scale_means(hs_dims, prune)[self._index]

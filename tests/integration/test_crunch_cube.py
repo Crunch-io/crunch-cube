@@ -54,6 +54,8 @@ from .fixtures import MR_X_CAT_X_MR_PRUNE
 from .fixtures import HUFFPOST_ACTIONS_X_HOUSEHOLD
 from .fixtures import GENDER_X_WEIGHT
 
+from . import assert_scale_means_equal
+
 
 class TestCrunchCube(TestCase):
     def test_crunch_cube_loads_data(self):
@@ -1540,80 +1542,80 @@ class TestCrunchCube(TestCase):
 
     def test_means_univariate_cat(self):
         cube = CrunchCube(ECON_BLAME_WITH_HS)
-        expected = 2.1735205616850553
+        expected = [[np.array(2.1735205616850553)]]
         actual = cube.scale_means()
-        self.assertEqual(actual, expected)
+        assert_scale_means_equal(actual, expected)
 
     def test_means_bivariate_cat(self):
         cube = CrunchCube(ECON_BLAME_X_IDEOLOGY_ROW_HS)
-        expected = np.array([
+        expected = [[np.array([
             2.19444444,
             2.19230769,
             2.26666667,
             1.88990826,
             1.76363636,
             3.85,
-        ])
+        ])]]
         actual = cube.scale_means()
-        np.testing.assert_almost_equal(actual, expected)
+        assert_scale_means_equal(actual, expected)
 
     def test_means_cat_x_mr(self):
         cube = CrunchCube(FRUIT_X_PETS)
-        expected = np.array([1.7, 1.6470588, 1.6842105])
+        expected = [[np.array([1.7, 1.6470588, 1.6842105]), None]]
         actual = cube.scale_means()
-        np.testing.assert_almost_equal(actual, expected)
+        assert_scale_means_equal(actual, expected)
 
     def test_means_mr_x_cat(self):
         cube = CrunchCube(PETS_X_FRUIT)
-        expected = np.array([1.7, 1.6470588, 1.6842105])
+        expected = [[None, np.array([1.7, 1.6470588, 1.6842105])]]
         actual = cube.scale_means()
-        np.testing.assert_almost_equal(actual, expected)
+        assert_scale_means_equal(actual, expected)
 
     def test_means_cat_array_cat_dim_first(self):
         cube = CrunchCube(PETS_ARRAY_CAT_FIRST)
-        expected = np.array([1.44333002, 1.48049069, 1.57881177])
+        expected = [[None, np.array([1.44333002, 1.48049069, 1.57881177])]]
         actual = cube.scale_means()
-        np.testing.assert_almost_equal(actual, expected)
+        assert_scale_means_equal(actual, expected)
 
     def test_means_cat_array_subvar_dim_first(self):
         cube = CrunchCube(PETS_ARRAY_SUBVAR_FIRST)
-        expected = np.array([1.44333002, 1.48049069, 1.57881177])
+        expected = [[np.array([1.44333002, 1.48049069, 1.57881177]), None]]
         actual = cube.scale_means()
-        np.testing.assert_almost_equal(actual, expected)
+        assert_scale_means_equal(actual, expected)
 
     def test_means_cat_x_cat_arr_fruit_first(self):
         cube = CrunchCube(FRUIT_X_PETS_ARRAY)
-        expected = np.array([
-            [1.48, 1.42857143, 1.52173913],
-            [1.40740741, 1.53846154, 1.55319149],
-        ])
+        expected = [
+            [None, np.array([1.48, 1.42857143, 1.52173913])],
+            [None, np.array([1.40740741, 1.53846154, 1.55319149])],
+        ]
         actual = cube.scale_means()
-        np.testing.assert_almost_equal(actual, expected)
+        assert_scale_means_equal(actual, expected)
 
     def test_means_cat_x_cat_arr_subvars_first(self):
         cube = CrunchCube(FRUIT_X_PETS_ARRAY_SUBVARS_FIRST)
-        expected = np.array([
-            [1.71111111, 1.6, 1.65625],
-            [1.64705882, 1.7, 1.68421053],
-        ])
+        expected = [
+            [np.array([1.71111111, 1.6, 1.65625]), None],
+            [np.array([1.64705882, 1.7, 1.68421053]), None],
+        ]
         actual = cube.scale_means()
-        np.testing.assert_almost_equal(actual, expected)
+        assert_scale_means_equal(actual, expected)
 
     def test_means_cat_x_cat_arr_pets_first(self):
         cube = CrunchCube(FRUIT_X_PETS_ARRAY_PETS_FIRST)
-        expected = np.array([
-            [1.48, 1.40740741],
-            [1.42857143, 1.53846154],
-            [1.52173913, 1.55319149],
-        ])
+        expected = [
+            [np.array([1.48, 1.40740741]), np.array([1.71111111, 1.64705882])],
+            [np.array([1.42857143, 1.53846154]), np.array([1.6, 1.7])],
+            [np.array([1.52173913, 1.55319149]), np.array([1.65625, 1.68421053])],
+        ]
         actual = cube.scale_means()
-        np.testing.assert_almost_equal(actual, expected)
+        assert_scale_means_equal(actual, expected)
 
     def test_means_with_null_values(self):
         cube = CrunchCube(SCALE_WITH_NULL_VALUES)
-        expected = np.array([1.2060688, 1.0669344, 1.023199])
+        expected = [[np.array([1.2060688, 1.0669344, 1.023199]), None]]
         actual = cube.scale_means()
-        np.testing.assert_almost_equal(actual, expected)
+        assert_scale_means_equal(actual, expected)
 
     def test_values_services(self):
         cube = CrunchCube(VALUE_SERVICES)

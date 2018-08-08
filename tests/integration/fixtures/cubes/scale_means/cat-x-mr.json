@@ -1,0 +1,539 @@
+{
+    "element": "shoji:view",
+    "self": "https://app.crunch.io/api/datasets/ddc1b8a25c454689911d3d7a59c97aee/cube/?filter=%7B%22filter%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2Fddc1b8a25c454689911d3d7a59c97aee%2Ffilters%2F06b4deb17519405ebe4581dd8dbe9eba%2F%22%7D&query=%7B%22dimensions%22:%5B%7B%22variable%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2Fddc1b8a25c454689911d3d7a59c97aee%2Fvariables%2F000067%2F%22%7D,%7B%22each%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2Fddc1b8a25c454689911d3d7a59c97aee%2Fvariables%2F0000dd%2F%22%7D,%7B%22function%22:%22as_selected%22,%22args%22:%5B%7B%22variable%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2Fddc1b8a25c454689911d3d7a59c97aee%2Fvariables%2F0000dd%2F%22%7D%5D%7D%5D,%22measures%22:%7B%22count%22:%7B%22function%22:%22cube_count%22,%22args%22:%5B%5D%7D%7D,%22weight%22:null%7D",
+    "value": {
+        "query": {
+            "measures": {
+                "count": {
+                    "function": "cube_count",
+                    "args": []
+                }
+            },
+            "dimensions": [
+                {
+                    "variable": "https://app.crunch.io/api/datasets/ddc1b8a25c454689911d3d7a59c97aee/variables/000067/"
+                },
+                {
+                    "each": "https://app.crunch.io/api/datasets/ddc1b8a25c454689911d3d7a59c97aee/variables/0000dd/"
+                },
+                {
+                    "function": "as_selected",
+                    "args": [
+                        {
+                            "variable": "https://app.crunch.io/api/datasets/ddc1b8a25c454689911d3d7a59c97aee/variables/0000dd/"
+                        }
+                    ]
+                }
+            ],
+            "weight": null
+        },
+        "query_environment": {
+            "filter": [
+                "https://app.crunch.io/api/datasets/ddc1b8a25c454689911d3d7a59c97aee/filters/06b4deb17519405ebe4581dd8dbe9eba/"
+            ]
+        },
+        "result": {
+            "dimensions": [
+                {
+                    "references": {
+                        "alias": "food_groups",
+                        "notes": "A categorical variable where the missing categories are interspersed throughout the non-missing categories",
+                        "name": "Food groups",
+                        "description": "Four of the five USDA food groups"
+                    },
+                    "derived": false,
+                    "type": {
+                        "ordinal": false,
+                        "class": "categorical",
+                        "categories": [
+                            {
+                                "numeric_value": 0,
+                                "missing": false,
+                                "id": 0,
+                                "name": "Vegetables"
+                            },
+                            {
+                                "numeric_value": 32766,
+                                "missing": true,
+                                "id": 32766,
+                                "name": "Don't know"
+                            },
+                            {
+                                "numeric_value": 2,
+                                "missing": false,
+                                "id": 2,
+                                "name": "Fruit"
+                            },
+                            {
+                                "numeric_value": 5,
+                                "missing": false,
+                                "id": 5,
+                                "name": "Grain"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": true,
+                                "id": -1,
+                                "name": "No Data"
+                            },
+                            {
+                                "numeric_value": 4,
+                                "missing": false,
+                                "id": 4,
+                                "name": "Meat"
+                            },
+                            {
+                                "numeric_value": 32767,
+                                "missing": true,
+                                "id": 32767,
+                                "name": "Not asked"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "derived": true,
+                    "references": {
+                        "subreferences": [
+                            {
+                                "alias": "eurasia",
+                                "name": "Eurasia",
+                                "description": "union_hhold_1"
+                            },
+                            {
+                                "alias": "oceania",
+                                "name": "Oceania",
+                                "description": "union_hhold_2"
+                            },
+                            {
+                                "alias": "eastasia",
+                                "name": "Eastasia",
+                                "description": "union_hhold_3"
+                            },
+                            {
+                                "alias": "disputed",
+                                "name": "Disputed"
+                            }
+                        ],
+                        "notes": "A multiple response variable, where one item has no responses",
+                        "alias": "1984_countries",
+                        "description": "Which of the following countries from 1984 would you live in? (select all that apply)",
+                        "name": "Countries from 1984"
+                    },
+                    "type": {
+                        "subtype": {
+                            "class": "variable"
+                        },
+                        "elements": [
+                            {
+                                "id": 1,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "eurasia",
+                                        "name": "Eurasia",
+                                        "description": "union_hhold_1"
+                                    },
+                                    "id": "00c5",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Other"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 2,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "oceania",
+                                        "name": "Oceania",
+                                        "description": "union_hhold_2"
+                                    },
+                                    "id": "00c6",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Other"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 3,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "eastasia",
+                                        "name": "Eastasia",
+                                        "description": "union_hhold_3"
+                                    },
+                                    "id": "00c7",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Other"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 4,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "disputed",
+                                        "name": "Disputed"
+                                    },
+                                    "id": "de5314cea98b44eb9c243a86e06d1476",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Other"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            }
+                        ],
+                        "class": "enum"
+                    }
+                },
+                {
+                    "references": {
+                        "subreferences": [
+                            {
+                                "alias": "eurasia",
+                                "name": "Eurasia",
+                                "description": "union_hhold_1"
+                            },
+                            {
+                                "alias": "oceania",
+                                "name": "Oceania",
+                                "description": "union_hhold_2"
+                            },
+                            {
+                                "alias": "eastasia",
+                                "name": "Eastasia",
+                                "description": "union_hhold_3"
+                            },
+                            {
+                                "alias": "disputed",
+                                "name": "Disputed"
+                            }
+                        ],
+                        "notes": "A multiple response variable, where one item has no responses",
+                        "description": "Which of the following countries from 1984 would you live in? (select all that apply)",
+                        "name": "Countries from 1984",
+                        "alias": "1984_countries"
+                    },
+                    "derived": true,
+                    "type": {
+                        "ordinal": false,
+                        "subvariables": [
+                            "00c5",
+                            "00c6",
+                            "00c7",
+                            "de5314cea98b44eb9c243a86e06d1476"
+                        ],
+                        "class": "categorical",
+                        "categories": [
+                            {
+                                "numeric_value": 1,
+                                "selected": true,
+                                "id": 1,
+                                "missing": false,
+                                "name": "Selected"
+                            },
+                            {
+                                "numeric_value": 0,
+                                "missing": false,
+                                "id": 0,
+                                "name": "Other"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": true,
+                                "id": -1,
+                                "name": "No Data"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "missing": 6,
+            "measures": {
+                "count": {
+                    "data": [
+                        39,
+                        389,
+                        0,
+                        34,
+                        394,
+                        0,
+                        357,
+                        71,
+                        0,
+                        0,
+                        428,
+                        0,
+                        0,
+                        6,
+                        0,
+                        0,
+                        6,
+                        0,
+                        5,
+                        1,
+                        0,
+                        0,
+                        6,
+                        0,
+                        44,
+                        447,
+                        0,
+                        36,
+                        455,
+                        0,
+                        415,
+                        76,
+                        0,
+                        0,
+                        491,
+                        0,
+                        24,
+                        266,
+                        0,
+                        29,
+                        261,
+                        0,
+                        241,
+                        49,
+                        0,
+                        0,
+                        290,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        35,
+                        394,
+                        0,
+                        24,
+                        405,
+                        0,
+                        371,
+                        58,
+                        0,
+                        0,
+                        429,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                    ],
+                    "n_missing": 6,
+                    "metadata": {
+                        "references": {},
+                        "derived": true,
+                        "type": {
+                            "integer": true,
+                            "missing_rules": {},
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "class": "numeric"
+                        }
+                    }
+                }
+            },
+            "element": "crunch:cube",
+            "counts": [
+                39,
+                389,
+                0,
+                34,
+                394,
+                0,
+                357,
+                71,
+                0,
+                0,
+                428,
+                0,
+                0,
+                6,
+                0,
+                0,
+                6,
+                0,
+                5,
+                1,
+                0,
+                0,
+                6,
+                0,
+                44,
+                447,
+                0,
+                36,
+                455,
+                0,
+                415,
+                76,
+                0,
+                0,
+                491,
+                0,
+                24,
+                266,
+                0,
+                29,
+                261,
+                0,
+                241,
+                49,
+                0,
+                0,
+                290,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                35,
+                394,
+                0,
+                24,
+                405,
+                0,
+                371,
+                58,
+                0,
+                0,
+                429,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "n": 1644
+        }
+    }
+}
