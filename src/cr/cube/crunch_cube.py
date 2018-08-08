@@ -147,7 +147,7 @@ class CrunchCube(DataTable):
                          i - dim_offset in include_transforms_for_dims)
             if dim.type == 'multiple_response':
                 dim_offset += 1
-            if not transform or dim.type == 'categorical_array':
+            if not transform or dim.type in ['categorical_array', 'multiple_response']:
                 continue
             # Perform transformations
             insertions = self._insertions(res, dim, i)
@@ -947,6 +947,7 @@ class CrunchCube(DataTable):
 
         # Calculate nominator from table (include all H&S dimensions).
         num = self._transform(table, include_transforms_for_dims, inflate=True)
+        # num = self._transform(table, hs_dims, inflate=True)
 
         res = self._fix_shape(num / den)
 
