@@ -1128,14 +1128,20 @@ class CrunchCube(DataTable):
         slices_means = [ScaleMeans(slice_).data for slice_ in self.slices]
 
         if  hs_dims and self.ndim > 1:
-            # Intersperse scale means with nans if H&S specified
-            inserted_indices = self.inserted_hs_indices()
+            # Intersperse scale means with nans if H&S specified, and 2D. No
+            # need to modify 1D, as only one mean will ever be inserted.
+            inserted_indices = self.inserted_hs_indices()[-2:]
             for scale_means in slices_means:
-                if scale_means[0] is not None and 0 in hs_dims and inserted_indices[0]:
-                    for i in inserted_indices[0]:
-                        scale_means[0] = np.insert(scale_means[0], i, np.nan)
-                if scale_means[1] is not None and 1 in hs_dims and inserted_indices[1]:
+                # Scale means 0 corresonds to the column dimension (is
+                # calculated by using its values). The result of it, however,
+                # is a row. That's why we need to check the insertions on the
+                # row dim (inserted columns).
+                if scale_means[0] is not None and 1 in hs_dims and inserted_indices[1]:
                     for i in inserted_indices[1]:
+                        scale_means[0] = np.insert(scale_means[0], i, np.nan)
+                # Scale means 1 is a column, so we need to check for row insertions.
+                if scale_means[1] is not None and 0 in hs_dims and inserted_indices[0]:
+                    for i in inserted_indices[0]:
                         scale_means[1] = np.insert(scale_means[1], i, np.nan)
 
         if prune:

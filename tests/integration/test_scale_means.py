@@ -136,8 +136,8 @@ def test_cat_x_cat_with_hs():
 
     # Test with H&S
     expected = [[
-        np.array([2.19444444, 2.19230769, np.nan, 2.26666667, 1.88990826, 1.76363636, 3.85]),
-        np.array([3.87368421, 2.51767677, 3.38429752, 3.66666667, 4.13235294]),
+        np.array([2.19444444, 2.19230769, 2.26666667, 1.88990826, 1.76363636, 3.85]),
+        np.array([3.87368421, 2.51767677, np.nan, 3.38429752, 3.66666667, 4.13235294]),
     ]]
     actual = cube.scale_means(hs_dims=[0, 1])
     assert_scale_means_equal(actual, expected)
@@ -180,8 +180,8 @@ def test_cat_x_cat_with_hs_on_both_dims():
 
     # Test with H&S
     expected =[[
-        np.array([2.19444444, 2.19230769, np.nan, 2.26666667, 1.88990826, 1.76363636, 3.85]),
-        np.array([3.87368421, 2.51767677, 3.38429752, np.nan, 3.66666667, 4.13235294]),
+        np.array([2.19444444, 2.19230769, 2.26666667, np.nan, 1.88990826, 1.76363636, 3.85]),
+        np.array([3.87368421, 2.51767677, np.nan, 3.38429752, 3.66666667, 4.13235294]),
     ]]
     actual = cube.scale_means(hs_dims=[0, 1])
     assert_scale_means_equal(actual, expected)
