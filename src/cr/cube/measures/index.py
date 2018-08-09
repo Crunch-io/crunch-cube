@@ -48,7 +48,11 @@ class Index(object):
         if len(result) == 1 and self.cube.ndim < 3:
             result = result[0]
         else:
-            result = np.ma.masked_array(result) if self.prune else np.array(result)
+            if self.prune:
+                mask = np.array([slice_.mask for slice_ in result])
+                result = np.ma.masked_array(result, mask)
+            else:
+                result = np.array(result)
 
         return result
 
