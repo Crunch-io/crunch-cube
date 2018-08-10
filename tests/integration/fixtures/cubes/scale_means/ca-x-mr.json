@@ -1,0 +1,1390 @@
+{
+    "element": "shoji:view",
+    "self": "https://app.crunch.io/api/datasets/ddc1b8a25c454689911d3d7a59c97aee/cube/?filter=%5B%5D&query=%7B%22dimensions%22:%5B%7B%22each%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2Fddc1b8a25c454689911d3d7a59c97aee%2Fvariables%2F0000d1%2F%22%7D,%7B%22variable%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2Fddc1b8a25c454689911d3d7a59c97aee%2Fvariables%2F0000d1%2F%22%7D,%7B%22each%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2Fddc1b8a25c454689911d3d7a59c97aee%2Fvariables%2F0000dd%2F%22%7D,%7B%22function%22:%22as_selected%22,%22args%22:%5B%7B%22variable%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2Fddc1b8a25c454689911d3d7a59c97aee%2Fvariables%2F0000dd%2F%22%7D%5D%7D%5D,%22measures%22:%7B%22count%22:%7B%22function%22:%22cube_count%22,%22args%22:%5B%5D%7D%7D,%22weight%22:null%7D",
+    "value": {
+        "query": {
+            "measures": {
+                "count": {
+                    "function": "cube_count",
+                    "args": []
+                }
+            },
+            "dimensions": [
+                {
+                    "each": "https://app.crunch.io/api/datasets/ddc1b8a25c454689911d3d7a59c97aee/variables/0000d1/"
+                },
+                {
+                    "variable": "https://app.crunch.io/api/datasets/ddc1b8a25c454689911d3d7a59c97aee/variables/0000d1/"
+                },
+                {
+                    "each": "https://app.crunch.io/api/datasets/ddc1b8a25c454689911d3d7a59c97aee/variables/0000dd/"
+                },
+                {
+                    "function": "as_selected",
+                    "args": [
+                        {
+                            "variable": "https://app.crunch.io/api/datasets/ddc1b8a25c454689911d3d7a59c97aee/variables/0000dd/"
+                        }
+                    ]
+                }
+            ],
+            "weight": null
+        },
+        "query_environment": {
+            "filter": []
+        },
+        "result": {
+            "dimensions": [
+                {
+                    "derived": true,
+                    "references": {
+                        "subreferences": [
+                            {
+                                "alias": "stalin",
+                                "name": "იოსებ სტალინი (Stalin)",
+                                "description": "cabatt_1"
+                            },
+                            {
+                                "alias": "trotsky",
+                                "name": "Лев Троцкий (Trotsky)",
+                                "description": "cabatt_6"
+                            },
+                            {
+                                "alias": "kalinin",
+                                "name": "Михаи́л Ива́нович Кали́нин (Kalinin)",
+                                "description": "cabatt_3"
+                            },
+                            {
+                                "alias": "lenin",
+                                "name": "Владимир Ленин (Lenin)",
+                                "description": "cabatt_7"
+                            }
+                        ],
+                        "notes": "A categorical array variable where the missing categories are interspersed throughout the non-missing categories",
+                        "description": "In your opinion, each of these famous Bolshevik's facial hair is...",
+                        "name": "Bolshevik facial hair",
+                        "alias": "bolshevik_hair"
+                    },
+                    "type": {
+                        "subtype": {
+                            "class": "variable"
+                        },
+                        "elements": [
+                            {
+                                "id": 1,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "stalin",
+                                        "name": "იოსებ სტალინი (Stalin)",
+                                        "description": "cabatt_1"
+                                    },
+                                    "id": "0007",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 32766,
+                                                "selected": false,
+                                                "id": 32766,
+                                                "missing": true,
+                                                "name": "skipped"
+                                            },
+                                            {
+                                                "numeric_value": 32767,
+                                                "selected": false,
+                                                "id": 32767,
+                                                "missing": true,
+                                                "name": "not asked"
+                                            },
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": false,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Too much"
+                                            },
+                                            {
+                                                "numeric_value": 5,
+                                                "selected": false,
+                                                "id": 5,
+                                                "missing": false,
+                                                "name": "Too little"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "selected": false,
+                                                "id": 0,
+                                                "missing": false,
+                                                "name": "The right amount"
+                                            },
+                                            {
+                                                "numeric_value": 4,
+                                                "selected": false,
+                                                "id": 4,
+                                                "missing": false,
+                                                "name": "Not sure"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "selected": false,
+                                                "id": -1,
+                                                "missing": true,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 2,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "trotsky",
+                                        "name": "Лев Троцкий (Trotsky)",
+                                        "description": "cabatt_6"
+                                    },
+                                    "id": "0008",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 32766,
+                                                "selected": false,
+                                                "id": 32766,
+                                                "missing": true,
+                                                "name": "skipped"
+                                            },
+                                            {
+                                                "numeric_value": 32767,
+                                                "selected": false,
+                                                "id": 32767,
+                                                "missing": true,
+                                                "name": "not asked"
+                                            },
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": false,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Too much"
+                                            },
+                                            {
+                                                "numeric_value": 5,
+                                                "selected": false,
+                                                "id": 5,
+                                                "missing": false,
+                                                "name": "Too little"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "selected": false,
+                                                "id": 0,
+                                                "missing": false,
+                                                "name": "The right amount"
+                                            },
+                                            {
+                                                "numeric_value": 4,
+                                                "selected": false,
+                                                "id": 4,
+                                                "missing": false,
+                                                "name": "Not sure"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "selected": false,
+                                                "id": -1,
+                                                "missing": true,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 3,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "kalinin",
+                                        "name": "Михаи́л Ива́нович Кали́нин (Kalinin)",
+                                        "description": "cabatt_3"
+                                    },
+                                    "id": "0009",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 32766,
+                                                "selected": false,
+                                                "id": 32766,
+                                                "missing": true,
+                                                "name": "skipped"
+                                            },
+                                            {
+                                                "numeric_value": 32767,
+                                                "selected": false,
+                                                "id": 32767,
+                                                "missing": true,
+                                                "name": "not asked"
+                                            },
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": false,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Too much"
+                                            },
+                                            {
+                                                "numeric_value": 5,
+                                                "selected": false,
+                                                "id": 5,
+                                                "missing": false,
+                                                "name": "Too little"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "selected": false,
+                                                "id": 0,
+                                                "missing": false,
+                                                "name": "The right amount"
+                                            },
+                                            {
+                                                "numeric_value": 4,
+                                                "selected": false,
+                                                "id": 4,
+                                                "missing": false,
+                                                "name": "Not sure"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "selected": false,
+                                                "id": -1,
+                                                "missing": true,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 4,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "lenin",
+                                        "name": "Владимир Ленин (Lenin)",
+                                        "description": "cabatt_7"
+                                    },
+                                    "id": "000a",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 32766,
+                                                "selected": false,
+                                                "id": 32766,
+                                                "missing": true,
+                                                "name": "skipped"
+                                            },
+                                            {
+                                                "numeric_value": 32767,
+                                                "selected": false,
+                                                "id": 32767,
+                                                "missing": true,
+                                                "name": "not asked"
+                                            },
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": false,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Too much"
+                                            },
+                                            {
+                                                "numeric_value": 5,
+                                                "selected": false,
+                                                "id": 5,
+                                                "missing": false,
+                                                "name": "Too little"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "selected": false,
+                                                "id": 0,
+                                                "missing": false,
+                                                "name": "The right amount"
+                                            },
+                                            {
+                                                "numeric_value": 4,
+                                                "selected": false,
+                                                "id": 4,
+                                                "missing": false,
+                                                "name": "Not sure"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "selected": false,
+                                                "id": -1,
+                                                "missing": true,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            }
+                        ],
+                        "class": "enum"
+                    }
+                },
+                {
+                    "references": {
+                        "subreferences": [
+                            {
+                                "alias": "stalin",
+                                "name": "იოსებ სტალინი (Stalin)",
+                                "description": "cabatt_1"
+                            },
+                            {
+                                "alias": "trotsky",
+                                "name": "Лев Троцкий (Trotsky)",
+                                "description": "cabatt_6"
+                            },
+                            {
+                                "alias": "kalinin",
+                                "name": "Михаи́л Ива́нович Кали́нин (Kalinin)",
+                                "description": "cabatt_3"
+                            },
+                            {
+                                "alias": "lenin",
+                                "name": "Владимир Ленин (Lenin)",
+                                "description": "cabatt_7"
+                            }
+                        ],
+                        "notes": "A categorical array variable where the missing categories are interspersed throughout the non-missing categories",
+                        "alias": "bolshevik_hair",
+                        "description": "In your opinion, each of these famous Bolshevik's facial hair is...",
+                        "name": "Bolshevik facial hair"
+                    },
+                    "derived": false,
+                    "type": {
+                        "ordinal": false,
+                        "subvariables": [
+                            "0007",
+                            "0008",
+                            "0009",
+                            "000a"
+                        ],
+                        "class": "categorical",
+                        "categories": [
+                            {
+                                "numeric_value": 32766,
+                                "selected": false,
+                                "id": 32766,
+                                "missing": true,
+                                "name": "skipped"
+                            },
+                            {
+                                "numeric_value": 32767,
+                                "selected": false,
+                                "id": 32767,
+                                "missing": true,
+                                "name": "not asked"
+                            },
+                            {
+                                "numeric_value": 1,
+                                "selected": false,
+                                "id": 1,
+                                "missing": false,
+                                "name": "Too much"
+                            },
+                            {
+                                "numeric_value": 5,
+                                "selected": false,
+                                "id": 5,
+                                "missing": false,
+                                "name": "Too little"
+                            },
+                            {
+                                "numeric_value": 0,
+                                "selected": false,
+                                "id": 0,
+                                "missing": false,
+                                "name": "The right amount"
+                            },
+                            {
+                                "numeric_value": 4,
+                                "selected": false,
+                                "id": 4,
+                                "missing": false,
+                                "name": "Not sure"
+                            },
+                            {
+                                "numeric_value": null,
+                                "selected": false,
+                                "id": -1,
+                                "missing": true,
+                                "name": "No Data"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "derived": true,
+                    "references": {
+                        "subreferences": [
+                            {
+                                "alias": "eurasia",
+                                "name": "Eurasia",
+                                "description": "union_hhold_1"
+                            },
+                            {
+                                "alias": "oceania",
+                                "name": "Oceania",
+                                "description": "union_hhold_2"
+                            },
+                            {
+                                "alias": "eastasia",
+                                "name": "Eastasia",
+                                "description": "union_hhold_3"
+                            },
+                            {
+                                "alias": "disputed",
+                                "name": "Disputed"
+                            }
+                        ],
+                        "notes": "A multiple response variable, where one item has no responses",
+                        "alias": "1984_countries",
+                        "description": "Which of the following countries from 1984 would you live in? (select all that apply)",
+                        "name": "Countries from 1984"
+                    },
+                    "type": {
+                        "subtype": {
+                            "class": "variable"
+                        },
+                        "elements": [
+                            {
+                                "id": 1,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "eurasia",
+                                        "name": "Eurasia",
+                                        "description": "union_hhold_1"
+                                    },
+                                    "id": "00c5",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Other"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 2,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "oceania",
+                                        "name": "Oceania",
+                                        "description": "union_hhold_2"
+                                    },
+                                    "id": "00c6",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Other"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 3,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "eastasia",
+                                        "name": "Eastasia",
+                                        "description": "union_hhold_3"
+                                    },
+                                    "id": "00c7",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Other"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 4,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "disputed",
+                                        "name": "Disputed"
+                                    },
+                                    "id": "de5314cea98b44eb9c243a86e06d1476",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Other"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            }
+                        ],
+                        "class": "enum"
+                    }
+                },
+                {
+                    "references": {
+                        "subreferences": [
+                            {
+                                "alias": "eurasia",
+                                "name": "Eurasia",
+                                "description": "union_hhold_1"
+                            },
+                            {
+                                "alias": "oceania",
+                                "name": "Oceania",
+                                "description": "union_hhold_2"
+                            },
+                            {
+                                "alias": "eastasia",
+                                "name": "Eastasia",
+                                "description": "union_hhold_3"
+                            },
+                            {
+                                "alias": "disputed",
+                                "name": "Disputed"
+                            }
+                        ],
+                        "notes": "A multiple response variable, where one item has no responses",
+                        "description": "Which of the following countries from 1984 would you live in? (select all that apply)",
+                        "name": "Countries from 1984",
+                        "alias": "1984_countries"
+                    },
+                    "derived": true,
+                    "type": {
+                        "ordinal": false,
+                        "subvariables": [
+                            "00c5",
+                            "00c6",
+                            "00c7",
+                            "de5314cea98b44eb9c243a86e06d1476"
+                        ],
+                        "class": "categorical",
+                        "categories": [
+                            {
+                                "numeric_value": 1,
+                                "selected": true,
+                                "id": 1,
+                                "missing": false,
+                                "name": "Selected"
+                            },
+                            {
+                                "numeric_value": 0,
+                                "missing": false,
+                                "id": 0,
+                                "name": "Other"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": true,
+                                "id": -1,
+                                "name": "No Data"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "missing": 2,
+            "measures": {
+                "count": {
+                    "data": [
+                        2,
+                        11,
+                        0,
+                        1,
+                        12,
+                        0,
+                        10,
+                        3,
+                        0,
+                        0,
+                        13,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        85,
+                        756,
+                        0,
+                        73,
+                        768,
+                        0,
+                        692,
+                        149,
+                        0,
+                        0,
+                        841,
+                        0,
+                        10,
+                        102,
+                        0,
+                        19,
+                        93,
+                        0,
+                        83,
+                        29,
+                        0,
+                        0,
+                        112,
+                        0,
+                        34,
+                        392,
+                        0,
+                        27,
+                        399,
+                        0,
+                        368,
+                        58,
+                        0,
+                        0,
+                        426,
+                        0,
+                        12,
+                        258,
+                        0,
+                        21,
+                        249,
+                        0,
+                        236,
+                        34,
+                        0,
+                        0,
+                        270,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        17,
+                        105,
+                        0,
+                        20,
+                        102,
+                        0,
+                        86,
+                        36,
+                        0,
+                        0,
+                        122,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        8,
+                        60,
+                        0,
+                        8,
+                        60,
+                        0,
+                        52,
+                        16,
+                        0,
+                        0,
+                        68,
+                        0,
+                        74,
+                        711,
+                        0,
+                        68,
+                        717,
+                        0,
+                        651,
+                        134,
+                        0,
+                        0,
+                        785,
+                        0,
+                        34,
+                        453,
+                        0,
+                        38,
+                        449,
+                        0,
+                        417,
+                        70,
+                        0,
+                        0,
+                        487,
+                        0,
+                        10,
+                        190,
+                        0,
+                        7,
+                        193,
+                        0,
+                        183,
+                        17,
+                        0,
+                        0,
+                        200,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        2,
+                        17,
+                        0,
+                        3,
+                        16,
+                        0,
+                        14,
+                        5,
+                        0,
+                        0,
+                        19,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        8,
+                        59,
+                        0,
+                        17,
+                        50,
+                        0,
+                        43,
+                        24,
+                        0,
+                        0,
+                        67,
+                        0,
+                        83,
+                        811,
+                        0,
+                        74,
+                        820,
+                        0,
+                        745,
+                        149,
+                        0,
+                        0,
+                        894,
+                        0,
+                        39,
+                        398,
+                        0,
+                        32,
+                        405,
+                        0,
+                        368,
+                        69,
+                        0,
+                        0,
+                        437,
+                        0,
+                        11,
+                        234,
+                        0,
+                        15,
+                        230,
+                        0,
+                        219,
+                        26,
+                        0,
+                        0,
+                        245,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        7,
+                        29,
+                        0,
+                        6,
+                        30,
+                        0,
+                        23,
+                        13,
+                        0,
+                        0,
+                        36,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        7,
+                        43,
+                        0,
+                        5,
+                        45,
+                        0,
+                        39,
+                        11,
+                        0,
+                        0,
+                        50,
+                        0,
+                        90,
+                        783,
+                        0,
+                        75,
+                        798,
+                        0,
+                        717,
+                        156,
+                        0,
+                        0,
+                        873,
+                        0,
+                        33,
+                        419,
+                        0,
+                        37,
+                        415,
+                        0,
+                        384,
+                        68,
+                        0,
+                        0,
+                        452,
+                        0,
+                        6,
+                        245,
+                        0,
+                        18,
+                        233,
+                        0,
+                        226,
+                        25,
+                        0,
+                        0,
+                        251,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                    ],
+                    "n_missing": 2,
+                    "metadata": {
+                        "references": {},
+                        "derived": true,
+                        "type": {
+                            "integer": true,
+                            "missing_rules": {},
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "class": "numeric"
+                        }
+                    }
+                }
+            },
+            "element": "crunch:cube",
+            "counts": [
+                2,
+                11,
+                0,
+                1,
+                12,
+                0,
+                10,
+                3,
+                0,
+                0,
+                13,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                85,
+                756,
+                0,
+                73,
+                768,
+                0,
+                692,
+                149,
+                0,
+                0,
+                841,
+                0,
+                10,
+                102,
+                0,
+                19,
+                93,
+                0,
+                83,
+                29,
+                0,
+                0,
+                112,
+                0,
+                34,
+                392,
+                0,
+                27,
+                399,
+                0,
+                368,
+                58,
+                0,
+                0,
+                426,
+                0,
+                12,
+                258,
+                0,
+                21,
+                249,
+                0,
+                236,
+                34,
+                0,
+                0,
+                270,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                17,
+                105,
+                0,
+                20,
+                102,
+                0,
+                86,
+                36,
+                0,
+                0,
+                122,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                8,
+                60,
+                0,
+                8,
+                60,
+                0,
+                52,
+                16,
+                0,
+                0,
+                68,
+                0,
+                74,
+                711,
+                0,
+                68,
+                717,
+                0,
+                651,
+                134,
+                0,
+                0,
+                785,
+                0,
+                34,
+                453,
+                0,
+                38,
+                449,
+                0,
+                417,
+                70,
+                0,
+                0,
+                487,
+                0,
+                10,
+                190,
+                0,
+                7,
+                193,
+                0,
+                183,
+                17,
+                0,
+                0,
+                200,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                2,
+                17,
+                0,
+                3,
+                16,
+                0,
+                14,
+                5,
+                0,
+                0,
+                19,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                8,
+                59,
+                0,
+                17,
+                50,
+                0,
+                43,
+                24,
+                0,
+                0,
+                67,
+                0,
+                83,
+                811,
+                0,
+                74,
+                820,
+                0,
+                745,
+                149,
+                0,
+                0,
+                894,
+                0,
+                39,
+                398,
+                0,
+                32,
+                405,
+                0,
+                368,
+                69,
+                0,
+                0,
+                437,
+                0,
+                11,
+                234,
+                0,
+                15,
+                230,
+                0,
+                219,
+                26,
+                0,
+                0,
+                245,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                7,
+                29,
+                0,
+                6,
+                30,
+                0,
+                23,
+                13,
+                0,
+                0,
+                36,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                7,
+                43,
+                0,
+                5,
+                45,
+                0,
+                39,
+                11,
+                0,
+                0,
+                50,
+                0,
+                90,
+                783,
+                0,
+                75,
+                798,
+                0,
+                717,
+                156,
+                0,
+                0,
+                873,
+                0,
+                33,
+                419,
+                0,
+                37,
+                415,
+                0,
+                384,
+                68,
+                0,
+                0,
+                452,
+                0,
+                6,
+                245,
+                0,
+                18,
+                233,
+                0,
+                226,
+                25,
+                0,
+                0,
+                251,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "n": 1662
+        }
+    }
+}
