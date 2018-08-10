@@ -1,9 +1,12 @@
+# encoding: utf-8
+
 '''Home of the CrunchCube class.
 
 This module contains the definition of the CrunchCube class. It represents
 the open-source library used for manipulating the crunch cubes (JSON responses
 from the Crunch.io platform).
 '''
+
 from __future__ import division
 
 import json
@@ -17,6 +20,7 @@ from .cube_slice import CubeSlice
 from .measures.index import Index
 from .measures.scale_means import ScaleMeans
 from .utils import lazyproperty
+from . import ITEM_DIMENSION_TYPES
 
 np.seterr(divide='ignore', invalid='ignore')
 
@@ -147,7 +151,7 @@ class CrunchCube(DataTable):
                          i - dim_offset in include_transforms_for_dims)
             if dim.type == 'multiple_response':
                 dim_offset += 1
-            if not transform or dim.type in ['categorical_array', 'multiple_response']:
+            if not transform or dim.type in ITEM_DIMENSION_TYPES:
                 continue
             # Perform transformations
             insertions = self._insertions(res, dim, i)
@@ -1042,7 +1046,7 @@ class CrunchCube(DataTable):
 
     def _calculate_std_res(self, counts, total, colsum, rowsum, slice_):
         dim_types = slice_.dim_types
-        has_mr_or_ca = 'categorical_array' in dim_types or 'multiple_response' in dim_types
+        has_mr_or_ca = set(dim_types) & set(ITEM_DIMENSION_TYPES)
         # if self.has_mr or self.ca_dim_ind is not None:
         if has_mr_or_ca:
             if not self.is_double_mr and (self.mr_dim_ind == 0 or self.mr_dim_ind == 1 and self.ndim == 3):
