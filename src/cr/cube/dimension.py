@@ -70,8 +70,14 @@ class Dimension(object):
         if not categories:
             return False
 
-        ids = [cat['id'] for cat in categories]
-        return ids == [1, 0, -1]
+        if len(categories) != 3:
+            return False
+
+        mr_ids = (1, 0, -1)
+        for i, mr_id in enumerate(mr_ids):
+            if categories[i]['id'] != mr_id:
+                return False
+        return True
 
     @classmethod
     def _get_name(cls, element):
@@ -111,8 +117,7 @@ class Dimension(object):
             return self._dim['type']['categories']
         return self._dim['type']['elements']
 
-    # This needs to be computed each time. Don't use lazyproperty.
-    @property
+    @lazyproperty
     def inserted_hs_indices(self):
         '''Returns inserted H&S indices for the dimension.'''
         if (self.type == 'categorical_array' or not self.subtotals):
@@ -151,25 +156,30 @@ class Dimension(object):
         if subtotal.anchor in ['top', 'bottom']:
             return subtotal.anchor
 
-        element_ids = [el['id'] for el in self._elements]
-        contiguous_anchors = [
-            i for (i, id_) in enumerate(element_ids)
-            if id_ == subtotal.anchor
-        ]
-        # In case of more matches, return the first one (although there
-        # shouldn't be any)
-        return contiguous_anchors[0]
+        return self.elements_by_id[subtotal.anchor]['index']
+
+    @lazyproperty
+    def elements_by_id(self):
+        r = {}
+        for i, el in enumerate(self._elements):
+            el['index'] = i
+            r[el['id']] = el
+        return r
 
     @lazyproperty
     def hs_indices(self):
         '''Headers and Subtotals indices.'''
-        elements = self._elements
+        eid = self.elements_by_id
 
-        indices = [{
-            'anchor_ind': self._transform_anchor(subtotal),
-            'inds': [i for (i, el) in enumerate(elements)
-                     if el['id'] in subtotal.args],
-        } for subtotal in self.subtotals]
+        indices = []
+        for subtotal in self.subtotals:
+
+            ind = []
+            for arg in subtotal.args:
+                ind.append(eid[arg]['index'])
+
+            indices.append({'anchor_ind': self._transform_anchor(subtotal),
+                            'inds': ind})
 
         # filter where indices aren't available to sum
         indices = [ind for ind in indices if len(ind['inds']) > 0]
@@ -212,7 +222,6 @@ class Dimension(object):
     def labels(self, include_missing=False, include_transforms=False,
                include_cat_ids=False):
         '''Get labels of the Crunch Dimension.'''
-        valid_indices = self.valid_indices(include_missing)
         if (not (include_transforms and self.has_transforms) or
                 self.type == 'categorical_array'):
             return [
@@ -234,6 +243,7 @@ class Dimension(object):
         } for (i, el) in enumerate(self._elements)]
         labels_with_cat_ids = self._update_with_subtotals(labels_with_cat_ids)
 
+        valid_indices = self.valid_indices(include_missing)
         return [
             (
                 label['name']
@@ -302,20 +312,17 @@ class Dimension(object):
         those of the missing values.
         '''
         if include_missing:
-            return [i for (i, el) in enumerate(self._elements)]
+            return range(len(self._elements))
         else:
-            return [
-                i for (i, el) in enumerate(self._elements)
-                if not el.get('missing')
-            ]
+            return [x for x in range(len(self._elements))
+                    if x not in self.invalid_indices]
 
     @lazyproperty
     def invalid_indices(self):
-        return set([
+        return set((
             i for (i, el) in enumerate(self._elements)
             if el.get('missing')
-        ])
-
+        ))
 
     @lazyproperty
     def shape(self):
@@ -323,10 +330,15 @@ class Dimension(object):
 
     @lazyproperty
     def is_selections(self):
-        category_ids = [el.get('id') for el in self._elements]
-        if category_ids == [1, 0, -1]:
-            return True
-        return False
+        categories = self._elements
+        if len(categories) != 3:
+            return False
+
+        mr_ids = (1, 0, -1)
+        for i, mr_id in enumerate(mr_ids):
+            if categories[i]['id'] != mr_id:
+                return False
+        return True
 
     def is_mr_selections(self, others):
         '''Check whether a selections dimension has a corresponding items dim

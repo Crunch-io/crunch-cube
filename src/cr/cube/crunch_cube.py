@@ -141,6 +141,7 @@ class CrunchCube(DataTable):
 
         dim_offset = 0
         dims = self.all_dimensions if self.has_mr else self.dimensions
+        new_valids = [i for i in valid_indices]
         for (i, dim) in enumerate(dims):
             # Check if transformations can/need to be performed
             transform = (dim.has_transforms and
@@ -152,10 +153,10 @@ class CrunchCube(DataTable):
             # Perform transformations
             insertions = self._insertions(res, dim, i)
             ind = i if inflate else i - dim_offset
-            res, valid_indices = self._update_result(
-                res, insertions, ind, valid_indices
+            res, new_valids = self._update_result(
+                res, insertions, ind, new_valids
             )
-        return res[np.ix_(*valid_indices)] if valid_indices else res
+        return res[np.ix_(*new_valids)] if new_valids else res
 
     def _as_array(self, include_missing=False, get_non_selected=False,
                   weighted=True, adjusted=False,
@@ -545,7 +546,7 @@ class CrunchCube(DataTable):
     def ndim(self):
         return len(self.dimensions)
 
-    @property
+    @lazyproperty
     def valid_indices_with_selections(self):
         '''Get all valid indices (including MR selections).'''
         return [dim.valid_indices(False) for dim in self.all_dimensions]
@@ -600,14 +601,16 @@ class CrunchCube(DataTable):
     @staticmethod
     def _adjust_inserted_indices(inserted_indices_list, prune_indices_list):
         '''Adjust inserted indices, if there are pruned elements.'''
-        pruned_and_inserted = zip(prune_indices_list, inserted_indices_list)
+        # Created a copy, to preserve cached property
+        updated_inserted = [[i for i in dim_inds] for dim_inds in inserted_indices_list]
+        pruned_and_inserted = zip(prune_indices_list, updated_inserted)
         for prune_inds, inserted_inds in pruned_and_inserted:
             # Only prune indices if they're not H&S (inserted)
             prune_inds = prune_inds[~np.in1d(prune_inds, inserted_inds)]
             for i, ind in enumerate(inserted_inds):
                 ind -= np.sum(prune_inds < ind)
                 inserted_inds[i] = ind
-        return inserted_indices_list
+        return updated_inserted
 
     def _insertions(self, result, dimension, dimension_index):
         insertions = []
