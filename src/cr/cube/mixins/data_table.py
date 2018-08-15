@@ -124,7 +124,7 @@ class DataTable(object):
         elif weighted and self.is_weighted:
             count = self._cube['result']['measures'].get('count', {})
             values = count.get('data', values)
-        values = [(val if not isinstance(val, dict) else np.nan)
+        values = [(val if not type(val) is dict else np.nan)
                   for val in values]
         return values
 
