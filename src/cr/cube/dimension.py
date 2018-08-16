@@ -1,9 +1,12 @@
+# encoding: utf-8
+
 '''Contains implementation of the Dimension class, for Crunch Cubes.'''
 
 import numpy as np
 
 from .subtotal import Subtotal
 from .utils import lazyproperty, memoize
+from . import ITEM_DIMENSION_TYPES
 
 
 class Dimension(object):
@@ -120,8 +123,8 @@ class Dimension(object):
     @lazyproperty
     def inserted_hs_indices(self):
         '''Returns inserted H&S indices for the dimension.'''
-        if (self.type == 'categorical_array' or not self.subtotals):
-            return []  # For CA subvariables, we don't do H&S insertions
+        if (self.type in ITEM_DIMENSION_TYPES or not self.subtotals):
+            return []  # For CA and MR items, we don't do H&S insertions
 
         elements = self.elements()
         element_ids = [element['id'] for element in elements]
