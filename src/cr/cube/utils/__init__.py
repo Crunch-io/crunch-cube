@@ -1,6 +1,7 @@
 '''Utility functions for crunch cube, as well as other modules.'''
 import collections
 import functools
+import numpy as np
 
 try:
     from itertools import ifilterfalse
@@ -122,3 +123,26 @@ def lru_cache(maxsize=100):
 
 
 memoize = lru_cache(100)
+
+
+def compress_pruned(table):
+    """Compress table based on pruning mask.
+
+    Only the rows/cols in which all of the elements are masked need to be
+    pruned.
+    """
+    if not isinstance(table, np.ma.core.MaskedArray):
+        return table
+
+    if table.ndim == 0:
+        return table.data
+
+    if table.ndim == 1:
+        return np.ma.compressed(table)
+
+    row_inds = ~table.mask.all(axis=1)
+    col_inds = ~table.mask.all(axis=0)
+    table = table[row_inds, :][:, col_inds]
+    if table.dtype == float and table.mask.any():
+        table[table.mask] = np.nan
+    return table
