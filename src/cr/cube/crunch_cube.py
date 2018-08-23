@@ -383,6 +383,9 @@ class CrunchCube(DataTable):
     def _margin_pruned_indices(margin, inserted_ind, axis):
         pruned_ind = np.logical_or(margin == 0, np.isnan(margin))
 
+        if pruned_ind.ndim == 0:
+            pruned_ind = np.array([pruned_ind])
+
         if np.any(margin) and inserted_ind is not None and any(inserted_ind):
             ind_inserted = np.zeros(pruned_ind.shape, dtype=bool)
             if len(pruned_ind.shape) == 2 and axis == 1:
@@ -847,7 +850,11 @@ class CrunchCube(DataTable):
             inflate_ind = [
                 (
                     None
-                    if d.is_mr_selections(self.all_dimensions) or n <= 1 else
+                    if (
+                        d.is_mr_selections(self.all_dimensions) or
+                        n <= 1 or
+                        len(d.elements()) <= 1
+                    ) else
                     slice(None)
                 )
                 for d, n in zip(self.all_dimensions, table.shape)
