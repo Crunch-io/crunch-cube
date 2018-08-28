@@ -1,6 +1,5 @@
 '''Unit tests for the CrunchCube class.'''
 
-import pytest
 from unittest import TestCase
 from mock import Mock
 from mock import patch
