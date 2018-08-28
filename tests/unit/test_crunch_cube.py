@@ -1,4 +1,6 @@
 '''Unit tests for the CrunchCube class.'''
+
+import pytest
 from unittest import TestCase
 from mock import Mock
 from mock import patch
@@ -931,3 +933,38 @@ class TestCrunchCube(TestCase):
         actual = cc.ca_dim_ind
         expected = None
         assert actual == expected
+
+    def test_population_fraction(self):
+
+        # Assert fraction is 1 when none of the counts are specified
+        cc = CrunchCube({})
+        actual = cc.population_fraction
+        assert actual == 1
+
+        # Assert fraction is 1 when only some counts are specified
+        cc = CrunchCube({'result': {'unfiltered': {'unweighted_n': 10}}})
+        assert cc.population_fraction == 1
+        cc = CrunchCube({'result': {'unfiltered': {'weighted_n': 10}}})
+        assert cc.population_fraction == 1
+        cc = CrunchCube({'result': {'unfiltered': {'weighted_n': 10, 'unweighted_n': 10}}})
+        assert cc.population_fraction == 1
+        cc = CrunchCube({'result': {'filtered': {'weighted_n': 10, 'unweighted_n': 10}}})
+        assert cc.population_fraction == 1
+
+        # Assert fraction is calculated when correct counts are specified
+        cc = CrunchCube({
+            'result': {
+                'filtered': {'weighted_n': 5},
+                'unfiltered': {'weighted_n': 10},
+            }
+        })
+        assert cc.population_fraction == 0.5
+
+        # Assert fraction is NaN, when denominator is zero
+        cc = CrunchCube({
+            'result': {
+                'filtered': {'weighted_n': 5},
+                'unfiltered': {'weighted_n': 0},
+            }
+        })
+        assert np.isnan(cc.population_fraction)
