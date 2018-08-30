@@ -132,12 +132,6 @@ class DataTable(object):
     def _shape(self):
         return tuple([dim.shape for dim in self.all_dimensions])
 
-    @lazyproperty
-    def counts(self):
-        unfiltered = self._cube['result'].get('unfiltered')
-        filtered = self._cube['result'].get('filtered')
-        return unfiltered, filtered
-
     def data(self, weighted, margin=False):
         '''Get the data in non-flattened shape.
 
