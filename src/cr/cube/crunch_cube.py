@@ -1016,18 +1016,6 @@ class CrunchCube(DataTable):
         '''
         return self.proportions(axis) * 100
 
-    @lazyproperty
-    def population_fraction(self):
-        try:
-            unfiltered, filtered = self.counts
-            num = filtered.get('weighted_n')
-            den = unfiltered.get('weighted_n')
-            return num / den
-        except ZeroDivisionError:
-            return np.nan
-        except:
-            return 1
-
     def population_counts(self, population_size, weighted=True,
                           include_missing=False,
                           include_transforms_for_dims=None, prune=False):
@@ -1060,7 +1048,7 @@ class CrunchCube(DataTable):
             include_missing=include_missing,
             include_transforms_for_dims=include_transforms_for_dims,
             prune=prune
-        ) * population_size * self.population_fraction
+        ) * population_size
 
     def index(self, weighted=True, prune=False):
         '''Get cube index measurement.'''
