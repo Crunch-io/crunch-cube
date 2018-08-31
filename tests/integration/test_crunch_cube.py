@@ -55,6 +55,7 @@ from .fixtures import MR_X_CAT_X_MR_PRUNE
 from .fixtures import HUFFPOST_ACTIONS_X_HOUSEHOLD
 from .fixtures import GENDER_X_WEIGHT
 from .fixtures import CAT_X_MR_X_CAT
+from .fixtures import CAT_X_CAT_FILTERED_POP
 
 from . import assert_scale_means_equal
 
@@ -392,6 +393,17 @@ class TestCrunchCube(TestCase):
             [3000.3333333, 1800.2],
         ])
         actual = cube.population_counts(9001)
+        np.testing.assert_almost_equal(actual, expected)
+
+    def test_filtered_population_counts(self):
+        cube = CrunchCube(CAT_X_CAT_FILTERED_POP)
+        expected = np.array([
+            [ 300000.,  1400000., 0., 0., 0., 0.],
+            [5900000., 13200000., 0., 0., 0., 0.],
+            [ 600000.,  2900000., 0., 0., 0., 0.],
+            [ 100000.,   100000., 0., 0., 0., 0.],
+            [ 300000.,   600000., 0., 0., 0., 0.]])
+        actual = cube.population_counts(100000000)
         np.testing.assert_almost_equal(actual, expected)
 
     def test_labels_cat_x_cat_exclude_missing(self):
