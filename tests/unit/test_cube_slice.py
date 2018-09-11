@@ -32,7 +32,7 @@ class TestCubeSlice(TestCase):
         '''Test if ndim calls corresponding cube's method.'''
         cube = Mock(ndim=3)
         cs = CubeSlice(cube, 1)
-        assert cs.ndim == 3
+        assert cs.ndim == 2
 
     def test_table_name(self):
         '''Test correct name is returned.
@@ -279,6 +279,7 @@ class TestCubeSlice(TestCase):
         cube.mr_dim_ind = (1, 2)
         assert cs.mr_dim_ind == (0, 1)
         cube.mr_dim_ind = (0, 2)
+        cs = CubeSlice(cube, 0)
         assert cs.mr_dim_ind == 1
 
     def test_ca_main_axis(self):
@@ -291,6 +292,7 @@ class TestCubeSlice(TestCase):
         cs = CubeSlice(cube, 0)
         assert cs.ca_main_axis == 0
         cube.dim_types = [Mock(), Mock()]
+        cs = CubeSlice(cube, 0)
         assert cs.ca_main_axis is None
 
     def test_has_mr(self):

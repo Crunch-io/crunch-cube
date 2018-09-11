@@ -3,6 +3,8 @@
 from functools import partial
 import numpy as np
 
+from .utils import lazyproperty
+
 
 # pylint: disable=too-few-public-methods
 class CubeSlice(object):
@@ -28,7 +30,7 @@ class CubeSlice(object):
         self._index = index
         self.ca_as_0th = ca_as_0th
 
-    @property
+    @lazyproperty
     def col_dim_ind(self):
         return 1 if not self.ca_as_0th else 0
 
@@ -53,7 +55,7 @@ class CubeSlice(object):
 
     def _update_args(self, kwargs):
 
-        if self.ndim < 3:
+        if self._cube.ndim < 3:
             # If cube is 2D it doesn't actually have slices (itself is a slice).
             # In this case we don't need to convert any arguments, but just
             # pass them to the underlying cube (which is the slice).
@@ -109,7 +111,7 @@ class CubeSlice(object):
         return kwargs
 
     def _update_result(self, result):
-        if (self.ndim < 3 and not self.ca_as_0th) or len(result) - 1 < self._index:
+        if (self._cube.ndim < 3 and not self.ca_as_0th) or len(result) - 1 < self._index:
             return result
         result = result[self._index]
         if isinstance(result, tuple):
@@ -127,7 +129,7 @@ class CubeSlice(object):
             return result
         return self._update_result(result)
 
-    @property
+    @lazyproperty
     def table_name(self):
         '''Get slice name.
 
@@ -135,14 +137,14 @@ class CubeSlice(object):
         of the cube name with the label of the corresponding slice
         (nth label of the 0th dimension).
         '''
-        if self.ndim < 3 and not self.ca_as_0th:
+        if self._cube.ndim < 3 and not self.ca_as_0th:
             return None
 
         title = self._cube.name
         table_name = self._cube.labels()[0][self._index]
         return '%s: %s' % (title, table_name)
 
-    @property
+    @lazyproperty
     def has_ca(self):
         '''Check if the cube slice has the CA dimension.
 
@@ -153,13 +155,13 @@ class CubeSlice(object):
         '''
         return 'categorical_array' in self.dim_types
 
-    @property
+    @lazyproperty
     def ca_dim_ind(self):
         index = self._cube.ca_dim_ind
         if index is None:
             return None
 
-        if self.ndim == 3:
+        if self._cube.ndim == 3:
             if index == 0:
                 # If tab dim is items, slices are not
                 return None
@@ -168,11 +170,11 @@ class CubeSlice(object):
         # If 2D - just return it
         return index
 
-    @property
+    @lazyproperty
     def mr_dim_ind(self):
         '''Get the correct index of the MR dimension in the cube slice.'''
         mr_dim_ind = self._cube.mr_dim_ind
-        if self.ndim == 3:
+        if self._cube.ndim == 3:
             if isinstance(mr_dim_ind, int):
                 if mr_dim_ind == 0:
                     # If only the 0th dimension of a 3D is an MR, the sliced
@@ -193,7 +195,7 @@ class CubeSlice(object):
 
         return mr_dim_ind
 
-    @property
+    @lazyproperty
     def ca_main_axis(self):
         '''For univariate CA, the main axis is the categorical axis'''
         try:
@@ -227,7 +229,7 @@ class CubeSlice(object):
         ]
         return labels
 
-    @property
+    @lazyproperty
     def has_mr(self):
         '''True if the slice has MR dimension.
 
@@ -236,7 +238,7 @@ class CubeSlice(object):
         '''
         return 'multiple_response' in self.dim_types
 
-    @property
+    @lazyproperty
     def is_double_mr(self):
         '''This has to be overridden from cr.cube.
 
@@ -248,3 +250,11 @@ class CubeSlice(object):
 
     def scale_means(self, hs_dims=None, prune=False):
         return self._cube.scale_means(hs_dims, prune)[self._index]
+
+    @lazyproperty
+    def ndim(self):
+        return min(self._cube.ndim, 2)
+
+    @lazyproperty
+    def shape(self):
+        return self.as_array().shape
