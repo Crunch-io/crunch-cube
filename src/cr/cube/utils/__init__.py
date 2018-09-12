@@ -24,10 +24,9 @@ def load_fixture(fixtures_directory, filename):
         fixture = json.load(ctx_file)
     return fixture
 
+
 class lazyproperty(property):
-    """
-    borrowed from: https://stackoverflow.com/questions/3012421/python-memoising-deferred-lookup-property-decorator
-    """
+    """borrowed from: https://stackoverflow.com/questions/3012421/python-memoising-deferred-lookup-property-decorator"""  # noqa
     def __init__(self, func, name=None, doc=None):
         self.__name__ = name or func.__name__
         self.__module__ = func.__module__
@@ -46,6 +45,7 @@ class lazyproperty(property):
             obj.__dict__[self.__name__] = value
         return value
 
+
 def lru_cache(maxsize=100):
     '''Least-recently-used cache decorator.
 
@@ -57,8 +57,8 @@ def lru_cache(maxsize=100):
     '''
     maxqueue = maxsize * 10
 
-    def decorating_function(user_function,
-            len=len, iter=iter, tuple=tuple, sorted=sorted, KeyError=KeyError):
+    def decorating_function(user_function, len=len, iter=iter, tuple=tuple,
+                            sorted=sorted, KeyError=KeyError):
         cache = {}                   # mapping of args to results
         queue = collections.deque()  # order that keys have been used
         refcount = Counter()         # times each key is in the queue

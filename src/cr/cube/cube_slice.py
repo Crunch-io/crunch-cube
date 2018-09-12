@@ -111,7 +111,8 @@ class CubeSlice(object):
         return kwargs
 
     def _update_result(self, result):
-        if (self._cube.ndim < 3 and not self.ca_as_0th) or len(result) - 1 < self._index:
+        if (self._cube.ndim < 3 and not self.ca_as_0th or
+                len(result) - 1 < self._index):
             return result
         result = result[self._index]
         if isinstance(result, tuple):
@@ -201,7 +202,7 @@ class CubeSlice(object):
         try:
             ca_ind = self.dim_types.index('categorical_array')
             return 1 - ca_ind
-        except:
+        except Exception:
             return None
 
     def labels(self, hs_dims=None, prune=False):
