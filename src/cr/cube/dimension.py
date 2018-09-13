@@ -146,11 +146,18 @@ class Dimension(object):
         top_indexes = list(range(len_top_indexes))
 
         # adjust the middle_indexes appropriately
-        middle_indexes = [i + element_ids.index(index) + len_top_indexes + 1 for i, index in enumerate(middle_indexes)]
+        middle_indexes = [
+            i + element_ids.index(index) + len_top_indexes + 1
+            for i, index in enumerate(middle_indexes)
+        ]
 
         # what remains is the bottom
-        len_non_bottom_indexes = len_top_indexes + len(middle_indexes) + len(elements)
-        bottom_indexes = list(range(len_non_bottom_indexes, len_non_bottom_indexes + len(bottom_indexes)))
+        len_non_bottom_indexes = (
+            len_top_indexes + len(middle_indexes) + len(elements)
+        )
+        bottom_indexes = list(range(
+            len_non_bottom_indexes, len_non_bottom_indexes + len(bottom_indexes)
+        ))
 
         return top_indexes + middle_indexes + bottom_indexes
 
@@ -177,12 +184,12 @@ class Dimension(object):
         indices = []
         for subtotal in self.subtotals:
 
-            ind = []
+            inds = []
             for arg in subtotal.args:
-                ind.append(eid[arg]['index'])
+                inds.append(eid[arg]['index'])
 
             indices.append({'anchor_ind': self._transform_anchor(subtotal),
-                            'inds': ind})
+                            'inds': inds})
 
         # filter where indices aren't available to sum
         indices = [ind for ind in indices if len(ind['inds']) > 0]
