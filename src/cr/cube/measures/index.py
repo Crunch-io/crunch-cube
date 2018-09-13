@@ -36,10 +36,10 @@ class Index(object):
         for slice_ in self.cube.slices:
             if self.cube.has_mr:
                 return self._mr_index()
-            margin = (
-                slice_.margin(axis=0, weighted=self.weighted, prune=self.prune) /
-                slice_.margin(weighted=self.weighted, prune=self.prune)
-            )
+            num = slice_.margin(axis=0, weighted=self.weighted,
+                                prune=self.prune)
+            den = slice_.margin(weighted=self.weighted, prune=self.prune)
+            margin = num / den
             proportions = slice_.proportions(
                 axis=1, weighted=self.weighted, prune=self.prune
             )
@@ -70,11 +70,13 @@ class Index(object):
         # mr by cat and cat by mr
         if self.cube.mr_dim_ind == 0 or self.cube.mr_dim_ind == 1:
             axis = self.cube.mr_dim_ind
-            margin = (
-                self.cube.margin(axis=1 - axis, weighted=self.weighted, prune=self.prune) /
-                self.cube.margin(weighted=self.weighted, prune=self.prune)
+            num = self.cube.margin(axis=1 - axis, weighted=self.weighted,
+                                   prune=self.prune)
+            den = self.cube.margin(weighted=self.weighted, prune=self.prune)
+            margin = num / den
+            proportions = self.cube.proportions(
+                axis=axis, weighted=self.weighted, prune=self.prune
             )
-            proportions = self.cube.proportions(axis=axis, weighted=self.weighted, prune=self.prune)
             if self.cube.mr_dim_ind == 0:
                 margin = margin[:, np.newaxis]  # pivot
             return proportions / margin

@@ -68,7 +68,10 @@ class DataTable(object):
     @lazyproperty
     def has_means(self):
         '''Check if cube has means.'''
-        return self._cube['result']['measures'].get('mean', None) is not None
+        measures = self._cube.get('result', {}).get('measures')
+        if not measures:
+            return False
+        return measures.get('mean', None) is not None
 
     @lazyproperty
     def is_weighted(self):

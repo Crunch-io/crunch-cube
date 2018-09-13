@@ -609,7 +609,9 @@ class CrunchCube(DataTable):
     def _adjust_inserted_indices(inserted_indices_list, prune_indices_list):
         '''Adjust inserted indices, if there are pruned elements.'''
         # Created a copy, to preserve cached property
-        updated_inserted = [[i for i in dim_inds] for dim_inds in inserted_indices_list]
+        updated_inserted = [
+            [i for i in dim_inds] for dim_inds in inserted_indices_list
+        ]
         pruned_and_inserted = zip(prune_indices_list, updated_inserted)
         for prune_inds, inserted_inds in pruned_and_inserted:
             # Only prune indices if they're not H&S (inserted)
@@ -865,7 +867,8 @@ class CrunchCube(DataTable):
             )
             den = np.ma.masked_array(den, mask)
 
-        if self.ndim != 1 or axis is None or axis == 0 and len(self.all_dimensions) == 1:
+        if (self.ndim != 1 or axis is None or
+                axis == 0 and len(self.all_dimensions) == 1):
             # Special case for 1D cube wigh MR, for "Table" direction
             den = np.sum(den, axis=new_axis)[index]
 
@@ -1025,7 +1028,7 @@ class CrunchCube(DataTable):
             return num / den
         except ZeroDivisionError:
             return np.nan
-        except:
+        except Exception:
             return 1
 
     def population_counts(self, population_size, weighted=True,
@@ -1071,7 +1074,9 @@ class CrunchCube(DataTable):
         has_mr_or_ca = set(dim_types) & set(ITEM_DIMENSION_TYPES)
         # if self.has_mr or self.ca_dim_ind is not None:
         if has_mr_or_ca:
-            if not self.is_double_mr and (self.mr_dim_ind == 0 or self.mr_dim_ind == 1 and self.ndim == 3):
+            if (not self.is_double_mr and
+                    (self.mr_dim_ind == 0 or
+                        self.mr_dim_ind == 1 and self.ndim == 3)):
                 total = total[:, np.newaxis]
                 rowsum = rowsum[:, np.newaxis]
 
@@ -1099,7 +1104,9 @@ class CrunchCube(DataTable):
             total = slice_.margin(weighted=weighted)
             colsum = slice_.margin(axis=0, weighted=weighted)
             rowsum = slice_.margin(axis=1, weighted=weighted)
-            std_res = self._calculate_std_res(counts, total, colsum, rowsum, slice_)
+            std_res = self._calculate_std_res(
+                counts, total, colsum, rowsum, slice_,
+            )
             res.append(std_res)
 
         if len(res) == 1 and self.ndim < 3:
@@ -1154,7 +1161,7 @@ class CrunchCube(DataTable):
         '''Get cube means.'''
         slices_means = [ScaleMeans(slice_).data for slice_ in self.slices]
 
-        if  hs_dims and self.ndim > 1:
+        if hs_dims and self.ndim > 1:
             # Intersperse scale means with nans if H&S specified, and 2D. No
             # need to modify 1D, as only one mean will ever be inserted.
             inserted_indices = self.inserted_hs_indices()[-2:]
@@ -1163,11 +1170,14 @@ class CrunchCube(DataTable):
                 # calculated by using its values). The result of it, however,
                 # is a row. That's why we need to check the insertions on the
                 # row dim (inserted columns).
-                if scale_means[0] is not None and 1 in hs_dims and inserted_indices[1]:
+                if (scale_means[0] is not None and 1 in hs_dims and
+                        inserted_indices[1]):
                     for i in inserted_indices[1]:
                         scale_means[0] = np.insert(scale_means[0], i, np.nan)
-                # Scale means 1 is a column, so we need to check for row insertions.
-                if scale_means[1] is not None and 0 in hs_dims and inserted_indices[0]:
+                # Scale means 1 is a column, so we need to check
+                # for row insertions.
+                if (scale_means[1] is not None and 0 in hs_dims and
+                        inserted_indices[0]):
                     for i in inserted_indices[0]:
                         scale_means[1] = np.insert(scale_means[1], i, np.nan)
 
@@ -1178,10 +1188,18 @@ class CrunchCube(DataTable):
                 mask = arr.mask
                 for i, scale_means in enumerate(slices_means):
                     if scale_means[0] is not None:
-                        row_mask = mask.all(axis=0) if self.ndim < 3 else mask.all(axis=1)[i]
+                        row_mask = (
+                            mask.all(axis=0)
+                            if self.ndim < 3 else
+                            mask.all(axis=1)[i]
+                        )
                         scale_means[0] = scale_means[0][~row_mask]
                     if self.ndim > 1 and scale_means[1] is not None:
-                        col_mask = mask.all(axis=1) if self.ndim < 3 else mask.all(axis=2)[i]
+                        col_mask = (
+                            mask.all(axis=1)
+                            if self.ndim < 3 else
+                            mask.all(axis=2)[i]
+                        )
                         scale_means[1] = scale_means[1][~col_mask]
         return slices_means
 
@@ -1189,4 +1207,7 @@ class CrunchCube(DataTable):
         if self.ndim < 3 and not ca_as_0th:
             return [CubeSlice(self, 0)]
 
-        return [CubeSlice(self, i, ca_as_0th) for i, _ in enumerate(self.labels()[0])]
+        return [
+            CubeSlice(self, i, ca_as_0th)
+            for i, _ in enumerate(self.labels()[0])
+        ]
