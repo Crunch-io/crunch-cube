@@ -1,0 +1,1183 @@
+{
+    "dataset": {
+        "dataset_id": "735dd266b8ca47ee8849af70fb5e5b4e",
+        "description": "",
+        "name": "Guardian tracker W+8 Fork",
+        "notes": "",
+        "population_size": null
+    },
+    "slides": [
+        {
+            "cube": {
+                "query": {
+                    "dimensions": [
+                        {
+                            "each": 1
+                        },
+                        {
+                            "args": [
+                                {
+                                    "variable": "001113"
+                                }
+                            ],
+                            "function": "as_selected"
+                        }
+                    ],
+                    "measures": {
+                        "count": {
+                            "args": [],
+                            "function": "cube_count"
+                        }
+                    },
+                    "weight": "http://127.0.0.1:8080/datasets/735dd266b8ca47ee8849af70fb5e5b4e/variables/000001X/"
+                },
+                "query_environment": {
+                    "filter": []
+                },
+                "result": {
+                    "counts": [
+                        10587,
+                        22771,
+                        0,
+                        5171,
+                        28187,
+                        0,
+                        1930,
+                        31428,
+                        0,
+                        3984,
+                        29374,
+                        0,
+                        3070,
+                        30288,
+                        0,
+                        2189,
+                        31169,
+                        0,
+                        773,
+                        32585,
+                        0,
+                        14751,
+                        18607,
+                        0,
+                        677,
+                        32681,
+                        0
+                    ],
+                    "dimensions": [
+                        {
+                            "derived": true,
+                            "references": {
+                                "alias": "Q17",
+                                "description": "Which, if any, of the following ways have you used to pay for news in the last year?",
+                                "name": "Paid for news in the last year",
+                                "notes": "All News readers",
+                                "subreferences": [
+                                    {
+                                        "alias": "Q17_1",
+                                        "name": "A newspaper (printed) in a shop",
+                                        "view": {
+                                            "column_width": null,
+                                            "include_missing": false,
+                                            "include_noneoftheabove": false,
+                                            "show_counts": false,
+                                            "transform": {
+                                                "insertions": [
+                                                    {
+                                                        "anchor": "bottom",
+                                                        "args": [
+                                                            1,
+                                                            2
+                                                        ],
+                                                        "function": "subtotal",
+                                                        "name": "Net Printed"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "alias": "Q17_2",
+                                        "name": "A printed newspaper subscription",
+                                        "view": {
+                                            "column_width": null,
+                                            "include_missing": false,
+                                            "include_noneoftheabove": false,
+                                            "show_counts": false,
+                                            "transform": {
+                                                "insertions": [
+                                                    {
+                                                        "anchor": "bottom",
+                                                        "args": [
+                                                            1,
+                                                            2
+                                                        ],
+                                                        "function": "subtotal",
+                                                        "name": "Net Printed"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "alias": "Q17_3",
+                                        "name": "A single one-off payment to access a single article or edition online",
+                                        "view": {
+                                            "column_width": null,
+                                            "include_missing": false,
+                                            "include_noneoftheabove": false,
+                                            "show_counts": false,
+                                            "transform": {
+                                                "insertions": [
+                                                    {
+                                                        "anchor": "bottom",
+                                                        "args": [
+                                                            1,
+                                                            2
+                                                        ],
+                                                        "function": "subtotal",
+                                                        "name": "Net Printed"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "alias": "Q17_4",
+                                        "name": "An ongoing payment subscription for a digital news service \u2013 eg monthly, quarterly or annual payment (subscription or membership)",
+                                        "view": {
+                                            "column_width": null,
+                                            "include_missing": false,
+                                            "include_noneoftheabove": false,
+                                            "show_counts": false,
+                                            "transform": {
+                                                "insertions": [
+                                                    {
+                                                        "anchor": "bottom",
+                                                        "args": [
+                                                            1,
+                                                            2
+                                                        ],
+                                                        "function": "subtotal",
+                                                        "name": "Net Printed"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "alias": "Q17_5",
+                                        "name": "Pay for digital news as part of a print-digital bundle, or I get it for free as part of a print subscription",
+                                        "view": {
+                                            "column_width": null,
+                                            "include_missing": false,
+                                            "include_noneoftheabove": false,
+                                            "show_counts": false,
+                                            "transform": {
+                                                "insertions": [
+                                                    {
+                                                        "anchor": "bottom",
+                                                        "args": [
+                                                            1,
+                                                            2
+                                                        ],
+                                                        "function": "subtotal",
+                                                        "name": "Net Printed"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "alias": "Q17_6",
+                                        "name": "I have made a donation to support a digital news service",
+                                        "view": {
+                                            "column_width": null,
+                                            "include_missing": false,
+                                            "include_noneoftheabove": false,
+                                            "show_counts": false,
+                                            "transform": {
+                                                "insertions": [
+                                                    {
+                                                        "anchor": "bottom",
+                                                        "args": [
+                                                            1,
+                                                            2
+                                                        ],
+                                                        "function": "subtotal",
+                                                        "name": "Net Printed"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "alias": "Q17_7",
+                                        "name": "Other",
+                                        "view": {
+                                            "column_width": null,
+                                            "include_missing": false,
+                                            "include_noneoftheabove": false,
+                                            "show_counts": false,
+                                            "transform": {
+                                                "insertions": [
+                                                    {
+                                                        "anchor": "bottom",
+                                                        "args": [
+                                                            1,
+                                                            2
+                                                        ],
+                                                        "function": "subtotal",
+                                                        "name": "Net Printed"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "alias": "Q17_8",
+                                        "name": "No, I haven\u2019t paid for news in the last year",
+                                        "view": {
+                                            "column_width": null,
+                                            "include_missing": false,
+                                            "include_noneoftheabove": false,
+                                            "show_counts": false,
+                                            "transform": {
+                                                "insertions": [
+                                                    {
+                                                        "anchor": "bottom",
+                                                        "args": [
+                                                            1,
+                                                            2
+                                                        ],
+                                                        "function": "subtotal",
+                                                        "name": "Net Printed"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "alias": "Q17_98",
+                                        "name": "Don\u2019t know",
+                                        "view": {
+                                            "column_width": null,
+                                            "include_missing": false,
+                                            "include_noneoftheabove": false,
+                                            "show_counts": false,
+                                            "transform": {
+                                                "insertions": [
+                                                    {
+                                                        "anchor": "bottom",
+                                                        "args": [
+                                                            1,
+                                                            2
+                                                        ],
+                                                        "function": "subtotal",
+                                                        "name": "Net Printed"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    }
+                                ],
+                                "view": {
+                                    "column_width": null,
+                                    "include_missing": false,
+                                    "include_noneoftheabove": false,
+                                    "show_counts": false,
+                                    "transform": {
+                                        "insertions": [
+                                            {
+                                                "anchor": "bottom",
+                                                "args": [
+                                                    1,
+                                                    2
+                                                ],
+                                                "function": "subtotal",
+                                                "name": "Net Printed"
+                                            }
+                                        ]
+                                    }
+                                }
+                            },
+                            "type": {
+                                "class": "enum",
+                                "elements": [
+                                    {
+                                        "id": 1,
+                                        "missing": false,
+                                        "value": {
+                                            "derived": false,
+                                            "id": "0001",
+                                            "references": {
+                                                "alias": "Q17_1",
+                                                "name": "A newspaper (printed) in a shop",
+                                                "view": {
+                                                    "column_width": null,
+                                                    "include_missing": false,
+                                                    "include_noneoftheabove": false,
+                                                    "show_counts": false,
+                                                    "transform": {
+                                                        "insertions": [
+                                                            {
+                                                                "anchor": "bottom",
+                                                                "args": [
+                                                                    1,
+                                                                    2
+                                                                ],
+                                                                "function": "subtotal",
+                                                                "name": "Net Printed"
+                                                            }
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            "type": {
+                                                "categories": [
+                                                    {
+                                                        "id": 1,
+                                                        "missing": false,
+                                                        "name": "Selected",
+                                                        "numeric_value": 1,
+                                                        "selected": true
+                                                    },
+                                                    {
+                                                        "id": 0,
+                                                        "missing": false,
+                                                        "name": "Other",
+                                                        "numeric_value": 0
+                                                    },
+                                                    {
+                                                        "id": -1,
+                                                        "missing": true,
+                                                        "name": "No Data",
+                                                        "numeric_value": null
+                                                    }
+                                                ],
+                                                "class": "categorical",
+                                                "ordinal": false
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "id": 2,
+                                        "missing": false,
+                                        "value": {
+                                            "derived": false,
+                                            "id": "0002",
+                                            "references": {
+                                                "alias": "Q17_2",
+                                                "name": "A printed newspaper subscription",
+                                                "view": {
+                                                    "column_width": null,
+                                                    "include_missing": false,
+                                                    "include_noneoftheabove": false,
+                                                    "show_counts": false,
+                                                    "transform": {
+                                                        "insertions": [
+                                                            {
+                                                                "anchor": "bottom",
+                                                                "args": [
+                                                                    1,
+                                                                    2
+                                                                ],
+                                                                "function": "subtotal",
+                                                                "name": "Net Printed"
+                                                            }
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            "type": {
+                                                "categories": [
+                                                    {
+                                                        "id": 1,
+                                                        "missing": false,
+                                                        "name": "Selected",
+                                                        "numeric_value": 1,
+                                                        "selected": true
+                                                    },
+                                                    {
+                                                        "id": 0,
+                                                        "missing": false,
+                                                        "name": "Other",
+                                                        "numeric_value": 0
+                                                    },
+                                                    {
+                                                        "id": -1,
+                                                        "missing": true,
+                                                        "name": "No Data",
+                                                        "numeric_value": null
+                                                    }
+                                                ],
+                                                "class": "categorical",
+                                                "ordinal": false
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "id": 3,
+                                        "missing": false,
+                                        "value": {
+                                            "derived": false,
+                                            "id": "0003",
+                                            "references": {
+                                                "alias": "Q17_3",
+                                                "name": "A single one-off payment to access a single article or edition online",
+                                                "view": {
+                                                    "column_width": null,
+                                                    "include_missing": false,
+                                                    "include_noneoftheabove": false,
+                                                    "show_counts": false,
+                                                    "transform": {
+                                                        "insertions": [
+                                                            {
+                                                                "anchor": "bottom",
+                                                                "args": [
+                                                                    1,
+                                                                    2
+                                                                ],
+                                                                "function": "subtotal",
+                                                                "name": "Net Printed"
+                                                            }
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            "type": {
+                                                "categories": [
+                                                    {
+                                                        "id": 1,
+                                                        "missing": false,
+                                                        "name": "Selected",
+                                                        "numeric_value": 1,
+                                                        "selected": true
+                                                    },
+                                                    {
+                                                        "id": 0,
+                                                        "missing": false,
+                                                        "name": "Other",
+                                                        "numeric_value": 0
+                                                    },
+                                                    {
+                                                        "id": -1,
+                                                        "missing": true,
+                                                        "name": "No Data",
+                                                        "numeric_value": null
+                                                    }
+                                                ],
+                                                "class": "categorical",
+                                                "ordinal": false
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "id": 4,
+                                        "missing": false,
+                                        "value": {
+                                            "derived": false,
+                                            "id": "0004",
+                                            "references": {
+                                                "alias": "Q17_4",
+                                                "name": "An ongoing payment subscription for a digital news service \u2013 eg monthly, quarterly or annual payment (subscription or membership)",
+                                                "view": {
+                                                    "column_width": null,
+                                                    "include_missing": false,
+                                                    "include_noneoftheabove": false,
+                                                    "show_counts": false,
+                                                    "transform": {
+                                                        "insertions": [
+                                                            {
+                                                                "anchor": "bottom",
+                                                                "args": [
+                                                                    1,
+                                                                    2
+                                                                ],
+                                                                "function": "subtotal",
+                                                                "name": "Net Printed"
+                                                            }
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            "type": {
+                                                "categories": [
+                                                    {
+                                                        "id": 1,
+                                                        "missing": false,
+                                                        "name": "Selected",
+                                                        "numeric_value": 1,
+                                                        "selected": true
+                                                    },
+                                                    {
+                                                        "id": 0,
+                                                        "missing": false,
+                                                        "name": "Other",
+                                                        "numeric_value": 0
+                                                    },
+                                                    {
+                                                        "id": -1,
+                                                        "missing": true,
+                                                        "name": "No Data",
+                                                        "numeric_value": null
+                                                    }
+                                                ],
+                                                "class": "categorical",
+                                                "ordinal": false
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "id": 5,
+                                        "missing": false,
+                                        "value": {
+                                            "derived": false,
+                                            "id": "0005",
+                                            "references": {
+                                                "alias": "Q17_5",
+                                                "name": "Pay for digital news as part of a print-digital bundle, or I get it for free as part of a print subscription",
+                                                "view": {
+                                                    "column_width": null,
+                                                    "include_missing": false,
+                                                    "include_noneoftheabove": false,
+                                                    "show_counts": false,
+                                                    "transform": {
+                                                        "insertions": [
+                                                            {
+                                                                "anchor": "bottom",
+                                                                "args": [
+                                                                    1,
+                                                                    2
+                                                                ],
+                                                                "function": "subtotal",
+                                                                "name": "Net Printed"
+                                                            }
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            "type": {
+                                                "categories": [
+                                                    {
+                                                        "id": 1,
+                                                        "missing": false,
+                                                        "name": "Selected",
+                                                        "numeric_value": 1,
+                                                        "selected": true
+                                                    },
+                                                    {
+                                                        "id": 0,
+                                                        "missing": false,
+                                                        "name": "Other",
+                                                        "numeric_value": 0
+                                                    },
+                                                    {
+                                                        "id": -1,
+                                                        "missing": true,
+                                                        "name": "No Data",
+                                                        "numeric_value": null
+                                                    }
+                                                ],
+                                                "class": "categorical",
+                                                "ordinal": false
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "id": 6,
+                                        "missing": false,
+                                        "value": {
+                                            "derived": false,
+                                            "id": "0006",
+                                            "references": {
+                                                "alias": "Q17_6",
+                                                "name": "I have made a donation to support a digital news service",
+                                                "view": {
+                                                    "column_width": null,
+                                                    "include_missing": false,
+                                                    "include_noneoftheabove": false,
+                                                    "show_counts": false,
+                                                    "transform": {
+                                                        "insertions": [
+                                                            {
+                                                                "anchor": "bottom",
+                                                                "args": [
+                                                                    1,
+                                                                    2
+                                                                ],
+                                                                "function": "subtotal",
+                                                                "name": "Net Printed"
+                                                            }
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            "type": {
+                                                "categories": [
+                                                    {
+                                                        "id": 1,
+                                                        "missing": false,
+                                                        "name": "Selected",
+                                                        "numeric_value": 1,
+                                                        "selected": true
+                                                    },
+                                                    {
+                                                        "id": 0,
+                                                        "missing": false,
+                                                        "name": "Other",
+                                                        "numeric_value": 0
+                                                    },
+                                                    {
+                                                        "id": -1,
+                                                        "missing": true,
+                                                        "name": "No Data",
+                                                        "numeric_value": null
+                                                    }
+                                                ],
+                                                "class": "categorical",
+                                                "ordinal": false
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "id": 7,
+                                        "missing": false,
+                                        "value": {
+                                            "derived": false,
+                                            "id": "0007",
+                                            "references": {
+                                                "alias": "Q17_7",
+                                                "name": "Other",
+                                                "view": {
+                                                    "column_width": null,
+                                                    "include_missing": false,
+                                                    "include_noneoftheabove": false,
+                                                    "show_counts": false,
+                                                    "transform": {
+                                                        "insertions": [
+                                                            {
+                                                                "anchor": "bottom",
+                                                                "args": [
+                                                                    1,
+                                                                    2
+                                                                ],
+                                                                "function": "subtotal",
+                                                                "name": "Net Printed"
+                                                            }
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            "type": {
+                                                "categories": [
+                                                    {
+                                                        "id": 1,
+                                                        "missing": false,
+                                                        "name": "Selected",
+                                                        "numeric_value": 1,
+                                                        "selected": true
+                                                    },
+                                                    {
+                                                        "id": 0,
+                                                        "missing": false,
+                                                        "name": "Other",
+                                                        "numeric_value": 0
+                                                    },
+                                                    {
+                                                        "id": -1,
+                                                        "missing": true,
+                                                        "name": "No Data",
+                                                        "numeric_value": null
+                                                    }
+                                                ],
+                                                "class": "categorical",
+                                                "ordinal": false
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "id": 8,
+                                        "missing": false,
+                                        "value": {
+                                            "derived": false,
+                                            "id": "0008",
+                                            "references": {
+                                                "alias": "Q17_8",
+                                                "name": "No, I haven\u2019t paid for news in the last year",
+                                                "view": {
+                                                    "column_width": null,
+                                                    "include_missing": false,
+                                                    "include_noneoftheabove": false,
+                                                    "show_counts": false,
+                                                    "transform": {
+                                                        "insertions": [
+                                                            {
+                                                                "anchor": "bottom",
+                                                                "args": [
+                                                                    1,
+                                                                    2
+                                                                ],
+                                                                "function": "subtotal",
+                                                                "name": "Net Printed"
+                                                            }
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            "type": {
+                                                "categories": [
+                                                    {
+                                                        "id": 1,
+                                                        "missing": false,
+                                                        "name": "Selected",
+                                                        "numeric_value": 1,
+                                                        "selected": true
+                                                    },
+                                                    {
+                                                        "id": 0,
+                                                        "missing": false,
+                                                        "name": "Other",
+                                                        "numeric_value": 0
+                                                    },
+                                                    {
+                                                        "id": -1,
+                                                        "missing": true,
+                                                        "name": "No Data",
+                                                        "numeric_value": null
+                                                    }
+                                                ],
+                                                "class": "categorical",
+                                                "ordinal": false
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "id": 9,
+                                        "missing": false,
+                                        "value": {
+                                            "derived": false,
+                                            "id": "0009",
+                                            "references": {
+                                                "alias": "Q17_98",
+                                                "name": "Don\u2019t know",
+                                                "view": {
+                                                    "column_width": null,
+                                                    "include_missing": false,
+                                                    "include_noneoftheabove": false,
+                                                    "show_counts": false,
+                                                    "transform": {
+                                                        "insertions": [
+                                                            {
+                                                                "anchor": "bottom",
+                                                                "args": [
+                                                                    1,
+                                                                    2
+                                                                ],
+                                                                "function": "subtotal",
+                                                                "name": "Net Printed"
+                                                            }
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            "type": {
+                                                "categories": [
+                                                    {
+                                                        "id": 1,
+                                                        "missing": false,
+                                                        "name": "Selected",
+                                                        "numeric_value": 1,
+                                                        "selected": true
+                                                    },
+                                                    {
+                                                        "id": 0,
+                                                        "missing": false,
+                                                        "name": "Other",
+                                                        "numeric_value": 0
+                                                    },
+                                                    {
+                                                        "id": -1,
+                                                        "missing": true,
+                                                        "name": "No Data",
+                                                        "numeric_value": null
+                                                    }
+                                                ],
+                                                "class": "categorical",
+                                                "ordinal": false
+                                            }
+                                        }
+                                    }
+                                ],
+                                "subtype": {
+                                    "class": "variable"
+                                }
+                            }
+                        },
+                        {
+                            "derived": true,
+                            "references": {
+                                "alias": "Q17",
+                                "description": "Which, if any, of the following ways have you used to pay for news in the last year?",
+                                "name": "Paid for news in the last year",
+                                "notes": "All News readers",
+                                "subreferences": [
+                                    {
+                                        "alias": "Q17_1",
+                                        "name": "A newspaper (printed) in a shop",
+                                        "view": {
+                                            "column_width": null,
+                                            "include_missing": false,
+                                            "include_noneoftheabove": false,
+                                            "show_counts": false,
+                                            "transform": {
+                                                "insertions": [
+                                                    {
+                                                        "anchor": "bottom",
+                                                        "args": [
+                                                            1,
+                                                            2
+                                                        ],
+                                                        "function": "subtotal",
+                                                        "name": "Net Printed"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "alias": "Q17_2",
+                                        "name": "A printed newspaper subscription",
+                                        "view": {
+                                            "column_width": null,
+                                            "include_missing": false,
+                                            "include_noneoftheabove": false,
+                                            "show_counts": false,
+                                            "transform": {
+                                                "insertions": [
+                                                    {
+                                                        "anchor": "bottom",
+                                                        "args": [
+                                                            1,
+                                                            2
+                                                        ],
+                                                        "function": "subtotal",
+                                                        "name": "Net Printed"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "alias": "Q17_3",
+                                        "name": "A single one-off payment to access a single article or edition online",
+                                        "view": {
+                                            "column_width": null,
+                                            "include_missing": false,
+                                            "include_noneoftheabove": false,
+                                            "show_counts": false,
+                                            "transform": {
+                                                "insertions": [
+                                                    {
+                                                        "anchor": "bottom",
+                                                        "args": [
+                                                            1,
+                                                            2
+                                                        ],
+                                                        "function": "subtotal",
+                                                        "name": "Net Printed"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "alias": "Q17_4",
+                                        "name": "An ongoing payment subscription for a digital news service \u2013 eg monthly, quarterly or annual payment (subscription or membership)",
+                                        "view": {
+                                            "column_width": null,
+                                            "include_missing": false,
+                                            "include_noneoftheabove": false,
+                                            "show_counts": false,
+                                            "transform": {
+                                                "insertions": [
+                                                    {
+                                                        "anchor": "bottom",
+                                                        "args": [
+                                                            1,
+                                                            2
+                                                        ],
+                                                        "function": "subtotal",
+                                                        "name": "Net Printed"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "alias": "Q17_5",
+                                        "name": "Pay for digital news as part of a print-digital bundle, or I get it for free as part of a print subscription",
+                                        "view": {
+                                            "column_width": null,
+                                            "include_missing": false,
+                                            "include_noneoftheabove": false,
+                                            "show_counts": false,
+                                            "transform": {
+                                                "insertions": [
+                                                    {
+                                                        "anchor": "bottom",
+                                                        "args": [
+                                                            1,
+                                                            2
+                                                        ],
+                                                        "function": "subtotal",
+                                                        "name": "Net Printed"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "alias": "Q17_6",
+                                        "name": "I have made a donation to support a digital news service",
+                                        "view": {
+                                            "column_width": null,
+                                            "include_missing": false,
+                                            "include_noneoftheabove": false,
+                                            "show_counts": false,
+                                            "transform": {
+                                                "insertions": [
+                                                    {
+                                                        "anchor": "bottom",
+                                                        "args": [
+                                                            1,
+                                                            2
+                                                        ],
+                                                        "function": "subtotal",
+                                                        "name": "Net Printed"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "alias": "Q17_7",
+                                        "name": "Other",
+                                        "view": {
+                                            "column_width": null,
+                                            "include_missing": false,
+                                            "include_noneoftheabove": false,
+                                            "show_counts": false,
+                                            "transform": {
+                                                "insertions": [
+                                                    {
+                                                        "anchor": "bottom",
+                                                        "args": [
+                                                            1,
+                                                            2
+                                                        ],
+                                                        "function": "subtotal",
+                                                        "name": "Net Printed"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "alias": "Q17_8",
+                                        "name": "No, I haven\u2019t paid for news in the last year",
+                                        "view": {
+                                            "column_width": null,
+                                            "include_missing": false,
+                                            "include_noneoftheabove": false,
+                                            "show_counts": false,
+                                            "transform": {
+                                                "insertions": [
+                                                    {
+                                                        "anchor": "bottom",
+                                                        "args": [
+                                                            1,
+                                                            2
+                                                        ],
+                                                        "function": "subtotal",
+                                                        "name": "Net Printed"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "alias": "Q17_98",
+                                        "name": "Don\u2019t know",
+                                        "view": {
+                                            "column_width": null,
+                                            "include_missing": false,
+                                            "include_noneoftheabove": false,
+                                            "show_counts": false,
+                                            "transform": {
+                                                "insertions": [
+                                                    {
+                                                        "anchor": "bottom",
+                                                        "args": [
+                                                            1,
+                                                            2
+                                                        ],
+                                                        "function": "subtotal",
+                                                        "name": "Net Printed"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    }
+                                ],
+                                "view": {
+                                    "column_width": null,
+                                    "include_missing": false,
+                                    "include_noneoftheabove": false,
+                                    "show_counts": false,
+                                    "transform": {
+                                        "insertions": [
+                                            {
+                                                "anchor": "bottom",
+                                                "args": [
+                                                    1,
+                                                    2
+                                                ],
+                                                "function": "subtotal",
+                                                "name": "Net Printed"
+                                            }
+                                        ]
+                                    }
+                                }
+                            },
+                            "type": {
+                                "categories": [
+                                    {
+                                        "id": 1,
+                                        "missing": false,
+                                        "name": "Selected",
+                                        "numeric_value": 1,
+                                        "selected": true
+                                    },
+                                    {
+                                        "id": 0,
+                                        "missing": false,
+                                        "name": "Other",
+                                        "numeric_value": 0
+                                    },
+                                    {
+                                        "id": -1,
+                                        "missing": true,
+                                        "name": "No Data",
+                                        "numeric_value": null
+                                    }
+                                ],
+                                "class": "categorical",
+                                "ordinal": false,
+                                "subvariables": [
+                                    "0001",
+                                    "0002",
+                                    "0003",
+                                    "0004",
+                                    "0005",
+                                    "0006",
+                                    "0007",
+                                    "0008",
+                                    "0009"
+                                ]
+                            }
+                        }
+                    ],
+                    "element": "crunch:cube",
+                    "filtered": {
+                        "unweighted_n": 33358,
+                        "weighted_n": 33364.078683702
+                    },
+                    "measures": {
+                        "count": {
+                            "data": [
+                                10488.8965088969,
+                                22875.1821748055,
+                                0.0,
+                                5051.443927452,
+                                28312.6347562509,
+                                0.0,
+                                1960.495229921,
+                                31403.5834537819,
+                                0.0,
+                                3985.375341388,
+                                29378.7033423149,
+                                0.0,
+                                3073.367020631,
+                                30290.7116630719,
+                                0.0,
+                                2196.709452755,
+                                31167.3692309479,
+                                0.0,
+                                779.432275915,
+                                32584.6464077879,
+                                0.0,
+                                14859.5550671778,
+                                18504.5236165244,
+                                0.0,
+                                713.547824492,
+                                32650.5308592109,
+                                0.0
+                            ],
+                            "metadata": {
+                                "derived": true,
+                                "references": {},
+                                "type": {
+                                    "class": "numeric",
+                                    "integer": false,
+                                    "missing_reasons": {
+                                        "No Data": -1
+                                    },
+                                    "missing_rules": {}
+                                }
+                            },
+                            "n_missing": 0
+                        }
+                    },
+                    "missing": 0,
+                    "n": 33358,
+                    "unfiltered": {
+                        "unweighted_n": 53334,
+                        "weighted_n": 33497.39413943
+                    }
+                }
+            },
+            "meta": {
+                "filters": [],
+                "format": {
+                    "decimal_places": 0,
+                    "pval_colors": false,
+                    "show_empty": false
+                },
+                "measures": [
+                    "col_percent"
+                ],
+                "name": "Paid for news in the last year ",
+                "page_layout": {
+                    "columns": {
+                        "alias": false,
+                        "description": false,
+                        "merge_ranges": true,
+                        "notes": false,
+                        "right": []
+                    },
+                    "rows": {
+                        "alias": false,
+                        "bottom": [],
+                        "description": true,
+                        "notes": false
+                    }
+                },
+                "subtitle": "",
+                "title": "Paid for news in the last year",
+                "viz_type": "table",
+                "weight": "weight"
+            }
+        }
+    ]
+}
