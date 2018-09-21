@@ -56,6 +56,7 @@ from .fixtures import HUFFPOST_ACTIONS_X_HOUSEHOLD
 from .fixtures import GENDER_X_WEIGHT
 from .fixtures import CAT_X_MR_X_CAT
 from .fixtures import CAT_X_CAT_FILTERED_POP
+from .fixtures import UNIV_MR_WITH_HS
 
 from . import assert_scale_means_equal
 
@@ -1866,3 +1867,14 @@ class TestCrunchCube(TestCase):
         ])
         actual = compress_pruned(props[1])
         np.testing.assert_almost_equal(actual, expected)
+
+    def test_univ_mr_with_hs_does_not_crash(self):
+        """Assert that MR with H&S doesn't crash."""
+        cube = CrunchCube(UNIV_MR_WITH_HS['slides'][0]['cube'])
+        cube.as_array(include_transforms_for_dims=[0])
+        # If it doesn't crash, the test passes, we don't actually care about
+        # the result. We only care that the H&S transform doesn't crash the MR
+        # variable (that it doesn't try to actually include the transform
+        # in the result). H&S shouldn't be in the MR variable, but there
+        # are cases when there are.
+        assert True

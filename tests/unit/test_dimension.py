@@ -383,3 +383,11 @@ class TestDimension(TestCase):
         expected = [1, 2, np.nan]
         actual = dim.values
         self.assertEqual(actual, expected)
+
+    @patch('cr.cube.dimension.Dimension.is_selections', True)
+    @patch('cr.cube.dimension.Dimension._get_type')
+    def test_hs_indices_for_mr(self, mock_type):
+        dim = Dimension({})
+        expected = []
+        actual = dim.hs_indices
+        assert actual == expected
