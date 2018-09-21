@@ -179,6 +179,9 @@ class Dimension(object):
     @lazyproperty
     def hs_indices(self):
         '''Headers and Subtotals indices.'''
+        if self.is_selections:
+            return []
+
         eid = self.elements_by_id
 
         indices = []

@@ -152,7 +152,8 @@ class CrunchCube(DataTable):
                          i - dim_offset in include_transforms_for_dims)
             if dim.type == 'multiple_response':
                 dim_offset += 1
-            if not transform or dim.type in ITEM_DIMENSION_TYPES:
+            if (not transform or
+                    dim.type in ITEM_DIMENSION_TYPES or dim.is_selections):
                 continue
             # Perform transformations
             insertions = self._insertions(res, dim, i)
