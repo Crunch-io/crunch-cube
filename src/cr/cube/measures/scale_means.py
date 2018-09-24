@@ -34,9 +34,11 @@ class ScaleMeans(object):
         return means
 
     def margin(self, axis):
+        dimension_index = 1 - axis
         margin = self._slice.margin(axis)
         total = np.sum(margin)
-        return np.sum(self.values[axis] * margin) / total
+        values = self.values[dimension_index]
+        return np.sum(values * margin) / total
 
     @lazyproperty
     def values(self):
