@@ -11,6 +11,7 @@ from .fixtures.cubes.scale_means import CAT_X_CAT
 from .fixtures.cubes.scale_means import CAT_X_MR
 from .fixtures.cubes.scale_means import MR_X_CAT
 from .fixtures.cubes.scale_means import UNIVARIATE_CAT
+from .fixtures.cubes.scale_means import CAT_X_CAT_SM_MARGIN
 from .fixtures import ECON_BLAME_X_IDEOLOGY_ROW_HS
 from .fixtures import ECON_BLAME_WITH_HS
 from .fixtures import ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS
@@ -241,3 +242,14 @@ def test_cat_x_cat_pruning_and_hs():
     ]]
     actual = cube.scale_means(hs_dims=[0, 1], prune=True)
     assert_scale_means_equal(actual, expected)
+
+
+def test_cat_x_cat_scale_means_margin():
+    cs = CrunchCube(CAT_X_CAT_SM_MARGIN['slides'][0]['cube']).slices[0]
+    expected = 2.6846246973365617
+    actual = cs.scale_means_margin(1)
+    assert actual == expected
+
+    expected = 2.536319612590799
+    actual = cs.scale_means_margin(0)
+    assert actual == expected
