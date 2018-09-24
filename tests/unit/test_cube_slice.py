@@ -356,7 +356,7 @@ class TestCubeSlice(TestCase):
 
         cube.ca_dim_ind = None
         cs = CubeSlice(cube, 0)
-        assert cs.ca_dim_ind == None
+        assert cs.ca_dim_ind is None
 
         cube.ca_dim_ind = 0
         cs = CubeSlice(cube, 0)
@@ -374,4 +374,4 @@ class TestCubeSlice(TestCase):
         cube.ndim = 3
         cube.ca_dim_ind = 0
         cs = CubeSlice(cube, 0)
-        assert cs.ca_dim_ind == None
+        assert cs.ca_dim_ind is None
