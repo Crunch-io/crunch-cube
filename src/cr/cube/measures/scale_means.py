@@ -33,6 +33,11 @@ class ScaleMeans(object):
             means.append(mean)
         return means
 
+    def margin(self, axis):
+        margin = self._slice.margin(axis)
+        total = np.sum(margin)
+        return np.sum(self.values[axis] * margin) / total
+
     @lazyproperty
     def values(self):
         '''Get num values for means calculation.'''
