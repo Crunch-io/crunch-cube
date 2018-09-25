@@ -55,19 +55,19 @@ class TestIndex(TestCase):
 
         # Test index values
         expected = np.array([
-            [[ 1.,  1., np.nan, np.nan, np.nan],
+            [[1., 1., np.nan, np.nan, np.nan],
              [np.nan, np.nan, np.nan, np.nan, np.nan],
              [np.nan, np.nan, np.nan, np.nan, np.nan],
              [np.nan, np.nan, np.nan, np.nan, np.nan]],
 
-            [[ 2.,  0., np.nan, np.nan, np.nan],
-             [ 0.,  2., np.nan, np.nan, np.nan],
+            [[2., 0., np.nan, np.nan, np.nan],
+             [0., 2., np.nan, np.nan, np.nan],
              [np.nan, np.nan, np.nan, np.nan, np.nan],
              [np.nan, np.nan, np.nan, np.nan, np.nan]],
 
             [[np.nan, np.nan, np.nan, np.nan, np.nan],
-             [ 2.,  0., np.nan, np.nan, np.nan],
-             [ 0.,  2., np.nan, np.nan, np.nan],
+             [2., 0., np.nan, np.nan, np.nan],
+             [0., 2., np.nan, np.nan, np.nan],
              [np.nan, np.nan, np.nan, np.nan, np.nan]],
         ])
         actual = cube.index()
@@ -75,19 +75,19 @@ class TestIndex(TestCase):
 
         # Test pruning mask
         expected = np.array([
-            [[ False,  False, True, True, True],
+            [[False, False, True, True, True],
              [True, True, True, True, True],
              [True, True, True, True, True],
              [True, True, True, True, True]],
 
-            [[ False,  False, True, True, True],
-             [ False,  False, True, True, True],
+            [[False, False, True, True, True],
+             [False, False, True, True, True],
              [True, True, True, True, True],
              [True, True, True, True, True]],
 
             [[True, True, True, True, True],
-             [ False,  False, True, True, True],
-             [ False,  False, True, True, True],
+             [False, False, True, True, True],
+             [False, False, True, True, True],
              [True, True, True, True, True]],
         ])
         actual = cube.index(prune=True).mask

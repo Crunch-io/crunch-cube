@@ -1,5 +1,4 @@
 from unittest import TestCase
-from mock import patch
 import numpy as np
 
 from cr.cube.crunch_cube import CrunchCube
@@ -399,11 +398,11 @@ class TestCrunchCube(TestCase):
     def test_filtered_population_counts(self):
         cube = CrunchCube(CAT_X_CAT_FILTERED_POP)
         expected = np.array([
-            [ 300000.,  1400000., 0., 0., 0., 0.],
+            [300000., 1400000., 0., 0., 0., 0.],
             [5900000., 13200000., 0., 0., 0., 0.],
-            [ 600000.,  2900000., 0., 0., 0., 0.],
-            [ 100000.,   100000., 0., 0., 0., 0.],
-            [ 300000.,   600000., 0., 0., 0., 0.]])
+            [600000., 2900000., 0., 0., 0., 0.],
+            [100000., 100000., 0., 0., 0., 0.],
+            [300000., 600000., 0., 0., 0., 0.]])
         actual = cube.population_counts(100000000)
         np.testing.assert_almost_equal(actual, expected)
 
@@ -1553,7 +1552,7 @@ class TestCrunchCube(TestCase):
             [0, 2, 1, 3, 2],
         ])
         actual = cube.as_array(include_transforms_for_dims=[0, 1], prune=True)
-        # np.testing.assert_array_equal(actual, expected)
+        np.testing.assert_array_equal(actual, expected)
 
     def test_means_univariate_cat(self):
         cube = CrunchCube(ECON_BLAME_WITH_HS)
@@ -1621,7 +1620,10 @@ class TestCrunchCube(TestCase):
         expected = [
             [np.array([1.48, 1.40740741]), np.array([1.71111111, 1.64705882])],
             [np.array([1.42857143, 1.53846154]), np.array([1.6, 1.7])],
-            [np.array([1.52173913, 1.55319149]), np.array([1.65625, 1.68421053])],
+            [
+                np.array([1.52173913, 1.55319149]),
+                np.array([1.65625, 1.68421053]),
+            ],
         ]
         actual = cube.scale_means()
         assert_scale_means_equal(actual, expected)
@@ -1776,7 +1778,9 @@ class TestCrunchCube(TestCase):
 
     def test_proportions_cat_x_mr_x_cat(self):
         cube = CrunchCube(CAT_X_MR_X_CAT['slides'][0]['cube'])
-        props = cube.proportions(axis=1, include_transforms_for_dims=[1, 2], prune=True)
+        props = cube.proportions(
+            axis=1, include_transforms_for_dims=[1, 2], prune=True,
+        )
 
         # Test first slice
         expected = np.array([
