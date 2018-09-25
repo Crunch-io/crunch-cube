@@ -24,22 +24,26 @@ def test_scale_means_marginal(scale_means_fixture):
 
 @pytest.fixture(params=[
     (
-        [None, ROWS_DIM_VALUES], margin, 0,
+        [None, ROWS_DIM_VALUES], margin, 0, 2,
         np.sum(COL_MARGIN * ROWS_DIM_VALUES) / np.sum(COL_MARGIN),
     ),
     (
-        [COLS_DIM_VALUES, None], margin, 1,
+        [COLS_DIM_VALUES, None], margin, 1, 2,
         np.sum(ROW_MARGIN * COLS_DIM_VALUES) / np.sum(ROW_MARGIN),
     ),
     (
-        [None, ROWS_DIM_VALUES], margin, 0,
+        [None, ROWS_DIM_VALUES], margin, 0, 2,
         np.sum(COL_MARGIN * ROWS_DIM_VALUES) / np.sum(COL_MARGIN),
+    ),
+    (
+        [None, None], margin, 0, 2, None,
     ),
 ])
 def scale_means_fixture(request, values_prop_):
-    values, margin, axis, expected = request.param
+    values, margin, axis, ndim, expected = request.param
     values_prop_.return_value = values
     slice_ = Mock()
+    slice_.ndim = ndim
     slice_.margin = margin
     scale_means = ScaleMeans(slice_)
     return scale_means, axis, expected

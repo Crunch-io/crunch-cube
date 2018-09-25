@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from cr.cube.crunch_cube import CrunchCube
 
@@ -25,9 +26,18 @@ def test_ca_cat_x_items():
     expected = [[np.array([1.50454821, 3.11233766, 3.35788192, 3.33271833]), None]]  # noqa
     actual = cube.scale_means()
     assert_scale_means_equal(actual, expected)
+
     # Test for cube slices
-    actual = cube.slices[0].scale_means()
+    slice_ = cube.slices[0]
+    actual = slice_.scale_means()
     assert_scale_means_equal(actual, expected[0])
+
+    # Test ScaleMeans marginal
+    actual = slice_.scale_means_margin(0)
+    assert actual is None
+    with pytest.raises(ValueError):
+        # Items dimension doesn't have means
+        actual = slice_.scale_means_margin(1)
 
 
 def test_ca_items_x_cat():
@@ -35,9 +45,18 @@ def test_ca_items_x_cat():
     expected = [[None, np.array([1.50454821, 3.11233766, 3.35788192, 3.33271833])]]  # noqa
     actual = cube.scale_means()
     assert_scale_means_equal(actual, expected)
+
     # Test for cube slices
-    actual = cube.slices[0].scale_means()
+    slice_ = cube.slices[0]
+    actual = slice_.scale_means()
     assert_scale_means_equal(actual, expected[0])
+
+    # Test ScaleMeans marginal
+    with pytest.raises(ValueError):
+        # Items dimension doesn't have means
+        actual = slice_.scale_means_margin(0)
+    actual = slice_.scale_means_margin(1)
+    assert actual is None
 
 
 def test_ca_x_mr():
@@ -50,9 +69,18 @@ def test_ca_x_mr():
     ]
     actual = cube.scale_means()
     assert_scale_means_equal(actual, expected)
+
     # Test for cube slices
-    actual = cube.slices[0].scale_means()
+    slice_ = cube.slices[0]
+    actual = slice_.scale_means()
     assert_scale_means_equal(actual, expected[0])
+
+    # Test ScaleMeans marginal
+    with pytest.raises(ValueError):
+        # Items dimension doesn't have means
+        actual = slice_.scale_means_margin(0)
+    actual = slice_.scale_means_margin(1)
+    assert actual == 0.5066265060240964
 
 
 def test_cat_x_ca_cat_x_items():
@@ -67,15 +95,22 @@ def test_cat_x_ca_cat_x_items():
     ]
     actual = cube.scale_means()
     assert_scale_means_equal(actual, expected)
-    # Test for cube slices
-    actual = cube.slices[0].scale_means()
-    assert_scale_means_equal(actual, expected[0])
 
     actual = cube.scale_means(hs_dims=[0, 1])
     assert_scale_means_equal(actual, expected)
+
     # Test for cube slices
-    actual = cube.slices[0].scale_means(hs_dims=[0, 1])
+    slice_ = cube.slices[0]
+    actual = slice_.scale_means()
     assert_scale_means_equal(actual, expected[0])
+    actual = slice_.scale_means(hs_dims=[0, 1])
+    assert_scale_means_equal(actual, expected[0])
+
+    # Test ScaleMeans marginal
+    actual = slice_.scale_means_margin(0)
+    assert actual is None
+    actual = slice_.scale_means_margin(1)
+    assert actual == 2.4413145539906105
 
 
 def test_cat_x_cat():
@@ -86,9 +121,17 @@ def test_cat_x_cat():
     ]]
     actual = cube.scale_means()
     assert_scale_means_equal(actual, expected)
+
     # Test for cube slices
-    actual = cube.slices[0].scale_means()
+    slice_ = cube.slices[0]
+    actual = slice_.scale_means()
     assert_scale_means_equal(actual, expected[0])
+
+    # Test ScaleMeans marginal
+    actual = slice_.scale_means_margin(0)
+    assert actual == 2.536319612590799
+    actual = slice_.scale_means_margin(1)
+    assert actual == 2.6846246973365617
 
 
 def test_cat_x_mr():
@@ -96,9 +139,17 @@ def test_cat_x_mr():
     expected = [[np.array([2.45070423, 2.54471545, 2.54263006, np.nan]), None]]
     actual = cube.scale_means()
     assert_scale_means_equal(actual, expected)
+
     # Test for cube slices
-    actual = cube.slices[0].scale_means()
+    slice_ = cube.slices[0]
+    actual = slice_.scale_means()
     assert_scale_means_equal(actual, expected[0])
+
+    # Test ScaleMeans marginal
+    actual = slice_.scale_means_margin(0)
+    assert actual is None
+    actual = slice_.scale_means_margin(1)
+    assert actual == 2.75
 
 
 def test_mr_x_cat():
@@ -106,9 +157,17 @@ def test_mr_x_cat():
     expected = [[None, np.array([2.45070423, 2.54471545, 2.54263006, np.nan])]]
     actual = cube.scale_means()
     assert_scale_means_equal(actual, expected)
+
     # Test for cube slices
-    actual = cube.slices[0].scale_means()
+    slice_ = cube.slices[0]
+    actual = slice_.scale_means()
     assert_scale_means_equal(actual, expected[0])
+
+    # Test ScaleMeans marginal
+    actual = slice_.scale_means_margin(0)
+    assert actual == 2.5323565323565322
+    actual = slice_.scale_means_margin(1)
+    assert actual is None
 
 
 def test_univariate_cat():
@@ -116,9 +175,15 @@ def test_univariate_cat():
     expected = [[np.array([2.6865854])]]
     actual = cube.scale_means()
     assert_scale_means_equal(actual, expected)
+
     # Test for cube slices
-    actual = cube.slices[0].scale_means()
+    slice_ = cube.slices[0]
+    actual = slice_.scale_means()
     assert_scale_means_equal(actual, expected[0])
+
+    # Test ScaleMeans marginal
+    with pytest.raises(ValueError):
+        actual = slice_.scale_means_margin(0)
 
 
 def test_cat_x_cat_with_hs():
@@ -131,8 +196,10 @@ def test_cat_x_cat_with_hs():
     ]]
     actual = cube.scale_means()
     assert_scale_means_equal(actual, expected)
+
     # Test for cube slices
-    actual = cube.slices[0].scale_means()
+    slice_ = cube.slices[0]
+    actual = slice_.scale_means()
     assert_scale_means_equal(actual, expected[0])
 
     # Test with H&S
@@ -142,6 +209,7 @@ def test_cat_x_cat_with_hs():
     ]]
     actual = cube.scale_means(hs_dims=[0, 1])
     assert_scale_means_equal(actual, expected)
+
     # Test for cube slices
     actual = cube.slices[0].scale_means(hs_dims=[0, 1])
     assert_scale_means_equal(actual, expected[0])
@@ -154,6 +222,7 @@ def test_univariate_with_hs():
     expected = [[np.array([2.17352056])]]
     actual = cube.scale_means()
     assert_scale_means_equal(actual, expected)
+
     # Test for cube slices
     actual = cube.slices[0].scale_means()
     assert_scale_means_equal(actual, expected[0])
@@ -162,6 +231,7 @@ def test_univariate_with_hs():
     expected = [[np.array([2.17352056])]]
     actual = cube.scale_means(hs_dims=[0])
     assert_scale_means_equal(actual, expected)
+
     # Test for cube slices
     actual = cube.slices[0].scale_means(hs_dims=[0, 1])
     assert_scale_means_equal(actual, expected[0])
@@ -177,6 +247,7 @@ def test_cat_x_cat_with_hs_on_both_dims():
     ]]
     actual = cube.scale_means()
     assert_scale_means_equal(actual, expected)
+
     # Test for cube slices
     actual = cube.slices[0].scale_means()
     assert_scale_means_equal(actual, expected[0])
@@ -188,6 +259,7 @@ def test_cat_x_cat_with_hs_on_both_dims():
     ]]
     actual = cube.scale_means(hs_dims=[0, 1])
     assert_scale_means_equal(actual, expected)
+
     # Test for cube slices
     actual = cube.slices[0].scale_means(hs_dims=[0, 1])
     assert_scale_means_equal(actual, expected[0])
