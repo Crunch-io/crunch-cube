@@ -119,4 +119,3 @@ class TestSubtotal(TestCase):
         subtotal = Subtotal(self.valid_subtotal_anchor_bottom, dim)
         anchor = subtotal.anchor
         assert anchor == 'bottom'
-

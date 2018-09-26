@@ -453,8 +453,8 @@ class TestCrunchCube(TestCase):
         Mock(type='categorical', is_selections=True),
         Mock(type='categorical', is_selections=False),
     ])
-    def test_adjust_axis_mr_x_cat(self):
-        '''Test axes for MR x CAT.'''
+    def test_adjust_axis_mr_x_cat_x_cat(self):
+        '''Test axes for MR x CAT x CAT.'''
         cc = CrunchCube({})
         adjust = cc._adjust_axis
 
@@ -726,8 +726,8 @@ class TestCrunchCube(TestCase):
         Mock(type='categorical_array', is_selections=False),
         Mock(type='categorical', is_selections=False),
     ])
-    def test_adjust_axis_mr_x_cat(self):
-        '''Test axes for MR x CAT.'''
+    def test_adjust_axis_mr_x_cat_x_ca(self):
+        '''Test axes for MR x CAT x CA.'''
         cc = CrunchCube({})
         adjust = cc._adjust_axis
 
@@ -945,9 +945,11 @@ class TestCrunchCube(TestCase):
         assert cc.population_fraction == 1
         cc = CrunchCube({'result': {'unfiltered': {'weighted_n': 10}}})
         assert cc.population_fraction == 1
-        cc = CrunchCube({'result': {'unfiltered': {'weighted_n': 10, 'unweighted_n': 10}}})
+        cc = CrunchCube({'result': {'unfiltered': {
+            'weighted_n': 10, 'unweighted_n': 10}}})
         assert cc.population_fraction == 1
-        cc = CrunchCube({'result': {'filtered': {'weighted_n': 10, 'unweighted_n': 10}}})
+        cc = CrunchCube({'result': {'filtered': {
+            'weighted_n': 10, 'unweighted_n': 10}}})
         assert cc.population_fraction == 1
 
         # Assert fraction is calculated when correct counts are specified

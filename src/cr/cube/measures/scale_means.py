@@ -33,6 +33,24 @@ class ScaleMeans(object):
             means.append(mean)
         return means
 
+    def margin(self, axis):
+        if self._slice.ndim < 2:
+            msg = (
+                'Scale Means marginal cannot be calculated on 1D cubes, as'
+                'the scale means already get reduced to a scalar value.'
+            )
+            raise ValueError(msg)
+
+        dimension_index = 1 - axis
+        margin = self._slice.margin(axis)
+        total = np.sum(margin)
+        values = self.values[dimension_index]
+
+        if values is None:
+            return None
+
+        return np.sum(values * margin) / total
+
     @lazyproperty
     def values(self):
         '''Get num values for means calculation.'''
