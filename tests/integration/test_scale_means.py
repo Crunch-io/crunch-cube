@@ -347,7 +347,7 @@ def test_cat_x_cat_pruning_and_hs():
 
 
 def test_cat_x_cat_scale_means_margin():
-    cs = CrunchCube(CAT_X_CAT_SM_MARGIN['slides'][0]['cube']).slices[0]
+    cs = CrunchCube(CAT_X_CAT_SM_MARGIN).slices[0]
     expected = 2.6846246973365617
     actual = cs.scale_means_margin(1)
     assert actual == expected
