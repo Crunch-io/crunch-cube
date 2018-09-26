@@ -3,6 +3,8 @@
 from functools import partial
 import numpy as np
 
+from cr.cube.measures.scale_means import ScaleMeans
+
 from .utils import lazyproperty
 
 
@@ -259,3 +261,6 @@ class CubeSlice(object):
     @lazyproperty
     def shape(self):
         return self.as_array().shape
+
+    def scale_means_margin(self, axis):
+        return ScaleMeans(self).margin(axis)

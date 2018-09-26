@@ -152,3 +152,6 @@ The detailed description can be found
 - Add property `is_double_mr` to `CubeSlice` (which is needed since it differs from the interpretation of the cube. E.g. MR x CA x MR will render slices which are *not* double MRs).
 - Add `shape`, `ndim`, and `scale_means` to `CubeSlice`, for accessibility.
 - `index` now also operates on slices (no api change).
+
+#### 1.6.8 Scale Means Marginal
+- Add capability to calculate the scale means marginal. This is used when analysing a 2D cube, and obtaining a sort of a "scale mean _total_" for each of the variables constituting a cube.

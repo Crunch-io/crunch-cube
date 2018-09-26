@@ -1,6 +1,6 @@
 '''Unit tests for the CubeSlice class.'''
 from unittest import TestCase
-from mock import Mock
+from mock import Mock, patch
 import numpy as np
 
 from cr.cube.cube_slice import CubeSlice
@@ -356,7 +356,7 @@ class TestCubeSlice(TestCase):
 
         cube.ca_dim_ind = None
         cs = CubeSlice(cube, 0)
-        assert cs.ca_dim_ind == None
+        assert cs.ca_dim_ind is None
 
         cube.ca_dim_ind = 0
         cs = CubeSlice(cube, 0)
@@ -374,4 +374,14 @@ class TestCubeSlice(TestCase):
         cube.ndim = 3
         cube.ca_dim_ind = 0
         cs = CubeSlice(cube, 0)
-        assert cs.ca_dim_ind == None
+        assert cs.ca_dim_ind is None
+
+    @patch('cr.cube.measures.scale_means.ScaleMeans.margin')
+    @patch('cr.cube.measures.scale_means.ScaleMeans.__init__')
+    def test_scale_means_marginal(self, mock_sm_init, mock_sm_margin):
+        mock_sm_init.return_value = None
+
+        cs = CubeSlice({}, 0)
+        fake_axis = Mock()
+        cs.scale_means_margin(fake_axis)
+        assert mock_sm_margin.called_once_with(fake_axis)
