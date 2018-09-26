@@ -2,11 +2,13 @@
 from unittest import TestCase
 from mock import Mock, patch
 import numpy as np
+import pytest
 
 from cr.cube.cube_slice import CubeSlice
 
 
 # pylint: disable=invalid-name, no-self-use, protected-access
+# pylint: disable=too-many-public-methods, missing-docstring
 class TestCubeSlice(TestCase):
     '''Test class for the CubeSlice unit tests.'''
 
@@ -392,3 +394,41 @@ class TestCubeSlice(TestCase):
         cube.dim_types = ['categorical_array']
         cs = CubeSlice(cube, 0, ca_as_0th=True)
         assert cs.scale_means() == [None, None]
+
+    def test_shape(self):
+        cube = Mock()
+
+        cube.ndim = 2
+        cube.as_array.return_value = np.zeros((3, 2))
+        cs = CubeSlice(cube, 0)
+        with pytest.warns(DeprecationWarning):
+            # TODO: Remove once 'shape' is removed
+            assert cs.shape == (3, 2)
+
+        # Test non-pruned
+        assert cs.get_shape() == (3, 2)
+
+        # Test pruned
+        cube.as_array.return_value = np.ma.masked_array(
+            np.zeros((3, 2)),
+            mask=np.array([[True, False], [True, False], [True, False]])
+        )
+        assert cs.get_shape(prune=True) == (3,)
+
+        cube.as_array.return_value = np.ma.masked_array(
+            np.zeros((3, 2)),
+            mask=np.array([[False, False], [True, True], [True, True]])
+        )
+        assert cs.get_shape(prune=True) == (2,)
+
+        cube.as_array.return_value = np.ma.masked_array(
+            np.zeros((3, 2)),
+            mask=np.array([[False, False], [True, True], [False, False]])
+        )
+        assert cs.get_shape(prune=True) == (2, 2)
+
+        cube.as_array.return_value = np.ma.masked_array(
+            np.zeros((3, 2)),
+            mask=np.array([[True, True], [True, True], [True, True]])
+        )
+        assert cs.get_shape(prune=True) == ()

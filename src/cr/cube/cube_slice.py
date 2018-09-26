@@ -2,10 +2,10 @@
 
 from functools import partial
 import numpy as np
+import warnings
 
 from cr.cube.measures.scale_means import ScaleMeans
-
-from .utils import lazyproperty
+from .utils import lazyproperty, compress_pruned
 
 
 # pylint: disable=too-few-public-methods
@@ -262,7 +262,17 @@ class CubeSlice(object):
 
     @lazyproperty
     def shape(self):
-        return self.as_array().shape
+        warnings.warn('Deprecated. Use `get_shape` instead.', DeprecationWarning)
+        return self.get_shape()
 
     def scale_means_margin(self, axis):
         return ScaleMeans(self).margin(axis)
+
+    def get_shape(self, prune=False):
+        if not prune:
+            return self.as_array().shape
+
+        shape = compress_pruned(self.as_array(prune=True)).shape
+        # Eliminate dimensions that get reduced to 1
+        # (e.g. single element categoricals)
+        return tuple(n for n in shape if n > 1)
