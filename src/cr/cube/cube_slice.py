@@ -1,8 +1,8 @@
 '''Home of the CubeSlice class.'''
 
 from functools import partial
-import numpy as np
 import warnings
+import numpy as np
 
 from cr.cube.measures.scale_means import ScaleMeans
 from .utils import lazyproperty, compress_pruned
@@ -34,6 +34,7 @@ class CubeSlice(object):
 
     @lazyproperty
     def col_dim_ind(self):
+        """Return 1 if not categorical array as 0th, 0 otherwise."""
         return 1 if not self.ca_as_0th else 0
 
     def __getattr__(self, attr):
@@ -160,6 +161,19 @@ class CubeSlice(object):
 
     @lazyproperty
     def ca_dim_ind(self):
+        """Return items dimension index if there is one.
+
+        If the slice is a part of a cube that has Categorical Array variable,
+        return the index of the items dimension (if it belongs to the slice).
+        Examples:
+        - For a CA(items) x CAT => returns 0
+        - For CAT x CA(items) => returns 1
+        - For CAT x CA(items) x CAT => returns 0 (because the items is the 0th
+          dimension of each slice)
+        - For CA(items) x CAT x CAT => returns None (because the 0th items
+          dimension doesn't belong to any one slice, and is itself used for
+          slicing the cube).
+        """
         index = self._cube.ca_dim_ind
         if index is None:
             return None
@@ -204,7 +218,7 @@ class CubeSlice(object):
         try:
             ca_ind = self.dim_types.index('categorical_array')
             return 1 - ca_ind
-        except Exception:
+        except ValueError:
             return None
 
     def labels(self, hs_dims=None, prune=False):
@@ -252,23 +266,44 @@ class CubeSlice(object):
         return self.dim_types == ['multiple_response'] * 2
 
     def scale_means(self, hs_dims=None, prune=False):
+        """Return scale means of the CubeSlice."""
         if self.ca_as_0th:
             return [None, None]
         return self._cube.scale_means(hs_dims, prune)[self._index]
 
     @lazyproperty
     def ndim(self):
+        """Number of slice dimensions
+
+        Returns 2 if the origin cube has 3 or 2 dimensions.  Returns 1 if the
+        cube (and the slice) has 1 dimension.  Returns 0 if the cube doesn't
+        have any dimensions.
+        """
         return min(self._cube.ndim, 2)
 
     @lazyproperty
     def shape(self):
-        warnings.warn('Deprecated. Use `get_shape` instead.', DeprecationWarning)
+        """Return the shape of the slice.
+
+        This property is anloguous to numpy's 'shape' property of ndarray. It
+        returns a tuple, returning the shape of the slice's 'as_array' method.
+        This property is deprecated, use 'get_shape' instead. Pruning is not
+        supported (supported in 'get_shape').
+        """
+        deprecation_msg = 'Deprecated. Use `get_shape` instead.'
+        warnings.warn(deprecation_msg, DeprecationWarning)
         return self.get_shape()
 
     def scale_means_margin(self, axis):
         return ScaleMeans(self).margin(axis)
 
     def get_shape(self, prune=False):
+        """Return the shape of the slice.
+
+        This method is anloguous to numpy's 'shape' property of ndarray. It
+        returns a tuple, returning the shape of the slice's 'as_array' method.
+        Pruning is supported (hence the method and not property).
+        """
         if not prune:
             return self.as_array().shape
 
