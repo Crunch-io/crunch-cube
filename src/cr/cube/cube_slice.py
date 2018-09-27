@@ -5,7 +5,7 @@ import warnings
 import numpy as np
 
 from cr.cube.measures.scale_means import ScaleMeans
-from .utils import lazyproperty, compress_pruned
+from .utils import lazyproperty, compress_pruned, memoize
 
 
 # pylint: disable=too-few-public-methods
@@ -294,6 +294,7 @@ class CubeSlice(object):
         warnings.warn(deprecation_msg, DeprecationWarning)
         return self.get_shape()
 
+    @memoize
     def scale_means_margin(self, axis):
         """Get scale means margin for 2D slice.
 
@@ -305,6 +306,7 @@ class CubeSlice(object):
         """
         return ScaleMeans(self).margin(axis)
 
+    @memoize
     def get_shape(self, prune=False):
         """Return the shape of the slice.
 

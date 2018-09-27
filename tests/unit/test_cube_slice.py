@@ -8,7 +8,7 @@ from cr.cube.cube_slice import CubeSlice
 
 
 # pylint: disable=invalid-name, no-self-use, protected-access
-# pylint: disable=too-many-public-methods, missing-docstring
+# pylint: disable=too-many-public-methods
 class TestCubeSlice(TestCase):
     '''Test class for the CubeSlice unit tests.'''
 
@@ -381,6 +381,7 @@ class TestCubeSlice(TestCase):
     @patch('cr.cube.measures.scale_means.ScaleMeans.margin')
     @patch('cr.cube.measures.scale_means.ScaleMeans.__init__')
     def test_scale_means_marginal(self, mock_sm_init, mock_sm_margin):
+        """Test if slice method invokes cube method."""
         mock_sm_init.return_value = None
 
         cs = CubeSlice({}, 0)
@@ -396,6 +397,7 @@ class TestCubeSlice(TestCase):
         assert cs.scale_means() == [None, None]
 
     def test_shape(self):
+        """Test shape based on 'as_array' and pruning."""
         cube = Mock()
 
         cube.ndim = 2
@@ -419,16 +421,19 @@ class TestCubeSlice(TestCase):
             np.zeros((3, 2)),
             mask=np.array([[False, False], [True, True], [True, True]])
         )
+        cs = CubeSlice(cube, 0)  # Have to create new CS, because memoize
         assert cs.get_shape(prune=True) == (2,)
 
         cube.as_array.return_value = np.ma.masked_array(
             np.zeros((3, 2)),
             mask=np.array([[False, False], [True, True], [False, False]])
         )
+        cs = CubeSlice(cube, 0)  # Have to create new slice, because memoize
         assert cs.get_shape(prune=True) == (2, 2)
 
         cube.as_array.return_value = np.ma.masked_array(
             np.zeros((3, 2)),
             mask=np.array([[True, True], [True, True], [True, True]])
         )
+        cs = CubeSlice(cube, 0)  # Have to create new slice, because memoize
         assert cs.get_shape(prune=True) == ()
