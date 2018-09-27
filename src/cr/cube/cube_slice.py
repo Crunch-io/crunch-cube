@@ -295,6 +295,14 @@ class CubeSlice(object):
         return self.get_shape()
 
     def scale_means_margin(self, axis):
+        """Get scale means margin for 2D slice.
+
+        This value represents the scale mean of a single variable that
+        constitutes a 2D slice. There's one for each axis, if there are
+        numerical values on the corresponding (opposite) dimension. The
+        numerical values are filtered by non-missing criterium of the
+        opposite dimension.
+        """
         return ScaleMeans(self).margin(axis)
 
     def get_shape(self, prune=False):
