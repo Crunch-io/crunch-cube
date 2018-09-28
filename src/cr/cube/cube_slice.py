@@ -283,10 +283,11 @@ class CubeSlice(object):
 
     @lazyproperty
     def shape(self):
-        """Return the shape of the slice.
+        """Tuple of array dimensions' lengths.
 
-        This property is anloguous to numpy's 'shape' property of ndarray. It
-        returns a tuple, returning the shape of the slice's 'as_array' method.
+        It returns a tuple of ints, each representing the length of a cube
+        dimension, in the order those dimensions appear in the cube.
+
         This property is deprecated, use 'get_shape' instead. Pruning is not
         supported (supported in 'get_shape').
         """
@@ -308,11 +309,19 @@ class CubeSlice(object):
 
     @memoize
     def get_shape(self, prune=False):
-        """Return the shape of the slice.
+        """Tuple of array dimensions' lengths.
 
-        This method is anloguous to numpy's 'shape' property of ndarray. It
-        returns a tuple, returning the shape of the slice's 'as_array' method.
-        Pruning is supported (hence the method and not property).
+        It returns a tuple of ints, each representing the length of a cube
+        dimension, in the order those dimensions appear in the cube.
+        Pruning is supported. Dimensions that get reduced to a single element
+        (e.g. due to pruning) are removed from the returning shape, thus
+        allowing for the differentiation between true 2D cubes (over which
+        statistical testing can be performed) and essentially
+        1D cubes (over which it can't).
+
+        Usage:
+        >>> shape = get_shape()
+        >>> pruned_shape = get_shape(prune=True)
         """
         if not prune:
             return self.as_array().shape
