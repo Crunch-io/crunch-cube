@@ -155,3 +155,6 @@ The detailed description can be found
 
 #### 1.6.8 Scale Means Marginal
 - Add capability to calculate the scale means marginal. This is used when analysing a 2D cube, and obtaining a sort of a "scale mean _total_" for each of the variables constituting a cube.
+
+#### 1.6.9 Bugfix
+- When Categorical Array variable is selected in multitable export, and Scale Means is selected, the cube fails, because it tries to access the non-existing slice (the CA is only _interpreted_ as multiple slices in tabbooks). This fix makes sure that the export cube doesn't fail in such case.
