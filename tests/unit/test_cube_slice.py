@@ -385,3 +385,10 @@ class TestCubeSlice(TestCase):
         fake_axis = Mock()
         cs.scale_means_margin(fake_axis)
         assert mock_sm_margin.called_once_with(fake_axis)
+
+    def test_scale_means_for_ca_as_0th(self):
+        """Test that CA as 0th slice always returns empty scale means."""
+        cube = Mock()
+        cube.dim_types = ['categorical_array']
+        cs = CubeSlice(cube, 0, ca_as_0th=True)
+        assert cs.scale_means() == [None, None]
