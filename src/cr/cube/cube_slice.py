@@ -252,6 +252,8 @@ class CubeSlice(object):
         return self.dim_types == ['multiple_response'] * 2
 
     def scale_means(self, hs_dims=None, prune=False):
+        if self.ca_as_0th:
+            return [None, None]
         return self._cube.scale_means(hs_dims, prune)[self._index]
 
     @lazyproperty
