@@ -3,7 +3,7 @@
 
 from setuptools import setup, find_packages
 
-version = '1.6.9'
+version = '1.6.10'
 
 
 def get_long_desc():
@@ -26,6 +26,7 @@ setup(
     version=version,
     description="Crunch.io Cube library",
     long_description=get_long_desc(),
+    long_description_content_type="text/markdown",
     url='https://github.com/Crunch-io/crunch-cube/',
 
     classifiers=[

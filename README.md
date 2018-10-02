@@ -145,9 +145,11 @@ The detailed description can be found
 - Add property `population_fraction`. This is needed for the exporter to be able to calculate the correct population counts, based on weighted/unweighted and filtered/unfiltered states of the cube.
 - Apply newly added `population_fraction` to the calculation of `population_counts`.
 - Modify API for `scale_means`. It now accepts additional parameters `hs_dims` (defaults to `None`) and `prune` (defaults to `False`). Also, the format of the return value is slightly different in nature. It is a list of lists of numpy arrrays. It functions like this:
+
     - The outermost list corresponds to cube slices. If cube.ndim < 3, then it's a single-element list
     - Inner lists have either 1 or 2 elements (if they're a 1D cube slice, or a 2D cube slice, respectively).
     - If there are scale means defined on the corresponding dimension of the cube slice, then the inner list element is a numpy array with scale means. If it doesn't have scale means defined (numeric values), then the element is `None`.
+
 - Add property `ca_dim_ind` to `CubeSlice`.
 - Add property `is_double_mr` to `CubeSlice` (which is needed since it differs from the interpretation of the cube. E.g. MR x CA x MR will render slices which are *not* double MRs).
 - Add `shape`, `ndim`, and `scale_means` to `CubeSlice`, for accessibility.
@@ -158,3 +160,5 @@ The detailed description can be found
 
 #### 1.6.9 Bugfix
 - When Categorical Array variable is selected in multitable export, and Scale Means is selected, the cube fails, because it tries to access the non-existing slice (the CA is only _interpreted_ as multiple slices in tabbooks). This fix makes sure that the export cube doesn't fail in such case.
+
+#### 1.6.10 Fix README on pypi
