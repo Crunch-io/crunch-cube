@@ -1,5 +1,5 @@
 '''Unit tests for the CubeSlice class.'''
-from unittest import TestCase
+
 from mock import Mock, patch
 import numpy as np
 import pytest
@@ -8,8 +8,8 @@ from cr.cube.cube_slice import CubeSlice
 
 
 # pylint: disable=invalid-name, no-self-use, protected-access
-# pylint: disable=too-many-public-methods
-class TestCubeSlice(TestCase):
+# pylint: disable=too-many-public-methods, missing-docstring
+class TestCubeSlice(object):
     '''Test class for the CubeSlice unit tests.'''
 
     def test_init(self):
@@ -27,7 +27,7 @@ class TestCubeSlice(TestCase):
         assert CubeSlice(cube, 0, ca_as_0th=True)
 
         cube.dim_types = ['categorical', 'categorical']
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             CubeSlice(cube, 0, ca_as_0th=True)
 
     def test_ndim_invokes_ndim_from_cube(self):
@@ -396,8 +396,7 @@ class TestCubeSlice(TestCase):
         cs = CubeSlice(cube, 0, ca_as_0th=True)
         assert cs.scale_means() == [None, None]
 
-    def test_shape(self):
-        """Test shape based on 'as_array' and pruning."""
+    def test_shape_property_deprecated(self):
         cube = Mock()
 
         cube.ndim = 2
@@ -407,33 +406,26 @@ class TestCubeSlice(TestCase):
             # TODO: Remove once 'shape' is removed
             assert cs.shape == (3, 2)
 
-        # Test non-pruned
-        assert cs.get_shape() == (3, 2)
+    def test_get_shape(self, shape_fixture):
+        """Test shape based on 'as_array' and pruning."""
+        slice_, prune, expected = shape_fixture
+        actual = slice_.get_shape(prune=prune)
+        assert actual == expected
 
-        # Test pruned
-        cube.as_array.return_value = np.ma.masked_array(
-            np.zeros((3, 2)),
-            mask=np.array([[True, False], [True, False], [True, False]])
-        )
-        assert cs.get_shape(prune=True) == (3,)
-
-        cube.as_array.return_value = np.ma.masked_array(
-            np.zeros((3, 2)),
-            mask=np.array([[False, False], [True, True], [True, True]])
-        )
-        cs = CubeSlice(cube, 0)  # Have to create new CS, because memoize
-        assert cs.get_shape(prune=True) == (2,)
-
-        cube.as_array.return_value = np.ma.masked_array(
-            np.zeros((3, 2)),
-            mask=np.array([[False, False], [True, True], [False, False]])
-        )
-        cs = CubeSlice(cube, 0)  # Have to create new slice, because memoize
-        assert cs.get_shape(prune=True) == (2, 2)
-
-        cube.as_array.return_value = np.ma.masked_array(
-            np.zeros((3, 2)),
-            mask=np.array([[True, True], [True, True], [True, True]])
-        )
-        cs = CubeSlice(cube, 0)  # Have to create new slice, because memoize
-        assert cs.get_shape(prune=True) == ()
+    @pytest.fixture(params=[
+        (False, None, (3, 2)),
+        (True, [[True, False], [True, False], [True, False]], (3,)),
+        (True, [[False, False], [True, True], [True, True]], (2,)),
+        (True, [[False, False], [True, True], [False, False]], (2, 2)),
+        (True, [[True, True], [True, True], [True, True]], ()),
+    ])
+    def shape_fixture(self, request):
+        prune, mask, expected = request.param
+        array = np.zeros((3, 2))
+        cube = Mock()
+        cube.ndim = 2
+        if mask is not None:
+            array = np.ma.masked_array(array, np.array(mask))
+        cube.as_array.return_value = array
+        cs = CubeSlice(cube, 0)
+        return cs, prune, expected
