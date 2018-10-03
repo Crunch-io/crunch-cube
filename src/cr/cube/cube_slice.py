@@ -266,7 +266,13 @@ class CubeSlice(object):
         return self.dim_types == ['multiple_response'] * 2
 
     def scale_means(self, hs_dims=None, prune=False):
-        """Return scale means of the CubeSlice."""
+        """Return list of column and row scaled means for this slice.
+
+        If a row/col doesn't have numerical values, return None for the
+        corresponding dimension. If a slice only has 1D, return only the column
+        scaled mean (as numpy array). If both row and col scaled means are
+        present, return them as two numpy arrays inside of a list.
+        """
         if self.ca_as_0th:
             return [None, None]
         return self._cube.scale_means(hs_dims, prune)[self._index]
