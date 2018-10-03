@@ -3,7 +3,7 @@
 
 from setuptools import setup, find_packages
 
-version = '1.6.10'
+version = '1.6.11'
 
 
 def get_long_desc():
