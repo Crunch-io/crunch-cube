@@ -1,11 +1,11 @@
 '''Home of the CubeSlice class.'''
 
 from functools import partial
+import warnings
 import numpy as np
 
 from cr.cube.measures.scale_means import ScaleMeans
-
-from .utils import lazyproperty
+from .utils import lazyproperty, compress_pruned, memoize
 
 
 # pylint: disable=too-few-public-methods
@@ -34,6 +34,7 @@ class CubeSlice(object):
 
     @lazyproperty
     def col_dim_ind(self):
+        """Return 1 if not categorical array as 0th, 0 otherwise."""
         return 1 if not self.ca_as_0th else 0
 
     def __getattr__(self, attr):
@@ -160,6 +161,19 @@ class CubeSlice(object):
 
     @lazyproperty
     def ca_dim_ind(self):
+        """Return items dimension index if there is one.
+
+        If the slice is a part of a cube that has Categorical Array variable,
+        return the index of the items dimension (if it belongs to the slice).
+        Examples:
+        - For a CA(items) x CAT => returns 0
+        - For CAT x CA(items) => returns 1
+        - For CAT x CA(items) x CAT => returns 0 (because the items is the 0th
+          dimension of each slice)
+        - For CA(items) x CAT x CAT => returns None (because the 0th items
+          dimension doesn't belong to any one slice, and is itself used for
+          slicing the cube).
+        """
         index = self._cube.ca_dim_ind
         if index is None:
             return None
@@ -204,7 +218,7 @@ class CubeSlice(object):
         try:
             ca_ind = self.dim_types.index('categorical_array')
             return 1 - ca_ind
-        except Exception:
+        except ValueError:
             return None
 
     def labels(self, hs_dims=None, prune=False):
@@ -252,17 +266,73 @@ class CubeSlice(object):
         return self.dim_types == ['multiple_response'] * 2
 
     def scale_means(self, hs_dims=None, prune=False):
+        """Return list of column and row scaled means for this slice.
+
+        If a row/col doesn't have numerical values, return None for the
+        corresponding dimension. If a slice only has 1D, return only the column
+        scaled mean (as numpy array). If both row and col scaled means are
+        present, return them as two numpy arrays inside of a list.
+        """
         if self.ca_as_0th:
             return [None, None]
         return self._cube.scale_means(hs_dims, prune)[self._index]
 
     @lazyproperty
     def ndim(self):
+        """Number of slice dimensions
+
+        Returns 2 if the origin cube has 3 or 2 dimensions.  Returns 1 if the
+        cube (and the slice) has 1 dimension.  Returns 0 if the cube doesn't
+        have any dimensions.
+        """
         return min(self._cube.ndim, 2)
 
     @lazyproperty
     def shape(self):
-        return self.as_array().shape
+        """Tuple of array dimensions' lengths.
 
+        It returns a tuple of ints, each representing the length of a cube
+        dimension, in the order those dimensions appear in the cube.
+
+        This property is deprecated, use 'get_shape' instead. Pruning is not
+        supported (supported in 'get_shape').
+        """
+        deprecation_msg = 'Deprecated. Use `get_shape` instead.'
+        warnings.warn(deprecation_msg, DeprecationWarning)
+        return self.get_shape()
+
+    @memoize
     def scale_means_margin(self, axis):
+        """Get scale means margin for 2D slice.
+
+        This value represents the scale mean of a single variable that
+        constitutes a 2D slice. There's one for each axis, if there are
+        numerical values on the corresponding (opposite) dimension. The
+        numerical values are filtered by non-missing criterium of the
+        opposite dimension.
+        """
         return ScaleMeans(self).margin(axis)
+
+    @memoize
+    def get_shape(self, prune=False):
+        """Tuple of array dimensions' lengths.
+
+        It returns a tuple of ints, each representing the length of a cube
+        dimension, in the order those dimensions appear in the cube.
+        Pruning is supported. Dimensions that get reduced to a single element
+        (e.g. due to pruning) are removed from the returning shape, thus
+        allowing for the differentiation between true 2D cubes (over which
+        statistical testing can be performed) and essentially
+        1D cubes (over which it can't).
+
+        Usage:
+        >>> shape = get_shape()
+        >>> pruned_shape = get_shape(prune=True)
+        """
+        if not prune:
+            return self.as_array().shape
+
+        shape = compress_pruned(self.as_array(prune=True)).shape
+        # Eliminate dimensions that get reduced to 1
+        # (e.g. single element categoricals)
+        return tuple(n for n in shape if n > 1)
