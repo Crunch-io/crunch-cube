@@ -41,8 +41,8 @@ class ScaleMeans(object):
                 continue
 
             # Calculate means
-            num = np.sum(product[self.valid_indices(axis)], axis)
-            den = np.sum(table[self.valid_indices(axis)], axis)
+            num = np.sum(product[self._valid_indices(axis)], axis)
+            den = np.sum(table[self._valid_indices(axis)], axis)
             mean = num / den
             if not isinstance(mean, np.ndarray):
                 mean = np.array([mean])
@@ -50,6 +50,13 @@ class ScaleMeans(object):
         return means
 
     def margin(self, axis):
+        '''Return marginal value of the current slice scaled means.
+
+        This value is the the same what you would get from a single variable
+        (constituting a 2D cube/slice), when the "non-missing" filter of the
+        opposite variable would be applied. This behavior is consistent with
+        what is visible in the front-end client.
+        '''
         if self._slice.ndim < 2:
             msg = (
                 'Scale Means marginal cannot be calculated on 1D cubes, as'
@@ -104,14 +111,31 @@ class ScaleMeans(object):
             for dim in self._slice.dimensions
         ]
 
+    def _valid_indices(self, axis):
+        return [
+            (
+                ~np.isnan(np.array(dim.values))
+                if dim.values and any(~np.isnan(dim.values)) and axis == i else
+                slice(None)
+            )
+            for i, dim in enumerate(self._slice.dimensions)
+            if len(dim.values) > 1
+        ]
+
+    def _inflate(self, dim_ind):
+        return (
+            self._slice.ndim > 1 and
+            len(self._slice.get_shape()) > 1 and
+            not dim_ind
+        )
+
     def _inner_prods(self, contents, values):
         products = []
         for i, numeric in enumerate(values):
             if numeric is None:
                 products.append(numeric)
                 continue
-            inflate = self._slice.ndim > 1 and not i
-            numeric = numeric[:, None] if inflate else numeric
+            numeric = numeric[:, None] if self._inflate(i) else numeric
             product = contents * numeric
             products.append(product)
         return products
