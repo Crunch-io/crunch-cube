@@ -7,6 +7,7 @@ from __future__ import division
 from functools import partial
 import warnings
 import numpy as np
+from tabulate import tabulate
 
 from cr.cube.measures.scale_means import ScaleMeans
 from cr.cube.util import lazyproperty, compress_pruned, memoize
@@ -57,6 +58,22 @@ class CubeSlice(object):
 
         # ---otherwise, the property value is the same for cube or slice---
         return cube_attr
+
+    def __repr__(self):
+        text = '\n\n' + str(type(self))
+        text += '\nName: {}'.format(self.name)
+        text += '\nType: {}'.format(' x '.join(self.dim_types))
+        labels = self.labels()
+        headers = labels[1] if len(labels) > 1 else ['N']
+        tbl = self.as_array()
+        if len(tbl.shape) <= 1:
+            tbl = tbl[:, None]
+        body = tabulate(
+            [[lbl] + lst for lbl, lst in zip(labels[0], tbl.tolist())],
+            headers=headers
+        )
+        text += '\n' + body
+        return text
 
     def _apply_pruning_mask(self, res, prune):
         if not prune:

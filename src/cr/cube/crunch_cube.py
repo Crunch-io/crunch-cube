@@ -75,6 +75,15 @@ class CrunchCube(object):
 
         self.slices = self.get_slices()
 
+    def __repr__(self):
+        text = '\n' + str(type(self))
+        text += '\nName: {}'.format(self.name)
+        text += '\nType: {}'.format(' x '.join(self.dim_types))
+        text += '\n\nSlices:'
+        for slice_ in self.slices:
+            text += str(slice_)
+        return text
+
     @lazyproperty
     def all_dimensions(self):
         """Gets the dimensions of the crunch cube.
