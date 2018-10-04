@@ -13,6 +13,7 @@ def get_long_desc():
 
 install_requires = [
     'scipy',
+    'tabulate',
 ]
 
 test_requires = [
