@@ -292,10 +292,10 @@ class CrunchCube(DataTable):
 
         table = self.data(weighted=weighted, margin=True)
         new_axis = self._adjust_axis(axis)
-        index = [
+        index = tuple(
             None if i in new_axis else slice(None)
             for i, _ in enumerate(table.shape)
-        ]
+        )
 
         # Calculate denominator. Only include those H&S dimensions, across
         # which we DON'T sum. These H&S are needed because of the shape, when
@@ -312,7 +312,7 @@ class CrunchCube(DataTable):
         )
         if isinstance(arr, np.ma.core.MaskedArray):
 
-            inflate_ind = [
+            inflate_ind = tuple(
                 (
                     None
                     if (
@@ -323,7 +323,7 @@ class CrunchCube(DataTable):
                     slice(None)
                 )
                 for d, n in zip(self.all_dimensions, table.shape)
-            ]
+            )
             mask = np.logical_or(
                 np.zeros(den.shape, dtype=bool),
                 arr.mask[inflate_ind],
@@ -525,10 +525,10 @@ class CrunchCube(DataTable):
 
         table = self.data(weighted)
         new_axis = self._adjust_axis(axis)
-        index = [
+        index = tuple(
             None if i in new_axis else slice(None)
             for i, _ in enumerate(table.shape)
-        ]
+        )
 
         # Calculate denominator. Only include those H&S dimensions, across
         # which we DON'T sum. These H&S are needed because of the shape, when
@@ -886,10 +886,10 @@ class CrunchCube(DataTable):
         # up to here. At this point, we need to remove the non-selected part of
         # selections dimension (and subsequently purge the dimension itself).
 
-        display_ind = [
+        display_ind = tuple(
             0 if dim.is_mr_selections(self.all_dimensions) else slice(None)
             for dim in self.all_dimensions
-        ]
+        )
         array = array[display_ind]
 
         # If a first dimension only has one element, we don't want to
@@ -931,7 +931,7 @@ class CrunchCube(DataTable):
             else:
                 ind_insertion = indices['anchor_ind']
 
-            ind = (
+            ind = tuple(
                 [slice(None) for _ in range(dimension_index)] +
                 [ind_subtotal_elements]
             )

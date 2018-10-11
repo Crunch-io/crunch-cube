@@ -64,14 +64,14 @@ class ScaleMeans(object):
         ]
 
     def valid_indices(self, axis):
-        return [
+        return tuple(
             (
                 ~np.isnan(np.array(dim.values))
                 if dim.values and any(~np.isnan(dim.values)) and axis == i else
                 slice(None)
             )
             for i, dim in enumerate(self._slice.dimensions)
-        ]
+        )
 
     def _inner_prods(self, contents, values):
         products = []
