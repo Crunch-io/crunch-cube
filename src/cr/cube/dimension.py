@@ -6,7 +6,7 @@ import numpy as np
 
 from cr.cube import ITEM_DIMENSION_TYPES
 from cr.cube.subtotal import Subtotal
-from cr.cube.utils import lazyproperty, memoize
+from cr.cube.util import lazyproperty, memoize
 
 
 class Dimension(object):

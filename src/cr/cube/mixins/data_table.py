@@ -5,7 +5,7 @@
 import numpy as np
 
 from cr.cube.dimension import Dimension
-from cr.cube.utils import lazyproperty
+from cr.cube.util import lazyproperty
 
 
 class DataTable(object):

@@ -19,7 +19,7 @@ from __future__ import division
 
 import numpy as np
 
-from cr.cube.utils import lazyproperty
+from cr.cube.util import lazyproperty
 
 
 class ScaleMeans(object):

@@ -2,7 +2,7 @@
 
 """Contains implementation of the Subtotal class, for Crunch Cubes."""
 
-from cr.cube.utils import lazyproperty
+from cr.cube.util import lazyproperty
 
 
 class Subtotal(object):

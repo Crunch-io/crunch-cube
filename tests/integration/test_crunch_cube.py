@@ -2,7 +2,7 @@ from unittest import TestCase
 import numpy as np
 
 from cr.cube.crunch_cube import CrunchCube
-from cr.cube.utils import compress_pruned
+from cr.cube.util import compress_pruned
 
 from .fixtures import CAT_X_CAT
 from .fixtures import CAT_X_CAT_GERMAN_WEIGHTED

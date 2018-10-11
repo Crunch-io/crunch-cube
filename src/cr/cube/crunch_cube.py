@@ -19,7 +19,7 @@ from cr.cube.cube_slice import CubeSlice
 from cr.cube.measures.index import Index
 from cr.cube.measures.scale_means import ScaleMeans
 from cr.cube.mixins.data_table import DataTable
-from cr.cube.utils import lazyproperty
+from cr.cube.util import lazyproperty
 
 np.seterr(divide='ignore', invalid='ignore')
 

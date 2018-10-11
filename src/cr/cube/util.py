@@ -1,4 +1,7 @@
-'''Utility functions for crunch cube, as well as other modules.'''
+# encoding: utf-8
+
+"""Utility functions for crunch cube, as well as other modules."""
+
 import collections
 import functools
 import numpy as np
@@ -47,14 +50,14 @@ class lazyproperty(property):
 
 
 def lru_cache(maxsize=100):
-    '''Least-recently-used cache decorator.
+    """Least-recently-used cache decorator.
 
     Arguments to the cached function must be hashable.
     Cache performance statistics stored in f.hits and f.misses.
     Clear the cache with f.clear().
     http://en.wikipedia.org/wiki/Cache_algorithms#Least_Recently_Used
 
-    '''
+    """
     maxqueue = maxsize * 10
 
     def decorating_function(user_function, len=len, iter=iter, tuple=tuple,
