@@ -4,9 +4,9 @@
 
 import numpy as np
 
-from .subtotal import Subtotal
-from .utils import lazyproperty, memoize
-from . import ITEM_DIMENSION_TYPES
+from cr.cube import ITEM_DIMENSION_TYPES
+from cr.cube.subtotal import Subtotal
+from cr.cube.utils import lazyproperty, memoize
 
 
 class Dimension(object):

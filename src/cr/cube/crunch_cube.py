@@ -9,17 +9,17 @@ responses.
 from __future__ import division
 
 import json
-
 import numpy as np
+
 from scipy.stats import norm
 from scipy.stats.contingency import expected_freq
 
-from .mixins.data_table import DataTable
-from .cube_slice import CubeSlice
-from .measures.index import Index
-from .measures.scale_means import ScaleMeans
-from .utils import lazyproperty
-from . import ITEM_DIMENSION_TYPES
+from cr.cube import ITEM_DIMENSION_TYPES
+from cr.cube.cube_slice import CubeSlice
+from cr.cube.measures.index import Index
+from cr.cube.measures.scale_means import ScaleMeans
+from cr.cube.mixins.data_table import DataTable
+from cr.cube.utils import lazyproperty
 
 np.seterr(divide='ignore', invalid='ignore')
 

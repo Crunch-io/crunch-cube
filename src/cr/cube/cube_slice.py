@@ -7,7 +7,7 @@ import warnings
 import numpy as np
 
 from cr.cube.measures.scale_means import ScaleMeans
-from .utils import lazyproperty, compress_pruned, memoize
+from cr.cube.utils import lazyproperty, compress_pruned, memoize
 
 
 class CubeSlice(object):

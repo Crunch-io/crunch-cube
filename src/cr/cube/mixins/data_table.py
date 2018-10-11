@@ -4,8 +4,8 @@
 
 import numpy as np
 
-from ..utils import lazyproperty
-from ..dimension import Dimension
+from cr.cube.dimension import Dimension
+from cr.cube.utils import lazyproperty
 
 
 class DataTable(object):
