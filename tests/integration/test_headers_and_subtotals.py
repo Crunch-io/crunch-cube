@@ -2,26 +2,15 @@ from unittest import TestCase
 
 import numpy as np
 
-from .fixtures import ADMIT_X_GENDER_WEIGHTED
-from .fixtures import ECON_BLAME_WITH_HS
-from .fixtures import ECON_BLAME_WITH_HS_MISSING
-from .fixtures import ECON_BLAME_X_IDEOLOGY_ROW_HS
-from .fixtures import ECON_BLAME_X_IDEOLOGY_COL_HS
-from .fixtures import ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS
-from .fixtures import SIMPLE_CA_HS
-from .fixtures import ECON_US_PROBLEM_X_BIGGER_PROBLEM
-from .fixtures import FRUIT_HS_TOP_BOTTOM
-from .fixtures import FRUIT_X_PETS_HS_TOP_BOTTOM
-from .fixtures import CAT_X_DATE_HS_PRUNE
-from .fixtures import CAT_X_NUM_HS_PRUNE
-from .fixtures import PETS_X_FRUIT_HS
-from .fixtures import MISSING_CAT_HS
-from .fixtures import CA_X_CAT_HS
-from .fixtures import CAT_X_MR_WEIGHTED_HS
-from .fixtures import MR_X_CA_HS
-from .fixtures import CA_CAT_X_MR_X_CA_SUBVAR_HS
-from .fixtures import CA_X_MR_HS
-from .fixtures import CAT_X_ITEMS_X_CATS_HS
+from .fixtures import (
+    ADMIT_X_GENDER_WEIGHTED, CAT_X_DATE_HS_PRUNE, CAT_X_ITEMS_X_CATS_HS,
+    CAT_X_MR_WEIGHTED_HS, CAT_X_NUM_HS_PRUNE, CA_CAT_X_MR_X_CA_SUBVAR_HS,
+    CA_X_CAT_HS, CA_X_MR_HS, ECON_BLAME_WITH_HS, ECON_BLAME_WITH_HS_MISSING,
+    ECON_BLAME_X_IDEOLOGY_COL_HS, ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS,
+    ECON_BLAME_X_IDEOLOGY_ROW_HS, ECON_US_PROBLEM_X_BIGGER_PROBLEM,
+    FRUIT_HS_TOP_BOTTOM, FRUIT_X_PETS_HS_TOP_BOTTOM, MISSING_CAT_HS,
+    MR_X_CA_HS, PETS_X_FRUIT_HS, SIMPLE_CA_HS
+)
 
 from cr.cube.crunch_cube import CrunchCube
 
@@ -485,14 +474,19 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_subtotals_pvals_2d_cube_with_hs_on_row(self):
-        '''Ensure that pvals shape is the same as table shape with H%S'''
+        """Ensure that pvals shape is the same as table shape with H%S"""
         cube = CrunchCube(ECON_BLAME_X_IDEOLOGY_ROW_HS)
         expected = np.array([
-            [1.92562832e-06, 5.20117283e-12, 8.30737469e-05, 0.00000000e+00, 1.77635684e-15, 1.13223165e-01],  # noqa
-            [2.90878432e-14, 0.00000000e+00, 8.11477145e-02, 0.00000000e+00, 5.87376814e-11, 4.64141147e-06],  # noqa
-            [1.05605732e-03, 3.70613426e-03, 6.11851617e-03, 1.18269053e-02, 8.68890220e-01, 7.62914197e-02],  # noqa
-            [3.69990005e-01, 9.19546240e-01, 2.88068221e-01, 7.57299844e-01, 3.86924216e-01, 2.41648361e-04],  # noqa
-            [3.53745446e-01, 3.70094812e-02, 5.03974440e-01, 1.67769523e-02, 3.15641644e-01, 0.00000000e+00],  # noqa
+            [1.92562832e-06, 5.20117283e-12, 8.30737469e-05, 0.00000000e+00,
+             1.77635684e-15, 1.13223165e-01],
+            [2.90878432e-14, 0.00000000e+00, 8.11477145e-02, 0.00000000e+00,
+             5.87376814e-11, 4.64141147e-06],
+            [1.05605732e-03, 3.70613426e-03, 6.11851617e-03, 1.18269053e-02,
+             8.68890220e-01, 7.62914197e-02],
+            [3.69990005e-01, 9.19546240e-01, 2.88068221e-01, 7.57299844e-01,
+             3.86924216e-01, 2.41648361e-04],
+            [3.53745446e-01, 3.70094812e-02, 5.03974440e-01, 1.67769523e-02,
+             3.15641644e-01, 0.00000000e+00],
         ])
         actual = cube.pvals()
         np.testing.assert_almost_equal(actual, expected)
@@ -765,17 +759,17 @@ class TestHeadersAndSubtotals(TestCase):
     def test_mr_x_ca_props_by_row_without_hs(self):
         cube = CrunchCube(MR_X_CA_HS)
         expected = np.array([
-            [[0.66666667, 0.33333333, 0.        , 0.        ],  # noqa
-             [0.33333333, 0.33333333, 0.33333333, 0.        ],  # noqa
-             [0.        , 0.33333333, 0.33333333, 0.33333333]],   # noqa
+            [[0.66666667, 0.33333333, 0.00000000, 0.00000000],
+             [0.33333333, 0.33333333, 0.33333333, 0.00000000],
+             [0.00000000, 0.33333333, 0.33333333, 0.33333333]],
 
-            [[0.5       , 0.5       , 0.        , 0.        ],  # noqa
-             [0.25      , 0.25      , 0.5       , 0.        ],  # noqa
-             [0.        , 0.25      , 0.        , 0.75      ]],   # noqa
+            [[0.50000000, 0.50000000, 0.00000000, 0.00000000],
+             [0.25000000, 0.25000000, 0.50000000, 0.00000000],
+             [0.00000000, 0.25000000, 0.00000000, 0.75000000]],
 
-            [[    np.nan,     np.nan,     np.nan,     np.nan],  # noqa
-             [    np.nan,     np.nan,     np.nan,     np.nan],  # noqa
-             [    np.nan,     np.nan,     np.nan,     np.nan]],  # noqa
+            [[np.nan, np.nan, np.nan, np.nan],
+             [np.nan, np.nan, np.nan, np.nan],
+             [np.nan, np.nan, np.nan, np.nan]],
         ])
         with self.assertRaises(ValueError):
             # "Table" direction not allowed, because cube's rows are CA dim
@@ -786,17 +780,23 @@ class TestHeadersAndSubtotals(TestCase):
     def test_mr_x_ca_props_by_row_with_hs(self):
         cube = CrunchCube(MR_X_CA_HS)
         expected = np.array([
-            [[0.66666667, 0.33333333, 1.        , 0.        , 0.        , 0.        , 1.        ],  # noqa
-             [0.33333333, 0.33333333, 0.66666667, 0.33333333, 0.        , 0.33333333, 1.        ],  # noqa
-             [0.        , 0.33333333, 0.33333333, 0.33333333, 0.33333333, 0.66666667, 1.        ]],  # noqa
+            [[0.66666667, 0.33333333, 1.00000000, 0.00000000, 0.00000000,
+              0.00000000, 1.00000000],
+             [0.33333333, 0.33333333, 0.66666667, 0.33333333, 0.00000000,
+              0.33333333, 1.00000000],
+             [0.00000000, 0.33333333, 0.33333333, 0.33333333, 0.33333333,
+              0.66666667, 1.00000000]],
 
-            [[0.5       , 0.5       , 1.        , 0.        , 0.        , 0.        , 1.        ],  # noqa
-             [0.25      , 0.25      , 0.5       , 0.5       , 0.        , 0.5       , 1.        ],  # noqa
-             [0.        , 0.25      , 0.25      , 0.        , 0.75      , 0.75      , 1.        ]],  # noqa
+            [[0.50000000, 0.50000000, 1.00000000, 0.00000000, 0.00000000,
+              0.00000000, 1.00000000],
+             [0.25000000, 0.25000000, 0.50000000, 0.50000000, 0.00000000,
+              0.50000000, 1.00000000],
+             [0.00000000, 0.25000000, 0.25000000, 0.00000000, 0.75000000,
+              0.75000000, 1.00000000]],
 
-            [[    np.nan,     np.nan,     np.nan,     np.nan,     np.nan,     np.nan,     np.nan],  # noqa
-             [    np.nan,     np.nan,     np.nan,     np.nan,     np.nan,     np.nan,     np.nan],  # noqa
-             [    np.nan,     np.nan,     np.nan,     np.nan,     np.nan,     np.nan,     np.nan]],  # noqa
+            [[np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
+             [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
+             [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan]],
         ])
 
         with self.assertRaises(ValueError):
