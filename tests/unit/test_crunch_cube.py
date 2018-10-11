@@ -60,6 +60,22 @@ class TestCrunchCube(TestCase):
         with self.assertRaises(ValueError):
             CrunchCube._calculate_constraints_sum(Mock(), Mock(), 2)
 
+    def test_cube_counts(self):
+        cube = CrunchCube({'result': {}})
+        assert cube.counts == (None, None)
+
+        fake_count = Mock()
+        cube = CrunchCube({'result': {'unfiltered': fake_count}})
+        assert cube.counts == (fake_count, None)
+
+        cube = CrunchCube({'result': {'filtered': fake_count}})
+        assert cube.counts == (None, fake_count)
+
+        cube = CrunchCube(
+            {'result': {'unfiltered': fake_count, 'filtered': fake_count}}
+        )
+        assert cube.counts == (fake_count, fake_count)
+
     @patch('cr.cube.crunch_cube.CrunchCube.dimensions', None)
     def test_name_with_no_dimensions(self):
         fake_cube = {}
@@ -94,7 +110,7 @@ class TestCrunchCube(TestCase):
         actual = cube.description
         self.assertEqual(actual, expected)
 
-    @patch('cr.cube.mixins.data_table.DataTable.has_means', False)
+    @patch('cr.cube.crunch_cube.CrunchCube.has_means', False)
     def test_missing_when_there_are_none(self):
         fake_cube = {'result': {}}
         cube = CrunchCube(fake_cube)
@@ -138,8 +154,8 @@ class TestCrunchCube(TestCase):
         )
         self.assertEqual(actual, expected)
 
-    @patch('cr.cube.mixins.data_table.DataTable.all_dimensions', [])
-    @patch('cr.cube.mixins.data_table.DataTable.mr_selections_indices')
+    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [])
+    @patch('cr.cube.crunch_cube.CrunchCube.mr_selections_indices')
     def test_does_not_have_multiple_response(self, mock_mr_indices):
         mock_mr_indices.return_value = []
         expected = False
@@ -166,7 +182,7 @@ class TestCrunchCube(TestCase):
         actual = CrunchCube({}).description
         self.assertEqual(actual, expected)
 
-    @patch('cr.cube.mixins.data_table.DataTable.has_means', False)
+    @patch('cr.cube.crunch_cube.CrunchCube.has_means', False)
     def test_missing(self):
         missing = Mock()
         fake_cube = {'result': {'missing': missing}}
@@ -231,7 +247,7 @@ class TestCrunchCube(TestCase):
         expected = unweighted_count
         self.assertEqual(actual, expected)
 
-    @patch('cr.cube.mixins.data_table.DataTable.is_weighted', False)
+    @patch('cr.cube.crunch_cube.CrunchCube.is_weighted', False)
     def test_n_weighted_and_has_no_weight(self):
         unweighted_count = Mock()
         weighted_counts = Mock()
@@ -249,7 +265,7 @@ class TestCrunchCube(TestCase):
         expected = unweighted_count
         self.assertEqual(actual, expected)
 
-    @patch('cr.cube.mixins.data_table.DataTable.is_weighted', True)
+    @patch('cr.cube.crunch_cube.CrunchCube.is_weighted', True)
     def test_n_weighted_and_has_weight(self):
         unweighted_count = Mock()
         weighted_counts = [1, 2, 3, 4]
@@ -267,13 +283,13 @@ class TestCrunchCube(TestCase):
         expected = sum(weighted_counts)
         self.assertEqual(actual, expected)
 
-    @patch('cr.cube.mixins.data_table.DataTable.is_weighted', 'fake_val')
+    @patch('cr.cube.crunch_cube.CrunchCube.is_weighted', 'fake_val')
     def test_is_weighted_invoked(self):
         cube = CrunchCube({})
         actual = cube.is_weighted
         assert actual == 'fake_val'
 
-    @patch('cr.cube.mixins.data_table.DataTable.has_means', 'fake_val')
+    @patch('cr.cube.crunch_cube.CrunchCube.has_means', 'fake_val')
     def test_has_means_invoked(self):
         cube = CrunchCube({})
         actual = cube.has_means
