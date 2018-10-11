@@ -11,7 +11,7 @@ from cr.cube.cube_slice import CubeSlice
 
 def test_index_performs_correct_division(index_fixture):
     cs, axis, base, expected = index_fixture
-    actual = cs.index(axis, base)
+    actual = cs.index_table(axis, base)
     np.testing.assert_almost_equal(actual, expected)
 
 

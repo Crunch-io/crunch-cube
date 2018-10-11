@@ -368,7 +368,7 @@ class CubeSlice(object):
         base = base / np.sum(base)
         return base / np.sum(base, axis=0)
 
-    def index(self, axis=None, base=None):
+    def index_table(self, axis=None, base=None):
         '''Return index percentages for a given axis and base.
 
         The index values represent the difference of the percentages to the

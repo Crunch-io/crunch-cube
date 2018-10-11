@@ -10,6 +10,7 @@ from the Crunch.io platform).
 from __future__ import division
 
 import json
+import warnings
 
 import numpy as np
 from scipy.stats import norm
@@ -1072,7 +1073,12 @@ class CrunchCube(DataTable):
         ) * population_size * self.population_fraction
 
     def index(self, weighted=True, prune=False):
-        '''Get cube index measurement.'''
+        '''Get cube index measurement.
+
+        This function is deprecated. Use index directly from cube slices.
+        '''
+        deprecation_msg = 'Deprecated. Use `cube.slices` instead of `cube`.'
+        warnings.warn(deprecation_msg, DeprecationWarning)
         return Index(self, weighted, prune).data
 
     def _calculate_std_res(self, counts, total, colsum, rowsum, slice_):
