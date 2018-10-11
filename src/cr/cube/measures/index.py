@@ -1,4 +1,6 @@
-'''Contains implementation of the Index service class.'''
+# encoding: utf-8
+
+"""Provides the Index value class."""
 
 from __future__ import division
 
@@ -8,7 +10,8 @@ from ..utils import lazyproperty
 
 
 class Index(object):
-    '''Implementation of the Index service class for Crunch Cubes.'''
+    """Value class providing index calculations for a CrunchCube object."""
+
     def __init__(self, cube, weighted, prune):
         self._cube = cube
         self._weighted = weighted
@@ -16,22 +19,12 @@ class Index(object):
 
     @lazyproperty
     def cube(self):
-        '''Get stored cube object.'''
+        """CrunchCube object passed on construction."""
         return self._cube
 
     @lazyproperty
-    def weighted(self):
-        '''Get weighted property.'''
-        return self._weighted
-
-    @lazyproperty
-    def prune(self):
-        '''Get prune property.'''
-        return self._prune
-
-    @lazyproperty
     def data(self):
-        '''Return table index by margin.'''
+        """ndarray representing table index by margin."""
         result = []
         for slice_ in self.cube.slices:
             if self.cube.has_mr:
@@ -55,6 +48,16 @@ class Index(object):
                 result = np.array(result)
 
         return result
+
+    @lazyproperty
+    def prune(self):
+        """Get prune property."""
+        return self._prune
+
+    @lazyproperty
+    def weighted(self):
+        """Get weighted property."""
+        return self._weighted
 
     def _mr_index(self):
         # mr by mr
