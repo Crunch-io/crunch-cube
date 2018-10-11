@@ -108,18 +108,13 @@ class DataTable(object):
         return self._cube['result']['n']
 
     def flat_values(self, weighted, margin=False):
-        '''Gets the flat values from the original cube response.
+        """Return list of measure values as found in cube response.
 
-        Params
-            weighted (bool): Whether to get the unweighted or weighted counts
-            margin (bool): If we're doing the calculations for the margin, we
-                don't want any other measure (e.g. means), but only counts
-                (which may be weighted or unweighted, depending on the type
-                of the margin).
-        Returns
-            values (ndarray): The flattened array, which represents the result
-                of the cube computation.
-        '''
+        If *weighted* is True, weighted counts are returned if present in the
+        cube. Otherwise, unweighted counts are returned. If *margin* is True,
+        counts are returned even if mean values are present, which may be
+        preferred for example when calculating a margin.
+        """
         values = self._cube['result']['counts']
         if self.has_means and not margin:
             mean = self._cube['result']['measures'].get('mean', {})

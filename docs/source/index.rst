@@ -1,27 +1,26 @@
-.. Crunch Cube documentation master file, created by
-   sphinx-quickstart on Fri Oct 20 07:37:21 2017.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
 
 Welcome to Crunch Cube's documentation!
 =======================================
 
-The purpose of this library is to make it much easier to manipulate cube responses that come from
-the crunch api.  (we'll refer to them as *cubes* in the subsequent text). When used in conjunction
-with pycrunch, this library can unlock powerful second-order analytics and visualizations.
+Crunch Cube allows you to manipulate cube responses from the Crunch API using
+Python. We'll refer to these cube responses as *cubes* in the subsequent
+text. When used in conjunction with `pycrunch`, this library can unlock
+powerful second-order analytics and visualizations.
 
-*Cubes* are obtained from the *Crunch.io* platform, as JSON responses to the specific *queries* created by the user.
-These queries specify which data the user wants to extract from the Crunch.io system.
-The most common usage is to obtain the following:
+A *cube* is obtained from the *Crunch.io* platform as a JSON response to
+a specific *query* created by a user. The most common usage is to obtain the
+following:
 
-- Cross correlation between different variable
-- Margins of the cross tab *cube*
-- Proportions of the cross tab *cube* (e.g. proportions of each single element to the entire sample size)
-- Percentages
+* Cross correlation between different variables
+* Margins of the cross-tab *cube*
+* Proportions of the cross-tab *cube* (e.g. proportions of each single
+  element to the entire sample size)
 
-When the data is obtained from the Crunch.io platform, it needs to be interpreted to the form that's convenient for a user. The actual shape of the *cube* JSON contains many internal details, which are not of essence to the end-user (but are still necessary for proper *cube* functionality).
+Crunch Cube allows you to access these values from a cube response without
+dealing with the complexities of the underlying JSON format.
 
-The job of this library is to provide a convenient API that handles those intricacies, and enables the user to quickly and easily obtain (extract) the relevant data from the *cube*. Such data is best represented in a table-like format. For this reason, the most of the API functions return some form of the `ndarray` type, from the `numpy` package. Each function is explained in greater detail, uner its own section, under the API subsection of this document.
+The data in a cube is often best represented in a table-like format. For this
+reason, many API methods return data as a `numpy.ndarray` object.
 
 
 Installation
@@ -53,6 +52,17 @@ is as simple as:
      ])
 
 
+API Reference
+-------------
+
+.. toctree::
+   :maxdepth: 2
+
+   crunch_cube
+   cube_slice
+   dimension
+
+
 
 For developers
 ---------------
@@ -69,21 +79,14 @@ your code has proper coverage before submitting.  All pull requests
 will be tested by travis.
 
 
-.. toctree::
-   :maxdepth: 4
-   :caption: Contents:
-
-   cr.cube
-
-
 .. image:: https://www.travis-ci.org/Crunch-io/crunch-cube.svg?branch=master
-    :target: https://www.travis-ci.org/Crunch-io/crunch-cube
+   :target: https://www.travis-ci.org/Crunch-io/crunch-cube
 
 .. image:: https://coveralls.io/repos/github/Crunch-io/crunch-cube/badge.svg?branch=master
-    :target: https://coveralls.io/github/Crunch-io/crunch-cube?branch=master
+   :target: https://coveralls.io/github/Crunch-io/crunch-cube?branch=master
 
 .. image:: https://readthedocs.org/projects/crunch-cube/badge/?version=latest
-    :target: http://crunch-cube.readthedocs.io/en/latest/?badge=latest
+   :target: http://crunch-cube.readthedocs.io/en/latest/?badge=latest
 
 
 
