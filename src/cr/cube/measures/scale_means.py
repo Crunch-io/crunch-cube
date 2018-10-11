@@ -68,13 +68,24 @@ class ScaleMeans(object):
         return np.sum(values * margin) / total
 
     def valid_indices(self, axis):
+        # --there is an interaction with CrunchCube._fix_shape() which
+        # --essentially eliminates length-1 dimensions not in the first
+        # --position. We must mirror that reshaping here. The fact this logic
+        # --needs to be duplicated indicates we're missing an abstraction
+        # --somewhere, like perhaps CrunchCube and/or
+        # --CrunchSlice.reshaped_dimensions.
+        reshaped_dimensions = [
+            dim for (idx, dim) in enumerate(self._slice.dimensions)
+            if len(dim.elements()) != 1 or idx == 0
+        ]
+
         return tuple(
             (
                 ~np.isnan(np.array(dim.values))
                 if dim.values and any(~np.isnan(dim.values)) and axis == i else
                 slice(None)
             )
-            for i, dim in enumerate(self._slice.dimensions)
+            for i, dim in enumerate(reshaped_dimensions)
         )
 
     @lazyproperty
