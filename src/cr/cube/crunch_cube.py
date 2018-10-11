@@ -1,10 +1,9 @@
 # encoding: utf-8
 
-"""Home of the CrunchCube class.
+"""Provides the CrunchCube class.
 
-This module contains the definition of the CrunchCube class. It represents
-the open-source library used for manipulating the crunch cubes (JSON responses
-from the Crunch.io platform).
+CrunchCube is the main API class for manipulating the Crunch.io JSON cube
+responses.
 """
 
 from __future__ import division
@@ -26,29 +25,26 @@ np.seterr(divide='ignore', invalid='ignore')
 
 
 class CrunchCube(DataTable):
-    """Implementation of the CrunchCube API class.
+    """The main API object for manipulating Crunch.io cube-responses.
 
-    Class is used for the implementation of the main API functions that are
-    needed for seamless integration with the crunch cube responses
-    (from Crunch.io platform).
+    This object provides the main API methods for working with cubes. The
+    main API functions are:
 
-    Main API functions are:
-      - as_array
-      - margin
-      - proportions
-      - percentages
+    * `as_array()`
+    * `margin()`
+    * `proportions()`
+    * `percentages()`
 
-    These functions are used to retrieve statistical information of interest,
-    from the JSON like crunch cubes. Complete usage of each API function is
-    described within the appropriate docstring.
+    These methods return statistical information of interest from a JSON
+    cube response.
 
-    Crunch Cubes contain richer metadata than standart Python objects, and
-    they also conceal certain complexity in the data structures from the user.
-    In particular, Multiple Response variables are generally represented as
+    Crunch Cubes contain richer metadata than standard Python objects and
+    also conceal certain complexity in the data structures from the user.
+    In particular, multiple-response variables are generally represented as
     single dimensions in result tables, but in the actual data, they may
     comprise of two dimensions. These methods (API) understand the subtleties
-    in the Crunch data types, and correctly compute margins and
-    percentages off of them.
+    in the Crunch data types, and correctly compute margins and percentages
+    from them.
     """
 
     def __init__(self, response):
@@ -80,19 +76,17 @@ class CrunchCube(DataTable):
 
     def as_array(self, include_missing=False, weighted=True, adjusted=False,
                  include_transforms_for_dims=None, prune=False, margin=False):
-        """Get crunch cube as ndarray.
+        """Return `ndarray` representing cube values.
 
-        Returns the tabular representation of the crunch cube. The returning
-        value has as many dimensions, as there are dimensions in the crunch
-        cube itself. E.g. for a cross-tab representation of a categorical and
-        numerical variable, the resulting cube will have two dimensions.
+        Returns the tabular representation of the crunch cube. The returned
+        array has the same number of dimensions as the cube. E.g. for
+        a cross-tab representation of a categorical and numerical variable,
+        the resulting cube will have two dimensions.
 
-        Args
-            include_missing (bool): Include rows/cols for missing values
-        Returns
-            (ndarray): Tabular representation of the crunch cube
+        *include_missing* (bool): Include rows/cols for missing values.
 
-        Example 1 (Categorical x Categorical):
+        Example 1 (Categorical x Categorical)::
+
             >>> cube = CrunchCube(response)
             >>> cube.as_array()
             np.array([
@@ -100,7 +94,8 @@ class CrunchCube(DataTable):
                 [5, 3],
             ])
 
-        Example 2 (Categorical x Categorical, include missing values):
+        Example 2 (Categorical x Categorical, include missing values)::
+
             >>> cube = CrunchCube(response)
             >>> cube.as_array(include_missing=True)
             np.array([
@@ -151,6 +146,13 @@ class CrunchCube(DataTable):
         ]
 
     def get_slices(self, ca_as_0th=False):
+        """Return list of :class:`.CubeSlice` objects.
+
+        The number of slice objects in the returned list depends on the
+        dimensionality of this cube. A 1D or 2D cube will return a list
+        containing one slice object. A 3D cube will return a list of slices
+        the same length as the first dimension.
+        """
         if self.ndim < 3 and not ca_as_0th:
             return [CubeSlice(self, 0)]
 
@@ -161,7 +163,7 @@ class CrunchCube(DataTable):
 
     @lazyproperty
     def has_mr(self):
-        """Determines if a cube has MR dimensions."""
+        """True if this cube has a multiple-response dimension."""
         return self.mr_dim_ind is not None
 
     def index(self, weighted=True, prune=False):
@@ -170,7 +172,6 @@ class CrunchCube(DataTable):
 
     def inserted_hs_indices(self, prune=False):
         """Get indices of the inserted H&S (for formatting purposes)."""
-
         if self.ndim == 2 and prune:
             # If pruning is applied, we need to subtract from the H&S indes
             # the number of pruned rows (cols) that come before that index.
@@ -281,6 +282,7 @@ class CrunchCube(DataTable):
                 [0, 1],
             ])
         """
+
         def hs_dims_for_den(hs_dims, axis):
             if axis is None or hs_dims is None:
                 return None
@@ -362,6 +364,7 @@ class CrunchCube(DataTable):
 
     @lazyproperty
     def ndim(self):
+        """int count of dimensions for this cube."""
         return len(self.dimensions)
 
     def percentages(self, axis=None):
@@ -408,18 +411,16 @@ class CrunchCube(DataTable):
     def population_counts(self, population_size, weighted=True,
                           include_missing=False,
                           include_transforms_for_dims=None, prune=False):
-        """Get population counts relative to the total population size estimate.
-        This function calculates the population counts for crunch cube values.
-        The population counts are based on the values of the 'proportions'.
-        Args
-            population_size (int): Estimated total population size
-            weighted (bool): see proportions method
-            include_missing (bool): see proportions  method
-            include_transforms_for_dims (list): see proportions method
-            prune (bool): see proportions method
-        Returns
-            (nparray): Calculated array of crunch cube population counts.
-        Example:
+        """Return counts scaled in proportion to overall population.
+
+        The return value is a numpy.ndarray object. Count values are scaled
+        proportionally to approximate their value if the entire population
+        had been sampled. This calculation is based on the estimated size of
+        the population provided as *population size*. The remaining arguments
+        have the same meaning as they do for the `.proportions()` method.
+
+        Example::
+
             >>> cube = CrunchCube(fixt_cat_x_cat)
             >>> cube.as_array()
             np.array([
@@ -454,40 +455,40 @@ class CrunchCube(DataTable):
     def proportions(self, axis=None, weighted=True,
                     include_transforms_for_dims=None, include_missing=False,
                     prune=False):
-        """Get proportions of a crunch cube.
+        """Return percentage values for cube as `numpy.ndarray`.
 
         This function calculates the proportions across the selected axis
         of a crunch cube. For most variable types, it means the value divided
-        by the margin value. For Multiple Response types, the value is divied
-        by the sum of selected and non-selected slices.
+        by the margin value. For a multiple-response variable, the value is
+        divided by the sum of selected and non-selected slices.
 
-        Args
-            axis (int): Base axis of proportions calculation. If no axis is
-                        provided, calculations are done accros entire table.
-            weighted (bool): Do weighted or non-weighted proportions.
-            include_transforms_for_dims (list): Also include headings and
-                        subtotals transformations for the provided dimensions.
-                        If the dimensions have the transformations, they'll be
-                        included in the resulting numpy array. If the
-                        dimensions don't have the transformations, nothing will
-                        happen (the result will be the same as if the argument
-                        weren't provided).
-            include_transforms_for_dims (list): Include headers and subtotals
-                        across various dimensions. The dimensions are provided
-                        as list elements. For example:
-                        "include_transforms_for_dims=[0, 1]" instructs the
-                        CrunchCube to return H&S for both rows and columns
-                        (if it's a 2D cube).
-            include_missing (bool): Include missing categories
-            prune (bool): Instructs the CrunchCube to prune empty rows/cols.
-                        Emptiness is determined by the state of the margin
-                        (if it's either 0 or nan at certain index). If it is,
-                        the corresponding row/col is not included in the result.
+        *axis* (int): base axis of proportions calculation. If no axis is
+        provided, calculations are done across the entire table.
 
-        Returns
-            (nparray): Calculated array of crunch cube proportions.
+        *weighted* (bool): Specifies weighted or non-weighted proportions.
 
-        Example 1:
+        *include_transforms_for_dims* (list): Also include headings and
+        subtotals transformations for the provided dimensions. If the
+        dimensions have the transformations, they'll be included in the
+        resulting numpy array. If the dimensions don't have the
+        transformations, nothing will happen (the result will be the same as
+        if the argument weren't provided).
+
+        *include_transforms_for_dims* (list): Include headers and subtotals
+        (H&S) across various dimensions. The dimensions are provided as list
+        elements. For example: "include_transforms_for_dims=[0, 1]" instructs
+        the CrunchCube to return H&S for both rows and columns (if it's a 2D
+        cube).
+
+        *include_missing* (bool): Include missing categories.
+
+        *prune* (bool): Instructs the CrunchCube to prune empty rows/cols.
+        Emptiness is determined by the state of the margin (if it's either
+        0 or nan at certain index). If it is, the corresponding row/col is
+        not included in the result.
+
+        Example 1::
+
             >>> cube = CrunchCube(fixt_cat_x_cat)
             np.array([
                [5, 2],
@@ -500,7 +501,8 @@ class CrunchCube(DataTable):
                 [0.3333333, 0.2000000],
             ])
 
-        Example 2:
+        Example 2::
+
             >>> cube = CrunchCube(fixt_cat_x_cat)
             np.array([
                [5, 2],
@@ -553,18 +555,18 @@ class CrunchCube(DataTable):
         return res
 
     def prune_indices(self, transforms=None):
-        """Indices of pruned rows and columns.
+        """Return indices of pruned rows and columns as list.
 
-        Returns:
-            (list) One of the possible lists:
+        The return value has one of three possible forms:
 
-            - 1-element list of row indices (in case of 1D cube)
-            - 2-element list of row and col indices (in case of 2D cube)
-            - n-element list of tuples of 2 elements (if it's 3D cube).
-            For each case, the 2 elements are the ROW and COL indices of the
-            elements that need to be pruned. If it's a 3D cube, these indices
-            are calculated "per slice", that is NOT on the 0th dimension
-            (as the 0th dimension represents the slices).
+        * a 1-element list of row indices (in case of 1D cube)
+        * 2-element list of row and col indices (in case of 2D cube)
+        * n-element list of tuples of 2 elements (if it's 3D cube).
+
+        For each case, the 2 elements are the ROW and COL indices of the
+        elements that need to be pruned. If it's a 3D cube, these indices are
+        calculated "per slice", that is NOT on the 0th dimension (as the 0th
+        dimension represents the slices).
         """
         if self.ndim >= 3:
             # In case of a 3D cube, return list of tuples
@@ -665,7 +667,6 @@ class CrunchCube(DataTable):
 
     def zscore(self, weighted=True, prune=False, hs_dims=None):
         """Get cube zscore measurement."""
-
         res = []
         for slice_ in self.slices:
             counts = slice_.as_array(weighted=weighted)
@@ -709,13 +710,11 @@ class CrunchCube(DataTable):
 
         For more info on how it needs to operate, check the unit tests.
         """
-
         if not self._is_axis_allowed(axis):
             ca_error_msg = 'Direction {} not allowed (items dimension)'
             raise ValueError(ca_error_msg.format(axis))
 
         if isinstance(axis, int):
-
             # If single axis was provided, create a list out of it, so that
             # we can do the subsequent iteration.
             axis = list([axis])
@@ -786,7 +785,6 @@ class CrunchCube(DataTable):
         Returns
             res (ndarray): Tabular representation of crunch cube
         """
-
         values = self.flat_values(weighted, margin)
         dimensions = self.all_dimensions
         shape = [len(dim.elements(include_missing=True)) for dim in dimensions]
@@ -874,7 +872,6 @@ class CrunchCube(DataTable):
         general, use private methods, if operating inside CrunchCube. API
         methods should only be used from outside CrunchCube.
         """
-
         if not array.shape or len(array.shape) != len(self.all_dimensions):
             # This condition covers two cases:
             # 1. In case of no dimensions, the shape of the array is empty
@@ -899,8 +896,8 @@ class CrunchCube(DataTable):
         # remove it from the shape. Hence the i == 0 part. For other dimensions
         # that have one element, it means that these are the remnants of the MR
         # selections, which we don't need as separate dimensions.
-        new_shape = [dim for (i, dim) in enumerate(array.shape)
-                     if dim != 1 or i == 0]
+        new_shape = [length for (i, length) in enumerate(array.shape)
+                     if length != 1 or i == 0]
         return array.reshape(new_shape)
 
     @classmethod
@@ -914,7 +911,6 @@ class CrunchCube(DataTable):
         return valid_indices
 
     def _inserted_dim_inds(self, transform_dims, axis):
-
         dim_ind = axis if self.ndim < 3 else axis + 1
         if not transform_dims or dim_ind not in transform_dims:
             return np.array([])
@@ -964,7 +960,6 @@ class CrunchCube(DataTable):
         In case the calculation is requested over CA items dimension, it is not
         valid. It's valid in all other cases.
         """
-
         if axis is None:
             # If table direction was requested, we must ensure that each slice
             # doesn't have the CA items dimension (thus the [-2:] part). It's
@@ -1056,7 +1051,6 @@ class CrunchCube(DataTable):
         Pruning is the removal of rows or columns, whose corresponding
         marginal elements are either 0 or not defined (np.nan).
         """
-
         if self.ndim > 2:
             return self._prune_3d_body(res, transforms)
 
@@ -1146,7 +1140,6 @@ class CrunchCube(DataTable):
         case of a subvars (items) dimension, we only prune if all the counts
         of the corresponding row/column are all zero.
         """
-
         if not self._is_axis_allowed(axis):
             # In case we encountered axis that would go across items dimension,
             # we need to return at least some result, to prevent explicitly
@@ -1167,7 +1160,6 @@ class CrunchCube(DataTable):
 
     def _transform(self, res, include_transforms_for_dims,
                    inflate=False, fix=True):
-
         valid_indices = self.valid_indices_with_selections if fix else None
         """Transform the shape of the resulting ndarray."""
         if not include_transforms_for_dims:
