@@ -1,4 +1,19 @@
-'''Contains implementation of the Means service class.'''
+# encoding: utf-8
+
+"""Objects related to "scale-mean" features.
+
+Categorical variables (and perhaps others) allow a *numeric-value* to be
+assigned to each category. This could be something like "like=1, dislike=-1,
+neutral=0", or possibly "one-child=1, two-children=2, three-or-more=3".
+
+These numeric values impose a quantitative *scale* on an otherwise
+non-numeric variable, and thereby allow quantitative operations on that
+variable.
+
+Taking the mean value is one of those quantitative operations, and
+"scale-mean" refers to calculating the *mean* value of the values on this
+numeric *scale*.
+"""
 
 from __future__ import division
 
@@ -8,13 +23,14 @@ from ..utils import lazyproperty
 
 
 class ScaleMeans(object):
-    '''Implementation of the Means service.'''
+    """Value object providing "mean-of-scale" values on a CubeSlice object."""
+
     def __init__(self, slice_):
         self._slice = slice_
 
     @lazyproperty
     def data(self):
-        '''Get the means calculation.'''
+        """list of mean numeric values of categorical responses."""
         means = []
         table = self._slice.as_array()
         products = self._inner_prods(table, self.values)
@@ -51,18 +67,6 @@ class ScaleMeans(object):
 
         return np.sum(values * margin) / total
 
-    @lazyproperty
-    def values(self):
-        '''Get num values for means calculation.'''
-        return [
-            (
-                np.array(dim.values)
-                if dim.values and any(~np.isnan(dim.values)) else
-                None
-            )
-            for dim in self._slice.dimensions
-        ]
-
     def valid_indices(self, axis):
         return tuple(
             (
@@ -72,6 +76,22 @@ class ScaleMeans(object):
             )
             for i, dim in enumerate(self._slice.dimensions)
         )
+
+    @lazyproperty
+    def values(self):
+        """list of ndarray value-ids for each dimension in slice.
+
+        The values for each dimension appear as an ndarray. None appears
+        instead of the array for each dimension having only NaN values.
+        """
+        return [
+            (
+                np.array(dim.values)
+                if dim.values and any(~np.isnan(dim.values)) else
+                None
+            )
+            for dim in self._slice.dimensions
+        ]
 
     def _inner_prods(self, contents, values):
         products = []
