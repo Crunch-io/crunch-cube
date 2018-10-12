@@ -96,14 +96,15 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.6.12 Index table on slices
+- Implement correct index table functionality
+- Deprecate old index functionality
+
 #### 1.6.11 Deprecate `shape`
 - Deprecate the `CubeSlice` `shape` property
 - Use `get_shape(prune=False)` instead
 - Will be removed in future versions
 
 #### 1.6.10 Fix README on pypi
-
-#### 1.6.9 Bugfix
-- When Categorical Array variable is selected in multitable export, and Scale Means is selected, the cube fails, because it tries to access the non-existing slice (the CA is only _interpreted_ as multiple slices in tabbooks). This fix makes sure that the export cube doesn't fail in such case.
 
 For a complete list of changes see [history](https://github.com/Crunch-io/crunch-cube/blob/master/HISTORY.md).
