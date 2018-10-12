@@ -19,7 +19,6 @@ test_requires = [
     'pytest',
     'pytest-cov',
     'mock',
-    'pre-commit',
 ]
 
 setup(
