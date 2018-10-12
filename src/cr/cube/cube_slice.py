@@ -1,5 +1,7 @@
 '''Home of the CubeSlice class.'''
 
+from __future__ import division
+
 from functools import partial
 import warnings
 import numpy as np
@@ -336,3 +338,40 @@ class CubeSlice(object):
         # Eliminate dimensions that get reduced to 1
         # (e.g. single element categoricals)
         return tuple(n for n in shape if n > 1)
+
+    # @memoize
+    def index(self, axis=None, base=None):
+        '''Return index percentages for a given axis and base.'''
+        proportions = self.proportions(axis=axis)
+        base = (
+            base
+            if base is not None else
+            self.margin(axis=(1 - axis), include_missing=True)
+        )
+        if axis == self.mr_dim_ind:
+            if axis == 0:
+                base = base / np.sum(base, axis=(1 - axis))[:, None]
+                base = base[:, 0]
+            else:
+                base = base / np.sum(base, axis=1)[:, None]
+                base = base[:, 0]
+        elif type(self.mr_dim_ind) == tuple and axis in self.mr_dim_ind:
+            if axis == 0:
+                total = np.sum(base, axis=(1 - axis))[0][0]
+                base = base[:, 0, :] / total
+            else:
+                total = np.sum(base, axis=2)[0]
+                base = base[0, :, 0] / total
+        else:
+            if axis == 0 and self.mr_dim_ind is not None:
+                base = base[:, 0]
+                base = base / np.sum(base)
+            else:
+                base = base if len(base.shape) <= 1 else base[0]
+                base = base / np.sum(base)
+                base = base / np.sum(base, axis=0)
+
+        if axis == 0 and len(base.shape) <= 1:
+            base = base[:, None]
+
+        return proportions / base * 100
