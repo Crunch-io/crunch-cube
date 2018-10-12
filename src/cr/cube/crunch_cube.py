@@ -256,7 +256,7 @@ class CrunchCube(object):
 
     def index(self, weighted=True, prune=False):
         """Get cube index measurement."""
-        return Index(self, weighted, prune).data
+        return Index.data(self, weighted, prune)
 
     def inserted_hs_indices(self, prune=False):
         """Get indices of the inserted H&S (for formatting purposes)."""
