@@ -78,7 +78,7 @@ class CrunchCube(DataTable):
 
         self.slices = self.get_slices()
 
-    def _fix_shape(self, array):
+    def _fix_shape(self, array, fix_valids=False):
         '''Fixes shape of MR variables.
         For MR variables, where 'selections' dims are dropped, the ndarray
         needs to be reshaped, in order to seem as if those dims never existed.
@@ -108,8 +108,12 @@ class CrunchCube(DataTable):
 
         display_ind = [
             0 if dim.is_mr_selections(self.all_dimensions) else slice(None)
-            for dim in self.all_dimensions
-        ]
+            # 0 if dim.is_mr_selections(self.all_dimensions) else (slice(None) if not fix_valids or n <= 1 else dim.valid_indices(False))
+            for dim, n in zip(self.all_dimensions, array.shape)
+        ] if not fix_valids else np.ix_(*[
+            dim.valid_indices(False) if n > 1 else [0]
+            for dim, n in zip(self.all_dimensions, array.shape)
+        ])
         array = array[display_ind]
 
         # If a first dimension only has one element, we don't want to
@@ -136,9 +140,9 @@ class CrunchCube(DataTable):
         return result, valid_indices
 
     def _transform(self, res, include_transforms_for_dims,
-                   inflate=False, fix=True):
+                   inflate=False, fix=True, include_missing=False):
 
-        valid_indices = self.valid_indices_with_selections if fix else None
+        valid_indices = self.valid_indices_with_selections(include_missing) if fix else None
         '''Transform the shape of the resulting ndarray.'''
         if not include_transforms_for_dims:
             return res[np.ix_(*valid_indices)] if valid_indices else res
@@ -190,7 +194,7 @@ class CrunchCube(DataTable):
         dimensions = self.all_dimensions
         shape = [len(dim.elements(include_missing=True)) for dim in dimensions]
         res = np.array(values).reshape(shape)
-        res = self._transform(res, include_transforms_for_dims, inflate=True)
+        res = self._transform(res, include_transforms_for_dims, inflate=True, include_missing=include_missing)
         res = res + adjusted
 
         if prune:
@@ -554,10 +558,10 @@ class CrunchCube(DataTable):
     def ndim(self):
         return len(self.dimensions)
 
-    @lazyproperty
-    def valid_indices_with_selections(self):
+    # @lazyproperty
+    def valid_indices_with_selections(self, include_missing=False):
         '''Get all valid indices (including MR selections).'''
-        return [dim.valid_indices(False) for dim in self.all_dimensions]
+        return [dim.valid_indices(include_missing) for dim in self.all_dimensions]
 
     @lazyproperty
     def has_mr(self):
@@ -763,7 +767,7 @@ class CrunchCube(DataTable):
             include_transforms_for_dims=hs_dims,
         )
 
-    def margin(self, axis=None, weighted=True,
+    def margin(self, axis=None, weighted=True, include_missing=False,
                include_transforms_for_dims=None, prune=False):
         '''Get margin for the selected axis.
 
@@ -840,13 +844,14 @@ class CrunchCube(DataTable):
         # dividing. Those across dims which are summed across MUST NOT be
         # included, because they would change the result.
         hs_dims = hs_dims_for_den(include_transforms_for_dims, axis)
-        den = self._transform(table, hs_dims, inflate=True, fix=True)
+        den = self._transform(table, hs_dims, inflate=True, fix=True, include_missing=include_missing)
 
         # Apply correct mask (based on the as_array shape)
-        arr = self.as_array(
+        arr = self._as_array(
             prune=prune,
             # include_transforms_for_dims=include_transforms_for_dims,
             include_transforms_for_dims=hs_dims,
+            include_missing=include_missing,
         )
         if isinstance(arr, np.ma.core.MaskedArray):
 
@@ -873,7 +878,7 @@ class CrunchCube(DataTable):
             # Special case for 1D cube wigh MR, for "Table" direction
             den = np.sum(den, axis=new_axis)[index]
 
-        den = self._fix_shape(den)
+        den = self._fix_shape(den, fix_valids=include_missing)
         if den.shape[0] == 1 and len(den.shape) > 1 and self.ndim < 3:
             den = den.reshape(den.shape[1:])
         return den
