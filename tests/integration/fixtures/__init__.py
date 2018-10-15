@@ -9,7 +9,7 @@ source files relatively clean.
 import os
 from functools import partial
 
-from cr.cube.utils import load_fixture
+from cr.cube.util import load_fixture
 
 CUBES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cubes')
 

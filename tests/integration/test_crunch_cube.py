@@ -2,61 +2,27 @@ from unittest import TestCase
 import numpy as np
 
 from cr.cube.crunch_cube import CrunchCube
-from cr.cube.utils import compress_pruned
+from cr.cube.util import compress_pruned
 
-from .fixtures import CAT_X_CAT
-from .fixtures import CAT_X_CAT_GERMAN_WEIGHTED
-from .fixtures import CAT_X_DATETIME
-from .fixtures import CAT_X_NUM_X_DATETIME
-from .fixtures import ECON_GENDER_X_IDEOLOGY_WEIGHTED
-from .fixtures import UNIVARIATE_CATEGORICAL
-from .fixtures import VOTER_REGISTRATION
-from .fixtures import SIMPLE_DATETIME
-from .fixtures import SIMPLE_TEXT
-from .fixtures import SIMPLE_CAT_ARRAY
-from .fixtures import STATS_TEST
-from .fixtures import ECON_MEAN_AGE_BLAME_X_GENDER
-from .fixtures import ECON_MEAN_NO_DIMS
-from .fixtures import ADMIT_X_DEPT_UNWEIGHTED
-from .fixtures import ADMIT_X_GENDER_WEIGHTED
-from .fixtures import SELECTED_CROSSTAB_4
-from .fixtures import PETS_X_PETS
-from .fixtures import PETS_X_FRUIT
-from .fixtures import PETS_ARRAY
-from .fixtures import PETS_ARRAY_CAT_FIRST
-from .fixtures import PETS_ARRAY_SUBVAR_FIRST
-from .fixtures import FRUIT_X_PETS
-from .fixtures import FRUIT_X_PETS_ARRAY
-from .fixtures import GENDER_PARTY_RACE
-from .fixtures import SINGLE_COL_MARGIN_NOT_ITERABLE
-from .fixtures import BINNED
-from .fixtures import CAT_X_CAT_WITH_EMPTY_COLS
-from .fixtures import PROFILES_PERCENTS
-from .fixtures import IDENTITY_X_PERIOD
-from .fixtures import CA_SINGLE_CAT
-from .fixtures import PETS_ARRAY_X_PETS
-from .fixtures import PETS_X_PETS_ARRAY
-from .fixtures import SINGLE_CAT_MEANS
-from .fixtures import CA_X_SINGLE_CAT
-from .fixtures import CA_SUBVAR_X_CAT_HS
-from .fixtures import ECON_BLAME_WITH_HS
-from .fixtures import ECON_BLAME_X_IDEOLOGY_ROW_HS
-from .fixtures import FRUIT_X_PETS_ARRAY_SUBVARS_FIRST
-from .fixtures import FRUIT_X_PETS_ARRAY_PETS_FIRST
-from .fixtures import SCALE_WITH_NULL_VALUES
-from .fixtures import VALUE_SERVICES
-from .fixtures import LETTERS_X_PETS_HS
-from .fixtures import XYZ_SIMPLE_ALLTYPES
-from .fixtures import MR_X_CA_HS
-from .fixtures import MR_X_CAT_HS
-from .fixtures import CA_X_MR_WEIGHTED_HS
-from .fixtures import MR_X_CAT_X_MR_PRUNE
-from .fixtures import HUFFPOST_ACTIONS_X_HOUSEHOLD
-from .fixtures import GENDER_X_WEIGHT
-from .fixtures import CAT_X_MR_X_CAT
-from .fixtures import CAT_X_CAT_FILTERED_POP
-from .fixtures import UNIV_MR_WITH_HS
-
+from .fixtures import (
+    ADMIT_X_DEPT_UNWEIGHTED, ADMIT_X_GENDER_WEIGHTED, BINNED, CAT_X_CAT,
+    CAT_X_CAT_FILTERED_POP, CAT_X_CAT_GERMAN_WEIGHTED,
+    CAT_X_CAT_WITH_EMPTY_COLS, CAT_X_DATETIME, CAT_X_MR_X_CAT,
+    CAT_X_NUM_X_DATETIME, CA_SINGLE_CAT, CA_SUBVAR_X_CAT_HS,
+    CA_X_MR_WEIGHTED_HS, CA_X_SINGLE_CAT, ECON_BLAME_WITH_HS,
+    ECON_BLAME_X_IDEOLOGY_ROW_HS, ECON_GENDER_X_IDEOLOGY_WEIGHTED,
+    ECON_MEAN_AGE_BLAME_X_GENDER, ECON_MEAN_NO_DIMS, FRUIT_X_PETS,
+    FRUIT_X_PETS_ARRAY, FRUIT_X_PETS_ARRAY_PETS_FIRST,
+    FRUIT_X_PETS_ARRAY_SUBVARS_FIRST, GENDER_PARTY_RACE, GENDER_X_WEIGHT,
+    HUFFPOST_ACTIONS_X_HOUSEHOLD, IDENTITY_X_PERIOD, LETTERS_X_PETS_HS,
+    MR_X_CAT_HS, MR_X_CAT_X_MR_PRUNE, MR_X_CA_HS, PETS_ARRAY,
+    PETS_ARRAY_CAT_FIRST, PETS_ARRAY_SUBVAR_FIRST, PETS_ARRAY_X_PETS,
+    PETS_X_FRUIT, PETS_X_PETS, PETS_X_PETS_ARRAY, PROFILES_PERCENTS,
+    SCALE_WITH_NULL_VALUES, SELECTED_CROSSTAB_4, SIMPLE_CAT_ARRAY,
+    SIMPLE_DATETIME, SIMPLE_TEXT, SINGLE_CAT_MEANS,
+    SINGLE_COL_MARGIN_NOT_ITERABLE, STATS_TEST, UNIVARIATE_CATEGORICAL,
+    UNIV_MR_WITH_HS, VALUE_SERVICES, VOTER_REGISTRATION, XYZ_SIMPLE_ALLTYPES,
+)
 from . import assert_scale_means_equal
 
 
@@ -1169,7 +1135,7 @@ class TestCrunchCube(TestCase):
     def test_pets_array_x_pets_cell(self):
         cube = CrunchCube(PETS_ARRAY_X_PETS)
         expected = np.array([
-            [0.24992768, 0.        , 0.26901938],  # noqa
+            [0.24992768, 0.00000000, 0.26901938],
             [0.17298235, 0.44258027, 0.21174429],
         ])
         actual = cube.proportions(axis=None)[0]
@@ -1192,9 +1158,9 @@ class TestCrunchCube(TestCase):
         '''
         cube = CrunchCube(PETS_X_PETS_ARRAY)
         expected = np.array([
-            [0.58823529, 0.41176471],  # noqa
-            [0.        , 1.        ],  # noqa
-            [0.47058824, 0.52941176],  # noqa
+            [0.58823529, 0.41176471],
+            [0.00000000, 1.00000000],
+            [0.47058824, 0.52941176],
         ])
         # TODO: Remove this if not needed anymore...
         # TODO: Consult with jon and Mike. The new expectation is closer to what

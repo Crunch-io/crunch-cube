@@ -3,8 +3,7 @@ import numpy as np
 from mock import Mock
 from mock import patch
 from unittest import TestCase
-from cr.cube.dimension import Dimension
-from cr.cube.subtotal import Subtotal
+from cr.cube.dimension import Dimension, _Subtotal
 
 
 class TestDimension(TestCase):
@@ -183,7 +182,7 @@ class TestDimension(TestCase):
     @patch('cr.cube.dimension.Dimension._elements', [
         {'id': 1}, {'id': 2}, {'id': 5}, {'id': 4}
     ])
-    @patch('cr.cube.subtotal.Subtotal._all_dim_ids', [1, 2, 4, 5])
+    @patch('cr.cube.dimension._Subtotal._all_dim_ids', [1, 2, 4, 5])
     @patch('cr.cube.dimension.Dimension._get_type')
     def test_hs_names_with_bad_data(self, mock_type):
         '''Test H&S names with bad input data.
@@ -296,9 +295,9 @@ class TestDimension(TestCase):
         dim = Dimension(dim_data)
         actual = dim.subtotals
         assert len(actual) == 2
-        assert isinstance(actual[0], Subtotal)
+        assert isinstance(actual[0], _Subtotal)
         assert actual[0]._data == self.insertions_with_bad_data[1]
-        assert isinstance(actual[1], Subtotal)
+        assert isinstance(actual[1], _Subtotal)
         assert actual[1]._data == self.insertions_with_bad_data[2]
         assert actual[0].anchor == 'bottom'
         assert actual[1].anchor == 5
@@ -391,3 +390,120 @@ class TestDimension(TestCase):
         expected = []
         actual = dim.hs_indices
         assert actual == expected
+
+
+class Test_Subtotal(TestCase):
+
+    invalid_subtotal_1 = {
+        u'anchor': 0,
+        u'name': u'This is respondent ideology',
+    }
+    invalid_subtotal_2 = {
+        u'anchor': 2,
+        u'args': [1, 2],
+        u'function': u'fake_fcn_not_subtotal',
+        u'name': u'Liberal net',
+    }
+    valid_subtotal = {
+        u'anchor': 5,
+        u'args': [5, 4],
+        u'function': u'subtotal',
+        u'name': u'Conservative net',
+    }
+
+    valid_subtotal_anchor_bottom = {
+        u'anchor': 'Bottom',
+        u'args': [5, 4],
+        u'function': u'subtotal',
+        u'name': u'Conservative net',
+    }
+
+    def test_data(self):
+        subtotal = _Subtotal(self.valid_subtotal, Mock())
+        expected = self.valid_subtotal
+        actual = subtotal.data
+        self.assertEqual(actual, expected)
+
+    def test_is_invalid_when_missing_keys(self):
+        subtotal = _Subtotal(self.invalid_subtotal_1, Mock())
+        expected = False
+        actual = subtotal.is_valid
+        self.assertEqual(actual, expected)
+
+    def test_is_invalid_when_not_subtotal(self):
+        dim = Mock()
+        dim.elements.return_value = [{'id': 5}, {'id': 4}]
+        subtotal = _Subtotal(self.invalid_subtotal_2, dim)
+        expected = False
+        actual = subtotal.is_valid
+        self.assertEqual(actual, expected)
+
+    def test_is_valid(self):
+        dim = Mock()
+        dim.elements.return_value = [{'id': 5}, {'id': 4}]
+        subtotal = _Subtotal(self.valid_subtotal, dim)
+        expected = True
+        actual = subtotal.is_valid
+        self.assertEqual(actual, expected)
+
+    def test_is_invalid_when_hs_ids_not_in_dim_elements(self):
+        dim = Mock()
+        dim.elements.return_value = [{'id': 101}, {'id': 102}]
+        subtotal = _Subtotal(self.valid_subtotal, dim)
+        expected = False
+        actual = subtotal.is_valid
+        self.assertEqual(actual, expected)
+
+    def test_anchor_on_invalid_missing_keys(self):
+        subtotal = _Subtotal(self.invalid_subtotal_1, Mock())
+        expected = None
+        actual = subtotal.anchor
+        self.assertEqual(actual, expected)
+
+    def test_anchor_on_invalid_not_subtotal(self):
+        dim = Mock()
+        dim.elements.return_value = [{'id': 5}, {'id': 4}]
+        subtotal = _Subtotal(self.invalid_subtotal_2, dim)
+        expected = None
+        actual = subtotal.anchor
+        self.assertEqual(actual, expected)
+
+    @patch('cr.cube.dimension._Subtotal._all_dim_ids', [1, 3, 5])
+    def test_anchor_on_valid(self):
+        dim = Mock()
+        dim.elements.return_value = [{'id': 5}, {'id': 4}]
+        subtotal = _Subtotal(self.valid_subtotal, dim)
+        expected = 5
+        actual = subtotal.anchor
+        self.assertEqual(actual, expected)
+
+    def test_args_on_invalid_1(self):
+        dim = Mock()
+        dim.elements.return_value = [{'id': 5}, {'id': 4}]
+        subtotal = _Subtotal(self.invalid_subtotal_1, dim)
+        expected = []
+        actual = subtotal.args
+        self.assertEqual(actual, expected)
+
+    def test_args_on_invalid_2(self):
+        dim = Mock()
+        dim.elements.return_value = [{'id': 5}, {'id': 4}]
+        subtotal = _Subtotal(self.invalid_subtotal_2, dim)
+        expected = []
+        actual = subtotal.args
+        self.assertEqual(actual, expected)
+
+    def test_args_on_valid(self):
+        dim = Mock()
+        dim.elements.return_value = [{'id': 5}, {'id': 4}]
+        subtotal = _Subtotal(self.valid_subtotal, dim)
+        expected = [5, 4]
+        actual = subtotal.args
+        self.assertEqual(actual, expected)
+
+    def test_anchor_on_uppercased_bottom(self):
+        dim = Mock()
+        dim.elements.return_value = [{'id': 5}, {'id': 4}]
+        subtotal = _Subtotal(self.valid_subtotal_anchor_bottom, dim)
+        anchor = subtotal.anchor
+        assert anchor == 'bottom'
