@@ -74,7 +74,7 @@ class ScaleMeans(object):
 
         return np.sum(values * margin) / total
 
-    def valid_indices(self, axis):
+    def _valid_indices(self, axis):
         # --there is an interaction with CrunchCube._fix_shape() which
         # --essentially eliminates length-1 dimensions not in the first
         # --position. We must mirror that reshaping here. The fact this logic
@@ -82,8 +82,8 @@ class ScaleMeans(object):
         # --somewhere, like perhaps CrunchCube and/or
         # --CrunchSlice.reshaped_dimensions.
         reshaped_dimensions = [
-            dim for (idx, dim) in enumerate(self._slice.dimensions)
-            if len(dim.elements()) != 1 or idx == 0
+            dimension for dimension in self._slice.dimensions
+            if len(dimension.values) > 1
         ]
 
         return tuple(
@@ -109,17 +109,6 @@ class ScaleMeans(object):
                 None
             )
             for dim in self._slice.dimensions
-        ]
-
-    def _valid_indices(self, axis):
-        return [
-            (
-                ~np.isnan(np.array(dim.values))
-                if dim.values and any(~np.isnan(dim.values)) and axis == i else
-                slice(None)
-            )
-            for i, dim in enumerate(self._slice.dimensions)
-            if len(dim.values) > 1
         ]
 
     def _inflate(self, dim_ind):
