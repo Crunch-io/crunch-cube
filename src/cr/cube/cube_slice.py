@@ -2,6 +2,8 @@
 
 """CubeSlice class."""
 
+from __future__ import division
+
 from functools import partial
 import warnings
 import numpy as np
@@ -55,6 +57,35 @@ class CubeSlice(object):
 
         # ---otherwise, the property value is the same for cube or slice---
         return cube_attr
+
+    def _prepare_index_base(self, axis):
+        # First get the margin of the opposite direction of the index axis.
+        # We need this in order to end up with the right shape of the
+        # numerator vs denominator.
+        base = self.margin(axis=(1 - axis), include_missing=True)
+
+        # Now check if the shape of the marginal needs to be fixed, because
+        # different versions of the MR containing cubes, combined with
+        # different margin directions, provide marginals of different shapes.
+        # We also need to calculate the percentage marginals correctly,
+        # so we need to perform the addition (to get the denominator)
+        # across the correct axis.
+        if axis == self.mr_dim_ind:
+            base = base / np.sum(base, axis=1)[:, None]
+            return base[:, 0]
+        elif isinstance(self.mr_dim_ind, tuple) and axis in self.mr_dim_ind:
+            total = np.sum(base, axis=(axis + 1))
+            if axis == 0:
+                return base[:, 0, 0] / total[:, 0]
+            return base[0, :, 0] / total[0]
+
+        if axis == 0 and self.mr_dim_ind is not None:
+            base = base[:, 0]
+            return base / np.sum(base)
+
+        base = base if len(base.shape) <= 1 else base[0]
+        base = base / np.sum(base)
+        return base / np.sum(base, axis=0)
 
     @lazyproperty
     def ca_dim_ind(self):
@@ -145,6 +176,22 @@ class CubeSlice(object):
         0th dimension (and if it's an MR) in the case of a 3D cube.
         """
         return 'multiple_response' in self.dim_types
+
+    def index_table(self, axis=None, base=None):
+        """Return index percentages for a given axis and base.
+
+        The index values represent the difference of the percentages to the
+        corresponding base values. The base values are the univariate
+        percentages of the corresponding variable.
+        """
+        proportions = self.proportions(axis=axis)
+        base = base if base is not None else self._prepare_index_base(axis)
+
+        # Fix the shape to enable correct broadcasting
+        if axis == 0 and len(base.shape) <= 1:
+            base = base[:, None]
+
+        return proportions / base * 100
 
     @lazyproperty
     def is_double_mr(self):
