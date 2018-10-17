@@ -96,6 +96,10 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.7.2
+- Implement correct index table functionality
+- Deprecate old index functionality
+
 #### 1.7.1 Fix index error
 - Fix peculiar case of CA x CAT (single elem) index error
 - Support with unit tests
@@ -105,10 +109,5 @@ The detailed description can be found
 - Refactored to remove a couple modules
 - Fixed pesky numpy warnings
 - Replaced vulnerable lazyproperty implementation
-
-#### 1.6.11 Deprecate `shape`
-- Deprecate the `CubeSlice` `shape` property
-- Use `get_shape(prune=False)` instead
-- Will be removed in future versions
 
 For a complete list of changes see [history](https://github.com/Crunch-io/crunch-cube/blob/master/HISTORY.md).

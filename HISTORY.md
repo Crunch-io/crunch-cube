@@ -1,5 +1,10 @@
 # History of Changes
 
+#### 1.6.11 Deprecate `shape`
+- Deprecate the `CubeSlice` `shape` property
+- Use `get_shape(prune=False)` instead
+- Will be removed in future versions
+
 #### 1.6.10 Fix README on pypi
 
 #### 1.6.9 Bugfix
