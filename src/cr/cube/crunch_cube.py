@@ -10,6 +10,7 @@ from __future__ import division
 
 import json
 import numpy as np
+import warnings
 
 from scipy.stats import norm
 from scipy.stats.contingency import expected_freq
@@ -255,7 +256,12 @@ class CrunchCube(object):
         return self.mr_dim_ind is not None
 
     def index(self, weighted=True, prune=False):
-        """Get cube index measurement."""
+        """Return cube index measurement.
+
+        This function is deprecated. Use index_table from CubeSlice.
+        """
+        msg = "Deprecated. Use index_table from CubeSlice"""
+        warnings.warn(msg, DeprecationWarning)
         return Index.data(self, weighted, prune)
 
     def inserted_hs_indices(self, prune=False):
@@ -324,7 +330,7 @@ class CrunchCube(object):
             for dim in self.dimensions
         ]
 
-    def margin(self, axis=None, weighted=True,
+    def margin(self, axis=None, weighted=True, include_missing=False,
                include_transforms_for_dims=None, prune=False):
         """Get margin for the selected axis.
 
@@ -402,14 +408,18 @@ class CrunchCube(object):
         # dividing. Those across dims which are summed across MUST NOT be
         # included, because they would change the result.
         hs_dims = hs_dims_for_den(include_transforms_for_dims, axis)
-        den = self._transform(table, hs_dims, inflate=True, fix=True)
+        den = self._transform(
+            table, hs_dims, inflate=True, fix=True,
+            include_missing=include_missing,
+        )
 
         # Apply correct mask (based on the as_array shape)
-        arr = self.as_array(
+        arr = self._as_array(
             prune=prune,
-            # include_transforms_for_dims=include_transforms_for_dims,
             include_transforms_for_dims=hs_dims,
+            include_missing=include_missing,
         )
+        arr = self._fix_shape(arr, fix_valids=include_missing)
         if isinstance(arr, np.ma.core.MaskedArray):
 
             inflate_ind = tuple(
@@ -435,7 +445,7 @@ class CrunchCube(object):
             # Special case for 1D cube wigh MR, for "Table" direction
             den = np.sum(den, axis=new_axis)[index]
 
-        den = self._fix_shape(den)
+        den = self._fix_shape(den, fix_valids=include_missing)
         if den.shape[0] == 1 and len(den.shape) > 1 and self.ndim < 3:
             den = den.reshape(den.shape[1:])
         return den
@@ -788,10 +798,12 @@ class CrunchCube(object):
         dim_types = [dim.type for dim in self.dimensions]
         return dim_types.index('categorical')
 
-    @lazyproperty
-    def valid_indices_with_selections(self):
+    def valid_indices_with_selections(self, include_missing=False):
         """Get all valid indices (including MR selections)."""
-        return [dim.valid_indices(False) for dim in self.all_dimensions]
+        return [
+            dim.valid_indices(include_missing)
+            for dim in self.all_dimensions
+        ]
 
     def zscore(self, weighted=True, prune=False, hs_dims=None):
         """Get cube zscore measurement."""
@@ -917,7 +929,10 @@ class CrunchCube(object):
         dimensions = self.all_dimensions
         shape = [len(dim.elements(include_missing=True)) for dim in dimensions]
         res = np.array(values).reshape(shape)
-        res = self._transform(res, include_transforms_for_dims, inflate=True)
+        res = self._transform(
+            res, include_transforms_for_dims, inflate=True,
+            include_missing=include_missing,
+        )
         res = res + adjusted
 
         if prune:
@@ -987,11 +1002,10 @@ class CrunchCube(object):
         )
         return np.logical_or(mask_rows, mask_cols)
 
-    def _fix_shape(self, array):
+    def _fix_shape(self, array, fix_valids=False):
         """Fixes shape of MR variables.
         For MR variables, where 'selections' dims are dropped, the ndarray
         needs to be reshaped, in order to seem as if those dims never existed.
-
         Also, if any (except 1st) dimension has a single element, it is
         flattened in the resulting array (which is more convenient for the
         users of the CrunchCube). If the original shape of the cube is
@@ -1000,6 +1014,7 @@ class CrunchCube(object):
         general, use private methods, if operating inside CrunchCube. API
         methods should only be used from outside CrunchCube.
         """
+
         if not array.shape or len(array.shape) != len(self.all_dimensions):
             # This condition covers two cases:
             # 1. In case of no dimensions, the shape of the array is empty
@@ -1016,8 +1031,11 @@ class CrunchCube(object):
 
         display_ind = tuple(
             0 if dim.is_mr_selections(self.all_dimensions) else slice(None)
-            for dim in self.all_dimensions
-        )
+            for dim, n in zip(self.all_dimensions, array.shape)
+        ) if not fix_valids else np.ix_(*[
+            dim.valid_indices(False) if n > 1 else [0]
+            for dim, n in zip(self.all_dimensions, array.shape)
+        ])
         array = array[display_ind]
 
         # If a first dimension only has one element, we don't want to
@@ -1291,9 +1309,12 @@ class CrunchCube(object):
         return tuple([dim.shape for dim in self.all_dimensions])
 
     def _transform(self, res, include_transforms_for_dims,
-                   inflate=False, fix=True):
-        valid_indices = self.valid_indices_with_selections if fix else None
+                   inflate=False, fix=True, include_missing=False):
         """Transform the shape of the resulting ndarray."""
+        valid_indices = (
+            self.valid_indices_with_selections(include_missing)
+            if fix else None
+        )
         if not include_transforms_for_dims:
             return res[np.ix_(*valid_indices)] if valid_indices else res
 
