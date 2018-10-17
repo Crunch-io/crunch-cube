@@ -11,6 +11,7 @@ from .fixtures import CAT_X_MR_SIMPLE
 from .fixtures import SELECTED_CROSSTAB_4
 from .fixtures import FULL_CUBE as MR_X_MR
 from .fixtures import NATREP as MR_ALONE
+from .fixtures import MR_X_MR_INDEX_TABLE
 
 
 def test_cat_x_cat_slice_column_index():
@@ -122,6 +123,26 @@ def test_cat_x_mr_slice_row_index():
     expected = np.array([
         [85.7142857, 111.5294118, 96.1098398],
         [107.6923077, 94.6623094, 101.9036954],
+    ])
+    actual = cat_x_mr.slices[0].index_table(axis=1)
+    np.testing.assert_almost_equal(actual, expected)
+
+
+def test_mr_x_mr_index_tables_parity_with_whaam_and_r():
+    cat_x_mr = CrunchCube(MR_X_MR_INDEX_TABLE)
+    # Test column direction
+    expected = np.array([
+        [192.05298013, 97.23165321, 89.68799602],
+        [99.22588537, 239.38592924, 95.99096915],
+        [93.52597694, 98.08689727, 182.31556654],
+    ])
+    actual = cat_x_mr.slices[0].index_table(axis=0)
+    np.testing.assert_almost_equal(actual, expected)
+    # Test row direction
+    expected = np.array([
+        [192.0529801, 99.2258854, 93.5259769],
+        [97.2316532, 239.3859292, 98.0868973],
+        [89.687996, 95.9909692, 182.3155665],
     ])
     actual = cat_x_mr.slices[0].index_table(axis=1)
     np.testing.assert_almost_equal(actual, expected)
