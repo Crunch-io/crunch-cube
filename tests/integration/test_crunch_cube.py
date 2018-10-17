@@ -1701,6 +1701,15 @@ class TestCrunchCube(TestCase):
         )[0]
         np.testing.assert_array_equal(actual, expected)
 
+    def test_ca_x_mr_margin_prune(self):
+        cube = CrunchCube(CA_X_MR_WEIGHTED_HS)
+        expected = np.array([504, 215, 224, 76, 8, 439])
+        actual = cube.margin(
+            axis=1, weighted=False, include_transforms_for_dims=[0, 1, 2],
+            prune=True,
+        )[0]
+        np.testing.assert_array_equal(actual, expected)
+
     def test_mr_x_cat_x_mr_pruning(self):
         cube = CrunchCube(MR_X_CAT_X_MR_PRUNE)
         expected = np.array([
