@@ -41,8 +41,8 @@ class ScaleMeans(object):
                 continue
 
             # Calculate means
-            num = np.sum(product[self.valid_indices(axis)], axis)
-            den = np.sum(table[self.valid_indices(axis)], axis)
+            num = np.sum(product[self._valid_indices(axis)], axis)
+            den = np.sum(table[self._valid_indices(axis)], axis)
             mean = num / den
             if not isinstance(mean, np.ndarray):
                 mean = np.array([mean])
@@ -50,6 +50,13 @@ class ScaleMeans(object):
         return means
 
     def margin(self, axis):
+        '''Return marginal value of the current slice scaled means.
+
+        This value is the the same what you would get from a single variable
+        (constituting a 2D cube/slice), when the "non-missing" filter of the
+        opposite variable would be applied. This behavior is consistent with
+        what is visible in the front-end client.
+        '''
         if self._slice.ndim < 2:
             msg = (
                 'Scale Means marginal cannot be calculated on 1D cubes, as'
@@ -67,7 +74,7 @@ class ScaleMeans(object):
 
         return np.sum(values * margin) / total
 
-    def valid_indices(self, axis):
+    def _valid_indices(self, axis):
         # --there is an interaction with CrunchCube._fix_shape() which
         # --essentially eliminates length-1 dimensions not in the first
         # --position. We must mirror that reshaping here. The fact this logic
@@ -75,8 +82,8 @@ class ScaleMeans(object):
         # --somewhere, like perhaps CrunchCube and/or
         # --CrunchSlice.reshaped_dimensions.
         reshaped_dimensions = [
-            dim for (idx, dim) in enumerate(self._slice.dimensions)
-            if len(dim.elements()) != 1 or idx == 0
+            dimension for dimension in self._slice.dimensions
+            if len(dimension.values) > 1
         ]
 
         return tuple(
@@ -104,14 +111,20 @@ class ScaleMeans(object):
             for dim in self._slice.dimensions
         ]
 
+    def _inflate(self, dim_ind):
+        return (
+            self._slice.ndim > 1 and
+            len(self._slice.get_shape()) > 1 and
+            not dim_ind
+        )
+
     def _inner_prods(self, contents, values):
         products = []
         for i, numeric in enumerate(values):
             if numeric is None:
                 products.append(numeric)
                 continue
-            inflate = self._slice.ndim > 1 and not i
-            numeric = numeric[:, None] if inflate else numeric
+            numeric = numeric[:, None] if self._inflate(i) else numeric
             product = contents * numeric
             products.append(product)
         return products

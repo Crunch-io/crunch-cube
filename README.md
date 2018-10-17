@@ -96,6 +96,11 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.7.1 Fix index error
+- Fix peculiar case of CA x CAT (single elem) index error
+- Support with unit tests
+- Create base for fixing exporter issues
+
 #### 1.7.0 Normalization, PEP8 and bugfix
 - Refactored to remove a couple modules
 - Fixed pesky numpy warnings
@@ -105,7 +110,5 @@ The detailed description can be found
 - Deprecate the `CubeSlice` `shape` property
 - Use `get_shape(prune=False)` instead
 - Will be removed in future versions
-
-#### 1.6.10 Fix README on pypi
 
 For a complete list of changes see [history](https://github.com/Crunch-io/crunch-cube/blob/master/HISTORY.md).
