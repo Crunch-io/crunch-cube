@@ -58,11 +58,11 @@ class CubeSlice(object):
         # ---otherwise, the property value is the same for cube or slice---
         return cube_attr
 
-    def _prepare_index_base(self, axis):
+    def _prepare_index_baseline(self, axis):
         # First get the margin of the opposite direction of the index axis.
         # We need this in order to end up with the right shape of the
         # numerator vs denominator.
-        base = self.margin(axis=(1 - axis), include_missing=True)
+        baseline = self.margin(axis=(1 - axis), include_missing=True)
 
         # Now check if the shape of the marginal needs to be fixed, because
         # different versions of the MR containing cubes, combined with
@@ -71,21 +71,21 @@ class CubeSlice(object):
         # so we need to perform the addition (to get the denominator)
         # across the correct axis.
         if axis == self.mr_dim_ind:
-            base = base / np.sum(base, axis=1)[:, None]
-            return base[:, 0]
+            baseline = baseline / np.sum(baseline, axis=1)[:, None]
+            return baseline[:, 0]
         elif isinstance(self.mr_dim_ind, tuple) and axis in self.mr_dim_ind:
-            total = np.sum(base, axis=(axis + 1))
+            total = np.sum(baseline, axis=(axis + 1))
             if axis == 0:
-                return base[:, 0, 0] / total[:, 0]
-            return base[0, :, 0] / total[0]
+                return baseline[:, 0, 0] / total[:, 0]
+            return baseline[0, :, 0] / total[0]
 
         if axis == 0 and self.mr_dim_ind is not None:
-            base = base[:, 0]
-            return base / np.sum(base)
+            baseline = baseline[:, 0]
+            return baseline / np.sum(baseline)
 
-        base = base if len(base.shape) <= 1 else base[0]
-        base = base / np.sum(base)
-        return base / np.sum(base, axis=0)
+        baseline = baseline if len(baseline.shape) <= 1 else baseline[0]
+        baseline = baseline / np.sum(baseline)
+        return baseline / np.sum(baseline, axis=0)
 
     @lazyproperty
     def ca_dim_ind(self):
@@ -177,21 +177,25 @@ class CubeSlice(object):
         """
         return 'multiple_response' in self.dim_types
 
-    def index_table(self, axis=None, base=None):
-        """Return index percentages for a given axis and base.
+    def index_table(self, axis=None, baseline=None):
+        """Return index percentages for a given axis and baseline.
 
         The index values represent the difference of the percentages to the
-        corresponding base values. The base values are the univariate
+        corresponding baseline values. The baseline values are the univariate
         percentages of the corresponding variable.
         """
         proportions = self.proportions(axis=axis)
-        base = base if base is not None else self._prepare_index_base(axis)
+        baseline = (
+            baseline
+            if baseline is not None else
+            self._prepare_index_baseline(axis)
+        )
 
         # Fix the shape to enable correct broadcasting
-        if axis == 0 and len(base.shape) <= 1:
-            base = base[:, None]
+        if axis == 0 and len(baseline.shape) <= 1:
+            baseline = baseline[:, None]
 
-        return proportions / base * 100
+        return proportions / baseline * 100
 
     @lazyproperty
     def is_double_mr(self):

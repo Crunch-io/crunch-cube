@@ -40,7 +40,7 @@ def test_cat_x_cat_slice_row_index_with_baseline():
         [119.047619047619, 71.4285714285714],
         [104.16666666666667, 93.75],
     ])
-    actual = cube.slices[0].index_table(axis=1, base=np.array([0.6, 0.4]))
+    actual = cube.slices[0].index_table(axis=1, baseline=np.array([0.6, 0.4]))
     np.testing.assert_almost_equal(actual, expected)
 
 
@@ -50,21 +50,7 @@ def test_cat_x_cat_slice_column_index_with_baseline():
         [83.3333333333333, 66.6666666666667],
         [125, 150],
     ])
-    actual = cube.slices[0].index_table(axis=0, base=np.array([0.6, 0.4]))
-    np.testing.assert_almost_equal(actual, expected)
-
-
-def test_mr_x_cat_slice_row_index():
-    cube = CrunchCube(SELECTED_CROSSTAB_4)
-    expected = np.array([
-        [95.3416155822363, 104.394053238208],
-        [101.879419344372, 98.2272247381305],
-        [97.1985863211465, 102.642452778304],
-        [99.2098729346168, 100.745292805163],
-        [115.700063998356, 85.1908063256891],
-        [100.477252947149, 99.5498278652431],
-    ])
-    actual = cube.slices[0].index_table(axis=1)
+    actual = cube.slices[0].index_table(axis=0, baseline=np.array([0.6, 0.4]))
     np.testing.assert_almost_equal(actual, expected)
 
 
@@ -79,6 +65,20 @@ def test_mr_x_cat_slice_column_index():
         [99.2925720053358, 100.682933745397],
     ])
     actual = cube.slices[0].index_table(axis=0)
+    np.testing.assert_almost_equal(actual, expected)
+
+
+def test_mr_x_cat_slice_row_index():
+    cube = CrunchCube(SELECTED_CROSSTAB_4)
+    expected = np.array([
+        [95.3416155822363, 104.394053238208],
+        [101.879419344372, 98.2272247381305],
+        [97.1985863211465, 102.642452778304],
+        [99.2098729346168, 100.745292805163],
+        [115.700063998356, 85.1908063256891],
+        [100.477252947149, 99.5498278652431],
+    ])
+    actual = cube.slices[0].index_table(axis=1)
     np.testing.assert_almost_equal(actual, expected)
 
 
@@ -108,7 +108,7 @@ def test_mr_x_mr_slice_row_index():
     np.testing.assert_almost_equal(actual, expected)
 
 
-def test_cat_x_mr_slice_col_index():
+def test_cat_x_mr_slice_column_index():
     cat_x_mr = CrunchCube(CAT_X_MR_SIMPLE)
     expected = np.array([
         [90.9090909, 106.9518717, 95.6937799],
