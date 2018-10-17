@@ -355,10 +355,10 @@ class CubeSlice(object):
             base = base / np.sum(base, axis=1)[:, None]
             return base[:, 0]
         elif isinstance(self.mr_dim_ind, tuple) and axis in self.mr_dim_ind:
-            total = np.sum(base, axis=(axis + 1))[0]
+            total = np.sum(base, axis=(axis + 1))
             if axis == 0:
-                return base[:, 0] / total[0]
-            return base[0, :, 0] / total
+                return base[:, 0, 0] / total[:, 0]
+            return base[0, :, 0] / total[0]
 
         if axis == 0 and self.mr_dim_ind is not None:
             base = base[:, 0]
