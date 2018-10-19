@@ -40,6 +40,7 @@ def compress_pruned(table):
 
 class Counter(dict):
     """Mapping where default values are zero"""
+
     def __missing__(self, key):
         return 0
 
