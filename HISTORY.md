@@ -1,5 +1,10 @@
 # History of Changes
 
+#### 1.7.0 Normalization, PEP8 and bugfix
+- Refactored to remove a couple modules
+- Fixed pesky numpy warnings
+- Replaced vulnerable lazyproperty implementation
+
 #### 1.6.11 Deprecate `shape`
 - Deprecate the `CubeSlice` `shape` property
 - Use `get_shape(prune=False)` instead
