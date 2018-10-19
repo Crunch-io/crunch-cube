@@ -2,6 +2,8 @@
 
 """Provides the Dimension class."""
 
+from collections import Sequence
+
 import numpy as np
 
 from cr.cube import ITEM_DIMENSION_TYPES
@@ -25,7 +27,7 @@ class Dimension(object):
 
     @lazyproperty
     def alias(self):
-        """Alias of a cube's dimension."""
+        """str system (as opposed to human) name for this dimension."""
         refs = self._dim['references']
         return refs.get('alias')
 
@@ -69,7 +71,20 @@ class Dimension(object):
 
     @lazyproperty
     def hs_indices(self):
-        """Headers and Subtotals indices."""
+        """list of dict each having 'anchor_ind' and 'inds' items.
+
+        Represents subtotal insertions in terms of their anchor and element
+        indices.
+        """
+        # TODO: This implementation is an example of primitive obsession,
+        # using a primitive type (dict in this case) to do the job of an
+        # object. This increases complexity and risk. There is no place to
+        # document the contracts of the object's methods and its form and
+        # behaviors need to be learned by each new developer the hard way.
+        # Also, it's mutable and vulnerable to unintended state changes for
+        # that reason. I'm inclined to think this behavior should be migrated
+        # to _Subtotals such that subtotal element indices can be retrieved
+        # directly from the _Subtotal object.
         if self.is_selections:
             return []
 
@@ -213,15 +228,18 @@ class Dimension(object):
 
     @lazyproperty
     def subtotals(self):
+        """_Subtotals sequence object for this dimension.
+
+        The subtotals sequence provides access to any subtotal insertions
+        defined on this dimension.
+        """
         view = self._dim.get('references', {}).get('view', {})
-
-        if not view:
-            # View can be both None and {}, thus the edge case.
-            return []
-
-        insertions_data = view.get('transform', {}).get('insertions', [])
-        subtotals = [_Subtotal(data, self) for data in insertions_data]
-        return [subtotal for subtotal in subtotals if subtotal.is_valid]
+        # ---view can be both None and {}, thus the edge case.---
+        insertion_dicts = (
+            [] if view is None else
+            view.get('transform', {}).get('insertions', [])
+        )
+        return _Subtotals(insertion_dicts, self)
 
     @lazyproperty
     def type(self):
@@ -379,9 +397,78 @@ class Dimension(object):
                     if item.get('id') == subtotal.anchor
                 ) + 1
 
-            labels_with_cat_ids.insert(ind_insert, subtotal.data)
+            labels_with_cat_ids.insert(ind_insert, subtotal.label_dict)
 
         return labels_with_cat_ids
+
+
+class _Subtotals(Sequence):
+    """Sequence of _Subtotal objects for a dimension.
+
+    Each _Subtotal object represents a "subtotal" insertion transformation
+    defined for the dimension.
+
+    A subtotal can only involve valid (i.e. non-missing) elements.
+    """
+
+    def __init__(self, insertion_dicts, dimension):
+        self._insertion_dicts = insertion_dicts
+        self._dimension = dimension
+
+    def __getitem__(self, idx_or_slice):
+        """Implements indexed access."""
+        return self._subtotals[idx_or_slice]
+
+    def __iter__(self):
+        """Implements (efficient) iterability."""
+        return iter(self._subtotals)
+
+    def __len__(self):
+        """Implements len(subtotals)."""
+        return len(self._subtotals)
+
+    @lazyproperty
+    def _dim_element_ids(self):
+        """frozenset of int id of each cat or subvar in dimension.
+
+        Ids of categories or subvariables representing missing values are not
+        included.
+        """
+        return frozenset(
+            element.get('id')
+            for element in self._dimension.elements()
+        )
+
+    def _iter_valid_subtotal_dicts(self):
+        """Generate each insertion dict that represents a valid subtotal."""
+        for insertion_dict in self._insertion_dicts:
+            # ---skip any non-dicts---
+            if not isinstance(insertion_dict, dict):
+                continue
+
+            # ---skip any non-subtotal insertions---
+            if insertion_dict.get('function') != 'subtotal':
+                continue
+
+            # ---skip any malformed subtotal-dicts---
+            if not {'anchor', 'args', 'name'}.issubset(insertion_dict.keys()):
+                continue
+
+            # ---skip if doesn't reference at least one non-missing element---
+            if not self._dim_element_ids.intersection(insertion_dict['args']):
+                continue
+
+            # ---an insertion-dict that successfully runs this gauntlet
+            # ---is a valid subtotal dict
+            yield insertion_dict
+
+    @lazyproperty
+    def _subtotals(self):
+        """Composed tuple storing actual sequence of _Subtotal objects."""
+        return tuple(
+            _Subtotal(subtotal_dict, self._dimension)
+            for subtotal_dict in self._iter_valid_subtotal_dicts()
+        )
 
 
 class _Subtotal(object):
@@ -392,20 +479,26 @@ class _Subtotal(object):
     of headers and subtotals.
     """
 
-    def __init__(self, data, dim):
-        self._data = data
-        self._dim = dim
+    def __init__(self, subtotal_dict, dimension):
+        self._subtotal_dict = subtotal_dict
+        self._dimension = dimension
 
     @lazyproperty
     def anchor(self):
-        """Get the anchor of the subtotal (if it's valid)."""
-        if not self.is_valid:
-            return None
+        """int or str indicating element under which to insert this subtotal.
 
-        anchor = self._data['anchor']
+        An int anchor is the id of the dimension element (category or
+        subvariable) under which to place this subtotal. The return value can
+        also be one of 'top' or 'bottom'.
+
+        The return value defaults to 'bottom' for an anchor referring to an
+        element that is no longer present in the dimension or an element that
+        represents missing data.
+        """
+        anchor = self._subtotal_dict['anchor']
         try:
             anchor = int(anchor)
-            if anchor not in self._all_dim_ids:
+            if anchor not in self._valid_dim_element_ids:
                 return 'bottom'
             return anchor
         except (TypeError, ValueError):
@@ -413,30 +506,31 @@ class _Subtotal(object):
 
     @lazyproperty
     def args(self):
-        """Get H&S args."""
-        hs_ids = self._data.get('args', None)
-        if hs_ids and self.is_valid:
-            return hs_ids
-        return []
+        """tuple of int ids of elements contributing to this subtotal.
+
+        Any element id not present in the dimension or present but
+        representing missing data is excluded.
+        """
+        return tuple(
+            arg for arg in self._subtotal_dict.get('args', [])
+            if arg in self._valid_dim_element_ids
+        )
 
     @lazyproperty
-    def data(self):
-        """Get data in JSON format."""
-        return self._data
+    def label_dict(self):
+        """dict having 'name' and 'anchor' items for this subtotal."""
+        return {key: self._subtotal_dict[key] for key in ('anchor', 'name')}
 
     @lazyproperty
-    def is_valid(self):
-        """Test if the subtotal data is valid."""
-        if isinstance(self._data, dict):
-            required_keys = {'anchor', 'args', 'function', 'name'}
-            has_keys = set(self._data.keys()) == required_keys
-            if has_keys and self._data['function'] == 'subtotal':
-                return any(
-                    element for element in self._dim.elements()
-                    if element['id'] in self._data['args']
-                )
-        return False
+    def _valid_dim_element_ids(self):
+        """frozenset of int id of each valid cat or subvar in dimension.
 
-    @lazyproperty
-    def _all_dim_ids(self):
-        return [el.get('id') for el in self._dim.elements(include_missing=True)]
+        The term "valid" here means "not-missing", so intuitively, that it
+        represents "valid" data actually collected, as opposed to
+        characterizing why the data is missing.
+        """
+        return frozenset(
+            element['id']
+            for element in self._dimension.elements(include_missing=False)
+            if 'id' in element
+        )

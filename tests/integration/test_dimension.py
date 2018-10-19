@@ -1,15 +1,15 @@
 from unittest import TestCase
 
-from .fixtures import ECON_BLAME_WITH_HS
-from .fixtures import ECON_BLAME_WITH_HS_MISSING
-from .fixtures import ECON_BLAME_X_IDEOLOGY_ROW_HS
-from .fixtures import CA_WITH_NETS
-from .fixtures import LOGICAL_UNIVARIATE, LOGICAL_X_CAT
-
 from cr.cube.crunch_cube import CrunchCube
+
+from .fixtures import (
+    CA_WITH_NETS, ECON_BLAME_WITH_HS, ECON_BLAME_WITH_HS_MISSING,
+    ECON_BLAME_X_IDEOLOGY_ROW_HS, LOGICAL_UNIVARIATE, LOGICAL_X_CAT
+)
 
 
 class TestDimension(TestCase):
+
     def test_subtotals_indices_single_subtotal(self):
         dimension = CrunchCube(ECON_BLAME_WITH_HS).dimensions[0]
         expected = [{
@@ -34,7 +34,7 @@ class TestDimension(TestCase):
             'inds': [0, 1]
         }, {
             'anchor_ind': 'bottom',
-            'inds': [3, 4, 5]
+            'inds': [3, 4]
         }]
         actual = dimension.hs_indices
         self.assertEqual(actual, expected)

@@ -1,9 +1,14 @@
 import numpy as np
+import pytest
 
 from mock import Mock
 from mock import patch
 from unittest import TestCase
-from cr.cube.dimension import Dimension, _Subtotal
+from cr.cube.dimension import Dimension, _Subtotal, _Subtotals
+
+from .unitutil import (
+    call, class_mock, instance_mock, method_mock, property_mock
+)
 
 
 class TestDimension(TestCase):
@@ -182,7 +187,7 @@ class TestDimension(TestCase):
     @patch('cr.cube.dimension.Dimension._elements', [
         {'id': 1}, {'id': 2}, {'id': 5}, {'id': 4}
     ])
-    @patch('cr.cube.dimension._Subtotal._all_dim_ids', [1, 2, 4, 5])
+    @patch('cr.cube.dimension._Subtotal._valid_dim_element_ids', (1, 2, 4, 5))
     @patch('cr.cube.dimension.Dimension._get_type')
     def test_hs_names_with_bad_data(self, mock_type):
         '''Test H&S names with bad input data.
@@ -296,9 +301,9 @@ class TestDimension(TestCase):
         actual = dim.subtotals
         assert len(actual) == 2
         assert isinstance(actual[0], _Subtotal)
-        assert actual[0]._data == self.insertions_with_bad_data[1]
+        assert actual[0]._subtotal_dict == self.insertions_with_bad_data[1]
         assert isinstance(actual[1], _Subtotal)
-        assert actual[1]._data == self.insertions_with_bad_data[2]
+        assert actual[1]._subtotal_dict == self.insertions_with_bad_data[2]
         assert actual[0].anchor == 'bottom'
         assert actual[1].anchor == 5
 
@@ -392,118 +397,176 @@ class TestDimension(TestCase):
         assert actual == expected
 
 
-class Test_Subtotal(TestCase):
+class Describe_Subtotals(object):
 
-    invalid_subtotal_1 = {
-        u'anchor': 0,
-        u'name': u'This is respondent ideology',
-    }
-    invalid_subtotal_2 = {
-        u'anchor': 2,
-        u'args': [1, 2],
-        u'function': u'fake_fcn_not_subtotal',
-        u'name': u'Liberal net',
-    }
-    valid_subtotal = {
-        u'anchor': 5,
-        u'args': [5, 4],
-        u'function': u'subtotal',
-        u'name': u'Conservative net',
-    }
+    def it_has_sequence_behaviors(self, request, _subtotals_prop_):
+        _subtotals_prop_.return_value = (1, 2, 3)
+        subtotals = _Subtotals(None, None)
 
-    valid_subtotal_anchor_bottom = {
-        u'anchor': 'Bottom',
-        u'args': [5, 4],
-        u'function': u'subtotal',
-        u'name': u'Conservative net',
-    }
+        assert subtotals[1] == 2
+        assert subtotals[1:3] == (2, 3)
+        assert len(subtotals) == 3
+        assert list(n for n in subtotals) == [1, 2, 3]
 
-    def test_data(self):
-        subtotal = _Subtotal(self.valid_subtotal, Mock())
-        expected = self.valid_subtotal
-        actual = subtotal.data
-        self.assertEqual(actual, expected)
+    def it_knows_the_set_of_dimension_element_ids_to_help(self, dimension_):
+        dimension_.elements.return_value = ({'id': 1}, {}, {'id': 3})
+        subtotals = _Subtotals(None, dimension_)
 
-    def test_is_invalid_when_missing_keys(self):
-        subtotal = _Subtotal(self.invalid_subtotal_1, Mock())
-        expected = False
-        actual = subtotal.is_valid
-        self.assertEqual(actual, expected)
+        dim_element_ids = subtotals._dim_element_ids
 
-    def test_is_invalid_when_not_subtotal(self):
-        dim = Mock()
-        dim.elements.return_value = [{'id': 5}, {'id': 4}]
-        subtotal = _Subtotal(self.invalid_subtotal_2, dim)
-        expected = False
-        actual = subtotal.is_valid
-        self.assertEqual(actual, expected)
+        dimension_.elements.assert_called_once_with()
+        assert dim_element_ids == {1, None, 3}
 
-    def test_is_valid(self):
-        dim = Mock()
-        dim.elements.return_value = [{'id': 5}, {'id': 4}]
-        subtotal = _Subtotal(self.valid_subtotal, dim)
-        expected = True
-        actual = subtotal.is_valid
-        self.assertEqual(actual, expected)
+    def it_iterates_the_valid_subtotal_insertion_dicts_to_help(
+            self, iter_valid_fixture, _dim_element_ids_prop_):
+        insertion_dicts, dim_element_ids, expected_value = iter_valid_fixture
+        _dim_element_ids_prop_.return_value = dim_element_ids
+        subtotals = _Subtotals(insertion_dicts, None)
 
-    def test_is_invalid_when_hs_ids_not_in_dim_elements(self):
-        dim = Mock()
-        dim.elements.return_value = [{'id': 101}, {'id': 102}]
-        subtotal = _Subtotal(self.valid_subtotal, dim)
-        expected = False
-        actual = subtotal.is_valid
-        self.assertEqual(actual, expected)
+        subtotal_dicts = tuple(subtotals._iter_valid_subtotal_dicts())
 
-    def test_anchor_on_invalid_missing_keys(self):
-        subtotal = _Subtotal(self.invalid_subtotal_1, Mock())
-        expected = None
-        actual = subtotal.anchor
-        self.assertEqual(actual, expected)
+        assert subtotal_dicts == expected_value
 
-    def test_anchor_on_invalid_not_subtotal(self):
-        dim = Mock()
-        dim.elements.return_value = [{'id': 5}, {'id': 4}]
-        subtotal = _Subtotal(self.invalid_subtotal_2, dim)
-        expected = None
-        actual = subtotal.anchor
-        self.assertEqual(actual, expected)
+    def it_constructs_its_subtotal_objects_to_help(
+            self, request, _iter_valid_subtotal_dicts_, dimension_,
+            _Subtotal_):
+        subtotal_dicts_ = tuple({'subtotal-dict': idx} for idx in range(3))
+        subtotal_objs_ = tuple(
+            instance_mock(request, _Subtotal, name='subtotal-%d' % idx)
+            for idx in range(3)
+        )
+        _iter_valid_subtotal_dicts_.return_value = iter(subtotal_dicts_)
+        _Subtotal_.side_effect = iter(subtotal_objs_)
+        subtotals = _Subtotals(None, dimension_)
 
-    @patch('cr.cube.dimension._Subtotal._all_dim_ids', [1, 3, 5])
-    def test_anchor_on_valid(self):
-        dim = Mock()
-        dim.elements.return_value = [{'id': 5}, {'id': 4}]
-        subtotal = _Subtotal(self.valid_subtotal, dim)
-        expected = 5
-        actual = subtotal.anchor
-        self.assertEqual(actual, expected)
+        subtotal_objs = subtotals._subtotals
 
-    def test_args_on_invalid_1(self):
-        dim = Mock()
-        dim.elements.return_value = [{'id': 5}, {'id': 4}]
-        subtotal = _Subtotal(self.invalid_subtotal_1, dim)
-        expected = []
-        actual = subtotal.args
-        self.assertEqual(actual, expected)
+        assert _Subtotal_.call_args_list == [
+            call(subtot_dict, dimension_) for subtot_dict in subtotal_dicts_
+        ]
+        assert subtotal_objs == subtotal_objs_
 
-    def test_args_on_invalid_2(self):
-        dim = Mock()
-        dim.elements.return_value = [{'id': 5}, {'id': 4}]
-        subtotal = _Subtotal(self.invalid_subtotal_2, dim)
-        expected = []
-        actual = subtotal.args
-        self.assertEqual(actual, expected)
+    # fixtures -------------------------------------------------------
 
-    def test_args_on_valid(self):
-        dim = Mock()
-        dim.elements.return_value = [{'id': 5}, {'id': 4}]
-        subtotal = _Subtotal(self.valid_subtotal, dim)
-        expected = [5, 4]
-        actual = subtotal.args
-        self.assertEqual(actual, expected)
+    @pytest.fixture(params=[
+        ([], (), ()),
+        (['not-a-dict', None], (), ()),
+        ([{'function': 'hyperdrive'}], (), ()),
+        ([{'function': 'subtotal', 'arghhs': []}], (), ()),
+        ([{'function': 'subtotal', 'anchor': 9, 'args': [1, 2]}], (), ()),
+        ([{'function': 'subtotal', 'anchor': 9, 'args': [1, 2], 'name': 'A'}],
+         {3, 4}, ()),
+        ([{'function': 'subtotal', 'anchor': 9, 'args': [1, 2], 'name': 'B'}],
+         {1, 2, 3, 4, 5, 8, -1},
+         ({'function': 'subtotal', 'anchor': 9, 'args': [1, 2], 'name': 'B'},)),
+        ([{'function': 'subtotal', 'anchor': 9, 'args': [1, 2], 'name': 'C'},
+          {'function': 'subtotal', 'anchor': 9, 'args': [3, 4], 'name': 'Z'},
+          {'function': 'subtotal', 'anchor': 9, 'args': [5, 6], 'name': 'D'}],
+         {1, 2, 5, 8, -1},
+         ({'function': 'subtotal', 'anchor': 9, 'args': [1, 2], 'name': 'C'},
+          {'function': 'subtotal', 'anchor': 9, 'args': [5, 6], 'name': 'D'})),
+    ])
+    def iter_valid_fixture(self, request):
+        insertion_dicts, dim_element_ids, expected_value = request.param
+        return insertion_dicts, dim_element_ids, expected_value
 
-    def test_anchor_on_uppercased_bottom(self):
-        dim = Mock()
-        dim.elements.return_value = [{'id': 5}, {'id': 4}]
-        subtotal = _Subtotal(self.valid_subtotal_anchor_bottom, dim)
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _dim_element_ids_prop_(self, request):
+        return property_mock(request, _Subtotals, '_dim_element_ids')
+
+    @pytest.fixture
+    def dimension_(self, request):
+        return instance_mock(request, Dimension)
+
+    @pytest.fixture
+    def _iter_valid_subtotal_dicts_(self, request):
+        return method_mock(request, _Subtotals, '_iter_valid_subtotal_dicts')
+
+    @pytest.fixture
+    def _Subtotal_(self, request):
+        return class_mock(request, 'cr.cube.dimension._Subtotal')
+
+    @pytest.fixture
+    def _subtotals_prop_(self, request):
+        return property_mock(request, _Subtotals, '_subtotals')
+
+
+class Describe_Subtotal(object):
+
+    def it_knows_the_insertion_anchor(
+            self, anchor_fixture, _valid_dim_element_ids_prop_):
+        subtotal_dict, element_ids, expected_value = anchor_fixture
+        _valid_dim_element_ids_prop_.return_value = element_ids
+        subtotal = _Subtotal(subtotal_dict, None)
+
         anchor = subtotal.anchor
-        assert anchor == 'bottom'
+
+        assert anchor == expected_value
+
+    def it_provides_access_to_the_addend_element_ids(
+            self, args_fixture, _valid_dim_element_ids_prop_):
+        subtotal_dict, element_ids, expected_value = args_fixture
+        _valid_dim_element_ids_prop_.return_value = element_ids
+        subtotal = _Subtotal(subtotal_dict, None)
+
+        args = subtotal.args
+
+        assert args == expected_value
+
+    def it_provides_a_dict_suitable_for_labeling(self):
+        subtotal_dict = {
+            'anchor': 42,
+            'args': [7, 8],
+            'function': 'subtotal',
+            'name': 'Paul'
+        }
+        subtotal = _Subtotal(subtotal_dict, None)
+
+        label_dict = subtotal.label_dict
+
+        assert label_dict == {'anchor': 42, 'name': 'Paul'}
+
+    def it_knows_the_dimension_element_ids_to_help(self, dimension_):
+        dimension_.elements.return_value = ({'id': 1}, {}, {'id': 3})
+        subtotal = _Subtotal(None, dimension_)
+
+        ids = subtotal._valid_dim_element_ids
+
+        dimension_.elements.assert_called_once_with(include_missing=False)
+        assert ids == {1, 3}
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture(params=[
+        ({'anchor': 1}, {1, 2, 3}, 1),
+        ({'anchor': 4}, {1, 2, 3}, 'bottom'),
+        ({'anchor': 'Top'}, {1, 2, 3}, 'top'),
+    ])
+    def anchor_fixture(self, request):
+        subtotal_dict, element_ids, expected_value = request.param
+        return subtotal_dict, element_ids, expected_value
+
+    @pytest.fixture(params=[
+        ({}, {}, ()),
+        ({'args': [1]}, {1}, (1,)),
+        ({'args': [1, 2, 3]}, {1, 2, 3}, (1, 2, 3)),
+        ({'args': [1, 2, 3]}, {1, 3}, (1, 3)),
+        ({'args': [3, 2]}, {1, 2, 3}, (3, 2)),
+        ({'args': []}, {1, 2, 3}, ()),
+        ({'args': [1, 2, 3]}, {}, ()),
+    ])
+    def args_fixture(self, request):
+        subtotal_dict, element_ids, expected_value = request.param
+        return subtotal_dict, element_ids, expected_value
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def dimension_(self, request):
+        return instance_mock(request, Dimension)
+
+    @pytest.fixture
+    def _valid_dim_element_ids_prop_(self, request):
+        return property_mock(request, _Subtotal, '_valid_dim_element_ids')
