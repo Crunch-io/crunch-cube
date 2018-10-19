@@ -5,3 +5,4 @@ repos:
     -   id: flake8
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
+    -   id: autopep8-wrapper
