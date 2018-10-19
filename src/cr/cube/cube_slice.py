@@ -58,6 +58,16 @@ class CubeSlice(object):
         # ---otherwise, the property value is the same for cube or slice---
         return cube_attr
 
+    def _apply_pruning_mask(self, res, prune):
+        if not prune:
+            return res
+
+        array = self.as_array(prune=True)
+        if not isinstance(array, np.ma.core.MaskedArray):
+            return res
+
+        return np.ma.masked_array(res, mask=array.mask)
+
     def _prepare_index_baseline(self, axis):
         # First get the margin of the opposite direction of the index axis.
         # We need this in order to end up with the right shape of the
@@ -177,7 +187,7 @@ class CubeSlice(object):
         """
         return 'multiple_response' in self.dim_types
 
-    def index_table(self, axis=None, baseline=None):
+    def index_table(self, axis=None, baseline=None, prune=False):
         """Return index percentages for a given axis and baseline.
 
         The index values represent the difference of the percentages to the
@@ -195,7 +205,9 @@ class CubeSlice(object):
         if axis == 0 and len(baseline.shape) <= 1:
             baseline = baseline[:, None]
 
-        return proportions / baseline * 100
+        indexes = proportions / baseline * 100
+
+        return self._apply_pruning_mask(indexes, prune)
 
     @lazyproperty
     def is_double_mr(self):

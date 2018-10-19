@@ -96,6 +96,9 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.7.3
+- Implement pruning for index tables
+
 #### 1.7.2
 - Implement correct index table functionality
 - Deprecate old index functionality
@@ -104,10 +107,5 @@ The detailed description can be found
 - Fix peculiar case of CA x CAT (single elem) index error
 - Support with unit tests
 - Create base for fixing exporter issues
-
-#### 1.7.0 Normalization, PEP8 and bugfix
-- Refactored to remove a couple modules
-- Fixed pesky numpy warnings
-- Replaced vulnerable lazyproperty implementation
 
 For a complete list of changes see [history](https://github.com/Crunch-io/crunch-cube/blob/master/HISTORY.md).
