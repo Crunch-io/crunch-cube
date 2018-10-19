@@ -38,17 +38,22 @@ The `cr.cube` package can be installed by using the `pip install`:
 ### For developers
 
 For development mode, `cr.cube` needs to be installed from the local checkout
-of the `crunch-cube` repository. Navigate to the top-level folder of the repo,
-on the local file system, and run:
+of the `crunch-cube` repository. It is strongly advised to use `virtualenv`.
+Assuming you've created and activated a virtual environment `venv`, navigate
+to the top-level folder of the repo, on the local file system, and run:
+
+    pip install -e .
+
+or
 
     python setup.py develop
 
 ### Running tests
 
 To setup and run tests, you will need to install `cr.cube` as well as testing
-dependencies. To do this, simply run:
+dependencies. To do this, from the root directory, simply run:
 
-    pip install cr.cube[testing]
+    pip install -e .[testing]
 
 And then tests can be run using `py.test` in the root directory:
 
