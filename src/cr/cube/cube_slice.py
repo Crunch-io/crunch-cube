@@ -61,9 +61,11 @@ class CubeSlice(object):
 
     def __repr__(self):
         text = '\n\n' + str(type(self))
-        text += '\nName: {}'.format(self.table_name if self.table_name else self.name)
+        text += '\nName: {}'.format(
+            self.table_name if self.table_name else self.name)
         text += '\nType: {}'.format(' x '.join(self.dim_types))
-        text += '\nDimensions: {}'.format(' x '.join([dim.name for dim in self.dimensions]))
+        text += '\nDimensions: {}'.format(
+            ' x '.join([dim.name for dim in self.dimensions]))
         labels = self.labels()
         headers = labels[1] if len(labels) > 1 else ['N']
         tbl = self.as_array()
