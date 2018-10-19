@@ -1,11 +1,11 @@
 # crunch-cube
 
-Open Source Python implementation of the API for working with Crunch Cubes
+Open Source Python implementation of the API for working with CrunchCubes
 
 ## Introduction
 
-This package contains the implementation of the Crunch Cube API. It is used to
-extract useful information from Crunch Cube responses (we'll refer to them as
+This package contains the implementation of the CrunchCube API. It is used to
+extract useful information from CrunchCube responses (we'll refer to them as
 _cubes_ in the subsequent text). _Cubes_ are obtained from the *Crunch.io*
 platform, as JSON responses to the specific _queries_ created by the user.
 These queries specify which data the user wants to extract from the Crunch.io
@@ -30,18 +30,34 @@ detail, uner its own section, under the API subsection of this document.
 
 ## Installation
 
-The Crunch Cube package can be installed by using the `pip install`:
+The `cr.cube` package can be installed by using the `pip install`:
 
     pip install cr.cube
 
 
 ### For developers
 
-For development mode, Crunch Cube needs to be installed from the local checkout
-of the `crunch-cube` repository. Navigate to the top-level folder of the repo,
-on the local file system, and run:
+For development mode, `cr.cube` needs to be installed from the local checkout
+of the `crunch-cube` repository. It is strongly advised to use `virtualenv`.
+Assuming you've created and activated a virtual environment `venv`, navigate
+to the top-level folder of the repo, on the local file system, and run:
+
+    pip install -e .
+
+or
 
     python setup.py develop
+
+### Running tests
+
+To setup and run tests, you will need to install `cr.cube` as well as testing
+dependencies. To do this, from the root directory, simply run:
+
+    pip install -e .[testing]
+
+And then tests can be run using `py.test` in the root directory:
+
+    pytest
 
 ## Usage
 
