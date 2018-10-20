@@ -1,400 +1,432 @@
+# encoding: utf-8
+
+"""Unit test suite for cr.cube.dimension module."""
+
+from __future__ import (
+    absolute_import, division, print_function, unicode_literals
+)
+
 import numpy as np
 import pytest
 
-from mock import Mock
-from mock import patch
-from unittest import TestCase
-from cr.cube.dimension import Dimension, _Subtotal, _Subtotals
+from cr.cube.dimension import (
+    _AllElements, _BaseElement, _BaseElements, _Category, Dimension,
+    _Element, _Subtotal, _Subtotals, _ValidElements
+)
 
-from .unitutil import (
+from ..unitutil import (
     call, class_mock, instance_mock, method_mock, property_mock
 )
 
 
-class TestDimension(TestCase):
+class DescribeDimension(object):
 
-    insertions_with_bad_data = [
-        {
-            u'anchor': 101,
-            u'name': u'This is respondent ideology',
-        },
-        {
-            u'anchor': 2,
-            u'args': [1, 2],
-            u'function': u'subtotal',
-            u'name': u'Liberal net',
-        },
-        {
-            u'anchor': 5,
-            u'args': [5, 4],
-            u'function': u'subtotal',
-            u'name': u'Conservative net',
-        },
-        {
-            u'anchor': 'fake anchor',
-            u'args': ['fake_arg_1', 'fake_arg_2'],
-            u'function': u'fake_fcn_name_not_subtotal',
-            u'name': u'Fake Name',
-        }
-    ]
+    def it_provides_subtotal_indices(
+            self, hs_indices_fixture, is_selections_prop_, subtotals_prop_):
+        is_selections, subtotals_, expected_value = hs_indices_fixture
+        is_selections_prop_.return_value = is_selections
+        subtotals_prop_.return_value = subtotals_
+        dimension = Dimension(None, None)
 
-    def test_get_type_categorical_array(self):
-        dim = {
-            'references': {'subreferences': []},
-            'type': {'class': 'enum'},
-        }
-        expected = 'categorical_array'
-        actual = Dimension._get_type(dim)
-        self.assertEqual(actual, expected)
+        hs_indices = dimension.hs_indices
 
-    def test_get_type_categorical(self):
-        dim = {
-            'type': {'class': 'categorical'},
-        }
-        expected = 'categorical'
-        actual = Dimension._get_type(dim)
-        self.assertEqual(actual, expected)
+        assert hs_indices == expected_value
 
-    def test_get_type_numeric(self):
-        dim = {
-            'type': {'subtype': {'class': 'numeric'}},
-        }
-        expected = 'numeric'
-        actual = Dimension._get_type(dim)
-        self.assertEqual(actual, expected)
+    def it_knows_the_numeric_values_of_its_elements(
+            self, request, _valid_elements_prop_):
+        _valid_elements_prop_.return_value = tuple(
+            instance_mock(request, _BaseElement, numeric_value=numeric_value)
+            for numeric_value in (1, 2.2, np.nan)
+        )
+        dimension = Dimension(None, None)
 
-    def test_get_type_datetime(self):
-        dim = {
-            'type': {'subtype': {'class': 'datetime'}},
-            'class': 'enum',
-        }
-        expected = 'datetime'
-        actual = Dimension._get_type(dim)
-        self.assertEqual(actual, expected)
+        numeric_values = dimension.numeric_values
 
-    def test_get_type_text(self):
-        dim = {
-            'type': {'subtype': {'class': 'text'}},
-        }
-        expected = 'text'
-        actual = Dimension._get_type(dim)
-        self.assertEqual(actual, expected)
+        assert numeric_values == (1, 2.2, np.nan)
 
-    def test_labels_for_categoricals(self):
-        name_cat_1 = Mock()
-        name_cat_2 = Mock()
-        name_cat_3 = Mock()
-        dim = {
-            'type': {
-                'class': 'categorical',
-                'categories': [
-                    {
-                        'name': name_cat_1,
-                        'missing': False,
-                    },
-                    {
-                        'name': name_cat_2,
-                        'missing': False,
-                    },
-                    {
-                        'name': name_cat_3,
-                        'missing': True,
-                    },
-                ]
-            }
-        }
-        # Get only non-missing
-        expected = [name_cat_1, name_cat_2]
-        actual = Dimension(dim).labels()
-        self.assertEqual(actual, expected)
-        # Get all
-        expected = [name_cat_1, name_cat_2, name_cat_3]
-        actual = Dimension(dim).labels(include_missing=True)
-        self.assertEqual(actual, expected)
+    def it_provides_access_to_its_subtotals(
+            self, subtotals_fixture, _Subtotals_, subtotals_,
+            _valid_elements_prop_, valid_elements_):
+        dimension_dict, insertion_dicts = subtotals_fixture
+        _valid_elements_prop_.return_value = valid_elements_
+        _Subtotals_.return_value = subtotals_
+        dimension = Dimension(dimension_dict, None)
 
-    def test_labels_for_numericals(self):
-        val_num_1 = 'fake val 1'
-        val_num_2 = 'fake val 2'
-        val_num_3 = {}
-        dim = {
-            'type': {
-                "subtype": {
-                    "class": "numeric"
-                },
-                "elements": [
-                    {
-                        "id": 0,
-                        "value": val_num_1,
-                        "missing": False,
-                    },
-                    {
-                        "id": 1,
-                        "value": val_num_2,
-                        "missing": False,
-                    },
-                    {
-                        "id": 2,
-                        "value": val_num_3,
-                        "missing": True,
-                    }
-                ],
-            }
-        }
-        # Get only non-missing
-        expected = [val_num_1, val_num_2]
-        actual = Dimension(dim).labels()
-        self.assertEqual(actual, expected)
-        # Get all
-        expected = [val_num_1, val_num_2, None]
-        actual = Dimension(dim).labels(include_missing=True)
-        self.assertEqual(actual, expected)
+        subtotals = dimension.subtotals
 
-    def test_is_not_multiple_response(self):
-        expected = False
-        actual = Dimension._is_multiple_response({'type': {'fake': Mock()}})
-        self.assertEqual(actual, expected)
+        _Subtotals_.assert_called_once_with(insertion_dicts, valid_elements_)
+        assert subtotals is subtotals_
 
-    def test_get_name_from_element_name(self):
-        name = Mock()
-        expected = name
-        actual = Dimension._get_name({'name': name})
-        self.assertEqual(actual, expected)
+    # fixtures -------------------------------------------------------
 
-    def test_get_name_from_element_list_vals(self):
-        list_vals = [1.2, 3.4]
-        expected = '-'.join(str(el) for el in list_vals)
-        actual = Dimension._get_name({'value': list_vals})
-        self.assertEqual(actual, expected)
-
-    def test_get_name_from_element_numeric_value(self):
-        num_val = 1.2
-        expected = str(num_val)
-        actual = Dimension._get_name({'value': num_val})
-        self.assertEqual(actual, expected)
-
-    def test_get_name_none(self):
-        expected = None
-        actual = Dimension._get_name({})
-        self.assertEqual(actual, expected)
-
-    def test_dimension_description(self):
-        desc = Mock()
-        dim = Dimension({'type': Mock(), 'references': {'description': desc}})
-        expected = desc
-        actual = dim.description
-        self.assertEqual(actual, expected)
-
-    @patch('cr.cube.dimension.Dimension._elements', [
-        {'id': 1}, {'id': 2}, {'id': 5}, {'id': 4}
+    @pytest.fixture(params=[
+        (True, ()),
+        (False, ((0, (1, 2)), (3, (4, 5)))),
     ])
-    @patch('cr.cube.dimension._Subtotal._valid_dim_element_ids', (1, 2, 4, 5))
-    @patch('cr.cube.dimension.Dimension._get_type')
-    def test_hs_names_with_bad_data(self, mock_type):
-        '''Test H&S names with bad input data.
+    def hs_indices_fixture(self, request):
+        is_selections, expected_value = request.param
+        subtotals_ = (
+            instance_mock(
+                request, _Subtotal, anchor_idx=idx * 3,
+                addend_idxs=(idx + 1 + (2 * idx), idx + 2 + (2 * idx))
+            ) for idx in range(2)
+        )
+        return is_selections, subtotals_, expected_value
 
-        This test ensures that H&S functionality doesn't break if it encounters
-        bad transformations data, as is possible with some of the leftovers in
-        the variables.
-        '''
-        mock_type.return_value = None
-        insertions_with_bad_data = [
-            {
-                u'anchor': 0,
-                u'name': u'This is respondent ideology',
-            },
-            {
-                u'anchor': 2,
-                u'args': [1, 2],
-                u'function': u'subtotal',
-                u'name': u'Liberal net',
-            },
-            {
-                u'anchor': 5,
-                u'args': [5, 4],
-                u'function': u'subtotal',
-                u'name': u'Conservative net',
-            }
+    @pytest.fixture(params=[
+        ({}, []),
+        ({'references': {}}, []),
+        ({'references': {'view': {}}}, []),
+        ({'references': {'view': {'transform': {}}}}, []),
+        ({'references': {'view': {'transform': {'insertions': []}}}}, []),
+        ({'references': {'view': {'transform': {'insertions': [
+            {'insertion': 'dict-1'},
+            {'insertion': 'dict-2'}]}}}},
+         [
+            {'insertion': 'dict-1'},
+            {'insertion': 'dict-2'}])
+    ])
+    def subtotals_fixture(self, request):
+        dimension_dict, insertion_dicts = request.param
+        dimension_dict['type'] = {
+            'class': 'categorical',
+            'categories': [],
+        }
+        return dimension_dict, insertion_dicts
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _get_type_(self, request):
+        return method_mock(request, Dimension, '_get_type', autospec=False)
+
+    @pytest.fixture
+    def is_selections_prop_(self, request):
+        return property_mock(request, Dimension, 'is_selections')
+
+    @pytest.fixture
+    def _Subtotals_(self, request):
+        return class_mock(request, 'cr.cube.dimension._Subtotals')
+
+    @pytest.fixture
+    def subtotals_(self, request):
+        return instance_mock(request, _Subtotals)
+
+    @pytest.fixture
+    def subtotals_prop_(self, request):
+        return property_mock(request, Dimension, 'subtotals')
+
+    @pytest.fixture
+    def valid_elements_(self, request):
+        return instance_mock(request, _ValidElements)
+
+    @pytest.fixture
+    def _valid_elements_prop_(self, request):
+        return property_mock(request, Dimension, '_valid_elements')
+
+
+class Describe_BaseElements(object):
+
+    def it_has_sequence_behaviors(self, request, _elements_prop_):
+        _elements_prop_.return_value = (1, 2, 3)
+        elements = _BaseElements(None)
+
+        assert elements[1] == 2
+        assert elements[1:3] == (2, 3)
+        assert len(elements) == 3
+        assert list(n for n in elements) == [1, 2, 3]
+
+    def it_knows_the_element_ids(self, request, _elements_prop_):
+        _elements_prop_.return_value = tuple(
+            instance_mock(request, _BaseElement, element_id=n)
+            for n in (1, 2, 5)
+        )
+        elements = _BaseElements(None)
+
+        element_ids = elements.element_ids
+
+        assert element_ids == (1, 2, 5)
+
+    def it_knows_the_element_indices(self, request, _elements_prop_):
+        _elements_prop_.return_value = tuple(
+            instance_mock(request, _BaseElement, index=index)
+            for index in (1, 3, 4)
+        )
+        elements = _BaseElements(None)
+
+        element_idxs = elements.element_idxs
+
+        assert element_idxs == (1, 3, 4)
+
+    def it_can_find_an_element_by_id(self, request, _elements_by_id_prop_):
+        elements_ = tuple(
+            instance_mock(request, _BaseElement, element_id=element_id)
+            for element_id in (3, 7, 11)
+        )
+        _elements_by_id_prop_.return_value = {
+            element_.element_id: element_ for element_ in elements_
+        }
+        elements = _BaseElements(None)
+
+        element = elements.get_by_id(7)
+
+        assert element is elements_[1]
+
+    def it_provides_element_factory_inputs_to_help(self, makings_fixture):
+        type_dict, expected_element_class = makings_fixture[:2]
+        expected_element_dicts = makings_fixture[2]
+        elements = _BaseElements(type_dict)
+
+        ElementCls, element_dicts = elements._element_makings
+
+        assert ElementCls == expected_element_class
+        assert element_dicts == expected_element_dicts
+
+    def it_maintains_a_dict_of_elements_by_id_to_help(
+            self, request, _elements_prop_):
+        elements_ = tuple(
+            instance_mock(request, _BaseElement, element_id=element_id)
+            for element_id in (4, 6, 7)
+        )
+        _elements_prop_.return_value = elements_
+        elements = _BaseElements(None)
+
+        elements_by_id = elements._elements_by_id
+
+        assert elements_by_id == {
+            4: elements_[0],
+            6: elements_[1],
+            7: elements_[2],
+        }
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture(params=[
+        ({'class': 'categorical', 'categories': ['cat', 'dicts']},
+         _Category, ['cat', 'dicts']),
+        ({'class': 'enum', 'elements': ['element', 'dicts']},
+         _Element, ['element', 'dicts']),
+    ])
+    def makings_fixture(self, request):
+        type_dict, expected_element_cls, expected_element_dicts = request.param
+        return type_dict, expected_element_cls, expected_element_dicts
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _elements_by_id_prop_(self, request):
+        return property_mock(request, _BaseElements, '_elements_by_id')
+
+    @pytest.fixture
+    def _elements_prop_(self, request):
+        return property_mock(request, _BaseElements, '_elements')
+
+
+class Describe_AllElements(object):
+
+    def it_provides_access_to_the_ValidElements_object(
+            self, request, _elements_prop_, _ValidElements_, valid_elements_):
+        elements_ = tuple(
+            instance_mock(request, _BaseElement, name='el%s' % idx)
+            for idx in range(3)
+        )
+        _elements_prop_.return_value = elements_
+        _ValidElements_.return_value = valid_elements_
+        all_elements = _AllElements(None)
+
+        valid_elements = all_elements.valid_elements
+
+        _ValidElements_.assert_called_once_with(elements_)
+        assert valid_elements is valid_elements_
+
+    def it_creates_its_Element_objects_in_its_local_factory(
+            self, request, _element_makings_prop_, _BaseElement_):
+        element_dicts_ = (
+            {'element': 'dict-A'},
+            {'element': 'dict-B'},
+            {'element': 'dict-C'},
+        )
+        elements_ = tuple(
+            instance_mock(request, _BaseElement, name='element-%s' % idx)
+            for idx in range(3)
+        )
+        _element_makings_prop_.return_value = _BaseElement_, element_dicts_
+        _BaseElement_.side_effect = iter(elements_)
+        all_elements = _AllElements(None)
+
+        elements = all_elements._elements
+
+        assert _BaseElement_.call_args_list == [
+            call({'element': 'dict-A'}, 0),
+            call({'element': 'dict-B'}, 1),
+            call({'element': 'dict-C'}, 2),
         ]
-        transform_data = {
-            'references': {
-                'view': {
-                    'transform': {'insertions': insertions_with_bad_data}
-                }
-            }
-        }
-        dim = Dimension(transform_data)
-        actual = dim.subtotals
-        actual_anchors = [st.anchor for st in actual]
-        self.assertEqual(actual_anchors, [2, 5])
+        assert elements == (elements_[0], elements_[1], elements_[2])
 
-    @patch('cr.cube.dimension.Dimension._elements', [
-        {'id': 1}, {'id': 2}, {'id': 5}, {'id': 4}
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _BaseElement_(self, request):
+        return class_mock(request, 'cr.cube.dimension._BaseElement')
+
+    @pytest.fixture
+    def _element_makings_prop_(self, request):
+        return property_mock(request, _AllElements, '_element_makings')
+
+    @pytest.fixture
+    def _elements_prop_(self, request):
+        return property_mock(request, _AllElements, '_elements')
+
+    @pytest.fixture
+    def _ValidElements_(self, request):
+        return class_mock(request, 'cr.cube.dimension._ValidElements')
+
+    @pytest.fixture
+    def valid_elements_(self, request):
+        return instance_mock(request, _ValidElements)
+
+
+class Describe_ValidElements(object):
+
+    def it_gets_its_Element_objects_from_an_AllElements_object(
+            self, request, all_elements_):
+        elements_ = tuple(
+            instance_mock(
+                request, _BaseElement,
+                name='element-%s' % idx,
+                missing=missing
+            )
+            for idx, missing in enumerate([False, True, False])
+        )
+        all_elements_.__iter__.return_value = iter(elements_)
+        valid_elements = _ValidElements(all_elements_)
+
+        elements = valid_elements._elements
+
+        assert elements == (elements_[0], elements_[2])
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def all_elements_(self, request):
+        return instance_mock(request, _AllElements)
+
+
+class Describe_BaseElement(object):
+
+    def it_knows_its_element_id(self):
+        element_dict = {'id': 42}
+        element = _BaseElement(element_dict, None)
+
+        element_id = element.element_id
+
+        assert element_id == 42
+
+    def it_knows_its_position_among_all_the_dimension_elements(self):
+        element = _BaseElement(None, 17)
+        index = element.index
+        assert index == 17
+
+    def it_knows_whether_its_missing_or_valid(self, missing_fixture):
+        element_dict, expected_value = missing_fixture
+        element = _BaseElement(element_dict, None)
+
+        missing = element.missing
+
+        # ---only True or False, no Truthy or Falsy (so use `is` not `==`)---
+        assert missing is expected_value
+
+    def it_knows_its_numeric_value(self, numeric_value_fixture):
+        element_dict, expected_value = numeric_value_fixture
+        element = _BaseElement(element_dict, None)
+
+        numeric_value = element.numeric_value
+
+        # ---np.nan != np.nan, but np.nan in [np.nan] works---
+        assert numeric_value in [expected_value]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture(params=[
+        ({}, False),
+        ({'missing': None}, False),
+        ({'missing': False}, False),
+        ({'missing': True}, True),
+        # ---not expected values, but just in case---
+        ({'missing': 0}, False),
+        ({'missing': 1}, True),
     ])
-    @patch('cr.cube.dimension.Dimension._get_type')
-    def test_hs_indices_with_bad_data(self, mock_type):
-        '''Test H&S indices with bad input data.
+    def missing_fixture(self, request):
+        element_dict, expected_value = request.param
+        return element_dict, expected_value
 
-        This test ensures that H&S functionality doesn't break if it encounters
-        bad transformations data, as is possible with some of the leftovers in
-        the variables.
-        '''
-        mock_type.return_value = None
-        dim_data = {
-            'references': {
-                'view': {
-                    'transform': {'insertions': self.insertions_with_bad_data}
-                }
-            }
-        }
-        dim = Dimension(dim_data)
-        expected = [
-            {'anchor_ind': 1, 'inds': [0, 1]},
-            {'anchor_ind': 2, 'inds': [2, 3]}
-        ]
-        actual = dim.hs_indices
-        self.assertEqual(actual, expected)
-
-    @patch('cr.cube.dimension.Dimension._elements', [
-        {'id': 1}, {'id': 2}, {'id': 5}, {'id': 4}
+    @pytest.fixture(params=[
+        ({}, np.nan),
+        ({'numeric_value': None}, np.nan),
+        ({'numeric_value': 0}, 0),
+        ({'numeric_value': 7}, 7),
+        ({'numeric_value': -3.2}, -3.2),
+        # ---not expected values, just to document the behavior that
+        # ---no attempt is made to convert values to numeric
+        ({'numeric_value': '666'}, '666'),
+        ({'numeric_value': {}}, {}),
+        ({'numeric_value': {'?': 8}}, {'?': 8}),
     ])
-    @patch('cr.cube.dimension.Dimension._get_type')
-    def test_hs_indices_with_empty_indices(self, mock_type):
+    def numeric_value_fixture(self, request):
+        element_dict, expected_value = request.param
+        return element_dict, expected_value
 
-        mock_type.return_value = None
-        dim_data = {
-            'references': {
-                'view': {
-                    'transform': {'insertions': [{
-                        "function": "subtotal",
-                        "args": [
-                            7,
-                            8,
-                            9,
-                            10,
-                            11
-                        ],
-                        "anchor": "bottom",
-                        "name": "test subtotal"
-                    }]}
-                }
-            }
-        }
-        dim = Dimension(dim_data)
-        expected = []
-        actual = dim.hs_indices
-        self.assertEqual(actual, expected)
 
-    # pylint: disable=protected-access, missing-docstring
-    @patch('cr.cube.dimension.Dimension.elements')
-    @patch('cr.cube.dimension.Dimension._get_type')
-    def test_subtotals(self, mock_type, mock_elements):
-        mock_type.return_value = None
-        mock_elements.return_value = [{'id': 1}, {'id': 5}]
-        dim_data = {
-            'references': {
-                'view': {
-                    'transform': {'insertions': self.insertions_with_bad_data}
-                }
-            }
-        }
-        dim = Dimension(dim_data)
-        actual = dim.subtotals
-        assert len(actual) == 2
-        assert isinstance(actual[0], _Subtotal)
-        assert actual[0]._subtotal_dict == self.insertions_with_bad_data[1]
-        assert isinstance(actual[1], _Subtotal)
-        assert actual[1]._subtotal_dict == self.insertions_with_bad_data[2]
-        assert actual[0].anchor == 'bottom'
-        assert actual[1].anchor == 5
+class Describe_Category(object):
 
-    @patch('cr.cube.dimension.Dimension._elements', [
-        {'id': 111}, {'id': 222}, {'id': 333}, {'id': 444}, {'id': 555}
+    def it_knows_its_name(self, name_fixture):
+        category_dict, expected_value = name_fixture
+        category = _Category(category_dict, None)
+
+        name = category.name
+
+        assert name == expected_value
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture(params=[
+        ({}, ''),
+        ({'name': ''}, ''),
+        ({'name': None}, ''),
+        ({'name': 'Bob'}, 'Bob'),
+        ({'name': 'Hinzufägen'}, 'Hinzufägen'),
     ])
-    @patch('cr.cube.dimension.Dimension._get_type')
-    def test_inserted_hs_indices_and_order(self, mock_type):
-        mock_type.return_value = None
-        dim_data = {
-            'references': {
-                'view': {
-                    'transform': {
-                        'insertions': [
-                            {
-                                u'anchor': u'bottom',
-                                u'args': [111],
-                                u'function': u'subtotal',
-                                u'name': u'bottoms up one',
-                            },
-                            {
-                                u'anchor': u'bottom',
-                                u'args': [222],
-                                u'function': u'subtotal',
-                                u'name': u'bottoms up two',
-                            },
-                            {
-                                u'anchor': u'bottom',
-                                u'args': [333],
-                                u'function': u'subtotal',
-                                u'name': u'bottoms up three',
-                            },
-                            {
-                                u'anchor': u'top',
-                                u'args': [444],
-                                u'function': u'subtotal',
-                                u'name': u'on top one',
-                            },
-                            {
-                                u'anchor': u'top',
-                                u'args': [555],
-                                u'function': u'subtotal',
-                                u'name': u'on top two',
-                            },
-                            {
-                                u'anchor': 333,
-                                u'args': [555],
-                                u'function': u'subtotal',
-                                u'name': u'in the middle one',
-                            },
-                            {
-                                u'anchor': 333,
-                                u'args': [555],
-                                u'function': u'subtotal',
-                                u'name': u'in the middle two',
-                            }
-                        ]
-                    }
-                }
-            }
-        }
-        dim = Dimension(dim_data)
-        self.assertEqual(dim.inserted_hs_indices, [0, 1, 5, 6, 9, 10, 11])
-        labels = [
-            u'on top one', u'on top two', None, None, None,
-            u'in the middle one', u'in the middle two', None, None,
-            u'bottoms up one', u'bottoms up two', u'bottoms up three'
-        ]
-        self.assertEqual(labels, dim.labels(include_transforms=True))
+    def name_fixture(self, request):
+        category_dict, expected_value = request.param
+        return category_dict, expected_value
 
-    @patch('cr.cube.dimension.Dimension._elements', [
-        {'numeric_value': 1},
-        {'numeric_value': 2, 'missing': False},
-        {'numeric_value': 3, 'missing': True},
-        {'numeric_value': None},
+
+class Describe_Element(object):
+
+    def it_knows_its_name(self, name_fixture):
+        element_dict, expected_value = name_fixture
+        element = _Element(element_dict, None)
+
+        name = element.name
+
+        assert name == expected_value
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture(params=[
+        ({}, ''),
+        ({'value': ['A', 'F']}, 'A-F'),
+        ({'value': [1.2, 3.4]}, '1.2-3.4'),
+        ({'value': 42}, '42'),
+        ({'value': 4.2}, '4.2'),
+        ({'value': 'Bill'}, 'Bill'),
+        ({'value': 'Fähig'}, 'Fähig'),
+        ({'value': {'references': {}}}, ''),
+        ({'value': {'references': {'name': 'Tom'}}}, 'Tom'),
     ])
-    @patch('cr.cube.dimension.Dimension._get_type')
-    def test_values(self, mock_type):
-        dim = Dimension({})
-        mock_type.return_value = None
-        expected = [1, 2, np.nan]
-        actual = dim.values
-        self.assertEqual(actual, expected)
-
-    @patch('cr.cube.dimension.Dimension.is_selections', True)
-    @patch('cr.cube.dimension.Dimension._get_type')
-    def test_hs_indices_for_mr(self, mock_type):
-        dim = Dimension({})
-        expected = []
-        actual = dim.hs_indices
-        assert actual == expected
+    def name_fixture(self, request):
+        element_dict, expected_value = request.param
+        return element_dict, expected_value
 
 
 class Describe_Subtotals(object):
@@ -408,19 +440,19 @@ class Describe_Subtotals(object):
         assert len(subtotals) == 3
         assert list(n for n in subtotals) == [1, 2, 3]
 
-    def it_knows_the_set_of_dimension_element_ids_to_help(self, dimension_):
-        dimension_.elements.return_value = ({'id': 1}, {}, {'id': 3})
-        subtotals = _Subtotals(None, dimension_)
+    def it_provides_the_element_ids_as_a_set_to_help(
+            self, request, valid_elements_):
+        valid_elements_.element_ids = tuple(range(3))
+        subtotals = _Subtotals(None, valid_elements_)
 
-        dim_element_ids = subtotals._dim_element_ids
+        element_ids = subtotals._element_ids
 
-        dimension_.elements.assert_called_once_with()
-        assert dim_element_ids == {1, None, 3}
+        assert element_ids == {0, 1, 2}
 
     def it_iterates_the_valid_subtotal_insertion_dicts_to_help(
-            self, iter_valid_fixture, _dim_element_ids_prop_):
-        insertion_dicts, dim_element_ids, expected_value = iter_valid_fixture
-        _dim_element_ids_prop_.return_value = dim_element_ids
+            self, iter_valid_fixture, _element_ids_prop_):
+        insertion_dicts, element_ids, expected_value = iter_valid_fixture
+        _element_ids_prop_.return_value = element_ids
         subtotals = _Subtotals(insertion_dicts, None)
 
         subtotal_dicts = tuple(subtotals._iter_valid_subtotal_dicts())
@@ -428,7 +460,7 @@ class Describe_Subtotals(object):
         assert subtotal_dicts == expected_value
 
     def it_constructs_its_subtotal_objects_to_help(
-            self, request, _iter_valid_subtotal_dicts_, dimension_,
+            self, request, _iter_valid_subtotal_dicts_, valid_elements_,
             _Subtotal_):
         subtotal_dicts_ = tuple({'subtotal-dict': idx} for idx in range(3))
         subtotal_objs_ = tuple(
@@ -437,12 +469,13 @@ class Describe_Subtotals(object):
         )
         _iter_valid_subtotal_dicts_.return_value = iter(subtotal_dicts_)
         _Subtotal_.side_effect = iter(subtotal_objs_)
-        subtotals = _Subtotals(None, dimension_)
+        subtotals = _Subtotals(None, valid_elements_)
 
         subtotal_objs = subtotals._subtotals
 
         assert _Subtotal_.call_args_list == [
-            call(subtot_dict, dimension_) for subtot_dict in subtotal_dicts_
+            call(subtot_dict_, valid_elements_)
+            for subtot_dict_ in subtotal_dicts_
         ]
         assert subtotal_objs == subtotal_objs_
 
@@ -467,18 +500,14 @@ class Describe_Subtotals(object):
           {'function': 'subtotal', 'anchor': 9, 'args': [5, 6], 'name': 'D'})),
     ])
     def iter_valid_fixture(self, request):
-        insertion_dicts, dim_element_ids, expected_value = request.param
-        return insertion_dicts, dim_element_ids, expected_value
+        insertion_dicts, element_ids, expected_value = request.param
+        return insertion_dicts, element_ids, expected_value
 
     # fixture components ---------------------------------------------
 
     @pytest.fixture
-    def _dim_element_ids_prop_(self, request):
-        return property_mock(request, _Subtotals, '_dim_element_ids')
-
-    @pytest.fixture
-    def dimension_(self, request):
-        return instance_mock(request, Dimension)
+    def _element_ids_prop_(self, request):
+        return property_mock(request, _Subtotals, '_element_ids')
 
     @pytest.fixture
     def _iter_valid_subtotal_dicts_(self, request):
@@ -492,52 +521,94 @@ class Describe_Subtotals(object):
     def _subtotals_prop_(self, request):
         return property_mock(request, _Subtotals, '_subtotals')
 
+    @pytest.fixture
+    def valid_elements_(self, request):
+        return instance_mock(request, _ValidElements)
+
 
 class Describe_Subtotal(object):
 
-    def it_knows_the_insertion_anchor(
-            self, anchor_fixture, _valid_dim_element_ids_prop_):
+    def it_knows_the_insertion_anchor(self, anchor_fixture, valid_elements_):
         subtotal_dict, element_ids, expected_value = anchor_fixture
-        _valid_dim_element_ids_prop_.return_value = element_ids
-        subtotal = _Subtotal(subtotal_dict, None)
+        valid_elements_.element_ids = element_ids
+        subtotal = _Subtotal(subtotal_dict, valid_elements_)
 
         anchor = subtotal.anchor
 
         assert anchor == expected_value
 
+    def it_knows_the_index_of_the_anchor_element(
+            self, anchor_idx_fixture, anchor_prop_, valid_elements_,
+            element_):
+        anchor, index, calls, expected_value = anchor_idx_fixture
+        anchor_prop_.return_value = anchor
+        valid_elements_.get_by_id.return_value = element_
+        element_.index = index
+        subtotal = _Subtotal(None, valid_elements_)
+
+        anchor_idx = subtotal.anchor_idx
+
+        assert valid_elements_.get_by_id.call_args_list == calls
+        assert anchor_idx == expected_value
+
     def it_provides_access_to_the_addend_element_ids(
-            self, args_fixture, _valid_dim_element_ids_prop_):
-        subtotal_dict, element_ids, expected_value = args_fixture
-        _valid_dim_element_ids_prop_.return_value = element_ids
-        subtotal = _Subtotal(subtotal_dict, None)
+            self, addend_ids_fixture, valid_elements_):
+        subtotal_dict, element_ids, expected_value = addend_ids_fixture
+        valid_elements_.element_ids = element_ids
+        subtotal = _Subtotal(subtotal_dict, valid_elements_)
 
-        args = subtotal.args
+        addend_ids = subtotal.addend_ids
 
-        assert args == expected_value
+        assert addend_ids == expected_value
 
-    def it_provides_a_dict_suitable_for_labeling(self):
-        subtotal_dict = {
-            'anchor': 42,
-            'args': [7, 8],
-            'function': 'subtotal',
-            'name': 'Paul'
-        }
-        subtotal = _Subtotal(subtotal_dict, None)
+    def it_provides_access_to_the_addend_element_indices(
+            self, request, addend_ids_prop_, valid_elements_):
+        addend_ids_prop_.return_value = (3, 6, 9)
+        valid_elements_.get_by_id.side_effect = iter(
+            instance_mock(request, _BaseElement, index=index)
+            for index in (2, 4, 6)
+        )
+        subtotal = _Subtotal(None, valid_elements_)
+
+        addend_idxs = subtotal.addend_idxs
+
+        assert valid_elements_.get_by_id.call_args_list == [
+            call(3), call(6), call(9)
+        ]
+        assert addend_idxs == (2, 4, 6)
+
+    def it_provides_a_dict_suitable_for_labeling(
+            self, anchor_prop_, name_prop_):
+        anchor_prop_.return_value = 42
+        name_prop_.return_value = 'Paul'
+        subtotal = _Subtotal(None, None)
 
         label_dict = subtotal.label_dict
 
         assert label_dict == {'anchor': 42, 'name': 'Paul'}
 
-    def it_knows_the_dimension_element_ids_to_help(self, dimension_):
-        dimension_.elements.return_value = ({'id': 1}, {}, {'id': 3})
-        subtotal = _Subtotal(None, dimension_)
+    def it_knows_the_subtotal_label(self, name_fixture):
+        subtotal_dict, expected_value = name_fixture
+        subtotal = _Subtotal(subtotal_dict, None)
 
-        ids = subtotal._valid_dim_element_ids
+        name = subtotal.name
 
-        dimension_.elements.assert_called_once_with(include_missing=False)
-        assert ids == {1, 3}
+        assert name == expected_value
 
     # fixtures -------------------------------------------------------
+
+    @pytest.fixture(params=[
+        ({}, {}, ()),
+        ({'args': [1]}, {1}, (1,)),
+        ({'args': [1, 2, 3]}, {1, 2, 3}, (1, 2, 3)),
+        ({'args': [1, 2, 3]}, {1, 3}, (1, 3)),
+        ({'args': [3, 2]}, {1, 2, 3}, (3, 2)),
+        ({'args': []}, {1, 2, 3}, ()),
+        ({'args': [1, 2, 3]}, {}, ()),
+    ])
+    def addend_ids_fixture(self, request):
+        subtotal_dict, element_ids, expected_value = request.param
+        return subtotal_dict, element_ids, expected_value
 
     @pytest.fixture(params=[
         ({'anchor': 1}, {1, 2, 3}, 1),
@@ -549,24 +620,43 @@ class Describe_Subtotal(object):
         return subtotal_dict, element_ids, expected_value
 
     @pytest.fixture(params=[
-        ({}, {}, ()),
-        ({'args': [1]}, {1}, (1,)),
-        ({'args': [1, 2, 3]}, {1, 2, 3}, (1, 2, 3)),
-        ({'args': [1, 2, 3]}, {1, 3}, (1, 3)),
-        ({'args': [3, 2]}, {1, 2, 3}, (3, 2)),
-        ({'args': []}, {1, 2, 3}, ()),
-        ({'args': [1, 2, 3]}, {}, ()),
+        ('top', None, 0, 'top'),
+        ('bottom', None, 0, 'bottom'),
+        (42, 7, 1, 7),
     ])
-    def args_fixture(self, request):
-        subtotal_dict, element_ids, expected_value = request.param
-        return subtotal_dict, element_ids, expected_value
+    def anchor_idx_fixture(self, request):
+        anchor, index, call_count, expected_value = request.param
+        calls = [call(anchor)] * call_count
+        return anchor, index, calls, expected_value
+
+    @pytest.fixture(params=[
+        ({}, ''),
+        ({'name': None}, ''),
+        ({'name': ''}, ''),
+        ({'name': 'Joe'}, 'Joe'),
+    ])
+    def name_fixture(self, request):
+        subtotal_dict, expected_value = request.param
+        return subtotal_dict, expected_value
 
     # fixture components ---------------------------------------------
 
     @pytest.fixture
-    def dimension_(self, request):
-        return instance_mock(request, Dimension)
+    def addend_ids_prop_(self, request):
+        return property_mock(request, _Subtotal, 'addend_ids')
 
     @pytest.fixture
-    def _valid_dim_element_ids_prop_(self, request):
-        return property_mock(request, _Subtotal, '_valid_dim_element_ids')
+    def anchor_prop_(self, request):
+        return property_mock(request, _Subtotal, 'anchor')
+
+    @pytest.fixture
+    def element_(self, request):
+        return instance_mock(request, _BaseElement)
+
+    @pytest.fixture
+    def name_prop_(self, request):
+        return property_mock(request, _Subtotal, 'name')
+
+    @pytest.fixture
+    def valid_elements_(self, request):
+        return instance_mock(request, _ValidElements)

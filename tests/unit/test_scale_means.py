@@ -1,12 +1,17 @@
-# pylint: disable=missing-docstring, redefined-outer-name, protected-access
+# encoding: utf-8
+
+"""Unit test suite for the  cr.cube.measures.scale_means module."""
+
 from __future__ import division
-from mock import Mock
+
 import numpy as np
 import pytest
 
 from cr.cube.measures.scale_means import ScaleMeans
 
-from .unitutil import property_mock
+from ..unitutil import Mock, property_mock
+
+# pylint: disable=missing-docstring, redefined-outer-name, protected-access
 
 COLS_DIM_VALUES = np.array([0, 1, 2])
 ROWS_DIM_VALUES = np.array([3, 4, 5, 6])
@@ -82,18 +87,19 @@ def test_valid_indices(valid_indices_fixture):
 
 
 @pytest.fixture(params=[
-    ([Mock(values=[])], 0, []),
-    ([Mock(values=[1, 2, 3])], 0, [np.array([True, True, True])]),
+    ([Mock(numeric_values=[])], 0, []),
+    ([Mock(numeric_values=[1, 2, 3])], 0, [np.array([True, True, True])]),
     (
-        [Mock(values=[1, 2, np.nan, 4])], 0,
+        [Mock(numeric_values=[1, 2, np.nan, 4])], 0,
         [np.array([True, True, False, True])],
     ),
-    ([Mock(values=[1])], 0, []),
+    ([Mock(numeric_values=[1])], 0, []),
     (
-        [Mock(values=[1, 2, 3]), Mock(values=[])], 0,
+        [Mock(numeric_values=[1, 2, 3]), Mock(numeric_values=[])], 0,
         [np.array([True, True, True])],
     ),
-    ([Mock(values=[1, 2, 3]), Mock(values=[])], 1, [slice(None)]),
+    ([Mock(numeric_values=[1, 2, 3]), Mock(numeric_values=[])], 1,
+     [slice(None)]),
 ])
 def valid_indices_fixture(request):
     dimensions, axis, expected = request.param

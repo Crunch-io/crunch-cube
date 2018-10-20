@@ -323,21 +323,6 @@ class TestCrunchCube(TestCase):
         actual = CrunchCube._margin_pruned_indices(table, insertions, 0)
         np.testing.assert_array_equal(actual, expected)
 
-    def test_insertions_with_empty_indices(self):
-        cc = CrunchCube({})
-
-        class DummyDimension:
-            @property
-            def hs_indices(self):
-                return [{'anchor_ind': 0, 'inds': []}]
-
-        result = Mock()
-        dimension_index = 0
-        dimension = DummyDimension()
-
-        insertions = cc._insertions(result, dimension, dimension_index)
-        assert insertions == [], insertions
-
     @patch('numpy.array')
     @patch('cr.cube.crunch_cube.CrunchCube.inserted_hs_indices')
     @patch('cr.cube.crunch_cube.CrunchCube.ndim', 1)

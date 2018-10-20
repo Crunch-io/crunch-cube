@@ -801,7 +801,7 @@ class CrunchCube(object):
     def valid_indices_with_selections(self, include_missing=False):
         """Get all valid indices (including MR selections)."""
         return [
-            dim.valid_indices(include_missing)
+            dim.element_indices(include_missing)
             for dim in self.all_dimensions
         ]
 
@@ -1033,7 +1033,7 @@ class CrunchCube(object):
             0 if dim.is_mr_selections(self.all_dimensions) else slice(None)
             for dim, n in zip(self.all_dimensions, array.shape)
         ) if not fix_valids else np.ix_(*[
-            dim.valid_indices(False) if n > 1 else [0]
+            dim.element_indices(include_missing=False) if n > 1 else [0]
             for dim, n in zip(self.all_dimensions, array.shape)
         ])
         array = array[display_ind]
@@ -1065,32 +1065,29 @@ class CrunchCube(object):
         return np.array(inserted_inds[dim_ind] if len(inserted_inds) else [])
 
     def _insertions(self, result, dimension, dimension_index):
-        insertions = []
+        """Return list of (idx, sum) pairs representing subtotals.
 
-        for indices in dimension.hs_indices:
-            ind_subtotal_elements = np.array(indices['inds'])
+        *idx* is the int offset at which to insert the ndarray subtotal
+        in *sum*.
+        """
 
-            if indices['anchor_ind'] == 'top':
-                ind_insertion = -1
-            elif indices['anchor_ind'] == 'bottom':
-                ind_insertion = result.shape[dimension_index] - 1
-            else:
-                ind_insertion = indices['anchor_ind']
+        def iter_insertions():
+            for anchor_idx, addend_idxs in dimension.hs_indices:
+                insertion_idx = (
+                    -1 if anchor_idx == 'top' else
+                    result.shape[dimension_index] - 1 if anchor_idx == 'bottom'
+                    else anchor_idx
+                )
+                addend_fancy_idx = tuple(
+                    [slice(None) for _ in range(dimension_index)] +
+                    [np.array(addend_idxs)]
+                )
+                yield (
+                    insertion_idx,
+                    np.sum(result[addend_fancy_idx], axis=dimension_index)
+                )
 
-            ind = tuple(
-                [slice(None) for _ in range(dimension_index)] +
-                [ind_subtotal_elements]
-            )
-            axis = dimension_index
-
-            # no indices are provided (should never get here)
-            if len(indices['inds']) == 0:
-                value = 0
-            else:
-                value = np.sum(result[ind], axis=axis)
-                insertions.append((ind_insertion, value))
-
-        return insertions
+        return [insertion for insertion in iter_insertions()]
 
     def _intersperse_hs_in_std_res(self, hs_dims, res):
         for dim, inds in enumerate(self.inserted_hs_indices()):
