@@ -21,6 +21,14 @@ from ..unitutil import (
 
 class DescribeDimension(object):
 
+    def it_knows_its_description(self, description_fixture):
+        dimension_dict, expected_value = description_fixture
+        dimension = Dimension(dimension_dict)
+
+        description = dimension.description
+
+        assert description == expected_value
+
     def it_knows_its_dimension_type(self, type_fixture):
         dimension_dict, next_dimension_dict, expected_value = type_fixture
         dimension = Dimension(dimension_dict, next_dimension_dict)
@@ -30,10 +38,10 @@ class DescribeDimension(object):
         assert dimension_type == expected_value
 
     def it_provides_subtotal_indices(
-            self, hs_indices_fixture, is_selections_prop_, subtotals_prop_):
+            self, hs_indices_fixture, is_selections_prop_, _subtotals_prop_):
         is_selections, subtotals_, expected_value = hs_indices_fixture
         is_selections_prop_.return_value = is_selections
-        subtotals_prop_.return_value = subtotals_
+        _subtotals_prop_.return_value = subtotals_
         dimension = Dimension(None, None)
 
         hs_indices = dimension.hs_indices
@@ -52,7 +60,7 @@ class DescribeDimension(object):
 
         assert numeric_values == (1, 2.2, np.nan)
 
-    def it_provides_access_to_its_subtotals(
+    def it_provides_access_to_its_subtotals_to_help(
             self, subtotals_fixture, _Subtotals_, subtotals_,
             _valid_elements_prop_, valid_elements_):
         dimension_dict, insertion_dicts = subtotals_fixture
@@ -60,12 +68,22 @@ class DescribeDimension(object):
         _Subtotals_.return_value = subtotals_
         dimension = Dimension(dimension_dict, None)
 
-        subtotals = dimension.subtotals
+        subtotals = dimension._subtotals
 
         _Subtotals_.assert_called_once_with(insertion_dicts, valid_elements_)
         assert subtotals is subtotals_
 
     # fixtures -------------------------------------------------------
+
+    @pytest.fixture(params=[
+        ({'references': {}}, ''),
+        ({'references': {'description': None}}, ''),
+        ({'references': {'description': ''}}, ''),
+        ({'references': {'description': 'Crunchiness'}}, 'Crunchiness'),
+    ])
+    def description_fixture(self, request):
+        dimension_dict, expected_value = request.param
+        return dimension_dict, expected_value
 
     @pytest.fixture(params=[
         (True, ()),
@@ -117,8 +135,8 @@ class DescribeDimension(object):
         return instance_mock(request, _Subtotals)
 
     @pytest.fixture
-    def subtotals_prop_(self, request):
-        return property_mock(request, Dimension, 'subtotals')
+    def _subtotals_prop_(self, request):
+        return property_mock(request, Dimension, '_subtotals')
 
     @pytest.fixture(params=[
         ({'type': {'class': 'categorical'}},
@@ -403,13 +421,13 @@ class Describe_BaseElement(object):
 
 class Describe_Category(object):
 
-    def it_knows_its_name(self, name_fixture):
-        category_dict, expected_value = name_fixture
+    def it_knows_its_label(self, label_fixture):
+        category_dict, expected_value = label_fixture
         category = _Category(category_dict, None)
 
-        name = category.name
+        label = category.label
 
-        assert name == expected_value
+        assert label == expected_value
 
     # fixtures -------------------------------------------------------
 
@@ -420,20 +438,20 @@ class Describe_Category(object):
         ({'name': 'Bob'}, 'Bob'),
         ({'name': 'Hinzufägen'}, 'Hinzufägen'),
     ])
-    def name_fixture(self, request):
+    def label_fixture(self, request):
         category_dict, expected_value = request.param
         return category_dict, expected_value
 
 
 class Describe_Element(object):
 
-    def it_knows_its_name(self, name_fixture):
-        element_dict, expected_value = name_fixture
+    def it_knows_its_label(self, label_fixture):
+        element_dict, expected_value = label_fixture
         element = _Element(element_dict, None)
 
-        name = element.name
+        label = element.label
 
-        assert name == expected_value
+        assert label == expected_value
 
     # fixtures -------------------------------------------------------
 
@@ -448,7 +466,7 @@ class Describe_Element(object):
         ({'value': {'references': {}}}, ''),
         ({'value': {'references': {'name': 'Tom'}}}, 'Tom'),
     ])
-    def name_fixture(self, request):
+    def label_fixture(self, request):
         element_dict, expected_value = request.param
         return element_dict, expected_value
 
@@ -463,6 +481,21 @@ class Describe_Subtotals(object):
         assert subtotals[1:3] == (2, 3)
         assert len(subtotals) == 3
         assert list(n for n in subtotals) == [1, 2, 3]
+
+    def it_can_iterate_subtotals_having_a_given_anchor(
+            self, request, _subtotals_prop_):
+        subtotals_ = tuple(
+            instance_mock(
+                request, _Subtotal, name='subtotal-%d' % idx, anchor=anchor
+            )
+            for idx, anchor in enumerate(['bottom', 2, 'bottom'])
+        )
+        _subtotals_prop_.return_value = subtotals_
+        subtotals = _Subtotals(None, None)
+
+        subtotals_with_anchor = tuple(subtotals.iter_for_anchor('bottom'))
+
+        assert subtotals_with_anchor == (subtotals_[0], subtotals[2])
 
     def it_provides_the_element_ids_as_a_set_to_help(
             self, request, valid_elements_):
@@ -601,23 +634,13 @@ class Describe_Subtotal(object):
         ]
         assert addend_idxs == (2, 4, 6)
 
-    def it_provides_a_dict_suitable_for_labeling(
-            self, anchor_prop_, name_prop_):
-        anchor_prop_.return_value = 42
-        name_prop_.return_value = 'Paul'
-        subtotal = _Subtotal(None, None)
-
-        label_dict = subtotal.label_dict
-
-        assert label_dict == {'anchor': 42, 'name': 'Paul'}
-
-    def it_knows_the_subtotal_label(self, name_fixture):
-        subtotal_dict, expected_value = name_fixture
+    def it_knows_the_subtotal_label(self, label_fixture):
+        subtotal_dict, expected_value = label_fixture
         subtotal = _Subtotal(subtotal_dict, None)
 
-        name = subtotal.name
+        label = subtotal.label
 
-        assert name == expected_value
+        assert label == expected_value
 
     # fixtures -------------------------------------------------------
 
@@ -659,7 +682,7 @@ class Describe_Subtotal(object):
         ({'name': ''}, ''),
         ({'name': 'Joe'}, 'Joe'),
     ])
-    def name_fixture(self, request):
+    def label_fixture(self, request):
         subtotal_dict, expected_value = request.param
         return subtotal_dict, expected_value
 
@@ -676,10 +699,6 @@ class Describe_Subtotal(object):
     @pytest.fixture
     def element_(self, request):
         return instance_mock(request, _BaseElement)
-
-    @pytest.fixture
-    def name_prop_(self, request):
-        return property_mock(request, _Subtotal, 'name')
 
     @pytest.fixture
     def valid_elements_(self, request):

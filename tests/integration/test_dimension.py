@@ -11,9 +11,9 @@ from cr.cube.dimension import Dimension, _Subtotal
 
 from .fixtures import (
     CA_WITH_NETS, ECON_BLAME_WITH_HS, ECON_BLAME_WITH_HS_MISSING,
-    ECON_BLAME_X_IDEOLOGY_ROW_HS, LOGICAL_UNIVARIATE, LOGICAL_X_CAT
+    ECON_BLAME_X_IDEOLOGY_ROW_HS, LOGICAL_UNIVARIATE, LOGICAL_X_CAT,
+    MR_X_CAT_HS
 )
-from ..unitutil import Mock, patch
 
 
 class TestDimension(TestCase):
@@ -30,6 +30,39 @@ class TestDimension(TestCase):
         expected = [2]
         actual = dimension.inserted_hs_indices
         assert actual == expected
+
+    def test_labels_for_categoricals(self):
+        dimension_dict = {
+            'type': {
+                'class': 'categorical',
+                'categories': [
+                    {
+                        'id': 1,
+                        'name': 'Cat',
+                        'missing': False,
+                    },
+                    {
+                        'id': 2,
+                        'name': 'Mouse',
+                        'missing': False,
+                    },
+                    {
+                        'id': -1,
+                        'name': 'Iguana',
+                        'missing': True,
+                    },
+                ]
+            }
+        }
+        dimension = Dimension(dimension_dict)
+
+        # ---get only non-missing---
+        labels = dimension.labels()
+        assert labels == ['Cat', 'Mouse']
+
+        # ---get all---
+        labels = dimension.labels(include_missing=True)
+        assert labels == ['Cat', 'Mouse', 'Iguana']
 
     def test_labels_for_numericals(self):
         dimension_dict = {
@@ -177,6 +210,11 @@ class TestDimension(TestCase):
         expected = True
         actual = dimension.has_transforms
         self.assertEqual(actual, expected)
+
+    def test_hs_indices_for_mr(self):
+        dimension = CrunchCube(MR_X_CAT_HS).all_dimensions[1]
+        hs_indices = dimension.hs_indices
+        assert hs_indices == ()
 
     def test_hs_indices_with_bad_data(self):
         cube = CrunchCube(CA_WITH_NETS)
@@ -327,7 +365,7 @@ class TestDimension(TestCase):
         }
         dimension = Dimension(dimension_dict)
 
-        subtotals = dimension.subtotals
+        subtotals = dimension._subtotals
 
         assert len(subtotals) == 2
 
@@ -336,14 +374,14 @@ class TestDimension(TestCase):
         assert subtotal.anchor == 'bottom'
         assert subtotal.addend_ids == (1,)
         assert subtotal.addend_idxs == (0,)
-        assert subtotal.name == 'Liberal net'
+        assert subtotal.label == 'Liberal net'
 
         subtotal = subtotals[1]
         assert isinstance(subtotal, _Subtotal)
         assert subtotal.anchor == 5
         assert subtotal.addend_ids == (5,)
         assert subtotal.addend_idxs == (1,)
-        assert subtotal.name == 'Conservative net'
+        assert subtotal.label == 'Conservative net'
 
     def test_numeric_values(self):
         dimension_dict = {
@@ -363,76 +401,3 @@ class TestDimension(TestCase):
         numeric_values = dimension.numeric_values
 
         self.assertEqual(numeric_values, (1, 2, np.nan, np.nan))
-
-
-class TestPartiallyIntegratedDimension(TestCase):
-
-    insertions_with_bad_data = [
-        {
-            u'anchor': 101,
-            u'name': u'This is respondent ideology',
-        },
-        {
-            u'anchor': 2,
-            u'args': [1, 2],
-            u'function': u'subtotal',
-            u'name': u'Liberal net',
-        },
-        {
-            u'anchor': 5,
-            u'args': [5, 4],
-            u'function': u'subtotal',
-            u'name': u'Conservative net',
-        },
-        {
-            u'anchor': 'fake anchor',
-            u'args': ['fake_arg_1', 'fake_arg_2'],
-            u'function': u'fake_fcn_name_not_subtotal',
-            u'name': u'Fake Name',
-        }
-    ]
-
-    def test_labels_for_categoricals(self):
-        name_cat_1 = Mock()
-        name_cat_2 = Mock()
-        name_cat_3 = Mock()
-        dim = {
-            'type': {
-                'class': 'categorical',
-                'categories': [
-                    {
-                        'name': name_cat_1,
-                        'missing': False,
-                    },
-                    {
-                        'name': name_cat_2,
-                        'missing': False,
-                    },
-                    {
-                        'name': name_cat_3,
-                        'missing': True,
-                    },
-                ]
-            }
-        }
-        # Get only non-missing
-        expected = [name_cat_1, name_cat_2]
-        actual = Dimension(dim).labels()
-        self.assertEqual(actual, expected)
-        # Get all
-        expected = [name_cat_1, name_cat_2, name_cat_3]
-        actual = Dimension(dim).labels(include_missing=True)
-        self.assertEqual(actual, expected)
-
-    def test_dimension_description(self):
-        desc = Mock()
-        dim = Dimension({'type': Mock(), 'references': {'description': desc}})
-        expected = desc
-        actual = dim.description
-        self.assertEqual(actual, expected)
-
-    @patch('cr.cube.dimension.Dimension.is_selections', True)
-    def test_hs_indices_for_mr(self):
-        dim = Dimension({})
-        hs_indices = dim.hs_indices
-        assert hs_indices == ()
