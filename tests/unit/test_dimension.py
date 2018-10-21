@@ -21,6 +21,14 @@ from ..unitutil import (
 
 class DescribeDimension(object):
 
+    def it_knows_its_dimension_type(self, type_fixture):
+        dimension_dict, next_dimension_dict, expected_value = type_fixture
+        dimension = Dimension(dimension_dict, next_dimension_dict)
+
+        dimension_type = dimension.dimension_type
+
+        assert dimension_type == expected_value
+
     def it_provides_subtotal_indices(
             self, hs_indices_fixture, is_selections_prop_, subtotals_prop_):
         is_selections, subtotals_, expected_value = hs_indices_fixture
@@ -97,10 +105,6 @@ class DescribeDimension(object):
     # fixture components ---------------------------------------------
 
     @pytest.fixture
-    def _get_type_(self, request):
-        return method_mock(request, Dimension, '_get_type', autospec=False)
-
-    @pytest.fixture
     def is_selections_prop_(self, request):
         return property_mock(request, Dimension, 'is_selections')
 
@@ -115,6 +119,26 @@ class DescribeDimension(object):
     @pytest.fixture
     def subtotals_prop_(self, request):
         return property_mock(request, Dimension, 'subtotals')
+
+    @pytest.fixture(params=[
+        ({'type': {'class': 'categorical'}},
+         None, 'categorical'),
+        ({'type': {'class': 'enum', 'subtype': {'class': 'datetime'}},
+          'references': {}},
+         None, 'datetime'),
+        ({'type': {'class': 'enum'}, 'references': {'subreferences': []}},
+         None, 'categorical_array'),
+        ({'type': {'class': 'enum'}, 'references': {'subreferences': []}},
+         {'type': {'categories': [{'id': 1}, {'id': 0}, {'id': -1}, ]}},
+         'multiple_response'),
+        ({'type': {'subtype': {'class': 'numeric'}}},
+         None, 'numeric'),
+        ({'type': {'subtype': {'class': 'text'}}},
+         None, 'text'),
+    ])
+    def type_fixture(self, request):
+        dimension_dict, next_dimension_dict, expected_value = request.param
+        return dimension_dict, next_dimension_dict, expected_value
 
     @pytest.fixture
     def valid_elements_(self, request):

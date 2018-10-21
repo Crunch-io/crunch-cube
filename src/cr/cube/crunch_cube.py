@@ -149,7 +149,7 @@ class CrunchCube(object):
     @lazyproperty
     def ca_dim_ind(self):
         for (i, dim) in enumerate(self.dimensions):
-            if dim.type == 'categorical_array':
+            if dim.dimension_type == 'categorical_array':
                 return i
         else:
             return None
@@ -192,7 +192,7 @@ class CrunchCube(object):
 
     @lazyproperty
     def dim_types(self):
-        return [dim.type for dim in self.dimensions]
+        return [d.dimension_type for d in self.dimensions]
 
     @lazyproperty
     def dimensions(self):
@@ -300,7 +300,7 @@ class CrunchCube(object):
     @lazyproperty
     def is_univariate_ca(self):
         """Check if cube is a just the CA ("ca x cat" or "cat x ca" dims)"""
-        types = {d.type for d in self.dimensions}
+        types = {d.dimension_type for d in self.dimensions}
         ca_types = {'categorical_array', 'categorical'}
         return self.ndim == 2 and types == ca_types
 
@@ -461,7 +461,7 @@ class CrunchCube(object):
     def mr_dim_ind(self):
         indices = [
             i for i, dim in enumerate(self.dimensions)
-            if dim.type == 'multiple_response'
+            if dim.dimension_type == 'multiple_response'
         ]
         if indices:
             return indices[0] if len(indices) == 1 else tuple(indices)
@@ -479,7 +479,7 @@ class CrunchCube(object):
         mr_dimensions_indices = [
             i for (i, dim) in enumerate(self.all_dimensions)
             if (i + 1 < len(self.all_dimensions) and
-                dim.type == 'multiple_response')
+                dim.dimension_type == 'multiple_response')
         ]
 
         # For each MR and CA dimension, the 'selections' dimension
@@ -795,7 +795,7 @@ class CrunchCube(object):
     @lazyproperty
     def univariate_ca_main_axis(self):
         """For univariate CA, the main axis is the categorical axis"""
-        dim_types = [dim.type for dim in self.dimensions]
+        dim_types = [d.dimension_type for d in self.dimensions]
         return dim_types.index('categorical')
 
     def valid_indices_with_selections(self, include_missing=False):
@@ -880,7 +880,7 @@ class CrunchCube(object):
         # axis (that were provided by the user). But we don't need to update
         # the axis that are "behind" the current MR.
         for i, dim in enumerate(self.dimensions):
-            if dim.type == 'multiple_response':
+            if dim.dimension_type == 'multiple_response':
                 # This formula updates only the axis that come "after" the
                 # current MR (items) dimension.
                 new_axis[axis >= i] += 1
@@ -1322,10 +1322,11 @@ class CrunchCube(object):
             # Check if transformations can/need to be performed
             transform = (dim.has_transforms and
                          i - dim_offset in include_transforms_for_dims)
-            if dim.type == 'multiple_response':
+            if dim.dimension_type == 'multiple_response':
                 dim_offset += 1
             if (not transform or
-                    dim.type in ITEM_DIMENSION_TYPES or dim.is_selections):
+                    dim.dimension_type in ITEM_DIMENSION_TYPES or
+                    dim.is_selections):
                 continue
             # Perform transformations
             insertions = self._insertions(res, dim, i)

@@ -269,15 +269,15 @@ class TestDimension(TestCase):
         cube = CrunchCube(LOGICAL_UNIVARIATE)
         dimension = cube.dimensions[0]
         expected = 'categorical'
-        actual = dimension.type
+        actual = dimension.dimension_type
         self.assertEqual(expected, actual)
         self.assertFalse(dimension.is_mr_selections(cube.all_dimensions))
 
     def test_logical_x_cat_dims(self):
         cube = CrunchCube(LOGICAL_X_CAT)
         logical_dim = cube.dimensions[1]
-        self.assertEqual(cube.dimensions[0].type, 'categorical')
-        self.assertEqual(logical_dim.type, 'categorical')
+        self.assertEqual(cube.dimensions[0].dimension_type, 'categorical')
+        self.assertEqual(logical_dim.dimension_type, 'categorical')
 
         self.assertTrue(logical_dim.is_selections)
         self.assertFalse(logical_dim.is_mr_selections(cube.all_dimensions))
@@ -392,48 +392,6 @@ class TestPartiallyIntegratedDimension(TestCase):
         }
     ]
 
-    def test_get_type_categorical_array(self):
-        dim = {
-            'references': {'subreferences': []},
-            'type': {'class': 'enum'},
-        }
-        expected = 'categorical_array'
-        actual = Dimension._get_type(dim)
-        self.assertEqual(actual, expected)
-
-    def test_get_type_categorical(self):
-        dim = {
-            'type': {'class': 'categorical'},
-        }
-        expected = 'categorical'
-        actual = Dimension._get_type(dim)
-        self.assertEqual(actual, expected)
-
-    def test_get_type_numeric(self):
-        dim = {
-            'type': {'subtype': {'class': 'numeric'}},
-        }
-        expected = 'numeric'
-        actual = Dimension._get_type(dim)
-        self.assertEqual(actual, expected)
-
-    def test_get_type_datetime(self):
-        dim = {
-            'type': {'subtype': {'class': 'datetime'}},
-            'class': 'enum',
-        }
-        expected = 'datetime'
-        actual = Dimension._get_type(dim)
-        self.assertEqual(actual, expected)
-
-    def test_get_type_text(self):
-        dim = {
-            'type': {'subtype': {'class': 'text'}},
-        }
-        expected = 'text'
-        actual = Dimension._get_type(dim)
-        self.assertEqual(actual, expected)
-
     def test_labels_for_categoricals(self):
         name_cat_1 = Mock()
         name_cat_2 = Mock()
@@ -466,11 +424,6 @@ class TestPartiallyIntegratedDimension(TestCase):
         actual = Dimension(dim).labels(include_missing=True)
         self.assertEqual(actual, expected)
 
-    def test_is_not_multiple_response(self):
-        expected = False
-        actual = Dimension._is_multiple_response({'type': {'fake': Mock()}})
-        self.assertEqual(actual, expected)
-
     def test_dimension_description(self):
         desc = Mock()
         dim = Dimension({'type': Mock(), 'references': {'description': desc}})
@@ -479,8 +432,7 @@ class TestPartiallyIntegratedDimension(TestCase):
         self.assertEqual(actual, expected)
 
     @patch('cr.cube.dimension.Dimension.is_selections', True)
-    @patch('cr.cube.dimension.Dimension._get_type')
-    def test_hs_indices_for_mr(self, _get_type_):
+    def test_hs_indices_for_mr(self):
         dim = Dimension({})
         hs_indices = dim.hs_indices
         assert hs_indices == ()

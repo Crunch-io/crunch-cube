@@ -21,9 +21,9 @@ class Dimension(object):
     :attr:`.CrunchCube.dimensions`.
     """
 
-    def __init__(self, dimension_dict, selections=None):
+    def __init__(self, dimension_dict, next_dimension_dict=None):
         self._dimension_dict = dimension_dict
-        self._selections = selections
+        self._next_dimension_dict = next_dimension_dict
 
     @lazyproperty
     def alias(self):
@@ -36,6 +36,44 @@ class Dimension(object):
         """Description of a cube's dimension."""
         refs = self._dimension_dict['references']
         return refs.get('description')
+
+    @lazyproperty
+    def dimension_type(self):
+        """str representing type of this cube dimension."""
+        # ---all this logic really belongs in the Dimensions collection
+        # ---object, which is where it will move to once that's implemented
+
+        def next_dim_is_mr_cat():
+            """True if subsequent dimension is an MR_CAT dimension."""
+            if not self._next_dimension_dict:
+                return False
+
+            categories = self._next_dimension_dict['type'].get('categories')
+            if not categories:
+                return False
+
+            return (
+                [category.get('id') for category in categories] == [1, 0, -1]
+            )
+
+        type_dict = self._dimension_dict['type']
+        type_class = type_dict.get('class')
+
+        if not type_class:
+            # ---numeric and text are like this---
+            return type_dict['subtype']['class']
+
+        if type_class == 'enum':
+            if 'subreferences' in self._dimension_dict['references']:
+                return (
+                    'multiple_response' if next_dim_is_mr_cat()
+                    else 'categorical_array'
+                )
+            if 'subtype' in type_dict:
+                # ---datetime is like this (enum without subreferences)---
+                return type_dict['subtype']['class']
+
+        return type_class
 
     @memoize
     def element_indices(self, include_missing):
@@ -78,7 +116,8 @@ class Dimension(object):
     @lazyproperty
     def inserted_hs_indices(self):
         """Returns inserted H&S indices for the dimension."""
-        if (self.type in ITEM_DIMENSION_TYPES or not self.subtotals):
+        if (self.dimension_type in ITEM_DIMENSION_TYPES or
+                not self.subtotals):
             return []  # For CA and MR items, we don't do H&S insertions
 
         elements = self._valid_elements
@@ -144,7 +183,7 @@ class Dimension(object):
                include_cat_ids=False):
         """Get labels of the Crunch Dimension."""
         if (not (include_transforms and self.has_transforms) or
-                self.type == 'categorical_array'):
+                self.dimension_type == 'categorical_array'):
             elements = (
                 self._all_elements if include_missing else
                 self._valid_elements
@@ -223,37 +262,9 @@ class Dimension(object):
         return _Subtotals(insertion_dicts, self._valid_elements)
 
     @lazyproperty
-    def type(self):
-        """Get type of the Crunch Dimension."""
-        return self.__class__._get_type(self._dimension_dict, self._selections)
-
-    @lazyproperty
     def _all_elements(self):
         """_AllElements object providing cats or subvars of this dimension."""
         return _AllElements(self._dimension_dict['type'])
-
-    @classmethod
-    def _get_type(cls, dimension_dict, selections=None):
-        """Gets the Dimension type.
-
-        MR and CA variables have two subsequent dimension, which are both
-        necessary to determine the correct type ('categorical_array', or
-        'multiple_response').
-        """
-        type_ = dimension_dict['type'].get('class')
-
-        if type_:
-            if type_ == 'enum':
-                if 'subreferences' in dimension_dict['references']:
-                    return ('multiple_response'
-                            if cls._is_multiple_response(selections)
-                            else 'categorical_array')
-                if 'subtype' in dimension_dict['type']:
-                    return dimension_dict['type']['subtype']['class']
-
-            return type_
-
-        return dimension_dict['type']['subtype']['class']
 
     @staticmethod
     def _include_in_labels(label_with_ind, valid_indices):
@@ -263,24 +274,6 @@ class Dimension(object):
             return True
 
         return label_with_ind['ind'] in valid_indices
-
-    @classmethod
-    def _is_multiple_response(cls, dimension_dict):
-        if not dimension_dict:
-            return False
-
-        categories = dimension_dict['type'].get('categories')
-        if not categories:
-            return False
-
-        if len(categories) != 3:
-            return False
-
-        mr_ids = (1, 0, -1)
-        for i, mr_id in enumerate(mr_ids):
-            if categories[i]['id'] != mr_id:
-                return False
-        return True
 
     def _update_with_subtotals(self, labels_with_cat_ids):
         for subtotal in self.subtotals:
