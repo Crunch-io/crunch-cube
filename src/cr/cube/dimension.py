@@ -126,45 +126,20 @@ class Dimension(object):
 
     @lazyproperty
     def inserted_hs_indices(self):
-        """Returns inserted H&S indices for the dimension."""
-        if (self.dimension_type in ITEM_DIMENSION_TYPES or
-                not self._subtotals):
-            return []  # For CA and MR items, we don't do H&S insertions
+        """list of int index of each inserted subtotal for the dimension.
 
-        elements = self._valid_elements
-        element_ids = elements.element_ids
+        Each value represents the position of a subtotal in the interleaved
+        sequence of elements and subtotals items.
+        """
+        # ---don't do H&S insertions for CA and MR subvar dimensions---
+        if self.dimension_type in ITEM_DIMENSION_TYPES:
+            return []
 
-        top_indexes = []
-        middle_indexes = []
-        bottom_indexes = []
-        for i, st in enumerate(self._subtotals):
-            anchor = st.anchor
-            if anchor == 'top':
-                top_indexes.append(i)
-            elif anchor == 'bottom':
-                bottom_indexes.append(i)
-            else:
-                middle_indexes.append(anchor)
-        len_top_indexes = len(top_indexes)
-
-        # push all top indexes to the top
-        top_indexes = list(range(len_top_indexes))
-
-        # adjust the middle_indexes appropriately
-        middle_indexes = [
-            i + element_ids.index(index) + len_top_indexes + 1
-            for i, index in enumerate(middle_indexes)
+        return [
+            idx for idx, item
+            in enumerate(self._iter_interleaved_items(self._valid_elements))
+            if item.is_insertion
         ]
-
-        # what remains is the bottom
-        len_non_bottom_indexes = (
-            len_top_indexes + len(middle_indexes) + len(elements)
-        )
-        bottom_indexes = list(range(
-            len_non_bottom_indexes, len_non_bottom_indexes + len(bottom_indexes)
-        ))
-
-        return top_indexes + middle_indexes + bottom_indexes
 
     def is_mr_selections(self, others):
         """Return True if this dimension var is multiple-response selections.
