@@ -241,6 +241,12 @@ class Describe_BaseElements(object):
             7: elements_[2],
         }
 
+    def it_stores_its_elements_in_a_tuple_to_help(self):
+        base_elements = _BaseElements(None)
+        # ---must be implemented by each subclass---
+        with pytest.raises(NotImplementedError):
+            base_elements._elements
+
     # fixtures -------------------------------------------------------
 
     @pytest.fixture(params=[

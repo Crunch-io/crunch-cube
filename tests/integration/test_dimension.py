@@ -10,13 +10,20 @@ from cr.cube.crunch_cube import CrunchCube
 from cr.cube.dimension import Dimension, _Subtotal
 
 from .fixtures import (
-    CA_WITH_NETS, ECON_BLAME_WITH_HS, ECON_BLAME_WITH_HS_MISSING,
-    ECON_BLAME_X_IDEOLOGY_ROW_HS, LOGICAL_UNIVARIATE, LOGICAL_X_CAT,
-    MR_X_CAT_HS
+    CA_SUBVAR_HS_X_MR_X_CA_CAT, CA_WITH_NETS, ECON_BLAME_WITH_HS,
+    ECON_BLAME_WITH_HS_MISSING, ECON_BLAME_X_IDEOLOGY_ROW_HS,
+    LOGICAL_UNIVARIATE, LOGICAL_X_CAT, MR_X_CAT_HS
 )
 
 
 class TestDimension(TestCase):
+
+    def test_dimension_type(self):
+        cube = CrunchCube(CA_SUBVAR_HS_X_MR_X_CA_CAT)
+        dimension_types = [d.dimension_type for d in cube.dimensions]
+        assert dimension_types == [
+            'categorical_array', 'multiple_response', 'categorical'
+        ]
 
     def test_subtotals_indices_single_subtotal(self):
         dimension = CrunchCube(ECON_BLAME_WITH_HS).dimensions[0]
@@ -99,6 +106,10 @@ class TestDimension(TestCase):
         # ---all labels, both valid and missing---
         labels = dimension.labels(include_missing=True)
         assert labels == ['smallish', 'kinda big', '']
+
+        # ---all labels, both valid and missing---
+        labels = dimension.labels(include_cat_ids=True)
+        assert labels == [('smallish', 0), ('kinda big', 1)]
 
     def test_subtotals_indices_two_subtotals(self):
         dimension = CrunchCube(ECON_BLAME_WITH_HS_MISSING).dimensions[0]

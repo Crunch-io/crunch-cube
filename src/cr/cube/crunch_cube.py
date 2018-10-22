@@ -73,8 +73,6 @@ class CrunchCube(object):
                     'A `cube` must be JSON or `dict`.'
                 ).format(type(response)))
 
-        self.slices = self.get_slices()
-
     @lazyproperty
     def all_dimensions(self):
         """Gets the dimensions of the crunch cube.
@@ -244,7 +242,7 @@ class CrunchCube(object):
 
     @lazyproperty
     def has_means(self):
-        """Check if cube has means."""
+        """True if cube contains means data."""
         measures = self._cube.get('result', {}).get('measures')
         if not measures:
             return False
@@ -420,8 +418,8 @@ class CrunchCube(object):
             include_missing=include_missing,
         )
         arr = self._fix_shape(arr, fix_valids=include_missing)
-        if isinstance(arr, np.ma.core.MaskedArray):
 
+        if isinstance(arr, np.ma.core.MaskedArray):
             inflate_ind = tuple(
                 (
                     None
@@ -791,6 +789,10 @@ class CrunchCube(object):
                         )
                         scale_means[1] = scale_means[1][~col_mask]
         return slices_means
+
+    @lazyproperty
+    def slices(self):
+        return self.get_slices()
 
     @lazyproperty
     def univariate_ca_main_axis(self):

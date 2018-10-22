@@ -18,6 +18,9 @@ clean:
 cleandocs:
 	$(MAKE) -C docs clean
 
+coverage:
+	py.test --cov-report term-missing --cov=src --cov=tests -p no:warnings
+
 docs:
 	$(MAKE) -C docs html
 

@@ -2,12 +2,36 @@
 
 """Unit test suite for the cr.cube.crunch_cube module."""
 
-from unittest import TestCase
-from mock import Mock
-from mock import patch
 import numpy as np
+import pytest
+
+from unittest import TestCase
 
 from cr.cube.crunch_cube import CrunchCube
+
+from ..unitutil import Mock, patch
+
+
+class DescribeCrunchCube(object):
+
+    def it_knows_whether_cube_contains_means_data(self, has_means_fixture):
+        cube_response, expected_value = has_means_fixture
+        cube = CrunchCube(cube_response)
+
+        has_means = cube.has_means
+
+        assert has_means is expected_value
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture(params=[
+        ({'result': {}}, False),
+        ({'result': {'measures': {}}}, False),
+        ({'result': {'measures': {'mean': {}}}}, True),
+    ])
+    def has_means_fixture(self, request):
+        cube_response, expected_value = request.param
+        return cube_response, expected_value
 
 
 # pylint: disable=invalid-name, no-self-use, protected-access
@@ -199,13 +223,6 @@ class TestCrunchCube(TestCase):
         expected = missing
         actual = CrunchCube(fake_cube).missing
         self.assertEqual(actual, expected)
-
-    def test_has_means(self):
-        has_means = Mock()
-        with patch('cr.cube.crunch_cube.CrunchCube.has_means', has_means):
-            expected = has_means
-            actual = CrunchCube({}).has_means
-            self.assertEqual(actual, expected)
 
     def test_test_filter_annotation(self):
         mock_cube = {'filter_names': Mock()}

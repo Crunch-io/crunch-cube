@@ -187,6 +187,7 @@ class Dimension(object):
             self.dimension_type != 'categorical_array'
         )
 
+        # ---items are elements or subtotals, interleaved in display order---
         interleaved_items = tuple(self._iter_interleaved_items(elements))
 
         labels = list(
@@ -245,8 +246,7 @@ class Dimension(object):
         This ordering corresponds to how value "rows" (or columns) are to
         appear after subtotals have been inserted at their anchor locations.
         Where more than one subtotal is anchored to the same location, they
-        appear in their document order in the cube response. pairs for this
-        dimension.
+        appear in their document order in the cube response.
 
         Only elements in the passed *elements* collection appear, which
         allows control over whether missing elements are included by choosing
@@ -386,7 +386,6 @@ class _AllElements(_BaseElements):
 class _ValidElements(_BaseElements):
     """Sequence of non-missing element objects for a dimension.
 
-    *type_dict* is the dict on the 'type': key of a dimension and
     *all_elements* is an instance of _AllElements containing all the elements
     of a dimension. This object is only intended to be constructed by
     _AllElements.valid_elements and there should be no reason to construct it
@@ -419,14 +418,18 @@ class _BaseElement(object):
 
     @lazyproperty
     def index(self):
-        """int offset at which this element appears in elements sequence."""
+        """int offset at which this element appears in dimension.
+
+        This position is based upon the document position of this element in
+        the cube response. No adjustment for missing elements is made.
+        """
         return self._index
 
     @property
     def is_insertion(self):
         """True if this item represents an insertion (e.g. subtotal).
 
-        Unconditionally False for elements.
+        Unconditionally False for all element types.
         """
         return False
 
