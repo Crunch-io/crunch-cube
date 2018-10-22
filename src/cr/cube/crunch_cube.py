@@ -267,8 +267,10 @@ class CrunchCube(object):
 
         This function is deprecated. Use index_table from CubeSlice.
         """
-        msg = "Deprecated. Use index_table from CubeSlice"""
-        warnings.warn(msg, DeprecationWarning)
+        warnings.warn(
+            "CrunchCube.index() is deprecated. Use CubeSlice.index_table().",
+            DeprecationWarning
+        )
         return Index.data(self, weighted, prune)
 
     def inserted_hs_indices(self, prune=False):
