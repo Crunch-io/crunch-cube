@@ -3,7 +3,7 @@
 
 from setuptools import setup, find_packages
 
-version = '1.7.2'
+version = '1.7.3'
 
 
 def get_long_desc():
@@ -13,6 +13,7 @@ def get_long_desc():
 
 install_requires = [
     'scipy',
+    'tabulate',
 ]
 
 test_requires = [

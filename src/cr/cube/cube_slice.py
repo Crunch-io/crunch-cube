@@ -7,6 +7,7 @@ from __future__ import division
 from functools import partial
 import warnings
 import numpy as np
+from tabulate import tabulate
 
 from cr.cube.measures.scale_means import ScaleMeans
 from cr.cube.util import lazyproperty, compress_pruned, memoize
@@ -57,6 +58,35 @@ class CubeSlice(object):
 
         # ---otherwise, the property value is the same for cube or slice---
         return cube_attr
+
+    def __repr__(self):
+        text = '\n\n' + str(type(self))
+        text += '\nName: {}'.format(
+            self.table_name if self.table_name else self.name)
+        text += '\nType: {}'.format(' x '.join(self.dim_types))
+        text += '\nDimensions: {}'.format(
+            ' x '.join([dim.name for dim in self.dimensions]))
+        labels = self.labels()
+        headers = labels[1] if len(labels) > 1 else ['N']
+        tbl = self.as_array()
+        if len(tbl.shape) <= 1:
+            tbl = tbl[:, None]
+        body = tabulate(
+            [[lbl] + lst for lbl, lst in zip(labels[0], tbl.tolist())],
+            headers=headers
+        )
+        text += '\n' + body
+        return text
+
+    def _apply_pruning_mask(self, res, prune):
+        if not prune:
+            return res
+
+        array = self.as_array(prune=True)
+        if not isinstance(array, np.ma.core.MaskedArray):
+            return res
+
+        return np.ma.masked_array(res, mask=array.mask)
 
     def _prepare_index_baseline(self, axis):
         # First get the margin of the opposite direction of the index axis.
@@ -177,7 +207,7 @@ class CubeSlice(object):
         """
         return 'multiple_response' in self.dim_types
 
-    def index_table(self, axis=None, baseline=None):
+    def index_table(self, axis=None, baseline=None, prune=False):
         """Return index percentages for a given axis and baseline.
 
         The index values represent the difference of the percentages to the
@@ -195,7 +225,9 @@ class CubeSlice(object):
         if axis == 0 and len(baseline.shape) <= 1:
             baseline = baseline[:, None]
 
-        return proportions / baseline * 100
+        indexes = proportions / baseline * 100
+
+        return self._apply_pruning_mask(indexes, prune)
 
     @lazyproperty
     def is_double_mr(self):

@@ -42,6 +42,7 @@ class TestCrunchCube(TestCase):
     This class also tests the functionality of private methods,
     not just the API ones.
     '''
+
     def test_init_raises_value_type_on_initialization(self):
         with self.assertRaises(TypeError) as ctx:
             CrunchCube(Mock())
