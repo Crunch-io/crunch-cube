@@ -42,6 +42,15 @@ class AllDimensions(_BaseDimensions):
         self._dimension_dicts = dimension_dicts
 
     @lazyproperty
+    def apparent_dimensions(self):
+        """_ApparentDimensions collection of the "visible" dimensions.
+
+        The two dimensions for a multiple-response (MR) variable are
+        conflated into a single dimensions in this collection.
+        """
+        return _ApparentDimensions(all_dimensions=self._dimensions)
+
+    @lazyproperty
     def _dimensions(self):
         """tuple of dimension objects in this collection.
 
@@ -51,6 +60,13 @@ class AllDimensions(_BaseDimensions):
         return tuple(
             _DimensionFactory.iter_dimensions(self._dimension_dicts)
         )
+
+
+class _ApparentDimensions(_BaseDimensions):
+    """Collection containing only "user" dimensions of a cube."""
+
+    def __init__(self, all_dimensions):
+        self._all_dimensions = all_dimensions
 
 
 class _DimensionFactory(object):

@@ -10,9 +10,10 @@ import numpy as np
 import pytest
 
 from cr.cube.dimension import (
-    AllDimensions, _AllElements, _BaseDimensions, _BaseElement,
-    _BaseElements, _Category, Dimension, _DimensionFactory, _Element,
-    NewDimension, _RawDimension, _Subtotal, _Subtotals, _ValidElements
+    AllDimensions, _AllElements, _ApparentDimensions, _BaseDimensions,
+    _BaseElement, _BaseElements, _Category, Dimension, _DimensionFactory,
+    _Element, NewDimension, _RawDimension, _Subtotal, _Subtotals,
+    _ValidElements
 )
 from cr.cube.enum import DIMENSION_TYPE as DT
 
@@ -47,6 +48,20 @@ class Describe_BaseDimensions(object):
 
 class DescribeAllDimensions(object):
 
+    def it_provides_access_to_its_ApparentDimensions_to_help(
+            self, _ApparentDimensions_, apparent_dimensions_,
+            _dimensions_prop_, all_dimensions_):
+        _dimensions_prop_.return_value = all_dimensions_
+        _ApparentDimensions_.return_value = apparent_dimensions_
+        all_dimensions = AllDimensions(None)
+
+        apparent_dimensions = all_dimensions.apparent_dimensions
+
+        _ApparentDimensions_.assert_called_once_with(
+            all_dimensions=all_dimensions_
+        )
+        assert apparent_dimensions is apparent_dimensions_
+
     def it_stores_its_dimensions_in_a_tuple_to_help(
             self, request, _DimensionFactory_):
         dimension_dicts_ = [{'d': 0}, {'d': 1}, {'d': 2}]
@@ -67,8 +82,24 @@ class DescribeAllDimensions(object):
     # fixture components ---------------------------------------------
 
     @pytest.fixture
+    def all_dimensions_(self, request):
+        return instance_mock(request, AllDimensions)
+
+    @pytest.fixture
+    def _ApparentDimensions_(self, request):
+        return class_mock(request, 'cr.cube.dimension._ApparentDimensions')
+
+    @pytest.fixture
+    def apparent_dimensions_(self, request):
+        return instance_mock(request, _ApparentDimensions)
+
+    @pytest.fixture
     def _DimensionFactory_(self, request):
         return class_mock(request, 'cr.cube.dimension._DimensionFactory')
+
+    @pytest.fixture
+    def _dimensions_prop_(self, request):
+        return property_mock(request, AllDimensions, '_dimensions')
 
 
 class Describe_DimensionFactory(object):
