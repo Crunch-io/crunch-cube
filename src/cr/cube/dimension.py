@@ -61,9 +61,16 @@ class _DimensionFactory(object):
     make dimension class choices as well.
     """
 
+    def __init__(self, dimension_dicts):
+        self._dimension_dicts = dimension_dicts
+
     @classmethod
     def iter_dimensions(cls, dimension_dicts):
         """Generate Dimension object for each of *dimension_dicts*."""
+        return cls(dimension_dicts)._iter_dimensions()
+
+    def _iter_dimensions(self):
+        """Generate Dimension object for each dimension dict."""
         raise NotImplementedError
 
 

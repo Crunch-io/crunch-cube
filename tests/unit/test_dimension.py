@@ -11,13 +11,14 @@ import pytest
 
 from cr.cube.dimension import (
     AllDimensions, _AllElements, _BaseDimensions, _BaseElement,
-    _BaseElements, _Category, Dimension, _Element, _Subtotal, _Subtotals,
-    _ValidElements
+    _BaseElements, _Category, Dimension, _DimensionFactory, _Element,
+    _Subtotal, _Subtotals, _ValidElements
 )
 from cr.cube.enum import DIMENSION_TYPE as DT
 
 from ..unitutil import (
-    call, class_mock, instance_mock, method_mock, property_mock
+    ANY, call, class_mock, initializer_mock, instance_mock, method_mock,
+    property_mock
 )
 
 
@@ -68,6 +69,35 @@ class DescribeAllDimensions(object):
     @pytest.fixture
     def _DimensionFactory_(self, request):
         return class_mock(request, 'cr.cube.dimension._DimensionFactory')
+
+
+class Describe_DimensionFactory(object):
+
+    def it_provides_an_interface_classmethod(
+            self, request, _init_, _iter_dimensions_):
+        dimension_dicts_ = [{'d': 0}, {'d': 1}, {'d': 2}]
+        dimensions_ = tuple(
+            instance_mock(request, Dimension, name='dim-%d' % idx)
+            for idx in range(3)
+        )
+        _iter_dimensions_.return_value = iter(dimensions_)
+
+        dimension_iter = _DimensionFactory.iter_dimensions(dimension_dicts_)
+
+        # ---ANY is for dimension_factory object (self), which we can't see---
+        _init_.assert_called_once_with(ANY, dimension_dicts_)
+        _iter_dimensions_.assert_called_once_with(ANY)
+        assert tuple(dimension_iter) == dimensions_
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _init_(self, request):
+        return initializer_mock(request, _DimensionFactory)
+
+    @pytest.fixture
+    def _iter_dimensions_(self, request):
+        return method_mock(request, _DimensionFactory, '_iter_dimensions')
 
 
 class DescribeDimension(object):
