@@ -163,6 +163,17 @@ class Describe_DimensionFactory(object):
         return property_mock(request, _DimensionFactory, '_raw_dimensions')
 
 
+class Describe_RawDimension(object):
+
+    def it_provides_access_to_the_dimension_dict(self):
+        dimension_dict_ = {'dimension': 'dict'}
+        raw_dimension = _RawDimension(dimension_dict_, None)
+
+        dimension_dict = raw_dimension.dimension_dict
+
+        assert dimension_dict == dimension_dict_
+
+
 class DescribeDimension(object):
 
     def it_knows_its_description(self, description_fixture):

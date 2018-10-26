@@ -103,7 +103,7 @@ class _RawDimension(object):
     @lazyproperty
     def dimension_dict(self):
         """dict defining this dimension in cube response."""
-        raise NotImplementedError
+        return self._dimension_dict
 
     @lazyproperty
     def dimension_type(self):
