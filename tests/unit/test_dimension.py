@@ -117,6 +117,24 @@ class Describe_DimensionFactory(object):
             call(dimension_dicts_[2], dimension_types_[2])
         ]
 
+    def it_constructs_RawDimension_objects_to_help(
+            self, request, dimension_dicts_, _RawDimension_):
+        raw_dimensions_ = tuple(
+            instance_mock(request, _RawDimension, name='raw-dim-%d' % idx)
+            for idx in range(3)
+        )
+        _RawDimension_.side_effect = iter(raw_dimensions_)
+        dimension_factory = _DimensionFactory(dimension_dicts_)
+
+        raw_dimensions = dimension_factory._raw_dimensions
+
+        assert _RawDimension_.call_args_list == [
+            call(dimension_dicts_[0], dimension_dicts_),
+            call(dimension_dicts_[1], dimension_dicts_),
+            call(dimension_dicts_[2], dimension_dicts_)
+        ]
+        assert raw_dimensions == raw_dimensions_
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -135,6 +153,10 @@ class Describe_DimensionFactory(object):
     @pytest.fixture
     def _iter_dimensions_(self, request):
         return method_mock(request, _DimensionFactory, '_iter_dimensions')
+
+    @pytest.fixture
+    def _RawDimension_(self, request):
+        return class_mock(request, 'cr.cube.dimension._RawDimension')
 
     @pytest.fixture
     def _raw_dimensions_prop_(self, request):

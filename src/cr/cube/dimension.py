@@ -82,7 +82,10 @@ class _DimensionFactory(object):
     @lazyproperty
     def _raw_dimensions(self):
         """Sequence of _RawDimension objects wrapping each dimension dict."""
-        raise NotImplementedError
+        return tuple(
+            _RawDimension(dimension_dict, self._dimension_dicts)
+            for dimension_dict in self._dimension_dicts
+        )
 
 
 class _RawDimension(object):
@@ -92,6 +95,10 @@ class _RawDimension(object):
     partial parsing of both the dimension dict and its siblings. This class
     abstracts that access for clarity.
     """
+
+    def __init__(self, dimension_dict, dimension_dicts):
+        self._dimension_dict = dimension_dict
+        self._dimension_dicts = dimension_dicts
 
     @lazyproperty
     def dimension_dict(self):
