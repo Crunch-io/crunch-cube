@@ -10,8 +10,9 @@ import numpy as np
 import pytest
 
 from cr.cube.dimension import (
-    _AllElements, _BaseDimensions, _BaseElement, _BaseElements, _Category,
-    Dimension, _Element, _Subtotal, _Subtotals, _ValidElements
+    AllDimensions, _AllElements, _BaseDimensions, _BaseElement,
+    _BaseElements, _Category, Dimension, _Element, _Subtotal, _Subtotals,
+    _ValidElements
 )
 from cr.cube.enum import DIMENSION_TYPE as DT
 
@@ -41,6 +42,32 @@ class Describe_BaseDimensions(object):
     @pytest.fixture
     def _dimensions_prop_(self, request):
         return property_mock(request, _BaseDimensions, '_dimensions')
+
+
+class DescribeAllDimensions(object):
+
+    def it_stores_its_dimensions_in_a_tuple_to_help(
+            self, request, _DimensionFactory_):
+        dimension_dicts_ = [{'d': 0}, {'d': 1}, {'d': 2}]
+        dimensions_ = tuple(
+            instance_mock(request, Dimension, name='dim-%d' % idx)
+            for idx in range(3)
+        )
+        _DimensionFactory_.iter_dimensions.return_value = iter(dimensions_)
+        all_dimensions = AllDimensions(dimension_dicts_)
+
+        dimensions = all_dimensions._dimensions
+
+        _DimensionFactory_.iter_dimensions.assert_called_once_with(
+            dimension_dicts_
+        )
+        assert dimensions == dimensions_
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _DimensionFactory_(self, request):
+        return class_mock(request, 'cr.cube.dimension._DimensionFactory')
 
 
 class DescribeDimension(object):

@@ -41,6 +41,31 @@ class AllDimensions(_BaseDimensions):
     def __init__(self, dimension_dicts):
         self._dimension_dicts = dimension_dicts
 
+    @lazyproperty
+    def _dimensions(self):
+        """tuple of dimension objects in this collection.
+
+        This composed tuple is the internal source for the dimension objects
+        in this collection.
+        """
+        return tuple(
+            _DimensionFactory.iter_dimensions(self._dimension_dicts)
+        )
+
+
+class _DimensionFactory(object):
+    """Produce Dimension objects of correct type from dimension-dicts.
+
+    "type" here is primarily the `.dimension_type` value of the dimension,
+    although if `Dimension` becomes an object hierarchy, this factory would
+    make dimension class choices as well.
+    """
+
+    @classmethod
+    def iter_dimensions(cls, dimension_dicts):
+        """Generate Dimension object for each of *dimension_dicts*."""
+        raise NotImplementedError
+
 
 class Dimension(object):
     """Represents one dimension of a cube response.
