@@ -71,7 +71,45 @@ class _DimensionFactory(object):
 
     def _iter_dimensions(self):
         """Generate Dimension object for each dimension dict."""
+        return (
+            NewDimension(
+                raw_dimension.dimension_dict,
+                raw_dimension.dimension_type
+            )
+            for raw_dimension in self._raw_dimensions
+        )
+
+    @lazyproperty
+    def _raw_dimensions(self):
+        """Sequence of _RawDimension objects wrapping each dimension dict."""
         raise NotImplementedError
+
+
+class _RawDimension(object):
+    """Thin wrapper around dimension-dict to support dimension-type discovery.
+
+    Determining dimension-type is pretty complex and requires repeated
+    partial parsing of both the dimension dict and its siblings. This class
+    abstracts that access for clarity.
+    """
+
+    @lazyproperty
+    def dimension_dict(self):
+        """dict defining this dimension in cube response."""
+        raise NotImplementedError
+
+    @lazyproperty
+    def dimension_type(self):
+        """Return member of DIMENSION_TYPE appropriate to dimension_dict."""
+        raise NotImplementedError
+
+
+class NewDimension(object):
+    """Temporary placeholder to be incorporated into Dimension shortly."""
+
+    def __init__(self, dimension_dict, dimension_type):
+        self._dimension_dict = dimension_dict
+        self._dimension_type = dimension_type
 
 
 class Dimension(object):

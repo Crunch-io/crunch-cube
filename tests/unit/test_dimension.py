@@ -12,7 +12,7 @@ import pytest
 from cr.cube.dimension import (
     AllDimensions, _AllElements, _BaseDimensions, _BaseElement,
     _BaseElements, _Category, Dimension, _DimensionFactory, _Element,
-    _Subtotal, _Subtotals, _ValidElements
+    _RawDimension, _Subtotal, _Subtotals, _ValidElements
 )
 from cr.cube.enum import DIMENSION_TYPE as DT
 
@@ -74,8 +74,7 @@ class DescribeAllDimensions(object):
 class Describe_DimensionFactory(object):
 
     def it_provides_an_interface_classmethod(
-            self, request, _init_, _iter_dimensions_):
-        dimension_dicts_ = [{'d': 0}, {'d': 1}, {'d': 2}]
+            self, request, dimension_dicts_, _init_, _iter_dimensions_):
         dimensions_ = tuple(
             instance_mock(request, Dimension, name='dim-%d' % idx)
             for idx in range(3)
@@ -89,7 +88,45 @@ class Describe_DimensionFactory(object):
         _iter_dimensions_.assert_called_once_with(ANY)
         assert tuple(dimension_iter) == dimensions_
 
+    def it_generates_the_dimensions_for_a_cube(
+            self, request, dimension_dicts_, _raw_dimensions_prop_,
+            NewDimension_):
+        dimension_types_ = (DT.CAT, DT.CA_SUBVAR, DT.CA_CAT)
+        _raw_dimensions_prop_.return_value = tuple(
+            instance_mock(
+                request, _RawDimension, name='raw-dim-%d' % idx,
+                dimension_dict=dimension_dicts_[idx],
+                dimension_type=dimension_types_[idx]
+            )
+            for idx in range(3)
+        )
+        dimensions_ = tuple(
+            instance_mock(request, Dimension, name='dim-%d' % idx)
+            for idx in range(3)
+        )
+        NewDimension_.side_effect = iter(dimensions_)
+        dimension_factory = _DimensionFactory(None)
+
+        dimension_iter = dimension_factory._iter_dimensions()
+
+        # ---exercising the iterator needs to come first---
+        assert tuple(dimension_iter) == dimensions_
+        assert NewDimension_.call_args_list == [
+            call(dimension_dicts_[0], dimension_types_[0]),
+            call(dimension_dicts_[1], dimension_types_[1]),
+            call(dimension_dicts_[2], dimension_types_[2])
+        ]
+
     # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def NewDimension_(self, request):
+        return class_mock(request, 'cr.cube.dimension.NewDimension')
+
+    @pytest.fixture
+    def dimension_dicts_(self, request):
+        """Tuple of three shallow dimension-dict placeholders."""
+        return ({'d': 0}, {'d': 1}, {'d': 2})
 
     @pytest.fixture
     def _init_(self, request):
@@ -98,6 +135,10 @@ class Describe_DimensionFactory(object):
     @pytest.fixture
     def _iter_dimensions_(self, request):
         return method_mock(request, _DimensionFactory, '_iter_dimensions')
+
+    @pytest.fixture
+    def _raw_dimensions_prop_(self, request):
+        return property_mock(request, _DimensionFactory, '_raw_dimensions')
 
 
 class DescribeDimension(object):
