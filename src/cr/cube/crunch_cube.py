@@ -160,25 +160,6 @@ class CrunchCube(object):
         """Get cube's filter annotation."""
         return self._cube.get('filter_names', [])
 
-    def flat_values(self, weighted, margin=False):
-        """Return list of measure values as found in cube response.
-
-        If *weighted* is True, weighted counts are returned if present in the
-        cube. Otherwise, unweighted counts are returned. If *margin* is True,
-        counts are returned even if mean values are present, which may be
-        preferred for example when calculating a margin.
-        """
-        values = self._cube['result']['counts']
-        if self.has_means and not margin:
-            mean = self._cube['result']['measures'].get('mean', {})
-            values = mean.get('data', values)
-        elif weighted and self.is_weighted:
-            count = self._cube['result']['measures'].get('count', {})
-            values = count.get('data', values)
-        values = [(val if not type(val) is dict else np.nan)
-                  for val in values]
-        return values
-
     def get_slices(self, ca_as_0th=False):
         """Return list of :class:`.CubeSlice` objects.
 
@@ -915,7 +896,7 @@ class CrunchCube(object):
         Returns
             res (ndarray): Tabular representation of crunch cube
         """
-        values = self.flat_values(weighted, margin)
+        values = self._flat_values(weighted, margin)
         dimensions = self._all_dimensions
         shape = [len(dim.elements(include_missing=True)) for dim in dimensions]
         res = np.array(values).reshape(shape)
@@ -1004,7 +985,7 @@ class CrunchCube(object):
         cube, with 2 categories in each dimension (variable), we end up with
         a ndarray of shape (2, 2).
         """
-        values = self.flat_values(weighted, margin)
+        values = self._flat_values(weighted, margin)
         return np.array(values).reshape(self._shape)
 
     def _fix_shape(self, array, fix_valids=False):
@@ -1060,6 +1041,25 @@ class CrunchCube(object):
         indices = np.insert(indices, slice_index, insertion_index + 1)
         valid_indices[dim] = indices.tolist()
         return valid_indices
+
+    def _flat_values(self, weighted, margin=False):
+        """Return list of measure values as found in cube response.
+
+        If *weighted* is True, weighted counts are returned if present in the
+        cube. Otherwise, unweighted counts are returned. If *margin* is True,
+        counts are returned even if mean values are present, which may be
+        preferred for example when calculating a margin.
+        """
+        values = self._cube['result']['counts']
+        if self.has_means and not margin:
+            mean = self._cube['result']['measures'].get('mean', {})
+            values = mean.get('data', values)
+        elif weighted and self.is_weighted:
+            count = self._cube['result']['measures'].get('count', {})
+            values = count.get('data', values)
+        values = [(val if not type(val) is dict else np.nan)
+                  for val in values]
+        return values
 
     def _inserted_dim_inds(self, transform_dims, axis):
         dim_ind = axis if self.ndim < 3 else axis + 1
