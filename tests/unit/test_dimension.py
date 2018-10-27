@@ -173,6 +173,56 @@ class Describe_RawDimension(object):
 
         assert dimension_dict == dimension_dict_
 
+    def it_determines_the_dimension_type(
+            self, dim_type_fixture, _base_type_prop_, _resolve_categorical_,
+            _resolve_array_type_):
+        base_type, cat_type, arr_type, expected_value = dim_type_fixture
+        _base_type_prop_.return_value = base_type
+        _resolve_categorical_.return_value = cat_type if cat_type else None
+        _resolve_array_type_.return_value = arr_type if arr_type else None
+        raw_dimension = _RawDimension(None, None)
+        resolve_cat_calls = [call(raw_dimension)] if cat_type else []
+        resolve_arr_calls = [call(raw_dimension)] if arr_type else []
+
+        dimension_type = raw_dimension.dimension_type
+
+        assert _resolve_categorical_.call_args_list == resolve_cat_calls
+        assert _resolve_array_type_.call_args_list == resolve_arr_calls
+        assert dimension_type == expected_value
+
+    def but_it_raises_on_unrecognized_base_type(self, _base_type_prop_):
+        raw_dimension = _RawDimension(None, None)
+        _base_type_prop_.return_value = 'hyper.dimensional'
+        with pytest.raises(NotImplementedError):
+            raw_dimension.dimension_type
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture(params=[
+        ('categorical', DT.CAT, None, DT.CAT),
+        ('enum.variable', None, DT.MR, DT.MR),
+        ('enum.datetime', None, None, DT.DATETIME),
+        ('enum.numeric', None, None, DT.BINNED_NUMERIC),
+        ('enum.text', None, None, DT.TEXT),
+    ])
+    def dim_type_fixture(self, request):
+        base_type, cat_type, arr_type, expected_value = request.param
+        return base_type, cat_type, arr_type, expected_value
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _base_type_prop_(self, request):
+        return property_mock(request, _RawDimension, '_base_type')
+
+    @pytest.fixture
+    def _resolve_array_type_(self, request):
+        return method_mock(request, _RawDimension, '_resolve_array_type')
+
+    @pytest.fixture
+    def _resolve_categorical_(self, request):
+        return method_mock(request, _RawDimension, '_resolve_categorical')
+
 
 class DescribeDimension(object):
 

@@ -108,6 +108,48 @@ class _RawDimension(object):
     @lazyproperty
     def dimension_type(self):
         """Return member of DIMENSION_TYPE appropriate to dimension_dict."""
+        base_type = self._base_type
+        if base_type == 'categorical':
+            return self._resolve_categorical()
+        if base_type == 'enum.variable':
+            return self._resolve_array_type()
+        if base_type == 'enum.datetime':
+            return DT.DATETIME
+        if base_type == 'enum.numeric':
+            return DT.BINNED_NUMERIC
+        if base_type == 'enum.text':
+            return DT.TEXT
+        raise NotImplementedError(
+            'unrecognized dimension type %s' % base_type
+        )
+
+    @lazyproperty
+    def _base_type(self):
+        """Return str like 'enum.numeric' representing dimension type.
+
+        This string is a 'type.subclass' concatenation of the str keys
+        used to identify the dimension type in the cube response JSON.
+        The '.subclass' suffix only appears where a subtype is present.
+        """
+        raise NotImplementedError
+
+    def _resolve_array_type(self):
+        """Return one of the ARRAY_TYPES members of DIMENSION_TYPE.
+
+        This method distinguishes between CA and MR dimensions. The return
+        value is only meaningful if the dimension is known to be of array
+        type (i.e. either CA or MR, base-type 'enum.variable').
+        """
+        raise NotImplementedError
+
+    def _resolve_categorical(self):
+        """Return one of the categorical members of DIMENSION_TYPE.
+
+        This method distinguishes between CAT, CA_CAT, MR_CAT, and LOGICAL
+        dimension types, all of which have the base type 'categorical'. The
+        return value is only meaningful if the dimension is known to be one
+        of the categorical types (has base-type 'categorical').
+        """
         raise NotImplementedError
 
 
