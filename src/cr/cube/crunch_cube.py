@@ -715,13 +715,6 @@ class CrunchCube(object):
         dim_types = [d.dimension_type for d in self.dimensions]
         return dim_types.index('categorical')
 
-    def valid_indices_with_selections(self, include_missing=False):
-        """Get all valid indices (including MR selections)."""
-        return [
-            dim.element_indices(include_missing)
-            for dim in self._all_dimensions
-        ]
-
     def zscore(self, weighted=True, prune=False, hs_dims=None):
         """Get cube zscore measurement."""
         res = []
@@ -1314,7 +1307,7 @@ class CrunchCube(object):
                    inflate=False, fix=True, include_missing=False):
         """Transform the shape of the resulting ndarray."""
         valid_indices = (
-            self.valid_indices_with_selections(include_missing)
+            self._valid_indices_with_selections(include_missing)
             if fix else None
         )
         if not include_transforms_for_dims:
@@ -1355,3 +1348,10 @@ class CrunchCube(object):
                 )
             )
         return result, valid_indices
+
+    def _valid_indices_with_selections(self, include_missing=False):
+        """Get all valid indices (including MR selections)."""
+        return [
+            dim.element_indices(include_missing)
+            for dim in self._all_dimensions
+        ]
