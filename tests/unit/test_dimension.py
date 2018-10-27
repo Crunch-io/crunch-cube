@@ -226,6 +226,16 @@ class Describe_RawDimension(object):
 
         assert is_array_cat == expected_value
 
+    def it_resolves_an_array_type_to_help(
+            self, resolve_arr_fixture, _next_raw_dimension_prop_):
+        next_raw_dimension, expected_value = resolve_arr_fixture
+        _next_raw_dimension_prop_.return_value = next_raw_dimension
+        raw_dimension = _RawDimension(None, None)
+
+        dimension_type = raw_dimension._resolve_array_type()
+
+        assert dimension_type == expected_value
+
     def it_resolves_a_categorical_type_to_help(
             self, resolve_cat_fixture, _is_array_cat_prop_,
             _has_selected_category_prop_):
@@ -280,6 +290,17 @@ class Describe_RawDimension(object):
         return dimension_dict, expected_value
 
     @pytest.fixture(params=[
+        (False, None, None, None, DT.CA),
+    ])
+    def resolve_arr_fixture(self, request, raw_dimension_):
+        is_last, base_type, has_sel_cat, alias, expected_value = request.param
+        raw_dimension_._base_type = base_type
+        raw_dimension_._has_selected_category = has_sel_cat
+        raw_dimension_._alias = alias
+        next_raw_dimension_ = None if is_last else raw_dimension_
+        return next_raw_dimension_, expected_value
+
+    @pytest.fixture(params=[
         (False, False, DT.CAT),
         (False, True, DT.LOGICAL),
         (True, False, DT.CA_CAT),
@@ -302,6 +323,14 @@ class Describe_RawDimension(object):
     @pytest.fixture
     def _is_array_cat_prop_(self, request):
         return property_mock(request, _RawDimension, '_is_array_cat')
+
+    @pytest.fixture
+    def _next_raw_dimension_prop_(self, request):
+        return property_mock(request, _RawDimension, '_next_raw_dimension')
+
+    @pytest.fixture
+    def raw_dimension_(self, request):
+        return instance_mock(request, _RawDimension)
 
     @pytest.fixture
     def _resolve_array_type_(self, request):

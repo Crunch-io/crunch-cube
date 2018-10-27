@@ -101,6 +101,11 @@ class _RawDimension(object):
         self._dimension_dicts = dimension_dicts
 
     @lazyproperty
+    def _alias(self):
+        """Return str key for variable behind *dimension_dict*."""
+        raise NotImplementedError
+
+    @lazyproperty
     def dimension_dict(self):
         """dict defining this dimension in cube response."""
         return self._dimension_dict
@@ -163,6 +168,14 @@ class _RawDimension(object):
         """
         return 'subreferences' in self._dimension_dict['references']
 
+    @lazyproperty
+    def _next_raw_dimension(self):
+        """_RawDimension for next *dimension_dict* in sequence or None for last.
+
+        Returns None if this dimension is the last in sequence for this cube.
+        """
+        raise NotImplementedError
+
     def _resolve_array_type(self):
         """Return one of the ARRAY_TYPES members of DIMENSION_TYPE.
 
@@ -170,7 +183,16 @@ class _RawDimension(object):
         value is only meaningful if the dimension is known to be of array
         type (i.e. either CA or MR, base-type 'enum.variable').
         """
-        raise NotImplementedError
+        next_raw_dimension = self._next_raw_dimension
+        if next_raw_dimension is None:
+            return DT.CA
+
+        is_mr_subvar = (
+            next_raw_dimension._base_type == 'categorical' and
+            next_raw_dimension._has_selected_category and
+            next_raw_dimension._alias == self._alias
+        )
+        return DT.MR if is_mr_subvar else DT.CA
 
     def _resolve_categorical(self):
         """Return one of the categorical members of DIMENSION_TYPE.
