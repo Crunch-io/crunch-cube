@@ -154,10 +154,10 @@ class CrunchCube(object):
 
         A cube involving a multiple-response (MR) variable has two dimensions
         for that variable (subvariables and categories dimensions), but is
-        "collapsed" into a single effective dimension for cube-user purposes.
-        This collection will contain a single dimension for each MR variable
-        and therefore may have fewer dimensions than appear in the cube
-        response.
+        "collapsed" into a single effective dimension for cube-user purposes
+        (its categories dimension is supressed). This collection will contain
+        a single dimension for each MR variable and therefore may have fewer
+        dimensions than appear in the cube response.
         """
         return self._all_dimensions.apparent_dimensions
 
@@ -402,9 +402,21 @@ class CrunchCube(object):
 
     @lazyproperty
     def mr_dim_ind(self):
+        """Return int, tuple of int, or None, representing MR indices.
+
+        The return value represents the index of each multiple-response (MR)
+        dimension in this cube. Return value is None if there are no MR
+        dimensions, and int if there is one MR dimension, and a tuple of int
+        when there are more than one. The index is the (zero-based) position
+        of the MR dimensions in the _ApparentDimensions sequence returned by
+        the :attr"`.dimensions` property.
+        """
+        # TODO: rename to `mr_dim_idxs` or better yet get rid of need for
+        # this as it's really a cube internal characteristic.
+        # TODO: Make this return a tuple in all cases, like (), (1,), or (0, 2).
         indices = tuple(
-            i for i, dim in enumerate(self.dimensions)
-            if dim.dimension_type == DT.MR_SUBVAR
+            idx for idx, d in enumerate(self.dimensions)
+            if d.dimension_type == DT.MR_SUBVAR
         )
         if indices == ():
             return None
@@ -806,8 +818,8 @@ class CrunchCube(object):
 
         The AllDimensions object provides access to all the dimensions
         appearing in the cube response, not only apparent dimensions (those
-        that appear to a user). It also provides access to an
-        _ApparentDimensions object which contains only those user-apparent
+        that appear to a user). It also provides access to
+        an _ApparentDimensions object which contains only those user-apparent
         dimensions (basically the categories dimension of each MR
         dimension-pair is suppressed).
         """
@@ -878,8 +890,7 @@ class CrunchCube(object):
             return np.dot(prop_margin, V)
 
     def _calculate_std_res(self, counts, total, colsum, rowsum, slice_):
-        dim_types = slice_.dim_types
-        has_mr_or_ca = set(dim_types) & DT.ARRAY_TYPES
+        has_mr_or_ca = set(slice_.dim_types) & DT.ARRAY_TYPES
         if has_mr_or_ca:
             if (not self.is_double_mr and
                     (self.mr_dim_ind == 0 or
@@ -1064,6 +1075,7 @@ class CrunchCube(object):
                 return True
             axis = [axis]
 
+        # ---axis is a tuple---
         for dim_idx in axis:
             if self.dim_types[dim_idx] == DT.CA_SUBVAR:
                 # If any of the directions explicitly asked for directly
@@ -1091,7 +1103,13 @@ class CrunchCube(object):
         return pruned_ind
 
     def _prune_3d_body(self, res, transforms):
+        """Return masked array where mask indicates pruned vectors.
+
+        *res* is an ndarray (result). *transforms* is a list of ...
+        """
         mask = np.zeros(res.shape)
+        mr_dim_idxs = self.mr_dim_ind
+
         for i, prune_inds in enumerate(self._prune_indices(transforms)):
             rows_pruned = prune_inds[0]
             cols_pruned = prune_inds[1]
@@ -1104,18 +1122,19 @@ class CrunchCube(object):
             slice_mask = np.logical_or(rows_pruned, cols_pruned)
 
             # In case of MRs we need to "inflate" mask
-            if self.mr_dim_ind == (1, 2):
+            if mr_dim_idxs == (1, 2):
                 slice_mask = slice_mask[:, np.newaxis, :, np.newaxis]
-            elif self.mr_dim_ind == (0, 1):
+            elif mr_dim_idxs == (0, 1):
                 slice_mask = slice_mask[np.newaxis, :, np.newaxis, :]
-            elif self.mr_dim_ind == (0, 2):
+            elif mr_dim_idxs == (0, 2):
                 slice_mask = slice_mask[np.newaxis, :, :, np.newaxis]
-            elif self.mr_dim_ind == 1 and self.ndim == 3:
+            elif mr_dim_idxs == 1 and self.ndim == 3:
                 slice_mask = slice_mask[:, np.newaxis, :]
-            elif self.mr_dim_ind == 2 and self.ndim == 3:
+            elif mr_dim_idxs == 2 and self.ndim == 3:
                 slice_mask = slice_mask[:, :, np.newaxis]
 
             mask[i] = slice_mask
+
         res = np.ma.masked_array(res, mask=mask)
         return res
 

@@ -1,6 +1,12 @@
-from unittest import TestCase
+# encoding: utf-8
+
+"""Integrations tests for headings and subtotals behaviors."""
 
 import numpy as np
+
+from cr.cube.crunch_cube import CrunchCube
+
+from unittest import TestCase
 
 from .fixtures import (
     ADMIT_X_GENDER_WEIGHTED, CAT_X_DATE_HS_PRUNE, CAT_X_ITEMS_X_CATS_HS,
@@ -12,10 +18,9 @@ from .fixtures import (
     MR_X_CA_HS, PETS_X_FRUIT_HS, SIMPLE_CA_HS
 )
 
-from cr.cube.crunch_cube import CrunchCube
-
 
 class TestHeadersAndSubtotals(TestCase):
+
     def test_headings_econ_blame_one_subtotal(self):
         cube = CrunchCube(ECON_BLAME_WITH_HS)
         expected = [

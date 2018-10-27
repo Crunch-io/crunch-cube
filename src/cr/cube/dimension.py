@@ -267,7 +267,7 @@ class Dimension(object):
 
     @lazyproperty
     def dimension_type(self):
-        """Member of DIMENSION_TYPE representing for this cube dimension."""
+        """Member of DIMENSION_TYPE appropriate to this cube dimension."""
         return self._dimension_type
 
     @memoize

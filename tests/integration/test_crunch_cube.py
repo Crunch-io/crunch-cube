@@ -871,9 +871,8 @@ class TestCrunchCube(TestCase):
 
     def test_pets_x_pets_is_double_mr(self):
         cube = CrunchCube(PETS_X_PETS)
-        expected = True
-        actual = cube.is_double_mr
-        self.assertEqual(actual, expected)
+        is_double_mr = cube.is_double_mr
+        self.assertEqual(is_double_mr, True)
 
     def test_pets_x_pets_as_array(self):
         cube = CrunchCube(PETS_X_PETS)
@@ -1396,6 +1395,7 @@ class TestCrunchCube(TestCase):
         self.assertEqual(actual, expected)
 
     def test_3d_percentages_by_col(self):
+        # ---CAT x CAT x CAT---
         cube = CrunchCube(GENDER_PARTY_RACE)
         expected = np.array([
             [[.17647059, 0., 0., 0., 0., 0., 0., 0.],
@@ -1404,8 +1404,7 @@ class TestCrunchCube(TestCase):
              [.11764706, .05882353, 0., 0.05882353, 0., 0.05882353, 0., 0.]],
 
             [[.04761905, 0., 0., 0.04761905, 0., 0., 0., 0.],
-             [.14285714, .04761905, .0952381, .04761905, 0., .04761905, 0.,
-              0.],
+             [.14285714, .04761905, .0952381, .04761905, 0., .04761905, 0., 0.],
              [.23809524, 0., 0.04761905, 0., 0., 0., 0., 0.],
              [.19047619, 0., 0.04761905, 0., 0., 0., 0., 0.]]
         ])
@@ -1722,13 +1721,18 @@ class TestCrunchCube(TestCase):
         np.testing.assert_array_equal(actual, expected)
 
     def test_ca_x_mr_margin_prune(self):
+        # ---CA x MR---
         cube = CrunchCube(CA_X_MR_WEIGHTED_HS)
-        expected = np.array([504, 215, 224, 76, 8, 439])
-        actual = cube.margin(
+
+        margin = cube.margin(
             axis=1, weighted=False, include_transforms_for_dims=[0, 1, 2],
             prune=True,
         )[0]
-        np.testing.assert_array_equal(actual, expected)
+
+        np.testing.assert_array_equal(
+            margin,
+            np.array([504, 215, 224, 76, 8, 439])
+        )
 
     def test_mr_x_cat_x_mr_pruning(self):
         cube = CrunchCube(MR_X_CAT_X_MR_PRUNE)
