@@ -226,6 +226,28 @@ class Describe_RawDimension(object):
 
         assert is_array_cat == expected_value
 
+    def it_finds_the_subsequent_raw_dimension_to_help(
+            self, request, dimension_dicts_):
+        dimension_dict_ = dimension_dicts_[1]
+        next_dimension_dict_ = dimension_dicts_[2]
+        raw_dimension = _RawDimension(dimension_dict_, dimension_dicts_)
+        # --initializer must be mocked after contructing raw_dimension
+        # --otherwise it would have no instance variables
+        _init_ = initializer_mock(request, _RawDimension)
+
+        next_raw_dimension = raw_dimension._next_raw_dimension
+
+        _init_.assert_called_once_with(
+            next_raw_dimension, next_dimension_dict_, dimension_dicts_
+        )
+        assert type(next_raw_dimension).__name__ == '_RawDimension'
+
+    def but_it_returns_None_for_the_last_dimension(self, dimension_dicts_):
+        dimension_dict_ = dimension_dicts_[2]
+        raw_dimension = _RawDimension(dimension_dict_, dimension_dicts_)
+        next_raw_dimension = raw_dimension._next_raw_dimension
+        assert next_raw_dimension is None
+
     def it_resolves_an_array_type_to_help(
             self, resolve_arr_fixture, _next_raw_dimension_prop_):
         next_raw_dimension, expected_value = resolve_arr_fixture
@@ -315,6 +337,10 @@ class Describe_RawDimension(object):
     @pytest.fixture
     def _base_type_prop_(self, request):
         return property_mock(request, _RawDimension, '_base_type')
+
+    @pytest.fixture
+    def dimension_dicts_(self):
+        return ({'dim', 0}, {'dim', 1}, {'dim', 2})
 
     @pytest.fixture
     def _has_selected_category_prop_(self, request):
