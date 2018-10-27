@@ -181,7 +181,7 @@ class TestCrunchCube(TestCase):
         )
         self.assertEqual(actual, expected)
 
-    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [])
+    @patch('cr.cube.crunch_cube.CrunchCube._all_dimensions', [])
     @patch('cr.cube.crunch_cube.CrunchCube.mr_selections_indices')
     def test_does_not_have_multiple_response(self, mock_mr_indices):
         mock_mr_indices.return_value = []
@@ -365,7 +365,7 @@ class TestCrunchCube(TestCase):
         actual = cc._inserted_dim_inds([0], 0)
         mock_inserted_hs_indices.assert_called_once()
 
-    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+    @patch('cr.cube.crunch_cube.CrunchCube._all_dimensions', [
         Mock(dimension_type='categorical', is_selections=False),
         Mock(dimension_type='categorical', is_selections=False),
     ])
@@ -391,7 +391,7 @@ class TestCrunchCube(TestCase):
         actual = adjust((0, 1))
         assert actual == expected
 
-    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+    @patch('cr.cube.crunch_cube.CrunchCube._all_dimensions', [
         Mock(dimension_type='categorical', is_selections=False),
         Mock(dimension_type='categorical', is_selections=False),
         Mock(dimension_type='categorical', is_selections=False),
@@ -423,7 +423,7 @@ class TestCrunchCube(TestCase):
         actual = adjust((1, 2))
         assert actual == expected
 
-    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+    @patch('cr.cube.crunch_cube.CrunchCube._all_dimensions', [
         Mock(dimension_type='multiple_response'),
         Mock(dimension_type='categorical', is_selections=True),
     ])
@@ -442,7 +442,7 @@ class TestCrunchCube(TestCase):
         actual = adjust(None)
         assert actual == expected
 
-    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+    @patch('cr.cube.crunch_cube.CrunchCube._all_dimensions', [
         Mock(dimension_type='categorical', is_selections=False),
         Mock(dimension_type='multiple_response'),
         Mock(dimension_type='categorical', is_selections=True),
@@ -469,7 +469,7 @@ class TestCrunchCube(TestCase):
         actual = adjust((0, 1))
         assert actual == expected
 
-    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+    @patch('cr.cube.crunch_cube.CrunchCube._all_dimensions', [
         Mock(dimension_type='multiple_response', is_selections=False),
         Mock(dimension_type='categorical', is_selections=True),
         Mock(dimension_type='categorical', is_selections=False),
@@ -496,7 +496,7 @@ class TestCrunchCube(TestCase):
         actual = adjust((0, 1))
         assert actual == expected
 
-    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+    @patch('cr.cube.crunch_cube.CrunchCube._all_dimensions', [
         Mock(dimension_type='multiple_response', is_selections=False),
         Mock(dimension_type='categorical', is_selections=True),
         Mock(dimension_type='multiple_response', is_selections=False),
@@ -524,7 +524,7 @@ class TestCrunchCube(TestCase):
         actual = adjust((0, 1))
         assert actual == expected
 
-    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+    @patch('cr.cube.crunch_cube.CrunchCube._all_dimensions', [
         Mock(dimension_type='categorical', is_selections=False),
         Mock(dimension_type='multiple_response', is_selections=False),
         Mock(dimension_type='categorical', is_selections=True),
@@ -558,7 +558,7 @@ class TestCrunchCube(TestCase):
         actual = adjust((1, 2))
         assert actual == expected
 
-    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+    @patch('cr.cube.crunch_cube.CrunchCube._all_dimensions', [
         Mock(dimension_type='multiple_response', is_selections=False),
         Mock(dimension_type='categorical', is_selections=True),
         Mock(dimension_type='categorical', is_selections=False),
@@ -592,7 +592,7 @@ class TestCrunchCube(TestCase):
         actual = adjust((1, 2))
         assert actual == expected
 
-    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+    @patch('cr.cube.crunch_cube.CrunchCube._all_dimensions', [
         Mock(dimension_type='multiple_response', is_selections=False),
         Mock(dimension_type='categorical', is_selections=True),
         Mock(dimension_type='multiple_response', is_selections=False),
@@ -626,7 +626,7 @@ class TestCrunchCube(TestCase):
         actual = adjust((1, 2))
         assert actual == expected
 
-    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+    @patch('cr.cube.crunch_cube.CrunchCube._all_dimensions', [
         Mock(dimension_type='categorical_array', is_selections=False),
         Mock(dimension_type='categorical', is_selections=False),
     ])
@@ -650,7 +650,7 @@ class TestCrunchCube(TestCase):
         with self.assertRaises(ValueError):
             adjust((0, 1))
 
-    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+    @patch('cr.cube.crunch_cube.CrunchCube._all_dimensions', [
         Mock(dimension_type='categorical_array', is_selections=False),
         Mock(dimension_type='categorical', is_selections=False),
         Mock(dimension_type='categorical', is_selections=False),
@@ -682,7 +682,7 @@ class TestCrunchCube(TestCase):
         actual = adjust((1, 2))
         assert actual == expected
 
-    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+    @patch('cr.cube.crunch_cube.CrunchCube._all_dimensions', [
         Mock(dimension_type='categorical', is_selections=False),
         Mock(dimension_type='categorical_array', is_selections=False),
         Mock(dimension_type='categorical', is_selections=False),
@@ -707,7 +707,7 @@ class TestCrunchCube(TestCase):
         with self.assertRaises(ValueError):
             adjust((1, 2))
 
-    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+    @patch('cr.cube.crunch_cube.CrunchCube._all_dimensions', [
         Mock(dimension_type='categorical_array', is_selections=False),
         Mock(dimension_type='categorical', is_selections=False),
         Mock(dimension_type='multiple_response', is_selections=False),
@@ -741,7 +741,7 @@ class TestCrunchCube(TestCase):
         actual = adjust((1, 2))
         assert expected == actual
 
-    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+    @patch('cr.cube.crunch_cube.CrunchCube._all_dimensions', [
         Mock(dimension_type='multiple_response', is_selections=False),
         Mock(dimension_type='categorical', is_selections=True),
         Mock(dimension_type='categorical_array', is_selections=False),
@@ -776,7 +776,7 @@ class TestCrunchCube(TestCase):
             # and error, since adding across items (subvars) is not allowed.
             adjust((1, 2))
 
-    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+    @patch('cr.cube.crunch_cube.CrunchCube._all_dimensions', [
         Mock(dimension_type='categorical_array', is_selections=False),
         Mock(dimension_type='categorical', is_selections=False),
     ])
@@ -788,7 +788,7 @@ class TestCrunchCube(TestCase):
         assert is_allowed(1)
         assert is_allowed(None) is False
 
-    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+    @patch('cr.cube.crunch_cube.CrunchCube._all_dimensions', [
         Mock(dimension_type='categorical_array', is_selections=False),
         Mock(dimension_type='categorical', is_selections=False),
         Mock(dimension_type='categorical', is_selections=False),
@@ -803,7 +803,7 @@ class TestCrunchCube(TestCase):
         assert is_allowed(None)
         assert is_allowed((1, 2))
 
-    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+    @patch('cr.cube.crunch_cube.CrunchCube._all_dimensions', [
         Mock(dimension_type='categorical', is_selections=False),
         Mock(dimension_type='categorical_array', is_selections=False),
         Mock(dimension_type='categorical', is_selections=False),
@@ -818,7 +818,7 @@ class TestCrunchCube(TestCase):
         assert is_allowed(None) is False
         assert is_allowed((1, 2)) is False
 
-    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+    @patch('cr.cube.crunch_cube.CrunchCube._all_dimensions', [
         Mock(dimension_type='multiple_response', is_selections=False),
         Mock(dimension_type='categorical', is_selections=True),
         Mock(dimension_type='categorical_array', is_selections=False),
@@ -834,7 +834,7 @@ class TestCrunchCube(TestCase):
         assert is_allowed(None) is False
         assert is_allowed((1, 2)) is False
 
-    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+    @patch('cr.cube.crunch_cube.CrunchCube._all_dimensions', [
         Mock(dimension_type='categorical_array', is_selections=False),
         Mock(dimension_type='categorical', is_selections=False),
         Mock(dimension_type='multiple_response', is_selections=False),
@@ -850,7 +850,7 @@ class TestCrunchCube(TestCase):
         assert is_allowed(None)
         assert is_allowed((1, 2))
 
-    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+    @patch('cr.cube.crunch_cube.CrunchCube._all_dimensions', [
         Mock(dimension_type='categorical', is_selections=False),
     ])
     def test_axis_allowed_univ_cat(self):
@@ -860,7 +860,7 @@ class TestCrunchCube(TestCase):
         assert is_allowed(0)
         assert is_allowed(None)
 
-    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+    @patch('cr.cube.crunch_cube.CrunchCube._all_dimensions', [
         Mock(dimension_type='categorical', is_selections=False),
         Mock(dimension_type='categorical', is_selections=False),
     ])
@@ -873,7 +873,7 @@ class TestCrunchCube(TestCase):
         assert is_allowed(None)
         assert is_allowed((0, 1))
 
-    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+    @patch('cr.cube.crunch_cube.CrunchCube._all_dimensions', [
         Mock(dimension_type='categorical', is_selections=False),
         Mock(dimension_type='multiple_response', is_selections=False),
         Mock(dimension_type='categorical', is_selections=True),
@@ -890,7 +890,7 @@ class TestCrunchCube(TestCase):
         assert is_allowed(None)
         assert is_allowed((1, 2))
 
-    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+    @patch('cr.cube.crunch_cube.CrunchCube._all_dimensions', [
         Mock(dimension_type='multiple_response', is_selections=False),
         Mock(dimension_type='categorical', is_selections=True),
         Mock(dimension_type='categorical', is_selections=False),
@@ -907,7 +907,7 @@ class TestCrunchCube(TestCase):
         assert is_allowed(None)
         assert is_allowed((1, 2))
 
-    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+    @patch('cr.cube.crunch_cube.CrunchCube._all_dimensions', [
         Mock(dimension_type='multiple_response', is_selections=False),
         Mock(dimension_type='categorical', is_selections=True),
         Mock(dimension_type='multiple_response', is_selections=False),
@@ -924,7 +924,7 @@ class TestCrunchCube(TestCase):
         assert is_allowed(None)
         assert is_allowed((1, 2))
 
-    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+    @patch('cr.cube.crunch_cube.CrunchCube._all_dimensions', [
         Mock(dimension_type='categorical_array', is_selections=False),
         Mock(dimension_type='categorical', is_selections=True),
     ])
@@ -934,7 +934,7 @@ class TestCrunchCube(TestCase):
         expected = 0
         assert actual == expected
 
-    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+    @patch('cr.cube.crunch_cube.CrunchCube._all_dimensions', [
         Mock(dimension_type='categorical', is_selections=False),
         Mock(dimension_type='categorical_array', is_selections=True),
     ])
@@ -944,7 +944,7 @@ class TestCrunchCube(TestCase):
         expected = 1
         assert actual == expected
 
-    @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
+    @patch('cr.cube.crunch_cube.CrunchCube._all_dimensions', [
         Mock(dimension_type='categorical', is_selections=False),
         Mock(dimension_type='categorical', is_selections=True),
     ])

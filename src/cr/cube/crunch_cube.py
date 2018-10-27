@@ -82,37 +82,6 @@ class CrunchCube(object):
             text += str(slice_)
         return text
 
-    @lazyproperty
-    def all_dimensions(self):
-        """Gets the dimensions of the crunch cube.
-
-        This function is internal, and is not mean to be used by ouside users
-        of the CrunchCube class. The main reason for this is the internal
-        representation of the different variable types (namely the MR and the
-        CA). These types have two dimensions each, but in the case of MR, the
-        second dimensions shouldn't be visible to the user. This function
-        returns such dimensions as well, since they're necessary for the
-        correct implementation of the functionality for the MR type.
-        The version that is mentioned to be used by users is the
-        property 'dimensions'.
-        """
-        entries = self._cube['result']['dimensions']
-        return [
-            (
-                # Multiple Response and Categorical Array variables have
-                # two subsequent dimensions (elements and selections). For
-                # this reason it's necessary to pass in both of them in the
-                # Dimension class init method. This is needed in order to
-                # determine the correct type (CA or MR). We only skip the
-                # two-argument constructor for the last dimension in the list
-                # (where it's not possible to fetch the subsequent one).
-                Dimension(entry)
-                if i + 1 >= len(entries)
-                else Dimension(entry, entries[i + 1])
-            )
-            for (i, entry) in enumerate(entries)
-        ]
-
     def as_array(self, include_missing=False, weighted=True, adjusted=False,
                  include_transforms_for_dims=None, prune=False, margin=False):
         """Return `ndarray` representing cube values.
@@ -205,7 +174,7 @@ class CrunchCube(object):
     def dimensions(self):
         """Dimensions of the crunch cube."""
         return [
-            dim for (i, dim) in enumerate(self.all_dimensions)
+            dim for (i, dim) in enumerate(self._all_dimensions)
             if i not in self.mr_selections_indices
         ]
 
@@ -435,13 +404,13 @@ class CrunchCube(object):
                 (
                     None
                     if (
-                        d.is_mr_selections(self.all_dimensions) or
+                        d.is_mr_selections(self._all_dimensions) or
                         n <= 1 or
                         len(d.elements()) <= 1
                     ) else
                     slice(None)
                 )
-                for d, n in zip(self.all_dimensions, table.shape)
+                for d, n in zip(self._all_dimensions, table.shape)
             )
             mask = np.logical_or(
                 np.zeros(den.shape, dtype=bool),
@@ -450,7 +419,7 @@ class CrunchCube(object):
             den = np.ma.masked_array(den, mask)
 
         if (self.ndim != 1 or axis is None or
-                axis == 0 and len(self.all_dimensions) == 1):
+                axis == 0 and len(self._all_dimensions) == 1):
             # Special case for 1D cube wigh MR, for "Table" direction
             den = np.sum(den, axis=new_axis)[index]
 
@@ -486,8 +455,8 @@ class CrunchCube(object):
         the 'selections' dimension for each MR variable.
         """
         mr_dimensions_indices = [
-            i for (i, dim) in enumerate(self.all_dimensions)
-            if (i + 1 < len(self.all_dimensions) and
+            i for (i, dim) in enumerate(self._all_dimensions)
+            if (i + 1 < len(self._all_dimensions) and
                 dim.dimension_type == 'multiple_response')
         ]
 
@@ -815,7 +784,7 @@ class CrunchCube(object):
         """Get all valid indices (including MR selections)."""
         return [
             dim.element_indices(include_missing)
-            for dim in self.all_dimensions
+            for dim in self._all_dimensions
         ]
 
     def zscore(self, weighted=True, prune=False, hs_dims=None):
@@ -916,6 +885,37 @@ class CrunchCube(object):
                 inserted_inds[i] = ind
         return updated_inserted
 
+    @lazyproperty
+    def _all_dimensions(self):
+        """Gets the dimensions of the crunch cube.
+
+        This function is internal, and is not mean to be used by ouside users
+        of the CrunchCube class. The main reason for this is the internal
+        representation of the different variable types (namely the MR and the
+        CA). These types have two dimensions each, but in the case of MR, the
+        second dimensions shouldn't be visible to the user. This function
+        returns such dimensions as well, since they're necessary for the
+        correct implementation of the functionality for the MR type.
+        The version that is mentioned to be used by users is the
+        property 'dimensions'.
+        """
+        entries = self._cube['result']['dimensions']
+        return [
+            (
+                # Multiple Response and Categorical Array variables have
+                # two subsequent dimensions (elements and selections). For
+                # this reason it's necessary to pass in both of them in the
+                # Dimension class init method. This is needed in order to
+                # determine the correct type (CA or MR). We only skip the
+                # two-argument constructor for the last dimension in the list
+                # (where it's not possible to fetch the subsequent one).
+                Dimension(entry)
+                if i + 1 >= len(entries)
+                else Dimension(entry, entries[i + 1])
+            )
+            for (i, entry) in enumerate(entries)
+        ]
+
     def _as_array(self, include_missing=False, get_non_selected=False,
                   weighted=True, adjusted=False,
                   include_transforms_for_dims=False,
@@ -939,7 +939,7 @@ class CrunchCube(object):
             res (ndarray): Tabular representation of crunch cube
         """
         values = self.flat_values(weighted, margin)
-        dimensions = self.all_dimensions
+        dimensions = self._all_dimensions
         shape = [len(dim.elements(include_missing=True)) for dim in dimensions]
         res = np.array(values).reshape(shape)
         res = self._transform(
@@ -1028,7 +1028,7 @@ class CrunchCube(object):
         methods should only be used from outside CrunchCube.
         """
 
-        if not array.shape or len(array.shape) != len(self.all_dimensions):
+        if not array.shape or len(array.shape) != len(self._all_dimensions):
             # This condition covers two cases:
             # 1. In case of no dimensions, the shape of the array is empty
             # 2. If the shape was already fixed, we don't need to fix it again.
@@ -1043,11 +1043,11 @@ class CrunchCube(object):
         # selections dimension (and subsequently purge the dimension itself).
 
         display_ind = tuple(
-            0 if dim.is_mr_selections(self.all_dimensions) else slice(None)
-            for dim, n in zip(self.all_dimensions, array.shape)
+            0 if dim.is_mr_selections(self._all_dimensions) else slice(None)
+            for dim, n in zip(self._all_dimensions, array.shape)
         ) if not fix_valids else np.ix_(*[
             dim.element_indices(include_missing=False) if n > 1 else [0]
-            for dim, n in zip(self.all_dimensions, array.shape)
+            for dim, n in zip(self._all_dimensions, array.shape)
         ])
         array = array[display_ind]
 
@@ -1316,7 +1316,7 @@ class CrunchCube(object):
 
     @lazyproperty
     def _shape(self):
-        return tuple([dim.shape for dim in self.all_dimensions])
+        return tuple([dim.shape for dim in self._all_dimensions])
 
     def _transform(self, res, include_transforms_for_dims,
                    inflate=False, fix=True, include_missing=False):
@@ -1329,7 +1329,7 @@ class CrunchCube(object):
             return res[np.ix_(*valid_indices)] if valid_indices else res
 
         dim_offset = 0
-        dims = self.all_dimensions if self.has_mr else self.dimensions
+        dims = self._all_dimensions if self.has_mr else self.dimensions
         new_valids = [i for i in valid_indices]
         for (i, dim) in enumerate(dims):
             # Check if transformations can/need to be performed

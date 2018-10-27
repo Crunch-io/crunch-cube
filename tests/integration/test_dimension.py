@@ -223,7 +223,7 @@ class TestDimension(TestCase):
         self.assertEqual(actual, expected)
 
     def test_hs_indices_for_mr(self):
-        dimension = CrunchCube(MR_X_CAT_HS).all_dimensions[1]
+        dimension = CrunchCube(MR_X_CAT_HS)._all_dimensions[1]
         hs_indices = dimension.hs_indices
         assert hs_indices == ()
 
@@ -320,7 +320,7 @@ class TestDimension(TestCase):
         expected = 'categorical'
         actual = dimension.dimension_type
         self.assertEqual(expected, actual)
-        self.assertFalse(dimension.is_mr_selections(cube.all_dimensions))
+        self.assertFalse(dimension.is_mr_selections(cube._all_dimensions))
 
     def test_logical_x_cat_dims(self):
         cube = CrunchCube(LOGICAL_X_CAT)
@@ -329,7 +329,7 @@ class TestDimension(TestCase):
         self.assertEqual(logical_dim.dimension_type, 'categorical')
 
         self.assertTrue(logical_dim.is_selections)
-        self.assertFalse(logical_dim.is_mr_selections(cube.all_dimensions))
+        self.assertFalse(logical_dim.is_mr_selections(cube._all_dimensions))
 
     def test_subtotals(self):
         dimension_dict = {
