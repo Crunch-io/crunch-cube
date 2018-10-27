@@ -146,10 +146,10 @@ class TestCubeSlice(object):
         cube = Mock()
         cube.ndim = 3
         all_prune_inds = [Mock(), (1, 2), Mock()]
-        cube.prune_indices.return_value = all_prune_inds
+        cube._prune_indices.return_value = all_prune_inds
         cs = CubeSlice(cube, 1)
         # Assert extracted indices tuple is converted to list
-        actual = cs.prune_indices()
+        actual = cs._prune_indices()
         expected = np.array([1, 2])
         np.testing.assert_array_equal(actual, expected)
 
@@ -175,7 +175,7 @@ class TestCubeSlice(object):
         '''Test that 2D labels are fetched from cr.cube, and pruned.'''
         cube = Mock()
         cube.ndim = 2
-        cube.prune_indices.return_value = [
+        cube._prune_indices.return_value = [
             np.array([True, False]), np.array([False, False, True]),
         ]
         cube.labels.return_value = [
@@ -189,7 +189,7 @@ class TestCubeSlice(object):
         '''Test that 2D labels are fetched from cr.cube, and pruned.'''
         cube = Mock()
         cube.ndim = 3
-        cube.prune_indices.return_value = [
+        cube._prune_indices.return_value = [
             Mock(),
             (np.array([True, False]), np.array([False, False, True])),
             Mock(),

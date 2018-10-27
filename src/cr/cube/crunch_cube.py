@@ -628,29 +628,6 @@ class CrunchCube(object):
 
         return res
 
-    def prune_indices(self, transforms=None):
-        """Return indices of pruned rows and columns as list.
-
-        The return value has one of three possible forms:
-
-        * a 1-element list of row indices (in case of 1D cube)
-        * 2-element list of row and col indices (in case of 2D cube)
-        * n-element list of tuples of 2 elements (if it's 3D cube).
-
-        For each case, the 2 elements are the ROW and COL indices of the
-        elements that need to be pruned. If it's a 3D cube, these indices are
-        calculated "per slice", that is NOT on the 0th dimension (as the 0th
-        dimension represents the slices).
-        """
-        if self.ndim >= 3:
-            # In case of a 3D cube, return list of tuples
-            # (of row and col pruned indices).
-            return self._prune_3d_indices(transforms)
-
-        # In case of 1 or 2 D cubes, return a list of
-        # row indices (or row and col indices)
-        return self._prune_indices(transforms)
-
     def pvals(self, weighted=True, prune=False, hs_dims=None):
         """Calculate p-vals.
 
@@ -1152,7 +1129,7 @@ class CrunchCube(object):
 
     def _prune_3d_body(self, res, transforms):
         mask = np.zeros(res.shape)
-        for i, prune_inds in enumerate(self.prune_indices(transforms)):
+        for i, prune_inds in enumerate(self._prune_indices(transforms)):
             rows_pruned = prune_inds[0]
             cols_pruned = prune_inds[1]
             rows_pruned = np.repeat(
@@ -1235,35 +1212,58 @@ class CrunchCube(object):
         res = np.ma.masked_array(res, mask=mask)
         return res
 
-    def _prune_indices(self, transforms):
-        row_margin = self._pruning_base(
-            hs_dims=transforms,
-            axis=self.row_direction_axis,
-        )
-        row_indices = self._margin_pruned_indices(
-            row_margin, self._inserted_dim_inds(transforms, 0), 0
-        )
+    def _prune_indices(self, transforms=None):
+        """Return indices of pruned rows and columns as list.
 
-        if row_indices.ndim > 1:
-            # In case of MR, we'd have 2D prune indices
-            row_indices = row_indices.all(axis=1)
+        The return value has one of three possible forms:
 
-        if self.ndim == 1:
-            return [row_indices]
+        * a 1-element list of row indices (in case of 1D cube)
+        * 2-element list of row and col indices (in case of 2D cube)
+        * n-element list of tuples of 2 elements (if it's 3D cube).
 
-        col_margin = self._pruning_base(
-            hs_dims=transforms,
-            axis=self._col_direction_axis,
-        )
+        For each case, the 2 elements are the ROW and COL indices of the
+        elements that need to be pruned. If it's a 3D cube, these indices are
+        calculated "per slice", that is NOT on the 0th dimension (as the 0th
+        dimension represents the slices).
+        """
+        if self.ndim >= 3:
+            # In case of a 3D cube, return list of tuples
+            # (of row and col pruned indices).
+            return self._prune_3d_indices(transforms)
 
-        col_indices = self._margin_pruned_indices(
-            col_margin, self._inserted_dim_inds(transforms, 1), 1
-        )
-        if col_indices.ndim > 1:
-            # In case of MR, we'd have 2D prune indices
-            col_indices = col_indices.all(axis=0)
+        def prune_non_3d_indices(transforms):
+            row_margin = self._pruning_base(
+                hs_dims=transforms,
+                axis=self.row_direction_axis,
+            )
+            row_indices = self._margin_pruned_indices(
+                row_margin, self._inserted_dim_inds(transforms, 0), 0
+            )
 
-        return [row_indices, col_indices]
+            if row_indices.ndim > 1:
+                # In case of MR, we'd have 2D prune indices
+                row_indices = row_indices.all(axis=1)
+
+            if self.ndim == 1:
+                return [row_indices]
+
+            col_margin = self._pruning_base(
+                hs_dims=transforms,
+                axis=self._col_direction_axis,
+            )
+
+            col_indices = self._margin_pruned_indices(
+                col_margin, self._inserted_dim_inds(transforms, 1), 1
+            )
+            if col_indices.ndim > 1:
+                # In case of MR, we'd have 2D prune indices
+                col_indices = col_indices.all(axis=0)
+
+            return [row_indices, col_indices]
+
+        # In case of 1 or 2 D cubes, return a list of
+        # row indices (or row and col indices)
+        return prune_non_3d_indices(transforms)
 
     def _prune_indices_tuple(self, row_margin, column_margin, transforms):
         if row_margin.ndim > 1:

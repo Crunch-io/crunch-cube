@@ -190,7 +190,7 @@ class CubeSlice(object):
         labels = [
             prune_dimension_labels(dim_labels, dim_prune_inds)
             for dim_labels, dim_prune_inds in
-            zip(labels, self.prune_indices(transforms=hs_dims))
+            zip(labels, self._prune_indices(transforms=hs_dims))
         ]
         return labels
 

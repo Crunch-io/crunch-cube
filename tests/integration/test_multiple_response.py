@@ -616,7 +616,7 @@ def test_mr_counts_pruned():
              False, False, True, True, False, False, False, False, False,
              False, False, False])
     ]
-    pruned = cube.prune_indices()
+    pruned = cube._prune_indices()
     assert len(pruned) == len(pruned_expected)
     for i, actual in enumerate(pruned):
         np.testing.assert_array_equal(pruned[i], pruned_expected[i])
