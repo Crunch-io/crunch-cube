@@ -195,6 +195,11 @@ class NewDimension(object):
         self._dimension_dict = dimension_dict
         self._dimension_type = dimension_type
 
+    @lazyproperty
+    def dimension_type(self):
+        """Member of DIMENSION_TYPE describing this cube dimension."""
+        return self._dimension_type
+
 
 class Dimension(object):
     """Represents one dimension of a cube response.

@@ -12,7 +12,7 @@ import pytest
 from cr.cube.dimension import (
     AllDimensions, _AllElements, _BaseDimensions, _BaseElement,
     _BaseElements, _Category, Dimension, _DimensionFactory, _Element,
-    _RawDimension, _Subtotal, _Subtotals, _ValidElements
+    NewDimension, _RawDimension, _Subtotal, _Subtotals, _ValidElements
 )
 from cr.cube.enum import DIMENSION_TYPE as DT
 
@@ -310,6 +310,14 @@ class Describe_RawDimension(object):
     @pytest.fixture
     def _resolve_categorical_(self, request):
         return method_mock(request, _RawDimension, '_resolve_categorical')
+
+
+class DescribeNewDimension(object):
+
+    def it_knows_its_dimension_type(self):
+        dimension = NewDimension(None, DT.CAT)
+        dimension_type = dimension.dimension_type
+        assert dimension_type == DT.CAT
 
 
 class DescribeDimension(object):

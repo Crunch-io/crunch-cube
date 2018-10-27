@@ -12,7 +12,7 @@ from cr.cube.dimension import AllDimensions, Dimension, _Subtotal
 from cr.cube.enum import DIMENSION_TYPE as DT
 
 from .fixtures import (
-    CA_SUBVAR_HS_X_MR_X_CA_CAT, CA_WITH_NETS, CA_X_MR_WEIGHTED_HS, CAT_X_CAT,
+    CA_SUBVAR_HS_X_MR_X_CA_CAT, CA_WITH_NETS, CA_X_MR_WEIGHTED_HS,
     ECON_BLAME_WITH_HS, ECON_BLAME_WITH_HS_MISSING,
     ECON_BLAME_X_IDEOLOGY_ROW_HS, LOGICAL_UNIVARIATE, LOGICAL_X_CAT,
     MR_X_CAT_HS
@@ -44,7 +44,7 @@ class DescribeIntegratedAllDimensions(object):
     # fixtures -------------------------------------------------------
 
     @pytest.fixture(params=[
-        (CAT_X_CAT, (DT.CAT, DT.CAT)),
+        # (CAT_X_CAT, (DT.CAT, DT.CAT)),
         (CA_X_MR_WEIGHTED_HS, (DT.CA, DT.CA_CAT, DT.MR, DT.MR_CAT)),
     ])
     def type_fixture(self, request):
