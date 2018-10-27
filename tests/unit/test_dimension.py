@@ -10,14 +10,37 @@ import numpy as np
 import pytest
 
 from cr.cube.dimension import (
-    _AllElements, _BaseElement, _BaseElements, _Category, Dimension,
-    _Element, _Subtotal, _Subtotals, _ValidElements
+    _AllElements, _BaseDimensions, _BaseElement, _BaseElements, _Category,
+    Dimension, _Element, _Subtotal, _Subtotals, _ValidElements
 )
 from cr.cube.enum import DIMENSION_TYPE as DT
 
 from ..unitutil import (
     call, class_mock, instance_mock, method_mock, property_mock
 )
+
+
+class Describe_BaseDimensions(object):
+
+    def it_has_sequence_behaviors(self, request, _dimensions_prop_):
+        _dimensions_prop_.return_value = (0, 1, 2)
+        base_dimensions = _BaseDimensions()
+
+        assert base_dimensions[1] == 1
+        assert base_dimensions[1:3] == (1, 2)
+        assert len(base_dimensions) == 3
+        assert list(n for n in base_dimensions) == [0, 1, 2]
+
+    def it_stores_its_dimension_objects_in_a_tuple_to_help(self):
+        base_dimensions = _BaseDimensions()
+        with pytest.raises(NotImplementedError):
+            base_dimensions._dimensions
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _dimensions_prop_(self, request):
+        return property_mock(request, _BaseDimensions, '_dimensions')
 
 
 class DescribeDimension(object):

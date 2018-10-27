@@ -13,6 +13,27 @@ from cr.cube.util import lazyproperty, memoize
 class _BaseDimensions(Sequence):
     """Base class for dimension collections."""
 
+    def __getitem__(self, idx_or_slice):
+        """Implements indexed access."""
+        return self._dimensions[idx_or_slice]
+
+    def __iter__(self):
+        """Implements (efficient) iterability."""
+        return iter(self._dimensions)
+
+    def __len__(self):
+        """Implements len(elements)."""
+        return len(self._dimensions)
+
+    @lazyproperty
+    def _dimensions(self):
+        """tuple of dimension objects in this collection.
+
+        This composed tuple is the source for the dimension objects in this
+        collection.
+        """
+        raise NotImplementedError('must be implemented by each sublass')
+
 
 class AllDimensions(_BaseDimensions):
     """Collection containing every dimension defined in cube response."""
