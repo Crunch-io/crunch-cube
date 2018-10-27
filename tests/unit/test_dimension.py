@@ -173,6 +173,19 @@ class Describe_RawDimension(object):
 
         assert dimension_dict == dimension_dict_
 
+    def it_parses_the_base_type_to_help(self, base_type_fixture):
+        dimension_dict, expected_value = base_type_fixture
+        raw_dimension = _RawDimension(dimension_dict, None)
+
+        base_type = raw_dimension._base_type
+
+        assert base_type == expected_value
+
+    def but_it_raises_on_unrecognized_type_class(self):
+        raw_dimension = _RawDimension({'type': {'class': 'crunched'}}, None)
+        with pytest.raises(NotImplementedError):
+            raw_dimension._base_type
+
     def it_determines_the_dimension_type(
             self, dim_type_fixture, _base_type_prop_, _resolve_categorical_,
             _resolve_array_type_):
@@ -197,6 +210,15 @@ class Describe_RawDimension(object):
             raw_dimension.dimension_type
 
     # fixtures -------------------------------------------------------
+
+    @pytest.fixture(params=[
+        ({'type': {'class': 'categorical'}}, 'categorical'),
+        ({'type': {'class': 'enum', 'subtype': {'class': 'variable'}}},
+         'enum.variable'),
+    ])
+    def base_type_fixture(self, request):
+        dimension_dict, expected_value = request.param
+        return dimension_dict, expected_value
 
     @pytest.fixture(params=[
         ('categorical', DT.CAT, None, DT.CAT),

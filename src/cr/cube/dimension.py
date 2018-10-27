@@ -131,7 +131,15 @@ class _RawDimension(object):
         used to identify the dimension type in the cube response JSON.
         The '.subclass' suffix only appears where a subtype is present.
         """
-        raise NotImplementedError
+        type_class = self._dimension_dict['type']['class']
+        if type_class == 'categorical':
+            return 'categorical'
+        if type_class == 'enum':
+            subclass = self._dimension_dict['type']['subtype']['class']
+            return 'enum.%s' % subclass
+        raise NotImplementedError(
+            'unexpected dimension type class \'%s\'' % type_class
+        )
 
     def _resolve_array_type(self):
         """Return one of the ARRAY_TYPES members of DIMENSION_TYPE.
