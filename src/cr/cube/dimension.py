@@ -101,11 +101,6 @@ class _RawDimension(object):
         self._dimension_dicts = dimension_dicts
 
     @lazyproperty
-    def _alias(self):
-        """Return str key for variable behind *dimension_dict*."""
-        raise NotImplementedError
-
-    @lazyproperty
     def dimension_dict(self):
         """dict defining this dimension in cube response."""
         return self._dimension_dict
@@ -127,6 +122,11 @@ class _RawDimension(object):
         raise NotImplementedError(
             'unrecognized dimension type %s' % base_type
         )
+
+    @lazyproperty
+    def _alias(self):
+        """Return str key for variable behind *dimension_dict*."""
+        return self._dimension_dict['references']['alias']
 
     @lazyproperty
     def _base_type(self):

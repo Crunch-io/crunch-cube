@@ -209,10 +209,19 @@ class Describe_RawDimension(object):
         with pytest.raises(NotImplementedError):
             raw_dimension.dimension_type
 
+    def it_knows_the_dimension_variable_identifier_to_help(self):
+        dimension_dict = {'references': {'alias': 'varski'}}
+        raw_dimension = _RawDimension(dimension_dict, None)
+
+        alias = raw_dimension._alias
+
+        assert alias == 'varski'
+
     def it_can_tell_when_a_dimension_has_a_selected_category_to_help(
             self, has_selected_fixture):
         dimension_dict, expected_value = has_selected_fixture
         raw_dimension = _RawDimension(dimension_dict, None)
+
         has_selected_category = raw_dimension._has_selected_category
 
         assert has_selected_category is expected_value
