@@ -12,8 +12,7 @@ import pytest
 from cr.cube.dimension import (
     AllDimensions, _AllElements, _ApparentDimensions, _BaseDimensions,
     _BaseElement, _BaseElements, _Category, Dimension, _DimensionFactory,
-    _Element, NewDimension, _RawDimension, _Subtotal, _Subtotals,
-    _ValidElements
+    _Element, _RawDimension, _Subtotal, _Subtotals, _ValidElements
 )
 from cr.cube.enum import DIMENSION_TYPE as DT
 
@@ -137,7 +136,7 @@ class Describe_DimensionFactory(object):
 
     def it_generates_the_dimensions_for_a_cube(
             self, request, dimension_dicts_, _raw_dimensions_prop_,
-            NewDimension_):
+            Dimension_):
         dimension_types_ = (DT.CAT, DT.CA_SUBVAR, DT.CA_CAT)
         _raw_dimensions_prop_.return_value = tuple(
             instance_mock(
@@ -151,14 +150,14 @@ class Describe_DimensionFactory(object):
             instance_mock(request, Dimension, name='dim-%d' % idx)
             for idx in range(3)
         )
-        NewDimension_.side_effect = iter(dimensions_)
+        Dimension_.side_effect = iter(dimensions_)
         dimension_factory = _DimensionFactory(None)
 
         dimension_iter = dimension_factory._iter_dimensions()
 
         # ---exercising the iterator needs to come first---
         assert tuple(dimension_iter) == dimensions_
-        assert NewDimension_.call_args_list == [
+        assert Dimension_.call_args_list == [
             call(dimension_dicts_[0], dimension_types_[0]),
             call(dimension_dicts_[1], dimension_types_[1]),
             call(dimension_dicts_[2], dimension_types_[2])
@@ -185,8 +184,8 @@ class Describe_DimensionFactory(object):
     # fixture components ---------------------------------------------
 
     @pytest.fixture
-    def NewDimension_(self, request):
-        return class_mock(request, 'cr.cube.dimension.NewDimension')
+    def Dimension_(self, request):
+        return class_mock(request, 'cr.cube.dimension.Dimension')
 
     @pytest.fixture
     def dimension_dicts_(self, request):
@@ -423,31 +422,20 @@ class Describe_RawDimension(object):
         return method_mock(request, _RawDimension, '_resolve_categorical')
 
 
-class DescribeNewDimension(object):
-
-    def it_knows_its_dimension_type(self):
-        dimension = NewDimension(None, DT.CAT)
-        dimension_type = dimension.dimension_type
-        assert dimension_type == DT.CAT
-
-
 class DescribeDimension(object):
 
     def it_knows_its_description(self, description_fixture):
         dimension_dict, expected_value = description_fixture
-        dimension = Dimension(dimension_dict)
+        dimension = Dimension(dimension_dict, None)
 
         description = dimension.description
 
         assert description == expected_value
 
-    def it_knows_its_dimension_type(self, type_fixture):
-        dimension_dict, next_dimension_dict, expected_value = type_fixture
-        dimension = Dimension(dimension_dict, next_dimension_dict)
-
+    def it_knows_its_dimension_type(self):
+        dimension = Dimension(None, DT.CAT)
         dimension_type = dimension.dimension_type
-
-        assert dimension_type == expected_value
+        assert dimension_type == DT.CAT
 
     def it_provides_subtotal_indices(
             self, hs_indices_fixture, is_selections_prop_, _subtotals_prop_):
@@ -549,25 +537,6 @@ class DescribeDimension(object):
     @pytest.fixture
     def _subtotals_prop_(self, request):
         return property_mock(request, Dimension, '_subtotals')
-
-    @pytest.fixture(params=[
-        ({'type': {'class': 'categorical'}},
-         None, DT.CATEGORICAL),
-        ({'type': {'class': 'enum', 'subtype': {'class': 'datetime'}}},
-         None, DT.DATETIME),
-        ({'type': {'class': 'enum', 'subtype': {'class': 'variable'}}},
-         None, DT.CATEGORICAL_ARRAY),
-        ({'type': {'class': 'enum', 'subtype': {'class': 'variable'}}},
-         {'type': {'categories': [{'id': 1}, {'id': 0}, {'id': -1}, ]}},
-         DT.MR_SUBVAR),
-        ({'type': {'class': 'enum', 'subtype': {'class': 'numeric'}}},
-         None, DT.BINNED_NUMERIC),
-        ({'type': {'class': 'enum', 'subtype': {'class': 'text'}}},
-         None, DT.TEXT),
-    ])
-    def type_fixture(self, request):
-        dimension_dict, next_dimension_dict, expected_value = request.param
-        return dimension_dict, next_dimension_dict, expected_value
 
     @pytest.fixture
     def valid_elements_(self, request):

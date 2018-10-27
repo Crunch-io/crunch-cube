@@ -100,7 +100,7 @@ class _DimensionFactory(object):
     def _iter_dimensions(self):
         """Generate Dimension object for each dimension dict."""
         return (
-            NewDimension(
+            Dimension(
                 raw_dimension.dimension_dict,
                 raw_dimension.dimension_type
             )
@@ -244,19 +244,6 @@ class _RawDimension(object):
         return DT.LOGICAL if self._has_selected_category else DT.CAT
 
 
-class NewDimension(object):
-    """Temporary placeholder to be incorporated into Dimension shortly."""
-
-    def __init__(self, dimension_dict, dimension_type):
-        self._dimension_dict = dimension_dict
-        self._dimension_type = dimension_type
-
-    @lazyproperty
-    def dimension_type(self):
-        """Member of DIMENSION_TYPE describing this cube dimension."""
-        return self._dimension_type
-
-
 class Dimension(object):
     """Represents one dimension of a cube response.
 
@@ -268,9 +255,9 @@ class Dimension(object):
     :attr:`.CrunchCube.dimensions`.
     """
 
-    def __init__(self, dimension_dict, next_dimension_dict=None):
+    def __init__(self, dimension_dict, dimension_type):
         self._dimension_dict = dimension_dict
-        self._next_dimension_dict = next_dimension_dict
+        self._dimension_type = dimension_type
 
     @lazyproperty
     def alias(self):
@@ -286,41 +273,8 @@ class Dimension(object):
 
     @lazyproperty
     def dimension_type(self):
-        """str representing type of this cube dimension."""
-        # ---all this logic really belongs in the Dimensions collection
-        # ---object, which is where it will move to once that's implemented
-
-        def next_dim_is_mr_cat():
-            """True if subsequent dimension is an MR_CAT dimension."""
-            if not self._next_dimension_dict:
-                return False
-
-            categories = self._next_dimension_dict['type'].get('categories')
-            if not categories:
-                return False
-
-            return (
-                [category.get('id') for category in categories] == [1, 0, -1]
-            )
-
-        type_dict = self._dimension_dict['type']
-
-        if type_dict.get('class') == 'enum':
-            subclass = type_dict['subtype']['class']
-            # ---array types (CA, MR) have enum.variable base type---
-            if subclass == 'variable':
-                return (
-                    DT.MULTIPLE_RESPONSE if next_dim_is_mr_cat()
-                    else DT.CATEGORICAL_ARRAY
-                )
-            # ---datetime, binned numeric, and text are non-array enums
-            return {
-                'datetime': DT.DATETIME,
-                'numeric': DT.BINNED_NUMERIC,
-                'text': DT.TEXT
-            }.get(subclass, subclass)
-
-        return DT.CATEGORICAL
+        """Member of DIMENSION_TYPE representing for this cube dimension."""
+        return self._dimension_type
 
     @memoize
     def element_indices(self, include_missing):

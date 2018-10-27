@@ -8,27 +8,26 @@ import pytest
 from unittest import TestCase
 
 from cr.cube.crunch_cube import CrunchCube
-from cr.cube.dimension import Dimension
+from cr.cube.dimension import AllDimensions, _ApparentDimensions, Dimension
 from cr.cube.enum import DIMENSION_TYPE as DT
 
-from ..unitutil import instance_mock, method_mock, Mock, patch, property_mock
+from ..unitutil import (
+    class_mock, instance_mock, method_mock, Mock, patch, property_mock
+)
 
 
 class DescribeCrunchCube(object):
 
     def it_provides_access_to_its_dimensions(
-            self, request, _all_dimensions_prop_, mr_selections_indices_prop_):
-        all_dimensions_ = tuple(
-            instance_mock(request, Dimension, name='dim-%d' % idx)
-            for idx in range(4)
-        )
+            self, _all_dimensions_prop_, all_dimensions_,
+            apparent_dimensions_):
         _all_dimensions_prop_.return_value = all_dimensions_
-        mr_selections_indices_prop_.return_value = [1, 3]
+        all_dimensions_.apparent_dimensions = apparent_dimensions_
         cube = CrunchCube({})
 
         dimensions = cube.dimensions
 
-        assert dimensions == [all_dimensions_[0], all_dimensions_[2]]
+        assert dimensions is apparent_dimensions_
 
     def it_knows_when_it_contains_means_data(self, has_means_fixture):
         cube_response, expected_value = has_means_fixture
@@ -70,6 +69,17 @@ class DescribeCrunchCube(object):
             cube._adjust_axis(axis)
 
         _is_axis_allowed_.assert_called_once_with(cube, axis)
+
+    def it_provides_its_AllDimensions_collection_to_help(
+            self, AllDimensions_, all_dimensions_):
+        cube_response = {'result': {'dimensions': [{'d': 1}, {'d': 2}]}}
+        AllDimensions_.return_value = all_dimensions_
+        cube = CrunchCube(cube_response)
+
+        all_dimensions = cube._all_dimensions
+
+        AllDimensions_.assert_called_once_with([{'d': 1}, {'d': 2}])
+        assert all_dimensions is all_dimensions_
 
     def it_knows_whether_an_axis_is_marginable_to_help(
             self, request, allowed_fixture, dimensions_prop_):
@@ -210,8 +220,20 @@ class DescribeCrunchCube(object):
     # fixture components ---------------------------------------------
 
     @pytest.fixture
+    def AllDimensions_(self, request):
+        return class_mock(request, 'cr.cube.crunch_cube.AllDimensions')
+
+    @pytest.fixture
+    def all_dimensions_(self, request):
+        return instance_mock(request, AllDimensions)
+
+    @pytest.fixture
     def _all_dimensions_prop_(self, request):
         return property_mock(request, CrunchCube, '_all_dimensions')
+
+    @pytest.fixture
+    def apparent_dimensions_(self, request):
+        return instance_mock(request, _ApparentDimensions)
 
     @pytest.fixture
     def dimensions_prop_(self, request):

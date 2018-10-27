@@ -16,7 +16,7 @@ from scipy.stats import norm
 from scipy.stats.contingency import expected_freq
 
 from cr.cube.cube_slice import CubeSlice
-from cr.cube.dimension import Dimension
+from cr.cube.dimension import AllDimensions
 from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.measures.index import Index
 from cr.cube.measures.scale_means import ScaleMeans
@@ -149,11 +149,16 @@ class CrunchCube(object):
 
     @lazyproperty
     def dimensions(self):
-        """Dimensions of the crunch cube."""
-        return [
-            dim for (i, dim) in enumerate(self._all_dimensions)
-            if i not in self.mr_selections_indices
-        ]
+        """_ApparentDimension object providing access to visible dimensions.
+
+        A cube involving a multiple-response (MR) variable has two dimensions
+        for that variable (subvariables and categories dimensions), but is
+        "collapsed" into a single effective dimension for cube-user purposes.
+        This collection will contain a single dimension for each MR variable
+        and therefore may have fewer dimensions than appear in the cube
+        response.
+        """
+        return self._all_dimensions.apparent_dimensions
 
     @lazyproperty
     def filter_annotation(self):
@@ -816,34 +821,18 @@ class CrunchCube(object):
 
     @lazyproperty
     def _all_dimensions(self):
-        """Gets the dimensions of the crunch cube.
+        """The AllDimensions object for this cube.
 
-        This function is internal, and is not mean to be used by ouside users
-        of the CrunchCube class. The main reason for this is the internal
-        representation of the different variable types (namely the MR and the
-        CA). These types have two dimensions each, but in the case of MR, the
-        second dimensions shouldn't be visible to the user. This function
-        returns such dimensions as well, since they're necessary for the
-        correct implementation of the functionality for the MR type.
-        The version that is mentioned to be used by users is the
-        property 'dimensions'.
+        The AllDimensions object provides access to all the dimensions
+        appearing in the cube response, not only apparent dimensions (those
+        that appear to a user). It also provides access to an
+        _ApparentDimensions object which contains only those user-apparent
+        dimensions (basically the categories dimension of each MR
+        dimension-pair is suppressed).
         """
-        entries = self._cube['result']['dimensions']
-        return [
-            (
-                # Multiple Response and Categorical Array variables have
-                # two subsequent dimensions (elements and selections). For
-                # this reason it's necessary to pass in both of them in the
-                # Dimension class init method. This is needed in order to
-                # determine the correct type (CA or MR). We only skip the
-                # two-argument constructor for the last dimension in the list
-                # (where it's not possible to fetch the subsequent one).
-                Dimension(entry)
-                if i + 1 >= len(entries)
-                else Dimension(entry, entries[i + 1])
-            )
-            for (i, entry) in enumerate(entries)
-        ]
+        return AllDimensions(
+            dimension_dicts=self._cube['result']['dimensions']
+        )
 
     def _as_array(self, include_missing=False, get_non_selected=False,
                   weighted=True, adjusted=False,
