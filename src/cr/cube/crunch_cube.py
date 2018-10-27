@@ -136,17 +136,6 @@ class CrunchCube(object):
         filtered = self._cube['result'].get('filtered')
         return unfiltered, filtered
 
-    def data(self, weighted, margin=False):
-        """Get the data in non-flattened shape.
-
-        Converts the flattened shape (original response) into non-flattened
-        shape (count of elements per cube dimension). E.g. for a CAT x CAT
-        cube, with 2 categories in each dimension (variable), we end up with
-        a ndarray of shape (2, 2).
-        """
-        values = self.flat_values(weighted, margin)
-        return np.array(values).reshape(self._shape)
-
     @lazyproperty
     def description(self):
         """Return the description of the cube."""
@@ -362,7 +351,7 @@ class CrunchCube(object):
                 axis = [axis]
             return [dim for dim in hs_dims if dim not in axis]
 
-        table = self.data(weighted=weighted, margin=True)
+        table = self._data(weighted=weighted, margin=True)
         new_axis = self._adjust_axis(axis)
         index = tuple(
             None if i in new_axis else slice(None)
@@ -627,7 +616,7 @@ class CrunchCube(object):
                 axis = [axis]
             return [dim for dim in hs_dims if dim not in axis]
 
-        table = self.data(weighted)
+        table = self._data(weighted)
         new_axis = self._adjust_axis(axis)
         index = tuple(
             None if i in new_axis else slice(None)
@@ -1006,6 +995,17 @@ class CrunchCube(object):
             col_prune_inds[None, :], len(row_prune_inds), axis=0
         )
         return np.logical_or(mask_rows, mask_cols)
+
+    def _data(self, weighted, margin=False):
+        """Get the data in non-flattened shape.
+
+        Converts the flattened shape (original response) into non-flattened
+        shape (count of elements per cube dimension). E.g. for a CAT x CAT
+        cube, with 2 categories in each dimension (variable), we end up with
+        a ndarray of shape (2, 2).
+        """
+        values = self.flat_values(weighted, margin)
+        return np.array(values).reshape(self._shape)
 
     def _fix_shape(self, array, fix_valids=False):
         """Fixes shape of MR variables.
