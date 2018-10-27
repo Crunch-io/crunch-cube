@@ -209,6 +209,14 @@ class Describe_RawDimension(object):
         with pytest.raises(NotImplementedError):
             raw_dimension.dimension_type
 
+    def it_can_tell_when_a_dimension_has_a_selected_category_to_help(
+            self, has_selected_fixture):
+        dimension_dict, expected_value = has_selected_fixture
+        raw_dimension = _RawDimension(dimension_dict, None)
+        has_selected_category = raw_dimension._has_selected_category
+
+        assert has_selected_category is expected_value
+
     def it_distinguishes_an_array_categorical_type_to_help(
             self, is_array_fixture):
         dimension_dict, expected_value = is_array_fixture
@@ -251,6 +259,17 @@ class Describe_RawDimension(object):
     def dim_type_fixture(self, request):
         base_type, cat_type, arr_type, expected_value = request.param
         return base_type, cat_type, arr_type, expected_value
+
+    @pytest.fixture(params=[
+        ({'type': {}}, False),
+        ({'type': {'categories': []}}, False),
+        ({'type': {'categories': [{}, {}]}}, False),
+        ({'type': {'categories': [{'selected': False}, {}]}}, False),
+        ({'type': {'categories': [{'selected': True}, {}]}}, True),
+    ])
+    def has_selected_fixture(self, request):
+        dimension_dict, expected_value = request.param
+        return dimension_dict, expected_value
 
     @pytest.fixture(params=[
         ({'references': {}}, False),

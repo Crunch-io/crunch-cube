@@ -148,7 +148,10 @@ class _RawDimension(object):
         A "selected" category-dict is one having `'selected': True`. This
         property is only meaningful for a categorical dimension dict.
         """
-        raise NotImplementedError
+        return True in {
+            category.get('selected')
+            for category in self._dimension_dict['type'].get('categories', [])
+        }
 
     @lazyproperty
     def _is_array_cat(self):
