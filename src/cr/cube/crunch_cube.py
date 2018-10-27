@@ -122,10 +122,6 @@ class CrunchCube(object):
         )
         return self._fix_shape(array)
 
-    @lazyproperty
-    def col_direction_axis(self):
-        return self.ndim - 2
-
     def count(self, weighted=True):
         """Get cube's count with automatic weighted/unweighted selection."""
         if weighted and self.is_weighted:
@@ -997,6 +993,10 @@ class CrunchCube(object):
             res = residuals / np.sqrt(variance)
         return res
 
+    @lazyproperty
+    def _col_direction_axis(self):
+        return self.ndim - 2
+
     @staticmethod
     def _create_mask(res, row_prune_inds, col_prune_inds):
         mask_rows = np.repeat(
@@ -1186,7 +1186,7 @@ class CrunchCube(object):
         )
         col_margin = self._pruning_base(
             hs_dims=transforms,
-            axis=self.col_direction_axis,
+            axis=self._col_direction_axis,
         )
         return [
             self._prune_indices_tuple(rm, cm, transforms)
@@ -1223,7 +1223,7 @@ class CrunchCube(object):
         # Prune columns by column margin values.
         col_margin = self._pruning_base(
             hs_dims=transforms,
-            axis=self.col_direction_axis,
+            axis=self._col_direction_axis,
         )
         if col_margin.ndim > 1:
             # In case of MR x CAT, we have 2D margin
@@ -1253,7 +1253,7 @@ class CrunchCube(object):
 
         col_margin = self._pruning_base(
             hs_dims=transforms,
-            axis=self.col_direction_axis,
+            axis=self._col_direction_axis,
         )
 
         col_indices = self._margin_pruned_indices(
