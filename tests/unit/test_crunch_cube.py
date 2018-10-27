@@ -924,36 +924,6 @@ class TestCrunchCube(TestCase):
         assert is_allowed(None)
         assert is_allowed((1, 2))
 
-    @patch('cr.cube.crunch_cube.CrunchCube._all_dimensions', [
-        Mock(dimension_type='categorical_array', is_selections=False),
-        Mock(dimension_type='categorical', is_selections=True),
-    ])
-    def test_ca_dim_ind_is_zero(self):
-        cc = CrunchCube({})
-        actual = cc.ca_dim_ind
-        expected = 0
-        assert actual == expected
-
-    @patch('cr.cube.crunch_cube.CrunchCube._all_dimensions', [
-        Mock(dimension_type='categorical', is_selections=False),
-        Mock(dimension_type='categorical_array', is_selections=True),
-    ])
-    def test_ca_dim_ind_is_one(self):
-        cc = CrunchCube({})
-        actual = cc.ca_dim_ind
-        expected = 1
-        assert actual == expected
-
-    @patch('cr.cube.crunch_cube.CrunchCube._all_dimensions', [
-        Mock(dimension_type='categorical', is_selections=False),
-        Mock(dimension_type='categorical', is_selections=True),
-    ])
-    def test_ca_dim_ind_is_none(self):
-        cc = CrunchCube({})
-        actual = cc.ca_dim_ind
-        expected = None
-        assert actual == expected
-
     def test_population_fraction(self):
 
         # Assert fraction is 1 when none of the counts are specified

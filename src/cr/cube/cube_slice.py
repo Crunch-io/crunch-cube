@@ -79,37 +79,6 @@ class CubeSlice(object):
         return text
 
     @lazyproperty
-    def ca_dim_ind(self):
-        """Return items dimension index if there is one.
-
-        If the slice is a part of a cube that has a categorical-array
-        variable, return the index of the items dimension (if it belongs to
-        this slice).
-
-        Examples:
-
-        * For a CA(items) x CAT => returns 0
-        * For CAT x CA(items) => returns 1
-        * For CAT x CA(items) x CAT => returns 0 (because the items is the 0th
-          dimension of each slice)
-        * For CA(items) x CAT x CAT => returns None (because the 0th items
-          dimension doesn't belong to any one slice, and is itself used for
-          slicing the cube).
-        """
-        index = self._cube.ca_dim_ind
-        if index is None:
-            return None
-
-        if self._cube.ndim == 3:
-            if index == 0:
-                # If tab dim is items, slices are not
-                return None
-            return index - 1
-
-        # If 2D - just return it
-        return index
-
-    @lazyproperty
     def ca_main_axis(self):
         """For univariate CA, the main axis is the categorical axis"""
         try:

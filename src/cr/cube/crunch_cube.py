@@ -123,14 +123,6 @@ class CrunchCube(object):
         return self._fix_shape(array)
 
     @lazyproperty
-    def ca_dim_ind(self):
-        for (i, dim) in enumerate(self.dimensions):
-            if dim.dimension_type == 'categorical_array':
-                return i
-        else:
-            return None
-
-    @lazyproperty
     def col_direction_axis(self):
         return self.ndim - 2
 

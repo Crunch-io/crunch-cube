@@ -352,32 +352,6 @@ class TestCubeSlice(object):
         # Not double MR because the 0th dims is 'just' tabs
         assert not cs.is_double_mr
 
-    def test_ca_dim_ind(self):
-        '''Test if slice are double MRs.'''
-        cube = Mock()
-
-        cube.ca_dim_ind = None
-        cs = CubeSlice(cube, 0)
-        assert cs.ca_dim_ind is None
-
-        cube.ca_dim_ind = 0
-        cs = CubeSlice(cube, 0)
-        assert cs.ca_dim_ind == 0
-
-        cube.ca_dim_ind = 1
-        cs = CubeSlice(cube, 0)
-        assert cs.ca_dim_ind == 1
-
-        cube.ndim = 3
-        cube.ca_dim_ind = 1
-        cs = CubeSlice(cube, 0)
-        assert cs.ca_dim_ind == 0
-
-        cube.ndim = 3
-        cube.ca_dim_ind = 0
-        cs = CubeSlice(cube, 0)
-        assert cs.ca_dim_ind is None
-
     @patch('cr.cube.measures.scale_means.ScaleMeans.margin')
     @patch('cr.cube.measures.scale_means.ScaleMeans.__init__')
     def test_scale_means_marginal(self, mock_sm_init, mock_sm_margin):
