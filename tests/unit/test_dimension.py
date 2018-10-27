@@ -209,6 +209,15 @@ class Describe_RawDimension(object):
         with pytest.raises(NotImplementedError):
             raw_dimension.dimension_type
 
+    def it_distinguishes_an_array_categorical_type_to_help(
+            self, is_array_fixture):
+        dimension_dict, expected_value = is_array_fixture
+        raw_dimension = _RawDimension(dimension_dict, None)
+
+        is_array_cat = raw_dimension._is_array_cat
+
+        assert is_array_cat == expected_value
+
     def it_resolves_a_categorical_type_to_help(
             self, resolve_cat_fixture, _is_array_cat_prop_,
             _has_selected_category_prop_):
@@ -242,6 +251,14 @@ class Describe_RawDimension(object):
     def dim_type_fixture(self, request):
         base_type, cat_type, arr_type, expected_value = request.param
         return base_type, cat_type, arr_type, expected_value
+
+    @pytest.fixture(params=[
+        ({'references': {}}, False),
+        ({'references': {'subreferences': {}}}, True),
+    ])
+    def is_array_fixture(self, request):
+        dimension_dict, expected_value = request.param
+        return dimension_dict, expected_value
 
     @pytest.fixture(params=[
         (False, False, DT.CAT),

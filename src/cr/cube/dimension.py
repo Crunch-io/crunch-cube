@@ -158,7 +158,7 @@ class _RawDimension(object):
         the dimension is known to be categorical (has base-type
         'categorical').
         """
-        raise NotImplementedError
+        return 'subreferences' in self._dimension_dict['references']
 
     def _resolve_array_type(self):
         """Return one of the ARRAY_TYPES members of DIMENSION_TYPE.
