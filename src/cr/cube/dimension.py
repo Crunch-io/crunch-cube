@@ -68,6 +68,18 @@ class _ApparentDimensions(_BaseDimensions):
     def __init__(self, all_dimensions):
         self._all_dimensions = all_dimensions
 
+    @lazyproperty
+    def _dimensions(self):
+        """tuple of dimension objects in this collection.
+
+        This composed tuple is the source for the dimension objects in this
+        collection.
+        """
+        return tuple(
+            d for d in self._all_dimensions
+            if d.dimension_type != DT.MR_CAT
+        )
+
 
 class _DimensionFactory(object):
     """Produce Dimension objects of correct type from dimension-dicts.

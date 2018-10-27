@@ -29,7 +29,6 @@ class DescribeIntegratedAllDimensions(object):
 
         assert dimension_types == expected_types
 
-    @pytest.mark.xfail(reason='WIP', strict=True)
     def it_provides_access_to_the_apparent_dimensions(self):
         dimension_dicts = CA_X_MR_WEIGHTED_HS['result']['dimensions']
         all_dimensions = AllDimensions(dimension_dicts)

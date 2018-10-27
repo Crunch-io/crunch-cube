@@ -102,6 +102,22 @@ class DescribeAllDimensions(object):
         return property_mock(request, AllDimensions, '_dimensions')
 
 
+class Describe_ApparentDimensions(object):
+
+    def it_stores_its_dimensions_in_a_tuple_to_help(self, request):
+        all_dimensions_ = tuple(
+            instance_mock(
+                request, Dimension, name='dim-%d' % idx, dimension_type=dt
+            )
+            for idx, dt in enumerate((DT.CAT, DT.MR, DT.MR_CAT))
+        )
+        apparent_dimensions = _ApparentDimensions(all_dimensions_)
+
+        dimensions = apparent_dimensions._dimensions
+
+        assert dimensions == all_dimensions_[:2]
+
+
 class Describe_DimensionFactory(object):
 
     def it_provides_an_interface_classmethod(
