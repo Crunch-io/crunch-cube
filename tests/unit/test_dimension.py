@@ -209,6 +209,18 @@ class Describe_RawDimension(object):
         with pytest.raises(NotImplementedError):
             raw_dimension.dimension_type
 
+    def it_resolves_a_categorical_type_to_help(
+            self, resolve_cat_fixture, _is_array_cat_prop_,
+            _has_selected_category_prop_):
+        is_array_cat, has_selected_cat, expected_value = resolve_cat_fixture
+        _is_array_cat_prop_.return_value = is_array_cat
+        _has_selected_category_prop_.return_value = has_selected_cat
+        raw_dimension = _RawDimension(None, None)
+
+        dimension_type = raw_dimension._resolve_categorical()
+
+        assert dimension_type == expected_value
+
     # fixtures -------------------------------------------------------
 
     @pytest.fixture(params=[
@@ -231,11 +243,29 @@ class Describe_RawDimension(object):
         base_type, cat_type, arr_type, expected_value = request.param
         return base_type, cat_type, arr_type, expected_value
 
+    @pytest.fixture(params=[
+        (False, False, DT.CAT),
+        (False, True, DT.LOGICAL),
+        (True, False, DT.CA_CAT),
+        (True, True, DT.MR_CAT),
+    ])
+    def resolve_cat_fixture(self, request):
+        is_array_cat, has_selected_cat, expected_value = request.param
+        return is_array_cat, has_selected_cat, expected_value
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
     def _base_type_prop_(self, request):
         return property_mock(request, _RawDimension, '_base_type')
+
+    @pytest.fixture
+    def _has_selected_category_prop_(self, request):
+        return property_mock(request, _RawDimension, '_has_selected_category')
+
+    @pytest.fixture
+    def _is_array_cat_prop_(self, request):
+        return property_mock(request, _RawDimension, '_is_array_cat')
 
     @pytest.fixture
     def _resolve_array_type_(self, request):

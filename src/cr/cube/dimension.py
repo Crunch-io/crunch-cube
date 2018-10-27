@@ -141,6 +141,25 @@ class _RawDimension(object):
             'unexpected dimension type class \'%s\'' % type_class
         )
 
+    @lazyproperty
+    def _has_selected_category(self):
+        """True if dimension-dict includes one or more selected categories.
+
+        A "selected" category-dict is one having `'selected': True`. This
+        property is only meaningful for a categorical dimension dict.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
+    def _is_array_cat(self):
+        """True if a categorical dimension_dict belongs to an array pair.
+
+        Returns True for a CA_CAT or MR_CAT dimension. Only meaningful when
+        the dimension is known to be categorical (has base-type
+        'categorical').
+        """
+        raise NotImplementedError
+
     def _resolve_array_type(self):
         """Return one of the ARRAY_TYPES members of DIMENSION_TYPE.
 
@@ -158,7 +177,12 @@ class _RawDimension(object):
         return value is only meaningful if the dimension is known to be one
         of the categorical types (has base-type 'categorical').
         """
-        raise NotImplementedError
+        # ---an array categorical is either CA_CAT or MR_CAT---
+        if self._is_array_cat:
+            return DT.MR_CAT if self._has_selected_category else DT.CA_CAT
+
+        # ---what's left is logical or plain-old categorical---
+        return DT.LOGICAL if self._has_selected_category else DT.CAT
 
 
 class NewDimension(object):
