@@ -368,7 +368,7 @@ class CrunchCube(object):
                 (
                     None
                     if (
-                        d.is_mr_selections(self._all_dimensions) or
+                        d.dimension_type == DT.MR_CAT or
                         n <= 1 or
                         len(d.elements()) <= 1
                     ) else
@@ -976,7 +976,7 @@ class CrunchCube(object):
         # selections dimension (and subsequently purge the dimension itself).
 
         display_ind = tuple(
-            0 if dim.is_mr_selections(self._all_dimensions) else slice(None)
+            0 if dim.dimension_type == DT.MR_CAT else slice(None)
             for dim, n in zip(self._all_dimensions, array.shape)
         ) if not fix_valids else np.ix_(*[
             dim.element_indices(include_missing=False) if n > 1 else [0]

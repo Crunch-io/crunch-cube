@@ -342,22 +342,6 @@ class Dimension(object):
             if item.is_insertion
         ]
 
-    def is_mr_selections(self, others):
-        """Return True if this dimension var is multiple-response selections.
-
-        *others* is an iterable containing all dimensions in the cube.
-
-        Sometimes selections are used in conjunction with another dimension
-        that knows where to find them (following it). Other times, they
-        behave as a normal categorical dimension. This checks against the
-        aliases of all other dims to see which is the case.
-        """
-        if self.is_selections:
-            for dim in others:
-                if dim.alias == self.alias and not dim.is_selections:
-                    return True
-        return False
-
     @lazyproperty
     def is_selections(self):
         """True for the categories dimension of an MR dimension-pair."""

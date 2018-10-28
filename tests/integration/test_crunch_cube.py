@@ -43,10 +43,6 @@ class DescribeIntegratedCrunchCube(object):
         dimension_type = logical_dimension.dimension_type
 
         assert dimension_type == DT.LOGICAL
-        assert (
-            logical_dimension.is_mr_selections(cube._all_dimensions)
-            is False
-        )
 
     def it_properly_recognizes_dimensions_of_cat_x_logical(self):
         cube = CrunchCube(CAT_X_LOGICAL)
@@ -56,7 +52,6 @@ class DescribeIntegratedCrunchCube(object):
         assert cat_dim.dimension_type == DT.CAT
         assert logical_dim.dimension_type == DT.LOGICAL
         assert logical_dim.is_selections
-        assert not logical_dim.is_mr_selections(cube._all_dimensions)
 
     def it_knows_if_it_is_a_single_ca_cube(self):
         cube = CrunchCube(SIMPLE_CAT_ARRAY)
