@@ -5,6 +5,7 @@ import numpy as np
 import pytest
 
 from cr.cube.cube_slice import CubeSlice
+from cr.cube.enum import DIMENSION_TYPE as DT
 
 
 # pylint: disable=invalid-name, no-self-use, protected-access
@@ -23,10 +24,10 @@ class TestCubeSlice(object):
     def test_init_ca_as_0th(self):
         '''Test creation of the 0th CA slice.'''
         cube = Mock()
-        cube.dim_types = ['categorical_array', 'categorical']
+        cube.dim_types = [DT.CA_SUBVAR, DT.CAT]
         assert CubeSlice(cube, 0, ca_as_0th=True)
 
-        cube.dim_types = ['categorical', 'categorical']
+        cube.dim_types = [DT.CAT, DT.CAT]
         with pytest.raises(ValueError):
             CubeSlice(cube, 0, ca_as_0th=True)
 
@@ -137,7 +138,7 @@ class TestCubeSlice(object):
         assert cs.labels() == all_labels[-2:]
 
         cube.ndim = 2
-        cube.dim_types = ['categorical_array', Mock()]
+        cube.dim_types = [DT.CA_SUBVAR, Mock()]
         cs = CubeSlice(cube, 1, ca_as_0th=True)
         assert cs.labels() == all_labels[1:]
 
@@ -206,7 +207,7 @@ class TestCubeSlice(object):
     def test_col_dim_ind(self):
         '''Test column dimension index for normal slice vs CA as 0th.'''
         cube = Mock()
-        cube.dim_types = ['categorical_array', Mock()]
+        cube.dim_types = [DT.CA_SUBVAR, Mock()]
         cs = CubeSlice(cube, 0, ca_as_0th=False)
         assert cs.col_dim_ind == 1
 
@@ -216,7 +217,7 @@ class TestCubeSlice(object):
     def test_axis_for_ca_as_0th(self):
         '''Test if the axis parameter is updated correctly for the CA as 0th.'''
         cube = Mock()
-        cube.dim_types = ['categorical_array', Mock()]
+        cube.dim_types = [DT.CA_SUBVAR, Mock()]
         cube.ndim = 2
         cube.margin.return_value = np.array([0, 1, 2])
         cs = CubeSlice(cube, 0, ca_as_0th=True)
@@ -240,7 +241,7 @@ class TestCubeSlice(object):
         cs = CubeSlice(cube, 0)
         assert cs.inserted_hs_indices() == [2, 3]
 
-        cube.dim_types = ['categorical_array', Mock()]
+        cube.dim_types = [DT.CA_SUBVAR, Mock()]
         cs = CubeSlice(cube, 0, ca_as_0th=True)
         assert cs.inserted_hs_indices() == [1, 2, 3]
 
@@ -248,13 +249,13 @@ class TestCubeSlice(object):
         '''Test if slice has CA.'''
         cube = Mock()
         cube.ndim = 2
-        cube.dim_types = ['categorical_array', Mock()]
+        cube.dim_types = [DT.CA_SUBVAR, Mock()]
 
         cs = CubeSlice(cube, 0)
         assert cs.has_ca
 
         cube.ndim = 3
-        cube.dim_types = ['categorical_array', Mock(), Mock()]
+        cube.dim_types = [DT.CA_SUBVAR, Mock(), Mock()]
         cs = CubeSlice(cube, 0)
         assert not cs.has_ca
 
@@ -287,10 +288,10 @@ class TestCubeSlice(object):
     def test_ca_main_axis(self):
         '''Test interpretation of the main axis for CA cube.'''
         cube = Mock()
-        cube.dim_types = ['categorical_array', Mock()]
+        cube.dim_types = [DT.CA_SUBVAR, Mock()]
         cs = CubeSlice(cube, 0)
         assert cs.ca_main_axis == 1
-        cube.dim_types = [Mock(), 'categorical_array']
+        cube.dim_types = [Mock(), DT.CA_SUBVAR]
         cs = CubeSlice(cube, 0)
         assert cs.ca_main_axis == 0
         cube.dim_types = [Mock(), Mock()]
@@ -300,10 +301,10 @@ class TestCubeSlice(object):
     def test_has_mr(self):
         '''Test if slice has MR dimension(s).'''
         cube = Mock()
-        cube.dim_types = ['multiple_response', Mock()]
+        cube.dim_types = [DT.MR, Mock()]
         cs = CubeSlice(cube, 0)
         assert cs.has_mr
-        cube.dim_types = [Mock(), 'multiple_response']
+        cube.dim_types = [Mock(), DT.MR]
         cs = CubeSlice(cube, 0)
         assert cs.has_mr
         cube.dim_types = [Mock(), Mock()]
@@ -313,11 +314,11 @@ class TestCubeSlice(object):
     def test_is_double_mr(self):
         '''Test if slice are double MRs.'''
         cube = Mock()
-        cube.dim_types = ['multiple_response', Mock()]
+        cube.dim_types = [DT.MR, Mock()]
         cs = CubeSlice(cube, 0)
         assert not cs.is_double_mr
 
-        cube.dim_types = [Mock(), 'multiple_response']
+        cube.dim_types = [Mock(), DT.MR]
         cs = CubeSlice(cube, 0)
         assert not cs.is_double_mr
 
@@ -325,29 +326,29 @@ class TestCubeSlice(object):
         cs = CubeSlice(cube, 0)
         assert not cs.is_double_mr
 
-        cube.dim_types = ['multiple_response'] * 2
+        cube.dim_types = [DT.MR, DT.MR]
         cs = CubeSlice(cube, 0)
         assert cs.is_double_mr
 
         cube.ndim = 3
-        cube.dim_types = ['multiple_response'] * 3
+        cube.dim_types = [DT.MR, DT.MR, DT.MR]
         cs = CubeSlice(cube, 0)
         # It is double MR because the last two are MRs
         assert cs.is_double_mr
 
         cube.ndim = 3
-        cube.dim_types = [Mock()] + ['multiple_response'] * 2
+        cube.dim_types = [Mock(), DT.MR, DT.MR]
         cs = CubeSlice(cube, 0)
         assert cs.is_double_mr
 
         cube.ndim = 3
-        cube.dim_types = ['multiple_response', Mock(), 'multiple_response']
+        cube.dim_types = [DT.MR, Mock(), DT.MR]
         cs = CubeSlice(cube, 0)
         # Not double MR because the 0th dims is 'just' tabs
         assert not cs.is_double_mr
 
         cube.ndim = 3
-        cube.dim_types = ['multiple_response', 'multiple_response', Mock()]
+        cube.dim_types = [DT.MR, DT.MR, Mock()]
         cs = CubeSlice(cube, 0)
         # Not double MR because the 0th dims is 'just' tabs
         assert not cs.is_double_mr
@@ -366,7 +367,7 @@ class TestCubeSlice(object):
     def test_scale_means_for_ca_as_0th(self):
         """Test that CA as 0th slice always returns empty scale means."""
         cube = Mock()
-        cube.dim_types = ['categorical_array']
+        cube.dim_types = [DT.CA_SUBVAR]
         cs = CubeSlice(cube, 0, ca_as_0th=True)
         assert cs.scale_means() == [None, None]
 

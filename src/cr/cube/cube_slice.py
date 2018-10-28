@@ -9,6 +9,7 @@ import warnings
 import numpy as np
 from tabulate import tabulate
 
+from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.measures.scale_means import ScaleMeans
 from cr.cube.util import lazyproperty, compress_pruned, memoize
 
@@ -26,7 +27,7 @@ class CubeSlice(object):
 
     def __init__(self, cube, index, ca_as_0th=False):
 
-        if ca_as_0th and cube.dim_types[0] != 'categorical_array':
+        if ca_as_0th and cube.dim_types[0] != DT.CA_SUBVAR:
             msg = (
                 'Cannot set CA as 0th for cube that '
                 'does not have CA items as the 0th dimension.'
@@ -82,7 +83,7 @@ class CubeSlice(object):
     def ca_main_axis(self):
         """For univariate CA, the main axis is the categorical axis"""
         try:
-            ca_ind = self.dim_types.index('categorical_array')
+            ca_ind = self.dim_types.index(DT.CA_SUBVAR)
             return 1 - ca_ind
         except ValueError:
             return None
@@ -122,11 +123,11 @@ class CubeSlice(object):
         """Check if the cube slice has the CA dimension.
 
         This is used to distinguish between slices that are considered 'normal'
-        (like CAT x CAT), that might be a part of te 3D cube that has 0th dim
+        (like CAT x CAT), that might be a part of the 3D cube that has 0th dim
         as the CA items (subvars). In such a case, we still need to process
         the slices 'normally', and not address the CA items constraints.
         """
-        return 'categorical_array' in self.dim_types
+        return DT.CA_SUBVAR in self.dim_types
 
     @lazyproperty
     def has_mr(self):
@@ -135,7 +136,7 @@ class CubeSlice(object):
         This property needs to be overridden, because we don't care about the
         0th dimension (and if it's an MR) in the case of a 3D cube.
         """
-        return 'multiple_response' in self.dim_types
+        return DT.MR in self.dim_types
 
     def index_table(self, axis=None, baseline=None, prune=False):
         """Return index percentages for a given axis and baseline.
@@ -167,7 +168,7 @@ class CubeSlice(object):
         account, since it's only the tabs dimension, and mustn't affect the
         properties of the slices.
         """
-        return self.dim_types == ['multiple_response'] * 2
+        return self.dim_types == [DT.MR, DT.MR]
 
     def labels(self, hs_dims=None, prune=False):
         """Get labels for the cube slice, and perform pruning by slice."""

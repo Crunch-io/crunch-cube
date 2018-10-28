@@ -13,6 +13,7 @@ from cr.cube.dimension import (
     _AllElements, _BaseElement, _BaseElements, _Category, Dimension,
     _Element, _Subtotal, _Subtotals, _ValidElements
 )
+from cr.cube.enum import DIMENSION_TYPE as DT
 
 from ..unitutil import (
     call, class_mock, instance_mock, method_mock, property_mock
@@ -140,19 +141,18 @@ class DescribeDimension(object):
 
     @pytest.fixture(params=[
         ({'type': {'class': 'categorical'}},
-         None, 'categorical'),
-        ({'type': {'class': 'enum', 'subtype': {'class': 'datetime'}},
-          'references': {}},
-         None, 'datetime'),
-        ({'type': {'class': 'enum'}, 'references': {'subreferences': []}},
-         None, 'categorical_array'),
-        ({'type': {'class': 'enum'}, 'references': {'subreferences': []}},
+         None, DT.CATEGORICAL),
+        ({'type': {'class': 'enum', 'subtype': {'class': 'datetime'}}},
+         None, DT.DATETIME),
+        ({'type': {'class': 'enum', 'subtype': {'class': 'variable'}}},
+         None, DT.CATEGORICAL_ARRAY),
+        ({'type': {'class': 'enum', 'subtype': {'class': 'variable'}}},
          {'type': {'categories': [{'id': 1}, {'id': 0}, {'id': -1}, ]}},
-         'multiple_response'),
-        ({'type': {'subtype': {'class': 'numeric'}}},
-         None, 'numeric'),
-        ({'type': {'subtype': {'class': 'text'}}},
-         None, 'text'),
+         DT.MR_SUBVAR),
+        ({'type': {'class': 'enum', 'subtype': {'class': 'numeric'}}},
+         None, DT.BINNED_NUMERIC),
+        ({'type': {'class': 'enum', 'subtype': {'class': 'text'}}},
+         None, DT.TEXT),
     ])
     def type_fixture(self, request):
         dimension_dict, next_dimension_dict, expected_value = request.param

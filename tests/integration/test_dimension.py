@@ -8,6 +8,7 @@ from unittest import TestCase
 
 from cr.cube.crunch_cube import CrunchCube
 from cr.cube.dimension import Dimension, _Subtotal
+from cr.cube.enum import DIMENSION_TYPE as DT
 
 from .fixtures import (
     CA_SUBVAR_HS_X_MR_X_CA_CAT, CA_WITH_NETS, ECON_BLAME_WITH_HS,
@@ -21,9 +22,7 @@ class TestDimension(TestCase):
     def test_dimension_type(self):
         cube = CrunchCube(CA_SUBVAR_HS_X_MR_X_CA_CAT)
         dimension_types = [d.dimension_type for d in cube.dimensions]
-        assert dimension_types == [
-            'categorical_array', 'multiple_response', 'categorical'
-        ]
+        assert dimension_types == [DT.CA_SUBVAR, DT.MR, DT.CAT]
 
     def test_subtotals_indices_single_subtotal(self):
         dimension = CrunchCube(ECON_BLAME_WITH_HS).dimensions[0]
@@ -317,7 +316,7 @@ class TestDimension(TestCase):
     def test_logical_univariate_dim(self):
         cube = CrunchCube(LOGICAL_UNIVARIATE)
         dimension = cube.dimensions[0]
-        expected = 'categorical'
+        expected = DT.CATEGORICAL
         actual = dimension.dimension_type
         self.assertEqual(expected, actual)
         self.assertFalse(dimension.is_mr_selections(cube._all_dimensions))
@@ -325,8 +324,8 @@ class TestDimension(TestCase):
     def test_logical_x_cat_dims(self):
         cube = CrunchCube(LOGICAL_X_CAT)
         logical_dim = cube.dimensions[1]
-        self.assertEqual(cube.dimensions[0].dimension_type, 'categorical')
-        self.assertEqual(logical_dim.dimension_type, 'categorical')
+        self.assertEqual(cube.dimensions[0].dimension_type, DT.CAT)
+        self.assertEqual(logical_dim.dimension_type, DT.CAT)
 
         self.assertTrue(logical_dim.is_selections)
         self.assertFalse(logical_dim.is_mr_selections(cube._all_dimensions))

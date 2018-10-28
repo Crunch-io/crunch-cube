@@ -6,7 +6,7 @@ from collections import Sequence
 
 import numpy as np
 
-from cr.cube import ITEM_DIMENSION_TYPES
+from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.util import lazyproperty, memoize
 
 
@@ -57,23 +57,23 @@ class Dimension(object):
             )
 
         type_dict = self._dimension_dict['type']
-        type_class = type_dict.get('class')
 
-        if not type_class:
-            # ---numeric and text are like this---
-            return type_dict['subtype']['class']
-
-        if type_class == 'enum':
-            if 'subreferences' in self._dimension_dict['references']:
+        if type_dict.get('class') == 'enum':
+            subclass = type_dict['subtype']['class']
+            # ---array types (CA, MR) have enum.variable base type---
+            if subclass == 'variable':
                 return (
-                    'multiple_response' if next_dim_is_mr_cat()
-                    else 'categorical_array'
+                    DT.MULTIPLE_RESPONSE if next_dim_is_mr_cat()
+                    else DT.CATEGORICAL_ARRAY
                 )
-            if 'subtype' in type_dict:
-                # ---datetime is like this (enum without subreferences)---
-                return type_dict['subtype']['class']
+            # ---datetime, binned numeric, and text are non-array enums
+            return {
+                'datetime': DT.DATETIME,
+                'numeric': DT.BINNED_NUMERIC,
+                'text': DT.TEXT
+            }.get(subclass, subclass)
 
-        return type_class
+        return DT.CATEGORICAL
 
     @memoize
     def element_indices(self, include_missing):
@@ -132,7 +132,7 @@ class Dimension(object):
         sequence of elements and subtotals items.
         """
         # ---don't do H&S insertions for CA and MR subvar dimensions---
-        if self.dimension_type in ITEM_DIMENSION_TYPES:
+        if self.dimension_type in DT.ARRAY_TYPES:
             return []
 
         return [
@@ -184,7 +184,7 @@ class Dimension(object):
 
         include_subtotals = (
             include_transforms and
-            self.dimension_type != 'categorical_array'
+            self.dimension_type != DT.CA_SUBVAR
         )
 
         # ---items are elements or subtotals, interleaved in display order---

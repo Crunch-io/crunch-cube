@@ -15,9 +15,9 @@ import warnings
 from scipy.stats import norm
 from scipy.stats.contingency import expected_freq
 
-from cr.cube import ITEM_DIMENSION_TYPES
 from cr.cube.cube_slice import CubeSlice
 from cr.cube.dimension import Dimension
+from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.measures.index import Index
 from cr.cube.measures.scale_means import ScaleMeans
 from cr.cube.util import lazyproperty
@@ -236,9 +236,8 @@ class CrunchCube(object):
     @lazyproperty
     def is_univariate_ca(self):
         """Check if cube is a just the CA ("ca x cat" or "cat x ca" dims)"""
-        types = {d.dimension_type for d in self.dimensions}
-        ca_types = {'categorical_array', 'categorical'}
-        return self.ndim == 2 and types == ca_types
+        ca_types = {DT.CA_SUBVAR, DT.CAT}
+        return self.ndim == 2 and set(self.dim_types) == ca_types
 
     @lazyproperty
     def is_weighted(self):
@@ -395,13 +394,15 @@ class CrunchCube(object):
 
     @lazyproperty
     def mr_dim_ind(self):
-        indices = [
+        indices = tuple(
             i for i, dim in enumerate(self.dimensions)
-            if dim.dimension_type == 'multiple_response'
-        ]
-        if indices:
-            return indices[0] if len(indices) == 1 else tuple(indices)
-        return None
+            if dim.dimension_type == DT.MR_SUBVAR
+        )
+        if indices == ():
+            return None
+        if len(indices) == 1:
+            return indices[0]
+        return indices
 
     @lazyproperty
     def mr_selections_indices(self):
@@ -415,7 +416,7 @@ class CrunchCube(object):
         mr_dimensions_indices = [
             i for (i, dim) in enumerate(self._all_dimensions)
             if (i + 1 < len(self._all_dimensions) and
-                dim.dimension_type == 'multiple_response')
+                dim.dimension_type == DT.MR_SUBVAR)
         ]
 
         # For each MR and CA dimension, the 'selections' dimension
@@ -713,7 +714,7 @@ class CrunchCube(object):
     def univariate_ca_main_axis(self):
         """For univariate CA, the main axis is the categorical axis"""
         dim_types = [d.dimension_type for d in self.dimensions]
-        return dim_types.index('categorical')
+        return dim_types.index(DT.CATEGORICAL)
 
     def zscore(self, weighted=True, prune=False, hs_dims=None):
         """Get cube zscore measurement."""
@@ -790,7 +791,7 @@ class CrunchCube(object):
         # axis (that were provided by the user). But we don't need to update
         # the axis that are "behind" the current MR.
         for i, dim in enumerate(self.dimensions):
-            if dim.dimension_type == 'multiple_response':
+            if dim.dimension_type == DT.MR_SUBVAR:
                 # This formula updates only the axis that come "after" the
                 # current MR (items) dimension.
                 new_axis[axis >= i] += 1
@@ -908,8 +909,7 @@ class CrunchCube(object):
 
     def _calculate_std_res(self, counts, total, colsum, rowsum, slice_):
         dim_types = slice_.dim_types
-        has_mr_or_ca = set(dim_types) & set(ITEM_DIMENSION_TYPES)
-        # if self.has_mr or self.ca_dim_ind is not None:
+        has_mr_or_ca = set(dim_types) & DT.ARRAY_TYPES
         if has_mr_or_ca:
             if (not self.is_double_mr and
                     (self.mr_dim_ind == 0 or
@@ -1083,7 +1083,7 @@ class CrunchCube(object):
             # doesn't have the CA items dimension (thus the [-2:] part). It's
             # OK for the 0th dimension to be items, since no calculation is
             # performed over it.
-            if 'categorical_array' in self.dim_types[-2:]:
+            if DT.CA_SUBVAR in self.dim_types[-2:]:
                 return False
             return True
 
@@ -1094,8 +1094,8 @@ class CrunchCube(object):
                 return True
             axis = [axis]
 
-        for el in axis:
-            if self.dim_types[el] == 'categorical_array':
+        for dim_idx in axis:
+            if self.dim_types[dim_idx] == DT.CA_SUBVAR:
                 # If any of the directions explicitly asked for directly
                 # corresponds to the CA items dimension, the requested
                 # calculation is not valid.
@@ -1320,10 +1320,10 @@ class CrunchCube(object):
             # Check if transformations can/need to be performed
             transform = (dim.has_transforms and
                          i - dim_offset in include_transforms_for_dims)
-            if dim.dimension_type == 'multiple_response':
+            if dim.dimension_type == DT.MR_SUBVAR:
                 dim_offset += 1
             if (not transform or
-                    dim.dimension_type in ITEM_DIMENSION_TYPES or
+                    dim.dimension_type in DT.ARRAY_TYPES or
                     dim.is_selections):
                 continue
             # Perform transformations
