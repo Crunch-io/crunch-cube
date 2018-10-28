@@ -10,6 +10,17 @@ from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.util import lazyproperty, memoize
 
 
+class _BaseDimensions(Sequence):
+    """Base class for dimension collections."""
+
+
+class AllDimensions(_BaseDimensions):
+    """Collection containing every dimension defined in cube response."""
+
+    def __init__(self, dimension_dicts):
+        self._dimension_dicts = dimension_dicts
+
+
 class Dimension(object):
     """Represents one dimension of a cube response.
 

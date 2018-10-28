@@ -30,9 +30,8 @@ from . import assert_scale_means_equal
 class TestCrunchCube(TestCase):
     def test_crunch_cube_loads_data(self):
         cube = CrunchCube(CAT_X_CAT)
-        expected = CAT_X_CAT['value']
-        actual = cube._cube
-        self.assertEqual(actual, expected)
+        cube_dict = cube._cube
+        self.assertEqual(cube_dict, CAT_X_CAT)
 
     def test_as_array_univariate_cat_exclude_missing(self):
         cube = CrunchCube(UNIVARIATE_CATEGORICAL)
