@@ -720,8 +720,7 @@ class CrunchCube(object):
     @lazyproperty
     def univariate_ca_main_axis(self):
         """For univariate CA, the main axis is the categorical axis"""
-        dim_types = [d.dimension_type for d in self.dimensions]
-        return dim_types.index(DT.CATEGORICAL)
+        return self.dim_types.index(DT.CA_CAT)
 
     def zscore(self, weighted=True, prune=False, hs_dims=None):
         """Get cube zscore measurement."""

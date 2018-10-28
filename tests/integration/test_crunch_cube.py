@@ -34,6 +34,11 @@ class DescribeIntegratedCrunchCube(object):
         is_univariate_ca = cube.is_univariate_ca
         assert is_univariate_ca is True
 
+    def it_knows_the_main_axis_of_a_univariate_ca_cube(self):
+        cube = CrunchCube(SIMPLE_CAT_ARRAY)  # ---CA_SUBVAR x CA_CAT---
+        univariate_ca_main_axis = cube.univariate_ca_main_axis
+        assert univariate_ca_main_axis == 1
+
 
 class TestCrunchCube(TestCase):
 
@@ -403,13 +408,6 @@ class TestCrunchCube(TestCase):
         ]
         actual = cube.labels()
         self.assertEqual(actual, expected)
-
-    @pytest.mark.xfail(reason='WIP', strict=True)
-    def test_simpla_ca_main_axis(self):
-        cube = CrunchCube(SIMPLE_CAT_ARRAY)
-        expected = 1
-        actual = cube.univariate_ca_main_axis
-        assert actual == expected
 
     def test_labels_simple_cat_array_exclude_missing(self):
         cube = CrunchCube(SIMPLE_CAT_ARRAY)
