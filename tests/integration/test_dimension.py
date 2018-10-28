@@ -12,10 +12,9 @@ from cr.cube.dimension import AllDimensions, Dimension, _Subtotal
 from cr.cube.enum import DIMENSION_TYPE as DT
 
 from .fixtures import (
-    CA_SUBVAR_HS_X_MR_X_CA_CAT, CA_WITH_NETS, CA_X_MR_WEIGHTED_HS, CAT_X_CAT,
-    ECON_BLAME_WITH_HS, ECON_BLAME_WITH_HS_MISSING,
-    ECON_BLAME_X_IDEOLOGY_ROW_HS, LOGICAL_UNIVARIATE, LOGICAL_X_CAT,
-    MR_X_CAT_HS
+    CA_WITH_NETS, CA_X_MR_WEIGHTED_HS, CAT_X_CAT, ECON_BLAME_WITH_HS,
+    ECON_BLAME_WITH_HS_MISSING, ECON_BLAME_X_IDEOLOGY_ROW_HS,
+    LOGICAL_UNIVARIATE, LOGICAL_X_CAT, MR_X_CAT_HS
 )
 
 
@@ -52,12 +51,6 @@ class DescribeIntegratedAllDimensions(object):
 
 
 class TestDimension(TestCase):
-
-    @pytest.mark.xfail(reason='WIP', strict=True)
-    def test_dimension_type(self):
-        cube = CrunchCube(CA_SUBVAR_HS_X_MR_X_CA_CAT)
-        dimension_types = [d.dimension_type for d in cube.dimensions]
-        assert dimension_types == [DT.CA_SUBVAR, DT.MR, DT.CAT]
 
     def test_subtotals_indices_single_subtotal(self):
         dimension = CrunchCube(ECON_BLAME_WITH_HS).dimensions[0]
