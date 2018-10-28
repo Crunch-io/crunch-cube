@@ -13,8 +13,7 @@ from cr.cube.enum import DIMENSION_TYPE as DT
 
 from .fixtures import (
     CA_WITH_NETS, CA_X_MR_WEIGHTED_HS, CAT_X_CAT, ECON_BLAME_WITH_HS,
-    ECON_BLAME_WITH_HS_MISSING, ECON_BLAME_X_IDEOLOGY_ROW_HS, LOGICAL_X_CAT,
-    MR_X_CAT_HS
+    ECON_BLAME_WITH_HS_MISSING, ECON_BLAME_X_IDEOLOGY_ROW_HS, MR_X_CAT_HS
 )
 
 
@@ -340,16 +339,6 @@ class TestDimension(TestCase):
 
         print('hs_indices == %s' % [hs_indices])
         assert hs_indices == ((1, (0, 1)), (2, (2, 3)))
-
-    @pytest.mark.xfail(reason='WIP', strict=True)
-    def test_logical_x_cat_dims(self):
-        cube = CrunchCube(LOGICAL_X_CAT)
-        logical_dim = cube.dimensions[1]
-        self.assertEqual(cube.dimensions[0].dimension_type, DT.CAT)
-        self.assertEqual(logical_dim.dimension_type, DT.CAT)
-
-        self.assertTrue(logical_dim.is_selections)
-        self.assertFalse(logical_dim.is_mr_selections(cube._all_dimensions))
 
     def test_subtotals(self):
         dimension_dict = {

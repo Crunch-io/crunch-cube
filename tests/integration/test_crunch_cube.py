@@ -9,7 +9,7 @@ from cr.cube.util import compress_pruned
 from .fixtures import (
     ADMIT_X_DEPT_UNWEIGHTED, ADMIT_X_GENDER_WEIGHTED, BINNED, CAT_X_CAT,
     CAT_X_CAT_FILTERED_POP, CAT_X_CAT_GERMAN_WEIGHTED,
-    CAT_X_CAT_WITH_EMPTY_COLS, CAT_X_DATETIME, CAT_X_MR_X_CAT,
+    CAT_X_CAT_WITH_EMPTY_COLS, CAT_X_DATETIME, CAT_X_LOGICAL, CAT_X_MR_X_CAT,
     CAT_X_NUM_X_DATETIME, CA_SINGLE_CAT, CA_SUBVAR_HS_X_MR_X_CA_CAT,
     CA_SUBVAR_X_CAT_HS, CA_X_MR_WEIGHTED_HS, CA_X_SINGLE_CAT,
     ECON_BLAME_WITH_HS, ECON_BLAME_X_IDEOLOGY_ROW_HS,
@@ -47,6 +47,16 @@ class DescribeIntegratedCrunchCube(object):
             logical_dimension.is_mr_selections(cube._all_dimensions)
             is False
         )
+
+    def it_properly_recognizes_dimensions_of_cat_x_logical(self):
+        cube = CrunchCube(CAT_X_LOGICAL)
+
+        cat_dim, logical_dim = cube.dimensions
+
+        assert cat_dim.dimension_type == DT.CAT
+        assert logical_dim.dimension_type == DT.LOGICAL
+        assert logical_dim.is_selections
+        assert not logical_dim.is_mr_selections(cube._all_dimensions)
 
     def it_knows_if_it_is_a_single_ca_cube(self):
         cube = CrunchCube(SIMPLE_CAT_ARRAY)

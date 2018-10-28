@@ -1,0 +1,206 @@
+{
+    "query": {
+        "dimensions": [
+            {
+                "variable": "/api/datasets/123/variables/000026/"
+            },
+            {
+                "variable": "/api/datasets/123/variables/5a2969d0f6d440bfb42d3bb4540eee27/"
+            }
+        ],
+        "measures": {
+            "count": {
+                "args": [],
+                "function": "cube_count"
+            }
+        },
+        "weight": null
+    },
+    "query_environment": {
+        "filter": []
+    },
+    "result": {
+        "counts": [
+            55,
+            0,
+            0,
+            126,
+            0,
+            0,
+            0,
+            616,
+            0,
+            0,
+            310,
+            0,
+            0,
+            401,
+            0,
+            0,
+            150,
+            0,
+            0,
+            0,
+            4,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ],
+        "dimensions": [
+            {
+                "derived": false,
+                "references": {
+                    "alias": "pasta",
+                    "description": "The geometry of pasta",
+                    "name": "Shapes of pasta",
+                    "notes": "A categorical variable"
+                },
+                "type": {
+                    "categories": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "name": "Bucatini",
+                            "numeric_value": 1
+                        },
+                        {
+                            "id": 2,
+                            "missing": false,
+                            "name": "Chitarra",
+                            "numeric_value": 2
+                        },
+                        {
+                            "id": 0,
+                            "missing": false,
+                            "name": "Boccoli",
+                            "numeric_value": 0
+                        },
+                        {
+                            "id": 4,
+                            "missing": false,
+                            "name": "Orecchiette",
+                            "numeric_value": 4
+                        },
+                        {
+                            "id": 5,
+                            "missing": false,
+                            "name": "Quadrefiore",
+                            "numeric_value": 5
+                        },
+                        {
+                            "id": 6,
+                            "missing": false,
+                            "name": "Fileja",
+                            "numeric_value": 6
+                        },
+                        {
+                            "id": 32766,
+                            "missing": true,
+                            "name": "Skipped",
+                            "numeric_value": 32766
+                        },
+                        {
+                            "id": 32767,
+                            "missing": true,
+                            "name": "Not asked",
+                            "numeric_value": 32767
+                        },
+                        {
+                            "id": -1,
+                            "missing": true,
+                            "name": "No Data",
+                            "numeric_value": null
+                        }
+                    ],
+                    "class": "categorical",
+                    "ordinal": false
+                }
+            },
+            {
+                "derived": true,
+                "references": {
+                    "alias": "long pastas",
+                    "api_derivation": null,
+                    "name": "long pastas"
+                },
+                "type": {
+                    "categories": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "name": "Selected",
+                            "numeric_value": 1,
+                            "selected": true
+                        },
+                        {
+                            "id": 0,
+                            "missing": false,
+                            "name": "Other",
+                            "numeric_value": 0
+                        },
+                        {
+                            "id": -1,
+                            "missing": true,
+                            "name": "No Data",
+                            "numeric_value": null
+                        }
+                    ],
+                    "class": "categorical",
+                    "ordinal": false
+                }
+            }
+        ],
+        "element": "crunch:cube",
+        "measures": {
+            "count": {
+                "data": [
+                    55,
+                    0,
+                    0,
+                    126,
+                    0,
+                    0,
+                    0,
+                    616,
+                    0,
+                    0,
+                    310,
+                    0,
+                    0,
+                    401,
+                    0,
+                    0,
+                    150,
+                    0,
+                    0,
+                    0,
+                    4,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "metadata": {
+                    "derived": true,
+                    "references": {},
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {}
+                    }
+                },
+                "n_missing": 4
+            }
+        },
+        "missing": 4,
+        "n": 1662
+    }
+}
