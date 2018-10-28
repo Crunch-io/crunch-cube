@@ -240,9 +240,11 @@ class CrunchCube(object):
 
     @lazyproperty
     def is_univariate_ca(self):
-        """Check if cube is a just the CA ("ca x cat" or "cat x ca" dims)"""
-        ca_types = {DT.CA_SUBVAR, DT.CAT}
-        return self.ndim == 2 and set(self.dim_types) == ca_types
+        """True if cube only contains a CA dimension-pair, in either order."""
+        return (
+            self.ndim == 2 and
+            set(self.dim_types) == {DT.CA_SUBVAR, DT.CA_CAT}
+        )
 
     @lazyproperty
     def is_weighted(self):

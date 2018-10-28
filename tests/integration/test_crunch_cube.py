@@ -27,7 +27,16 @@ from .fixtures import (
 from . import assert_scale_means_equal
 
 
+class DescribeIntegratedCrunchCube(object):
+
+    def it_knows_if_it_is_a_single_ca_cube(self):
+        cube = CrunchCube(SIMPLE_CAT_ARRAY)
+        is_univariate_ca = cube.is_univariate_ca
+        assert is_univariate_ca is True
+
+
 class TestCrunchCube(TestCase):
+
     def test_crunch_cube_loads_data(self):
         cube = CrunchCube(CAT_X_CAT)
         cube_dict = cube._cube
@@ -394,13 +403,6 @@ class TestCrunchCube(TestCase):
         ]
         actual = cube.labels()
         self.assertEqual(actual, expected)
-
-    @pytest.mark.xfail(reason='WIP', strict=True)
-    def test_is_simple_ca(self):
-        cube = CrunchCube(SIMPLE_CAT_ARRAY)
-        expected = True
-        actual = cube.is_univariate_ca
-        assert actual == expected
 
     @pytest.mark.xfail(reason='WIP', strict=True)
     def test_simpla_ca_main_axis(self):
