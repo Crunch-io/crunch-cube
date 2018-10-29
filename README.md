@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.8.0
+- Major refactor of `Dimension` class
+
 #### 1.7.3
 - Implement pruning for index tables
 
