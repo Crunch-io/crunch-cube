@@ -29,6 +29,19 @@ class DescribeCrunchCube(object):
 
         assert dimensions is apparent_dimensions_
 
+    def it_knows_the_types_of_its_dimension(self, request, dimensions_prop_):
+        dimensions_prop_.return_value = tuple(
+            instance_mock(
+                request, Dimension, name='dim-%d' % idx, dimension_type=dt
+            )
+            for idx, dt in enumerate((DT.CAT, DT.CA_SUBVAR, DT.MR, DT.MR_CAT))
+        )
+        cube = CrunchCube({})
+
+        dim_types = cube.dim_types
+
+        assert dim_types == (DT.CAT, DT.CA_SUBVAR, DT.MR, DT.MR_CAT)
+
     def it_knows_when_it_contains_means_data(self, has_means_fixture):
         cube_response, expected_value = has_means_fixture
         cube = CrunchCube(cube_response)

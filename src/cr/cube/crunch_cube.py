@@ -145,7 +145,8 @@ class CrunchCube(object):
 
     @lazyproperty
     def dim_types(self):
-        return [d.dimension_type for d in self.dimensions]
+        """Tuple of DIMENSION_TYPE member for each dimension of cube."""
+        return tuple(d.dimension_type for d in self.dimensions)
 
     @lazyproperty
     def dimensions(self):

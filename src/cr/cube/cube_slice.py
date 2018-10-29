@@ -93,6 +93,11 @@ class CubeSlice(object):
         """Return 1 if not categorical array as 0th, 0 otherwise."""
         return 1 if not self.ca_as_0th else 0
 
+    @lazyproperty
+    def dim_types(self):
+        """Tuple of DIMENSION_TYPE member for each dimension of slice."""
+        return self._cube.dim_types[-2:]
+
     @memoize
     def get_shape(self, prune=False):
         """Tuple of array dimensions' lengths.
@@ -168,7 +173,7 @@ class CubeSlice(object):
         account, since it's only the tabs dimension, and mustn't affect the
         properties of the slices.
         """
-        return self.dim_types == [DT.MR, DT.MR]
+        return self.dim_types == (DT.MR, DT.MR)
 
     def labels(self, hs_dims=None, prune=False):
         """Get labels for the cube slice, and perform pruning by slice."""
