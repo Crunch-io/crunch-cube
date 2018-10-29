@@ -772,12 +772,6 @@ class TestCrunchCube(TestCase):
         actual = [dim.name for dim in cube.dimensions]
         self.assertEqual(actual, expected)
 
-    def test_selected_crosstab_dim_aliases(self):
-        cube = CrunchCube(SELECTED_CROSSTAB_4)
-        expected = ['attitudes_recoded_klima_2', 'pdl_gender']
-        actual = [dim.alias for dim in cube.dimensions]
-        self.assertEqual(actual, expected)
-
     def test_selected_crosstab_as_array(self):
         cube = CrunchCube(SELECTED_CROSSTAB_4)
         expected = np.array([

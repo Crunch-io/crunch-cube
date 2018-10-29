@@ -260,12 +260,6 @@ class Dimension(object):
         self._dimension_type = dimension_type
 
     @lazyproperty
-    def alias(self):
-        """str system (as opposed to human) name for this dimension."""
-        refs = self._dimension_dict['references']
-        return refs.get('alias')
-
-    @lazyproperty
     def description(self):
         """str description of this dimension."""
         description = self._dimension_dict['references'].get('description')
