@@ -78,45 +78,6 @@ class CubeSlice(object):
         text += '\n' + body
         return text
 
-    def _apply_pruning_mask(self, res, prune):
-        if not prune:
-            return res
-
-        array = self.as_array(prune=True)
-        if not isinstance(array, np.ma.core.MaskedArray):
-            return res
-
-        return np.ma.masked_array(res, mask=array.mask)
-
-    def _prepare_index_baseline(self, axis):
-        # First get the margin of the opposite direction of the index axis.
-        # We need this in order to end up with the right shape of the
-        # numerator vs denominator.
-        baseline = self.margin(axis=(1 - axis), include_missing=True)
-
-        # Now check if the shape of the marginal needs to be fixed, because
-        # different versions of the MR containing cubes, combined with
-        # different margin directions, provide marginals of different shapes.
-        # We also need to calculate the percentage marginals correctly,
-        # so we need to perform the addition (to get the denominator)
-        # across the correct axis.
-        if axis == self.mr_dim_ind:
-            baseline = baseline / np.sum(baseline, axis=1)[:, None]
-            return baseline[:, 0]
-        elif isinstance(self.mr_dim_ind, tuple) and axis in self.mr_dim_ind:
-            total = np.sum(baseline, axis=(axis + 1))
-            if axis == 0:
-                return baseline[:, 0, 0] / total[:, 0]
-            return baseline[0, :, 0] / total[0]
-
-        if axis == 0 and self.mr_dim_ind is not None:
-            baseline = baseline[:, 0]
-            return baseline / np.sum(baseline)
-
-        baseline = baseline if len(baseline.shape) <= 1 else baseline[0]
-        baseline = baseline / np.sum(baseline)
-        return baseline / np.sum(baseline, axis=0)
-
     @lazyproperty
     def ca_dim_ind(self):
         """Return items dimension index if there is one.
@@ -352,6 +313,16 @@ class CubeSlice(object):
         table_name = self._cube.labels()[0][self._index]
         return '%s: %s' % (title, table_name)
 
+    def _apply_pruning_mask(self, res, prune):
+        if not prune:
+            return res
+
+        array = self.as_array(prune=True)
+        if not isinstance(array, np.ma.core.MaskedArray):
+            return res
+
+        return np.ma.masked_array(res, mask=array.mask)
+
     def _call_cube_method(self, method, *args, **kwargs):
         kwargs = self._update_args(kwargs)
         result = getattr(self._cube, method)(*args, **kwargs)
@@ -360,6 +331,35 @@ class CubeSlice(object):
                 result = result[-2:]
             return result
         return self._update_result(result)
+
+    def _prepare_index_baseline(self, axis):
+        # First get the margin of the opposite direction of the index axis.
+        # We need this in order to end up with the right shape of the
+        # numerator vs denominator.
+        baseline = self.margin(axis=(1 - axis), include_missing=True)
+
+        # Now check if the shape of the marginal needs to be fixed, because
+        # different versions of the MR containing cubes, combined with
+        # different margin directions, provide marginals of different shapes.
+        # We also need to calculate the percentage marginals correctly,
+        # so we need to perform the addition (to get the denominator)
+        # across the correct axis.
+        if axis == self.mr_dim_ind:
+            baseline = baseline / np.sum(baseline, axis=1)[:, None]
+            return baseline[:, 0]
+        elif isinstance(self.mr_dim_ind, tuple) and axis in self.mr_dim_ind:
+            total = np.sum(baseline, axis=(axis + 1))
+            if axis == 0:
+                return baseline[:, 0, 0] / total[:, 0]
+            return baseline[0, :, 0] / total[0]
+
+        if axis == 0 and self.mr_dim_ind is not None:
+            baseline = baseline[:, 0]
+            return baseline / np.sum(baseline)
+
+        baseline = baseline if len(baseline.shape) <= 1 else baseline[0]
+        baseline = baseline / np.sum(baseline)
+        return baseline / np.sum(baseline, axis=0)
 
     def _update_args(self, kwargs):
         if self._cube.ndim < 3:
