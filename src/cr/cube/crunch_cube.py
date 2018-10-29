@@ -412,27 +412,6 @@ class CrunchCube(object):
         return indices
 
     @lazyproperty
-    def mr_selections_indices(self):
-        """Gets indices of each 'selection' dim, for corresponding MR dim.
-
-        Multiple Response (MR) and Categorical Array (CA) variables are
-        represented by two dimensions each. These dimensions can be thought of
-        as 'elements' and 'selections'. This function returns the indices of
-        the 'selections' dimension for each MR variable.
-        """
-        mr_dimensions_indices = [
-            i for (i, dim) in enumerate(self._all_dimensions)
-            if (i + 1 < len(self._all_dimensions) and
-                dim.dimension_type == DT.MR_SUBVAR)
-        ]
-
-        # For each MR and CA dimension, the 'selections' dimension
-        # follows right after it (in the originating cube).
-        # Here we increase the MR index by 1, which gives us
-        # the index of the corresponding 'selections' dimension.
-        return [i + 1 for i in mr_dimensions_indices]
-
-    @lazyproperty
     def name(self):
         """Return the name of the cube.
 

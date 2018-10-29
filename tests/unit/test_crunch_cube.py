@@ -247,10 +247,6 @@ class DescribeCrunchCube(object):
     def mr_dim_ind_prop_(self, request):
         return property_mock(request, CrunchCube, 'mr_dim_ind')
 
-    @pytest.fixture
-    def mr_selections_indices_prop_(self, request):
-        return property_mock(request, CrunchCube, 'mr_selections_indices')
-
 
 # pylint: disable=invalid-name, no-self-use, protected-access
 @patch('cr.cube.crunch_cube.CrunchCube.get_slices', lambda x: None)
