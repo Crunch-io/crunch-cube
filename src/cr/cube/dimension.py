@@ -317,7 +317,7 @@ class Dimension(object):
         will always contains at least one index (a subtotal with no addends
         is ignored).
         """
-        if self.is_selections:
+        if self.dimension_type in {DT.MR_CAT, DT.LOGICAL}:
             return ()
 
         return tuple(
@@ -341,14 +341,6 @@ class Dimension(object):
             in enumerate(self._iter_interleaved_items(self._valid_elements))
             if item.is_insertion
         ]
-
-    @lazyproperty
-    def is_selections(self):
-        """True for the categories dimension of an MR dimension-pair."""
-        return (
-            len(self._all_elements) == 3 and
-            self._all_elements.element_ids == (1, 0, -1)
-        )
 
     def labels(self, include_missing=False, include_transforms=False,
                include_cat_ids=False):

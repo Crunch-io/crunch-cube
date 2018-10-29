@@ -1307,14 +1307,17 @@ class CrunchCube(object):
         dims = self._all_dimensions if self.has_mr else self.dimensions
         new_valids = [i for i in valid_indices]
         for (i, dim) in enumerate(dims):
-            # Check if transformations can/need to be performed
-            transform = (dim.has_transforms and
-                         i - dim_offset in include_transforms_for_dims)
-            if dim.dimension_type == DT.MR_SUBVAR:
+            if dim.dimension_type == DT.MR:
                 dim_offset += 1
-            if (not transform or
-                    dim.dimension_type in DT.ARRAY_TYPES or
-                    dim.is_selections):
+                continue
+            # Check if transformations can/need to be performed
+            if dim.dimension_type in {DT.CA, DT.MR_CAT, DT.LOGICAL}:
+                continue
+            transform = (
+                dim.has_transforms and
+                i - dim_offset in include_transforms_for_dims
+            )
+            if not transform:
                 continue
             # Perform transformations
             insertions = self._insertions(res, dim, i)

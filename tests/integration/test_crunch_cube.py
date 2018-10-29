@@ -31,27 +31,13 @@ from . import assert_scale_means_equal
 
 class DescribeIntegratedCrunchCube(object):
 
-    def it_provides_access_to_its_dimensions(self):
-        cube = CrunchCube(CA_SUBVAR_HS_X_MR_X_CA_CAT)
-        dimension_types = [d.dimension_type for d in cube.dimensions]
-        assert dimension_types == [DT.CA_SUBVAR, DT.MR, DT.CA_CAT]
+    def it_provides_access_to_its_dimensions(self, dimensions_fixture):
+        cube_response, expected_dimension_types = dimensions_fixture
+        cube = CrunchCube(cube_response)
 
-    def it_properly_recognizes_a_logical_dimension(self):
-        cube = CrunchCube(LOGICAL_UNIVARIATE)
-        logical_dimension = cube.dimensions[0]
+        dimension_types = tuple(d.dimension_type for d in cube.dimensions)
 
-        dimension_type = logical_dimension.dimension_type
-
-        assert dimension_type == DT.LOGICAL
-
-    def it_properly_recognizes_dimensions_of_cat_x_logical(self):
-        cube = CrunchCube(CAT_X_LOGICAL)
-
-        cat_dim, logical_dim = cube.dimensions
-
-        assert cat_dim.dimension_type == DT.CAT
-        assert logical_dim.dimension_type == DT.LOGICAL
-        assert logical_dim.is_selections
+        assert dimension_types == expected_dimension_types
 
     def it_knows_if_it_is_a_single_ca_cube(self):
         cube = CrunchCube(SIMPLE_CAT_ARRAY)
@@ -62,6 +48,17 @@ class DescribeIntegratedCrunchCube(object):
         cube = CrunchCube(SIMPLE_CAT_ARRAY)  # ---CA_SUBVAR x CA_CAT---
         univariate_ca_main_axis = cube.univariate_ca_main_axis
         assert univariate_ca_main_axis == 1
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture(params=[
+        (CA_SUBVAR_HS_X_MR_X_CA_CAT, (DT.CA_SUBVAR, DT.MR, DT.CA_CAT)),
+        (CAT_X_LOGICAL, (DT.CAT, DT.LOGICAL)),
+        (LOGICAL_UNIVARIATE, (DT.LOGICAL,)),
+    ])
+    def dimensions_fixture(self, request):
+        cube_response, expected_dimension_types = request.param
+        return cube_response, expected_dimension_types
 
 
 class TestCrunchCube(TestCase):

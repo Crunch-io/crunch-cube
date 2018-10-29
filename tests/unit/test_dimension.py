@@ -438,9 +438,9 @@ class DescribeDimension(object):
         assert dimension_type == DT.CAT
 
     def it_provides_subtotal_indices(
-            self, hs_indices_fixture, is_selections_prop_, _subtotals_prop_):
-        is_selections, subtotals_, expected_value = hs_indices_fixture
-        is_selections_prop_.return_value = is_selections
+            self, hs_indices_fixture, dimension_type_prop_, _subtotals_prop_):
+        dimension_type, subtotals_, expected_value = hs_indices_fixture
+        dimension_type_prop_.return_value = dimension_type
         _subtotals_prop_.return_value = subtotals_
         dimension = Dimension(None, None)
 
@@ -486,18 +486,19 @@ class DescribeDimension(object):
         return dimension_dict, expected_value
 
     @pytest.fixture(params=[
-        (True, ()),
-        (False, ((0, (1, 2)), (3, (4, 5)))),
+        (DT.MR_CAT, ()),
+        (DT.LOGICAL, ()),
+        (DT.CAT, ((0, (1, 2)), (3, (4, 5)))),
     ])
     def hs_indices_fixture(self, request):
-        is_selections, expected_value = request.param
+        dimension_type, expected_value = request.param
         subtotals_ = (
             instance_mock(
                 request, _Subtotal, anchor_idx=idx * 3,
                 addend_idxs=(idx + 1 + (2 * idx), idx + 2 + (2 * idx))
             ) for idx in range(2)
         )
-        return is_selections, subtotals_, expected_value
+        return dimension_type, subtotals_, expected_value
 
     @pytest.fixture(params=[
         ({}, []),
@@ -523,8 +524,8 @@ class DescribeDimension(object):
     # fixture components ---------------------------------------------
 
     @pytest.fixture
-    def is_selections_prop_(self, request):
-        return property_mock(request, Dimension, 'is_selections')
+    def dimension_type_prop_(self, request):
+        return property_mock(request, Dimension, 'dimension_type')
 
     @pytest.fixture
     def _Subtotals_(self, request):
