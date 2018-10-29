@@ -1,0 +1,1292 @@
+{
+    "query": {
+        "dimensions": [
+            {
+                "each": 3
+            },
+            {
+                "each": 2
+            },
+            {
+                "args": [
+                    {
+                        "variable": "0000dd"
+                    }
+                ],
+                "function": "as_selected"
+            },
+            {
+                "variable": "0000d8"
+            }
+        ],
+        "measures": {
+            "count": {
+                "args": [],
+                "function": "cube_count"
+            }
+        },
+        "weight": "http://127.0.0.1:8080/datasets/230d454e1b5942a99f870fdb0a31c8ca/variables/0000d0/"
+    },
+    "query_environment": {
+        "filter": []
+    },
+    "result": {
+        "counts": [
+            34,
+            39,
+            26,
+            37,
+            6,
+            1,
+            0,
+            0,
+            21,
+            36,
+            23,
+            26,
+            18,
+            4,
+            0,
+            0,
+            257,
+            340,
+            222,
+            427,
+            129,
+            16,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            312,
+            415,
+            271,
+            490,
+            153,
+            21,
+            0,
+            0,
+            29,
+            43,
+            26,
+            33,
+            7,
+            3,
+            0,
+            0,
+            23,
+            35,
+            20,
+            28,
+            17,
+            3,
+            0,
+            0,
+            260,
+            337,
+            225,
+            429,
+            129,
+            15,
+            0,
+            0,
+            251,
+            335,
+            223,
+            424,
+            140,
+            16,
+            0,
+            0,
+            6,
+            11,
+            7,
+            6,
+            1,
+            2,
+            0,
+            0,
+            55,
+            69,
+            41,
+            60,
+            12,
+            3,
+            0,
+            0,
+            15,
+            36,
+            23,
+            62,
+            6,
+            1,
+            0,
+            0,
+            16,
+            35,
+            25,
+            32,
+            18,
+            2,
+            0,
+            0,
+            141,
+            288,
+            234,
+            573,
+            135,
+            20,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            172,
+            359,
+            282,
+            667,
+            159,
+            23,
+            0,
+            0,
+            19,
+            31,
+            30,
+            50,
+            7,
+            4,
+            0,
+            0,
+            14,
+            35,
+            23,
+            34,
+            17,
+            3,
+            0,
+            0,
+            139,
+            293,
+            229,
+            583,
+            135,
+            16,
+            0,
+            0,
+            139,
+            294,
+            233,
+            560,
+            146,
+            17,
+            0,
+            0,
+            5,
+            8,
+            7,
+            10,
+            1,
+            2,
+            0,
+            0,
+            28,
+            57,
+            42,
+            97,
+            12,
+            4,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            143,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            128,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1391,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1662,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            141,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            126,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1395,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1389,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            33,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            240
+        ],
+        "dimensions": [
+            {
+                "derived": true,
+                "references": {
+                    "alias": "abolitionists",
+                    "description": "Do you have a favorable or an unfavorable opinion of the following abolitionists?",
+                    "name": "Abolitionists",
+                    "notes": "A categorical array variable, where one item has no responses",
+                    "subreferences": [
+                        {
+                            "alias": "douglass",
+                            "description": "fav_ppdem",
+                            "name": "Frederick Douglass"
+                        },
+                        {
+                            "alias": "brown",
+                            "description": "fav_pprep",
+                            "name": "John Brown"
+                        },
+                        {
+                            "alias": "truth",
+                            "name": "Sojourner Truth"
+                        }
+                    ],
+                    "view": {
+                        "column_width": null,
+                        "include_missing": false,
+                        "show_counts": false,
+                        "transform": {
+                            "insertions": [
+                                {
+                                    "anchor": 2,
+                                    "args": [
+                                        0,
+                                        2
+                                    ],
+                                    "function": "subtotal",
+                                    "name": "favorable"
+                                },
+                                {
+                                    "anchor": 4,
+                                    "args": [
+                                        3,
+                                        4
+                                    ],
+                                    "function": "subtotal",
+                                    "name": "unfavorable"
+                                }
+                            ]
+                        }
+                    }
+                },
+                "type": {
+                    "class": "enum",
+                    "elements": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0061",
+                                "references": {
+                                    "alias": "douglass",
+                                    "description": "fav_ppdem",
+                                    "name": "Frederick Douglass"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Very favorable",
+                                            "numeric_value": 0,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": 2,
+                                            "missing": false,
+                                            "name": "Somewhat favorable",
+                                            "numeric_value": 2,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": 3,
+                                            "missing": false,
+                                            "name": "Somewhat unfavorable",
+                                            "numeric_value": 3,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": 4,
+                                            "missing": false,
+                                            "name": "Very unfavorable",
+                                            "numeric_value": 4,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": 5,
+                                            "missing": false,
+                                            "name": "Don't know",
+                                            "numeric_value": 5,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": 32766,
+                                            "missing": true,
+                                            "name": "skipped",
+                                            "numeric_value": 32766,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": 32767,
+                                            "missing": true,
+                                            "name": "not asked",
+                                            "numeric_value": 32767,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null,
+                                            "selected": false
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0062",
+                                "references": {
+                                    "alias": "brown",
+                                    "description": "fav_pprep",
+                                    "name": "John Brown"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Very favorable",
+                                            "numeric_value": 0,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": 2,
+                                            "missing": false,
+                                            "name": "Somewhat favorable",
+                                            "numeric_value": 2,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": 3,
+                                            "missing": false,
+                                            "name": "Somewhat unfavorable",
+                                            "numeric_value": 3,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": 4,
+                                            "missing": false,
+                                            "name": "Very unfavorable",
+                                            "numeric_value": 4,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": 5,
+                                            "missing": false,
+                                            "name": "Don't know",
+                                            "numeric_value": 5,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": 32766,
+                                            "missing": true,
+                                            "name": "skipped",
+                                            "numeric_value": 32766,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": 32767,
+                                            "missing": true,
+                                            "name": "not asked",
+                                            "numeric_value": 32767,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null,
+                                            "selected": false
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 3,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "fb4492a07d5142f9a9a49de9c07ce8a1",
+                                "references": {
+                                    "alias": "truth",
+                                    "name": "Sojourner Truth"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Very favorable",
+                                            "numeric_value": 0,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": 2,
+                                            "missing": false,
+                                            "name": "Somewhat favorable",
+                                            "numeric_value": 2,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": 3,
+                                            "missing": false,
+                                            "name": "Somewhat unfavorable",
+                                            "numeric_value": 3,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": 4,
+                                            "missing": false,
+                                            "name": "Very unfavorable",
+                                            "numeric_value": 4,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": 5,
+                                            "missing": false,
+                                            "name": "Don't know",
+                                            "numeric_value": 5,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": 32766,
+                                            "missing": true,
+                                            "name": "skipped",
+                                            "numeric_value": 32766,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": 32767,
+                                            "missing": true,
+                                            "name": "not asked",
+                                            "numeric_value": 32767,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null,
+                                            "selected": false
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        }
+                    ],
+                    "subtype": {
+                        "class": "variable"
+                    }
+                }
+            },
+            {
+                "derived": true,
+                "references": {
+                    "alias": "1984_countries",
+                    "description": "Which of the following countries from 1984 would you live in? (select all that apply)",
+                    "name": "Countries from 1984",
+                    "notes": "A multiple response variable, where one item has no responses",
+                    "subreferences": [
+                        {
+                            "alias": "eurasia",
+                            "description": "union_hhold_1",
+                            "name": "Eurasia"
+                        },
+                        {
+                            "alias": "disputed",
+                            "name": "Disputed"
+                        },
+                        {
+                            "alias": "oceania",
+                            "description": "union_hhold_2",
+                            "name": "Oceania"
+                        },
+                        {
+                            "alias": "eastasia",
+                            "description": "union_hhold_3",
+                            "name": "Eastasia"
+                        }
+                    ],
+                    "uniform_basis": false
+                },
+                "type": {
+                    "class": "enum",
+                    "elements": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "00c5",
+                                "references": {
+                                    "alias": "eurasia",
+                                    "description": "union_hhold_1",
+                                    "name": "Eurasia"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Other",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "11b45a85e5ac4011bd3cf884b8a2476f",
+                                "references": {
+                                    "alias": "disputed",
+                                    "name": "Disputed"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Other",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 3,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "00c6",
+                                "references": {
+                                    "alias": "oceania",
+                                    "description": "union_hhold_2",
+                                    "name": "Oceania"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Other",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 4,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "00c7",
+                                "references": {
+                                    "alias": "eastasia",
+                                    "description": "union_hhold_3",
+                                    "name": "Eastasia"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Other",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        }
+                    ],
+                    "subtype": {
+                        "class": "variable"
+                    }
+                }
+            },
+            {
+                "derived": true,
+                "references": {
+                    "alias": "1984_countries",
+                    "description": "Which of the following countries from 1984 would you live in? (select all that apply)",
+                    "name": "Countries from 1984",
+                    "notes": "A multiple response variable, where one item has no responses",
+                    "subreferences": [
+                        {
+                            "alias": "eurasia",
+                            "description": "union_hhold_1",
+                            "name": "Eurasia"
+                        },
+                        {
+                            "alias": "disputed",
+                            "name": "Disputed"
+                        },
+                        {
+                            "alias": "oceania",
+                            "description": "union_hhold_2",
+                            "name": "Oceania"
+                        },
+                        {
+                            "alias": "eastasia",
+                            "description": "union_hhold_3",
+                            "name": "Eastasia"
+                        }
+                    ],
+                    "uniform_basis": false
+                },
+                "type": {
+                    "categories": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "name": "Selected",
+                            "numeric_value": 1,
+                            "selected": true
+                        },
+                        {
+                            "id": 0,
+                            "missing": false,
+                            "name": "Other",
+                            "numeric_value": 0
+                        },
+                        {
+                            "id": -1,
+                            "missing": true,
+                            "name": "No Data",
+                            "numeric_value": null
+                        }
+                    ],
+                    "class": "categorical",
+                    "ordinal": false,
+                    "subvariables": [
+                        "00c5",
+                        "11b45a85e5ac4011bd3cf884b8a2476f",
+                        "00c6",
+                        "00c7"
+                    ]
+                }
+            },
+            {
+                "derived": false,
+                "references": {
+                    "alias": "abolitionists",
+                    "description": "Do you have a favorable or an unfavorable opinion of the following abolitionists?",
+                    "name": "Abolitionists",
+                    "notes": "A categorical array variable, where one item has no responses",
+                    "subreferences": [
+                        {
+                            "alias": "douglass",
+                            "description": "fav_ppdem",
+                            "name": "Frederick Douglass"
+                        },
+                        {
+                            "alias": "brown",
+                            "description": "fav_pprep",
+                            "name": "John Brown"
+                        },
+                        {
+                            "alias": "truth",
+                            "name": "Sojourner Truth"
+                        }
+                    ],
+                    "view": {
+                        "column_width": null,
+                        "include_missing": false,
+                        "show_counts": false,
+                        "transform": {
+                            "insertions": [
+                                {
+                                    "anchor": 2,
+                                    "args": [
+                                        0,
+                                        2
+                                    ],
+                                    "function": "subtotal",
+                                    "name": "favorable"
+                                },
+                                {
+                                    "anchor": 4,
+                                    "args": [
+                                        3,
+                                        4
+                                    ],
+                                    "function": "subtotal",
+                                    "name": "unfavorable"
+                                }
+                            ]
+                        }
+                    }
+                },
+                "type": {
+                    "categories": [
+                        {
+                            "id": 0,
+                            "missing": false,
+                            "name": "Very favorable",
+                            "numeric_value": 0,
+                            "selected": false
+                        },
+                        {
+                            "id": 2,
+                            "missing": false,
+                            "name": "Somewhat favorable",
+                            "numeric_value": 2,
+                            "selected": false
+                        },
+                        {
+                            "id": 3,
+                            "missing": false,
+                            "name": "Somewhat unfavorable",
+                            "numeric_value": 3,
+                            "selected": false
+                        },
+                        {
+                            "id": 4,
+                            "missing": false,
+                            "name": "Very unfavorable",
+                            "numeric_value": 4,
+                            "selected": false
+                        },
+                        {
+                            "id": 5,
+                            "missing": false,
+                            "name": "Don't know",
+                            "numeric_value": 5,
+                            "selected": false
+                        },
+                        {
+                            "id": 32766,
+                            "missing": true,
+                            "name": "skipped",
+                            "numeric_value": 32766,
+                            "selected": false
+                        },
+                        {
+                            "id": 32767,
+                            "missing": true,
+                            "name": "not asked",
+                            "numeric_value": 32767,
+                            "selected": false
+                        },
+                        {
+                            "id": -1,
+                            "missing": true,
+                            "name": "No Data",
+                            "numeric_value": null,
+                            "selected": false
+                        }
+                    ],
+                    "class": "categorical",
+                    "ordinal": false,
+                    "subvariables": [
+                        "0061",
+                        "0062",
+                        "fb4492a07d5142f9a9a49de9c07ce8a1"
+                    ]
+                }
+            }
+        ],
+        "element": "crunch:cube",
+        "measures": {
+            "count": {
+                "data": [
+                    22.26099250327014,
+                    34.4602057043984,
+                    25.563088877030076,
+                    32.401718138262495,
+                    4.991129397989441,
+                    0.752560977946403,
+                    0,
+                    0,
+                    16.984483530316655,
+                    38.9081180709724,
+                    35.7209072453127,
+                    31.035266136006467,
+                    28.002444742699026,
+                    6.919184332291868,
+                    0,
+                    0,
+                    222.31051106413815,
+                    318.45957711552364,
+                    202.83721619112774,
+                    438.0131298156195,
+                    179.35124397873264,
+                    23.028222178364448,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    261.55598709772505,
+                    391.82790089089457,
+                    264.12121231347066,
+                    501.4501140898886,
+                    212.34481811942115,
+                    30.699967488602727,
+                    0,
+                    0,
+                    21.4670764652966,
+                    44.01337663270962,
+                    25.335068002584972,
+                    33.84106799535904,
+                    8.545097091441706,
+                    3.60847290734546,
+                    0,
+                    0,
+                    18.762347138878738,
+                    40.29378632551246,
+                    30.437410841562908,
+                    33.331393844496965,
+                    26.346143477186818,
+                    5.740042205022288,
+                    0,
+                    0,
+                    221.32656349354963,
+                    307.5207379326725,
+                    208.34873346932272,
+                    434.2776522500326,
+                    177.4535775507926,
+                    21.351452376234974,
+                    0,
+                    0,
+                    219.18232447849093,
+                    314.36524891432765,
+                    217.58401250955848,
+                    438.9091648608562,
+                    198.80859162999,
+                    23.69171518220356,
+                    0,
+                    0,
+                    3.199266164300618,
+                    11.037444901300132,
+                    8.945965337412046,
+                    5.019667741252505,
+                    1.65630126551221,
+                    3.82636054837688,
+                    0,
+                    0,
+                    39.174396454933415,
+                    66.42520707526663,
+                    37.5912344665001,
+                    57.52128148777984,
+                    11.879925223918939,
+                    3.1818917580222825,
+                    0,
+                    0,
+                    15.106451517802475,
+                    32.56041000932026,
+                    25.12416755778091,
+                    41.5686964119083,
+                    5.2311713101206525,
+                    0.838798791964368,
+                    0,
+                    0,
+                    14.896428954467083,
+                    41.42346016529121,
+                    28.221835152107467,
+                    41.93341125911934,
+                    28.002444742699026,
+                    3.092823783914988,
+                    0,
+                    0,
+                    140.99549592400103,
+                    329.9257009025295,
+                    215.05009246581164,
+                    486.723309333154,
+                    187.65185151445908,
+                    23.653450203551206,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    170.9983763962706,
+                    403.90957107714144,
+                    268.3960951757001,
+                    570.2254170041821,
+                    220.8854675672788,
+                    27.58507277943056,
+                    0,
+                    0,
+                    21.02300969501045,
+                    34.32300344117949,
+                    29.553152424754533,
+                    40.04699026362585,
+                    8.225370781902221,
+                    3.63863248826485,
+                    0,
+                    0,
+                    12.966918811913406,
+                    41.211297404201865,
+                    26.87050214243102,
+                    43.584639421047704,
+                    26.346143477186818,
+                    3.931622575879356,
+                    0,
+                    0,
+                    137.00844788934674,
+                    328.3752702317596,
+                    211.97244060851443,
+                    486.59378731950824,
+                    186.31395330818972,
+                    20.014817715286352,
+                    0,
+                    0,
+                    135.9175154233714,
+                    338.33312724914975,
+                    217.765472615634,
+                    492.6355937339217,
+                    207.42892547525588,
+                    20.460423078094042,
+                    0,
+                    0,
+                    3.7245122738576018,
+                    9.330372140702387,
+                    8.59861013012241,
+                    6.889192934888112,
+                    1.65630126551221,
+                    3.4860172130716682,
+                    0,
+                    0,
+                    31.356348699041565,
+                    56.24607168728871,
+                    42.032012429943606,
+                    70.7006303353718,
+                    11.800240826510663,
+                    3.63863248826485,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    120.4296955988969,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    157.57040405759912,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1383.9999003434998,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1661.9999999999927,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    136.81015909473734,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    154.9111238326602,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1370.2787170725978,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1412.5410575754197,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    33.685005958154385,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    215.77393646642128
+                ],
+                "metadata": {
+                    "derived": true,
+                    "references": {},
+                    "type": {
+                        "class": "numeric",
+                        "integer": false,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {}
+                    }
+                },
+                "n_missing": 10
+            }
+        },
+        "missing": 10,
+        "n": 1662
+    }
+}

@@ -1,5 +1,6 @@
 from unittest import TestCase
 import numpy as np
+import pytest
 
 from cr.cube.crunch_cube import CrunchCube
 from cr.cube.util import compress_pruned
@@ -1316,6 +1317,7 @@ class TestCrunchCube(TestCase):
         for i, actual in enumerate(pruned):
             np.testing.assert_array_equal(pruned[i], pruned_expected[i])
 
+    @pytest.mark.filterwarnings('ignore:DeprecationWarning')
     def test_cat_x_cat_index_by_col_prune_cols(self):
         cube = CrunchCube(CAT_X_CAT_WITH_EMPTY_COLS)
         expected = np.array([
@@ -1596,9 +1598,11 @@ class TestCrunchCube(TestCase):
 
     def test_means_with_null_values(self):
         cube = CrunchCube(SCALE_WITH_NULL_VALUES)
-        expected = [[np.array([1.2060688, 1.0669344, 1.023199]), None]]
-        actual = cube.scale_means()
-        assert_scale_means_equal(actual, expected)
+        scale_means = cube.scale_means()
+        assert_scale_means_equal(
+            scale_means,
+            [[np.array([1.2060688, 1.0669344, 1.023199]), None]]
+        )
 
     def test_values_services(self):
         cube = CrunchCube(VALUE_SERVICES)

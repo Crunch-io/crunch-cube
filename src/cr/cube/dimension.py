@@ -2,6 +2,8 @@
 
 """Provides the Dimension class."""
 
+from collections import Sequence
+
 import numpy as np
 
 from cr.cube import ITEM_DIMENSION_TYPES
@@ -19,124 +21,125 @@ class Dimension(object):
     :attr:`.CrunchCube.dimensions`.
     """
 
-    def __init__(self, dim, selections=None):
-        self._dim = dim
-        self._type = self._get_type(dim, selections)
+    def __init__(self, dimension_dict, next_dimension_dict=None):
+        self._dimension_dict = dimension_dict
+        self._next_dimension_dict = next_dimension_dict
 
     @lazyproperty
     def alias(self):
-        """Alias of a cube's dimension."""
-        refs = self._dim['references']
+        """str system (as opposed to human) name for this dimension."""
+        refs = self._dimension_dict['references']
         return refs.get('alias')
 
     @lazyproperty
     def description(self):
-        """Description of a cube's dimension."""
-        refs = self._dim['references']
-        return refs.get('description')
+        """str description of this dimension."""
+        description = self._dimension_dict['references'].get('description')
+        return description if description else ''
+
+    @lazyproperty
+    def dimension_type(self):
+        """str representing type of this cube dimension."""
+        # ---all this logic really belongs in the Dimensions collection
+        # ---object, which is where it will move to once that's implemented
+
+        def next_dim_is_mr_cat():
+            """True if subsequent dimension is an MR_CAT dimension."""
+            if not self._next_dimension_dict:
+                return False
+
+            categories = self._next_dimension_dict['type'].get('categories')
+            if not categories:
+                return False
+
+            return (
+                [category.get('id') for category in categories] == [1, 0, -1]
+            )
+
+        type_dict = self._dimension_dict['type']
+        type_class = type_dict.get('class')
+
+        if not type_class:
+            # ---numeric and text are like this---
+            return type_dict['subtype']['class']
+
+        if type_class == 'enum':
+            if 'subreferences' in self._dimension_dict['references']:
+                return (
+                    'multiple_response' if next_dim_is_mr_cat()
+                    else 'categorical_array'
+                )
+            if 'subtype' in type_dict:
+                # ---datetime is like this (enum without subreferences)---
+                return type_dict['subtype']['class']
+
+        return type_class
+
+    @memoize
+    def element_indices(self, include_missing):
+        """Return tuple of int element idxs for this dimension.
+
+        *include_missing* determines whether missing elements are included or
+        only valid element index values are returned.
+        """
+        return (
+            self._all_elements.element_idxs if include_missing else
+            self._valid_elements.element_idxs
+        )
 
     @memoize
     def elements(self, include_missing=False):
-        """Get elements of the crunch Dimension.
-
-        For categorical variables, the elements are represented by categories
-        internally. For other variable types, actual 'elements' of the
-        Crunch Cube JSON response are returned.
-        """
-        if include_missing:
-            return self._elements
-
-        return [
-            el for (i, el) in enumerate(self._elements)
-            if i not in self.invalid_indices
-        ]
-
-    @lazyproperty
-    def elements_by_id(self):
-        r = {}
-        for i, el in enumerate(self._elements):
-            el['index'] = i
-            r[el['id']] = el
-        return r
+        """_Elements object providing access to elements of this dimension."""
+        return (
+            self._all_elements if include_missing else self._valid_elements
+        )
 
     @lazyproperty
     def has_transforms(self):
-        view = self._dim['references'].get('view')
-        if not view:
-            return False
-        insertions = view.get('transform', {}).get('insertions')
-        return insertions is not None
+        """True if there are subtotals on this dimension, False otherwise."""
+        return len(self._subtotals) > 0
 
     @lazyproperty
     def hs_indices(self):
-        """Headers and Subtotals indices."""
+        """tuple of (anchor_idx, addend_idxs) pair for each subtotal.
+
+        Example::
+
+            (
+                (2, (0, 1, 2)),
+                (3, (3,)),
+                ('bottom', (4, 5))
+            )
+
+        Note that the `anchor_idx` item in the first position of each pair
+        can be 'top' or 'bottom' as well as an int. The `addend_idxs` tuple
+        will always contains at least one index (a subtotal with no addends
+        is ignored).
+        """
         if self.is_selections:
-            return []
+            return ()
 
-        eid = self.elements_by_id
-
-        indices = []
-        for subtotal in self.subtotals:
-
-            inds = []
-            for arg in subtotal.args:
-                inds.append(eid[arg]['index'])
-
-            indices.append({'anchor_ind': self._transform_anchor(subtotal),
-                            'inds': inds})
-
-        # filter where indices aren't available to sum
-        indices = [ind for ind in indices if len(ind['inds']) > 0]
-
-        return indices
+        return tuple(
+            (subtotal.anchor_idx, subtotal.addend_idxs)
+            for subtotal in self._subtotals
+        )
 
     @lazyproperty
     def inserted_hs_indices(self):
-        """Returns inserted H&S indices for the dimension."""
-        if (self.type in ITEM_DIMENSION_TYPES or not self.subtotals):
-            return []  # For CA and MR items, we don't do H&S insertions
+        """list of int index of each inserted subtotal for the dimension.
 
-        elements = self.elements()
-        element_ids = [element['id'] for element in elements]
+        Each value represents the position of a subtotal in the interleaved
+        sequence of elements and subtotals items.
+        """
+        # ---don't do H&S insertions for CA and MR subvar dimensions---
+        if self.dimension_type in ITEM_DIMENSION_TYPES:
+            return []
 
-        top_indexes = []
-        middle_indexes = []
-        bottom_indexes = []
-        for i, st in enumerate(self.subtotals):
-            anchor = st.anchor
-            if anchor == 'top':
-                top_indexes.append(i)
-            elif anchor == 'bottom':
-                bottom_indexes.append(i)
-            else:
-                middle_indexes.append(anchor)
-        len_top_indexes = len(top_indexes)
-
-        # push all top indexes to the top
-        top_indexes = list(range(len_top_indexes))
-
-        # adjust the middle_indexes appropriately
-        middle_indexes = [
-            i + element_ids.index(index) + len_top_indexes + 1
-            for i, index in enumerate(middle_indexes)
+        return [
+            idx for idx, item
+            in enumerate(self._iter_interleaved_items(self._valid_elements))
+            if item.is_insertion
         ]
-
-        # what remains is the bottom
-        len_non_bottom_indexes = (
-            len_top_indexes + len(middle_indexes) + len(elements)
-        )
-        bottom_indexes = list(range(
-            len_non_bottom_indexes, len_non_bottom_indexes + len(bottom_indexes)
-        ))
-
-        return top_indexes + middle_indexes + bottom_indexes
-
-    @lazyproperty
-    def invalid_indices(self):
-        return set((
-            i for (i, el) in enumerate(self._elements)
-            if el.get('missing')
-        ))
 
     def is_mr_selections(self, others):
         """Return True if this dimension var is multiple-response selections.
@@ -156,96 +159,62 @@ class Dimension(object):
 
     @lazyproperty
     def is_selections(self):
-        categories = self._elements
-        if len(categories) != 3:
-            return False
-
-        mr_ids = (1, 0, -1)
-        for i, mr_id in enumerate(mr_ids):
-            if categories[i]['id'] != mr_id:
-                return False
-        return True
+        """True for the categories dimension of an MR dimension-pair."""
+        return (
+            len(self._all_elements) == 3 and
+            self._all_elements.element_ids == (1, 0, -1)
+        )
 
     def labels(self, include_missing=False, include_transforms=False,
                include_cat_ids=False):
-        """Get labels of the Crunch Dimension."""
-        if (not (include_transforms and self.has_transforms) or
-                self.type == 'categorical_array'):
-            return [
-                (
-                    self._get_name(el)
-                    if not include_cat_ids else
-                    (self._get_name(el), el.get('id', -1))
-                )
-                for (i, el) in enumerate(self._elements)
-                if include_missing or i not in self.invalid_indices
-            ]
+        """Return list of str labels for the elements of this dimension.
 
-        # Create subtotals names and insert them in labels after
-        # appropriate anchors
-        labels_with_cat_ids = [{
-            'ind': i,
-            'id': el['id'],
-            'name': self._get_name(el),
-        } for (i, el) in enumerate(self._elements)]
-        labels_with_cat_ids = self._update_with_subtotals(labels_with_cat_ids)
+        Returns a list of (label, element_id) pairs if *include_cat_ids* is
+        True. The `element_id` value in the second position of the pair is
+        None for subtotal items (which don't have an element-id).
+        """
+        # TODO: Having an alternate return type triggered by a flag-parameter
+        # (`include_cat_ids` in this case) is poor practice. Using flags like
+        # that effectively squashes what should be two methods into one.
+        # Either get rid of the need for that alternate return value type or
+        # create a separate method for it.
+        elements = (
+            self._all_elements if include_missing else self._valid_elements
+        )
 
-        valid_indices = self.valid_indices(include_missing)
-        return [
-            (
-                label['name']
-                if not include_cat_ids else
-                (label['name'], label.get('id', -1))
+        include_subtotals = (
+            include_transforms and
+            self.dimension_type != 'categorical_array'
+        )
+
+        # ---items are elements or subtotals, interleaved in display order---
+        interleaved_items = tuple(self._iter_interleaved_items(elements))
+
+        labels = list(
+            item.label
+            for item in interleaved_items
+            if include_subtotals or not item.is_insertion
+        )
+
+        if include_cat_ids:
+            element_ids = tuple(
+                None if item.is_insertion else item.element_id
+                for item in interleaved_items
+                if include_subtotals or not item.is_insertion
             )
-            for label in labels_with_cat_ids
-            if self._include_in_labels(label, valid_indices)
-        ]
+            return list(zip(labels, element_ids))
+
+        return labels
 
     @lazyproperty
     def name(self):
         """Name of a cube's dimension."""
-        refs = self._dim['references']
+        refs = self._dimension_dict['references']
         return refs.get('name', refs.get('alias'))
 
     @lazyproperty
-    def shape(self):
-        return len(self._elements)
-
-    @lazyproperty
-    def subtotals(self):
-        view = self._dim.get('references', {}).get('view', {})
-
-        if not view:
-            # View can be both None and {}, thus the edge case.
-            return []
-
-        insertions_data = view.get('transform', {}).get('insertions', [])
-        subtotals = [_Subtotal(data, self) for data in insertions_data]
-        return [subtotal for subtotal in subtotals if subtotal.is_valid]
-
-    @lazyproperty
-    def type(self):
-        """Get type of the Crunch Dimension."""
-        return self._type
-
-    @memoize
-    def valid_indices(self, include_missing):
-        """Gets valid indices of Crunch Cube Dimension's elements.
-
-        This function needs to be used by CrunchCube class, in order to
-        correctly calculate the indices of the result that needs to be
-        returned to the user. In most cases, the non-valid indices are
-        those of the missing values.
-        """
-        if include_missing:
-            return range(len(self._elements))
-        else:
-            return [x for x in range(len(self._elements))
-                    if x not in self.invalid_indices]
-
-    @lazyproperty
-    def values(self):
-        """list of numeric values for elements of this dimension.
+    def numeric_values(self):
+        """tuple of numeric values for valid elements of this dimension.
 
         Each category of a categorical variable can be assigned a *numeric
         value*. For example, one might assign `like=1, dislike=-1,
@@ -258,185 +227,416 @@ class Dimension(object):
         a value, but an element with no numeric value appears as `np.nan` in
         the returned list.
         """
-        values = [
-            el.get('numeric_value', np.nan)
-            for el in self._elements
-            if not el.get('missing')
-        ]
-        return [val if val is not None else np.nan for val in values]
+        return tuple(
+            element.numeric_value for element in self._valid_elements
+        )
+
+    @lazyproperty
+    def shape(self):
+        return len(self._all_elements)
+
+    @lazyproperty
+    def _all_elements(self):
+        """_AllElements object providing cats or subvars of this dimension."""
+        return _AllElements(self._dimension_dict['type'])
+
+    def _iter_interleaved_items(self, elements):
+        """Generate element or subtotal items in interleaved order.
+
+        This ordering corresponds to how value "rows" (or columns) are to
+        appear after subtotals have been inserted at their anchor locations.
+        Where more than one subtotal is anchored to the same location, they
+        appear in their document order in the cube response.
+
+        Only elements in the passed *elements* collection appear, which
+        allows control over whether missing elements are included by choosing
+        `._all_elements` or `._valid_elements`.
+        """
+        subtotals = self._subtotals
+
+        for subtotal in subtotals.iter_for_anchor('top'):
+            yield subtotal
+
+        for element in elements:
+            yield element
+            for subtotal in subtotals.iter_for_anchor(element.element_id):
+                yield subtotal
+
+        for subtotal in subtotals.iter_for_anchor('bottom'):
+            yield subtotal
+
+    @lazyproperty
+    def _subtotals(self):
+        """_Subtotals sequence object for this dimension.
+
+        The subtotals sequence provides access to any subtotal insertions
+        defined on this dimension.
+        """
+        view = self._dimension_dict.get('references', {}).get('view', {})
+        # ---view can be both None and {}, thus the edge case.---
+        insertion_dicts = (
+            [] if view is None else
+            view.get('transform', {}).get('insertions', [])
+        )
+        return _Subtotals(insertion_dicts, self._valid_elements)
+
+    @lazyproperty
+    def _valid_elements(self):
+        """_Elements object providing access to non-missing elements.
+
+        Any categories or subvariables representing missing data are excluded
+        from the collection; this sequence represents a subset of that
+        provided by `._all_elements`.
+        """
+        return self._all_elements.valid_elements
+
+
+class _BaseElements(Sequence):
+    """Base class for element sequence containers."""
+
+    def __init__(self, type_dict):
+        self._type_dict = type_dict
+
+    def __getitem__(self, idx_or_slice):
+        """Implements indexed access."""
+        return self._elements[idx_or_slice]
+
+    def __iter__(self):
+        """Implements (efficient) iterability."""
+        return iter(self._elements)
+
+    def __len__(self):
+        """Implements len(elements)."""
+        return len(self._elements)
+
+    @lazyproperty
+    def element_ids(self):
+        """tuple of element-id for each element in collection.
+
+        Element ids appear in the order they occur in the cube response.
+        """
+        return tuple(element.element_id for element in self._elements)
+
+    @lazyproperty
+    def element_idxs(self):
+        """tuple of element-index for each element in collection.
+
+        Element index values represent the position of this element in the
+        dimension-dict it came from. In the case of an _AllElements object,
+        it will simply be a tuple(range(len(all_elements))).
+        """
+        return tuple(element.index for element in self._elements)
+
+    def get_by_id(self, element_id):
+        """Return _Element object identified by *element_id*.
+
+        Raises KeyError if not found. Only elements known to this collection
+        are accessible for lookup. For example, a _ValidElements object will
+        raise KeyError for the id of a missing element.
+        """
+        return self._elements_by_id[element_id]
 
     @lazyproperty
     def _elements(self):
-        if self.type == 'categorical':
-            return self._dim['type']['categories']
-        return self._dim['type']['elements']
+        """tuple storing actual sequence of element objects.
 
-    @classmethod
-    def _get_name(cls, element):
-        name = element.get('name')
+        Must be implemented by each subclass.
+        """
+        raise NotImplementedError('must be implemented by each subclass')
 
-        # For categorical variables
-        if name:
-            return name
+    @lazyproperty
+    def _element_makings(self):
+        """(ElementCls, element_dicts) pair for this dimension's elements.
 
-        # For numerical, datetime and text variables
-        value = element.get('value')
-        if value is None:
-            return None
+        All the elements of a given dimension are the same type. This method
+        determines the type (class) and source dicts for the elements of this
+        dimension and provides them for the element factory.
+        """
+        if self._type_dict['class'] == 'categorical':
+            return _Category, self._type_dict['categories']
+        return _Element, self._type_dict['elements']
 
-        # The following statement is used for compatibility between
-        # python 2 and 3. In python 3 everything is 'str' and 'unicode'
-        # is not defined. So, if the value is textual, in python 3 the first
-        # part of the 'or' statement should short-circuit to 'True'.
-        type_ = type(value)
-        if type_ == list:
-            return '-'.join([str(el) for el in value])
-        elif type_ in [float, int]:
+    @lazyproperty
+    def _elements_by_id(self):
+        """dict mapping each element by its id."""
+        return {element.element_id: element for element in self._elements}
+
+
+class _AllElements(_BaseElements):
+    """Sequence of _BaseElement subclass objects for a dimension.
+
+    Each element is either a category or a subvariable.
+    """
+
+    @lazyproperty
+    def valid_elements(self):
+        """_ValidElements object containing only non-missing elements."""
+        return _ValidElements(self._elements)
+
+    @lazyproperty
+    def _elements(self):
+        """Composed tuple storing actual sequence of element objects."""
+        ElementCls, element_dicts = self._element_makings
+        return tuple(
+            ElementCls(element_dict, idx)
+            for idx, element_dict in enumerate(element_dicts)
+        )
+
+
+class _ValidElements(_BaseElements):
+    """Sequence of non-missing element objects for a dimension.
+
+    *all_elements* is an instance of _AllElements containing all the elements
+    of a dimension. This object is only intended to be constructed by
+    _AllElements.valid_elements and there should be no reason to construct it
+    directly.
+    """
+
+    def __init__(self, all_elements):
+        self._all_elements = all_elements
+
+    @lazyproperty
+    def _elements(self):
+        """tuple containing actual sequence of element objects."""
+        return tuple(
+            element for element in self._all_elements
+            if not element.missing
+        )
+
+
+class _BaseElement(object):
+    """Base class for element objects."""
+
+    def __init__(self, element_dict, index):
+        self._element_dict = element_dict
+        self._index = index
+
+    @lazyproperty
+    def element_id(self):
+        """int identifier for this category or subvariable."""
+        return self._element_dict['id']
+
+    @lazyproperty
+    def index(self):
+        """int offset at which this element appears in dimension.
+
+        This position is based upon the document position of this element in
+        the cube response. No adjustment for missing elements is made.
+        """
+        return self._index
+
+    @property
+    def is_insertion(self):
+        """True if this item represents an insertion (e.g. subtotal).
+
+        Unconditionally False for all element types.
+        """
+        return False
+
+    @lazyproperty
+    def missing(self):
+        """True if this element represents missing data.
+
+        False if this category or subvariable represents valid (collected)
+        data.
+        """
+        return bool(self._element_dict.get('missing'))
+
+    @lazyproperty
+    def numeric_value(self):
+        """Numeric value assigned to element by user, np.nan if absent."""
+        numeric_value = self._element_dict.get('numeric_value')
+        return np.nan if numeric_value is None else numeric_value
+
+
+class _Category(_BaseElement):
+    """A category on a categorical dimension."""
+
+    def __init__(self, category_dict, index):
+        super(_Category, self).__init__(category_dict, index)
+        self._category_dict = category_dict
+
+    @lazyproperty
+    def label(self):
+        """str display name assigned to this category by user."""
+        name = self._category_dict.get('name')
+        return name if name else ''
+
+
+class _Element(_BaseElement):
+    """A subvariable on an MR or CA enum dimension."""
+
+    @lazyproperty
+    def label(self):
+        """str display-name for this element, '' when absent from cube response.
+
+        This property handles numeric, datetime and text variables, but also
+        subvar dimensions
+        """
+        value = self._element_dict.get('value')
+        type_name = type(value).__name__
+
+        if type_name == 'NoneType':
+            return ''
+
+        if type_name == 'list':
+            # ---like '10-15' or 'A-F'---
+            return '-'.join([str(item) for item in value])
+
+        if type_name in ('float', 'int'):
             return str(value)
-        elif type_ != dict and (type_ == str or type_ == unicode):  # noqa: F821
+
+        if type_name in ('str', 'unicode'):
             return value
 
-        # For categorical array variables
+        # ---For CA and MR subvar dimensions---
         name = value.get('references', {}).get('name')
-        if name:
-            return name
+        return name if name else ''
 
-        return None
 
-    @classmethod
-    def _get_type(cls, dim, selections=None):
-        """Gets the Dimension type.
+class _Subtotals(Sequence):
+    """Sequence of _Subtotal objects for a dimension.
 
-        MR and CA variables have two subsequent dimension, which are both
-        necessary to determine the correct type ('categorical_array', or
-        'multiple_response').
-        """
-        type_ = dim['type'].get('class')
+    Each _Subtotal object represents a "subtotal" insertion transformation
+    defined for the dimension.
 
-        if type_:
-            if type_ == 'enum':
-                if 'subreferences' in dim['references']:
-                    return ('multiple_response'
-                            if cls._is_multiple_response(selections)
-                            else 'categorical_array')
-                if 'subtype' in dim['type']:
-                    return dim['type']['subtype']['class']
+    A subtotal can only involve valid (i.e. non-missing) elements.
+    """
 
-            return type_
+    def __init__(self, insertion_dicts, valid_elements):
+        self._insertion_dicts = insertion_dicts
+        self._valid_elements = valid_elements
 
-        return dim['type']['subtype']['class']
+    def __getitem__(self, idx_or_slice):
+        """Implements indexed access."""
+        return self._subtotals[idx_or_slice]
 
-    @staticmethod
-    def _include_in_labels(label_with_ind, valid_indices):
-        if label_with_ind.get('ind') is None:
-            # In this case, it's a transformation and not an element of the
-            # cube. Thus, needs to be included in resulting labels.
-            return True
+    def __iter__(self):
+        """Implements (efficient) iterability."""
+        return iter(self._subtotals)
 
-        return label_with_ind['ind'] in valid_indices
+    def __len__(self):
+        """Implements len(subtotals)."""
+        return len(self._subtotals)
 
-    @classmethod
-    def _is_multiple_response(cls, dim):
-        if not dim:
-            return False
+    def iter_for_anchor(self, anchor):
+        """Generate each subtotal having matching *anchor*."""
+        return (
+            subtotal for subtotal in self._subtotals
+            if subtotal.anchor == anchor
+        )
 
-        categories = dim['type'].get('categories')
-        if not categories:
-            return False
+    @lazyproperty
+    def _element_ids(self):
+        """frozenset of int id of each non-missing cat or subvar in dim."""
+        return frozenset(self._valid_elements.element_ids)
 
-        if len(categories) != 3:
-            return False
+    def _iter_valid_subtotal_dicts(self):
+        """Generate each insertion dict that represents a valid subtotal."""
+        for insertion_dict in self._insertion_dicts:
+            # ---skip any non-dicts---
+            if not isinstance(insertion_dict, dict):
+                continue
 
-        mr_ids = (1, 0, -1)
-        for i, mr_id in enumerate(mr_ids):
-            if categories[i]['id'] != mr_id:
-                return False
-        return True
+            # ---skip any non-subtotal insertions---
+            if insertion_dict.get('function') != 'subtotal':
+                continue
 
-    def _transform_anchor(self, subtotal):
+            # ---skip any malformed subtotal-dicts---
+            if not {'anchor', 'args', 'name'}.issubset(insertion_dict.keys()):
+                continue
 
-        if subtotal.anchor in ['top', 'bottom']:
-            return subtotal.anchor
+            # ---skip if doesn't reference at least one non-missing element---
+            if not self._element_ids.intersection(insertion_dict['args']):
+                continue
 
-        return self.elements_by_id[subtotal.anchor]['index']
+            # ---an insertion-dict that successfully runs this gauntlet
+            # ---is a valid subtotal dict
+            yield insertion_dict
 
-    def _update_with_subtotals(self, labels_with_cat_ids):
-        for subtotal in self.subtotals:
-            already_inserted_with_the_same_anchor = [
-                index for (index, item) in enumerate(labels_with_cat_ids)
-                if 'anchor' in item and item['anchor'] == subtotal.anchor
-            ]
-
-            if len(already_inserted_with_the_same_anchor):
-                ind_insert = already_inserted_with_the_same_anchor[-1] + 1
-            elif subtotal.anchor == 'top':
-                ind_insert = 0
-            elif subtotal.anchor == 'bottom':
-                ind_insert = len(labels_with_cat_ids)
-            else:
-                ind_insert = next(
-                    index for (index, item) in enumerate(labels_with_cat_ids)
-                    if item.get('id') == subtotal.anchor
-                ) + 1
-
-            labels_with_cat_ids.insert(ind_insert, subtotal.data)
-
-        return labels_with_cat_ids
+    @lazyproperty
+    def _subtotals(self):
+        """Composed tuple storing actual sequence of _Subtotal objects."""
+        return tuple(
+            _Subtotal(subtotal_dict, self._valid_elements)
+            for subtotal_dict in self._iter_valid_subtotal_dicts()
+        )
 
 
 class _Subtotal(object):
-    """Implementation of the Insertion class for Crunch Cubes.
+    """A subtotal insertion on a cube dimension."""
 
-    Contains all functionality necessary for retrieving the information
-    for subtotals. This functionality is used in the context
-    of headers and subtotals.
-    """
-
-    def __init__(self, data, dim):
-        self._data = data
-        self._dim = dim
+    def __init__(self, subtotal_dict, valid_elements):
+        self._subtotal_dict = subtotal_dict
+        self._valid_elements = valid_elements
 
     @lazyproperty
     def anchor(self):
-        """Get the anchor of the subtotal (if it's valid)."""
-        if not self.is_valid:
-            return None
+        """int or str indicating element under which to insert this subtotal.
 
-        anchor = self._data['anchor']
+        An int anchor is the id of the dimension element (category or
+        subvariable) under which to place this subtotal. The return value can
+        also be one of 'top' or 'bottom'.
+
+        The return value defaults to 'bottom' for an anchor referring to an
+        element that is no longer present in the dimension or an element that
+        represents missing data.
+        """
+        anchor = self._subtotal_dict['anchor']
         try:
             anchor = int(anchor)
-            if anchor not in self._all_dim_ids:
+            if anchor not in self._valid_elements.element_ids:
                 return 'bottom'
             return anchor
         except (TypeError, ValueError):
             return anchor.lower()
 
     @lazyproperty
-    def args(self):
-        """Get H&S args."""
-        hs_ids = self._data.get('args', None)
-        if hs_ids and self.is_valid:
-            return hs_ids
-        return []
+    def anchor_idx(self):
+        """int or str representing index of anchor element in dimension.
+
+        When the anchor is an operation, like 'top' or 'bottom'
+        """
+        anchor = self.anchor
+        if anchor in ['top', 'bottom']:
+            return anchor
+        return self._valid_elements.get_by_id(anchor).index
 
     @lazyproperty
-    def data(self):
-        """Get data in JSON format."""
-        return self._data
+    def addend_ids(self):
+        """tuple of int ids of elements contributing to this subtotal.
+
+        Any element id not present in the dimension or present but
+        representing missing data is excluded.
+        """
+        return tuple(
+            arg for arg in self._subtotal_dict.get('args', [])
+            if arg in self._valid_elements.element_ids
+        )
 
     @lazyproperty
-    def is_valid(self):
-        """Test if the subtotal data is valid."""
-        if isinstance(self._data, dict):
-            required_keys = {'anchor', 'args', 'function', 'name'}
-            has_keys = set(self._data.keys()) == required_keys
-            if has_keys and self._data['function'] == 'subtotal':
-                return any(
-                    element for element in self._dim.elements()
-                    if element['id'] in self._data['args']
-                )
-        return False
+    def addend_idxs(self):
+        """tuple of int index of each addend element for this subtotal.
+
+        The length of the tuple is the same as that for `.addend_ids`, but
+        each value repesents the offset of that element within the dimension,
+        rather than its element id.
+        """
+        return tuple(
+            self._valid_elements.get_by_id(addend_id).index
+            for addend_id in self.addend_ids
+        )
+
+    @property
+    def is_insertion(self):
+        """True if this item represents an insertion (e.g. subtotal).
+
+        Unconditionally True for _Subtotal objects.
+        """
+        return True
 
     @lazyproperty
-    def _all_dim_ids(self):
-        return [el.get('id') for el in self._dim.elements(include_missing=True)]
+    def label(self):
+        """str display name for this subtotal, suitable for use as label."""
+        name = self._subtotal_dict.get('name')
+        return name if name else ''

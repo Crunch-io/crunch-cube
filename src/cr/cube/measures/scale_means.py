@@ -83,14 +83,18 @@ class ScaleMeans(object):
         # --CrunchSlice.reshaped_dimensions.
         reshaped_dimensions = [
             dimension for dimension in self._slice.dimensions
-            if len(dimension.values) > 1
+            if len(dimension.numeric_values) > 1
         ]
 
         return tuple(
             (
-                ~np.isnan(np.array(dim.values))
-                if dim.values and any(~np.isnan(dim.values)) and axis == i else
-                slice(None)
+                ~np.isnan(np.array(dim.numeric_values))
+                if (
+                    dim.numeric_values and
+                    any(~np.isnan(dim.numeric_values)) and
+                    axis == i
+                )
+                else slice(None)
             )
             for i, dim in enumerate(reshaped_dimensions)
         )
@@ -104,9 +108,12 @@ class ScaleMeans(object):
         """
         return [
             (
-                np.array(dim.values)
-                if dim.values and any(~np.isnan(dim.values)) else
-                None
+                np.array(dim.numeric_values)
+                if (
+                    dim.numeric_values and
+                    any(~np.isnan(dim.numeric_values))
+                )
+                else None
             )
             for dim in self._slice.dimensions
         ]

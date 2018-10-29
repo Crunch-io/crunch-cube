@@ -73,8 +73,6 @@ class CrunchCube(object):
                     'A `cube` must be JSON or `dict`.'
                 ).format(type(response)))
 
-        self.slices = self.get_slices()
-
     def __repr__(self):
         text = '\n' + str(type(self))
         text += '\nName: {}'.format(self.name)
@@ -158,7 +156,7 @@ class CrunchCube(object):
     @lazyproperty
     def ca_dim_ind(self):
         for (i, dim) in enumerate(self.dimensions):
-            if dim.type == 'categorical_array':
+            if dim.dimension_type == 'categorical_array':
                 return i
         else:
             return None
@@ -201,7 +199,7 @@ class CrunchCube(object):
 
     @lazyproperty
     def dim_types(self):
-        return [dim.type for dim in self.dimensions]
+        return [d.dimension_type for d in self.dimensions]
 
     @lazyproperty
     def dimensions(self):
@@ -253,7 +251,7 @@ class CrunchCube(object):
 
     @lazyproperty
     def has_means(self):
-        """Check if cube has means."""
+        """True if cube contains means data."""
         measures = self._cube.get('result', {}).get('measures')
         if not measures:
             return False
@@ -309,7 +307,7 @@ class CrunchCube(object):
     @lazyproperty
     def is_univariate_ca(self):
         """Check if cube is a just the CA ("ca x cat" or "cat x ca" dims)"""
-        types = {d.type for d in self.dimensions}
+        types = {d.dimension_type for d in self.dimensions}
         ca_types = {'categorical_array', 'categorical'}
         return self.ndim == 2 and types == ca_types
 
@@ -429,8 +427,8 @@ class CrunchCube(object):
             include_missing=include_missing,
         )
         arr = self._fix_shape(arr, fix_valids=include_missing)
-        if isinstance(arr, np.ma.core.MaskedArray):
 
+        if isinstance(arr, np.ma.core.MaskedArray):
             inflate_ind = tuple(
                 (
                     None
@@ -470,7 +468,7 @@ class CrunchCube(object):
     def mr_dim_ind(self):
         indices = [
             i for i, dim in enumerate(self.dimensions)
-            if dim.type == 'multiple_response'
+            if dim.dimension_type == 'multiple_response'
         ]
         if indices:
             return indices[0] if len(indices) == 1 else tuple(indices)
@@ -488,7 +486,7 @@ class CrunchCube(object):
         mr_dimensions_indices = [
             i for (i, dim) in enumerate(self.all_dimensions)
             if (i + 1 < len(self.all_dimensions) and
-                dim.type == 'multiple_response')
+                dim.dimension_type == 'multiple_response')
         ]
 
         # For each MR and CA dimension, the 'selections' dimension
@@ -802,15 +800,19 @@ class CrunchCube(object):
         return slices_means
 
     @lazyproperty
+    def slices(self):
+        return self.get_slices()
+
+    @lazyproperty
     def univariate_ca_main_axis(self):
         """For univariate CA, the main axis is the categorical axis"""
-        dim_types = [dim.type for dim in self.dimensions]
+        dim_types = [d.dimension_type for d in self.dimensions]
         return dim_types.index('categorical')
 
     def valid_indices_with_selections(self, include_missing=False):
         """Get all valid indices (including MR selections)."""
         return [
-            dim.valid_indices(include_missing)
+            dim.element_indices(include_missing)
             for dim in self.all_dimensions
         ]
 
@@ -889,7 +891,7 @@ class CrunchCube(object):
         # axis (that were provided by the user). But we don't need to update
         # the axis that are "behind" the current MR.
         for i, dim in enumerate(self.dimensions):
-            if dim.type == 'multiple_response':
+            if dim.dimension_type == 'multiple_response':
                 # This formula updates only the axis that come "after" the
                 # current MR (items) dimension.
                 new_axis[axis >= i] += 1
@@ -1042,7 +1044,7 @@ class CrunchCube(object):
             0 if dim.is_mr_selections(self.all_dimensions) else slice(None)
             for dim, n in zip(self.all_dimensions, array.shape)
         ) if not fix_valids else np.ix_(*[
-            dim.valid_indices(False) if n > 1 else [0]
+            dim.element_indices(include_missing=False) if n > 1 else [0]
             for dim, n in zip(self.all_dimensions, array.shape)
         ])
         array = array[display_ind]
@@ -1074,32 +1076,29 @@ class CrunchCube(object):
         return np.array(inserted_inds[dim_ind] if len(inserted_inds) else [])
 
     def _insertions(self, result, dimension, dimension_index):
-        insertions = []
+        """Return list of (idx, sum) pairs representing subtotals.
 
-        for indices in dimension.hs_indices:
-            ind_subtotal_elements = np.array(indices['inds'])
+        *idx* is the int offset at which to insert the ndarray subtotal
+        in *sum*.
+        """
 
-            if indices['anchor_ind'] == 'top':
-                ind_insertion = -1
-            elif indices['anchor_ind'] == 'bottom':
-                ind_insertion = result.shape[dimension_index] - 1
-            else:
-                ind_insertion = indices['anchor_ind']
+        def iter_insertions():
+            for anchor_idx, addend_idxs in dimension.hs_indices:
+                insertion_idx = (
+                    -1 if anchor_idx == 'top' else
+                    result.shape[dimension_index] - 1 if anchor_idx == 'bottom'
+                    else anchor_idx
+                )
+                addend_fancy_idx = tuple(
+                    [slice(None) for _ in range(dimension_index)] +
+                    [np.array(addend_idxs)]
+                )
+                yield (
+                    insertion_idx,
+                    np.sum(result[addend_fancy_idx], axis=dimension_index)
+                )
 
-            ind = tuple(
-                [slice(None) for _ in range(dimension_index)] +
-                [ind_subtotal_elements]
-            )
-            axis = dimension_index
-
-            # no indices are provided (should never get here)
-            if len(indices['inds']) == 0:
-                value = 0
-            else:
-                value = np.sum(result[ind], axis=axis)
-                insertions.append((ind_insertion, value))
-
-        return insertions
+        return [insertion for insertion in iter_insertions()]
 
     def _intersperse_hs_in_std_res(self, hs_dims, res):
         for dim, inds in enumerate(self.inserted_hs_indices()):
@@ -1334,10 +1333,11 @@ class CrunchCube(object):
             # Check if transformations can/need to be performed
             transform = (dim.has_transforms and
                          i - dim_offset in include_transforms_for_dims)
-            if dim.type == 'multiple_response':
+            if dim.dimension_type == 'multiple_response':
                 dim_offset += 1
             if (not transform or
-                    dim.type in ITEM_DIMENSION_TYPES or dim.is_selections):
+                    dim.dimension_type in ITEM_DIMENSION_TYPES or
+                    dim.is_selections):
                 continue
             # Perform transformations
             insertions = self._insertions(res, dim, i)

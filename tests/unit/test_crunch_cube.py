@@ -1,11 +1,37 @@
-'''Unit tests for the CrunchCube class.'''
+# encoding: utf-8
+
+"""Unit test suite for the cr.cube.crunch_cube module."""
+
+import numpy as np
+import pytest
 
 from unittest import TestCase
-from mock import Mock
-from mock import patch
-import numpy as np
 
 from cr.cube.crunch_cube import CrunchCube
+
+from ..unitutil import Mock, patch
+
+
+class DescribeCrunchCube(object):
+
+    def it_knows_whether_cube_contains_means_data(self, has_means_fixture):
+        cube_response, expected_value = has_means_fixture
+        cube = CrunchCube(cube_response)
+
+        has_means = cube.has_means
+
+        assert has_means is expected_value
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture(params=[
+        ({'result': {}}, False),
+        ({'result': {'measures': {}}}, False),
+        ({'result': {'measures': {'mean': {}}}}, True),
+    ])
+    def has_means_fixture(self, request):
+        cube_response, expected_value = request.param
+        return cube_response, expected_value
 
 
 # pylint: disable=invalid-name, no-self-use, protected-access
@@ -199,13 +225,6 @@ class TestCrunchCube(TestCase):
         actual = CrunchCube(fake_cube).missing
         self.assertEqual(actual, expected)
 
-    def test_has_means(self):
-        has_means = Mock()
-        with patch('cr.cube.crunch_cube.CrunchCube.has_means', has_means):
-            expected = has_means
-            actual = CrunchCube({}).has_means
-            self.assertEqual(actual, expected)
-
     def test_test_filter_annotation(self):
         mock_cube = {'filter_names': Mock()}
         expected = mock_cube['filter_names']
@@ -324,21 +343,6 @@ class TestCrunchCube(TestCase):
         actual = CrunchCube._margin_pruned_indices(table, insertions, 0)
         np.testing.assert_array_equal(actual, expected)
 
-    def test_insertions_with_empty_indices(self):
-        cc = CrunchCube({})
-
-        class DummyDimension:
-            @property
-            def hs_indices(self):
-                return [{'anchor_ind': 0, 'inds': []}]
-
-        result = Mock()
-        dimension_index = 0
-        dimension = DummyDimension()
-
-        insertions = cc._insertions(result, dimension, dimension_index)
-        assert insertions == [], insertions
-
     @patch('numpy.array')
     @patch('cr.cube.crunch_cube.CrunchCube.inserted_hs_indices')
     @patch('cr.cube.crunch_cube.CrunchCube.ndim', 1)
@@ -362,8 +366,8 @@ class TestCrunchCube(TestCase):
         mock_inserted_hs_indices.assert_called_once()
 
     @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
-        Mock(type='categorical', is_selections=False),
-        Mock(type='categorical', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=False),
     ])
     def test_adjust_axis_cat_x_cat(self):
         '''Test axes for CAT x CAT.'''
@@ -388,9 +392,9 @@ class TestCrunchCube(TestCase):
         assert actual == expected
 
     @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
-        Mock(type='categorical', is_selections=False),
-        Mock(type='categorical', is_selections=False),
-        Mock(type='categorical', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=False),
     ])
     def test_adjust_axis_cat_x_cat_x_cat(self):
         '''Test axes for CAT x CAT.'''
@@ -420,8 +424,8 @@ class TestCrunchCube(TestCase):
         assert actual == expected
 
     @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
-        Mock(type='multiple_response'),
-        Mock(type='categorical', is_selections=True),
+        Mock(dimension_type='multiple_response'),
+        Mock(dimension_type='categorical', is_selections=True),
     ])
     def test_adjust_axis_univariate_mr(self):
         '''Test axes for univariate MR.'''
@@ -439,9 +443,9 @@ class TestCrunchCube(TestCase):
         assert actual == expected
 
     @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
-        Mock(type='categorical', is_selections=False),
-        Mock(type='multiple_response'),
-        Mock(type='categorical', is_selections=True),
+        Mock(dimension_type='categorical', is_selections=False),
+        Mock(dimension_type='multiple_response'),
+        Mock(dimension_type='categorical', is_selections=True),
     ])
     def test_adjust_axis_cat_x_mr(self):
         '''Test axes for CAT x MR.'''
@@ -466,9 +470,9 @@ class TestCrunchCube(TestCase):
         assert actual == expected
 
     @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
-        Mock(type='multiple_response', is_selections=False),
-        Mock(type='categorical', is_selections=True),
-        Mock(type='categorical', is_selections=False),
+        Mock(dimension_type='multiple_response', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=True),
+        Mock(dimension_type='categorical', is_selections=False),
     ])
     def test_adjust_axis_mr_x_cat_x_cat(self):
         '''Test axes for MR x CAT x CAT.'''
@@ -493,10 +497,10 @@ class TestCrunchCube(TestCase):
         assert actual == expected
 
     @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
-        Mock(type='multiple_response', is_selections=False),
-        Mock(type='categorical', is_selections=True),
-        Mock(type='multiple_response', is_selections=False),
-        Mock(type='categorical', is_selections=True),
+        Mock(dimension_type='multiple_response', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=True),
+        Mock(dimension_type='multiple_response', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=True),
     ])
     def test_adjust_axis_mr_x_mr(self):
         '''Test axes for MR x MR.'''
@@ -521,11 +525,11 @@ class TestCrunchCube(TestCase):
         assert actual == expected
 
     @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
-        Mock(type='categorical', is_selections=False),
-        Mock(type='multiple_response', is_selections=False),
-        Mock(type='categorical', is_selections=True),
-        Mock(type='multiple_response', is_selections=False),
-        Mock(type='categorical', is_selections=True),
+        Mock(dimension_type='categorical', is_selections=False),
+        Mock(dimension_type='multiple_response', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=True),
+        Mock(dimension_type='multiple_response', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=True),
     ])
     def test_adjust_axis_cat_mr_x_mr(self):
         '''Test axes for CAT x MR x MR.'''
@@ -555,11 +559,11 @@ class TestCrunchCube(TestCase):
         assert actual == expected
 
     @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
-        Mock(type='multiple_response', is_selections=False),
-        Mock(type='categorical', is_selections=True),
-        Mock(type='categorical', is_selections=False),
-        Mock(type='multiple_response', is_selections=False),
-        Mock(type='categorical', is_selections=True),
+        Mock(dimension_type='multiple_response', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=True),
+        Mock(dimension_type='categorical', is_selections=False),
+        Mock(dimension_type='multiple_response', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=True),
     ])
     def test_adjust_axis_mr_x_cat_x_mr(self):
         '''Test axes for MR x CAT x MR.'''
@@ -589,11 +593,11 @@ class TestCrunchCube(TestCase):
         assert actual == expected
 
     @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
-        Mock(type='multiple_response', is_selections=False),
-        Mock(type='categorical', is_selections=True),
-        Mock(type='multiple_response', is_selections=False),
-        Mock(type='categorical', is_selections=True),
-        Mock(type='categorical', is_selections=False),
+        Mock(dimension_type='multiple_response', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=True),
+        Mock(dimension_type='multiple_response', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=True),
+        Mock(dimension_type='categorical', is_selections=False),
     ])
     def test_adjust_axis_mr_x_mr_cat(self):
         '''Test axes for MR x MR x CAT.'''
@@ -623,8 +627,8 @@ class TestCrunchCube(TestCase):
         assert actual == expected
 
     @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
-        Mock(type='categorical_array', is_selections=False),
-        Mock(type='categorical', is_selections=False),
+        Mock(dimension_type='categorical_array', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=False),
     ])
     def test_adjust_axis_simple_ca(self):
         '''Test axes for simple CA.'''
@@ -647,9 +651,9 @@ class TestCrunchCube(TestCase):
             adjust((0, 1))
 
     @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
-        Mock(type='categorical_array', is_selections=False),
-        Mock(type='categorical', is_selections=False),
-        Mock(type='categorical', is_selections=False),
+        Mock(dimension_type='categorical_array', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=False),
     ])
     def test_adjust_axis_ca_x_cat(self):
         '''Test axes for CA x CAT.'''
@@ -679,9 +683,9 @@ class TestCrunchCube(TestCase):
         assert actual == expected
 
     @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
-        Mock(type='categorical', is_selections=False),
-        Mock(type='categorical_array', is_selections=False),
-        Mock(type='categorical', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=False),
+        Mock(dimension_type='categorical_array', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=False),
     ])
     def test_adjust_axis_cat_x_ca(self):
         '''Test axes for CAT x CA.'''
@@ -704,10 +708,10 @@ class TestCrunchCube(TestCase):
             adjust((1, 2))
 
     @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
-        Mock(type='categorical_array', is_selections=False),
-        Mock(type='categorical', is_selections=False),
-        Mock(type='multiple_response', is_selections=False),
-        Mock(type='categorical', is_selections=True),
+        Mock(dimension_type='categorical_array', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=False),
+        Mock(dimension_type='multiple_response', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=True),
     ])
     def test_adjust_axis_ca_x_mr(self):
         '''Test axes for CAT x MR.'''
@@ -738,10 +742,10 @@ class TestCrunchCube(TestCase):
         assert expected == actual
 
     @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
-        Mock(type='multiple_response', is_selections=False),
-        Mock(type='categorical', is_selections=True),
-        Mock(type='categorical_array', is_selections=False),
-        Mock(type='categorical', is_selections=False),
+        Mock(dimension_type='multiple_response', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=True),
+        Mock(dimension_type='categorical_array', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=False),
     ])
     def test_adjust_axis_mr_x_cat_x_ca(self):
         '''Test axes for MR x CAT x CA.'''
@@ -773,8 +777,8 @@ class TestCrunchCube(TestCase):
             adjust((1, 2))
 
     @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
-        Mock(type='categorical_array', is_selections=False),
-        Mock(type='categorical', is_selections=False),
+        Mock(dimension_type='categorical_array', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=False),
     ])
     def test_axis_allowed_simple_ca(self):
         cc = CrunchCube({})
@@ -785,9 +789,9 @@ class TestCrunchCube(TestCase):
         assert is_allowed(None) is False
 
     @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
-        Mock(type='categorical_array', is_selections=False),
-        Mock(type='categorical', is_selections=False),
-        Mock(type='categorical', is_selections=False),
+        Mock(dimension_type='categorical_array', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=False),
     ])
     def test_axis_allowed_ca_x_cat(self):
         cc = CrunchCube({})
@@ -800,9 +804,9 @@ class TestCrunchCube(TestCase):
         assert is_allowed((1, 2))
 
     @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
-        Mock(type='categorical', is_selections=False),
-        Mock(type='categorical_array', is_selections=False),
-        Mock(type='categorical', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=False),
+        Mock(dimension_type='categorical_array', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=False),
     ])
     def test_axis_allowed_cat_x_ca(self):
         cc = CrunchCube({})
@@ -815,10 +819,10 @@ class TestCrunchCube(TestCase):
         assert is_allowed((1, 2)) is False
 
     @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
-        Mock(type='multiple_response', is_selections=False),
-        Mock(type='categorical', is_selections=True),
-        Mock(type='categorical_array', is_selections=False),
-        Mock(type='categorical', is_selections=False),
+        Mock(dimension_type='multiple_response', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=True),
+        Mock(dimension_type='categorical_array', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=False),
     ])
     def test_axis_allowed_mr_x_ca(self):
         cc = CrunchCube({})
@@ -831,10 +835,10 @@ class TestCrunchCube(TestCase):
         assert is_allowed((1, 2)) is False
 
     @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
-        Mock(type='categorical_array', is_selections=False),
-        Mock(type='categorical', is_selections=False),
-        Mock(type='multiple_response', is_selections=False),
-        Mock(type='categorical', is_selections=True),
+        Mock(dimension_type='categorical_array', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=False),
+        Mock(dimension_type='multiple_response', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=True),
     ])
     def test_axis_allowed_ca_x_mr(self):
         cc = CrunchCube({})
@@ -847,7 +851,7 @@ class TestCrunchCube(TestCase):
         assert is_allowed((1, 2))
 
     @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
-        Mock(type='categorical', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=False),
     ])
     def test_axis_allowed_univ_cat(self):
         cc = CrunchCube({})
@@ -857,8 +861,8 @@ class TestCrunchCube(TestCase):
         assert is_allowed(None)
 
     @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
-        Mock(type='categorical', is_selections=False),
-        Mock(type='categorical', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=False),
     ])
     def test_axis_allowed_cat_x_cat(self):
         cc = CrunchCube({})
@@ -870,11 +874,11 @@ class TestCrunchCube(TestCase):
         assert is_allowed((0, 1))
 
     @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
-        Mock(type='categorical', is_selections=False),
-        Mock(type='multiple_response', is_selections=False),
-        Mock(type='categorical', is_selections=True),
-        Mock(type='multiple_response', is_selections=False),
-        Mock(type='categorical', is_selections=True),
+        Mock(dimension_type='categorical', is_selections=False),
+        Mock(dimension_type='multiple_response', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=True),
+        Mock(dimension_type='multiple_response', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=True),
     ])
     def test_axis_allowed_cat_x_mr_x_mr(self):
         cc = CrunchCube({})
@@ -887,11 +891,11 @@ class TestCrunchCube(TestCase):
         assert is_allowed((1, 2))
 
     @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
-        Mock(type='multiple_response', is_selections=False),
-        Mock(type='categorical', is_selections=True),
-        Mock(type='categorical', is_selections=False),
-        Mock(type='multiple_response', is_selections=False),
-        Mock(type='categorical', is_selections=True),
+        Mock(dimension_type='multiple_response', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=True),
+        Mock(dimension_type='categorical', is_selections=False),
+        Mock(dimension_type='multiple_response', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=True),
     ])
     def test_axis_allowed_mr_x_cat_x_mr(self):
         cc = CrunchCube({})
@@ -904,11 +908,11 @@ class TestCrunchCube(TestCase):
         assert is_allowed((1, 2))
 
     @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
-        Mock(type='multiple_response', is_selections=False),
-        Mock(type='categorical', is_selections=True),
-        Mock(type='multiple_response', is_selections=False),
-        Mock(type='categorical', is_selections=True),
-        Mock(type='categorical', is_selections=False),
+        Mock(dimension_type='multiple_response', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=True),
+        Mock(dimension_type='multiple_response', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=True),
+        Mock(dimension_type='categorical', is_selections=False),
     ])
     def test_axis_allowed_mr_x_mr_x_cat(self):
         cc = CrunchCube({})
@@ -921,8 +925,8 @@ class TestCrunchCube(TestCase):
         assert is_allowed((1, 2))
 
     @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
-        Mock(type='categorical_array', is_selections=False),
-        Mock(type='categorical', is_selections=True),
+        Mock(dimension_type='categorical_array', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=True),
     ])
     def test_ca_dim_ind_is_zero(self):
         cc = CrunchCube({})
@@ -931,8 +935,8 @@ class TestCrunchCube(TestCase):
         assert actual == expected
 
     @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
-        Mock(type='categorical', is_selections=False),
-        Mock(type='categorical_array', is_selections=True),
+        Mock(dimension_type='categorical', is_selections=False),
+        Mock(dimension_type='categorical_array', is_selections=True),
     ])
     def test_ca_dim_ind_is_one(self):
         cc = CrunchCube({})
@@ -941,8 +945,8 @@ class TestCrunchCube(TestCase):
         assert actual == expected
 
     @patch('cr.cube.crunch_cube.CrunchCube.all_dimensions', [
-        Mock(type='categorical', is_selections=False),
-        Mock(type='categorical', is_selections=True),
+        Mock(dimension_type='categorical', is_selections=False),
+        Mock(dimension_type='categorical', is_selections=True),
     ])
     def test_ca_dim_ind_is_none(self):
         cc = CrunchCube({})

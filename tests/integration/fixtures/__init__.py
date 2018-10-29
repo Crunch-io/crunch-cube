@@ -33,6 +33,7 @@ SIMPLE_CAT_ARRAY = _load('simple-cat-array.json')
 LOGICAL_UNIVARIATE = _load('logical-univariate.json')
 
 # Various other Cubes
+CA_SUBVAR_HS_X_MR_X_CA_CAT = _load('ca-subvar-hs-x-mr-x-ca-cat.json')
 CAT_X_NUM_X_DATETIME = _load('cat-x-num-x-datetime.json')
 SIMPLE_MR = _load('simple-mr.json')
 CAT_X_MR_SIMPLE = _load('cat-x-mr.json')
