@@ -351,7 +351,7 @@ class CrunchCube(object):
         # dividing. Those across dims which are summed across MUST NOT be
         # included, because they would change the result.
         hs_dims = hs_dims_for_den(include_transforms_for_dims, axis)
-        den = self._transform(
+        den = self._apply_missings_and_insertions(
             table, hs_dims, include_missing=include_missing
         )
 
@@ -608,11 +608,13 @@ class CrunchCube(object):
         # dividing. Those across dims which are summed across MUST NOT be
         # included, because they would change the result.
         hs_dims = hs_dims_for_den(include_transforms_for_dims, axis)
-        den = self._transform(table, hs_dims)
+        den = self._apply_missings_and_insertions(table, hs_dims)
         den = np.sum(den, axis=new_axis)[index]
 
-        # Calculate nominator from table (include all H&S dimensions).
-        num = self._transform(table, include_transforms_for_dims)
+        # Calculate numerator from table (include all H&S dimensions).
+        num = self._apply_missings_and_insertions(
+            table, include_transforms_for_dims
+        )
 
         res = self._fix_shape(num / den)
 
@@ -825,6 +827,55 @@ class CrunchCube(object):
             dimension_dicts=self._cube['result']['dimensions']
         )
 
+    def _apply_missings_and_insertions(self, res, include_transforms_for_dims,
+                                       include_missing=False):
+        """Return ndarray with missing and insertions as specified.
+
+        The return value is the result of the following operations on *res*,
+        which is a raw cube value array (raw meaning it has shape of original
+        cube response).
+
+        * Remove vectors (rows/cols) for missing elements if *include_missin*
+          is False.
+
+        * Insert subtotals (and perhaps other insertions later) for
+          dimensions having their apparent dimension-idx in
+          *include_transforms_for_dims*.
+
+        Note that it does *not* include pruning.
+        """
+        # --element idxs that satisfy `include_missing` arg. Note this
+        # --includes MR_CAT elements so is essentially all-or-valid-elements
+        element_idxs = tuple(
+            d.element_indices(include_missing) for d in self._all_dimensions
+        )
+        if not include_transforms_for_dims:
+            return res[np.ix_(*element_idxs)] if element_idxs else res
+
+        # ---insert subtotals---
+        suppressed_dim_count = 0
+        new_valids = [i for i in element_idxs]
+        for (dim_idx, dim) in enumerate(self._all_dimensions):
+            if dim.dimension_type == DT.MR_CAT:
+                suppressed_dim_count += 1
+            # ---only marginable dimensions can be subtotaled---
+            if dim.dimension_type in {DT.CA, DT.MR, DT.MR_CAT, DT.LOGICAL}:
+                continue
+            apparent_dim_idx = dim_idx - suppressed_dim_count
+            transform = (
+                dim.has_transforms and
+                apparent_dim_idx in include_transforms_for_dims
+            )
+            if not transform:
+                continue
+            # ---insert subtotal vectors for this dimension---
+            insertions = self._insertions(res, dim, dim_idx)
+            res, new_valids = self._update_result(
+                res, insertions, dim_idx, new_valids
+            )
+
+        return res[np.ix_(*new_valids)] if new_valids else res
+
     def _as_array(self, include_missing=False, get_non_selected=False,
                   weighted=True, adjusted=False,
                   include_transforms_for_dims=False,
@@ -851,7 +902,7 @@ class CrunchCube(object):
         dimensions = self._all_dimensions
         shape = [len(dim.elements(include_missing=True)) for dim in dimensions]
         res = np.array(values).reshape(shape)
-        res = self._transform(
+        res = self._apply_missings_and_insertions(
             res, include_transforms_for_dims, include_missing=include_missing
         )
         res = res + adjusted
@@ -1288,55 +1339,6 @@ class CrunchCube(object):
     @lazyproperty
     def _shape(self):
         return tuple([dim.shape for dim in self._all_dimensions])
-
-    def _transform(self, res, include_transforms_for_dims,
-                   include_missing=False):
-        """Return ndarray with missing and insertions as specified.
-
-        The return value is the result of the following operations on *res*,
-        which is a raw cube value array (raw meaning it has shape of original
-        cube response).
-
-        * Remove vectors (rows/cols) for missing elements if *include_missin*
-          is False.
-
-        * Insert subtotals (and perhaps other insertions later) for
-          dimensions having their apparent dimension-idx in
-          *include_transforms_for_dims*.
-
-        Note that it does *not* include pruning.
-        """
-        # --element idxs that satisfy `include_missing` arg. Note this
-        # --includes MR_CAT elements so is essentially all-or-valid-elements
-        element_idxs = tuple(
-            d.element_indices(include_missing) for d in self._all_dimensions
-        )
-        if not include_transforms_for_dims:
-            return res[np.ix_(*element_idxs)] if element_idxs else res
-
-        # ---insert subtotals---
-        suppressed_dim_count = 0
-        new_valids = [i for i in element_idxs]
-        for (dim_idx, dim) in enumerate(self._all_dimensions):
-            if dim.dimension_type == DT.MR_CAT:
-                suppressed_dim_count += 1
-            # ---only marginable dimensions can be subtotaled---
-            if dim.dimension_type in {DT.CA, DT.MR, DT.MR_CAT, DT.LOGICAL}:
-                continue
-            apparent_dim_idx = dim_idx - suppressed_dim_count
-            transform = (
-                dim.has_transforms and
-                apparent_dim_idx in include_transforms_for_dims
-            )
-            if not transform:
-                continue
-            # ---insert subtotal vectors for this dimension---
-            insertions = self._insertions(res, dim, dim_idx)
-            res, new_valids = self._update_result(
-                res, insertions, dim_idx, new_valids
-            )
-
-        return res[np.ix_(*new_valids)] if new_valids else res
 
     def _update_result(self, result, insertions, dimension_index,
                        valid_indices):
