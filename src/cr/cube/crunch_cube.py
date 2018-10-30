@@ -887,7 +887,7 @@ class CrunchCube(object):
             get_non_selected (bool): Get non-selected slices for MR vars.
             weighted (bool): Take weighted or unweighted counts.
             adjusted (bool): If adjusted, add + 1 to the resulting array. This
-                is needed when calculating statistical signifficance.
+                is needed when calculating statistical significance.
             include_transforms_for_dims (list): For which dims to
                 include headings & subtotals (H&S) transformations.
             prune (bool): Prune rows and columns for which corresponding
@@ -898,14 +898,15 @@ class CrunchCube(object):
         Returns
             res (ndarray): Tabular representation of crunch cube
         """
-        values = self._flat_values(weighted, margin)
-        dimensions = self._all_dimensions
-        shape = [len(dim.elements(include_missing=True)) for dim in dimensions]
-        res = np.array(values).reshape(shape)
         res = self._apply_missings_and_insertions(
-            res, include_transforms_for_dims, include_missing=include_missing
+            self._raw_cube_array(weighted, margin),
+            include_transforms_for_dims,
+            include_missing=include_missing
         )
-        res = res + adjusted
+
+        # ---prepare resulting array for sig-testing if requested---
+        if adjusted:
+            res += 1
 
         if prune:
             return self._prune_body(res, transforms=include_transforms_for_dims)
@@ -1334,6 +1335,22 @@ class CrunchCube(object):
         return self.margin(
             axis=axis, weighted=False,
             include_transforms_for_dims=hs_dims,
+        )
+
+    def _raw_cube_array(self, weighted, margin):
+        """Return ndarray of measure values from cube-response.
+
+        The shape of the ndarray mirrors the shape of the (raw) cube
+        response. Specifically, in includes values for missing elements, any
+        MR_CAT dimensions, and any prunable rows and columns.
+
+        The choice among available measures in the cube response is
+        determined by *weighted* and *margin*, according to the same rules as
+        `._flat_values()`.
+        """
+        return (
+            np.array(self._flat_values(weighted, margin))
+              .reshape(self._all_dimensions.shape)
         )
 
     @lazyproperty
