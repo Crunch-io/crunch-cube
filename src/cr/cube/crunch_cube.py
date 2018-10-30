@@ -1314,27 +1314,28 @@ class CrunchCube(object):
         if not include_transforms_for_dims:
             return res[np.ix_(*element_idxs)] if element_idxs else res
 
-        dim_offset = 0
-        dims = self._all_dimensions if self.has_mr else self.dimensions
+        # ---insert subtotals---
+        suppressed_dim_count = 0
         new_valids = [i for i in element_idxs]
-        for (i, dim) in enumerate(dims):
-            if dim.dimension_type == DT.MR:
-                dim_offset += 1
+        for (dim_idx, dim) in enumerate(self._all_dimensions):
+            if dim.dimension_type == DT.MR_CAT:
+                suppressed_dim_count += 1
+            # ---only marginable dimensions can be subtotaled---
+            if dim.dimension_type in {DT.CA, DT.MR, DT.MR_CAT, DT.LOGICAL}:
                 continue
-            # Check if transformations can/need to be performed
-            if dim.dimension_type in {DT.CA, DT.MR_CAT, DT.LOGICAL}:
-                continue
+            apparent_dim_idx = dim_idx - suppressed_dim_count
             transform = (
                 dim.has_transforms and
-                i - dim_offset in include_transforms_for_dims
+                apparent_dim_idx in include_transforms_for_dims
             )
             if not transform:
                 continue
-            # Perform transformations
-            insertions = self._insertions(res, dim, i)
+            # ---insert subtotal vectors for this dimension---
+            insertions = self._insertions(res, dim, dim_idx)
             res, new_valids = self._update_result(
-                res, insertions, i, new_valids
+                res, insertions, dim_idx, new_valids
             )
+
         return res[np.ix_(*new_valids)] if new_valids else res
 
     def _update_result(self, result, insertions, dimension_index,
