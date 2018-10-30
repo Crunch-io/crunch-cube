@@ -126,7 +126,7 @@ class CrunchCube(object):
                 array, transforms=include_transforms_for_dims
             )
 
-        return self._fix_shape(array)
+        return self._drop_mr_cat_dims(array)
 
     def count(self, weighted=True):
         """Get cube's count with automatic weighted/unweighted selection."""
@@ -371,7 +371,7 @@ class CrunchCube(object):
         if prune:
             arr = self._prune_body(arr, transforms=hs_dims)
 
-        arr = self._fix_shape(arr, fix_valids=include_missing)
+        arr = self._drop_mr_cat_dims(arr, fix_valids=include_missing)
 
         if isinstance(arr, np.ma.core.MaskedArray):
             inflate_ind = tuple(
@@ -397,7 +397,7 @@ class CrunchCube(object):
             # Special case for 1D cube wigh MR, for "Table" direction
             den = np.sum(den, axis=new_axis)[index]
 
-        den = self._fix_shape(den, fix_valids=include_missing)
+        den = self._drop_mr_cat_dims(den, fix_valids=include_missing)
         if den.shape[0] == 1 and len(den.shape) > 1 and self.ndim < 3:
             den = den.reshape(den.shape[1:])
         return den
@@ -626,7 +626,7 @@ class CrunchCube(object):
             table, include_transforms_for_dims
         )
 
-        res = self._fix_shape(num / den)
+        res = self._drop_mr_cat_dims(num / den)
 
         # Apply correct mask (based on the as_array shape)
         arr = self.as_array(
@@ -992,18 +992,24 @@ class CrunchCube(object):
         values = self._flat_values(weighted, margin)
         return np.array(values).reshape(self._shape)
 
-    def _fix_shape(self, array, fix_valids=False):
-        """Fixes shape of MR variables.
-        For MR variables, where 'selections' dims are dropped, the ndarray
-        needs to be reshaped, in order to seem as if those dims never existed.
-        Also, if any (except 1st) dimension has a single element, it is
+    def _drop_mr_cat_dims(self, array, fix_valids=False):
+        """Return ndarray reflecting *array* with MR_CAT dims dropped.
+
+        If any (except 1st) dimension has a single element, it is
         flattened in the resulting array (which is more convenient for the
-        users of the CrunchCube). If the original shape of the cube is
-        needed (e.g. to calculate the margins with correct axis arguments),
-        this needs to happen before the call to this method '_fix_shape'. In
-        general, use private methods, if operating inside CrunchCube. API
-        methods should only be used from outside CrunchCube.
+        users of the CrunchCube).
+
+        If the original shape of the cube is needed (e.g. to calculate the
+        margins with correct axis arguments), this needs to happen before the
+        call to this method '_drop_mr_cat_dims'.
         """
+        # TODO: We cannot arbitrarily drop any dimension simply because it
+        # has a length (shape) of 1. We must target MR_CAT dimensions
+        # specifically. Otherwise unexpected results can occur based on
+        # accidents of cube category count etc. If "user-friendly" reshaping
+        # needs be done, it should be as a very last step and much safer to
+        # leave that to the cr.cube client; software being "helpful" almost
+        # never is.
 
         if not array.shape or len(array.shape) != len(self._all_dimensions):
             # This condition covers two cases:
@@ -1214,7 +1220,7 @@ class CrunchCube(object):
         if self.ndim > 2:
             return self._prune_3d_body(res, transforms)
 
-        res = self._fix_shape(res)
+        res = self._drop_mr_cat_dims(res)
 
         row_margin = self._pruning_base(
             hs_dims=transforms,
