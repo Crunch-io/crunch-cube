@@ -9,10 +9,10 @@ from cr.cube.util import compress_pruned
 from .fixtures import (
     ADMIT_X_DEPT_UNWEIGHTED, ADMIT_X_GENDER_WEIGHTED, BINNED, CAT_X_CAT,
     CAT_X_CAT_FILTERED_POP, CAT_X_CAT_GERMAN_WEIGHTED,
-    CAT_X_CAT_WITH_EMPTY_COLS, CAT_X_DATETIME, CAT_X_LOGICAL, CAT_X_MR_X_CAT,
-    CAT_X_NUM_X_DATETIME, CA_SINGLE_CAT, CA_SUBVAR_HS_X_MR_X_CA_CAT,
-    CA_SUBVAR_X_CAT_HS, CA_X_MR_WEIGHTED_HS, CA_X_SINGLE_CAT,
-    ECON_BLAME_WITH_HS, ECON_BLAME_X_IDEOLOGY_ROW_HS,
+    CAT_X_CAT_WITH_EMPTY_COLS, CAT_X_DATETIME, CAT_X_LOGICAL,
+    CAT_X_MR_SENTRY, CAT_X_MR_X_CAT, CAT_X_NUM_X_DATETIME, CA_SINGLE_CAT,
+    CA_SUBVAR_HS_X_MR_X_CA_CAT, CA_SUBVAR_X_CAT_HS, CA_X_MR_WEIGHTED_HS,
+    CA_X_SINGLE_CAT, ECON_BLAME_WITH_HS, ECON_BLAME_X_IDEOLOGY_ROW_HS,
     ECON_GENDER_X_IDEOLOGY_WEIGHTED, ECON_MEAN_AGE_BLAME_X_GENDER,
     ECON_MEAN_NO_DIMS, FRUIT_X_PETS, FRUIT_X_PETS_ARRAY,
     FRUIT_X_PETS_ARRAY_PETS_FIRST, FRUIT_X_PETS_ARRAY_SUBVARS_FIRST,
@@ -48,6 +48,20 @@ class DescribeIntegratedCrunchCube(object):
         cube = CrunchCube(SIMPLE_CAT_ARRAY)  # ---CA_SUBVAR x CA_CAT---
         univariate_ca_main_axis = cube.univariate_ca_main_axis
         assert univariate_ca_main_axis == 1
+
+    @pytest.mark.xfail(reason='WIP', strict=True)
+    def it_provides_array_for_single_valid_cat_CAT_X_MR(self):
+        # --we're not sure yet what is distinctive about this cube, but it
+        # --broke .as_array() in _prune_body with mask size mismatch. The
+        # --cat dimension has only one valid cat, so that's one thing, the
+        # --other is that all weighted counts are 0 (zero) even though
+        # --unweighted counts are non-zero.
+        cube = CrunchCube(CAT_X_MR_SENTRY)
+        arr = cube.as_array(prune=True)
+        # ---!!! not sure what expected form is, maybe [] since all values
+        # ---are zero and prune=True. It raises mask exception so haven't
+        # ---ever seen the right answer and can't confidently predict it yet.
+        np.testing.assert_array_equal(arr, np.array([[0, 0, 0]]))
 
     # fixtures -------------------------------------------------------
 
