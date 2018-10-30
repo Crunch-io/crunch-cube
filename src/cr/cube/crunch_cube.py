@@ -352,8 +352,7 @@ class CrunchCube(object):
         # included, because they would change the result.
         hs_dims = hs_dims_for_den(include_transforms_for_dims, axis)
         den = self._transform(
-            table, hs_dims, inflate=True, fix=True,
-            include_missing=include_missing,
+            table, hs_dims, inflate=True, include_missing=include_missing
         )
 
         # Apply correct mask (based on the as_array shape)
@@ -609,12 +608,11 @@ class CrunchCube(object):
         # dividing. Those across dims which are summed across MUST NOT be
         # included, because they would change the result.
         hs_dims = hs_dims_for_den(include_transforms_for_dims, axis)
-        den = self._transform(table, hs_dims, inflate=True, fix=True)
+        den = self._transform(table, hs_dims, inflate=True)
         den = np.sum(den, axis=new_axis)[index]
 
         # Calculate nominator from table (include all H&S dimensions).
         num = self._transform(table, include_transforms_for_dims, inflate=True)
-        # num = self._transform(table, hs_dims, inflate=True)
 
         res = self._fix_shape(num / den)
 
@@ -1293,11 +1291,24 @@ class CrunchCube(object):
         return tuple([dim.shape for dim in self._all_dimensions])
 
     def _transform(self, res, include_transforms_for_dims,
-                   inflate=False, fix=True, include_missing=False):
-        """Transform the shape of the resulting ndarray."""
+                   inflate=False, include_missing=False):
+        """Return ndarray with missing and insertions as specified.
+
+        The return value is the result of the following operations on *res*,
+        which is a raw cube value array (raw meaning it has shape of original
+        cube response).
+
+        * Remove vectors (rows/cols) for missing elements if *include_missin*
+          is False.
+
+        * Insert subtotals (and perhaps other insertions later) for
+          dimensions having their apparent dimension-idx in
+          *include_transforms_for_dims*.
+
+        Note that it does *not* include pruning.
+        """
         valid_indices = (
             self._valid_indices_with_selections(include_missing)
-            if fix else None
         )
         if not include_transforms_for_dims:
             return res[np.ix_(*valid_indices)] if valid_indices else res
