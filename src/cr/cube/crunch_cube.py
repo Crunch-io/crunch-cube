@@ -1306,15 +1306,17 @@ class CrunchCube(object):
 
         Note that it does *not* include pruning.
         """
-        valid_indices = (
-            self._valid_indices_with_selections(include_missing)
+        # --element idxs that satisfy `include_missing` arg. Note this
+        # --includes MR_CAT elements so is essentially all-or-valid-elements
+        element_idxs = tuple(
+            d.element_indices(include_missing) for d in self._all_dimensions
         )
         if not include_transforms_for_dims:
-            return res[np.ix_(*valid_indices)] if valid_indices else res
+            return res[np.ix_(*element_idxs)] if element_idxs else res
 
         dim_offset = 0
         dims = self._all_dimensions if self.has_mr else self.dimensions
-        new_valids = [i for i in valid_indices]
+        new_valids = [i for i in element_idxs]
         for (i, dim) in enumerate(dims):
             if dim.dimension_type == DT.MR:
                 dim_offset += 1
@@ -1349,10 +1351,3 @@ class CrunchCube(object):
                 )
             )
         return result, valid_indices
-
-    def _valid_indices_with_selections(self, include_missing=False):
-        """Get all valid indices (including MR selections)."""
-        return [
-            dim.element_indices(include_missing)
-            for dim in self._all_dimensions
-        ]
