@@ -756,7 +756,7 @@ class CrunchCube(object):
         return res
 
     def _adjust_axis(self, axis):
-        """Adjust user provided axis.
+        """Return raw axis/axes corresponding to apparent axis/axes.
 
         This method adjusts user provided 'axis' parameter, for some of the
         cube operations, mainly 'margin'. The user never sees the MR selections
@@ -878,7 +878,7 @@ class CrunchCube(object):
             )
             if not transform:
                 continue
-            # ---insert subtotal vectors for this dimension---
+            # ---insert subtotals into result array---
             insertions = self._insertions(res, dim, dim_idx)
             res, new_valids = self._update_result(
                 res, insertions, dim_idx, new_valids
@@ -1021,7 +1021,7 @@ class CrunchCube(object):
             # result to the user.
             return array
 
-        # We keep MR selections dimensions included in the array, all the way
+        # We keep MR selections (MR_CAT) dimensions in the array, all the way
         # up to here. At this point, we need to remove the non-selected part of
         # selections dimension (and subsequently purge the dimension itself).
 
@@ -1045,6 +1045,9 @@ class CrunchCube(object):
     @classmethod
     def _fix_valid_indices(cls, valid_indices, insertion_index, dim):
         """Add indices for H&S inserted elements."""
+        # TODO: make this accept an immutable sequence for valid_indices
+        # (a tuple) and return an immutable sequence rather than mutating an
+        # argument.
         indices = np.array(sorted(valid_indices[dim]))
         slice_index = np.sum(indices <= insertion_index)
         indices[slice_index:] += 1
@@ -1212,16 +1215,18 @@ class CrunchCube(object):
         ]
 
     def _prune_body(self, res, transforms=None):
-        """Prune the result based on margins content.
+        """Return a masked version of *res* where pruned rows/cols are masked.
 
-        Pruning is the removal of rows or columns, whose corresponding
-        marginal elements are either 0 or not defined (np.nan).
+        Return value is an `np.ma.MaskedArray` object. Pruning is the removal
+        of rows or columns whose corresponding marginal elements are either
+        0 or not defined (np.nan).
         """
         if self.ndim > 2:
             return self._prune_3d_body(res, transforms)
 
         res = self._drop_mr_cat_dims(res)
 
+        # ---determine which rows should be pruned---
         row_margin = self._pruning_base(
             hs_dims=transforms,
             axis=self.row_direction_axis,
@@ -1229,16 +1234,16 @@ class CrunchCube(object):
         if row_margin.ndim > 1:
             # In case of CAT x MR, we have 2D margin
             row_margin = np.sum(row_margin, axis=1)
-
         row_prune_inds = self._margin_pruned_indices(
             row_margin, self._inserted_dim_inds(transforms, 0), 0
         )
 
+        # ---a 1D only has rows, so mask only with row-prune-idxs---
         if self.ndim == 1 or len(res.shape) == 1:
             # For 1D, margin is calculated as the row margin.
             return np.ma.masked_array(res, mask=row_prune_inds)
 
-        # Prune columns by column margin values.
+        # ---determine which columns should be pruned---
         col_margin = self._pruning_base(
             hs_dims=transforms,
             axis=self._col_direction_axis,
@@ -1249,8 +1254,12 @@ class CrunchCube(object):
         col_prune_inds = self._margin_pruned_indices(
             col_margin, self._inserted_dim_inds(transforms, 1), 1
         )
+
+        # ---create rows x cols mask and mask the result array---
         mask = self._create_mask(res, row_prune_inds, col_prune_inds)
         res = np.ma.masked_array(res, mask=mask)
+
+        # ---return the masked array---
         return res
 
     def _prune_indices(self, transforms=None):
@@ -1327,15 +1336,14 @@ class CrunchCube(object):
         Categorical variables are pruned based on their marginal values. If the
         marginal is a 0 or a NaN, the corresponding row/column is pruned. In
         case of a subvars (items) dimension, we only prune if all the counts
-        of the corresponding row/column are all zero.
+        of the corresponding row/column are zero.
         """
         if not self._is_axis_allowed(axis):
             # In case we encountered axis that would go across items dimension,
             # we need to return at least some result, to prevent explicitly
             # checking for this condition, wherever self._margin is used
             return self.as_array(
-                weighted=False,
-                include_transforms_for_dims=hs_dims,
+                weighted=False, include_transforms_for_dims=hs_dims
             )
 
         # In case of allowed axis, just return the normal API margin. This call
@@ -1370,6 +1378,8 @@ class CrunchCube(object):
     def _update_result(self, result, insertions, dimension_index,
                        valid_indices):
         """Insert subtotals into resulting ndarray."""
+        # TODO: valid_indices should be a tuple as a parameter and as a return
+        # value
         for j, (ind_insertion, value) in enumerate(insertions):
             result = np.insert(
                 result, ind_insertion + j + 1, value, axis=dimension_index
