@@ -117,9 +117,15 @@ class CrunchCube(object):
             weighted=weighted,
             adjusted=adjusted,
             include_transforms_for_dims=include_transforms_for_dims,
-            prune=prune,
-            margin=margin,
+            margin=margin
         )
+
+        # ---prune array if pruning was requested---
+        if prune:
+            array = self._prune_body(
+                array, transforms=include_transforms_for_dims
+            )
+
         return self._fix_shape(array)
 
     def count(self, weighted=True):
@@ -357,10 +363,14 @@ class CrunchCube(object):
 
         # Apply correct mask (based on the as_array shape)
         arr = self._as_array(
-            prune=prune,
             include_transforms_for_dims=hs_dims,
-            include_missing=include_missing,
+            include_missing=include_missing
         )
+
+        # ---prune array if pruning was requested---
+        if prune:
+            arr = self._prune_body(arr, transforms=hs_dims)
+
         arr = self._fix_shape(arr, fix_valids=include_missing)
 
         if isinstance(arr, np.ma.core.MaskedArray):
@@ -878,8 +888,7 @@ class CrunchCube(object):
 
     def _as_array(self, include_missing=False, get_non_selected=False,
                   weighted=True, adjusted=False,
-                  include_transforms_for_dims=False,
-                  prune=False, margin=False):
+                  include_transforms_for_dims=False, margin=False):
         """Get crunch cube as ndarray.
 
         Args
@@ -890,8 +899,6 @@ class CrunchCube(object):
                 is needed when calculating statistical significance.
             include_transforms_for_dims (list): For which dims to
                 include headings & subtotals (H&S) transformations.
-            prune (bool): Prune rows and columns for which corresponding
-                marginal values are 0 (or not defined / np.nan)
             margin (bool): Designates whether array is intented for margin
                 calculation. This essentially tells the CrunchCube to use
                 counts (and not means, or other measures) as the result.
@@ -907,9 +914,6 @@ class CrunchCube(object):
         # ---prepare resulting array for sig-testing if requested---
         if adjusted:
             res += 1
-
-        if prune:
-            return self._prune_body(res, transforms=include_transforms_for_dims)
 
         return res
 
