@@ -51,6 +51,16 @@ class AllDimensions(_BaseDimensions):
         return _ApparentDimensions(all_dimensions=self._dimensions)
 
     @lazyproperty
+    def shape(self):
+        """Tuple of int element count for each dimension.
+
+        This corresponds to the shape of the ndarray representing the raw
+        cube response values (raw meaning including missing and prunable
+        elements and any MR_CAT dimensions).
+        """
+        return tuple(d.shape for d in self._dimensions)
+
+    @lazyproperty
     def _dimensions(self):
         """tuple of dimension objects in this collection.
 

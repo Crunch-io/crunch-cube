@@ -47,7 +47,7 @@ class Describe_BaseDimensions(object):
 
 class DescribeAllDimensions(object):
 
-    def it_provides_access_to_its_ApparentDimensions_to_help(
+    def it_provides_access_to_its_ApparentDimensions(
             self, _ApparentDimensions_, apparent_dimensions_,
             _dimensions_prop_, all_dimensions_):
         _dimensions_prop_.return_value = all_dimensions_
@@ -60,6 +60,19 @@ class DescribeAllDimensions(object):
             all_dimensions=all_dimensions_
         )
         assert apparent_dimensions is apparent_dimensions_
+
+    def it_knows_its_shape(self, request, _dimensions_prop_):
+        _dimensions_prop_.return_value = tuple(
+            instance_mock(
+                request, Dimension, name='dim-%d' % idx, shape=element_count
+            )
+            for idx, element_count in enumerate((3, 2, 1))
+        )
+        all_dimensions = AllDimensions(None)
+
+        shape = all_dimensions.shape
+
+        assert shape == (3, 2, 1)
 
     def it_stores_its_dimensions_in_a_tuple_to_help(
             self, request, _DimensionFactory_):
