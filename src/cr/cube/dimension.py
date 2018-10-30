@@ -346,6 +346,11 @@ class Dimension(object):
             if item.is_insertion
         ]
 
+    @lazyproperty
+    def is_marginable(self):
+        """True if adding counts across this dimension axis is meaningful."""
+        return self.dimension_type not in {DT.CA, DT.MR, DT.MR_CAT, DT.LOGICAL}
+
     def labels(self, include_missing=False, include_transforms=False,
                include_cat_ids=False):
         """Return list of str labels for the elements of this dimension.

@@ -869,7 +869,7 @@ class CrunchCube(object):
             if dim.dimension_type == DT.MR_CAT:
                 suppressed_dim_count += 1
             # ---only marginable dimensions can be subtotaled---
-            if dim.dimension_type in {DT.CA, DT.MR, DT.MR_CAT, DT.LOGICAL}:
+            if not dim.is_marginable:
                 continue
             apparent_dim_idx = dim_idx - suppressed_dim_count
             transform = (

@@ -461,6 +461,14 @@ class DescribeDimension(object):
 
         assert hs_indices == expected_value
 
+    def it_knows_whether_it_is_marginable(self, marginable_fixture):
+        dimension_type, expected_value = marginable_fixture
+        dimension = Dimension(None, dimension_type)
+
+        is_marginable = dimension.is_marginable
+
+        assert is_marginable is expected_value
+
     def it_knows_the_numeric_values_of_its_elements(
             self, request, _valid_elements_prop_):
         _valid_elements_prop_.return_value = tuple(
@@ -512,6 +520,21 @@ class DescribeDimension(object):
             ) for idx in range(2)
         )
         return dimension_type, subtotals_, expected_value
+
+    @pytest.fixture(params=[
+        (DT.CAT, True),
+        (DT.CA_SUBVAR, False),
+        (DT.CA_CAT, True),
+        (DT.MR_SUBVAR, False),
+        (DT.MR_CAT, False),
+        (DT.LOGICAL, False),
+        (DT.BINNED_NUMERIC, True),
+        (DT.DATETIME, True),
+        (DT.TEXT, True),
+    ])
+    def marginable_fixture(self, request):
+        dimension_type, expected_value = request.param
+        return dimension_type, expected_value
 
     @pytest.fixture(params=[
         ({}, []),
