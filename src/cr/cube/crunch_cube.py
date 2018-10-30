@@ -352,7 +352,7 @@ class CrunchCube(object):
         # included, because they would change the result.
         hs_dims = hs_dims_for_den(include_transforms_for_dims, axis)
         den = self._transform(
-            table, hs_dims, inflate=True, include_missing=include_missing
+            table, hs_dims, include_missing=include_missing
         )
 
         # Apply correct mask (based on the as_array shape)
@@ -608,11 +608,11 @@ class CrunchCube(object):
         # dividing. Those across dims which are summed across MUST NOT be
         # included, because they would change the result.
         hs_dims = hs_dims_for_den(include_transforms_for_dims, axis)
-        den = self._transform(table, hs_dims, inflate=True)
+        den = self._transform(table, hs_dims)
         den = np.sum(den, axis=new_axis)[index]
 
         # Calculate nominator from table (include all H&S dimensions).
-        num = self._transform(table, include_transforms_for_dims, inflate=True)
+        num = self._transform(table, include_transforms_for_dims)
 
         res = self._fix_shape(num / den)
 
@@ -852,8 +852,7 @@ class CrunchCube(object):
         shape = [len(dim.elements(include_missing=True)) for dim in dimensions]
         res = np.array(values).reshape(shape)
         res = self._transform(
-            res, include_transforms_for_dims, inflate=True,
-            include_missing=include_missing,
+            res, include_transforms_for_dims, include_missing=include_missing
         )
         res = res + adjusted
 
@@ -1291,7 +1290,7 @@ class CrunchCube(object):
         return tuple([dim.shape for dim in self._all_dimensions])
 
     def _transform(self, res, include_transforms_for_dims,
-                   inflate=False, include_missing=False):
+                   include_missing=False):
         """Return ndarray with missing and insertions as specified.
 
         The return value is the result of the following operations on *res*,
@@ -1331,9 +1330,8 @@ class CrunchCube(object):
                 continue
             # Perform transformations
             insertions = self._insertions(res, dim, i)
-            ind = i if inflate else i - dim_offset
             res, new_valids = self._update_result(
-                res, insertions, ind, new_valids
+                res, insertions, i, new_valids
             )
         return res[np.ix_(*new_valids)] if new_valids else res
 
