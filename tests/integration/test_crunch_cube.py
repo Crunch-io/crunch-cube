@@ -49,18 +49,11 @@ class DescribeIntegratedCrunchCube(object):
         univariate_ca_main_axis = cube.univariate_ca_main_axis
         assert univariate_ca_main_axis == 1
 
-    @pytest.mark.xfail(reason='WIP', strict=True)
     def it_provides_array_for_single_valid_cat_CAT_X_MR(self):
-        # --we're not sure yet what is distinctive about this cube, but it
-        # --broke .as_array() in _prune_body with mask size mismatch. The
-        # --cat dimension has only one valid cat, so that's one thing, the
-        # --other is that all weighted counts are 0 (zero) even though
-        # --unweighted counts are non-zero.
+        # --The CAT dim of this cube has only 1 valid category (+1 missing).
+        # --This is an edge case because that CAT dimension gets squashed.
         cube = CrunchCube(CAT_X_MR_SENTRY)
         arr = cube.as_array(prune=True)
-        # ---!!! not sure what expected form is, maybe [] since all values
-        # ---are zero and prune=True. It raises mask exception so haven't
-        # ---ever seen the right answer and can't confidently predict it yet.
         np.testing.assert_array_equal(arr, np.array([[0, 0, 0]]))
 
     # fixtures -------------------------------------------------------
