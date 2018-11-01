@@ -1,4 +1,6 @@
-'''Unit tests for the CubeSlice class.'''
+# encoding: utf-8
+
+"""Unit test suite for cr.cube.cube_slice module."""
 
 from mock import Mock, patch
 import numpy as np
