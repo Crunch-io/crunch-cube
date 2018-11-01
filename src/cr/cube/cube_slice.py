@@ -9,6 +9,7 @@ import warnings
 import numpy as np
 from tabulate import tabulate
 
+from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.measures.scale_means import ScaleMeans
 from cr.cube.util import lazyproperty, compress_pruned, memoize
 
@@ -26,7 +27,7 @@ class CubeSlice(object):
 
     def __init__(self, cube, index, ca_as_0th=False):
 
-        if ca_as_0th and cube.dim_types[0] != 'categorical_array':
+        if ca_as_0th and cube.dim_types[0] != DT.CA_SUBVAR:
             msg = (
                 'Cannot set CA as 0th for cube that '
                 'does not have CA items as the 0th dimension.'
@@ -78,81 +79,11 @@ class CubeSlice(object):
         text += '\n' + body
         return text
 
-    def _apply_pruning_mask(self, res, prune):
-        if not prune:
-            return res
-
-        array = self.as_array(prune=True)
-        if not isinstance(array, np.ma.core.MaskedArray):
-            return res
-
-        return np.ma.masked_array(res, mask=array.mask)
-
-    def _prepare_index_baseline(self, axis):
-        # First get the margin of the opposite direction of the index axis.
-        # We need this in order to end up with the right shape of the
-        # numerator vs denominator.
-        baseline = self.margin(axis=(1 - axis), include_missing=True)
-
-        # Now check if the shape of the marginal needs to be fixed, because
-        # different versions of the MR containing cubes, combined with
-        # different margin directions, provide marginals of different shapes.
-        # We also need to calculate the percentage marginals correctly,
-        # so we need to perform the addition (to get the denominator)
-        # across the correct axis.
-        if axis == self.mr_dim_ind:
-            baseline = baseline / np.sum(baseline, axis=1)[:, None]
-            return baseline[:, 0]
-        elif isinstance(self.mr_dim_ind, tuple) and axis in self.mr_dim_ind:
-            total = np.sum(baseline, axis=(axis + 1))
-            if axis == 0:
-                return baseline[:, 0, 0] / total[:, 0]
-            return baseline[0, :, 0] / total[0]
-
-        if axis == 0 and self.mr_dim_ind is not None:
-            baseline = baseline[:, 0]
-            return baseline / np.sum(baseline)
-
-        baseline = baseline if len(baseline.shape) <= 1 else baseline[0]
-        baseline = baseline / np.sum(baseline)
-        return baseline / np.sum(baseline, axis=0)
-
-    @lazyproperty
-    def ca_dim_ind(self):
-        """Return items dimension index if there is one.
-
-        If the slice is a part of a cube that has a categorical-array
-        variable, return the index of the items dimension (if it belongs to
-        this slice).
-
-        Examples:
-
-        * For a CA(items) x CAT => returns 0
-        * For CAT x CA(items) => returns 1
-        * For CAT x CA(items) x CAT => returns 0 (because the items is the 0th
-          dimension of each slice)
-        * For CA(items) x CAT x CAT => returns None (because the 0th items
-          dimension doesn't belong to any one slice, and is itself used for
-          slicing the cube).
-        """
-        index = self._cube.ca_dim_ind
-        if index is None:
-            return None
-
-        if self._cube.ndim == 3:
-            if index == 0:
-                # If tab dim is items, slices are not
-                return None
-            return index - 1
-
-        # If 2D - just return it
-        return index
-
     @lazyproperty
     def ca_main_axis(self):
         """For univariate CA, the main axis is the categorical axis"""
         try:
-            ca_ind = self.dim_types.index('categorical_array')
+            ca_ind = self.dim_types.index(DT.CA_SUBVAR)
             return 1 - ca_ind
         except ValueError:
             return None
@@ -161,6 +92,11 @@ class CubeSlice(object):
     def col_dim_ind(self):
         """Return 1 if not categorical array as 0th, 0 otherwise."""
         return 1 if not self.ca_as_0th else 0
+
+    @lazyproperty
+    def dim_types(self):
+        """Tuple of DIMENSION_TYPE member for each dimension of slice."""
+        return self._cube.dim_types[-2:]
 
     @memoize
     def get_shape(self, prune=False):
@@ -192,11 +128,11 @@ class CubeSlice(object):
         """Check if the cube slice has the CA dimension.
 
         This is used to distinguish between slices that are considered 'normal'
-        (like CAT x CAT), that might be a part of te 3D cube that has 0th dim
+        (like CAT x CAT), that might be a part of the 3D cube that has 0th dim
         as the CA items (subvars). In such a case, we still need to process
         the slices 'normally', and not address the CA items constraints.
         """
-        return 'categorical_array' in self.dim_types
+        return DT.CA_SUBVAR in self.dim_types
 
     @lazyproperty
     def has_mr(self):
@@ -205,7 +141,7 @@ class CubeSlice(object):
         This property needs to be overridden, because we don't care about the
         0th dimension (and if it's an MR) in the case of a 3D cube.
         """
-        return 'multiple_response' in self.dim_types
+        return DT.MR in self.dim_types
 
     def index_table(self, axis=None, baseline=None, prune=False):
         """Return index percentages for a given axis and baseline.
@@ -237,7 +173,7 @@ class CubeSlice(object):
         account, since it's only the tabs dimension, and mustn't affect the
         properties of the slices.
         """
-        return self.dim_types == ['multiple_response'] * 2
+        return self.dim_types == (DT.MR, DT.MR)
 
     def labels(self, hs_dims=None, prune=False):
         """Get labels for the cube slice, and perform pruning by slice."""
@@ -260,7 +196,7 @@ class CubeSlice(object):
         labels = [
             prune_dimension_labels(dim_labels, dim_prune_inds)
             for dim_labels, dim_prune_inds in
-            zip(labels, self.prune_indices(transforms=hs_dims))
+            zip(labels, self._prune_indices(transforms=hs_dims))
         ]
         return labels
 
@@ -352,6 +288,16 @@ class CubeSlice(object):
         table_name = self._cube.labels()[0][self._index]
         return '%s: %s' % (title, table_name)
 
+    def _apply_pruning_mask(self, res, prune):
+        if not prune:
+            return res
+
+        array = self.as_array(prune=True)
+        if not isinstance(array, np.ma.core.MaskedArray):
+            return res
+
+        return np.ma.masked_array(res, mask=array.mask)
+
     def _call_cube_method(self, method, *args, **kwargs):
         kwargs = self._update_args(kwargs)
         result = getattr(self._cube, method)(*args, **kwargs)
@@ -360,6 +306,35 @@ class CubeSlice(object):
                 result = result[-2:]
             return result
         return self._update_result(result)
+
+    def _prepare_index_baseline(self, axis):
+        # First get the margin of the opposite direction of the index axis.
+        # We need this in order to end up with the right shape of the
+        # numerator vs denominator.
+        baseline = self.margin(axis=(1 - axis), include_missing=True)
+
+        # Now check if the shape of the marginal needs to be fixed, because
+        # different versions of the MR containing cubes, combined with
+        # different margin directions, provide marginals of different shapes.
+        # We also need to calculate the percentage marginals correctly,
+        # so we need to perform the addition (to get the denominator)
+        # across the correct axis.
+        if axis == self.mr_dim_ind:
+            baseline = baseline / np.sum(baseline, axis=1)[:, None]
+            return baseline[:, 0]
+        elif isinstance(self.mr_dim_ind, tuple) and axis in self.mr_dim_ind:
+            total = np.sum(baseline, axis=(axis + 1))
+            if axis == 0:
+                return baseline[:, 0, 0] / total[:, 0]
+            return baseline[0, :, 0] / total[0]
+
+        if axis == 0 and self.mr_dim_ind is not None:
+            baseline = baseline[:, 0]
+            return baseline / np.sum(baseline)
+
+        baseline = baseline if len(baseline.shape) <= 1 else baseline[0]
+        baseline = baseline / np.sum(baseline)
+        return baseline / np.sum(baseline, axis=0)
 
     def _update_args(self, kwargs):
         if self._cube.ndim < 3:

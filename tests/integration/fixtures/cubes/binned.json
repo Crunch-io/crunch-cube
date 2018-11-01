@@ -30,6 +30,9 @@
                 },
                 "type": {
                     "class": "enum",
+                    "subtype": {
+                        "class": "numeric"
+                    },
                     "elements": [
                         {
                             "id": -1,

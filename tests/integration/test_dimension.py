@@ -3,27 +3,53 @@
 """Integration test suite for the cr.cube.dimension module."""
 
 import numpy as np
+import pytest
 
 from unittest import TestCase
 
 from cr.cube.crunch_cube import CrunchCube
-from cr.cube.dimension import Dimension, _Subtotal
+from cr.cube.dimension import AllDimensions, Dimension, _Subtotal
+from cr.cube.enum import DIMENSION_TYPE as DT
 
 from .fixtures import (
-    CA_SUBVAR_HS_X_MR_X_CA_CAT, CA_WITH_NETS, ECON_BLAME_WITH_HS,
-    ECON_BLAME_WITH_HS_MISSING, ECON_BLAME_X_IDEOLOGY_ROW_HS,
-    LOGICAL_UNIVARIATE, LOGICAL_X_CAT, MR_X_CAT_HS
+    CA_WITH_NETS, CA_X_MR_WEIGHTED_HS, CAT_X_CAT, ECON_BLAME_WITH_HS,
+    ECON_BLAME_WITH_HS_MISSING, ECON_BLAME_X_IDEOLOGY_ROW_HS, MR_X_CAT_HS
 )
 
 
-class TestDimension(TestCase):
+class DescribeIntegratedAllDimensions(object):
 
-    def test_dimension_type(self):
-        cube = CrunchCube(CA_SUBVAR_HS_X_MR_X_CA_CAT)
-        dimension_types = [d.dimension_type for d in cube.dimensions]
-        assert dimension_types == [
-            'categorical_array', 'multiple_response', 'categorical'
-        ]
+    def it_resolves_the_type_of_each_dimension(self, type_fixture):
+        dimension_dicts, expected_types = type_fixture
+        all_dimensions = AllDimensions(dimension_dicts)
+
+        dimension_types = tuple(d.dimension_type for d in all_dimensions)
+
+        assert dimension_types == expected_types
+
+    def it_provides_access_to_the_apparent_dimensions(self):
+        dimension_dicts = CA_X_MR_WEIGHTED_HS['result']['dimensions']
+        all_dimensions = AllDimensions(dimension_dicts)
+
+        apparent_dimension_types = tuple(
+            d.dimension_type for d in all_dimensions.apparent_dimensions
+        )
+
+        assert apparent_dimension_types == (DT.CA, DT.CA_CAT, DT.MR)
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture(params=[
+        (CAT_X_CAT, (DT.CAT, DT.CAT)),
+        (CA_X_MR_WEIGHTED_HS, (DT.CA, DT.CA_CAT, DT.MR, DT.MR_CAT)),
+    ])
+    def type_fixture(self, request):
+        cube_response, expected_types = request.param
+        dimension_dicts = cube_response['result']['dimensions']
+        return dimension_dicts, expected_types
+
+
+class TestDimension(TestCase):
 
     def test_subtotals_indices_single_subtotal(self):
         dimension = CrunchCube(ECON_BLAME_WITH_HS).dimensions[0]
@@ -61,7 +87,7 @@ class TestDimension(TestCase):
                 ]
             }
         }
-        dimension = Dimension(dimension_dict)
+        dimension = Dimension(dimension_dict, DT.CAT)
 
         # ---get only non-missing---
         labels = dimension.labels()
@@ -97,7 +123,7 @@ class TestDimension(TestCase):
                 }
             }
         }
-        dimension = Dimension(dimension_dict)
+        dimension = Dimension(dimension_dict, DT.BINNED_NUMERIC)
 
         # ---non-missing labels---
         labels = dimension.labels()
@@ -197,7 +223,7 @@ class TestDimension(TestCase):
                 "class": "categorical"
             }
         }
-        dimension = Dimension(dimension_dict)
+        dimension = Dimension(dimension_dict, DT.CAT)
 
         assert dimension.inserted_hs_indices == [0, 1, 5, 6, 9, 10, 11]
         assert dimension.labels(include_transforms=True) == [
@@ -223,7 +249,7 @@ class TestDimension(TestCase):
         self.assertEqual(actual, expected)
 
     def test_hs_indices_for_mr(self):
-        dimension = CrunchCube(MR_X_CAT_HS).all_dimensions[1]
+        dimension = CrunchCube(MR_X_CAT_HS)._all_dimensions[1]
         hs_indices = dimension.hs_indices
         assert hs_indices == ()
 
@@ -307,29 +333,12 @@ class TestDimension(TestCase):
                 'ordinal': False
             }
         }
-        dimension = Dimension(dimension_dict)
+        dimension = Dimension(dimension_dict, DT.CAT)
 
         hs_indices = dimension.hs_indices
 
         print('hs_indices == %s' % [hs_indices])
         assert hs_indices == ((1, (0, 1)), (2, (2, 3)))
-
-    def test_logical_univariate_dim(self):
-        cube = CrunchCube(LOGICAL_UNIVARIATE)
-        dimension = cube.dimensions[0]
-        expected = 'categorical'
-        actual = dimension.dimension_type
-        self.assertEqual(expected, actual)
-        self.assertFalse(dimension.is_mr_selections(cube.all_dimensions))
-
-    def test_logical_x_cat_dims(self):
-        cube = CrunchCube(LOGICAL_X_CAT)
-        logical_dim = cube.dimensions[1]
-        self.assertEqual(cube.dimensions[0].dimension_type, 'categorical')
-        self.assertEqual(logical_dim.dimension_type, 'categorical')
-
-        self.assertTrue(logical_dim.is_selections)
-        self.assertFalse(logical_dim.is_mr_selections(cube.all_dimensions))
 
     def test_subtotals(self):
         dimension_dict = {
@@ -374,7 +383,7 @@ class TestDimension(TestCase):
                 'class': 'categorical'
             }
         }
-        dimension = Dimension(dimension_dict)
+        dimension = Dimension(dimension_dict, DT.CAT)
 
         subtotals = dimension._subtotals
 
@@ -407,7 +416,7 @@ class TestDimension(TestCase):
                 'class': 'categorical'
             }
         }
-        dimension = Dimension(dimension_dict)
+        dimension = Dimension(dimension_dict, DT.CAT)
 
         numeric_values = dimension.numeric_values
 
