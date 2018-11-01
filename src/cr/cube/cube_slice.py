@@ -61,23 +61,33 @@ class CubeSlice(object):
         return cube_attr
 
     def __repr__(self):
-        text = '\n\n' + str(type(self))
-        text += '\nName: {}'.format(
-            self.table_name if self.table_name else self.name)
-        text += '\nType: {}'.format(' x '.join(self.dim_types))
-        text += '\nDimensions: {}'.format(
-            ' x '.join([dim.name for dim in self.dimensions]))
-        labels = self.labels()
-        headers = labels[1] if len(labels) > 1 else ['N']
-        tbl = self.as_array()
-        if len(tbl.shape) <= 1:
-            tbl = tbl[:, None]
-        body = tabulate(
-            [[lbl] + lst for lbl, lst in zip(labels[0], tbl.tolist())],
-            headers=headers
-        )
-        text += '\n' + body
-        return text
+        """Provide text representation suitable for working at console.
+
+        Falls back to a default repr on exception, such as might occur in
+        unit tests where object need not otherwise be provided with all
+        instance variable values.
+        """
+        try:
+            name = self.table_name if self.table_name else self.name
+            dimensionality = ' x '.join(dt.name for dt in self.dim_types)
+            dim_names = ' x '.join(d.name for d in self.dimensions)
+            labels = self.labels()
+            headers = labels[1] if len(labels) > 1 else ['N']
+            tbl = (
+                self.as_array()
+                if len(self.as_array().shape) > 1
+                else self.as_array()[:, None]
+            )
+            body = tabulate(
+                [[lbl] + lst for lbl, lst in zip(labels[0], tbl.tolist())],
+                headers=headers
+            )
+            return (
+                "%s(name='%s', dim_types='%s', dims='%s')\n%s" %
+                (type(self).__name__, name, dimensionality, dim_names, body)
+            )
+        except Exception:
+            return super(CubeSlice, self).__repr__()
 
     @lazyproperty
     def ca_main_axis(self):

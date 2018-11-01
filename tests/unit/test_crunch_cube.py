@@ -18,6 +18,11 @@ from ..unitutil import (
 
 class DescribeCrunchCube(object):
 
+    def it_provides_a_default_repr(self):
+        cube = CrunchCube({})
+        repr_ = repr(cube)
+        assert repr_.startswith('<cr.cube.crunch_cube.CrunchCube object at 0x')
+
     def it_provides_access_to_its_dimensions(
             self, _all_dimensions_prop_, all_dimensions_,
             apparent_dimensions_):

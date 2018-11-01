@@ -13,6 +13,11 @@ from ..unitutil import instance_mock, property_mock
 
 class DescribeCubeSlice(object):
 
+    def it_provides_a_default_repr(self):
+        slice_ = CubeSlice(None, None)
+        repr_ = repr(slice_)
+        assert repr_.startswith('<cr.cube.cube_slice.CubeSlice object at 0x')
+
     def it_knows_its_dimension_types(self, dim_types_fixture, cube_):
         cube_dim_types, expected_value = dim_types_fixture
         cube_.dim_types = cube_dim_types
