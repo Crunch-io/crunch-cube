@@ -112,19 +112,13 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.8.1
+- Major Cube refactor and a couple bugfixes
+
 #### 1.8.0
 - Major refactor of `Dimension` class
 
 #### 1.7.3
 - Implement pruning for index tables
-
-#### 1.7.2
-- Implement correct index table functionality
-- Deprecate old index functionality
-
-#### 1.7.1 Fix index error
-- Fix peculiar case of CA x CAT (single elem) index error
-- Support with unit tests
-- Create base for fixing exporter issues
 
 For a complete list of changes see [history](https://github.com/Crunch-io/crunch-cube/blob/master/HISTORY.md).

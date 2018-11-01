@@ -1,5 +1,14 @@
 # History of Changes
 
+#### 1.7.2
+- Implement correct index table functionality
+- Deprecate old index functionality
+
+#### 1.7.1 Fix index error
+- Fix peculiar case of CA x CAT (single elem) index error
+- Support with unit tests
+- Create base for fixing exporter issues
+
 #### 1.7.0 Normalization, PEP8 and bugfix
 - Refactored to remove a couple modules
 - Fixed pesky numpy warnings
