@@ -8,7 +8,7 @@ import numpy as np
 
 try:
     from itertools import ifilterfalse
-except ImportError:
+except ImportError:  # pragma: no cover
     from itertools import filterfalse as ifilterfalse
 
 import json
@@ -172,7 +172,6 @@ def lru_cache(maxsize=100):
     Cache performance statistics stored in f.hits and f.misses.
     Clear the cache with f.clear().
     http://en.wikipedia.org/wiki/Cache_algorithms#Least_Recently_Used
-
     """
     maxqueue = maxsize * 10
 
@@ -229,7 +228,7 @@ def lru_cache(maxsize=100):
 
             return result
 
-        def clear():
+        def clear():  # pragma: no cover
             cache.clear()
             queue.clear()
             refcount.clear()

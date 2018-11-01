@@ -22,7 +22,8 @@ def class_mock(request, q_class_name, autospec=True, **kwargs):
     return _patch.start()
 
 
-def function_mock(request, q_function_name, autospec=True, **kwargs):
+def function_mock(request, q_function_name, autospec=True,
+                  **kwargs):  # pragma: no cover
     """Return mock patching function with qualified name *q_function_name*.
 
     Patch is reversed after calling test returns.

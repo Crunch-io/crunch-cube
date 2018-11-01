@@ -174,15 +174,6 @@ class DescribeCrunchCube(object):
     @pytest.fixture(params=[
         # ---0 - CA---
         ((DT.CA, DT.CAT),
-         (0, None, (0, 1))),
-    ])
-    def adjust_raises_fixture(self, request):
-        dimension_types, axis_cases = request.param
-        return dimension_types, axis_cases
-
-    @pytest.fixture(params=[
-        # ---0 - CA---
-        ((DT.CA, DT.CAT),
          ((0, False), (1, True), (None, False))),
         # ---1 - CA x CAT---
         ((DT.CA, DT.CAT, DT.CAT),

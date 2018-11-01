@@ -1,13 +1,15 @@
-from unittest import TestCase
+# encoding: utf-8
+
 import numpy as np
+
+from unittest import TestCase
 
 from cr.cube.crunch_cube import CrunchCube
 
-from .fixtures import CAT_X_MR_SIMPLE
-from .fixtures import PETS_X_PETS
-from .fixtures import SELECTED_CROSSTAB_4
-from .fixtures import CAT_X_MR_X_MR
-from .fixtures import CA_ITEMS_X_CA_CAT_X_CAT
+from .fixtures import (
+    CAT_X_MR_SIMPLE, CA_ITEMS_X_CA_CAT_X_CAT, PETS_X_PETS,
+    SELECTED_CROSSTAB_4
+)
 
 
 class TestIndex(TestCase):
@@ -40,13 +42,6 @@ class TestIndex(TestCase):
             [0.8529411764705883, 1.0000000000000000, 0.763157894736842],
             [1.1176470588235294, 1.310344827586207, 1.0000000000000000]
         ])
-        actual = cube.index()
-        np.testing.assert_almost_equal(actual, expected)
-
-    def test_cat_mr_x_mr_index(self):
-        self.skipTest('not yet implemented')
-        cube = CrunchCube(CAT_X_MR_X_MR)
-        expected = np.array([])
         actual = cube.index()
         np.testing.assert_almost_equal(actual, expected)
 
