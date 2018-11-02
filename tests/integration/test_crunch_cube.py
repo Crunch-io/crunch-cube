@@ -80,7 +80,7 @@ class TestCrunchCube(TestCase):
 
     def test_crunch_cube_loads_data(self):
         cube = CrunchCube(CR.CAT_X_CAT)
-        cube_dict = cube._cube
+        cube_dict = cube._cube_dict
         self.assertEqual(cube_dict, CR.CAT_X_CAT)
 
     def test_as_array_univariate_cat_exclude_missing(self):

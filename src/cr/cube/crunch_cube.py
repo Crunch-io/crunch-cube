@@ -64,7 +64,7 @@ class CrunchCube(object):
         try:
             if not isinstance(response, dict):
                 response = json.loads(response)
-            self._cube = response.get('value', response)
+            self._cube_dict = response.get('value', response)
         except TypeError:
             # If an unexpected type is provided raise descriptive exception.
             if not isinstance(response, dict):
@@ -145,14 +145,16 @@ class CrunchCube(object):
         """Get cube's count with automatic weighted/unweighted selection."""
         if weighted and self.is_weighted:
             return sum(
-                self._cube['result']['measures'].get('count', {}).get('data')
+                self._cube_dict['result']['measures']
+                    .get('count', {})
+                    .get('data')
             )
-        return self._cube['result']['n']
+        return self._cube_dict['result']['n']
 
     @lazyproperty
     def counts(self):
-        unfiltered = self._cube['result'].get('unfiltered')
-        filtered = self._cube['result'].get('filtered')
+        unfiltered = self._cube_dict['result'].get('unfiltered')
+        filtered = self._cube_dict['result'].get('filtered')
         return unfiltered, filtered
 
     @lazyproperty
@@ -183,7 +185,7 @@ class CrunchCube(object):
     @lazyproperty
     def filter_annotation(self):
         """Get cube's filter annotation."""
-        return self._cube.get('filter_names', [])
+        return self._cube_dict.get('filter_names', [])
 
     def get_slices(self, ca_as_0th=False):
         """Return list of :class:`.CubeSlice` objects.
@@ -204,7 +206,7 @@ class CrunchCube(object):
     @lazyproperty
     def has_means(self):
         """True if cube contains means data."""
-        measures = self._cube.get('result', {}).get('measures')
+        measures = self._cube_dict.get('result', {}).get('measures')
         if not measures:
             return False
         return measures.get('mean', None) is not None
@@ -268,15 +270,22 @@ class CrunchCube(object):
 
     @lazyproperty
     def is_weighted(self):
-        """Check if the cube dataset is weighted."""
-        weighted = self._cube.get('query', {}).get('weight', None) is not None
-        weighted = weighted or self._cube.get('weight_var', None) is not None
-        weighted = weighted or self._cube.get('weight_url', None) is not None
-        weighted = weighted or (
-            self._cube['result']['counts'] !=
-            self._cube['result']['measures'].get('count', {}).get('data')
+        """True if cube response contains weighted data."""
+        if self._cube_dict.get('query', {}).get('weight') is not None:
+            return True
+        if self._cube_dict.get('weight_var') is not None:
+            return True
+        if self._cube_dict.get('weight_url') is not None:
+            return True
+        unweighted_counts = self._cube_dict['result']['counts']
+        weighted_counts = (
+            self._cube_dict['result']['measures']
+                .get('count', {})
+                .get('data')
         )
-        return weighted
+        if unweighted_counts != weighted_counts:
+            return True
+        return False
 
     def labels(self, include_missing=False, include_transforms_for_dims=False):
         """Gets labels for each cube's dimension.
@@ -419,8 +428,8 @@ class CrunchCube(object):
     def missing(self):
         """Get missing count of a cube."""
         if self.has_means:
-            return self._cube['result']['measures']['mean']['n_missing']
-        return self._cube['result'].get('missing')
+            return self._cube_dict['result']['measures']['mean']['n_missing']
+        return self._cube_dict['result'].get('missing')
 
     @lazyproperty
     def mr_dim_ind(self):
@@ -847,7 +856,7 @@ class CrunchCube(object):
         dimension-pair is suppressed).
         """
         return AllDimensions(
-            dimension_dicts=self._cube['result']['dimensions']
+            dimension_dicts=self._cube_dict['result']['dimensions']
         )
 
     def _apply_missings_and_insertions(self, res, include_transforms_for_dims,
@@ -1076,12 +1085,12 @@ class CrunchCube(object):
         counts are returned even if mean values are present, which may be
         preferred for example when calculating a margin.
         """
-        values = self._cube['result']['counts']
+        values = self._cube_dict['result']['counts']
         if self.has_means and not margin:
-            mean = self._cube['result']['measures'].get('mean', {})
+            mean = self._cube_dict['result']['measures'].get('mean', {})
             values = mean.get('data', values)
         elif weighted and self.is_weighted:
-            count = self._cube['result']['measures'].get('count', {})
+            count = self._cube_dict['result']['measures'].get('count', {})
             values = count.get('data', values)
         values = [(val if not type(val) is dict else np.nan)
                   for val in values]
