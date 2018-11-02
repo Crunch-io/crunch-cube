@@ -18,6 +18,11 @@ from ..unitutil import (
 
 class DescribeCrunchCube(object):
 
+    def it_provides_a_default_repr(self):
+        cube = CrunchCube({})
+        repr_ = repr(cube)
+        assert repr_.startswith('<cr.cube.crunch_cube.CrunchCube object at 0x')
+
     def it_provides_access_to_its_dimensions(
             self, _all_dimensions_prop_, all_dimensions_,
             apparent_dimensions_):
@@ -163,15 +168,6 @@ class DescribeCrunchCube(object):
          ((0, (1,)), (2, (3,)))),
     ])
     def adjust_fixture(self, request):
-        dimension_types, axis_cases = request.param
-        return dimension_types, axis_cases
-
-    @pytest.fixture(params=[
-        # ---0 - CA---
-        ((DT.CA, DT.CAT),
-         (0, None, (0, 1))),
-    ])
-    def adjust_raises_fixture(self, request):
         dimension_types, axis_cases = request.param
         return dimension_types, axis_cases
 

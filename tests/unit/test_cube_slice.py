@@ -1,4 +1,6 @@
-'''Unit tests for the CubeSlice class.'''
+# encoding: utf-8
+
+"""Unit test suite for cr.cube.cube_slice module."""
 
 from mock import Mock, patch
 import numpy as np
@@ -12,6 +14,11 @@ from ..unitutil import instance_mock, property_mock
 
 
 class DescribeCubeSlice(object):
+
+    def it_provides_a_default_repr(self):
+        slice_ = CubeSlice(None, None)
+        repr_ = repr(slice_)
+        assert repr_.startswith('<cr.cube.cube_slice.CubeSlice object at 0x')
 
     def it_knows_its_dimension_types(self, dim_types_fixture, cube_):
         cube_dim_types, expected_value = dim_types_fixture
@@ -411,23 +418,29 @@ class TestCubeSlice(object):
         return cs, prune, expected
 
     def test_apply_pruning_mask(self, mask_fixture):
-        cs, prune, res, expected = mask_fixture
-        actual = type(cs._apply_pruning_mask(res, prune))
-        assert actual == expected
+        cube_, res, prune, expected_type = mask_fixture
+        slice_ = CubeSlice(cube_, None)
+
+        return_type = type(slice_._apply_pruning_mask(res, prune))
+
+        assert return_type == expected_type
 
     @pytest.fixture(params=[
+        (False, [False, False], [0, 1], np.ndarray),
+        (False, None, [0, 1], np.ndarray),
+        (True, None, [0, 1], np.ndarray),
+        (False, [True, True], [0, 1], np.ndarray),
         (True, [True, False], [0, 1], np.ma.core.MaskedArray),
         (True, [False, False], [0, 1], np.ma.core.MaskedArray),
-        (False, [False, False], [0, 1], np.ndarray),
-        (False, [True, True], [0, 1], np.ndarray),
     ])
     def mask_fixture(self, request):
-        prune, mask, res, expected = request.param
-        array = np.zeros((2,))
-        cube = Mock()
-        cube.ndim = 2
-        if mask is not None:
-            array = np.ma.masked_array(array, np.array(mask))
-        cube.as_array.return_value = array
-        cs = CubeSlice(cube, 0)
-        return cs, prune, np.array(res), expected
+        prune, mask, values, expected_type = request.param
+        res = np.array(values)
+        array = (
+            np.zeros((2,)) if mask is None
+            else np.ma.masked_array(np.zeros((2,)), np.array(mask))
+        )
+        cube_ = instance_mock(request, CrunchCube)
+        cube_.as_array.return_value = array
+        cube_.ndim = 2
+        return cube_, res, prune, expected_type

@@ -1,6 +1,23 @@
 from cr.cube.crunch_cube import CrunchCube
 
-from .fixtures import CAT_X_CAT_PRUNING_HS
+from .fixtures import CAT_X_CAT, CAT_X_CAT_PRUNING_HS
+
+
+class DescribeIntegratedCrunchCube(object):
+
+    def it_provides_a_console_friendly_repr_for_a_slice(self):
+        cube = CrunchCube(CAT_X_CAT)
+        slice_ = cube.slices[0]
+
+        repr_ = repr(slice_)
+
+        assert repr_ == (
+            "CubeSlice(name='v4', dim_types='CAT x CAT', dims='v4 x v7')\n"
+            "      C    E\n"
+            "--  ---  ---\n"
+            "B     5    2\n"
+            "C     5    3"
+        )
 
 
 def test_labels_with_hs_and_pruning():

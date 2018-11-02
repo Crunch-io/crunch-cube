@@ -2,6 +2,8 @@
 
 """Enumerated sets related to cubes."""
 
+from cr.cube.util import lazyproperty
+
 
 class _DimensionType(object):
     """Member of the DIMENSION_TYPE enumeration."""
@@ -15,29 +17,34 @@ class _DimensionType(object):
     def __str__(self):
         return 'DIMENSION_TYPE.%s' % self._name
 
+    @lazyproperty
+    def name(self):
+        """str like 'CA_CAT' for this dimension type."""
+        return self._name
+
 
 class DIMENSION_TYPE(object):
     """Enumerated values representing the various types of dimension."""
 
     # ---member definitions---
     BINNED_NUMERIC = _DimensionType('BINNED_NUMERIC')
-    CATEGORICAL = _DimensionType('CATEGORICAL')
-    CATEGORICAL_ARRAY = _DimensionType('CATEGORICAL_ARRAY')
+    CAT = _DimensionType('CAT')
     CA_CAT = _DimensionType('CA_CAT')
+    CA_SUBVAR = _DimensionType('CA_SUBVAR')
     DATETIME = _DimensionType('DATETIME')
     LOGICAL = _DimensionType('LOGICAL')
     MR_CAT = _DimensionType('MR_CAT')
-    MULTIPLE_RESPONSE = _DimensionType('MULTIPLE_RESPONSE')
+    MR_SUBVAR = _DimensionType('MR_SUBVAR')
     TEXT = _DimensionType('TEXT')
 
     # ---aliases---
-    CA = CATEGORICAL_ARRAY
-    CAT = CATEGORICAL
-    CAT_ARRAY = CATEGORICAL_ARRAY
-    CA_SUBVAR = CATEGORICAL_ARRAY
-    MR = MULTIPLE_RESPONSE
+    CA = CA_SUBVAR
+    CATEGORICAL = CAT
+    CATEGORICAL_ARRAY = CA_SUBVAR
+    CAT_ARRAY = CA_SUBVAR
+    MR = MR_SUBVAR
     MR_SELECTIONS = MR_CAT
-    MR_SUBVAR = MULTIPLE_RESPONSE
+    MULTIPLE_RESPONSE = MR_SUBVAR
 
     # ---subsets---
-    ARRAY_TYPES = frozenset((CATEGORICAL_ARRAY, MULTIPLE_RESPONSE))
+    ARRAY_TYPES = frozenset((CA_SUBVAR, MR_SUBVAR))

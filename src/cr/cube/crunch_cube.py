@@ -9,9 +9,9 @@ responses.
 from __future__ import division
 
 import json
-import numpy as np
 import warnings
 
+import numpy as np
 from scipy.stats import norm
 from scipy.stats.contingency import expected_freq
 
@@ -74,13 +74,26 @@ class CrunchCube(object):
                 ).format(type(response)))
 
     def __repr__(self):
-        text = '\n' + str(type(self))
-        text += '\nName: {}'.format(self.name)
-        text += '\nType: {}'.format(' x '.join(self.dim_types))
-        text += '\n\nSlices:'
-        for slice_ in self.slices:
-            text += str(slice_)
-        return text
+        """Provide text representation suitable for working at console.
+
+        Falls back to a default repr on exception, such as might occur in
+        unit tests where object need not otherwise be provided with all
+        instance variable values.
+        """
+        try:
+            dimensionality = ' x '.join(dt.name for dt in self.dim_types)
+            slice_reprs = (
+                '\n'.join(
+                    'slices[%d]: %s' % (idx, repr(s))
+                    for idx, s in enumerate(self.slices)
+                )
+            )
+            return (
+                "%s(name='%s', dim_types='%s')\n%s" %
+                (type(self).__name__, self.name, dimensionality, slice_reprs)
+            )
+        except Exception:
+            return super(CrunchCube, self).__repr__()
 
     def as_array(self, include_missing=False, weighted=True, adjusted=False,
                  include_transforms_for_dims=None, prune=False, margin=False):
