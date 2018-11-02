@@ -9,9 +9,9 @@ responses.
 from __future__ import division
 
 import json
-import numpy as np
 import warnings
 
+import numpy as np
 from scipy.stats import norm
 from scipy.stats.contingency import expected_freq
 

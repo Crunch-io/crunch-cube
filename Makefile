@@ -1,7 +1,8 @@
 MAKE   = make
 PYTHON = python
+SETUP  = $(PYTHON) ./setup.py
 
-.PHONY: clean cleandocs docs opendocs
+.PHONY: clean cleandocs docs opendocs sdist
 
 help:
 	@echo "Usage: \`make <target>' where <target> is one or more of"
@@ -26,3 +27,6 @@ docs:
 
 opendocs:
 	open docs/build/html/index.html
+
+sdist:
+	$(SETUP) sdist

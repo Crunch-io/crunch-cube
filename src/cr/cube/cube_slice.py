@@ -4,14 +4,15 @@
 
 from __future__ import division
 
-from functools import partial
 import warnings
+from functools import partial
+
 import numpy as np
 from tabulate import tabulate
 
 from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.measures.scale_means import ScaleMeans
-from cr.cube.util import lazyproperty, compress_pruned, memoize
+from cr.cube.util import compress_pruned, lazyproperty, memoize
 
 
 class CubeSlice(object):

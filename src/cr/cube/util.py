@@ -4,15 +4,15 @@
 
 import collections
 import functools
+import json
+import os
+
 import numpy as np
 
 try:
     from itertools import ifilterfalse
 except ImportError:  # pragma: no cover
     from itertools import filterfalse as ifilterfalse
-
-import json
-import os
 
 
 def compress_pruned(table):
