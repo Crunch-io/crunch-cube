@@ -12,7 +12,8 @@ from cr.cube.dimension import AllDimensions, _ApparentDimensions, Dimension
 from cr.cube.enum import DIMENSION_TYPE as DT
 
 from ..unitutil import (
-    class_mock, instance_mock, method_mock, Mock, patch, property_mock
+    class_mock, function_mock, instance_mock, method_mock, Mock, patch,
+    property_mock
 )
 
 
@@ -64,6 +65,22 @@ class DescribeCrunchCube(object):
         has_mr = cube.has_mr
 
         assert has_mr is expected_value
+
+    def it_has_a_deprecated_index_method_that_forwards_to_Index_data(
+            self, request):
+        Index_ = class_mock(request, 'cr.cube.crunch_cube.Index')
+        index_ = Index_.data.return_value
+        warn_ = function_mock(request, 'cr.cube.crunch_cube.warnings.warn')
+        cube = CrunchCube(None)
+
+        index = cube.index()
+
+        warn_.assert_called_once_with(
+            "CrunchCube.index() is deprecated. Use CubeSlice.index_table().",
+            DeprecationWarning
+        )
+        Index_.data.assert_called_once_with(cube, True, False)
+        assert index is index_
 
     def it_can_adjust_an_axis_to_help(
             self, request, adjust_fixture, dimensions_prop_):

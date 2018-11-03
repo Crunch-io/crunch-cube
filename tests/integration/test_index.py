@@ -5,6 +5,7 @@ import numpy as np
 from unittest import TestCase
 
 from cr.cube.crunch_cube import CrunchCube
+from cr.cube.measures.index import Index
 
 from ..fixtures import CR
 
@@ -21,7 +22,7 @@ class TestIndex(TestCase):
             [1.14466510106092, 0.8606566846476],
             [0.99292572005336, 1.0068293374540]
         ])
-        actual = cube.index()
+        actual = Index.data(cube, weighted=True, prune=False)
         np.testing.assert_almost_equal(actual, expected)
 
     def test_cat_x_mr_index(self):
@@ -30,7 +31,7 @@ class TestIndex(TestCase):
             [0.8571429, 1.1152941, 0.9610984],
             [1.0769231, 0.9466231, 1.019037],
         ])
-        actual = cube.index()
+        actual = Index.data(cube, weighted=True, prune=False)
         np.testing.assert_almost_equal(actual, expected)
 
     def test_mr_x_mr_index(self):
@@ -40,7 +41,7 @@ class TestIndex(TestCase):
             [0.8529411764705883, 1.0000000000000000, 0.763157894736842],
             [1.1176470588235294, 1.310344827586207, 1.0000000000000000]
         ])
-        actual = cube.index()
+        actual = Index.data(cube, weighted=True, prune=False)
         np.testing.assert_almost_equal(actual, expected)
 
     def test_ca_items_x_ca_cat_x_cat_index(self):
@@ -63,7 +64,7 @@ class TestIndex(TestCase):
              [0., 2., np.nan, np.nan, np.nan],
              [np.nan, np.nan, np.nan, np.nan, np.nan]],
         ])
-        actual = cube.index()
+        actual = Index.data(cube, weighted=True, prune=False)
         np.testing.assert_almost_equal(actual, expected)
 
         # Test pruning mask
@@ -83,5 +84,5 @@ class TestIndex(TestCase):
              [False, False, True, True, True],
              [True, True, True, True, True]],
         ])
-        actual = cube.index(prune=True).mask
+        actual = Index.data(cube, weighted=True, prune=True).mask
         np.testing.assert_array_equal(actual, expected)

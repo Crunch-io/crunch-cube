@@ -3,6 +3,7 @@ import numpy as np
 import pytest
 
 from cr.cube.crunch_cube import CrunchCube
+from cr.cube.measures.index import Index
 
 from ..fixtures import CR
 
@@ -280,7 +281,7 @@ def test_cat_x_mr_index_by_row():
         [.8571429, 1.1152941, .9610984],
         [1.0769231, .9466231, 1.019037],
     ])
-    actual = cube.index()
+    actual = Index.data(cube, weighted=True, prune=False)
     np.testing.assert_almost_equal(actual, expected)
 
 
@@ -290,7 +291,7 @@ def test_cat_x_mr_index_by_cell():
         [.8571429, 1.1152941, .9610984],
         [1.0769231, .9466231, 1.019037],
     ])
-    actual = cube.index()
+    actual = Index.data(cube, weighted=True, prune=False)
     np.testing.assert_almost_equal(actual, expected)
 
 
@@ -300,7 +301,7 @@ def test_cat_x_mr_index_by_col():
         [.8571429, 1.1152941, .9610984],
         [1.0769231, .9466231, 1.019037],
     ])
-    actual = cube.index()
+    actual = Index.data(cube, weighted=True, prune=False)
     np.testing.assert_almost_equal(actual, expected)
 
 
@@ -308,7 +309,7 @@ def test_cat_x_mr_index_by_col():
 def test_cat_x_mr_index_bad_direction():
     cube = CrunchCube(CR.CAT_X_MR)
     with pytest.raises(ValueError):
-        cube.index()
+        Index.data(cube, weighted=True, prune=False)
 
 
 def test_mr_x_single_wave():

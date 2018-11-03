@@ -4,6 +4,7 @@ import pytest
 
 from cr.cube.crunch_cube import CrunchCube
 from cr.cube.enum import DIMENSION_TYPE as DT
+from cr.cube.measures.index import Index
 from cr.cube.util import compress_pruned
 
 from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
@@ -1024,7 +1025,7 @@ class TestCrunchCube(TestCase):
                 1.32339565,
             ],
         ])
-        actual = cube.index()
+        actual = Index.data(cube, weighted=True, prune=False)
         np.testing.assert_almost_equal(actual, expected)
 
     def test_econ_x_ideology_index_by_row(self):
@@ -1047,7 +1048,7 @@ class TestCrunchCube(TestCase):
                 1.32339565,
             ],
         ])
-        actual = cube.index()
+        actual = Index.data(cube, weighted=True, prune=False)
         np.testing.assert_almost_equal(actual, expected)
 
     def test_fruit_x_pets_proportions_by_cell(self):
@@ -1347,7 +1348,6 @@ class TestCrunchCube(TestCase):
         for i, actual in enumerate(pruned):
             np.testing.assert_array_equal(pruned[i], pruned_expected[i])
 
-    @pytest.mark.filterwarnings('ignore:DeprecationWarning')
     def test_cat_x_cat_index_by_col_prune_cols(self):
         cube = CrunchCube(CR.CAT_X_CAT_WITH_EMPTY_COLS)
         expected = np.array([
@@ -1358,7 +1358,7 @@ class TestCrunchCube(TestCase):
             [0., 1.16666667, np.nan, 1.16666667],
             [0., 1.75, np.nan, 0.]
         ])
-        actual = cube.index(prune=False)
+        actual = Index.data(cube, weighted=True, prune=False)
         # Assert index without pruning
         np.testing.assert_almost_equal(actual, expected)
 
@@ -1369,7 +1369,7 @@ class TestCrunchCube(TestCase):
             [0., 1.16666667, 1.16666667],
             [0., 1.75, 0.]
         ])
-        table = cube.index(prune=True)
+        table = Index.data(cube, weighted=True, prune=True)
         # Assert index witih pruning
         actual = table[:, ~table.mask.all(axis=0)][~table.mask.all(axis=1), :]
         np.testing.assert_almost_equal(actual, expected)
