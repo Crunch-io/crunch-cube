@@ -61,17 +61,7 @@ class CrunchCube(object):
             So we need to check its type, and convert it to a dictionary if
             it's JSON, if possible.
         """
-        try:
-            if not isinstance(response, dict):
-                response = json.loads(response)
-            self._cube_dict = response.get('value', response)
-        except TypeError:
-            # If an unexpected type is provided raise descriptive exception.
-            if not isinstance(response, dict):
-                raise TypeError((
-                    'Unsupported type provided: {}. '
-                    'A `cube` must be JSON or `dict`.'
-                ).format(type(response)))
+        self._cube_response_arg = response
 
     def __repr__(self):
         """Provide text representation suitable for working at console.
@@ -1002,6 +992,24 @@ class CrunchCube(object):
             col_prune_inds[None, :], len(row_prune_inds), axis=0
         )
         return np.logical_or(mask_rows, mask_cols)
+
+    @lazyproperty
+    def _cube_dict(self):
+        """dict containing raw cube response, parsed from JSON payload."""
+        try:
+            cube_response = self._cube_response_arg
+            # ---parse JSON to a dict when constructed with JSON---
+            cube_dict = (
+                cube_response if isinstance(cube_response, dict)
+                else json.loads(cube_response)
+            )
+            # ---cube is 'value' item in a shoji response---
+            return cube_dict.get('value', cube_dict)
+        except TypeError:
+            raise TypeError(
+                'Unsupported type <%s> provided. Cube response must be JSON '
+                '(str) or dict.' % type(self._cube_response_arg).__name__
+            )
 
     def _data(self, weighted, margin=False):
         """Get the data in non-flattened shape.

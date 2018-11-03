@@ -19,7 +19,7 @@ from ..unitutil import (
 class DescribeCrunchCube(object):
 
     def it_provides_a_default_repr(self):
-        cube = CrunchCube({})
+        cube = CrunchCube(None)
         repr_ = repr(cube)
         assert repr_.startswith('<cr.cube.crunch_cube.CrunchCube object at 0x')
 
@@ -28,7 +28,7 @@ class DescribeCrunchCube(object):
             apparent_dimensions_):
         _all_dimensions_prop_.return_value = all_dimensions_
         all_dimensions_.apparent_dimensions = apparent_dimensions_
-        cube = CrunchCube({})
+        cube = CrunchCube(None)
 
         dimensions = cube.dimensions
 
@@ -41,7 +41,7 @@ class DescribeCrunchCube(object):
             )
             for idx, dt in enumerate((DT.CAT, DT.CA_SUBVAR, DT.MR, DT.MR_CAT))
         )
-        cube = CrunchCube({})
+        cube = CrunchCube(None)
 
         dim_types = cube.dim_types
 
@@ -59,7 +59,7 @@ class DescribeCrunchCube(object):
             self, has_mr_fixture, mr_dim_ind_prop_):
         mr_dim_indices, expected_value = has_mr_fixture
         mr_dim_ind_prop_.return_value = mr_dim_indices
-        cube = CrunchCube({})
+        cube = CrunchCube(None)
 
         has_mr = cube.has_mr
 
@@ -72,7 +72,7 @@ class DescribeCrunchCube(object):
             instance_mock(request, Dimension, dimension_type=dimension_type)
             for dimension_type in dimension_types
         )
-        cube = CrunchCube({})
+        cube = CrunchCube(None)
 
         for axis, expected_value in axis_cases:
             adjusted_axis = cube._adjust_axis(axis)
@@ -81,7 +81,7 @@ class DescribeCrunchCube(object):
     def but_it_raises_on_disallowed_adjustment(self, _is_axis_allowed_):
         _is_axis_allowed_.return_value = False
         axis = 42
-        cube = CrunchCube({})
+        cube = CrunchCube(None)
 
         with pytest.raises(ValueError):
             cube._adjust_axis(axis)
@@ -99,6 +99,22 @@ class DescribeCrunchCube(object):
         AllDimensions_.assert_called_once_with([{'d': 1}, {'d': 2}])
         assert all_dimensions is all_dimensions_
 
+    def it_provides_access_to_the_cube_dict_to_help(self):
+        cube = CrunchCube({'cube': 'dict'})
+        cube_dict = cube._cube_dict
+        assert cube_dict == {'cube': 'dict'}
+
+    def but_it_first_parses_a_JSON_cube_response(self):
+        cube = CrunchCube('{"cubic": "dictum"}')
+        cube_dict = cube._cube_dict
+        assert cube_dict == {'cubic': 'dictum'}
+
+    def and_it_raises_on_invalid_cube_response_type(self):
+        cube = CrunchCube(42)
+        with pytest.raises(TypeError) as e:
+            cube._cube_dict
+        assert str(e.value).startswith('Unsupported type')
+
     def it_knows_whether_an_axis_is_marginable_to_help(
             self, request, allowed_fixture, dimensions_prop_):
         dimension_types, axis_cases = allowed_fixture
@@ -106,7 +122,7 @@ class DescribeCrunchCube(object):
             instance_mock(request, Dimension, dimension_type=dimension_type)
             for dimension_type in dimension_types
         )
-        cube = CrunchCube({})
+        cube = CrunchCube(None)
 
         for axis, expected_value in axis_cases:
             axis_is_marginable = cube._is_axis_allowed(axis)
@@ -266,22 +282,6 @@ class TestCrunchCube(TestCase):
     not just the API ones.
     '''
 
-    def test_init_raises_value_type_on_initialization(self):
-        with self.assertRaises(TypeError) as ctx:
-            CrunchCube(Mock())
-        expected = (
-            'Unsupported type provided: {}. '
-            'A `cube` must be JSON or `dict`.'
-        ).format(type(Mock()))
-        self.assertEqual(str(ctx.exception), expected)
-
-    @patch('cr.cube.crunch_cube.json.loads')
-    def test_init_invokes_json_loads_for_string_input(self, mock_loads):
-        mock_loads.return_value = {'value': {'result': {'dimensions': []}}}
-        fake_json = 'fake cube json'
-        CrunchCube(fake_json)
-        mock_loads.assert_called_once_with(fake_json)
-
     def test_calculate_constraints_sum_axis_0(self):
         prop_table = np.array([
             [0.32, 0.21, 0.45],
@@ -407,7 +407,7 @@ class TestCrunchCube(TestCase):
     @patch('cr.cube.crunch_cube.CrunchCube.dimensions', [])
     def test_does_not_have_description(self):
         expected = None
-        actual = CrunchCube({}).description
+        actual = CrunchCube(None).description
         self.assertEqual(actual, expected)
 
     @patch('cr.cube.crunch_cube.CrunchCube.dimensions')
@@ -415,7 +415,7 @@ class TestCrunchCube(TestCase):
         dims = [Mock(), Mock()]
         mock_dims.__get__ = Mock(return_value=dims)
         expected = dims[0].description
-        actual = CrunchCube({}).description
+        actual = CrunchCube(None).description
         self.assertEqual(actual, expected)
 
     @patch('cr.cube.crunch_cube.CrunchCube.has_means', False)
@@ -514,13 +514,13 @@ class TestCrunchCube(TestCase):
 
     @patch('cr.cube.crunch_cube.CrunchCube.is_weighted', 'fake_val')
     def test_is_weighted_invoked(self):
-        cube = CrunchCube({})
+        cube = CrunchCube(None)
         actual = cube.is_weighted
         assert actual == 'fake_val'
 
     @patch('cr.cube.crunch_cube.CrunchCube.has_means', 'fake_val')
     def test_has_means_invoked(self):
-        cube = CrunchCube({})
+        cube = CrunchCube(None)
         actual = cube.has_means
         assert actual == 'fake_val'
 
@@ -560,7 +560,7 @@ class TestCrunchCube(TestCase):
         expected = Mock()
         mock_np_array.return_value = expected
 
-        cc = CrunchCube({})
+        cc = CrunchCube(None)
 
         # Assert indices are not fetched without trasforms
         actual = cc._inserted_dim_inds(None, 0)
@@ -576,7 +576,7 @@ class TestCrunchCube(TestCase):
 
     def test_population_fraction(self):
         # Assert fraction is 1 when none of the counts are specified
-        cc = CrunchCube({})
+        cc = CrunchCube(None)
         actual = cc.population_fraction
         assert actual == 1
 
