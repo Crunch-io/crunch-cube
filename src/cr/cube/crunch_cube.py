@@ -85,7 +85,7 @@ class CrunchCube(object):
         except Exception:
             return super(CrunchCube, self).__repr__()
 
-    def as_array(self, include_missing=False, weighted=True, adjusted=False,
+    def as_array(self, include_missing=False, weighted=True,
                  include_transforms_for_dims=None, prune=False, margin=False):
         """Return `ndarray` representing cube values.
 
@@ -118,7 +118,6 @@ class CrunchCube(object):
         array = self._as_array(
             include_missing=include_missing,
             weighted=weighted,
-            adjusted=adjusted,
             include_transforms_for_dims=include_transforms_for_dims,
             margin=margin
         )
@@ -899,8 +898,8 @@ class CrunchCube(object):
         return res[np.ix_(*new_valids)] if new_valids else res
 
     def _as_array(self, include_missing=False, get_non_selected=False,
-                  weighted=True, adjusted=False,
-                  include_transforms_for_dims=False, margin=False):
+                  weighted=True, include_transforms_for_dims=False,
+                  margin=False):
         """Get crunch cube as ndarray.
 
         Args
@@ -917,17 +916,11 @@ class CrunchCube(object):
         Returns
             res (ndarray): Tabular representation of crunch cube
         """
-        res = self._apply_missings_and_insertions(
+        return self._apply_missings_and_insertions(
             self._raw_cube_array(weighted, margin),
             include_transforms_for_dims,
             include_missing=include_missing
         )
-
-        # ---prepare resulting array for sig-testing if requested---
-        if adjusted:
-            res += 1
-
-        return res
 
     @classmethod
     def _calculate_constraints_sum(cls, prop_table, prop_margin, axis):

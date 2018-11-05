@@ -90,34 +90,16 @@ class TestCrunchCube(TestCase):
         actual = cube.as_array()
         np.testing.assert_array_equal(actual, expected)
 
-    def test_as_array_univariate_cat_exclude_missing_adjusted(self):
-        cube = CrunchCube(CR.UNIVARIATE_CATEGORICAL)
-        expected = np.array([11, 6])
-        actual = cube.as_array(adjusted=True)
-        np.testing.assert_array_equal(actual, expected)
-
     def test_as_array_numeric(self):
         cube = CrunchCube(CR.VOTER_REGISTRATION)
         expected = np.array([885, 105, 10])
         actual = cube.as_array()
         np.testing.assert_array_equal(actual, expected)
 
-    def test_as_array_numeric_adjusted(self):
-        cube = CrunchCube(CR.VOTER_REGISTRATION)
-        expected = np.array([886, 106, 11])
-        actual = cube.as_array(adjusted=True)
-        np.testing.assert_array_equal(actual, expected)
-
     def test_as_array_datetime(self):
         cube = CrunchCube(CR.SIMPLE_DATETIME)
         expected = np.array([1, 1, 1, 1])
         actual = cube.as_array()
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_as_array_datetime_adjusted(self):
-        cube = CrunchCube(CR.SIMPLE_DATETIME)
-        expected = np.array([2, 2, 2, 2])
-        actual = cube.as_array(adjusted=True)
         np.testing.assert_array_equal(actual, expected)
 
     def test_as_array_text(self):
@@ -133,15 +115,6 @@ class TestCrunchCube(TestCase):
             [5, 3],
         ])
         actual = cube.as_array()
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_as_array_cat_x_cat_exclude_missing_adjusted(self):
-        cube = CrunchCube(CR.CAT_X_CAT)
-        expected = np.array([
-            [6, 3],
-            [6, 4],
-        ])
-        actual = cube.as_array(adjusted=True)
         np.testing.assert_array_equal(actual, expected)
 
     def test_as_array_cat_x_cat_unweighted(self):
