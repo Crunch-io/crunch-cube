@@ -1,0 +1,379 @@
+{
+    "query": {
+        "dimensions": [
+            {
+                "variable": "https://alpha.crunch.io/api/datasets/aefd8b1483754d639b46f5ee8f6d7821/variables/000000/"
+            },
+            {
+                "variable": "https://alpha.crunch.io/api/datasets/aefd8b1483754d639b46f5ee8f6d7821/variables/000004/"
+            }
+        ],
+        "measures": {
+            "count": {
+                "args": [],
+                "function": "cube_count"
+            },
+            "mean": {
+                "args": [
+                    {
+                        "variable": "https://alpha.crunch.io/api/datasets/aefd8b1483754d639b46f5ee8f6d7821/variables/00000c/"
+                    }
+                ],
+                "function": "cube_mean"
+            }
+        },
+        "weight": "https://alpha.crunch.io/api/datasets/aefd8b1483754d639b46f5ee8f6d7821/variables/0af6163c3e694b9b80071ed691fd4f28/"
+    },
+    "query_environment": {
+        "filter": []
+    },
+    "result": {
+        "counts": [
+            156,
+            129,
+            0,
+            0,
+            0,
+            197,
+            199,
+            0,
+            0,
+            0,
+            101,
+            141,
+            0,
+            0,
+            0,
+            2,
+            4,
+            0,
+            0,
+            0,
+            26,
+            42,
+            0,
+            0,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ],
+        "dimensions": [
+            {
+                "derived": false,
+                "references": {
+                    "alias": "ShutdownBlame",
+                    "description": "If President Obama and the Republicans in Congress do not reach a budget agreement in time to avoid a shutdown of the federal government, who do you think will more to blame--President Obama or the Republican Congress?",
+                    "name": "ShutdownBlame",
+                    "view": {
+                        "column_width": null,
+                        "include_missing": true,
+                        "show_counts": false,
+                        "show_numeric_values": false,
+                        "transforms": {
+                            "insertions": [
+                                {
+                                    "anchor": 5,
+                                    "args": [
+                                        5,
+                                        4
+                                    ],
+                                    "function": "subtotal",
+                                    "name": "test new"
+                                }
+                            ]
+                        }
+                    }
+                },
+                "type": {
+                    "categories": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "name": "President Obama",
+                            "numeric_value": 1
+                        },
+                        {
+                            "id": 2,
+                            "missing": false,
+                            "name": "Republicans in Congress",
+                            "numeric_value": 2
+                        },
+                        {
+                            "id": 3,
+                            "missing": false,
+                            "name": "Both",
+                            "numeric_value": 3
+                        },
+                        {
+                            "id": 4,
+                            "missing": false,
+                            "name": "Neither",
+                            "numeric_value": 4
+                        },
+                        {
+                            "id": 5,
+                            "missing": false,
+                            "name": "Not sure",
+                            "numeric_value": 5
+                        },
+                        {
+                            "id": 8,
+                            "missing": true,
+                            "name": "Skipped",
+                            "numeric_value": 8
+                        },
+                        {
+                            "id": 9,
+                            "missing": true,
+                            "name": "Not Asked",
+                            "numeric_value": 9
+                        },
+                        {
+                            "id": -1,
+                            "missing": true,
+                            "name": "No Data",
+                            "numeric_value": null
+                        }
+                    ],
+                    "class": "categorical",
+                    "ordinal": false
+                }
+            },
+            {
+                "derived": false,
+                "references": {
+                    "alias": "Gender",
+                    "description": "Are you male or female?",
+                    "name": "Gender"
+                },
+                "type": {
+                    "categories": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "name": "Male",
+                            "numeric_value": 1
+                        },
+                        {
+                            "id": 2,
+                            "missing": false,
+                            "name": "Female",
+                            "numeric_value": 2
+                        },
+                        {
+                            "id": 8,
+                            "missing": true,
+                            "name": "Skipped",
+                            "numeric_value": 8
+                        },
+                        {
+                            "id": 9,
+                            "missing": true,
+                            "name": "Not Asked",
+                            "numeric_value": 9
+                        },
+                        {
+                            "id": -1,
+                            "missing": true,
+                            "name": "No Data",
+                            "numeric_value": null
+                        }
+                    ],
+                    "class": "categorical",
+                    "ordinal": false
+                }
+            }
+        ],
+        "element": "crunch:cube",
+        "measures": {
+            "count": {
+                "data": [
+                    160.82474226804146,
+                    125.24271844660174,
+                    0,
+                    0,
+                    0,
+                    203.0927835051553,
+                    193.20388349514528,
+                    0,
+                    0,
+                    0,
+                    104.12371134020616,
+                    136.89320388349492,
+                    0,
+                    0,
+                    0,
+                    2.061855670103093,
+                    3.883495145631068,
+                    0,
+                    0,
+                    0,
+                    26.804123711340207,
+                    40.776699029126206,
+                    0,
+                    0,
+                    0,
+                    3.0927835051546397,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "metadata": {
+                    "derived": true,
+                    "references": {},
+                    "type": {
+                        "class": "numeric",
+                        "integer": false,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {}
+                    }
+                },
+                "n_missing": 3
+            },
+            "mean": {
+                "data": [
+                    52.78205128205122,
+                    49.9069767441861,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    50.43654822335009,
+                    48.20100502512572,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    51.5643564356436,
+                    47.602836879432715,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    58,
+                    29,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    37.53846153846155,
+                    39.45238095238095,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    36.666666666666664,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    }
+                ],
+                "metadata": {
+                    "derived": true,
+                    "references": {},
+                    "type": {
+                        "class": "numeric",
+                        "integer": false,
+                        "missing_reasons": {
+                            "NaN": -8,
+                            "No Data": -1
+                        },
+                        "missing_rules": {}
+                    }
+                },
+                "n_missing": 3
+            }
+        },
+        "missing": 3,
+        "n": 1000
+    }
+}

@@ -2,7 +2,7 @@ from unittest import TestCase
 import numpy as np
 import pytest
 
-from cr.cube.crunch_cube import CrunchCube
+from cr.cube.crunch_cube import CrunchCube, _Measures
 from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.measures.index import Index
 from cr.cube.util import compress_pruned
@@ -75,6 +75,135 @@ class DescribeIntegratedCrunchCube(object):
     def dimensions_fixture(self, request):
         cube_response, expected_dimension_types = request.param
         return cube_response, expected_dimension_types
+
+
+class DescribeIntegrated_Measures(object):
+
+    @pytest.mark.xfail(reason='WIP', strict=True)
+    def it_knows_when_its_measures_are_weighted(self, is_weighted_fixture):
+        cube_dict, expected_value = is_weighted_fixture
+        measures = _Measures(cube_dict, None)
+
+        is_weighted = measures.is_weighted
+
+        assert is_weighted == expected_value
+
+    @pytest.mark.xfail(reason='WIP', strict=True)
+    def it_provides_access_to_the_mean_measure(self):
+        cube_dict = CR.CAT_X_CAT_MEAN_WGTD
+        measures = _Measures(cube_dict, None)
+
+        means = measures.means
+
+        assert type(means).__name__ == '_MeanMeasure'
+
+    @pytest.mark.xfail(reason='WIP', strict=True)
+    def but_only_when_the_cube_response_contains_means(self):
+        cube_dict = CR.CAT_X_CAT
+        measures = _Measures(cube_dict, None)
+
+        means = measures.means
+
+        assert means is None
+
+    @pytest.mark.xfail(reason='WIP', strict=True)
+    def it_provides_the_means_missing_count_when_means_are_available(self):
+        measures = _Measures(CR.CAT_X_CAT_MEAN_WGTD, None)
+        missing_count = measures.missing_count
+        assert missing_count == 3
+
+    @pytest.mark.xfail(reason='WIP', strict=True)
+    def but_provides_the_general_missing_count_otherwise(self):
+        measures = _Measures(CR.CAT_X_CAT, None)
+        missing_count = measures.missing_count
+        assert missing_count == 5
+
+    @pytest.mark.xfail(reason='WIP', strict=True)
+    def it_knows_the_population_fraction(self, pop_frac_fixture):
+        cube_dict, expected_value = pop_frac_fixture
+        measures = _Measures(cube_dict, None)
+
+        population_fraction = measures.population_fraction
+
+        assert population_fraction == expected_value
+
+    @pytest.mark.xfail(reason='WIP', strict=True)
+    def it_provides_access_to_the_unweighted_count_measure(self):
+        measures = _Measures(None, None)
+
+        unweighted_counts = measures.unweighted_counts
+
+        assert type(unweighted_counts).__name__ == '_UnweightedCountMeasure'
+
+    @pytest.mark.xfail(reason='WIP', strict=True)
+    def it_knows_the_unweighted_n(self):
+        measures = _Measures(CR.CAT_X_CAT, None)
+        unweighted_n = measures.unweighted_n
+        assert unweighted_n == 20
+
+    @pytest.mark.xfail(reason='WIP', strict=True)
+    def it_provides_access_to_the_weighted_count_measure(
+            self, wgtd_counts_fixture):
+        cube_dict, expected_type_name = wgtd_counts_fixture
+        measures = _Measures(cube_dict, None)
+
+        weighted_counts = measures.weighted_counts
+
+        assert type(weighted_counts).__name__ == expected_type_name
+
+    @pytest.mark.xfail(reason='WIP', strict=True)
+    def it_knows_the_weighted_n(self, wgtd_n_fixture):
+        cube_dict, expected_value = wgtd_n_fixture
+        measures = _Measures(cube_dict, None)
+
+        weighted_n = measures.weighted_n
+
+        assert round(weighted_n, 3) == expected_value
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture(params=[
+        # ---has {'query': {'weight': url}}---
+        (CR.ADMIT_X_GENDER_WEIGHTED, True),
+        # ---has {'weight_var': weight_name_str}---
+        (CR.CAT_X_CAT_X_CAT_WGTD, True),
+        # ---unweighted_counts == measure_count_data---
+        (CR.ADMIT_X_DEPT_UNWEIGHTED, False),
+    ])
+    def is_weighted_fixture(self, request):
+        cube_response, expected_value = request.param
+        cube_dict = cube_response.get('value', cube_response)
+        return cube_dict, expected_value
+
+    @pytest.fixture(params=[
+        # ---filtered case---
+        (CR.CAT_X_CAT_FILT, 0.254),
+        # ---unfiltered case---
+        (CR.CAT_X_CAT, 1.0),
+    ])
+    def pop_frac_fixture(self, request):
+        cube_dict, expected_value = request.param
+        return cube_dict, expected_value
+
+    @pytest.fixture(params=[
+        # ---weighted case---
+        (CR.CAT_X_CAT_WGTD, '_WeightedCountMeasure'),
+        # ---unweighted case---
+        (CR.CAT_X_CAT, '_UnweightedCountMeasure'),
+    ])
+    def wgtd_counts_fixture(self, request):
+        cube_dict, expected_type_name = request.param
+        return cube_dict, expected_type_name
+
+    @pytest.fixture(params=[
+        # ---weighted case---
+        (CR.CAT_X_CAT_WGTD, 999.557),
+        # ---unweighted case---
+        (CR.CAT_X_CAT, 20.0),
+    ])
+    def wgtd_n_fixture(self, request):
+        cube_dict, expected_type = request.param
+        return cube_dict, expected_type
 
 
 class TestCrunchCube(TestCase):

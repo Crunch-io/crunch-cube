@@ -1419,3 +1419,7 @@ class CrunchCube(object):
                 )
             )
         return result, valid_indices
+
+
+class _Measures(object):
+    """Provides access to measures contained in cube response."""
