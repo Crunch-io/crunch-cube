@@ -50,7 +50,6 @@ class DescribeIntegratedCrunchCube(object):
         arr = cube.as_array(prune=True)
         np.testing.assert_array_equal(arr, np.array([[0, 0, 0]]))
 
-    @pytest.mark.xfail(reason='WIP', strict=True)
     def it_provides_pruned_array_for_CA_CAT_x_CA_SUBVAR(self):
         cube = CrunchCube(CR.CA_CAT_X_CA_SUBVAR)
         arr = cube.proportions(axis=0, prune=True)
