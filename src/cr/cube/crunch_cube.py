@@ -86,7 +86,7 @@ class CrunchCube(object):
             return super(CrunchCube, self).__repr__()
 
     def as_array(self, include_missing=False, weighted=True,
-                 include_transforms_for_dims=None, prune=False, margin=False):
+                 include_transforms_for_dims=None, prune=False):
         """Return `ndarray` representing cube values.
 
         Returns the tabular representation of the crunch cube. The returned
@@ -118,8 +118,7 @@ class CrunchCube(object):
         array = self._as_array(
             include_missing=include_missing,
             weighted=weighted,
-            include_transforms_for_dims=include_transforms_for_dims,
-            margin=margin
+            include_transforms_for_dims=include_transforms_for_dims
         )
 
         # ---prune array if pruning was requested---
@@ -869,26 +868,20 @@ class CrunchCube(object):
         return res[np.ix_(*new_valids)] if new_valids else res
 
     def _as_array(self, include_missing=False, get_non_selected=False,
-                  weighted=True, include_transforms_for_dims=False,
-                  margin=False):
+                  weighted=True, include_transforms_for_dims=False):
         """Get crunch cube as ndarray.
 
         Args
             include_missing (bool): Include rows/cols for missing values.
             get_non_selected (bool): Get non-selected slices for MR vars.
             weighted (bool): Take weighted or unweighted counts.
-            adjusted (bool): If adjusted, add + 1 to the resulting array. This
-                is needed when calculating statistical significance.
             include_transforms_for_dims (list): For which dims to
                 include headings & subtotals (H&S) transformations.
-            margin (bool): Designates whether array is intented for margin
-                calculation. This essentially tells the CrunchCube to use
-                counts (and not means, or other measures) as the result.
         Returns
             res (ndarray): Tabular representation of crunch cube
         """
         return self._apply_missings_and_insertions(
-            self._raw_cube_array(weighted, margin),
+            self._measure(weighted).raw_cube_array,
             include_transforms_for_dims,
             include_missing=include_missing
         )
@@ -1378,22 +1371,6 @@ class CrunchCube(object):
         return self.margin(
             axis=axis, weighted=False,
             include_transforms_for_dims=hs_dims,
-        )
-
-    def _raw_cube_array(self, weighted, margin):
-        """Return ndarray of measure values from cube-response.
-
-        The shape of the ndarray mirrors the shape of the (raw) cube
-        response. Specifically, in includes values for missing elements, any
-        MR_CAT dimensions, and any prunable rows and columns.
-
-        The choice among available measures in the cube response is
-        determined by *weighted* and *margin*, according to the same rules as
-        `._flat_values()`.
-        """
-        return (
-            np.array(self._flat_values(weighted, margin))
-              .reshape(self._all_dimensions.shape)
         )
 
     @lazyproperty
