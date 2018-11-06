@@ -11,10 +11,7 @@ from cr.cube.crunch_cube import CrunchCube
 from cr.cube.dimension import AllDimensions, Dimension, _Subtotal
 from cr.cube.enum import DIMENSION_TYPE as DT
 
-from .fixtures import (
-    CA_WITH_NETS, CA_X_MR_WEIGHTED_HS, CAT_X_CAT, ECON_BLAME_WITH_HS,
-    ECON_BLAME_WITH_HS_MISSING, ECON_BLAME_X_IDEOLOGY_ROW_HS, MR_X_CAT_HS
-)
+from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
 
 
 class DescribeIntegratedAllDimensions(object):
@@ -28,7 +25,7 @@ class DescribeIntegratedAllDimensions(object):
         assert dimension_types == expected_types
 
     def it_provides_access_to_the_apparent_dimensions(self):
-        dimension_dicts = CA_X_MR_WEIGHTED_HS['result']['dimensions']
+        dimension_dicts = CR.CA_X_MR_WEIGHTED_HS['result']['dimensions']
         all_dimensions = AllDimensions(dimension_dicts)
 
         apparent_dimension_types = tuple(
@@ -40,8 +37,8 @@ class DescribeIntegratedAllDimensions(object):
     # fixtures -------------------------------------------------------
 
     @pytest.fixture(params=[
-        (CAT_X_CAT, (DT.CAT, DT.CAT)),
-        (CA_X_MR_WEIGHTED_HS, (DT.CA, DT.CA_CAT, DT.MR, DT.MR_CAT)),
+        (CR.CAT_X_CAT, (DT.CAT, DT.CAT)),
+        (CR.CA_X_MR_WEIGHTED_HS, (DT.CA, DT.CA_CAT, DT.MR, DT.MR_CAT)),
     ])
     def type_fixture(self, request):
         cube_response, expected_types = request.param
@@ -52,12 +49,12 @@ class DescribeIntegratedAllDimensions(object):
 class TestDimension(TestCase):
 
     def test_subtotals_indices_single_subtotal(self):
-        dimension = CrunchCube(ECON_BLAME_WITH_HS).dimensions[0]
+        dimension = CrunchCube(CR.ECON_BLAME_WITH_HS).dimensions[0]
         hs_indices = dimension.hs_indices
         self.assertEqual(hs_indices, ((1, (0, 1)),))
 
     def test_inserted_hs_indices_single_subtotal(self):
-        dimension = CrunchCube(ECON_BLAME_WITH_HS).dimensions[0]
+        dimension = CrunchCube(CR.ECON_BLAME_WITH_HS).dimensions[0]
         # It can be verified what the inserted indices are, by comparing
         # labels with/without transforms.
         expected = [2]
@@ -138,12 +135,12 @@ class TestDimension(TestCase):
         assert labels == [('smallish', 0), ('kinda big', 1)]
 
     def test_subtotals_indices_two_subtotals(self):
-        dimension = CrunchCube(ECON_BLAME_WITH_HS_MISSING).dimensions[0]
+        dimension = CrunchCube(CR.ECON_BLAME_WITH_HS_MISSING).dimensions[0]
         hs_indices = dimension.hs_indices
         self.assertEqual(hs_indices, ((1, (0, 1)), ('bottom', (3, 4))))
 
     def test_inserted_hs_indices_two_subtotals(self):
-        dimension = CrunchCube(ECON_BLAME_WITH_HS_MISSING).dimensions[0]
+        dimension = CrunchCube(CR.ECON_BLAME_WITH_HS_MISSING).dimensions[0]
         # It can be verified what the inserted indices are, by comparing
         # labels with/without transforms.
         expected = [2, 6]
@@ -233,28 +230,24 @@ class TestDimension(TestCase):
         ]
 
     def test_has_transforms_false(self):
-        dimension = CrunchCube(
-            ECON_BLAME_X_IDEOLOGY_ROW_HS
-        ).dimensions[1]
+        dimension = CrunchCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS).dimensions[1]
         expected = False
         actual = dimension.has_transforms
         self.assertEqual(actual, expected)
 
     def test_has_transforms_true(self):
-        dimension = CrunchCube(
-            ECON_BLAME_X_IDEOLOGY_ROW_HS
-        ).dimensions[0]
+        dimension = CrunchCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS).dimensions[0]
         expected = True
         actual = dimension.has_transforms
         self.assertEqual(actual, expected)
 
     def test_hs_indices_for_mr(self):
-        dimension = CrunchCube(MR_X_CAT_HS)._all_dimensions[1]
+        dimension = CrunchCube(CR.MR_X_CAT_HS)._all_dimensions[1]
         hs_indices = dimension.hs_indices
         assert hs_indices == ()
 
     def test_hs_indices_with_bad_data(self):
-        cube = CrunchCube(CA_WITH_NETS)
+        cube = CrunchCube(CR.CA_WITH_NETS)
 
         subvar_dim = cube.dimensions[0]
         anchor_idxs = [anchor_idx for anchor_idx, _ in subvar_dim.hs_indices]

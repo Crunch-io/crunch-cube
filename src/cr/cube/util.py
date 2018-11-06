@@ -4,8 +4,6 @@
 
 import collections
 import functools
-import json
-import os
 
 import numpy as np
 
@@ -156,13 +154,6 @@ class lazyproperty(object):
         quite snappy and probably not a rich target for optimization efforts.
         """
         raise AttributeError('can\'t set attribute')
-
-
-def load_fixture(fixtures_directory, filename):
-    """Loads fixtures for CrunchCube integration tests."""
-    with open(os.path.join(fixtures_directory, filename)) as ctx_file:
-        fixture = json.load(ctx_file)
-    return fixture
 
 
 def lru_cache(maxsize=100):

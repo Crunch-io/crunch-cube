@@ -3,26 +3,13 @@ import pytest
 
 from cr.cube.crunch_cube import CrunchCube
 
-from .fixtures.cubes.scale_means import CA_CAT_X_ITEMS
-from .fixtures.cubes.scale_means import CA_ITEMS_X_CAT
-from .fixtures.cubes.scale_means import CA_X_MR
-from .fixtures.cubes.scale_means import CAT_X_CA_CAT_X_ITEMS
-from .fixtures.cubes.scale_means import CAT_X_CAT
-from .fixtures.cubes.scale_means import CAT_X_MR
-from .fixtures.cubes.scale_means import MR_X_CAT
-from .fixtures.cubes.scale_means import UNIVARIATE_CAT
-from .fixtures.cubes.scale_means import CAT_X_CAT_SM_MARGIN
-from .fixtures import ECON_BLAME_X_IDEOLOGY_ROW_HS
-from .fixtures import ECON_BLAME_WITH_HS
-from .fixtures import ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS
-from .fixtures import CA_X_MR_HS
-from .fixtures import CAT_X_CAT_PRUNING_HS
+from ..fixtures import CR, SM  # ---mnemonic: SM = 'scale means'---
 
 from . import assert_scale_means_equal
 
 
 def test_ca_cat_x_items():
-    cube = CrunchCube(CA_CAT_X_ITEMS)
+    cube = CrunchCube(SM.CA_CAT_X_ITEMS)
     expected = [[
         np.array([1.50454821, 3.11233766, 3.35788192, 3.33271833]), None,
     ]]
@@ -43,7 +30,7 @@ def test_ca_cat_x_items():
 
 
 def test_ca_items_x_cat():
-    cube = CrunchCube(CA_ITEMS_X_CAT)
+    cube = CrunchCube(SM.CA_ITEMS_X_CAT)
     expected = [[
         None, np.array([1.50454821, 3.11233766, 3.35788192, 3.33271833]),
     ]]
@@ -64,7 +51,7 @@ def test_ca_items_x_cat():
 
 
 def test_ca_x_mr():
-    cube = CrunchCube(CA_X_MR)
+    cube = CrunchCube(SM.CA_X_MR)
     expected = [
         [np.array([1.29787234, 1.8, 1.48730964, np.nan]), None],
         [np.array([3.31746032, 3.10743802, 3.09976976, np.nan]), None],
@@ -88,7 +75,7 @@ def test_ca_x_mr():
 
 
 def test_cat_x_ca_cat_x_items():
-    cube = CrunchCube(CAT_X_CA_CAT_X_ITEMS)
+    cube = CrunchCube(SM.CAT_X_CA_CAT_X_ITEMS)
     expected = [
         [np.array([1.34545455, 2.46938776, 2.7037037, 2.65454545]), None],
         [np.array([1.41935484, 3.25663717, 3.48, 3.58536585]), None],
@@ -118,7 +105,7 @@ def test_cat_x_ca_cat_x_items():
 
 
 def test_cat_x_cat():
-    cube = CrunchCube(CAT_X_CAT)
+    cube = CrunchCube(SM.CAT_X_CAT)
     expected = [[
         np.array([2.6009281, 2.3522267, 2.3197279, 3.3949192]),
         np.array(
@@ -141,7 +128,7 @@ def test_cat_x_cat():
 
 
 def test_cat_x_mr():
-    cube = CrunchCube(CAT_X_MR)
+    cube = CrunchCube(SM.CAT_X_MR)
     expected = [[np.array([2.45070423, 2.54471545, 2.54263006, np.nan]), None]]
     actual = cube.scale_means()
     assert_scale_means_equal(actual, expected)
@@ -159,7 +146,7 @@ def test_cat_x_mr():
 
 
 def test_mr_x_cat():
-    cube = CrunchCube(MR_X_CAT)
+    cube = CrunchCube(SM.MR_X_CAT)
     expected = [[None, np.array([2.45070423, 2.54471545, 2.54263006, np.nan])]]
     actual = cube.scale_means()
     assert_scale_means_equal(actual, expected)
@@ -177,7 +164,7 @@ def test_mr_x_cat():
 
 
 def test_univariate_cat():
-    cube = CrunchCube(UNIVARIATE_CAT)
+    cube = CrunchCube(SM.UNIVARIATE_CAT)
     expected = [[np.array([2.6865854])]]
     actual = cube.scale_means()
     assert_scale_means_equal(actual, expected)
@@ -193,7 +180,7 @@ def test_univariate_cat():
 
 
 def test_cat_x_cat_with_hs():
-    cube = CrunchCube(ECON_BLAME_X_IDEOLOGY_ROW_HS)
+    cube = CrunchCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS)
 
     # Test without H&S
     expected = [[
@@ -228,7 +215,7 @@ def test_cat_x_cat_with_hs():
 
 
 def test_univariate_with_hs():
-    cube = CrunchCube(ECON_BLAME_WITH_HS)
+    cube = CrunchCube(CR.ECON_BLAME_WITH_HS)
 
     # Test without H&S
     expected = [[np.array([2.17352056])]]
@@ -250,7 +237,7 @@ def test_univariate_with_hs():
 
 
 def test_cat_x_cat_with_hs_on_both_dims():
-    cube = CrunchCube(ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS)
+    cube = CrunchCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS)
 
     # Test without H&S
     expected = [[
@@ -288,7 +275,7 @@ def test_cat_x_cat_with_hs_on_both_dims():
 
 
 def test_ca_x_mr_with_hs_and_pruning():
-    cube = CrunchCube(CA_X_MR_HS)
+    cube = CrunchCube(CR.CA_X_MR_HS)
     expected = [
         [np.array([2.50818336, 2.56844883, 2.90251939, np.nan]), None],
         [np.array([2.78385708, 2.69292009, 3.11594714, np.nan]), None],
@@ -308,7 +295,7 @@ def test_ca_x_mr_with_hs_and_pruning():
 
 
 def test_cat_x_cat_pruning_and_hs():
-    cube = CrunchCube(CAT_X_CAT_PRUNING_HS)
+    cube = CrunchCube(CR.CAT_X_CAT_PRUNING_HS)
     expected = [[
         np.array([1.57933884, 2.10618401, 2.30460074, np.nan, 2.34680135]),
         np.array([1.74213625, 1.97, 2.45356177, 2.11838791, np.nan, 2.]),
@@ -347,7 +334,7 @@ def test_cat_x_cat_pruning_and_hs():
 
 
 def test_cat_x_cat_scale_means_margin():
-    cs = CrunchCube(CAT_X_CAT_SM_MARGIN).slices[0]
+    cs = CrunchCube(SM.CAT_X_CAT_SM_MARGIN).slices[0]
     expected = 2.6846246973365617
     actual = cs.scale_means_margin(1)
     assert actual == expected

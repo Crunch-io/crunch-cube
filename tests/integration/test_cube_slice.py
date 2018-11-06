@@ -1,12 +1,12 @@
 from cr.cube.crunch_cube import CrunchCube
 
-from .fixtures import CAT_X_CAT, CAT_X_CAT_PRUNING_HS
+from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
 
 
 class DescribeIntegratedCrunchCube(object):
 
     def it_provides_a_console_friendly_repr_for_a_slice(self):
-        cube = CrunchCube(CAT_X_CAT)
+        cube = CrunchCube(CR.CAT_X_CAT)
         slice_ = cube.slices[0]
 
         repr_ = repr(slice_)
@@ -21,7 +21,7 @@ class DescribeIntegratedCrunchCube(object):
 
 
 def test_labels_with_hs_and_pruning():
-    cs = CrunchCube(CAT_X_CAT_PRUNING_HS).slices[0]
+    cs = CrunchCube(CR.CAT_X_CAT_PRUNING_HS).slices[0]
 
     # Withouut pruning or H&S
     expected = [

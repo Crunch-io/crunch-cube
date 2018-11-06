@@ -4,65 +4,56 @@ import pytest
 
 from cr.cube.crunch_cube import CrunchCube
 
-from .fixtures import (
-    AGE_X_ACCRPIPE, ARRAY_X_MR, BBC_NEWS, CAT_X_MR_HS, CAT_X_MR_PRUNED_COL,
-    CAT_X_MR_PRUNED_ROW, CAT_X_MR_PRUNED_ROW_COL, CAT_X_MR_SIMPLE,
-    CAT_X_MR_X_CAT_MISSING, CAT_X_MR_X_MR, CAT_X_MR_X_MR_PRUNED_ROWS,
-    MR_X_CAT_HS, MR_X_CAT_PROFILES_STATS_WEIGHTED, MR_X_CAT_PRUNED_COL,
-    MR_X_CAT_PRUNED_ROW, MR_X_CAT_PRUNED_ROW_COL, MR_X_CAT_X_MR,
-    MR_X_MR_X_CAT, MR_X_SINGLE_WAVE, PROMPTED_AWARENESS, SELECTED_3_WAY,
-    SELECTED_3_WAY_2, SIMPLE_MR
-)
+from ..fixtures import CR
 
 
 # pylint: disable=invalid-name,missing-docstring,too-many-public-methods
-# class TestMultipleResponse(TestCase):
 
 
 def test_labels_simple_mr_exclude_missing():
-    cube = CrunchCube(SIMPLE_MR)
+    cube = CrunchCube(CR.SIMPLE_MR)
     expected = [['Response #1', 'Response #2', 'Response #3']]
     actual = cube.labels()
     assert actual == expected
 
 
 def test_labels_simple_mr_include_missing_does_not_break():
-    cube = CrunchCube(SIMPLE_MR)
+    cube = CrunchCube(CR.SIMPLE_MR)
     expected = [['Response #1', 'Response #2', 'Response #3']]
     actual = cube.labels(include_missing=True)
     assert actual == expected
 
 
 def test_as_array_simple_mr_exclude_missing():
-    cube = CrunchCube(SIMPLE_MR)
+    cube = CrunchCube(CR.SIMPLE_MR)
     expected = np.array([3, 4, 0])
     actual = cube.as_array()
     np.testing.assert_array_equal(actual, expected)
 
 
 def test_margin_simple_mr_axis_none():
-    cube = CrunchCube(SIMPLE_MR)
+    cube = CrunchCube(CR.SIMPLE_MR)
     expected = np.array([5, 6, 6])
     actual = cube.margin()
     np.testing.assert_array_equal(actual, expected)
 
 
 def test_proportions_simple_mr():
-    cube = CrunchCube(SIMPLE_MR)
+    cube = CrunchCube(CR.SIMPLE_MR)
     expected = np.array([0.6, 0.6666667, 0.])
     actual = cube.proportions()
     np.testing.assert_almost_equal(actual, expected)
 
 
 def test_proportions_simple_mr_prune():
-    cube = CrunchCube(SIMPLE_MR)
+    cube = CrunchCube(CR.SIMPLE_MR)
     expected = np.array([0.6, 0.6666667])
     actual = np.ma.compressed(cube.proportions(prune=True))
     np.testing.assert_almost_equal(actual, expected)
 
 
 def test_labels_cat_x_mr_exclude_missing():
-    cube = CrunchCube(CAT_X_MR_SIMPLE)
+    cube = CrunchCube(CR.CAT_X_MR)
     expected = [
         ['rambutan', 'satsuma'],
         ['dog', 'cat', 'wombat'],
@@ -72,7 +63,7 @@ def test_labels_cat_x_mr_exclude_missing():
 
 
 def test_labels_cat_x_mr_include_missing():
-    cube = CrunchCube(CAT_X_MR_SIMPLE)
+    cube = CrunchCube(CR.CAT_X_MR)
     expected = [
         ['rambutan', 'satsuma', 'No Data'],
         ['dog', 'cat', 'wombat'],
@@ -82,7 +73,7 @@ def test_labels_cat_x_mr_include_missing():
 
 
 def test_as_array_cat_x_mr():
-    cube = CrunchCube(CAT_X_MR_SIMPLE)
+    cube = CrunchCube(CR.CAT_X_MR)
     expected = np.array([
         [12, 12, 12],
         [28, 22, 26],
@@ -92,7 +83,7 @@ def test_as_array_cat_x_mr():
 
 
 def test_as_array_cat_x_mr_pruned_row():
-    cube = CrunchCube(CAT_X_MR_PRUNED_ROW)
+    cube = CrunchCube(CR.CAT_X_MR_PRUNED_ROW)
 
     # Not pruned
     expected = np.array([
@@ -109,7 +100,7 @@ def test_as_array_cat_x_mr_pruned_row():
 
 
 def test_as_array_cat_x_mr_pruned_col():
-    cube = CrunchCube(CAT_X_MR_PRUNED_COL)
+    cube = CrunchCube(CR.CAT_X_MR_PRUNED_COL)
 
     # Not pruned
     actual = cube.as_array()
@@ -129,7 +120,7 @@ def test_as_array_cat_x_mr_pruned_col():
 
 
 def test_as_array_cat_x_mr_pruned_row_col():
-    cube = CrunchCube(CAT_X_MR_PRUNED_ROW_COL)
+    cube = CrunchCube(CR.CAT_X_MR_PRUNED_ROW_COL)
 
     # Not pruned
     actual = cube.as_array()
@@ -147,7 +138,7 @@ def test_as_array_cat_x_mr_pruned_row_col():
 
 
 def test_as_array_mr_x_cat_pruned_col():
-    cube = CrunchCube(MR_X_CAT_PRUNED_COL)
+    cube = CrunchCube(CR.MR_X_CAT_PRUNED_COL)
 
     # Not pruned
     actual = cube.as_array()
@@ -169,7 +160,7 @@ def test_as_array_mr_x_cat_pruned_col():
 
 
 def test_as_array_mr_x_cat_pruned_row():
-    cube = CrunchCube(MR_X_CAT_PRUNED_ROW)
+    cube = CrunchCube(CR.MR_X_CAT_PRUNED_ROW)
 
     # Not pruned
     actual = cube.as_array()
@@ -190,7 +181,7 @@ def test_as_array_mr_x_cat_pruned_row():
 
 
 def test_as_array_mr_x_cat_pruned_row_col():
-    cube = CrunchCube(MR_X_CAT_PRUNED_ROW_COL)
+    cube = CrunchCube(CR.MR_X_CAT_PRUNED_ROW_COL)
 
     # Not pruned
     actual = cube.as_array()
@@ -212,21 +203,21 @@ def test_as_array_mr_x_cat_pruned_row_col():
 
 
 def test_margin_cat_x_mr_axis_none():
-    cube = CrunchCube(CAT_X_MR_SIMPLE)
+    cube = CrunchCube(CR.CAT_X_MR)
     expected = np.array([80, 79, 70])
     actual = cube.margin()
     np.testing.assert_array_equal(actual, expected)
 
 
 def test_margin_cat_x_mr_by_col():
-    cube = CrunchCube(CAT_X_MR_SIMPLE)
+    cube = CrunchCube(CR.CAT_X_MR)
     expected = np.array([40, 34, 38])
     actual = cube.margin(axis=0)
     np.testing.assert_array_equal(actual, expected)
 
 
 def test_proportions_cat_x_mr_by_cell():
-    cube = CrunchCube(CAT_X_MR_SIMPLE)
+    cube = CrunchCube(CR.CAT_X_MR)
     expected = np.array([
         [0.15, 0.15189873, 0.17142857],
         [0.35, 0.27848101, 0.37142857],
@@ -236,7 +227,7 @@ def test_proportions_cat_x_mr_by_cell():
 
 
 def test_proportions_cat_x_mr_by_col():
-    cube = CrunchCube(CAT_X_MR_SIMPLE)
+    cube = CrunchCube(CR.CAT_X_MR)
     expected = np.array([
         [.3, .3529412, .3157895],
         [.7, .6470588, .6842105],
@@ -246,7 +237,7 @@ def test_proportions_cat_x_mr_by_col():
 
 
 def test_proportions_cat_x_mr_by_row():
-    cube = CrunchCube(CAT_X_MR_SIMPLE)
+    cube = CrunchCube(CR.CAT_X_MR)
     expected = np.array([
         [0.42857143, 0.48, 0.52173913],
         [0.53846154, 0.40740741, 0.55319149],
@@ -256,7 +247,7 @@ def test_proportions_cat_x_mr_by_row():
 
 
 def test_z_scores_from_r_row_margin():
-    cube = CrunchCube(MR_X_CAT_PROFILES_STATS_WEIGHTED)
+    cube = CrunchCube(CR.MR_X_CAT_PROFILES_STATS_WEIGHTED)
     expected = np.array([
         [
             -1.465585354569577,
@@ -284,7 +275,7 @@ def test_z_scores_from_r_row_margin():
 
 
 def test_cat_x_mr_index_by_row():
-    cube = CrunchCube(CAT_X_MR_SIMPLE)
+    cube = CrunchCube(CR.CAT_X_MR)
     expected = np.array([
         [.8571429, 1.1152941, .9610984],
         [1.0769231, .9466231, 1.019037],
@@ -294,7 +285,7 @@ def test_cat_x_mr_index_by_row():
 
 
 def test_cat_x_mr_index_by_cell():
-    cube = CrunchCube(CAT_X_MR_SIMPLE)
+    cube = CrunchCube(CR.CAT_X_MR)
     expected = np.array([
         [.8571429, 1.1152941, .9610984],
         [1.0769231, .9466231, 1.019037],
@@ -304,7 +295,7 @@ def test_cat_x_mr_index_by_cell():
 
 
 def test_cat_x_mr_index_by_col():
-    cube = CrunchCube(CAT_X_MR_SIMPLE)
+    cube = CrunchCube(CR.CAT_X_MR)
     expected = np.array([
         [.8571429, 1.1152941, .9610984],
         [1.0769231, .9466231, 1.019037],
@@ -315,13 +306,13 @@ def test_cat_x_mr_index_by_col():
 
 @patch('cr.cube.crunch_cube.CrunchCube.mr_dim_ind', 2)
 def test_cat_x_mr_index_bad_direction():
-    cube = CrunchCube(CAT_X_MR_SIMPLE)
+    cube = CrunchCube(CR.CAT_X_MR)
     with pytest.raises(ValueError):
         cube.index()
 
 
 def test_mr_x_single_wave():
-    cube = CrunchCube(MR_X_SINGLE_WAVE)
+    cube = CrunchCube(CR.MR_X_SINGLE_WAVE)
     expected = np.array([
         308.32755712, 187.06825269, 424.82328071, 72.68885079,
         273.15993803, 467.62527785, 62.183386, 442.80441811,
@@ -333,7 +324,7 @@ def test_mr_x_single_wave():
 
 
 def test_array_x_mr_by_col():
-    cube = CrunchCube(ARRAY_X_MR)
+    cube = CrunchCube(CR.CA_SUBVAR_X_CA_CAT_X_MR)
     expected = np.array([
         [0.5146153267487166, 0.04320534228100489, 0.5933354514113938],
         [0.4853846732512835, 0.9567946577189951, 0.4066645485886063],
@@ -344,7 +335,7 @@ def test_array_x_mr_by_col():
 
 
 def test_array_x_mr_by_row():
-    cube = CrunchCube(ARRAY_X_MR)
+    cube = CrunchCube(CR.CA_SUBVAR_X_CA_CAT_X_MR)
     expected = np.array([
         [0.41922353375674093, 0.03471395310157275, 0.5832027484767315],
         [0.5143557893611596, 1, 0.5199603338915276],
@@ -355,11 +346,7 @@ def test_array_x_mr_by_row():
 
 
 def test_array_x_mr_by_cell():
-    cube = CrunchCube(ARRAY_X_MR)
-    # expected = np.array([
-    #     [0.41922353375674093, 0.03471395310157275, 0.5832027484767315],
-    #     [0.5143557893611596, 1, 0.5199603338915276],
-    # ])
+    cube = CrunchCube(CR.CA_SUBVAR_X_CA_CAT_X_MR)
     expected = np.array([
         [0.23701678, 0.01962626, 0.32972586],
         [0.223554, 0.43462911, 0.2259899],
@@ -370,14 +357,14 @@ def test_array_x_mr_by_cell():
 
 
 def test_simple_mr_margin_by_col():
-    cube = CrunchCube(SIMPLE_MR)
+    cube = CrunchCube(CR.SIMPLE_MR)
     expected = np.array([3, 4, 0])
     actual = cube.margin(axis=0)
     np.testing.assert_array_equal(actual, expected)
 
 
 def test_cat_x_mr_x_mr_proportions_by_row():
-    cube = CrunchCube(CAT_X_MR_X_MR)
+    cube = CrunchCube(CR.CAT_X_MR_X_MR)
     # Set axis to 2 (and not 1), since 3D cube
     actual = cube.proportions(axis=2)
 
@@ -409,7 +396,7 @@ def test_cat_x_mr_x_mr_proportions_by_row():
 
 
 def test_cat_x_mr_x_mr_pruned_rows():
-    cube = CrunchCube(CAT_X_MR_X_MR_PRUNED_ROWS)
+    cube = CrunchCube(CR.CAT_X_MR_X_MR_PRUNED_ROWS)
 
     # Not pruned
     expected = np.array([
@@ -441,7 +428,7 @@ def test_cat_x_mr_x_mr_pruned_rows():
 
 
 def test_cat_x_mr_x_mr_proportions_by_col():
-    cube = CrunchCube(CAT_X_MR_X_MR)
+    cube = CrunchCube(CR.CAT_X_MR_X_MR)
     # Set axis to 1 (and not 0), since 3D cube
     actual = cube.proportions(axis=1, weighted=False)
     # expected = np.array([
@@ -469,7 +456,7 @@ def test_cat_x_mr_x_mr_proportions_by_col():
 
 
 def test_cat_x_mr_x_mr_proportions_by_cell():
-    cube = CrunchCube(CAT_X_MR_X_MR)
+    cube = CrunchCube(CR.CAT_X_MR_X_MR)
     actual = cube.proportions()
     # expected = np.array([
     #     [[0.05795, 0.17985],
@@ -497,7 +484,7 @@ def test_cat_x_mr_x_mr_proportions_by_cell():
 
 def test_mr_x_cat_x_cat_by_col():
     # TODO: Check expectations with Mike and Jon
-    cube = CrunchCube(SELECTED_3_WAY_2)
+    cube = CrunchCube(CR.SELECTED_3WAY_2_FILLEDMISSING)
     # Only compare 0 slice (parity with whaam tests)
     expected = np.array([
         [0.5923110874002918, 0.3758961399306439],
@@ -511,7 +498,7 @@ def test_mr_x_cat_x_cat_by_col():
 
 def test_cat_x_mr_x_cat_by_col():
     # TODO: Check expectations with Mike and Jon
-    cube = CrunchCube(SELECTED_3_WAY)
+    cube = CrunchCube(CR.SELECTED_3WAY_FILLEDMISSING)
     # Only take first slice (parity with whaam tests).
     expected = np.array([
         [0.0997975162008577, np.nan],
@@ -525,7 +512,7 @@ def test_cat_x_mr_x_cat_by_col():
 
 def test_cat_x_mr_x_cat_by_row():
     # TODO: Check expectations with Mike and Jon
-    cube = CrunchCube(SELECTED_3_WAY)
+    cube = CrunchCube(CR.SELECTED_3WAY_FILLEDMISSING)
     # Only take first slice (parity with whaam tests).
     expected = np.array([[1, 0], [1, 0], [1, 0]])
     # 3D cube => row == 2
@@ -535,7 +522,7 @@ def test_cat_x_mr_x_cat_by_row():
 
 def test_cat_x_mr_x_cat_by_cell():
     # TODO: Check expectations with Mike and Jon
-    cube = CrunchCube(SELECTED_3_WAY)
+    cube = CrunchCube(CR.SELECTED_3WAY_FILLEDMISSING)
     # Only take first slice (parity with whaam tests).
     # TODO: Check with @jonkeane, since R results are slightly
     # different. (It's using (0, 2) rather than (1, 2) axis).
@@ -555,7 +542,7 @@ def test_cat_x_mr_x_cat_by_cell():
 
 
 def test_mr_props_pruned():
-    cube = CrunchCube(PROMPTED_AWARENESS)
+    cube = CrunchCube(CR.PROMPTED_AWARENESS)
     expected = np.array([
         9.70083312e-01, 9.53131845e-01, 9.64703914e-01,
         9.59703205e-01, 9.37891446e-01, 8.84137923e-01,
@@ -579,7 +566,7 @@ def test_mr_props_pruned():
 
 
 def test_mr_counts_not_pruned():
-    cube = CrunchCube(PROMPTED_AWARENESS)
+    cube = CrunchCube(CR.PROMPTED_AWARENESS)
     expected = np.array([
         224833, 221990, 223560, 222923, 217586, 206164, 183147, 167720,
         209355, 201847, 193826, 198744, 180015, 174349, 200050, 160769,
@@ -594,7 +581,7 @@ def test_mr_counts_not_pruned():
 
 
 def test_mr_counts_pruned():
-    cube = CrunchCube(PROMPTED_AWARENESS)
+    cube = CrunchCube(CR.PROMPTED_AWARENESS)
     expected = np.array([
         224833, 221990, 223560, 222923, 217586, 206164, 183147, 167720,
         209355, 201847, 193826, 198744, 180015, 174349, 200050, 160769,
@@ -623,7 +610,7 @@ def test_mr_counts_pruned():
 
 
 def test_mr_props_not_pruned():
-    cube = CrunchCube(PROMPTED_AWARENESS)
+    cube = CrunchCube(CR.PROMPTED_AWARENESS)
     expected = np.array([
         9.70083312e-01, 9.53131845e-01, 9.64703914e-01,
         9.59703205e-01, 9.37891446e-01, 8.84137923e-01,
@@ -647,7 +634,7 @@ def test_mr_props_not_pruned():
 
 
 def test_mr_x_mr_x_cat_pruned_rows():
-    cube = CrunchCube(MR_X_MR_X_CAT)
+    cube = CrunchCube(CR.MR_X_MR_X_CAT)
 
     # Not pruned
     expected = np.array([
@@ -673,7 +660,7 @@ def test_mr_x_mr_x_cat_pruned_rows():
 
 
 def test_mr_x_cat_x_mr_pruned_rows():
-    cube = CrunchCube(MR_X_CAT_X_MR)
+    cube = CrunchCube(CR.MR_X_CAT_X_MR)
 
     # Not pruned
     expected = np.array([
@@ -696,7 +683,7 @@ def test_mr_x_cat_x_mr_pruned_rows():
 
 
 def test_mr_x_num_with_means_pruned():
-    cube = CrunchCube(BBC_NEWS)
+    cube = CrunchCube(CR.BBC_NEWS)
     expected = np.array([
         [38.79868092168848, 37.911460968343384, 21.566826228784073,
             28.903166828677023, np.nan, np.nan, np.nan, np.nan],
@@ -722,7 +709,7 @@ def test_mr_x_num_with_means_pruned():
 
 
 def test_mr_x_num_with_means_not_pruned():
-    cube = CrunchCube(BBC_NEWS)
+    cube = CrunchCube(CR.BBC_NEWS)
     expected = np.array([
         [38.79868092, 37.91146097, 21.56682623, 28.90316683,
          np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
@@ -748,14 +735,14 @@ def test_mr_x_num_with_means_not_pruned():
 
 
 def test_mr_x_num_rows_margin():
-    cube = CrunchCube(BBC_NEWS)
+    cube = CrunchCube(CR.BBC_NEWS)
     expected = np.array([4805, 3614, 1156, 1200, 644, 258, 167, 170, 11419])  # noqa
     actual = cube.margin(axis=1, weighted=False)
     np.testing.assert_array_equal(actual, expected)
 
 
 def test_mr_x_num_cols_margin_not_pruned_unweighted():
-    cube = CrunchCube(BBC_NEWS)
+    cube = CrunchCube(CR.BBC_NEWS)
     expected = np.array(
         [1728, 1523, 1570, 1434, 1459, 1429, 1461, 1432, 0, 0, 0, 0]
     )
@@ -765,7 +752,7 @@ def test_mr_x_num_cols_margin_not_pruned_unweighted():
 
 
 def test_mr_x_num_cols_margin_not_pruned_weighted():
-    cube = CrunchCube(BBC_NEWS)
+    cube = CrunchCube(CR.BBC_NEWS)
     expected = np.array(
         [1709.607711404295, 1438.5504956329391, 1556.0764946283794,
             1419.8513591680107, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -776,7 +763,7 @@ def test_mr_x_num_cols_margin_not_pruned_weighted():
 
 
 def test_mr_x_num_cols_margin_pruned_unweighted():
-    cube = CrunchCube(BBC_NEWS)
+    cube = CrunchCube(CR.BBC_NEWS)
     expected = np.array([1728, 1523, 1570, 1434, 1459, 1429, 1461, 1432])
     margin = np.ma.compress_cols(
         cube.margin(axis=0, weighted=False, prune=True)
@@ -786,7 +773,7 @@ def test_mr_x_num_cols_margin_pruned_unweighted():
 
 
 def test_mr_x_num_cols_margin_pruned_weighted():
-    cube = CrunchCube(BBC_NEWS)
+    cube = CrunchCube(CR.BBC_NEWS)
     expected = np.array(
         [1709.607711404295, 1438.5504956329391, 1556.0764946283794,
             1419.8513591680107, 0, 0, 0, 0]
@@ -799,7 +786,7 @@ def test_mr_x_num_cols_margin_pruned_weighted():
 
 
 def test_num_x_mr_props_by_row():
-    cube = CrunchCube(AGE_X_ACCRPIPE)
+    cube = CrunchCube(CR.AGE_X_ACCRPIPE)
     expected = np.array([
         [0.33333333, 0.44444444, 0.18518519, 0.03703704],
         [0.512, 0.24, 0.208, 0.04],
@@ -823,7 +810,7 @@ def test_num_x_mr_props_by_row():
 
 
 def test_num_x_mr_props_by_col():
-    cube = CrunchCube(AGE_X_ACCRPIPE)
+    cube = CrunchCube(CR.AGE_X_ACCRPIPE)
     expected = np.array([
         [0.00707547, 0.00676437, 0.00472144, 0.00413223],
         [0.05031447, 0.01691094, 0.02455146, 0.02066116],
@@ -847,7 +834,7 @@ def test_num_x_mr_props_by_col():
 
 
 def test_num_x_mr_props_by_cell():
-    cube = CrunchCube(AGE_X_ACCRPIPE)
+    cube = CrunchCube(CR.AGE_X_ACCRPIPE)
     expected = np.array([
         [0.00207039, 0.00276052, 0.00115022, 0.00023004],
         [0.0147228, 0.00690131, 0.00598114, 0.00115022],
@@ -871,7 +858,7 @@ def test_num_x_mr_props_by_cell():
 
 
 def test_cat_x_mr_x_cat_missing_proportions_by_cell():
-    cube = CrunchCube(CAT_X_MR_X_CAT_MISSING)
+    cube = CrunchCube(CR.CAT_X_MR_X_CAT_MISSING)
     expected = np.array([
         [0.07211986, 0.00000000, 0.03422948, 0.10268843, 0.00000000,
          0.07184337, 0.03435395, 0.10659828, 0.07013931, 0.03422948,
@@ -894,7 +881,7 @@ def test_cat_x_mr_x_cat_missing_proportions_by_cell():
 
 
 def test_cat_x_mr_x_cat_missing_proportions_by_row():
-    cube = CrunchCube(CAT_X_MR_X_CAT_MISSING)
+    cube = CrunchCube(CR.CAT_X_MR_X_CAT_MISSING)
     expected = np.array([
         [0.10215990, 0.00000000, 0.04848706, 0.14546118, 0.00000000,
          0.10176825, 0.04866338, 0.15099960, 0.09935439, 0.04848706,
@@ -918,7 +905,7 @@ def test_cat_x_mr_x_cat_missing_proportions_by_row():
 
 
 def test_cat_x_mr_x_cat_missing_proportions_by_col():
-    cube = CrunchCube(CAT_X_MR_X_CAT_MISSING)
+    cube = CrunchCube(CR.CAT_X_MR_X_CAT_MISSING)
     expected = np.array([
         [0.67814114, np.nan, 0.47727273, 0.57668021, 0., 1., 1., 1., 1.,
          0.47461929, 1., 1., 0.66874513],
@@ -937,7 +924,7 @@ def test_cat_x_mr_x_cat_missing_proportions_by_col():
 
 
 def test_cat_by_mr_hs_col_percentage():
-    cube = CrunchCube(CAT_X_MR_HS)
+    cube = CrunchCube(CR.CAT_X_MR_HS)
     expected = np.array([
         [0.44079255048452126, 0.12706996944659374, 0.02245084839681615,
             0.03842827050449689, 0.06423004017489264],
@@ -959,7 +946,7 @@ def test_cat_by_mr_hs_col_percentage():
 
 
 def test_cat_by_mr_hs_row_percentage():
-    cube = CrunchCube(CAT_X_MR_HS)
+    cube = CrunchCube(CR.CAT_X_MR_HS)
     expected = np.array([
         [0.6399160598631669, 0.5710629087411291, 0.23101895600507977,
             0.6728815025053523, 0.7820669403643355],
@@ -981,7 +968,7 @@ def test_cat_by_mr_hs_row_percentage():
 
 
 def test_cat_by_mr_hs_cell_percentage():
-    cube = CrunchCube(CAT_X_MR_HS)
+    cube = CrunchCube(CR.CAT_X_MR_HS)
     expected = np.array([
         [0.07905704201278009, 0.042511244168882356, 0.011396586674371037,
             0.03084751530784915, 0.05127790466367509],
@@ -1003,7 +990,7 @@ def test_cat_by_mr_hs_cell_percentage():
 
 
 def test_mr_by_cat_hs_col_percentage():
-    cube = CrunchCube(MR_X_CAT_HS)
+    cube = CrunchCube(CR.MR_X_CAT_HS)
     expected = np.array([
         [0.6399160598631669, 0.18579712140082952, 0.3670032197169821,
             np.nan, 0.07093259641440403, 0.1179106652004235, np.nan,
@@ -1026,7 +1013,7 @@ def test_mr_by_cat_hs_col_percentage():
 
 
 def test_mr_by_cat_hs_row_percentage():
-    cube = CrunchCube(MR_X_CAT_HS)
+    cube = CrunchCube(CR.MR_X_CAT_HS)
     expected = np.array([
         [0.44079255048452126, 0.19275310260052075, 0.633545653085042, 0.0,
             0.13200554712733142, 0.23444879978762653, 0.0,
@@ -1048,7 +1035,7 @@ def test_mr_by_cat_hs_row_percentage():
 
 
 def test_mr_by_cat_hs_cell_percentage():
-    cube = CrunchCube(MR_X_CAT_HS)
+    cube = CrunchCube(CR.MR_X_CAT_HS)
     expected = np.array([
         [0.07905704201278009, 0.03457066167210144, 0.11362770368488152, 0.0,
             0.023675463829173602, 0.042048869914617856, 0.0,
