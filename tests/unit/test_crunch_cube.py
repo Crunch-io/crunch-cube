@@ -96,6 +96,17 @@ class DescribeCrunchCube(object):
         Index_.data.assert_called_once_with(cube, True, False)
         assert index is index_
 
+    def it_knows_when_it_contains_weighted_data(
+            self, is_weighted_fixture, _measures_prop_, measures_):
+        is_weighted, expected_value = is_weighted_fixture
+        _measures_prop_.return_value = measures_
+        measures_.is_weighted = is_weighted
+        cube = CrunchCube(None)
+
+        is_weighted = cube.is_weighted
+
+        assert is_weighted is expected_value
+
     def it_can_adjust_an_axis_to_help(
             self, request, adjust_fixture, dimensions_prop_):
         dimension_types, axis_cases = adjust_fixture
@@ -296,6 +307,14 @@ class DescribeCrunchCube(object):
     def has_mr_fixture(self, request):
         mr_dim_indices, expected_value = request.param
         return mr_dim_indices, expected_value
+
+    @pytest.fixture(params=[
+        (True, True),
+        (False, False),
+    ])
+    def is_weighted_fixture(self, request):
+        is_weighted, expected_value = request.param
+        return is_weighted, expected_value
 
     # fixture components ---------------------------------------------
 
@@ -813,12 +832,6 @@ class TestCrunchCube(TestCase):
         expected = mock_cube['filter_names']
         actual = CrunchCube(mock_cube).filter_annotation
         self.assertEqual(actual, expected)
-
-    @patch('cr.cube.crunch_cube.CrunchCube.is_weighted', 'fake_val')
-    def test_is_weighted_invoked(self):
-        cube = CrunchCube(None)
-        actual = cube.is_weighted
-        assert actual == 'fake_val'
 
     def test_margin_pruned_indices_without_insertions(self):
         table = np.array([0, 1, 0, 2, 3, 4])

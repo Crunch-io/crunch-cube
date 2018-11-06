@@ -254,21 +254,7 @@ class CrunchCube(object):
     @lazyproperty
     def is_weighted(self):
         """True if cube response contains weighted data."""
-        if self._cube_dict.get('query', {}).get('weight') is not None:
-            return True
-        if self._cube_dict.get('weight_var') is not None:
-            return True
-        if self._cube_dict.get('weight_url') is not None:
-            return True
-        unweighted_counts = self._cube_dict['result']['counts']
-        weighted_counts = (
-            self._cube_dict['result']['measures']
-                .get('count', {})
-                .get('data')
-        )
-        if unweighted_counts != weighted_counts:
-            return True
-        return False
+        return self._measures.is_weighted
 
     def labels(self, include_missing=False, include_transforms_for_dims=False):
         """Gets labels for each cube's dimension.
