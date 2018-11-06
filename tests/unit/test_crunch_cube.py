@@ -316,6 +316,15 @@ class Describe_Measures(object):
         means = measures.means
         assert means is None
 
+    def it_knows_the_missing_count(self, missing_count_fixture, means_prop_):
+        means, cube_dict, expected_value = missing_count_fixture
+        means_prop_.return_value = means
+        measures = _Measures(cube_dict, None)
+
+        missing_count = measures.missing_count
+
+        assert missing_count == expected_value
+
     # fixtures -------------------------------------------------------
 
     @pytest.fixture(params=[
@@ -333,6 +342,17 @@ class Describe_Measures(object):
         cube_dict, expected_value = request.param
         return cube_dict, expected_value
 
+    @pytest.fixture(params=[
+        ({}, True, 37),
+        ({'result': {'missing': 42}}, False, 42),
+        ({'result': {}}, False, 0),
+    ])
+    def missing_count_fixture(self, request, mean_measure_):
+        cube_dict, has_means, expected_value = request.param
+        mean_measure_.missing_count = expected_value if has_means else None
+        means = mean_measure_ if has_means else None
+        return means, cube_dict, expected_value
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -346,6 +366,10 @@ class Describe_Measures(object):
     @pytest.fixture
     def mean_measure_(self, request):
         return instance_mock(request, _MeanMeasure)
+
+    @pytest.fixture
+    def means_prop_(self, request):
+        return property_mock(request, _Measures, 'means')
 
 
 # pylint: disable=invalid-name, no-self-use, protected-access

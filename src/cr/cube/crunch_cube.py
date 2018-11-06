@@ -1466,6 +1466,13 @@ class _Measures(object):
             return None
         return _MeanMeasure(self._cube_dict, self._all_dimensions)
 
+    @lazyproperty
+    def missing_count(self):
+        """numeric representing count of missing rows in cube response."""
+        if self.means:
+            return self.means.missing_count
+        return self._cube_dict['result'].get('missing', 0)
+
 
 class _BaseMeasure(object):
     """Base class for measure objects."""
@@ -1477,3 +1484,8 @@ class _BaseMeasure(object):
 
 class _MeanMeasure(_BaseMeasure):
     """Statistical mean values from a cube-response."""
+
+    @lazyproperty
+    def missing_count(self):
+        """numeric representing count of missing rows reflected in response."""
+        raise NotImplementedError

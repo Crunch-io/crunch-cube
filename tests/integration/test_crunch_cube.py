@@ -109,7 +109,6 @@ class DescribeIntegrated_Measures(object):
         missing_count = measures.missing_count
         assert missing_count == 3
 
-    @pytest.mark.xfail(reason='WIP', strict=True)
     def but_provides_the_general_missing_count_otherwise(self):
         measures = _Measures(CR.CAT_X_CAT, None)
         missing_count = measures.missing_count
