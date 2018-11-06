@@ -325,6 +325,15 @@ class Describe_Measures(object):
 
         assert missing_count == expected_value
 
+    def it_knows_the_population_fraction(self, pop_frac_fixture):
+        cube_dict, expected_value = pop_frac_fixture
+        measures = _Measures(cube_dict, None)
+
+        population_fraction = measures.population_fraction
+
+        # ---works for np.nan, which doesn't equal itself---
+        assert population_fraction in (expected_value,)
+
     # fixtures -------------------------------------------------------
 
     @pytest.fixture(params=[
@@ -352,6 +361,21 @@ class Describe_Measures(object):
         mean_measure_.missing_count = expected_value if has_means else None
         means = mean_measure_ if has_means else None
         return means, cube_dict, expected_value
+
+    @pytest.fixture(params=[
+        ({'result': {}}, 1.0),
+        ({'result': {
+            'filtered': {'weighted_n': 21},
+            'unfiltered': {'weighted_n': 42}}}, 0.5),
+        ({'result': {
+            'filtered': {'weighted_n': 0},
+            'unfiltered': {'weighted_n': 0}}}, np.nan),
+        ({'result': {'filtered': {'weighted_n': 43}}}, 1.0),
+        ({'result': {'unfiltered': {'weighted_n': 44}}}, 1.0),
+    ])
+    def pop_frac_fixture(self, request):
+        cube_dict, expected_value = request.param
+        return cube_dict, expected_value
 
     # fixture components ---------------------------------------------
 

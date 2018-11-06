@@ -1473,6 +1473,32 @@ class _Measures(object):
             return self.means.missing_count
         return self._cube_dict['result'].get('missing', 0)
 
+    @lazyproperty
+    def population_fraction(self):
+        """The filtered/unfiltered ratio for cube response.
+
+        This value is required for properly calculating population on a cube
+        where a filter has been applied. Returns 1.0 for an unfiltered cube.
+        Returns `np.nan` if the unfiltered count is zero, which would
+        otherwise result in a divide-by-zero error.
+        """
+        numerator = (
+            self._cube_dict['result']
+                .get('filtered', {})
+                .get('weighted_n')
+        )
+        denominator = (
+            self._cube_dict['result']
+                .get('unfiltered', {})
+                .get('weighted_n')
+        )
+        try:
+            return numerator / denominator
+        except ZeroDivisionError:
+            return np.nan
+        except Exception:
+            return 1.0
+
 
 class _BaseMeasure(object):
     """Base class for measure objects."""

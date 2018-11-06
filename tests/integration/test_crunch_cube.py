@@ -113,7 +113,6 @@ class DescribeIntegrated_Measures(object):
         missing_count = measures.missing_count
         assert missing_count == 5
 
-    @pytest.mark.xfail(reason='WIP', strict=True)
     def it_knows_the_population_fraction(self, pop_frac_fixture):
         cube_dict, expected_value = pop_frac_fixture
         measures = _Measures(cube_dict, None)
