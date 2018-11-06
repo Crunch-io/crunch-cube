@@ -2,17 +2,7 @@ from unittest import TestCase
 
 import numpy as np
 
-from .fixtures import ADMIT_X_DEPT_UNWEIGHTED
-from .fixtures import ADMIT_X_GENDER_WEIGHTED
-from .fixtures import SELECTED_CROSSTAB_4
-from .fixtures import SEL_ARR_FIRST
-from .fixtures import SEL_ARR_LAST
-from .fixtures import MR_X_MR
-from .fixtures import MR_X_MR_HETEROGENOUS
-from .fixtures import ECON_BLAME_X_IDEOLOGY_ROW_HS
-from .fixtures import CA_X_MR_SIG_TESTING_SUBTOTALS
-from .fixtures import STARTTIME_X_NORDIC_COUNTRIES_X_FOOD_GROOPS
-from .fixtures import FOOD_GROOPS_X_STARTTIME_X_NORDIC_COUNTRIES
+from ..fixtures import CR
 
 from cr.cube.crunch_cube import CrunchCube
 
@@ -23,7 +13,7 @@ class TestStandardizedResiduals(TestCase):
 
     def test_standardized_residuals_admit_x_dept_unweighted(self):
         '''Z-Scores for normal unweighted crosstab.'''
-        cube = CrunchCube(ADMIT_X_DEPT_UNWEIGHTED)
+        cube = CrunchCube(CR.ADMIT_X_DEPT_UNWEIGHTED)
         expected = np.array([
             [
                 18.04029231,
@@ -47,7 +37,7 @@ class TestStandardizedResiduals(TestCase):
 
     def test_standardized_residuals_admit_x_gender_weighted(self):
         '''Z-Scores for normal weighted crosstab.'''
-        cube = CrunchCube(ADMIT_X_GENDER_WEIGHTED)
+        cube = CrunchCube(CR.ADMIT_X_GENDER_WEIGHTED)
         expected = np.array([
             [9.42561985, -9.42561985],
             [-9.42561985, 9.42561985],
@@ -57,7 +47,7 @@ class TestStandardizedResiduals(TestCase):
 
     def test_standardized_residuals_selected_crosstab(self):
         '''Residuals for MR x CAT unweighted.'''
-        cube = CrunchCube(SELECTED_CROSSTAB_4)
+        cube = CrunchCube(CR.SELECTED_CROSSTAB_4)
         expected = np.array([
             [-10.88317888, 10.88317888],
             [5.23577326, -5.23577326],
@@ -71,7 +61,7 @@ class TestStandardizedResiduals(TestCase):
 
     def test_standardized_residuals_mr_x_cat(self):
         '''Residuals for MR x CAT from app.'''
-        cube = CrunchCube(SEL_ARR_FIRST)
+        cube = CrunchCube(CR.SELECTED_CROSSTAB_ARRAY_FIRST)
         expected = np.array([
             [0.80134191, -0.80134191],
             [0.60455606, -0.60455606],
@@ -83,10 +73,10 @@ class TestStandardizedResiduals(TestCase):
     def test_standardized_residuals_cat_x_mr(self):
         '''Residuals for CAT x MR from app.
 
-        The results should be the exact transsposition of the results from
+        The results should be the exact transposition of the results from
         'test_standardized_residuals_mr_x_cat' test.
         '''
-        cube = CrunchCube(SEL_ARR_LAST)
+        cube = CrunchCube(CR.SELECTED_CROSSTAB_ARRAY_LAST)
         expected = np.array([
             [0.80134191, 0.60455606, -0.30884247],
             [-0.80134191, -0.60455606, 0.30884247],
@@ -96,7 +86,7 @@ class TestStandardizedResiduals(TestCase):
 
     def test_standardized_residuals_mr_x_mr(self):
         '''Residuals for MR x MR.'''
-        cube = CrunchCube(MR_X_MR)
+        cube = CrunchCube(CR.MR_X_MR)
         expected = np.array([
             [12.88418373, 0.1781302, -1.21901758, 4.15682487],
             [0.1781302, 11.910822, -2.70033782, 5.69476817],
@@ -108,7 +98,7 @@ class TestStandardizedResiduals(TestCase):
 
     def test_standardized_residuals_mr_x_mr_heterogenous(self):
         '''Residuals for MR x MR (disparate MRs).'''
-        cube = CrunchCube(MR_X_MR_HETEROGENOUS)
+        cube = CrunchCube(CR.MR_X_OTHER_MR)
         expected = np.array([
             [-0.17238393, 38.51646532],
             [0.10271174, -39.11229693],
@@ -118,7 +108,7 @@ class TestStandardizedResiduals(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_std_res_with_hs(self):
-        cube = CrunchCube(ECON_BLAME_X_IDEOLOGY_ROW_HS)
+        cube = CrunchCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS)
 
         # Don't include H&S dim (the one with transform)
         expected = np.array([
@@ -160,7 +150,7 @@ class TestStandardizedResiduals(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_3d_z_score(self):
-        cube = CrunchCube(CA_X_MR_SIG_TESTING_SUBTOTALS)
+        cube = CrunchCube(CR.CA_X_MR_SIG_TESTING_SUBTOTALS)
         expected = np.array([
             [[-0.97184831, 0.48259011, -0.22320406, 1.90369568, 0.84276015],
              [5.73141167, -2.36476938, -3.08927542, -5.58099225, -0.43365468],
@@ -186,7 +176,7 @@ class TestStandardizedResiduals(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_3d_z_score_with_mr_as_row(self):
-        cube = CrunchCube(STARTTIME_X_NORDIC_COUNTRIES_X_FOOD_GROOPS)
+        cube = CrunchCube(CR.STARTTIME_X_NORDIC_COUNTRIES_X_FOOD_GROOPS)
         expected = np.array([
             [[-0.59209185, -1.38186211, -0.61880093, 2.76977489],
              [-0.27226001, -0.90729991, 1.19984516, 0.18320768],
@@ -216,7 +206,7 @@ class TestStandardizedResiduals(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_3d_z_score_with_mr_as_col(self):
-        cube = CrunchCube(FOOD_GROOPS_X_STARTTIME_X_NORDIC_COUNTRIES)
+        cube = CrunchCube(CR.FOOD_GROOPS_X_STARTTIME_X_NORDIC_COUNTRIES)
         expected = np.array([
             [[0.01506113, -0.7584501, -0.02786318, -0.31878531, 0.47399192],
              [-0.11623796, 1.1295313, 0.42710872, 1.34964387, -1.01589615],

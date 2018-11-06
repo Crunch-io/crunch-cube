@@ -6,16 +6,11 @@ import numpy as np
 
 from cr.cube.crunch_cube import CrunchCube
 
-from .fixtures import CAT_X_CAT
-from .fixtures import CAT_X_MR_SIMPLE
-from .fixtures import SELECTED_CROSSTAB_4
-from .fixtures import FULL_CUBE as MR_X_MR
-from .fixtures import NATREP as MR_ALONE
-from .fixtures import MR_X_MR_INDEX_TABLE
+from ..fixtures import CR
 
 
 def test_cat_x_cat_slice_column_index():
-    cube = CrunchCube(CAT_X_CAT)
+    cube = CrunchCube(CR.CAT_X_CAT)
     expected = np.array([
         [100, 80],
         [100, 120],
@@ -25,7 +20,7 @@ def test_cat_x_cat_slice_column_index():
 
 
 def test_cat_x_cat_slice_row_index():
-    cube = CrunchCube(CAT_X_CAT)
+    cube = CrunchCube(CR.CAT_X_CAT)
     expected = np.array([
         [107.142857142857, 85.7142857142857],
         [93.75, 112.5],
@@ -35,7 +30,7 @@ def test_cat_x_cat_slice_row_index():
 
 
 def test_cat_x_cat_slice_row_index_with_baseline():
-    cube = CrunchCube(CAT_X_CAT)
+    cube = CrunchCube(CR.CAT_X_CAT)
     expected = np.array([
         [119.047619047619, 71.4285714285714],
         [104.16666666666667, 93.75],
@@ -45,7 +40,7 @@ def test_cat_x_cat_slice_row_index_with_baseline():
 
 
 def test_cat_x_cat_slice_column_index_with_baseline():
-    cube = CrunchCube(CAT_X_CAT)
+    cube = CrunchCube(CR.CAT_X_CAT)
     expected = np.array([
         [83.3333333333333, 66.6666666666667],
         [125, 150],
@@ -55,7 +50,7 @@ def test_cat_x_cat_slice_column_index_with_baseline():
 
 
 def test_mr_x_cat_slice_column_index():
-    cube = CrunchCube(SELECTED_CROSSTAB_4)
+    cube = CrunchCube(CR.SELECTED_CROSSTAB_4)
     expected = np.array([
         [95.8651525855387, 103.859044435659],
         [102.305106635277, 97.8432045727022],
@@ -69,7 +64,7 @@ def test_mr_x_cat_slice_column_index():
 
 
 def test_mr_x_cat_slice_row_index():
-    cube = CrunchCube(SELECTED_CROSSTAB_4)
+    cube = CrunchCube(CR.SELECTED_CROSSTAB_4)
     expected = np.array([
         [95.3416155822363, 104.394053238208],
         [101.879419344372, 98.2272247381305],
@@ -83,8 +78,8 @@ def test_mr_x_cat_slice_row_index():
 
 
 def test_mr_x_mr_slice_column_index():
-    mr_x_mr = CrunchCube(MR_X_MR)
-    mr_alone = CrunchCube(MR_ALONE)
+    mr_x_mr = CrunchCube(CR.FULL_CUBE)
+    mr_alone = CrunchCube(CR.MR_WGTD)
     expected = (
         mr_x_mr.proportions(axis=0) /
         mr_alone.proportions()[:, None] * 100
@@ -94,7 +89,7 @@ def test_mr_x_mr_slice_column_index():
 
 
 def test_mr_x_mr_slice_row_index():
-    mr_x_mr = CrunchCube(MR_X_MR)
+    mr_x_mr = CrunchCube(CR.FULL_CUBE)
     expected = np.array([
         96.5399786, 101.08725891, 89.22034634, 89.31908705,
         97.03625304, 99.96205366, 79.74421663, 94.32481007,
@@ -109,7 +104,7 @@ def test_mr_x_mr_slice_row_index():
 
 
 def test_cat_x_mr_slice_column_index():
-    cat_x_mr = CrunchCube(CAT_X_MR_SIMPLE)
+    cat_x_mr = CrunchCube(CR.CAT_X_MR)
     expected = np.array([
         [90.9090909, 106.9518717, 95.6937799],
         [104.4776119, 96.5759438, 102.1209741],
@@ -119,7 +114,7 @@ def test_cat_x_mr_slice_column_index():
 
 
 def test_cat_x_mr_slice_row_index():
-    cat_x_mr = CrunchCube(CAT_X_MR_SIMPLE)
+    cat_x_mr = CrunchCube(CR.CAT_X_MR)
     expected = np.array([
         [85.7142857, 111.5294118, 96.1098398],
         [107.6923077, 94.6623094, 101.9036954],
@@ -129,7 +124,7 @@ def test_cat_x_mr_slice_row_index():
 
 
 def test_mr_x_mr_index_tables_parity_with_whaam_and_r():
-    cat_x_mr = CrunchCube(MR_X_MR_INDEX_TABLE)
+    cat_x_mr = CrunchCube(CR.MR_X_MR_INDEX_TABLE)
     # Test column direction
     expected = np.array([
         [192.05298013, 97.23165321, 89.68799602],

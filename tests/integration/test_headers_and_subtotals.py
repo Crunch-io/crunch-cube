@@ -8,21 +8,13 @@ from cr.cube.crunch_cube import CrunchCube
 
 from unittest import TestCase
 
-from .fixtures import (
-    ADMIT_X_GENDER_WEIGHTED, CAT_X_DATE_HS_PRUNE, CAT_X_ITEMS_X_CATS_HS,
-    CAT_X_MR_WEIGHTED_HS, CAT_X_NUM_HS_PRUNE, CA_CAT_X_MR_X_CA_SUBVAR_HS,
-    CA_X_CAT_HS, CA_X_MR_HS, ECON_BLAME_WITH_HS, ECON_BLAME_WITH_HS_MISSING,
-    ECON_BLAME_X_IDEOLOGY_COL_HS, ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS,
-    ECON_BLAME_X_IDEOLOGY_ROW_HS, ECON_US_PROBLEM_X_BIGGER_PROBLEM,
-    FRUIT_HS_TOP_BOTTOM, FRUIT_X_PETS_HS_TOP_BOTTOM, MISSING_CAT_HS,
-    MR_X_CA_HS, PETS_X_FRUIT_HS, SIMPLE_CA_HS
-)
+from ..fixtures import CR
 
 
 class TestHeadersAndSubtotals(TestCase):
 
     def test_headings_econ_blame_one_subtotal(self):
-        cube = CrunchCube(ECON_BLAME_WITH_HS)
+        cube = CrunchCube(CR.ECON_BLAME_WITH_HS)
         expected = [
             'President Obama',
             'Republicans in Congress',
@@ -35,7 +27,7 @@ class TestHeadersAndSubtotals(TestCase):
         self.assertEqual(actual, expected)
 
     def test_headings_econ_blame_one_subtotal_do_not_fetch(self):
-        cube = CrunchCube(ECON_BLAME_WITH_HS)
+        cube = CrunchCube(CR.ECON_BLAME_WITH_HS)
         expected = [
             'President Obama',
             'Republicans in Congress',
@@ -47,7 +39,7 @@ class TestHeadersAndSubtotals(TestCase):
         self.assertEqual(actual, expected)
 
     def test_headings_econ_blame_two_subtotal_without_missing(self):
-        cube = CrunchCube(ECON_BLAME_WITH_HS_MISSING)
+        cube = CrunchCube(CR.ECON_BLAME_WITH_HS_MISSING)
         expected = [
             'President Obama',
             'Republicans in Congress',
@@ -61,7 +53,7 @@ class TestHeadersAndSubtotals(TestCase):
         self.assertEqual(actual, expected)
 
     def test_headings_two_subtotal_without_missing_do_not_fetch(self):
-        cube = CrunchCube(ECON_BLAME_WITH_HS_MISSING)
+        cube = CrunchCube(CR.ECON_BLAME_WITH_HS_MISSING)
         expected = [
             'President Obama',
             'Republicans in Congress',
@@ -73,7 +65,7 @@ class TestHeadersAndSubtotals(TestCase):
         self.assertEqual(actual, expected)
 
     def test_headings_econ_blame_two_subtotal_with_missing(self):
-        cube = CrunchCube(ECON_BLAME_WITH_HS_MISSING)
+        cube = CrunchCube(CR.ECON_BLAME_WITH_HS_MISSING)
         expected = [
             'President Obama',
             'Republicans in Congress',
@@ -92,25 +84,25 @@ class TestHeadersAndSubtotals(TestCase):
         self.assertEqual(actual, expected)
 
     def test_subtotals_as_array_one_transform(self):
-        cube = CrunchCube(ECON_BLAME_WITH_HS)
+        cube = CrunchCube(CR.ECON_BLAME_WITH_HS)
         expected = np.array([285, 396, 681, 242, 6, 68])
         actual = cube.as_array(include_transforms_for_dims=[0])
         np.testing.assert_array_equal(actual, expected)
 
     def test_subtotals_as_array_one_transform_do_not_fetch(self):
-        cube = CrunchCube(ECON_BLAME_WITH_HS)
+        cube = CrunchCube(CR.ECON_BLAME_WITH_HS)
         expected = np.array([285, 396, 242, 6, 68])
         actual = cube.as_array(include_transforms_for_dims=None)
         np.testing.assert_array_equal(actual, expected)
 
     def test_subtotals_as_array_two_transforms_missing_excluded(self):
-        cube = CrunchCube(ECON_BLAME_WITH_HS_MISSING)
+        cube = CrunchCube(CR.ECON_BLAME_WITH_HS_MISSING)
         expected = np.array([285, 396, 681, 242, 6, 68, 74])
         actual = cube.as_array(include_transforms_for_dims=[0])
         np.testing.assert_array_equal(actual, expected)
 
     def test_subtotals_proportions_one_transform(self):
-        cube = CrunchCube(ECON_BLAME_WITH_HS)
+        cube = CrunchCube(CR.ECON_BLAME_WITH_HS)
         expected = np.array([
             .2858576, .3971916, .6830491, .2427282, .0060181, .0682046,
         ])
@@ -118,7 +110,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_subtotals_proportions_one_transform_do_not_fetch(self):
-        cube = CrunchCube(ECON_BLAME_WITH_HS)
+        cube = CrunchCube(CR.ECON_BLAME_WITH_HS)
         expected = np.array([
             .2858576, .3971916, .2427282, .0060181, .0682046,
         ])
@@ -126,7 +118,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_subtotals_proportions_two_transforms_missing_excluded(self):
-        cube = CrunchCube(ECON_BLAME_WITH_HS_MISSING)
+        cube = CrunchCube(CR.ECON_BLAME_WITH_HS_MISSING)
         expected = np.array([
             .2858576,
             .3971916,
@@ -140,7 +132,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_labels_on_2d_cube_with_hs_on_1st_dim(self):
-        cube = CrunchCube(ECON_BLAME_X_IDEOLOGY_ROW_HS)
+        cube = CrunchCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS)
         expected = [[
             'President Obama',
             'Republicans in Congress',
@@ -160,7 +152,7 @@ class TestHeadersAndSubtotals(TestCase):
         self.assertEqual(actual, expected)
 
     def test_labels_on_2d_cube_with_hs_on_both_dim(self):
-        cube = CrunchCube(ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS)
+        cube = CrunchCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS)
         expected = [[
             'President Obama',
             'Republicans in Congress',
@@ -181,7 +173,7 @@ class TestHeadersAndSubtotals(TestCase):
         self.assertEqual(actual, expected)
 
     def test_labels_on_2d_cube_with_hs_on_both_dim_do_not_fetch(self):
-        cube = CrunchCube(ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS)
+        cube = CrunchCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS)
         expected = [[
             'President Obama',
             'Republicans in Congress',
@@ -200,7 +192,7 @@ class TestHeadersAndSubtotals(TestCase):
         self.assertEqual(actual, expected)
 
     def test_subtotals_as_array_2d_cube_with_hs_on_row(self):
-        cube = CrunchCube(ECON_BLAME_X_IDEOLOGY_ROW_HS)
+        cube = CrunchCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS)
         expected = np.array([
             [3, 14, 80, 114, 67, 7],
             [59, 132, 162, 29, 12, 2],
@@ -213,7 +205,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_array_equal(actual, expected)
 
     def test_subtotals_as_array_2d_cube_with_hs_on_col(self):
-        cube = CrunchCube(ECON_BLAME_X_IDEOLOGY_COL_HS)
+        cube = CrunchCube(CR.ECON_BLAME_X_IDEOLOGY_COL_HS)
         expected = np.array([
             [3, 14, 80, 94, 114, 67, 7],
             [59, 132, 162, 294, 29, 12, 2],
@@ -225,7 +217,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_array_equal(actual, expected)
 
     def test_subtotals_as_array_2d_cube_with_hs_on_both_dim(self):
-        cube = CrunchCube(ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS)
+        cube = CrunchCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS)
         expected = np.array([
             [3, 14, 80, 94, 114, 67, 7],
             [59, 132, 162, 294, 29, 12, 2],
@@ -238,7 +230,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_array_equal(actual, expected)
 
     def test_subtotals_as_array_2d_cube_with_hs_on_both_dim_do_not_fetch(self):
-        cube = CrunchCube(ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS)
+        cube = CrunchCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS)
         expected = np.array([
             [3, 14, 80, 114, 67, 7],
             [59, 132, 162, 29, 12, 2],
@@ -250,31 +242,31 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_array_equal(actual, expected)
 
     def test_subtotals_margin_2d_cube_with_hs_on_row_by_col(self):
-        cube = CrunchCube(ECON_BLAME_X_IDEOLOGY_ROW_HS)
+        cube = CrunchCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS)
         expected = np.array([72, 182, 375, 218, 110, 40])
         actual = cube.margin(axis=0, include_transforms_for_dims=[0, 1])
         np.testing.assert_almost_equal(actual, expected)
 
     def test_subtotals_margin_2d_cube_with_hs_on_row_by_row(self):
-        cube = CrunchCube(ECON_BLAME_X_IDEOLOGY_ROW_HS)
+        cube = CrunchCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS)
         expected = np.array([285, 396, 681, 242, 6, 68])
         actual = cube.margin(axis=1, include_transforms_for_dims=[0, 1])
         np.testing.assert_almost_equal(actual, expected)
 
     def test_subtotals_margin_2d_cube_with_hs_on_two_dim_by_col(self):
-        cube = CrunchCube(ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS)
+        cube = CrunchCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS)
         expected = np.array([72, 182, 375, 557, 218, 110, 40])
         actual = cube.margin(axis=0, include_transforms_for_dims=[0, 1])
         np.testing.assert_almost_equal(actual, expected)
 
     def test_subtotals_margin_2d_cube_with_hs_on_two_dim_by_row(self):
-        cube = CrunchCube(ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS)
+        cube = CrunchCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS)
         expected = np.array([285, 396, 681, 242, 6, 68])
         actual = cube.margin(axis=1, include_transforms_for_dims=[0, 1])
         np.testing.assert_almost_equal(actual, expected)
 
     def test_subtotals_proportions_2d_cube_with_hs_on_row_by_cell(self):
-        cube = CrunchCube(ECON_BLAME_X_IDEOLOGY_ROW_HS)
+        cube = CrunchCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS)
         expected = np.array([
             [.00300903, .01404213, .08024072, .11434303, .0672016, .00702106],
             [.05917753, .13239719, .16248746, .02908726, .01203611, .00200602],
@@ -287,7 +279,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_subtotals_proportions_2d_cube_with_hs_on_row_by_col(self):
-        cube = CrunchCube(ECON_BLAME_X_IDEOLOGY_ROW_HS)
+        cube = CrunchCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS)
         expected = np.array([
             [.04166667, .07692308, .21333333, .52293578, .60909091, .175],
             [.81944444, .72527473, .432, .13302752, .10909091, .05],
@@ -300,7 +292,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_subtotals_proportions_2d_cube_with_hs_on_row_by_row(self):
-        cube = CrunchCube(ECON_BLAME_X_IDEOLOGY_ROW_HS)
+        cube = CrunchCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS)
         expected = np.array([
             [.01052632, .04912281, .28070175, .4, .23508772, .0245614],
             [.1489899, .33333333, .40909091, .07323232, .03030303, .00505051],
@@ -313,7 +305,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_subtotals_proportions_2d_cube_with_hs_on_two_dim_by_cell(self):
-        cube = CrunchCube(ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS)
+        cube = CrunchCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS)
         expected = np.array([
             [
                 .00300903,
@@ -374,7 +366,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_ca_labels_with_hs(self):
-        cube = CrunchCube(SIMPLE_CA_HS)
+        cube = CrunchCube(CR.SIMPLE_CA_HS)
         expected = [
             ['ca_subvar_1', 'ca_subvar_2', 'ca_subvar_3'],
             ['a', 'b', 'Test A and B combined', 'c', 'd']
@@ -383,7 +375,7 @@ class TestHeadersAndSubtotals(TestCase):
         self.assertEqual(actual, expected)
 
     def test_ca_as_array_with_hs(self):
-        cube = CrunchCube(SIMPLE_CA_HS)
+        cube = CrunchCube(CR.SIMPLE_CA_HS)
         expected = np.array([
             [3, 3, 6, 0, 0],
             [1, 3, 4, 2, 0],
@@ -393,7 +385,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_array_equal(actual, expected)
 
     def test_ca_proportions_with_hs(self):
-        cube = CrunchCube(SIMPLE_CA_HS)
+        cube = CrunchCube(CR.SIMPLE_CA_HS)
         expected = np.array([
             [.5, .5, 1, 0, 0],
             [.16666667, .5, .66666667, .33333333, 0],
@@ -403,25 +395,25 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_ca_margin_with_hs(self):
-        cube = CrunchCube(SIMPLE_CA_HS)
+        cube = CrunchCube(CR.SIMPLE_CA_HS)
         expected = np.array([6, 6, 6])
         actual = cube.margin(include_transforms_for_dims=[0, 1], axis=1)
         np.testing.assert_almost_equal(actual, expected)
 
     def test_count_unweighted(self):
-        cube = CrunchCube(ADMIT_X_GENDER_WEIGHTED)
+        cube = CrunchCube(CR.ADMIT_X_GENDER_WEIGHTED)
         expected = 4526
         actual = cube.count(weighted=False)
         self.assertEqual(actual, expected)
 
     def test_count_weighted(self):
-        cube = CrunchCube(ADMIT_X_GENDER_WEIGHTED)
+        cube = CrunchCube(CR.ADMIT_X_GENDER_WEIGHTED)
         expected = 4451.955438803242
         actual = cube.count(weighted=True)
         self.assertEqual(actual, expected)
 
     def test_hs_with_anchor_on_zero_position_labels(self):
-        cube = CrunchCube(ECON_US_PROBLEM_X_BIGGER_PROBLEM)
+        cube = CrunchCube(CR.ECON_US_PROBLEM_X_BIGGER_PROBLEM)
         expected = [
             [
                 'Serious net',
@@ -440,7 +432,7 @@ class TestHeadersAndSubtotals(TestCase):
         self.assertEqual(actual, expected)
 
     def test_hs_with_anchor_on_zero_position_as_props_by_col(self):
-        cube = CrunchCube(ECON_US_PROBLEM_X_BIGGER_PROBLEM)
+        cube = CrunchCube(CR.ECON_US_PROBLEM_X_BIGGER_PROBLEM)
         expected = np.array([
             [0.93244626, 0.66023166],
             [0.63664278, 0.23166023],
@@ -453,7 +445,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_hs_with_anchor_on_zero_position_as_props_by_row(self):
-        cube = CrunchCube(ECON_US_PROBLEM_X_BIGGER_PROBLEM)
+        cube = CrunchCube(CR.ECON_US_PROBLEM_X_BIGGER_PROBLEM)
         expected = np.array([
             [0.72705507, 0.27294493],
             [0.83827493, 0.16172507],
@@ -466,7 +458,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_hs_with_anchor_on_zero_position_as_props_by_cell(self):
-        cube = CrunchCube(ECON_US_PROBLEM_X_BIGGER_PROBLEM)
+        cube = CrunchCube(CR.ECON_US_PROBLEM_X_BIGGER_PROBLEM)
         expected = np.array([
             [0.60936455, 0.22876254],
             [0.41605351, 0.08026756],
@@ -480,7 +472,7 @@ class TestHeadersAndSubtotals(TestCase):
 
     def test_subtotals_pvals_2d_cube_with_hs_on_row(self):
         """Ensure that pvals shape is the same as table shape with H%S"""
-        cube = CrunchCube(ECON_BLAME_X_IDEOLOGY_ROW_HS)
+        cube = CrunchCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS)
         expected = np.array([
             [1.92562832e-06, 5.20117283e-12, 8.30737469e-05, 0.00000000e+00,
              1.77635684e-15, 1.13223165e-01],
@@ -497,25 +489,25 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_fruit_hs_top_bottom_labels(self):
-        cube = CrunchCube(FRUIT_HS_TOP_BOTTOM)
+        cube = CrunchCube(CR.FRUIT_HS_TOP_BOTTOM)
         expected = [['TOP', 'rambutan', 'MIDDLE', 'satsuma', 'BOTTOM']]
         actual = cube.labels(include_transforms_for_dims=[0])
         assert actual == expected
 
     def test_fruit_hs_top_bottom_inserted_indices(self):
-        cube = CrunchCube(FRUIT_HS_TOP_BOTTOM)
+        cube = CrunchCube(CR.FRUIT_HS_TOP_BOTTOM)
         expected = [[0, 2, 4]]
         actual = cube.inserted_hs_indices(prune=True)
         assert actual == expected
 
     def test_fruit_hs_top_bottom_counts(self):
-        cube = CrunchCube(FRUIT_HS_TOP_BOTTOM)
+        cube = CrunchCube(CR.FRUIT_HS_TOP_BOTTOM)
         expected = np.array([100, 33, 100, 67, 100])
         actual = cube.as_array(include_transforms_for_dims=[0])
         np.testing.assert_array_equal(actual, expected)
 
     def test_fruit_x_pets_hs_top_bottom_middle_props(self):
-        cube = CrunchCube(FRUIT_X_PETS_HS_TOP_BOTTOM)
+        cube = CrunchCube(CR.FRUIT_X_PETS_HS_TOP_BOTTOM)
         expected = np.array([
             [1., 1., 1.],
             [0.3, 0.35294118, 0.31578947],
@@ -527,7 +519,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_fruit_x_pets_hs_top_bottom_middle_counts(self):
-        cube = CrunchCube(FRUIT_X_PETS_HS_TOP_BOTTOM)
+        cube = CrunchCube(CR.FRUIT_X_PETS_HS_TOP_BOTTOM)
         expected = np.array([
             [40, 34, 38],
             [12, 12, 12],
@@ -539,13 +531,13 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_array_equal(actual, expected)
 
     def test_hs_indices_pruned_cat_x_date(self):
-        cube = CrunchCube(CAT_X_DATE_HS_PRUNE)
+        cube = CrunchCube(CR.CAT_X_DATE_HS_PRUNE)
         expected = [0, 3, 6]
         actual = cube.inserted_hs_indices(prune=True)[0]
         assert actual == expected
 
     def test_hs_indices_pruned_cat_x_num(self):
-        cube = CrunchCube(CAT_X_NUM_HS_PRUNE)
+        cube = CrunchCube(CR.CAT_X_NUM_HS_PRUNE)
         expected = [0, 1, 3]
         actual = cube.inserted_hs_indices(prune=True)[0]
         assert actual == expected
@@ -557,7 +549,7 @@ class TestHeadersAndSubtotals(TestCase):
         assert actual == expected
 
     def test_cat_x_num_counts_pruned_with_hs(self):
-        cube = CrunchCube(CAT_X_NUM_HS_PRUNE)
+        cube = CrunchCube(CR.CAT_X_NUM_HS_PRUNE)
         expected = np.array([
             [0],
             [1],
@@ -570,7 +562,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_array_equal(actual, expected)
 
     def test_cat_x_num_counts_pruned_without_hs(self):
-        cube = CrunchCube(CAT_X_NUM_HS_PRUNE)
+        cube = CrunchCube(CR.CAT_X_NUM_HS_PRUNE)
         expected = np.array([[1]])
         table = cube.as_array(prune=True)
         # Extract only non-masked (pruned) values
@@ -578,7 +570,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_array_equal(actual, expected)
 
     def test_mr_x_cat_hs_counts(self):
-        cube = CrunchCube(PETS_X_FRUIT_HS)
+        cube = CrunchCube(CR.PETS_X_FRUIT_HS)
         expected = np.array([[12, 28, 40],
                              [12, 22, 34],
                              [12, 26, 38]])
@@ -586,7 +578,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_array_equal(actual, expected)
 
     def test_mr_x_cat_hs_props_by_cell(self):
-        cube = CrunchCube(PETS_X_FRUIT_HS)
+        cube = CrunchCube(CR.PETS_X_FRUIT_HS)
         # TODO: Change expectation once the MR cell props are fixed.
         expected = (3, 3)
         actual = cube.proportions(
@@ -595,7 +587,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_array_equal(actual, expected)
 
     def test_mr_x_cat_hs_props_by_row(self):
-        cube = CrunchCube(PETS_X_FRUIT_HS)
+        cube = CrunchCube(CR.PETS_X_FRUIT_HS)
         # TODO: Change expectation once the MR cell props are fixed.
         expected = (3, 3)
         actual = cube.proportions(
@@ -604,7 +596,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_array_equal(actual, expected)
 
     def test_mr_x_cat_hs_props_by_col(self):
-        cube = CrunchCube(PETS_X_FRUIT_HS)
+        cube = CrunchCube(CR.PETS_X_FRUIT_HS)
         # TODO: Change expectation once the MR cell props are fixed.
         expected = (3, 3)
         actual = cube.proportions(
@@ -613,7 +605,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_array_equal(actual, expected)
 
     def test_missing_cat_hs_labels(self):
-        cube = CrunchCube(MISSING_CAT_HS)
+        cube = CrunchCube(CR.MISSING_CAT_HS)
 
         # Don't expect the missing category "Non voters"
         expected = [[
@@ -629,7 +621,7 @@ class TestHeadersAndSubtotals(TestCase):
         assert actual == expected
 
     def test_ca_x_cat_counts_with_hs(self):
-        cube = CrunchCube(CA_X_CAT_HS)
+        cube = CrunchCube(CR.CA_X_CAT_HS)
 
         # Assert counts without H&S
         expected = np.array([
@@ -672,7 +664,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_array_equal(actual, expected)
 
     def test_ca_x_cat_margin_with_hs(self):
-        cube = CrunchCube(CA_X_CAT_HS)
+        cube = CrunchCube(CR.CA_X_CAT_HS)
 
         # Assert counts without H&S
         expected = np.array([
@@ -684,7 +676,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_array_equal(actual, expected)
 
     def test_cat_x_items_x_cats_margin_with_hs(self):
-        cube = CrunchCube(CAT_X_ITEMS_X_CATS_HS)
+        cube = CrunchCube(CR.CAT_X_ITEMS_X_CATS_HS)
 
         # Assert counts without H&S
         expected = np.array([
@@ -708,7 +700,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_array_equal(actual, expected)
 
     def test_cat_x_mr_weighted_with_hs(self):
-        cube = CrunchCube(CAT_X_MR_WEIGHTED_HS)
+        cube = CrunchCube(CR.CAT_X_MR_WEIGHTED_HS)
         expected = np.array([
             [
                 [0.05865163, 0.087823, 0.07486857, 0.0735683, 0., 0.08148267],
@@ -762,7 +754,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_mr_x_ca_props_by_row_without_hs(self):
-        cube = CrunchCube(MR_X_CA_HS)
+        cube = CrunchCube(CR.MR_X_CA_HS)
         expected = np.array([
             [[0.66666667, 0.33333333, 0.00000000, 0.00000000],
              [0.33333333, 0.33333333, 0.33333333, 0.00000000],
@@ -783,7 +775,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_mr_x_ca_props_by_row_with_hs(self):
-        cube = CrunchCube(MR_X_CA_HS)
+        cube = CrunchCube(CR.MR_X_CA_HS)
         expected = np.array([
             [[0.66666667, 0.33333333, 1.00000000, 0.00000000, 0.00000000,
               0.00000000, 1.00000000],
@@ -812,7 +804,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_ca_cat_x_mr_x_ca_subvar_counts_pruning(self):
-        cube = CrunchCube(CA_CAT_X_MR_X_CA_SUBVAR_HS)
+        cube = CrunchCube(CR.CA_CAT_X_MR_X_CA_SUBVAR_HS)
         expected = np.array([
             [False, False, True],
             [False, False, True],
@@ -823,7 +815,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_array_equal(actual, expected)
 
     def test_ca_cat_x_mr_x_ca_subvar_proportions_pruning(self):
-        cube = CrunchCube(CA_CAT_X_MR_X_CA_SUBVAR_HS)
+        cube = CrunchCube(CR.CA_CAT_X_MR_X_CA_SUBVAR_HS)
         expected = np.array([
             [False, False, True],
             [False, False, True],
@@ -839,7 +831,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_array_equal(actual, expected)
 
     def test_ca_x_mr_counts_pruning(self):
-        cube = CrunchCube(CA_X_MR_HS)
+        cube = CrunchCube(CR.CA_X_MR_HS)
         actual = cube.as_array(prune=True)[0].mask
         expected = np.array([
             [False, False, False, True],
@@ -851,7 +843,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_array_equal(actual, expected)
 
     def test_ca_x_mr_proportions_pruning(self):
-        cube = CrunchCube(CA_X_MR_HS)
+        cube = CrunchCube(CR.CA_X_MR_HS)
         expected = np.array([
             [False, False, False, True],
             [False, False, False, True],
