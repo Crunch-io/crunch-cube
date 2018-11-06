@@ -103,7 +103,6 @@ class DescribeIntegrated_Measures(object):
 
         assert means is None
 
-    @pytest.mark.xfail(reason='WIP', strict=True)
     def it_provides_the_means_missing_count_when_means_are_available(self):
         measures = _Measures(CR.CAT_X_CAT_MEAN_WGTD, None)
         missing_count = measures.missing_count

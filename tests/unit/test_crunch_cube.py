@@ -372,6 +372,27 @@ class Describe_Measures(object):
         return property_mock(request, _Measures, 'means')
 
 
+class Describe_MeanMeasure(object):
+
+    def it_knows_the_missing_count(self, missing_count_fixture):
+        cube_dict, expected_value = missing_count_fixture
+        mean_measure = _MeanMeasure(cube_dict, None)
+
+        missing_count = mean_measure.missing_count
+
+        assert missing_count == expected_value
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture(params=[
+        ({'result': {'measures': {'mean': {}}}}, 0),
+        ({'result': {'measures': {'mean': {'n_missing': 42}}}}, 42),
+    ])
+    def missing_count_fixture(self, request):
+        cube_dict, expected_value = request.param
+        return cube_dict, expected_value
+
+
 # pylint: disable=invalid-name, no-self-use, protected-access
 @patch('cr.cube.crunch_cube.CrunchCube.get_slices', lambda x: None)
 class TestCrunchCube(TestCase):

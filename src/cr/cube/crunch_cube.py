@@ -1488,4 +1488,6 @@ class _MeanMeasure(_BaseMeasure):
     @lazyproperty
     def missing_count(self):
         """numeric representing count of missing rows reflected in response."""
-        raise NotImplementedError
+        return (
+            self._cube_dict['result']['measures']['mean'].get('n_missing', 0)
+        )
