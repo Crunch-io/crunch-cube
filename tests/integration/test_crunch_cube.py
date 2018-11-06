@@ -133,7 +133,6 @@ class DescribeIntegrated_Measures(object):
         unweighted_n = measures.unweighted_n
         assert unweighted_n == 20
 
-    @pytest.mark.xfail(reason='WIP', strict=True)
     def it_provides_access_to_the_weighted_count_measure(
             self, wgtd_counts_fixture):
         cube_dict, expected_type_name = wgtd_counts_fixture

@@ -8,7 +8,8 @@ import pytest
 from unittest import TestCase
 
 from cr.cube.crunch_cube import (
-    CrunchCube, _MeanMeasure, _Measures, _UnweightedCountMeasure
+    CrunchCube, _MeanMeasure, _Measures, _UnweightedCountMeasure,
+    _WeightedCountMeasure
 )
 from cr.cube.dimension import AllDimensions, _ApparentDimensions, Dimension
 from cr.cube.enum import DIMENSION_TYPE as DT
@@ -358,6 +359,32 @@ class Describe_Measures(object):
 
         assert unweighted_n == 121
 
+    def it_provides_access_to_the_weighted_count_measure(
+            self, is_weighted_prop_, _WeightedCountMeasure_,
+            weighted_count_measure_, all_dimensions_):
+        cube_dict = {'cube': 'dict'}
+        is_weighted_prop_.return_value = True
+        _WeightedCountMeasure_.return_value = weighted_count_measure_
+        measures = _Measures(cube_dict, all_dimensions_)
+
+        weighted_counts = measures.weighted_counts
+
+        _WeightedCountMeasure_.assert_called_once_with(
+            cube_dict, all_dimensions_
+        )
+        assert weighted_counts is weighted_count_measure_
+
+    def but_it_returns_unweighted_count_measure_when_cube_is_not_weighted(
+            self, is_weighted_prop_, unweighted_counts_prop_,
+            unweighted_count_measure_):
+        is_weighted_prop_.return_value = False
+        unweighted_counts_prop_.return_value = unweighted_count_measure_
+        measures = _Measures(None, None)
+
+        weighted_counts = measures.weighted_counts
+
+        assert weighted_counts is unweighted_count_measure_
+
     # fixtures -------------------------------------------------------
 
     @pytest.fixture(params=[
@@ -408,6 +435,10 @@ class Describe_Measures(object):
         return instance_mock(request, AllDimensions)
 
     @pytest.fixture
+    def is_weighted_prop_(self, request):
+        return property_mock(request, _Measures, 'is_weighted')
+
+    @pytest.fixture
     def _MeanMeasure_(self, request):
         return class_mock(request, 'cr.cube.crunch_cube._MeanMeasure')
 
@@ -428,6 +459,20 @@ class Describe_Measures(object):
     @pytest.fixture
     def unweighted_count_measure_(self, request):
         return instance_mock(request, _UnweightedCountMeasure)
+
+    @pytest.fixture
+    def unweighted_counts_prop_(self, request):
+        return property_mock(request, _Measures, 'unweighted_counts')
+
+    @pytest.fixture
+    def _WeightedCountMeasure_(self, request):
+        return class_mock(
+            request, 'cr.cube.crunch_cube._WeightedCountMeasure'
+        )
+
+    @pytest.fixture
+    def weighted_count_measure_(self, request):
+        return instance_mock(request, _WeightedCountMeasure)
 
 
 class Describe_MeanMeasure(object):

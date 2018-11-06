@@ -1513,6 +1513,18 @@ class _Measures(object):
         """int count of actual rows represented by query response."""
         return self._cube_dict['result']['n']
 
+    @lazyproperty
+    def weighted_counts(self):
+        """_WeightedCountMeasure object for this cube.
+
+        This object provides access to weighted counts for this cube, if
+        available. If the cube response is not weighted, the
+        _UnweightedCountMeasure object for this cube is returned.
+        """
+        if not self.is_weighted:
+            return self.unweighted_counts
+        return _WeightedCountMeasure(self._cube_dict, self._all_dimensions)
+
 
 class _BaseMeasure(object):
     """Base class for measure objects."""
@@ -1535,3 +1547,7 @@ class _MeanMeasure(_BaseMeasure):
 
 class _UnweightedCountMeasure(_BaseMeasure):
     """Unweighted counts for cube."""
+
+
+class _WeightedCountMeasure(_BaseMeasure):
+    """Weighted counts for cube."""
