@@ -201,7 +201,6 @@ class DescribeIntegrated_Measures(object):
 
 class DescribeIntegrated_MeanMeasure(object):
 
-    @pytest.mark.xfail(reason='WIP', strict=True)
     def it_provides_access_to_its_raw_cube_array(self):
         cube_dict = CR.CAT_X_CAT_MEAN_WGTD
         cube = CrunchCube(cube_dict)

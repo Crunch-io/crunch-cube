@@ -547,6 +547,18 @@ class Describe_MeanMeasure(object):
 
         assert missing_count == expected_value
 
+    def it_parses_the_flat_values_to_help(self):
+        cube_dict = {
+            'result': {'measures': {'mean': {
+                'data': [1, 2, {'?': -1}, 4]
+            }}}
+        }
+        mean_measure = _MeanMeasure(cube_dict, None)
+
+        flat_values = mean_measure._flat_values
+
+        assert flat_values == (1, 2, np.nan, 4)
+
     # fixtures -------------------------------------------------------
 
     @pytest.fixture(params=[

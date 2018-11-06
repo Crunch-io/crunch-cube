@@ -1574,6 +1574,19 @@ class _MeanMeasure(_BaseMeasure):
             self._cube_dict['result']['measures']['mean'].get('n_missing', 0)
         )
 
+    @lazyproperty
+    def _flat_values(self):
+        """Return tuple of mean values as found in cube response.
+
+        Mean data may include missing items represented by a dict like
+        {'?': -1} in the cube response. These are replaced by np.nan in the
+        returned value.
+        """
+        return tuple(
+            np.nan if type(x) is dict else x
+            for x in self._cube_dict['result']['measures']['mean']['data']
+        )
+
 
 class _UnweightedCountMeasure(_BaseMeasure):
     """Unweighted counts for cube."""
