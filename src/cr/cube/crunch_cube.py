@@ -371,6 +371,27 @@ class CrunchCube(object):
             den = den.reshape(den.shape[1:])
         return den
 
+    def _denominator(self, axis, weighted, include_missing,
+                     include_transforms_for_dims):
+        table = self._data(weighted=weighted, margin=True)
+        new_axis = self._adjust_axis(axis)
+        index = tuple(
+            None if i in new_axis else slice(None)
+            for i, _ in enumerate(table.shape)
+        )
+
+        # Calculate denominator. Only include those H&S dimensions, across
+        # which we DON'T sum. These H&S are needed because of the shape, when
+        # dividing. Those across dims which are summed across MUST NOT be
+        # included, because they would change the result.
+        hs_dims = self._hs_dims_for_den(include_transforms_for_dims, axis)
+        den = self._apply_missings_and_insertions(
+            table, hs_dims, include_missing=include_missing
+        )
+        den = np.sum(den, axis=new_axis)[index]
+
+        return den
+
     @lazyproperty
     def missing(self):
         """Get missing count of a cube."""
@@ -565,24 +586,13 @@ class CrunchCube(object):
             ])
         """
 
-        table = self._measure(weighted).raw_cube_array
-        new_axis = self._adjust_axis(axis)
-        index = tuple(
-            None if i in new_axis else slice(None)
-            for i, _ in enumerate(table.shape)
-        )
-
-        # Calculate denominator. Only include those H&S dimensions, across
-        # which we DON'T sum. These H&S are needed because of the shape, when
-        # dividing. Those across dims which are summed across MUST NOT be
-        # included, because they would change the result.
-        hs_dims = self._hs_dims_for_den(include_transforms_for_dims, axis)
-        den = self._apply_missings_and_insertions(table, hs_dims)
-        den = np.sum(den, axis=new_axis)[index]
-
         # Calculate numerator from table (include all H&S dimensions).
         num = self._apply_missings_and_insertions(
-            table, include_transforms_for_dims
+            self._measure(weighted).raw_cube_array,
+            include_transforms_for_dims,
+        )
+        den = self._denominator(
+            axis, weighted, False, include_transforms_for_dims,
         )
 
         res = self._drop_mr_cat_dims(num / den)
