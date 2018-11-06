@@ -142,7 +142,6 @@ class DescribeIntegrated_Measures(object):
 
         assert type(weighted_counts).__name__ == expected_type_name
 
-    @pytest.mark.xfail(reason='WIP', strict=True)
     def it_knows_the_weighted_n(self, wgtd_n_fixture):
         cube_dict, expected_value = wgtd_n_fixture
         measures = _Measures(cube_dict, None)

@@ -1525,6 +1525,15 @@ class _Measures(object):
             return self.unweighted_counts
         return _WeightedCountMeasure(self._cube_dict, self._all_dimensions)
 
+    @lazyproperty
+    def weighted_n(self):
+        """float count of returned rows adjusted for weighting."""
+        if not self.is_weighted:
+            return float(self.unweighted_n)
+        return float(
+            sum(self._cube_dict['result']['measures']['count']['data'])
+        )
+
 
 class _BaseMeasure(object):
     """Base class for measure objects."""

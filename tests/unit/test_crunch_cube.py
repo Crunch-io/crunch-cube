@@ -385,6 +385,14 @@ class Describe_Measures(object):
 
         assert weighted_counts is unweighted_count_measure_
 
+    def it_knows_the_weighted_n(self, weighted_n_fixture):
+        cube_dict, is_weighted, expected_value = weighted_n_fixture
+        measures = _Measures(cube_dict, None)
+
+        weighted_n = measures.weighted_n
+
+        assert weighted_n == expected_value
+
     # fixtures -------------------------------------------------------
 
     @pytest.fixture(params=[
@@ -428,6 +436,17 @@ class Describe_Measures(object):
         cube_dict, expected_value = request.param
         return cube_dict, expected_value
 
+    @pytest.fixture(params=[
+        ({}, False, 24.0),
+        ({'result': {'measures': {'count': {'data': [7, 9]}}}}, True, 16.0),
+    ])
+    def weighted_n_fixture(self, request, unweighted_n_prop_,
+                           is_weighted_prop_):
+        cube_dict, is_weighted, expected_value = request.param
+        is_weighted_prop_.return_value = is_weighted
+        unweighted_n_prop_.return_value = 24
+        return cube_dict, is_weighted, expected_value
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -463,6 +482,10 @@ class Describe_Measures(object):
     @pytest.fixture
     def unweighted_counts_prop_(self, request):
         return property_mock(request, _Measures, 'unweighted_counts')
+
+    @pytest.fixture
+    def unweighted_n_prop_(self, request):
+        return property_mock(request, _Measures, 'unweighted_n')
 
     @pytest.fixture
     def _WeightedCountMeasure_(self, request):
