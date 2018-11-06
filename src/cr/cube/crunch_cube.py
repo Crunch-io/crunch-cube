@@ -1158,6 +1158,23 @@ class CrunchCube(object):
 
         return pruned_ind
 
+    def _measure(self, weighted):
+        """_BaseMeasure subclass representing primary measure for this cube.
+
+        If the cube response includes a means measure, the return value is
+        means. Otherwise it is counts, with the choice between weighted or
+        unweighted determined by *weighted*.
+
+        Note that weighted counts are provided on an "as-available" basis.
+        When *weighted* is True and the cube response is not weighted,
+        unweighted counts are returned.
+        """
+        return (
+            self._measures.means if self._measures.means is not None else
+            self._measures.weighted_counts if weighted else
+            self._measures.unweighted_counts
+        )
+
     @lazyproperty
     def _measures(self):
         """_Measures object for this cube.

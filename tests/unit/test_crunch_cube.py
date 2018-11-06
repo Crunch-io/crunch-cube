@@ -188,6 +188,16 @@ class DescribeCrunchCube(object):
             axis_is_marginable = cube._is_axis_allowed(axis)
             assert axis_is_marginable is expected_value
 
+    def it_selects_the_best_match_measure_to_help(
+            self, measure_fixture, _measures_prop_):
+        weighted, measures_, expected_measure_ = measure_fixture
+        _measures_prop_.return_value = measures_
+        cube = CrunchCube(None)
+
+        measure = cube._measure(weighted)
+
+        assert measure is expected_measure_
+
     def it_provides_access_to_its_Measures_object_to_help(
             self, _all_dimensions_prop_, all_dimensions_, _Measures_,
             measures_):
@@ -327,6 +337,34 @@ class DescribeCrunchCube(object):
         return mr_dim_indices, expected_value
 
     @pytest.fixture(params=[
+        (True, False, False, '_MeanMeasure'),
+        (True, False, True, '_MeanMeasure'),
+        (True, True, False, '_MeanMeasure'),
+        (True, True, True, '_MeanMeasure'),
+        (False, False, False, '_UnweightedCountMeasure'),
+        (False, False, True, '_UnweightedCountMeasure'),
+        (False, True, False, '_UnweightedCountMeasure'),
+        (False, True, True, '_WeightedCountMeasure'),
+    ])
+    def measure_fixture(self, request, measures_, weighted_count_measure_,
+                        unweighted_count_measure_, mean_measure_):
+        has_means, weighted, is_weighted, expected_type = request.param
+        # --weighted indicates the caller has requested that weighted values
+        # --be used by passing (weighted=True) to method.
+        measures_.means = mean_measure_ if has_means else None
+        measures_.weighted_counts = (
+            weighted_count_measure_ if is_weighted else
+            unweighted_count_measure_
+        )
+        measures_.unweighted_counts = unweighted_count_measure_
+        expected_measure = {
+            '_MeanMeasure': mean_measure_,
+            '_UnweightedCountMeasure': unweighted_count_measure_,
+            '_WeightedCountMeasure': weighted_count_measure_
+        }[expected_type]
+        return weighted, measures_, expected_measure
+
+    @pytest.fixture(params=[
         (True, True),
         (False, False),
     ])
@@ -379,6 +417,14 @@ class DescribeCrunchCube(object):
     @pytest.fixture
     def mr_dim_ind_prop_(self, request):
         return property_mock(request, CrunchCube, 'mr_dim_ind')
+
+    @pytest.fixture
+    def unweighted_count_measure_(self, request):
+        return instance_mock(request, _UnweightedCountMeasure)
+
+    @pytest.fixture
+    def weighted_count_measure_(self, request):
+        return instance_mock(request, _WeightedCountMeasure)
 
 
 class Describe_Measures(object):
