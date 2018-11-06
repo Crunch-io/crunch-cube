@@ -116,6 +116,15 @@ class DescribeCrunchCube(object):
 
         assert missing == 36
 
+    def it_knows_its_population_fraction(self, _measures_prop_, measures_):
+        _measures_prop_.return_value = measures_
+        measures_.population_fraction = 0.42
+        cube = CrunchCube(None)
+
+        population_fraction = cube.population_fraction
+
+        assert population_fraction == 0.42
+
     def it_can_adjust_an_axis_to_help(
             self, request, adjust_fixture, dimensions_prop_):
         dimension_types, axis_cases = adjust_fixture
@@ -712,22 +721,6 @@ class TestCrunchCube(TestCase):
         with self.assertRaises(ValueError):
             CrunchCube._calculate_constraints_sum(Mock(), Mock(), 2)
 
-    def test_cube_counts(self):
-        cube = CrunchCube({'result': {}})
-        assert cube.counts == (None, None)
-
-        fake_count = Mock()
-        cube = CrunchCube({'result': {'unfiltered': fake_count}})
-        assert cube.counts == (fake_count, None)
-
-        cube = CrunchCube({'result': {'filtered': fake_count}})
-        assert cube.counts == (None, fake_count)
-
-        cube = CrunchCube(
-            {'result': {'unfiltered': fake_count, 'filtered': fake_count}}
-        )
-        assert cube.counts == (fake_count, fake_count)
-
     @patch('cr.cube.crunch_cube.CrunchCube.dimensions', None)
     def test_name_with_no_dimensions(self):
         fake_cube = {}
@@ -867,39 +860,3 @@ class TestCrunchCube(TestCase):
         mock_inserted_hs_indices.assert_not_called()
         actual = cc._inserted_dim_inds([0], 0)
         mock_inserted_hs_indices.assert_called_once()
-
-    def test_population_fraction(self):
-        # Assert fraction is 1 when none of the counts are specified
-        cc = CrunchCube(None)
-        actual = cc.population_fraction
-        assert actual == 1
-
-        # Assert fraction is 1 when only some counts are specified
-        cc = CrunchCube({'result': {'unfiltered': {'unweighted_n': 10}}})
-        assert cc.population_fraction == 1
-        cc = CrunchCube({'result': {'unfiltered': {'weighted_n': 10}}})
-        assert cc.population_fraction == 1
-        cc = CrunchCube({'result': {'unfiltered': {
-            'weighted_n': 10, 'unweighted_n': 10}}})
-        assert cc.population_fraction == 1
-        cc = CrunchCube({'result': {'filtered': {
-            'weighted_n': 10, 'unweighted_n': 10}}})
-        assert cc.population_fraction == 1
-
-        # Assert fraction is calculated when correct counts are specified
-        cc = CrunchCube({
-            'result': {
-                'filtered': {'weighted_n': 5},
-                'unfiltered': {'weighted_n': 10},
-            }
-        })
-        assert cc.population_fraction == 0.5
-
-        # Assert fraction is NaN, when denominator is zero
-        cc = CrunchCube({
-            'result': {
-                'filtered': {'weighted_n': 5},
-                'unfiltered': {'weighted_n': 0},
-            }
-        })
-        assert np.isnan(cc.population_fraction)

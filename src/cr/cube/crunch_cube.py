@@ -138,12 +138,6 @@ class CrunchCube(object):
         )
 
     @lazyproperty
-    def counts(self):
-        unfiltered = self._cube_dict['result'].get('unfiltered')
-        filtered = self._cube_dict['result'].get('filtered')
-        return unfiltered, filtered
-
-    @lazyproperty
     def description(self):
         """Return the description of the cube."""
         if not self.dimensions:
@@ -514,15 +508,14 @@ class CrunchCube(object):
 
     @lazyproperty
     def population_fraction(self):
-        try:
-            unfiltered, filtered = self.counts
-            num = filtered.get('weighted_n')
-            den = unfiltered.get('weighted_n')
-            return num / den
-        except ZeroDivisionError:
-            return np.nan
-        except Exception:
-            return 1
+        """The filtered/unfiltered ratio for cube response.
+
+        This value is required for properly calculating population on a cube
+        where a filter has been applied. Returns 1.0 for an unfiltered cube.
+        Returns `np.nan` if the unfiltered count is zero, which would
+        otherwise result in a divide-by-zero error.
+        """
+        return self._measures.population_fraction
 
     def proportions(self, axis=None, weighted=True,
                     include_transforms_for_dims=None, include_missing=False,
