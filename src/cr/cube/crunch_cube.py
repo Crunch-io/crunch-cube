@@ -191,11 +191,8 @@ class CrunchCube(object):
 
     @lazyproperty
     def has_means(self):
-        """True if cube contains means data."""
-        measures = self._cube_dict.get('result', {}).get('measures')
-        if not measures:
-            return False
-        return measures.get('mean', None) is not None
+        """True if cube includes a means measure."""
+        return self._measures.means is not None
 
     @lazyproperty
     def has_mr(self):

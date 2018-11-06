@@ -59,9 +59,12 @@ class DescribeCrunchCube(object):
 
         assert dim_types == (DT.CAT, DT.CA_SUBVAR, DT.MR, DT.MR_CAT)
 
-    def it_knows_when_it_contains_means_data(self, has_means_fixture):
-        cube_response, expected_value = has_means_fixture
-        cube = CrunchCube(cube_response)
+    def it_knows_when_it_contains_means_data(
+            self, has_means_fixture, _measures_prop_, measures_):
+        means, expected_value = has_means_fixture
+        _measures_prop_.return_value = measures_
+        measures_.means = means
+        cube = CrunchCube(None)
 
         has_means = cube.has_means
 
@@ -276,13 +279,13 @@ class DescribeCrunchCube(object):
         return weighted, expected_value
 
     @pytest.fixture(params=[
-        ({'result': {}}, False),
-        ({'result': {'measures': {}}}, False),
-        ({'result': {'measures': {'mean': {}}}}, True),
+        (True, True),
+        (False, False),
     ])
-    def has_means_fixture(self, request):
-        cube_response, expected_value = request.param
-        return cube_response, expected_value
+    def has_means_fixture(self, request, mean_measure_):
+        has_mean_measure, expected_value = request.param
+        means = mean_measure_ if has_mean_measure else None
+        return means, expected_value
 
     @pytest.fixture(params=[
         (None, False),
@@ -319,6 +322,10 @@ class DescribeCrunchCube(object):
     @pytest.fixture
     def _is_axis_allowed_(self, request):
         return method_mock(request, CrunchCube, '_is_axis_allowed')
+
+    @pytest.fixture
+    def mean_measure_(self, request):
+        return instance_mock(request, _MeanMeasure)
 
     @pytest.fixture
     def _Measures_(self, request):
@@ -811,12 +818,6 @@ class TestCrunchCube(TestCase):
     def test_is_weighted_invoked(self):
         cube = CrunchCube(None)
         actual = cube.is_weighted
-        assert actual == 'fake_val'
-
-    @patch('cr.cube.crunch_cube.CrunchCube.has_means', 'fake_val')
-    def test_has_means_invoked(self):
-        cube = CrunchCube(None)
-        actual = cube.has_means
         assert actual == 'fake_val'
 
     def test_margin_pruned_indices_without_insertions(self):
