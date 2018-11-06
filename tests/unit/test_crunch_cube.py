@@ -8,8 +8,8 @@ import pytest
 from unittest import TestCase
 
 from cr.cube.crunch_cube import (
-    CrunchCube, _MeanMeasure, _Measures, _UnweightedCountMeasure,
-    _WeightedCountMeasure
+    _BaseMeasure, CrunchCube, _MeanMeasure, _Measures,
+    _UnweightedCountMeasure, _WeightedCountMeasure
 )
 from cr.cube.dimension import AllDimensions, _ApparentDimensions, Dimension
 from cr.cube.enum import DIMENSION_TYPE as DT
@@ -496,6 +496,45 @@ class Describe_Measures(object):
     @pytest.fixture
     def weighted_count_measure_(self, request):
         return instance_mock(request, _WeightedCountMeasure)
+
+
+class Describe_BaseMeasure(object):
+
+    def it_provides_access_to_the_raw_cube_array(
+            self, _flat_values_prop_, all_dimensions_):
+        _flat_values_prop_.return_value = (
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 2, 4, 6, 8, 0, 1, 3, 5, 7
+        )
+        all_dimensions_.shape = (2, 3, 3)
+        base_measure = _BaseMeasure(None, all_dimensions_)
+
+        raw_cube_array = base_measure.raw_cube_array
+
+        np.testing.assert_array_equal(
+            raw_cube_array,
+            np.array([[[1, 2, 3], [4, 5, 6], [7, 8, 9]],
+                      [[2, 4, 6], [8, 0, 1], [3, 5, 7]]])
+        )
+        assert raw_cube_array.flags.writeable is False
+
+    def it_requires_each_subclass_to_implement_flat_values(self):
+        base_measure = _BaseMeasure(None, None)
+
+        with pytest.raises(NotImplementedError) as pt_exc_info:
+            base_measure._flat_values
+
+        exception = pt_exc_info.value
+        assert str(exception) == 'must be implemented by each subclass'
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def all_dimensions_(self, request):
+        return instance_mock(request, AllDimensions)
+
+    @pytest.fixture
+    def _flat_values_prop_(self, request):
+        return property_mock(request, _BaseMeasure, '_flat_values')
 
 
 class Describe_MeanMeasure(object):

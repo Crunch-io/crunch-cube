@@ -1542,6 +1542,27 @@ class _BaseMeasure(object):
         self._cube_dict = cube_dict
         self._all_dimensions = all_dimensions
 
+    @lazyproperty
+    def raw_cube_array(self):
+        """Return read-only ndarray of measure values from cube-response.
+
+        The shape of the ndarray mirrors the shape of the (raw) cube
+        response. Specifically, it includes values for missing elements, any
+        MR_CAT dimensions, and any prunable rows and columns.
+        """
+        array = np.array(self._flat_values).reshape(self._all_dimensions.shape)
+        # ---must be read-only to avoid hard-to-find bugs---
+        array.flags.writeable = False
+        return array
+
+    @lazyproperty
+    def _flat_values(self):
+        """Return tuple of mean values as found in cube response.
+
+        This property must be implemented by each subclass.
+        """
+        raise NotImplementedError('must be implemented by each subclass')
+
 
 class _MeanMeasure(_BaseMeasure):
     """Statistical mean values from a cube-response."""
