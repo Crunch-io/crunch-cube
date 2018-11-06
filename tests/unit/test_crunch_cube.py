@@ -188,6 +188,16 @@ class DescribeCrunchCube(object):
             axis_is_marginable = cube._is_axis_allowed(axis)
             assert axis_is_marginable is expected_value
 
+    def it_selects_the_best_match_counts_measure_to_help(
+            self, counts_fixture, _measures_prop_):
+        weighted, measures_, expected_measure_ = counts_fixture
+        _measures_prop_.return_value = measures_
+        cube = CrunchCube(None)
+
+        measure = cube._counts(weighted)
+
+        assert measure is expected_measure_
+
     def it_selects_the_best_match_measure_to_help(
             self, measure_fixture, _measures_prop_):
         weighted, measures_, expected_measure_ = measure_fixture
@@ -316,6 +326,28 @@ class DescribeCrunchCube(object):
         measures_.unweighted_n = 42
         measures_.weighted_n = 48.732
         return weighted, expected_value
+
+    @pytest.fixture(params=[
+        (False, False, '_UnweightedCountMeasure'),
+        (False, True, '_UnweightedCountMeasure'),
+        (True, False, '_UnweightedCountMeasure'),
+        (True, True, '_WeightedCountMeasure'),
+    ])
+    def counts_fixture(self, request, measures_, weighted_count_measure_,
+                       unweighted_count_measure_):
+        weighted, is_weighted, expected_type = request.param
+        # --weighted indicates the caller has requested that weighted values
+        # --be used by passing (weighted=True) to method.
+        measures_.weighted_counts = (
+            weighted_count_measure_ if is_weighted else
+            unweighted_count_measure_
+        )
+        measures_.unweighted_counts = unweighted_count_measure_
+        expected_measure = {
+            '_UnweightedCountMeasure': unweighted_count_measure_,
+            '_WeightedCountMeasure': weighted_count_measure_
+        }[expected_type]
+        return weighted, measures_, expected_measure
 
     @pytest.fixture(params=[
         (True, True),

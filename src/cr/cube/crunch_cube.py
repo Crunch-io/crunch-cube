@@ -940,6 +940,19 @@ class CrunchCube(object):
     def _col_direction_axis(self):
         return self.ndim - 2
 
+    def _counts(self, weighted):
+        """Return _BaseMeasure subclass for *weighted* counts.
+
+        The return value is a _WeightedCountMeasure object if *weighted* is
+        True and the cube response is weighted. Otherwise it is an
+        _UnweightedCountMeasure object. Any means measure that may be present
+        is not considered. Contrast with `._measure()` below.
+        """
+        return (
+            self._measures.weighted_counts if weighted else
+            self._measures.unweighted_counts
+        )
+
     @staticmethod
     def _create_mask(res, row_prune_inds, col_prune_inds):
         mask_rows = np.repeat(
