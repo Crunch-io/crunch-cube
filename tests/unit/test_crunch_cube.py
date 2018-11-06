@@ -350,6 +350,14 @@ class Describe_Measures(object):
         )
         assert unweighted_counts is unweighted_count_measure_
 
+    def it_knows_the_unweighted_n(self):
+        cube_dict = {'result': {'n': 121}}
+        measures = _Measures(cube_dict, None)
+
+        unweighted_n = measures.unweighted_n
+
+        assert unweighted_n == 121
+
     # fixtures -------------------------------------------------------
 
     @pytest.fixture(params=[

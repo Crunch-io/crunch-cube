@@ -128,7 +128,6 @@ class DescribeIntegrated_Measures(object):
 
         assert type(unweighted_counts).__name__ == '_UnweightedCountMeasure'
 
-    @pytest.mark.xfail(reason='WIP', strict=True)
     def it_knows_the_unweighted_n(self):
         measures = _Measures(CR.CAT_X_CAT, None)
         unweighted_n = measures.unweighted_n

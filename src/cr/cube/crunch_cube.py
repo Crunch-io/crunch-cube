@@ -1508,6 +1508,11 @@ class _Measures(object):
         """
         return _UnweightedCountMeasure(self._cube_dict, self._all_dimensions)
 
+    @lazyproperty
+    def unweighted_n(self):
+        """int count of actual rows represented by query response."""
+        return self._cube_dict['result']['n']
+
 
 class _BaseMeasure(object):
     """Base class for measure objects."""
