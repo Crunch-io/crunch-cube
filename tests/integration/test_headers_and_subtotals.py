@@ -400,18 +400,6 @@ class TestHeadersAndSubtotals(TestCase):
         actual = cube.margin(include_transforms_for_dims=[0, 1], axis=1)
         np.testing.assert_almost_equal(actual, expected)
 
-    def test_count_unweighted(self):
-        cube = CrunchCube(CR.ADMIT_X_GENDER_WEIGHTED)
-        expected = 4526
-        actual = cube.count(weighted=False)
-        self.assertEqual(actual, expected)
-
-    def test_count_weighted(self):
-        cube = CrunchCube(CR.ADMIT_X_GENDER_WEIGHTED)
-        expected = 4451.955438803242
-        actual = cube.count(weighted=True)
-        self.assertEqual(actual, expected)
-
     def test_hs_with_anchor_on_zero_position_labels(self):
         cube = CrunchCube(CR.ECON_US_PROBLEM_X_BIGGER_PROBLEM)
         expected = [

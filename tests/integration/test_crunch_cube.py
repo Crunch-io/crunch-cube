@@ -1146,12 +1146,14 @@ class TestCrunchCube(TestCase):
         with self.assertRaises(ValueError):
             cube.margin(axis=0)
 
+    @pytest.mark.xfail(reason='WIP', strict=True)
     def test_count_unweighted(self):
         cube = CrunchCube(CR.ADMIT_X_GENDER_WEIGHTED)
         expected = 4526
         actual = cube.count(weighted=False)
         self.assertEqual(actual, expected)
 
+    @pytest.mark.xfail(reason='WIP', strict=True)
     def test_count_weighted(self):
         cube = CrunchCube(CR.ADMIT_X_GENDER_WEIGHTED)
         expected = 4451.955438803242

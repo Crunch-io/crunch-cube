@@ -27,6 +27,14 @@ class DescribeCrunchCube(object):
         repr_ = repr(cube)
         assert repr_.startswith('<cr.cube.crunch_cube.CrunchCube object at 0x')
 
+    def it_knows_its_row_count(self, count_fixture):
+        weighted, expected_value = count_fixture
+        cube = CrunchCube(None)
+
+        count = cube.count(weighted)
+
+        assert count == expected_value
+
     def it_provides_access_to_its_dimensions(
             self, _all_dimensions_prop_, all_dimensions_,
             apparent_dimensions_):
@@ -244,6 +252,17 @@ class DescribeCrunchCube(object):
         return dimension_types, axis_cases
 
     @pytest.fixture(params=[
+        (False, 42),
+        (True, 48.732),
+    ])
+    def count_fixture(self, request, _measures_prop_, measures_):
+        weighted, expected_value = request.param
+        _measures_prop_.return_value = measures_
+        measures_.unweighted_n = 42
+        measures_.weighted_n = 48.732
+        return weighted, expected_value
+
+    @pytest.fixture(params=[
         ({'result': {}}, False),
         ({'result': {'measures': {}}}, False),
         ({'result': {'measures': {'mean': {}}}}, True),
@@ -287,6 +306,14 @@ class DescribeCrunchCube(object):
     @pytest.fixture
     def _is_axis_allowed_(self, request):
         return method_mock(request, CrunchCube, '_is_axis_allowed')
+
+    @pytest.fixture
+    def measures_(self, request):
+        return instance_mock(request, _Measures)
+
+    @pytest.fixture
+    def _measures_prop_(self, request):
+        return property_mock(request, CrunchCube, '_measures')
 
     @pytest.fixture
     def mr_dim_ind_prop_(self, request):
@@ -761,78 +788,6 @@ class TestCrunchCube(TestCase):
         mock_cube = {'filter_names': Mock()}
         expected = mock_cube['filter_names']
         actual = CrunchCube(mock_cube).filter_annotation
-        self.assertEqual(actual, expected)
-
-    @patch('cr.cube.crunch_cube.CrunchCube.is_weighted', False)
-    def test_n_unweighted_and_has_no_weight(self):
-        unweighted_count = Mock()
-        weighted_counts = Mock()
-        actual = CrunchCube({
-            'result': {
-                'n': unweighted_count,
-                'measures': {
-                    'count': {
-                        'data': weighted_counts,
-                    },
-                },
-            },
-        }).count(weighted=False)
-
-        expected = unweighted_count
-        self.assertEqual(actual, expected)
-
-    @patch('cr.cube.crunch_cube.CrunchCube.is_weighted', True)
-    def test_n_unweighted_and_has_weight(self):
-        unweighted_count = Mock()
-        weighted_counts = Mock()
-        actual = CrunchCube({
-            'result': {
-                'n': unweighted_count,
-                'measures': {
-                    'count': {
-                        'data': weighted_counts,
-                    },
-                },
-            },
-        }).count(weighted=False)
-
-        expected = unweighted_count
-        self.assertEqual(actual, expected)
-
-    @patch('cr.cube.crunch_cube.CrunchCube.is_weighted', False)
-    def test_n_weighted_and_has_no_weight(self):
-        unweighted_count = Mock()
-        weighted_counts = Mock()
-        actual = CrunchCube({
-            'result': {
-                'n': unweighted_count,
-                'measures': {
-                    'count': {
-                        'data': weighted_counts,
-                    },
-                },
-            },
-        }).count(weighted=True)
-
-        expected = unweighted_count
-        self.assertEqual(actual, expected)
-
-    @patch('cr.cube.crunch_cube.CrunchCube.is_weighted', True)
-    def test_n_weighted_and_has_weight(self):
-        unweighted_count = Mock()
-        weighted_counts = [1, 2, 3, 4]
-        actual = CrunchCube({
-            'result': {
-                'n': unweighted_count,
-                'measures': {
-                    'count': {
-                        'data': weighted_counts,
-                    },
-                },
-            },
-        }).count(weighted=True)
-
-        expected = sum(weighted_counts)
         self.assertEqual(actual, expected)
 
     @patch('cr.cube.crunch_cube.CrunchCube.is_weighted', 'fake_val')

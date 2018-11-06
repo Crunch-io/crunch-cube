@@ -131,14 +131,11 @@ class CrunchCube(object):
         return self._drop_mr_cat_dims(array)
 
     def count(self, weighted=True):
-        """Get cube's count with automatic weighted/unweighted selection."""
-        if weighted and self.is_weighted:
-            return sum(
-                self._cube_dict['result']['measures']
-                    .get('count', {})
-                    .get('data')
-            )
-        return self._cube_dict['result']['n']
+        """Return numberic count of rows considered for cube response."""
+        return (
+            self._measures.weighted_n if weighted
+            else self._measures.unweighted_n
+        )
 
     @lazyproperty
     def counts(self):
@@ -1186,6 +1183,15 @@ class CrunchCube(object):
             pruned_ind = np.logical_and(pruned_ind, ~ind_inserted)
 
         return pruned_ind
+
+    @lazyproperty
+    def _measures(self):
+        """_Measures object for this cube.
+
+        Provides access to unweighted counts, and weighted counts and/or means
+        when available.
+        """
+        raise NotImplementedError
 
     def _prune_3d_body(self, res, transforms):
         """Return masked array where mask indicates pruned vectors.
