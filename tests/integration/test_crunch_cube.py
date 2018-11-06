@@ -79,7 +79,6 @@ class DescribeIntegratedCrunchCube(object):
 
 class DescribeIntegrated_Measures(object):
 
-    @pytest.mark.xfail(reason='WIP', strict=True)
     def it_knows_when_its_measures_are_weighted(self, is_weighted_fixture):
         cube_dict, expected_value = is_weighted_fixture
         measures = _Measures(cube_dict, None)

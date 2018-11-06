@@ -7,7 +7,7 @@ import pytest
 
 from unittest import TestCase
 
-from cr.cube.crunch_cube import CrunchCube
+from cr.cube.crunch_cube import CrunchCube, _Measures
 from cr.cube.dimension import AllDimensions, _ApparentDimensions, Dimension
 from cr.cube.enum import DIMENSION_TYPE as DT
 
@@ -288,6 +288,34 @@ class DescribeCrunchCube(object):
     @pytest.fixture
     def mr_dim_ind_prop_(self, request):
         return property_mock(request, CrunchCube, 'mr_dim_ind')
+
+
+class Describe_Measures(object):
+
+    def it_knows_when_a_measure_is_weighted(self, is_weighted_fixture):
+        cube_dict, expected_value = is_weighted_fixture
+        measures = _Measures(cube_dict, None)
+
+        is_weighted = measures.is_weighted
+
+        assert is_weighted is expected_value
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture(params=[
+        ({'query': {'weight': 'https://x'}}, True),
+        ({'weight_var': 'weight'}, True),
+        ({'weight_url': 'https://y'}, True),
+        ({'result': {
+            'counts': [1, 2, 3],
+            'measures': {'count': {'data': [2, 4, 6]}}}}, True),
+        ({'result': {
+            'counts': [1, 2, 3],
+            'measures': {'count': {'data': [1, 2, 3]}}}}, False),
+    ])
+    def is_weighted_fixture(self, request):
+        cube_dict, expected_value = request.param
+        return cube_dict, expected_value
 
 
 # pylint: disable=invalid-name, no-self-use, protected-access

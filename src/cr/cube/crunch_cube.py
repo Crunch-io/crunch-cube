@@ -1423,3 +1423,29 @@ class CrunchCube(object):
 
 class _Measures(object):
     """Provides access to measures contained in cube response."""
+
+    def __init__(self, cube_dict, all_dimensions):
+        self._cube_dict = cube_dict
+        self._all_dimensions = all_dimensions
+
+    @lazyproperty
+    def is_weighted(self):
+        """True if weights have been applied to the measure(s) for this cube.
+
+        Unweighted counts are available for all cubes. Weighting applies to
+        any other measures provided by the cube.
+        """
+        cube_dict = self._cube_dict
+        if cube_dict.get('query', {}).get('weight') is not None:
+            return True
+        if cube_dict.get('weight_var') is not None:
+            return True
+        if cube_dict.get('weight_url') is not None:
+            return True
+        unweighted_counts = cube_dict['result']['counts']
+        count_data = (
+            cube_dict['result']['measures'].get('count', {}).get('data')
+        )
+        if unweighted_counts != count_data:
+            return True
+        return False
