@@ -1591,6 +1591,11 @@ class _MeanMeasure(_BaseMeasure):
 class _UnweightedCountMeasure(_BaseMeasure):
     """Unweighted counts for cube."""
 
+    @lazyproperty
+    def _flat_values(self):
+        """tuple of int counts before weighting."""
+        return tuple(self._cube_dict['result']['counts'])
+
 
 class _WeightedCountMeasure(_BaseMeasure):
     """Weighted counts for cube."""

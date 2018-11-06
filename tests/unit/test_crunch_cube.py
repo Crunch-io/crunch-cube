@@ -570,6 +570,17 @@ class Describe_MeanMeasure(object):
         return cube_dict, expected_value
 
 
+class Describe_UnweightedCountMeasure(object):
+
+    def it_parses_the_flat_values_to_help(self):
+        cube_dict = {'result': {'counts': [1, 2, 3, 4]}}
+        unweighted_count_measure = _UnweightedCountMeasure(cube_dict, None)
+
+        flat_values = unweighted_count_measure._flat_values
+
+        assert flat_values == (1, 2, 3, 4)
+
+
 # pylint: disable=invalid-name, no-self-use, protected-access
 @patch('cr.cube.crunch_cube.CrunchCube.get_slices', lambda x: None)
 class TestCrunchCube(TestCase):
