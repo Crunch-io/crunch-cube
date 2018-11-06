@@ -1599,3 +1599,8 @@ class _UnweightedCountMeasure(_BaseMeasure):
 
 class _WeightedCountMeasure(_BaseMeasure):
     """Weighted counts for cube."""
+
+    @lazyproperty
+    def _flat_values(self):
+        """tuple of numeric counts after weighting."""
+        return tuple(self._cube_dict['result']['measures']['count']['data'])

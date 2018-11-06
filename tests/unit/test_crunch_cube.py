@@ -581,6 +581,21 @@ class Describe_UnweightedCountMeasure(object):
         assert flat_values == (1, 2, 3, 4)
 
 
+class Describe_WeightedCountMeasure(object):
+
+    def it_parses_the_flat_values_to_help(self):
+        cube_dict = {
+            'result': {'measures': {'count': {
+                'data': [1.1, 2.2, 3.3, 4.4]
+            }}}
+        }
+        weighted_count_measure = _WeightedCountMeasure(cube_dict, None)
+
+        flat_values = weighted_count_measure._flat_values
+
+        assert flat_values == (1.1, 2.2, 3.3, 4.4)
+
+
 # pylint: disable=invalid-name, no-self-use, protected-access
 @patch('cr.cube.crunch_cube.CrunchCube.get_slices', lambda x: None)
 class TestCrunchCube(TestCase):

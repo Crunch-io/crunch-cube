@@ -240,7 +240,6 @@ class DescribeIntegrated_UnweightedCountMeasure(object):
 
 class DescribeIntegrated_WeightedCountMeasure(object):
 
-    @pytest.mark.xfail(reason='WIP', strict=True)
     def it_provides_access_to_its_raw_cube_array(self):
         cube_dict = CR.CAT_X_CAT_WGTD
         cube = CrunchCube(cube_dict)
