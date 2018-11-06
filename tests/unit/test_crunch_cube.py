@@ -107,6 +107,15 @@ class DescribeCrunchCube(object):
 
         assert is_weighted is expected_value
 
+    def it_knows_its_missing_count(self, _measures_prop_, measures_):
+        _measures_prop_.return_value = measures_
+        measures_.missing_count = 36
+        cube = CrunchCube(None)
+
+        missing = cube.missing
+
+        assert missing == 36
+
     def it_can_adjust_an_axis_to_help(
             self, request, adjust_fixture, dimensions_prop_):
         dimension_types, axis_cases = adjust_fixture
@@ -753,14 +762,6 @@ class TestCrunchCube(TestCase):
         actual = cube.description
         self.assertEqual(actual, expected)
 
-    @patch('cr.cube.crunch_cube.CrunchCube.has_means', False)
-    def test_missing_when_there_are_none(self):
-        fake_cube = {'result': {}}
-        cube = CrunchCube(fake_cube)
-        expected = None
-        actual = cube.missing
-        self.assertEqual(actual, expected)
-
     def test_fix_valid_indices_subsequent(self):
         initial_indices = [[1, 2, 3]]
         insertion_index = 2
@@ -809,22 +810,6 @@ class TestCrunchCube(TestCase):
         mock_dims.__get__ = Mock(return_value=dims)
         expected = dims[0].description
         actual = CrunchCube(None).description
-        self.assertEqual(actual, expected)
-
-    @patch('cr.cube.crunch_cube.CrunchCube.has_means', False)
-    def test_missing(self):
-        missing = Mock()
-        fake_cube = {'result': {'missing': missing}}
-        expected = missing
-        actual = CrunchCube(fake_cube).missing
-        self.assertEqual(actual, expected)
-
-    @patch('cr.cube.crunch_cube.CrunchCube.has_means', True)
-    def test_missing_with_means(self):
-        missing = Mock()
-        fake_cube = {'result': {'measures': {'mean': {'n_missing': missing}}}}
-        expected = missing
-        actual = CrunchCube(fake_cube).missing
         self.assertEqual(actual, expected)
 
     def test_test_filter_annotation(self):

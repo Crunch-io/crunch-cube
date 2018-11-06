@@ -396,9 +396,7 @@ class CrunchCube(object):
     @lazyproperty
     def missing(self):
         """Get missing count of a cube."""
-        if self.has_means:
-            return self._cube_dict['result']['measures']['mean']['n_missing']
-        return self._cube_dict['result'].get('missing')
+        return self._measures.missing_count
 
     @lazyproperty
     def mr_dim_ind(self):
