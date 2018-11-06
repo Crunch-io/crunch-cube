@@ -2,7 +2,7 @@
 
 """Provides the CrunchCube class.
 
-CrunchCube is the main API class for manipulating the Crunch.io JSON cube
+CrunchCube is the main API class for manipulating Crunch.io JSON cube
 responses.
 """
 
@@ -1449,3 +1449,31 @@ class _Measures(object):
         if unweighted_counts != count_data:
             return True
         return False
+
+    @lazyproperty
+    def means(self):
+        """_MeanMeasure object providing access to means values.
+
+        None when the cube response does not contain a mean measure.
+        """
+        mean_measure_dict = (
+            self._cube_dict
+                .get('result', {})
+                .get('measures', {})
+                .get('mean')
+        )
+        if mean_measure_dict is None:
+            return None
+        return _MeanMeasure(self._cube_dict, self._all_dimensions)
+
+
+class _BaseMeasure(object):
+    """Base class for measure objects."""
+
+    def __init__(self, cube_dict, all_dimensions):
+        self._cube_dict = cube_dict
+        self._all_dimensions = all_dimensions
+
+
+class _MeanMeasure(_BaseMeasure):
+    """Statistical mean values from a cube-response."""

@@ -87,7 +87,6 @@ class DescribeIntegrated_Measures(object):
 
         assert is_weighted == expected_value
 
-    @pytest.mark.xfail(reason='WIP', strict=True)
     def it_provides_access_to_the_mean_measure(self):
         cube_dict = CR.CAT_X_CAT_MEAN_WGTD
         measures = _Measures(cube_dict, None)
@@ -96,7 +95,6 @@ class DescribeIntegrated_Measures(object):
 
         assert type(means).__name__ == '_MeanMeasure'
 
-    @pytest.mark.xfail(reason='WIP', strict=True)
     def but_only_when_the_cube_response_contains_means(self):
         cube_dict = CR.CAT_X_CAT
         measures = _Measures(cube_dict, None)

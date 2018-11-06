@@ -7,7 +7,7 @@ import pytest
 
 from unittest import TestCase
 
-from cr.cube.crunch_cube import CrunchCube, _Measures
+from cr.cube.crunch_cube import CrunchCube, _MeanMeasure, _Measures
 from cr.cube.dimension import AllDimensions, _ApparentDimensions, Dimension
 from cr.cube.enum import DIMENSION_TYPE as DT
 
@@ -300,6 +300,22 @@ class Describe_Measures(object):
 
         assert is_weighted is expected_value
 
+    def it_provides_access_to_the_means_measure(
+            self, _MeanMeasure_, mean_measure_, all_dimensions_):
+        cube_dict = {'result': {'measures': {'mean': {}}}}
+        _MeanMeasure_.return_value = mean_measure_
+        measures = _Measures(cube_dict, all_dimensions_)
+
+        means = measures.means
+
+        _MeanMeasure_.assert_called_once_with(cube_dict, all_dimensions_)
+        assert means is mean_measure_
+
+    def but_only_when_the_cube_has_a_mean_measure(self):
+        measures = _Measures({'result': {'measures': {}}}, None)
+        means = measures.means
+        assert means is None
+
     # fixtures -------------------------------------------------------
 
     @pytest.fixture(params=[
@@ -316,6 +332,20 @@ class Describe_Measures(object):
     def is_weighted_fixture(self, request):
         cube_dict, expected_value = request.param
         return cube_dict, expected_value
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def all_dimensions_(self, request):
+        return instance_mock(request, AllDimensions)
+
+    @pytest.fixture
+    def _MeanMeasure_(self, request):
+        return class_mock(request, 'cr.cube.crunch_cube._MeanMeasure')
+
+    @pytest.fixture
+    def mean_measure_(self, request):
+        return instance_mock(request, _MeanMeasure)
 
 
 # pylint: disable=invalid-name, no-self-use, protected-access
