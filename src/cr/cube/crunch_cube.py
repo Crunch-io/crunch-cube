@@ -1191,7 +1191,7 @@ class CrunchCube(object):
         Provides access to unweighted counts, and weighted counts and/or means
         when available.
         """
-        raise NotImplementedError
+        return _Measures(self._cube_dict, self._all_dimensions)
 
     def _prune_3d_body(self, res, transforms):
         """Return masked array where mask indicates pruned vectors.

@@ -156,6 +156,19 @@ class DescribeCrunchCube(object):
             axis_is_marginable = cube._is_axis_allowed(axis)
             assert axis_is_marginable is expected_value
 
+    def it_provides_access_to_its_Measures_object_to_help(
+            self, _all_dimensions_prop_, all_dimensions_, _Measures_,
+            measures_):
+        cube_dict = {'cube': 'dict'}
+        _all_dimensions_prop_.return_value = all_dimensions_
+        _Measures_.return_value = measures_
+        cube = CrunchCube(cube_dict)
+
+        measures = cube._measures
+
+        _Measures_.assert_called_once_with(cube_dict, all_dimensions_)
+        assert measures is measures_
+
     # fixtures -------------------------------------------------------
 
     @pytest.fixture(params=[
@@ -306,6 +319,10 @@ class DescribeCrunchCube(object):
     @pytest.fixture
     def _is_axis_allowed_(self, request):
         return method_mock(request, CrunchCube, '_is_axis_allowed')
+
+    @pytest.fixture
+    def _Measures_(self, request):
+        return class_mock(request, 'cr.cube.crunch_cube._Measures')
 
     @pytest.fixture
     def measures_(self, request):
