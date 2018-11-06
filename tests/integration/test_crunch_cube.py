@@ -2,7 +2,10 @@ from unittest import TestCase
 import numpy as np
 import pytest
 
-from cr.cube.crunch_cube import CrunchCube, _Measures
+from cr.cube.crunch_cube import (
+    CrunchCube, _MeanMeasure, _Measures, _UnweightedCountMeasure,
+    _WeightedCountMeasure
+)
 from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.measures.index import Index
 from cr.cube.util import compress_pruned
@@ -194,6 +197,67 @@ class DescribeIntegrated_Measures(object):
     def wgtd_n_fixture(self, request):
         cube_dict, expected_type = request.param
         return cube_dict, expected_type
+
+
+class DescribeIntegrated_MeanMeasure(object):
+
+    @pytest.mark.xfail(reason='WIP', strict=True)
+    def it_provides_access_to_its_raw_cube_array(self):
+        cube_dict = CR.CAT_X_CAT_MEAN_WGTD
+        cube = CrunchCube(cube_dict)
+        measure = _MeanMeasure(cube_dict, cube._all_dimensions)
+
+        raw_cube_array = measure.raw_cube_array
+
+        np.testing.assert_array_almost_equal(
+            raw_cube_array,
+            [[52.78205128, 49.90697674, np.nan, np.nan, np.nan],
+             [50.43654822, 48.20100503, np.nan, np.nan, np.nan],
+             [51.56435644, 47.60283688, np.nan, np.nan, np.nan],
+             [58.0, 29.0, np.nan, np.nan, np.nan],
+             [37.53846154, 39.45238095, np.nan, np.nan, np.nan],
+             [36.66666667, np.nan, np.nan, np.nan, np.nan],
+             [np.nan, np.nan, np.nan, np.nan, np.nan],
+             [np.nan, np.nan, np.nan, np.nan, np.nan]]
+        )
+
+
+class DescribeIntegrated_UnweightedCountMeasure(object):
+
+    @pytest.mark.xfail(reason='WIP', strict=True)
+    def it_provides_access_to_its_raw_cube_array(self):
+        cube_dict = CR.CAT_X_CAT
+        cube = CrunchCube(cube_dict)
+        measure = _UnweightedCountMeasure(cube_dict, cube._all_dimensions)
+
+        raw_cube_array = measure.raw_cube_array
+
+        np.testing.assert_array_almost_equal(
+            raw_cube_array,
+            [[5, 3, 2, 0],
+             [5, 2, 3, 0],
+             [0, 0, 0, 0]]
+        )
+
+
+class DescribeIntegrated_WeightedCountMeasure(object):
+
+    @pytest.mark.xfail(reason='WIP', strict=True)
+    def it_provides_access_to_its_raw_cube_array(self):
+        cube_dict = CR.CAT_X_CAT_WGTD
+        cube = CrunchCube(cube_dict)
+        measure = _WeightedCountMeasure(cube_dict, cube._all_dimensions)
+
+        raw_cube_array = measure.raw_cube_array
+
+        np.testing.assert_array_almost_equal(
+            raw_cube_array,
+            [[32.9, 87.6, 176.2, 117.5, 72.1, 13.4, 0.0, 0.0, 0.0],
+             [38.8, 94.1, 199.0128, 102.9, 38.8305, 26.2135, 0.0, 0.0, 0.0],
+             [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+             [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+             [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]
+        )
 
 
 class TestCrunchCube(TestCase):
