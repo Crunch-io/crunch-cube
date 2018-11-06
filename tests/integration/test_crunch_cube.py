@@ -121,7 +121,6 @@ class DescribeIntegrated_Measures(object):
 
         assert population_fraction == expected_value
 
-    @pytest.mark.xfail(reason='WIP', strict=True)
     def it_provides_access_to_the_unweighted_count_measure(self):
         measures = _Measures(None, None)
 

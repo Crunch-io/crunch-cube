@@ -7,7 +7,9 @@ import pytest
 
 from unittest import TestCase
 
-from cr.cube.crunch_cube import CrunchCube, _MeanMeasure, _Measures
+from cr.cube.crunch_cube import (
+    CrunchCube, _MeanMeasure, _Measures, _UnweightedCountMeasure
+)
 from cr.cube.dimension import AllDimensions, _ApparentDimensions, Dimension
 from cr.cube.enum import DIMENSION_TYPE as DT
 
@@ -334,6 +336,20 @@ class Describe_Measures(object):
         # ---works for np.nan, which doesn't equal itself---
         assert population_fraction in (expected_value,)
 
+    def it_provides_access_to_the_unweighted_count_measure(
+            self, _UnweightedCountMeasure_, unweighted_count_measure_,
+            all_dimensions_):
+        cube_dict = {'cube': 'dict'}
+        _UnweightedCountMeasure_.return_value = unweighted_count_measure_
+        measures = _Measures(cube_dict, all_dimensions_)
+
+        unweighted_counts = measures.unweighted_counts
+
+        _UnweightedCountMeasure_.assert_called_once_with(
+            cube_dict, all_dimensions_
+        )
+        assert unweighted_counts is unweighted_count_measure_
+
     # fixtures -------------------------------------------------------
 
     @pytest.fixture(params=[
@@ -394,6 +410,16 @@ class Describe_Measures(object):
     @pytest.fixture
     def means_prop_(self, request):
         return property_mock(request, _Measures, 'means')
+
+    @pytest.fixture
+    def _UnweightedCountMeasure_(self, request):
+        return class_mock(
+            request, 'cr.cube.crunch_cube._UnweightedCountMeasure'
+        )
+
+    @pytest.fixture
+    def unweighted_count_measure_(self, request):
+        return instance_mock(request, _UnweightedCountMeasure)
 
 
 class Describe_MeanMeasure(object):

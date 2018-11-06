@@ -1499,6 +1499,15 @@ class _Measures(object):
         except Exception:
             return 1.0
 
+    @lazyproperty
+    def unweighted_counts(self):
+        """_UnweightedCountMeasure object for this cube.
+
+        This object provides access to unweighted counts for this cube,
+        whether or not the cube contains weighted counts.
+        """
+        return _UnweightedCountMeasure(self._cube_dict, self._all_dimensions)
+
 
 class _BaseMeasure(object):
     """Base class for measure objects."""
@@ -1517,3 +1526,7 @@ class _MeanMeasure(_BaseMeasure):
         return (
             self._cube_dict['result']['measures']['mean'].get('n_missing', 0)
         )
+
+
+class _UnweightedCountMeasure(_BaseMeasure):
+    """Unweighted counts for cube."""
