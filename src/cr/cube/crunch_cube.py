@@ -329,7 +329,7 @@ class CrunchCube(object):
                 axis = [axis]
             return [dim for dim in hs_dims if dim not in axis]
 
-        table = self._data(weighted=weighted, margin=True)
+        table = self._counts(weighted).raw_cube_array
         new_axis = self._adjust_axis(axis)
         index = tuple(
             None if i in new_axis else slice(None)
@@ -587,7 +587,7 @@ class CrunchCube(object):
                 axis = [axis]
             return [dim for dim in hs_dims if dim not in axis]
 
-        table = self._data(weighted)
+        table = self._measure(weighted).raw_cube_array
         new_axis = self._adjust_axis(axis)
         index = tuple(
             None if i in new_axis else slice(None)
@@ -981,17 +981,6 @@ class CrunchCube(object):
                 '(str) or dict.' % type(self._cube_response_arg).__name__
             )
 
-    def _data(self, weighted, margin=False):
-        """Get the data in non-flattened shape.
-
-        Converts the flattened shape (original response) into non-flattened
-        shape (count of elements per cube dimension). E.g. for a CAT x CAT
-        cube, with 2 categories in each dimension (variable), we end up with
-        a ndarray of shape (2, 2).
-        """
-        values = self._flat_values(weighted, margin)
-        return np.array(values).reshape(self._shape)
-
     def _drop_mr_cat_dims(self, array, fix_valids=False):
         """Return ndarray reflecting *array* with MR_CAT dims dropped.
 
@@ -1054,25 +1043,6 @@ class CrunchCube(object):
         indices = np.insert(indices, slice_index, insertion_index + 1)
         valid_indices[dim] = indices.tolist()
         return valid_indices
-
-    def _flat_values(self, weighted, margin=False):
-        """Return list of measure values as found in cube response.
-
-        If *weighted* is True, weighted counts are returned if present in the
-        cube. Otherwise, unweighted counts are returned. If *margin* is True,
-        counts are returned even if mean values are present, which may be
-        preferred for example when calculating a margin.
-        """
-        values = self._cube_dict['result']['counts']
-        if self.has_means and not margin:
-            mean = self._cube_dict['result']['measures'].get('mean', {})
-            values = mean.get('data', values)
-        elif weighted and self.is_weighted:
-            count = self._cube_dict['result']['measures'].get('count', {})
-            values = count.get('data', values)
-        values = [(val if not type(val) is dict else np.nan)
-                  for val in values]
-        return values
 
     def _inserted_dim_inds(self, transform_dims, axis):
         dim_ind = axis if self.ndim < 3 else axis + 1
@@ -1385,10 +1355,6 @@ class CrunchCube(object):
             axis=axis, weighted=False,
             include_transforms_for_dims=hs_dims,
         )
-
-    @lazyproperty
-    def _shape(self):
-        return tuple([dim.shape for dim in self._all_dimensions])
 
     def _update_result(self, result, insertions, dimension_index,
                        valid_indices):
