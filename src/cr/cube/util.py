@@ -179,7 +179,7 @@ def lru_cache(maxsize=100):
         queue_appendleft, queue_pop = queue.appendleft, queue.pop
 
         @functools.wraps(user_function)
-        def wrapper(*args, **kwds):
+        def wrapper(*args, **kwds):  # pragma: no cover
             # cache key records both positional and keyword args
             key = args
             if kwds:
