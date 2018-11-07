@@ -1,0 +1,1542 @@
+{
+    "element": "shoji:view",
+    "self": "https://app.crunch.io/api/datasets/8b8c438f5f1445a58a649f30ca48be19/cube/?filter=%5B%5D&query=%7B%22dimensions%22:%5B%7B%22each%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2F8b8c438f5f1445a58a649f30ca48be19%2Fvariables%2F000120%2F%22%7D,%7B%22function%22:%22as_selected%22,%22args%22:%5B%7B%22variable%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2F8b8c438f5f1445a58a649f30ca48be19%2Fvariables%2F000120%2F%22%7D%5D%7D,%7B%22each%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2F8b8c438f5f1445a58a649f30ca48be19%2Fvariables%2F000228%2F%22%7D,%7B%22function%22:%22as_selected%22,%22args%22:%5B%7B%22variable%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2F8b8c438f5f1445a58a649f30ca48be19%2Fvariables%2F000228%2F%22%7D%5D%7D%5D,%22measures%22:%7B%22count%22:%7B%22function%22:%22cube_count%22,%22args%22:%5B%5D%7D%7D,%22weight%22:null%7D",
+    "value": {
+        "query": {
+            "dimensions": [
+                {
+                    "each": "https://app.crunch.io/api/datasets/8b8c438f5f1445a58a649f30ca48be19/variables/000120/"
+                },
+                {
+                    "args": [
+                        {
+                            "variable": "https://app.crunch.io/api/datasets/8b8c438f5f1445a58a649f30ca48be19/variables/000120/"
+                        }
+                    ],
+                    "function": "as_selected"
+                },
+                {
+                    "each": "https://app.crunch.io/api/datasets/8b8c438f5f1445a58a649f30ca48be19/variables/000228/"
+                },
+                {
+                    "args": [
+                        {
+                            "variable": "https://app.crunch.io/api/datasets/8b8c438f5f1445a58a649f30ca48be19/variables/000228/"
+                        }
+                    ],
+                    "function": "as_selected"
+                }
+            ],
+            "measures": {
+                "count": {
+                    "args": [],
+                    "function": "cube_count"
+                }
+            },
+            "weight": null
+        },
+        "query_environment": {
+            "filter": []
+        },
+        "result": {
+            "counts": [
+                83,
+                137,
+                69,
+                165,
+                55,
+                69,
+                112,
+                108,
+                69,
+                179,
+                41,
+                69,
+                24,
+                196,
+                69,
+                34,
+                186,
+                69,
+                0,
+                220,
+                69,
+                8,
+                10,
+                6,
+                14,
+                4,
+                6,
+                9,
+                9,
+                6,
+                16,
+                2,
+                6,
+                2,
+                16,
+                6,
+                3,
+                15,
+                6,
+                0,
+                18,
+                6,
+                265,
+                292,
+                423,
+                423,
+                134,
+                423,
+                223,
+                334,
+                423,
+                465,
+                92,
+                423,
+                83,
+                474,
+                423,
+                81,
+                476,
+                423,
+                0,
+                557,
+                423,
+                12,
+                23,
+                11,
+                24,
+                11,
+                11,
+                23,
+                12,
+                11,
+                27,
+                8,
+                11,
+                4,
+                31,
+                11,
+                2,
+                33,
+                11,
+                0,
+                35,
+                11,
+                79,
+                124,
+                64,
+                155,
+                48,
+                64,
+                98,
+                105,
+                64,
+                168,
+                35,
+                64,
+                22,
+                181,
+                64,
+                35,
+                168,
+                64,
+                0,
+                203,
+                64,
+                265,
+                292,
+                423,
+                423,
+                134,
+                423,
+                223,
+                334,
+                423,
+                465,
+                92,
+                423,
+                83,
+                474,
+                423,
+                81,
+                476,
+                423,
+                0,
+                557,
+                423,
+                4,
+                8,
+                2,
+                9,
+                3,
+                2,
+                7,
+                5,
+                2,
+                9,
+                3,
+                2,
+                2,
+                10,
+                2,
+                1,
+                11,
+                2,
+                0,
+                12,
+                2,
+                87,
+                139,
+                73,
+                170,
+                56,
+                73,
+                114,
+                112,
+                73,
+                186,
+                40,
+                73,
+                24,
+                202,
+                73,
+                36,
+                190,
+                73,
+                0,
+                226,
+                73,
+                265,
+                292,
+                423,
+                423,
+                134,
+                423,
+                223,
+                334,
+                423,
+                465,
+                92,
+                423,
+                83,
+                474,
+                423,
+                81,
+                476,
+                423,
+                0,
+                557,
+                423,
+                5,
+                7,
+                1,
+                9,
+                3,
+                1,
+                5,
+                7,
+                1,
+                8,
+                4,
+                1,
+                2,
+                10,
+                1,
+                2,
+                10,
+                1,
+                0,
+                12,
+                1,
+                86,
+                140,
+                74,
+                170,
+                56,
+                74,
+                116,
+                110,
+                74,
+                187,
+                39,
+                74,
+                24,
+                202,
+                74,
+                35,
+                191,
+                74,
+                0,
+                226,
+                74,
+                265,
+                292,
+                423,
+                423,
+                134,
+                423,
+                223,
+                334,
+                423,
+                465,
+                92,
+                423,
+                83,
+                474,
+                423,
+                81,
+                476,
+                423,
+                0,
+                557,
+                423,
+                3,
+                3,
+                0,
+                5,
+                1,
+                0,
+                4,
+                2,
+                0,
+                5,
+                1,
+                0,
+                2,
+                4,
+                0,
+                0,
+                6,
+                0,
+                0,
+                6,
+                0,
+                88,
+                144,
+                75,
+                174,
+                58,
+                75,
+                117,
+                115,
+                75,
+                190,
+                42,
+                75,
+                24,
+                208,
+                75,
+                37,
+                195,
+                75,
+                0,
+                232,
+                75,
+                265,
+                292,
+                423,
+                423,
+                134,
+                423,
+                223,
+                334,
+                423,
+                465,
+                92,
+                423,
+                83,
+                474,
+                423,
+                81,
+                476,
+                423,
+                0,
+                557,
+                423,
+                4,
+                4,
+                3,
+                6,
+                2,
+                3,
+                3,
+                5,
+                3,
+                8,
+                0,
+                3,
+                2,
+                6,
+                3,
+                4,
+                4,
+                3,
+                0,
+                8,
+                3,
+                87,
+                143,
+                72,
+                173,
+                57,
+                72,
+                118,
+                112,
+                72,
+                187,
+                43,
+                72,
+                24,
+                206,
+                72,
+                33,
+                197,
+                72,
+                0,
+                230,
+                72,
+                265,
+                292,
+                423,
+                423,
+                134,
+                423,
+                223,
+                334,
+                423,
+                465,
+                92,
+                423,
+                83,
+                474,
+                423,
+                81,
+                476,
+                423,
+                0,
+                557,
+                423
+            ],
+            "dimensions": [
+                {
+                    "derived": true,
+                    "references": {
+                        "alias": "Q2_RECOGNITION",
+                        "description": "\u00bfY a trav\u00e9s de qu\u00e9 plataformas recuerdas haber visto este anuncio? Selecciona todas las opciones que recuerdes",
+                        "name": "Q2_RECOGNITION",
+                        "subreferences": [
+                            {
+                                "alias": "Q2_RECOGNITION_1",
+                                "name": "Televisi\u00f3n/Radio"
+                            },
+                            {
+                                "alias": "Q2_RECOGNITION_2",
+                                "name": "Redes sociales"
+                            },
+                            {
+                                "alias": "Q2_RECOGNITION_3",
+                                "name": "Cine"
+                            },
+                            {
+                                "alias": "Q2_RECOGNITION_4",
+                                "name": "Revistas/Prensa"
+                            },
+                            {
+                                "alias": "Q2_RECOGNITION_5",
+                                "name": "Carteler\u00eda"
+                            },
+                            {
+                                "alias": "Q2_RECOGNITION_6",
+                                "name": "Otra"
+                            }
+                        ]
+                    },
+                    "type": {
+                        "class": "enum",
+                        "elements": [
+                            {
+                                "id": 1,
+                                "missing": false,
+                                "value": {
+                                    "derived": false,
+                                    "id": "0001",
+                                    "references": {
+                                        "alias": "Q2_RECOGNITION_1",
+                                        "name": "Televisi\u00f3n/Radio"
+                                    },
+                                    "type": {
+                                        "categories": [
+                                            {
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected",
+                                                "numeric_value": 1,
+                                                "selected": true
+                                            },
+                                            {
+                                                "id": 0,
+                                                "missing": false,
+                                                "name": "Other",
+                                                "numeric_value": 0
+                                            },
+                                            {
+                                                "id": -1,
+                                                "missing": true,
+                                                "name": "No Data",
+                                                "numeric_value": null
+                                            }
+                                        ],
+                                        "class": "categorical",
+                                        "ordinal": false
+                                    }
+                                }
+                            },
+                            {
+                                "id": 2,
+                                "missing": false,
+                                "value": {
+                                    "derived": false,
+                                    "id": "0002",
+                                    "references": {
+                                        "alias": "Q2_RECOGNITION_2",
+                                        "name": "Redes sociales"
+                                    },
+                                    "type": {
+                                        "categories": [
+                                            {
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected",
+                                                "numeric_value": 1,
+                                                "selected": true
+                                            },
+                                            {
+                                                "id": 0,
+                                                "missing": false,
+                                                "name": "Other",
+                                                "numeric_value": 0
+                                            },
+                                            {
+                                                "id": -1,
+                                                "missing": true,
+                                                "name": "No Data",
+                                                "numeric_value": null
+                                            }
+                                        ],
+                                        "class": "categorical",
+                                        "ordinal": false
+                                    }
+                                }
+                            },
+                            {
+                                "id": 3,
+                                "missing": false,
+                                "value": {
+                                    "derived": false,
+                                    "id": "0003",
+                                    "references": {
+                                        "alias": "Q2_RECOGNITION_3",
+                                        "name": "Cine"
+                                    },
+                                    "type": {
+                                        "categories": [
+                                            {
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected",
+                                                "numeric_value": 1,
+                                                "selected": true
+                                            },
+                                            {
+                                                "id": 0,
+                                                "missing": false,
+                                                "name": "Other",
+                                                "numeric_value": 0
+                                            },
+                                            {
+                                                "id": -1,
+                                                "missing": true,
+                                                "name": "No Data",
+                                                "numeric_value": null
+                                            }
+                                        ],
+                                        "class": "categorical",
+                                        "ordinal": false
+                                    }
+                                }
+                            },
+                            {
+                                "id": 4,
+                                "missing": false,
+                                "value": {
+                                    "derived": false,
+                                    "id": "0004",
+                                    "references": {
+                                        "alias": "Q2_RECOGNITION_4",
+                                        "name": "Revistas/Prensa"
+                                    },
+                                    "type": {
+                                        "categories": [
+                                            {
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected",
+                                                "numeric_value": 1,
+                                                "selected": true
+                                            },
+                                            {
+                                                "id": 0,
+                                                "missing": false,
+                                                "name": "Other",
+                                                "numeric_value": 0
+                                            },
+                                            {
+                                                "id": -1,
+                                                "missing": true,
+                                                "name": "No Data",
+                                                "numeric_value": null
+                                            }
+                                        ],
+                                        "class": "categorical",
+                                        "ordinal": false
+                                    }
+                                }
+                            },
+                            {
+                                "id": 5,
+                                "missing": false,
+                                "value": {
+                                    "derived": false,
+                                    "id": "0005",
+                                    "references": {
+                                        "alias": "Q2_RECOGNITION_5",
+                                        "name": "Carteler\u00eda"
+                                    },
+                                    "type": {
+                                        "categories": [
+                                            {
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected",
+                                                "numeric_value": 1,
+                                                "selected": true
+                                            },
+                                            {
+                                                "id": 0,
+                                                "missing": false,
+                                                "name": "Other",
+                                                "numeric_value": 0
+                                            },
+                                            {
+                                                "id": -1,
+                                                "missing": true,
+                                                "name": "No Data",
+                                                "numeric_value": null
+                                            }
+                                        ],
+                                        "class": "categorical",
+                                        "ordinal": false
+                                    }
+                                }
+                            },
+                            {
+                                "id": 6,
+                                "missing": false,
+                                "value": {
+                                    "derived": false,
+                                    "id": "0006",
+                                    "references": {
+                                        "alias": "Q2_RECOGNITION_6",
+                                        "name": "Otra"
+                                    },
+                                    "type": {
+                                        "categories": [
+                                            {
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected",
+                                                "numeric_value": 1,
+                                                "selected": true
+                                            },
+                                            {
+                                                "id": 0,
+                                                "missing": false,
+                                                "name": "Other",
+                                                "numeric_value": 0
+                                            },
+                                            {
+                                                "id": -1,
+                                                "missing": true,
+                                                "name": "No Data",
+                                                "numeric_value": null
+                                            }
+                                        ],
+                                        "class": "categorical",
+                                        "ordinal": false
+                                    }
+                                }
+                            }
+                        ],
+                        "subtype": {
+                            "class": "variable"
+                        }
+                    }
+                },
+                {
+                    "derived": true,
+                    "references": {
+                        "alias": "Q2_RECOGNITION",
+                        "description": "\u00bfY a trav\u00e9s de qu\u00e9 plataformas recuerdas haber visto este anuncio? Selecciona todas las opciones que recuerdes",
+                        "name": "Q2_RECOGNITION",
+                        "subreferences": [
+                            {
+                                "alias": "Q2_RECOGNITION_1",
+                                "name": "Televisi\u00f3n/Radio"
+                            },
+                            {
+                                "alias": "Q2_RECOGNITION_2",
+                                "name": "Redes sociales"
+                            },
+                            {
+                                "alias": "Q2_RECOGNITION_3",
+                                "name": "Cine"
+                            },
+                            {
+                                "alias": "Q2_RECOGNITION_4",
+                                "name": "Revistas/Prensa"
+                            },
+                            {
+                                "alias": "Q2_RECOGNITION_5",
+                                "name": "Carteler\u00eda"
+                            },
+                            {
+                                "alias": "Q2_RECOGNITION_6",
+                                "name": "Otra"
+                            }
+                        ]
+                    },
+                    "type": {
+                        "categories": [
+                            {
+                                "id": 1,
+                                "missing": false,
+                                "name": "Selected",
+                                "numeric_value": 1,
+                                "selected": true
+                            },
+                            {
+                                "id": 0,
+                                "missing": false,
+                                "name": "Other",
+                                "numeric_value": 0
+                            },
+                            {
+                                "id": -1,
+                                "missing": true,
+                                "name": "No Data",
+                                "numeric_value": null
+                            }
+                        ],
+                        "class": "categorical",
+                        "ordinal": false,
+                        "subvariables": [
+                            "0001",
+                            "0002",
+                            "0003",
+                            "0004",
+                            "0005",
+                            "0006"
+                        ]
+                    }
+                },
+                {
+                    "derived": true,
+                    "references": {
+                        "alias": "Q2",
+                        "description": "\u00bfQu\u00e9 tipo de seguro has tenido o tienes contratado? Selecciona todas las respuestas que correspondan",
+                        "name": "Q2",
+                        "subreferences": [
+                            {
+                                "alias": "Q2_1",
+                                "name": "Seguro m\u00e9dico"
+                            },
+                            {
+                                "alias": "Q2_2",
+                                "name": "Seguro del hogar"
+                            },
+                            {
+                                "alias": "Q2_3",
+                                "name": "Seguro de vida"
+                            },
+                            {
+                                "alias": "Q2_4",
+                                "name": "Seguro de veh\u00edculos (coche, moto...)"
+                            },
+                            {
+                                "alias": "Q2_5",
+                                "name": "Seguro de viajes"
+                            },
+                            {
+                                "alias": "Q2_6",
+                                "name": "Otro tipo de seguro"
+                            },
+                            {
+                                "alias": "Q2_7",
+                                "name": "No lo s\u00e9"
+                            }
+                        ]
+                    },
+                    "type": {
+                        "class": "enum",
+                        "elements": [
+                            {
+                                "id": 1,
+                                "missing": false,
+                                "value": {
+                                    "derived": false,
+                                    "id": "0001",
+                                    "references": {
+                                        "alias": "Q2_1",
+                                        "name": "Seguro m\u00e9dico"
+                                    },
+                                    "type": {
+                                        "categories": [
+                                            {
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected",
+                                                "numeric_value": 1,
+                                                "selected": true
+                                            },
+                                            {
+                                                "id": 0,
+                                                "missing": false,
+                                                "name": "Other",
+                                                "numeric_value": 0
+                                            },
+                                            {
+                                                "id": -1,
+                                                "missing": true,
+                                                "name": "No Data",
+                                                "numeric_value": null
+                                            }
+                                        ],
+                                        "class": "categorical",
+                                        "ordinal": false
+                                    }
+                                }
+                            },
+                            {
+                                "id": 2,
+                                "missing": false,
+                                "value": {
+                                    "derived": false,
+                                    "id": "0002",
+                                    "references": {
+                                        "alias": "Q2_2",
+                                        "name": "Seguro del hogar"
+                                    },
+                                    "type": {
+                                        "categories": [
+                                            {
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected",
+                                                "numeric_value": 1,
+                                                "selected": true
+                                            },
+                                            {
+                                                "id": 0,
+                                                "missing": false,
+                                                "name": "Other",
+                                                "numeric_value": 0
+                                            },
+                                            {
+                                                "id": -1,
+                                                "missing": true,
+                                                "name": "No Data",
+                                                "numeric_value": null
+                                            }
+                                        ],
+                                        "class": "categorical",
+                                        "ordinal": false
+                                    }
+                                }
+                            },
+                            {
+                                "id": 3,
+                                "missing": false,
+                                "value": {
+                                    "derived": false,
+                                    "id": "0003",
+                                    "references": {
+                                        "alias": "Q2_3",
+                                        "name": "Seguro de vida"
+                                    },
+                                    "type": {
+                                        "categories": [
+                                            {
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected",
+                                                "numeric_value": 1,
+                                                "selected": true
+                                            },
+                                            {
+                                                "id": 0,
+                                                "missing": false,
+                                                "name": "Other",
+                                                "numeric_value": 0
+                                            },
+                                            {
+                                                "id": -1,
+                                                "missing": true,
+                                                "name": "No Data",
+                                                "numeric_value": null
+                                            }
+                                        ],
+                                        "class": "categorical",
+                                        "ordinal": false
+                                    }
+                                }
+                            },
+                            {
+                                "id": 4,
+                                "missing": false,
+                                "value": {
+                                    "derived": false,
+                                    "id": "0004",
+                                    "references": {
+                                        "alias": "Q2_4",
+                                        "name": "Seguro de veh\u00edculos (coche, moto...)"
+                                    },
+                                    "type": {
+                                        "categories": [
+                                            {
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected",
+                                                "numeric_value": 1,
+                                                "selected": true
+                                            },
+                                            {
+                                                "id": 0,
+                                                "missing": false,
+                                                "name": "Other",
+                                                "numeric_value": 0
+                                            },
+                                            {
+                                                "id": -1,
+                                                "missing": true,
+                                                "name": "No Data",
+                                                "numeric_value": null
+                                            }
+                                        ],
+                                        "class": "categorical",
+                                        "ordinal": false
+                                    }
+                                }
+                            },
+                            {
+                                "id": 5,
+                                "missing": false,
+                                "value": {
+                                    "derived": false,
+                                    "id": "0005",
+                                    "references": {
+                                        "alias": "Q2_5",
+                                        "name": "Seguro de viajes"
+                                    },
+                                    "type": {
+                                        "categories": [
+                                            {
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected",
+                                                "numeric_value": 1,
+                                                "selected": true
+                                            },
+                                            {
+                                                "id": 0,
+                                                "missing": false,
+                                                "name": "Other",
+                                                "numeric_value": 0
+                                            },
+                                            {
+                                                "id": -1,
+                                                "missing": true,
+                                                "name": "No Data",
+                                                "numeric_value": null
+                                            }
+                                        ],
+                                        "class": "categorical",
+                                        "ordinal": false
+                                    }
+                                }
+                            },
+                            {
+                                "id": 6,
+                                "missing": false,
+                                "value": {
+                                    "derived": false,
+                                    "id": "0006",
+                                    "references": {
+                                        "alias": "Q2_6",
+                                        "name": "Otro tipo de seguro"
+                                    },
+                                    "type": {
+                                        "categories": [
+                                            {
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected",
+                                                "numeric_value": 1,
+                                                "selected": true
+                                            },
+                                            {
+                                                "id": 0,
+                                                "missing": false,
+                                                "name": "Other",
+                                                "numeric_value": 0
+                                            },
+                                            {
+                                                "id": -1,
+                                                "missing": true,
+                                                "name": "No Data",
+                                                "numeric_value": null
+                                            }
+                                        ],
+                                        "class": "categorical",
+                                        "ordinal": false
+                                    }
+                                }
+                            },
+                            {
+                                "id": 7,
+                                "missing": false,
+                                "value": {
+                                    "derived": false,
+                                    "id": "0007",
+                                    "references": {
+                                        "alias": "Q2_7",
+                                        "name": "No lo s\u00e9"
+                                    },
+                                    "type": {
+                                        "categories": [
+                                            {
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected",
+                                                "numeric_value": 1,
+                                                "selected": true
+                                            },
+                                            {
+                                                "id": 0,
+                                                "missing": false,
+                                                "name": "Other",
+                                                "numeric_value": 0
+                                            },
+                                            {
+                                                "id": -1,
+                                                "missing": true,
+                                                "name": "No Data",
+                                                "numeric_value": null
+                                            }
+                                        ],
+                                        "class": "categorical",
+                                        "ordinal": false
+                                    }
+                                }
+                            }
+                        ],
+                        "subtype": {
+                            "class": "variable"
+                        }
+                    }
+                },
+                {
+                    "derived": true,
+                    "references": {
+                        "alias": "Q2",
+                        "description": "\u00bfQu\u00e9 tipo de seguro has tenido o tienes contratado? Selecciona todas las respuestas que correspondan",
+                        "name": "Q2",
+                        "subreferences": [
+                            {
+                                "alias": "Q2_1",
+                                "name": "Seguro m\u00e9dico"
+                            },
+                            {
+                                "alias": "Q2_2",
+                                "name": "Seguro del hogar"
+                            },
+                            {
+                                "alias": "Q2_3",
+                                "name": "Seguro de vida"
+                            },
+                            {
+                                "alias": "Q2_4",
+                                "name": "Seguro de veh\u00edculos (coche, moto...)"
+                            },
+                            {
+                                "alias": "Q2_5",
+                                "name": "Seguro de viajes"
+                            },
+                            {
+                                "alias": "Q2_6",
+                                "name": "Otro tipo de seguro"
+                            },
+                            {
+                                "alias": "Q2_7",
+                                "name": "No lo s\u00e9"
+                            }
+                        ]
+                    },
+                    "type": {
+                        "categories": [
+                            {
+                                "id": 1,
+                                "missing": false,
+                                "name": "Selected",
+                                "numeric_value": 1,
+                                "selected": true
+                            },
+                            {
+                                "id": 0,
+                                "missing": false,
+                                "name": "Other",
+                                "numeric_value": 0
+                            },
+                            {
+                                "id": -1,
+                                "missing": true,
+                                "name": "No Data",
+                                "numeric_value": null
+                            }
+                        ],
+                        "class": "categorical",
+                        "ordinal": false,
+                        "subvariables": [
+                            "0001",
+                            "0002",
+                            "0003",
+                            "0004",
+                            "0005",
+                            "0006",
+                            "0007"
+                        ]
+                    }
+                }
+            ],
+            "element": "crunch:cube",
+            "filtered": {
+                "unweighted_n": 1293,
+                "weighted_n": 1293
+            },
+            "measures": {
+                "count": {
+                    "data": [
+                        83,
+                        137,
+                        69,
+                        165,
+                        55,
+                        69,
+                        112,
+                        108,
+                        69,
+                        179,
+                        41,
+                        69,
+                        24,
+                        196,
+                        69,
+                        34,
+                        186,
+                        69,
+                        0,
+                        220,
+                        69,
+                        8,
+                        10,
+                        6,
+                        14,
+                        4,
+                        6,
+                        9,
+                        9,
+                        6,
+                        16,
+                        2,
+                        6,
+                        2,
+                        16,
+                        6,
+                        3,
+                        15,
+                        6,
+                        0,
+                        18,
+                        6,
+                        265,
+                        292,
+                        423,
+                        423,
+                        134,
+                        423,
+                        223,
+                        334,
+                        423,
+                        465,
+                        92,
+                        423,
+                        83,
+                        474,
+                        423,
+                        81,
+                        476,
+                        423,
+                        0,
+                        557,
+                        423,
+                        12,
+                        23,
+                        11,
+                        24,
+                        11,
+                        11,
+                        23,
+                        12,
+                        11,
+                        27,
+                        8,
+                        11,
+                        4,
+                        31,
+                        11,
+                        2,
+                        33,
+                        11,
+                        0,
+                        35,
+                        11,
+                        79,
+                        124,
+                        64,
+                        155,
+                        48,
+                        64,
+                        98,
+                        105,
+                        64,
+                        168,
+                        35,
+                        64,
+                        22,
+                        181,
+                        64,
+                        35,
+                        168,
+                        64,
+                        0,
+                        203,
+                        64,
+                        265,
+                        292,
+                        423,
+                        423,
+                        134,
+                        423,
+                        223,
+                        334,
+                        423,
+                        465,
+                        92,
+                        423,
+                        83,
+                        474,
+                        423,
+                        81,
+                        476,
+                        423,
+                        0,
+                        557,
+                        423,
+                        4,
+                        8,
+                        2,
+                        9,
+                        3,
+                        2,
+                        7,
+                        5,
+                        2,
+                        9,
+                        3,
+                        2,
+                        2,
+                        10,
+                        2,
+                        1,
+                        11,
+                        2,
+                        0,
+                        12,
+                        2,
+                        87,
+                        139,
+                        73,
+                        170,
+                        56,
+                        73,
+                        114,
+                        112,
+                        73,
+                        186,
+                        40,
+                        73,
+                        24,
+                        202,
+                        73,
+                        36,
+                        190,
+                        73,
+                        0,
+                        226,
+                        73,
+                        265,
+                        292,
+                        423,
+                        423,
+                        134,
+                        423,
+                        223,
+                        334,
+                        423,
+                        465,
+                        92,
+                        423,
+                        83,
+                        474,
+                        423,
+                        81,
+                        476,
+                        423,
+                        0,
+                        557,
+                        423,
+                        5,
+                        7,
+                        1,
+                        9,
+                        3,
+                        1,
+                        5,
+                        7,
+                        1,
+                        8,
+                        4,
+                        1,
+                        2,
+                        10,
+                        1,
+                        2,
+                        10,
+                        1,
+                        0,
+                        12,
+                        1,
+                        86,
+                        140,
+                        74,
+                        170,
+                        56,
+                        74,
+                        116,
+                        110,
+                        74,
+                        187,
+                        39,
+                        74,
+                        24,
+                        202,
+                        74,
+                        35,
+                        191,
+                        74,
+                        0,
+                        226,
+                        74,
+                        265,
+                        292,
+                        423,
+                        423,
+                        134,
+                        423,
+                        223,
+                        334,
+                        423,
+                        465,
+                        92,
+                        423,
+                        83,
+                        474,
+                        423,
+                        81,
+                        476,
+                        423,
+                        0,
+                        557,
+                        423,
+                        3,
+                        3,
+                        0,
+                        5,
+                        1,
+                        0,
+                        4,
+                        2,
+                        0,
+                        5,
+                        1,
+                        0,
+                        2,
+                        4,
+                        0,
+                        0,
+                        6,
+                        0,
+                        0,
+                        6,
+                        0,
+                        88,
+                        144,
+                        75,
+                        174,
+                        58,
+                        75,
+                        117,
+                        115,
+                        75,
+                        190,
+                        42,
+                        75,
+                        24,
+                        208,
+                        75,
+                        37,
+                        195,
+                        75,
+                        0,
+                        232,
+                        75,
+                        265,
+                        292,
+                        423,
+                        423,
+                        134,
+                        423,
+                        223,
+                        334,
+                        423,
+                        465,
+                        92,
+                        423,
+                        83,
+                        474,
+                        423,
+                        81,
+                        476,
+                        423,
+                        0,
+                        557,
+                        423,
+                        4,
+                        4,
+                        3,
+                        6,
+                        2,
+                        3,
+                        3,
+                        5,
+                        3,
+                        8,
+                        0,
+                        3,
+                        2,
+                        6,
+                        3,
+                        4,
+                        4,
+                        3,
+                        0,
+                        8,
+                        3,
+                        87,
+                        143,
+                        72,
+                        173,
+                        57,
+                        72,
+                        118,
+                        112,
+                        72,
+                        187,
+                        43,
+                        72,
+                        24,
+                        206,
+                        72,
+                        33,
+                        197,
+                        72,
+                        0,
+                        230,
+                        72,
+                        265,
+                        292,
+                        423,
+                        423,
+                        134,
+                        423,
+                        223,
+                        334,
+                        423,
+                        465,
+                        92,
+                        423,
+                        83,
+                        474,
+                        423,
+                        81,
+                        476,
+                        423,
+                        0,
+                        557,
+                        423
+                    ],
+                    "metadata": {
+                        "derived": true,
+                        "references": {},
+                        "type": {
+                            "class": "numeric",
+                            "integer": true,
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "missing_rules": {}
+                        }
+                    },
+                    "n_missing": 1055
+                }
+            },
+            "missing": 1055,
+            "n": 1293,
+            "unfiltered": {
+                "unweighted_n": 1293,
+                "weighted_n": 1293
+            }
+        }
+    }
+}

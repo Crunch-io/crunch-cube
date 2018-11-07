@@ -1053,3 +1053,39 @@ def test_mr_by_cat_hs_cell_percentage():
     ])
     actual = cube.proportions(axis=None, include_transforms_for_dims=[0, 1])
     np.testing.assert_almost_equal(actual, expected)
+
+
+def test_mr_x_mr_counts():
+    cube = CrunchCube(CR.MR_X_MR_COUNTS)
+    expected = np.array([
+        [91, 179, 121, 195, 26, 37, 0],
+        [91, 179, 121, 195, 26, 37, 0],
+        [91, 179, 121, 195, 26, 37, 0],
+        [91, 179, 121, 195, 26, 37, 0],
+        [91, 179, 121, 195, 26, 37, 0],
+        [91, 179, 121, 195, 26, 37, 0],
+    ])
+    actual = cube.margin(axis=0)
+    np.testing.assert_array_equal(actual, expected)
+
+    expected = np.array([
+        [220, 220, 220, 220, 220, 220, 220],
+        [35, 35, 35, 35, 35, 35, 35],
+        [12, 12, 12, 12, 12, 12, 12],
+        [12, 12, 12, 12, 12, 12, 12],
+        [6, 6, 6, 6, 6, 6, 6],
+        [8, 8, 8, 8, 8, 8, 8],
+    ])
+    actual = cube.margin(axis=1)
+    np.testing.assert_array_equal(actual, expected)
+
+    expected = np.array([
+        [238, 238, 238, 238, 238, 238, 238],
+        [238, 238, 238, 238, 238, 238, 238],
+        [238, 238, 238, 238, 238, 238, 238],
+        [238, 238, 238, 238, 238, 238, 238],
+        [238, 238, 238, 238, 238, 238, 238],
+        [238, 238, 238, 238, 238, 238, 238],
+    ])
+    actual = cube.margin()
+    np.testing.assert_array_equal(actual, expected)
