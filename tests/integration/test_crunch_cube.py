@@ -2,8 +2,12 @@ from unittest import TestCase
 import numpy as np
 import pytest
 
-from cr.cube.crunch_cube import CrunchCube
+from cr.cube.crunch_cube import (
+    CrunchCube, _MeanMeasure, _Measures, _UnweightedCountMeasure,
+    _WeightedCountMeasure
+)
 from cr.cube.enum import DIMENSION_TYPE as DT
+from cr.cube.measures.index import Index
 from cr.cube.util import compress_pruned
 
 from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
@@ -76,11 +80,188 @@ class DescribeIntegratedCrunchCube(object):
         return cube_response, expected_dimension_types
 
 
+class DescribeIntegrated_Measures(object):
+
+    def it_knows_when_its_measures_are_weighted(self, is_weighted_fixture):
+        cube_dict, expected_value = is_weighted_fixture
+        measures = _Measures(cube_dict, None)
+
+        is_weighted = measures.is_weighted
+
+        assert is_weighted == expected_value
+
+    def it_provides_access_to_the_mean_measure(self):
+        cube_dict = CR.CAT_X_CAT_MEAN_WGTD
+        measures = _Measures(cube_dict, None)
+
+        means = measures.means
+
+        assert type(means).__name__ == '_MeanMeasure'
+
+    def but_only_when_the_cube_response_contains_means(self):
+        cube_dict = CR.CAT_X_CAT
+        measures = _Measures(cube_dict, None)
+
+        means = measures.means
+
+        assert means is None
+
+    def it_provides_the_means_missing_count_when_means_are_available(self):
+        measures = _Measures(CR.CAT_X_CAT_MEAN_WGTD, None)
+        missing_count = measures.missing_count
+        assert missing_count == 3
+
+    def but_provides_the_general_missing_count_otherwise(self):
+        measures = _Measures(CR.CAT_X_CAT, None)
+        missing_count = measures.missing_count
+        assert missing_count == 5
+
+    def it_knows_the_population_fraction(self, pop_frac_fixture):
+        cube_dict, expected_value = pop_frac_fixture
+        measures = _Measures(cube_dict, None)
+
+        population_fraction = measures.population_fraction
+
+        assert population_fraction == expected_value
+
+    def it_provides_access_to_the_unweighted_count_measure(self):
+        measures = _Measures(None, None)
+
+        unweighted_counts = measures.unweighted_counts
+
+        assert type(unweighted_counts).__name__ == '_UnweightedCountMeasure'
+
+    def it_knows_the_unweighted_n(self):
+        measures = _Measures(CR.CAT_X_CAT, None)
+        unweighted_n = measures.unweighted_n
+        assert unweighted_n == 20
+
+    def it_provides_access_to_the_weighted_count_measure(
+            self, wgtd_counts_fixture):
+        cube_dict, expected_type_name = wgtd_counts_fixture
+        measures = _Measures(cube_dict, None)
+
+        weighted_counts = measures.weighted_counts
+
+        assert type(weighted_counts).__name__ == expected_type_name
+
+    def it_knows_the_weighted_n(self, wgtd_n_fixture):
+        cube_dict, expected_value = wgtd_n_fixture
+        measures = _Measures(cube_dict, None)
+
+        weighted_n = measures.weighted_n
+
+        assert round(weighted_n, 3) == expected_value
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture(params=[
+        # ---has {'query': {'weight': url}}---
+        (CR.ADMIT_X_GENDER_WEIGHTED, True),
+        # ---has {'weight_var': weight_name_str}---
+        (CR.CAT_X_CAT_X_CAT_WGTD, True),
+        # ---unweighted_counts == measure_count_data---
+        (CR.ADMIT_X_DEPT_UNWEIGHTED, False),
+    ])
+    def is_weighted_fixture(self, request):
+        cube_response, expected_value = request.param
+        cube_dict = cube_response.get('value', cube_response)
+        return cube_dict, expected_value
+
+    @pytest.fixture(params=[
+        # ---filtered case---
+        (CR.CAT_X_CAT_FILT, 0.254),
+        # ---unfiltered case---
+        (CR.CAT_X_CAT, 1.0),
+    ])
+    def pop_frac_fixture(self, request):
+        cube_dict, expected_value = request.param
+        return cube_dict, expected_value
+
+    @pytest.fixture(params=[
+        # ---weighted case---
+        (CR.CAT_X_CAT_WGTD, '_WeightedCountMeasure'),
+        # ---unweighted case---
+        (CR.CAT_X_CAT, '_UnweightedCountMeasure'),
+    ])
+    def wgtd_counts_fixture(self, request):
+        cube_dict, expected_type_name = request.param
+        return cube_dict, expected_type_name
+
+    @pytest.fixture(params=[
+        # ---weighted case---
+        (CR.CAT_X_CAT_WGTD, 999.557),
+        # ---unweighted case---
+        (CR.CAT_X_CAT, 20.0),
+    ])
+    def wgtd_n_fixture(self, request):
+        cube_dict, expected_type = request.param
+        return cube_dict, expected_type
+
+
+class DescribeIntegrated_MeanMeasure(object):
+
+    def it_provides_access_to_its_raw_cube_array(self):
+        cube_dict = CR.CAT_X_CAT_MEAN_WGTD
+        cube = CrunchCube(cube_dict)
+        measure = _MeanMeasure(cube_dict, cube._all_dimensions)
+
+        raw_cube_array = measure.raw_cube_array
+
+        np.testing.assert_array_almost_equal(
+            raw_cube_array,
+            [[52.78205128, 49.90697674, np.nan, np.nan, np.nan],
+             [50.43654822, 48.20100503, np.nan, np.nan, np.nan],
+             [51.56435644, 47.60283688, np.nan, np.nan, np.nan],
+             [58.0, 29.0, np.nan, np.nan, np.nan],
+             [37.53846154, 39.45238095, np.nan, np.nan, np.nan],
+             [36.66666667, np.nan, np.nan, np.nan, np.nan],
+             [np.nan, np.nan, np.nan, np.nan, np.nan],
+             [np.nan, np.nan, np.nan, np.nan, np.nan]]
+        )
+
+
+class DescribeIntegrated_UnweightedCountMeasure(object):
+
+    def it_provides_access_to_its_raw_cube_array(self):
+        cube_dict = CR.CAT_X_CAT
+        cube = CrunchCube(cube_dict)
+        measure = _UnweightedCountMeasure(cube_dict, cube._all_dimensions)
+
+        raw_cube_array = measure.raw_cube_array
+
+        np.testing.assert_array_almost_equal(
+            raw_cube_array,
+            [[5, 3, 2, 0],
+             [5, 2, 3, 0],
+             [0, 0, 0, 0]]
+        )
+
+
+class DescribeIntegrated_WeightedCountMeasure(object):
+
+    def it_provides_access_to_its_raw_cube_array(self):
+        cube_dict = CR.CAT_X_CAT_WGTD
+        cube = CrunchCube(cube_dict)
+        measure = _WeightedCountMeasure(cube_dict, cube._all_dimensions)
+
+        raw_cube_array = measure.raw_cube_array
+
+        np.testing.assert_array_almost_equal(
+            raw_cube_array,
+            [[32.9, 87.6, 176.2, 117.5, 72.1, 13.4, 0.0, 0.0, 0.0],
+             [38.8, 94.1, 199.0128, 102.9, 38.8305, 26.2135, 0.0, 0.0, 0.0],
+             [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+             [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+             [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]
+        )
+
+
 class TestCrunchCube(TestCase):
 
     def test_crunch_cube_loads_data(self):
         cube = CrunchCube(CR.CAT_X_CAT)
-        cube_dict = cube._cube
+        cube_dict = cube._cube_dict
         self.assertEqual(cube_dict, CR.CAT_X_CAT)
 
     def test_as_array_univariate_cat_exclude_missing(self):
@@ -89,34 +270,16 @@ class TestCrunchCube(TestCase):
         actual = cube.as_array()
         np.testing.assert_array_equal(actual, expected)
 
-    def test_as_array_univariate_cat_exclude_missing_adjusted(self):
-        cube = CrunchCube(CR.UNIVARIATE_CATEGORICAL)
-        expected = np.array([11, 6])
-        actual = cube.as_array(adjusted=True)
-        np.testing.assert_array_equal(actual, expected)
-
     def test_as_array_numeric(self):
         cube = CrunchCube(CR.VOTER_REGISTRATION)
         expected = np.array([885, 105, 10])
         actual = cube.as_array()
         np.testing.assert_array_equal(actual, expected)
 
-    def test_as_array_numeric_adjusted(self):
-        cube = CrunchCube(CR.VOTER_REGISTRATION)
-        expected = np.array([886, 106, 11])
-        actual = cube.as_array(adjusted=True)
-        np.testing.assert_array_equal(actual, expected)
-
     def test_as_array_datetime(self):
         cube = CrunchCube(CR.SIMPLE_DATETIME)
         expected = np.array([1, 1, 1, 1])
         actual = cube.as_array()
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_as_array_datetime_adjusted(self):
-        cube = CrunchCube(CR.SIMPLE_DATETIME)
-        expected = np.array([2, 2, 2, 2])
-        actual = cube.as_array(adjusted=True)
         np.testing.assert_array_equal(actual, expected)
 
     def test_as_array_text(self):
@@ -132,15 +295,6 @@ class TestCrunchCube(TestCase):
             [5, 3],
         ])
         actual = cube.as_array()
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_as_array_cat_x_cat_exclude_missing_adjusted(self):
-        cube = CrunchCube(CR.CAT_X_CAT)
-        expected = np.array([
-            [6, 3],
-            [6, 4],
-        ])
-        actual = cube.as_array(adjusted=True)
         np.testing.assert_array_equal(actual, expected)
 
     def test_as_array_cat_x_cat_unweighted(self):
@@ -1024,7 +1178,7 @@ class TestCrunchCube(TestCase):
                 1.32339565,
             ],
         ])
-        actual = cube.index()
+        actual = Index.data(cube, weighted=True, prune=False)
         np.testing.assert_almost_equal(actual, expected)
 
     def test_econ_x_ideology_index_by_row(self):
@@ -1047,7 +1201,7 @@ class TestCrunchCube(TestCase):
                 1.32339565,
             ],
         ])
-        actual = cube.index()
+        actual = Index.data(cube, weighted=True, prune=False)
         np.testing.assert_almost_equal(actual, expected)
 
     def test_fruit_x_pets_proportions_by_cell(self):
@@ -1347,7 +1501,6 @@ class TestCrunchCube(TestCase):
         for i, actual in enumerate(pruned):
             np.testing.assert_array_equal(pruned[i], pruned_expected[i])
 
-    @pytest.mark.filterwarnings('ignore:DeprecationWarning')
     def test_cat_x_cat_index_by_col_prune_cols(self):
         cube = CrunchCube(CR.CAT_X_CAT_WITH_EMPTY_COLS)
         expected = np.array([
@@ -1358,7 +1511,7 @@ class TestCrunchCube(TestCase):
             [0., 1.16666667, np.nan, 1.16666667],
             [0., 1.75, np.nan, 0.]
         ])
-        actual = cube.index(prune=False)
+        actual = Index.data(cube, weighted=True, prune=False)
         # Assert index without pruning
         np.testing.assert_almost_equal(actual, expected)
 
@@ -1369,7 +1522,7 @@ class TestCrunchCube(TestCase):
             [0., 1.16666667, 1.16666667],
             [0., 1.75, 0.]
         ])
-        table = cube.index(prune=True)
+        table = Index.data(cube, weighted=True, prune=True)
         # Assert index witih pruning
         actual = table[:, ~table.mask.all(axis=0)][~table.mask.all(axis=1), :]
         np.testing.assert_almost_equal(actual, expected)

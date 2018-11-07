@@ -2,7 +2,7 @@
 
 """Provides the CrunchCube class.
 
-CrunchCube is the main API class for manipulating the Crunch.io JSON cube
+CrunchCube is the main API class for manipulating Crunch.io JSON cube
 responses.
 """
 
@@ -61,17 +61,7 @@ class CrunchCube(object):
             So we need to check its type, and convert it to a dictionary if
             it's JSON, if possible.
         """
-        try:
-            if not isinstance(response, dict):
-                response = json.loads(response)
-            self._cube = response.get('value', response)
-        except TypeError:
-            # If an unexpected type is provided raise descriptive exception.
-            if not isinstance(response, dict):
-                raise TypeError((
-                    'Unsupported type provided: {}. '
-                    'A `cube` must be JSON or `dict`.'
-                ).format(type(response)))
+        self._cube_response_arg = response
 
     def __repr__(self):
         """Provide text representation suitable for working at console.
@@ -95,8 +85,8 @@ class CrunchCube(object):
         except Exception:
             return super(CrunchCube, self).__repr__()
 
-    def as_array(self, include_missing=False, weighted=True, adjusted=False,
-                 include_transforms_for_dims=None, prune=False, margin=False):
+    def as_array(self, include_missing=False, weighted=True,
+                 include_transforms_for_dims=None, prune=False):
         """Return `ndarray` representing cube values.
 
         Returns the tabular representation of the crunch cube. The returned
@@ -128,9 +118,7 @@ class CrunchCube(object):
         array = self._as_array(
             include_missing=include_missing,
             weighted=weighted,
-            adjusted=adjusted,
-            include_transforms_for_dims=include_transforms_for_dims,
-            margin=margin
+            include_transforms_for_dims=include_transforms_for_dims
         )
 
         # ---prune array if pruning was requested---
@@ -142,18 +130,11 @@ class CrunchCube(object):
         return self._drop_mr_cat_dims(array)
 
     def count(self, weighted=True):
-        """Get cube's count with automatic weighted/unweighted selection."""
-        if weighted and self.is_weighted:
-            return sum(
-                self._cube['result']['measures'].get('count', {}).get('data')
-            )
-        return self._cube['result']['n']
-
-    @lazyproperty
-    def counts(self):
-        unfiltered = self._cube['result'].get('unfiltered')
-        filtered = self._cube['result'].get('filtered')
-        return unfiltered, filtered
+        """Return numberic count of rows considered for cube response."""
+        return (
+            self._measures.weighted_n if weighted
+            else self._measures.unweighted_n
+        )
 
     @lazyproperty
     def description(self):
@@ -183,7 +164,7 @@ class CrunchCube(object):
     @lazyproperty
     def filter_annotation(self):
         """Get cube's filter annotation."""
-        return self._cube.get('filter_names', [])
+        return self._cube_dict.get('filter_names', [])
 
     def get_slices(self, ca_as_0th=False):
         """Return list of :class:`.CubeSlice` objects.
@@ -203,11 +184,8 @@ class CrunchCube(object):
 
     @lazyproperty
     def has_means(self):
-        """True if cube contains means data."""
-        measures = self._cube.get('result', {}).get('measures')
-        if not measures:
-            return False
-        return measures.get('mean', None) is not None
+        """True if cube includes a means measure."""
+        return self._measures.means is not None
 
     @lazyproperty
     def has_mr(self):
@@ -268,15 +246,8 @@ class CrunchCube(object):
 
     @lazyproperty
     def is_weighted(self):
-        """Check if the cube dataset is weighted."""
-        weighted = self._cube.get('query', {}).get('weight', None) is not None
-        weighted = weighted or self._cube.get('weight_var', None) is not None
-        weighted = weighted or self._cube.get('weight_url', None) is not None
-        weighted = weighted or (
-            self._cube['result']['counts'] !=
-            self._cube['result']['measures'].get('count', {}).get('data')
-        )
-        return weighted
+        """True if cube response contains weighted data."""
+        return self._measures.is_weighted
 
     def labels(self, include_missing=False, include_transforms_for_dims=False):
         """Gets labels for each cube's dimension.
@@ -358,7 +329,7 @@ class CrunchCube(object):
                 axis = [axis]
             return [dim for dim in hs_dims if dim not in axis]
 
-        table = self._data(weighted=weighted, margin=True)
+        table = self._counts(weighted).raw_cube_array
         new_axis = self._adjust_axis(axis)
         index = tuple(
             None if i in new_axis else slice(None)
@@ -418,9 +389,7 @@ class CrunchCube(object):
     @lazyproperty
     def missing(self):
         """Get missing count of a cube."""
-        if self.has_means:
-            return self._cube['result']['measures']['mean']['n_missing']
-        return self._cube['result'].get('missing')
+        return self._measures.missing_count
 
     @lazyproperty
     def mr_dim_ind(self):
@@ -538,15 +507,14 @@ class CrunchCube(object):
 
     @lazyproperty
     def population_fraction(self):
-        try:
-            unfiltered, filtered = self.counts
-            num = filtered.get('weighted_n')
-            den = unfiltered.get('weighted_n')
-            return num / den
-        except ZeroDivisionError:
-            return np.nan
-        except Exception:
-            return 1
+        """The filtered/unfiltered ratio for cube response.
+
+        This value is required for properly calculating population on a cube
+        where a filter has been applied. Returns 1.0 for an unfiltered cube.
+        Returns `np.nan` if the unfiltered count is zero, which would
+        otherwise result in a divide-by-zero error.
+        """
+        return self._measures.population_fraction
 
     def proportions(self, axis=None, weighted=True,
                     include_transforms_for_dims=None, include_missing=False,
@@ -619,7 +587,7 @@ class CrunchCube(object):
                 axis = [axis]
             return [dim for dim in hs_dims if dim not in axis]
 
-        table = self._data(weighted)
+        table = self._measure(weighted).raw_cube_array
         new_axis = self._adjust_axis(axis)
         index = tuple(
             None if i in new_axis else slice(None)
@@ -847,7 +815,7 @@ class CrunchCube(object):
         dimension-pair is suppressed).
         """
         return AllDimensions(
-            dimension_dicts=self._cube['result']['dimensions']
+            dimension_dicts=self._cube_dict['result']['dimensions']
         )
 
     def _apply_missings_and_insertions(self, res, include_transforms_for_dims,
@@ -900,35 +868,23 @@ class CrunchCube(object):
         return res[np.ix_(*new_valids)] if new_valids else res
 
     def _as_array(self, include_missing=False, get_non_selected=False,
-                  weighted=True, adjusted=False,
-                  include_transforms_for_dims=False, margin=False):
+                  weighted=True, include_transforms_for_dims=False):
         """Get crunch cube as ndarray.
 
         Args
             include_missing (bool): Include rows/cols for missing values.
             get_non_selected (bool): Get non-selected slices for MR vars.
             weighted (bool): Take weighted or unweighted counts.
-            adjusted (bool): If adjusted, add + 1 to the resulting array. This
-                is needed when calculating statistical significance.
             include_transforms_for_dims (list): For which dims to
                 include headings & subtotals (H&S) transformations.
-            margin (bool): Designates whether array is intented for margin
-                calculation. This essentially tells the CrunchCube to use
-                counts (and not means, or other measures) as the result.
         Returns
             res (ndarray): Tabular representation of crunch cube
         """
-        res = self._apply_missings_and_insertions(
-            self._raw_cube_array(weighted, margin),
+        return self._apply_missings_and_insertions(
+            self._measure(weighted).raw_cube_array,
             include_transforms_for_dims,
             include_missing=include_missing
         )
-
-        # ---prepare resulting array for sig-testing if requested---
-        if adjusted:
-            res += 1
-
-        return res
 
     @classmethod
     def _calculate_constraints_sum(cls, prop_table, prop_margin, axis):
@@ -984,6 +940,19 @@ class CrunchCube(object):
     def _col_direction_axis(self):
         return self.ndim - 2
 
+    def _counts(self, weighted):
+        """Return _BaseMeasure subclass for *weighted* counts.
+
+        The return value is a _WeightedCountMeasure object if *weighted* is
+        True and the cube response is weighted. Otherwise it is an
+        _UnweightedCountMeasure object. Any means measure that may be present
+        is not considered. Contrast with `._measure()` below.
+        """
+        return (
+            self._measures.weighted_counts if weighted else
+            self._measures.unweighted_counts
+        )
+
     @staticmethod
     def _create_mask(res, row_prune_inds, col_prune_inds):
         mask_rows = np.repeat(
@@ -994,16 +963,23 @@ class CrunchCube(object):
         )
         return np.logical_or(mask_rows, mask_cols)
 
-    def _data(self, weighted, margin=False):
-        """Get the data in non-flattened shape.
-
-        Converts the flattened shape (original response) into non-flattened
-        shape (count of elements per cube dimension). E.g. for a CAT x CAT
-        cube, with 2 categories in each dimension (variable), we end up with
-        a ndarray of shape (2, 2).
-        """
-        values = self._flat_values(weighted, margin)
-        return np.array(values).reshape(self._shape)
+    @lazyproperty
+    def _cube_dict(self):
+        """dict containing raw cube response, parsed from JSON payload."""
+        try:
+            cube_response = self._cube_response_arg
+            # ---parse JSON to a dict when constructed with JSON---
+            cube_dict = (
+                cube_response if isinstance(cube_response, dict)
+                else json.loads(cube_response)
+            )
+            # ---cube is 'value' item in a shoji response---
+            return cube_dict.get('value', cube_dict)
+        except TypeError:
+            raise TypeError(
+                'Unsupported type <%s> provided. Cube response must be JSON '
+                '(str) or dict.' % type(self._cube_response_arg).__name__
+            )
 
     def _drop_mr_cat_dims(self, array, fix_valids=False):
         """Return ndarray reflecting *array* with MR_CAT dims dropped.
@@ -1067,25 +1043,6 @@ class CrunchCube(object):
         indices = np.insert(indices, slice_index, insertion_index + 1)
         valid_indices[dim] = indices.tolist()
         return valid_indices
-
-    def _flat_values(self, weighted, margin=False):
-        """Return list of measure values as found in cube response.
-
-        If *weighted* is True, weighted counts are returned if present in the
-        cube. Otherwise, unweighted counts are returned. If *margin* is True,
-        counts are returned even if mean values are present, which may be
-        preferred for example when calculating a margin.
-        """
-        values = self._cube['result']['counts']
-        if self.has_means and not margin:
-            mean = self._cube['result']['measures'].get('mean', {})
-            values = mean.get('data', values)
-        elif weighted and self.is_weighted:
-            count = self._cube['result']['measures'].get('count', {})
-            values = count.get('data', values)
-        values = [(val if not type(val) is dict else np.nan)
-                  for val in values]
-        return values
 
     def _inserted_dim_inds(self, transform_dims, axis):
         dim_ind = axis if self.ndim < 3 else axis + 1
@@ -1176,6 +1133,32 @@ class CrunchCube(object):
             pruned_ind = np.logical_and(pruned_ind, ~ind_inserted)
 
         return pruned_ind
+
+    def _measure(self, weighted):
+        """_BaseMeasure subclass representing primary measure for this cube.
+
+        If the cube response includes a means measure, the return value is
+        means. Otherwise it is counts, with the choice between weighted or
+        unweighted determined by *weighted*.
+
+        Note that weighted counts are provided on an "as-available" basis.
+        When *weighted* is True and the cube response is not weighted,
+        unweighted counts are returned.
+        """
+        return (
+            self._measures.means if self._measures.means is not None else
+            self._measures.weighted_counts if weighted else
+            self._measures.unweighted_counts
+        )
+
+    @lazyproperty
+    def _measures(self):
+        """_Measures object for this cube.
+
+        Provides access to unweighted counts, and weighted counts and/or means
+        when available.
+        """
+        return _Measures(self._cube_dict, self._all_dimensions)
 
     def _prune_3d_body(self, res, transforms):
         """Return masked array where mask indicates pruned vectors.
@@ -1373,26 +1356,6 @@ class CrunchCube(object):
             include_transforms_for_dims=hs_dims,
         )
 
-    def _raw_cube_array(self, weighted, margin):
-        """Return ndarray of measure values from cube-response.
-
-        The shape of the ndarray mirrors the shape of the (raw) cube
-        response. Specifically, in includes values for missing elements, any
-        MR_CAT dimensions, and any prunable rows and columns.
-
-        The choice among available measures in the cube response is
-        determined by *weighted* and *margin*, according to the same rules as
-        `._flat_values()`.
-        """
-        return (
-            np.array(self._flat_values(weighted, margin))
-              .reshape(self._all_dimensions.shape)
-        )
-
-    @lazyproperty
-    def _shape(self):
-        return tuple([dim.shape for dim in self._all_dimensions])
-
     def _update_result(self, result, insertions, dimension_index,
                        valid_indices):
         """Insert subtotals into resulting ndarray."""
@@ -1409,3 +1372,188 @@ class CrunchCube(object):
                 )
             )
         return result, valid_indices
+
+
+class _Measures(object):
+    """Provides access to measures contained in cube response."""
+
+    def __init__(self, cube_dict, all_dimensions):
+        self._cube_dict = cube_dict
+        self._all_dimensions = all_dimensions
+
+    @lazyproperty
+    def is_weighted(self):
+        """True if weights have been applied to the measure(s) for this cube.
+
+        Unweighted counts are available for all cubes. Weighting applies to
+        any other measures provided by the cube.
+        """
+        cube_dict = self._cube_dict
+        if cube_dict.get('query', {}).get('weight') is not None:
+            return True
+        if cube_dict.get('weight_var') is not None:
+            return True
+        if cube_dict.get('weight_url') is not None:
+            return True
+        unweighted_counts = cube_dict['result']['counts']
+        count_data = (
+            cube_dict['result']['measures'].get('count', {}).get('data')
+        )
+        if unweighted_counts != count_data:
+            return True
+        return False
+
+    @lazyproperty
+    def means(self):
+        """_MeanMeasure object providing access to means values.
+
+        None when the cube response does not contain a mean measure.
+        """
+        mean_measure_dict = (
+            self._cube_dict
+                .get('result', {})
+                .get('measures', {})
+                .get('mean')
+        )
+        if mean_measure_dict is None:
+            return None
+        return _MeanMeasure(self._cube_dict, self._all_dimensions)
+
+    @lazyproperty
+    def missing_count(self):
+        """numeric representing count of missing rows in cube response."""
+        if self.means:
+            return self.means.missing_count
+        return self._cube_dict['result'].get('missing', 0)
+
+    @lazyproperty
+    def population_fraction(self):
+        """The filtered/unfiltered ratio for cube response.
+
+        This value is required for properly calculating population on a cube
+        where a filter has been applied. Returns 1.0 for an unfiltered cube.
+        Returns `np.nan` if the unfiltered count is zero, which would
+        otherwise result in a divide-by-zero error.
+        """
+        numerator = (
+            self._cube_dict['result']
+                .get('filtered', {})
+                .get('weighted_n')
+        )
+        denominator = (
+            self._cube_dict['result']
+                .get('unfiltered', {})
+                .get('weighted_n')
+        )
+        try:
+            return numerator / denominator
+        except ZeroDivisionError:
+            return np.nan
+        except Exception:
+            return 1.0
+
+    @lazyproperty
+    def unweighted_counts(self):
+        """_UnweightedCountMeasure object for this cube.
+
+        This object provides access to unweighted counts for this cube,
+        whether or not the cube contains weighted counts.
+        """
+        return _UnweightedCountMeasure(self._cube_dict, self._all_dimensions)
+
+    @lazyproperty
+    def unweighted_n(self):
+        """int count of actual rows represented by query response."""
+        return self._cube_dict['result']['n']
+
+    @lazyproperty
+    def weighted_counts(self):
+        """_WeightedCountMeasure object for this cube.
+
+        This object provides access to weighted counts for this cube, if
+        available. If the cube response is not weighted, the
+        _UnweightedCountMeasure object for this cube is returned.
+        """
+        if not self.is_weighted:
+            return self.unweighted_counts
+        return _WeightedCountMeasure(self._cube_dict, self._all_dimensions)
+
+    @lazyproperty
+    def weighted_n(self):
+        """float count of returned rows adjusted for weighting."""
+        if not self.is_weighted:
+            return float(self.unweighted_n)
+        return float(
+            sum(self._cube_dict['result']['measures']['count']['data'])
+        )
+
+
+class _BaseMeasure(object):
+    """Base class for measure objects."""
+
+    def __init__(self, cube_dict, all_dimensions):
+        self._cube_dict = cube_dict
+        self._all_dimensions = all_dimensions
+
+    @lazyproperty
+    def raw_cube_array(self):
+        """Return read-only ndarray of measure values from cube-response.
+
+        The shape of the ndarray mirrors the shape of the (raw) cube
+        response. Specifically, it includes values for missing elements, any
+        MR_CAT dimensions, and any prunable rows and columns.
+        """
+        array = np.array(self._flat_values).reshape(self._all_dimensions.shape)
+        # ---must be read-only to avoid hard-to-find bugs---
+        array.flags.writeable = False
+        return array
+
+    @lazyproperty
+    def _flat_values(self):
+        """Return tuple of mean values as found in cube response.
+
+        This property must be implemented by each subclass.
+        """
+        raise NotImplementedError('must be implemented by each subclass')
+
+
+class _MeanMeasure(_BaseMeasure):
+    """Statistical mean values from a cube-response."""
+
+    @lazyproperty
+    def missing_count(self):
+        """numeric representing count of missing rows reflected in response."""
+        return (
+            self._cube_dict['result']['measures']['mean'].get('n_missing', 0)
+        )
+
+    @lazyproperty
+    def _flat_values(self):
+        """Return tuple of mean values as found in cube response.
+
+        Mean data may include missing items represented by a dict like
+        {'?': -1} in the cube response. These are replaced by np.nan in the
+        returned value.
+        """
+        return tuple(
+            np.nan if type(x) is dict else x
+            for x in self._cube_dict['result']['measures']['mean']['data']
+        )
+
+
+class _UnweightedCountMeasure(_BaseMeasure):
+    """Unweighted counts for cube."""
+
+    @lazyproperty
+    def _flat_values(self):
+        """tuple of int counts before weighting."""
+        return tuple(self._cube_dict['result']['counts'])
+
+
+class _WeightedCountMeasure(_BaseMeasure):
+    """Weighted counts for cube."""
+
+    @lazyproperty
+    def _flat_values(self):
+        """tuple of numeric counts after weighting."""
+        return tuple(self._cube_dict['result']['measures']['count']['data'])
