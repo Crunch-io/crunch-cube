@@ -1245,10 +1245,12 @@ class CrunchCube(object):
             axis=self.row_direction_axis,
         )
         # ---adjust special-case row-margin values---
-        if self.ndim > 1 and self.dim_types[1] == DT.MULTIPLE_RESPONSE:
+        item_types = (DT.MR, DT.CA_SUBVAR)
+        if self.ndim > 1 and self.dim_types[1] in item_types:
             # ---when row-dimension has only one category it gets squashed---
             axis = 1 if res.shape[0] > 1 else None
-            # ---in CAT x MR case we get 2D margin (denom really)---
+            # ---in CAT x MR case (or if it has CA subvars) we get
+            # a 2D margin (denom really)---
             row_margin = np.sum(row_margin, axis=axis)
         row_prune_inds = self._margin_pruned_indices(
             row_margin, self._inserted_dim_inds(transforms, 0), 0

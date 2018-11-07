@@ -50,6 +50,20 @@ class DescribeIntegratedCrunchCube(object):
         arr = cube.as_array(prune=True)
         np.testing.assert_array_equal(arr, np.array([[0, 0, 0]]))
 
+    def it_provides_pruned_array_for_CA_CAT_x_CA_SUBVAR(self):
+        cube = CrunchCube(CR.CA_CAT_X_CA_SUBVAR)
+        arr = cube.proportions(axis=0, prune=True)
+        np.testing.assert_array_equal(
+            compress_pruned(arr),
+            np.array(
+                [[0.19012797074954296, 0.10494203782794387],
+                 [0.2528945764777575, 0.2190359975594875],
+                 [0.16514320536258378, 0.1720561317876754],
+                 [0.29859841560024375, 0.4069554606467358],
+                 [0.09323583180987204, 0.09701037217815742]]
+            )
+        )
+
     # fixtures -------------------------------------------------------
 
     @pytest.fixture(params=[
