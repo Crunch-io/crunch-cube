@@ -314,6 +314,24 @@ class CrunchCube(object):
             ])
         """
 
+        # Try out with _denominator
+        den = self._denominator(
+            axis, weighted, include_missing, include_transforms_for_dims)
+
+        # Calculate "margin" from denominator
+        margin = self._drop_mr_cat_dims(den, fix_valids=include_missing)
+
+        if margin.shape[0] == 1 and len(margin.shape) > 1 and self.ndim < 3:
+            margin = margin.reshape(margin.shape[1:])
+
+        if prune:
+            mask = margin == 0
+            return np.ma.masked_array(margin, mask)
+
+        return margin
+
+    def _denominator(self, axis, weighted, include_missing,
+                     include_transforms_for_dims):
         table = self._counts(weighted).raw_cube_array
         new_axis = self._adjust_axis(axis)
         index = tuple(
@@ -329,68 +347,10 @@ class CrunchCube(object):
         den = self._apply_missings_and_insertions(
             table, hs_dims, include_missing=include_missing
         )
-
-        # Apply correct mask (based on the as_array shape)
-        arr = self._as_array(
-            include_transforms_for_dims=hs_dims,
-            include_missing=include_missing
-        )
-
-        # ---prune array if pruning was requested---
-        if prune:
-            arr = self._prune_body(arr, transforms=hs_dims)
-
-        arr = self._drop_mr_cat_dims(arr, fix_valids=include_missing)
-
-        if isinstance(arr, np.ma.core.MaskedArray):
-            inflate_ind = tuple(
-                (
-                    None
-                    if (
-                        d.dimension_type == DT.MR_CAT or
-                        n <= 1 or
-                        len(d.elements()) <= 1
-                    ) else
-                    slice(None)
-                )
-                for d, n in zip(self._all_dimensions, table.shape)
-            )
-            mask = np.logical_or(
-                np.zeros(den.shape, dtype=bool),
-                arr.mask[inflate_ind],
-            )
-            den = np.ma.masked_array(den, mask)
-
-        if (self.ndim != 1 or axis is None or
-                axis == 0 and len(self._all_dimensions) == 1):
-            # Special case for 1D cube wigh MR, for "Table" direction
-            den = np.sum(den, axis=new_axis)[index]
-
-        den = self._drop_mr_cat_dims(den, fix_valids=include_missing)
-        if den.shape[0] == 1 and len(den.shape) > 1 and self.ndim < 3:
-            den = den.reshape(den.shape[1:])
-        return den
-
-    def _denominator(self, axis, weighted, include_missing,
-                     include_transforms_for_dims):
-        table = self._data(weighted=weighted, margin=True)
-        new_axis = self._adjust_axis(axis)
-        index = tuple(
-            None if i in new_axis else slice(None)
-            for i, _ in enumerate(table.shape)
-        )
-
-        # Calculate denominator. Only include those H&S dimensions, across
-        # which we DON'T sum. These H&S are needed because of the shape, when
-        # dividing. Those across dims which are summed across MUST NOT be
-        # included, because they would change the result.
-        hs_dims = self._hs_dims_for_den(include_transforms_for_dims, axis)
-        den = self._apply_missings_and_insertions(
-            table, hs_dims, include_missing=include_missing
-        )
-        den = np.sum(den, axis=new_axis)[index]
-
-        return den
+        try:
+            return np.sum(den, axis=new_axis)[index]
+        except np.AxisError:
+            return den
 
     @lazyproperty
     def missing(self):

@@ -46,7 +46,6 @@ def test_proportions_simple_mr():
     np.testing.assert_almost_equal(actual, expected)
 
 
-@pytest.mark.xfail(reason='WIP', strict=True)
 def test_proportions_simple_mr_prune():
     cube = CrunchCube(CR.SIMPLE_MR)
     expected = np.array([0.6, 0.6666667, 0.])
@@ -358,7 +357,6 @@ def test_array_x_mr_by_cell():
     np.testing.assert_almost_equal(actual, expected)
 
 
-@pytest.mark.xfail(reason='WIP', strict=True)
 def test_simple_mr_margin_by_col():
     cube = CrunchCube(CR.SIMPLE_MR)
     expected = np.array([5, 6, 6])
@@ -736,7 +734,6 @@ def test_mr_x_num_cols_margin_pruned_unweighted():
         np.testing.assert_array_equal(actual, expected)
 
 
-@pytest.mark.xfail(reason='WIP', strict=True)
 def test_mr_x_num_cols_margin_pruned_weighted():
     cube = CrunchCube(CR.BBC_NEWS)
     expected = np.array(
