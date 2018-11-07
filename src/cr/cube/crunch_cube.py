@@ -330,28 +330,6 @@ class CrunchCube(object):
 
         return margin
 
-    def _denominator(self, axis, weighted, include_missing,
-                     include_transforms_for_dims):
-        table = self._counts(weighted).raw_cube_array
-        new_axis = self._adjust_axis(axis)
-        index = tuple(
-            None if i in new_axis else slice(None)
-            for i, _ in enumerate(table.shape)
-        )
-
-        # Calculate denominator. Only include those H&S dimensions, across
-        # which we DON'T sum. These H&S are needed because of the shape, when
-        # dividing. Those across dims which are summed across MUST NOT be
-        # included, because they would change the result.
-        hs_dims = self._hs_dims_for_den(include_transforms_for_dims, axis)
-        den = self._apply_missings_and_insertions(
-            table, hs_dims, include_missing=include_missing
-        )
-        try:
-            return np.sum(den, axis=new_axis)[index]
-        except np.AxisError:
-            return den
-
     @lazyproperty
     def missing(self):
         """Get missing count of a cube."""
@@ -883,6 +861,28 @@ class CrunchCube(object):
                 'Unsupported type <%s> provided. Cube response must be JSON '
                 '(str) or dict.' % type(self._cube_response_arg).__name__
             )
+
+    def _denominator(self, axis, weighted, include_missing,
+                     include_transforms_for_dims):
+        table = self._counts(weighted).raw_cube_array
+        new_axis = self._adjust_axis(axis)
+        index = tuple(
+            None if i in new_axis else slice(None)
+            for i, _ in enumerate(table.shape)
+        )
+
+        # Calculate denominator. Only include those H&S dimensions, across
+        # which we DON'T sum. These H&S are needed because of the shape, when
+        # dividing. Those across dims which are summed across MUST NOT be
+        # included, because they would change the result.
+        hs_dims = self._hs_dims_for_den(include_transforms_for_dims, axis)
+        den = self._apply_missings_and_insertions(
+            table, hs_dims, include_missing=include_missing
+        )
+        try:
+            return np.sum(den, axis=new_axis)[index]
+        except np.AxisError:
+            return den
 
     def _drop_mr_cat_dims(self, array, fix_valids=False):
         """Return ndarray reflecting *array* with MR_CAT dims dropped.
