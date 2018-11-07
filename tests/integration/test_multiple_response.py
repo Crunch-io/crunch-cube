@@ -46,9 +46,10 @@ def test_proportions_simple_mr():
     np.testing.assert_almost_equal(actual, expected)
 
 
+@pytest.mark.xfail(reason='WIP', strict=True)
 def test_proportions_simple_mr_prune():
     cube = CrunchCube(CR.SIMPLE_MR)
-    expected = np.array([0.6, 0.6666667])
+    expected = np.array([0.6, 0.6666667, 0.])
     actual = np.ma.compressed(cube.proportions(prune=True))
     np.testing.assert_almost_equal(actual, expected)
 
@@ -357,9 +358,10 @@ def test_array_x_mr_by_cell():
     np.testing.assert_almost_equal(actual, expected)
 
 
+@pytest.mark.xfail(reason='WIP', strict=True)
 def test_simple_mr_margin_by_col():
     cube = CrunchCube(CR.SIMPLE_MR)
-    expected = np.array([3, 4, 0])
+    expected = np.array([5, 6, 6])
     actual = cube.margin(axis=0)
     np.testing.assert_array_equal(actual, expected)
 
@@ -568,31 +570,7 @@ def test_cat_x_mr_x_cat_by_cell():
     np.testing.assert_almost_equal(actual, expected)
 
 
-def test_mr_props_pruned():
-    cube = CrunchCube(CR.PROMPTED_AWARENESS)
-    expected = np.array([
-        9.70083312e-01, 9.53131845e-01, 9.64703914e-01,
-        9.59703205e-01, 9.37891446e-01, 8.84137923e-01,
-        7.77056917e-01, 7.15135296e-01, 9.03057657e-01,
-        8.67103783e-01, 8.38011719e-01, 8.60897234e-01,
-        7.68101070e-01, 7.59030477e-01, 8.66127931e-01,
-        6.89111039e-01, 7.39338305e-01, 1.89895586e-01,
-        1.95866187e-01, 8.90452848e-01, 6.10278144e-01,
-        6.35237428e-01, 6.54874171e-01, 6.89736947e-01,
-        2.31607423e-01, 4.44608376e-01, 6.06987388e-01,
-        4.16165746e-01, 2.06262071e-01, 2.08512519e-01,
-        1.59533129e-01, 1.86245154e-01, 1.01661334e-01,
-        1.82235674e-01, 7.30060936e-01, 4.45912391e-01,
-        4.87037442e-01, 1.29527814e-01, 4.95486986e-01,
-        2.84392427e-01, 3.93962082e-01, 3.91279968e-01,
-        8.96639874e-02, 9.50985735e-04, 1.35477929e-01,
-        1.86531215e-01,
-    ])
-    actual = np.ma.compressed(cube.proportions(prune=True))
-    np.testing.assert_almost_equal(actual, expected)
-
-
-def test_mr_counts_not_pruned():
+def test_mr_counts_not_pruned_and_pruned():
     cube = CrunchCube(CR.PROMPTED_AWARENESS)
     expected = np.array([
         224833, 221990, 223560, 222923, 217586, 206164, 183147, 167720,
@@ -606,37 +584,15 @@ def test_mr_counts_not_pruned():
     actual = cube.as_array(weighted=False)
     np.testing.assert_array_equal(actual, expected)
 
-
-def test_mr_counts_pruned():
-    cube = CrunchCube(CR.PROMPTED_AWARENESS)
-    expected = np.array([
-        224833, 221990, 223560, 222923, 217586, 206164, 183147, 167720,
-        209355, 201847, 193826, 198744, 180015, 174349, 200050, 160769,
-        167969, 43193, 44339, 207539, 135973, 146002, 146789, 160692,
-        53995, 95741, 135700, 91878, 48465, 48929, 35189, 42764,
-        21194, 41422, 167652, 95676, 111961, 26137, 111760, 60761,
-        87645, 85306, 18873, 178, 30461, 42843,
-    ])
-    # Use unweighted, because of the whole numbers (for comparison)
+    # Now test the pruned version. Note that the zero entries are not removed.
+    # This might seem counter-intuitive, but is actually the right thing to do.
+    # The criterion for pruning is the denominator, which is the combined value
+    # of selected + non-selected (which is not zero in this case).
     actual = cube.as_array(weighted=False, prune=True)
-    np.testing.assert_array_equal(actual[~actual.mask], expected)
-
-    pruned_expected = [
-        np.array(
-            [False, False, False, False, False, False, False, False, False,
-             False, False, False, False, False, False, False, False, False,
-             False, False, False, False, False, False, False, False, False,
-             False, False, False, False, False, False, False, False, False,
-             False, False, True, True, False, False, False, False, False,
-             False, False, False])
-    ]
-    pruned = cube._prune_indices()
-    assert len(pruned) == len(pruned_expected)
-    for i, actual in enumerate(pruned):
-        np.testing.assert_array_equal(pruned[i], pruned_expected[i])
+    np.testing.assert_array_equal(actual, expected)
 
 
-def test_mr_props_not_pruned():
+def test_mr_props_not_pruned_and_pruned():
     cube = CrunchCube(CR.PROMPTED_AWARENESS)
     expected = np.array([
         9.70083312e-01, 9.53131845e-01, 9.64703914e-01,
@@ -657,6 +613,13 @@ def test_mr_props_not_pruned():
         9.50985735e-04, 1.35477929e-01, 1.86531215e-01,
     ])
     actual = cube.proportions()
+    np.testing.assert_almost_equal(actual, expected)
+
+    # Now test the pruned version. Note that the zero entries are not removed.
+    # This might seem counter-intuitive, but is actually the right thing to do.
+    # The criterion for pruning is the denominator, which is the combined value
+    # of selected + non-selected (which is not zero in this case).
+    actual = cube.proportions(prune=True)
     np.testing.assert_almost_equal(actual, expected)
 
 
@@ -773,11 +736,12 @@ def test_mr_x_num_cols_margin_pruned_unweighted():
         np.testing.assert_array_equal(actual, expected)
 
 
+@pytest.mark.xfail(reason='WIP', strict=True)
 def test_mr_x_num_cols_margin_pruned_weighted():
     cube = CrunchCube(CR.BBC_NEWS)
     expected = np.array(
-        [1709.607711404295, 1438.5504956329391, 1556.0764946283794,
-            1419.8513591680107, 0, 0, 0, 0]
+        [1709.607711404295, 1438.5504956329391,
+            1556.0764946283794, 1419.8513591680107]
     )
     margin = np.ma.compress_cols(
         cube.margin(axis=0, weighted=True, prune=True)
