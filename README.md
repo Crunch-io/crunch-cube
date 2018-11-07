@@ -112,6 +112,11 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.8.2
+- fix "broadcast error" bug
+- improve test coverage
+- relocate test fixtures and add cached fixture lazy-loading
+
 #### 1.8.1
 - Major Cube refactor and a couple bugfixes
 

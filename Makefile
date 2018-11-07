@@ -2,14 +2,18 @@ MAKE   = make
 PYTHON = python
 SETUP  = $(PYTHON) ./setup.py
 
-.PHONY: clean cleandocs docs opendocs sdist
+.PHONY: clean cleandocs coverage dist docs opendocs unit-coverage upload
 
 help:
 	@echo "Usage: \`make <target>' where <target> is one or more of"
-	@echo "  clean     delete intermediate work product and start fresh"
-	@echo "  cleandocs delete cached HTML documentation and start fresh"
-	@echo "  docs      build HTML documentation using Sphinx (incremental)"
-	@echo "  opendocs  open local HTML documentation in browser"
+	@echo "  clean          delete intermediate work product and start fresh"
+	@echo "  cleandocs      delete cached HTML documentation and start fresh"
+	@echo "  coverage       report overall test coverage"
+	@echo "  docs           build HTML documentation using Sphinx (incremental)"
+	@echo "  opendocs       open local HTML documentation in browser"
+	@echo "  dist           generate source and wheel distribution into dist/"
+	@echo "  unit-coverage  report unit test coverage"
+	@echo "  upload         upload distribution to PyPI"
 
 clean:
 	find . -type f -name \*.pyc -exec rm {} \;
@@ -20,7 +24,11 @@ cleandocs:
 	$(MAKE) -C docs clean
 
 coverage:
-	py.test --cov-report term-missing --cov=src --cov=tests -p no:warnings
+	py.test --cov-report term-missing --cov=src --cov=tests
+
+dist:
+	rm -rf dist/
+	$(SETUP) sdist bdist_wheel
 
 docs:
 	$(MAKE) -C docs html
@@ -28,5 +36,10 @@ docs:
 opendocs:
 	open docs/build/html/index.html
 
-sdist:
-	$(SETUP) sdist
+unit-coverage:
+	py.test --cov-report term-missing --cov=src tests/unit
+
+upload:
+	rm -rf dist/
+	$(SETUP) sdist bdist_wheel
+	twine upload dist/*
