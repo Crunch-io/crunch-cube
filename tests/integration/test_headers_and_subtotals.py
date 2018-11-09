@@ -841,3 +841,13 @@ class TestHeadersAndSubtotals(TestCase):
         ])
         actual = cube.proportions(axis=None, prune=True)[0].mask
         np.testing.assert_array_equal(actual, expected)
+
+    def test_num_x_cat_hs_margin_pruned(self):
+        cube = CrunchCube(CR.NUM_BY_CAT_HS)
+        expected = np.array(
+            [False, True, True, False, False, True, True, False]
+        )
+        actual = cube.margin(
+            axis=0, prune=True, include_transforms_for_dims=[0, 1]
+        ).mask
+        np.testing.assert_array_equal(actual, expected)

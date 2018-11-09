@@ -316,17 +316,15 @@ class CrunchCube(object):
 
         # Try out with _denominator
         den = self._denominator(
-            axis, weighted, include_missing, include_transforms_for_dims)
+            axis, weighted, include_missing,
+            include_transforms_for_dims, prune
+        )
 
         # Calculate "margin" from denominator
         margin = self._drop_mr_cat_dims(den, fix_valids=include_missing)
 
         if margin.shape[0] == 1 and len(margin.shape) > 1 and self.ndim < 3:
             margin = margin.reshape(margin.shape[1:])
-
-        if prune:
-            mask = margin == 0
-            return np.ma.masked_array(margin, mask)
 
         return margin
 
@@ -530,10 +528,11 @@ class CrunchCube(object):
             include_transforms_for_dims,
         )
         den = self._denominator(
-            axis, weighted, False, include_transforms_for_dims,
+            axis, weighted, False, include_transforms_for_dims, prune
         )
 
-        res = self._drop_mr_cat_dims(num / den)
+        # res = self._drop_mr_cat_dims(num / den)
+        res = self._drop_mr_cat_dims(self._divide_and_apply_mask(num, den))
 
         # Apply correct mask (based on the as_array shape)
         arr = self.as_array(
@@ -863,7 +862,7 @@ class CrunchCube(object):
             )
 
     def _denominator(self, axis, weighted, include_missing,
-                     include_transforms_for_dims):
+                     include_transforms_for_dims, prune):
         table = self._counts(weighted).raw_cube_array
         new_axis = self._adjust_axis(axis)
         index = tuple(
@@ -875,6 +874,9 @@ class CrunchCube(object):
         # which we DON'T sum. These H&S are needed because of the shape, when
         # dividing. Those across dims which are summed across MUST NOT be
         # included, because they would change the result.
+        if prune:
+            mask = table == 0
+            table = np.ma.masked_array(table, mask)
         hs_dims = self._hs_dims_for_den(include_transforms_for_dims, axis)
         den = self._apply_missings_and_insertions(
             table, hs_dims, include_missing=include_missing
@@ -883,6 +885,14 @@ class CrunchCube(object):
             return np.sum(den, axis=new_axis)[index]
         except np.AxisError:
             return den
+
+    @staticmethod
+    def _divide_and_apply_mask(numerator, denominator):
+        if type(denominator) is not np.ma.core.MaskedArray:
+            return numerator / denominator
+        result = numerator / denominator.data
+        mask = (numerator * denominator).mask
+        return np.ma.masked_array(result, mask)
 
     def _drop_mr_cat_dims(self, array, fix_valids=False):
         """Return ndarray reflecting *array* with MR_CAT dims dropped.
@@ -1264,16 +1274,25 @@ class CrunchCube(object):
         """Insert subtotals into resulting ndarray."""
         # TODO: valid_indices should be a tuple as a parameter and as a return
         # value
+        masked = type(result) == np.ma.core.MaskedArray
+        if masked:
+            mask = result.mask
         for j, (ind_insertion, value) in enumerate(insertions):
             result = np.insert(
                 result, ind_insertion + j + 1, value, axis=dimension_index
             )
+            if masked:
+                mask = np.insert(
+                    mask, ind_insertion + j + 1, False, axis=dimension_index
+                )
             valid_indices = (
                 valid_indices and
                 self._fix_valid_indices(
                     valid_indices, ind_insertion + j, dimension_index
                 )
             )
+        if masked:
+            result = np.ma.masked_array(result, mask)
         return result, valid_indices
 
 
