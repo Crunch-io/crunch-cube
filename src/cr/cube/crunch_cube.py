@@ -314,19 +314,10 @@ class CrunchCube(object):
             ])
         """
 
-        # Always use unpruned denominator, because pruning needs to be done
-        # based on unweighted
         den = self._denominator(
             axis, weighted, include_missing,
-            include_transforms_for_dims,
+            include_transforms_for_dims, prune,
         )
-        if prune:
-            unweighted = self._denominator(
-                axis, False, include_missing,
-                include_transforms_for_dims, True,
-            )
-            if type(unweighted) is np.ma.core.MaskedArray:
-                den = np.ma.masked_array(den, unweighted.mask)
 
         # Calculate "margin" from denominator
         margin = self._drop_mr_cat_dims(den, fix_valids=include_missing)
@@ -884,7 +875,8 @@ class CrunchCube(object):
         # dividing. Those across dims which are summed across MUST NOT be
         # included, because they would change the result.
         if prune:
-            mask = table == 0
+            # Always prune only based on _unweighted_ counts
+            mask = self._counts(False).raw_cube_array == 0
             table = np.ma.masked_array(table, mask)
         hs_dims = self._hs_dims_for_den(include_transforms_for_dims, axis)
         den = self._apply_missings_and_insertions(
