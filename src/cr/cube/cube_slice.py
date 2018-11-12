@@ -569,9 +569,14 @@ class CubeSlice(object):
         if (self._cube.ndim < 3 and not self.ca_as_0th or
                 len(result) - 1 < self._index):
             return result
-        result = result[self._index]
-        if isinstance(result, tuple):
-            return np.array(result)
-        elif not isinstance(result, np.ndarray):
-            result = np.array([result])
-        return result
+        masked = type(result) == np.ma.core.MaskedArray
+        slice_result = result[self._index]
+        if isinstance(slice_result, tuple):
+            return np.array(slice_result)
+        elif not isinstance(slice_result, np.ndarray):
+            if masked:
+                return np.ma.masked_array(
+                    slice_result, result.mask[self._index]
+                )
+            return np.array([slice_result])
+        return slice_result

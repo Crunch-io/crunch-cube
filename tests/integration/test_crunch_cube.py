@@ -2061,3 +2061,23 @@ class TestCrunchCube(TestCase):
         np.testing.assert_array_equal(actual, expected)
         actual = cs.proportions(axis=1, weighted=True, prune=True).mask
         np.testing.assert_array_equal(actual, expected)
+
+        # Assert that both weighted and unweighted
+        # summaries are not pruned
+        expected = False
+        actual = cs.margin(weighted=True, prune=True).mask
+        assert actual == expected
+        actual = cs.margin(weighted=False, prune=True).mask
+        assert actual == expected
+
+        expected = np.zeros((2,), dtype=bool)
+        actual = cs.margin(axis=0, weighted=True, prune=True).mask
+        np.testing.assert_array_equal(actual, expected)
+        actual = cs.margin(axis=0, weighted=False, prune=True).mask
+        np.testing.assert_array_equal(actual, expected)
+
+        expected = np.zeros((6,), dtype=bool)
+        actual = cs.margin(axis=1, weighted=True, prune=True).mask
+        np.testing.assert_array_equal(actual, expected)
+        actual = cs.margin(axis=1, weighted=False, prune=True).mask
+        np.testing.assert_array_equal(actual, expected)

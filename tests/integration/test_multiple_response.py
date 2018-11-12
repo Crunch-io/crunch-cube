@@ -738,7 +738,7 @@ def test_mr_x_num_cols_margin_pruned_weighted():
     cube = CrunchCube(CR.BBC_NEWS)
     expected = np.array(
         [1709.607711404295, 1438.5504956329391,
-            1556.0764946283794, 1419.8513591680107]
+            1556.0764946283794, 1419.8513591680107, 0., 0., 0., 0.]
     )
     margin = np.ma.compress_cols(
         cube.margin(axis=0, weighted=True, prune=True)
