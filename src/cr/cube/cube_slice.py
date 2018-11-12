@@ -213,6 +213,36 @@ class CubeSlice(object):
         ]
         return labels
 
+    def margin(self, axis=None, weighted=True, include_missing=False,
+               include_transforms_for_dims=None, prune=False):
+        """Return ndarray representing slice margin across selected axis.
+
+        A margin (or basis) can be calculated for a n-dim cube, provided that
+        the dimensions of the desired directions are marginable. The dimensions
+        are marginable if they represent essentially mutualy exclusive data,
+        such as true categorical data. For multiple response types, the items
+        dimensions are not marginable, however, their categorical dimensions
+        (that represent selections) are. For categoricaly array cubes, the
+        items dimensions are not marginable, and doing a margin across them
+        will produce an error.
+
+        :param axis: Axis across which to sum. For MR variables,
+        :param weighted: Weighted or unweighted counts.
+        :param include_missing: Include missing categories or not.
+        :param include_transforms_for_dims: Indices of dimensions for which to
+               include transformations
+        :param prune: Perform pruning based on unweighted counts.
+        :returns: Margin (or basis) across selected axis.
+        """
+
+        return self._call_cube_method(
+            'margin',
+            axis=axis, weighted=weighted,
+            include_missing=include_missing,
+            include_transforms_for_dims=include_transforms_for_dims,
+            prune=prune,
+        )
+
     @lazyproperty
     def mr_dim_ind(self):
         """Get the correct index of the MR dimension in the cube slice."""
@@ -514,13 +544,3 @@ class CubeSlice(object):
         elif not isinstance(result, np.ndarray):
             result = np.array([result])
         return result
-
-    def margin(self, axis=None, weighted=True, include_missing=False,
-               include_transforms_for_dims=None, prune=False):
-        return self._call_cube_method(
-            'margin',
-            axis=axis, weighted=weighted,
-            include_missing=include_missing,
-            include_transforms_for_dims=include_transforms_for_dims,
-            prune=prune,
-        )
