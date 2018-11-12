@@ -527,14 +527,15 @@ class CrunchCube(object):
             self._measure(weighted).raw_cube_array,
             include_transforms_for_dims,
         )
+        # Always use unpruned denominator (bases), because pruning is based on
+        # unweighted bases explicitly
         den = self._denominator(
-            axis, weighted, False, include_transforms_for_dims, prune
+            axis, weighted, False, include_transforms_for_dims, False
         )
 
-        # res = self._drop_mr_cat_dims(num / den)
-        res = self._drop_mr_cat_dims(self._divide_and_apply_mask(num, den))
+        res = self._drop_mr_cat_dims(num / den)
 
-        # Apply correct mask (based on the as_array shape)
+        # Apply correct pruning mask (based on the as_array shape)
         arr = self.as_array(
             prune=prune,
             include_transforms_for_dims=include_transforms_for_dims,
@@ -885,14 +886,6 @@ class CrunchCube(object):
             return np.sum(den, axis=new_axis)[index]
         except np.AxisError:
             return den
-
-    @staticmethod
-    def _divide_and_apply_mask(numerator, denominator):
-        if type(denominator) is not np.ma.core.MaskedArray:
-            return numerator / denominator
-        result = numerator / denominator.data
-        mask = (numerator * denominator).mask
-        return np.ma.masked_array(result, mask)
 
     def _drop_mr_cat_dims(self, array, fix_valids=False):
         """Return ndarray reflecting *array* with MR_CAT dims dropped.
