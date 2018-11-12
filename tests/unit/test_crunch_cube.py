@@ -311,6 +311,9 @@ class DescribeCrunchCube(object):
         # ---9 - MR x MR x CAT---
         ((DT.MR, DT.MR, DT.CAT),
          ((0, True), (1, True), (2, True), (None, True), ((1, 2), True))),
+        # ---10 - No dimensions---
+        ((),
+         ((0, False), (1, False), (None, False))),
     ])
     def allowed_fixture(self, request):
         dimension_types, axis_cases = request.param

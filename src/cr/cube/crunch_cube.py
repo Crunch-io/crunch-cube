@@ -997,6 +997,10 @@ class CrunchCube(object):
         In case the calculation is requested over CA items dimension, it is not
         valid. It's valid in all other cases.
         """
+        if not self.dimensions:
+            # In case of no dimensions any direction is not allowed
+            return False
+
         if axis is None:
             # If table direction was requested, we must ensure that each slice
             # doesn't have the CA items dimension (thus the [-2:] part). It's
