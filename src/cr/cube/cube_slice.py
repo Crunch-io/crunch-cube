@@ -514,3 +514,13 @@ class CubeSlice(object):
         elif not isinstance(result, np.ndarray):
             result = np.array([result])
         return result
+
+    def margin(self, axis=None, weighted=True, include_missing=False,
+               include_transforms_for_dims=None, prune=False):
+        return self._call_cube_method(
+            'margin',
+            axis=axis, weighted=weighted,
+            include_missing=include_missing,
+            include_transforms_for_dims=include_transforms_for_dims,
+            prune=prune,
+        )

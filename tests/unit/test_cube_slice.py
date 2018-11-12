@@ -255,7 +255,10 @@ class TestCubeSlice(object):
         # Assert arguments are passed correctly
         cs.margin(axis=0)
         # Expect axis to be increased by 1, because 3D
-        cs._cube.margin.assert_called_once_with(axis=1)
+        cs._cube.margin.assert_called_once_with(
+            axis=1, include_missing=False, include_transforms_for_dims=None,
+            prune=False, weighted=True,
+        )
 
         # Assert correct slice is returned when index is set
         assert cs.margin() == array[1]
@@ -368,7 +371,10 @@ class TestCubeSlice(object):
         cube.margin.return_value = np.array([0, 1, 2])
         cs = CubeSlice(cube, 0, ca_as_0th=True)
         cs.margin(axis=None)
-        cube.margin.assert_called_once_with(axis=1)
+        cube.margin.assert_called_once_with(
+            axis=1, include_missing=False, include_transforms_for_dims=None,
+            prune=False, weighted=True
+        )
 
     def test_update_hs_dims(self):
         '''Test if H&S dims are updated for 3D cubes.'''
