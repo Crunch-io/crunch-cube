@@ -1,0 +1,2275 @@
+{
+    "query": {
+        "dimensions": [
+            {
+                "each": "https://app.crunch.io/api/datasets/3aefb7da75f643c9a36ed70882465c3d/variables/000317/"
+            },
+            {
+                "variable": "https://app.crunch.io/api/datasets/3aefb7da75f643c9a36ed70882465c3d/variables/000317/"
+            },
+            {
+                "variable": "https://app.crunch.io/api/datasets/3aefb7da75f643c9a36ed70882465c3d/variables/47a800ed909a417c96d1f3bdc584b420/"
+            }
+        ],
+        "measures": {
+            "count": {
+                "args": [],
+                "function": "cube_count"
+            }
+        },
+        "weight": "https://app.crunch.io/api/datasets/3aefb7da75f643c9a36ed70882465c3d/variables/43dd76dfe4ce4dbabdbe4a6792d1635d/"
+    },
+    "query_environment": {
+        "filter": []
+    },
+    "result": {
+        "counts": [
+            5268,
+            6780,
+            0,
+            0,
+            0,
+            1567,
+            1538,
+            0,
+            0,
+            0,
+            696,
+            587,
+            0,
+            0,
+            0,
+            379,
+            313,
+            0,
+            0,
+            0,
+            715,
+            637,
+            0,
+            0,
+            0,
+            3051,
+            2748,
+            0,
+            0,
+            0,
+            1644,
+            1082,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            2507,
+            3466,
+            0,
+            0,
+            0,
+            1050,
+            1124,
+            0,
+            0,
+            0,
+            553,
+            559,
+            0,
+            0,
+            0,
+            367,
+            382,
+            0,
+            0,
+            0,
+            828,
+            1035,
+            0,
+            0,
+            0,
+            2843,
+            2982,
+            0,
+            0,
+            0,
+            5172,
+            4137,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            7715,
+            7645,
+            0,
+            0,
+            0,
+            1749,
+            2447,
+            0,
+            0,
+            0,
+            518,
+            785,
+            0,
+            0,
+            0,
+            231,
+            258,
+            0,
+            0,
+            0,
+            297,
+            395,
+            0,
+            0,
+            0,
+            505,
+            619,
+            0,
+            0,
+            0,
+            2305,
+            1536,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1471,
+            1576,
+            0,
+            0,
+            0,
+            553,
+            475,
+            0,
+            0,
+            0,
+            293,
+            240,
+            0,
+            0,
+            0,
+            162,
+            165,
+            0,
+            0,
+            0,
+            396,
+            431,
+            0,
+            0,
+            0,
+            1059,
+            1065,
+            0,
+            0,
+            0,
+            9386,
+            9733,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            6656,
+            7009,
+            0,
+            0,
+            0,
+            679,
+            584,
+            0,
+            0,
+            0,
+            278,
+            259,
+            0,
+            0,
+            0,
+            155,
+            152,
+            0,
+            0,
+            0,
+            333,
+            307,
+            0,
+            0,
+            0,
+            689,
+            654,
+            0,
+            0,
+            0,
+            4530,
+            4720,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            170,
+            268,
+            0,
+            0,
+            0,
+            145,
+            253,
+            0,
+            0,
+            0,
+            145,
+            171,
+            0,
+            0,
+            0,
+            70,
+            140,
+            0,
+            0,
+            0,
+            190,
+            433,
+            0,
+            0,
+            0,
+            871,
+            1210,
+            0,
+            0,
+            0,
+            11729,
+            11210,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            73,
+            31,
+            0,
+            0,
+            0,
+            66,
+            29,
+            0,
+            0,
+            0,
+            42,
+            22,
+            0,
+            0,
+            0,
+            30,
+            16,
+            0,
+            0,
+            0,
+            87,
+            23,
+            0,
+            0,
+            0,
+            185,
+            152,
+            0,
+            0,
+            0,
+            12837,
+            13412,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            781,
+            737,
+            0,
+            0,
+            0,
+            180,
+            147,
+            0,
+            0,
+            0,
+            104,
+            69,
+            0,
+            0,
+            0,
+            73,
+            33,
+            0,
+            0,
+            0,
+            177,
+            125,
+            0,
+            0,
+            0,
+            152,
+            78,
+            0,
+            0,
+            0,
+            11853,
+            12496,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            449,
+            275,
+            0,
+            0,
+            0,
+            70,
+            61,
+            0,
+            0,
+            0,
+            45,
+            32,
+            0,
+            0,
+            0,
+            31,
+            30,
+            0,
+            0,
+            0,
+            121,
+            104,
+            0,
+            0,
+            0,
+            70,
+            65,
+            0,
+            0,
+            0,
+            12534,
+            13118,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            138,
+            108,
+            0,
+            0,
+            0,
+            67,
+            54,
+            0,
+            0,
+            0,
+            33,
+            26,
+            0,
+            0,
+            0,
+            33,
+            24,
+            0,
+            0,
+            0,
+            97,
+            80,
+            0,
+            0,
+            0,
+            184,
+            140,
+            0,
+            0,
+            0,
+            12768,
+            13253,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            7,
+            22,
+            0,
+            0,
+            0,
+            6,
+            21,
+            0,
+            0,
+            0,
+            3,
+            13,
+            0,
+            0,
+            0,
+            2,
+            24,
+            0,
+            0,
+            0,
+            9,
+            50,
+            0,
+            0,
+            0,
+            61,
+            156,
+            0,
+            0,
+            0,
+            13232,
+            13399,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            46,
+            214,
+            0,
+            0,
+            0,
+            49,
+            226,
+            0,
+            0,
+            0,
+            45,
+            139,
+            0,
+            0,
+            0,
+            38,
+            64,
+            0,
+            0,
+            0,
+            59,
+            118,
+            0,
+            0,
+            0,
+            387,
+            374,
+            0,
+            0,
+            0,
+            12696,
+            12550,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ],
+        "dimensions": [
+            {
+                "derived": true,
+                "references": {
+                    "alias": "usage_grid",
+                    "description": "When was the last time you used this app?",
+                    "name": "[Brand] Usage",
+                    "subreferences": [
+                        {
+                            "alias": "usage_Instagram",
+                            "name": "Instagram"
+                        },
+                        {
+                            "alias": "usage_Snapchat",
+                            "name": "Snapchat"
+                        },
+                        {
+                            "alias": "usage_YouTube",
+                            "name": "YouTube"
+                        },
+                        {
+                            "alias": "usage_Twitter",
+                            "name": "Twitter"
+                        },
+                        {
+                            "alias": "usage_WhatsApp",
+                            "name": "WhatsApp"
+                        },
+                        {
+                            "alias": "usage_Musical_ly",
+                            "name": "Musical.ly"
+                        },
+                        {
+                            "alias": "usage_BigoLive",
+                            "name": "Bigo Live"
+                        },
+                        {
+                            "alias": "usage_Line",
+                            "name": "Line"
+                        },
+                        {
+                            "alias": "usage_BBM",
+                            "name": "BBM"
+                        },
+                        {
+                            "alias": "usage_Path",
+                            "name": "Path"
+                        },
+                        {
+                            "alias": "usage_MixChannel",
+                            "name": "MixChannel"
+                        },
+                        {
+                            "alias": "usage_SNOW",
+                            "name": "SNOW"
+                        }
+                    ],
+                    "view": {
+                        "column_width": null,
+                        "include_missing": false,
+                        "show_counts": false
+                    }
+                },
+                "type": {
+                    "class": "enum",
+                    "elements": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0001",
+                                "references": {
+                                    "alias": "usage_Instagram",
+                                    "name": "Instagram"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "In the past day",
+                                            "numeric_value": 1
+                                        },
+                                        {
+                                            "id": 2,
+                                            "missing": false,
+                                            "name": "In the past week, but not in the last day",
+                                            "numeric_value": 2
+                                        },
+                                        {
+                                            "id": 3,
+                                            "missing": false,
+                                            "name": "In the past month, but not in the past week",
+                                            "numeric_value": 3
+                                        },
+                                        {
+                                            "id": 4,
+                                            "missing": false,
+                                            "name": "In the past 3 months, but not in the last month",
+                                            "numeric_value": 4
+                                        },
+                                        {
+                                            "id": 5,
+                                            "missing": false,
+                                            "name": "Over 3 months ago",
+                                            "numeric_value": 5
+                                        },
+                                        {
+                                            "id": 6,
+                                            "missing": false,
+                                            "name": "Never",
+                                            "numeric_value": 6
+                                        },
+                                        {
+                                            "id": 9,
+                                            "missing": true,
+                                            "name": "not asked",
+                                            "numeric_value": null
+                                        },
+                                        {
+                                            "id": 8,
+                                            "missing": true,
+                                            "name": "skipped",
+                                            "numeric_value": null
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null,
+                                            "selected": false
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0002",
+                                "references": {
+                                    "alias": "usage_Snapchat",
+                                    "name": "Snapchat"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "In the past day",
+                                            "numeric_value": 1
+                                        },
+                                        {
+                                            "id": 2,
+                                            "missing": false,
+                                            "name": "In the past week, but not in the last day",
+                                            "numeric_value": 2
+                                        },
+                                        {
+                                            "id": 3,
+                                            "missing": false,
+                                            "name": "In the past month, but not in the past week",
+                                            "numeric_value": 3
+                                        },
+                                        {
+                                            "id": 4,
+                                            "missing": false,
+                                            "name": "In the past 3 months, but not in the last month",
+                                            "numeric_value": 4
+                                        },
+                                        {
+                                            "id": 5,
+                                            "missing": false,
+                                            "name": "Over 3 months ago",
+                                            "numeric_value": 5
+                                        },
+                                        {
+                                            "id": 6,
+                                            "missing": false,
+                                            "name": "Never",
+                                            "numeric_value": 6
+                                        },
+                                        {
+                                            "id": 9,
+                                            "missing": true,
+                                            "name": "not asked",
+                                            "numeric_value": null
+                                        },
+                                        {
+                                            "id": 8,
+                                            "missing": true,
+                                            "name": "skipped",
+                                            "numeric_value": null
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null,
+                                            "selected": false
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 3,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0003",
+                                "references": {
+                                    "alias": "usage_YouTube",
+                                    "name": "YouTube"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "In the past day",
+                                            "numeric_value": 1
+                                        },
+                                        {
+                                            "id": 2,
+                                            "missing": false,
+                                            "name": "In the past week, but not in the last day",
+                                            "numeric_value": 2
+                                        },
+                                        {
+                                            "id": 3,
+                                            "missing": false,
+                                            "name": "In the past month, but not in the past week",
+                                            "numeric_value": 3
+                                        },
+                                        {
+                                            "id": 4,
+                                            "missing": false,
+                                            "name": "In the past 3 months, but not in the last month",
+                                            "numeric_value": 4
+                                        },
+                                        {
+                                            "id": 5,
+                                            "missing": false,
+                                            "name": "Over 3 months ago",
+                                            "numeric_value": 5
+                                        },
+                                        {
+                                            "id": 6,
+                                            "missing": false,
+                                            "name": "Never",
+                                            "numeric_value": 6
+                                        },
+                                        {
+                                            "id": 9,
+                                            "missing": true,
+                                            "name": "not asked",
+                                            "numeric_value": null
+                                        },
+                                        {
+                                            "id": 8,
+                                            "missing": true,
+                                            "name": "skipped",
+                                            "numeric_value": null
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null,
+                                            "selected": false
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 4,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0004",
+                                "references": {
+                                    "alias": "usage_Twitter",
+                                    "name": "Twitter"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "In the past day",
+                                            "numeric_value": 1
+                                        },
+                                        {
+                                            "id": 2,
+                                            "missing": false,
+                                            "name": "In the past week, but not in the last day",
+                                            "numeric_value": 2
+                                        },
+                                        {
+                                            "id": 3,
+                                            "missing": false,
+                                            "name": "In the past month, but not in the past week",
+                                            "numeric_value": 3
+                                        },
+                                        {
+                                            "id": 4,
+                                            "missing": false,
+                                            "name": "In the past 3 months, but not in the last month",
+                                            "numeric_value": 4
+                                        },
+                                        {
+                                            "id": 5,
+                                            "missing": false,
+                                            "name": "Over 3 months ago",
+                                            "numeric_value": 5
+                                        },
+                                        {
+                                            "id": 6,
+                                            "missing": false,
+                                            "name": "Never",
+                                            "numeric_value": 6
+                                        },
+                                        {
+                                            "id": 9,
+                                            "missing": true,
+                                            "name": "not asked",
+                                            "numeric_value": null
+                                        },
+                                        {
+                                            "id": 8,
+                                            "missing": true,
+                                            "name": "skipped",
+                                            "numeric_value": null
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null,
+                                            "selected": false
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 5,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0005",
+                                "references": {
+                                    "alias": "usage_WhatsApp",
+                                    "name": "WhatsApp"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "In the past day",
+                                            "numeric_value": 1
+                                        },
+                                        {
+                                            "id": 2,
+                                            "missing": false,
+                                            "name": "In the past week, but not in the last day",
+                                            "numeric_value": 2
+                                        },
+                                        {
+                                            "id": 3,
+                                            "missing": false,
+                                            "name": "In the past month, but not in the past week",
+                                            "numeric_value": 3
+                                        },
+                                        {
+                                            "id": 4,
+                                            "missing": false,
+                                            "name": "In the past 3 months, but not in the last month",
+                                            "numeric_value": 4
+                                        },
+                                        {
+                                            "id": 5,
+                                            "missing": false,
+                                            "name": "Over 3 months ago",
+                                            "numeric_value": 5
+                                        },
+                                        {
+                                            "id": 6,
+                                            "missing": false,
+                                            "name": "Never",
+                                            "numeric_value": 6
+                                        },
+                                        {
+                                            "id": 9,
+                                            "missing": true,
+                                            "name": "not asked",
+                                            "numeric_value": null
+                                        },
+                                        {
+                                            "id": 8,
+                                            "missing": true,
+                                            "name": "skipped",
+                                            "numeric_value": null
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null,
+                                            "selected": false
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 6,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0006",
+                                "references": {
+                                    "alias": "usage_Musical_ly",
+                                    "name": "Musical.ly"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "In the past day",
+                                            "numeric_value": 1
+                                        },
+                                        {
+                                            "id": 2,
+                                            "missing": false,
+                                            "name": "In the past week, but not in the last day",
+                                            "numeric_value": 2
+                                        },
+                                        {
+                                            "id": 3,
+                                            "missing": false,
+                                            "name": "In the past month, but not in the past week",
+                                            "numeric_value": 3
+                                        },
+                                        {
+                                            "id": 4,
+                                            "missing": false,
+                                            "name": "In the past 3 months, but not in the last month",
+                                            "numeric_value": 4
+                                        },
+                                        {
+                                            "id": 5,
+                                            "missing": false,
+                                            "name": "Over 3 months ago",
+                                            "numeric_value": 5
+                                        },
+                                        {
+                                            "id": 6,
+                                            "missing": false,
+                                            "name": "Never",
+                                            "numeric_value": 6
+                                        },
+                                        {
+                                            "id": 9,
+                                            "missing": true,
+                                            "name": "not asked",
+                                            "numeric_value": null
+                                        },
+                                        {
+                                            "id": 8,
+                                            "missing": true,
+                                            "name": "skipped",
+                                            "numeric_value": null
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null,
+                                            "selected": false
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 7,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0007",
+                                "references": {
+                                    "alias": "usage_BigoLive",
+                                    "name": "Bigo Live"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "In the past day",
+                                            "numeric_value": 1
+                                        },
+                                        {
+                                            "id": 2,
+                                            "missing": false,
+                                            "name": "In the past week, but not in the last day",
+                                            "numeric_value": 2
+                                        },
+                                        {
+                                            "id": 3,
+                                            "missing": false,
+                                            "name": "In the past month, but not in the past week",
+                                            "numeric_value": 3
+                                        },
+                                        {
+                                            "id": 4,
+                                            "missing": false,
+                                            "name": "In the past 3 months, but not in the last month",
+                                            "numeric_value": 4
+                                        },
+                                        {
+                                            "id": 5,
+                                            "missing": false,
+                                            "name": "Over 3 months ago",
+                                            "numeric_value": 5
+                                        },
+                                        {
+                                            "id": 6,
+                                            "missing": false,
+                                            "name": "Never",
+                                            "numeric_value": 6
+                                        },
+                                        {
+                                            "id": 9,
+                                            "missing": true,
+                                            "name": "not asked",
+                                            "numeric_value": null
+                                        },
+                                        {
+                                            "id": 8,
+                                            "missing": true,
+                                            "name": "skipped",
+                                            "numeric_value": null
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null,
+                                            "selected": false
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 8,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0008",
+                                "references": {
+                                    "alias": "usage_Line",
+                                    "name": "Line"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "In the past day",
+                                            "numeric_value": 1
+                                        },
+                                        {
+                                            "id": 2,
+                                            "missing": false,
+                                            "name": "In the past week, but not in the last day",
+                                            "numeric_value": 2
+                                        },
+                                        {
+                                            "id": 3,
+                                            "missing": false,
+                                            "name": "In the past month, but not in the past week",
+                                            "numeric_value": 3
+                                        },
+                                        {
+                                            "id": 4,
+                                            "missing": false,
+                                            "name": "In the past 3 months, but not in the last month",
+                                            "numeric_value": 4
+                                        },
+                                        {
+                                            "id": 5,
+                                            "missing": false,
+                                            "name": "Over 3 months ago",
+                                            "numeric_value": 5
+                                        },
+                                        {
+                                            "id": 6,
+                                            "missing": false,
+                                            "name": "Never",
+                                            "numeric_value": 6
+                                        },
+                                        {
+                                            "id": 9,
+                                            "missing": true,
+                                            "name": "not asked",
+                                            "numeric_value": null
+                                        },
+                                        {
+                                            "id": 8,
+                                            "missing": true,
+                                            "name": "skipped",
+                                            "numeric_value": null
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null,
+                                            "selected": false
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 9,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0009",
+                                "references": {
+                                    "alias": "usage_BBM",
+                                    "name": "BBM"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "In the past day",
+                                            "numeric_value": 1
+                                        },
+                                        {
+                                            "id": 2,
+                                            "missing": false,
+                                            "name": "In the past week, but not in the last day",
+                                            "numeric_value": 2
+                                        },
+                                        {
+                                            "id": 3,
+                                            "missing": false,
+                                            "name": "In the past month, but not in the past week",
+                                            "numeric_value": 3
+                                        },
+                                        {
+                                            "id": 4,
+                                            "missing": false,
+                                            "name": "In the past 3 months, but not in the last month",
+                                            "numeric_value": 4
+                                        },
+                                        {
+                                            "id": 5,
+                                            "missing": false,
+                                            "name": "Over 3 months ago",
+                                            "numeric_value": 5
+                                        },
+                                        {
+                                            "id": 6,
+                                            "missing": false,
+                                            "name": "Never",
+                                            "numeric_value": 6
+                                        },
+                                        {
+                                            "id": 9,
+                                            "missing": true,
+                                            "name": "not asked",
+                                            "numeric_value": null
+                                        },
+                                        {
+                                            "id": 8,
+                                            "missing": true,
+                                            "name": "skipped",
+                                            "numeric_value": null
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null,
+                                            "selected": false
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 10,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0010",
+                                "references": {
+                                    "alias": "usage_Path",
+                                    "name": "Path"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "In the past day",
+                                            "numeric_value": 1
+                                        },
+                                        {
+                                            "id": 2,
+                                            "missing": false,
+                                            "name": "In the past week, but not in the last day",
+                                            "numeric_value": 2
+                                        },
+                                        {
+                                            "id": 3,
+                                            "missing": false,
+                                            "name": "In the past month, but not in the past week",
+                                            "numeric_value": 3
+                                        },
+                                        {
+                                            "id": 4,
+                                            "missing": false,
+                                            "name": "In the past 3 months, but not in the last month",
+                                            "numeric_value": 4
+                                        },
+                                        {
+                                            "id": 5,
+                                            "missing": false,
+                                            "name": "Over 3 months ago",
+                                            "numeric_value": 5
+                                        },
+                                        {
+                                            "id": 6,
+                                            "missing": false,
+                                            "name": "Never",
+                                            "numeric_value": 6
+                                        },
+                                        {
+                                            "id": 9,
+                                            "missing": true,
+                                            "name": "not asked",
+                                            "numeric_value": null
+                                        },
+                                        {
+                                            "id": 8,
+                                            "missing": true,
+                                            "name": "skipped",
+                                            "numeric_value": null
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null,
+                                            "selected": false
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 11,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0011",
+                                "references": {
+                                    "alias": "usage_MixChannel",
+                                    "name": "MixChannel"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "In the past day",
+                                            "numeric_value": 1
+                                        },
+                                        {
+                                            "id": 2,
+                                            "missing": false,
+                                            "name": "In the past week, but not in the last day",
+                                            "numeric_value": 2
+                                        },
+                                        {
+                                            "id": 3,
+                                            "missing": false,
+                                            "name": "In the past month, but not in the past week",
+                                            "numeric_value": 3
+                                        },
+                                        {
+                                            "id": 4,
+                                            "missing": false,
+                                            "name": "In the past 3 months, but not in the last month",
+                                            "numeric_value": 4
+                                        },
+                                        {
+                                            "id": 5,
+                                            "missing": false,
+                                            "name": "Over 3 months ago",
+                                            "numeric_value": 5
+                                        },
+                                        {
+                                            "id": 6,
+                                            "missing": false,
+                                            "name": "Never",
+                                            "numeric_value": 6
+                                        },
+                                        {
+                                            "id": 9,
+                                            "missing": true,
+                                            "name": "not asked",
+                                            "numeric_value": null
+                                        },
+                                        {
+                                            "id": 8,
+                                            "missing": true,
+                                            "name": "skipped",
+                                            "numeric_value": null
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null,
+                                            "selected": false
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 12,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0012",
+                                "references": {
+                                    "alias": "usage_SNOW",
+                                    "name": "SNOW"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "In the past day",
+                                            "numeric_value": 1
+                                        },
+                                        {
+                                            "id": 2,
+                                            "missing": false,
+                                            "name": "In the past week, but not in the last day",
+                                            "numeric_value": 2
+                                        },
+                                        {
+                                            "id": 3,
+                                            "missing": false,
+                                            "name": "In the past month, but not in the past week",
+                                            "numeric_value": 3
+                                        },
+                                        {
+                                            "id": 4,
+                                            "missing": false,
+                                            "name": "In the past 3 months, but not in the last month",
+                                            "numeric_value": 4
+                                        },
+                                        {
+                                            "id": 5,
+                                            "missing": false,
+                                            "name": "Over 3 months ago",
+                                            "numeric_value": 5
+                                        },
+                                        {
+                                            "id": 6,
+                                            "missing": false,
+                                            "name": "Never",
+                                            "numeric_value": 6
+                                        },
+                                        {
+                                            "id": 9,
+                                            "missing": true,
+                                            "name": "not asked",
+                                            "numeric_value": null
+                                        },
+                                        {
+                                            "id": 8,
+                                            "missing": true,
+                                            "name": "skipped",
+                                            "numeric_value": null
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null,
+                                            "selected": false
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        }
+                    ],
+                    "subtype": {
+                        "class": "variable"
+                    }
+                }
+            },
+            {
+                "derived": false,
+                "references": {
+                    "alias": "usage_grid",
+                    "description": "When was the last time you used this app?",
+                    "name": "[Brand] Usage",
+                    "subreferences": [
+                        {
+                            "alias": "usage_Instagram",
+                            "name": "Instagram"
+                        },
+                        {
+                            "alias": "usage_Snapchat",
+                            "name": "Snapchat"
+                        },
+                        {
+                            "alias": "usage_YouTube",
+                            "name": "YouTube"
+                        },
+                        {
+                            "alias": "usage_Twitter",
+                            "name": "Twitter"
+                        },
+                        {
+                            "alias": "usage_WhatsApp",
+                            "name": "WhatsApp"
+                        },
+                        {
+                            "alias": "usage_Musical_ly",
+                            "name": "Musical.ly"
+                        },
+                        {
+                            "alias": "usage_BigoLive",
+                            "name": "Bigo Live"
+                        },
+                        {
+                            "alias": "usage_Line",
+                            "name": "Line"
+                        },
+                        {
+                            "alias": "usage_BBM",
+                            "name": "BBM"
+                        },
+                        {
+                            "alias": "usage_Path",
+                            "name": "Path"
+                        },
+                        {
+                            "alias": "usage_MixChannel",
+                            "name": "MixChannel"
+                        },
+                        {
+                            "alias": "usage_SNOW",
+                            "name": "SNOW"
+                        }
+                    ],
+                    "view": {
+                        "column_width": null,
+                        "include_missing": false,
+                        "show_counts": false
+                    }
+                },
+                "type": {
+                    "categories": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "name": "In the past day",
+                            "numeric_value": 1
+                        },
+                        {
+                            "id": 2,
+                            "missing": false,
+                            "name": "In the past week, but not in the last day",
+                            "numeric_value": 2
+                        },
+                        {
+                            "id": 3,
+                            "missing": false,
+                            "name": "In the past month, but not in the past week",
+                            "numeric_value": 3
+                        },
+                        {
+                            "id": 4,
+                            "missing": false,
+                            "name": "In the past 3 months, but not in the last month",
+                            "numeric_value": 4
+                        },
+                        {
+                            "id": 5,
+                            "missing": false,
+                            "name": "Over 3 months ago",
+                            "numeric_value": 5
+                        },
+                        {
+                            "id": 6,
+                            "missing": false,
+                            "name": "Never",
+                            "numeric_value": 6
+                        },
+                        {
+                            "id": 9,
+                            "missing": true,
+                            "name": "not asked",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 8,
+                            "missing": true,
+                            "name": "skipped",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": -1,
+                            "missing": true,
+                            "name": "No Data",
+                            "numeric_value": null,
+                            "selected": false
+                        }
+                    ],
+                    "class": "categorical",
+                    "ordinal": false,
+                    "subvariables": [
+                        "0001",
+                        "0002",
+                        "0003",
+                        "0004",
+                        "0005",
+                        "0006",
+                        "0007",
+                        "0008",
+                        "0009",
+                        "0010",
+                        "0011",
+                        "0012"
+                    ]
+                }
+            },
+            {
+                "derived": false,
+                "references": {
+                    "alias": "gender2cat",
+                    "description": "Are you male or female?",
+                    "discarded": false,
+                    "format": {
+                        "summary": {
+                            "digits": 0
+                        }
+                    },
+                    "name": "Gender",
+                    "notes": "",
+                    "view": {
+                        "column_width": null,
+                        "include_missing": false,
+                        "show_counts": false,
+                        "show_numeric_values": false
+                    }
+                },
+                "type": {
+                    "categories": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "name": "Male",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 2,
+                            "missing": false,
+                            "name": "Female",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 9,
+                            "missing": true,
+                            "name": "not asked",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 8,
+                            "missing": true,
+                            "name": "skipped",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": -1,
+                            "missing": true,
+                            "name": "No Data",
+                            "numeric_value": null
+                        }
+                    ],
+                    "class": "categorical",
+                    "ordinal": false
+                }
+            }
+        ],
+        "element": "crunch:cube",
+        "measures": {
+            "count": {
+                "data": [
+                    807.0319999999988,
+                    1149.3788999999965,
+                    0,
+                    0,
+                    0,
+                    280.9202,
+                    358.6191000000008,
+                    0,
+                    0,
+                    0,
+                    133.6142000000001,
+                    145.79300000000012,
+                    0,
+                    0,
+                    0,
+                    111.15220000000004,
+                    74.77919999999993,
+                    0,
+                    0,
+                    0,
+                    192.56540000000007,
+                    193.5960000000001,
+                    0,
+                    0,
+                    0,
+                    1053.9514000000024,
+                    821.4441999999982,
+                    0,
+                    0,
+                    0,
+                    235.04890000000037,
+                    238.06810000000004,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    625.773800000004,
+                    725.8424000000006,
+                    0,
+                    0,
+                    0,
+                    196.39420000000044,
+                    253.04080000000062,
+                    0,
+                    0,
+                    0,
+                    143.1135000000002,
+                    139.87830000000002,
+                    0,
+                    0,
+                    0,
+                    103.97980000000003,
+                    102.3926,
+                    0,
+                    0,
+                    0,
+                    336.4187000000001,
+                    289.93580000000037,
+                    0,
+                    0,
+                    0,
+                    1098.7115000000008,
+                    1157.0831999999973,
+                    0,
+                    0,
+                    0,
+                    309.8928000000005,
+                    313.50540000000035,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1382.0630999999867,
+                    1156.0773999999985,
+                    0,
+                    0,
+                    0,
+                    718.7748000000033,
+                    812.2358999999988,
+                    0,
+                    0,
+                    0,
+                    164.57770000000028,
+                    340.17870000000045,
+                    0,
+                    0,
+                    0,
+                    100.49040000000005,
+                    118.52589999999995,
+                    0,
+                    0,
+                    0,
+                    97.64699999999999,
+                    151.82100000000005,
+                    0,
+                    0,
+                    0,
+                    202.42190000000028,
+                    232.7614000000003,
+                    0,
+                    0,
+                    0,
+                    148.30940000000015,
+                    170.0782,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    2814.2842999999325,
+                    2981.6785000000764,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    729.6135000000082,
+                    799.6292999999986,
+                    0,
+                    0,
+                    0,
+                    161.3057999999995,
+                    232.31700000000043,
+                    0,
+                    0,
+                    0,
+                    73.82529999999994,
+                    87.36209999999991,
+                    0,
+                    0,
+                    0,
+                    53.73309999999996,
+                    33.98349999999998,
+                    0,
+                    0,
+                    0,
+                    101.9765,
+                    79.87939999999985,
+                    0,
+                    0,
+                    0,
+                    271.08889999999957,
+                    209.41950000000017,
+                    0,
+                    0,
+                    0,
+                    1422.7411999999774,
+                    1539.0877000000148,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    36.90299999999999,
+                    15.435600000000012,
+                    0,
+                    0,
+                    0,
+                    31.35889999999999,
+                    22.248699999999996,
+                    0,
+                    0,
+                    0,
+                    16.66149999999999,
+                    23.691299999999995,
+                    0,
+                    0,
+                    0,
+                    31.752099999999984,
+                    11.416000000000007,
+                    0,
+                    0,
+                    0,
+                    8.833900000000014,
+                    74.94549999999984,
+                    0,
+                    0,
+                    0,
+                    314.37400000000036,
+                    469.2866000000012,
+                    0,
+                    0,
+                    0,
+                    2374.400899999955,
+                    2364.6548000000375,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    2814.2842999999325,
+                    2981.6785000000764,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    2814.2842999999325,
+                    2981.6785000000764,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    2814.2842999999325,
+                    2981.6785000000764,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    2814.2842999999325,
+                    2981.6785000000764,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    2814.2842999999325,
+                    2981.6785000000764,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    2814.2842999999325,
+                    2981.6785000000764,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "metadata": {
+                    "derived": true,
+                    "references": {},
+                    "type": {
+                        "class": "numeric",
+                        "integer": false,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {}
+                    }
+                },
+                "n_missing": 21209
+            }
+        },
+        "missing": 21209,
+        "n": 27005
+    }
+}

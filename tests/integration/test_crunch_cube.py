@@ -2041,3 +2041,23 @@ class TestCrunchCube(TestCase):
         # in the result). H&S shouldn't be in the MR variable, but there
         # are cases when there are.
         assert True
+
+    def test_ca_x_cat_pruning_bases(self):
+        """Assert that pruning is based on unweighted bases."""
+        cube = CrunchCube(CR.CA_SUBVAR_X_CA_CAT_X_CAT)
+        cs = cube.slices[3]
+
+        # Expectation is that the mask values are all False
+        # (i.e. not masked for pruning)
+        expected = np.zeros((6, 2), dtype=bool)
+
+        # Assert that both weighted and unweighted proportions
+        # are not pruned
+        actual = cs.proportions(weighted=True, prune=True).mask
+        np.testing.assert_array_equal(actual, expected)
+        actual = cs.proportions(weighted=False, prune=True).mask
+        np.testing.assert_array_equal(actual, expected)
+        actual = cs.proportions(axis=0, weighted=True, prune=True).mask
+        np.testing.assert_array_equal(actual, expected)
+        actual = cs.proportions(axis=1, weighted=True, prune=True).mask
+        np.testing.assert_array_equal(actual, expected)
