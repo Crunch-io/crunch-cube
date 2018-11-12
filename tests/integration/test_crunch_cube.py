@@ -19,15 +19,7 @@ class DescribeIntegratedCrunchCube(object):
     def it_provides_a_console_friendly_repr_for_a_cube(self):
         cube = CrunchCube(CR.CAT_X_CAT)
         repr_ = repr(cube)
-        assert repr_ == (
-            'CrunchCube(name=\'v4\', dim_types=\'CAT x CAT\')\n'
-            'slices[0]: CubeSlice(name=\'v4\', dim_types=\'CAT x CAT\', dims'
-            '=\'v4 x v7\')\n'
-            '      C    E\n'
-            '--  ---  ---\n'
-            'B     5    2\n'
-            'C     5    3'
-        )
+        assert repr_ == 'CrunchCube(name=\'v4\', dim_types=\'CAT x CAT\')'
 
     def it_provides_access_to_its_dimensions(self, dimensions_fixture):
         cube_response, expected_dimension_types = dimensions_fixture

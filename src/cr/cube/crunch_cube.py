@@ -72,15 +72,9 @@ class CrunchCube(object):
         """
         try:
             dimensionality = ' x '.join(dt.name for dt in self.dim_types)
-            slice_reprs = (
-                '\n'.join(
-                    'slices[%d]: %s' % (idx, repr(s))
-                    for idx, s in enumerate(self.slices)
-                )
-            )
             return (
-                "%s(name='%s', dim_types='%s')\n%s" %
-                (type(self).__name__, self.name, dimensionality, slice_reprs)
+                "%s(name='%s', dim_types='%s')" %
+                (type(self).__name__, self.name, dimensionality)
             )
         except Exception:
             return super(CrunchCube, self).__repr__()

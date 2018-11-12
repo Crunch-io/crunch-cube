@@ -428,6 +428,32 @@ def test_cat_x_mr_x_mr_pruned_rows():
     np.testing.assert_array_equal(actual_1st_tab, expected_1st_tab)
 
 
+def test_cat_x_mr_x_mr_pruned_cols():
+    cube = CrunchCube(CR.CAT_X_MR_X_MR_EMPTY_COLS)
+
+    # Not pruned
+    expected = np.array([
+        [1.42180119, 5.67259693, 0.00000000, 0.],
+        [5.96105631, 1.46479350, 22.51724162, 0.],
+        [1.79182255, 1.19879791, 23.60391651, 0.],
+        [4.67364825, 8.02124010, 93.65643860, 0.],
+        [16.0107376, 13.06260544, 206.93592858, 0.],
+    ])
+    actual = cube.as_array()[0]
+    np.testing.assert_almost_equal(actual, expected)
+
+    # Pruned
+    expected = np.array([
+        [1.42180119, 5.67259693, 0.],
+        [5.96105631, 1.46479350, 22.51724162],
+        [1.79182255, 1.19879791, 23.60391651],
+        [4.67364825, 8.02124010, 93.65643860],
+        [16.0107376, 13.06260544, 206.93592858],
+    ])
+    actual = np.ma.compress_cols(cube.as_array(prune=True)[0])
+    np.testing.assert_almost_equal(actual, expected)
+
+
 def test_cat_x_mr_x_mr_proportions_by_col():
     cube = CrunchCube(CR.CAT_X_MR_X_MR)
     # Set axis to 1 (and not 0), since 3D cube
@@ -631,32 +657,6 @@ def test_mr_props_not_pruned():
         9.50985735e-04, 1.35477929e-01, 1.86531215e-01,
     ])
     actual = cube.proportions()
-    np.testing.assert_almost_equal(actual, expected)
-
-
-def test_mr_x_mr_x_cat_pruned_rows():
-    cube = CrunchCube(CR.MR_X_MR_X_CAT)
-
-    # Not pruned
-    expected = np.array([
-        [1.42180119, 5.67259693, 0.00000000, 0.],
-        [5.96105631, 1.46479350, 22.51724162, 0.],
-        [1.79182255, 1.19879791, 23.60391651, 0.],
-        [4.67364825, 8.02124010, 93.65643860, 0.],
-        [16.0107376, 13.06260544, 206.93592858, 0.],
-    ])
-    actual = cube.as_array()[0]
-    np.testing.assert_almost_equal(actual, expected)
-
-    # Pruned
-    expected = np.array([
-        [1.42180119, 5.67259693, 0.],
-        [5.96105631, 1.46479350, 22.51724162],
-        [1.79182255, 1.19879791, 23.60391651],
-        [4.67364825, 8.02124010, 93.65643860],
-        [16.0107376, 13.06260544, 206.93592858],
-    ])
-    actual = np.ma.compress_cols(cube.as_array(prune=True)[0])
     np.testing.assert_almost_equal(actual, expected)
 
 

@@ -1,9 +1,16 @@
+# encoding: utf-8
+
+"""Integration test suite for cr.cube.cube_slice module."""
+
+import numpy as np
+import pytest
+
 from cr.cube.crunch_cube import CrunchCube
 
 from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
 
 
-class DescribeIntegratedCrunchCube(object):
+class DescribeIntegratedCubeSlice(object):
 
     def it_provides_a_console_friendly_repr_for_a_slice(self):
         cube = CrunchCube(CR.CAT_X_CAT)
@@ -17,6 +24,22 @@ class DescribeIntegratedCrunchCube(object):
             "--  ---  ---\n"
             "B     5    2\n"
             "C     5    3"
+        )
+
+    @pytest.mark.xfail(reason='WIP', strict=True)
+    def it_knows_zscore_for_MR_X_MR_X_CAT(self):
+        cube = CrunchCube(CR.MR_X_MR_X_CAT)
+        slice_ = cube.slices[0]
+
+        zscore = slice_.zscore()
+
+        np.testing.assert_array_almost_equal(
+            zscore,
+            # ---fix this expectation once we have plausible result---
+            np.array([
+                [1, 2, 3],
+                [4, 5, 6]
+            ])
         )
 
 
