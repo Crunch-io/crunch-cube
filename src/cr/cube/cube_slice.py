@@ -217,31 +217,42 @@ class CubeSlice(object):
                include_transforms_for_dims=None, prune=False):
         """Return ndarray representing slice margin across selected axis.
 
-        A margin (or basis) can be calculated for a n-dim cube, provided that
-        the dimensions of the desired directions are marginable. The dimensions
-        are marginable if they represent essentially mutualy exclusive data,
-        such as true categorical data. For multiple response types, the items
-        dimensions are not marginable, however, their categorical dimensions
-        (that represent selections) are. For categoricaly array cubes, the
-        items dimensions are not marginable, and doing a margin across them
-        will produce an error.
+        A margin (or basis) can be calculated for a contingency table, provided
+        that the dimensions of the desired directions are marginable. The
+        dimensions are marginable if they represent mutualy exclusive data,
+        such as true categorical data. For array types the items dimensions are
+        not marginable. Requesting a margin across these dimensions
+        (e.g. slice.margin(axis=0) for a categorical array cube slice) will
+        produce an error. For multiple response slices, the implicit convention
+        is that the provided direction scales to the selections dimension of the
+        slice. These cases produce meaningful data, but of a slightly different
+        shape (e.g. slice.margin(0) for a MR x CAT slice will produce 2D ndarray
+        (variable dimensions are never collapsed!)).
 
-        :param axis: Axis across which to sum. For MR variables,
+        :param axis: Axis across which to sum. Can be 0 (columns margin),
+            1 (rows margin) and None (table margin). If requested across
+            variables dimension (e.g. requesting 0 margin for CA array) it will
+            produce an error.
         :param weighted: Weighted or unweighted counts.
         :param include_missing: Include missing categories or not.
         :param include_transforms_for_dims: Indices of dimensions for which to
                include transformations
         :param prune: Perform pruning based on unweighted counts.
-        :returns: Margin (or basis) across selected axis.
+        :returns: (weighed or unweighted counts) summed across provided axis.
+            For multiple response types, items dimensions are not collapsed.
         """
 
-        return self._call_cube_method(
-            'margin',
+        axis = self._calculate_correct_axis_for_cube(axis)
+        hs_dims = self._hs_dims_for_cube(include_transforms_for_dims)
+
+        margin = self._cube.margin(
             axis=axis, weighted=weighted,
             include_missing=include_missing,
-            include_transforms_for_dims=include_transforms_for_dims,
+            include_transforms_for_dims=hs_dims,
             prune=prune,
         )
+
+        return self._extract_slice_result_from_cube(margin)
 
     @lazyproperty
     def mr_dim_ind(self):
@@ -426,7 +437,59 @@ class CubeSlice(object):
             if not self.ca_as_0th:
                 result = result[-2:]
             return result
-        return self._update_result(result)
+        return self._extract_slice_result_from_cube(result)
+
+    def _calculate_correct_axis_for_cube(self, axis):
+        """Return correct axis for cube, based on ndim.
+
+        If cube has 3 dimensions, increase axis by 1. This will translate the
+        default 0 (cols direction) and 1 (rows direction) to actual 1
+        (cols direction) and 2 (rows direction). This is needed because the
+        0th dimension of the 3D cube is only used to slice across. The actual
+        margins need to be calculated for each slice separately, and since
+        they're implemented as an ndarray, the direction needs to be increased
+        by one. For the value of `None`, don't modify the axis parameter.
+
+        :param axis: 0, 1, or None. Axis that will be passed to self._cube
+                     methods. If the cube is 3D, the axis is typically
+                     increased by 1, to represent correct measure direction.
+        :returns: int or None, representing the updated axis to pass to cube
+        """
+
+        if self._cube.ndim < 3:
+            if self.ca_as_0th and axis is None:
+                # Special case for CA slices (in multitables). In this case,
+                # we need to calculate a measurement across CA categories
+                # dimension (and not across items, because it's not
+                # allowed). The value for the axis parameter of None, would
+                # imply both cat and items dimensions, and we don't want that.
+                return 1
+            return axis
+
+        # Expected usage of the 'axis' parameter from CubeSlice is 0, 1, or
+        # None. CrunchCube handles all other logic. The only 'smart' thing
+        # about the handling here, is that the axes are increased for 3D cubes.
+        # This way the 3Dness is hidden from the user and he still sees 2D
+        # crosstabs, with col and row axes (0 and 1), which are transformed to
+        # corresponding numbers in case of 3D cubes (namely 1 and 2). In the
+        # case of None, we need to analyze across all valid dimensions, and the
+        # CrunchCube takes care of that (no need to update axis if it's None).
+        # If the user provides a tuple, it's considered that he "knows" what
+        # he's doing, and the axis argument is not updated in this case.
+        if isinstance(axis, int):
+            axis += 1
+        return axis
+
+    def _hs_dims_for_cube(self, hs_dims):
+        if self._cube.ndim < 3:
+            return hs_dims
+
+        # Keep the 2D illusion for the user. If a user sees a 2D slice, he
+        # still needs to be able to address both dimensions (for which he
+        # wants the H&S included) as 0 and 1. Since these are offset by a 0
+        # dimension in a 3D case, inside the cr.cube, we need to increase
+        # the indexes of the required dims.
+        return [d + 1 for d in hs_dims] if hs_dims is not None else None
 
     def _intersperse_hs_in_std_res(self, hs_dims, res):
         for dim, inds in enumerate(self.inserted_hs_indices()):
@@ -483,58 +546,26 @@ class CubeSlice(object):
             # If cube is 2D it doesn't actually have slices (itself is a slice).
             # In this case we don't need to convert any arguments, but just
             # pass them to the underlying cube (which is the slice).
-            if self.ca_as_0th:
-                axis = kwargs.get('axis', False)
-                if axis is None:
-                    # Special case for CA slices (in multitables). In this case,
-                    # we need to calculate a measurement across CA categories
-                    # dimension (and not across items, because it's not
-                    # allowed). The value for the axis parameter of None, would
-                    # incur the items dimension, and we don't want that.
-                    kwargs['axis'] = 1
             return kwargs
 
         # Handling API methods that include 'axis' parameter
 
-        axis = kwargs.get('axis')
-        # Expected usage of the 'axis' parameter from CubeSlice is 0, 1, or
-        # None. CrunchCube handles all other logic. The only 'smart' thing
-        # about the handling here, is that the axes are increased for 3D cubes.
-        # This way the 3Dness is hidden from the user and he still sees 2D
-        # crosstabs, with col and row axes (0 and 1), which are transformed to
-        # corresponding numbers in case of 3D cubes (namely 1 and 2). In the
-        # case of None, we need to analyze across all valid dimensions, and the
-        # CrunchCube takes care of that (no need to update axis if it's None).
-        # If the user provides a tuple, it's considered that he "knows" what
-        # he's doing, and the axis argument is not updated in this case.
-        if isinstance(axis, int):
-            kwargs['axis'] += 1
+        axis = self._calculate_correct_axis_for_cube(kwargs.get('axis'))
+        if axis:
+            kwargs['axis'] = axis
 
-        # Handling API methods that include H&S parameter
-
-        # For most cr.cube methods, we use the 'include_transforms_for_dims'
-        # parameter name. For some, namely the prune_indices, we use the
-        # 'transforms'. These are parameters that tell to the cr.cube "which
-        # dimensions to include the H&S for". The only point of this parameter
-        # (from the perspective of the cr.exporter) is to exclude the 0th
-        # dimension's H&S in the case of 3D cubes.
         hs_dims_key = (
             'transforms' in kwargs and 'transforms' or
             'hs_dims' in kwargs and 'hs_dims' or
             'include_transforms_for_dims'
         )
-        hs_dims = kwargs.get(hs_dims_key)
-        if isinstance(hs_dims, list):
-            # Keep the 2D illusion for the user. If a user sees a 2D slice, he
-            # still needs to be able to address both dimensions (for which he
-            # wants the H&S included) as 0 and 1. Since these are offset by a 0
-            # dimension in a 3D case, inside the cr.cube, we need to increase
-            # the indexes of the required dims.
-            kwargs[hs_dims_key] = [dim + 1 for dim in hs_dims]
+        hs_dims = self._hs_dims_for_cube(kwargs.get(hs_dims_key))
+        if hs_dims:
+            kwargs[hs_dims_key] = hs_dims
 
         return kwargs
 
-    def _update_result(self, result):
+    def _extract_slice_result_from_cube(self, result):
         if (self._cube.ndim < 3 and not self.ca_as_0th or
                 len(result) - 1 < self._index):
             return result

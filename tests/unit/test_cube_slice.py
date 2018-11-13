@@ -15,6 +15,16 @@ from ..unitutil import instance_mock, method_mock, property_mock
 
 class DescribeCubeSlice(object):
 
+    def it_can_calculate_correct_axis_for_cube(self, axis_fixture, cube_):
+        axis, ndim, ca_as_0th, expected_value = axis_fixture
+        cube_.ndim = ndim
+        slice_ = CubeSlice(cube_, None)
+        slice_.ca_as_0th = ca_as_0th
+
+        updated_axis = slice_._calculate_correct_axis_for_cube(axis)
+
+        assert updated_axis == expected_value
+
     def it_can_calculate_std_res(self, std_res_fixture, cube_, dim_types_prop_):
         dim_types, expected_value = std_res_fixture
         dim_types_prop_.return_value = dim_types
@@ -26,6 +36,17 @@ class DescribeCubeSlice(object):
         expected_value.assert_called_once_with(
             slice_, counts, total, colsum, rowsum
         )
+
+    def it_can_extract_slice_from_cube_result(self, extract_fixture, cube_):
+        result, ndim, ca_as_0th, index, expected_value = extract_fixture
+        cube_.ndim = ndim
+        slice_ = CubeSlice(cube_, None)
+        slice_.ca_as_0th = ca_as_0th
+        slice_._index = index
+
+        extracted_result = slice_._extract_slice_result_from_cube(result)
+
+        np.testing.assert_array_equal(extracted_result, expected_value)
 
     def it_provides_a_default_repr(self):
         slice_ = CubeSlice(None, None)
@@ -57,7 +78,65 @@ class DescribeCubeSlice(object):
 
         assert is_double_mr is expected_value
 
+    def it_updates_hs_dims_arguments(self, hs_fixture, cube_):
+        hs_dims, ndim, expected_value = hs_fixture
+        cube_.ndim = ndim
+        slice_ = CubeSlice(cube_, None)
+
+        updated_hs_dims = slice_._hs_dims_for_cube(hs_dims)
+
+        assert updated_hs_dims == expected_value
+
     # fixtures -------------------------------------------------------
+
+    @pytest.fixture(params=[
+        (0, 1, False, 0),
+        (1, 1, False, 1),
+        (None, 1, False, None),
+        (0, 2, False, 0),
+        (1, 2, False, 1),
+        (None, 2, False, None),
+        (0, 3, False, 1),
+        (1, 3, False, 2),
+        (None, 3, False, None),
+        (0, 0, False, 0),
+        (None, 2, True, 1),
+    ])
+    def axis_fixture(self, request):
+        axis, ndim, ca_as_0th, expected_value = request.param
+        return axis, ndim, ca_as_0th, expected_value
+
+    @pytest.fixture(params=[
+        # Expect same value as result, since cube has < 3 dimensions
+        (1, 1, False, 0, 1),
+        (1, 2, False, 1, 1),
+        # Expect same value as result, since there's nothing to index, even
+        # though the ndim is == 3
+        ([1], 3, False, 1, 1),
+        # Expect slicing to take place
+        ([0, 1, 2], 3, False, 0, 0),
+        ([0, 1, 2], 3, False, 1, 1),
+        ([0, 1, 2], 3, False, 2, 2),
+        # Return entire result if not capable to index correctly
+        ([0, 1, 2], 3, False, 3, [0, 1, 2]),
+        # Check that it converts extracted tuples
+        ((0, 1, (1, 2)), 3, False, 2, [1, 2]),
+    ])
+    def extract_fixture(self, request):
+        result, ndim, ca_as_0th, index, expected = request.param
+        expected_value = np.array(expected)
+        return result, ndim, ca_as_0th, index, expected_value
+
+    @pytest.fixture(params=[
+        ([0, 1], 1, [0, 1]),
+        ([0, 1], 2, [0, 1]),
+        ([0, 1], 3, [1, 2]),
+        (None, 2, None),
+        (None, 3, None),
+    ])
+    def hs_fixture(self, request):
+        axis, ndim, expected_value = request.param
+        return axis, ndim, expected_value
 
     @pytest.fixture(params=[
         ((DT.CAT,), (DT.CAT,)),
