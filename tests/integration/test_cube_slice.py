@@ -33,7 +33,6 @@ class DescribeIntegratedCubeSlice(object):
 
         np.testing.assert_array_almost_equal(
             zscore,
-            # ---fix this expectation once we have plausible result---
             np.array([
                 [-2.0890161, 2.0890161],
                 [-0.31167807, 0.31167807],

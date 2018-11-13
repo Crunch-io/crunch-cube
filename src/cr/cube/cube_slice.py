@@ -176,7 +176,7 @@ class CubeSlice(object):
 
         indexes = proportions / baseline * 100
 
-        return self._apply_pruning_mask(indexes, prune)
+        return self._apply_pruning_mask(indexes) if prune else indexes
 
     @lazyproperty
     def is_double_mr(self):
@@ -315,14 +315,9 @@ class CubeSlice(object):
                   cell of the table-like representation of the crunch cube.
         """
         stats = self.zscore(weighted=weighted, prune=prune, hs_dims=hs_dims)
-        res = 2 * (1 - norm.cdf(np.abs(stats)))
+        pvals = 2 * (1 - norm.cdf(np.abs(stats)))
 
-        if isinstance(stats, np.ma.core.MaskedArray):
-            # Explicit setting of the mask is necessary, because the norm.cdf
-            # creates a non-masked version
-            res = np.ma.masked_array(res, stats.mask)
-
-        return res
+        return self._apply_pruning_mask(pvals, hs_dims) if prune else pvals
 
     def zscore(self, weighted=True, prune=False, hs_dims=None):
         """Return ndarray with slices's zscore measurements.
@@ -339,63 +334,60 @@ class CubeSlice(object):
         total = self.margin(weighted=weighted)
         colsum = self.margin(axis=0, weighted=weighted)
         rowsum = self.margin(axis=1, weighted=weighted)
-        res = self._calculate_std_res(
+        zscore = self._calculate_std_res(
             counts, total, colsum, rowsum,
         )
 
         if hs_dims:
-            res = self._intersperse_hs_in_std_res(hs_dims, res)
+            zscore = self._intersperse_hs_in_std_res(hs_dims, zscore)
 
         if prune:
-            arr = self.as_array(
-                prune=prune,
-                include_transforms_for_dims=hs_dims,
-            )
-            if isinstance(arr, np.ma.core.MaskedArray):
-                res = np.ma.masked_array(res, arr.mask)
+            return self._apply_pruning_mask(zscore, hs_dims)
 
-        return res
+        return zscore
 
-    def _intersperse_hs_in_std_res(self, hs_dims, res):
-        for dim, inds in enumerate(self.inserted_hs_indices()):
-            for i in inds:
-                if dim not in hs_dims:
-                    continue
-                res = np.insert(res, i, np.nan, axis=(dim - self.ndim))
-        return res
+    def _apply_pruning_mask(self, res, hs_dims=None):
+        array = self.as_array(prune=True, include_transforms_for_dims=hs_dims)
 
-    def _apply_pruning_mask(self, res, prune):
-        if not prune:
-            return res
-
-        array = self.as_array(prune=True)
         if not isinstance(array, np.ma.core.MaskedArray):
             return res
 
         return np.ma.masked_array(res, mask=array.mask)
 
-    def _calculate_std_res(self, counts, total, colsum, rowsum):
-        has_mr_or_ca = set(self.dim_types) & DT.ARRAY_TYPES
-        if has_mr_or_ca:
-            if self.mr_dim_ind == 0:
-                total = total[:, np.newaxis]
-                rowsum = rowsum[:, np.newaxis]
+    def _array_type_std_res(self, counts, total, colsum, rowsum):
+        """Return ndarray containing standard residuals for array values.
 
-            expected = rowsum * colsum / total
-            variance = (
-                rowsum * colsum * (total - rowsum) * (total - colsum) /
-                total ** 3
-            )
-            res = (counts - expected) / np.sqrt(variance)
-        else:
-            expected_counts = expected_freq(counts)
-            residuals = counts - expected_counts
-            variance = (
-                np.outer(rowsum, colsum) *
-                np.outer(total - rowsum, total - colsum) / total ** 3
-            )
-            res = residuals / np.sqrt(variance)
-        return res
+        The shape of the return value is the same as that of *counts*.
+        Array variables require special processing because of the
+        underlying math. Essentially, it boils down to the fact that the
+        variable dimensions are mutually independent, and standard residuals
+        are calculated for each of them separately, and then stacked together
+        in the resulting array.
+        """
+        if self.mr_dim_ind == 0:
+            # --This is a special case where broadcasting cannot be
+            # --automatically done. We need to "inflate" the single dimensional
+            # --ndarrays, to be able to treat them as "columns" (essentially a
+            # --Nx1 ndarray). This is needed for subsequent multiplication
+            # --that needs to happen column wise (rowsum * colsum) / total.
+            total = total[:, np.newaxis]
+            rowsum = rowsum[:, np.newaxis]
+
+        expected_counts = rowsum * colsum / total
+        variance = (
+            rowsum * colsum * (total - rowsum) * (total - colsum) /
+            total ** 3
+        )
+        return (counts - expected_counts) / np.sqrt(variance)
+
+    def _calculate_std_res(self, counts, total, colsum, rowsum):
+        """Return ndarray containing standard residuals.
+
+        The shape of the return value is the same as that of *counts*.
+        """
+        if set(self.dim_types) & DT.ARRAY_TYPES:  # ---has-mr-or-ca---
+            return self._array_type_std_res(counts, total, colsum, rowsum)
+        return self._scalar_type_std_res(counts, total, colsum, rowsum)
 
     def _call_cube_method(self, method, *args, **kwargs):
         kwargs = self._update_args(kwargs)
@@ -405,6 +397,14 @@ class CubeSlice(object):
                 result = result[-2:]
             return result
         return self._update_result(result)
+
+    def _intersperse_hs_in_std_res(self, hs_dims, res):
+        for dim, inds in enumerate(self.inserted_hs_indices()):
+            for i in inds:
+                if dim not in hs_dims:
+                    continue
+                res = np.insert(res, i, np.nan, axis=(dim - self.ndim))
+        return res
 
     def _prepare_index_baseline(self, axis):
         # First get the margin of the opposite direction of the index axis.
@@ -434,6 +434,19 @@ class CubeSlice(object):
         baseline = baseline if len(baseline.shape) <= 1 else baseline[0]
         baseline = baseline / np.sum(baseline)
         return baseline / np.sum(baseline, axis=0)
+
+    def _scalar_type_std_res(self, counts, total, colsum, rowsum):
+        """Return ndarray containing standard residuals for category values.
+
+        The shape of the return value is the same as that of *counts*.
+        """
+        expected_counts = expected_freq(counts)
+        residuals = counts - expected_counts
+        variance = (
+            np.outer(rowsum, colsum) *
+            np.outer(total - rowsum, total - colsum) / total ** 3
+        )
+        return residuals / np.sqrt(variance)
 
     def _update_args(self, kwargs):
         if self._cube.ndim < 3:

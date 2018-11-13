@@ -10,10 +10,22 @@ from cr.cube.crunch_cube import CrunchCube
 from cr.cube.cube_slice import CubeSlice
 from cr.cube.enum import DIMENSION_TYPE as DT
 
-from ..unitutil import instance_mock, property_mock
+from ..unitutil import instance_mock, method_mock, property_mock
 
 
 class DescribeCubeSlice(object):
+
+    def it_can_calculate_std_res(self, std_res_fixture, cube_, dim_types_prop_):
+        dim_types, expected_value = std_res_fixture
+        dim_types_prop_.return_value = dim_types
+        slice_ = CubeSlice(cube_, None)
+        counts, total, colsum, rowsum = Mock(), Mock(), Mock(), Mock()
+        slice_._calculate_std_res(counts, total, colsum, rowsum)
+
+        # Assert correct methods are invoked
+        expected_value.assert_called_once_with(
+            slice_, counts, total, colsum, rowsum
+        )
 
     def it_provides_a_default_repr(self):
         slice_ = CubeSlice(None, None)
@@ -28,6 +40,12 @@ class DescribeCubeSlice(object):
         dim_types = slice_.dim_types
 
         assert dim_types == expected_value
+
+    def it_knows_its_scalar_type_std_res(self, scalar_std_res_fixture, cube_):
+        counts, total, colsum, rowsum, expected_value = scalar_std_res_fixture
+        slice_ = CubeSlice(cube_, None)
+        std_res = slice_._scalar_type_std_res(counts, total, colsum, rowsum)
+        np.testing.assert_almost_equal(std_res, expected_value)
 
     def it_knows_whether_its_a_double_mr(
             self, is_double_mr_fixture, dim_types_prop_):
@@ -61,6 +79,64 @@ class DescribeCubeSlice(object):
         dim_types, expected_value = request.param
         return dim_types, expected_value
 
+    @pytest.fixture(params=[
+        (
+            [
+                [32.98969072, 87.62886598, 176.28865979,
+                    117.5257732, 72.16494845, 13.40206186],
+                [38.83495146, 94.17475728, 199.02912621,
+                    102.91262136, 38.83495146, 26.21359223],
+            ],
+            1000,
+            [71.82464218, 181.80362326, 375.31778601,
+                220.43839456, 110.99989991, 39.61565409],
+            [500, 500],
+            [
+                [-0.71589963, -0.53670884, -1.48514968,
+                    1.11474378, 3.35523602, -2.07704095],
+                [0.71589963, 0.53670884, 1.48514968, -
+                    1.11474378, -3.35523602, 2.07704095],
+            ],
+        ),
+        (
+            [[3702.47166525, 3643.75050424, 1997.62192817, 918.59066509,
+              771.46715459, 3320.71410532, 166.44054077, 278.10407838],
+             [4114.85193946, 3647.97800893, 1924.89008796, 925.51974172,
+              731.59384577, 4172.16468577, 184.56963554, 281.00640173]],
+            30781.73498867,
+            [7817.32360471, 7291.72851317, 3922.51201613, 1844.11040681,
+             1503.06100036, 7492.87879108, 351.0101763, 559.11048011],
+            [14799.1606418, 15982.57434687],
+            [[-1.46558535, 3.70412588, 3.82368945, 1.53747453, 2.58473417,
+              -7.48814346, -0.24896875, 0.79414354],
+             [1.46558535, -3.70412588, -3.82368945, -1.53747453, -2.58473417,
+                7.48814346, 0.24896875, -0.79414354]]
+        ),
+
+    ])
+    def scalar_std_res_fixture(self, request):
+        counts, total, colsum, rowsum, expected = request.param
+        counts = np.array(counts)
+        total = np.array(total)
+        rowsum = np.array(rowsum)
+        colsum = np.array(colsum)
+        expected_value = np.array(expected)
+        return counts, total, colsum, rowsum, expected_value
+
+    @pytest.fixture(params=[
+        ((DT.CAT, DT.CAT), False),
+        ((DT.MR, DT.CAT), True),
+    ])
+    def std_res_fixture(self, request, _array_type_std_res,
+                        _scalar_type_std_res):
+        dim_types, is_array = request.param
+        expected_value = (
+            _array_type_std_res
+            if is_array else
+            _scalar_type_std_res
+        )
+        return dim_types, expected_value
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -71,11 +147,27 @@ class DescribeCubeSlice(object):
     def dim_types_prop_(self, request):
         return property_mock(request, CubeSlice, 'dim_types')
 
+    @pytest.fixture
+    def _array_type_std_res(self, request):
+        return method_mock(request, CubeSlice, '_array_type_std_res')
+
+    @pytest.fixture
+    def _scalar_type_std_res(self, request):
+        return method_mock(request, CubeSlice, '_scalar_type_std_res')
+
 
 # pylint: disable=invalid-name, no-self-use, protected-access
 # pylint: disable=too-many-public-methods, missing-docstring
 class TestCubeSlice(object):
     '''Test class for the CubeSlice unit tests.'''
+
+    def it_can_apply_pruning_mask(self, mask_fixture):
+        cube_, res, expected_type = mask_fixture
+        slice_ = CubeSlice(cube_, None)
+
+        return_type = type(slice_._apply_pruning_mask(res))
+
+        assert return_type == expected_type
 
     def test_init(self):
         '''Test that init correctly invoked cube construction and sets index.'''
@@ -399,6 +491,26 @@ class TestCubeSlice(object):
         actual = slice_.get_shape(prune=prune)
         assert actual == expected
 
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture(params=[
+        (None, [0, 1], np.ndarray),
+        (None, [0, 1], np.ndarray),
+        ([True, False], [0, 1], np.ma.core.MaskedArray),
+        ([False, False], [0, 1], np.ma.core.MaskedArray),
+    ])
+    def mask_fixture(self, request):
+        mask, values, expected_type = request.param
+        res = np.array(values)
+        array = (
+            np.zeros((2,)) if mask is None
+            else np.ma.masked_array(np.zeros((2,)), np.array(mask))
+        )
+        cube_ = instance_mock(request, CrunchCube)
+        cube_.as_array.return_value = array
+        cube_.ndim = 2
+        return cube_, res, expected_type
+
     @pytest.fixture(params=[
         (False, None, (3, 2)),
         (True, [[True, False], [True, False], [True, False]], (3,)),
@@ -416,31 +528,3 @@ class TestCubeSlice(object):
         cube.as_array.return_value = array
         cs = CubeSlice(cube, 0)
         return cs, prune, expected
-
-    def test_apply_pruning_mask(self, mask_fixture):
-        cube_, res, prune, expected_type = mask_fixture
-        slice_ = CubeSlice(cube_, None)
-
-        return_type = type(slice_._apply_pruning_mask(res, prune))
-
-        assert return_type == expected_type
-
-    @pytest.fixture(params=[
-        (False, [False, False], [0, 1], np.ndarray),
-        (False, None, [0, 1], np.ndarray),
-        (True, None, [0, 1], np.ndarray),
-        (False, [True, True], [0, 1], np.ndarray),
-        (True, [True, False], [0, 1], np.ma.core.MaskedArray),
-        (True, [False, False], [0, 1], np.ma.core.MaskedArray),
-    ])
-    def mask_fixture(self, request):
-        prune, mask, values, expected_type = request.param
-        res = np.array(values)
-        array = (
-            np.zeros((2,)) if mask is None
-            else np.ma.masked_array(np.zeros((2,)), np.array(mask))
-        )
-        cube_ = instance_mock(request, CrunchCube)
-        cube_.as_array.return_value = array
-        cube_.ndim = 2
-        return cube_, res, prune, expected_type
