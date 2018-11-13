@@ -3,7 +3,6 @@
 """Integration test suite for cr.cube.cube_slice module."""
 
 import numpy as np
-import pytest
 
 from cr.cube.crunch_cube import CrunchCube
 
@@ -26,7 +25,6 @@ class DescribeIntegratedCubeSlice(object):
             "C     5    3"
         )
 
-    @pytest.mark.xfail(reason='WIP', strict=True)
     def it_knows_zscore_for_MR_X_MR_X_CAT(self):
         cube = CrunchCube(CR.MR_X_MR_X_CAT)
         slice_ = cube.slices[0]
@@ -37,8 +35,24 @@ class DescribeIntegratedCubeSlice(object):
             zscore,
             # ---fix this expectation once we have plausible result---
             np.array([
-                [1, 2, 3],
-                [4, 5, 6]
+                [-2.0890161, 2.0890161],
+                [-0.31167807, 0.31167807],
+                [-0.4574511, 0.4574511],
+                [0.08713899, -0.08713899],
+                [-1.88534457, 1.88534457],
+                [-1.18201963, 1.18201963],
+                [-0.14570511, 0.14570511],
+                [-0.79331024, 0.79331024],
+                [-0.10870154, 0.10870154],
+                [0.39665764, -0.39665764],
+                [-0.76214626, 0.76214626],
+                [-1.59164242, 1.59164242],
+                [np.nan, np.nan],
+                [-1.97343777, 1.97343777],
+                [-0.63278752, 0.63278752],
+                [-0.4446455, 0.4446455],
+                [-0.10084772, 0.10084772],
+                [-0.42861964, 0.42861964],
             ])
         )
 

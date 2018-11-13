@@ -908,9 +908,7 @@ class CrunchCube(object):
     def _calculate_std_res(self, counts, total, colsum, rowsum, slice_):
         has_mr_or_ca = set(slice_.dim_types) & DT.ARRAY_TYPES
         if has_mr_or_ca:
-            if (not self.is_double_mr and
-                    (self.mr_dim_ind == 0 or
-                        self.mr_dim_ind == 1 and self.ndim == 3)):
+            if slice_.mr_dim_ind == 0:
                 total = total[:, np.newaxis]
                 rowsum = rowsum[:, np.newaxis]
 
