@@ -9,6 +9,7 @@ from functools import partial
 
 import numpy as np
 from tabulate import tabulate
+from scipy.stats import norm
 from scipy.stats.contingency import expected_freq
 
 from cr.cube.enum import DIMENSION_TYPE as DT
@@ -300,6 +301,29 @@ class CubeSlice(object):
         table_name = self._cube.labels()[0][self._index]
         return '%s: %s' % (title, table_name)
 
+    def pvals(self, weighted=True, prune=False, hs_dims=None):
+        """Return 2D ndarray with calculated p-vals.
+
+        This function calculates statistically significant results for
+        categorical contingency tables. The values are calculated for 2D tables
+        only.
+
+        :param weighted: Use weighted counts for zscores
+        :param prune: Prune based on unweighted counts
+        :param hs_dims: Include headers and subtotals (as NaN values)
+        :returns: 2 or 3 Dimensional ndarray, representing the p-values for each
+                  cell of the table-like representation of the crunch cube.
+        """
+        stats = self.zscore(weighted=weighted, prune=prune, hs_dims=hs_dims)
+        res = 2 * (1 - norm.cdf(np.abs(stats)))
+
+        if isinstance(stats, np.ma.core.MaskedArray):
+            # Explicit setting of the mask is necessary, because the norm.cdf
+            # creates a non-masked version
+            res = np.ma.masked_array(res, stats.mask)
+
+        return res
+
     def zscore(self, weighted=True, prune=False, hs_dims=None):
         """Return ndarray with slices's zscore measurements.
 
@@ -315,9 +339,30 @@ class CubeSlice(object):
         total = self.margin(weighted=weighted)
         colsum = self.margin(axis=0, weighted=weighted)
         rowsum = self.margin(axis=1, weighted=weighted)
-        return self._calculate_std_res(
+        res = self._calculate_std_res(
             counts, total, colsum, rowsum,
         )
+
+        if hs_dims:
+            res = self._intersperse_hs_in_std_res(hs_dims, res)
+
+        if prune:
+            arr = self.as_array(
+                prune=prune,
+                include_transforms_for_dims=hs_dims,
+            )
+            if isinstance(arr, np.ma.core.MaskedArray):
+                res = np.ma.masked_array(res, arr.mask)
+
+        return res
+
+    def _intersperse_hs_in_std_res(self, hs_dims, res):
+        for dim, inds in enumerate(self.inserted_hs_indices()):
+            for i in inds:
+                if dim not in hs_dims:
+                    continue
+                res = np.insert(res, i, np.nan, axis=(dim - self.ndim))
+        return res
 
     def _apply_pruning_mask(self, res, prune):
         if not prune:
