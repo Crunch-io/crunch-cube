@@ -9,6 +9,7 @@ from functools import partial
 
 import numpy as np
 from tabulate import tabulate
+from scipy.stats.contingency import expected_freq
 
 from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.measures.scale_means import ScaleMeans
@@ -299,6 +300,25 @@ class CubeSlice(object):
         table_name = self._cube.labels()[0][self._index]
         return '%s: %s' % (title, table_name)
 
+    def zscore(self, weighted=True, prune=False, hs_dims=None):
+        """Return ndarray with slices's zscore measurements.
+
+        Zscore is a measure of statistical signifficance of observed vs.
+        expected counts. It's only applicable to a 2D contingency tables.
+
+        :param weighted: Use weighted counts for zscores
+        :param prune: Prune based on unweighted counts
+        :param hs_dims: Include headers and subtotals (as NaN values)
+        :returns zscore: ndarray representing zscore measurements
+        """
+        counts = self.as_array(weighted=weighted)
+        total = self.margin(weighted=weighted)
+        colsum = self.margin(axis=0, weighted=weighted)
+        rowsum = self.margin(axis=1, weighted=weighted)
+        return self._calculate_std_res(
+            counts, total, colsum, rowsum,
+        )
+
     def _apply_pruning_mask(self, res, prune):
         if not prune:
             return res
@@ -308,6 +328,29 @@ class CubeSlice(object):
             return res
 
         return np.ma.masked_array(res, mask=array.mask)
+
+    def _calculate_std_res(self, counts, total, colsum, rowsum):
+        has_mr_or_ca = set(self.dim_types) & DT.ARRAY_TYPES
+        if has_mr_or_ca:
+            if self.mr_dim_ind == 0:
+                total = total[:, np.newaxis]
+                rowsum = rowsum[:, np.newaxis]
+
+            expected = rowsum * colsum / total
+            variance = (
+                rowsum * colsum * (total - rowsum) * (total - colsum) /
+                total ** 3
+            )
+            res = (counts - expected) / np.sqrt(variance)
+        else:
+            expected_counts = expected_freq(counts)
+            residuals = counts - expected_counts
+            variance = (
+                np.outer(rowsum, colsum) *
+                np.outer(total - rowsum, total - colsum) / total ** 3
+            )
+            res = residuals / np.sqrt(variance)
+        return res
 
     def _call_cube_method(self, method, *args, **kwargs):
         kwargs = self._update_args(kwargs)

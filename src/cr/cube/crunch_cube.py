@@ -13,7 +13,6 @@ import warnings
 
 import numpy as np
 from scipy.stats import norm
-from scipy.stats.contingency import expected_freq
 
 from cr.cube.cube_slice import CubeSlice
 from cr.cube.dimension import AllDimensions
@@ -700,17 +699,21 @@ class CrunchCube(object):
         return self.dim_types.index(DT.CA_CAT)
 
     def zscore(self, weighted=True, prune=False, hs_dims=None):
-        """Get cube zscore measurement."""
+        """Return ndarray with cube's zscore measurements.
+
+        Zscore is a measure of statistical signifficance of observed vs.
+        expected counts. It's only applicable to a 2D contingency tables.
+        For 3D cubes, the measures of separate slices are stacked together
+        and returned as the result.
+
+        :param weighted: Use weighted counts for zscores
+        :param prune: Prune based on unweighted counts
+        :param hs_dims: Include headers and subtotals (as NaN values)
+        :returns zscore: ndarray representing zscore measurements
+        """
         res = []
         for slice_ in self.slices:
-            counts = slice_.as_array(weighted=weighted)
-            total = slice_.margin(weighted=weighted)
-            colsum = slice_.margin(axis=0, weighted=weighted)
-            rowsum = slice_.margin(axis=1, weighted=weighted)
-            std_res = self._calculate_std_res(
-                counts, total, colsum, rowsum, slice_,
-            )
-            res.append(std_res)
+            res.append(slice_.zscore(weighted, prune, hs_dims))
 
         if len(res) == 1 and self.ndim < 3:
             res = res[0]
@@ -904,29 +907,6 @@ class CrunchCube(object):
             # requires the matrix to be multiplied from the left
             # (because of the inner matrix dimensions).
             return np.dot(prop_margin, V)
-
-    def _calculate_std_res(self, counts, total, colsum, rowsum, slice_):
-        has_mr_or_ca = set(slice_.dim_types) & DT.ARRAY_TYPES
-        if has_mr_or_ca:
-            if slice_.mr_dim_ind == 0:
-                total = total[:, np.newaxis]
-                rowsum = rowsum[:, np.newaxis]
-
-            expected = rowsum * colsum / total
-            variance = (
-                rowsum * colsum * (total - rowsum) * (total - colsum) /
-                total ** 3
-            )
-            res = (counts - expected) / np.sqrt(variance)
-        else:
-            expected_counts = expected_freq(counts)
-            residuals = counts - expected_counts
-            variance = (
-                np.outer(rowsum, colsum) *
-                np.outer(total - rowsum, total - colsum) / total ** 3
-            )
-            res = residuals / np.sqrt(variance)
-        return res
 
     @lazyproperty
     def _col_direction_axis(self):
