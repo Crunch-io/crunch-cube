@@ -112,6 +112,11 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.8.3
+- fix second "broadcast error" bug (different cause)
+- refactor to extract `_Measures` object and related
+- other general factoring improvements in `cr.cube.crunch_cube`
+
 #### 1.8.2
 - fix "broadcast error" bug
 - improve test coverage
