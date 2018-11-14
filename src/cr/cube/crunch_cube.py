@@ -12,8 +12,6 @@ import json
 import warnings
 
 import numpy as np
-from scipy.stats import norm
-from scipy.stats.contingency import expected_freq
 
 from cr.cube.cube_slice import CubeSlice
 from cr.cube.dimension import AllDimensions
@@ -72,15 +70,9 @@ class CrunchCube(object):
         """
         try:
             dimensionality = ' x '.join(dt.name for dt in self.dim_types)
-            slice_reprs = (
-                '\n'.join(
-                    'slices[%d]: %s' % (idx, repr(s))
-                    for idx, s in enumerate(self.slices)
-                )
-            )
             return (
-                "%s(name='%s', dim_types='%s')\n%s" %
-                (type(self).__name__, self.name, dimensionality, slice_reprs)
+                "%s(name='%s', dim_types='%s')" %
+                (type(self).__name__, self.name, dimensionality)
             )
         except Exception:
             return super(CrunchCube, self).__repr__()
@@ -620,26 +612,21 @@ class CrunchCube(object):
         return res
 
     def pvals(self, weighted=True, prune=False, hs_dims=None):
-        """Calculate p-vals.
+        """Return ndarray with calculated p-vals.
 
         This function calculates statistically significant results for
-        categorical contingency tables. The values can be calculated across
-        columns (axis = 0), or across rows (axis = 1).
+        categorical contingency tables. The values are calculated for 2D tables
+        only. For 3D cubes, the slices' results are stacked together and
+        returned as an ndarray.
 
-        Returns
-            (ndarray): 2-Dimensional array, representing the p-values for each
-                       cell of the table-like representation of the
-                       crunch cube.
+        :param weighted: Use weighted counts for zscores
+        :param prune: Prune based on unweighted counts
+        :param hs_dims: Include headers and subtotals (as NaN values)
+        :returns: 2 or 3 Dimensional ndarray, representing the p-values for each
+                  cell of the table-like representation of the crunch cube.
         """
-        stats = self.zscore(weighted=weighted, prune=prune, hs_dims=hs_dims)
-        res = 2 * (1 - norm.cdf(np.abs(stats)))
-
-        if isinstance(stats, np.ma.core.MaskedArray):
-            # Explicit setting of the mask is necessary, because the norm.cdf
-            # creates a non-masked version
-            res = np.ma.masked_array(res, stats.mask)
-
-        return res
+        res = [s.pvals(weighted, prune, hs_dims) for s in self.slices]
+        return np.array(res) if self.ndim == 3 else res[0]
 
     @lazyproperty
     def row_direction_axis(self):
@@ -706,35 +693,20 @@ class CrunchCube(object):
         return self.dim_types.index(DT.CA_CAT)
 
     def zscore(self, weighted=True, prune=False, hs_dims=None):
-        """Get cube zscore measurement."""
-        res = []
-        for slice_ in self.slices:
-            counts = slice_.as_array(weighted=weighted)
-            total = slice_.margin(weighted=weighted)
-            colsum = slice_.margin(axis=0, weighted=weighted)
-            rowsum = slice_.margin(axis=1, weighted=weighted)
-            std_res = self._calculate_std_res(
-                counts, total, colsum, rowsum, slice_,
-            )
-            res.append(std_res)
+        """Return ndarray with cube's zscore measurements.
 
-        if len(res) == 1 and self.ndim < 3:
-            res = res[0]
-        else:
-            res = np.array(res)
+        Zscore is a measure of statistical signifficance of observed vs.
+        expected counts. It's only applicable to a 2D contingency tables.
+        For 3D cubes, the measures of separate slices are stacked together
+        and returned as the result.
 
-        if hs_dims:
-            res = self._intersperse_hs_in_std_res(hs_dims, res)
-
-        if prune:
-            arr = self.as_array(
-                prune=prune,
-                include_transforms_for_dims=hs_dims,
-            )
-            if isinstance(arr, np.ma.core.MaskedArray):
-                res = np.ma.masked_array(res, arr.mask)
-
-        return res
+        :param weighted: Use weighted counts for zscores
+        :param prune: Prune based on unweighted counts
+        :param hs_dims: Include headers and subtotals (as NaN values)
+        :returns zscore: ndarray representing zscore measurements
+        """
+        res = [s.zscore(weighted, prune, hs_dims) for s in self.slices]
+        return np.array(res) if self.ndim == 3 else res[0]
 
     def _adjust_axis(self, axis):
         """Return raw axis/axes corresponding to apparent axis/axes.
@@ -911,31 +883,6 @@ class CrunchCube(object):
             # (because of the inner matrix dimensions).
             return np.dot(prop_margin, V)
 
-    def _calculate_std_res(self, counts, total, colsum, rowsum, slice_):
-        has_mr_or_ca = set(slice_.dim_types) & DT.ARRAY_TYPES
-        if has_mr_or_ca:
-            if (not self.is_double_mr and
-                    (self.mr_dim_ind == 0 or
-                        self.mr_dim_ind == 1 and self.ndim == 3)):
-                total = total[:, np.newaxis]
-                rowsum = rowsum[:, np.newaxis]
-
-            expected = rowsum * colsum / total
-            variance = (
-                rowsum * colsum * (total - rowsum) * (total - colsum) /
-                total ** 3
-            )
-            res = (counts - expected) / np.sqrt(variance)
-        else:
-            expected_counts = expected_freq(counts)
-            residuals = counts - expected_counts
-            variance = (
-                np.outer(rowsum, colsum) *
-                np.outer(total - rowsum, total - colsum) / total ** 3
-            )
-            res = residuals / np.sqrt(variance)
-        return res
-
     @lazyproperty
     def _col_direction_axis(self):
         return self.ndim - 2
@@ -1076,14 +1023,6 @@ class CrunchCube(object):
                 )
 
         return [insertion for insertion in iter_insertions()]
-
-    def _intersperse_hs_in_std_res(self, hs_dims, res):
-        for dim, inds in enumerate(self.inserted_hs_indices()):
-            for i in inds:
-                if dim not in hs_dims:
-                    continue
-                res = np.insert(res, i, np.nan, axis=(dim - self.ndim))
-        return res
 
     def _is_axis_allowed(self, axis):
         """Check if axis are allowed.

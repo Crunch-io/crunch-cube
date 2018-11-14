@@ -1,9 +1,15 @@
+# encoding: utf-8
+
+"""Integration test suite for cr.cube.cube_slice module."""
+
+import numpy as np
+
 from cr.cube.crunch_cube import CrunchCube
 
 from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
 
 
-class DescribeIntegratedCrunchCube(object):
+class DescribeIntegratedCubeSlice(object):
 
     def it_provides_a_console_friendly_repr_for_a_slice(self):
         cube = CrunchCube(CR.CAT_X_CAT)
@@ -17,6 +23,36 @@ class DescribeIntegratedCrunchCube(object):
             "--  ---  ---\n"
             "B     5    2\n"
             "C     5    3"
+        )
+
+    def it_knows_zscore_for_MR_X_MR_X_CAT(self):
+        cube = CrunchCube(CR.MR_X_MR_X_CAT)
+        slice_ = cube.slices[0]
+
+        zscore = slice_.zscore()
+
+        np.testing.assert_array_almost_equal(
+            zscore,
+            np.array([
+                [-2.0890161, 2.0890161],
+                [-0.31167807, 0.31167807],
+                [-0.4574511, 0.4574511],
+                [0.08713899, -0.08713899],
+                [-1.88534457, 1.88534457],
+                [-1.18201963, 1.18201963],
+                [-0.14570511, 0.14570511],
+                [-0.79331024, 0.79331024],
+                [-0.10870154, 0.10870154],
+                [0.39665764, -0.39665764],
+                [-0.76214626, 0.76214626],
+                [-1.59164242, 1.59164242],
+                [np.nan, np.nan],
+                [-1.97343777, 1.97343777],
+                [-0.63278752, 0.63278752],
+                [-0.4446455, 0.4446455],
+                [-0.10084772, 0.10084772],
+                [-0.42861964, 0.42861964],
+            ])
         )
 
 

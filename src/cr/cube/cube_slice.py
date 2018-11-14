@@ -9,6 +9,8 @@ from functools import partial
 
 import numpy as np
 from tabulate import tabulate
+from scipy.stats import norm
+from scipy.stats.contingency import expected_freq
 
 from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.measures.scale_means import ScaleMeans
@@ -174,7 +176,7 @@ class CubeSlice(object):
 
         indexes = proportions / baseline * 100
 
-        return self._apply_pruning_mask(indexes, prune)
+        return self._apply_pruning_mask(indexes) if prune else indexes
 
     @lazyproperty
     def is_double_mr(self):
@@ -299,15 +301,93 @@ class CubeSlice(object):
         table_name = self._cube.labels()[0][self._index]
         return '%s: %s' % (title, table_name)
 
-    def _apply_pruning_mask(self, res, prune):
-        if not prune:
-            return res
+    def pvals(self, weighted=True, prune=False, hs_dims=None):
+        """Return 2D ndarray with calculated p-vals.
 
-        array = self.as_array(prune=True)
+        This function calculates statistically significant results for
+        categorical contingency tables. The values are calculated for 2D tables
+        only.
+
+        :param weighted: Use weighted counts for zscores
+        :param prune: Prune based on unweighted counts
+        :param hs_dims: Include headers and subtotals (as NaN values)
+        :returns: 2 or 3 Dimensional ndarray, representing the p-values for each
+                  cell of the table-like representation of the crunch cube.
+        """
+        stats = self.zscore(weighted=weighted, prune=prune, hs_dims=hs_dims)
+        pvals = 2 * (1 - norm.cdf(np.abs(stats)))
+
+        return self._apply_pruning_mask(pvals, hs_dims) if prune else pvals
+
+    def zscore(self, weighted=True, prune=False, hs_dims=None):
+        """Return ndarray with slices's zscore measurements.
+
+        Zscore is a measure of statistical signifficance of observed vs.
+        expected counts. It's only applicable to a 2D contingency tables.
+
+        :param weighted: Use weighted counts for zscores
+        :param prune: Prune based on unweighted counts
+        :param hs_dims: Include headers and subtotals (as NaN values)
+        :returns zscore: ndarray representing zscore measurements
+        """
+        counts = self.as_array(weighted=weighted)
+        total = self.margin(weighted=weighted)
+        colsum = self.margin(axis=0, weighted=weighted)
+        rowsum = self.margin(axis=1, weighted=weighted)
+        zscore = self._calculate_std_res(
+            counts, total, colsum, rowsum,
+        )
+
+        if hs_dims:
+            zscore = self._intersperse_hs_in_std_res(hs_dims, zscore)
+
+        if prune:
+            return self._apply_pruning_mask(zscore, hs_dims)
+
+        return zscore
+
+    def _apply_pruning_mask(self, res, hs_dims=None):
+        array = self.as_array(prune=True, include_transforms_for_dims=hs_dims)
+
         if not isinstance(array, np.ma.core.MaskedArray):
             return res
 
         return np.ma.masked_array(res, mask=array.mask)
+
+    def _array_type_std_res(self, counts, total, colsum, rowsum):
+        """Return ndarray containing standard residuals for array values.
+
+        The shape of the return value is the same as that of *counts*.
+        Array variables require special processing because of the
+        underlying math. Essentially, it boils down to the fact that the
+        variable dimensions are mutually independent, and standard residuals
+        are calculated for each of them separately, and then stacked together
+        in the resulting array.
+        """
+        if self.mr_dim_ind == 0:
+            # --This is a special case where broadcasting cannot be
+            # --automatically done. We need to "inflate" the single dimensional
+            # --ndarrays, to be able to treat them as "columns" (essentially a
+            # --Nx1 ndarray). This is needed for subsequent multiplication
+            # --that needs to happen column wise (rowsum * colsum) / total.
+            total = total[:, np.newaxis]
+            rowsum = rowsum[:, np.newaxis]
+
+        expected_counts = rowsum * colsum / total
+        variance = (
+            rowsum * colsum * (total - rowsum) * (total - colsum) /
+            total ** 3
+        )
+        return (counts - expected_counts) / np.sqrt(variance)
+
+    def _calculate_std_res(self, counts, total, colsum, rowsum):
+        """Return ndarray containing standard residuals.
+
+        The shape of the return value is the same as that of *counts*.
+        """
+        if set(self.dim_types) & DT.ARRAY_TYPES:  # ---has-mr-or-ca---
+            return self._array_type_std_res(counts, total, colsum, rowsum)
+        return self._scalar_type_std_res(counts, total, colsum, rowsum)
 
     def _call_cube_method(self, method, *args, **kwargs):
         kwargs = self._update_args(kwargs)
@@ -317,6 +397,14 @@ class CubeSlice(object):
                 result = result[-2:]
             return result
         return self._update_result(result)
+
+    def _intersperse_hs_in_std_res(self, hs_dims, res):
+        for dim, inds in enumerate(self.inserted_hs_indices()):
+            for i in inds:
+                if dim not in hs_dims:
+                    continue
+                res = np.insert(res, i, np.nan, axis=(dim - self.ndim))
+        return res
 
     def _prepare_index_baseline(self, axis):
         # First get the margin of the opposite direction of the index axis.
@@ -346,6 +434,19 @@ class CubeSlice(object):
         baseline = baseline if len(baseline.shape) <= 1 else baseline[0]
         baseline = baseline / np.sum(baseline)
         return baseline / np.sum(baseline, axis=0)
+
+    def _scalar_type_std_res(self, counts, total, colsum, rowsum):
+        """Return ndarray containing standard residuals for category values.
+
+        The shape of the return value is the same as that of *counts*.
+        """
+        expected_counts = expected_freq(counts)
+        residuals = counts - expected_counts
+        variance = (
+            np.outer(rowsum, colsum) *
+            np.outer(total - rowsum, total - colsum) / total ** 3
+        )
+        return residuals / np.sqrt(variance)
 
     def _update_args(self, kwargs):
         if self._cube.ndim < 3:
