@@ -242,17 +242,55 @@ class CubeSlice(object):
             For multiple response types, items dimensions are not collapsed.
         """
 
-        axis = self._calculate_correct_axis_for_cube(axis)
+        cube_axis = self._calculate_correct_axis_for_cube(axis)
         hs_dims = self._hs_dims_for_cube(include_transforms_for_dims)
 
         margin = self._cube.margin(
-            axis=axis, weighted=weighted,
+            axis=cube_axis, weighted=weighted,
             include_missing=include_missing,
             include_transforms_for_dims=hs_dims,
             prune=prune,
         )
 
-        return self._extract_slice_result_from_cube(margin)
+        margin = self._extract_slice_result_from_cube(margin)
+        if prune:
+            return self._fixup_margin_pruning(margin, axis)
+        return margin
+
+    def _fix_pruning_for_2D_margin_with_mr(self, margin, axis):
+        if self.mr_dim_ind == axis or axis is None:
+            opposite_axis = self._calculate_correct_axis_for_cube(
+                1 - self.mr_dim_ind)
+            opposite_mask = self._extract_slice_result_from_cube(
+                self._cube.margin(axis=opposite_axis, prune=True)
+            ).mask
+            if axis == 0 and len(margin.shape) > 1:
+                opposite_mask = opposite_mask[:, None]
+            mask = np.logical_or(margin.mask, opposite_mask)
+            return np.ma.masked_array(margin, mask)
+        return margin
+
+    def _fix_pruning_for_margin_with_only_empty_hs(self, margin):
+        if isinstance(margin, np.ma.core.MaskedConstant):
+            return margin
+
+        mask = margin.mask
+        if not np.all(mask):
+            # --Special case when a margin is not pruned all the way
+            # --(because of H&S), but the oposite margin _is_ completely
+            # --pruned, so there's nothing to show actually.
+            return np.ma.masked_array(margin.data, np.ones(margin.shape))
+
+        return margin
+
+    def _fixup_margin_pruning(self, margin, axis):
+        if self.has_mr and not self.has_ca:
+            return self._fix_pruning_for_2D_margin_with_mr(margin, axis)
+
+        if isinstance(margin, np.ma.MaskedArray) and self._is_empty:
+            return self._fix_pruning_for_margin_with_only_empty_hs(margin)
+
+        return margin
 
     @lazyproperty
     def mr_dim_ind(self):
@@ -498,6 +536,13 @@ class CubeSlice(object):
                     continue
                 res = np.insert(res, i, np.nan, axis=(dim - self.ndim))
         return res
+
+    @lazyproperty
+    def _is_empty(self):
+        array = self.as_array(weighted=False, prune=True)
+        if not isinstance(array, np.ma.core.MaskedArray):
+            return False
+        return np.all(array.mask)
 
     def _prepare_index_baseline(self, axis):
         # First get the margin of the opposite direction of the index axis.
