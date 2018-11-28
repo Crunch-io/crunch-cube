@@ -258,22 +258,19 @@ class CubeSlice(object):
         return margin
 
     def _fix_pruning_for_2D_margin_with_mr(self, margin, axis):
-        if self.mr_dim_ind == axis or axis is None:
-            opposite_axis = self._calculate_correct_axis_for_cube(
-                1 - self.mr_dim_ind)
-            opposite_mask = self._extract_slice_result_from_cube(
-                self._cube.margin(axis=opposite_axis, prune=True)
-            ).mask
-            if axis == 0 and len(margin.shape) > 1:
-                opposite_mask = opposite_mask[:, None]
-            mask = np.logical_or(margin.mask, opposite_mask)
-            return np.ma.masked_array(margin, mask)
-        return margin
+        if self.mr_dim_ind != axis and axis is not None:
+            return margin
+        opposite_axis = self._calculate_correct_axis_for_cube(
+            1 - self.mr_dim_ind)
+        opposite_mask = self._extract_slice_result_from_cube(
+            self._cube.margin(axis=opposite_axis, prune=True)
+        ).mask
+        if axis == 0 and len(margin.shape) > 1:
+            opposite_mask = opposite_mask[:, None]
+        mask = np.logical_or(margin.mask, opposite_mask)
+        return np.ma.masked_array(margin, mask)
 
     def _fix_pruning_for_margin_with_only_empty_hs(self, margin):
-        if isinstance(margin, np.ma.core.MaskedConstant):
-            return margin
-
         mask = margin.mask
         if not np.all(mask):
             # --Special case when a margin is not pruned all the way
@@ -287,7 +284,7 @@ class CubeSlice(object):
         if self.has_mr and not self.has_ca:
             return self._fix_pruning_for_2D_margin_with_mr(margin, axis)
 
-        if isinstance(margin, np.ma.MaskedArray) and self._is_empty:
+        if self._is_empty:
             return self._fix_pruning_for_margin_with_only_empty_hs(margin)
 
         return margin
@@ -540,8 +537,6 @@ class CubeSlice(object):
     @lazyproperty
     def _is_empty(self):
         array = self.as_array(weighted=False, prune=True)
-        if not isinstance(array, np.ma.core.MaskedArray):
-            return False
         return np.all(array.mask)
 
     def _prepare_index_baseline(self, axis):

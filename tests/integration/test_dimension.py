@@ -94,7 +94,7 @@ class TestDimension(TestCase):
         labels = dimension.labels(include_missing=True)
         assert labels == ['Cat', 'Mouse', 'Iguana']
 
-    def test_labels_for_numericals(self):
+    def test_labels_and_elements_for_numericals(self):
         dimension_dict = {
             'type': {
                 'class': 'enum',
@@ -133,6 +133,12 @@ class TestDimension(TestCase):
         # ---all labels, both valid and missing---
         labels = dimension.labels(include_cat_ids=True)
         assert labels == [('smallish', 0), ('kinda big', 1)]
+
+        elements = dimension.elements(include_missing=False)
+        assert [e.label for e in elements] == ['smallish', 'kinda big']
+
+        elements = dimension.elements(include_missing=True)
+        assert [e.label for e in elements] == ['smallish', 'kinda big', '']
 
     def test_subtotals_indices_two_subtotals(self):
         dimension = CrunchCube(CR.ECON_BLAME_WITH_HS_MISSING).dimensions[0]

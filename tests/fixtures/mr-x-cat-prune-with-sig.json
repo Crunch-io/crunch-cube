@@ -1,0 +1,1235 @@
+{
+    "element": "shoji:view",
+    "self": "https://app.crunch.io/api/datasets/ddc1b8a25c454689911d3d7a59c97aee/cube/?filter=%5B%5D&query=%7B%22dimensions%22:%5B%7B%22each%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2Fddc1b8a25c454689911d3d7a59c97aee%2Fvariables%2F0000db%2F%22%7D,%7B%22function%22:%22as_selected%22,%22args%22:%5B%7B%22variable%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2Fddc1b8a25c454689911d3d7a59c97aee%2Fvariables%2F0000db%2F%22%7D%5D%7D,%7B%22variable%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2Fddc1b8a25c454689911d3d7a59c97aee%2Fvariables%2F0000bd%2F%22%7D%5D,%22measures%22:%7B%22count%22:%7B%22function%22:%22cube_count%22,%22args%22:%5B%5D%7D%7D,%22weight%22:null%7D",
+    "value": {
+        "query": {
+            "measures": {
+                "count": {
+                    "function": "cube_count",
+                    "args": []
+                }
+            },
+            "dimensions": [
+                {
+                    "each": "https://app.crunch.io/api/datasets/ddc1b8a25c454689911d3d7a59c97aee/variables/0000db/"
+                },
+                {
+                    "function": "as_selected",
+                    "args": [
+                        {
+                            "variable": "https://app.crunch.io/api/datasets/ddc1b8a25c454689911d3d7a59c97aee/variables/0000db/"
+                        }
+                    ]
+                },
+                {
+                    "variable": "https://app.crunch.io/api/datasets/ddc1b8a25c454689911d3d7a59c97aee/variables/0000bd/"
+                }
+            ],
+            "weight": null
+        },
+        "query_environment": {
+            "filter": []
+        },
+        "result": {
+            "dimensions": [
+                {
+                    "derived": true,
+                    "references": {
+                        "subreferences": [
+                            {
+                                "alias": "france",
+                                "name": "France",
+                                "description": "multrace_1"
+                            },
+                            {
+                                "alias": "bdr",
+                                "name": "West Germany",
+                                "description": "multrace_2"
+                            },
+                            {
+                                "alias": "italy",
+                                "name": "Italy",
+                                "description": "multrace_3"
+                            },
+                            {
+                                "alias": "belgium",
+                                "name": "Belgium",
+                                "description": "multrace_4"
+                            },
+                            {
+                                "alias": "holland",
+                                "name": "the Netherlands",
+                                "description": "multrace_5"
+                            },
+                            {
+                                "alias": "luxembourg",
+                                "name": "Luxembourg",
+                                "description": "multrace_8"
+                            },
+                            {
+                                "alias": "other",
+                                "name": "Other",
+                                "description": "multrace_97"
+                            },
+                            {
+                                "alias": "ec98",
+                                "name": "Don't know",
+                                "description": "multrace_98"
+                            },
+                            {
+                                "alias": "ec99",
+                                "name": "None of these",
+                                "description": "multrace_99"
+                            }
+                        ],
+                        "notes": "A multiple response variable",
+                        "description": "Which of the following members of the ECSC have you lived in? (select all that apply)",
+                        "name": "Founding Members of the European Coal and Steel Community",
+                        "alias": "ec"
+                    },
+                    "type": {
+                        "subtype": {
+                            "class": "variable"
+                        },
+                        "elements": [
+                            {
+                                "id": 1,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "france",
+                                        "name": "France",
+                                        "description": "multrace_1"
+                                    },
+                                    "id": "00a5",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Other"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 2,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "bdr",
+                                        "name": "West Germany",
+                                        "description": "multrace_2"
+                                    },
+                                    "id": "00a6",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Other"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 3,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "italy",
+                                        "name": "Italy",
+                                        "description": "multrace_3"
+                                    },
+                                    "id": "00a7",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Other"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 4,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "belgium",
+                                        "name": "Belgium",
+                                        "description": "multrace_4"
+                                    },
+                                    "id": "00a8",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Other"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 5,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "holland",
+                                        "name": "the Netherlands",
+                                        "description": "multrace_5"
+                                    },
+                                    "id": "00a9",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Other"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 6,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "luxembourg",
+                                        "name": "Luxembourg",
+                                        "description": "multrace_8"
+                                    },
+                                    "id": "00aa",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Other"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 7,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "other",
+                                        "name": "Other",
+                                        "description": "multrace_97"
+                                    },
+                                    "id": "00ab",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Other"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 8,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "ec98",
+                                        "name": "Don't know",
+                                        "description": "multrace_98"
+                                    },
+                                    "id": "00ac",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Other"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 9,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "ec99",
+                                        "name": "None of these",
+                                        "description": "multrace_99"
+                                    },
+                                    "id": "00ad",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "missing": false,
+                                                "id": 0,
+                                                "name": "Other"
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "missing": true,
+                                                "id": -1,
+                                                "name": "No Data"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            }
+                        ],
+                        "class": "enum"
+                    }
+                },
+                {
+                    "references": {
+                        "subreferences": [
+                            {
+                                "alias": "france",
+                                "name": "France",
+                                "description": "multrace_1"
+                            },
+                            {
+                                "alias": "bdr",
+                                "name": "West Germany",
+                                "description": "multrace_2"
+                            },
+                            {
+                                "alias": "italy",
+                                "name": "Italy",
+                                "description": "multrace_3"
+                            },
+                            {
+                                "alias": "belgium",
+                                "name": "Belgium",
+                                "description": "multrace_4"
+                            },
+                            {
+                                "alias": "holland",
+                                "name": "the Netherlands",
+                                "description": "multrace_5"
+                            },
+                            {
+                                "alias": "luxembourg",
+                                "name": "Luxembourg",
+                                "description": "multrace_8"
+                            },
+                            {
+                                "alias": "other",
+                                "name": "Other",
+                                "description": "multrace_97"
+                            },
+                            {
+                                "alias": "ec98",
+                                "name": "Don't know",
+                                "description": "multrace_98"
+                            },
+                            {
+                                "alias": "ec99",
+                                "name": "None of these",
+                                "description": "multrace_99"
+                            }
+                        ],
+                        "notes": "A multiple response variable",
+                        "alias": "ec",
+                        "description": "Which of the following members of the ECSC have you lived in? (select all that apply)",
+                        "name": "Founding Members of the European Coal and Steel Community"
+                    },
+                    "derived": true,
+                    "type": {
+                        "ordinal": false,
+                        "subvariables": [
+                            "00a5",
+                            "00a6",
+                            "00a7",
+                            "00a8",
+                            "00a9",
+                            "00aa",
+                            "00ab",
+                            "00ac",
+                            "00ad"
+                        ],
+                        "class": "categorical",
+                        "categories": [
+                            {
+                                "numeric_value": 1,
+                                "selected": true,
+                                "id": 1,
+                                "missing": false,
+                                "name": "Selected"
+                            },
+                            {
+                                "numeric_value": 0,
+                                "missing": false,
+                                "id": 0,
+                                "name": "Other"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": true,
+                                "id": -1,
+                                "name": "No Data"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "references": {
+                        "alias": "offal",
+                        "notes": "A categorical variable where one of the categories has no responses",
+                        "name": "Offal",
+                        "description": "Mike's favorite food"
+                    },
+                    "derived": false,
+                    "type": {
+                        "ordinal": false,
+                        "class": "categorical",
+                        "categories": [
+                            {
+                                "numeric_value": 1,
+                                "missing": false,
+                                "id": 1,
+                                "name": "Liver"
+                            },
+                            {
+                                "numeric_value": 2,
+                                "missing": false,
+                                "id": 2,
+                                "name": "Kidney"
+                            },
+                            {
+                                "numeric_value": 3,
+                                "missing": false,
+                                "id": 3,
+                                "name": "Heart"
+                            },
+                            {
+                                "numeric_value": 4,
+                                "missing": false,
+                                "id": 4,
+                                "name": "Pancreas"
+                            },
+                            {
+                                "numeric_value": 5,
+                                "missing": false,
+                                "id": 5,
+                                "name": "Thymus"
+                            },
+                            {
+                                "numeric_value": 6,
+                                "missing": false,
+                                "id": 6,
+                                "name": "Snout"
+                            },
+                            {
+                                "numeric_value": 7,
+                                "missing": false,
+                                "id": 7,
+                                "name": "Lung"
+                            },
+                            {
+                                "numeric_value": 8,
+                                "missing": false,
+                                "id": 8,
+                                "name": "Tongue"
+                            },
+                            {
+                                "numeric_value": 32766,
+                                "missing": true,
+                                "id": 32766,
+                                "name": "Don't know"
+                            },
+                            {
+                                "numeric_value": 32767,
+                                "missing": true,
+                                "id": 32767,
+                                "name": "Not asked"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": true,
+                                "id": -1,
+                                "name": "No Data"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "missing": 1104,
+            "measures": {
+                "count": {
+                    "data": [
+                        144,
+                        48,
+                        0,
+                        24,
+                        124,
+                        43,
+                        30,
+                        9,
+                        0,
+                        23,
+                        0,
+                        49,
+                        21,
+                        0,
+                        11,
+                        21,
+                        20,
+                        10,
+                        4,
+                        0,
+                        10,
+                        0,
+                        361,
+                        101,
+                        0,
+                        115,
+                        202,
+                        126,
+                        77,
+                        18,
+                        1,
+                        70,
+                        0,
+                        32,
+                        13,
+                        0,
+                        10,
+                        16,
+                        7,
+                        4,
+                        0,
+                        0,
+                        4,
+                        0,
+                        161,
+                        56,
+                        0,
+                        25,
+                        129,
+                        56,
+                        36,
+                        13,
+                        0,
+                        29,
+                        0,
+                        361,
+                        101,
+                        0,
+                        115,
+                        202,
+                        126,
+                        77,
+                        18,
+                        1,
+                        70,
+                        0,
+                        13,
+                        8,
+                        0,
+                        4,
+                        3,
+                        9,
+                        6,
+                        2,
+                        0,
+                        1,
+                        0,
+                        180,
+                        61,
+                        0,
+                        31,
+                        142,
+                        54,
+                        34,
+                        11,
+                        0,
+                        32,
+                        0,
+                        361,
+                        101,
+                        0,
+                        115,
+                        202,
+                        126,
+                        77,
+                        18,
+                        1,
+                        70,
+                        0,
+                        9,
+                        3,
+                        0,
+                        0,
+                        2,
+                        2,
+                        2,
+                        1,
+                        0,
+                        9,
+                        0,
+                        184,
+                        66,
+                        0,
+                        35,
+                        143,
+                        61,
+                        38,
+                        12,
+                        0,
+                        24,
+                        0,
+                        361,
+                        101,
+                        0,
+                        115,
+                        202,
+                        126,
+                        77,
+                        18,
+                        1,
+                        70,
+                        0,
+                        2,
+                        4,
+                        0,
+                        2,
+                        6,
+                        3,
+                        0,
+                        1,
+                        0,
+                        0,
+                        0,
+                        191,
+                        65,
+                        0,
+                        33,
+                        139,
+                        60,
+                        40,
+                        12,
+                        0,
+                        33,
+                        0,
+                        361,
+                        101,
+                        0,
+                        115,
+                        202,
+                        126,
+                        77,
+                        18,
+                        1,
+                        70,
+                        0,
+                        3,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        0,
+                        190,
+                        69,
+                        0,
+                        35,
+                        145,
+                        63,
+                        40,
+                        13,
+                        0,
+                        32,
+                        0,
+                        361,
+                        101,
+                        0,
+                        115,
+                        202,
+                        126,
+                        77,
+                        18,
+                        1,
+                        70,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        193,
+                        69,
+                        0,
+                        35,
+                        145,
+                        63,
+                        40,
+                        13,
+                        0,
+                        33,
+                        0,
+                        361,
+                        101,
+                        0,
+                        115,
+                        202,
+                        126,
+                        77,
+                        18,
+                        1,
+                        70,
+                        0,
+                        3,
+                        1,
+                        0,
+                        0,
+                        2,
+                        2,
+                        0,
+                        1,
+                        0,
+                        1,
+                        0,
+                        190,
+                        68,
+                        0,
+                        35,
+                        143,
+                        61,
+                        40,
+                        12,
+                        0,
+                        32,
+                        0,
+                        361,
+                        101,
+                        0,
+                        115,
+                        202,
+                        126,
+                        77,
+                        18,
+                        1,
+                        70,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        193,
+                        69,
+                        0,
+                        35,
+                        145,
+                        63,
+                        40,
+                        13,
+                        0,
+                        33,
+                        0,
+                        361,
+                        101,
+                        0,
+                        115,
+                        202,
+                        126,
+                        77,
+                        18,
+                        1,
+                        70,
+                        0
+                    ],
+                    "n_missing": 1104,
+                    "metadata": {
+                        "references": {},
+                        "derived": true,
+                        "type": {
+                            "integer": true,
+                            "missing_rules": {},
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "class": "numeric"
+                        }
+                    }
+                }
+            },
+            "element": "crunch:cube",
+            "counts": [
+                144,
+                48,
+                0,
+                24,
+                124,
+                43,
+                30,
+                9,
+                0,
+                23,
+                0,
+                49,
+                21,
+                0,
+                11,
+                21,
+                20,
+                10,
+                4,
+                0,
+                10,
+                0,
+                361,
+                101,
+                0,
+                115,
+                202,
+                126,
+                77,
+                18,
+                1,
+                70,
+                0,
+                32,
+                13,
+                0,
+                10,
+                16,
+                7,
+                4,
+                0,
+                0,
+                4,
+                0,
+                161,
+                56,
+                0,
+                25,
+                129,
+                56,
+                36,
+                13,
+                0,
+                29,
+                0,
+                361,
+                101,
+                0,
+                115,
+                202,
+                126,
+                77,
+                18,
+                1,
+                70,
+                0,
+                13,
+                8,
+                0,
+                4,
+                3,
+                9,
+                6,
+                2,
+                0,
+                1,
+                0,
+                180,
+                61,
+                0,
+                31,
+                142,
+                54,
+                34,
+                11,
+                0,
+                32,
+                0,
+                361,
+                101,
+                0,
+                115,
+                202,
+                126,
+                77,
+                18,
+                1,
+                70,
+                0,
+                9,
+                3,
+                0,
+                0,
+                2,
+                2,
+                2,
+                1,
+                0,
+                9,
+                0,
+                184,
+                66,
+                0,
+                35,
+                143,
+                61,
+                38,
+                12,
+                0,
+                24,
+                0,
+                361,
+                101,
+                0,
+                115,
+                202,
+                126,
+                77,
+                18,
+                1,
+                70,
+                0,
+                2,
+                4,
+                0,
+                2,
+                6,
+                3,
+                0,
+                1,
+                0,
+                0,
+                0,
+                191,
+                65,
+                0,
+                33,
+                139,
+                60,
+                40,
+                12,
+                0,
+                33,
+                0,
+                361,
+                101,
+                0,
+                115,
+                202,
+                126,
+                77,
+                18,
+                1,
+                70,
+                0,
+                3,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                190,
+                69,
+                0,
+                35,
+                145,
+                63,
+                40,
+                13,
+                0,
+                32,
+                0,
+                361,
+                101,
+                0,
+                115,
+                202,
+                126,
+                77,
+                18,
+                1,
+                70,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                193,
+                69,
+                0,
+                35,
+                145,
+                63,
+                40,
+                13,
+                0,
+                33,
+                0,
+                361,
+                101,
+                0,
+                115,
+                202,
+                126,
+                77,
+                18,
+                1,
+                70,
+                0,
+                3,
+                1,
+                0,
+                0,
+                2,
+                2,
+                0,
+                1,
+                0,
+                1,
+                0,
+                190,
+                68,
+                0,
+                35,
+                143,
+                61,
+                40,
+                12,
+                0,
+                32,
+                0,
+                361,
+                101,
+                0,
+                115,
+                202,
+                126,
+                77,
+                18,
+                1,
+                70,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                193,
+                69,
+                0,
+                35,
+                145,
+                63,
+                40,
+                13,
+                0,
+                33,
+                0,
+                361,
+                101,
+                0,
+                115,
+                202,
+                126,
+                77,
+                18,
+                1,
+                70,
+                0
+            ],
+            "n": 1662
+        }
+    }
+}

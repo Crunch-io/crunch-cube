@@ -1,0 +1,2104 @@
+{
+    "query": {
+        "dimensions": [
+            {
+                "each": 1
+            },
+            {
+                "args": [
+                    {
+                        "variable": "afda2064ac8140a4960eac27fd43f253"
+                    }
+                ],
+                "function": "as_selected"
+            },
+            {
+                "each": 3
+            },
+            {
+                "args": [
+                    {
+                        "variable": "62adad17f78a4fcdaed5a852c92bbcde"
+                    }
+                ],
+                "function": "as_selected"
+            }
+        ],
+        "measures": {
+            "count": {
+                "args": [],
+                "function": "cube_count"
+            }
+        },
+        "weight": null
+    },
+    "query_environment": {
+        "filter": []
+    },
+    "result": {
+        "counts": [
+            5905,
+            12760,
+            4,
+            7122,
+            11543,
+            4,
+            12972,
+            5693,
+            4,
+            16285,
+            2380,
+            4,
+            5543,
+            13122,
+            4,
+            3335,
+            15330,
+            4,
+            12447,
+            74514,
+            34,
+            13962,
+            72999,
+            34,
+            23911,
+            63050,
+            34,
+            67271,
+            19690,
+            34,
+            8651,
+            78310,
+            34,
+            5739,
+            81222,
+            34,
+            37,
+            97,
+            111851,
+            20,
+            114,
+            111851,
+            40,
+            94,
+            111851,
+            101,
+            33,
+            111851,
+            20,
+            114,
+            111851,
+            12,
+            122,
+            111851,
+            6098,
+            11225,
+            3,
+            6663,
+            10660,
+            3,
+            11759,
+            5564,
+            3,
+            14144,
+            3179,
+            3,
+            5018,
+            12305,
+            3,
+            3929,
+            13394,
+            3,
+            12254,
+            76049,
+            35,
+            14421,
+            73882,
+            35,
+            25124,
+            63179,
+            35,
+            69412,
+            18891,
+            35,
+            9176,
+            79127,
+            35,
+            5145,
+            83158,
+            35,
+            37,
+            97,
+            111851,
+            20,
+            114,
+            111851,
+            40,
+            94,
+            111851,
+            101,
+            33,
+            111851,
+            20,
+            114,
+            111851,
+            12,
+            122,
+            111851,
+            3973,
+            11001,
+            1,
+            4383,
+            10591,
+            1,
+            7839,
+            7135,
+            1,
+            14469,
+            505,
+            1,
+            3179,
+            11795,
+            1,
+            1937,
+            13037,
+            1,
+            14379,
+            76273,
+            37,
+            16701,
+            73951,
+            37,
+            29044,
+            61608,
+            37,
+            69087,
+            21565,
+            37,
+            11015,
+            79637,
+            37,
+            7137,
+            83515,
+            37,
+            37,
+            97,
+            111851,
+            20,
+            114,
+            111851,
+            40,
+            94,
+            111851,
+            101,
+            33,
+            111851,
+            20,
+            114,
+            111851,
+            12,
+            122,
+            111851,
+            9222,
+            40217,
+            15,
+            10664,
+            38775,
+            15,
+            17267,
+            32172,
+            15,
+            48428,
+            1011,
+            15,
+            7730,
+            41709,
+            15,
+            3953,
+            45486,
+            15,
+            9130,
+            47057,
+            23,
+            10420,
+            45767,
+            23,
+            19616,
+            36571,
+            23,
+            35128,
+            21059,
+            23,
+            6464,
+            49723,
+            23,
+            5121,
+            51066,
+            23,
+            37,
+            97,
+            111851,
+            20,
+            114,
+            111851,
+            40,
+            94,
+            111851,
+            101,
+            33,
+            111851,
+            20,
+            114,
+            111851,
+            12,
+            122,
+            111851,
+            5213,
+            20387,
+            8,
+            5608,
+            19992,
+            8,
+            9149,
+            16451,
+            8,
+            25166,
+            434,
+            8,
+            4535,
+            21065,
+            8,
+            2345,
+            23255,
+            8,
+            13139,
+            66887,
+            30,
+            15476,
+            64550,
+            30,
+            27734,
+            52292,
+            30,
+            58390,
+            21636,
+            30,
+            9659,
+            70367,
+            30,
+            6729,
+            73297,
+            30,
+            37,
+            97,
+            111851,
+            20,
+            114,
+            111851,
+            40,
+            94,
+            111851,
+            101,
+            33,
+            111851,
+            20,
+            114,
+            111851,
+            12,
+            122,
+            111851,
+            12627,
+            31293,
+            12,
+            14252,
+            29668,
+            12,
+            24468,
+            19452,
+            12,
+            37381,
+            6539,
+            12,
+            10210,
+            33710,
+            12,
+            7137,
+            36783,
+            12,
+            5725,
+            55981,
+            26,
+            6832,
+            54874,
+            26,
+            12415,
+            49291,
+            26,
+            46175,
+            15531,
+            26,
+            3984,
+            57722,
+            26,
+            1937,
+            59769,
+            26,
+            37,
+            97,
+            111851,
+            20,
+            114,
+            111851,
+            40,
+            94,
+            111851,
+            101,
+            33,
+            111851,
+            20,
+            114,
+            111851,
+            12,
+            122,
+            111851,
+            11745,
+            25670,
+            9,
+            13649,
+            23766,
+            9,
+            22861,
+            14554,
+            9,
+            31583,
+            5832,
+            9,
+            9615,
+            27800,
+            9,
+            5642,
+            31773,
+            9,
+            6607,
+            61604,
+            29,
+            7435,
+            60776,
+            29,
+            14022,
+            54189,
+            29,
+            51973,
+            16238,
+            29,
+            4579,
+            63632,
+            29,
+            3432,
+            64779,
+            29,
+            37,
+            97,
+            111851,
+            20,
+            114,
+            111851,
+            40,
+            94,
+            111851,
+            101,
+            33,
+            111851,
+            20,
+            114,
+            111851,
+            12,
+            122,
+            111851,
+            3912,
+            17022,
+            3,
+            4520,
+            16414,
+            3,
+            8853,
+            12081,
+            3,
+            20492,
+            442,
+            3,
+            3737,
+            17197,
+            3,
+            2305,
+            18629,
+            3,
+            14440,
+            70252,
+            35,
+            16564,
+            68128,
+            35,
+            28030,
+            56662,
+            35,
+            63064,
+            21628,
+            35,
+            10457,
+            74235,
+            35,
+            6769,
+            77923,
+            35,
+            37,
+            97,
+            111851,
+            20,
+            114,
+            111851,
+            40,
+            94,
+            111851,
+            101,
+            33,
+            111851,
+            20,
+            114,
+            111851,
+            12,
+            122,
+            111851,
+            8096,
+            8963,
+            8,
+            8563,
+            8496,
+            8,
+            10184,
+            6875,
+            8,
+            14530,
+            2529,
+            8,
+            6259,
+            10800,
+            8,
+            3942,
+            13117,
+            8,
+            10256,
+            78311,
+            30,
+            12521,
+            76046,
+            30,
+            26699,
+            61868,
+            30,
+            69026,
+            19541,
+            30,
+            7935,
+            80632,
+            30,
+            5132,
+            83435,
+            30,
+            37,
+            97,
+            111851,
+            20,
+            114,
+            111851,
+            40,
+            94,
+            111851,
+            101,
+            33,
+            111851,
+            20,
+            114,
+            111851,
+            12,
+            122,
+            111851
+        ],
+        "dimensions": [
+            {
+                "derived": true,
+                "references": {
+                    "alias": "draft abbreviated Services used to watch TV yesterday (12 months combined)",
+                    "name": "draft abbreviated Services used to watch TV yesterday (12 months combined)",
+                    "subreferences": [
+                        {
+                            "alias": "Amazon Prime Video-afda2064ac8140a4960eac27fd43f253",
+                            "name": "Amazon Prime Video",
+                            "view": {
+                                "entity_name": "Amazon Prime Video",
+                                "origin_entity": "9",
+                                "origin_metric": "services_used_any_year",
+                                "origin_source": "tv_survey"
+                            }
+                        },
+                        {
+                            "alias": "Hulu-afda2064ac8140a4960eac27fd43f253",
+                            "name": "Hulu",
+                            "view": {
+                                "entity_name": "Hulu",
+                                "origin_entity": "8",
+                                "origin_metric": "services_used_any_year",
+                                "origin_source": "tv_survey"
+                            }
+                        },
+                        {
+                            "alias": "Live TV (free-to-air)-afda2064ac8140a4960eac27fd43f253",
+                            "name": "Live TV (free-to-air)",
+                            "view": {
+                                "entity_name": "Live TV (free-to-air)",
+                                "origin_entity": "3",
+                                "origin_metric": "services_used_any_year",
+                                "origin_source": "tv_survey"
+                            }
+                        },
+                        {
+                            "alias": "Live TV through cable provider-afda2064ac8140a4960eac27fd43f253",
+                            "name": "Live TV through cable provider",
+                            "view": {
+                                "entity_name": "Live TV through cable provider",
+                                "origin_entity": "1",
+                                "origin_metric": "services_used_any_year",
+                                "origin_source": "tv_survey"
+                            }
+                        },
+                        {
+                            "alias": "Live TV via satellite provider-afda2064ac8140a4960eac27fd43f253",
+                            "name": "Live TV via satellite provider",
+                            "view": {
+                                "entity_name": "Live TV via satellite provider",
+                                "origin_entity": "2",
+                                "origin_metric": "services_used_any_year",
+                                "origin_source": "tv_survey"
+                            }
+                        },
+                        {
+                            "alias": "Netflix-afda2064ac8140a4960eac27fd43f253",
+                            "name": "Netflix",
+                            "view": {
+                                "entity_name": "Netflix",
+                                "origin_entity": "7",
+                                "origin_metric": "services_used_any_year",
+                                "origin_source": "tv_survey"
+                            }
+                        },
+                        {
+                            "alias": "other etc-afda2064ac8140a4960eac27fd43f253",
+                            "name": "other etc",
+                            "view": {
+                                "entity_name": "Pay-per-view",
+                                "origin_entity": "21",
+                                "origin_metric": "services_used_any_year",
+                                "origin_source": "tv_survey"
+                            }
+                        },
+                        {
+                            "alias": "Via DVR (e.g., TiVo, or \u2018On Demand\u2019 services)-afda2064ac8140a4960eac27fd43f253",
+                            "name": "Via DVR (e.g., TiVo, or \u2018On Demand\u2019 services)",
+                            "view": {
+                                "entity_name": "Via DVR (e.g., TiVo, or \u2018On Demand\u2019 services)",
+                                "origin_entity": "5",
+                                "origin_metric": "services_used_any_year",
+                                "origin_source": "tv_survey"
+                            }
+                        },
+                        {
+                            "alias": "YouTube/ Vevo-afda2064ac8140a4960eac27fd43f253",
+                            "name": "YouTube/ Vevo",
+                            "view": {
+                                "entity_name": "YouTube/ Vevo",
+                                "origin_entity": "15",
+                                "origin_metric": "services_used_any_year",
+                                "origin_source": "tv_survey"
+                            }
+                        }
+                    ]
+                },
+                "type": {
+                    "class": "enum",
+                    "elements": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0001",
+                                "references": {
+                                    "alias": "Amazon Prime Video-afda2064ac8140a4960eac27fd43f253",
+                                    "name": "Amazon Prime Video",
+                                    "view": {
+                                        "entity_name": "Amazon Prime Video",
+                                        "origin_entity": "9",
+                                        "origin_metric": "services_used_any_year",
+                                        "origin_source": "tv_survey"
+                                    }
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Other",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0002",
+                                "references": {
+                                    "alias": "Hulu-afda2064ac8140a4960eac27fd43f253",
+                                    "name": "Hulu",
+                                    "view": {
+                                        "entity_name": "Hulu",
+                                        "origin_entity": "8",
+                                        "origin_metric": "services_used_any_year",
+                                        "origin_source": "tv_survey"
+                                    }
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Other",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 3,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0003",
+                                "references": {
+                                    "alias": "Live TV (free-to-air)-afda2064ac8140a4960eac27fd43f253",
+                                    "name": "Live TV (free-to-air)",
+                                    "view": {
+                                        "entity_name": "Live TV (free-to-air)",
+                                        "origin_entity": "3",
+                                        "origin_metric": "services_used_any_year",
+                                        "origin_source": "tv_survey"
+                                    }
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Other",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 4,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0004",
+                                "references": {
+                                    "alias": "Live TV through cable provider-afda2064ac8140a4960eac27fd43f253",
+                                    "name": "Live TV through cable provider",
+                                    "view": {
+                                        "entity_name": "Live TV through cable provider",
+                                        "origin_entity": "1",
+                                        "origin_metric": "services_used_any_year",
+                                        "origin_source": "tv_survey"
+                                    }
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Other",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 5,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0005",
+                                "references": {
+                                    "alias": "Live TV via satellite provider-afda2064ac8140a4960eac27fd43f253",
+                                    "name": "Live TV via satellite provider",
+                                    "view": {
+                                        "entity_name": "Live TV via satellite provider",
+                                        "origin_entity": "2",
+                                        "origin_metric": "services_used_any_year",
+                                        "origin_source": "tv_survey"
+                                    }
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Other",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 6,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0006",
+                                "references": {
+                                    "alias": "Netflix-afda2064ac8140a4960eac27fd43f253",
+                                    "name": "Netflix",
+                                    "view": {
+                                        "entity_name": "Netflix",
+                                        "origin_entity": "7",
+                                        "origin_metric": "services_used_any_year",
+                                        "origin_source": "tv_survey"
+                                    }
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Other",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 7,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0007",
+                                "references": {
+                                    "alias": "other etc-afda2064ac8140a4960eac27fd43f253",
+                                    "name": "other etc",
+                                    "view": {
+                                        "entity_name": "Pay-per-view",
+                                        "origin_entity": "21",
+                                        "origin_metric": "services_used_any_year",
+                                        "origin_source": "tv_survey"
+                                    }
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Other",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 8,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0008",
+                                "references": {
+                                    "alias": "Via DVR (e.g., TiVo, or \u2018On Demand\u2019 services)-afda2064ac8140a4960eac27fd43f253",
+                                    "name": "Via DVR (e.g., TiVo, or \u2018On Demand\u2019 services)",
+                                    "view": {
+                                        "entity_name": "Via DVR (e.g., TiVo, or \u2018On Demand\u2019 services)",
+                                        "origin_entity": "5",
+                                        "origin_metric": "services_used_any_year",
+                                        "origin_source": "tv_survey"
+                                    }
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Other",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 9,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0009",
+                                "references": {
+                                    "alias": "YouTube/ Vevo-afda2064ac8140a4960eac27fd43f253",
+                                    "name": "YouTube/ Vevo",
+                                    "view": {
+                                        "entity_name": "YouTube/ Vevo",
+                                        "origin_entity": "15",
+                                        "origin_metric": "services_used_any_year",
+                                        "origin_source": "tv_survey"
+                                    }
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Other",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        }
+                    ],
+                    "subtype": {
+                        "class": "variable"
+                    }
+                }
+            },
+            {
+                "derived": true,
+                "references": {
+                    "alias": "draft abbreviated Services used to watch TV yesterday (12 months combined)",
+                    "name": "draft abbreviated Services used to watch TV yesterday (12 months combined)",
+                    "subreferences": [
+                        {
+                            "alias": "Amazon Prime Video-afda2064ac8140a4960eac27fd43f253",
+                            "name": "Amazon Prime Video",
+                            "view": {
+                                "entity_name": "Amazon Prime Video",
+                                "origin_entity": "9",
+                                "origin_metric": "services_used_any_year",
+                                "origin_source": "tv_survey"
+                            }
+                        },
+                        {
+                            "alias": "Hulu-afda2064ac8140a4960eac27fd43f253",
+                            "name": "Hulu",
+                            "view": {
+                                "entity_name": "Hulu",
+                                "origin_entity": "8",
+                                "origin_metric": "services_used_any_year",
+                                "origin_source": "tv_survey"
+                            }
+                        },
+                        {
+                            "alias": "Live TV (free-to-air)-afda2064ac8140a4960eac27fd43f253",
+                            "name": "Live TV (free-to-air)",
+                            "view": {
+                                "entity_name": "Live TV (free-to-air)",
+                                "origin_entity": "3",
+                                "origin_metric": "services_used_any_year",
+                                "origin_source": "tv_survey"
+                            }
+                        },
+                        {
+                            "alias": "Live TV through cable provider-afda2064ac8140a4960eac27fd43f253",
+                            "name": "Live TV through cable provider",
+                            "view": {
+                                "entity_name": "Live TV through cable provider",
+                                "origin_entity": "1",
+                                "origin_metric": "services_used_any_year",
+                                "origin_source": "tv_survey"
+                            }
+                        },
+                        {
+                            "alias": "Live TV via satellite provider-afda2064ac8140a4960eac27fd43f253",
+                            "name": "Live TV via satellite provider",
+                            "view": {
+                                "entity_name": "Live TV via satellite provider",
+                                "origin_entity": "2",
+                                "origin_metric": "services_used_any_year",
+                                "origin_source": "tv_survey"
+                            }
+                        },
+                        {
+                            "alias": "Netflix-afda2064ac8140a4960eac27fd43f253",
+                            "name": "Netflix",
+                            "view": {
+                                "entity_name": "Netflix",
+                                "origin_entity": "7",
+                                "origin_metric": "services_used_any_year",
+                                "origin_source": "tv_survey"
+                            }
+                        },
+                        {
+                            "alias": "other etc-afda2064ac8140a4960eac27fd43f253",
+                            "name": "other etc",
+                            "view": {
+                                "entity_name": "Pay-per-view",
+                                "origin_entity": "21",
+                                "origin_metric": "services_used_any_year",
+                                "origin_source": "tv_survey"
+                            }
+                        },
+                        {
+                            "alias": "Via DVR (e.g., TiVo, or \u2018On Demand\u2019 services)-afda2064ac8140a4960eac27fd43f253",
+                            "name": "Via DVR (e.g., TiVo, or \u2018On Demand\u2019 services)",
+                            "view": {
+                                "entity_name": "Via DVR (e.g., TiVo, or \u2018On Demand\u2019 services)",
+                                "origin_entity": "5",
+                                "origin_metric": "services_used_any_year",
+                                "origin_source": "tv_survey"
+                            }
+                        },
+                        {
+                            "alias": "YouTube/ Vevo-afda2064ac8140a4960eac27fd43f253",
+                            "name": "YouTube/ Vevo",
+                            "view": {
+                                "entity_name": "YouTube/ Vevo",
+                                "origin_entity": "15",
+                                "origin_metric": "services_used_any_year",
+                                "origin_source": "tv_survey"
+                            }
+                        }
+                    ]
+                },
+                "type": {
+                    "categories": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "name": "Selected",
+                            "numeric_value": 1,
+                            "selected": true
+                        },
+                        {
+                            "id": 0,
+                            "missing": false,
+                            "name": "Other",
+                            "numeric_value": 0
+                        },
+                        {
+                            "id": -1,
+                            "missing": true,
+                            "name": "No Data",
+                            "numeric_value": null
+                        }
+                    ],
+                    "class": "categorical",
+                    "ordinal": false,
+                    "subvariables": [
+                        "0001",
+                        "0002",
+                        "0003",
+                        "0004",
+                        "0005",
+                        "0006",
+                        "0007",
+                        "0008",
+                        "0009"
+                    ]
+                }
+            },
+            {
+                "derived": true,
+                "references": {
+                    "alias": "draft abbreviated Devices used to watch TV yesterday (12 months combined)",
+                    "name": "draft abbreviated Devices used to watch TV yesterday (12 months combined)",
+                    "subreferences": [
+                        {
+                            "alias": "Cell phone (Devices used to watch TV yesterday (12 months combined))-62adad17f78a4fcdaed5a852c92bbcde",
+                            "name": "Cell phone (Devices used to watch TV yesterday (12 months combined))",
+                            "view": {
+                                "entity_name": "Cell phone",
+                                "origin_entity": "10",
+                                "origin_metric": "devices_used_any_year",
+                                "origin_source": "tv_survey"
+                            }
+                        },
+                        {
+                            "alias": "Desktop/laptop-62adad17f78a4fcdaed5a852c92bbcde",
+                            "name": "Desktop/laptop",
+                            "view": {
+                                "entity_name": "Desktop/laptop",
+                                "origin_entity": "11",
+                                "origin_metric": "devices_used_any_year",
+                                "origin_source": "tv_survey"
+                            }
+                        },
+                        {
+                            "alias": "Other etc-62adad17f78a4fcdaed5a852c92bbcde",
+                            "name": "Other etc",
+                            "view": {
+                                "entity_name": "Other",
+                                "origin_entity": "12",
+                                "origin_metric": "devices_used_any_year",
+                                "origin_source": "tv_survey"
+                            }
+                        },
+                        {
+                            "alias": "TV (regular or smart)-62adad17f78a4fcdaed5a852c92bbcde",
+                            "name": "TV (regular or smart)",
+                            "view": {
+                                "entity_name": "Regular TV ",
+                                "origin_entity": "1",
+                                "origin_metric": "devices_used_any_year",
+                                "origin_source": "tv_survey"
+                            }
+                        },
+                        {
+                            "alias": "Tablet-62adad17f78a4fcdaed5a852c92bbcde",
+                            "name": "Tablet",
+                            "view": {
+                                "entity_name": "Tablet",
+                                "origin_entity": "9",
+                                "origin_metric": "devices_used_any_year",
+                                "origin_source": "tv_survey"
+                            }
+                        },
+                        {
+                            "alias": "Via gaming console-62adad17f78a4fcdaed5a852c92bbcde",
+                            "name": "Via gaming console",
+                            "view": {
+                                "entity_name": "Via gaming console (e.g., PS3, Xbox)",
+                                "origin_entity": "3",
+                                "origin_metric": "devices_used_any_year",
+                                "origin_source": "tv_survey"
+                            }
+                        }
+                    ]
+                },
+                "type": {
+                    "class": "enum",
+                    "elements": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0001",
+                                "references": {
+                                    "alias": "Cell phone (Devices used to watch TV yesterday (12 months combined))-62adad17f78a4fcdaed5a852c92bbcde",
+                                    "name": "Cell phone (Devices used to watch TV yesterday (12 months combined))",
+                                    "view": {
+                                        "entity_name": "Cell phone",
+                                        "origin_entity": "10",
+                                        "origin_metric": "devices_used_any_year",
+                                        "origin_source": "tv_survey"
+                                    }
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Other",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0002",
+                                "references": {
+                                    "alias": "Desktop/laptop-62adad17f78a4fcdaed5a852c92bbcde",
+                                    "name": "Desktop/laptop",
+                                    "view": {
+                                        "entity_name": "Desktop/laptop",
+                                        "origin_entity": "11",
+                                        "origin_metric": "devices_used_any_year",
+                                        "origin_source": "tv_survey"
+                                    }
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Other",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 3,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0003",
+                                "references": {
+                                    "alias": "Other etc-62adad17f78a4fcdaed5a852c92bbcde",
+                                    "name": "Other etc",
+                                    "view": {
+                                        "entity_name": "Other",
+                                        "origin_entity": "12",
+                                        "origin_metric": "devices_used_any_year",
+                                        "origin_source": "tv_survey"
+                                    }
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Other",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 4,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0004",
+                                "references": {
+                                    "alias": "TV (regular or smart)-62adad17f78a4fcdaed5a852c92bbcde",
+                                    "name": "TV (regular or smart)",
+                                    "view": {
+                                        "entity_name": "Regular TV ",
+                                        "origin_entity": "1",
+                                        "origin_metric": "devices_used_any_year",
+                                        "origin_source": "tv_survey"
+                                    }
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Other",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 5,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0005",
+                                "references": {
+                                    "alias": "Tablet-62adad17f78a4fcdaed5a852c92bbcde",
+                                    "name": "Tablet",
+                                    "view": {
+                                        "entity_name": "Tablet",
+                                        "origin_entity": "9",
+                                        "origin_metric": "devices_used_any_year",
+                                        "origin_source": "tv_survey"
+                                    }
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Other",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 6,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0006",
+                                "references": {
+                                    "alias": "Via gaming console-62adad17f78a4fcdaed5a852c92bbcde",
+                                    "name": "Via gaming console",
+                                    "view": {
+                                        "entity_name": "Via gaming console (e.g., PS3, Xbox)",
+                                        "origin_entity": "3",
+                                        "origin_metric": "devices_used_any_year",
+                                        "origin_source": "tv_survey"
+                                    }
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Other",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        }
+                    ],
+                    "subtype": {
+                        "class": "variable"
+                    }
+                }
+            },
+            {
+                "derived": true,
+                "references": {
+                    "alias": "draft abbreviated Devices used to watch TV yesterday (12 months combined)",
+                    "name": "draft abbreviated Devices used to watch TV yesterday (12 months combined)",
+                    "subreferences": [
+                        {
+                            "alias": "Cell phone (Devices used to watch TV yesterday (12 months combined))-62adad17f78a4fcdaed5a852c92bbcde",
+                            "name": "Cell phone (Devices used to watch TV yesterday (12 months combined))",
+                            "view": {
+                                "entity_name": "Cell phone",
+                                "origin_entity": "10",
+                                "origin_metric": "devices_used_any_year",
+                                "origin_source": "tv_survey"
+                            }
+                        },
+                        {
+                            "alias": "Desktop/laptop-62adad17f78a4fcdaed5a852c92bbcde",
+                            "name": "Desktop/laptop",
+                            "view": {
+                                "entity_name": "Desktop/laptop",
+                                "origin_entity": "11",
+                                "origin_metric": "devices_used_any_year",
+                                "origin_source": "tv_survey"
+                            }
+                        },
+                        {
+                            "alias": "Other etc-62adad17f78a4fcdaed5a852c92bbcde",
+                            "name": "Other etc",
+                            "view": {
+                                "entity_name": "Other",
+                                "origin_entity": "12",
+                                "origin_metric": "devices_used_any_year",
+                                "origin_source": "tv_survey"
+                            }
+                        },
+                        {
+                            "alias": "TV (regular or smart)-62adad17f78a4fcdaed5a852c92bbcde",
+                            "name": "TV (regular or smart)",
+                            "view": {
+                                "entity_name": "Regular TV ",
+                                "origin_entity": "1",
+                                "origin_metric": "devices_used_any_year",
+                                "origin_source": "tv_survey"
+                            }
+                        },
+                        {
+                            "alias": "Tablet-62adad17f78a4fcdaed5a852c92bbcde",
+                            "name": "Tablet",
+                            "view": {
+                                "entity_name": "Tablet",
+                                "origin_entity": "9",
+                                "origin_metric": "devices_used_any_year",
+                                "origin_source": "tv_survey"
+                            }
+                        },
+                        {
+                            "alias": "Via gaming console-62adad17f78a4fcdaed5a852c92bbcde",
+                            "name": "Via gaming console",
+                            "view": {
+                                "entity_name": "Via gaming console (e.g., PS3, Xbox)",
+                                "origin_entity": "3",
+                                "origin_metric": "devices_used_any_year",
+                                "origin_source": "tv_survey"
+                            }
+                        }
+                    ]
+                },
+                "type": {
+                    "categories": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "name": "Selected",
+                            "numeric_value": 1,
+                            "selected": true
+                        },
+                        {
+                            "id": 0,
+                            "missing": false,
+                            "name": "Other",
+                            "numeric_value": 0
+                        },
+                        {
+                            "id": -1,
+                            "missing": true,
+                            "name": "No Data",
+                            "numeric_value": null
+                        }
+                    ],
+                    "class": "categorical",
+                    "ordinal": false,
+                    "subvariables": [
+                        "0001",
+                        "0002",
+                        "0003",
+                        "0004",
+                        "0005",
+                        "0006"
+                    ]
+                }
+            }
+        ],
+        "element": "crunch:cube",
+        "measures": {
+            "count": {
+                "data": [
+                    5905,
+                    12760,
+                    4,
+                    7122,
+                    11543,
+                    4,
+                    12972,
+                    5693,
+                    4,
+                    16285,
+                    2380,
+                    4,
+                    5543,
+                    13122,
+                    4,
+                    3335,
+                    15330,
+                    4,
+                    12447,
+                    74514,
+                    34,
+                    13962,
+                    72999,
+                    34,
+                    23911,
+                    63050,
+                    34,
+                    67271,
+                    19690,
+                    34,
+                    8651,
+                    78310,
+                    34,
+                    5739,
+                    81222,
+                    34,
+                    37,
+                    97,
+                    111851,
+                    20,
+                    114,
+                    111851,
+                    40,
+                    94,
+                    111851,
+                    101,
+                    33,
+                    111851,
+                    20,
+                    114,
+                    111851,
+                    12,
+                    122,
+                    111851,
+                    6098,
+                    11225,
+                    3,
+                    6663,
+                    10660,
+                    3,
+                    11759,
+                    5564,
+                    3,
+                    14144,
+                    3179,
+                    3,
+                    5018,
+                    12305,
+                    3,
+                    3929,
+                    13394,
+                    3,
+                    12254,
+                    76049,
+                    35,
+                    14421,
+                    73882,
+                    35,
+                    25124,
+                    63179,
+                    35,
+                    69412,
+                    18891,
+                    35,
+                    9176,
+                    79127,
+                    35,
+                    5145,
+                    83158,
+                    35,
+                    37,
+                    97,
+                    111851,
+                    20,
+                    114,
+                    111851,
+                    40,
+                    94,
+                    111851,
+                    101,
+                    33,
+                    111851,
+                    20,
+                    114,
+                    111851,
+                    12,
+                    122,
+                    111851,
+                    3973,
+                    11001,
+                    1,
+                    4383,
+                    10591,
+                    1,
+                    7839,
+                    7135,
+                    1,
+                    14469,
+                    505,
+                    1,
+                    3179,
+                    11795,
+                    1,
+                    1937,
+                    13037,
+                    1,
+                    14379,
+                    76273,
+                    37,
+                    16701,
+                    73951,
+                    37,
+                    29044,
+                    61608,
+                    37,
+                    69087,
+                    21565,
+                    37,
+                    11015,
+                    79637,
+                    37,
+                    7137,
+                    83515,
+                    37,
+                    37,
+                    97,
+                    111851,
+                    20,
+                    114,
+                    111851,
+                    40,
+                    94,
+                    111851,
+                    101,
+                    33,
+                    111851,
+                    20,
+                    114,
+                    111851,
+                    12,
+                    122,
+                    111851,
+                    9222,
+                    40217,
+                    15,
+                    10664,
+                    38775,
+                    15,
+                    17267,
+                    32172,
+                    15,
+                    48428,
+                    1011,
+                    15,
+                    7730,
+                    41709,
+                    15,
+                    3953,
+                    45486,
+                    15,
+                    9130,
+                    47057,
+                    23,
+                    10420,
+                    45767,
+                    23,
+                    19616,
+                    36571,
+                    23,
+                    35128,
+                    21059,
+                    23,
+                    6464,
+                    49723,
+                    23,
+                    5121,
+                    51066,
+                    23,
+                    37,
+                    97,
+                    111851,
+                    20,
+                    114,
+                    111851,
+                    40,
+                    94,
+                    111851,
+                    101,
+                    33,
+                    111851,
+                    20,
+                    114,
+                    111851,
+                    12,
+                    122,
+                    111851,
+                    5213,
+                    20387,
+                    8,
+                    5608,
+                    19992,
+                    8,
+                    9149,
+                    16451,
+                    8,
+                    25166,
+                    434,
+                    8,
+                    4535,
+                    21065,
+                    8,
+                    2345,
+                    23255,
+                    8,
+                    13139,
+                    66887,
+                    30,
+                    15476,
+                    64550,
+                    30,
+                    27734,
+                    52292,
+                    30,
+                    58390,
+                    21636,
+                    30,
+                    9659,
+                    70367,
+                    30,
+                    6729,
+                    73297,
+                    30,
+                    37,
+                    97,
+                    111851,
+                    20,
+                    114,
+                    111851,
+                    40,
+                    94,
+                    111851,
+                    101,
+                    33,
+                    111851,
+                    20,
+                    114,
+                    111851,
+                    12,
+                    122,
+                    111851,
+                    12627,
+                    31293,
+                    12,
+                    14252,
+                    29668,
+                    12,
+                    24468,
+                    19452,
+                    12,
+                    37381,
+                    6539,
+                    12,
+                    10210,
+                    33710,
+                    12,
+                    7137,
+                    36783,
+                    12,
+                    5725,
+                    55981,
+                    26,
+                    6832,
+                    54874,
+                    26,
+                    12415,
+                    49291,
+                    26,
+                    46175,
+                    15531,
+                    26,
+                    3984,
+                    57722,
+                    26,
+                    1937,
+                    59769,
+                    26,
+                    37,
+                    97,
+                    111851,
+                    20,
+                    114,
+                    111851,
+                    40,
+                    94,
+                    111851,
+                    101,
+                    33,
+                    111851,
+                    20,
+                    114,
+                    111851,
+                    12,
+                    122,
+                    111851,
+                    11745,
+                    25670,
+                    9,
+                    13649,
+                    23766,
+                    9,
+                    22861,
+                    14554,
+                    9,
+                    31583,
+                    5832,
+                    9,
+                    9615,
+                    27800,
+                    9,
+                    5642,
+                    31773,
+                    9,
+                    6607,
+                    61604,
+                    29,
+                    7435,
+                    60776,
+                    29,
+                    14022,
+                    54189,
+                    29,
+                    51973,
+                    16238,
+                    29,
+                    4579,
+                    63632,
+                    29,
+                    3432,
+                    64779,
+                    29,
+                    37,
+                    97,
+                    111851,
+                    20,
+                    114,
+                    111851,
+                    40,
+                    94,
+                    111851,
+                    101,
+                    33,
+                    111851,
+                    20,
+                    114,
+                    111851,
+                    12,
+                    122,
+                    111851,
+                    3912,
+                    17022,
+                    3,
+                    4520,
+                    16414,
+                    3,
+                    8853,
+                    12081,
+                    3,
+                    20492,
+                    442,
+                    3,
+                    3737,
+                    17197,
+                    3,
+                    2305,
+                    18629,
+                    3,
+                    14440,
+                    70252,
+                    35,
+                    16564,
+                    68128,
+                    35,
+                    28030,
+                    56662,
+                    35,
+                    63064,
+                    21628,
+                    35,
+                    10457,
+                    74235,
+                    35,
+                    6769,
+                    77923,
+                    35,
+                    37,
+                    97,
+                    111851,
+                    20,
+                    114,
+                    111851,
+                    40,
+                    94,
+                    111851,
+                    101,
+                    33,
+                    111851,
+                    20,
+                    114,
+                    111851,
+                    12,
+                    122,
+                    111851,
+                    8096,
+                    8963,
+                    8,
+                    8563,
+                    8496,
+                    8,
+                    10184,
+                    6875,
+                    8,
+                    14530,
+                    2529,
+                    8,
+                    6259,
+                    10800,
+                    8,
+                    3942,
+                    13117,
+                    8,
+                    10256,
+                    78311,
+                    30,
+                    12521,
+                    76046,
+                    30,
+                    26699,
+                    61868,
+                    30,
+                    69026,
+                    19541,
+                    30,
+                    7935,
+                    80632,
+                    30,
+                    5132,
+                    83435,
+                    30,
+                    37,
+                    97,
+                    111851,
+                    20,
+                    114,
+                    111851,
+                    40,
+                    94,
+                    111851,
+                    101,
+                    33,
+                    111851,
+                    20,
+                    114,
+                    111851,
+                    12,
+                    122,
+                    111851
+                ],
+                "metadata": {
+                    "derived": true,
+                    "references": {},
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {}
+                    }
+                },
+                "n_missing": 112023
+            }
+        },
+        "missing": 112023,
+        "n": 217649
+    }
+}

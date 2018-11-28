@@ -1,0 +1,858 @@
+{
+    "query": {
+        "dimensions": [
+            {
+                "each": 1
+            },
+            {
+                "variable": "0000d8"
+            },
+            {
+                "variable": "000067"
+            }
+        ],
+        "measures": {
+            "count": {
+                "args": [],
+                "function": "cube_count"
+            }
+        },
+        "weight": "http://127.0.0.1:8080/datasets/230d454e1b5942a99f870fdb0a31c8ca/variables/0000d0/"
+    },
+    "query_environment": {
+        "filter": []
+    },
+    "result": {
+        "counts": [
+            214,
+            1,
+            79,
+            12,
+            0,
+            6,
+            0,
+            123,
+            0,
+            218,
+            51,
+            0,
+            23,
+            0,
+            40,
+            1,
+            93,
+            79,
+            0,
+            58,
+            0,
+            17,
+            1,
+            47,
+            111,
+            0,
+            314,
+            0,
+            35,
+            1,
+            51,
+            39,
+            0,
+            27,
+            0,
+            5,
+            2,
+            7,
+            2,
+            0,
+            5,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            17,
+            0,
+            18,
+            39,
+            0,
+            98,
+            0,
+            27,
+            1,
+            78,
+            79,
+            0,
+            174,
+            0,
+            51,
+            1,
+            96,
+            59,
+            0,
+            75,
+            0,
+            287,
+            1,
+            246,
+            77,
+            0,
+            56,
+            0,
+            46,
+            1,
+            48,
+            36,
+            0,
+            28,
+            0,
+            6,
+            2,
+            9,
+            4,
+            0,
+            2,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            434,
+            6,
+            495,
+            294,
+            0,
+            433,
+            0
+        ],
+        "dimensions": [
+            {
+                "derived": true,
+                "references": {
+                    "alias": "abolitionists",
+                    "description": "Do you have a favorable or an unfavorable opinion of the following abolitionists?",
+                    "name": "Abolitionists",
+                    "notes": "A categorical array variable, where one item has no responses",
+                    "subreferences": [
+                        {
+                            "alias": "douglass",
+                            "description": "fav_ppdem",
+                            "name": "Frederick Douglass"
+                        },
+                        {
+                            "alias": "brown",
+                            "description": "fav_pprep",
+                            "name": "John Brown"
+                        },
+                        {
+                            "alias": "truth",
+                            "name": "Sojourner Truth"
+                        }
+                    ],
+                    "view": {
+                        "column_width": null,
+                        "include_missing": false,
+                        "show_counts": false,
+                        "transform": {
+                            "insertions": [
+                                {
+                                    "anchor": 2,
+                                    "args": [
+                                        0,
+                                        2
+                                    ],
+                                    "function": "subtotal",
+                                    "name": "favorable"
+                                },
+                                {
+                                    "anchor": 4,
+                                    "args": [
+                                        3,
+                                        4
+                                    ],
+                                    "function": "subtotal",
+                                    "name": "unfavorable"
+                                }
+                            ]
+                        }
+                    }
+                },
+                "type": {
+                    "class": "enum",
+                    "elements": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0061",
+                                "references": {
+                                    "alias": "douglass",
+                                    "description": "fav_ppdem",
+                                    "name": "Frederick Douglass"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Very favorable",
+                                            "numeric_value": 0,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": 2,
+                                            "missing": false,
+                                            "name": "Somewhat favorable",
+                                            "numeric_value": 2,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": 3,
+                                            "missing": false,
+                                            "name": "Somewhat unfavorable",
+                                            "numeric_value": 3,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": 4,
+                                            "missing": false,
+                                            "name": "Very unfavorable",
+                                            "numeric_value": 4,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": 5,
+                                            "missing": false,
+                                            "name": "Don't know",
+                                            "numeric_value": 5,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": 32766,
+                                            "missing": true,
+                                            "name": "skipped",
+                                            "numeric_value": 32766,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": 32767,
+                                            "missing": true,
+                                            "name": "not asked",
+                                            "numeric_value": 32767,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null,
+                                            "selected": false
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0062",
+                                "references": {
+                                    "alias": "brown",
+                                    "description": "fav_pprep",
+                                    "name": "John Brown"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Very favorable",
+                                            "numeric_value": 0,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": 2,
+                                            "missing": false,
+                                            "name": "Somewhat favorable",
+                                            "numeric_value": 2,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": 3,
+                                            "missing": false,
+                                            "name": "Somewhat unfavorable",
+                                            "numeric_value": 3,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": 4,
+                                            "missing": false,
+                                            "name": "Very unfavorable",
+                                            "numeric_value": 4,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": 5,
+                                            "missing": false,
+                                            "name": "Don't know",
+                                            "numeric_value": 5,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": 32766,
+                                            "missing": true,
+                                            "name": "skipped",
+                                            "numeric_value": 32766,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": 32767,
+                                            "missing": true,
+                                            "name": "not asked",
+                                            "numeric_value": 32767,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null,
+                                            "selected": false
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 3,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "fb4492a07d5142f9a9a49de9c07ce8a1",
+                                "references": {
+                                    "alias": "truth",
+                                    "name": "Sojourner Truth"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Very favorable",
+                                            "numeric_value": 0,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": 2,
+                                            "missing": false,
+                                            "name": "Somewhat favorable",
+                                            "numeric_value": 2,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": 3,
+                                            "missing": false,
+                                            "name": "Somewhat unfavorable",
+                                            "numeric_value": 3,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": 4,
+                                            "missing": false,
+                                            "name": "Very unfavorable",
+                                            "numeric_value": 4,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": 5,
+                                            "missing": false,
+                                            "name": "Don't know",
+                                            "numeric_value": 5,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": 32766,
+                                            "missing": true,
+                                            "name": "skipped",
+                                            "numeric_value": 32766,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": 32767,
+                                            "missing": true,
+                                            "name": "not asked",
+                                            "numeric_value": 32767,
+                                            "selected": false
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null,
+                                            "selected": false
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        }
+                    ],
+                    "subtype": {
+                        "class": "variable"
+                    }
+                }
+            },
+            {
+                "derived": false,
+                "references": {
+                    "alias": "abolitionists",
+                    "description": "Do you have a favorable or an unfavorable opinion of the following abolitionists?",
+                    "name": "Abolitionists",
+                    "notes": "A categorical array variable, where one item has no responses",
+                    "subreferences": [
+                        {
+                            "alias": "douglass",
+                            "description": "fav_ppdem",
+                            "name": "Frederick Douglass"
+                        },
+                        {
+                            "alias": "brown",
+                            "description": "fav_pprep",
+                            "name": "John Brown"
+                        },
+                        {
+                            "alias": "truth",
+                            "name": "Sojourner Truth"
+                        }
+                    ],
+                    "view": {
+                        "column_width": null,
+                        "include_missing": false,
+                        "show_counts": false,
+                        "transform": {
+                            "insertions": [
+                                {
+                                    "anchor": 2,
+                                    "args": [
+                                        0,
+                                        2
+                                    ],
+                                    "function": "subtotal",
+                                    "name": "favorable"
+                                },
+                                {
+                                    "anchor": 4,
+                                    "args": [
+                                        3,
+                                        4
+                                    ],
+                                    "function": "subtotal",
+                                    "name": "unfavorable"
+                                }
+                            ]
+                        }
+                    }
+                },
+                "type": {
+                    "categories": [
+                        {
+                            "id": 0,
+                            "missing": false,
+                            "name": "Very favorable",
+                            "numeric_value": 0,
+                            "selected": false
+                        },
+                        {
+                            "id": 2,
+                            "missing": false,
+                            "name": "Somewhat favorable",
+                            "numeric_value": 2,
+                            "selected": false
+                        },
+                        {
+                            "id": 3,
+                            "missing": false,
+                            "name": "Somewhat unfavorable",
+                            "numeric_value": 3,
+                            "selected": false
+                        },
+                        {
+                            "id": 4,
+                            "missing": false,
+                            "name": "Very unfavorable",
+                            "numeric_value": 4,
+                            "selected": false
+                        },
+                        {
+                            "id": 5,
+                            "missing": false,
+                            "name": "Don't know",
+                            "numeric_value": 5,
+                            "selected": false
+                        },
+                        {
+                            "id": 32766,
+                            "missing": true,
+                            "name": "skipped",
+                            "numeric_value": 32766,
+                            "selected": false
+                        },
+                        {
+                            "id": 32767,
+                            "missing": true,
+                            "name": "not asked",
+                            "numeric_value": 32767,
+                            "selected": false
+                        },
+                        {
+                            "id": -1,
+                            "missing": true,
+                            "name": "No Data",
+                            "numeric_value": null,
+                            "selected": false
+                        }
+                    ],
+                    "class": "categorical",
+                    "ordinal": false,
+                    "subvariables": [
+                        "0061",
+                        "0062",
+                        "fb4492a07d5142f9a9a49de9c07ce8a1"
+                    ]
+                }
+            },
+            {
+                "derived": false,
+                "references": {
+                    "alias": "food_groups",
+                    "description": "Four of the five USDA food groups",
+                    "name": "Food groups",
+                    "notes": "A categorical variable where the missing categories are interspersed throughout the non-missing categories",
+                    "view": {
+                        "column_width": null,
+                        "include_missing": false,
+                        "show_counts": false,
+                        "show_numeric_values": false,
+                        "transform": {
+                            "insertions": []
+                        }
+                    }
+                },
+                "type": {
+                    "categories": [
+                        {
+                            "id": 0,
+                            "missing": false,
+                            "name": "Vegetables",
+                            "numeric_value": 0
+                        },
+                        {
+                            "id": 32766,
+                            "missing": true,
+                            "name": "Don't know",
+                            "numeric_value": 32766
+                        },
+                        {
+                            "id": 2,
+                            "missing": false,
+                            "name": "Fruit",
+                            "numeric_value": 2
+                        },
+                        {
+                            "id": 5,
+                            "missing": false,
+                            "name": "Grain",
+                            "numeric_value": 5
+                        },
+                        {
+                            "id": -1,
+                            "missing": true,
+                            "name": "No Data",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 4,
+                            "missing": false,
+                            "name": "Meat",
+                            "numeric_value": 4
+                        },
+                        {
+                            "id": 32767,
+                            "missing": true,
+                            "name": "Not asked",
+                            "numeric_value": 32767
+                        }
+                    ],
+                    "class": "categorical",
+                    "ordinal": false
+                }
+            }
+        ],
+        "element": "crunch:cube",
+        "measures": {
+            "count": {
+                "data": [
+                    175.7706778019,
+                    1.4714274949,
+                    69.2301852478,
+                    9.1734717817,
+                    0,
+                    5.9102247713,
+                    0,
+                    99.950123551,
+                    0,
+                    204.7343967189,
+                    59.4610994313,
+                    0,
+                    27.6822811897,
+                    0,
+                    31.1109507937,
+                    1.2887348151,
+                    88.7050070294,
+                    77.4922188913,
+                    0,
+                    65.524300784,
+                    0,
+                    17.6688253748,
+                    0.8441290249,
+                    44.2243736828,
+                    115.9351379606,
+                    0,
+                    322.7776480468,
+                    0,
+                    45.9089532773,
+                    1.3364538264,
+                    69.6643528395,
+                    53.425324945,
+                    0,
+                    42.0097332312,
+                    0,
+                    6.3656880013,
+                    4.9989584402,
+                    9.030895117,
+                    2.6873057241,
+                    0,
+                    7.617120206,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    11.4532735643,
+                    0,
+                    19.9127149409,
+                    42.1005010748,
+                    0,
+                    97.5318868163,
+                    0,
+                    27.5214697515,
+                    0.8441290249,
+                    90.5818751885,
+                    95.9350215001,
+                    0,
+                    189.0270756122,
+                    0,
+                    43.6048806298,
+                    1.2887348151,
+                    93.3367744269,
+                    54.9627061409,
+                    0,
+                    75.202999163,
+                    0,
+                    229.5601354504,
+                    1.4714274949,
+                    206.1009639531,
+                    68.2007510768,
+                    0,
+                    64.892139029,
+                    0,
+                    58.6753661709,
+                    1.3364538264,
+                    65.9588886546,
+                    52.4895658577,
+                    0,
+                    42.4251930577,
+                    0,
+                    5.9600932333,
+                    4.9989584402,
+                    9.6979934714,
+                    4.4860130839,
+                    0,
+                    2.4420145507,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    376.7752188001,
+                    9.9397036014,
+                    485.5892106354,
+                    318.174558734,
+                    0,
+                    471.5213082289,
+                    0
+                ],
+                "metadata": {
+                    "derived": true,
+                    "references": {},
+                    "type": {
+                        "class": "numeric",
+                        "integer": false,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {}
+                    }
+                },
+                "n_missing": 14
+            }
+        },
+        "missing": 14,
+        "n": 1662
+    }
+}
