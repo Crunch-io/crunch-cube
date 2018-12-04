@@ -1,0 +1,253 @@
+{
+    "query": {
+        "dimensions": [
+            {
+                "each": 1
+            },
+            {
+                "args": [
+                    {
+                        "variable": "034732"
+                    }
+                ],
+                "function": "as_selected"
+            },
+            {
+                "variable": "2f9eccf6292149179d8d83dff6ff03ce"
+            }
+        ],
+        "measures": {
+            "count": {
+                "args": [],
+                "function": "cube_count"
+            }
+        },
+        "weight": "http://127.0.0.1:8080/datasets/3380aa4bfd154dc6967e0b5ed9bee8f6/variables/010288/"
+    },
+    "query_environment": {
+        "filter": []
+    },
+    "result": {
+        "counts": [
+            0,
+            4,
+            49,
+            122,
+            611,
+            10180,
+            857,
+            3847,
+            320271
+        ],
+        "dimensions": [
+            {
+                "derived": true,
+                "references": {
+                    "alias": "wakoopa_uses_app_year_family",
+                    "name": "Family mobile/tablet apps ever used",
+                    "subreferences": [
+                        {
+                            "alias": "wakoopa_uses_app_year_sub_familylocator",
+                            "name": "Family Locator",
+                            "view": {
+                                "entity_name": "Family Locator",
+                                "origin_entity": "Family Locator",
+                                "origin_metric": "uses_app_year",
+                                "origin_source": "wakoopa"
+                            }
+                        }
+                    ],
+                    "uniform_basis": false,
+                    "view": {
+                        "origin_metric": "uses_app_year",
+                        "origin_source": "wakoopa",
+                        "roles": [
+                            "group_definition",
+                            "profiles_datapoints",
+                            "market_sizing"
+                        ]
+                    }
+                },
+                "type": {
+                    "class": "enum",
+                    "elements": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0001",
+                                "references": {
+                                    "alias": "wakoopa_uses_app_year_sub_familylocator",
+                                    "name": "Family Locator",
+                                    "view": {
+                                        "entity_name": "Family Locator",
+                                        "origin_entity": "Family Locator",
+                                        "origin_metric": "uses_app_year",
+                                        "origin_source": "wakoopa"
+                                    }
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Other",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        }
+                    ],
+                    "subtype": {
+                        "class": "variable"
+                    }
+                }
+            },
+            {
+                "derived": true,
+                "references": {
+                    "alias": "wakoopa_uses_app_year_family",
+                    "name": "Family mobile/tablet apps ever used",
+                    "subreferences": [
+                        {
+                            "alias": "wakoopa_uses_app_year_sub_familylocator",
+                            "name": "Family Locator",
+                            "view": {
+                                "entity_name": "Family Locator",
+                                "origin_entity": "Family Locator",
+                                "origin_metric": "uses_app_year",
+                                "origin_source": "wakoopa"
+                            }
+                        }
+                    ],
+                    "uniform_basis": false,
+                    "view": {
+                        "origin_metric": "uses_app_year",
+                        "origin_source": "wakoopa",
+                        "roles": [
+                            "group_definition",
+                            "profiles_datapoints",
+                            "market_sizing"
+                        ]
+                    }
+                },
+                "type": {
+                    "categories": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "name": "Selected",
+                            "numeric_value": 1,
+                            "selected": true
+                        },
+                        {
+                            "id": 0,
+                            "missing": false,
+                            "name": "Other",
+                            "numeric_value": 0
+                        },
+                        {
+                            "id": -1,
+                            "missing": true,
+                            "name": "No Data",
+                            "numeric_value": null
+                        }
+                    ],
+                    "class": "categorical",
+                    "ordinal": false,
+                    "subvariables": [
+                        "0001"
+                    ]
+                }
+            },
+            {
+                "derived": true,
+                "references": {
+                    "alias": "NCAA Basketball Fan",
+                    "name": "NCAA Basketball Fan"
+                },
+                "type": {
+                    "categories": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "name": "Selected",
+                            "numeric_value": 1,
+                            "selected": true
+                        },
+                        {
+                            "id": 0,
+                            "missing": false,
+                            "name": "Other",
+                            "numeric_value": 0
+                        },
+                        {
+                            "id": -1,
+                            "missing": true,
+                            "name": "No Data",
+                            "numeric_value": null
+                        }
+                    ],
+                    "class": "categorical",
+                    "ordinal": false
+                }
+            }
+        ],
+        "element": "crunch:cube",
+        "filtered": {
+            "unweighted_n": 335941,
+            "weighted_n": 332454.547559862
+        },
+        "measures": {
+            "count": {
+                "data": [
+                    0.0,
+                    3.7738308131,
+                    58.7294464386,
+                    110.1113103737,
+                    710.0146573226,
+                    12167.6528717411,
+                    622.1626277642,
+                    3731.6142102834,
+                    315050.4886052931
+                ],
+                "metadata": {
+                    "derived": true,
+                    "references": {},
+                    "type": {
+                        "class": "numeric",
+                        "integer": false,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {}
+                    }
+                },
+                "n_missing": 335204
+            }
+        },
+        "missing": 335204,
+        "n": 335941,
+        "unfiltered": {
+            "unweighted_n": 335941,
+            "weighted_n": 332454.547559862
+        }
+    }
+}
