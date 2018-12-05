@@ -141,3 +141,24 @@ def test_mr_x_mr_index_tables_parity_with_whaam_and_r():
     ])
     actual = cat_x_mr.slices[0].index_table(axis=1)
     np.testing.assert_almost_equal(actual, expected)
+
+def test_mr_x_mr_index_tables_parity_with_nssat():
+    mr_x_mr = CrunchCube(CR.NSSAT_MR_X_MR)
+    # Test column direction
+    expected = np.array([
+        [179.793686976007, 90.4924459426829],
+        [182.343952039497, 88.5838171105893],
+        [84.6174957937067, 101.993855386627],
+        [np.nan, np.nan]
+    ])
+    actual = mr_x_mr.slices[0].index_table(axis=0)
+    np.testing.assert_almost_equal(actual, expected)
+    # Test row direction
+    expected = np.array([
+        [179.360970521192, 90.2746542556969],
+        [184.52243729878, 89.6421386925666],
+        [84.5355650535557, 101.895100017134],
+        [np.nan, np.nan]
+    ])
+    actual = mr_x_mr.slices[0].index_table(axis=1)
+    np.testing.assert_almost_equal(actual, expected)
