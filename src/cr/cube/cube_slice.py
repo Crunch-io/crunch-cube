@@ -419,6 +419,12 @@ class CubeSlice(object):
         # so we need to perform the addition (to get the denominator)
         # across the correct axis.
         if axis == self.mr_dim_ind:
+            if baseline.ndim == 1:
+                # If baseline is compressed to a single dimension (e.g. due to
+                # a row dimension having only a single element), it's necessary
+                # to _inflate_ it, so that it can be summed across in
+                # row direction.
+                baseline = baseline[None, :]
             baseline = baseline / np.sum(baseline, axis=1)[:, None]
             return baseline[:, 0]
         elif isinstance(self.mr_dim_ind, tuple) and axis in self.mr_dim_ind:

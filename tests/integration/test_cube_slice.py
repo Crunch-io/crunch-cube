@@ -56,6 +56,22 @@ class DescribeIntegratedCubeSlice(object):
         )
 
 
+class DescribeCubeSliceAPI(object):
+
+    def it_calculates_correct_index_tables_for_single_elements(self):
+        cs = CrunchCube(CR.MR_X_CAT_BOTH_SINGLE_ELEMENT).slices[0]
+
+        # Check for column direction (as in the exporter), backed by R
+        expected = np.array([[0., 110.39006714]])
+        index_table = cs.index_table(axis=0)
+        np.testing.assert_array_almost_equal(index_table, expected)
+
+        # Check for row direction, backed by R
+        expected = np.array([[0., 116.472612]])
+        index_table = cs.index_table(axis=1)
+        np.testing.assert_array_almost_equal(index_table, expected)
+
+
 def test_labels_with_hs_and_pruning():
     cs = CrunchCube(CR.CAT_X_CAT_PRUNING_HS).slices[0]
 
