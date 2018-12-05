@@ -3,7 +3,6 @@
 """Integration test suite for cr.cube.cube_slice module."""
 
 import numpy as np
-import pytest
 
 from cr.cube.crunch_cube import CrunchCube
 
@@ -59,12 +58,18 @@ class DescribeIntegratedCubeSlice(object):
 
 class DescribeCubeSliceAPI(object):
 
-    @pytest.mark.xfail(reason='WIP', strict=True)
     def it_calculates_correct_index_tables_for_single_elements(self):
         cs = CrunchCube(CR.MR_X_CAT_BOTH_SINGLE_ELEMENT).slices[0]
-        expected = np.array([])  # TODO: Replace with correct values
+
+        # Check for column direction (as in the exporter), backed by R
+        expected = np.array([[0., 110.39006714]])
         index_table = cs.index_table(axis=0)
-        assert np.testing.assert_array_almost_equal(index_table, expected)
+        np.testing.assert_array_almost_equal(index_table, expected)
+
+        # Check for row direction, backed by R
+        expected = np.array([[0., 116.472612]])
+        index_table = cs.index_table(axis=1)
+        np.testing.assert_array_almost_equal(index_table, expected)
 
 
 def test_labels_with_hs_and_pruning():
