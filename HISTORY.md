@@ -1,5 +1,14 @@
 # History of Changes
 
+#### 1.8.1
+- Major Cube refactor and a couple bugfixes
+
+#### 1.8.0
+- Major refactor of `Dimension` class
+
+#### 1.7.3
+- Implement pruning for index tables
+
 #### 1.7.2
 - Implement correct index table functionality
 - Deprecate old index functionality

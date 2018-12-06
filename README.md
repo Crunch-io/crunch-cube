@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.8.4
+- Fix `index_table` for MR (single element) x CAT
+
 #### 1.8.3
 - fix second "broadcast error" bug (different cause)
 - refactor to extract `_Measures` object and related
@@ -121,14 +124,5 @@ The detailed description can be found
 - fix "broadcast error" bug
 - improve test coverage
 - relocate test fixtures and add cached fixture lazy-loading
-
-#### 1.8.1
-- Major Cube refactor and a couple bugfixes
-
-#### 1.8.0
-- Major refactor of `Dimension` class
-
-#### 1.7.3
-- Implement pruning for index tables
 
 For a complete list of changes see [history](https://github.com/Crunch-io/crunch-cube/blob/master/HISTORY.md).
