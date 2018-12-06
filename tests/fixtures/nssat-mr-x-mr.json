@@ -1,0 +1,1482 @@
+{
+    "element": "shoji:view",
+    "self": "https://app.crunch.io/api/datasets/ddc1b8a25c454689911d3d7a59c97aee/cube/?query=%7B%22dimensions%22%3A%5B%7B%22each%22%3A%22https%3A%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2Fddc1b8a25c454689911d3d7a59c97aee%2Fvariables%2F0000dd%2F%22%7D%2C%7B%22function%22%3A%22as_selected%22%2C%22args%22%3A%5B%7B%22variable%22%3A%22https%3A%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2Fddc1b8a25c454689911d3d7a59c97aee%2Fvariables%2F0000dd%2F%22%7D%5D%7D%2C%7B%22each%22%3A%22https%3A%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2Fddc1b8a25c454689911d3d7a59c97aee%2Fvariables%2F0000db%2F%22%7D%2C%7B%22function%22%3A%22as_selected%22%2C%22args%22%3A%5B%7B%22variable%22%3A%22https%3A%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2Fddc1b8a25c454689911d3d7a59c97aee%2Fvariables%2F0000db%2F%22%7D%5D%7D%5D%2C%22measures%22%3A%7B%22count%22%3A%7B%22function%22%3A%22cube_count%22%2C%22args%22%3A%5B%5D%7D%7D%2C%22weight%22%3Anull%7D&filter=%7B%7D",
+    "value": {
+        "query": {
+            "measures": {
+                "count": {
+                    "function": "cube_count",
+                    "args": [
+
+                    ]
+                }
+            },
+            "dimensions": [
+                {
+                    "each": "https://app.crunch.io/api/datasets/ddc1b8a25c454689911d3d7a59c97aee/variables/0000dd/"
+                },
+                {
+                    "function": "as_selected",
+                    "args": [
+                        {
+                            "variable": "https://app.crunch.io/api/datasets/ddc1b8a25c454689911d3d7a59c97aee/variables/0000dd/"
+                        }
+                    ]
+                },
+                {
+                    "each": "https://app.crunch.io/api/datasets/ddc1b8a25c454689911d3d7a59c97aee/variables/0000db/"
+                },
+                {
+                    "function": "as_selected",
+                    "args": [
+                        {
+                            "variable": "https://app.crunch.io/api/datasets/ddc1b8a25c454689911d3d7a59c97aee/variables/0000db/"
+                        }
+                    ]
+                }
+            ],
+            "weight": null
+        },
+        "query_environment": {
+            "filter": [
+
+            ]
+        },
+        "result": {
+            "dimensions": [
+                {
+                    "references": {
+                        "subreferences": [
+                            {
+                                "alias": "eurasia",
+                                "name": "Eurasia",
+                                "description": "union_hhold_1"
+                            },
+                            {
+                                "alias": "oceania",
+                                "name": "Oceania",
+                                "description": "union_hhold_2"
+                            },
+                            {
+                                "alias": "eastasia",
+                                "name": "Eastasia",
+                                "description": "union_hhold_3"
+                            },
+                            {
+                                "alias": "disputed",
+                                "name": "Disputed"
+                            }
+                        ],
+                        "notes": "A multiple response variable, where one item has no responses",
+                        "description": "Which of the following countries from 1984 would you live in? (select all that apply)",
+                        "name": "Countries from 1984",
+                        "alias": "1984_countries"
+                    },
+                    "derived": true,
+                    "type": {
+                        "subtype": {
+                            "class": "variable"
+                        },
+                        "elements": [
+                            {
+                                "id": 1,
+                                "value": {
+                                    "references": {
+                                        "alias": "eurasia",
+                                        "name": "Eurasia",
+                                        "description": "union_hhold_1"
+                                    },
+                                    "derived": false,
+                                    "id": "00c5",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "id": 0,
+                                                "name": "Other",
+                                                "missing": false
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "id": -1,
+                                                "name": "No Data",
+                                                "missing": true
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 2,
+                                "value": {
+                                    "references": {
+                                        "alias": "oceania",
+                                        "name": "Oceania",
+                                        "description": "union_hhold_2"
+                                    },
+                                    "derived": false,
+                                    "id": "00c6",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "id": 0,
+                                                "name": "Other",
+                                                "missing": false
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "id": -1,
+                                                "name": "No Data",
+                                                "missing": true
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 3,
+                                "value": {
+                                    "references": {
+                                        "alias": "eastasia",
+                                        "name": "Eastasia",
+                                        "description": "union_hhold_3"
+                                    },
+                                    "derived": false,
+                                    "id": "00c7",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "id": 0,
+                                                "name": "Other",
+                                                "missing": false
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "id": -1,
+                                                "name": "No Data",
+                                                "missing": true
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 4,
+                                "value": {
+                                    "references": {
+                                        "alias": "disputed",
+                                        "name": "Disputed"
+                                    },
+                                    "derived": false,
+                                    "id": "de5314cea98b44eb9c243a86e06d1476",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "id": 0,
+                                                "name": "Other",
+                                                "missing": false
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "id": -1,
+                                                "name": "No Data",
+                                                "missing": true
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            }
+                        ],
+                        "class": "enum"
+                    }
+                },
+                {
+                    "derived": true,
+                    "references": {
+                        "subreferences": [
+                            {
+                                "alias": "eurasia",
+                                "name": "Eurasia",
+                                "description": "union_hhold_1"
+                            },
+                            {
+                                "alias": "oceania",
+                                "name": "Oceania",
+                                "description": "union_hhold_2"
+                            },
+                            {
+                                "alias": "eastasia",
+                                "name": "Eastasia",
+                                "description": "union_hhold_3"
+                            },
+                            {
+                                "alias": "disputed",
+                                "name": "Disputed"
+                            }
+                        ],
+                        "notes": "A multiple response variable, where one item has no responses",
+                        "alias": "1984_countries",
+                        "description": "Which of the following countries from 1984 would you live in? (select all that apply)",
+                        "name": "Countries from 1984"
+                    },
+                    "type": {
+                        "ordinal": false,
+                        "subvariables": [
+                            "00c5",
+                            "00c6",
+                            "00c7",
+                            "de5314cea98b44eb9c243a86e06d1476"
+                        ],
+                        "class": "categorical",
+                        "categories": [
+                            {
+                                "numeric_value": 1,
+                                "selected": true,
+                                "id": 1,
+                                "missing": false,
+                                "name": "Selected"
+                            },
+                            {
+                                "numeric_value": 0,
+                                "id": 0,
+                                "name": "Other",
+                                "missing": false
+                            },
+                            {
+                                "numeric_value": null,
+                                "id": -1,
+                                "name": "No Data",
+                                "missing": true
+                            }
+                        ]
+                    }
+                },
+                {
+                    "references": {
+                        "subreferences": [
+                            {
+                                "alias": "france",
+                                "name": "France",
+                                "description": "multrace_1"
+                            },
+                            {
+                                "alias": "bdr",
+                                "name": "West Germany",
+                                "description": "multrace_2"
+                            },
+                            {
+                                "alias": "italy",
+                                "name": "Italy",
+                                "description": "multrace_3"
+                            },
+                            {
+                                "alias": "belgium",
+                                "name": "Belgium",
+                                "description": "multrace_4"
+                            },
+                            {
+                                "alias": "holland",
+                                "name": "the Netherlands",
+                                "description": "multrace_5"
+                            },
+                            {
+                                "alias": "luxembourg",
+                                "name": "Luxembourg",
+                                "description": "multrace_8"
+                            },
+                            {
+                                "alias": "other",
+                                "name": "Other",
+                                "description": "multrace_97"
+                            },
+                            {
+                                "alias": "ec98",
+                                "name": "Don't know",
+                                "description": "multrace_98"
+                            },
+                            {
+                                "alias": "ec99",
+                                "name": "None of these",
+                                "description": "multrace_99"
+                            }
+                        ],
+                        "notes": "A multiple response variable",
+                        "alias": "ec",
+                        "description": "Which of the following members of the ECSC have you lived in? (select all that apply)",
+                        "name": "Founding Members of the European Coal and Steel Community"
+                    },
+                    "derived": true,
+                    "type": {
+                        "subtype": {
+                            "class": "variable"
+                        },
+                        "elements": [
+                            {
+                                "id": 1,
+                                "value": {
+                                    "references": {
+                                        "alias": "france",
+                                        "name": "France",
+                                        "description": "multrace_1"
+                                    },
+                                    "derived": false,
+                                    "id": "00a5",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "id": 0,
+                                                "name": "Other",
+                                                "missing": false
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "id": -1,
+                                                "name": "No Data",
+                                                "missing": true
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 2,
+                                "value": {
+                                    "references": {
+                                        "alias": "bdr",
+                                        "name": "West Germany",
+                                        "description": "multrace_2"
+                                    },
+                                    "derived": false,
+                                    "id": "00a6",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "id": 0,
+                                                "name": "Other",
+                                                "missing": false
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "id": -1,
+                                                "name": "No Data",
+                                                "missing": true
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 3,
+                                "value": {
+                                    "references": {
+                                        "alias": "italy",
+                                        "name": "Italy",
+                                        "description": "multrace_3"
+                                    },
+                                    "derived": false,
+                                    "id": "00a7",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "id": 0,
+                                                "name": "Other",
+                                                "missing": false
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "id": -1,
+                                                "name": "No Data",
+                                                "missing": true
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 4,
+                                "value": {
+                                    "references": {
+                                        "alias": "belgium",
+                                        "name": "Belgium",
+                                        "description": "multrace_4"
+                                    },
+                                    "derived": false,
+                                    "id": "00a8",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "id": 0,
+                                                "name": "Other",
+                                                "missing": false
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "id": -1,
+                                                "name": "No Data",
+                                                "missing": true
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 5,
+                                "value": {
+                                    "references": {
+                                        "alias": "holland",
+                                        "name": "the Netherlands",
+                                        "description": "multrace_5"
+                                    },
+                                    "derived": false,
+                                    "id": "00a9",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "id": 0,
+                                                "name": "Other",
+                                                "missing": false
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "id": -1,
+                                                "name": "No Data",
+                                                "missing": true
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 6,
+                                "value": {
+                                    "references": {
+                                        "alias": "luxembourg",
+                                        "name": "Luxembourg",
+                                        "description": "multrace_8"
+                                    },
+                                    "derived": false,
+                                    "id": "00aa",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "id": 0,
+                                                "name": "Other",
+                                                "missing": false
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "id": -1,
+                                                "name": "No Data",
+                                                "missing": true
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 7,
+                                "value": {
+                                    "references": {
+                                        "alias": "other",
+                                        "name": "Other",
+                                        "description": "multrace_97"
+                                    },
+                                    "derived": false,
+                                    "id": "00ab",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "id": 0,
+                                                "name": "Other",
+                                                "missing": false
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "id": -1,
+                                                "name": "No Data",
+                                                "missing": true
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 8,
+                                "value": {
+                                    "references": {
+                                        "alias": "ec98",
+                                        "name": "Don't know",
+                                        "description": "multrace_98"
+                                    },
+                                    "derived": false,
+                                    "id": "00ac",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "id": 0,
+                                                "name": "Other",
+                                                "missing": false
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "id": -1,
+                                                "name": "No Data",
+                                                "missing": true
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 9,
+                                "value": {
+                                    "references": {
+                                        "alias": "ec99",
+                                        "name": "None of these",
+                                        "description": "multrace_99"
+                                    },
+                                    "derived": false,
+                                    "id": "00ad",
+                                    "type": {
+                                        "ordinal": false,
+                                        "class": "categorical",
+                                        "categories": [
+                                            {
+                                                "numeric_value": 1,
+                                                "selected": true,
+                                                "id": 1,
+                                                "missing": false,
+                                                "name": "Selected"
+                                            },
+                                            {
+                                                "numeric_value": 0,
+                                                "id": 0,
+                                                "name": "Other",
+                                                "missing": false
+                                            },
+                                            {
+                                                "numeric_value": null,
+                                                "id": -1,
+                                                "name": "No Data",
+                                                "missing": true
+                                            }
+                                        ]
+                                    }
+                                },
+                                "missing": false
+                            }
+                        ],
+                        "class": "enum"
+                    }
+                },
+                {
+                    "derived": true,
+                    "references": {
+                        "subreferences": [
+                            {
+                                "alias": "france",
+                                "name": "France",
+                                "description": "multrace_1"
+                            },
+                            {
+                                "alias": "bdr",
+                                "name": "West Germany",
+                                "description": "multrace_2"
+                            },
+                            {
+                                "alias": "italy",
+                                "name": "Italy",
+                                "description": "multrace_3"
+                            },
+                            {
+                                "alias": "belgium",
+                                "name": "Belgium",
+                                "description": "multrace_4"
+                            },
+                            {
+                                "alias": "holland",
+                                "name": "the Netherlands",
+                                "description": "multrace_5"
+                            },
+                            {
+                                "alias": "luxembourg",
+                                "name": "Luxembourg",
+                                "description": "multrace_8"
+                            },
+                            {
+                                "alias": "other",
+                                "name": "Other",
+                                "description": "multrace_97"
+                            },
+                            {
+                                "alias": "ec98",
+                                "name": "Don't know",
+                                "description": "multrace_98"
+                            },
+                            {
+                                "alias": "ec99",
+                                "name": "None of these",
+                                "description": "multrace_99"
+                            }
+                        ],
+                        "notes": "A multiple response variable",
+                        "description": "Which of the following members of the ECSC have you lived in? (select all that apply)",
+                        "name": "Founding Members of the European Coal and Steel Community",
+                        "alias": "ec"
+                    },
+                    "type": {
+                        "ordinal": false,
+                        "subvariables": [
+                            "00a5",
+                            "00a6",
+                            "00a7",
+                            "00a8",
+                            "00a9",
+                            "00aa",
+                            "00ab",
+                            "00ac",
+                            "00ad"
+                        ],
+                        "class": "categorical",
+                        "categories": [
+                            {
+                                "numeric_value": 1,
+                                "selected": true,
+                                "id": 1,
+                                "missing": false,
+                                "name": "Selected"
+                            },
+                            {
+                                "numeric_value": 0,
+                                "id": 0,
+                                "name": "Other",
+                                "missing": false
+                            },
+                            {
+                                "numeric_value": null,
+                                "id": -1,
+                                "name": "No Data",
+                                "missing": true
+                            }
+                        ]
+                    }
+                }
+            ],
+            "missing": 1071,
+            "measures": {
+                "count": {
+                    "data": [
+                        44,
+                        12,
+                        87,
+                        7,
+                        49,
+                        87,
+                        3,
+                        53,
+                        87,
+                        1,
+                        55,
+                        87,
+                        1,
+                        55,
+                        87,
+                        2,
+                        54,
+                        87,
+                        0,
+                        56,
+                        87,
+                        0,
+                        56,
+                        87,
+                        0,
+                        56,
+                        87,
+                        401,
+                        134,
+                        984,
+                        79,
+                        456,
+                        984,
+                        43,
+                        492,
+                        984,
+                        27,
+                        508,
+                        984,
+                        17,
+                        518,
+                        984,
+                        2,
+                        533,
+                        984,
+                        0,
+                        535,
+                        984,
+                        10,
+                        525,
+                        984,
+                        0,
+                        535,
+                        984,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        34,
+                        12,
+                        95,
+                        7,
+                        39,
+                        95,
+                        4,
+                        42,
+                        95,
+                        2,
+                        44,
+                        95,
+                        4,
+                        42,
+                        95,
+                        0,
+                        46,
+                        95,
+                        0,
+                        46,
+                        95,
+                        0,
+                        46,
+                        95,
+                        0,
+                        46,
+                        95,
+                        411,
+                        134,
+                        976,
+                        79,
+                        466,
+                        976,
+                        42,
+                        503,
+                        976,
+                        26,
+                        519,
+                        976,
+                        14,
+                        531,
+                        976,
+                        4,
+                        541,
+                        976,
+                        0,
+                        545,
+                        976,
+                        10,
+                        535,
+                        976,
+                        0,
+                        545,
+                        976,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        370,
+                        123,
+                        896,
+                        73,
+                        420,
+                        896,
+                        39,
+                        454,
+                        896,
+                        25,
+                        468,
+                        896,
+                        13,
+                        480,
+                        896,
+                        2,
+                        491,
+                        896,
+                        0,
+                        493,
+                        896,
+                        10,
+                        483,
+                        896,
+                        0,
+                        493,
+                        896,
+                        75,
+                        23,
+                        175,
+                        13,
+                        85,
+                        175,
+                        7,
+                        91,
+                        175,
+                        3,
+                        95,
+                        175,
+                        5,
+                        93,
+                        175,
+                        2,
+                        96,
+                        175,
+                        0,
+                        98,
+                        175,
+                        0,
+                        98,
+                        175,
+                        0,
+                        98,
+                        175,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        445,
+                        146,
+                        1071,
+                        86,
+                        505,
+                        1071,
+                        46,
+                        545,
+                        1071,
+                        28,
+                        563,
+                        1071,
+                        18,
+                        573,
+                        1071,
+                        4,
+                        587,
+                        1071,
+                        0,
+                        591,
+                        1071,
+                        10,
+                        581,
+                        1071,
+                        0,
+                        591,
+                        1071,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                    ],
+                    "n_missing": 1071,
+                    "metadata": {
+                        "references": {
+
+                        },
+                        "derived": true,
+                        "type": {
+                            "integer": true,
+                            "missing_rules": {
+
+                            },
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "class": "numeric"
+                        }
+                    }
+                }
+            },
+            "n": 1662,
+            "unfiltered": {
+                "unweighted_n": 1662,
+                "weighted_n": 1662
+            },
+            "filtered": {
+                "unweighted_n": 1662,
+                "weighted_n": 1662
+            },
+            "counts": [
+                44,
+                12,
+                87,
+                7,
+                49,
+                87,
+                3,
+                53,
+                87,
+                1,
+                55,
+                87,
+                1,
+                55,
+                87,
+                2,
+                54,
+                87,
+                0,
+                56,
+                87,
+                0,
+                56,
+                87,
+                0,
+                56,
+                87,
+                401,
+                134,
+                984,
+                79,
+                456,
+                984,
+                43,
+                492,
+                984,
+                27,
+                508,
+                984,
+                17,
+                518,
+                984,
+                2,
+                533,
+                984,
+                0,
+                535,
+                984,
+                10,
+                525,
+                984,
+                0,
+                535,
+                984,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                34,
+                12,
+                95,
+                7,
+                39,
+                95,
+                4,
+                42,
+                95,
+                2,
+                44,
+                95,
+                4,
+                42,
+                95,
+                0,
+                46,
+                95,
+                0,
+                46,
+                95,
+                0,
+                46,
+                95,
+                0,
+                46,
+                95,
+                411,
+                134,
+                976,
+                79,
+                466,
+                976,
+                42,
+                503,
+                976,
+                26,
+                519,
+                976,
+                14,
+                531,
+                976,
+                4,
+                541,
+                976,
+                0,
+                545,
+                976,
+                10,
+                535,
+                976,
+                0,
+                545,
+                976,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                370,
+                123,
+                896,
+                73,
+                420,
+                896,
+                39,
+                454,
+                896,
+                25,
+                468,
+                896,
+                13,
+                480,
+                896,
+                2,
+                491,
+                896,
+                0,
+                493,
+                896,
+                10,
+                483,
+                896,
+                0,
+                493,
+                896,
+                75,
+                23,
+                175,
+                13,
+                85,
+                175,
+                7,
+                91,
+                175,
+                3,
+                95,
+                175,
+                5,
+                93,
+                175,
+                2,
+                96,
+                175,
+                0,
+                98,
+                175,
+                0,
+                98,
+                175,
+                0,
+                98,
+                175,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                445,
+                146,
+                1071,
+                86,
+                505,
+                1071,
+                46,
+                545,
+                1071,
+                28,
+                563,
+                1071,
+                18,
+                573,
+                1071,
+                4,
+                587,
+                1071,
+                0,
+                591,
+                1071,
+                10,
+                581,
+                1071,
+                0,
+                591,
+                1071,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "element": "crunch:cube"
+        }
+    }
+}
