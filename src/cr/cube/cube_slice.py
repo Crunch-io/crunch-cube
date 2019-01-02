@@ -171,7 +171,8 @@ class CubeSlice(object):
         )
 
         # Fix the shape to enable correct broadcasting
-        if axis == 0 and len(baseline.shape) <= 1:
+        if (axis == 0 and len(baseline.shape) <= 1 and
+                self.ndim == len(self.get_shape())):
             baseline = baseline[:, None]
 
         indexes = proportions / baseline * 100
@@ -414,11 +415,18 @@ class CubeSlice(object):
         slice_ = [slice(None)]
         total_axis = None
         if isinstance(self.mr_dim_ind, tuple):
-            total_axis = axis + 1
-            slice_ += [slice(None), 0] if axis == 1 else [0]
+            if self.get_shape()[0] == 1:
+                total_axis = axis
+                slice_ = [0]
+            else:
+                total_axis = axis + 1
+                slice_ += [slice(None), 0] if axis == 1 else [0]
         elif self.mr_dim_ind is not None:
-            slice_ = [0] if self.mr_dim_ind == 0 and axis != 0 else [
-                slice(None), 0]
+            slice_ = (
+                [0]
+                if self.mr_dim_ind == 0 and axis != 0 else
+                [slice(None), 0]
+            )
             total_axis = axis if self.mr_dim_ind != 0 else 1 - axis
 
         total = np.sum(baseline, axis=total_axis)
