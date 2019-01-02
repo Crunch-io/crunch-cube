@@ -411,31 +411,23 @@ class CubeSlice(object):
         # We need this in order to end up with the right shape of the
         # numerator vs denominator.
         baseline = self.margin(axis=(1 - axis), include_missing=True)
+        slice_ = [slice(None)]
+        total_axis = None
+        if isinstance(self.mr_dim_ind, tuple):
+            total_axis = axis + 1
+            slice_ += [slice(None), 0] if axis == 1 else [0]
+        elif self.mr_dim_ind is not None:
+            slice_ = [0] if self.mr_dim_ind == 0 and axis != 0 else [
+                slice(None), 0]
+            total_axis = axis if self.mr_dim_ind != 0 else 1 - axis
 
-        # Now check if the shape of the marginal needs to be fixed, because
-        # different versions of the MR containing cubes, combined with
-        # different margin directions, provide marginals of different shapes.
-        # We also need to calculate the percentage marginals correctly,
-        # so we need to perform the addition (to get the denominator)
-        # across the correct axis.
+        total = np.sum(baseline, axis=total_axis)
+        baseline = baseline[slice_]
+
         if axis == self.mr_dim_ind:
-            if baseline.ndim == 1:
-                # If baseline is compressed to a single dimension (e.g. due to
-                # a row dimension having only a single element), it's necessary
-                # to _inflate_ it, so that it can be summed across in
-                # row direction.
-                baseline = baseline[None, :]
-            baseline = baseline / np.sum(baseline, axis=1)[:, None]
-            return baseline[:, 0]
+            return baseline / total
         elif isinstance(self.mr_dim_ind, tuple) and axis in self.mr_dim_ind:
-            total = np.sum(baseline, axis=(axis + 1))
-            if axis == 0:
-                return baseline[:, 0, 0] / total[:, 0]
-            return baseline[0, :, 0] / total[0]
-
-        if axis == 0 and self.mr_dim_ind is not None:
-            baseline = baseline[:, 0]
-            return baseline / np.sum(baseline)
+            return baseline / total
 
         baseline = baseline if len(baseline.shape) <= 1 else baseline[0]
         baseline = baseline / np.sum(baseline)
