@@ -1,0 +1,436 @@
+{
+    "query": {
+        "dimensions": [
+            {
+                "each": 1
+            },
+            {
+                "args": [
+                    {
+                        "variable": "00000d"
+                    }
+                ],
+                "function": "as_selected"
+            },
+            {
+                "each": 3
+            },
+            {
+                "args": [
+                    {
+                        "variable": "55b458f8f4644373ab82e0af4485f7b5"
+                    }
+                ],
+                "function": "as_selected"
+            }
+        ],
+        "measures": {
+            "count": {
+                "args": [],
+                "function": "cube_count"
+            }
+        },
+        "weight": "http://127.0.0.1:8080/datasets/1433e16a07474ec1b1b3c0fbb0acd3c8/variables/88908b0a6be04128be2fb1d69d0a0bcf/"
+    },
+    "query_environment": {
+        "filter": []
+    },
+    "result": {
+        "counts": [
+            3,
+            0,
+            0,
+            2,
+            1,
+            0,
+            0,
+            0,
+            0,
+            4,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            5,
+            1,
+            0,
+            0,
+            0,
+            0
+        ],
+        "dimensions": [
+            {
+                "derived": true,
+                "references": {
+                    "alias": "mymrset",
+                    "description": "My multiple response set",
+                    "is_dichotomous": true,
+                    "name": "mymrset",
+                    "subreferences": [
+                        {
+                            "alias": "bool1",
+                            "description": "bool1",
+                            "name": "Response #1"
+                        },
+                        {
+                            "alias": "bool2",
+                            "description": "bool2",
+                            "name": "Response #2"
+                        },
+                        {
+                            "alias": "bool3",
+                            "description": "bool3",
+                            "name": "Response #3"
+                        }
+                    ]
+                },
+                "type": {
+                    "class": "enum",
+                    "elements": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0004",
+                                "references": {
+                                    "alias": "bool1",
+                                    "description": "bool1",
+                                    "name": "Response #1"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Other",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0005",
+                                "references": {
+                                    "alias": "bool2",
+                                    "description": "bool2",
+                                    "name": "Response #2"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Other",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 3,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0006",
+                                "references": {
+                                    "alias": "bool3",
+                                    "description": "bool3",
+                                    "name": "Response #3"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Other",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        }
+                    ],
+                    "subtype": {
+                        "class": "variable"
+                    }
+                }
+            },
+            {
+                "derived": true,
+                "references": {
+                    "alias": "mymrset",
+                    "description": "My multiple response set",
+                    "is_dichotomous": true,
+                    "name": "mymrset",
+                    "subreferences": [
+                        {
+                            "alias": "bool1",
+                            "description": "bool1",
+                            "name": "Response #1"
+                        },
+                        {
+                            "alias": "bool2",
+                            "description": "bool2",
+                            "name": "Response #2"
+                        },
+                        {
+                            "alias": "bool3",
+                            "description": "bool3",
+                            "name": "Response #3"
+                        }
+                    ]
+                },
+                "type": {
+                    "categories": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "name": "Selected",
+                            "numeric_value": 1,
+                            "selected": true
+                        },
+                        {
+                            "id": 0,
+                            "missing": false,
+                            "name": "Other",
+                            "numeric_value": 0
+                        },
+                        {
+                            "id": -1,
+                            "missing": true,
+                            "name": "No Data",
+                            "numeric_value": null
+                        }
+                    ],
+                    "class": "categorical",
+                    "ordinal": false,
+                    "subvariables": [
+                        "0004",
+                        "0005",
+                        "0006"
+                    ]
+                }
+            },
+            {
+                "derived": true,
+                "references": {
+                    "alias": "Combined responses from mymrset",
+                    "description": "Combined responses from mymrset",
+                    "name": "Combined responses from mymrset",
+                    "subreferences": [
+                        {
+                            "alias": "Response #2, Response #3, Response #1-55b458f8f4644373ab82e0af4485f7b5",
+                            "description": "bool2",
+                            "name": "Response #2, Response #3, Response #1"
+                        }
+                    ]
+                },
+                "type": {
+                    "class": "enum",
+                    "elements": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0001",
+                                "references": {
+                                    "alias": "Response #2, Response #3, Response #1-55b458f8f4644373ab82e0af4485f7b5",
+                                    "description": "bool2",
+                                    "name": "Response #2, Response #3, Response #1"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Other",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        }
+                    ],
+                    "subtype": {
+                        "class": "variable"
+                    }
+                }
+            },
+            {
+                "derived": true,
+                "references": {
+                    "alias": "Combined responses from mymrset",
+                    "description": "Combined responses from mymrset",
+                    "name": "Combined responses from mymrset",
+                    "subreferences": [
+                        {
+                            "alias": "Response #2, Response #3, Response #1-55b458f8f4644373ab82e0af4485f7b5",
+                            "description": "bool2",
+                            "name": "Response #2, Response #3, Response #1"
+                        }
+                    ]
+                },
+                "type": {
+                    "categories": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "name": "Selected",
+                            "numeric_value": 1,
+                            "selected": true
+                        },
+                        {
+                            "id": 0,
+                            "missing": false,
+                            "name": "Other",
+                            "numeric_value": 0
+                        },
+                        {
+                            "id": -1,
+                            "missing": true,
+                            "name": "No Data",
+                            "numeric_value": null
+                        }
+                    ],
+                    "class": "categorical",
+                    "ordinal": false,
+                    "subvariables": [
+                        "0001"
+                    ]
+                }
+            }
+        ],
+        "element": "crunch:cube",
+        "filtered": {
+            "unweighted_n": 6,
+            "weighted_n": 2.0
+        },
+        "measures": {
+            "count": {
+                "data": [
+                    2.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0,
+                    0.0,
+                    0.0,
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    2.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "metadata": {
+                    "derived": true,
+                    "references": {},
+                    "type": {
+                        "class": "numeric",
+                        "integer": false,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {}
+                    }
+                },
+                "n_missing": 0
+            }
+        },
+        "missing": 0,
+        "n": 6,
+        "unfiltered": {
+            "unweighted_n": 6,
+            "weighted_n": 2.0
+        }
+    }
+}

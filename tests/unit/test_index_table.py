@@ -33,6 +33,7 @@ def index_fixture(request):
     cc.ndim = 2
     cc.mr_dim_ind = None
     cc.proportions.return_value = np.array(proportions)
+    cc.as_array.return_value = np.array(proportions)
     cs = CubeSlice(cc, 0)
     base = np.array(base)
     return cs, axis, base, expected
