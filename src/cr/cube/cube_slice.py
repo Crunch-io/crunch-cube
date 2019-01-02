@@ -412,12 +412,19 @@ class CubeSlice(object):
         # We need this in order to end up with the right shape of the
         # numerator vs denominator.
         baseline = self.margin(axis=(1 - axis), include_missing=True)
+        if len(baseline.shape) <= 1:
+            # If any dimension gets flattened out, due to having a single
+            # element, re-inflate it
+            baseline = baseline[None, :]
         slice_ = [slice(None)]
         total_axis = None
         if isinstance(self.mr_dim_ind, tuple):
-            if self.get_shape()[0] == 1:
+            if self.get_shape()[0] == 1 and axis == 0:
                 total_axis = axis
                 slice_ = [0]
+            elif self.get_shape()[0] == 1 and axis == 1:
+                total_axis = 1
+                slice_ = [slice(None), 0]
             else:
                 total_axis = axis + 1
                 slice_ += [slice(None), 0] if axis == 1 else [0]
@@ -427,7 +434,11 @@ class CubeSlice(object):
                 if self.mr_dim_ind == 0 and axis != 0 else
                 [slice(None), 0]
             )
-            total_axis = axis if self.mr_dim_ind != 0 else 1 - axis
+            total_axis = (
+                axis
+                if self.mr_dim_ind != 0 else
+                1 - axis
+            )
 
         total = np.sum(baseline, axis=total_axis)
         baseline = baseline[slice_]
