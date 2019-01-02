@@ -190,3 +190,14 @@ def test_mr_x_mr_index_tables_parity_with_nssat():
     ])
     actual = mr_x_mr.slices[0].index_table(axis=1)
     np.testing.assert_almost_equal(actual, expected)
+
+def test_mr_single_cat_x_mr():
+    cube_slice = CrunchCube(CR.MR_SINGLE_CAT_X_MR).slices[0]
+    expected = np.array([[100, 100, np.nan]])
+    np.testing.assert_array_equal(cube_slice.index_table(axis=0), expected)
+
+
+def test_mr_x_mr_single_cat():
+    cube_slice = CrunchCube(CR.MR_X_MR_SINGLE_CAT).slices[0]
+    expected = np.array([100, 100, np.nan])
+    np.testing.assert_array_equal(cube_slice.index_table(axis=0), expected)
