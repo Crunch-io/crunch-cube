@@ -6,7 +6,9 @@
             "measures": {
                 "count": {
                     "function": "cube_count",
-                    "args": []
+                    "args": [
+
+                    ]
                 }
             },
             "dimensions": [
@@ -33,7 +35,9 @@
             "weight": null
         },
         "query_environment": {
-            "filter": []
+            "filter": [
+
+            ]
         },
         "result": {
             "dimensions": [
@@ -46,7 +50,9 @@
                     "derived": true,
                     "type": {
                         "subtype": {
-                            "missing_rules": {},
+                            "missing_rules": {
+
+                            },
                             "missing_reasons": {
                                 "No Data": -1
                             },
@@ -63,160 +69,160 @@
                             {
                                 "id": 1,
                                 "value": [
-                                    0.0,
-                                    5.0
+                                    0,
+                                    5
                                 ],
                                 "missing": false
                             },
                             {
                                 "id": 2,
                                 "value": [
-                                    5.0,
-                                    10.0
+                                    5,
+                                    10
                                 ],
                                 "missing": false
                             },
                             {
                                 "id": 3,
                                 "value": [
-                                    10.0,
-                                    15.0
+                                    10,
+                                    15
                                 ],
                                 "missing": false
                             },
                             {
                                 "id": 4,
                                 "value": [
-                                    15.0,
-                                    20.0
+                                    15,
+                                    20
                                 ],
                                 "missing": false
                             },
                             {
                                 "id": 5,
                                 "value": [
-                                    20.0,
-                                    25.0
+                                    20,
+                                    25
                                 ],
                                 "missing": false
                             },
                             {
                                 "id": 6,
                                 "value": [
-                                    25.0,
-                                    30.0
+                                    25,
+                                    30
                                 ],
                                 "missing": false
                             },
                             {
                                 "id": 7,
                                 "value": [
-                                    30.0,
-                                    35.0
+                                    30,
+                                    35
                                 ],
                                 "missing": false
                             },
                             {
                                 "id": 8,
                                 "value": [
-                                    35.0,
-                                    40.0
+                                    35,
+                                    40
                                 ],
                                 "missing": false
                             },
                             {
                                 "id": 9,
                                 "value": [
-                                    40.0,
-                                    45.0
+                                    40,
+                                    45
                                 ],
                                 "missing": false
                             },
                             {
                                 "id": 10,
                                 "value": [
-                                    45.0,
-                                    50.0
+                                    45,
+                                    50
                                 ],
                                 "missing": false
                             },
                             {
                                 "id": 11,
                                 "value": [
-                                    50.0,
-                                    55.0
+                                    50,
+                                    55
                                 ],
                                 "missing": false
                             },
                             {
                                 "id": 12,
                                 "value": [
-                                    55.0,
-                                    60.0
+                                    55,
+                                    60
                                 ],
                                 "missing": false
                             },
                             {
                                 "id": 13,
                                 "value": [
-                                    60.0,
-                                    65.0
+                                    60,
+                                    65
                                 ],
                                 "missing": false
                             },
                             {
                                 "id": 14,
                                 "value": [
-                                    65.0,
-                                    70.0
+                                    65,
+                                    70
                                 ],
                                 "missing": false
                             },
                             {
                                 "id": 15,
                                 "value": [
-                                    70.0,
-                                    75.0
+                                    70,
+                                    75
                                 ],
                                 "missing": false
                             },
                             {
                                 "id": 16,
                                 "value": [
-                                    75.0,
-                                    80.0
+                                    75,
+                                    80
                                 ],
                                 "missing": false
                             },
                             {
                                 "id": 17,
                                 "value": [
-                                    80.0,
-                                    85.0
+                                    80,
+                                    85
                                 ],
                                 "missing": false
                             },
                             {
                                 "id": 18,
                                 "value": [
-                                    85.0,
-                                    90.0
+                                    85,
+                                    90
                                 ],
                                 "missing": false
                             },
                             {
                                 "id": 19,
                                 "value": [
-                                    90.0,
-                                    95.0
+                                    90,
+                                    95
                                 ],
                                 "missing": false
                             },
                             {
                                 "id": 20,
                                 "value": [
-                                    95.0,
-                                    100.0
+                                    95,
+                                    100
                                 ],
                                 "missing": false
                             }
@@ -723,11 +729,15 @@
                     ],
                     "n_missing": 4332,
                     "metadata": {
-                        "references": {},
+                        "references": {
+
+                        },
                         "derived": true,
                         "type": {
                             "integer": true,
-                            "missing_rules": {},
+                            "missing_rules": {
+
+                            },
                             "missing_reasons": {
                                 "No Data": -1
                             },

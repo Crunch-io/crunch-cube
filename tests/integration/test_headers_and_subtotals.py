@@ -685,7 +685,7 @@ class TestHeadersAndSubtotals(TestCase):
             ]
         ])
         actual = cube.margin(axis=2, include_transforms_for_dims=[1, 2])
-        np.testing.assert_array_equal(actual, expected)
+        np.testing.assert_almost_equal(actual, expected)
 
     def test_cat_x_mr_weighted_with_hs(self):
         cube = CrunchCube(CR.CAT_X_MR_WEIGHTED_HS)

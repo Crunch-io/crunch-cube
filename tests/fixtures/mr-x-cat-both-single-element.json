@@ -18,14 +18,18 @@
         ],
         "measures": {
             "count": {
-                "args": [],
+                "args": [
+
+                ],
                 "function": "cube_count"
             }
         },
         "weight": "http://127.0.0.1:8080/datasets/3380aa4bfd154dc6967e0b5ed9bee8f6/variables/010288/"
     },
     "query_environment": {
-        "filter": []
+        "filter": [
+
+        ]
     },
     "result": {
         "counts": [
@@ -218,7 +222,7 @@
         "measures": {
             "count": {
                 "data": [
-                    0.0,
+                    0,
                     3.7738308131,
                     58.7294464386,
                     110.1113103737,
@@ -226,18 +230,22 @@
                     12167.6528717411,
                     622.1626277642,
                     3731.6142102834,
-                    315050.4886052931
+                    315050.488605293
                 ],
                 "metadata": {
                     "derived": true,
-                    "references": {},
+                    "references": {
+
+                    },
                     "type": {
                         "class": "numeric",
                         "integer": false,
                         "missing_reasons": {
                             "No Data": -1
                         },
-                        "missing_rules": {}
+                        "missing_rules": {
+
+                        }
                     }
                 },
                 "n_missing": 335204

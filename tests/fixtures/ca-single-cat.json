@@ -6,7 +6,9 @@
             "measures": {
                 "count": {
                     "function": "cube_count",
-                    "args": []
+                    "args": [
+
+                    ]
                 }
             },
             "dimensions": [
@@ -20,7 +22,9 @@
             "weight": "https://alpha.crunch.io/api/datasets/f4b3fc3bf4224f0db900a5a6315d3ee3/variables/00000d/"
         },
         "query_environment": {
-            "filter": []
+            "filter": [
+
+            ]
         },
         "result": {
             "dimensions": [
@@ -293,22 +297,26 @@
             "measures": {
                 "count": {
                     "data": [
-                        199.80858513911403,
-                        57.98181516229974,
-                        206.6250667338822,
-                        51.165333567531576,
-                        181.05633508950658,
-                        76.73406521190718,
+                        199.808585139114,
+                        57.9818151622997,
+                        206.625066733882,
+                        51.1653335675316,
+                        181.056335089507,
+                        76.7340652119072,
                         0,
-                        257.79040030141374
+                        257.790400301414
                     ],
                     "n_missing": 13,
                     "metadata": {
-                        "references": {},
+                        "references": {
+
+                        },
                         "derived": true,
                         "type": {
                             "integer": false,
-                            "missing_rules": {},
+                            "missing_rules": {
+
+                            },
                             "missing_reasons": {
                                 "No Data": -1
                             },

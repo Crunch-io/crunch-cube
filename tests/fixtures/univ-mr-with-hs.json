@@ -25,14 +25,18 @@
                     ],
                     "measures": {
                         "count": {
-                            "args": [],
+                            "args": [
+
+                            ],
                             "function": "cube_count"
                         }
                     },
                     "weight": "http://127.0.0.1:8080/datasets/735dd266b8ca47ee8849af70fb5e5b4e/variables/000001X/"
                 },
                 "query_environment": {
-                    "filter": []
+                    "filter": [
+
+                    ]
                 },
                 "result": {
                     "counts": [
@@ -144,7 +148,7 @@
                                     },
                                     {
                                         "alias": "Q17_4",
-                                        "name": "An ongoing payment subscription for a digital news service \u2013 eg monthly, quarterly or annual payment (subscription or membership)",
+                                        "name": "An ongoing payment subscription for a digital news service – eg monthly, quarterly or annual payment (subscription or membership)",
                                         "view": {
                                             "column_width": null,
                                             "include_missing": false,
@@ -236,7 +240,7 @@
                                     },
                                     {
                                         "alias": "Q17_8",
-                                        "name": "No, I haven\u2019t paid for news in the last year",
+                                        "name": "No, I haven’t paid for news in the last year",
                                         "view": {
                                             "column_width": null,
                                             "include_missing": false,
@@ -259,7 +263,7 @@
                                     },
                                     {
                                         "alias": "Q17_98",
-                                        "name": "Don\u2019t know",
+                                        "name": "Don’t know",
                                         "view": {
                                             "column_width": null,
                                             "include_missing": false,
@@ -480,7 +484,7 @@
                                             "id": "0004",
                                             "references": {
                                                 "alias": "Q17_4",
-                                                "name": "An ongoing payment subscription for a digital news service \u2013 eg monthly, quarterly or annual payment (subscription or membership)",
+                                                "name": "An ongoing payment subscription for a digital news service – eg monthly, quarterly or annual payment (subscription or membership)",
                                                 "view": {
                                                     "column_width": null,
                                                     "include_missing": false,
@@ -704,7 +708,7 @@
                                             "id": "0008",
                                             "references": {
                                                 "alias": "Q17_8",
-                                                "name": "No, I haven\u2019t paid for news in the last year",
+                                                "name": "No, I haven’t paid for news in the last year",
                                                 "view": {
                                                     "column_width": null,
                                                     "include_missing": false,
@@ -760,7 +764,7 @@
                                             "id": "0009",
                                             "references": {
                                                 "alias": "Q17_98",
-                                                "name": "Don\u2019t know",
+                                                "name": "Don’t know",
                                                 "view": {
                                                     "column_width": null,
                                                     "include_missing": false,
@@ -893,7 +897,7 @@
                                     },
                                     {
                                         "alias": "Q17_4",
-                                        "name": "An ongoing payment subscription for a digital news service \u2013 eg monthly, quarterly or annual payment (subscription or membership)",
+                                        "name": "An ongoing payment subscription for a digital news service – eg monthly, quarterly or annual payment (subscription or membership)",
                                         "view": {
                                             "column_width": null,
                                             "include_missing": false,
@@ -985,7 +989,7 @@
                                     },
                                     {
                                         "alias": "Q17_8",
-                                        "name": "No, I haven\u2019t paid for news in the last year",
+                                        "name": "No, I haven’t paid for news in the last year",
                                         "view": {
                                             "column_width": null,
                                             "include_missing": false,
@@ -1008,7 +1012,7 @@
                                     },
                                     {
                                         "alias": "Q17_98",
-                                        "name": "Don\u2019t know",
+                                        "name": "Don’t know",
                                         "view": {
                                             "column_width": null,
                                             "include_missing": false,
@@ -1098,42 +1102,46 @@
                             "data": [
                                 10488.8965088969,
                                 22875.1821748055,
-                                0.0,
+                                0,
                                 5051.443927452,
                                 28312.6347562509,
-                                0.0,
+                                0,
                                 1960.495229921,
                                 31403.5834537819,
-                                0.0,
+                                0,
                                 3985.375341388,
                                 29378.7033423149,
-                                0.0,
+                                0,
                                 3073.367020631,
                                 30290.7116630719,
-                                0.0,
+                                0,
                                 2196.709452755,
                                 31167.3692309479,
-                                0.0,
+                                0,
                                 779.432275915,
                                 32584.6464077879,
-                                0.0,
+                                0,
                                 14859.5550671778,
                                 18504.5236165244,
-                                0.0,
+                                0,
                                 713.547824492,
                                 32650.5308592109,
-                                0.0
+                                0
                             ],
                             "metadata": {
                                 "derived": true,
-                                "references": {},
+                                "references": {
+
+                                },
                                 "type": {
                                     "class": "numeric",
                                     "integer": false,
                                     "missing_reasons": {
                                         "No Data": -1
                                     },
-                                    "missing_rules": {}
+                                    "missing_rules": {
+
+                                    }
                                 }
                             },
                             "n_missing": 0
@@ -1148,7 +1156,9 @@
                 }
             },
             "meta": {
-                "filters": [],
+                "filters": [
+
+                ],
                 "format": {
                     "decimal_places": 0,
                     "pval_colors": false,
@@ -1164,11 +1174,15 @@
                         "description": false,
                         "merge_ranges": true,
                         "notes": false,
-                        "right": []
+                        "right": [
+
+                        ]
                     },
                     "rows": {
                         "alias": false,
-                        "bottom": [],
+                        "bottom": [
+
+                        ],
                         "description": true,
                         "notes": false
                     }

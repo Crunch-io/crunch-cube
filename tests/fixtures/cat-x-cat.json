@@ -10,14 +10,18 @@
         ],
         "measures": {
             "count": {
-                "args": [],
+                "args": [
+
+                ],
                 "function": "cube_count"
             }
         },
         "weight": null
     },
     "query_environment": {
-        "filter": []
+        "filter": [
+
+        ]
     },
     "result": {
         "counts": [
@@ -123,14 +127,18 @@
                 ],
                 "metadata": {
                     "derived": true,
-                    "references": {},
+                    "references": {
+
+                    },
                     "type": {
                         "class": "numeric",
                         "integer": true,
                         "missing_reasons": {
                             "No Data": -1
                         },
-                        "missing_rules": {}
+                        "missing_rules": {
+
+                        }
                     }
                 },
                 "n_missing": 5

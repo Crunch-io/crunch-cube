@@ -11,7 +11,9 @@
                     "derived": true,
                     "type": {
                         "subtype": {
-                            "missing_rules": {},
+                            "missing_rules": {
+
+                            },
                             "missing_reasons": {
                                 "No Data": -1
                             },
@@ -75,7 +77,9 @@
                             "missing_reasons": {
                                 "No Data": -1
                             },
-                            "missing_rules": {}
+                            "missing_rules": {
+
+                            }
                         },
                         "elements": [
                             {
@@ -138,29 +142,78 @@
             "measures": {
                 "count": {
                     "data": [
-                        1, 1, 0, 0,
-                        0, 0, 0, 0,
-                        0, 0, 0, 0,
-                        2, 1, 0, 1,
-                        1, 0, 0, 0,
-                        0, 0, 0, 0,
-                        0, 0, 0, 2,
-                        3, 0, 0, 0,
-                        0, 0, 0, 0,
-                        0, 0, 0, 0,
-                        0, 0, 3, 2,
-                        0, 0, 0, 0,
-                        0, 0, 0, 0,
-                        0, 0, 1, 1,
-                        0, 0, 1, 0
+                        1,
+                        1,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        2,
+                        1,
+                        0,
+                        1,
+                        1,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        2,
+                        3,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        3,
+                        2,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        1,
+                        0,
+                        0,
+                        1,
+                        0
                     ],
                     "n_missing": 0,
                     "metadata": {
-                        "references": {},
+                        "references": {
+
+                        },
                         "derived": true,
                         "type": {
                             "integer": true,
-                            "missing_rules": {},
+                            "missing_rules": {
+
+                            },
                             "missing_reasons": {
                                 "No Data": -1
                             },

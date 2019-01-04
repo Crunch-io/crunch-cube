@@ -213,14 +213,18 @@
                 ],
                 "metadata": {
                     "derived": true,
-                    "references": {},
+                    "references": {
+
+                    },
                     "type": {
                         "class": "numeric",
                         "integer": false,
                         "missing_reasons": {
                             "No Data": -1
                         },
-                        "missing_rules": {}
+                        "missing_rules": {
+
+                        }
                     }
                 },
                 "n_missing": 0

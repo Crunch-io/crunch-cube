@@ -26,14 +26,18 @@
         ],
         "measures": {
             "count": {
-                "args": [],
+                "args": [
+
+                ],
                 "function": "cube_count"
             }
         },
         "weight": "http://127.0.0.1:8080/datasets/1433e16a07474ec1b1b3c0fbb0acd3c8/variables/88908b0a6be04128be2fb1d69d0a0bcf/"
     },
     "query_environment": {
-        "filter": []
+        "filter": [
+
+        ]
     },
     "result": {
         "counts": [
@@ -378,49 +382,53 @@
         "element": "crunch:cube",
         "filtered": {
             "unweighted_n": 6,
-            "weighted_n": 2.0
+            "weighted_n": 2
         },
         "measures": {
             "count": {
                 "data": [
-                    2.0,
-                    0.0,
-                    0.0,
-                    1.0,
-                    1.0,
-                    0.0,
-                    0.0,
-                    2.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0
+                    2,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    2,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
                 ],
                 "metadata": {
                     "derived": true,
-                    "references": {},
+                    "references": {
+
+                    },
                     "type": {
                         "class": "numeric",
                         "integer": false,
                         "missing_reasons": {
                             "No Data": -1
                         },
-                        "missing_rules": {}
+                        "missing_rules": {
+
+                        }
                     }
                 },
                 "n_missing": 0
@@ -430,7 +438,7 @@
         "n": 6,
         "unfiltered": {
             "unweighted_n": 6,
-            "weighted_n": 2.0
+            "weighted_n": 2
         }
     }
 }
