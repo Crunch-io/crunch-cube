@@ -42,43 +42,7 @@
                                         "name": "ca_subvar_1",
                                         "description": null
                                     },
-                                    "id": "0007",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": null,
-                                                "missing": false,
-                                                "id": 1,
-                                                "name": "a"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": false,
-                                                "id": 2,
-                                                "name": "b"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": false,
-                                                "id": 3,
-                                                "name": "c"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": false,
-                                                "id": 4,
-                                                "name": "d"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0007"
                                 },
                                 "missing": false
                             },
@@ -91,43 +55,7 @@
                                         "name": "ca_subvar_2",
                                         "description": null
                                     },
-                                    "id": "0008",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": null,
-                                                "missing": false,
-                                                "id": 1,
-                                                "name": "a"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": false,
-                                                "id": 2,
-                                                "name": "b"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": false,
-                                                "id": 3,
-                                                "name": "c"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": false,
-                                                "id": 4,
-                                                "name": "d"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0008"
                                 },
                                 "missing": false
                             },
@@ -140,43 +68,7 @@
                                         "name": "ca_subvar_3",
                                         "description": null
                                     },
-                                    "id": "0009",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": null,
-                                                "missing": false,
-                                                "id": 1,
-                                                "name": "a"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": false,
-                                                "id": 2,
-                                                "name": "b"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": false,
-                                                "id": 3,
-                                                "name": "c"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": false,
-                                                "id": 4,
-                                                "name": "d"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0009"
                                 },
                                 "missing": false
                             }

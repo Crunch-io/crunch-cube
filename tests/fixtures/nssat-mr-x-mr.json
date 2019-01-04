@@ -87,32 +87,7 @@
                                         "description": "union_hhold_1"
                                     },
                                     "derived": false,
-                                    "id": "00c5",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "id": 0,
-                                                "name": "Other",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "id": -1,
-                                                "name": "No Data",
-                                                "missing": true
-                                            }
-                                        ]
-                                    }
+                                    "id": "00c5"
                                 },
                                 "missing": false
                             },
@@ -125,32 +100,7 @@
                                         "description": "union_hhold_2"
                                     },
                                     "derived": false,
-                                    "id": "00c6",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "id": 0,
-                                                "name": "Other",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "id": -1,
-                                                "name": "No Data",
-                                                "missing": true
-                                            }
-                                        ]
-                                    }
+                                    "id": "00c6"
                                 },
                                 "missing": false
                             },
@@ -163,32 +113,7 @@
                                         "description": "union_hhold_3"
                                     },
                                     "derived": false,
-                                    "id": "00c7",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "id": 0,
-                                                "name": "Other",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "id": -1,
-                                                "name": "No Data",
-                                                "missing": true
-                                            }
-                                        ]
-                                    }
+                                    "id": "00c7"
                                 },
                                 "missing": false
                             },
@@ -200,32 +125,7 @@
                                         "name": "Disputed"
                                     },
                                     "derived": false,
-                                    "id": "de5314cea98b44eb9c243a86e06d1476",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "id": 0,
-                                                "name": "Other",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "id": -1,
-                                                "name": "No Data",
-                                                "missing": true
-                                            }
-                                        ]
-                                    }
+                                    "id": "de5314cea98b44eb9c243a86e06d1476"
                                 },
                                 "missing": false
                             }
@@ -363,32 +263,7 @@
                                         "description": "multrace_1"
                                     },
                                     "derived": false,
-                                    "id": "00a5",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "id": 0,
-                                                "name": "Other",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "id": -1,
-                                                "name": "No Data",
-                                                "missing": true
-                                            }
-                                        ]
-                                    }
+                                    "id": "00a5"
                                 },
                                 "missing": false
                             },
@@ -401,32 +276,7 @@
                                         "description": "multrace_2"
                                     },
                                     "derived": false,
-                                    "id": "00a6",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "id": 0,
-                                                "name": "Other",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "id": -1,
-                                                "name": "No Data",
-                                                "missing": true
-                                            }
-                                        ]
-                                    }
+                                    "id": "00a6"
                                 },
                                 "missing": false
                             },
@@ -439,32 +289,7 @@
                                         "description": "multrace_3"
                                     },
                                     "derived": false,
-                                    "id": "00a7",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "id": 0,
-                                                "name": "Other",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "id": -1,
-                                                "name": "No Data",
-                                                "missing": true
-                                            }
-                                        ]
-                                    }
+                                    "id": "00a7"
                                 },
                                 "missing": false
                             },
@@ -477,32 +302,7 @@
                                         "description": "multrace_4"
                                     },
                                     "derived": false,
-                                    "id": "00a8",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "id": 0,
-                                                "name": "Other",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "id": -1,
-                                                "name": "No Data",
-                                                "missing": true
-                                            }
-                                        ]
-                                    }
+                                    "id": "00a8"
                                 },
                                 "missing": false
                             },
@@ -515,32 +315,7 @@
                                         "description": "multrace_5"
                                     },
                                     "derived": false,
-                                    "id": "00a9",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "id": 0,
-                                                "name": "Other",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "id": -1,
-                                                "name": "No Data",
-                                                "missing": true
-                                            }
-                                        ]
-                                    }
+                                    "id": "00a9"
                                 },
                                 "missing": false
                             },
@@ -553,32 +328,7 @@
                                         "description": "multrace_8"
                                     },
                                     "derived": false,
-                                    "id": "00aa",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "id": 0,
-                                                "name": "Other",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "id": -1,
-                                                "name": "No Data",
-                                                "missing": true
-                                            }
-                                        ]
-                                    }
+                                    "id": "00aa"
                                 },
                                 "missing": false
                             },
@@ -591,32 +341,7 @@
                                         "description": "multrace_97"
                                     },
                                     "derived": false,
-                                    "id": "00ab",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "id": 0,
-                                                "name": "Other",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "id": -1,
-                                                "name": "No Data",
-                                                "missing": true
-                                            }
-                                        ]
-                                    }
+                                    "id": "00ab"
                                 },
                                 "missing": false
                             },
@@ -629,32 +354,7 @@
                                         "description": "multrace_98"
                                     },
                                     "derived": false,
-                                    "id": "00ac",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "id": 0,
-                                                "name": "Other",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "id": -1,
-                                                "name": "No Data",
-                                                "missing": true
-                                            }
-                                        ]
-                                    }
+                                    "id": "00ac"
                                 },
                                 "missing": false
                             },
@@ -667,32 +367,7 @@
                                         "description": "multrace_99"
                                     },
                                     "derived": false,
-                                    "id": "00ad",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "id": 0,
-                                                "name": "Other",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "id": -1,
-                                                "name": "No Data",
-                                                "missing": true
-                                            }
-                                        ]
-                                    }
+                                    "id": "00ad"
                                 },
                                 "missing": false
                             }

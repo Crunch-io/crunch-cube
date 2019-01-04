@@ -167,31 +167,6 @@
                                         "alias": "dog",
                                         "description": "dog",
                                         "name": "dog"
-                                    },
-                                    "type": {
-                                        "categories": [
-                                            {
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected",
-                                                "numeric_value": 1,
-                                                "selected": true
-                                            },
-                                            {
-                                                "id": 0,
-                                                "missing": false,
-                                                "name": "Not Selected",
-                                                "numeric_value": 0
-                                            },
-                                            {
-                                                "id": -1,
-                                                "missing": true,
-                                                "name": "No Data",
-                                                "numeric_value": null
-                                            }
-                                        ],
-                                        "class": "categorical",
-                                        "ordinal": false
                                     }
                                 }
                             },
@@ -205,31 +180,6 @@
                                         "alias": "cat",
                                         "description": "cat",
                                         "name": "cat"
-                                    },
-                                    "type": {
-                                        "categories": [
-                                            {
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected",
-                                                "numeric_value": 1,
-                                                "selected": true
-                                            },
-                                            {
-                                                "id": 0,
-                                                "missing": false,
-                                                "name": "Not Selected",
-                                                "numeric_value": 0
-                                            },
-                                            {
-                                                "id": -1,
-                                                "missing": true,
-                                                "name": "No Data",
-                                                "numeric_value": null
-                                            }
-                                        ],
-                                        "class": "categorical",
-                                        "ordinal": false
                                     }
                                 }
                             },
@@ -243,31 +193,6 @@
                                         "alias": "wombat",
                                         "description": "wombat",
                                         "name": "wombat"
-                                    },
-                                    "type": {
-                                        "categories": [
-                                            {
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected",
-                                                "numeric_value": 1,
-                                                "selected": true
-                                            },
-                                            {
-                                                "id": 0,
-                                                "missing": false,
-                                                "name": "Not Selected",
-                                                "numeric_value": 0
-                                            },
-                                            {
-                                                "id": -1,
-                                                "missing": true,
-                                                "name": "No Data",
-                                                "numeric_value": null
-                                            }
-                                        ],
-                                        "class": "categorical",
-                                        "ordinal": false
                                     }
                                 }
                             }
@@ -373,31 +298,6 @@
                                         "alias": "dog",
                                         "description": "dog",
                                         "name": "dog"
-                                    },
-                                    "type": {
-                                        "categories": [
-                                            {
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected",
-                                                "numeric_value": 1,
-                                                "selected": true
-                                            },
-                                            {
-                                                "id": 0,
-                                                "missing": false,
-                                                "name": "Not Selected",
-                                                "numeric_value": 0
-                                            },
-                                            {
-                                                "id": -1,
-                                                "missing": true,
-                                                "name": "No Data",
-                                                "numeric_value": null
-                                            }
-                                        ],
-                                        "class": "categorical",
-                                        "ordinal": false
                                     }
                                 }
                             },
@@ -411,31 +311,6 @@
                                         "alias": "cat",
                                         "description": "cat",
                                         "name": "cat"
-                                    },
-                                    "type": {
-                                        "categories": [
-                                            {
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected",
-                                                "numeric_value": 1,
-                                                "selected": true
-                                            },
-                                            {
-                                                "id": 0,
-                                                "missing": false,
-                                                "name": "Not Selected",
-                                                "numeric_value": 0
-                                            },
-                                            {
-                                                "id": -1,
-                                                "missing": true,
-                                                "name": "No Data",
-                                                "numeric_value": null
-                                            }
-                                        ],
-                                        "class": "categorical",
-                                        "ordinal": false
                                     }
                                 }
                             },
@@ -449,31 +324,6 @@
                                         "alias": "wombat",
                                         "description": "wombat",
                                         "name": "wombat"
-                                    },
-                                    "type": {
-                                        "categories": [
-                                            {
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected",
-                                                "numeric_value": 1,
-                                                "selected": true
-                                            },
-                                            {
-                                                "id": 0,
-                                                "missing": false,
-                                                "name": "Not Selected",
-                                                "numeric_value": 0
-                                            },
-                                            {
-                                                "id": -1,
-                                                "missing": true,
-                                                "name": "No Data",
-                                                "numeric_value": null
-                                            }
-                                        ],
-                                        "class": "categorical",
-                                        "ordinal": false
                                     }
                                 }
                             }

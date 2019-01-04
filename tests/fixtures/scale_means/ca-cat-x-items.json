@@ -164,62 +164,7 @@
                                         "name": "იოსებ სტალინი (Stalin)",
                                         "description": "cabatt_1"
                                     },
-                                    "id": "0007",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 32766,
-                                                "selected": false,
-                                                "id": 32766,
-                                                "missing": true,
-                                                "name": "skipped"
-                                            },
-                                            {
-                                                "numeric_value": 32767,
-                                                "selected": false,
-                                                "id": 32767,
-                                                "missing": true,
-                                                "name": "not asked"
-                                            },
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": false,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Too much"
-                                            },
-                                            {
-                                                "numeric_value": 5,
-                                                "selected": false,
-                                                "id": 5,
-                                                "missing": false,
-                                                "name": "Too little"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "selected": false,
-                                                "id": 0,
-                                                "missing": false,
-                                                "name": "The right amount"
-                                            },
-                                            {
-                                                "numeric_value": 4,
-                                                "selected": false,
-                                                "id": 4,
-                                                "missing": false,
-                                                "name": "Not sure"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "selected": false,
-                                                "id": -1,
-                                                "missing": true,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0007"
                                 },
                                 "missing": false
                             },
@@ -232,62 +177,7 @@
                                         "name": "Лев Троцкий (Trotsky)",
                                         "description": "cabatt_6"
                                     },
-                                    "id": "0008",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 32766,
-                                                "selected": false,
-                                                "id": 32766,
-                                                "missing": true,
-                                                "name": "skipped"
-                                            },
-                                            {
-                                                "numeric_value": 32767,
-                                                "selected": false,
-                                                "id": 32767,
-                                                "missing": true,
-                                                "name": "not asked"
-                                            },
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": false,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Too much"
-                                            },
-                                            {
-                                                "numeric_value": 5,
-                                                "selected": false,
-                                                "id": 5,
-                                                "missing": false,
-                                                "name": "Too little"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "selected": false,
-                                                "id": 0,
-                                                "missing": false,
-                                                "name": "The right amount"
-                                            },
-                                            {
-                                                "numeric_value": 4,
-                                                "selected": false,
-                                                "id": 4,
-                                                "missing": false,
-                                                "name": "Not sure"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "selected": false,
-                                                "id": -1,
-                                                "missing": true,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0008"
                                 },
                                 "missing": false
                             },
@@ -300,62 +190,7 @@
                                         "name": "Михаи́л Ива́нович Кали́нин (Kalinin)",
                                         "description": "cabatt_3"
                                     },
-                                    "id": "0009",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 32766,
-                                                "selected": false,
-                                                "id": 32766,
-                                                "missing": true,
-                                                "name": "skipped"
-                                            },
-                                            {
-                                                "numeric_value": 32767,
-                                                "selected": false,
-                                                "id": 32767,
-                                                "missing": true,
-                                                "name": "not asked"
-                                            },
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": false,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Too much"
-                                            },
-                                            {
-                                                "numeric_value": 5,
-                                                "selected": false,
-                                                "id": 5,
-                                                "missing": false,
-                                                "name": "Too little"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "selected": false,
-                                                "id": 0,
-                                                "missing": false,
-                                                "name": "The right amount"
-                                            },
-                                            {
-                                                "numeric_value": 4,
-                                                "selected": false,
-                                                "id": 4,
-                                                "missing": false,
-                                                "name": "Not sure"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "selected": false,
-                                                "id": -1,
-                                                "missing": true,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0009"
                                 },
                                 "missing": false
                             },
@@ -368,62 +203,7 @@
                                         "name": "Владимир Ленин (Lenin)",
                                         "description": "cabatt_7"
                                     },
-                                    "id": "000a",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 32766,
-                                                "selected": false,
-                                                "id": 32766,
-                                                "missing": true,
-                                                "name": "skipped"
-                                            },
-                                            {
-                                                "numeric_value": 32767,
-                                                "selected": false,
-                                                "id": 32767,
-                                                "missing": true,
-                                                "name": "not asked"
-                                            },
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": false,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Too much"
-                                            },
-                                            {
-                                                "numeric_value": 5,
-                                                "selected": false,
-                                                "id": 5,
-                                                "missing": false,
-                                                "name": "Too little"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "selected": false,
-                                                "id": 0,
-                                                "missing": false,
-                                                "name": "The right amount"
-                                            },
-                                            {
-                                                "numeric_value": 4,
-                                                "selected": false,
-                                                "id": 4,
-                                                "missing": false,
-                                                "name": "Not sure"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "selected": false,
-                                                "id": -1,
-                                                "missing": true,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "000a"
                                 },
                                 "missing": false
                             }

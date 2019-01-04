@@ -202,32 +202,7 @@
                                         "name": "Eurasia",
                                         "description": "union_hhold_1"
                                     },
-                                    "id": "00c5",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "missing": false,
-                                                "id": 0,
-                                                "name": "Not Selected"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "00c5"
                                 },
                                 "missing": false
                             },
@@ -240,32 +215,7 @@
                                         "name": "Oceania",
                                         "description": "union_hhold_2"
                                     },
-                                    "id": "00c6",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "missing": false,
-                                                "id": 0,
-                                                "name": "Not Selected"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "00c6"
                                 },
                                 "missing": false
                             },
@@ -278,32 +228,7 @@
                                         "name": "Eastasia",
                                         "description": "union_hhold_3"
                                     },
-                                    "id": "00c7",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "missing": false,
-                                                "id": 0,
-                                                "name": "Not Selected"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "00c7"
                                 },
                                 "missing": false
                             },
@@ -315,32 +240,7 @@
                                         "alias": "disputed",
                                         "name": "Disputed"
                                     },
-                                    "id": "11b45a85e5ac4011bd3cf884b8a2476f",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "missing": false,
-                                                "id": 0,
-                                                "name": "Not Selected"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "11b45a85e5ac4011bd3cf884b8a2476f"
                                 },
                                 "missing": false
                             }
@@ -475,69 +375,7 @@
                                         "name": "Frederick Douglass",
                                         "description": "fav_ppdem"
                                     },
-                                    "id": "0061",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 0,
-                                                "selected": false,
-                                                "id": 0,
-                                                "name": "Very favorable",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": 2,
-                                                "selected": false,
-                                                "id": 2,
-                                                "name": "Somewhat favorable",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": 3,
-                                                "selected": false,
-                                                "id": 3,
-                                                "name": "Somewhat unfavorable",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": 4,
-                                                "selected": false,
-                                                "id": 4,
-                                                "name": "Very unfavorable",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": 5,
-                                                "selected": false,
-                                                "id": 5,
-                                                "name": "Don't know",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": 32766,
-                                                "selected": false,
-                                                "id": 32766,
-                                                "name": "skipped",
-                                                "missing": true
-                                            },
-                                            {
-                                                "numeric_value": 32767,
-                                                "selected": false,
-                                                "id": 32767,
-                                                "name": "not asked",
-                                                "missing": true
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "selected": false,
-                                                "id": -1,
-                                                "name": "No Data",
-                                                "missing": true
-                                            }
-                                        ]
-                                    }
+                                    "id": "0061"
                                 },
                                 "missing": false
                             },
@@ -550,69 +388,7 @@
                                         "name": "John Brown",
                                         "description": "fav_pprep"
                                     },
-                                    "id": "0062",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 0,
-                                                "selected": false,
-                                                "id": 0,
-                                                "name": "Very favorable",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": 2,
-                                                "selected": false,
-                                                "id": 2,
-                                                "name": "Somewhat favorable",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": 3,
-                                                "selected": false,
-                                                "id": 3,
-                                                "name": "Somewhat unfavorable",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": 4,
-                                                "selected": false,
-                                                "id": 4,
-                                                "name": "Very unfavorable",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": 5,
-                                                "selected": false,
-                                                "id": 5,
-                                                "name": "Don't know",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": 32766,
-                                                "selected": false,
-                                                "id": 32766,
-                                                "name": "skipped",
-                                                "missing": true
-                                            },
-                                            {
-                                                "numeric_value": 32767,
-                                                "selected": false,
-                                                "id": 32767,
-                                                "name": "not asked",
-                                                "missing": true
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "selected": false,
-                                                "id": -1,
-                                                "name": "No Data",
-                                                "missing": true
-                                            }
-                                        ]
-                                    }
+                                    "id": "0062"
                                 },
                                 "missing": false
                             },
@@ -624,69 +400,7 @@
                                         "alias": "truth",
                                         "name": "Sojourner Truth"
                                     },
-                                    "id": "fb4492a07d5142f9a9a49de9c07ce8a1",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 0,
-                                                "selected": false,
-                                                "id": 0,
-                                                "name": "Very favorable",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": 2,
-                                                "selected": false,
-                                                "id": 2,
-                                                "name": "Somewhat favorable",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": 3,
-                                                "selected": false,
-                                                "id": 3,
-                                                "name": "Somewhat unfavorable",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": 4,
-                                                "selected": false,
-                                                "id": 4,
-                                                "name": "Very unfavorable",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": 5,
-                                                "selected": false,
-                                                "id": 5,
-                                                "name": "Don't know",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": 32766,
-                                                "selected": false,
-                                                "id": 32766,
-                                                "name": "skipped",
-                                                "missing": true
-                                            },
-                                            {
-                                                "numeric_value": 32767,
-                                                "selected": false,
-                                                "id": 32767,
-                                                "name": "not asked",
-                                                "missing": true
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "selected": false,
-                                                "id": -1,
-                                                "name": "No Data",
-                                                "missing": true
-                                            }
-                                        ]
-                                    }
+                                    "id": "fb4492a07d5142f9a9a49de9c07ce8a1"
                                 },
                                 "missing": false
                             }

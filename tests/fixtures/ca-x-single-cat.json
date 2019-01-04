@@ -70,31 +70,7 @@
                                         "name": "cat",
                                         "description": "a_cat"
                                     },
-                                    "id": "0003",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "missing": false,
-                                                "id": 1,
-                                                "name": "not selected"
-                                            },
-                                            {
-                                                "numeric_value": 2,
-                                                "missing": false,
-                                                "id": 2,
-                                                "name": "selected"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0003"
                                 },
                                 "missing": false
                             },
@@ -107,31 +83,7 @@
                                         "name": "dog",
                                         "description": "a_dog"
                                     },
-                                    "id": "0004",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "missing": false,
-                                                "id": 1,
-                                                "name": "not selected"
-                                            },
-                                            {
-                                                "numeric_value": 2,
-                                                "missing": false,
-                                                "id": 2,
-                                                "name": "selected"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0004"
                                 },
                                 "missing": false
                             },
@@ -144,31 +96,7 @@
                                         "name": "wombat",
                                         "description": "a_wombat"
                                     },
-                                    "id": "0005",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "missing": false,
-                                                "id": 1,
-                                                "name": "not selected"
-                                            },
-                                            {
-                                                "numeric_value": 2,
-                                                "missing": false,
-                                                "id": 2,
-                                                "name": "selected"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0005"
                                 },
                                 "missing": false
                             }
