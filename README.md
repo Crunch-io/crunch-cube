@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.8.6
+- Fix pruning for single element MRs
+
 #### 1.8.5
 - Fix `index_table` for MR x MR where either dimension has a only single element
 
