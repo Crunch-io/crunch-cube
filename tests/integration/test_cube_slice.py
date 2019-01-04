@@ -55,6 +55,18 @@ class DescribeIntegratedCubeSlice(object):
             ])
         )
 
+    def test_mr_x_mr_single_cat_pruning(self):
+        cc = CrunchCube(CR.MR_X_MR_SINGLE_CAT)
+        cube_slice = cc.slices[0]
+        expected = np.ma.masked_array([2, 1, 0], mask=[False, False, True])
+        np.testing.assert_array_equal(cube_slice.as_array(prune=True), expected)
+
+    def test_mr_single_cat_x_mr_margin_with_pruning(self):
+        cc = CrunchCube(CR.MR_SINGLE_CAT_X_MR)
+        cube_slice = cc.slices[0]
+        expected = np.ma.masked_array([2, 2, 2], mask=[False, False, True])
+        np.testing.assert_array_equal(cube_slice.margin(prune=True), expected)
+
 
 class DescribeCubeSliceAPI(object):
 
