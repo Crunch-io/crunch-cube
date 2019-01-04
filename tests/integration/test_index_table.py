@@ -201,8 +201,22 @@ def test_mr_single_cat_x_mr():
     np.testing.assert_array_equal(cube_slice.index_table(axis=0), expected)
     np.testing.assert_array_equal(cube_slice.index_table(axis=1), expected)
 
+    # With pruning
+    expected = np.ma.masked_array(
+        [[100, 100, np.nan]], mask=[[False, False, True]]
+    )
+    np.testing.assert_array_equal(
+        cube_slice.index_table(axis=0, prune=True), expected
+    )
+
 
 def test_mr_x_mr_single_cat():
     cube_slice = CrunchCube(CR.MR_X_MR_SINGLE_CAT).slices[0]
     expected = np.array([100, 100, np.nan])
     np.testing.assert_array_equal(cube_slice.index_table(axis=0), expected)
+
+    # With pruning
+    expected = np.ma.masked_array([100, 100, np.nan], mask=[False, False, True])
+    np.testing.assert_array_equal(
+        cube_slice.index_table(axis=0, prune=True), expected
+    )

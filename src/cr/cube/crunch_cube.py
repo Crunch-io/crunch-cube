@@ -350,17 +350,26 @@ class CrunchCube(object):
         arr = self._drop_mr_cat_dims(arr, fix_valids=include_missing)
 
         if isinstance(arr, np.ma.core.MaskedArray):
+            # Inflate the reduced version of the array, to match the
+            # non-reduced version, for the purposes of creating the correct
+            # mask. Create additional dimension (with no elements) where MR_CAT
+            # dimensions should be. Don't inflate 0th dimension if it has only
+            # a single element, because it's not being reduced
+            # in self._drop_mr_cat_dims
             inflate_ind = tuple(
                 (
                     None
                     if (
                         d.dimension_type == DT.MR_CAT or
-                        n <= 1 or
-                        len(d.elements()) <= 1
+                        i != 0 and (
+                            n <= 1 or
+                            len(d.elements()) <= 1
+                        )
                     ) else
                     slice(None)
                 )
-                for d, n in zip(self._all_dimensions, table.shape)
+                for i, (d, n) in
+                enumerate(zip(self._all_dimensions, table.shape))
             )
             mask = np.logical_or(
                 np.zeros(den.shape, dtype=bool),
@@ -1168,7 +1177,8 @@ class CrunchCube(object):
         )
         # ---adjust special-case row-margin values---
         item_types = (DT.MR, DT.CA_SUBVAR)
-        if self.ndim > 1 and self.dim_types[1] in item_types:
+        if (self.ndim > 1 and self.dim_types[1] in item_types and
+                len(res.shape) > 1):
             # ---when row-dimension has only one category it gets squashed---
             axis = 1 if res.shape[0] > 1 else None
             # ---in CAT x MR case (or if it has CA subvars) we get
