@@ -357,7 +357,7 @@ class CubeSlice(object):
 
         return zscore
 
-    def pairwise_chisq(self, weighted=True, prune=False, hs_dims=None):
+    def pairwise_chisq(self, axis=0, weighted=True):
         """Return square ndarray of pairwise Chi-squared statistics along axis.
 
         Zscore is a measure of statistical signifficance of observed vs.
@@ -369,9 +369,7 @@ class CubeSlice(object):
         :returns zscore: ndarray representing zscore measurements
         """
         counts = self.as_array(weighted=weighted)
-        colsum = self.margin(axis=0, weighted=weighted)
-        rowsum = self.margin(axis=1, weighted=weighted)
-        chisq = self._categorical_pairwise_chisq(counts, axis, colsum, rowsum)
+        chisq = self._categorical_pairwise_chisq(counts, axis)
 
         return chisq
 
@@ -483,22 +481,30 @@ class CubeSlice(object):
         )
         return residuals / np.sqrt(variance)
 
-    def _categorical_pairwise_chisq(self, counts, axis, margin, offmargin):
+    def _categorical_pairwise_chisq(self, counts, axis=0):
         """Return ndarray containing pairwise comparisons along axis
 
         Returns a square, symmetric matrix of test statistics for the null
         hypothesis that each vector along *axis* is equal to each other.
         """
         if axis == 0:
-            proportions = counts.proportions(axis=0)
-            wts = offmargin / counts.margin()
-            elements = counts.shape[0]
+            margin = self.margin(0)
+            offmargin = self.margin(1)
+            proportions = self.proportions(axis=0)
+            wts = offmargin / self.margin()
+            elements = counts.shape[1]
             chisq = np.zeros([elements, elements])
-            for i, _ in np.ndenumerate(chisq):
-                for j, _ in np.ndenumerate(chisq):
+            for i in xrange(1, elements):
+                for j in xrange(0, elements - 1):
                     chisq[i, j] = chisq[j, i] = np.sum(
-                        np.square((props[i, :] - props[j, :])) / wts
+                        np.square(proportions[:, i] - proportions[:, j]) / wts
                     ) / (1 / margin[i] + 1 / margin[j])
+
+            print(chisq.tolist())
+            return chisq
+
+            # sum( (props[,i] - props[,j])^2 / weights ) /
+            #  ( 1 / margins[i] + 1 / margins[j] )
 
     def _update_args(self, kwargs):
         if self._cube.ndim < 3:

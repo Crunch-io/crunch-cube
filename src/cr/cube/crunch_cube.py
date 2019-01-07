@@ -713,7 +713,7 @@ class CrunchCube(object):
         res = [s.zscore(weighted, prune, hs_dims) for s in self.slices]
         return np.array(res) if self.ndim == 3 else res[0]
 
-    def pairwise_chisq(self, axis=0, weighted=True, prune=False, hs_dims=None):
+    def pairwise_chisq(self, axis=0):
         """Return square ndarray of pairwise Chi-square along axis.
 
         Zscore is a measure of statistical signifficance of observed vs.
@@ -726,7 +726,7 @@ class CrunchCube(object):
         :param hs_dims: Include headers and subtotals (as NaN values)
         :returns zscore: ndarray representing zscore measurements
         """
-        res = [s.pairwise_chisq(axis, weighted) for s in self.slices]
+        res = [s.pairwise_chisq(axis=0) for s in self.slices]
         return res[0]
 
     def _adjust_axis(self, axis):
