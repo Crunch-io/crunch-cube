@@ -307,11 +307,12 @@ class CubeSlice(object):
         return "%s: %s" % (title, table_name)
 
     def pvals(self, weighted=True, prune=False, hs_dims=None):
-        """Return 2D ndarray with calculated p-vals.
+        """Return 2D ndarray with calculated P values
 
-        This function calculates statistically significant results for
-        categorical contingency tables. The values are calculated for 2D tables
-        only.
+        This function calculates statistically significant cells for
+        categorical contingency tables under the null hypothesis that the
+        row and column variables are independent (uncorrelated).
+        The values are calculated for 2D tables only.
 
         :param weighted: Use weighted counts for zscores
         :param prune: Prune based on unweighted counts
@@ -325,15 +326,22 @@ class CubeSlice(object):
         return self._apply_pruning_mask(pvals, hs_dims) if prune else pvals
 
     def zscore(self, weighted=True, prune=False, hs_dims=None):
-        """Return ndarray with slices's zscore measurements.
+        """Return ndarray with slices's standardized residuals (Z-scores).
 
-        Zscore is a measure of statistical signifficance of observed vs.
-        expected counts. It's only applicable to a 2D contingency tables.
+        (Only applicable to a 2D contingency tables.) The Z-score or
+        standardized residual is the difference between observed and expected
+        cell counts if row and column variables were independent divided
+        by the residual cell variance. They are assumed to come from a N(0,1)
+        or standard Normal distribution, and can show which cells deviate from
+        the null hypothesis that the row and column variables are uncorrelated.
+
+        See also *pairwise_chisq*, *pairwise_pvals* for a pairwise column-
+        or row-based test of statistical significance.
 
         :param weighted: Use weighted counts for zscores
         :param prune: Prune based on unweighted counts
         :param hs_dims: Include headers and subtotals (as NaN values)
-        :returns zscore: ndarray representing zscore measurements
+        :returns zscore: ndarray representing cell standardized residuals (Z)
         """
         counts = self.as_array(weighted=weighted)
         total = self.margin(weighted=weighted)
@@ -348,6 +356,24 @@ class CubeSlice(object):
             return self._apply_pruning_mask(zscore, hs_dims)
 
         return zscore
+
+    def pairwise_chisq(self, weighted=True, prune=False, hs_dims=None):
+        """Return square ndarray of pairwise Chi-squared statistics along axis.
+
+        Zscore is a measure of statistical signifficance of observed vs.
+        expected counts. It's only applicable to a 2D contingency tables.
+
+        :param weighted: Use weighted counts for zscores
+        :param prune: Prune based on unweighted counts
+        :param hs_dims: Include headers and subtotals (as NaN values)
+        :returns zscore: ndarray representing zscore measurements
+        """
+        counts = self.as_array(weighted=weighted)
+        colsum = self.margin(axis=0, weighted=weighted)
+        rowsum = self.margin(axis=1, weighted=weighted)
+        chisq = self._categorical_pairwise_chisq(counts, axis, colsum, rowsum)
+
+        return chisq
 
     def _apply_pruning_mask(self, res, hs_dims=None):
         array = self.as_array(prune=True, include_transforms_for_dims=hs_dims)
@@ -456,6 +482,23 @@ class CubeSlice(object):
             / total ** 3
         )
         return residuals / np.sqrt(variance)
+
+    def _categorical_pairwise_chisq(self, counts, axis, margin, offmargin):
+        """Return ndarray containing pairwise comparisons along axis
+
+        Returns a square, symmetric matrix of test statistics for the null
+        hypothesis that each vector along *axis* is equal to each other.
+        """
+        if axis == 0:
+            proportions = counts.proportions(axis=0)
+            wts = offmargin / counts.margin()
+            elements = counts.shape[0]
+            chisq = np.zeros([elements, elements])
+            for i, _ in np.ndenumerate(chisq):
+                for j, _ in np.ndenumerate(chisq):
+                    chisq[i, j] = chisq[j, i] = np.sum(
+                        np.square((props[i, :] - props[j, :])) / wts
+                    ) / (1 / margin[i] + 1 / margin[j])
 
     def _update_args(self, kwargs):
         if self._cube.ndim < 3:

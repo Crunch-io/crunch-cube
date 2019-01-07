@@ -713,6 +713,22 @@ class CrunchCube(object):
         res = [s.zscore(weighted, prune, hs_dims) for s in self.slices]
         return np.array(res) if self.ndim == 3 else res[0]
 
+    def pairwise_chisq(self, axis=0, weighted=True, prune=False, hs_dims=None):
+        """Return square ndarray of pairwise Chi-square along axis.
+
+        Zscore is a measure of statistical signifficance of observed vs.
+        expected counts. It's only applicable to a 2D contingency tables.
+        For 3D cubes, the measures of separate slices are stacked together
+        and returned as the result.
+
+        :param weighted: Use weighted counts for zscores
+        :param prune: Prune based on unweighted counts
+        :param hs_dims: Include headers and subtotals (as NaN values)
+        :returns zscore: ndarray representing zscore measurements
+        """
+        res = [s.pairwise_chisq(axis, weighted) for s in self.slices]
+        return res[0]
+
     def _adjust_axis(self, axis):
         """Return raw axis/axes corresponding to apparent axis/axes.
 
