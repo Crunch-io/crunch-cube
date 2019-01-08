@@ -20,7 +20,9 @@
                     "derived": true,
                     "type": {
                         "subtype": {
-                            "missing_rules": {},
+                            "missing_rules": {
+
+                            },
                             "class": "numeric",
                             "missing_reasons": {
                                 "No Data": -1
@@ -57,11 +59,15 @@
                     ],
                     "n_missing": 0,
                     "metadata": {
-                        "references": {},
+                        "references": {
+
+                        },
                         "derived": true,
                         "type": {
                             "integer": true,
-                            "missing_rules": {},
+                            "missing_rules": {
+
+                            },
                             "missing_reasons": {
                                 "No Data": -1
                             },

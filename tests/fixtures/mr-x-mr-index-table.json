@@ -29,14 +29,18 @@
             ],
             "measures": {
                 "count": {
-                    "args": [],
+                    "args": [
+
+                    ],
                     "function": "cube_count"
                 }
             },
             "weight": "/api/datasets/d998523c126d497e92d4fe6f679b5f64/variables/05213176522140458efa4e369bf6a081/"
         },
         "query_environment": {
-            "filter": []
+            "filter": [
+
+            ]
         },
         "result": {
             "__comment": "WARNING: filtered and unfiltered params have been manually added to this fixture and there is a high possibility they might be wrong, see ticket #160167172",
@@ -163,31 +167,6 @@
                                         "alias": "dog",
                                         "description": "dog",
                                         "name": "dog"
-                                    },
-                                    "type": {
-                                        "categories": [
-                                            {
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected",
-                                                "numeric_value": 1,
-                                                "selected": true
-                                            },
-                                            {
-                                                "id": 0,
-                                                "missing": false,
-                                                "name": "Not Selected",
-                                                "numeric_value": 0
-                                            },
-                                            {
-                                                "id": -1,
-                                                "missing": true,
-                                                "name": "No Data",
-                                                "numeric_value": null
-                                            }
-                                        ],
-                                        "class": "categorical",
-                                        "ordinal": false
                                     }
                                 }
                             },
@@ -201,31 +180,6 @@
                                         "alias": "cat",
                                         "description": "cat",
                                         "name": "cat"
-                                    },
-                                    "type": {
-                                        "categories": [
-                                            {
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected",
-                                                "numeric_value": 1,
-                                                "selected": true
-                                            },
-                                            {
-                                                "id": 0,
-                                                "missing": false,
-                                                "name": "Not Selected",
-                                                "numeric_value": 0
-                                            },
-                                            {
-                                                "id": -1,
-                                                "missing": true,
-                                                "name": "No Data",
-                                                "numeric_value": null
-                                            }
-                                        ],
-                                        "class": "categorical",
-                                        "ordinal": false
                                     }
                                 }
                             },
@@ -239,31 +193,6 @@
                                         "alias": "wombat",
                                         "description": "wombat",
                                         "name": "wombat"
-                                    },
-                                    "type": {
-                                        "categories": [
-                                            {
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected",
-                                                "numeric_value": 1,
-                                                "selected": true
-                                            },
-                                            {
-                                                "id": 0,
-                                                "missing": false,
-                                                "name": "Not Selected",
-                                                "numeric_value": 0
-                                            },
-                                            {
-                                                "id": -1,
-                                                "missing": true,
-                                                "name": "No Data",
-                                                "numeric_value": null
-                                            }
-                                        ],
-                                        "class": "categorical",
-                                        "ordinal": false
                                     }
                                 }
                             }
@@ -369,31 +298,6 @@
                                         "alias": "dog",
                                         "description": "dog",
                                         "name": "dog"
-                                    },
-                                    "type": {
-                                        "categories": [
-                                            {
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected",
-                                                "numeric_value": 1,
-                                                "selected": true
-                                            },
-                                            {
-                                                "id": 0,
-                                                "missing": false,
-                                                "name": "Not Selected",
-                                                "numeric_value": 0
-                                            },
-                                            {
-                                                "id": -1,
-                                                "missing": true,
-                                                "name": "No Data",
-                                                "numeric_value": null
-                                            }
-                                        ],
-                                        "class": "categorical",
-                                        "ordinal": false
                                     }
                                 }
                             },
@@ -407,31 +311,6 @@
                                         "alias": "cat",
                                         "description": "cat",
                                         "name": "cat"
-                                    },
-                                    "type": {
-                                        "categories": [
-                                            {
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected",
-                                                "numeric_value": 1,
-                                                "selected": true
-                                            },
-                                            {
-                                                "id": 0,
-                                                "missing": false,
-                                                "name": "Not Selected",
-                                                "numeric_value": 0
-                                            },
-                                            {
-                                                "id": -1,
-                                                "missing": true,
-                                                "name": "No Data",
-                                                "numeric_value": null
-                                            }
-                                        ],
-                                        "class": "categorical",
-                                        "ordinal": false
                                     }
                                 }
                             },
@@ -445,31 +324,6 @@
                                         "alias": "wombat",
                                         "description": "wombat",
                                         "name": "wombat"
-                                    },
-                                    "type": {
-                                        "categories": [
-                                            {
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected",
-                                                "numeric_value": 1,
-                                                "selected": true
-                                            },
-                                            {
-                                                "id": 0,
-                                                "missing": false,
-                                                "name": "Not Selected",
-                                                "numeric_value": 0
-                                            },
-                                            {
-                                                "id": -1,
-                                                "missing": true,
-                                                "name": "No Data",
-                                                "numeric_value": null
-                                            }
-                                        ],
-                                        "class": "categorical",
-                                        "ordinal": false
                                     }
                                 }
                             }
@@ -545,98 +399,102 @@
             "measures": {
                 "count": {
                     "data": [
-                        40.97693351424693,
-                        0.0,
-                        0.0,
-                        14.50474898236092,
-                        20.488466757123472,
+                        40.9769335142469,
+                        0,
+                        0,
+                        14.5047489823609,
+                        20.4884667571235,
                         5.98371777476255,
-                        17.95115332428765,
-                        17.04206241519674,
+                        17.9511533242876,
+                        17.0420624151967,
                         5.98371777476255,
-                        0.0,
-                        37.72048846675711,
-                        0.0,
-                        14.14518317503392,
-                        20.94301221166893,
-                        2.632293080054274,
-                        20.488466757123476,
-                        14.599728629579374,
-                        2.632293080054274,
-                        0.0,
-                        0.0,
-                        21.302578018995927,
+                        0,
+                        37.7204884667571,
+                        0,
+                        14.1451831750339,
+                        20.9430122116689,
+                        2.63229308005427,
+                        20.4884667571235,
+                        14.5997286295794,
+                        2.63229308005427,
+                        0,
+                        0,
+                        21.3025780189959,
                         4.71506105834464,
-                        5.074626865671641,
-                        11.512890094979646,
-                        0.0,
-                        0.0,
-                        21.302578018995927,
-                        14.50474898236092,
-                        14.14518317503392,
+                        5.07462686567164,
+                        11.5128900949796,
+                        0,
+                        0,
+                        21.3025780189959,
+                        14.5047489823609,
+                        14.1451831750339,
                         4.71506105834464,
-                        33.36499321573948,
-                        0.0,
-                        0.0,
-                        15.413839891451829,
-                        13.236092265943011,
+                        33.3649932157395,
+                        0,
+                        0,
+                        15.4138398914518,
+                        13.236092265943,
                         4.71506105834464,
-                        20.488466757123472,
-                        20.94301221166893,
-                        5.074626865671641,
-                        0.0,
-                        46.506105834464016,
-                        0.0,
-                        23.025780189959292,
-                        18.405698778833106,
-                        5.074626865671641,
+                        20.4884667571235,
+                        20.9430122116689,
+                        5.07462686567164,
+                        0,
+                        46.506105834464,
+                        0,
+                        23.0257801899593,
+                        18.4056987788331,
+                        5.07462686567164,
                         5.98371777476255,
-                        2.632293080054274,
-                        11.512890094979646,
-                        0.0,
-                        0.0,
-                        20.12890094979647,
-                        0.0,
-                        0.0,
-                        20.12890094979647,
-                        17.95115332428765,
-                        20.488466757123476,
-                        0.0,
-                        15.413839891451829,
-                        23.025780189959292,
-                        0.0,
-                        38.439620081411114,
-                        0.0,
-                        0.0,
-                        17.04206241519674,
-                        14.599728629579374,
-                        0.0,
-                        13.236092265943011,
-                        18.405698778833106,
-                        0.0,
-                        0.0,
-                        31.641791044776124,
-                        0.0,
+                        2.63229308005427,
+                        11.5128900949796,
+                        0,
+                        0,
+                        20.1289009497965,
+                        0,
+                        0,
+                        20.1289009497965,
+                        17.9511533242876,
+                        20.4884667571235,
+                        0,
+                        15.4138398914518,
+                        23.0257801899593,
+                        0,
+                        38.4396200814111,
+                        0,
+                        0,
+                        17.0420624151967,
+                        14.5997286295794,
+                        0,
+                        13.236092265943,
+                        18.4056987788331,
+                        0,
+                        0,
+                        31.6417910447761,
+                        0,
                         5.98371777476255,
-                        2.632293080054274,
-                        21.302578018995927,
+                        2.63229308005427,
+                        21.3025780189959,
                         4.71506105834464,
-                        5.074626865671641,
-                        20.12890094979647,
-                        0.0,
-                        0.0,
-                        29.91858887381275
+                        5.07462686567164,
+                        20.1289009497965,
+                        0,
+                        0,
+                        29.9185888738128
                     ],
                     "metadata": {
                         "derived": true,
-                        "references": {},
+                        "references": {
+
+                        },
                         "type": {
                             "class": "numeric",
                             "integer": false,
                             "missing_reasons": {
                                 "No Data": -1
                             },
-                            "missing_rules": {}
+                            "missing_rules": {
+
+                            }
                         }
                     },
                     "n_missing": 11

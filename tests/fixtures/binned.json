@@ -10,10 +10,14 @@
                 "function": "bin"
             }
         ],
-        "filters": [],
+        "filters": [
+
+        ],
         "measures": {
             "count": {
-                "args": [],
+                "args": [
+
+                ],
                 "function": "cube_count"
             }
         },
@@ -208,14 +212,14 @@
         "element": "crunch:cube",
         "margins": {
             "data": [
-                575543.0542529409
+                575543.054252941
             ]
         },
         "measures": {
             "count": {
                 "data": [
-                    118853.42316535371,
-                    118504.40402203641,
+                    118853.423165354,
+                    118504.404022036,
                     0,
                     0,
                     0,
@@ -225,7 +229,7 @@
                     0,
                     0,
                     0,
-                    155261.27236309808,
+                    155261.272363098,
                     0,
                     0,
                     0,
@@ -234,18 +238,22 @@
                     0,
                     0,
                     0,
-                    182923.9547024528
+                    182923.954702453
                 ],
                 "metadata": {
                     "derived": true,
-                    "references": {},
+                    "references": {
+
+                    },
                     "type": {
                         "class": "numeric",
                         "integer": false,
                         "missing_reasons": {
                             "No Data": -1
                         },
-                        "missing_rules": {}
+                        "missing_rules": {
+
+                        }
                     }
                 },
                 "n_missing": 116732

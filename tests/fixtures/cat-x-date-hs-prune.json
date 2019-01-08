@@ -6,7 +6,9 @@
             "measures": {
                 "count": {
                     "function": "cube_count",
-                    "args": []
+                    "args": [
+
+                    ]
                 }
             },
             "dimensions": [
@@ -28,7 +30,9 @@
             "weight": null
         },
         "query_environment": {
-            "filter": []
+            "filter": [
+
+            ]
         },
         "result": {
             "dimensions": [
@@ -134,7 +138,9 @@
                     "derived": true,
                     "type": {
                         "subtype": {
-                            "missing_rules": {},
+                            "missing_rules": {
+
+                            },
                             "resolution": "Y",
                             "class": "datetime",
                             "missing_reasons": {
@@ -204,11 +210,15 @@
                     ],
                     "n_missing": 2,
                     "metadata": {
-                        "references": {},
+                        "references": {
+
+                        },
                         "derived": true,
                         "type": {
                             "integer": true,
-                            "missing_rules": {},
+                            "missing_rules": {
+
+                            },
                             "missing_reasons": {
                                 "No Data": -1
                             },

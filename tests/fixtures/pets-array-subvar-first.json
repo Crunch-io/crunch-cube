@@ -6,7 +6,9 @@
             "measures": {
                 "count": {
                     "function": "cube_count",
-                    "args": []
+                    "args": [
+
+                    ]
                 }
             },
             "dimensions": [
@@ -20,7 +22,9 @@
             "weight": "https://app.crunch.io/api/datasets/b29b6e2b6dbe48f2b2c5def9b03c52f9/variables/f7e078235d7b412987ac97848a2877cf/"
         },
         "query_environment": {
-            "filter": []
+            "filter": [
+
+            ]
         },
         "result": {
             "dimensions": [
@@ -120,31 +124,7 @@
                                         "name": "cat",
                                         "description": "a_cat"
                                     },
-                                    "id": "0003",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "missing": false,
-                                                "id": 1,
-                                                "name": "not selected"
-                                            },
-                                            {
-                                                "numeric_value": 2,
-                                                "missing": false,
-                                                "id": 2,
-                                                "name": "selected"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0003"
                                 },
                                 "missing": false
                             },
@@ -157,31 +137,7 @@
                                         "name": "dog",
                                         "description": "a_dog"
                                     },
-                                    "id": "0004",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "missing": false,
-                                                "id": 1,
-                                                "name": "not selected"
-                                            },
-                                            {
-                                                "numeric_value": 2,
-                                                "missing": false,
-                                                "id": 2,
-                                                "name": "selected"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0004"
                                 },
                                 "missing": false
                             },
@@ -194,31 +150,7 @@
                                         "name": "wombat",
                                         "description": "a_wombat"
                                     },
-                                    "id": "0005",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "missing": false,
-                                                "id": 1,
-                                                "name": "not selected"
-                                            },
-                                            {
-                                                "numeric_value": 2,
-                                                "missing": false,
-                                                "id": 2,
-                                                "name": "selected"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0005"
                                 },
                                 "missing": false
                             }
@@ -231,23 +163,27 @@
             "measures": {
                 "count": {
                     "data": [
-                        111.22744149293605,
-                        107.34364601126751,
-                        76.25879678116948,
-                        88.58114364617798,
-                        99.28142072261471,
-                        104.79753830833712,
-                        53.98181516229974,
-                        47.165333567531576,
-                        72.73406521190718
+                        111.227441492936,
+                        107.343646011268,
+                        76.2587967811695,
+                        88.581143646178,
+                        99.2814207226147,
+                        104.797538308337,
+                        53.9818151622997,
+                        47.1653335675316,
+                        72.7340652119072
                     ],
                     "n_missing": 11,
                     "metadata": {
-                        "references": {},
+                        "references": {
+
+                        },
                         "derived": true,
                         "type": {
                             "integer": false,
-                            "missing_rules": {},
+                            "missing_rules": {
+
+                            },
                             "missing_reasons": {
                                 "No Data": -1
                             },

@@ -6,176 +6,59 @@
             "measures": {
                 "count": {
                     "function": "cube_count",
-                    "args": []
+                    "args": [
+
+                    ]
                 }
             },
-            "dimensions": [{
-                "each": "/api/datasets/123/variables/00000f/"
-            }, {
-                "variable": "/api/datasets/123/variables/00000f/"
-            }, {
-                "each": "/api/datasets/123/variables/000010/"
-            }, {
-                "function": "as_selected",
-                "args": [{
-                    "variable": "/api/datasets/123/variables/000010/"
-                }]
-            }],
+            "dimensions": [
+                {
+                    "each": "/api/datasets/123/variables/00000f/"
+                },
+                {
+                    "variable": "/api/datasets/123/variables/00000f/"
+                },
+                {
+                    "each": "/api/datasets/123/variables/000010/"
+                },
+                {
+                    "function": "as_selected",
+                    "args": [
+                        {
+                            "variable": "/api/datasets/123/variables/000010/"
+                        }
+                    ]
+                }
+            ],
             "weight": "/api/datasets/123/variables/00000d/"
         },
         "query_environment": {
-            "filter": []
+            "filter": [
+
+            ]
         },
         "result": {
-            "dimensions": [{
-                "derived": true,
-                "references": {
-                    "subreferences": [{
-                        "alias": "a_cat",
-                        "name": "cat",
-                        "description": "a_cat"
-                    }, {
-                        "alias": "a_dog",
-                        "name": "dog",
-                        "description": "a_dog"
-                    }, {
-                        "alias": "a_wombat",
-                        "name": "wombat",
-                        "description": "a_wombat"
-                    }, {
-                        "uniform_basis": null,
-                        "description": null,
-                        "name": "tarantula",
-                        "format": null,
-                        "subreferences": null,
-                        "notes": null,
-                        "api_derivation": null,
-                        "dichotomous": false,
-                        "discarded": null,
-                        "alias": "tarantula",
-                        "view": null
-                    }],
-                    "view": {
-                        "show_counts": false,
-                        "transforms": {
-                            "insertions": [{
-                                "function": "subtotal",
-                                "args": [2],
-                                "anchor": 2,
-                                "name": "selected, again"
-                            }]
-                        },
-                        "include_missing": false,
-                        "column_width": null
-                    },
-                    "name": "pets_array",
-                    "alias": "pets_array"
-                },
-                "type": {
-                    "subtype": {
-                        "class": "variable"
-                    },
-                    "elements": [{
-                        "id": 1,
-                        "value": {
-                            "derived": false,
-                            "references": {
+            "dimensions": [
+                {
+                    "derived": true,
+                    "references": {
+                        "subreferences": [
+                            {
                                 "alias": "a_cat",
                                 "name": "cat",
                                 "description": "a_cat"
                             },
-                            "id": "0004",
-                            "type": {
-                                "ordinal": false,
-                                "class": "categorical",
-                                "categories": [{
-                                    "numeric_value": 1,
-                                    "missing": false,
-                                    "id": 1,
-                                    "name": "not selected"
-                                }, {
-                                    "numeric_value": 2,
-                                    "missing": false,
-                                    "id": 2,
-                                    "name": "selected"
-                                }, {
-                                    "numeric_value": null,
-                                    "missing": true,
-                                    "id": -1,
-                                    "name": "No Data"
-                                }]
-                            }
-                        },
-                        "missing": false
-                    }, {
-                        "id": 2,
-                        "value": {
-                            "derived": false,
-                            "references": {
+                            {
                                 "alias": "a_dog",
                                 "name": "dog",
                                 "description": "a_dog"
                             },
-                            "id": "0005",
-                            "type": {
-                                "ordinal": false,
-                                "class": "categorical",
-                                "categories": [{
-                                    "numeric_value": 1,
-                                    "missing": false,
-                                    "id": 1,
-                                    "name": "not selected"
-                                }, {
-                                    "numeric_value": 2,
-                                    "missing": false,
-                                    "id": 2,
-                                    "name": "selected"
-                                }, {
-                                    "numeric_value": null,
-                                    "missing": true,
-                                    "id": -1,
-                                    "name": "No Data"
-                                }]
-                            }
-                        },
-                        "missing": false
-                    }, {
-                        "id": 3,
-                        "value": {
-                            "derived": false,
-                            "references": {
+                            {
                                 "alias": "a_wombat",
                                 "name": "wombat",
                                 "description": "a_wombat"
                             },
-                            "id": "0006",
-                            "type": {
-                                "ordinal": false,
-                                "class": "categorical",
-                                "categories": [{
-                                    "numeric_value": 1,
-                                    "missing": false,
-                                    "id": 1,
-                                    "name": "not selected"
-                                }, {
-                                    "numeric_value": 2,
-                                    "missing": false,
-                                    "id": 2,
-                                    "name": "selected"
-                                }, {
-                                    "numeric_value": null,
-                                    "missing": true,
-                                    "id": -1,
-                                    "name": "No Data"
-                                }]
-                            }
-                        },
-                        "missing": false
-                    }, {
-                        "id": 4,
-                        "value": {
-                            "derived": false,
-                            "references": {
+                            {
                                 "uniform_basis": null,
                                 "description": null,
                                 "name": "tarantula",
@@ -187,280 +70,435 @@
                                 "discarded": null,
                                 "alias": "tarantula",
                                 "view": null
-                            },
-                            "id": "f624a951fedf4eeb86774ea84142c043",
-                            "type": {
-                                "ordinal": false,
-                                "class": "categorical",
-                                "categories": [{
-                                    "numeric_value": 1,
-                                    "missing": false,
-                                    "id": 1,
-                                    "name": "not selected"
-                                }, {
-                                    "numeric_value": 2,
-                                    "missing": false,
-                                    "id": 2,
-                                    "name": "selected"
-                                }, {
-                                    "numeric_value": null,
-                                    "missing": true,
-                                    "id": -1,
-                                    "name": "No Data"
-                                }]
                             }
+                        ],
+                        "view": {
+                            "show_counts": false,
+                            "transforms": {
+                                "insertions": [
+                                    {
+                                        "function": "subtotal",
+                                        "args": [
+                                            2
+                                        ],
+                                        "anchor": 2,
+                                        "name": "selected, again"
+                                    }
+                                ]
+                            },
+                            "include_missing": false,
+                            "column_width": null
                         },
-                        "missing": false
-                    }],
-                    "class": "enum"
-                }
-            }, {
-                "references": {
-                    "subreferences": [{
-                        "alias": "a_cat",
-                        "name": "cat",
-                        "description": "a_cat"
-                    }, {
-                        "alias": "a_dog",
-                        "name": "dog",
-                        "description": "a_dog"
-                    }, {
-                        "alias": "a_wombat",
-                        "name": "wombat",
-                        "description": "a_wombat"
-                    }, {
-                        "uniform_basis": null,
-                        "description": null,
-                        "format": null,
-                        "subreferences": null,
-                        "notes": null,
-                        "api_derivation": null,
-                        "dichotomous": false,
-                        "discarded": null,
-                        "alias": "tarantula",
-                        "view": null,
-                        "name": "tarantula"
-                    }],
-                    "alias": "pets_array",
-                    "name": "pets_array",
-                    "view": {
-                        "show_counts": false,
-                        "transforms": {
-                            "insertions": [{
-                                "function": "subtotal",
-                                "args": [2],
-                                "anchor": 2,
-                                "name": "selected, again"
-                            }]
+                        "name": "pets_array",
+                        "alias": "pets_array"
+                    },
+                    "type": {
+                        "subtype": {
+                            "class": "variable"
                         },
-                        "include_missing": false,
-                        "column_width": null
+                        "elements": [
+                            {
+                                "id": 1,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "a_cat",
+                                        "name": "cat",
+                                        "description": "a_cat"
+                                    },
+                                    "id": "0004"
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 2,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "a_dog",
+                                        "name": "dog",
+                                        "description": "a_dog"
+                                    },
+                                    "id": "0005"
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 3,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "a_wombat",
+                                        "name": "wombat",
+                                        "description": "a_wombat"
+                                    },
+                                    "id": "0006"
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 4,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "uniform_basis": null,
+                                        "description": null,
+                                        "name": "tarantula",
+                                        "format": null,
+                                        "subreferences": null,
+                                        "notes": null,
+                                        "api_derivation": null,
+                                        "dichotomous": false,
+                                        "discarded": null,
+                                        "alias": "tarantula",
+                                        "view": null
+                                    },
+                                    "id": "f624a951fedf4eeb86774ea84142c043"
+                                },
+                                "missing": false
+                            }
+                        ],
+                        "class": "enum"
                     }
                 },
-                "derived": false,
-                "type": {
-                    "ordinal": false,
-                    "subvariables": ["0004", "0005", "0006", "f624a951fedf4eeb86774ea84142c043"],
-                    "class": "categorical",
-                    "categories": [{
-                        "numeric_value": 1,
-                        "missing": false,
-                        "id": 1,
-                        "name": "not selected"
-                    }, {
-                        "numeric_value": 2,
-                        "missing": false,
-                        "id": 2,
-                        "name": "selected"
-                    }, {
-                        "numeric_value": null,
-                        "missing": true,
-                        "id": -1,
-                        "name": "No Data"
-                    }]
-                }
-            }, {
-                "derived": true,
-                "references": {
-                    "alias": "languages",
-                    "subreferences": [{
-                        "alias": "Python",
-                        "name": "Python",
-                        "description": "Python"
-                    }, {
-                        "alias": "R",
-                        "name": "R",
-                        "description": "R"
-                    }, {
-                        "alias": "JavaScript",
-                        "name": "JavaScript",
-                        "description": "JavaScript"
-                    }],
-                    "is_dichotomous": false,
-                    "description": "Languages",
-                    "name": "languages"
-                },
-                "type": {
-                    "subtype": {
-                        "class": "variable"
+                {
+                    "references": {
+                        "subreferences": [
+                            {
+                                "alias": "a_cat",
+                                "name": "cat",
+                                "description": "a_cat"
+                            },
+                            {
+                                "alias": "a_dog",
+                                "name": "dog",
+                                "description": "a_dog"
+                            },
+                            {
+                                "alias": "a_wombat",
+                                "name": "wombat",
+                                "description": "a_wombat"
+                            },
+                            {
+                                "uniform_basis": null,
+                                "description": null,
+                                "format": null,
+                                "subreferences": null,
+                                "notes": null,
+                                "api_derivation": null,
+                                "dichotomous": false,
+                                "discarded": null,
+                                "alias": "tarantula",
+                                "view": null,
+                                "name": "tarantula"
+                            }
+                        ],
+                        "alias": "pets_array",
+                        "name": "pets_array",
+                        "view": {
+                            "show_counts": false,
+                            "transforms": {
+                                "insertions": [
+                                    {
+                                        "function": "subtotal",
+                                        "args": [
+                                            2
+                                        ],
+                                        "anchor": 2,
+                                        "name": "selected, again"
+                                    }
+                                ]
+                            },
+                            "include_missing": false,
+                            "column_width": null
+                        }
                     },
-                    "elements": [{
-                        "id": 1,
-                        "value": {
-                            "derived": false,
-                            "references": {
+                    "derived": false,
+                    "type": {
+                        "ordinal": false,
+                        "subvariables": [
+                            "0004",
+                            "0005",
+                            "0006",
+                            "f624a951fedf4eeb86774ea84142c043"
+                        ],
+                        "class": "categorical",
+                        "categories": [
+                            {
+                                "numeric_value": 1,
+                                "missing": false,
+                                "id": 1,
+                                "name": "not selected"
+                            },
+                            {
+                                "numeric_value": 2,
+                                "missing": false,
+                                "id": 2,
+                                "name": "selected"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": true,
+                                "id": -1,
+                                "name": "No Data"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "derived": true,
+                    "references": {
+                        "alias": "languages",
+                        "subreferences": [
+                            {
                                 "alias": "Python",
                                 "name": "Python",
                                 "description": "Python"
                             },
-                            "id": "0007",
-                            "type": {
-                                "ordinal": false,
-                                "class": "categorical",
-                                "categories": [{
-                                    "numeric_value": 1,
-                                    "selected": true,
-                                    "id": 1,
-                                    "missing": false,
-                                    "name": "Selected"
-                                }, {
-                                    "numeric_value": 0,
-                                    "missing": false,
-                                    "id": 0,
-                                    "name": "Not Selected"
-                                }, {
-                                    "numeric_value": null,
-                                    "missing": true,
-                                    "id": -1,
-                                    "name": "No Data"
-                                }]
-                            }
-                        },
-                        "missing": false
-                    }, {
-                        "id": 2,
-                        "value": {
-                            "derived": false,
-                            "references": {
+                            {
                                 "alias": "R",
                                 "name": "R",
                                 "description": "R"
                             },
-                            "id": "0008",
-                            "type": {
-                                "ordinal": false,
-                                "class": "categorical",
-                                "categories": [{
-                                    "numeric_value": 1,
-                                    "selected": true,
-                                    "id": 1,
-                                    "missing": false,
-                                    "name": "Selected"
-                                }, {
-                                    "numeric_value": 0,
-                                    "missing": false,
-                                    "id": 0,
-                                    "name": "Not Selected"
-                                }, {
-                                    "numeric_value": null,
-                                    "missing": true,
-                                    "id": -1,
-                                    "name": "No Data"
-                                }]
-                            }
-                        },
-                        "missing": false
-                    }, {
-                        "id": 3,
-                        "value": {
-                            "derived": false,
-                            "references": {
+                            {
                                 "alias": "JavaScript",
                                 "name": "JavaScript",
                                 "description": "JavaScript"
-                            },
-                            "id": "0009",
-                            "type": {
-                                "ordinal": false,
-                                "class": "categorical",
-                                "categories": [{
-                                    "numeric_value": 1,
-                                    "selected": true,
-                                    "id": 1,
-                                    "missing": false,
-                                    "name": "Selected"
-                                }, {
-                                    "numeric_value": 0,
-                                    "missing": false,
-                                    "id": 0,
-                                    "name": "Not Selected"
-                                }, {
-                                    "numeric_value": null,
-                                    "missing": true,
-                                    "id": -1,
-                                    "name": "No Data"
-                                }]
                             }
+                        ],
+                        "is_dichotomous": false,
+                        "description": "Languages",
+                        "name": "languages"
+                    },
+                    "type": {
+                        "subtype": {
+                            "class": "variable"
                         },
-                        "missing": false
-                    }],
-                    "class": "enum"
-                }
-            }, {
-                "references": {
-                    "alias": "languages",
-                    "is_dichotomous": false,
-                    "description": "Languages",
-                    "name": "languages",
-                    "subreferences": [{
-                        "alias": "Python",
-                        "name": "Python",
-                        "description": "Python"
-                    }, {
-                        "alias": "R",
-                        "name": "R",
-                        "description": "R"
-                    }, {
-                        "alias": "JavaScript",
-                        "name": "JavaScript",
-                        "description": "JavaScript"
-                    }]
+                        "elements": [
+                            {
+                                "id": 1,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "Python",
+                                        "name": "Python",
+                                        "description": "Python"
+                                    },
+                                    "id": "0007"
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 2,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "R",
+                                        "name": "R",
+                                        "description": "R"
+                                    },
+                                    "id": "0008"
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 3,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "JavaScript",
+                                        "name": "JavaScript",
+                                        "description": "JavaScript"
+                                    },
+                                    "id": "0009"
+                                },
+                                "missing": false
+                            }
+                        ],
+                        "class": "enum"
+                    }
                 },
-                "derived": true,
-                "type": {
-                    "ordinal": false,
-                    "subvariables": ["0007", "0008", "0009"],
-                    "class": "categorical",
-                    "categories": [{
-                        "numeric_value": 1,
-                        "selected": true,
-                        "id": 1,
-                        "missing": false,
-                        "name": "Selected"
-                    }, {
-                        "numeric_value": 0,
-                        "missing": false,
-                        "id": 0,
-                        "name": "Not Selected"
-                    }, {
-                        "numeric_value": null,
-                        "missing": true,
-                        "id": -1,
-                        "name": "No Data"
-                    }]
+                {
+                    "references": {
+                        "alias": "languages",
+                        "is_dichotomous": false,
+                        "description": "Languages",
+                        "name": "languages",
+                        "subreferences": [
+                            {
+                                "alias": "Python",
+                                "name": "Python",
+                                "description": "Python"
+                            },
+                            {
+                                "alias": "R",
+                                "name": "R",
+                                "description": "R"
+                            },
+                            {
+                                "alias": "JavaScript",
+                                "name": "JavaScript",
+                                "description": "JavaScript"
+                            }
+                        ]
+                    },
+                    "derived": true,
+                    "type": {
+                        "ordinal": false,
+                        "subvariables": [
+                            "0007",
+                            "0008",
+                            "0009"
+                        ],
+                        "class": "categorical",
+                        "categories": [
+                            {
+                                "numeric_value": 1,
+                                "selected": true,
+                                "id": 1,
+                                "missing": false,
+                                "name": "Selected"
+                            },
+                            {
+                                "numeric_value": 0,
+                                "missing": false,
+                                "id": 0,
+                                "name": "Not Selected"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": true,
+                                "id": -1,
+                                "name": "No Data"
+                            }
+                        ]
+                    }
                 }
-            }],
+            ],
             "missing": 11,
             "measures": {
                 "count": {
-                    "data": [48.30605520841679, 66.9213862845193, 0.0, 4.0, 111.22744149293605, 0.0, 67.20096057862209, 48.02648091431399, 0.0, 45.56222406264413, 43.01891958353383, 0.0, 88.58114364617798, 0.0, 0.0, 46.05868102676006, 42.522462619417894, 0.0, 37.73339333964035, 16.248421822659385, 0.0, 33.11950456297243, 20.862310599327305, 0.0, 22.085620392222374, 31.89619477007737, 0.0, 0.0, 107.34364601126751, 0.0, 44.59908661099255, 62.74455940027492, 0.0, 65.17721810696865, 42.16642790429883, 0.0, 99.28142072261471, 4.0, 0.0, 46.27629201487884, 57.005128707735885, 0.0, 47.398463619902365, 55.882957102712346, 0.0, 32.320251888086545, 14.845081679445034, 0.0, 34.825269583279, 12.340063984252577, 0.0, 22.769580270733503, 24.395753296798073, 0.0, 38.467089744085996, 37.79170703708349, 0.0, 34.91762662660323, 41.34117015456626, 0.0, 0.0, 76.25879678116948, 0.0, 40.219131492305436, 68.57840681603169, 0.0, 43.741061959020406, 65.05647634931671, 0.0, 104.79753830833712, 4.0, 0.0, 52.91545137430984, 19.81861383759734, 0.0, 47.04195962352676, 25.69210558838043, 0.0, 30.5477236892674, 42.186341522639765, 0.0, 0.0, 4.0, 0.0, 4.0, 0.0, 0.0, 0.0, 4.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 131.60167261070126, 122.18872769071254, 0.0, 121.70064820915043, 132.08975209226338, 0.0, 135.3452619976045, 118.44513830380927, 0.0],
+                    "data": [
+                        48.3060552084168,
+                        66.9213862845193,
+                        0,
+                        4,
+                        111.227441492936,
+                        0,
+                        67.2009605786221,
+                        48.026480914314,
+                        0,
+                        45.5622240626441,
+                        43.0189195835338,
+                        0,
+                        88.581143646178,
+                        0,
+                        0,
+                        46.0586810267601,
+                        42.5224626194179,
+                        0,
+                        37.7333933396404,
+                        16.2484218226594,
+                        0,
+                        33.1195045629724,
+                        20.8623105993273,
+                        0,
+                        22.0856203922224,
+                        31.8961947700774,
+                        0,
+                        0,
+                        107.343646011268,
+                        0,
+                        44.5990866109926,
+                        62.7445594002749,
+                        0,
+                        65.1772181069687,
+                        42.1664279042988,
+                        0,
+                        99.2814207226147,
+                        4,
+                        0,
+                        46.2762920148788,
+                        57.0051287077359,
+                        0,
+                        47.3984636199024,
+                        55.8829571027123,
+                        0,
+                        32.3202518880865,
+                        14.845081679445,
+                        0,
+                        34.825269583279,
+                        12.3400639842526,
+                        0,
+                        22.7695802707335,
+                        24.3957532967981,
+                        0,
+                        38.467089744086,
+                        37.7917070370835,
+                        0,
+                        34.9176266266032,
+                        41.3411701545663,
+                        0,
+                        0,
+                        76.2587967811695,
+                        0,
+                        40.2191314923054,
+                        68.5784068160317,
+                        0,
+                        43.7410619590204,
+                        65.0564763493167,
+                        0,
+                        104.797538308337,
+                        4,
+                        0,
+                        52.9154513743098,
+                        19.8186138375973,
+                        0,
+                        47.0419596235268,
+                        25.6921055883804,
+                        0,
+                        30.5477236892674,
+                        42.1863415226398,
+                        0,
+                        0,
+                        4,
+                        0,
+                        4,
+                        0,
+                        0,
+                        0,
+                        4,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        131.601672610701,
+                        122.188727690713,
+                        0,
+                        121.70064820915,
+                        132.089752092263,
+                        0,
+                        135.345261997604,
+                        118.445138303809,
+                        0
+                    ],
                     "n_missing": 11,
                     "metadata": {
-                        "references": {},
+                        "references": {
+
+                        },
                         "derived": true,
                         "type": {
                             "integer": false,
-                            "missing_rules": {},
+                            "missing_rules": {
+
+                            },
                             "missing_reasons": {
                                 "No Data": -1
                             },
@@ -470,7 +508,116 @@
                 }
             },
             "element": "crunch:cube",
-            "counts": [21, 26, 0, 2, 45, 0, 24, 23, 0, 18, 16, 0, 34, 0, 0, 18, 16, 0, 12, 9, 0, 13, 8, 0, 9, 12, 0, 0, 40, 0, 18, 22, 0, 21, 19, 0, 40, 2, 0, 19, 23, 0, 21, 21, 0, 11, 9, 0, 12, 8, 0, 9, 11, 0, 16, 16, 0, 13, 19, 0, 0, 32, 0, 18, 22, 0, 18, 22, 0, 38, 2, 0, 17, 13, 0, 18, 12, 0, 13, 17, 0, 0, 2, 0, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 51, 49, 0, 47, 53, 0, 51, 49, 0],
+            "counts": [
+                21,
+                26,
+                0,
+                2,
+                45,
+                0,
+                24,
+                23,
+                0,
+                18,
+                16,
+                0,
+                34,
+                0,
+                0,
+                18,
+                16,
+                0,
+                12,
+                9,
+                0,
+                13,
+                8,
+                0,
+                9,
+                12,
+                0,
+                0,
+                40,
+                0,
+                18,
+                22,
+                0,
+                21,
+                19,
+                0,
+                40,
+                2,
+                0,
+                19,
+                23,
+                0,
+                21,
+                21,
+                0,
+                11,
+                9,
+                0,
+                12,
+                8,
+                0,
+                9,
+                11,
+                0,
+                16,
+                16,
+                0,
+                13,
+                19,
+                0,
+                0,
+                32,
+                0,
+                18,
+                22,
+                0,
+                18,
+                22,
+                0,
+                38,
+                2,
+                0,
+                17,
+                13,
+                0,
+                18,
+                12,
+                0,
+                13,
+                17,
+                0,
+                0,
+                2,
+                0,
+                2,
+                0,
+                0,
+                0,
+                2,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                51,
+                49,
+                0,
+                47,
+                53,
+                0,
+                51,
+                49,
+                0
+            ],
             "n": 102
         }
     }

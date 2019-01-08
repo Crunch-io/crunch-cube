@@ -1146,7 +1146,7 @@ class TestCrunchCube(TestCase):
 
     def test_count_weighted(self):
         cube = CrunchCube(CR.ADMIT_X_GENDER_WEIGHTED)
-        expected = 4451.955438803242
+        expected = 4451.955438803248
         actual = cube.count(weighted=True)
         self.assertEqual(actual, expected)
 

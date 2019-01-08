@@ -6,7 +6,9 @@
             "measures": {
                 "count": {
                     "function": "cube_count",
-                    "args": []
+                    "args": [
+
+                    ]
                 }
             },
             "dimensions": [
@@ -31,7 +33,9 @@
             "weight": null
         },
         "query_environment": {
-            "filter": []
+            "filter": [
+
+            ]
         },
         "result": {
             "dimensions": [
@@ -74,32 +78,7 @@
                                         "name": "Response #1",
                                         "description": "bool1"
                                     },
-                                    "id": "0004",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "missing": false,
-                                                "id": 0,
-                                                "name": "Not Selected"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0004"
                                 },
                                 "missing": false
                             },
@@ -112,32 +91,7 @@
                                         "name": "Response #2",
                                         "description": "bool2"
                                     },
-                                    "id": "0005",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "missing": false,
-                                                "id": 0,
-                                                "name": "Not Selected"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0005"
                                 },
                                 "missing": false
                             },
@@ -150,32 +104,7 @@
                                         "name": "Response #3",
                                         "description": "bool3"
                                     },
-                                    "id": "0006",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "missing": false,
-                                                "id": 0,
-                                                "name": "Not Selected"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0006"
                                 },
                                 "missing": false
                             }
@@ -316,43 +245,7 @@
                                         "name": "ca_subvar_1",
                                         "description": null
                                     },
-                                    "id": "0007",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": null,
-                                                "id": 1,
-                                                "name": "a",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "id": 2,
-                                                "name": "b",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "id": 3,
-                                                "name": "c",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "id": 4,
-                                                "name": "d",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "id": -1,
-                                                "name": "No Data",
-                                                "missing": true
-                                            }
-                                        ]
-                                    }
+                                    "id": "0007"
                                 },
                                 "missing": false
                             },
@@ -365,43 +258,7 @@
                                         "name": "ca_subvar_2",
                                         "description": null
                                     },
-                                    "id": "0008",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": null,
-                                                "id": 1,
-                                                "name": "a",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "id": 2,
-                                                "name": "b",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "id": 3,
-                                                "name": "c",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "id": 4,
-                                                "name": "d",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "id": -1,
-                                                "name": "No Data",
-                                                "missing": true
-                                            }
-                                        ]
-                                    }
+                                    "id": "0008"
                                 },
                                 "missing": false
                             },
@@ -414,43 +271,7 @@
                                         "name": "ca_subvar_3",
                                         "description": null
                                     },
-                                    "id": "0009",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": null,
-                                                "id": 1,
-                                                "name": "a",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "id": 2,
-                                                "name": "b",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "id": 3,
-                                                "name": "c",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "id": 4,
-                                                "name": "d",
-                                                "missing": false
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "id": -1,
-                                                "name": "No Data",
-                                                "missing": true
-                                            }
-                                        ]
-                                    }
+                                    "id": "0009"
                                 },
                                 "missing": false
                             }
@@ -706,11 +527,15 @@
                     ],
                     "n_missing": 0,
                     "metadata": {
-                        "references": {},
+                        "references": {
+
+                        },
                         "derived": true,
                         "type": {
                             "integer": true,
-                            "missing_rules": {},
+                            "missing_rules": {
+
+                            },
                             "missing_reasons": {
                                 "No Data": -1
                             },

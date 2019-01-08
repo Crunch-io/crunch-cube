@@ -4,7 +4,9 @@
             "measures": {
                 "count": {
                     "function": "cube_count",
-                    "args": []
+                    "args": [
+
+                    ]
                 }
             },
             "dimensions": [
@@ -216,32 +218,7 @@
                                         "alias": "aided_1",
                                         "name": "Google Home"
                                     },
-                                    "id": "0001",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "missing": false,
-                                                "id": 0,
-                                                "name": "Not Selected"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0001"
                                 },
                                 "missing": false
                             },
@@ -253,32 +230,7 @@
                                         "alias": "aided_17",
                                         "name": "Google Home Mini"
                                     },
-                                    "id": "0863",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "missing": false,
-                                                "id": 0,
-                                                "name": "Not Selected"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0863"
                                 },
                                 "missing": false
                             },
@@ -290,32 +242,7 @@
                                         "alias": "aided_2",
                                         "name": "Amazon Echo"
                                     },
-                                    "id": "0002",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "missing": false,
-                                                "id": 0,
-                                                "name": "Not Selected"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0002"
                                 },
                                 "missing": false
                             },
@@ -327,32 +254,7 @@
                                         "alias": "aided_18",
                                         "name": "Google Home Max"
                                     },
-                                    "id": "0877",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "missing": false,
-                                                "id": 0,
-                                                "name": "Not Selected"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0877"
                                 },
                                 "missing": false
                             },
@@ -364,32 +266,7 @@
                                         "alias": "aided_13",
                                         "name": "Amazon Echo Dot"
                                     },
-                                    "id": "0012",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "missing": false,
-                                                "id": 0,
-                                                "name": "Not Selected"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0012"
                                 },
                                 "missing": false
                             },
@@ -401,32 +278,7 @@
                                         "alias": "aided_12",
                                         "name": "Alexa"
                                     },
-                                    "id": "0011",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "missing": false,
-                                                "id": 0,
-                                                "name": "Not Selected"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0011"
                                 },
                                 "missing": false
                             },
@@ -438,32 +290,7 @@
                                         "alias": "aided_16",
                                         "name": "Apple HomePod"
                                     },
-                                    "id": "0819",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "missing": false,
-                                                "id": 0,
-                                                "name": "Not Selected"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0819"
                                 },
                                 "missing": false
                             },
@@ -475,32 +302,7 @@
                                         "alias": "aided_5",
                                         "name": "Siri"
                                     },
-                                    "id": "0005",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "missing": false,
-                                                "id": 0,
-                                                "name": "Not Selected"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0005"
                                 },
                                 "missing": false
                             },
@@ -512,32 +314,7 @@
                                         "alias": "aided_8",
                                         "name": "Cortana"
                                     },
-                                    "id": "0008",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "missing": false,
-                                                "id": 0,
-                                                "name": "Not Selected"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0008"
                                 },
                                 "missing": false
                             },
@@ -549,32 +326,7 @@
                                         "alias": "aided_15",
                                         "name": "Telstra Smart Home"
                                     },
-                                    "id": "0692",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "missing": false,
-                                                "id": 0,
-                                                "name": "Not Selected"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0692"
                                 },
                                 "missing": false
                             },
@@ -586,32 +338,7 @@
                                         "alias": "aided_11",
                                         "name": "OK Google"
                                     },
-                                    "id": "0010",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "missing": false,
-                                                "id": 0,
-                                                "name": "Not Selected"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0010"
                                 },
                                 "missing": false
                             },
@@ -623,32 +350,7 @@
                                         "alias": "aided_10",
                                         "name": "Google Assistant"
                                     },
-                                    "id": "0459",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "missing": false,
-                                                "id": 0,
-                                                "name": "Not Selected"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0459"
                                 },
                                 "missing": false
                             },
@@ -660,32 +362,7 @@
                                         "alias": "aided_14",
                                         "name": "Bixby"
                                     },
-                                    "id": "0691",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "missing": false,
-                                                "id": 0,
-                                                "name": "Not Selected"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0691"
                                 },
                                 "missing": false
                             },
@@ -697,32 +374,7 @@
                                         "alias": "aided_3",
                                         "name": "Cubic"
                                     },
-                                    "id": "0003",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "missing": false,
-                                                "id": 0,
-                                                "name": "Not Selected"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0003"
                                 },
                                 "missing": false
                             },
@@ -734,32 +386,7 @@
                                         "alias": "aided_4",
                                         "name": "Jibo"
                                     },
-                                    "id": "0004",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "missing": false,
-                                                "id": 0,
-                                                "name": "Not Selected"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0004"
                                 },
                                 "missing": false
                             },
@@ -771,32 +398,7 @@
                                         "alias": "aided_6",
                                         "name": "Google Now"
                                     },
-                                    "id": "0006",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "missing": false,
-                                                "id": 0,
-                                                "name": "Not Selected"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0006"
                                 },
                                 "missing": false
                             },
@@ -808,32 +410,7 @@
                                         "alias": "aided_7",
                                         "name": "Hound"
                                     },
-                                    "id": "0007",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "missing": false,
-                                                "id": 0,
-                                                "name": "Not Selected"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0007"
                                 },
                                 "missing": false
                             },
@@ -845,32 +422,7 @@
                                         "alias": "aided_19",
                                         "name": "Clova (LINE)"
                                     },
-                                    "id": "0928",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "missing": false,
-                                                "id": 0,
-                                                "name": "Not Selected"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0928"
                                 },
                                 "missing": false
                             },
@@ -882,32 +434,7 @@
                                         "alias": "aided_20",
                                         "name": "LINE WAVE"
                                     },
-                                    "id": "0929",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "missing": false,
-                                                "id": 0,
-                                                "name": "Not Selected"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0929"
                                 },
                                 "missing": false
                             },
@@ -919,32 +446,7 @@
                                         "alias": "aided_99",
                                         "name": "None of the above"
                                     },
-                                    "id": "0009",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "missing": false,
-                                                "id": 0,
-                                                "name": "Not Selected"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0009"
                                 },
                                 "missing": false
                             },
@@ -956,32 +458,7 @@
                                         "alias": "aided_21",
                                         "name": "Amazon Echo Show"
                                     },
-                                    "id": "1193",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "missing": false,
-                                                "id": 0,
-                                                "name": "Not Selected"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "1193"
                                 },
                                 "missing": false
                             },
@@ -993,32 +470,7 @@
                                         "alias": "aided_22",
                                         "name": "Amazon Echo Spot"
                                     },
-                                    "id": "0013",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "missing": false,
-                                                "id": 0,
-                                                "name": "Not Selected"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0013"
                                 },
                                 "missing": false
                             },
@@ -1030,32 +482,7 @@
                                         "alias": "aided_23",
                                         "name": "Amazon Echo Plus"
                                     },
-                                    "id": "0014",
-                                    "type": {
-                                        "ordinal": false,
-                                        "class": "categorical",
-                                        "categories": [
-                                            {
-                                                "numeric_value": 1,
-                                                "selected": true,
-                                                "id": 1,
-                                                "missing": false,
-                                                "name": "Selected"
-                                            },
-                                            {
-                                                "numeric_value": 0,
-                                                "missing": false,
-                                                "id": 0,
-                                                "name": "Not Selected"
-                                            },
-                                            {
-                                                "numeric_value": null,
-                                                "missing": true,
-                                                "id": -1,
-                                                "name": "No Data"
-                                            }
-                                        ]
-                                    }
+                                    "id": "0014"
                                 },
                                 "missing": false
                             }
@@ -1232,7 +659,9 @@
                             "missing_reasons": {
                                 "No Data": -1
                             },
-                            "missing_rules": {}
+                            "missing_rules": {
+
+                            }
                         },
                         "elements": [
                             {
@@ -1249,83 +678,87 @@
             "measures": {
                 "count": {
                     "data": [
-                        308.32755711522964,
+                        308.32755711523,
                         341.67244288477,
                         0,
-                        187.06825268727977,
-                        462.9317473127201,
+                        187.06825268728,
+                        462.93174731272,
                         0,
-                        424.82328070644144,
-                        225.17671929355808,
+                        424.823280706441,
+                        225.176719293558,
                         0,
-                        72.68885078967783,
-                        577.3111492103212,
+                        72.6888507896778,
+                        577.311149210321,
                         0,
-                        273.15993803147586,
+                        273.159938031476,
                         376.840061968524,
                         0,
-                        467.62527785109177,
-                        182.37472214890818,
+                        467.625277851092,
+                        182.374722148908,
                         0,
-                        62.18338600156008,
-                        587.8166139984388,
+                        62.1833860015601,
+                        587.816613998439,
                         0,
-                        442.80441810866375,
-                        207.19558189133613,
+                        442.804418108664,
+                        207.195581891336,
                         0,
-                        281.5782591869191,
-                        368.4217408130805,
+                        281.578259186919,
+                        368.42174081308,
                         0,
                         0,
-                        649.9999999999991,
+                        649.999999999999,
                         0,
-                        237.3506584747095,
-                        412.6493415252903,
+                        237.350658474709,
+                        412.64934152529,
                         0,
-                        233.1969245514129,
+                        233.196924551413,
                         416.803075448587,
                         0,
                         0,
-                        649.9999999999991,
+                        649.999999999999,
                         0,
                         0,
-                        649.9999999999991,
+                        649.999999999999,
                         0,
                         0,
-                        649.9999999999991,
+                        649.999999999999,
                         0,
                         0,
-                        649.9999999999991,
+                        649.999999999999,
                         0,
                         0,
-                        649.9999999999991,
+                        649.999999999999,
                         0,
                         0,
-                        649.9999999999991,
+                        649.999999999999,
                         0,
                         0,
-                        649.9999999999991,
+                        649.999999999999,
                         0,
-                        38.05075633241613,
-                        611.9492436675828,
+                        38.0507563324161,
+                        611.949243667583,
                         0,
-                        90.93234492830953,
+                        90.9323449283095,
                         559.06765507169,
                         0,
-                        123.2274726602146,
-                        526.7725273397851,
+                        123.227472660215,
+                        526.772527339785,
                         0,
-                        142.42909712948875,
-                        507.5709028705112,
+                        142.429097129489,
+                        507.570902870511,
                         0
                     ],
                     "n_missing": 0,
                     "metadata": {
-                        "references": {},
+                        "references": {
+
+                        },
                         "derived": true,
                         "type": {
                             "integer": false,
-                            "missing_rules": {},
+                            "missing_rules": {
+
+                            },
                             "missing_reasons": {
                                 "No Data": -1
                             },
