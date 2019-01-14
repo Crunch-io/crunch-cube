@@ -149,10 +149,15 @@ class TestStandardizedResiduals(TestCase):
         actual = cube.pairwise_chisq(axis=0)
         np.testing.assert_almost_equal(actual, expected)
 
-    @pytest.mark.xfail
     def test_same_col_pvals(self):
         """P-values for columns that are all the same."""
         cube = CrunchCube(CR.SAME_COUNTS_3x4)
         expected = np.ones([4, 4])
         actual = cube.pairwise_pvals(axis=0)
         np.testing.assert_equal(actual, expected)
+
+    def test_hirotsu_pvals(self):
+        cube = CrunchCube(CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION)
+        actual = cube.pairwise_pvals(axis=0)
+        expected = np.ones([10, 10])
+        np.testing.assert_almost_equal(actual, expected)

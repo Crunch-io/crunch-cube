@@ -360,7 +360,7 @@ class CubeSlice(object):
     def pairwise_chisq(self, axis=0, weighted=True):
         """Return square ndarray of pairwise Chi-squared statistics along axis.
 
-        Zscore is a measure of statistical signifficance of observed vs.
+        Zscore is a measure of statistical significance of observed vs.
         expected counts. It's only applicable to a 2D contingency tables.
 
         :param weighted: Use weighted counts for zscores
@@ -500,11 +500,7 @@ class CubeSlice(object):
                         np.square(proportions[:, i] - proportions[:, j]) / wts
                     ) / (1 / margin[i] + 1 / margin[j])
 
-            print(chisq.tolist())
             return chisq
-
-            # sum( (props[,i] - props[,j])^2 / weights ) /
-            #  ( 1 / margins[i] + 1 / margins[j] )
 
     def _update_args(self, kwargs):
         if self._cube.ndim < 3:

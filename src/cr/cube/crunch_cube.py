@@ -17,6 +17,7 @@ from cr.cube.cube_slice import CubeSlice
 from cr.cube.dimension import AllDimensions
 from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.measures.index import Index
+from cr.cube.measures.pairwise_pvalues import PairwisePvalues
 from cr.cube.measures.scale_means import ScaleMeans
 from cr.cube.util import lazyproperty
 
@@ -728,6 +729,20 @@ class CrunchCube(object):
         """
         res = [s.pairwise_chisq(axis=0) for s in self.slices]
         return res[0]
+
+    def pairwise_pvals(self, axis=0):
+        """Return square ndarray of pairwise Chi-square along axis.
+
+        Square, symmetric matrix along *axis* of pairwise p-values for the
+        null hypothesis that col[i] = col[j] for each pair of columns.
+
+        :param axis: axis along which to perform comparison. Only columns (0)
+        implement currently.
+        :returns pvals: square, symmetric matrix of column-comparison p-values.
+        """
+        statistics = [s.pairwise_chisq(axis=0) for s in self.slices]
+        shapes = [s.get_shape() for s in self.slices]
+        return PairwisePvalues(statistics[0], shapes[0], axis=axis).values
 
     def _adjust_axis(self, axis):
         """Return raw axis/axes corresponding to apparent axis/axes.
