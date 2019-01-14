@@ -43,20 +43,18 @@ def _wishart_pfaffian(x, n_min, n_max):
     size = n_min + (n_min % 2)
     alpha = 0.5 * (n_max - n_min - 1)
     A = np.zeros([size, size])
-    alpha_ind = np.arange(n_min, dtype=float)
+    alpha_ind = np.arange(n_min, dtype=np.float)
     alpha_vec = alpha_ind + alpha + 1
-    gammainc_a = gammainc(alpha_vec, x / 2)
-
+    gammainc_a = gammainc(alpha_vec, 0.5 * x)
     if n_min != size:
         alpha_ind = alpha_ind.astype(np.int)
         other_ind = np.full(n_min, size - 1, dtype=np.int)
         alpha_last = (n_max + n_min + 1) / 2
         A[other_ind, alpha_ind] = (
-            np.power(2, -alpha_last) * gammainc_a / gamma(alpha_last)
+            np.float_power(2, -alpha_last) * gammainc_a / gamma(alpha_last)
         )
         # TODO check that this is not transposed
         A[alpha_ind, other_ind] = -A[other_ind, alpha_ind]
-        # print(A)
     """
 
     for (int i = 0; i < n_min; i++) {
@@ -71,11 +69,10 @@ def _wishart_pfaffian(x, n_min, n_max):
     g = gamma(alpha_vec)
     q_ind = np.arange(2 * n_min - 2)
     q = (
-        np.power(0.5, 2 * alpha + q_ind + 2)
+        np.float_power(0.5, 2 * alpha + q_ind + 2)
         * gamma(2 * alpha + q_ind + 2)
         * gammainc(2 * alpha + q_ind + 2, x)
     )
-
     """
 
 
@@ -94,10 +91,9 @@ def _wishart_pfaffian(x, n_min, n_max):
     for i in range(n_min):
         b = 0.5 * p[i] * p[i]
         for j in range(i, n_min - 1):
-            b -= q[i + j] / g[i] * g[j + 1]
+            b -= q[i + j] / (g[i] * g[j + 1])
             A[j + 1, i] = p[i] * p[j + 1] - 2 * b
             A[i, j + 1] = -A[j + 1, i]
-
     return np.sqrt(det(A))
 
 
@@ -114,21 +110,21 @@ def _normalizing_const(n_min, n_max):
     return K1*K2;"""
     size = n_min + (n_min % 2)
     alpha = 0.5 * (n_max - n_min - 1)
-    K1 = (
-        np.power(pi, 0.5 * n_min * n_min)
-        / np.power(2, 0.5 * n_min * n_max)
+    K1 = np.float_power(pi, 0.5 * n_min * n_min)
+    K1 /= (
+        np.float_power(2, 0.5 * n_min * n_max)
         * _mgamma(0.5 * n_max, n_min)
         * _mgamma(0.5 * n_min, n_min)
     )
-    K2 = np.power(2, alpha * size + 0.5 * size * (size + 1))
+
+    K2 = np.float_power(2, alpha * size + 0.5 * size * (size + 1))
     for i in range(size):
         K2 *= gamma(alpha + i + 1)
-    print K1*K2
     return K1 * K2
 
 
 def _mgamma(x, m):
-    res = pow(pi, 0.25 * m * (m - 1))
+    res = np.float_power(pi, 0.25 * m * (m - 1))
     for i in range(m):
         res *= gamma(x - 0.5 * i)
     return res

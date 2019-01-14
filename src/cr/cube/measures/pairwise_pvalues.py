@@ -15,9 +15,9 @@ class PairwisePvalues(object):
             raise NotImplementedError("Pairwise p-values only implemented for colums")
         self.axis = axis
         self._chisq = chisq
-        self.n_max = min(shape) - 1
-        self.n_min = max(shape) - 1
+        self.n_max = max(shape) - 1
+        self.n_min = min(shape) - 1
 
     @lazyproperty
     def values(self):
-        return 1.0 - wishartCDF(self._chisq, self.n_max, self.n_min)
+        return 1.0 - wishartCDF(self._chisq, self.n_min, self.n_max)
