@@ -16,6 +16,11 @@ from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.measures.scale_means import ScaleMeans
 from cr.cube.util import compress_pruned, lazyproperty, memoize
 
+try:
+    xrange
+except NameError:
+    xrange = range
+
 
 class CubeSlice(object):
     """Two-dimensional projection of a cube.

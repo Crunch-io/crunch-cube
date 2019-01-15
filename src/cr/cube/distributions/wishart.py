@@ -17,6 +17,11 @@ from scipy.special import gamma, gammainc
 from scipy.linalg import det
 from scipy.constants import pi
 
+try:
+    xrange
+except NameError:
+    xrange = range
+
 
 def wishartCDF(X, n_min, n_max):
     w_p = np.zeros(X.shape)
@@ -88,9 +93,9 @@ def _wishart_pfaffian(x, n_min, n_max):
     """
 
     # Lets do the inefficient iteration first and figure out index tricks later
-    for i in range(n_min):
+    for i in xrange(n_min):
         b = 0.5 * p[i] * p[i]
-        for j in range(i, n_min - 1):
+        for j in xrange(i, n_min - 1):
             b -= q[i + j] / (g[i] * g[j + 1])
             A[j + 1, i] = p[i] * p[j + 1] - 2 * b
             A[i, j + 1] = -A[j + 1, i]
@@ -118,13 +123,13 @@ def _normalizing_const(n_min, n_max):
     )
 
     K2 = np.float_power(2, alpha * size + 0.5 * size * (size + 1))
-    for i in range(size):
+    for i in xrange(size):
         K2 *= gamma(alpha + i + 1)
     return K1 * K2
 
 
 def _mgamma(x, m):
     res = np.float_power(pi, 0.25 * m * (m - 1))
-    for i in range(m):
+    for i in xrange(m):
         res *= gamma(x - 0.5 * i)
     return res
