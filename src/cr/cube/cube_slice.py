@@ -492,6 +492,8 @@ class CubeSlice(object):
         Returns a square, symmetric matrix of test statistics for the null
         hypothesis that each vector along *axis* is equal to each other.
         """
+        if axis != 0:
+            raise NotImplementedError("Pairwise comparison only implemented for colums")
         if axis == 0:
             margin = self.margin(0)
             offmargin = self.margin(1)

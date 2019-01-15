@@ -33,18 +33,8 @@ def wishartCDF(X, n_min, n_max):
 def _wishart_pfaffian(x, n_min, n_max):
     """Value providing the CDF of the largest eigenvalue of a Wishart(n, p)
     evaluated at x.
-
-    if (n_min != n_mat) {
-        // Fill in extra column
-        VectorXmp alpha_vec(n_min);
-        T alpha_last = 0.5*(n_max + n_min + 1);
-        for (int i = 0; i < n_min; i++) {
-            alpha_vec(i) = alpha + i + 1;
-            A(i, n_min) = pow(2, -alpha_last)*boost::math::gamma_p(alpha_vec(i), 0.5*xx)/boost::math::tgamma(alpha_last);
-            A(n_min, i) = - A(i, n_min);
-        }
-    }
     """
+
     size = n_min + (n_min % 2)
     alpha = 0.5 * (n_max - n_min - 1)
     A = np.zeros([size, size])
@@ -58,41 +48,15 @@ def _wishart_pfaffian(x, n_min, n_max):
         A[other_ind, alpha_ind] = (
             np.float_power(2, -alpha_last) * gammainc_a / gamma(alpha_last)
         )
-        # TODO check that this is not transposed
         A[alpha_ind, other_ind] = -A[other_ind, alpha_ind]
-    """
 
-    for (int i = 0; i < n_min; i++) {
-        p(i) = boost::math::gamma_p(alpha + i + 1, 0.5*xx);
-        g(i) = boost::math::tgamma(alpha + i + 1);
-    }
-    for (int i = 0; i < (2*n_min - 2); i++) {
-        q(i) = pow(0.5, 2*alpha + i + 2) * boost::math::tgamma(2*alpha+i+2)*boost::math::gamma_p(2*alpha + i + 2, xx);
-    }
-    """
     p = gammainc_a
     g = gamma(alpha_vec)
     q_ind = np.arange(2 * n_min - 2)
-    q = (
-        np.float_power(0.5, 2 * alpha + q_ind + 2)
-        * gamma(2 * alpha + q_ind + 2)
-        * gammainc(2 * alpha + q_ind + 2, x)
-    )
-    """
+    q_vec = 2 * alpha + q_ind + 2
+    q = np.float_power(0.5, q_vec) * gamma(q_vec) * gammainc(q_vec, x)
 
-
-    for (int i = 0; i < n_min; i++) {
-        b = 0.5*p(i)*p(i);
-        for(int j = i; j < (n_min - 1); j++) {
-            b -= q(i+j)/(g(i)*g(j+1));
-            A(i, j+1) = p(i)*p(j+1) - 2*b;
-            A(j+1, i) = -A(i, j+1);
-        }
-        Rcpp::checkUserInterrupt();
-    }
-    """
-
-    # Lets do the inefficient iteration first and figure out index tricks later
+    # TODO consider index tricks instead of iteration here
     for i in xrange(n_min):
         b = 0.5 * p[i] * p[i]
         for j in xrange(i, n_min - 1):
@@ -103,16 +67,6 @@ def _wishart_pfaffian(x, n_min, n_max):
 
 
 def _normalizing_const(n_min, n_max):
-    """int n_mat = n_min + (n_min % 2);
-    double alpha = 0.5*(n_max - n_min - 1);
-    // Compute constant
-    double K1 = pow(M_PI, 0.5*n_min*n_min);
-    K1 /= pow(2, 0.5*n_min*n_max)*mgamma_C(0.5*n_max, n_min, false)*mgamma_C(0.5*n_min, n_min, false);
-    double K2 = pow(2, alpha*n_mat+0.5*n_mat*(n_mat+1));
-    for (int k = 0; k < n_mat; k++) {
-        K2 *= boost::math::tgamma(alpha + k + 1);
-    }
-    return K1*K2;"""
     size = n_min + (n_min % 2)
     alpha = 0.5 * (n_max - n_min - 1)
     K1 = np.float_power(pi, 0.5 * n_min * n_min)
