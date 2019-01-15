@@ -12,10 +12,10 @@ class _DimensionType(object):
         self._name = name
 
     def __repr__(self):
-        return '<DIMENSION_TYPE.%s>' % self._name
+        return "<DIMENSION_TYPE.%s>" % self._name
 
     def __str__(self):
-        return 'DIMENSION_TYPE.%s' % self._name
+        return "DIMENSION_TYPE.%s" % self._name
 
     @lazyproperty
     def name(self):
@@ -27,15 +27,15 @@ class DIMENSION_TYPE(object):
     """Enumerated values representing the various types of dimension."""
 
     # ---member definitions---
-    BINNED_NUMERIC = _DimensionType('BINNED_NUMERIC')
-    CAT = _DimensionType('CAT')
-    CA_CAT = _DimensionType('CA_CAT')
-    CA_SUBVAR = _DimensionType('CA_SUBVAR')
-    DATETIME = _DimensionType('DATETIME')
-    LOGICAL = _DimensionType('LOGICAL')
-    MR_CAT = _DimensionType('MR_CAT')
-    MR_SUBVAR = _DimensionType('MR_SUBVAR')
-    TEXT = _DimensionType('TEXT')
+    BINNED_NUMERIC = _DimensionType("BINNED_NUMERIC")
+    CAT = _DimensionType("CAT")
+    CA_CAT = _DimensionType("CA_CAT")
+    CA_SUBVAR = _DimensionType("CA_SUBVAR")
+    DATETIME = _DimensionType("DATETIME")
+    LOGICAL = _DimensionType("LOGICAL")
+    MR_CAT = _DimensionType("MR_CAT")
+    MR_SUBVAR = _DimensionType("MR_SUBVAR")
+    TEXT = _DimensionType("TEXT")
 
     # ---aliases---
     CA = CA_SUBVAR

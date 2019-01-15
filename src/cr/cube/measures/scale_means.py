@@ -50,17 +50,17 @@ class ScaleMeans(object):
         return means
 
     def margin(self, axis):
-        '''Return marginal value of the current slice scaled means.
+        """Return marginal value of the current slice scaled means.
 
         This value is the the same what you would get from a single variable
         (constituting a 2D cube/slice), when the "non-missing" filter of the
         opposite variable would be applied. This behavior is consistent with
         what is visible in the front-end client.
-        '''
+        """
         if self._slice.ndim < 2:
             msg = (
-                'Scale Means marginal cannot be calculated on 1D cubes, as'
-                'the scale means already get reduced to a scalar value.'
+                "Scale Means marginal cannot be calculated on 1D cubes, as"
+                "the scale means already get reduced to a scalar value."
             )
             raise ValueError(msg)
 
@@ -82,7 +82,8 @@ class ScaleMeans(object):
         # --somewhere, like perhaps CrunchCube and/or
         # --CrunchSlice.reshaped_dimensions.
         reshaped_dimensions = [
-            dimension for dimension in self._slice.dimensions
+            dimension
+            for dimension in self._slice.dimensions
             if len(dimension.numeric_values) > 1
         ]
 
@@ -90,9 +91,9 @@ class ScaleMeans(object):
             (
                 ~np.isnan(np.array(dim.numeric_values))
                 if (
-                    dim.numeric_values and
-                    any(~np.isnan(dim.numeric_values)) and
-                    axis == i
+                    dim.numeric_values
+                    and any(~np.isnan(dim.numeric_values))
+                    and axis == i
                 )
                 else slice(None)
             )
@@ -109,21 +110,14 @@ class ScaleMeans(object):
         return [
             (
                 np.array(dim.numeric_values)
-                if (
-                    dim.numeric_values and
-                    any(~np.isnan(dim.numeric_values))
-                )
+                if (dim.numeric_values and any(~np.isnan(dim.numeric_values)))
                 else None
             )
             for dim in self._slice.dimensions
         ]
 
     def _inflate(self, dim_ind):
-        return (
-            self._slice.ndim > 1 and
-            len(self._slice.get_shape()) > 1 and
-            not dim_ind
-        )
+        return self._slice.ndim > 1 and len(self._slice.get_shape()) > 1 and not dim_ind
 
     def _inner_prods(self, contents, values):
         products = []

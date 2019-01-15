@@ -32,8 +32,8 @@ class CubeSlice(object):
 
         if ca_as_0th and cube.dim_types[0] != DT.CA_SUBVAR:
             msg = (
-                'Cannot set CA as 0th for cube that '
-                'does not have CA items as the 0th dimension.'
+                "Cannot set CA as 0th for cube that "
+                "does not have CA items as the 0th dimension."
             )
             raise ValueError(msg)
 
@@ -53,9 +53,7 @@ class CubeSlice(object):
 
         # API properties
         get_only_last_two = (
-            self._cube.ndim == 3 and
-            hasattr(cube_attr, '__len__') and
-            attr != 'name'
+            self._cube.ndim == 3 and hasattr(cube_attr, "__len__") and attr != "name"
         )
         if get_only_last_two:
             return cube_attr[-2:]
@@ -72,10 +70,10 @@ class CubeSlice(object):
         """
         try:
             name = self.table_name if self.table_name else self.name
-            dimensionality = ' x '.join(dt.name for dt in self.dim_types)
-            dim_names = ' x '.join(d.name for d in self.dimensions)
+            dimensionality = " x ".join(dt.name for dt in self.dim_types)
+            dim_names = " x ".join(d.name for d in self.dimensions)
             labels = self.labels()
-            headers = labels[1] if len(labels) > 1 else ['N']
+            headers = labels[1] if len(labels) > 1 else ["N"]
             tbl = (
                 self.as_array()
                 if len(self.as_array().shape) > 1
@@ -83,11 +81,14 @@ class CubeSlice(object):
             )
             body = tabulate(
                 [[lbl] + lst for lbl, lst in zip(labels[0], tbl.tolist())],
-                headers=headers
+                headers=headers,
             )
-            return (
-                "%s(name='%s', dim_types='%s', dims='%s')\n%s" %
-                (type(self).__name__, name, dimensionality, dim_names, body)
+            return "%s(name='%s', dim_types='%s', dims='%s')\n%s" % (
+                type(self).__name__,
+                name,
+                dimensionality,
+                dim_names,
+                body,
             )
         except Exception:
             return super(CubeSlice, self).__repr__()
@@ -165,14 +166,15 @@ class CubeSlice(object):
         """
         proportions = self.proportions(axis=axis)
         baseline = (
-            baseline
-            if baseline is not None else
-            self._prepare_index_baseline(axis)
+            baseline if baseline is not None else self._prepare_index_baseline(axis)
         )
 
         # Fix the shape to enable correct broadcasting
-        if (axis == 0 and len(baseline.shape) <= 1 and
-                self.ndim == len(self.get_shape())):
+        if (
+            axis == 0
+            and len(baseline.shape) <= 1
+            and self.ndim == len(self.get_shape())
+        ):
             baseline = baseline[:, None]
 
         indexes = proportions / baseline * 100
@@ -201,16 +203,14 @@ class CubeSlice(object):
 
         def prune_dimension_labels(labels, prune_indices):
             """Get pruned labels for single dimension, besed on prune inds."""
-            labels = [
-                label for label, prune in zip(labels, prune_indices)
-                if not prune
-            ]
+            labels = [label for label, prune in zip(labels, prune_indices) if not prune]
             return labels
 
         labels = [
             prune_dimension_labels(dim_labels, dim_prune_inds)
-            for dim_labels, dim_prune_inds in
-            zip(labels, self._prune_indices(transforms=hs_dims))
+            for dim_labels, dim_prune_inds in zip(
+                labels, self._prune_indices(transforms=hs_dims)
+            )
         ]
         return labels
 
@@ -283,7 +283,7 @@ class CubeSlice(object):
         This property is deprecated, use 'get_shape' instead. Pruning is not
         supported (supported in 'get_shape').
         """
-        deprecation_msg = 'Deprecated. Use `get_shape` instead.'
+        deprecation_msg = "Deprecated. Use `get_shape` instead."
         warnings.warn(deprecation_msg, DeprecationWarning)
         return self.get_shape()
 
@@ -300,7 +300,7 @@ class CubeSlice(object):
 
         title = self._cube.name
         table_name = self._cube.labels()[0][self._index]
-        return '%s: %s' % (title, table_name)
+        return "%s: %s" % (title, table_name)
 
     def pvals(self, weighted=True, prune=False, hs_dims=None):
         """Return 2D ndarray with calculated p-vals.
@@ -335,9 +335,7 @@ class CubeSlice(object):
         total = self.margin(weighted=weighted)
         colsum = self.margin(axis=0, weighted=weighted)
         rowsum = self.margin(axis=1, weighted=weighted)
-        zscore = self._calculate_std_res(
-            counts, total, colsum, rowsum,
-        )
+        zscore = self._calculate_std_res(counts, total, colsum, rowsum)
 
         if hs_dims:
             zscore = self._intersperse_hs_in_std_res(hs_dims, zscore)
@@ -375,10 +373,7 @@ class CubeSlice(object):
             rowsum = rowsum[:, np.newaxis]
 
         expected_counts = rowsum * colsum / total
-        variance = (
-            rowsum * colsum * (total - rowsum) * (total - colsum) /
-            total ** 3
-        )
+        variance = rowsum * colsum * (total - rowsum) * (total - colsum) / total ** 3
         return (counts - expected_counts) / np.sqrt(variance)
 
     def _calculate_std_res(self, counts, total, colsum, rowsum):
@@ -393,7 +388,7 @@ class CubeSlice(object):
     def _call_cube_method(self, method, *args, **kwargs):
         kwargs = self._update_args(kwargs)
         result = getattr(self._cube, method)(*args, **kwargs)
-        if method == 'inserted_hs_indices':
+        if method == "inserted_hs_indices":
             if not self.ca_as_0th:
                 result = result[-2:]
             return result
@@ -429,16 +424,8 @@ class CubeSlice(object):
                 total_axis = axis + 1
                 slice_ += [slice(None), 0] if axis == 1 else [0]
         elif self.mr_dim_ind is not None:
-            slice_ = (
-                [0]
-                if self.mr_dim_ind == 0 and axis != 0 else
-                [slice(None), 0]
-            )
-            total_axis = (
-                axis
-                if self.mr_dim_ind != 0 else
-                1 - axis
-            )
+            slice_ = [0] if self.mr_dim_ind == 0 and axis != 0 else [slice(None), 0]
+            total_axis = axis if self.mr_dim_ind != 0 else 1 - axis
 
         total = np.sum(baseline, axis=total_axis)
         baseline = baseline[slice_]
@@ -460,8 +447,9 @@ class CubeSlice(object):
         expected_counts = expected_freq(counts)
         residuals = counts - expected_counts
         variance = (
-            np.outer(rowsum, colsum) *
-            np.outer(total - rowsum, total - colsum) / total ** 3
+            np.outer(rowsum, colsum)
+            * np.outer(total - rowsum, total - colsum)
+            / total ** 3
         )
         return residuals / np.sqrt(variance)
 
@@ -471,19 +459,19 @@ class CubeSlice(object):
             # In this case we don't need to convert any arguments, but just
             # pass them to the underlying cube (which is the slice).
             if self.ca_as_0th:
-                axis = kwargs.get('axis', False)
+                axis = kwargs.get("axis", False)
                 if axis is None:
                     # Special case for CA slices (in multitables). In this case,
                     # we need to calculate a measurement across CA categories
                     # dimension (and not across items, because it's not
                     # allowed). The value for the axis parameter of None, would
                     # incur the items dimension, and we don't want that.
-                    kwargs['axis'] = 1
+                    kwargs["axis"] = 1
             return kwargs
 
         # Handling API methods that include 'axis' parameter
 
-        axis = kwargs.get('axis')
+        axis = kwargs.get("axis")
         # Expected usage of the 'axis' parameter from CubeSlice is 0, 1, or
         # None. CrunchCube handles all other logic. The only 'smart' thing
         # about the handling here, is that the axes are increased for 3D cubes.
@@ -495,7 +483,7 @@ class CubeSlice(object):
         # If the user provides a tuple, it's considered that he "knows" what
         # he's doing, and the axis argument is not updated in this case.
         if isinstance(axis, int):
-            kwargs['axis'] += 1
+            kwargs["axis"] += 1
 
         # Handling API methods that include H&S parameter
 
@@ -506,9 +494,11 @@ class CubeSlice(object):
         # (from the perspective of the cr.exporter) is to exclude the 0th
         # dimension's H&S in the case of 3D cubes.
         hs_dims_key = (
-            'transforms' in kwargs and 'transforms' or
-            'hs_dims' in kwargs and 'hs_dims' or
-            'include_transforms_for_dims'
+            "transforms" in kwargs
+            and "transforms"
+            or "hs_dims" in kwargs
+            and "hs_dims"
+            or "include_transforms_for_dims"
         )
         hs_dims = kwargs.get(hs_dims_key)
         if isinstance(hs_dims, list):
@@ -522,8 +512,7 @@ class CubeSlice(object):
         return kwargs
 
     def _update_result(self, result):
-        if (self._cube.ndim < 3 and not self.ca_as_0th or
-                len(result) - 1 < self._index):
+        if self._cube.ndim < 3 and not self.ca_as_0th or len(result) - 1 < self._index:
             return result
         result = result[self._index]
         if isinstance(result, tuple):

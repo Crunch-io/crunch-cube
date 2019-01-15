@@ -153,7 +153,7 @@ class lazyproperty(object):
         usec per access when measured on a 2.8GHz development machine; so
         quite snappy and probably not a rich target for optimization efforts.
         """
-        raise AttributeError('can\'t set attribute')
+        raise AttributeError("can't set attribute")
 
 
 def lru_cache(maxsize=100):
@@ -166,13 +166,14 @@ def lru_cache(maxsize=100):
     """
     maxqueue = maxsize * 10
 
-    def decorating_function(user_function, len=len, iter=iter, tuple=tuple,
-                            sorted=sorted, KeyError=KeyError):
-        cache = {}                   # mapping of args to results
+    def decorating_function(
+        user_function, len=len, iter=iter, tuple=tuple, sorted=sorted, KeyError=KeyError
+    ):
+        cache = {}  # mapping of args to results
         queue = collections.deque()  # order that keys have been used
-        refcount = Counter()         # times each key is in the queue
-        sentinel = object()          # marker for looping around the queue
-        kwd_mark = object()          # separate positional and keyword args
+        refcount = Counter()  # times each key is in the queue
+        sentinel = object()  # marker for looping around the queue
+        kwd_mark = object()  # separate positional and keyword args
 
         # lookup optimizations (ugly but fast)
         queue_append, queue_popleft = queue.append, queue.popleft
@@ -212,8 +213,9 @@ def lru_cache(maxsize=100):
             if len(queue) > maxqueue:
                 refcount.clear()
                 queue_appendleft(sentinel)
-                for key in ifilterfalse(refcount.__contains__,
-                                        iter(queue_pop, sentinel)):
+                for key in ifilterfalse(
+                    refcount.__contains__, iter(queue_pop, sentinel)
+                ):
                     queue_appendleft(key)
                     refcount[key] = 1
 
@@ -228,6 +230,7 @@ def lru_cache(maxsize=100):
         wrapper.hits = wrapper.misses = 0
         wrapper.clear = clear
         return wrapper
+
     return decorating_function
 
 
