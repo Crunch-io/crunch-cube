@@ -264,3 +264,31 @@ class TestStandardizedResiduals(TestCase):
             ]
         ).reshape(10, 10)
         np.testing.assert_almost_equal(actual, expected)
+
+    def test_odd_latent_dimensions(self):
+        """Test code path for the pfaffian of an odd-dimensioned matrix
+        Latent matrix size is (n_min - 1) so 3 for a 4x4 table.
+        """
+        cube = CrunchCube(CR.PAIRWISE_4X4)
+        actual = cube.pairwise_pvals(axis=0)
+        expected = np.array(
+            [
+                1,
+                0.949690252544668,
+                0.917559534718816,
+                0.97630069244232,
+                0.949690252544668,
+                1,
+                0.35511045473507,
+                0.999999119644564,
+                0.917559534718816,
+                0.35511045473507,
+                1,
+                0.313869429972919,
+                0.97630069244232,
+                0.999999119644564,
+                0.313869429972919,
+                1,
+            ]
+        ).reshape()
+        np.testing.assert_almost_equal(actual, expected)
