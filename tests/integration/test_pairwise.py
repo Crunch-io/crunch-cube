@@ -290,5 +290,5 @@ class TestStandardizedResiduals(TestCase):
                 0.313869429972919,
                 1,
             ]
-        ).reshape()
+        ).reshape(4, 4)
         np.testing.assert_almost_equal(actual, expected)
