@@ -2,9 +2,7 @@
 
 """Functions that make mocking with pytest easier and more readable."""
 
-from __future__ import (
-    absolute_import, division, print_function, unicode_literals
-)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from mock import ANY, call, Mock  # noqa
 from mock import create_autospec, patch, PropertyMock
@@ -22,8 +20,9 @@ def class_mock(request, q_class_name, autospec=True, **kwargs):
     return _patch.start()
 
 
-def function_mock(request, q_function_name, autospec=True,
-                  **kwargs):  # pragma: no cover
+def function_mock(
+    request, q_function_name, autospec=True, **kwargs
+):  # pragma: no cover
     """Return mock patching function with qualified name *q_function_name*.
 
     Patch is reversed after calling test returns.
@@ -39,7 +38,7 @@ def initializer_mock(request, cls, autospec=True, **kwargs):
     The patch is reversed after pytest uses it.
     """
     _patch = patch.object(
-        cls, '__init__', autospec=autospec, return_value=None, **kwargs
+        cls, "__init__", autospec=autospec, return_value=None, **kwargs
     )
     request.addfinalizer(_patch.stop)
     return _patch.start()
@@ -54,9 +53,7 @@ def instance_mock(request, cls, name=None, spec_set=True, **kwargs):
     through to the Mock() call that creates the mock.
     """
     name = name if name is not None else request.fixturename
-    return create_autospec(
-        cls, _name=name, spec_set=spec_set, instance=True, **kwargs
-    )
+    return create_autospec(cls, _name=name, spec_set=spec_set, instance=True, **kwargs)
 
 
 def method_mock(request, cls, method_name, autospec=True, **kwargs):

@@ -28,9 +28,7 @@ class Index(object):
             num = slice_.margin(axis=0, weighted=weighted, prune=prune)
             den = slice_.margin(weighted=weighted, prune=prune)
             margin = num / den
-            proportions = slice_.proportions(
-                axis=1, weighted=weighted, prune=prune
-            )
+            proportions = slice_.proportions(axis=1, weighted=weighted, prune=prune)
             result.append(proportions / margin)
 
         if len(result) == 1 and cube.ndim < 3:
@@ -47,12 +45,8 @@ class Index(object):
     def _mr_index(self, cube, weighted, prune):
         # mr by mr
         if len(cube.dimensions) == 2 and cube.mr_dim_ind == (0, 1):
-            col_proportions = cube.proportions(
-                axis=0, weighted=weighted, prune=prune
-            )
-            row_proportions = cube.proportions(
-                axis=1, weighted=weighted, prune=prune
-            )
+            col_proportions = cube.proportions(axis=0, weighted=weighted, prune=prune)
+            row_proportions = cube.proportions(axis=1, weighted=weighted, prune=prune)
             return col_proportions / row_proportions
 
         # mr by cat and cat by mr
@@ -61,11 +55,9 @@ class Index(object):
             num = cube.margin(axis=1 - axis, weighted=weighted, prune=prune)
             den = cube.margin(weighted=weighted, prune=prune)
             margin = num / den
-            proportions = cube.proportions(
-                axis=axis, weighted=weighted, prune=prune
-            )
+            proportions = cube.proportions(axis=axis, weighted=weighted, prune=prune)
             if cube.mr_dim_ind == 0:
                 margin = margin[:, np.newaxis]  # pivot
             return proportions / margin
 
-        raise ValueError('Unexpected dimension types for cube with MR.')
+        raise ValueError("Unexpected dimension types for cube with MR.")

@@ -5,7 +5,7 @@
 import json
 import os
 
-CUBES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cubes')
+CUBES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cubes")
 
 
 class LazyCubeResponseLoader(object):
@@ -41,10 +41,7 @@ class LazyCubeResponseLoader(object):
 
     def _json_path(self, fixture_name):
         """Return absolute path to JSON file for *fixture_name*."""
-        return (
-            '%s/%s.json' %
-            (self._dirpath, fixture_name.replace('_', '-').lower())
-        )
+        return "%s/%s.json" % (self._dirpath, fixture_name.replace("_", "-").lower())
 
     def _load_json(self, path):
         """Return dict parsed from JSON at *path*."""
@@ -55,9 +52,9 @@ class LazyCubeResponseLoader(object):
     def _load_to_cache(self, fixture_name):
         json_path = self._json_path(fixture_name)
         if not os.path.exists(json_path):
-            raise ValueError('no JSON fixture found at %s' % json_path)
+            raise ValueError("no JSON fixture found at %s" % json_path)
         self._cache[fixture_name] = self._load_json(json_path)
 
 
-CR = LazyCubeResponseLoader('.')  # ---mnemonic: CR = 'cube-response'---
-SM = LazyCubeResponseLoader('./scale_means')
+CR = LazyCubeResponseLoader(".")  # ---mnemonic: CR = 'cube-response'---
+SM = LazyCubeResponseLoader("./scale_means")

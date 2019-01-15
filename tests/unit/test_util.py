@@ -2,9 +2,7 @@
 
 """Unit test suite for cr.cube.util module."""
 
-from __future__ import (
-    absolute_import, division, print_function, unicode_literals
-)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
 import pytest
@@ -13,7 +11,6 @@ from cr.cube.util import compress_pruned, lazyproperty
 
 
 class Describe_compress_pruned(object):
-
     def it_returns_an_unmasked_array_unchanged(self):
         table = np.zeros((2, 2))
         return_value = compress_pruned(table)
@@ -25,25 +22,19 @@ class Describe_compress_pruned(object):
         assert return_value == 42
 
     def it_returns_a_compressed_1D_masked_array(self):
-        table = np.ma.masked_array(
-            np.array([42, 43, 44]), [False, True, False]
-        )
+        table = np.ma.masked_array(np.array([42, 43, 44]), [False, True, False])
         return_value = compress_pruned(table)
         np.testing.assert_array_equal(return_value, [42, 44])
 
     def it_NaNs_isolated_pruned_float_values(self):
         table = np.ma.masked_array(
-            np.array([[4.2, 0.0, 4.4],
-                      [4.5, 4.6, 4.7]]),
-            [[False, True, False],
-             [False, False, False]],
-            dtype=float
+            np.array([[4.2, 0.0, 4.4], [4.5, 4.6, 4.7]]),
+            [[False, True, False], [False, False, False]],
+            dtype=float,
         )
         return_value = compress_pruned(table)
         np.testing.assert_array_equal(
-            return_value,
-            [[4.2, np.nan, 4.4],
-             [4.5, 4.6, 4.7]]
+            return_value, [[4.2, np.nan, 4.4], [4.5, 4.6, 4.7]]
         )
 
 
@@ -54,14 +45,14 @@ class DescribeLazyPropertyDecorator(object):
         assert isinstance(Obj.fget, lazyproperty)
 
     def but_it_adopts_the_name_of_the_decorated_method(self, Obj):
-        assert Obj.fget.__name__ == 'fget'
+        assert Obj.fget.__name__ == "fget"
 
     def and_it_adopts_the_module_of_the_decorated_method(self, Obj):
         # ---the module name actually, not a module object
         assert Obj.fget.__module__ == __name__
 
     def and_it_adopts_the_docstring_of_the_decorated_method(self, Obj):
-        assert Obj.fget.__doc__ == 'Docstring of Obj.fget method definition.'
+        assert Obj.fget.__doc__ == "Docstring of Obj.fget method definition."
 
     def it_only_calculates_value_on_first_call(self, obj):
         assert obj.fget == 1
@@ -82,10 +73,11 @@ class DescribeLazyPropertyDecorator(object):
             @lazyproperty
             def fget(self):
                 """Docstring of Obj.fget method definition."""
-                if not hasattr(self, '_n'):
+                if not hasattr(self, "_n"):
                     self._n = 0
                 self._n += 1
                 return self._n
+
         return Obj
 
     @pytest.fixture

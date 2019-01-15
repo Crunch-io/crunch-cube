@@ -20,7 +20,7 @@ from cr.cube.measures.index import Index
 from cr.cube.measures.scale_means import ScaleMeans
 from cr.cube.util import lazyproperty
 
-np.seterr(divide='ignore', invalid='ignore')
+np.seterr(divide="ignore", invalid="ignore")
 
 
 class CrunchCube(object):
@@ -69,16 +69,22 @@ class CrunchCube(object):
         instance variable values.
         """
         try:
-            dimensionality = ' x '.join(dt.name for dt in self.dim_types)
-            return (
-                "%s(name='%s', dim_types='%s')" %
-                (type(self).__name__, self.name, dimensionality)
+            dimensionality = " x ".join(dt.name for dt in self.dim_types)
+            return "%s(name='%s', dim_types='%s')" % (
+                type(self).__name__,
+                self.name,
+                dimensionality,
             )
         except Exception:
             return super(CrunchCube, self).__repr__()
 
-    def as_array(self, include_missing=False, weighted=True,
-                 include_transforms_for_dims=None, prune=False):
+    def as_array(
+        self,
+        include_missing=False,
+        weighted=True,
+        include_transforms_for_dims=None,
+        prune=False,
+    ):
         """Return `ndarray` representing cube values.
 
         Returns the tabular representation of the crunch cube. The returned
@@ -110,23 +116,18 @@ class CrunchCube(object):
         array = self._as_array(
             include_missing=include_missing,
             weighted=weighted,
-            include_transforms_for_dims=include_transforms_for_dims
+            include_transforms_for_dims=include_transforms_for_dims,
         )
 
         # ---prune array if pruning was requested---
         if prune:
-            array = self._prune_body(
-                array, transforms=include_transforms_for_dims
-            )
+            array = self._prune_body(array, transforms=include_transforms_for_dims)
 
         return self._drop_mr_cat_dims(array)
 
     def count(self, weighted=True):
         """Return numberic count of rows considered for cube response."""
-        return (
-            self._measures.weighted_n if weighted
-            else self._measures.unweighted_n
-        )
+        return self._measures.weighted_n if weighted else self._measures.unweighted_n
 
     @lazyproperty
     def description(self):
@@ -156,7 +157,7 @@ class CrunchCube(object):
     @lazyproperty
     def filter_annotation(self):
         """Get cube's filter annotation."""
-        return self._cube_dict.get('filter_names', [])
+        return self._cube_dict.get("filter_names", [])
 
     def get_slices(self, ca_as_0th=False):
         """Return list of :class:`.CubeSlice` objects.
@@ -169,10 +170,7 @@ class CrunchCube(object):
         if self.ndim < 3 and not ca_as_0th:
             return [CubeSlice(self, 0)]
 
-        return [
-            CubeSlice(self, i, ca_as_0th)
-            for i, _ in enumerate(self.labels()[0])
-        ]
+        return [CubeSlice(self, i, ca_as_0th) for i, _ in enumerate(self.labels()[0])]
 
     @lazyproperty
     def has_means(self):
@@ -191,7 +189,7 @@ class CrunchCube(object):
         """
         warnings.warn(
             "CrunchCube.index() is deprecated. Use CubeSlice.index_table().",
-            DeprecationWarning
+            DeprecationWarning,
         )
         return Index.data(self, weighted, prune)
 
@@ -200,26 +198,20 @@ class CrunchCube(object):
         if self.ndim == 2 and prune:
             # If pruning is applied, we need to subtract from the H&S indes
             # the number of pruned rows (cols) that come before that index.
-            pruning_bases = [
-                self._pruning_base(axis=i, hs_dims=[0, 1])
-                for i in [1, 0]
-            ]
+            pruning_bases = [self._pruning_base(axis=i, hs_dims=[0, 1]) for i in [1, 0]]
             pruning_bases = [
                 base if base.ndim == 1 else np.sum(base, axis=(1 - i))
                 for i, base in enumerate(pruning_bases)
             ]
             # Obtain prune indices as subscripts
             prune_indices_list = [
-                np.arange(len(base))[
-                    np.logical_or(base == 0, np.isnan(base))
-                ]
+                np.arange(len(base))[np.logical_or(base == 0, np.isnan(base))]
                 for base in pruning_bases
             ]
-            inserted_indices_list = [
-                dim.inserted_hs_indices for dim in self.dimensions
-            ]
-            return self._adjust_inserted_indices(inserted_indices_list,
-                                                 prune_indices_list)
+            inserted_indices_list = [dim.inserted_hs_indices for dim in self.dimensions]
+            return self._adjust_inserted_indices(
+                inserted_indices_list, prune_indices_list
+            )
 
         return [dim.inserted_hs_indices for dim in self.dimensions]
 
@@ -231,10 +223,7 @@ class CrunchCube(object):
     @lazyproperty
     def is_univariate_ca(self):
         """True if cube only contains a CA dimension-pair, in either order."""
-        return (
-            self.ndim == 2 and
-            set(self.dim_types) == {DT.CA_SUBVAR, DT.CA_CAT}
-        )
+        return self.ndim == 2 and set(self.dim_types) == {DT.CA_SUBVAR, DT.CA_CAT}
 
     @lazyproperty
     def is_weighted(self):
@@ -255,8 +244,14 @@ class CrunchCube(object):
             for dim in self.dimensions
         ]
 
-    def margin(self, axis=None, weighted=True, include_missing=False,
-               include_transforms_for_dims=None, prune=False):
+    def margin(
+        self,
+        axis=None,
+        weighted=True,
+        include_missing=False,
+        include_transforms_for_dims=None,
+        prune=False,
+    ):
         """Get margin for the selected axis.
 
         the selected axis. For MR variables, this is the sum of the selected
@@ -324,8 +319,7 @@ class CrunchCube(object):
         table = self._counts(weighted).raw_cube_array
         new_axis = self._adjust_axis(axis)
         index = tuple(
-            None if i in new_axis else slice(None)
-            for i, _ in enumerate(table.shape)
+            None if i in new_axis else slice(None) for i, _ in enumerate(table.shape)
         )
 
         # Calculate denominator. Only include those H&S dimensions, across
@@ -339,8 +333,7 @@ class CrunchCube(object):
 
         # Apply correct mask (based on the as_array shape)
         arr = self._as_array(
-            include_transforms_for_dims=hs_dims,
-            include_missing=include_missing
+            include_transforms_for_dims=hs_dims, include_missing=include_missing
         )
 
         # ---prune array if pruning was requested---
@@ -360,25 +353,23 @@ class CrunchCube(object):
                 (
                     None
                     if (
-                        d.dimension_type == DT.MR_CAT or
-                        i != 0 and (
-                            n <= 1 or
-                            len(d.elements()) <= 1
-                        )
-                    ) else
-                    slice(None)
+                        d.dimension_type == DT.MR_CAT
+                        or i != 0
+                        and (n <= 1 or len(d.elements()) <= 1)
+                    )
+                    else slice(None)
                 )
-                for i, (d, n) in
-                enumerate(zip(self._all_dimensions, table.shape))
+                for i, (d, n) in enumerate(zip(self._all_dimensions, table.shape))
             )
-            mask = np.logical_or(
-                np.zeros(den.shape, dtype=bool),
-                arr.mask[inflate_ind],
-            )
+            mask = np.logical_or(np.zeros(den.shape, dtype=bool), arr.mask[inflate_ind])
             den = np.ma.masked_array(den, mask)
 
-        if (self.ndim != 1 or axis is None or
-                axis == 0 and len(self._all_dimensions) == 1):
+        if (
+            self.ndim != 1
+            or axis is None
+            or axis == 0
+            and len(self._all_dimensions) == 1
+        ):
             # Special case for 1D cube wigh MR, for "Table" direction
             den = np.sum(den, axis=new_axis)[index]
 
@@ -407,7 +398,8 @@ class CrunchCube(object):
         # this as it's really a cube internal characteristic.
         # TODO: Make this return a tuple in all cases, like (), (1,), or (0, 2).
         indices = tuple(
-            idx for idx, d in enumerate(self.dimensions)
+            idx
+            for idx, d in enumerate(self.dimensions)
             if d.dimension_type == DT.MR_SUBVAR
         )
         if indices == ():
@@ -474,9 +466,14 @@ class CrunchCube(object):
         """
         return self.proportions(axis) * 100
 
-    def population_counts(self, population_size, weighted=True,
-                          include_missing=False,
-                          include_transforms_for_dims=None, prune=False):
+    def population_counts(
+        self,
+        population_size,
+        weighted=True,
+        include_missing=False,
+        include_transforms_for_dims=None,
+        prune=False,
+    ):
         """Return counts scaled in proportion to overall population.
 
         The return value is a numpy.ndarray object. Count values are scaled
@@ -499,12 +496,16 @@ class CrunchCube(object):
                 [3000, 1800],
             ])
         """
-        return self.proportions(
-            weighted=weighted,
-            include_missing=include_missing,
-            include_transforms_for_dims=include_transforms_for_dims,
-            prune=prune
-        ) * population_size * self.population_fraction
+        return (
+            self.proportions(
+                weighted=weighted,
+                include_missing=include_missing,
+                include_transforms_for_dims=include_transforms_for_dims,
+                prune=prune,
+            )
+            * population_size
+            * self.population_fraction
+        )
 
     @lazyproperty
     def population_fraction(self):
@@ -517,9 +518,14 @@ class CrunchCube(object):
         """
         return self._measures.population_fraction
 
-    def proportions(self, axis=None, weighted=True,
-                    include_transforms_for_dims=None, include_missing=False,
-                    prune=False):
+    def proportions(
+        self,
+        axis=None,
+        weighted=True,
+        include_transforms_for_dims=None,
+        include_missing=False,
+        prune=False,
+    ):
         """Return percentage values for cube as `numpy.ndarray`.
 
         This function calculates the proportions across the selected axis
@@ -591,8 +597,7 @@ class CrunchCube(object):
         table = self._measure(weighted).raw_cube_array
         new_axis = self._adjust_axis(axis)
         index = tuple(
-            None if i in new_axis else slice(None)
-            for i, _ in enumerate(table.shape)
+            None if i in new_axis else slice(None) for i, _ in enumerate(table.shape)
         )
 
         # Calculate denominator. Only include those H&S dimensions, across
@@ -604,16 +609,13 @@ class CrunchCube(object):
         den = np.sum(den, axis=new_axis)[index]
 
         # Calculate numerator from table (include all H&S dimensions).
-        num = self._apply_missings_and_insertions(
-            table, include_transforms_for_dims
-        )
+        num = self._apply_missings_and_insertions(table, include_transforms_for_dims)
 
         res = self._drop_mr_cat_dims(num / den)
 
         # Apply correct mask (based on the as_array shape)
         arr = self.as_array(
-            prune=prune,
-            include_transforms_for_dims=include_transforms_for_dims,
+            prune=prune, include_transforms_for_dims=include_transforms_for_dims
         )
         if isinstance(arr, np.ma.core.MaskedArray):
             res = np.ma.masked_array(res, arr.mask)
@@ -659,14 +661,12 @@ class CrunchCube(object):
                 # calculated by using its values). The result of it, however,
                 # is a row. That's why we need to check the insertions on the
                 # row dim (inserted columns).
-                if (scale_means[0] is not None and 1 in hs_dims and
-                        inserted_indices[1]):
+                if scale_means[0] is not None and 1 in hs_dims and inserted_indices[1]:
                     for i in inserted_indices[1]:
                         scale_means[0] = np.insert(scale_means[0], i, np.nan)
                 # Scale means 1 is a column, so we need to check
                 # for row insertions.
-                if (scale_means[1] is not None and 0 in hs_dims and
-                        inserted_indices[0]):
+                if scale_means[1] is not None and 0 in hs_dims and inserted_indices[0]:
                     for i in inserted_indices[0]:
                         scale_means[1] = np.insert(scale_means[1], i, np.nan)
 
@@ -678,16 +678,12 @@ class CrunchCube(object):
                 for i, scale_means in enumerate(slices_means):
                     if scale_means[0] is not None:
                         row_mask = (
-                            mask.all(axis=0)
-                            if self.ndim < 3 else
-                            mask.all(axis=1)[i]
+                            mask.all(axis=0) if self.ndim < 3 else mask.all(axis=1)[i]
                         )
                         scale_means[0] = scale_means[0][~row_mask]
                     if self.ndim > 1 and scale_means[1] is not None:
                         col_mask = (
-                            mask.all(axis=1)
-                            if self.ndim < 3 else
-                            mask.all(axis=2)[i]
+                            mask.all(axis=1) if self.ndim < 3 else mask.all(axis=2)[i]
                         )
                         scale_means[1] = scale_means[1][~col_mask]
         return slices_means
@@ -732,7 +728,7 @@ class CrunchCube(object):
         For more info on how it needs to operate, check the unit tests.
         """
         if not self._is_axis_allowed(axis):
-            ca_error_msg = 'Direction {} not allowed (items dimension)'
+            ca_error_msg = "Direction {} not allowed (items dimension)"
             raise ValueError(ca_error_msg.format(axis))
 
         if isinstance(axis, int):
@@ -772,9 +768,7 @@ class CrunchCube(object):
     def _adjust_inserted_indices(inserted_indices_list, prune_indices_list):
         """Adjust inserted indices, if there are pruned elements."""
         # Created a copy, to preserve cached property
-        updated_inserted = [
-            [i for i in dim_inds] for dim_inds in inserted_indices_list
-        ]
+        updated_inserted = [[i for i in dim_inds] for dim_inds in inserted_indices_list]
         pruned_and_inserted = zip(prune_indices_list, updated_inserted)
         for prune_inds, inserted_inds in pruned_and_inserted:
             # Only prune indices if they're not H&S (inserted)
@@ -795,12 +789,11 @@ class CrunchCube(object):
         dimensions (basically the categories dimension of each MR
         dimension-pair is suppressed).
         """
-        return AllDimensions(
-            dimension_dicts=self._cube_dict['result']['dimensions']
-        )
+        return AllDimensions(dimension_dicts=self._cube_dict["result"]["dimensions"])
 
-    def _apply_missings_and_insertions(self, res, include_transforms_for_dims,
-                                       include_missing=False):
+    def _apply_missings_and_insertions(
+        self, res, include_transforms_for_dims, include_missing=False
+    ):
         """Return ndarray with missing and insertions as specified.
 
         The return value is the result of the following operations on *res*,
@@ -835,21 +828,23 @@ class CrunchCube(object):
                 continue
             apparent_dim_idx = dim_idx - suppressed_dim_count
             transform = (
-                dim.has_transforms and
-                apparent_dim_idx in include_transforms_for_dims
+                dim.has_transforms and apparent_dim_idx in include_transforms_for_dims
             )
             if not transform:
                 continue
             # ---insert subtotals into result array---
             insertions = self._insertions(res, dim, dim_idx)
-            res, new_valids = self._update_result(
-                res, insertions, dim_idx, new_valids
-            )
+            res, new_valids = self._update_result(res, insertions, dim_idx, new_valids)
 
         return res[np.ix_(*new_valids)] if new_valids else res
 
-    def _as_array(self, include_missing=False, get_non_selected=False,
-                  weighted=True, include_transforms_for_dims=False):
+    def _as_array(
+        self,
+        include_missing=False,
+        get_non_selected=False,
+        weighted=True,
+        include_transforms_for_dims=False,
+    ):
         """Get crunch cube as ndarray.
 
         Args
@@ -864,7 +859,7 @@ class CrunchCube(object):
         return self._apply_missings_and_insertions(
             self._measure(weighted).raw_cube_array,
             include_transforms_for_dims,
-            include_missing=include_missing
+            include_missing=include_missing,
         )
 
     @classmethod
@@ -878,7 +873,7 @@ class CrunchCube(object):
         across i and j indices).
         """
         if axis not in [0, 1]:
-            raise ValueError('Unexpected value for `axis`: {}'.format(axis))
+            raise ValueError("Unexpected value for `axis`: {}".format(axis))
 
         V = prop_table * (1 - prop_table)
         if axis == 0:
@@ -905,18 +900,15 @@ class CrunchCube(object):
         is not considered. Contrast with `._measure()` below.
         """
         return (
-            self._measures.weighted_counts if weighted else
-            self._measures.unweighted_counts
+            self._measures.weighted_counts
+            if weighted
+            else self._measures.unweighted_counts
         )
 
     @staticmethod
     def _create_mask(res, row_prune_inds, col_prune_inds):
-        mask_rows = np.repeat(
-            row_prune_inds[:, None], len(col_prune_inds), axis=1
-        )
-        mask_cols = np.repeat(
-            col_prune_inds[None, :], len(row_prune_inds), axis=0
-        )
+        mask_rows = np.repeat(row_prune_inds[:, None], len(col_prune_inds), axis=1)
+        mask_cols = np.repeat(col_prune_inds[None, :], len(row_prune_inds), axis=0)
         return np.logical_or(mask_rows, mask_cols)
 
     @lazyproperty
@@ -926,15 +918,16 @@ class CrunchCube(object):
             cube_response = self._cube_response_arg
             # ---parse JSON to a dict when constructed with JSON---
             cube_dict = (
-                cube_response if isinstance(cube_response, dict)
+                cube_response
+                if isinstance(cube_response, dict)
                 else json.loads(cube_response)
             )
             # ---cube is 'value' item in a shoji response---
-            return cube_dict.get('value', cube_dict)
+            return cube_dict.get("value", cube_dict)
         except TypeError:
             raise TypeError(
-                'Unsupported type <%s> provided. Cube response must be JSON '
-                '(str) or dict.' % type(self._cube_response_arg).__name__
+                "Unsupported type <%s> provided. Cube response must be JSON "
+                "(str) or dict." % type(self._cube_response_arg).__name__
             )
 
     def _drop_mr_cat_dims(self, array, fix_valids=False):
@@ -970,21 +963,28 @@ class CrunchCube(object):
         # up to here. At this point, we need to remove the non-selected part of
         # selections dimension (and subsequently purge the dimension itself).
 
-        display_ind = tuple(
-            0 if dim.dimension_type == DT.MR_CAT else slice(None)
-            for dim, n in zip(self._all_dimensions, array.shape)
-        ) if not fix_valids else np.ix_(*[
-            dim.element_indices(include_missing=False) if n > 1 else [0]
-            for dim, n in zip(self._all_dimensions, array.shape)
-        ])
+        display_ind = (
+            tuple(
+                0 if dim.dimension_type == DT.MR_CAT else slice(None)
+                for dim, n in zip(self._all_dimensions, array.shape)
+            )
+            if not fix_valids
+            else np.ix_(
+                *[
+                    dim.element_indices(include_missing=False) if n > 1 else [0]
+                    for dim, n in zip(self._all_dimensions, array.shape)
+                ]
+            )
+        )
         array = array[display_ind]
 
         # If a first dimension only has one element, we don't want to
         # remove it from the shape. Hence the i == 0 part. For other dimensions
         # that have one element, it means that these are the remnants of the MR
         # selections, which we don't need as separate dimensions.
-        new_shape = [length for (i, length) in enumerate(array.shape)
-                     if length != 1 or i == 0]
+        new_shape = [
+            length for (i, length) in enumerate(array.shape) if length != 1 or i == 0
+        ]
         return array.reshape(new_shape)
 
     @classmethod
@@ -1018,17 +1018,19 @@ class CrunchCube(object):
         def iter_insertions():
             for anchor_idx, addend_idxs in dimension.hs_indices:
                 insertion_idx = (
-                    -1 if anchor_idx == 'top' else
-                    result.shape[dimension_index] - 1 if anchor_idx == 'bottom'
+                    -1
+                    if anchor_idx == "top"
+                    else result.shape[dimension_index] - 1
+                    if anchor_idx == "bottom"
                     else anchor_idx
                 )
                 addend_fancy_idx = tuple(
-                    [slice(None) for _ in range(dimension_index)] +
-                    [np.array(addend_idxs)]
+                    [slice(None) for _ in range(dimension_index)]
+                    + [np.array(addend_idxs)]
                 )
                 yield (
                     insertion_idx,
-                    np.sum(result[addend_fancy_idx], axis=dimension_index)
+                    np.sum(result[addend_fancy_idx], axis=dimension_index),
                 )
 
         return [insertion for insertion in iter_insertions()]
@@ -1094,9 +1096,11 @@ class CrunchCube(object):
         unweighted counts are returned.
         """
         return (
-            self._measures.means if self._measures.means is not None else
-            self._measures.weighted_counts if weighted else
-            self._measures.unweighted_counts
+            self._measures.means
+            if self._measures.means is not None
+            else self._measures.weighted_counts
+            if weighted
+            else self._measures.unweighted_counts
         )
 
     @lazyproperty
@@ -1119,12 +1123,8 @@ class CrunchCube(object):
         for i, prune_inds in enumerate(self._prune_indices(transforms)):
             rows_pruned = prune_inds[0]
             cols_pruned = prune_inds[1]
-            rows_pruned = np.repeat(
-                rows_pruned[:, None], len(cols_pruned), axis=1
-            )
-            cols_pruned = np.repeat(
-                cols_pruned[None, :], len(rows_pruned), axis=0
-            )
+            rows_pruned = np.repeat(rows_pruned[:, None], len(cols_pruned), axis=1)
+            cols_pruned = np.repeat(cols_pruned[None, :], len(rows_pruned), axis=0)
             slice_mask = np.logical_or(rows_pruned, cols_pruned)
 
             # In case of MRs we need to "inflate" mask
@@ -1146,12 +1146,10 @@ class CrunchCube(object):
 
     def _prune_3d_indices(self, transforms):
         row_margin = self._pruning_base(
-            hs_dims=transforms,
-            axis=self.row_direction_axis
+            hs_dims=transforms, axis=self.row_direction_axis
         )
         col_margin = self._pruning_base(
-            hs_dims=transforms,
-            axis=self._col_direction_axis,
+            hs_dims=transforms, axis=self._col_direction_axis
         )
         return [
             self._prune_indices_tuple(rm, cm, transforms)
@@ -1172,13 +1170,11 @@ class CrunchCube(object):
 
         # ---determine which rows should be pruned---
         row_margin = self._pruning_base(
-            hs_dims=transforms,
-            axis=self.row_direction_axis,
+            hs_dims=transforms, axis=self.row_direction_axis
         )
         # ---adjust special-case row-margin values---
         item_types = (DT.MR, DT.CA_SUBVAR)
-        if (self.ndim > 1 and self.dim_types[1] in item_types and
-                len(res.shape) > 1):
+        if self.ndim > 1 and self.dim_types[1] in item_types and len(res.shape) > 1:
             # ---when row-dimension has only one category it gets squashed---
             axis = 1 if res.shape[0] > 1 else None
             # ---in CAT x MR case (or if it has CA subvars) we get
@@ -1195,8 +1191,7 @@ class CrunchCube(object):
 
         # ---determine which columns should be pruned---
         col_margin = self._pruning_base(
-            hs_dims=transforms,
-            axis=self._col_direction_axis,
+            hs_dims=transforms, axis=self._col_direction_axis
         )
         if col_margin.ndim > 1:
             # In case of MR x CAT, we have 2D margin
@@ -1233,8 +1228,7 @@ class CrunchCube(object):
 
         def prune_non_3d_indices(transforms):
             row_margin = self._pruning_base(
-                hs_dims=transforms,
-                axis=self.row_direction_axis,
+                hs_dims=transforms, axis=self.row_direction_axis
             )
             row_indices = self._margin_pruned_indices(
                 row_margin, self._inserted_dim_inds(transforms, 0), 0
@@ -1248,8 +1242,7 @@ class CrunchCube(object):
                 return [row_indices]
 
             col_margin = self._pruning_base(
-                hs_dims=transforms,
-                axis=self._col_direction_axis,
+                hs_dims=transforms, axis=self._col_direction_axis
             )
 
             col_indices = self._margin_pruned_indices(
@@ -1292,21 +1285,17 @@ class CrunchCube(object):
             # In case we encountered axis that would go across items dimension,
             # we need to return at least some result, to prevent explicitly
             # checking for this condition, wherever self._margin is used
-            return self.as_array(
-                weighted=False, include_transforms_for_dims=hs_dims
-            )
+            return self.as_array(weighted=False, include_transforms_for_dims=hs_dims)
 
         # In case of allowed axis, just return the normal API margin. This call
         # would throw an exception when directly invoked with bad axis. This is
         # intended, because we want to be as explicit as possible. Margins
         # across items are not allowed.
         return self.margin(
-            axis=axis, weighted=False,
-            include_transforms_for_dims=hs_dims,
+            axis=axis, weighted=False, include_transforms_for_dims=hs_dims
         )
 
-    def _update_result(self, result, insertions, dimension_index,
-                       valid_indices):
+    def _update_result(self, result, insertions, dimension_index, valid_indices):
         """Insert subtotals into resulting ndarray."""
         # TODO: valid_indices should be a tuple as a parameter and as a return
         # value
@@ -1314,11 +1303,8 @@ class CrunchCube(object):
             result = np.insert(
                 result, ind_insertion + j + 1, value, axis=dimension_index
             )
-            valid_indices = (
-                valid_indices and
-                self._fix_valid_indices(
-                    valid_indices, ind_insertion + j, dimension_index
-                )
+            valid_indices = valid_indices and self._fix_valid_indices(
+                valid_indices, ind_insertion + j, dimension_index
             )
         return result, valid_indices
 
@@ -1338,16 +1324,14 @@ class _Measures(object):
         any other measures provided by the cube.
         """
         cube_dict = self._cube_dict
-        if cube_dict.get('query', {}).get('weight') is not None:
+        if cube_dict.get("query", {}).get("weight") is not None:
             return True
-        if cube_dict.get('weight_var') is not None:
+        if cube_dict.get("weight_var") is not None:
             return True
-        if cube_dict.get('weight_url') is not None:
+        if cube_dict.get("weight_url") is not None:
             return True
-        unweighted_counts = cube_dict['result']['counts']
-        count_data = (
-            cube_dict['result']['measures'].get('count', {}).get('data')
-        )
+        unweighted_counts = cube_dict["result"]["counts"]
+        count_data = cube_dict["result"]["measures"].get("count", {}).get("data")
         if unweighted_counts != count_data:
             return True
         return False
@@ -1359,10 +1343,7 @@ class _Measures(object):
         None when the cube response does not contain a mean measure.
         """
         mean_measure_dict = (
-            self._cube_dict
-                .get('result', {})
-                .get('measures', {})
-                .get('mean')
+            self._cube_dict.get("result", {}).get("measures", {}).get("mean")
         )
         if mean_measure_dict is None:
             return None
@@ -1373,7 +1354,7 @@ class _Measures(object):
         """numeric representing count of missing rows in cube response."""
         if self.means:
             return self.means.missing_count
-        return self._cube_dict['result'].get('missing', 0)
+        return self._cube_dict["result"].get("missing", 0)
 
     @lazyproperty
     def population_fraction(self):
@@ -1384,16 +1365,8 @@ class _Measures(object):
         Returns `np.nan` if the unfiltered count is zero, which would
         otherwise result in a divide-by-zero error.
         """
-        numerator = (
-            self._cube_dict['result']
-                .get('filtered', {})
-                .get('weighted_n')
-        )
-        denominator = (
-            self._cube_dict['result']
-                .get('unfiltered', {})
-                .get('weighted_n')
-        )
+        numerator = self._cube_dict["result"].get("filtered", {}).get("weighted_n")
+        denominator = self._cube_dict["result"].get("unfiltered", {}).get("weighted_n")
         try:
             return numerator / denominator
         except ZeroDivisionError:
@@ -1413,7 +1386,7 @@ class _Measures(object):
     @lazyproperty
     def unweighted_n(self):
         """int count of actual rows represented by query response."""
-        return self._cube_dict['result']['n']
+        return self._cube_dict["result"]["n"]
 
     @lazyproperty
     def weighted_counts(self):
@@ -1432,9 +1405,7 @@ class _Measures(object):
         """float count of returned rows adjusted for weighting."""
         if not self.is_weighted:
             return float(self.unweighted_n)
-        return float(
-            sum(self._cube_dict['result']['measures']['count']['data'])
-        )
+        return float(sum(self._cube_dict["result"]["measures"]["count"]["data"]))
 
 
 class _BaseMeasure(object):
@@ -1463,7 +1434,7 @@ class _BaseMeasure(object):
 
         This property must be implemented by each subclass.
         """
-        raise NotImplementedError('must be implemented by each subclass')
+        raise NotImplementedError("must be implemented by each subclass")
 
 
 class _MeanMeasure(_BaseMeasure):
@@ -1472,9 +1443,7 @@ class _MeanMeasure(_BaseMeasure):
     @lazyproperty
     def missing_count(self):
         """numeric representing count of missing rows reflected in response."""
-        return (
-            self._cube_dict['result']['measures']['mean'].get('n_missing', 0)
-        )
+        return self._cube_dict["result"]["measures"]["mean"].get("n_missing", 0)
 
     @lazyproperty
     def _flat_values(self):
@@ -1486,7 +1455,7 @@ class _MeanMeasure(_BaseMeasure):
         """
         return tuple(
             np.nan if type(x) is dict else x
-            for x in self._cube_dict['result']['measures']['mean']['data']
+            for x in self._cube_dict["result"]["measures"]["mean"]["data"]
         )
 
 
@@ -1496,7 +1465,7 @@ class _UnweightedCountMeasure(_BaseMeasure):
     @lazyproperty
     def _flat_values(self):
         """tuple of int counts before weighting."""
-        return tuple(self._cube_dict['result']['counts'])
+        return tuple(self._cube_dict["result"]["counts"])
 
 
 class _WeightedCountMeasure(_BaseMeasure):
@@ -1505,4 +1474,4 @@ class _WeightedCountMeasure(_BaseMeasure):
     @lazyproperty
     def _flat_values(self):
         """tuple of numeric counts after weighting."""
-        return tuple(self._cube_dict['result']['measures']['count']['data'])
+        return tuple(self._cube_dict["result"]["measures"]["count"]["data"])
