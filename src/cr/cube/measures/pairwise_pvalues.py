@@ -1,23 +1,94 @@
 # encoding: utf-8
 
-"""P-values of pairwise comparison or columns of a contingency table
-"""
+"""P-values of pairwise comparison or columns of a contingency table."""
 
-from cr.cube.distributions.wishart import wishartCDF
+from __future__ import division
+
+import numpy as np
+
+# from cr.cube.distributions.wishart import wishartCDF
+from cr.cube.distributions.wishart import WishartCDF
 from cr.cube.util import lazyproperty
 
+try:
+    xrange
+except NameError:  # pragma: no cover
+    # pylint: disable=invalid-name
+    xrange = range
 
-class PairwisePvalues(object):
+
+# pylint: disable=too-few-public-methods
+class PairwisePvalues:
     """Value object providing matrix of pairwise-comparison P-values"""
 
-    def __init__(self, chisq, shape, axis=0):
-        if axis != 0:
-            raise NotImplementedError("Pairwise p-values only implemented for colums")
-        self.axis = axis
-        self._chisq = chisq
-        self.n_max = max(shape) - 1
-        self.n_min = min(shape) - 1
+    def __init__(self, slice_, axis=0, weighted=True):
+        self._slice = slice_
+        self._axis = axis
+        self._weighted = weighted
 
     @lazyproperty
     def values(self):
-        return 1.0 - wishartCDF(self._chisq, self.n_min, self.n_max)
+        """Square matrix of pairwise Chi-square along axis, as numpy.ndarray."""
+        return 1.0 - WishartCDF(self._pairwise_chisq, self._n_min, self._n_max).values
+
+    @lazyproperty
+    def _categorical_pairwise_chisq(self):
+        """Pairwise comparisons (Chi-Square) along axis, as numpy.ndarray.
+
+        Returns a square, symmetric matrix of test statistics for the null
+        hypothesis that each vector along *axis* is equal to each other.
+        """
+        chisq = np.zeros([self._numel, self._numel])
+        for i in xrange(1, self._numel):
+            for j in xrange(0, self._numel - 1):
+                chisq[i, j] = chisq[j, i] = np.sum(
+                    np.square(self._proportions[:, i] - self._proportions[:, j])
+                    / self._observed
+                ) / (1 / self._margin[i] + 1 / self._margin[j])
+
+        return chisq
+
+    @lazyproperty
+    def _margin(self):
+        """Margin for the axis as numpy.ndarray."""
+        return self._slice.margin(axis=self._axis)
+
+    @lazyproperty
+    def _off_margin(self):
+        """Margin for the opposite axis as numpy.ndarray."""
+        return self._slice.margin(axis=(1 - self._axis))
+
+    @lazyproperty
+    def _pairwise_chisq(self):
+        """Pairwise Chi-squared statistics along axis, as numpy.ndarray.
+
+        Zscore is a measure of statistical significance of observed vs.
+        expected counts. It's only applicable to a 2D contingency tables.
+        """
+        return self._categorical_pairwise_chisq
+
+    @lazyproperty
+    def _proportions(self):
+        """Slice proportions for *axis* as numpy.ndarray."""
+        return self._slice.proportions(axis=self._axis)
+
+    @lazyproperty
+    def _n_max(self):
+        """Size (zero based) of the bigger of the two slice's dimension, as int."""
+        return max(self._slice.get_shape()) - 1
+
+    @lazyproperty
+    def _n_min(self):
+        """Size (zero based) of the smaller of the two slice's dimension, as int."""
+        return min(self._slice.get_shape()) - 1
+
+    @lazyproperty
+    def _numel(self):
+        """Number of elements of the dimension opposite to axis, as int."""
+        return self._slice.get_shape()[1 - self._axis]
+
+    @lazyproperty
+    def _observed(self):
+        """Observed marginal proportions, as float."""
+        total = self._slice.margin()
+        return self._off_margin / total

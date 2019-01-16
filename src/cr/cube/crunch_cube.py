@@ -17,7 +17,6 @@ from cr.cube.cube_slice import CubeSlice
 from cr.cube.dimension import AllDimensions
 from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.measures.index import Index
-from cr.cube.measures.pairwise_pvalues import PairwisePvalues
 from cr.cube.measures.scale_means import ScaleMeans
 from cr.cube.util import lazyproperty
 
@@ -714,35 +713,16 @@ class CrunchCube(object):
         res = [s.zscore(weighted, prune, hs_dims) for s in self.slices]
         return np.array(res) if self.ndim == 3 else res[0]
 
-    def pairwise_chisq(self, axis=0):
-        """Return square ndarray of pairwise Chi-square along axis.
-
-        Zscore is a measure of statistical signifficance of observed vs.
-        expected counts. It's only applicable to a 2D contingency tables.
-        For 3D cubes, the measures of separate slices are stacked together
-        and returned as the result.
-
-        :param weighted: Use weighted counts for zscores
-        :param prune: Prune based on unweighted counts
-        :param hs_dims: Include headers and subtotals (as NaN values)
-        :returns zscore: ndarray representing zscore measurements
-        """
-        res = [s.pairwise_chisq(axis=0) for s in self.slices]
-        return res[0]
-
     def pairwise_pvals(self, axis=0):
-        """Return square ndarray of pairwise Chi-square along axis.
+        """Return matrices of column-comparison p-values as list of numpy.ndarrays.
 
         Square, symmetric matrix along *axis* of pairwise p-values for the
         null hypothesis that col[i] = col[j] for each pair of columns.
 
-        :param axis: axis along which to perform comparison. Only columns (0)
-        implement currently.
-        :returns pvals: square, symmetric matrix of column-comparison p-values.
+        *axis* (int): axis along which to perform comparison. Only columns (0)
+        are implemented currently.
         """
-        statistics = [s.pairwise_chisq(axis=0) for s in self.slices]
-        shapes = [s.get_shape() for s in self.slices]
-        return PairwisePvalues(statistics[0], shapes[0], axis=axis).values
+        return [slice_.pairwise_pvals(axis=axis) for slice_ in self.slices]
 
     def _adjust_axis(self, axis):
         """Return raw axis/axes corresponding to apparent axis/axes.

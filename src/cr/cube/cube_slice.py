@@ -14,12 +14,8 @@ from scipy.stats.contingency import expected_freq
 
 from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.measures.scale_means import ScaleMeans
+from cr.cube.measures.pairwise_pvalues import PairwisePvalues
 from cr.cube.util import compress_pruned, lazyproperty, memoize
-
-try:
-    xrange
-except NameError:
-    xrange = range
 
 
 class CubeSlice(object):
@@ -311,6 +307,19 @@ class CubeSlice(object):
         table_name = self._cube.labels()[0][self._index]
         return "%s: %s" % (title, table_name)
 
+    def pairwise_pvals(self, axis=0):
+        """Return square symmetric matrix of pairwise column-comparison p-values.
+
+        Square, symmetric matrix along *axis* of pairwise p-values for the
+        null hypothesis that col[i] = col[j] for each pair of columns.
+
+        *axis* (int): axis along which to perform comparison. Only columns (0)
+        are implemented currently.
+        """
+        if axis != 0:
+            raise NotImplementedError("Pairwise comparison only implemented for colums")
+        return PairwisePvalues(self, axis=axis).values
+
     def pvals(self, weighted=True, prune=False, hs_dims=None):
         """Return 2D ndarray with calculated P values
 
@@ -361,22 +370,6 @@ class CubeSlice(object):
             return self._apply_pruning_mask(zscore, hs_dims)
 
         return zscore
-
-    def pairwise_chisq(self, axis=0, weighted=True):
-        """Return square ndarray of pairwise Chi-squared statistics along axis.
-
-        Zscore is a measure of statistical significance of observed vs.
-        expected counts. It's only applicable to a 2D contingency tables.
-
-        :param weighted: Use weighted counts for zscores
-        :param prune: Prune based on unweighted counts
-        :param hs_dims: Include headers and subtotals (as NaN values)
-        :returns zscore: ndarray representing zscore measurements
-        """
-        counts = self.as_array(weighted=weighted)
-        chisq = self._categorical_pairwise_chisq(counts, axis)
-
-        return chisq
 
     def _apply_pruning_mask(self, res, hs_dims=None):
         array = self.as_array(prune=True, include_transforms_for_dims=hs_dims)
@@ -485,29 +478,6 @@ class CubeSlice(object):
             / total ** 3
         )
         return residuals / np.sqrt(variance)
-
-    def _categorical_pairwise_chisq(self, counts, axis=0):
-        """Return ndarray containing pairwise comparisons along axis
-
-        Returns a square, symmetric matrix of test statistics for the null
-        hypothesis that each vector along *axis* is equal to each other.
-        """
-        if axis != 0:
-            raise NotImplementedError("Pairwise comparison only implemented for colums")
-        if axis == 0:
-            margin = self.margin(0)
-            offmargin = self.margin(1)
-            proportions = self.proportions(axis=0)
-            wts = offmargin / self.margin()
-            elements = counts.shape[1]
-            chisq = np.zeros([elements, elements])
-            for i in xrange(1, elements):
-                for j in xrange(0, elements - 1):
-                    chisq[i, j] = chisq[j, i] = np.sum(
-                        np.square(proportions[:, i] - proportions[:, j]) / wts
-                    ) / (1 / margin[i] + 1 / margin[j])
-
-            return chisq
 
     def _update_args(self, kwargs):
         if self._cube.ndim < 3:
