@@ -713,6 +713,17 @@ class CrunchCube(object):
         res = [s.zscore(weighted, prune, hs_dims) for s in self.slices]
         return np.array(res) if self.ndim == 3 else res[0]
 
+    def pairwise_pvals(self, axis=0):
+        """Return matrices of column-comparison p-values as list of numpy.ndarrays.
+
+        Square, symmetric matrix along *axis* of pairwise p-values for the
+        null hypothesis that col[i] = col[j] for each pair of columns.
+
+        *axis* (int): axis along which to perform comparison. Only columns (0)
+        are implemented currently.
+        """
+        return [slice_.pairwise_pvals(axis=axis) for slice_ in self.slices]
+
     def _adjust_axis(self, axis):
         """Return raw axis/axes corresponding to apparent axis/axes.
 

@@ -14,6 +14,7 @@ from scipy.stats.contingency import expected_freq
 
 from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.measures.scale_means import ScaleMeans
+from cr.cube.measures.pairwise_pvalues import PairwisePvalues
 from cr.cube.util import compress_pruned, lazyproperty, memoize
 
 
@@ -306,12 +307,26 @@ class CubeSlice(object):
         table_name = self._cube.labels()[0][self._index]
         return "%s: %s" % (title, table_name)
 
-    def pvals(self, weighted=True, prune=False, hs_dims=None):
-        """Return 2D ndarray with calculated p-vals.
+    def pairwise_pvals(self, axis=0):
+        """Return square symmetric matrix of pairwise column-comparison p-values.
 
-        This function calculates statistically significant results for
-        categorical contingency tables. The values are calculated for 2D tables
-        only.
+        Square, symmetric matrix along *axis* of pairwise p-values for the
+        null hypothesis that col[i] = col[j] for each pair of columns.
+
+        *axis* (int): axis along which to perform comparison. Only columns (0)
+        are implemented currently.
+        """
+        if axis != 0:
+            raise NotImplementedError("Pairwise comparison only implemented for colums")
+        return PairwisePvalues(self, axis=axis).values
+
+    def pvals(self, weighted=True, prune=False, hs_dims=None):
+        """Return 2D ndarray with calculated P values
+
+        This function calculates statistically significant cells for
+        categorical contingency tables under the null hypothesis that the
+        row and column variables are independent (uncorrelated).
+        The values are calculated for 2D tables only.
 
         :param weighted: Use weighted counts for zscores
         :param prune: Prune based on unweighted counts
@@ -325,15 +340,22 @@ class CubeSlice(object):
         return self._apply_pruning_mask(pvals, hs_dims) if prune else pvals
 
     def zscore(self, weighted=True, prune=False, hs_dims=None):
-        """Return ndarray with slices's zscore measurements.
+        """Return ndarray with slices's standardized residuals (Z-scores).
 
-        Zscore is a measure of statistical signifficance of observed vs.
-        expected counts. It's only applicable to a 2D contingency tables.
+        (Only applicable to a 2D contingency tables.) The Z-score or
+        standardized residual is the difference between observed and expected
+        cell counts if row and column variables were independent divided
+        by the residual cell variance. They are assumed to come from a N(0,1)
+        or standard Normal distribution, and can show which cells deviate from
+        the null hypothesis that the row and column variables are uncorrelated.
+
+        See also *pairwise_chisq*, *pairwise_pvals* for a pairwise column-
+        or row-based test of statistical significance.
 
         :param weighted: Use weighted counts for zscores
         :param prune: Prune based on unweighted counts
         :param hs_dims: Include headers and subtotals (as NaN values)
-        :returns zscore: ndarray representing zscore measurements
+        :returns zscore: ndarray representing cell standardized residuals (Z)
         """
         counts = self.as_array(weighted=weighted)
         total = self.margin(weighted=weighted)
