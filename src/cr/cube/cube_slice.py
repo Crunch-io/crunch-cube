@@ -108,6 +108,10 @@ class CubeSlice(object):
         return 1 if not self.ca_as_0th else 0
 
     @lazyproperty
+    def can_compare_pairwise(self):
+        return self.dim_types == (DT.CAT, DT.CAT)
+
+    @lazyproperty
     def dim_types(self):
         """Tuple of DIMENSION_TYPE member for each dimension of slice."""
         return self._cube.dim_types[-2:]

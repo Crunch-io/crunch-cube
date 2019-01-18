@@ -53,7 +53,40 @@ class DescribeCubeSlice(object):
 
         assert is_double_mr is expected_value
 
+    def it_can_compare_pairwise(
+        self, cube_, dim_types_prop_, pairwise_comparisons_fixture
+    ):
+        dim_types, slice_can_show = pairwise_comparisons_fixture
+        dim_types_prop_.return_value = dim_types
+        slice_ = CubeSlice(cube_, None)
+
+        assert slice_.can_compare_pairwise == slice_can_show
+
     # fixtures -------------------------------------------------------
+
+    @pytest.fixture(
+        params=[
+            ((DT.CAT,), False),
+            ((DT.MR,), False),
+            ((DT.BINNED_NUMERIC,), False),
+            ((DT.DATETIME,), False),
+            ((DT.LOGICAL,), False),
+            ((DT.TEXT,), False),
+            ((DT.CA_CAT,), False),
+            ((DT.CA_SUBVAR, DT.CA_CAT), False),
+            ((DT.CA_SUBVAR, DT.MR, DT.CA_CAT), False),
+            ((DT.MR, DT.CAT), False),
+            ((DT.BINNED_NUMERIC, DT.CAT), False),
+            ((DT.DATETIME, DT.CAT), False),
+            ((DT.LOGICAL, DT.CAT), False),
+            ((DT.TEXT, DT.CAT), False),
+            ((DT.CA_CAT, DT.CAT), False),
+            ((DT.CAT, DT.CAT), True),
+        ]
+    )
+    def pairwise_comparisons_fixture(self, request):
+        dim_types, slice_can_show = request.param
+        return dim_types, slice_can_show
 
     @pytest.fixture(
         params=[
