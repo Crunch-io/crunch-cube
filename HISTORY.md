@@ -1,5 +1,18 @@
 # History of Changes
 
+#### 1.8.4
+- Fix `index_table` for MR (single element) x CAT
+
+#### 1.8.3
+- fix second "broadcast error" bug (different cause)
+- refactor to extract `_Measures` object and related
+- other general factoring improvements in `cr.cube.crunch_cube`
+
+#### 1.8.2
+- fix "broadcast error" bug
+- improve test coverage
+- relocate test fixtures and add cached fixture lazy-loading
+
 #### 1.8.1
 - Major Cube refactor and a couple bugfixes
 

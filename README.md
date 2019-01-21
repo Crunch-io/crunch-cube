@@ -112,23 +112,13 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.9.0
+- Implement pairwise comparisons
+
 #### 1.8.6
 - Fix pruning for single element MRs
 
 #### 1.8.5
 - Fix `index_table` for MR x MR where either dimension has a only single element
-
-#### 1.8.4
-- Fix `index_table` for MR (single element) x CAT
-
-#### 1.8.3
-- fix second "broadcast error" bug (different cause)
-- refactor to extract `_Measures` object and related
-- other general factoring improvements in `cr.cube.crunch_cube`
-
-#### 1.8.2
-- fix "broadcast error" bug
-- improve test coverage
-- relocate test fixtures and add cached fixture lazy-loading
 
 For a complete list of changes see [history](https://github.com/Crunch-io/crunch-cube/blob/master/HISTORY.md).
