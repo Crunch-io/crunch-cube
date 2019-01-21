@@ -15,6 +15,7 @@ from cr.cube.crunch_cube import (
     _UnweightedCountMeasure,
     _WeightedCountMeasure,
 )
+from cr.cube.cube_slice import CubeSlice
 from cr.cube.dimension import AllDimensions, _ApparentDimensions, Dimension
 from cr.cube.enum import DIMENSION_TYPE as DT
 
@@ -30,6 +31,12 @@ from ..unitutil import (
 
 
 class DescribeCrunchCube(object):
+    def it_can_compare_pariwise(self, can_compare_pairwise_fixture, slices_prop_):
+        slices, can_compare_pairwise = can_compare_pairwise_fixture
+        slices_prop_.return_value = slices
+        cube = CrunchCube(None)
+        assert cube.can_compare_pairwise is can_compare_pairwise
+
     def it_provides_a_default_repr(self):
         cube = CrunchCube(None)
         repr_ = repr(cube)
@@ -231,6 +238,22 @@ class DescribeCrunchCube(object):
         assert measures is measures_
 
     # fixtures -------------------------------------------------------
+
+    @pytest.fixture(
+        params=[
+            ([True, True, True], True),
+            ([False, True, True], False),
+            ([True, True, False], False),
+            ([False, False, False], False),
+        ]
+    )
+    def can_compare_pairwise_fixture(self, request):
+        slices_can_compare_pairwise, cube_can_compare_pairwise = request.param
+        slices = [
+            instance_mock(request, CubeSlice, can_compare_pairwise=can_compare_pairwise)
+            for can_compare_pairwise in slices_can_compare_pairwise
+        ]
+        return slices, cube_can_compare_pairwise
 
     @pytest.fixture(
         params=[
@@ -447,6 +470,10 @@ class DescribeCrunchCube(object):
     @pytest.fixture
     def AllDimensions_(self, request):
         return class_mock(request, "cr.cube.crunch_cube.AllDimensions")
+
+    @pytest.fixture
+    def slices_prop_(self, request):
+        return property_mock(request, CrunchCube, "slices")
 
     @pytest.fixture
     def all_dimensions_(self, request):

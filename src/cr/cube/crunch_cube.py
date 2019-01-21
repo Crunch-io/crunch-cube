@@ -125,6 +125,10 @@ class CrunchCube(object):
 
         return self._drop_mr_cat_dims(array)
 
+    @lazyproperty
+    def can_compare_pairwise(self):
+        return all(slice_.can_compare_pairwise for slice_ in self.slices)
+
     def count(self, weighted=True):
         """Return numberic count of rows considered for cube response."""
         return self._measures.weighted_n if weighted else self._measures.unweighted_n
