@@ -262,8 +262,9 @@ class CubeSlice(object):
         scaled mean (as numpy array). If both row and col scaled means are
         present, return them as two numpy arrays inside of a list.
         """
+        scale_means = self._cube.scale_means(hs_dims, prune)
         if self.ca_as_0th:
-            return [None, None]
+            return [scale_means[0][-1][self._index]]
         return self._cube.scale_means(hs_dims, prune)[self._index]
 
     @memoize

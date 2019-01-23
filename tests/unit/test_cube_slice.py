@@ -574,8 +574,10 @@ class TestCubeSlice(object):
         """Test that CA as 0th slice always returns empty scale means."""
         cube = Mock()
         cube.dim_types = (DT.CA_SUBVAR,)
+        scale_means_value = Mock()
+        cube.scale_means.return_value = [[None, [scale_means_value, Mock(), Mock()]]]
         cs = CubeSlice(cube, 0, ca_as_0th=True)
-        assert cs.scale_means() == [None, None]
+        assert cs.scale_means() == [scale_means_value]
 
     def test_shape_property_deprecated(self):
         cube = Mock()
