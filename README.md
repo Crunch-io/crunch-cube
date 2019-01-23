@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.9.1
+- Fix `scale_means` for Categorical Array (as a 0th slice in Tabbooks)
+
 #### 1.9.0
 - Implement pairwise comparisons
 
