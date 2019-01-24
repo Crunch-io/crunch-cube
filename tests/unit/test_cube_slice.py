@@ -571,13 +571,23 @@ class TestCubeSlice(object):
         assert mock_sm_margin.called_once_with(fake_axis)
 
     def test_scale_means_for_ca_as_0th(self):
-        """Test that CA as 0th slice always returns empty scale means."""
+        """Test that CA as 0th slice always returns empty scale means.
+
+        If we observe the slice as the 0th dimension of the Tabbook, we need it's 1st
+        dimension in the context of scale means (because the 0th dimension is CA items,
+        and can't have numerical values, and is used only for slicing)
+        """
         cube = Mock()
         cube.dim_types = (DT.CA_SUBVAR,)
         scale_means_value = Mock()
+
         cube.scale_means.return_value = [[None, [scale_means_value, Mock(), Mock()]]]
         cs = CubeSlice(cube, 0, ca_as_0th=True)
         assert cs.scale_means() == [scale_means_value]
+
+        cube.scale_means.return_value = [[None, None]]
+        cs = CubeSlice(cube, 0, ca_as_0th=True)
+        assert cs.scale_means() == [None]
 
     def test_shape_property_deprecated(self):
         cube = Mock()

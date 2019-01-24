@@ -263,9 +263,18 @@ class CubeSlice(object):
         present, return them as two numpy arrays inside of a list.
         """
         scale_means = self._cube.scale_means(hs_dims, prune)
+
         if self.ca_as_0th:
-            return [scale_means[0][-1][self._index]]
-        return self._cube.scale_means(hs_dims, prune)[self._index]
+            # If slice is used as 0th CA, then we need to observe the 1st dimension,
+            # because the 0th dimension is CA items, which is only used for slicing
+            # (and thus doesn't have numerical values, and also doesn't constitute any
+            # dimension of the actual crosstabs that will be created in this case).
+            scale_means = scale_means[0][-1]
+            if scale_means is None:
+                return [None]
+            return [scale_means[self._index]]
+
+        return scale_means[self._index]
 
     @memoize
     def scale_means_margin(self, axis):
