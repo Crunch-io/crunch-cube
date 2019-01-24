@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.9.2
+- Fix `scale_means` for Categorical Array (as a 0th slice in Tabbooks) where categorical doesn't have any numerical values
+
 #### 1.9.1
 - Fix `scale_means` for Categorical Array (as a 0th slice in Tabbooks)
 
