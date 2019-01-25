@@ -32,6 +32,11 @@ class PairwisePvalues:
         return 1.0 - WishartCDF(self._pairwise_chisq, self._n_min, self._n_max).values
 
     @lazyproperty
+    def values_with_hs(self):
+        """Chi-square with np.nan in place of H&S, as square numpy.ndarray."""
+        return self._intersperse_hs(self.values)
+
+    @lazyproperty
     def _categorical_pairwise_chisq(self):
         """Pairwise comparisons (Chi-Square) along axis, as numpy.ndarray.
 
@@ -92,3 +97,14 @@ class PairwisePvalues:
         """Observed marginal proportions, as float."""
         total = self._slice.margin()
         return self._off_margin / total
+
+    @lazyproperty
+    def _hs_inds(self):
+        """Return H&S indices of the pairwise comparison dimension."""
+        return self._slice.inserted_hs_indices()[1 - self._axis]
+
+    def _intersperse_hs(self, pairwise_pvals):
+        for i in self._hs_inds:
+            pairwise_pvals = np.insert(pairwise_pvals, i, np.nan, axis=0)
+            pairwise_pvals = np.insert(pairwise_pvals, i, np.nan, axis=1)
+        return pairwise_pvals

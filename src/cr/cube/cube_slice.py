@@ -328,7 +328,7 @@ class CubeSlice(object):
         """
         if axis != 0:
             raise NotImplementedError("Pairwise comparison only implemented for colums")
-        return PairwisePvalues(self, axis=axis).values
+        return PairwisePvalues(self, axis=axis).values_with_hs
 
     def pvals(self, weighted=True, prune=False, hs_dims=None):
         """Return 2D ndarray with calculated P values
@@ -432,9 +432,9 @@ class CubeSlice(object):
 
     def _intersperse_hs_in_std_res(self, hs_dims, res):
         for dim, inds in enumerate(self.inserted_hs_indices()):
+            if dim not in hs_dims:
+                continue
             for i in inds:
-                if dim not in hs_dims:
-                    continue
                 res = np.insert(res, i, np.nan, axis=(dim - self.ndim))
         return res
 
