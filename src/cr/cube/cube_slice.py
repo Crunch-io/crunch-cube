@@ -110,7 +110,15 @@ class CubeSlice(object):
 
     @lazyproperty
     def can_compare_pairwise(self):
-        return self.dim_types == (DT.CAT, DT.CAT)
+        """Return bool indicating if slice can compute pairwise comparisons.
+
+        Currently, only the CAT x CAT slice can compute pairwise comparisons. This also
+        includes the categorical array categories dimnension (CA_CAT).
+        """
+        if self.ndim != 2:
+            return False
+
+        return all(dt in (DT.CAT, DT.CA_CAT) for dt in self.dim_types)
 
     @lazyproperty
     def dim_types(self):

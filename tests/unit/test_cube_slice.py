@@ -54,10 +54,11 @@ class DescribeCubeSlice(object):
         assert is_double_mr is expected_value
 
     def it_can_compare_pairwise(
-        self, cube_, dim_types_prop_, pairwise_comparisons_fixture
+        self, cube_, dim_types_prop_, ndim_prop_, pairwise_comparisons_fixture
     ):
         dim_types, slice_can_show = pairwise_comparisons_fixture
         dim_types_prop_.return_value = dim_types
+        ndim_prop_.return_value = len(dim_types)
         slice_ = CubeSlice(cube_, None)
 
         assert slice_.can_compare_pairwise == slice_can_show
@@ -80,7 +81,8 @@ class DescribeCubeSlice(object):
             ((DT.DATETIME, DT.CAT), False),
             ((DT.LOGICAL, DT.CAT), False),
             ((DT.TEXT, DT.CAT), False),
-            ((DT.CA_CAT, DT.CAT), False),
+            ((DT.CA_CAT, DT.CAT), True),
+            ((DT.CAT, DT.CA_CAT), True),
             ((DT.CAT, DT.CAT), True),
         ]
     )
@@ -246,6 +248,10 @@ class DescribeCubeSlice(object):
     @pytest.fixture
     def dim_types_prop_(self, request):
         return property_mock(request, CubeSlice, "dim_types")
+
+    @pytest.fixture
+    def ndim_prop_(self, request):
+        return property_mock(request, CubeSlice, "ndim")
 
     @pytest.fixture
     def _array_type_std_res(self, request):
