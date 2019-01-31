@@ -432,9 +432,9 @@ class CubeSlice(object):
 
     def _intersperse_hs_in_std_res(self, hs_dims, res):
         for dim, inds in enumerate(self.inserted_hs_indices()):
+            if dim not in hs_dims:
+                continue
             for i in inds:
-                if dim not in hs_dims:
-                    continue
                 res = np.insert(res, i, np.nan, axis=(dim - self.ndim))
         return res
 

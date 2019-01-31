@@ -1,0 +1,284 @@
+{
+    "query": {
+        "measures": {
+            "count": {
+                "function": "cube_count",
+                "args": []
+            }
+        },
+        "dimensions": [
+            {
+                "variable": "000000"
+            },
+            {
+                "variable": "000001"
+            }
+        ],
+        "weight": null
+    },
+    "query_environment": {
+        "filter": []
+    },
+    "result": {
+        "dimensions": [
+            {
+                "derived": false,
+                "references": {
+                    "alias": "illness",
+                    "name": "illness"
+                },
+                "type": {
+                    "ordinal": false,
+                    "class": "categorical",
+                    "categories": [
+                        {
+                            "numeric_value": 3,
+                            "id": 3,
+                            "name": "slight",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 1,
+                            "id": 1,
+                            "name": "medium",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 2,
+                            "id": 2,
+                            "name": "serious",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": null,
+                            "id": -1,
+                            "name": "No Data",
+                            "missing": true
+                        }
+                    ]
+                }
+            },
+            {
+                "references": {
+                    "alias": "occupation",
+                    "name": "occupation",
+                    "view": {
+                        "show_counts": false,
+                        "show_numeric_values": false,
+                        "transform": {
+                            "insertions": [
+                                {
+                                    "function": "subtotal",
+                                    "args": [
+                                        6,
+                                        7,
+                                        8,
+                                        9,
+                                        10
+                                    ],
+                                    "name": "above 5",
+                                    "anchor": 5
+                                }
+                            ]
+                        },
+                        "include_missing": false,
+                        "column_width": null
+                    }
+                },
+                "derived": false,
+                "type": {
+                    "ordinal": false,
+                    "class": "categorical",
+                    "categories": [
+                        {
+                            "numeric_value": 1,
+                            "id": 1,
+                            "name": "1",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 2,
+                            "id": 2,
+                            "name": "2",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 3,
+                            "id": 3,
+                            "name": "3",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 4,
+                            "id": 4,
+                            "name": "4",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 5,
+                            "id": 5,
+                            "name": "5",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 6,
+                            "id": 6,
+                            "name": "6",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 7,
+                            "id": 7,
+                            "name": "7",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 8,
+                            "id": 8,
+                            "name": "8",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 9,
+                            "id": 9,
+                            "name": "9",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 10,
+                            "id": 10,
+                            "name": "10",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": null,
+                            "id": -1,
+                            "name": "No Data",
+                            "missing": true
+                        }
+                    ]
+                }
+            }
+        ],
+        "missing": 0,
+        "measures": {
+            "count": {
+                "data": [
+                    148,
+                    111,
+                    645,
+                    165,
+                    383,
+                    96,
+                    98,
+                    199,
+                    59,
+                    262,
+                    0,
+                    444,
+                    352,
+                    1911,
+                    771,
+                    1829,
+                    293,
+                    330,
+                    874,
+                    199,
+                    1320,
+                    0,
+                    86,
+                    49,
+                    328,
+                    119,
+                    311,
+                    47,
+                    58,
+                    155,
+                    30,
+                    236,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "n_missing": 0,
+                "metadata": {
+                    "references": {},
+                    "derived": true,
+                    "type": {
+                        "integer": true,
+                        "missing_rules": {},
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "class": "numeric"
+                    }
+                }
+            }
+        },
+        "n": 11908,
+        "unfiltered": {
+            "unweighted_n": 11908,
+            "weighted_n": 11908
+        },
+        "filtered": {
+            "unweighted_n": 11908,
+            "weighted_n": 11908
+        },
+        "counts": [
+            148,
+            111,
+            645,
+            165,
+            383,
+            96,
+            98,
+            199,
+            59,
+            262,
+            0,
+            444,
+            352,
+            1911,
+            771,
+            1829,
+            293,
+            330,
+            874,
+            199,
+            1320,
+            0,
+            86,
+            49,
+            328,
+            119,
+            311,
+            47,
+            58,
+            155,
+            30,
+            236,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ],
+        "element": "crunch:cube"
+    }
+}
