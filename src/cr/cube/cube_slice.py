@@ -328,7 +328,7 @@ class CubeSlice(object):
         """
         if axis != 0:
             raise NotImplementedError("Pairwise comparison only implemented for colums")
-        return PairwisePvalues(self, axis=axis).values_with_hs
+        return PairwisePvalues(self, axis=axis).values
 
     def pvals(self, weighted=True, prune=False, hs_dims=None):
         """Return 2D ndarray with calculated P values

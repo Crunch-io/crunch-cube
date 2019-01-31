@@ -29,12 +29,9 @@ class PairwisePvalues:
     @lazyproperty
     def values(self):
         """Square matrix of pairwise Chi-square along axis, as numpy.ndarray."""
-        return 1.0 - WishartCDF(self._pairwise_chisq, self._n_min, self._n_max).values
-
-    @lazyproperty
-    def values_with_hs(self):
-        """Chi-square with np.nan in place of H&S, as square numpy.ndarray."""
-        return self._intersperse_hs(self.values)
+        return self._intersperse_insertions_rows_and_columns(
+            1.0 - WishartCDF(self._pairwise_chisq, self._n_min, self._n_max).values
+        )
 
     @lazyproperty
     def _categorical_pairwise_chisq(self):
@@ -99,12 +96,20 @@ class PairwisePvalues:
         return self._off_margin / total
 
     @lazyproperty
-    def _hs_inds(self):
+    def _insertions_indices(self):
         """Return H&S indices of the pairwise comparison dimension."""
         return self._slice.inserted_hs_indices()[1 - self._axis]
 
-    def _intersperse_hs(self, pairwise_pvals):
-        for i in self._hs_inds:
+    def _intersperse_insertions_rows_and_columns(self, pairwise_pvals):
+        """Return pvals matrix with inserted NaN rows and columns, as numpy.ndarray.
+
+        Insertions (Headers and Subtotals) create offset in calculated pvals, and
+        these need to be taken into account, when converting them to columnar letters
+        representation. For this reason, we need to insert an all-NaN row and a
+        column in the right indices (the inserted indices of the H&S, in the
+        respective dimension).
+        """
+        for i in self._insertions_indices:
             pairwise_pvals = np.insert(pairwise_pvals, i, np.nan, axis=0)
             pairwise_pvals = np.insert(pairwise_pvals, i, np.nan, axis=1)
         return pairwise_pvals
