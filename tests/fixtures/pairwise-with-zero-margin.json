@@ -1,0 +1,249 @@
+{
+    "result": {
+        "dimensions": [
+            {
+                "references": {
+                    "alias": "illness",
+                    "name": "Illness"
+                },
+                "derived": false,
+                "type": {
+                    "ordinal": false,
+                    "class": "categorical",
+                    "categories": [
+                        {
+                            "numeric_value": 3,
+                            "missing": false,
+                            "id": 3,
+                            "name": "slight"
+                        },
+                        {
+                            "numeric_value": 1,
+                            "missing": false,
+                            "id": 1,
+                            "name": "medium"
+                        },
+                        {
+                            "numeric_value": 2,
+                            "missing": false,
+                            "id": 2,
+                            "name": "serious"
+                        },
+                        {
+                            "numeric_value": null,
+                            "missing": true,
+                            "id": -1,
+                            "name": "No Data"
+                        }
+                    ]
+                }
+            },
+            {
+                "derived": false,
+                "references": {
+                    "alias": "occupation",
+                    "name": "Occupation",
+                    "view": {
+                        "show_counts": false,
+                        "show_numeric_values": false,
+                        "transform": {
+                            "insertions": []
+                        },
+                        "include_missing": false,
+                        "column_width": null
+                    }
+                },
+                "type": {
+                    "ordinal": false,
+                    "class": "categorical",
+                    "categories": [
+                        {
+                            "numeric_value": 1,
+                            "missing": false,
+                            "id": 1,
+                            "name": "1"
+                        },
+                        {
+                            "numeric_value": 2,
+                            "missing": false,
+                            "id": 2,
+                            "name": "2"
+                        },
+                        {
+                            "numeric_value": 3,
+                            "missing": false,
+                            "id": 3,
+                            "name": "3"
+                        },
+                        {
+                            "numeric_value": 4,
+                            "missing": false,
+                            "id": 4,
+                            "name": "4"
+                        },
+                        {
+                            "numeric_value": 5,
+                            "missing": false,
+                            "id": 5,
+                            "name": "5"
+                        },
+                        {
+                            "numeric_value": 6,
+                            "missing": false,
+                            "id": 6,
+                            "name": "6"
+                        },
+                        {
+                            "numeric_value": 7,
+                            "missing": false,
+                            "id": 7,
+                            "name": "7"
+                        },
+                        {
+                            "numeric_value": 8,
+                            "missing": false,
+                            "id": 8,
+                            "name": "8"
+                        },
+                        {
+                            "numeric_value": 9,
+                            "missing": false,
+                            "id": 9,
+                            "name": "9"
+                        },
+                        {
+                            "numeric_value": 10,
+                            "missing": false,
+                            "id": 10,
+                            "name": "10"
+                        },
+                        {
+                            "numeric_value": null,
+                            "missing": true,
+                            "id": -1,
+                            "name": "No Data"
+                        }
+                    ]
+                }
+            }
+        ],
+        "measures": {
+            "count": {
+                "data": [
+                    148,
+                    111,
+                    645,
+                    165,
+                    383,
+                    96,
+                    98,
+                    199,
+                    59,
+                    262,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    86,
+                    49,
+                    328,
+                    119,
+                    311,
+                    47,
+                    58,
+                    155,
+                    30,
+                    236,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "n_missing": 0,
+                "metadata": {
+                    "references": {},
+                    "derived": true,
+                    "type": {
+                        "integer": true,
+                        "missing_rules": {},
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "class": "numeric"
+                    }
+                }
+            }
+        },
+        "n": 3585,
+        "unfiltered": {
+            "unweighted_n": 11908,
+            "weighted_n": 11908
+        },
+        "filtered": {
+            "unweighted_n": 3585,
+            "weighted_n": 3585
+        },
+        "counts": [
+            148,
+            111,
+            645,
+            165,
+            383,
+            96,
+            98,
+            199,
+            59,
+            262,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            86,
+            49,
+            328,
+            119,
+            311,
+            47,
+            58,
+            155,
+            30,
+            236,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ]
+    }
+}
