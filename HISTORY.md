@@ -1,5 +1,17 @@
 # History of Changes
 
+#### 1.9.1
+- Fix `scale_means` for Categorical Array (as a 0th slice in Tabbooks)
+
+#### 1.9.0
+- Implement pairwise comparisons
+
+#### 1.8.6
+- Fix pruning for single element MRs
+
+#### 1.8.5
+- Fix `index_table` for MR x MR where either dimension has a only single element
+
 #### 1.8.4
 - Fix `index_table` for MR (single element) x CAT
 

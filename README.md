@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.9.4
+- Enable `CA_CAT` as a dimension type when calculating Pairwise Comparisons
+
 #### 1.9.3
 - Support H&S when calculating Pairwise Comparisons
 
