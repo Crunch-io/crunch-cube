@@ -338,6 +338,27 @@ class CubeSlice(object):
             raise NotImplementedError("Pairwise comparison only implemented for colums")
         return PairwisePvalues(self, axis=axis).values
 
+    def population_counts(
+        self,
+        population_size,
+        weighted=True,
+        include_missing=False,
+        include_transforms_for_dims=None,
+        prune=False,
+    ):
+        axis = None if not self.ca_as_0th else 1
+        return (
+            self.proportions(
+                axis=axis,
+                weighted=weighted,
+                include_missing=include_missing,
+                include_transforms_for_dims=include_transforms_for_dims,
+                prune=prune,
+            )
+            * population_size
+            * self._cube.population_fraction
+        )
+
     def pvals(self, weighted=True, prune=False, hs_dims=None):
         """Return 2D ndarray with calculated P values
 

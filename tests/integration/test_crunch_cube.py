@@ -2206,3 +2206,11 @@ class TestCrunchCube(TestCase):
         # in the result). H&S shouldn't be in the MR variable, but there
         # are cases when there are.
         assert True
+
+    def test_pop_counts_ca_as_0th(self):
+        cube_slice = CrunchCube(CR.CA_AS_0TH).get_slices(ca_as_0th=True)[0]
+        expected = np.array(
+            [54523323.46453754, 24570078.10865863, 15710358.25446403, 5072107.27712256]
+        )
+        actual = cube_slice.population_counts(100000000)
+        np.testing.assert_almost_equal(actual, expected)
