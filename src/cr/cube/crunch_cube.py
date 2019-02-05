@@ -500,16 +500,20 @@ class CrunchCube(object):
                 [3000, 1800],
             ])
         """
-        return (
-            self.proportions(
+        population_counts = [
+            slice_.population_counts(
+                population_size,
                 weighted=weighted,
                 include_missing=include_missing,
                 include_transforms_for_dims=include_transforms_for_dims,
                 prune=prune,
             )
-            * population_size
-            * self.population_fraction
-        )
+            for slice_ in self.slices
+        ]
+
+        if len(population_counts) > 1:
+            return np.array(population_counts)
+        return population_counts[0]
 
     @lazyproperty
     def population_fraction(self):

@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.9.5
+- Fix calculating population counts for CAxCAT slices, that need to be treated as 0th cubes in tabbooks
+
 #### 1.9.4
 - Enable `CA_CAT` as a dimension type when calculating Pairwise Comparisons
 
@@ -120,17 +123,5 @@ The detailed description can be found
 
 #### 1.9.2
 - Fix `scale_means` for Categorical Array (as a 0th slice in Tabbooks) where categorical doesn't have any numerical values
-
-#### 1.9.1
-- Fix `scale_means` for Categorical Array (as a 0th slice in Tabbooks)
-
-#### 1.9.0
-- Implement pairwise comparisons
-
-#### 1.8.6
-- Fix pruning for single element MRs
-
-#### 1.8.5
-- Fix `index_table` for MR x MR where either dimension has a only single element
 
 For a complete list of changes see [history](https://github.com/Crunch-io/crunch-cube/blob/master/HISTORY.md).
