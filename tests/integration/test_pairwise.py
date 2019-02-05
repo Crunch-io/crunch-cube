@@ -441,3 +441,17 @@ class TestStandardizedResiduals(TestCase):
             ).reshape(4, 4)
         ]
         np.testing.assert_almost_equal(actual, expected)
+
+    def test_pairwise_with_zero_margin(self):
+        """Assert pairwise doesn't break when a 0 value is in any slice margin.
+
+        We currently don't know the correct maths behind this. This test needs to be
+        updated once we figure this out.
+        """
+        cube = CrunchCube(CR.PAIRWISE_WITH_ZERO_MARGIN)
+
+        # TODO: Replace with updated expectation when maths is figured out
+        expected = [np.ones((10, 10), dtype=float)]
+
+        actual = cube.pairwise_pvals(axis=0)
+        np.testing.assert_almost_equal(actual, expected)

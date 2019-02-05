@@ -145,6 +145,9 @@ class Pfaffian:
                 b -= q[i + j] / (g[i] * g[j + 1])
                 A[j + 1, i] = p[i] * p[j + 1] - 2 * b
                 A[i, j + 1] = -A[j + 1, i]
+
+        if np.any(np.isnan(A)):
+            return 0
         return np.sqrt(det(A))
 
     @lazyproperty
