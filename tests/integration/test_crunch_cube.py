@@ -2214,3 +2214,24 @@ class TestCrunchCube(TestCase):
         )
         actual = cube_slice.population_counts(100000000)
         np.testing.assert_almost_equal(actual, expected)
+
+    def test_pop_counts_for_multiple_slices(self):
+        cube = CrunchCube(CR.PETS_ARRAY_X_PETS)
+        expected = np.array(
+            [
+                [
+                    [24992768.29621058, 0.0, 26901938.09661558],
+                    [17298235.46427536, 44258027.19120625, 21174428.69540066],
+                ],
+                [
+                    [0.0, 19459910.91314028, 24053452.11581288],
+                    [48106904.23162583, 16648106.90423161, 22216035.63474388],
+                ],
+                [
+                    [21474773.60931439, 18272962.4838292, 0.0],
+                    [25808538.16300128, 23673997.41267791, 53751617.07632601],
+                ],
+            ]
+        )
+        actual = cube.population_counts(100000000)
+        np.testing.assert_almost_equal(actual, expected)
