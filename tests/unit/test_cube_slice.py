@@ -111,13 +111,6 @@ class DescribeCubeSlice(object):
         dim_types, slice_can_show = request.param
         return dim_types, slice_can_show
 
-    @pytest.fixture(
-        params=[
-            ((DT.CAT,), (DT.CAT,)),
-            ((DT.CA_SUBVAR, DT.CA_CAT), (DT.CA_SUBVAR, DT.CA_CAT)),
-            ((DT.CA_SUBVAR, DT.MR, DT.CA_CAT), (DT.MR, DT.CA_CAT)),
-        ]
-    )
     def it_updates_hs_dims_arguments(self, hs_fixture, cube_):
         hs_dims, ndim, expected_value = hs_fixture
         cube_.ndim = ndim
