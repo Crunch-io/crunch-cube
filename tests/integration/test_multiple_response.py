@@ -1832,3 +1832,154 @@ def test_mr_by_cat_hs_cell_percentage():
     )
     actual = cube.proportions(axis=None, include_transforms_for_dims=[0, 1])
     np.testing.assert_almost_equal(actual, expected)
+
+
+def test_mr_x_cat_min_base_size_mask():
+    cube_slice = CrunchCube(CR.MR_X_CAT_HS).slices[0]
+
+    # Table margin evaluates to:
+    #
+    # array([176.36555176, 211.42058767, 247.74073787, 457.05095566, 471.93176847])
+    #
+    # We thus choose the min base size to be 220, and expeect it to broadcast across
+    # columns (in the row direction, i.e. axis=1), sincee the MR is what won't be
+    # collapsed after doing the base calculation in the table direction.
+    expected_table_mask = np.array(
+        [
+            [True, True, True, True, True, True],
+            [True, True, True, True, True, True],
+            [False, False, False, False, False, False],
+            [False, False, False, False, False, False],
+            [False, False, False, False, False, False],
+        ]
+    )
+    np.testing.assert_array_equal(
+        cube_slice.min_base_size_mask(220).table_mask, expected_table_mask
+    )
+
+    # Column margin evaluates to:
+    #
+    # np.array([
+    #     [21.78869966, 32.81576041, 0.0, 58.86625406, 62.89483764, 0.0],
+    #     [15.7386377, 40.78574176, 0.0, 76.98691601, 77.90929221, 0.0],
+    #     [12.22150269, 40.98148847, 0.0, 91.95428994, 102.58345677, 0.0],
+    #     [20.95300034, 63.13595644, 0.0, 165.67203661, 207.28996226, 0.0],
+    #     [30.94322363, 88.23933157, 0.0, 165.82148906, 186.92772421, 0.0],
+    # ])
+    #
+    # We thus choose the min base size to be 30, and expeect it to not be broadcast.
+    expected_column_mask = np.array(
+        [
+            [True, False, True, False, False, True],
+            [True, False, True, False, False, True],
+            [True, False, True, False, False, True],
+            [True, False, True, False, False, True],
+            [False, False, True, False, False, True],
+        ]
+    )
+    np.testing.assert_array_equal(
+        cube_slice.min_base_size_mask(30).column_mask, expected_column_mask
+    )
+
+    # Row margin evaluates to:
+    #
+    # np.array([31.63152104, 70.73073413, 125.75911351, 366.88839144, 376.76564059])
+    #
+    # We thus choose the min base size to be 80, and expeect it to broadcast across
+    # columns (in the row direction, i.e. axis=1), sincee the MR is what won't be
+    # collapsed after doing the base calculation in the row direction.
+    expected_row_mask = np.array(
+        [
+            [True, True, True, True, True, True],
+            [True, True, True, True, True, True],
+            [False, False, False, False, False, False],
+            [False, False, False, False, False, False],
+            [False, False, False, False, False, False],
+        ]
+    )
+    np.testing.assert_array_equal(
+        cube_slice.min_base_size_mask(80).row_mask, expected_row_mask
+    )
+
+
+def test_cat_x_mr_min_base_size_mask():
+    cube_slice = CrunchCube(CR.CAT_X_MR).slices[0]
+
+    # Table margin evaluates to:
+    #
+    # array([80, 79, 70])
+    #
+    # We thus choose the min base size to be 75, and expeect it to broadcast across
+    # rows (in the col direction, i.e. axis=0), sincee the MR is what won't be
+    # collapsed after doing the base calculation in the table direction.
+    expected_table_mask = np.array([[False, False, True], [False, False, True]])
+    np.testing.assert_array_equal(
+        cube_slice.min_base_size_mask(75).table_mask, expected_table_mask
+    )
+
+    # Column margin evaluates to:
+    #
+    # np.array([40, 34, 38])
+    #
+    # We thus choose the min base size to be 35, and expeect it to broadcast across
+    # rows (in the col direction, i.e. axis=0), sincee the MR is what won't be
+    # collapsed after doing the base calculation in the table direction.
+    expected_column_mask = np.array([[False, True, False], [False, True, False]])
+    np.testing.assert_array_equal(
+        cube_slice.min_base_size_mask(35).column_mask, expected_column_mask
+    )
+
+    # Row margin evaluates to:
+    #
+    # np.array([[28, 25, 23], [52, 54, 47]])
+    #
+    # We thus choose the min base size to be 25, and expeect it to not be broadcast
+    expected_row_mask = np.array([[False, False, True], [False, False, False]])
+    np.testing.assert_array_equal(
+        cube_slice.min_base_size_mask(25).row_mask, expected_row_mask
+    )
+
+
+def test_mr_x_mr_min_base_size_mask():
+    cube_slice = CrunchCube(CR.CAT_X_MR_X_MR).slices[0]
+
+    # Table margin evaluates to:
+    #
+    # array([[10000, 10000],
+    #        [10000, 10000],
+    #        [10000, 10000]])
+    #
+    # We thus choose the min base size to be 11000, and expeect it to be broadcast
+    # across all values
+    expected_table_mask = np.array([[True, True], [True, True], [True, True]])
+    np.testing.assert_array_equal(
+        cube_slice.min_base_size_mask(11000).table_mask, expected_table_mask
+    )
+
+    # Column margin evaluates to:
+    #
+    # array([[1914, 5958],
+    #        [1914, 5958],
+    #        [1914, 5958]])
+    #
+    # We thus choose the min base size to be 2000, and expeect it to broadcast across
+    # rows (in the col direction, i.e. axis=0), sincee the MR is what won't be
+    # collapsed after doing the base calculation in the table direction.
+    expected_column_mask = np.array([[True, False], [True, False], [True, False]])
+    np.testing.assert_array_equal(
+        cube_slice.min_base_size_mask(2000).column_mask, expected_column_mask
+    )
+
+    # Row margin evaluates to:
+    #
+    # array([[6046, 6046],
+    #        [1008, 1008],
+    #        [ 974,  974]])
+    #
+    # We thus choose the min base size to be 1000, and expeect it to broadcast across
+    # rows (in the col direction, i.e. axis=0), sincee the MR is what won't be
+    # collapsed after doing the base calculation in the table direction.
+    expected_row_mask = np.array([[False, False], [False, False], [True, True]])
+    np.testing.assert_array_equal(
+        cube_slice.min_base_size_mask(1000).row_mask, expected_row_mask
+    )

@@ -13,6 +13,7 @@ from scipy.stats import norm
 from scipy.stats.contingency import expected_freq
 
 from cr.cube.enum import DIMENSION_TYPE as DT
+from cr.cube.min_base_size_mask import MinBaseSizeMask
 from cr.cube.measures.scale_means import ScaleMeans
 from cr.cube.measures.pairwise_pvalues import PairwisePvalues
 from cr.cube.util import compress_pruned, lazyproperty, memoize
@@ -274,6 +275,10 @@ class CubeSlice(object):
         )
 
         return self._extract_slice_result_from_cube(margin)
+
+    def min_base_size_mask(self, size):
+        """Return MinBaseSizeMask object with correct row, col and table masks."""
+        return MinBaseSizeMask(self, size)
 
     @lazyproperty
     def mr_dim_ind(self):
