@@ -24,6 +24,7 @@ class MinBaseSizeMask:
 
     @lazyproperty
     def column_mask(self):
+        """ndarray, True where column margin <= min_base_size, same shape as slice."""
         margin = self._slice.margin(axis=0)
         mask = margin < self._size
 
@@ -38,6 +39,7 @@ class MinBaseSizeMask:
 
     @lazyproperty
     def row_mask(self):
+        """ndarray, True where row margin <= min_base_size, same shape as slice."""
         margin = self._slice.margin(axis=1)
         mask = margin < self._size
 
@@ -52,6 +54,7 @@ class MinBaseSizeMask:
 
     @lazyproperty
     def table_mask(self):
+        """ndarray, True where table margin <= min_base_size, same shape as slice."""
         margin = self._slice.margin(axis=None)
         mask = margin < self._size
 

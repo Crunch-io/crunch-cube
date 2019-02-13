@@ -277,7 +277,19 @@ class CubeSlice(object):
         return self._extract_slice_result_from_cube(margin)
 
     def min_base_size_mask(self, size):
-        """Return MinBaseSizeMask object with correct row, col and table masks."""
+        """Returns MinBaseSizeMask object with correct row, col and table masks.
+
+        The returned object stores the necessary information about the base size, as
+        well as about the base values. It can create corresponding masks in teh row,
+        column, and table directions, based on the corresponding base values
+        (the values of the unweighted margins).
+
+        Usage:
+        >>> slice_ = cube.slices[0]  # obtain a valid cube slice
+        >>> slice_.min_base_size_mask(30).row_mask
+        >>> slice_.min_base_size_mask(50).column_mask
+        >>> slice_.min_base_size_mask(22).table_mask
+        """
         return MinBaseSizeMask(self, size)
 
     @lazyproperty
