@@ -63,11 +63,10 @@ def test_ca_x_mr():
     assert_scale_means_equal(actual, expected[0])
 
     # Test ScaleMeans marginal
-    with pytest.raises(ValueError):
-        # Items dimension doesn't have means
-        actual = slice_.scale_means_margin(0)
-    actual = slice_.scale_means_margin(1)
-    assert actual == 0.5066265060240964
+    actual = slice_.scale_means_margin(axis=0)
+    assert actual is None
+    actual = slice_.scale_means_margin(axis=1)
+    assert actual == 1.504548211036992
 
 
 def test_cat_x_ca_cat_x_items():
@@ -94,10 +93,10 @@ def test_cat_x_ca_cat_x_items():
     assert_scale_means_equal(actual, expected[0])
 
     # Test ScaleMeans marginal
-    actual = slice_.scale_means_margin(0)
+    actual = slice_.scale_means_margin(axis=0)
     assert actual is None
-    actual = slice_.scale_means_margin(1)
-    assert actual == 2.4413145539906105
+    with pytest.raises(ValueError):
+        slice_.scale_means_margin(axis=1)
 
 
 def test_cat_x_cat():
@@ -140,7 +139,7 @@ def test_cat_x_mr():
     actual = slice_.scale_means_margin(0)
     assert actual is None
     actual = slice_.scale_means_margin(1)
-    assert actual == 2.75
+    assert actual == 2.5323565323565322
 
 
 def test_mr_x_cat():
@@ -350,9 +349,7 @@ def test_cat_x_cat_pruning_and_hs():
 def test_cat_x_cat_scale_means_margin():
     cs = CrunchCube(SM.CAT_X_CAT_SM_MARGIN).slices[0]
     expected = 2.6846246973365617
-    actual = cs.scale_means_margin(1)
-    assert actual == expected
+    assert cs.scale_means_margin(1) == expected
 
     expected = 2.536319612590799
-    actual = cs.scale_means_margin(0)
-    assert actual == expected
+    assert cs.scale_means_margin(0) == expected
