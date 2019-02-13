@@ -18,14 +18,17 @@ class MinBaseSizeMask:
     marginal values and the shape of the underlying slice.
     """
 
-    def __init__(self, slice_, size):
+    def __init__(self, slice_, size, hs_dims=None):
         self._slice = slice_
         self._size = size
+        self._hs_dims = hs_dims
 
     @lazyproperty
     def column_mask(self):
         """ndarray, True where column margin <= min_base_size, same shape as slice."""
-        margin = self._slice.margin(axis=0)
+        margin = self._slice.margin(
+            axis=0, weighted=False, include_transforms_for_dims=self._hs_dims
+        )
         mask = margin < self._size
 
         if margin.shape == self._shape:
@@ -40,7 +43,9 @@ class MinBaseSizeMask:
     @lazyproperty
     def row_mask(self):
         """ndarray, True where row margin <= min_base_size, same shape as slice."""
-        margin = self._slice.margin(axis=1)
+        margin = self._slice.margin(
+            axis=1, weighted=False, include_transforms_for_dims=self._hs_dims
+        )
         mask = margin < self._size
 
         if margin.shape == self._shape:
@@ -55,7 +60,7 @@ class MinBaseSizeMask:
     @lazyproperty
     def table_mask(self):
         """ndarray, True where table margin <= min_base_size, same shape as slice."""
-        margin = self._slice.margin(axis=None)
+        margin = self._slice.margin(axis=None, weighted=False)
         mask = margin < self._size
 
         if margin.shape == self._shape:
@@ -69,4 +74,7 @@ class MinBaseSizeMask:
 
     @lazyproperty
     def _shape(self):
-        return self._slice.get_shape()
+        shape = self._slice.get_shape(hs_dims=self._hs_dims)
+        if len(shape) != self._slice.ndim:
+            shape = (shape[0], 1)
+        return shape

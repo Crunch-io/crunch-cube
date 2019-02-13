@@ -127,7 +127,7 @@ class CubeSlice(object):
         return self._cube.dim_types[-2:]
 
     @memoize
-    def get_shape(self, prune=False):
+    def get_shape(self, prune=False, hs_dims=None):
         """Tuple of array dimensions' lengths.
 
         It returns a tuple of ints, each representing the length of a cube
@@ -144,9 +144,11 @@ class CubeSlice(object):
         >>> pruned_shape = get_shape(prune=True)
         """
         if not prune:
-            return self.as_array().shape
+            return self.as_array(include_transforms_for_dims=hs_dims).shape
 
-        shape = compress_pruned(self.as_array(prune=True)).shape
+        shape = compress_pruned(
+            self.as_array(prune=True, include_transforms_for_dims=hs_dims)
+        ).shape
         # Eliminate dimensions that get reduced to 1
         # (e.g. single element categoricals)
         return tuple(n for n in shape if n > 1)
@@ -276,7 +278,7 @@ class CubeSlice(object):
 
         return self._extract_slice_result_from_cube(margin)
 
-    def min_base_size_mask(self, size):
+    def min_base_size_mask(self, size, hs_dims=None):
         """Returns MinBaseSizeMask object with correct row, col and table masks.
 
         The returned object stores the necessary information about the base size, as
@@ -290,7 +292,7 @@ class CubeSlice(object):
         >>> slice_.min_base_size_mask(50).column_mask
         >>> slice_.min_base_size_mask(22).table_mask
         """
-        return MinBaseSizeMask(self, size)
+        return MinBaseSizeMask(self, size, hs_dims)
 
     @lazyproperty
     def mr_dim_ind(self):

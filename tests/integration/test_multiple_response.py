@@ -1859,18 +1859,20 @@ def test_mr_x_cat_min_base_size_mask():
 
     # Column margin evaluates to:
     #
-    # np.array([
-    #     [21.78869966, 32.81576041, 0.0, 58.86625406, 62.89483764, 0.0],
-    #     [15.7386377, 40.78574176, 0.0, 76.98691601, 77.90929221, 0.0],
-    #     [12.22150269, 40.98148847, 0.0, 91.95428994, 102.58345677, 0.0],
-    #     [20.95300034, 63.13595644, 0.0, 165.67203661, 207.28996226, 0.0],
-    #     [30.94322363, 88.23933157, 0.0, 165.82148906, 186.92772421, 0.0],
-    # ])
+    # np.array(
+    #     [
+    #         [15, 24, 0, 57, 69, 0],
+    #         [15, 34, 0, 75, 86, 0],
+    #         [13, 37, 0, 81, 111, 0],
+    #         [20, 50, 0, 159, 221, 0],
+    #         [32, 69, 0, 167, 208, 0],
+    #     ]
+    # )
     #
     # We thus choose the min base size to be 30, and expeect it to not be broadcast.
     expected_column_mask = np.array(
         [
-            [True, False, True, False, False, True],
+            [True, True, True, False, False, True],
             [True, False, True, False, False, True],
             [True, False, True, False, False, True],
             [True, False, True, False, False, True],

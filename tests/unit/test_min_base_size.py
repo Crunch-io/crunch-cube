@@ -14,30 +14,33 @@ from ..unitutil import instance_mock, method_mock, property_mock
 
 class DescribeMinBaseSizeMask:
     def it_provides_access_to_column_direction_mask(
-        self, _margin, _get_shape, column_mask_fixture
+        self, _margin, _get_shape, _ndim, column_mask_fixture
     ):
         size, shape, margin, expected_mask = column_mask_fixture
         _margin.return_value = margin
         _get_shape.return_value = shape
+        _ndim.return_value = len(shape)
         row_mask = MinBaseSizeMask(CubeSlice(None, None), size).column_mask
         np.testing.assert_array_equal(row_mask, expected_mask)
 
     def it_provides_access_to_row_direction_mask(
-        self, _margin, _get_shape, row_mask_fixture
+        self, _margin, _get_shape, _ndim, row_mask_fixture
     ):
         size, shape, margin, expected_mask = row_mask_fixture
         _margin.return_value = margin
         _get_shape.return_value = shape
+        _ndim.return_value = len(shape)
         row_mask = MinBaseSizeMask(CubeSlice(None, None), size).row_mask
         np.testing.assert_array_equal(row_mask, expected_mask)
 
     def it_provides_access_to_table_direction_mask(
-        self, _margin, _get_shape, _dim_types, table_mask_fixture
+        self, _margin, _get_shape, _ndim, _dim_types, table_mask_fixture
     ):
         size, shape, dim_types, margin, expected_mask = table_mask_fixture
         _margin.return_value = margin
         _get_shape.return_value = shape
         _dim_types.return_value = dim_types
+        _ndim.return_value = len(shape)
         table_mask = MinBaseSizeMask(CubeSlice(None, None), size).table_mask
         np.testing.assert_array_equal(table_mask, expected_mask)
 
@@ -149,3 +152,7 @@ class DescribeMinBaseSizeMask:
     @pytest.fixture
     def _dim_types(self, request):
         return property_mock(request, CubeSlice, "dim_types")
+
+    @pytest.fixture
+    def _ndim(self, request):
+        return property_mock(request, CubeSlice, "ndim")
