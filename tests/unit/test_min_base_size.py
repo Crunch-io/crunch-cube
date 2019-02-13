@@ -44,6 +44,15 @@ class DescribeMinBaseSizeMask:
         table_mask = MinBaseSizeMask(CubeSlice(None, None), size).table_mask
         np.testing.assert_array_equal(table_mask, expected_mask)
 
+    def it_retains_single_element_dimension_in_shape(
+        self, _ndim, _get_shape, shape_fixture
+    ):
+        slice_shape, ndim, expected_mask_shape = shape_fixture
+        min_base_size = MinBaseSizeMask(CubeSlice(None, None), None)
+        _ndim.return_value = ndim
+        _get_shape.return_value = slice_shape
+        assert min_base_size._shape == expected_mask_shape
+
     def it_sets_slice_on_construction(self, slice_):
         size = 50
         min_base_size = MinBaseSizeMask(slice_, size)
@@ -89,6 +98,11 @@ class DescribeMinBaseSizeMask:
         margin = np.array(margin)
         expected = np.array(expected)
         return size, shape, margin, expected
+
+    @pytest.fixture(params=[((2, 3), 2, (2, 3)), ((2,), 2, (2, 1))])
+    def shape_fixture(self, request):
+        slice_shape, ndim, expected = request.param
+        return slice_shape, ndim, expected
 
     @pytest.fixture(
         params=[

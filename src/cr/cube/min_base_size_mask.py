@@ -75,6 +75,12 @@ class MinBaseSizeMask:
     @lazyproperty
     def _shape(self):
         shape = self._slice.get_shape(hs_dims=self._hs_dims)
+
         if len(shape) != self._slice.ndim:
+            # TODO: This is an ugly hack that needs to happen due to the fact that we
+            # purge dimensions with the count of 1, when getting the slice shape. This
+            # will be addressed in a PR (already on the way) that strives to abandon
+            # the ad-hoc purging of 1-element dimensions altogether.
             shape = (shape[0], 1)
+
         return shape
