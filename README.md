@@ -112,6 +112,10 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.9.6
+- Make `margin` explicit in CubeSlice
+- Fix calculation of `scale_means_margin` as a result
+
 #### 1.9.5
 - Fix calculating population counts for CAxCAT slices, that need to be treated as 0th cubes in tabbooks
 
