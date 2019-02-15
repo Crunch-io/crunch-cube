@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.9.7
+- Implement Min Base Size suppression masks
+
 #### 1.9.6
 - Make `margin` explicit in CubeSlice
 - Fix calculation of `scale_means_margin` as a result

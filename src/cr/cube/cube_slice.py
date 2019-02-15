@@ -287,10 +287,10 @@ class CubeSlice(object):
         (the values of the unweighted margins).
 
         Usage:
-        >>> slice_ = cube.slices[0]  # obtain a valid cube slice
-        >>> slice_.min_base_size_mask(30).row_mask
-        >>> slice_.min_base_size_mask(50).column_mask
-        >>> slice_.min_base_size_mask(22).table_mask
+        >>> cube_slice = CrunchCube(response).slices[0]  # obtain a valid cube slice
+        >>> cube_slice.min_base_size_mask(30).row_mask
+        >>> cube_slice.min_base_size_mask(50).column_mask
+        >>> cube_slice.min_base_size_mask(22).table_mask
         """
         return MinBaseSizeMask(self, size, hs_dims)
 
