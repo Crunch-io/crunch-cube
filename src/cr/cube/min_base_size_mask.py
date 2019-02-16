@@ -5,7 +5,7 @@
 from __future__ import division
 import numpy as np
 
-from cr.cube.util import lazyproperty
+from cr.cube.util import lazyproperty, compress_pruned
 from cr.cube.enum import DIMENSION_TYPE as DT
 
 
@@ -18,18 +18,22 @@ class MinBaseSizeMask:
     marginal values and the shape of the underlying slice.
     """
 
-    def __init__(self, slice_, size, hs_dims=None):
+    def __init__(self, slice_, size, hs_dims=None, prune=False):
         self._slice = slice_
         self._size = size
         self._hs_dims = hs_dims
+        self._prune = prune
 
     @lazyproperty
     def column_mask(self):
         """ndarray, True where column margin <= min_base_size, same shape as slice."""
         margin = self._slice.margin(
-            axis=0, weighted=False, include_transforms_for_dims=self._hs_dims
+            axis=0,
+            weighted=False,
+            include_transforms_for_dims=self._hs_dims,
+            prune=self._prune,
         )
-        mask = margin < self._size
+        mask = compress_pruned(margin) < self._size
 
         if margin.shape == self._shape:
             # If margin shape is the same as slice's (such as in a col margin for
@@ -44,9 +48,12 @@ class MinBaseSizeMask:
     def row_mask(self):
         """ndarray, True where row margin <= min_base_size, same shape as slice."""
         margin = self._slice.margin(
-            axis=1, weighted=False, include_transforms_for_dims=self._hs_dims
+            axis=1,
+            weighted=False,
+            include_transforms_for_dims=self._hs_dims,
+            prune=self._prune,
         )
-        mask = margin < self._size
+        mask = compress_pruned(margin) < self._size
 
         if margin.shape == self._shape:
             # If margin shape is the same as slice's (such as in a row margin for
@@ -60,8 +67,13 @@ class MinBaseSizeMask:
     @lazyproperty
     def table_mask(self):
         """ndarray, True where table margin <= min_base_size, same shape as slice."""
-        margin = self._slice.margin(axis=None, weighted=False)
-        mask = margin < self._size
+        margin = self._slice.margin(
+            axis=None,
+            weighted=False,
+            include_transforms_for_dims=self._hs_dims,
+            prune=self._prune,
+        )
+        mask = compress_pruned(margin) < self._size
 
         if margin.shape == self._shape:
             return mask
@@ -74,7 +86,7 @@ class MinBaseSizeMask:
 
     @lazyproperty
     def _shape(self):
-        shape = self._slice.get_shape(hs_dims=self._hs_dims)
+        shape = self._slice.get_shape(hs_dims=self._hs_dims, prune=self._prune)
 
         if len(shape) != self._slice.ndim:
             # TODO: This is an ugly hack that needs to happen due to the fact that we
