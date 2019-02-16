@@ -27,13 +27,15 @@ class MinBaseSizeMask:
     @lazyproperty
     def column_mask(self):
         """ndarray, True where column margin <= min_base_size, same shape as slice."""
-        margin = self._slice.margin(
-            axis=0,
-            weighted=False,
-            include_transforms_for_dims=self._hs_dims,
-            prune=self._prune,
+        margin = compress_pruned(
+            self._slice.margin(
+                axis=0,
+                weighted=False,
+                include_transforms_for_dims=self._hs_dims,
+                prune=self._prune,
+            )
         )
-        mask = compress_pruned(margin) < self._size
+        mask = margin < self._size
 
         if margin.shape == self._shape:
             # If margin shape is the same as slice's (such as in a col margin for
@@ -47,13 +49,15 @@ class MinBaseSizeMask:
     @lazyproperty
     def row_mask(self):
         """ndarray, True where row margin <= min_base_size, same shape as slice."""
-        margin = self._slice.margin(
-            axis=1,
-            weighted=False,
-            include_transforms_for_dims=self._hs_dims,
-            prune=self._prune,
+        margin = compress_pruned(
+            self._slice.margin(
+                axis=1,
+                weighted=False,
+                include_transforms_for_dims=self._hs_dims,
+                prune=self._prune,
+            )
         )
-        mask = compress_pruned(margin) < self._size
+        mask = margin < self._size
 
         if margin.shape == self._shape:
             # If margin shape is the same as slice's (such as in a row margin for
@@ -67,13 +71,15 @@ class MinBaseSizeMask:
     @lazyproperty
     def table_mask(self):
         """ndarray, True where table margin <= min_base_size, same shape as slice."""
-        margin = self._slice.margin(
-            axis=None,
-            weighted=False,
-            include_transforms_for_dims=self._hs_dims,
-            prune=self._prune,
+        margin = compress_pruned(
+            self._slice.margin(
+                axis=None,
+                weighted=False,
+                include_transforms_for_dims=self._hs_dims,
+                prune=self._prune,
+            )
         )
-        mask = compress_pruned(margin) < self._size
+        mask = margin < self._size
 
         if margin.shape == self._shape:
             return mask
@@ -93,6 +99,6 @@ class MinBaseSizeMask:
             # purge dimensions with the count of 1, when getting the slice shape. This
             # will be addressed in a PR (already on the way) that strives to abandon
             # the ad-hoc purging of 1-element dimensions altogether.
-            shape = (shape[0], 1)
+            shape = (shape[0], 1) if shape else (1,)
 
         return shape
