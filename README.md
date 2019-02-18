@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.9.8
+- Enable pruning for min-base-size masks
+
 #### 1.9.7
 - Implement Min Base Size suppression masks
 
