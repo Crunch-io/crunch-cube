@@ -1,5 +1,21 @@
 # History of Changes
 
+#### 1.9.6
+- Make `margin` explicit in CubeSlice
+- Fix calculation of `scale_means_margin` as a result
+
+#### 1.9.5
+- Fix calculating population counts for CAxCAT slices, that need to be treated as 0th cubes in tabbooks
+
+#### 1.9.4
+- Enable `CA_CAT` as a dimension type when calculating Pairwise Comparisons
+
+#### 1.9.3
+- Support H&S when calculating Pairwise Comparisons
+
+#### 1.9.2
+- Fix `scale_means` for Categorical Array (as a 0th slice in Tabbooks) where categorical doesn't have any numerical values
+
 #### 1.9.1
 - Fix `scale_means` for Categorical Array (as a 0th slice in Tabbooks)
 
