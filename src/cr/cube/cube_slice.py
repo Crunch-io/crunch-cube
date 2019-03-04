@@ -119,7 +119,7 @@ class CubeSlice(object):
         if self.ndim != 2:
             return False
 
-        return all(dt in (DT.CAT, DT.CA_CAT) for dt in self.dim_types)
+        return all(dt in DT.ALLOWED_PAIRWISE_TYPES for dt in self.dim_types)
 
     @lazyproperty
     def dim_types(self):
