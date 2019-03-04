@@ -98,13 +98,16 @@ class DescribeCubeSlice(object):
             ((DT.CA_SUBVAR, DT.CA_CAT), False),
             ((DT.CA_SUBVAR, DT.MR, DT.CA_CAT), False),
             ((DT.MR, DT.CAT), False),
-            ((DT.BINNED_NUMERIC, DT.CAT), False),
-            ((DT.DATETIME, DT.CAT), False),
             ((DT.LOGICAL, DT.CAT), False),
-            ((DT.TEXT, DT.CAT), False),
             ((DT.CA_CAT, DT.CAT), True),
             ((DT.CAT, DT.CA_CAT), True),
             ((DT.CAT, DT.CAT), True),
+            ((DT.BINNED_NUMERIC, DT.CAT), True),
+            ((DT.CAT, DT.BINNED_NUMERIC), True),
+            ((DT.DATETIME, DT.CAT), True),
+            ((DT.CAT, DT.DATETIME), True),
+            ((DT.CAT, DT.TEXT), True),
+            ((DT.TEXT, DT.CAT), True),
         ]
     )
     def pairwise_comparisons_fixture(self, request):
