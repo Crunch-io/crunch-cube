@@ -237,6 +237,7 @@ class CubeSlice(object):
         include_missing=False,
         include_transforms_for_dims=None,
         prune=False,
+        include_mr_cat=False,
     ):
         """Return ndarray representing slice margin across selected axis.
 
@@ -274,6 +275,7 @@ class CubeSlice(object):
             include_missing=include_missing,
             include_transforms_for_dims=hs_dims,
             prune=prune,
+            include_mr_cat=include_mr_cat,
         )
 
         return self._extract_slice_result_from_cube(margin)
@@ -418,7 +420,7 @@ class CubeSlice(object):
             self.proportions(
                 axis=axis,
                 weighted=weighted,
-                include_missing=include_missing,
+                include_mr_cat=include_missing,
                 include_transforms_for_dims=include_transforms_for_dims,
                 prune=prune,
             )

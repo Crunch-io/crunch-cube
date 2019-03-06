@@ -457,6 +457,7 @@ class TestCubeSlice(object):
             include_transforms_for_dims=None,
             prune=False,
             weighted=True,
+            include_mr_cat=False,
         )
 
         # Assert correct slice is returned when index is set
@@ -578,6 +579,7 @@ class TestCubeSlice(object):
             include_transforms_for_dims=None,
             prune=False,
             weighted=True,
+            include_mr_cat=False,
         )
 
     def test_update_hs_dims(self):

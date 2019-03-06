@@ -6,7 +6,7 @@ from __future__ import division
 
 import numpy as np
 
-# from cr.cube.distributions.wishart import wishartCDF
+from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.distributions.wishart import WishartCDF
 from cr.cube.util import lazyproperty
 
@@ -29,9 +29,16 @@ class PairwisePvalues:
     @lazyproperty
     def values(self):
         """Square matrix of pairwise Chi-square along axis, as numpy.ndarray."""
-        return self._intersperse_insertions_rows_and_columns(
-            1.0 - WishartCDF(self._pairwise_chisq, self._n_min, self._n_max).values
-        )
+        chisq = self._pairwise_chisq
+
+        def _prepare_result(props):
+            return self._intersperse_insertions_rows_and_columns(
+                1.0 - WishartCDF(props, self._n_min, self._n_max).values
+            )
+
+        if isinstance(chisq, list):
+            return [_prepare_result(table) for table in chisq]
+        return _prepare_result(chisq)
 
     @lazyproperty
     def _categorical_pairwise_chisq(self):
@@ -40,15 +47,34 @@ class PairwisePvalues:
         Returns a square, symmetric matrix of test statistics for the null
         hypothesis that each vector along *axis* is equal to each other.
         """
-        chisq = np.zeros([self._numel, self._numel])
-        for i in xrange(1, self._numel):
-            for j in xrange(0, self._numel - 1):
-                chisq[i, j] = chisq[j, i] = np.sum(
-                    np.square(self._proportions[:, i] - self._proportions[:, j])
-                    / self._observed
-                ) / (1 / self._margin[i] + 1 / self._margin[j])
+        return self._calculate_chi_squared(
+            self._numel, self._proportions, self._margin, self._observed
+        )
 
+    @staticmethod
+    def _calculate_chi_squared(numel, proportions, margin, observed):
+        chisq = np.zeros([numel, numel])
+        for i in xrange(1, numel):
+            for j in xrange(0, numel - 1):
+                chisq[i, j] = chisq[j, i] = np.sum(
+                    np.square(proportions[:, i] - proportions[:, j]) / observed
+                ) / (1 / margin[i] + 1 / margin[j])
         return chisq
+
+    @lazyproperty
+    def _mr_x_cat_pairwise_chisq(self):
+        """TODO: Add docstring"""
+        res = []
+        mr_proportions = self._slice.proportions(axis=self._axis, include_mr_cat=True)
+
+        for (margin_idx, table) in enumerate(mr_proportions):
+            margin = self._margin[margin_idx]
+            off_margin = self._slice.margin(axis=1, include_mr_cat=True)[margin_idx]
+            observed = off_margin / np.sum(off_margin)
+            res.append(
+                self._calculate_chi_squared(self._numel, table, margin, observed)
+            )
+        return res
 
     @lazyproperty
     def _margin(self):
@@ -67,6 +93,8 @@ class PairwisePvalues:
         Zscore is a measure of statistical significance of observed vs.
         expected counts. It's only applicable to a 2D contingency tables.
         """
+        if self._slice.dim_types[0] == DT.MR_SUBVAR:
+            return self._mr_x_cat_pairwise_chisq
         return self._categorical_pairwise_chisq
 
     @lazyproperty
