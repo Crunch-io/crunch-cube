@@ -314,13 +314,6 @@ class CrunchCube(object):
             ])
         """
 
-        def hs_dims_for_den(hs_dims, axis):
-            if axis is None or hs_dims is None:
-                return None
-            if isinstance(axis, int):
-                axis = [axis]
-            return [dim for dim in hs_dims if dim not in axis]
-
         table = self._counts(weighted).raw_cube_array
         new_axis = self._adjust_axis(axis)
         index = tuple(
@@ -331,7 +324,7 @@ class CrunchCube(object):
         # which we DON'T sum. These H&S are needed because of the shape, when
         # dividing. Those across dims which are summed across MUST NOT be
         # included, because they would change the result.
-        hs_dims = hs_dims_for_den(include_transforms_for_dims, axis)
+        hs_dims = self._hs_dims_for_den(include_transforms_for_dims, axis)
         den = self._apply_missings_and_insertions(
             table, hs_dims, include_missing=include_missing
         )
@@ -598,13 +591,6 @@ class CrunchCube(object):
             ])
         """
 
-        def hs_dims_for_den(hs_dims, axis):
-            if axis is None or hs_dims is None:
-                return None
-            if isinstance(axis, int):
-                axis = [axis]
-            return [dim for dim in hs_dims if dim not in axis]
-
         table = self._measure(weighted).raw_cube_array
         new_axis = self._adjust_axis(axis)
         index = tuple(
@@ -615,7 +601,7 @@ class CrunchCube(object):
         # which we DON'T sum. These H&S are needed because of the shape, when
         # dividing. Those across dims which are summed across MUST NOT be
         # included, because they would change the result.
-        hs_dims = hs_dims_for_den(include_transforms_for_dims, axis)
+        hs_dims = self._hs_dims_for_den(include_transforms_for_dims, axis)
         den = self._apply_missings_and_insertions(table, hs_dims)
         den = np.sum(den, axis=new_axis)[index]
 
@@ -1028,6 +1014,14 @@ class CrunchCube(object):
         indices = np.insert(indices, slice_index, insertion_index + 1)
         valid_indices[dim] = indices.tolist()
         return valid_indices
+
+    @staticmethod
+    def _hs_dims_for_den(hs_dims, axis):
+        if axis is None or hs_dims is None:
+            return None
+        if isinstance(axis, int):
+            axis = [axis]
+        return [dim for dim in hs_dims if dim not in axis]
 
     def _inserted_dim_inds(self, transform_dims, axis):
         dim_ind = axis if self.ndim < 3 else axis + 1
