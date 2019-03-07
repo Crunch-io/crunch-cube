@@ -591,35 +591,41 @@ class CrunchCube(object):
             ])
         """
 
-        table = self._measure(weighted).raw_cube_array
-        new_axis = self._adjust_axis(axis)
-        index = tuple(
-            None if i in new_axis else slice(None) for i, _ in enumerate(table.shape)
-        )
-
-        # Calculate denominator. Only include those H&S dimensions, across
-        # which we DON'T sum. These H&S are needed because of the shape, when
-        # dividing. Those across dims which are summed across MUST NOT be
-        # included, because they would change the result.
-        hs_dims = self._hs_dims_for_den(include_transforms_for_dims, axis)
-        den = self._apply_missings_and_insertions(table, hs_dims)
-        den = np.sum(den, axis=new_axis)[index]
-
         # Calculate numerator from table (include all H&S dimensions).
+        table = self._measure(weighted).raw_cube_array
         num = self._apply_missings_and_insertions(table, include_transforms_for_dims)
 
-        res = num / den
+        proportions = num / self._denominator(
+            weighted, include_transforms_for_dims, axis
+        )
         if not include_mr_cat:
-            res = self._drop_mr_cat_dims(res)
+            proportions = self._drop_mr_cat_dims(proportions)
 
         # Apply correct mask (based on the as_array shape)
         arr = self.as_array(
             prune=prune, include_transforms_for_dims=include_transforms_for_dims
         )
         if isinstance(arr, np.ma.core.MaskedArray):
-            res = np.ma.masked_array(res, arr.mask)
+            proportions = np.ma.masked_array(proportions, arr.mask)
 
-        return res
+        return proportions
+
+    def _denominator(self, weighted, include_transforms_for_dims, axis):
+        """Calculate denominator for percentages.
+
+        Only include those H&S dimensions, across which we DON'T sum. These H&S
+        are needed because of the shape, when dividing. Those across dims
+        which are summed across MUST NOT be included, because they would
+        change the result."""
+
+        table = self._measure(weighted).raw_cube_array
+        new_axis = self._adjust_axis(axis)
+        index = tuple(
+            None if i in new_axis else slice(None) for i, _ in enumerate(table.shape)
+        )
+        hs_dims = self._hs_dims_for_den(include_transforms_for_dims, axis)
+        den = self._apply_missings_and_insertions(table, hs_dims)
+        return np.sum(den, axis=new_axis)[index]
 
     def pvals(self, weighted=True, prune=False, hs_dims=None):
         """Return ndarray with calculated p-vals.
