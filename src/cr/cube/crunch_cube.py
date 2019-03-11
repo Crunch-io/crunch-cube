@@ -713,7 +713,7 @@ class CrunchCube(object):
     def zscore(self, weighted=True, prune=False, hs_dims=None):
         """Return ndarray with cube's zscore measurements.
 
-        Zscore is a measure of statistical signifficance of observed vs.
+        Zscore is a measure of statistical significance of observed vs.
         expected counts. It's only applicable to a 2D contingency tables.
         For 3D cubes, the measures of separate slices are stacked together
         and returned as the result.

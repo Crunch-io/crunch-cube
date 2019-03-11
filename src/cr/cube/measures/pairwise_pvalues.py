@@ -18,7 +18,7 @@ except NameError:  # pragma: no cover
 
 
 # pylint: disable=too-few-public-methods
-class PairwiseSignifficance:
+class PairwiseSignificance:
     """Value object providing matrix of pairwise-comparison P-values"""
 
     def __init__(self, slice_, axis=0, weighted=True):
@@ -48,8 +48,8 @@ class PairwiseSignifficance:
     @staticmethod
     def _factory(slice_, axis, weighted):
         if slice_.dim_types[0] == DT.MR_SUBVAR:
-            return _MrXCatPairwiseSignifficance(slice_, axis, weighted)
-        return _CatXCatPairwiseSignifficance(slice_, axis, weighted)
+            return _MrXCatPairwiseSignificance(slice_, axis, weighted)
+        return _CatXCatPairwiseSignificance(slice_, axis, weighted)
 
     @lazyproperty
     def _insertions_indices(self):
@@ -101,8 +101,8 @@ class PairwiseSignifficance:
         )
 
 
-class _CatXCatPairwiseSignifficance(PairwiseSignifficance):
-    """Pairwise signifficance for CAT x CAT type slices."""
+class _CatXCatPairwiseSignificance(PairwiseSignificance):
+    """Pairwise significance for CAT x CAT type slices."""
 
     _include_mr_cat = False
 
@@ -129,8 +129,8 @@ class _CatXCatPairwiseSignifficance(PairwiseSignifficance):
         return self._calculate_pvals_from_chi_squared(self._pairwise_chisq)
 
 
-class _MrXCatPairwiseSignifficance(PairwiseSignifficance):
-    """Pairwise signifficance for MR x CAT type slices."""
+class _MrXCatPairwiseSignificance(PairwiseSignificance):
+    """Pairwise significance for MR x CAT type slices."""
 
     _include_mr_cat = True
 
