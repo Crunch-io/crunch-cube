@@ -99,14 +99,14 @@ def test_valid_indices(valid_indices_fixture):
 
 @pytest.fixture(
     params=[
-        ([Mock(numeric_values=[])], 0, []),
+        ([Mock(numeric_values=[])], 0, [slice(None)]),
         ([Mock(numeric_values=[1, 2, 3])], 0, [np.array([True, True, True])]),
         (
             [Mock(numeric_values=[1, 2, np.nan, 4])],
             0,
             [np.array([True, True, False, True])],
         ),
-        ([Mock(numeric_values=[1])], 0, []),
+        ([Mock(numeric_values=[1])], 0, [np.array([True])]),
         (
             [Mock(numeric_values=[1, 2, 3]), Mock(numeric_values=[])],
             0,
