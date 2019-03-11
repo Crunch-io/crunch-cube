@@ -18,7 +18,7 @@ except NameError:  # pragma: no cover
 
 
 # pylint: disable=too-few-public-methods
-class PairwisePvalues:
+class PairwiseSignifficance:
     """Value object providing matrix of pairwise-comparison P-values"""
 
     def __init__(self, slice_, axis=0, weighted=True):
@@ -26,30 +26,20 @@ class PairwisePvalues:
         self._axis = axis
         self._weighted = weighted
 
-    @lazyproperty
-    def values(self):
-        """Square matrix of pairwise Chi-square along axis, as numpy.ndarray."""
-        chisq = self._pairwise_chisq
+    @classmethod
+    def pvals(cls, slice_, axis=0, weighted=True):
+        return cls._factory(slice_, axis, weighted)._pvals
 
-        def _prepare_result(props):
-            return self._intersperse_insertions_rows_and_columns(
-                1.0 - WishartCDF(props, self._n_min, self._n_max).values
-            )
-
-        if isinstance(chisq, list):
-            return [_prepare_result(table) for table in chisq]
-        return _prepare_result(chisq)
+    @staticmethod
+    def _factory(slice_, axis, weighted):
+        if slice_.dim_types[0] == DT.MR_SUBVAR:
+            return _MRxCatPairwisePvalues(slice_, axis, weighted)
+        return _CatxCatPairwisePvalues(slice_, axis, weighted)
 
     @lazyproperty
-    def _categorical_pairwise_chisq(self):
-        """Pairwise comparisons (Chi-Square) along axis, as numpy.ndarray.
-
-        Returns a square, symmetric matrix of test statistics for the null
-        hypothesis that each vector along *axis* is equal to each other.
-        """
-        return self._calculate_chi_squared(
-            self._numel, self._proportions, self._margin, self._observed
-        )
+    def _margin(self):
+        """Margin for the axis as numpy.ndarray."""
+        return self._slice.margin(axis=self._axis)
 
     @staticmethod
     def _calculate_chi_squared(numel, proportions, margin, observed):
@@ -62,45 +52,73 @@ class PairwisePvalues:
         return chisq
 
     @lazyproperty
-    def _mr_x_cat_pairwise_chisq(self):
-        """TODO: Add docstring"""
-        res = []
-        mr_proportions = self._slice.proportions(axis=self._axis, include_mr_cat=True)
+    def _numel(self):
+        """Number of elements of the dimension opposite to axis, as int."""
+        return self._slice.get_shape()[1 - self._axis]
 
-        for (margin_idx, table) in enumerate(mr_proportions):
-            margin = self._margin[margin_idx]
-            off_margin = self._slice.margin(axis=1, include_mr_cat=True)[margin_idx]
-            observed = off_margin / np.sum(off_margin)
-            res.append(
-                self._calculate_chi_squared(self._numel, table, margin, observed)
-            )
-        return res
-
-    @lazyproperty
-    def _margin(self):
-        """Margin for the axis as numpy.ndarray."""
-        return self._slice.margin(axis=self._axis)
+    def _calculate_pvals_from_chi_squared(self, props):
+        return self._intersperse_insertions_rows_and_columns(
+            1.0 - WishartCDF(props, self._n_min, self._n_max).values
+        )
 
     @lazyproperty
     def _off_margin(self):
-        """Margin for the opposite axis as numpy.ndarray."""
-        return self._slice.margin(axis=(1 - self._axis))
-
-    @lazyproperty
-    def _pairwise_chisq(self):
-        """Pairwise Chi-squared statistics along axis, as numpy.ndarray.
-
-        Zscore is a measure of statistical significance of observed vs.
-        expected counts. It's only applicable to a 2D contingency tables.
-        """
-        if self._slice.dim_types[0] == DT.MR_SUBVAR:
-            return self._mr_x_cat_pairwise_chisq
-        return self._categorical_pairwise_chisq
+        return self._slice.margin(axis=1, include_mr_cat=self._include_mr_cat)
 
     @lazyproperty
     def _proportions(self):
-        """Slice proportions for *axis* as numpy.ndarray."""
-        return self._slice.proportions(axis=self._axis)
+        return self._slice.proportions(
+            axis=self._axis, include_mr_cat=self._include_mr_cat
+        )
+
+
+class _MRxCatPairwisePvalues(PairwiseSignifficance):
+    _include_mr_cat = True
+
+    @lazyproperty
+    def _pvals(self):
+        """Square matrix of pairwise Chi-square along axis, as numpy.ndarray."""
+        return [
+            self._calculate_pvals_from_chi_squared(mr_subvar_chisq)
+            for mr_subvar_chisq in self._pairwise_chisq
+        ]
+
+    @lazyproperty
+    def _pairwise_chisq(self):
+        """Pairwise comparisons (Chi-Square) along axis, as numpy.ndarray.
+
+        Returns a list of square and symmetric matrices of test statistics for the null
+        hypothesis that each vector along *axis* is equal to each other.
+        """
+        return [
+            self._calculate_chi_squared(
+                self._numel,
+                mr_subvar_proportions,
+                self._margin[idx],
+                self._off_margin[idx] / np.sum(self._off_margin[idx]),
+            )
+            for (idx, mr_subvar_proportions) in enumerate(self._proportions)
+        ]
+
+
+class _CatxCatPairwisePvalues(PairwiseSignifficance):
+    _include_mr_cat = False
+
+    @lazyproperty
+    def _pvals(self):
+        """Square matrix of pairwise Chi-square along axis, as numpy.ndarray."""
+        return self._calculate_pvals_from_chi_squared(self._pairwise_chisq)
+
+    @lazyproperty
+    def _pairwise_chisq(self):
+        """Pairwise comparisons (Chi-Square) along axis, as numpy.ndarray.
+
+        Returns a square, symmetric matrix of test statistics for the null
+        hypothesis that each vector along *axis* is equal to each other.
+        """
+        return self._calculate_chi_squared(
+            self._numel, self._proportions, self._margin, self._observed
+        )
 
     @lazyproperty
     def _n_max(self):
@@ -111,11 +129,6 @@ class PairwisePvalues:
     def _n_min(self):
         """Size (zero based) of the smaller of the two slice's dimension, as int."""
         return min(self._slice.get_shape()) - 1
-
-    @lazyproperty
-    def _numel(self):
-        """Number of elements of the dimension opposite to axis, as int."""
-        return self._slice.get_shape()[1 - self._axis]
 
     @lazyproperty
     def _observed(self):

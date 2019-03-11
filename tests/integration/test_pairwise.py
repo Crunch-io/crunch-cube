@@ -9,7 +9,7 @@ import pytest
 import numpy as np
 
 from cr.cube.crunch_cube import CrunchCube
-from cr.cube.measures.pairwise_pvalues import PairwisePvalues
+from cr.cube.measures.pairwise_pvalues import PairwiseSignifficance
 
 from ..fixtures import CR
 
@@ -63,15 +63,18 @@ class TestStandardizedResiduals(TestCase):
         ]
         expected = [np.array(chisq) for chisq in chisq_rows]
         cube = CrunchCube(CR.NORDIC_X_SHAPES)
-        pairwise_pvalues = PairwisePvalues(cube.slices[0], axis=0)
-        actual = pairwise_pvalues._pairwise_chisq
+        actual = PairwiseSignifficance._factory(
+            cube.slices[0], axis=0, weighted=True
+        )._pairwise_chisq
         for i in range(len(actual)):
             np.testing.assert_almost_equal(actual[i], expected[i])
 
     def test_same_col_counts(self):
         """Test statistics for columns that are all the same."""
         cube = CrunchCube(CR.SAME_COUNTS_3x4)
-        pairwise_pvalues = PairwisePvalues(cube.slices[0], axis=0)
+        pairwise_pvalues = PairwiseSignifficance._factory(
+            cube.slices[0], axis=0, weighted=True
+        )
         expected = np.zeros([4, 4])
         actual = pairwise_pvalues._pairwise_chisq
         np.testing.assert_equal(actual, expected)
@@ -79,7 +82,9 @@ class TestStandardizedResiduals(TestCase):
     def test_hirotsu_chisq(self):
         """Test statistic for hirotsu data matches R"""
         cube = CrunchCube(CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION)
-        pairwise_pvalues = PairwisePvalues(cube.slices[0], axis=0)
+        pairwise_pvalues = PairwiseSignifficance._factory(
+            cube.slices[0], axis=0, weighted=True
+        )
         expected = np.array(
             [
                 [

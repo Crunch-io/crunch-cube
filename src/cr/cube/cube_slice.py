@@ -15,7 +15,7 @@ from scipy.stats.contingency import expected_freq
 from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.min_base_size_mask import MinBaseSizeMask
 from cr.cube.measures.scale_means import ScaleMeans
-from cr.cube.measures.pairwise_pvalues import PairwisePvalues
+from cr.cube.measures.pairwise_pvalues import PairwiseSignifficance
 from cr.cube.util import compress_pruned, lazyproperty, memoize
 
 
@@ -405,7 +405,7 @@ class CubeSlice(object):
         """
         if axis != 0:
             raise NotImplementedError("Pairwise comparison only implemented for colums")
-        return PairwisePvalues(self, axis=axis).values
+        return PairwiseSignifficance.pvals(self, axis=axis)
 
     def population_counts(
         self,
