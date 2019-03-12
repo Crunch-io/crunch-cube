@@ -1149,7 +1149,7 @@ class CrunchCube(object):
         mask = np.zeros(res.shape)
         mr_dim_idxs = self.mr_dim_ind
 
-        for i, prune_inds in enumerate(self._prune_indices(transforms)):
+        for i, prune_inds in enumerate(self.prune_indices(transforms)):
             rows_pruned = prune_inds[0]
             cols_pruned = prune_inds[1]
             rows_pruned = np.repeat(rows_pruned[:, None], len(cols_pruned), axis=1)
@@ -1236,7 +1236,7 @@ class CrunchCube(object):
         # ---return the masked array---
         return res
 
-    def _prune_indices(self, transforms=None):
+    def prune_indices(self, transforms=None):
         """Return indices of pruned rows and columns as list.
 
         The return value has one of three possible forms:

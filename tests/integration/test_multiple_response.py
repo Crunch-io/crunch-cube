@@ -765,10 +765,10 @@ def test_mr_counts_pruned():
             ]
         )
     ]
-    pruned = cube._prune_indices()
+    pruned = cube.prune_indices()
     assert len(pruned) == len(pruned_expected)
     for i, actual in enumerate(pruned):
-        np.testing.assert_array_equal(pruned[i], pruned_expected[i])
+        np.testing.assert_array_equal(actual, pruned_expected[i])
 
 
 def test_mr_props_not_pruned():

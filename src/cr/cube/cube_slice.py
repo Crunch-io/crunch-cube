@@ -132,7 +132,7 @@ class CubeSlice(object):
 
     def _prune_indices(self, transforms=None):
         hs_dims = self._hs_dims_for_cube(transforms)
-        prune_indices = self._cube._prune_indices(hs_dims)
+        prune_indices = self._cube.prune_indices(hs_dims)
         return self._extract_slice_result_from_cube(prune_indices)
 
     @lazyproperty
