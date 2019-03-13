@@ -325,8 +325,8 @@ class CrunchCube(object):
         # dividing. Those across dims which are summed across MUST NOT be
         # included, because they would change the result.
         hs_dims = self._hs_dims_for_den(include_transforms_for_dims, axis)
-        den = self._apply_missings_and_insertions(
-            table, hs_dims, include_missing=include_missing
+        den = self._apply_subtotals(
+            self._apply_missings(table, include_missing=include_missing), hs_dims
         )
 
         # Apply correct mask (based on the as_array shape)
@@ -593,7 +593,9 @@ class CrunchCube(object):
 
         # Calculate numerator from table (include all H&S dimensions).
         table = self._measure(weighted).raw_cube_array
-        num = self._apply_missings_and_insertions(table, include_transforms_for_dims)
+        num = self._apply_subtotals(
+            self._apply_missings(table), include_transforms_for_dims
+        )
 
         proportions = num / self._denominator(
             weighted, include_transforms_for_dims, axis
@@ -624,7 +626,7 @@ class CrunchCube(object):
             None if i in new_axis else slice(None) for i, _ in enumerate(table.shape)
         )
         hs_dims = self._hs_dims_for_den(include_transforms_for_dims, axis)
-        den = self._apply_missings_and_insertions(table, hs_dims)
+        den = self._apply_subtotals(self._apply_missings(table), hs_dims)
         return np.sum(den, axis=new_axis)[index]
 
     def pvals(self, weighted=True, prune=False, hs_dims=None):
@@ -820,9 +822,7 @@ class CrunchCube(object):
         """
         return AllDimensions(dimension_dicts=self._cube_dict["result"]["dimensions"])
 
-    def _apply_missings_and_insertions(
-        self, res, include_transforms_for_dims, include_missing=False
-    ):
+    def _apply_missings(self, res, include_missing=False):
         """Return ndarray with missing and insertions as specified.
 
         The return value is the result of the following operations on *res*,
@@ -832,9 +832,6 @@ class CrunchCube(object):
         * Remove vectors (rows/cols) for missing elements if *include_missin*
           is False.
 
-        * Insert subtotals (and perhaps other insertions later) for
-          dimensions having their apparent dimension-idx in
-          *include_transforms_for_dims*.
 
         Note that it does *not* include pruning.
         """
@@ -848,12 +845,17 @@ class CrunchCube(object):
             )
             for d in self._all_dimensions
         )
-        if not include_transforms_for_dims:
-            return res[np.ix_(*element_idxs)] if element_idxs else res
+        return res[np.ix_(*element_idxs)] if element_idxs else res
 
-        # ---insert subtotals---
+    def _apply_subtotals(self, res, include_transforms_for_dims):
+        """* Insert subtotals (and perhaps other insertions later) for
+          dimensions having their apparent dimension-idx in
+          *include_transforms_for_dims*.
+        """
+        if not include_transforms_for_dims:
+            return res
+
         suppressed_dim_count = 0
-        new_valids = [i for i in element_idxs]
         for (dim_idx, dim) in enumerate(self._all_dimensions):
             if dim.dimension_type == DT.MR_CAT:
                 suppressed_dim_count += 1
@@ -868,9 +870,9 @@ class CrunchCube(object):
                 continue
             # ---insert subtotals into result array---
             insertions = self._insertions(res, dim, dim_idx)
-            res, new_valids = self._update_result(res, insertions, dim_idx, new_valids)
+            res = self._update_result(res, insertions, dim_idx)
 
-        return res[np.ix_(*new_valids)] if new_valids else res
+        return res
 
     def _as_array(
         self,
@@ -890,10 +892,11 @@ class CrunchCube(object):
         Returns
             res (ndarray): Tabular representation of crunch cube
         """
-        return self._apply_missings_and_insertions(
-            self._measure(weighted).raw_cube_array,
+        return self._apply_subtotals(
+            self._apply_missings(
+                self._measure(weighted).raw_cube_array, include_missing=include_missing
+            ),
             include_transforms_for_dims,
-            include_missing=include_missing,
         )
 
     @classmethod
@@ -1337,18 +1340,13 @@ class CrunchCube(object):
             axis=axis, weighted=False, include_transforms_for_dims=hs_dims
         )
 
-    def _update_result(self, result, insertions, dimension_index, valid_indices):
+    def _update_result(self, result, insertions, dimension_index):
         """Insert subtotals into resulting ndarray."""
-        # TODO: valid_indices should be a tuple as a parameter and as a return
-        # value
         for j, (ind_insertion, value) in enumerate(insertions):
             result = np.insert(
                 result, ind_insertion + j + 1, value, axis=dimension_index
             )
-            valid_indices = valid_indices and self._fix_valid_indices(
-                valid_indices, ind_insertion + j, dimension_index
-            )
-        return result, valid_indices
+        return result
 
 
 class _Measures(object):

@@ -525,7 +525,7 @@ class _AllElements(_BaseElements):
         """Composed tuple storing actual sequence of element objects."""
         ElementCls, element_dicts = self._element_makings
         return tuple(
-            ElementCls(element_dict, idx)
+            ElementCls(element_dict, idx, element_dicts)
             for idx, element_dict in enumerate(element_dicts)
         )
 
@@ -551,9 +551,10 @@ class _ValidElements(_BaseElements):
 class _BaseElement(object):
     """Base class for element objects."""
 
-    def __init__(self, element_dict, index):
+    def __init__(self, element_dict, index, element_dicts):
         self._element_dict = element_dict
         self._index = index
+        self._element_dicts = element_dicts
 
     @lazyproperty
     def element_id(self):
@@ -568,6 +569,11 @@ class _BaseElement(object):
         the cube response. No adjustment for missing elements is made.
         """
         return self._index
+
+    @lazyproperty
+    def index_in_valids(self):
+        valid_ids = [el["id"] for el in self._element_dicts if not el.get("missing")]
+        return valid_ids.index(self.element_id)
 
     @property
     def is_insertion(self):
@@ -596,8 +602,8 @@ class _BaseElement(object):
 class _Category(_BaseElement):
     """A category on a categorical dimension."""
 
-    def __init__(self, category_dict, index):
-        super(_Category, self).__init__(category_dict, index)
+    def __init__(self, category_dict, index, element_dicts):
+        super(_Category, self).__init__(category_dict, index, element_dicts)
         self._category_dict = category_dict
 
     @lazyproperty
@@ -741,7 +747,7 @@ class _Subtotal(object):
         anchor = self.anchor
         if anchor in ["top", "bottom"]:
             return anchor
-        return self.valid_elements.get_by_id(anchor).index
+        return self.valid_elements.get_by_id(anchor).index_in_valids
 
     @lazyproperty
     def addend_ids(self):
@@ -765,7 +771,7 @@ class _Subtotal(object):
         rather than its element id.
         """
         return tuple(
-            self.valid_elements.get_by_id(addend_id).index
+            self.valid_elements.get_by_id(addend_id).index_in_valids
             for addend_id in self.addend_ids
         )
 
