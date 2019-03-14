@@ -42,8 +42,9 @@ class ScaleMeans(object):
                 continue
 
             # Calculate means
-            num = np.sum(product[self._valid_indices(axis)], axis)
-            den = np.sum(table[self._valid_indices(axis)], axis)
+            valid_indices = self._valid_indices(axis)
+            num = np.sum(product[valid_indices], axis)
+            den = np.sum(table[valid_indices], axis)
             mean = num / den
             if not isinstance(mean, np.ndarray):
                 mean = np.array([mean])
@@ -90,8 +91,8 @@ class ScaleMeans(object):
         # --CrunchSlice.reshaped_dimensions.
         reshaped_dimensions = [
             dimension
-            for dimension in self._slice.dimensions
-            if len(dimension.numeric_values) > 1
+            for i, dimension in enumerate(self._slice.dimensions)
+            if len(dimension.numeric_values) > 1 or i == 0
         ]
 
         return tuple(

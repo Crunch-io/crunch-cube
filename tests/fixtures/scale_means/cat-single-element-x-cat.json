@@ -1,0 +1,180 @@
+{
+    "query": {
+        "measures": {
+            "count": {
+                "function": "cube_count",
+                "args": []
+            }
+        },
+        "dimensions": [
+            {
+                "variable": "000396"
+            },
+            {
+                "variable": "000707"
+            }
+        ],
+        "weight": null
+    },
+    "query_environment": {
+        "filter": []
+    },
+    "result": {
+        "dimensions": [
+            {
+                "references": {
+                    "alias": "start_survey",
+                    "name": "start_survey",
+                    "description": "start the survey first time"
+                },
+                "derived": false,
+                "type": {
+                    "ordinal": false,
+                    "class": "categorical",
+                    "categories": [
+                        {
+                            "numeric_value": 1,
+                            "id": 1,
+                            "name": "Yes",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": null,
+                            "id": 32767,
+                            "name": "not asked",
+                            "missing": true
+                        },
+                        {
+                            "numeric_value": null,
+                            "id": 32766,
+                            "name": "skipped",
+                            "missing": true
+                        },
+                        {
+                            "numeric_value": null,
+                            "id": -1,
+                            "name": "No Data",
+                            "missing": true
+                        }
+                    ]
+                }
+            },
+            {
+                "references": {
+                    "alias": "exit_status",
+                    "name": "Exit Status",
+                    "description": "What is your exit status?"
+                },
+                "derived": false,
+                "type": {
+                    "ordinal": false,
+                    "class": "categorical",
+                    "categories": [
+                        {
+                            "numeric_value": 1,
+                            "id": 1,
+                            "name": "quotafull",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 3,
+                            "id": 3,
+                            "name": "redirect",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 0,
+                            "id": 0,
+                            "name": "screenout",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 2,
+                            "id": 2,
+                            "name": "turbosample",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": null,
+                            "id": -1,
+                            "name": "No Data",
+                            "missing": true
+                        }
+                    ]
+                }
+            }
+        ],
+        "missing": 543,
+        "measures": {
+            "count": {
+                "data": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    3,
+                    0,
+                    540,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "n_missing": 543,
+                "metadata": {
+                    "references": {},
+                    "derived": true,
+                    "type": {
+                        "integer": true,
+                        "missing_rules": {},
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "class": "numeric"
+                    }
+                }
+            }
+        },
+        "n": 543,
+        "unfiltered": {
+            "unweighted_n": 543,
+            "weighted_n": 543
+        },
+        "filtered": {
+            "unweighted_n": 543,
+            "weighted_n": 543
+        },
+        "counts": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            3,
+            0,
+            540,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ],
+        "element": "crunch:cube"
+    }
+}

@@ -353,3 +353,10 @@ def test_cat_x_cat_scale_means_margin():
 
     expected = 2.536319612590799
     assert cs.scale_means_margin(0) == expected
+
+
+def test_cat_single_element_x_cat():
+    cs = CrunchCube(SM.CAT_SINGLE_ELEMENT_X_CAT).slices[0]
+    scale_means = cs.scale_means()
+    np.testing.assert_equal(scale_means[0], np.array([np.nan, np.nan, np.nan, np.nan]))
+    np.testing.assert_equal(scale_means[1], np.array([np.nan]))
