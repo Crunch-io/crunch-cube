@@ -156,7 +156,7 @@ class lazyproperty(object):
         raise AttributeError("can't set attribute")
 
 
-def lru_cache(maxsize=100):
+def lru_cache(maxsize=100):  # pragma: no cover
     """Least-recently-used cache decorator.
 
     Arguments to the cached function must be hashable.
