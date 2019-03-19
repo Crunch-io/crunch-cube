@@ -112,6 +112,12 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.9.11
+- Eliminate `memoize` from `Dimension`, and thus reduce probability of threading bugs
+
+#### 1.9.10
+- Fix scale means for cubes with single-element categories
+
 #### 1.9.9
 - Enable other category-like types when comparing pairwise (datetime, text and binned numeric)
 
