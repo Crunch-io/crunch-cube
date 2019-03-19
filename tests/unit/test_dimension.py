@@ -619,7 +619,7 @@ class DescribeDimension(object):
 
     @pytest.fixture
     def _valid_elements_prop_(self, request):
-        return property_mock(request, Dimension, "_valid_elements")
+        return property_mock(request, Dimension, "valid_elements")
 
 
 class Describe_BaseElements(object):

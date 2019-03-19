@@ -359,7 +359,7 @@ class CrunchCube(object):
                     if (
                         d.dimension_type == DT.MR_CAT
                         or i != 0
-                        and (n <= 1 or len(d.elements()) <= 1)
+                        and (n <= 1 or len(d.valid_elements) <= 1)
                     )
                     else slice(None)
                 )
@@ -831,7 +831,12 @@ class CrunchCube(object):
         # --element idxs that satisfy `include_missing` arg. Note this
         # --includes MR_CAT elements so is essentially all-or-valid-elements
         element_idxs = tuple(
-            d.element_indices(include_missing) for d in self._all_dimensions
+            (
+                d.all_elements.element_idxs
+                if include_missing
+                else d.valid_elements.element_idxs
+            )
+            for d in self._all_dimensions
         )
         if not include_transforms_for_dims:
             return res[np.ix_(*element_idxs)] if element_idxs else res
@@ -990,7 +995,7 @@ class CrunchCube(object):
             if not fix_valids
             else np.ix_(
                 *[
-                    dim.element_indices(include_missing=False) if n > 1 else [0]
+                    dim.valid_elements.element_idxs if n > 1 else [0]
                     for dim, n in zip(self._all_dimensions, array.shape)
                 ]
             )

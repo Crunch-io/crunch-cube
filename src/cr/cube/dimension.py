@@ -7,7 +7,7 @@ from collections import Sequence
 import numpy as np
 
 from cr.cube.enum import DIMENSION_TYPE as DT
-from cr.cube.util import lazyproperty, memoize
+from cr.cube.util import lazyproperty
 
 
 class _BaseDimensions(Sequence):
@@ -266,24 +266,6 @@ class Dimension(object):
         """Member of DIMENSION_TYPE appropriate to this cube dimension."""
         return self._dimension_type
 
-    @memoize
-    def element_indices(self, include_missing):
-        """Return tuple of int element idxs for this dimension.
-
-        *include_missing* determines whether missing elements are included or
-        only valid element index values are returned.
-        """
-        return (
-            self._all_elements.element_idxs
-            if include_missing
-            else self._valid_elements.element_idxs
-        )
-
-    @memoize
-    def elements(self, include_missing=False):
-        """_Elements object providing access to elements of this dimension."""
-        return self._all_elements if include_missing else self._valid_elements
-
     @lazyproperty
     def has_transforms(self):
         """True if there are subtotals on this dimension, False otherwise."""
@@ -327,7 +309,7 @@ class Dimension(object):
         return [
             idx
             for idx, item in enumerate(
-                self._iter_interleaved_items(self._valid_elements)
+                self._iter_interleaved_items(self.valid_elements)
             )
             if item.is_insertion
         ]
@@ -351,7 +333,7 @@ class Dimension(object):
         # that effectively squashes what should be two methods into one.
         # Either get rid of the need for that alternate return value type or
         # create a separate method for it.
-        elements = self._all_elements if include_missing else self._valid_elements
+        elements = self.all_elements if include_missing else self.valid_elements
 
         include_subtotals = include_transforms and self.dimension_type != DT.CA_SUBVAR
 
@@ -395,14 +377,14 @@ class Dimension(object):
         a value, but an element with no numeric value appears as `np.nan` in
         the returned list.
         """
-        return tuple(element.numeric_value for element in self._valid_elements)
+        return tuple(element.numeric_value for element in self.valid_elements)
 
     @lazyproperty
     def shape(self):
-        return len(self._all_elements)
+        return len(self.all_elements)
 
     @lazyproperty
-    def _all_elements(self):
+    def all_elements(self):
         """_AllElements object providing cats or subvars of this dimension."""
         return _AllElements(self._dimension_dict["type"])
 
@@ -416,7 +398,7 @@ class Dimension(object):
 
         Only elements in the passed *elements* collection appear, which
         allows control over whether missing elements are included by choosing
-        `._all_elements` or `._valid_elements`.
+        `.all_elements` or `.valid_elements`.
         """
         subtotals = self._subtotals
 
@@ -443,17 +425,17 @@ class Dimension(object):
         insertion_dicts = (
             [] if view is None else view.get("transform", {}).get("insertions", [])
         )
-        return _Subtotals(insertion_dicts, self._valid_elements)
+        return _Subtotals(insertion_dicts, self.valid_elements)
 
     @lazyproperty
-    def _valid_elements(self):
+    def valid_elements(self):
         """_Elements object providing access to non-missing elements.
 
         Any categories or subvariables representing missing data are excluded
         from the collection; this sequence represents a subset of that
-        provided by `._all_elements`.
+        provided by `.all_elements`.
         """
-        return self._all_elements.valid_elements
+        return self.all_elements.valid_elements
 
 
 class _BaseElements(Sequence):
@@ -558,12 +540,12 @@ class _ValidElements(_BaseElements):
     """
 
     def __init__(self, all_elements):
-        self._all_elements = all_elements
+        self.all_elements = all_elements
 
     @lazyproperty
     def _elements(self):
         """tuple containing actual sequence of element objects."""
-        return tuple(element for element in self._all_elements if not element.missing)
+        return tuple(element for element in self.all_elements if not element.missing)
 
 
 class _BaseElement(object):
@@ -667,7 +649,7 @@ class _Subtotals(Sequence):
 
     def __init__(self, insertion_dicts, valid_elements):
         self._insertion_dicts = insertion_dicts
-        self._valid_elements = valid_elements
+        self.valid_elements = valid_elements
 
     def __getitem__(self, idx_or_slice):
         """Implements indexed access."""
@@ -688,7 +670,7 @@ class _Subtotals(Sequence):
     @lazyproperty
     def _element_ids(self):
         """frozenset of int id of each non-missing cat or subvar in dim."""
-        return frozenset(self._valid_elements.element_ids)
+        return frozenset(self.valid_elements.element_ids)
 
     def _iter_valid_subtotal_dicts(self):
         """Generate each insertion dict that represents a valid subtotal."""
@@ -717,7 +699,7 @@ class _Subtotals(Sequence):
     def _subtotals(self):
         """Composed tuple storing actual sequence of _Subtotal objects."""
         return tuple(
-            _Subtotal(subtotal_dict, self._valid_elements)
+            _Subtotal(subtotal_dict, self.valid_elements)
             for subtotal_dict in self._iter_valid_subtotal_dicts()
         )
 
@@ -727,7 +709,7 @@ class _Subtotal(object):
 
     def __init__(self, subtotal_dict, valid_elements):
         self._subtotal_dict = subtotal_dict
-        self._valid_elements = valid_elements
+        self.valid_elements = valid_elements
 
     @lazyproperty
     def anchor(self):
@@ -744,7 +726,7 @@ class _Subtotal(object):
         anchor = self._subtotal_dict["anchor"]
         try:
             anchor = int(anchor)
-            if anchor not in self._valid_elements.element_ids:
+            if anchor not in self.valid_elements.element_ids:
                 return "bottom"
             return anchor
         except (TypeError, ValueError):
@@ -759,7 +741,7 @@ class _Subtotal(object):
         anchor = self.anchor
         if anchor in ["top", "bottom"]:
             return anchor
-        return self._valid_elements.get_by_id(anchor).index
+        return self.valid_elements.get_by_id(anchor).index
 
     @lazyproperty
     def addend_ids(self):
@@ -771,7 +753,7 @@ class _Subtotal(object):
         return tuple(
             arg
             for arg in self._subtotal_dict.get("args", [])
-            if arg in self._valid_elements.element_ids
+            if arg in self.valid_elements.element_ids
         )
 
     @lazyproperty
@@ -783,7 +765,7 @@ class _Subtotal(object):
         rather than its element id.
         """
         return tuple(
-            self._valid_elements.get_by_id(addend_id).index
+            self.valid_elements.get_by_id(addend_id).index
             for addend_id in self.addend_ids
         )
 
