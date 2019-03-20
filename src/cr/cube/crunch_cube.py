@@ -255,6 +255,7 @@ class CrunchCube(object):
         include_missing=False,
         include_transforms_for_dims=None,
         prune=False,
+        include_mr_cat=False,
     ):
         """Get margin for the selected axis.
 
@@ -377,7 +378,9 @@ class CrunchCube(object):
             # Special case for 1D cube wigh MR, for "Table" direction
             den = np.sum(den, axis=new_axis)[index]
 
-        den = self._drop_mr_cat_dims(den, fix_valids=include_missing)
+        den = self._drop_mr_cat_dims(
+            den, fix_valids=(include_missing or include_mr_cat)
+        )
         if den.shape[0] == 1 and len(den.shape) > 1 and self.ndim < 3:
             den = den.reshape(den.shape[1:])
         return den
@@ -531,7 +534,7 @@ class CrunchCube(object):
         axis=None,
         weighted=True,
         include_transforms_for_dims=None,
-        include_missing=False,
+        include_mr_cat=False,
         prune=False,
     ):
         """Return percentage values for cube as `numpy.ndarray`.
@@ -559,7 +562,7 @@ class CrunchCube(object):
         the CrunchCube to return H&S for both rows and columns (if it's a 2D
         cube).
 
-        *include_missing* (bool): Include missing categories.
+        *include_mr_cat* (bool): Include MR categories.
 
         *prune* (bool): Instructs the CrunchCube to prune empty rows/cols.
         Emptiness is determined by the state of the margin (if it's either
@@ -619,7 +622,9 @@ class CrunchCube(object):
         # Calculate numerator from table (include all H&S dimensions).
         num = self._apply_missings_and_insertions(table, include_transforms_for_dims)
 
-        res = self._drop_mr_cat_dims(num / den)
+        res = num / den
+        if not include_mr_cat:
+            res = self._drop_mr_cat_dims(res)
 
         # Apply correct mask (based on the as_array shape)
         arr = self.as_array(
@@ -708,7 +713,7 @@ class CrunchCube(object):
     def zscore(self, weighted=True, prune=False, hs_dims=None):
         """Return ndarray with cube's zscore measurements.
 
-        Zscore is a measure of statistical signifficance of observed vs.
+        Zscore is a measure of statistical significance of observed vs.
         expected counts. It's only applicable to a 2D contingency tables.
         For 3D cubes, the measures of separate slices are stacked together
         and returned as the result.

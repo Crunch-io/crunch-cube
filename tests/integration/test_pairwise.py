@@ -5,23 +5,44 @@
 
 from unittest import TestCase
 import pytest
+import json
 
 import numpy as np
 
 from cr.cube.crunch_cube import CrunchCube
-from cr.cube.measures.pairwise_pvalues import PairwisePvalues
+from cr.cube.measures.pairwise_pvalues import PairwiseSignificance
 
 from ..fixtures import CR
+from ..util import load_expectation
 
 
 # pylint: disable=missing-docstring, invalid-name, no-self-use
 class TestStandardizedResiduals(TestCase):
     """Test cr.cube implementation of column family pairwise comparisons"""
 
+    def test_mr_x_cat_residuals(self):
+        expected = np.array(json.loads(load_expectation("mr_x_cat_chi_squared_rows")))
+        cube = CrunchCube(CR.MR_X_CAT_NOT_SO_SIMPLE_ALLTYPES)
+        actual = PairwiseSignificance._factory(
+            cube.slices[0], axis=0, weighted=True
+        )._pairwise_chisq
+        for i in range(len(actual)):
+            np.testing.assert_almost_equal(actual[i], expected[i])
+
+    def test_mr_x_cat_pvals(self):
+        cube = CrunchCube(CR.MR_X_CAT_NOT_SO_SIMPLE_ALLTYPES)
+        expectation = json.loads(load_expectation("mr_x_cat_pairwise_pvals"))
+        # Take only 0th slice, because it's the only one
+        actual = cube.pairwise_pvals(axis=0)[0]
+        for act, expected in zip(actual, expectation):
+            np.testing.assert_almost_equal(act, np.array(expected))
+
     def test_same_col_counts(self):
         """Test statistics for columns that are all the same."""
         cube = CrunchCube(CR.SAME_COUNTS_3x4)
-        pairwise_pvalues = PairwisePvalues(cube.slices[0], axis=0)
+        pairwise_pvalues = PairwiseSignificance._factory(
+            cube.slices[0], axis=0, weighted=True
+        )
         expected = np.zeros([4, 4])
         actual = pairwise_pvalues._pairwise_chisq
         np.testing.assert_equal(actual, expected)
@@ -29,7 +50,9 @@ class TestStandardizedResiduals(TestCase):
     def test_hirotsu_chisq(self):
         """Test statistic for hirotsu data matches R"""
         cube = CrunchCube(CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION)
-        pairwise_pvalues = PairwisePvalues(cube.slices[0], axis=0)
+        pairwise_pvalues = PairwiseSignificance._factory(
+            cube.slices[0], axis=0, weighted=True
+        )
         expected = np.array(
             [
                 [

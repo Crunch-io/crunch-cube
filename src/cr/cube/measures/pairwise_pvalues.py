@@ -6,7 +6,7 @@ from __future__ import division
 
 import numpy as np
 
-# from cr.cube.distributions.wishart import wishartCDF
+from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.distributions.wishart import WishartCDF
 from cr.cube.util import lazyproperty
 
@@ -18,7 +18,7 @@ except NameError:  # pragma: no cover
 
 
 # pylint: disable=too-few-public-methods
-class PairwisePvalues:
+class PairwiseSignificance:
     """Value object providing matrix of pairwise-comparison P-values"""
 
     def __init__(self, slice_, axis=0, weighted=True):
@@ -26,29 +26,69 @@ class PairwisePvalues:
         self._axis = axis
         self._weighted = weighted
 
-    @lazyproperty
-    def values(self):
-        """Square matrix of pairwise Chi-square along axis, as numpy.ndarray."""
-        return self._intersperse_insertions_rows_and_columns(
-            1.0 - WishartCDF(self._pairwise_chisq, self._n_min, self._n_max).values
+    @classmethod
+    def pvals(cls, slice_, axis=0, weighted=True):
+        """Wishart CDF values for slice columns as square ndarray.
+
+        Wishart CDF (Cumulative Distribution Function) is calculated to determine
+        statistical significance of slice columns, in relation to all other columns.
+        These values represent the answer to the question "How much is a particular
+        column different from each other column in the slice".
+        """
+        return cls._factory(slice_, axis, weighted)._pvals
+
+    def _chi_squared(self, proportions, margin, observed):
+        """return ndarray of chi-squared measures for proportions' columns.
+
+        *proportions* (ndarray): The basis of chi-squared calcualations
+        *margin* (ndarray): Column margin for proportions (See `def _margin`)
+        *observed* (ndarray): Row margin proportions (See `def _observed`)
+        """
+        n = self._element_count
+        chi_squared = np.zeros([n, n])
+        for i in xrange(1, n):
+            for j in xrange(0, n - 1):
+                denominator = 1 / margin[i] + 1 / margin[j]
+                chi_squared[i, j] = chi_squared[j, i] = (
+                    np.sum(np.square(proportions[:, i] - proportions[:, j]) / observed)
+                    / denominator
+                )
+        return chi_squared
+
+    def _pvals_from_chi_squared(self, pairwise_chisq):
+        """return statistical significance for props' columns.
+
+        *pairwise_chisq* (ndarray) Matrix of chi-squared values (bases for Wishart CDF)
+        """
+        return self._intersperse_insertion_rows_and_columns(
+            1.0 - WishartCDF(pairwise_chisq, self._n_min, self._n_max).values
         )
 
+    @staticmethod
+    def _factory(slice_, axis, weighted):
+        """return subclass for PairwiseSignificance, based on slice dimension types."""
+        if slice_.dim_types[0] == DT.MR_SUBVAR:
+            return _MrXCatPairwiseSignificance(slice_, axis, weighted)
+        return _CatXCatPairwiseSignificance(slice_, axis, weighted)
+
     @lazyproperty
-    def _categorical_pairwise_chisq(self):
-        """Pairwise comparisons (Chi-Square) along axis, as numpy.ndarray.
+    def _insertion_indices(self):
+        """Return H&S indices of the pairwise comparison dimension."""
+        return self._slice.inserted_hs_indices()[1 - self._axis]
 
-        Returns a square, symmetric matrix of test statistics for the null
-        hypothesis that each vector along *axis* is equal to each other.
+    def _intersperse_insertion_rows_and_columns(self, pairwise_pvals):
+        """Return pvals matrix with inserted NaN rows and columns, as numpy.ndarray.
+
+        Each insertion (a header or a subtotal) creates an offset in the calculated
+        pvals. These need to be taken into account when converting each pval to a
+        corresponding column letter. For this reason, we need to insert an all-NaN
+        row and a column at the right indices. These are the inserted indices of each
+        insertion, along respective dimensions.
         """
-        chisq = np.zeros([self._numel, self._numel])
-        for i in xrange(1, self._numel):
-            for j in xrange(0, self._numel - 1):
-                chisq[i, j] = chisq[j, i] = np.sum(
-                    np.square(self._proportions[:, i] - self._proportions[:, j])
-                    / self._observed
-                ) / (1 / self._margin[i] + 1 / self._margin[j])
-
-        return chisq
+        for i in self._insertion_indices:
+            pairwise_pvals = np.insert(pairwise_pvals, i, np.nan, axis=0)
+            pairwise_pvals = np.insert(pairwise_pvals, i, np.nan, axis=1)
+        return pairwise_pvals
 
     @lazyproperty
     def _margin(self):
@@ -56,23 +96,9 @@ class PairwisePvalues:
         return self._slice.margin(axis=self._axis)
 
     @lazyproperty
-    def _off_margin(self):
-        """Margin for the opposite axis as numpy.ndarray."""
-        return self._slice.margin(axis=(1 - self._axis))
-
-    @lazyproperty
-    def _pairwise_chisq(self):
-        """Pairwise Chi-squared statistics along axis, as numpy.ndarray.
-
-        Zscore is a measure of statistical significance of observed vs.
-        expected counts. It's only applicable to a 2D contingency tables.
-        """
-        return self._categorical_pairwise_chisq
-
-    @lazyproperty
-    def _proportions(self):
-        """Slice proportions for *axis* as numpy.ndarray."""
-        return self._slice.proportions(axis=self._axis)
+    def _element_count(self):
+        """Number of elements of the dimension opposite to axis, as int."""
+        return self._slice.get_shape()[1 - self._axis]
 
     @lazyproperty
     def _n_max(self):
@@ -85,31 +111,76 @@ class PairwisePvalues:
         return min(self._slice.get_shape()) - 1
 
     @lazyproperty
-    def _numel(self):
-        """Number of elements of the dimension opposite to axis, as int."""
-        return self._slice.get_shape()[1 - self._axis]
+    def _opposite_axis_margin(self):
+        """ndarray representing margin along the axis opposite of self._axis
+
+        In the process of calculating p-values for the column significance testing we
+        need both the margin along the primary axis and the percentage margin along
+        the opposite axis.
+        """
+        off_axis = 1 - self._axis
+        return self._slice.margin(axis=off_axis, include_mr_cat=self._include_mr_cat)
+
+    @lazyproperty
+    def _proportions(self):
+        """ndarray representing slice proportions along correct axis."""
+        return self._slice.proportions(
+            axis=self._axis, include_mr_cat=self._include_mr_cat
+        )
+
+
+class _CatXCatPairwiseSignificance(PairwiseSignificance):
+    """Pairwise significance for CAT x CAT type slices."""
+
+    _include_mr_cat = False
 
     @lazyproperty
     def _observed(self):
         """Observed marginal proportions, as float."""
         total = self._slice.margin()
-        return self._off_margin / total
+        return self._opposite_axis_margin / total
 
     @lazyproperty
-    def _insertions_indices(self):
-        """Return H&S indices of the pairwise comparison dimension."""
-        return self._slice.inserted_hs_indices()[1 - self._axis]
+    def _pairwise_chisq(self):
+        """Pairwise comparisons (Chi-Square) along axis, as numpy.ndarray.
 
-    def _intersperse_insertions_rows_and_columns(self, pairwise_pvals):
-        """Return pvals matrix with inserted NaN rows and columns, as numpy.ndarray.
-
-        Insertions (Headers and Subtotals) create offset in calculated pvals, and
-        these need to be taken into account, when converting them to columnar letters
-        representation. For this reason, we need to insert an all-NaN row and a
-        column in the right indices (the inserted indices of the H&S, in the
-        respective dimension).
+        Returns a square, symmetric matrix of test statistics for the null
+        hypothesis that each vector along *axis* is equal to each other.
         """
-        for i in self._insertions_indices:
-            pairwise_pvals = np.insert(pairwise_pvals, i, np.nan, axis=0)
-            pairwise_pvals = np.insert(pairwise_pvals, i, np.nan, axis=1)
-        return pairwise_pvals
+        return self._chi_squared(self._proportions, self._margin, self._observed)
+
+    @lazyproperty
+    def _pvals(self):
+        """Square matrix of pairwise Chi-square along axis, as numpy.ndarray."""
+        return self._pvals_from_chi_squared(self._pairwise_chisq)
+
+
+class _MrXCatPairwiseSignificance(PairwiseSignificance):
+    """Pairwise significance for MR x CAT type slices."""
+
+    _include_mr_cat = True
+
+    @lazyproperty
+    def _pairwise_chisq(self):
+        """Pairwise comparisons (Chi-Square) along axis, as numpy.ndarray.
+
+        Returns a list of square and symmetric matrices of test statistics for the null
+        hypothesis that each vector along *axis* is equal to each other.
+        """
+        return [
+            self._chi_squared(
+                mr_subvar_proportions,
+                self._margin[idx],
+                self._opposite_axis_margin[idx]
+                / np.sum(self._opposite_axis_margin[idx]),
+            )
+            for (idx, mr_subvar_proportions) in enumerate(self._proportions)
+        ]
+
+    @lazyproperty
+    def _pvals(self):
+        """Square matrix of pairwise Chi-square along axis, as numpy.ndarray."""
+        return [
+            self._pvals_from_chi_squared(mr_subvar_chisq)
+            for mr_subvar_chisq in self._pairwise_chisq
+        ]

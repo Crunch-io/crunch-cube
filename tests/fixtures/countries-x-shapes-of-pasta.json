@@ -1,0 +1,586 @@
+{
+    "query": {
+        "measures": {
+            "count": {
+                "function": "cube_count",
+                "args": []
+            }
+        },
+        "dimensions": [
+            {
+                "each": 1
+            },
+            {
+                "function": "as_selected",
+                "args": [
+                    {
+                        "variable": "0000dc"
+                    }
+                ]
+            },
+            {
+                "variable": "000026"
+            }
+        ],
+        "weight": null
+    },
+    "query_environment": {
+        "filter": []
+    },
+    "result": {
+        "dimensions": [
+            {
+                "references": {
+                    "uniform_basis": false,
+                    "description": "Which of the following Nordic countries have you visited? (select all that apply)",
+                    "subreferences": [
+                        {
+                            "alias": "dk",
+                            "name": "Denmark",
+                            "description": "milstat_1"
+                        },
+                        {
+                            "alias": "fi",
+                            "name": "Finland",
+                            "description": "milstat_2"
+                        },
+                        {
+                            "alias": "is",
+                            "name": "Iceland",
+                            "description": "milstat_3"
+                        },
+                        {
+                            "alias": "no",
+                            "name": "Norway",
+                            "description": "milstat_4"
+                        },
+                        {
+                            "alias": "se",
+                            "name": "Sweden",
+                            "description": "milstat_5"
+                        }
+                    ],
+                    "notes": "A multiple response variable",
+                    "alias": "nordics",
+                    "is_dichotomous": true,
+                    "name": "Nordic countries"
+                },
+                "derived": true,
+                "type": {
+                    "subtype": {
+                        "class": "variable"
+                    },
+                    "elements": [
+                        {
+                            "id": 1,
+                            "value": {
+                                "derived": false,
+                                "references": {
+                                    "alias": "dk",
+                                    "name": "Denmark",
+                                    "description": "milstat_1"
+                                },
+                                "id": "00c0"
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "derived": false,
+                                "references": {
+                                    "alias": "fi",
+                                    "name": "Finland",
+                                    "description": "milstat_2"
+                                },
+                                "id": "00c1"
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 3,
+                            "value": {
+                                "derived": false,
+                                "references": {
+                                    "alias": "is",
+                                    "name": "Iceland",
+                                    "description": "milstat_3"
+                                },
+                                "id": "00c2"
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 4,
+                            "value": {
+                                "derived": false,
+                                "references": {
+                                    "alias": "no",
+                                    "name": "Norway",
+                                    "description": "milstat_4"
+                                },
+                                "id": "00c3"
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 5,
+                            "value": {
+                                "derived": false,
+                                "references": {
+                                    "alias": "se",
+                                    "name": "Sweden",
+                                    "description": "milstat_5"
+                                },
+                                "id": "00c4"
+                            },
+                            "missing": false
+                        }
+                    ],
+                    "class": "enum"
+                }
+            },
+            {
+                "derived": true,
+                "references": {
+                    "uniform_basis": false,
+                    "description": "Which of the following Nordic countries have you visited? (select all that apply)",
+                    "subreferences": [
+                        {
+                            "alias": "dk",
+                            "name": "Denmark",
+                            "description": "milstat_1"
+                        },
+                        {
+                            "alias": "fi",
+                            "name": "Finland",
+                            "description": "milstat_2"
+                        },
+                        {
+                            "alias": "is",
+                            "name": "Iceland",
+                            "description": "milstat_3"
+                        },
+                        {
+                            "alias": "no",
+                            "name": "Norway",
+                            "description": "milstat_4"
+                        },
+                        {
+                            "alias": "se",
+                            "name": "Sweden",
+                            "description": "milstat_5"
+                        }
+                    ],
+                    "notes": "A multiple response variable",
+                    "alias": "nordics",
+                    "is_dichotomous": true,
+                    "name": "Nordic countries"
+                },
+                "type": {
+                    "ordinal": false,
+                    "subvariables": [
+                        "00c0",
+                        "00c1",
+                        "00c2",
+                        "00c3",
+                        "00c4"
+                    ],
+                    "class": "categorical",
+                    "categories": [
+                        {
+                            "numeric_value": 1,
+                            "selected": true,
+                            "id": 1,
+                            "missing": false,
+                            "name": "Selected"
+                        },
+                        {
+                            "numeric_value": 0,
+                            "id": 0,
+                            "name": "Other",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": null,
+                            "id": -1,
+                            "name": "No Data",
+                            "missing": true
+                        }
+                    ]
+                }
+            },
+            {
+                "references": {
+                    "alias": "pasta",
+                    "notes": "A categorical variable",
+                    "name": "Shapes of pasta",
+                    "description": "The geometry of pasta"
+                },
+                "derived": false,
+                "type": {
+                    "ordinal": false,
+                    "class": "categorical",
+                    "categories": [
+                        {
+                            "numeric_value": 1,
+                            "id": 1,
+                            "name": "Bucatini",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 2,
+                            "id": 2,
+                            "name": "Chitarra",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 0,
+                            "id": 0,
+                            "name": "Boccoli",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 4,
+                            "id": 4,
+                            "name": "Orecchiette",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 5,
+                            "id": 5,
+                            "name": "Quadrefiore",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 6,
+                            "id": 6,
+                            "name": "Fileja",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 32766,
+                            "id": 32766,
+                            "name": "Skipped",
+                            "missing": true
+                        },
+                        {
+                            "numeric_value": 32767,
+                            "id": 32767,
+                            "name": "Not asked",
+                            "missing": true
+                        },
+                        {
+                            "numeric_value": null,
+                            "id": -1,
+                            "name": "No Data",
+                            "missing": true
+                        }
+                    ]
+                }
+            }
+        ],
+        "missing": 4,
+        "measures": {
+            "count": {
+                "data": [
+                    8,
+                    7,
+                    5,
+                    6,
+                    5,
+                    2,
+                    0,
+                    0,
+                    0,
+                    7,
+                    17,
+                    68,
+                    51,
+                    64,
+                    15,
+                    0,
+                    0,
+                    0,
+                    40,
+                    102,
+                    543,
+                    253,
+                    332,
+                    133,
+                    4,
+                    0,
+                    0,
+                    7,
+                    16,
+                    56,
+                    26,
+                    27,
+                    11,
+                    0,
+                    0,
+                    0,
+                    8,
+                    18,
+                    65,
+                    49,
+                    59,
+                    12,
+                    0,
+                    0,
+                    0,
+                    40,
+                    92,
+                    495,
+                    235,
+                    315,
+                    127,
+                    4,
+                    0,
+                    0,
+                    4,
+                    21,
+                    71,
+                    39,
+                    54,
+                    11,
+                    0,
+                    0,
+                    0,
+                    9,
+                    16,
+                    64,
+                    42,
+                    57,
+                    14,
+                    0,
+                    0,
+                    0,
+                    42,
+                    89,
+                    481,
+                    229,
+                    290,
+                    125,
+                    4,
+                    0,
+                    0,
+                    13,
+                    36,
+                    230,
+                    130,
+                    190,
+                    36,
+                    2,
+                    0,
+                    0,
+                    7,
+                    14,
+                    43,
+                    29,
+                    31,
+                    10,
+                    0,
+                    0,
+                    0,
+                    35,
+                    76,
+                    343,
+                    151,
+                    180,
+                    104,
+                    2,
+                    0,
+                    0,
+                    27,
+                    58,
+                    307,
+                    134,
+                    166,
+                    101,
+                    2,
+                    0,
+                    0,
+                    5,
+                    11,
+                    39,
+                    33,
+                    42,
+                    8,
+                    0,
+                    0,
+                    0,
+                    23,
+                    57,
+                    270,
+                    143,
+                    193,
+                    41,
+                    2,
+                    0,
+                    0
+                ],
+                "n_missing": 4,
+                "metadata": {
+                    "references": {},
+                    "derived": true,
+                    "type": {
+                        "integer": true,
+                        "missing_rules": {},
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "class": "numeric"
+                    }
+                }
+            }
+        },
+        "n": 1662,
+        "unfiltered": {
+            "unweighted_n": 1662,
+            "weighted_n": 1662
+        },
+        "filtered": {
+            "unweighted_n": 1662,
+            "weighted_n": 1662
+        },
+        "counts": [
+            8,
+            7,
+            5,
+            6,
+            5,
+            2,
+            0,
+            0,
+            0,
+            7,
+            17,
+            68,
+            51,
+            64,
+            15,
+            0,
+            0,
+            0,
+            40,
+            102,
+            543,
+            253,
+            332,
+            133,
+            4,
+            0,
+            0,
+            7,
+            16,
+            56,
+            26,
+            27,
+            11,
+            0,
+            0,
+            0,
+            8,
+            18,
+            65,
+            49,
+            59,
+            12,
+            0,
+            0,
+            0,
+            40,
+            92,
+            495,
+            235,
+            315,
+            127,
+            4,
+            0,
+            0,
+            4,
+            21,
+            71,
+            39,
+            54,
+            11,
+            0,
+            0,
+            0,
+            9,
+            16,
+            64,
+            42,
+            57,
+            14,
+            0,
+            0,
+            0,
+            42,
+            89,
+            481,
+            229,
+            290,
+            125,
+            4,
+            0,
+            0,
+            13,
+            36,
+            230,
+            130,
+            190,
+            36,
+            2,
+            0,
+            0,
+            7,
+            14,
+            43,
+            29,
+            31,
+            10,
+            0,
+            0,
+            0,
+            35,
+            76,
+            343,
+            151,
+            180,
+            104,
+            2,
+            0,
+            0,
+            27,
+            58,
+            307,
+            134,
+            166,
+            101,
+            2,
+            0,
+            0,
+            5,
+            11,
+            39,
+            33,
+            42,
+            8,
+            0,
+            0,
+            0,
+            23,
+            57,
+            270,
+            143,
+            193,
+            41,
+            2,
+            0,
+            0
+        ],
+        "element": "crunch:cube"
+    }
+}

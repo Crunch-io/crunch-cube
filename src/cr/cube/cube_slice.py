@@ -15,7 +15,7 @@ from scipy.stats.contingency import expected_freq
 from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.min_base_size_mask import MinBaseSizeMask
 from cr.cube.measures.scale_means import ScaleMeans
-from cr.cube.measures.pairwise_pvalues import PairwisePvalues
+from cr.cube.measures.pairwise_pvalues import PairwiseSignificance
 from cr.cube.util import compress_pruned, lazyproperty, memoize
 
 
@@ -237,6 +237,7 @@ class CubeSlice(object):
         include_missing=False,
         include_transforms_for_dims=None,
         prune=False,
+        include_mr_cat=False,
     ):
         """Return ndarray representing slice margin across selected axis.
 
@@ -274,6 +275,7 @@ class CubeSlice(object):
             include_missing=include_missing,
             include_transforms_for_dims=hs_dims,
             prune=prune,
+            include_mr_cat=include_mr_cat,
         )
 
         return self._extract_slice_result_from_cube(margin)
@@ -403,7 +405,7 @@ class CubeSlice(object):
         """
         if axis != 0:
             raise NotImplementedError("Pairwise comparison only implemented for colums")
-        return PairwisePvalues(self, axis=axis).values
+        return PairwiseSignificance.pvals(self, axis=axis)
 
     def population_counts(
         self,
@@ -418,7 +420,7 @@ class CubeSlice(object):
             self.proportions(
                 axis=axis,
                 weighted=weighted,
-                include_missing=include_missing,
+                include_mr_cat=include_missing,
                 include_transforms_for_dims=include_transforms_for_dims,
                 prune=prune,
             )
