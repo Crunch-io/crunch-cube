@@ -730,9 +730,15 @@ class _Subtotal(object):
         represents missing data.
         """
         anchor = self._subtotal_dict["anchor"]
+
+        if anchor is None:
+            # In the case of undefined anchor default to "bottom"
+            return "bottom"
+
         try:
             anchor = int(anchor)
             if anchor not in self.valid_elements.element_ids:
+                # In the case of a non-valid int id, default to "bottom"
                 return "bottom"
             return anchor
         except (TypeError, ValueError):

@@ -1135,6 +1135,8 @@ class Describe_Subtotal(object):
             ({"anchor": 1}, {1, 2, 3}, 1),
             ({"anchor": 4}, {1, 2, 3}, "bottom"),
             ({"anchor": "Top"}, {1, 2, 3}, "top"),
+            # For an undefined anchor default to "bottom"
+            ({"anchor": None}, {1, 2, 3}, "bottom"),
         ]
     )
     def anchor_fixture(self, request):
