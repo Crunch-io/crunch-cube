@@ -544,14 +544,14 @@ class CubeSlice(object):
         test statistic (df = table N-2).
         """
 
-        counts = self.as_array(weighted=weighted)
         props = self.proportions(axis=0)
         diff = props[:, [column]] - props
         margin = self.margin(axis=0, weighted=weighted)
         var_props = props * (1.0 - props) / margin
         se_diff = np.sqrt(var_props + var_props[:, [column]])
         statistic = diff / se_diff
-        df = np.broadcast_to(margin, self.get_shape()) + margin[column] - 2
+        unweighted_n = self.margin(axis=0, weighted=False)
+        df = unweighted_n + unweighted_n[column] - 2
         pvals = 2 * (1 - t.cdf(abs(statistic), df=df))
         TtestResult = namedtuple("TTestResult", ("statistic", "pvalue"))
         return TtestResult(statistic, pvals)
