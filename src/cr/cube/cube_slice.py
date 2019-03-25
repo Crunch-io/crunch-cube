@@ -550,7 +550,7 @@ class CubeSlice(object):
         """
 
         props = self.proportions(axis=0)
-        diff = props[:, [column]] - props
+        diff = props - props[:, [column]]
         margin = self.margin(axis=0, weighted=weighted)
         var_props = props * (1.0 - props) / margin
         se_diff = np.sqrt(var_props + var_props[:, [column]])
@@ -568,15 +568,15 @@ class CubeSlice(object):
         from a series of pairwise t-tests.
 
         Argument both_pairs returns indices striclty on the test statistic. If
-        False, however, only the index of the larger value (the positive t-statistic)
-        is indicated in the result.
+        False, however, only the index of values *significantly smaller* than
+        each cell are indicated.
         """
         t_stats = self.compare_all_columns()
         flat = np.dstack(
             [
                 col.pvalue < alpha
                 if both_pairs
-                else np.logical_and(col.statistic > 0, col.pvalue < alpha)
+                else np.logical_and(col.statistic < 0, col.pvalue < alpha)
                 for col in t_stats
             ]
         ).swapaxes(2, 1)
