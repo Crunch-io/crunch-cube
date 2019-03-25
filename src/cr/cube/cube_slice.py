@@ -571,21 +571,21 @@ class CubeSlice(object):
         False, however, only the index of the larger value (the positive t-statistic)
         is indicated in the result.
         """
-        res = self.compare_all_columns()
+        t_stats = self.compare_all_columns()
         flat = np.dstack(
             [
                 col.pvalue < alpha
                 if both_pairs
                 else np.logical_and(col.statistic > 0, col.pvalue < alpha)
-                for col in res
+                for col in t_stats
             ]
         ).swapaxes(2, 1)
 
-        out = np.empty(self.get_shape(), dtype=object)
-        for index, cell in np.ndenumerate(out):
-            out[index] = np.where(flat[index])
+        significant_indices = np.empty(self.get_shape(), dtype=object)
+        for index, cell in np.ndenumerate(significant_indices):
+            significant_indices[index] = np.where(flat[index])
 
-        return out
+        return significant_indices
 
     def compare_all_columns(self):
         return [
