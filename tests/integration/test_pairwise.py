@@ -559,3 +559,9 @@ class TestStandardizedResiduals(TestCase):
         np.testing.assert_equal(actual[2, 0], (np.array([1, 2]),))
         np.testing.assert_equal(actual[4, 1], (np.array(0),))
         np.testing.assert_equal(actual[4, 2], (np.array(0),))
+
+    def test_compare_flatten_twotailed(self):
+        cube = CrunchCube(CR.PAIRWISE_HIROTSU_OCCUPATION_X_ILLNESS)
+        actual = cube.compare_flatten(slice=0, both_pairs=True)
+        np.testing.assert_equal(actual[0, 0], (np.array(1)))
+        np.testing.assert_equal(actual[0, 1], (np.array(0)))

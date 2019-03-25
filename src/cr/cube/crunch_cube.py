@@ -745,8 +745,8 @@ class CrunchCube(object):
     def compare_all_columns_all_slices(self):
         return [slice_.compare_all_columns() for slice_ in self.slices]
 
-    def compare_flatten(self, slice=0):
-        return self.slices[slice].pairwise_indices()
+    def compare_flatten(self, slice=0, both_pairs=False):
+        return self.slices[slice].pairwise_indices(both_pairs=both_pairs)
 
     def _adjust_axis(self, axis):
         """Return raw axis/axes corresponding to apparent axis/axes.
