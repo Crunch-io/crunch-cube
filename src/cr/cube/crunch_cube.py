@@ -729,6 +729,25 @@ class CrunchCube(object):
         """
         return [slice_.pairwise_pvals(axis=axis) for slice_ in self.slices]
 
+    def compare_to_column(self, slice=0, column=0):
+        """Return matrices of column-comparison p-values as list of numpy.ndarrays.
+
+        *t*-statistic and associated p-values for one column of one slice
+        compared to each of the other columns in that slice.
+        See scipy.stats.ttest_ind_from_stats.
+
+        (It does not make sense to compare the same column at once across slices.)
+
+        *column* (int): Index of slice to compare to, by default 0, the first.
+        """
+        return self.slices[slice].compare_to_column(column=column)
+
+    def compare_all_columns_all_slices(self):
+        return [slice_.compare_all_columns() for slice_ in self.slices]
+
+    def compare_flatten(self, slice=0):
+        return self.slices[slice].pairwise_indices()
+
     def _adjust_axis(self, axis):
         """Return raw axis/axes corresponding to apparent axis/axes.
 

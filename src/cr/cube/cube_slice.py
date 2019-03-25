@@ -5,10 +5,11 @@
 from __future__ import division
 
 import warnings
+from collections import namedtuple
 
 import numpy as np
 from tabulate import tabulate
-from scipy.stats import norm
+from scipy.stats import norm, t
 from scipy.stats.contingency import expected_freq
 
 from cr.cube.enum import DIMENSION_TYPE as DT
@@ -532,6 +533,59 @@ class CubeSlice(object):
             return self._apply_pruning_mask(zscore, hs_dims)
 
         return zscore
+
+    def compare_to_column(self, column=0, weighted=True):
+        """Test statistic and p-value for t-tests of proportions compared
+        to a column
+
+        Returns TtestResult, a pair of arrays of the same size as the current
+        slice: *statistic*, the t-statistic that proportions are different from
+        column *column*; and pvalue, the two-tailed p-value associated with that
+        test statistic (df = table N-2).
+        """
+
+        counts = self.as_array(weighted=weighted)
+        props = self.proportions(axis=0)
+        diff = props[:, [column]] - props
+        margin = self.margin(axis=0, weighted=weighted)
+        var_props = props * (1.0 - props) / margin
+        se_diff = np.sqrt(var_props + var_props[:, [column]])
+        statistic = diff / se_diff
+        df = np.broadcast_to(margin, self.get_shape()) + margin[column] - 2
+        pvals = 2 * (1 - t.cdf(abs(statistic), df=df))
+        TtestResult = namedtuple("TTestResult", ("statistic", "pvalue"))
+        return TtestResult(statistic, pvals)
+
+    def pairwise_indices(self, alpha=0.05, both_pairs=False):
+        """Indices of columns where p < alpha for column-comparison t-tests
+
+        Returns an array of tuples of columns that are significant at p<alpha,
+        from a series of pairwise t-tests.
+
+        Argument both_pairs returns indices striclty on the test statistic. If
+        False, however, only the index of the larger value (the positive t-statistic)
+        is indicated in the result.
+        """
+        res = self.compare_all_columns()
+        flat = np.dstack(
+            [
+                col.pvalue < alpha
+                if both_pairs
+                else np.logical_and(col.statistic > 0, col.pvalue < alpha)
+                for col in res
+            ]
+        ).swapaxes(2, 1)
+
+        out = np.empty(self.get_shape(), dtype=object)
+        for index, cell in np.ndenumerate(out):
+            out[index] = np.where(flat[index])
+
+        return out
+
+    def compare_all_columns(self):
+        return [
+            self.compare_to_column(column=col) for col in xrange(self.get_shape()[1])
+        ]
 
     def _apply_pruning_mask(self, res, hs_dims=None):
         array = self.as_array(prune=True, include_transforms_for_dims=hs_dims)

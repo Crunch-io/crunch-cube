@@ -478,3 +478,84 @@ class TestStandardizedResiduals(TestCase):
 
         actual = cube.pairwise_pvals(axis=0)
         np.testing.assert_almost_equal(actual, expected)
+
+    def test_compare_to_column(self):
+        cube = CrunchCube(CR.PAIRWISE_HIROTSU_OCCUPATION_X_ILLNESS)
+        actual = cube.compare_to_column(slice=0, column=2)
+        expected_tstats = np.array(
+            [
+                -0.926265419379764,
+                1.06821799614525,
+                0,
+                -2.46608073666841,
+                -1.45733791450049,
+                0,
+                -4.47444356884568,
+                0.127565104025694,
+                0,
+                0.825615066069789,
+                -1.09455611515513,
+                0,
+                3.08993537423754,
+                -0.0491518359221346,
+                0,
+                -1.72556180249472,
+                -0.403257023461294,
+                0,
+                -0.633715242008222,
+                0.215815666049458,
+                0,
+                1.67730697176792,
+                0.472402692576022,
+                0,
+                -1.17745694642709,
+                -0.663805453182429,
+                0,
+                3.74325301090516,
+                0.723631945942289,
+                0,
+            ]
+        ).reshape(10, 3)
+        expected_pvals = np.array(
+            [
+                0.3543704462583741,
+                0.2854486628456121,
+                1,
+                0.0137065536277976,
+                0.1450553643559893,
+                1,
+                0.0000078991077082,
+                0.898495781851322,
+                1,
+                0.4090774528587606,
+                0.2737382169902576,
+                1,
+                0.0020173609289613,
+                0.9607993020139403,
+                1,
+                0.0845124966799853,
+                0.6867680056298973,
+                1,
+                0.5263071263993964,
+                0.8291359554655602,
+                1,
+                0.093569693339443,
+                0.6366499668820378,
+                1,
+                0.2390913772747494,
+                0.5068305468138976,
+                1,
+                0.0001845038553001,
+                0.4693091017156237,
+                1,
+            ]
+        ).reshape(10, 3)
+        np.testing.assert_almost_equal(actual.statistic, expected_tstats)
+        np.testing.assert_almost_equal(actual.pvalue, expected_pvals)
+
+    def test_compare_flatten(self):
+        cube = CrunchCube(CR.PAIRWISE_HIROTSU_OCCUPATION_X_ILLNESS)
+        actual = cube.compare_flatten(slice=0)
+        np.testing.assert_equal(actual[2, 0], (np.array([1, 2]),))
+        np.testing.assert_equal(actual[4, 1], (np.array(0),))
+        np.testing.assert_equal(actual[4, 2], (np.array(0),))
