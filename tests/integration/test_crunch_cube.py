@@ -1298,7 +1298,7 @@ class TestCrunchCube(TestCase):
             np.array([False, True, False, False, False, False]),
             np.array([False, False, True, False]),
         ]
-        pruned = cube._prune_indices()
+        pruned = cube.prune_indices()
         self.assertEqual(len(pruned), len(pruned_expected))
         for i, actual in enumerate(pruned):
             np.testing.assert_array_equal(pruned[i], pruned_expected[i])
@@ -1333,7 +1333,7 @@ class TestCrunchCube(TestCase):
             np.array([False, True, False, False, False, False]),
             np.array([False, False, True, False]),
         ]
-        pruned = cube._prune_indices()
+        pruned = cube.prune_indices()
         self.assertEqual(len(pruned), len(pruned_expected))
         for i, actual in enumerate(pruned):
             np.testing.assert_array_equal(pruned[i], pruned_expected[i])
@@ -1368,7 +1368,7 @@ class TestCrunchCube(TestCase):
             np.array([False, True, False, False, False, False]),
             np.array([False, False, True, False]),
         ]
-        pruned = cube._prune_indices()
+        pruned = cube.prune_indices()
         self.assertEqual(len(pruned), len(pruned_expected))
         for i, actual in enumerate(pruned):
             np.testing.assert_array_equal(pruned[i], pruned_expected[i])
@@ -1403,7 +1403,7 @@ class TestCrunchCube(TestCase):
             np.array([False, True, False, False, False, False]),
             np.array([False, False, True, False]),
         ]
-        pruned = cube._prune_indices()
+        pruned = cube.prune_indices()
         self.assertEqual(len(pruned), len(pruned_expected))
         for i, actual in enumerate(pruned):
             np.testing.assert_array_equal(pruned[i], pruned_expected[i])
@@ -1442,7 +1442,7 @@ class TestCrunchCube(TestCase):
             np.array([False, True, False, False, False, False]),
             np.array([False, False, True, False]),
         ]
-        pruned = cube._prune_indices()
+        pruned = cube.prune_indices()
         self.assertEqual(len(pruned), len(pruned_expected))
         for i, actual in enumerate(pruned):
             np.testing.assert_array_equal(pruned[i], pruned_expected[i])
@@ -1479,7 +1479,7 @@ class TestCrunchCube(TestCase):
                 ]
             )
         ]
-        pruned = cube._prune_indices()
+        pruned = cube.prune_indices()
         self.assertEqual(len(pruned), len(pruned_expected))
         for i, actual in enumerate(pruned):
             np.testing.assert_array_equal(pruned[i], pruned_expected[i])
@@ -1592,7 +1592,7 @@ class TestCrunchCube(TestCase):
         )
         actual = np.ma.compressed(cube.margin(axis=1, weighted=False, prune=True))
         np.testing.assert_array_equal(actual, expected)
-        # not testing cube._prune_indices() because the margin has 6367 cells
+        # not testing cube.prune_indices() because the margin has 6367 cells
 
     def test_ca_with_single_cat_pruning(self):
         cube = CrunchCube(CR.CA_SINGLE_CAT)
@@ -1615,7 +1615,7 @@ class TestCrunchCube(TestCase):
             (np.array([False, False]), np.array([False])),
             (np.array([False, False]), np.array([False])),
         ]
-        actuals = cube._prune_indices()
+        actuals = cube.prune_indices()
         for expected, actual in zip(expecteds, actuals):
             np.testing.assert_array_equal(actual[0], expected[0])
             np.testing.assert_array_equal(actual[1], expected[1])
@@ -2027,7 +2027,7 @@ class TestCrunchCube(TestCase):
             np.array([True, True, False, True, True]),
             np.array([True, False, True]),
         )
-        actual = cube._prune_indices()[0]
+        actual = cube.prune_indices()[0]
         np.testing.assert_array_equal(actual[0], expected[0])
         np.testing.assert_array_equal(actual[1], expected[1])
 
@@ -2078,7 +2078,7 @@ class TestCrunchCube(TestCase):
             np.array([False, False, False, False, False, False, False, False]),
             np.array([False, False, False]),
         ]
-        actual = cube._prune_indices()
+        actual = cube.prune_indices()
         np.testing.assert_array_equal(actual[0], expected[0])
         np.testing.assert_array_equal(actual[1], expected[1])
 
@@ -2088,7 +2088,7 @@ class TestCrunchCube(TestCase):
             np.array([False, False, False, False, False]),
             np.array([False, False, False, True, False, False, True, False]),
         ]
-        actual = cube._prune_indices(transforms=[0, 1])
+        actual = cube.prune_indices(transforms=[0, 1])
         np.testing.assert_array_equal(actual[0], expected[0])
         np.testing.assert_array_equal(actual[1], expected[1])
 

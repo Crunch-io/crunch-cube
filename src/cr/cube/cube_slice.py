@@ -5,7 +5,6 @@
 from __future__ import division
 
 import warnings
-from functools import partial
 
 import numpy as np
 from tabulate import tabulate
@@ -43,26 +42,6 @@ class CubeSlice(object):
         self._index = index
         self.ca_as_0th = ca_as_0th
 
-    def __getattr__(self, attr):
-        # --Invoked when self.{attr} raises AttributeError, i.e. when
-        # --CubeSlice does not define a method or property and it needs to be
-        # --delegated to the underlying Cube instance
-        cube_attr = getattr(self._cube, attr)
-
-        # API Method calls
-        if callable(cube_attr):
-            return partial(self._call_cube_method, attr)
-
-        # API properties
-        get_only_last_two = (
-            self._cube.ndim == 3 and hasattr(cube_attr, "__len__") and attr != "name"
-        )
-        if get_only_last_two:
-            return cube_attr[-2:]
-
-        # ---otherwise, the property value is the same for cube or slice---
-        return cube_attr
-
     def __repr__(self):
         """Provide text representation suitable for working at console.
 
@@ -94,6 +73,83 @@ class CubeSlice(object):
             )
         except Exception:
             return super(CubeSlice, self).__repr__()
+
+    def as_array(
+        self,
+        include_missing=False,
+        weighted=True,
+        include_transforms_for_dims=None,
+        prune=False,
+    ):
+        hs_dims = self._hs_dims_for_cube(include_transforms_for_dims)
+        array = self._cube.as_array(
+            weighted=weighted,
+            include_missing=include_missing,
+            include_transforms_for_dims=hs_dims,
+            prune=prune,
+        )
+
+        return self._extract_slice_result_from_cube(array)
+
+    def proportions(
+        self,
+        axis=None,
+        weighted=True,
+        include_transforms_for_dims=None,
+        include_mr_cat=False,
+        prune=False,
+    ):
+        axis = self._calculate_correct_axis_for_cube(axis)
+        hs_dims = self._hs_dims_for_cube(include_transforms_for_dims)
+
+        proportions = self._cube.proportions(
+            axis=axis,
+            weighted=weighted,
+            include_mr_cat=include_mr_cat,
+            include_transforms_for_dims=hs_dims,
+            prune=prune,
+        )
+
+        return self._extract_slice_result_from_cube(proportions)
+
+    @lazyproperty
+    def dimensions(self):
+        return self._cube.dimensions[-2:]
+
+    def inserted_hs_indices(self, prune=False):
+        inserted_hs_indices = self._cube.inserted_hs_indices(prune)
+        return inserted_hs_indices if self.ca_as_0th else inserted_hs_indices[-2:]
+
+    @lazyproperty
+    def is_weighted(self):
+        return self._cube.is_weighted
+
+    @lazyproperty
+    def name(self):
+        if not self.dimensions:
+            return None
+        return self.dimensions[0].name
+
+    def _prune_indices(self, transforms=None):
+        hs_dims = self._hs_dims_for_cube(transforms)
+        prune_indices = self._cube.prune_indices(hs_dims)
+        return self._extract_slice_result_from_cube(prune_indices)
+
+    @lazyproperty
+    def has_means(self):
+        return self._cube.has_means
+
+    @lazyproperty
+    def is_univariate_ca(self):
+        return self._cube.is_univariate_ca
+
+    @lazyproperty
+    def population_fraction(self):
+        return self._cube.population_fraction
+
+    @lazyproperty
+    def univariate_ca_main_axis(self):
+        return self._cube.univariate_ca_main_axis
 
     @lazyproperty
     def ca_main_axis(self):
@@ -224,9 +280,7 @@ class CubeSlice(object):
 
         labels = [
             prune_dimension_labels(dim_labels, dim_prune_inds)
-            for dim_labels, dim_prune_inds in zip(
-                labels, self._prune_indices(transforms=hs_dims)
-            )
+            for dim_labels, dim_prune_inds in zip(labels, self._prune_indices(hs_dims))
         ]
         return labels
 
@@ -519,15 +573,6 @@ class CubeSlice(object):
             return self._array_type_std_res(counts, total, colsum, rowsum)
         return self._scalar_type_std_res(counts, total, colsum, rowsum)
 
-    def _call_cube_method(self, method, *args, **kwargs):
-        kwargs = self._update_args(kwargs)
-        result = getattr(self._cube, method)(*args, **kwargs)
-        if method == "inserted_hs_indices":
-            if not self.ca_as_0th:
-                result = result[-2:]
-            return result
-        return self._extract_slice_result_from_cube(result)
-
     def _calculate_correct_axis_for_cube(self, axis):
         """Return correct axis for cube, based on ndim.
 
@@ -638,32 +683,6 @@ class CubeSlice(object):
             / total ** 3
         )
         return residuals / np.sqrt(variance)
-
-    def _update_args(self, kwargs):
-        if self._cube.ndim < 3:
-            # If cube is 2D it doesn't actually have slices (itself is a slice).
-            # In this case we don't need to convert any arguments, but just
-            # pass them to the underlying cube (which is the slice).
-            return kwargs
-
-        # Handling API methods that include 'axis' parameter
-
-        axis = self._calculate_correct_axis_for_cube(kwargs.get("axis"))
-        if axis:
-            kwargs["axis"] = axis
-
-        hs_dims_key = (
-            "transforms" in kwargs
-            and "transforms"
-            or "hs_dims" in kwargs
-            and "hs_dims"
-            or "include_transforms_for_dims"
-        )
-        hs_dims = self._hs_dims_for_cube(kwargs.get(hs_dims_key))
-        if hs_dims:
-            kwargs[hs_dims_key] = hs_dims
-
-        return kwargs
 
     def _extract_slice_result_from_cube(self, result):
         if self._cube.ndim < 3 and not self.ca_as_0th or len(result) - 1 < self._index:
