@@ -742,9 +742,6 @@ class CrunchCube(object):
         """
         return self.slices[slice].pairwise_significance_tests[column]
 
-    def compare_flatten(self, slice=0, both_pairs=False):
-        return self.slices[slice].pairwise_indices(both_pairs=both_pairs)
-
     def _adjust_axis(self, axis):
         """Return raw axis/axes corresponding to apparent axis/axes.
 

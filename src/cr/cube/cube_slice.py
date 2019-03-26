@@ -539,7 +539,7 @@ class CubeSlice(object):
 
         return zscore
 
-    def pairwise_indices(self, alpha=0.05, both_pairs=False):
+    def pairwise_indices(self, alpha=0.05, only_larger=True):
         """Indices of columns where p < alpha for column-comparison t-tests
 
         Returns an array of tuples of columns that are significant at p<alpha,
@@ -549,28 +549,17 @@ class CubeSlice(object):
         False, however, only the index of values *significantly smaller* than
         each cell are indicated.
         """
-        t_stats = self.pairwise_significance_tests
-        flat = np.dstack(
-            [
-                col.p_vals < alpha
-                if both_pairs
-                else np.logical_and(col.t_stats < 0, col.p_vals < alpha)
-                for col in t_stats
-            ]
-        ).swapaxes(2, 1)
-
-        significant_indices = np.empty(self.get_shape(), dtype=object)
-        for index, _ in np.ndenumerate(significant_indices):
-            significant_indices[index] = np.where(flat[index])
-
-        return significant_indices
+        return PairwiseSignificance(
+            self, alpha=alpha, only_larger=only_larger
+        ).pairwise_indices
 
     @lazyproperty
     def pairwise_significance_tests(self):
         """list of _ColumnPairwiseSignificance tests.
 
-        Result has as many elements as there are coliumns in the slice. Each
-        significance test contains `p_vals` and `t_stats` significance tests.
+        Result has as many elements as there are columns in the slice. Each
+        significance test contains `p_vals` and `t_stats` (ndarrays that represent
+        probability values and statistical scores).
         """
         return PairwiseSignificance(self).values
 

@@ -513,15 +513,40 @@ class TestStandardizedResiduals(TestCase):
         np.testing.assert_almost_equal(actual.t_stats, expected_tstats)
         np.testing.assert_almost_equal(actual.p_vals, expected_pvals)
 
-    def test_compare_flatten(self):
+    def test_pairwise_indices_only_larger(self):
         cube = CrunchCube(CR.PAIRWISE_HIROTSU_OCCUPATION_X_ILLNESS)
-        actual = cube.compare_flatten(slice=0)
-        np.testing.assert_equal(actual[2, 0], (np.array([1, 2]),))
-        np.testing.assert_equal(actual[4, 1], (np.array(0),))
-        np.testing.assert_equal(actual[4, 2], (np.array(0),))
+        expected_indices = np.array(
+            [
+                [(1,), (), ()],
+                [(2,), (), ()],
+                [(1, 2), (), ()],
+                [(), (0,), ()],
+                [(), (0,), (0,)],
+                [(), (), ()],
+                [(), (), ()],
+                [(), (), ()],
+                [(), (), ()],
+                [(), (0,), (0,)],
+            ]
+        )
+        pairwise_indices = cube.slices[0].pairwise_indices()
+        np.testing.assert_array_equal(pairwise_indices, expected_indices)
 
-    def test_compare_flatten_twotailed(self):
+    def test_pairwise_indices_larger_and_smaller(self):
         cube = CrunchCube(CR.PAIRWISE_HIROTSU_OCCUPATION_X_ILLNESS)
-        actual = cube.compare_flatten(slice=0, both_pairs=True)
-        np.testing.assert_equal(actual[0, 0], (np.array(1)))
-        np.testing.assert_equal(actual[0, 1], (np.array(0)))
+        expected_indices = np.array(
+            [
+                [(1,), (0,), ()],
+                [(2,), (), (0,)],
+                [(1, 2), (0,), (0,)],
+                [(1,), (0,), ()],
+                [(1, 2), (0,), (0,)],
+                [(), (), ()],
+                [(), (), ()],
+                [(), (), ()],
+                [(), (), ()],
+                [(1, 2), (0,), (0,)],
+            ]
+        )
+        pairwise_indices = cube.slices[0].pairwise_indices(only_larger=False)
+        np.testing.assert_array_equal(pairwise_indices, expected_indices)

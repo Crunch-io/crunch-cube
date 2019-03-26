@@ -48,7 +48,56 @@ class Describe_ColumnPairwiseSignificance:
             _ColumnPairwiseSignificance(slice_, col_idx).p_vals, p_vals
         )
 
+    def it_knows_its_pairwise_indices(
+        self, pairwise_fixture, p_vals_prop_, t_stats_prop_
+    ):
+        p_vals, t_stats, only_larger, pairwise_indices = pairwise_fixture
+        p_vals_prop_.return_value = p_vals
+        t_stats_prop_.return_value = t_stats
+        cps = _ColumnPairwiseSignificance(None, None, only_larger=only_larger)
+        assert cps.pairwise_indices == pairwise_indices
+
     # fixtures -------------------------------------------------------
+
+    @pytest.fixture(
+        params=[
+            (
+                [
+                    [1, 1.1880841738678649e-02, 3.5437044625837411e-01],
+                    [1, 8.6687491806343608e-02, 1.3706553627797602e-02],
+                    [1, 3.4774760848677033e-10, 7.8991077081536076e-06],
+                    [1, 1.1689409524823668e-02, 4.0907745285876063e-01],
+                    [1, 4.6721384259207355e-06, 2.0173609289613204e-03],
+                    [1, 6.0764393762673841e-02, 8.4512496679985283e-02],
+                    [1, 3.1425637110338300e-06, 1.8450385530011104e-04],
+                ],
+                [],
+                False,
+                [(1,), (2,), (1, 2), (1,), (1, 2), (), (1, 2)],
+            ),
+            (
+                [
+                    [1, 1.1880841738678649e-02, 3.5437044625837411e-01],
+                    [1, 8.6687491806343608e-02, 1.3706553627797602e-02],
+                    [1, 3.4774760848677033e-10, 7.8991077081536076e-06],
+                    [1, 3.9057646289029502e-01, 2.3909137727474938e-01],
+                    [1, 3.1425637110338300e-06, 1.8450385530011104e-04],
+                ],
+                [
+                    [0.0, -2.5161034860255906, -0.9262654193797643],
+                    [0.0, -1.7132968783233498, -2.466080736668413],
+                    [0.0, -6.281888947702064, -4.474443568845684],
+                    [0.0, -0.8586079707543924, -1.1774569464270872],
+                    [0.0, 4.663801762560106, 3.743253010905157],
+                ],
+                True,
+                [(1,), (2,), (1, 2), (), ()],
+            ),
+        ]
+    )
+    def pairwise_fixture(self, request):
+        p_vals, t_stats, only_larger, pairwise_indices = request.param
+        return np.array(p_vals), np.array(t_stats), only_larger, pairwise_indices
 
     @pytest.fixture(
         params=[
@@ -131,3 +180,7 @@ class Describe_ColumnPairwiseSignificance:
     @pytest.fixture
     def t_stats_prop_(self, request):
         return property_mock(request, _ColumnPairwiseSignificance, "t_stats")
+
+    @pytest.fixture
+    def p_vals_prop_(self, request):
+        return property_mock(request, _ColumnPairwiseSignificance, "p_vals")
