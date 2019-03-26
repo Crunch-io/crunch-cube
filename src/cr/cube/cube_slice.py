@@ -96,7 +96,7 @@ class CubeSlice(object):
         axis=None,
         weighted=True,
         include_transforms_for_dims=None,
-        include_missing=False,
+        include_mr_cat=False,
         prune=False,
     ):
         axis = self._calculate_correct_axis_for_cube(axis)
@@ -105,7 +105,7 @@ class CubeSlice(object):
         proportions = self._cube.proportions(
             axis=axis,
             weighted=weighted,
-            include_missing=include_missing,
+            include_mr_cat=include_mr_cat,
             include_transforms_for_dims=hs_dims,
             prune=prune,
         )
