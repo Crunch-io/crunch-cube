@@ -718,7 +718,7 @@ class CrunchCube(object):
         res = [s.zscore(weighted, prune, hs_dims) for s in self.slices]
         return np.array(res) if self.ndim == 3 else res[0]
 
-    def pairwise_pvals(self, axis=0):
+    def wishart_pairwise_pvals(self, axis=0):
         """Return matrices of column-comparison p-values as list of numpy.ndarrays.
 
         Square, symmetric matrix along *axis* of pairwise p-values for the
@@ -727,7 +727,7 @@ class CrunchCube(object):
         *axis* (int): axis along which to perform comparison. Only columns (0)
         are implemented currently.
         """
-        return [slice_.pairwise_pvals(axis=axis) for slice_ in self.slices]
+        return [slice_.wishart_pairwise_pvals(axis=axis) for slice_ in self.slices]
 
     def compare_to_column(self, slice=0, column=0):
         """Return matrices of column-comparison p-values as list of numpy.ndarrays.
@@ -740,10 +740,7 @@ class CrunchCube(object):
 
         *column* (int): Index of slice to compare to, by default 0, the first.
         """
-        return self.slices[slice].compare_to_column(column=column)
-
-    def compare_all_columns_all_slices(self):
-        return [slice_.compare_all_columns() for slice_ in self.slices]
+        return self.slices[slice].pairwise_significance_tests[column]
 
     def compare_flatten(self, slice=0, both_pairs=False):
         return self.slices[slice].pairwise_indices(both_pairs=both_pairs)
