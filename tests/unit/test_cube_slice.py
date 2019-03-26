@@ -9,6 +9,7 @@ import pytest
 from cr.cube.crunch_cube import CrunchCube
 from cr.cube.cube_slice import CubeSlice
 from cr.cube.enum import DIMENSION_TYPE as DT
+from cr.cube.dimension import Dimension
 
 from ..unitutil import instance_mock, method_mock, property_mock
 
@@ -50,6 +51,18 @@ class DescribeCubeSlice(object):
         repr_ = repr(slice_)
         assert repr_.startswith("<cr.cube.cube_slice.CubeSlice object at 0x")
 
+    def it_knows_if_it_is_univariate_ca(self, cube_):
+        result_mock = "I am a fake univariate CA result"
+        cube_.is_univariate_ca = result_mock
+        slice_ = CubeSlice(cube_, None)
+        assert slice_.is_univariate_ca == result_mock
+
+    def it_knows_if_it_is_weighted(self, cube_):
+        result_mock = "I am a fake weighted result"
+        cube_.is_weighted = result_mock
+        slice_ = CubeSlice(cube_, None)
+        assert slice_.is_weighted == result_mock
+
     def it_knows_its_dimension_types(self, dim_types_fixture, cube_):
         cube_dim_types, expected_value = dim_types_fixture
         cube_.dim_types = cube_dim_types
@@ -59,11 +72,28 @@ class DescribeCubeSlice(object):
 
         assert dim_types == expected_value
 
+    def it_knows_its_name(self, name_fixture, dimensions_prop_):
+        dimensions, expected_name = name_fixture
+        dimensions_prop_.return_value = dimensions
+        assert CubeSlice(None, None).name == expected_name
+
+    def it_knows_its_population_fraction(self, cube_):
+        result_mock = "I am a fake population fraction result"
+        cube_.population_fraction = result_mock
+        slice_ = CubeSlice(cube_, None)
+        assert slice_.population_fraction == result_mock
+
     def it_knows_its_scalar_type_std_res(self, scalar_std_res_fixture, cube_):
         counts, total, colsum, rowsum, expected_value = scalar_std_res_fixture
         slice_ = CubeSlice(cube_, None)
         std_res = slice_._scalar_type_std_res(counts, total, colsum, rowsum)
         np.testing.assert_almost_equal(std_res, expected_value)
+
+    def it_knows_its_univariate_ca_main_axis(self, cube_):
+        result_mock = "I am a fake univariate CA main axis result"
+        cube_.univariate_ca_main_axis = result_mock
+        slice_ = CubeSlice(cube_, None)
+        assert slice_.univariate_ca_main_axis == result_mock
 
     def it_knows_whether_its_a_double_mr(self, is_double_mr_fixture, dim_types_prop_):
         dim_types, expected_value = is_double_mr_fixture
@@ -84,7 +114,30 @@ class DescribeCubeSlice(object):
 
         assert slice_.can_compare_pairwise == slice_can_show
 
+    def it_updates_hs_dims_arguments(self, hs_fixture, cube_):
+        hs_dims, ndim, expected_value = hs_fixture
+        cube_.ndim = ndim
+        slice_ = CubeSlice(cube_, None)
+
+        updated_hs_dims = slice_._hs_dims_for_cube(hs_dims)
+
+        assert updated_hs_dims == expected_value
+
     # fixtures -------------------------------------------------------
+
+    @pytest.fixture(
+        params=[
+            ((), None),
+            (("fake slice name",), "fake slice name"),
+            (("fake slice name", "this is not the slice name"), "fake slice name"),
+        ]
+    )
+    def name_fixture(self, request):
+        dim_names, expected_name = request.param
+        dimensions = [instance_mock(request, Dimension) for _ in range(len(dim_names))]
+        for dimension, name in zip(dimensions, dim_names):
+            dimension.name = name
+        return dimensions, expected_name
 
     @pytest.fixture(
         params=[
@@ -113,17 +166,6 @@ class DescribeCubeSlice(object):
     def pairwise_comparisons_fixture(self, request):
         dim_types, slice_can_show = request.param
         return dim_types, slice_can_show
-
-    def it_updates_hs_dims_arguments(self, hs_fixture, cube_):
-        hs_dims, ndim, expected_value = hs_fixture
-        cube_.ndim = ndim
-        slice_ = CubeSlice(cube_, None)
-
-        updated_hs_dims = slice_._hs_dims_for_cube(hs_dims)
-
-        assert updated_hs_dims == expected_value
-
-    # fixtures -------------------------------------------------------
 
     @pytest.fixture(
         params=[
@@ -336,6 +378,10 @@ class DescribeCubeSlice(object):
         return instance_mock(request, CrunchCube)
 
     @pytest.fixture
+    def dimensions_prop_(self, request):
+        return property_mock(request, CubeSlice, "dimensions")
+
+    @pytest.fixture
     def dim_types_prop_(self, request):
         return property_mock(request, CubeSlice, "dim_types")
 
@@ -427,12 +473,6 @@ class TestCubeSlice(object):
         array = [Mock(), Mock(), Mock()]
         cube.proportions.return_value = array
 
-        # # Assert arguments are passed correctly
-        # cs = CubeSlice(cube, 1)
-        # cs.proportions(axis=0)
-        # # Expect axis to be increased by 1, because 3D
-        # cs._cube.proportions.assert_called_once_with(axis=1)
-
         # Assert correct slice is returned when index is set
         cs = CubeSlice(cube, index=1)
         assert cs.proportions() == array[1]
@@ -465,13 +505,6 @@ class TestCubeSlice(object):
         cube.ndim = 3
         array = [Mock(), Mock(), Mock()]
         cube.as_array.return_value = array
-
-        # # Assert arguments are passed correctly
-        # cs = CubeSlice(cube, 1)
-        # arg = Mock()
-        # kw_arg = Mock()
-        # cs.as_array(arg, kw_arg=kw_arg)
-        # cs._cube.as_array.assert_called_once_with(arg, kw_arg=kw_arg)
 
         # Assert correct slice is returned when index is set
         cs = CubeSlice(cube, index=1)
@@ -571,15 +604,6 @@ class TestCubeSlice(object):
             weighted=True,
             include_mr_cat=False,
         )
-
-    def test_update_hs_dims(self):
-        """Test if H&S dims are updated for 3D cubes."""
-        cube = Mock()
-        cube.ndim = 3
-        cs = CubeSlice(cube, 0)
-        expected = {"include_transforms_for_dims": [1, 2]}
-        actual = cs._update_args({"include_transforms_for_dims": [0, 1]})
-        assert actual == expected
 
     def test_inserted_hs_indices(self):
         """Test H&S indices for different slices."""

@@ -684,32 +684,6 @@ class CubeSlice(object):
         )
         return residuals / np.sqrt(variance)
 
-    def _update_args(self, kwargs):
-        if self._cube.ndim < 3:
-            # If cube is 2D it doesn't actually have slices (itself is a slice).
-            # In this case we don't need to convert any arguments, but just
-            # pass them to the underlying cube (which is the slice).
-            return kwargs
-
-        # Handling API methods that include 'axis' parameter
-
-        axis = self._calculate_correct_axis_for_cube(kwargs.get("axis"))
-        if axis:
-            kwargs["axis"] = axis
-
-        hs_dims_key = (
-            "transforms" in kwargs
-            and "transforms"
-            or "hs_dims" in kwargs
-            and "hs_dims"
-            or "include_transforms_for_dims"
-        )
-        hs_dims = self._hs_dims_for_cube(kwargs.get(hs_dims_key))
-        if hs_dims:
-            kwargs[hs_dims_key] = hs_dims
-
-        return kwargs
-
     def _extract_slice_result_from_cube(self, result):
         if self._cube.ndim < 3 and not self.ca_as_0th or len(result) - 1 < self._index:
             return result
