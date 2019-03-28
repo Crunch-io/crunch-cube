@@ -14,8 +14,14 @@ from scipy.stats.contingency import expected_freq
 from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.min_base_size_mask import MinBaseSizeMask
 from cr.cube.measures.scale_means import ScaleMeans
-from cr.cube.measures.pairwise_pvalues import PairwiseSignificance
+from cr.cube.measures.wishart_pairwise_significance import WishartPairwiseSignificance
+from cr.cube.measures.pairwise_significance import PairwiseSignificance
 from cr.cube.util import compress_pruned, lazyproperty, memoize
+
+try:
+    xrange
+except NameError:  # pragma: no cover
+    xrange = range
 
 
 class CubeSlice(object):
@@ -448,7 +454,7 @@ class CubeSlice(object):
         table_name = self._cube.labels()[0][self._index]
         return "%s: %s" % (title, table_name)
 
-    def pairwise_pvals(self, axis=0):
+    def wishart_pairwise_pvals(self, axis=0):
         """Return square symmetric matrix of pairwise column-comparison p-values.
 
         Square, symmetric matrix along *axis* of pairwise p-values for the
@@ -459,7 +465,7 @@ class CubeSlice(object):
         """
         if axis != 0:
             raise NotImplementedError("Pairwise comparison only implemented for colums")
-        return PairwiseSignificance.pvals(self, axis=axis)
+        return WishartPairwiseSignificance.pvals(self, axis=axis)
 
     def population_counts(
         self,
@@ -532,6 +538,30 @@ class CubeSlice(object):
             return self._apply_pruning_mask(zscore, hs_dims)
 
         return zscore
+
+    def pairwise_indices(self, alpha=0.05, only_larger=True):
+        """Indices of columns where p < alpha for column-comparison t-tests
+
+        Returns an array of tuples of columns that are significant at p<alpha,
+        from a series of pairwise t-tests.
+
+        Argument both_pairs returns indices striclty on the test statistic. If
+        False, however, only the index of values *significantly smaller* than
+        each cell are indicated.
+        """
+        return PairwiseSignificance(
+            self, alpha=alpha, only_larger=only_larger
+        ).pairwise_indices
+
+    @lazyproperty
+    def pairwise_significance_tests(self):
+        """list of _ColumnPairwiseSignificance tests.
+
+        Result has as many elements as there are columns in the slice. Each
+        significance test contains `p_vals` and `t_stats` (ndarrays that represent
+        probability values and statistical scores).
+        """
+        return PairwiseSignificance(self).values
 
     def _apply_pruning_mask(self, res, hs_dims=None):
         array = self.as_array(prune=True, include_transforms_for_dims=hs_dims)

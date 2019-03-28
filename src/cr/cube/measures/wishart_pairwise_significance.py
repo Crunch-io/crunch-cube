@@ -18,7 +18,7 @@ except NameError:  # pragma: no cover
 
 
 # pylint: disable=too-few-public-methods
-class PairwiseSignificance:
+class WishartPairwiseSignificance:
     """Value object providing matrix of pairwise-comparison P-values"""
 
     def __init__(self, slice_, axis=0, weighted=True):
@@ -129,7 +129,7 @@ class PairwiseSignificance:
         )
 
 
-class _CatXCatPairwiseSignificance(PairwiseSignificance):
+class _CatXCatPairwiseSignificance(WishartPairwiseSignificance):
     """Pairwise significance for CAT x CAT type slices."""
 
     _include_mr_cat = False
@@ -155,7 +155,7 @@ class _CatXCatPairwiseSignificance(PairwiseSignificance):
         return self._pvals_from_chi_squared(self._pairwise_chisq)
 
 
-class _MrXCatPairwiseSignificance(PairwiseSignificance):
+class _MrXCatPairwiseSignificance(WishartPairwiseSignificance):
     """Pairwise significance for MR x CAT type slices."""
 
     _include_mr_cat = True
