@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.9.12
+- Implement pairwise comparisons based on T-Stats
+
 #### 1.9.11
 - Eliminate `memoize` from `Dimension`, and thus reduce probability of threading bugs
 
