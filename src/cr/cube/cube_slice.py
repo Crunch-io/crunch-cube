@@ -16,7 +16,12 @@ from cr.cube.min_base_size_mask import MinBaseSizeMask
 from cr.cube.measures.scale_means import ScaleMeans
 from cr.cube.measures.wishart_pairwise_significance import WishartPairwiseSignificance
 from cr.cube.measures.pairwise_significance import PairwiseSignificance
-from cr.cube.util import compress_pruned, lazyproperty, memoize
+from cr.cube.util import (
+    compress_pruned,
+    lazyproperty,
+    memoize,
+    intersperse_hs_in_std_res,
+)
 
 try:
     xrange
@@ -532,7 +537,7 @@ class CubeSlice(object):
         zscore = self._calculate_std_res(counts, total, colsum, rowsum)
 
         if hs_dims:
-            zscore = self._intersperse_hs_in_std_res(hs_dims, zscore)
+            zscore = intersperse_hs_in_std_res(self, hs_dims, zscore)
 
         if prune:
             return self._apply_pruning_mask(zscore, hs_dims)
@@ -549,10 +554,11 @@ class CubeSlice(object):
         False, however, only the index of values *significantly smaller* than
         each cell are indicated.
         """
-        return self._intersperse_hs_in_std_res(
+        return intersperse_hs_in_std_res(
+            self,
             hs_dims,
             PairwiseSignificance(
-                self, alpha=alpha, only_larger=only_larger
+                self, alpha=alpha, only_larger=only_larger, hs_dims=hs_dims
             ).pairwise_indices,
         )
 
@@ -657,20 +663,6 @@ class CubeSlice(object):
         # dimension in a 3D case, inside the cr.cube, we need to increase
         # the indexes of the required dims.
         return [d + 1 for d in hs_dims] if hs_dims is not None else None
-
-    def _intersperse_hs_in_std_res(self, hs_dims, res):
-
-        if not hs_dims:
-            # Don't intersperse anything, just return the result
-            return res
-
-        # Perform the insertions of place-holding rows and cols for insertions
-        for dim, inds in enumerate(self.inserted_hs_indices()):
-            if dim not in hs_dims:
-                continue
-            for i in inds:
-                res = np.insert(res, i, np.nan, axis=(dim - self.ndim))
-        return res
 
     def _prepare_index_baseline(self, axis):
         # First get the margin of the opposite direction of the index axis.
