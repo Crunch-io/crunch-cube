@@ -539,7 +539,7 @@ class CubeSlice(object):
 
         return zscore
 
-    def pairwise_indices(self, alpha=0.05, only_larger=True):
+    def pairwise_indices(self, alpha=0.05, only_larger=True, hs_dims=None):
         """Indices of columns where p < alpha for column-comparison t-tests
 
         Returns an array of tuples of columns that are significant at p<alpha,
@@ -549,9 +549,12 @@ class CubeSlice(object):
         False, however, only the index of values *significantly smaller* than
         each cell are indicated.
         """
-        return PairwiseSignificance(
-            self, alpha=alpha, only_larger=only_larger
-        ).pairwise_indices
+        return self._intersperse_hs_in_std_res(
+            hs_dims,
+            PairwiseSignificance(
+                self, alpha=alpha, only_larger=only_larger
+            ).pairwise_indices,
+        )
 
     @lazyproperty
     def pairwise_significance_tests(self):
@@ -656,6 +659,12 @@ class CubeSlice(object):
         return [d + 1 for d in hs_dims] if hs_dims is not None else None
 
     def _intersperse_hs_in_std_res(self, hs_dims, res):
+
+        if not hs_dims:
+            # Don't intersperse anything, just return the result
+            return res
+
+        # Perform the insertions of place-holding rows and cols for insertions
         for dim, inds in enumerate(self.inserted_hs_indices()):
             if dim not in hs_dims:
                 continue
