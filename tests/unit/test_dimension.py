@@ -760,9 +760,9 @@ class Describe_AllElements(object):
         elements = all_elements._elements
 
         assert _BaseElement_.call_args_list == [
-            call({"element": "dict-A"}, 0),
-            call({"element": "dict-B"}, 1),
-            call({"element": "dict-C"}, 2),
+            call({"element": "dict-A"}, 0, element_dicts_),
+            call({"element": "dict-B"}, 1, element_dicts_),
+            call({"element": "dict-C"}, 2, element_dicts_),
         ]
         assert elements == (elements_[0], elements_[1], elements_[2])
 
@@ -816,20 +816,20 @@ class Describe_ValidElements(object):
 class Describe_BaseElement(object):
     def it_knows_its_element_id(self):
         element_dict = {"id": 42}
-        element = _BaseElement(element_dict, None)
+        element = _BaseElement(element_dict, None, element_dict)
 
         element_id = element.element_id
 
         assert element_id == 42
 
     def it_knows_its_position_among_all_the_dimension_elements(self):
-        element = _BaseElement(None, 17)
+        element = _BaseElement(None, 17, {})
         index = element.index
         assert index == 17
 
     def it_knows_whether_its_missing_or_valid(self, missing_fixture):
         element_dict, expected_value = missing_fixture
-        element = _BaseElement(element_dict, None)
+        element = _BaseElement(element_dict, None, None)
 
         missing = element.missing
 
@@ -838,7 +838,7 @@ class Describe_BaseElement(object):
 
     def it_knows_its_numeric_value(self, numeric_value_fixture):
         element_dict, expected_value = numeric_value_fixture
-        element = _BaseElement(element_dict, None)
+        element = _BaseElement(element_dict, None, None)
 
         numeric_value = element.numeric_value
 
@@ -884,7 +884,7 @@ class Describe_BaseElement(object):
 class Describe_Category(object):
     def it_knows_its_label(self, label_fixture):
         category_dict, expected_value = label_fixture
-        category = _Category(category_dict, None)
+        category = _Category(category_dict, None, None)
 
         label = category.label
 
@@ -909,7 +909,7 @@ class Describe_Category(object):
 class Describe_Element(object):
     def it_knows_its_label(self, label_fixture):
         element_dict, expected_value = label_fixture
-        element = _Element(element_dict, None)
+        element = _Element(element_dict, None, None)
 
         label = element.label
 
@@ -1071,7 +1071,7 @@ class Describe_Subtotal(object):
         anchor, index, calls, expected_value = anchor_idx_fixture
         anchor_prop_.return_value = anchor
         valid_elements_.get_by_id.return_value = element_
-        element_.index = index
+        element_.index_in_valids = index
         subtotal = _Subtotal(None, valid_elements_)
 
         anchor_idx = subtotal.anchor_idx
@@ -1095,7 +1095,8 @@ class Describe_Subtotal(object):
     ):
         addend_ids_prop_.return_value = (3, 6, 9)
         valid_elements_.get_by_id.side_effect = iter(
-            instance_mock(request, _BaseElement, index=index) for index in (2, 4, 6)
+            instance_mock(request, _BaseElement, index_in_valids=index)
+            for index in (2, 4, 6)
         )
         subtotal = _Subtotal(None, valid_elements_)
 
