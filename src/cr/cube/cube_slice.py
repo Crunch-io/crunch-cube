@@ -562,15 +562,14 @@ class CubeSlice(object):
             ).pairwise_indices,
         )
 
-    @lazyproperty
-    def pairwise_significance_tests(self):
+    def pairwise_significance_tests(self, column_idx):
         """list of _ColumnPairwiseSignificance tests.
 
         Result has as many elements as there are columns in the slice. Each
         significance test contains `p_vals` and `t_stats` (ndarrays that represent
         probability values and statistical scores).
         """
-        return PairwiseSignificance(self).values
+        return PairwiseSignificance(self).values[column_idx]
 
     def _apply_pruning_mask(self, res, hs_dims=None):
         array = self.as_array(prune=True, include_transforms_for_dims=hs_dims)

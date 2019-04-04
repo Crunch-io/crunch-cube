@@ -731,7 +731,7 @@ class CrunchCube(object):
         """
         return [slice_.wishart_pairwise_pvals(axis=axis) for slice_ in self.slices]
 
-    def compare_to_column(self, slice=0, column=0):
+    def compare_to_column(self, slice_idx=0, column_idx=0):
         """Return matrices of column-comparison p-values as list of numpy.ndarrays.
 
         *t*-statistic and associated p-values for one column of one slice
@@ -740,9 +740,10 @@ class CrunchCube(object):
 
         (It does not make sense to compare the same column at once across slices.)
 
-        *column* (int): Index of slice to compare to, by default 0, the first.
+        *slice_idx* (int): Index of slice for which we perform comparisons
+        *column_idx* (int): Index of column to compare to, by default 0 (the first)
         """
-        return self.slices[slice].pairwise_significance_tests[column]
+        return self.slices[slice_idx].pairwise_significance_tests(column_idx)
 
     def _adjust_axis(self, axis):
         """Return raw axis/axes corresponding to apparent axis/axes.

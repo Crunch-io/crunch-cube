@@ -165,7 +165,7 @@ class TestStandardizedResiduals(TestCase):
 
     def test_compare_to_column(self):
         cube = CrunchCube(CR.PAIRWISE_HIROTSU_OCCUPATION_X_ILLNESS)
-        actual = cube.compare_to_column(slice=0, column=2)
+        actual = cube.compare_to_column(slice_idx=0, column_idx=2)
         expected_tstats = np.array(
             [
                 [0.926265419379764, -1.06821799614525, 0],
