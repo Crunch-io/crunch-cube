@@ -1,5 +1,17 @@
 # History of Changes
 
+#### 1.9.10
+- Fix scale means for cubes with single-element categories
+
+#### 1.9.9
+- Enable other category-like types when comparing pairwise (datetime, text and binned numeric)
+
+#### 1.9.8
+- Enable pruning for min-base-size masks
+
+#### 1.9.7
+- Implement Min Base Size suppression masks
+
 #### 1.9.8
 - Enable pruning for min-base-size masks
 

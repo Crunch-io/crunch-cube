@@ -112,22 +112,14 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.9.13
+- Parametrize pairwise comparisons based on column
+- Add placeholders for insertions
+
 #### 1.9.12
 - Implement pairwise comparisons based on T-Stats
 
 #### 1.9.11
 - Eliminate `memoize` from `Dimension`, and thus reduce probability of threading bugs
-
-#### 1.9.10
-- Fix scale means for cubes with single-element categories
-
-#### 1.9.9
-- Enable other category-like types when comparing pairwise (datetime, text and binned numeric)
-
-#### 1.9.8
-- Enable pruning for min-base-size masks
-
-#### 1.9.7
-- Implement Min Base Size suppression masks
 
 For a complete list of changes see [history](https://github.com/Crunch-io/crunch-cube/blob/master/HISTORY.md).
