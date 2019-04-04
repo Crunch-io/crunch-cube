@@ -36,6 +36,21 @@ def compress_pruned(table):
     return table
 
 
+def intersperse_hs_in_std_res(slice_, hs_dims, res):
+
+    if not hs_dims:
+        # Don't intersperse anything, just return the result
+        return res
+
+    # Perform the insertions of place-holding rows and cols for insertions
+    for dim, inds in enumerate(slice_.inserted_hs_indices()):
+        if dim not in hs_dims:
+            continue
+        for i in inds:
+            res = np.insert(res, i, np.nan, axis=(dim - slice_.ndim))
+    return res
+
+
 class Counter(dict):
     """Mapping where default values are zero"""
 

@@ -37,24 +37,24 @@ class Describe_ColumnPairwiseSignificance:
         slice_.proportions.return_value = props
         slice_.margin.return_value = margin
         np.testing.assert_almost_equal(
-            _ColumnPairwiseSignificance(slice_, col_idx).t_stats, t_stats
+            _ColumnPairwiseSignificance(slice_, col_idx)._t_stats, t_stats
         )
 
-    def it_can_calculate_p_vals(self, p_vals_fixture, slice_, t_stats_prop_):
+    def it_can_calculate_p_vals(self, p_vals_fixture, slice_, _t_stats_prop_):
         col_idx, t_stats, margin, p_vals = p_vals_fixture
         slice_.margin.return_value = margin
-        t_stats_prop_.return_value = t_stats
+        _t_stats_prop_.return_value = t_stats
         np.testing.assert_almost_equal(
             _ColumnPairwiseSignificance(slice_, col_idx).p_vals, p_vals
         )
 
     def it_knows_its_pairwise_indices(
-        self, pairwise_fixture, p_vals_prop_, t_stats_prop_
+        self, pairwise_fixture, p_vals_prop_, t_stats_prop_, slice_
     ):
         p_vals, t_stats, only_larger, pairwise_indices = pairwise_fixture
         p_vals_prop_.return_value = p_vals
         t_stats_prop_.return_value = t_stats
-        cps = _ColumnPairwiseSignificance(None, None, only_larger=only_larger)
+        cps = _ColumnPairwiseSignificance(slice_, None, only_larger=only_larger)
         assert cps.pairwise_indices == pairwise_indices
 
     # fixtures -------------------------------------------------------
@@ -176,6 +176,10 @@ class Describe_ColumnPairwiseSignificance:
     @pytest.fixture
     def slice_(self, request):
         return instance_mock(request, CubeSlice)
+
+    @pytest.fixture
+    def _t_stats_prop_(self, request):
+        return property_mock(request, _ColumnPairwiseSignificance, "_t_stats")
 
     @pytest.fixture
     def t_stats_prop_(self, request):
