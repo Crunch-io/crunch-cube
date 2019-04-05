@@ -545,7 +545,7 @@ class CubeSlice(object):
 
         return zscore
 
-    def pairwise_indices(self, alpha=0.05, only_larger=True, hs_dims=None):
+    def pairwise_indices(self, alpha=0.05, only_larger=True, hs_dims=None, prune=False):
         """Indices of columns where p < alpha for column-comparison t-tests
 
         Returns an array of tuples of columns that are significant at p<alpha,
@@ -559,7 +559,7 @@ class CubeSlice(object):
             self,
             hs_dims,
             PairwiseSignificance(
-                self, alpha=alpha, only_larger=only_larger, hs_dims=hs_dims
+                self, alpha=alpha, only_larger=only_larger, hs_dims=hs_dims, prune=prune
             ).pairwise_indices,
         )
 
