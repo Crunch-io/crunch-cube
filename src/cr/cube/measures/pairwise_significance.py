@@ -60,12 +60,18 @@ class PairwiseSignificance:
                 self._hs_dims,
                 self._prune,
             )
-            for col_idx in range(self._slice.shape[1])
+            for col_idx in range(self._slice.shape[1 - self._axis])
+            if not self._is_pruned(col_idx)
         ]
 
     @lazyproperty
     def pairwise_indices(self):
         return np.array([sig.pairwise_indices for sig in self.values]).T
+
+    def _is_pruned(self, col_idx):
+        if not self._prune:
+            return False
+        return not np.any(self._slice.as_array().T[col_idx])
 
 
 # pylint: disable=too-few-public-methods
@@ -93,11 +99,14 @@ class _ColumnPairwiseSignificance:
         self._prune = prune
 
     @lazyproperty
+    def _props(self):
+        return self._slice.proportions(axis=self._axis)
+
+    @lazyproperty
     def _t_stats(self):
-        props = self._slice.proportions(axis=0)
-        diff = props - props[:, [self._col_idx]]
-        margin = self._slice.margin(axis=0, weighted=self._weighted)
-        var_props = props * (1.0 - props) / margin
+        diff = self._props - self._props[:, [self._col_idx]]
+        margin = self._slice.margin(axis=self._axis, weighted=self._weighted)
+        var_props = self._props * (1.0 - self._props) / margin
         se_diff = np.sqrt(var_props + var_props[:, [self._col_idx]])
         return diff / se_diff
 
@@ -111,7 +120,7 @@ class _ColumnPairwiseSignificance:
 
     @lazyproperty
     def p_vals(self):
-        unweighted_n = self._slice.margin(axis=0, weighted=False)
+        unweighted_n = self._slice.margin(axis=self._axis, weighted=False)
         df = unweighted_n + unweighted_n[self._col_idx] - 2
         p_vals = 2 * (1 - t.cdf(abs(self._t_stats), df=df))
         p_vals = intersperse_hs_in_std_res(self._slice, self._hs_dims, p_vals)
@@ -125,4 +134,5 @@ class _ColumnPairwiseSignificance:
         significance = self.p_vals < self._alpha
         if self._only_larger:
             significance = np.logical_and(self.t_stats < 0, significance)
-        return [tuple(np.where(sig_row)[0]) for sig_row in significance]
+        pwi = [tuple(np.where(sig_row)[0]) for sig_row in significance]
+        return pwi

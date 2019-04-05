@@ -12,7 +12,7 @@ import numpy as np
 from cr.cube.crunch_cube import CrunchCube
 from cr.cube.measures.wishart_pairwise_significance import WishartPairwiseSignificance
 
-from ..fixtures import CR
+from ..fixtures import CR, PW
 from ..util import load_expectation
 
 
@@ -234,3 +234,34 @@ class TestStandardizedResiduals(TestCase):
         )
         pairwise_indices = cube.slices[0].pairwise_indices(only_larger=False)
         np.testing.assert_array_equal(pairwise_indices, expected_indices)
+
+    def test_pairwise_indices_with_pruning(self):
+        cube_slice = CrunchCube(PW.CAT_X_CAT_WITH_PRUNING).slices[0]
+
+        # Without pruning
+        expected = np.array(
+            [
+                [(1, 3), (), (), ()],
+                [(), (3,), (), ()],
+                [(3,), (0, 3), (), ()],
+                [(), (0,), (), ()],
+                [(1,), (), (), (0, 1)],
+                [(3,), (3,), (), ()],
+            ]
+        )
+        pairwise_indices_no_pruning = cube_slice.pairwise_indices()
+        np.testing.assert_array_equal(pairwise_indices_no_pruning, expected)
+
+        # With pruning
+        expected = np.array(
+            [
+                [(1, 2), (), ()],
+                [(), (2,), ()],
+                [(2,), (0, 2), ()],
+                [(), (0,), ()],
+                [(1,), (), (0, 1)],
+                [(2,), (2,), ()],
+            ]
+        )
+        pairwise_indices_no_pruning = cube_slice.pairwise_indices(prune=True)
+        np.testing.assert_array_equal(pairwise_indices_no_pruning, expected)
