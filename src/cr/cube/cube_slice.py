@@ -21,6 +21,7 @@ from cr.cube.util import (
     lazyproperty,
     memoize,
     intersperse_hs_in_std_res,
+    apply_pruning_mask,
 )
 
 try:
@@ -262,7 +263,7 @@ class CubeSlice(object):
 
         indexes = proportions / baseline * 100
 
-        return self._apply_pruning_mask(indexes) if prune else indexes
+        return apply_pruning_mask(self, indexes) if prune else indexes
 
     @lazyproperty
     def is_double_mr(self):
@@ -510,7 +511,7 @@ class CubeSlice(object):
         stats = self.zscore(weighted=weighted, prune=prune, hs_dims=hs_dims)
         pvals = 2 * (1 - norm.cdf(np.abs(stats)))
 
-        return self._apply_pruning_mask(pvals, hs_dims) if prune else pvals
+        return apply_pruning_mask(self, pvals, hs_dims) if prune else pvals
 
     def zscore(self, weighted=True, prune=False, hs_dims=None):
         """Return ndarray with slices's standardized residuals (Z-scores).
@@ -540,7 +541,7 @@ class CubeSlice(object):
             zscore = intersperse_hs_in_std_res(self, hs_dims, zscore)
 
         if prune:
-            return self._apply_pruning_mask(zscore, hs_dims)
+            return apply_pruning_mask(self, zscore, hs_dims)
 
         return zscore
 
@@ -570,14 +571,6 @@ class CubeSlice(object):
         probability values and statistical scores).
         """
         return PairwiseSignificance(self).values[column_idx]
-
-    def _apply_pruning_mask(self, res, hs_dims=None):
-        array = self.as_array(prune=True, include_transforms_for_dims=hs_dims)
-
-        if not isinstance(array, np.ma.core.MaskedArray):
-            return res
-
-        return np.ma.masked_array(res, mask=array.mask)
 
     def _array_type_std_res(self, counts, total, colsum, rowsum):
         """Return ndarray containing standard residuals for array values.

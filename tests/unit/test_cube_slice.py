@@ -10,6 +10,7 @@ from cr.cube.crunch_cube import CrunchCube
 from cr.cube.cube_slice import CubeSlice
 from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.dimension import Dimension
+from cr.cube.util import apply_pruning_mask
 
 from ..unitutil import instance_mock, method_mock, property_mock
 
@@ -407,7 +408,7 @@ class TestCubeSlice(object):
         cube_, res, expected_type = mask_fixture
         slice_ = CubeSlice(cube_, None)
 
-        return_type = type(slice_._apply_pruning_mask(res))
+        return_type = type(apply_pruning_mask(slice_, res))
 
         assert return_type == expected_type
 

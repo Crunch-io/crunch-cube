@@ -36,6 +36,15 @@ def compress_pruned(table):
     return table
 
 
+def apply_pruning_mask(slice_, res, hs_dims=None):
+    array = slice_.as_array(prune=True, include_transforms_for_dims=hs_dims)
+
+    if not isinstance(array, np.ma.core.MaskedArray):
+        return res
+
+    return np.ma.masked_array(res, mask=array.mask)
+
+
 def intersperse_hs_in_std_res(slice_, hs_dims, res):
 
     if not hs_dims:
