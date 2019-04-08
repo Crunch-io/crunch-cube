@@ -554,13 +554,9 @@ class CubeSlice(object):
         False, however, only the index of values *significantly smaller* than
         each cell are indicated.
         """
-        return intersperse_hs_in_std_res(
-            self,
-            hs_dims,
-            PairwiseSignificance(
-                self, alpha=alpha, only_larger=only_larger, hs_dims=hs_dims
-            ).pairwise_indices,
-        )
+        return PairwiseSignificance(
+            self, alpha=alpha, only_larger=only_larger, hs_dims=hs_dims
+        ).pairwise_indices
 
     def pairwise_significance_tests(self, column_idx):
         """list of _ColumnPairwiseSignificance tests.
