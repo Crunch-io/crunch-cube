@@ -21,10 +21,11 @@ except NameError:  # pragma: no cover
 class WishartPairwiseSignificance:
     """Value object providing matrix of pairwise-comparison P-values"""
 
-    def __init__(self, slice_, axis=0, weighted=True):
+    def __init__(self, slice_, axis=0, weighted=True, alpha=0.05):
         self._slice = slice_
         self._axis = axis
         self._weighted = weighted
+        self._alpha = alpha
 
     @classmethod
     def pvals(cls, slice_, axis=0, weighted=True):
@@ -35,7 +36,11 @@ class WishartPairwiseSignificance:
         These values represent the answer to the question "How much is a particular
         column different from each other column in the slice".
         """
-        return cls._factory(slice_, axis, weighted)._pvals
+        return cls._factory(slice_, axis, weighted).pvals
+
+    @classmethod
+    def pairwise_indices(cls, slice_, axis=0, weighted=True):
+        return cls._factory(slice_, axis, weighted).pairwise_indices
 
     def _chi_squared(self, proportions, margin, observed):
         """return ndarray of chi-squared measures for proportions' columns.
@@ -54,6 +59,19 @@ class WishartPairwiseSignificance:
                     / denominator
                 )
         return chi_squared
+
+    @staticmethod
+    def _pairwise_sig_indices(significance_by_col):
+        """Return tuple like (1, 3), (6,), or () identifying pairwise sig cols.
+
+        The *significance_by_col* parameter is a 1D boolean array with one value for
+        each column in this crosstab, a True value signifying pairwise significance.
+        """
+        return tuple(
+            i
+            for i, is_pairwise_significant in enumerate(significance_by_col)
+            if is_pairwise_significant
+        )
 
     def _pvals_from_chi_squared(self, pairwise_chisq):
         """return statistical significance for props' columns.
@@ -135,6 +153,20 @@ class _CatXCatPairwiseSignificance(WishartPairwiseSignificance):
     _include_mr_cat = False
 
     @lazyproperty
+    def pairwise_indices(self):
+        return np.array(
+            [
+                self._pairwise_sig_indices(pvals_row < self._alpha)
+                for pvals_row in self.pvals
+            ]
+        )
+
+    @lazyproperty
+    def pvals(self):
+        """Square matrix of pairwise Chi-square along axis, as numpy.ndarray."""
+        return self._pvals_from_chi_squared(self._pairwise_chisq)
+
+    @lazyproperty
     def _observed(self):
         """Observed marginal proportions, as float."""
         total = self._slice.margin()
@@ -149,16 +181,31 @@ class _CatXCatPairwiseSignificance(WishartPairwiseSignificance):
         """
         return self._chi_squared(self._proportions, self._margin, self._observed)
 
-    @lazyproperty
-    def _pvals(self):
-        """Square matrix of pairwise Chi-square along axis, as numpy.ndarray."""
-        return self._pvals_from_chi_squared(self._pairwise_chisq)
-
 
 class _MrXCatPairwiseSignificance(WishartPairwiseSignificance):
     """Pairwise significance for MR x CAT type slices."""
 
     _include_mr_cat = True
+
+    @lazyproperty
+    def pairwise_indices(self):
+        return np.array(
+            [
+                [
+                    self._pairwise_sig_indices(pvals_row < self._alpha)
+                    for pvals_row in pvals_matrix
+                ]
+                for pvals_matrix in self.pvals
+            ]
+        )
+
+    @lazyproperty
+    def pvals(self):
+        """Square matrix of pairwise Chi-square along axis, as numpy.ndarray."""
+        return [
+            self._pvals_from_chi_squared(mr_subvar_chisq)
+            for mr_subvar_chisq in self._pairwise_chisq
+        ]
 
     @lazyproperty
     def _pairwise_chisq(self):
@@ -175,12 +222,4 @@ class _MrXCatPairwiseSignificance(WishartPairwiseSignificance):
                 / np.sum(self._opposite_axis_margin[idx]),
             )
             for (idx, mr_subvar_proportions) in enumerate(self._proportions)
-        ]
-
-    @lazyproperty
-    def _pvals(self):
-        """Square matrix of pairwise Chi-square along axis, as numpy.ndarray."""
-        return [
-            self._pvals_from_chi_squared(mr_subvar_chisq)
-            for mr_subvar_chisq in self._pairwise_chisq
         ]
