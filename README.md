@@ -112,6 +112,11 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.9.14
+- Fix how Headings and Subtotals are treated in pairwise indices
+- Row dimension is treated when calculating indices, while the column dimension
+  is treated by inserting NaN placeholders
+
 #### 1.9.13
 - Parametrize pairwise comparisons based on column
 - Add placeholders for insertions
