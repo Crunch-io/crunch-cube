@@ -36,6 +36,8 @@ class PairwiseSignificance:
         Result has as many elements as there are coliumns in the slice. Each
         significance test contains `p_vals` and `t_stats` significance tests.
         """
+        # TODO: Figure out how to intersperse pairwise objects for columns
+        # that represent H&S
         return [
             _ColumnPairwiseSignificance(
                 self._slice,
@@ -51,7 +53,16 @@ class PairwiseSignificance:
 
     @lazyproperty
     def pairwise_indices(self):
-        return np.array([sig.pairwise_indices for sig in self.values]).T
+        """ndarray containing tuples of pairwise indices."""
+        pwi = np.array([sig.pairwise_indices for sig in self.values]).T
+
+        if self._hs_dims and 1 in self._hs_dims:
+            # If we need to account for the dimension 1 in pairwise indices, we need
+            # to intersperse with NaNs. The dimension 0 is already tackled
+            # when determining the indices.
+            pwi = intersperse_hs_in_std_res(self._slice, (1,), pwi)
+
+        return pwi
 
 
 # pylint: disable=too-few-public-methods
