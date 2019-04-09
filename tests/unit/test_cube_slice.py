@@ -25,6 +25,11 @@ class DescribeCubeSlice(object):
 
         assert updated_axis == expected_value
 
+    def it_raises_not_implemented_for_wrong_pairwise_indices_direction(self, cube_):
+        slice_ = CubeSlice(cube_, None)
+        with pytest.raises(NotImplementedError):
+            slice_.wishart_pairwise_indices(axis=1)
+
     def it_can_calculate_std_res(self, std_res_fixture, cube_, dim_types_prop_):
         dim_types, expected_value = std_res_fixture
         dim_types_prop_.return_value = dim_types
