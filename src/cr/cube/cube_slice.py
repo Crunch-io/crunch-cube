@@ -472,6 +472,11 @@ class CubeSlice(object):
             raise NotImplementedError("Pairwise comparison only implemented for colums")
         return WishartPairwiseSignificance.pvals(self, axis=axis)
 
+    def wishart_pairwise_indices(self, axis=0):
+        if axis != 0:
+            raise NotImplementedError("Pairwise comparison only implemented for colums")
+        return WishartPairwiseSignificance.pairwise_indices(self, axis=axis)
+
     def population_counts(
         self,
         population_size,
