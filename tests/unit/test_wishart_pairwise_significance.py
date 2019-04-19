@@ -17,7 +17,7 @@ from ..unitutil import instance_mock, property_mock
 class DescribePairwiseSignificance:
     def it_provides_access_to_its_values(self, request, slice_):
         shape = (2, 2)
-        slice_.shape = shape
+        slice_.get_shape.return_value = shape
         expected_test_values = PairwiseSignificance(slice_).values
         assert len(expected_test_values) == 2
         for i, column_pairwise_significance in enumerate(expected_test_values):
@@ -37,13 +37,13 @@ class Describe_ColumnPairwiseSignificance:
         slice_.proportions.return_value = props
         slice_.margin.return_value = margin
         np.testing.assert_almost_equal(
-            _ColumnPairwiseSignificance(slice_, col_idx)._t_stats, t_stats
+            _ColumnPairwiseSignificance(slice_, col_idx).t_stats, t_stats
         )
 
-    def it_can_calculate_p_vals(self, p_vals_fixture, slice_, _t_stats_prop_):
+    def it_can_calculate_p_vals(self, p_vals_fixture, slice_, t_stats_prop_):
         col_idx, t_stats, margin, p_vals = p_vals_fixture
         slice_.margin.return_value = margin
-        _t_stats_prop_.return_value = t_stats
+        t_stats_prop_.return_value = t_stats
         np.testing.assert_almost_equal(
             _ColumnPairwiseSignificance(slice_, col_idx).p_vals, p_vals
         )
@@ -176,10 +176,6 @@ class Describe_ColumnPairwiseSignificance:
     @pytest.fixture
     def slice_(self, request):
         return instance_mock(request, CubeSlice)
-
-    @pytest.fixture
-    def _t_stats_prop_(self, request):
-        return property_mock(request, _ColumnPairwiseSignificance, "_t_stats")
 
     @pytest.fixture
     def t_stats_prop_(self, request):

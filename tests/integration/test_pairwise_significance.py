@@ -96,17 +96,115 @@ class TestStandardizedResiduals(TestCase):
         expected = np.array([(), (), (3, 4, 7, 9), (2,), (2,), (), (), (2,), (), (2,)])
         np.testing.assert_array_equal(actual_pairwise_indices, expected)
 
+    def test_pairwise_t_stats_with_hs(self):
+        slice_ = CrunchCube(CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION_WITH_HS).slices[0]
+        expected = np.array(
+            [
+                [
+                    0.0,
+                    -0.06178448,
+                    0.30342874,
+                    -3.18865018,
+                    -3.82130608,
+                    -2.99560531,
+                    0.07456344,
+                    -0.68932699,
+                    -2.95469238,
+                    -0.46970468,
+                    -4.14956044,
+                ],
+                [
+                    0.0,
+                    1.18922394,
+                    0.38254102,
+                    3.3306654,
+                    3.45013209,
+                    2.7520633,
+                    0.59216241,
+                    0.86352416,
+                    2.54171145,
+                    1.10130414,
+                    3.3839919,
+                ],
+                [
+                    0.0,
+                    -1.7080666,
+                    -0.931165,
+                    -0.87419923,
+                    -0.24915622,
+                    -0.2367748,
+                    -0.97198009,
+                    -0.38504801,
+                    -0.03910193,
+                    -1.02720423,
+                    0.19773989,
+                ],
+            ]
+        )
+        t_stats = slice_.pairwise_significance_tests(
+            column_idx=0, hs_dims=(0, 1)
+        ).t_stats
+        np.testing.assert_almost_equal(t_stats, expected)
+
+    def test_pairwise_p_vals_with_hs(self):
+        slice_ = CrunchCube(CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION_WITH_HS).slices[0]
+        expected = np.array(
+            [
+                [
+                    1.00000000e00,
+                    9.50744855e-01,
+                    7.61580875e-01,
+                    1.45494511e-03,
+                    1.35271514e-04,
+                    2.75262668e-03,
+                    9.40575477e-01,
+                    4.90755141e-01,
+                    3.16822332e-03,
+                    6.38672254e-01,
+                    3.44275537e-05,
+                ],
+                [
+                    1.00000000e00,
+                    2.34589189e-01,
+                    7.02082945e-01,
+                    8.84605265e-04,
+                    5.67562813e-04,
+                    5.94375533e-03,
+                    5.53862215e-01,
+                    3.88027539e-01,
+                    1.11098015e-02,
+                    2.71039211e-01,
+                    7.25442977e-04,
+                ],
+                [
+                    1.00000000e00,
+                    8.78852262e-02,
+                    3.51831360e-01,
+                    3.82131035e-01,
+                    8.03255937e-01,
+                    8.12841336e-01,
+                    3.31271828e-01,
+                    7.00272311e-01,
+                    9.68813218e-01,
+                    3.04581978e-01,
+                    8.43264694e-01,
+                ],
+            ]
+        )
+        p_vals = slice_.pairwise_significance_tests(column_idx=0, hs_dims=(0, 1)).p_vals
+        np.testing.assert_almost_equal(p_vals, expected)
+
     def test_pairwise_indices_with_hs(self):
-        cube = CrunchCube(CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION_WITH_HS)
+        slice_ = CrunchCube(CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION_WITH_HS).slices[0]
         expected = [
             [
-                (3, 4, 8, 10),
-                (3, 4, 8, 10),
-                (3, 4, 8, 10),
+                (3, 4, 5, 8, 10),
+                (3, 4, 5, 8, 10),
+                (3, 4, 5, 8, 10),
                 (),
                 (),
-                np.nan,
-                (3, 4, 8, 10),
+                (10,),
+                (3, 4, 5, 8, 10),
                 (3, 4, 10),
                 (),
                 (4, 10),
@@ -118,17 +216,17 @@ class TestStandardizedResiduals(TestCase):
                 (),
                 (0, 2, 6, 7),
                 (0, 2, 6, 7),
-                np.nan,
+                (0, 2),
                 (),
                 (),
                 (0, 2),
                 (),
                 (0, 2, 6, 7),
             ],
-            [(), (), (), (), (), np.nan, (), (), (), (), (1,)],
+            [(), (), (), (), (), (1,), (), (), (), (), (1,)],
         ]
-        actual = cube.slices[0].pairwise_indices(hs_dims=[0, 1]).tolist()
-        assert actual == expected
+        pairwise_indices = slice_.pairwise_indices(hs_dims=(0, 1)).tolist()
+        assert pairwise_indices == expected
 
     def test_hirotsu_pvals_with_hs(self):
         """The shape of the result should be 11 x 11, with H&S (at index 5)."""

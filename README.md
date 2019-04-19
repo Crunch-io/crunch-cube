@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.9.16
+- Proper t-stats for cubes with H&S
+
 #### 1.9.15
 - Implement pairwise indices for Wishart, directly in cube
 

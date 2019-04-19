@@ -7,7 +7,7 @@ from __future__ import division
 import numpy as np
 from scipy.stats import t
 
-from cr.cube.util import lazyproperty, intersperse_hs_in_std_res
+from cr.cube.util import lazyproperty
 
 try:
     xrange
@@ -48,21 +48,13 @@ class PairwiseSignificance:
                 self._only_larger,
                 self._hs_dims,
             )
-            for col_idx in range(self._slice.shape[1])
+            for col_idx in range(self._slice.get_shape(hs_dims=self._hs_dims)[1])
         ]
 
     @lazyproperty
     def pairwise_indices(self):
         """ndarray containing tuples of pairwise indices."""
-        pwi = np.array([sig.pairwise_indices for sig in self.values]).T
-
-        if self._hs_dims and 1 in self._hs_dims:
-            # If we need to account for the dimension 1 in pairwise indices, we need
-            # to intersperse with NaNs. The dimension 0 is already tackled
-            # when determining the indices.
-            pwi = intersperse_hs_in_std_res(self._slice, (1,), pwi)
-
-        return pwi
+        return np.array([sig.pairwise_indices for sig in self.values]).T
 
 
 # pylint: disable=too-few-public-methods
@@ -88,24 +80,25 @@ class _ColumnPairwiseSignificance:
         self._hs_dims = hs_dims
 
     @lazyproperty
-    def _t_stats(self):
-        props = self._slice.proportions(axis=0)
+    def t_stats(self):
+        props = self._slice.proportions(
+            axis=0, include_transforms_for_dims=self._hs_dims
+        )
         diff = props - props[:, [self._col_idx]]
-        margin = self._slice.margin(axis=0, weighted=self._weighted)
+        margin = self._slice.margin(
+            axis=0, weighted=self._weighted, include_transforms_for_dims=self._hs_dims
+        )
         var_props = props * (1.0 - props) / margin
         se_diff = np.sqrt(var_props + var_props[:, [self._col_idx]])
         return diff / se_diff
 
     @lazyproperty
-    def t_stats(self):
-        return intersperse_hs_in_std_res(self._slice, self._hs_dims, self._t_stats)
-
-    @lazyproperty
     def p_vals(self):
-        unweighted_n = self._slice.margin(axis=0, weighted=False)
+        unweighted_n = self._slice.margin(
+            axis=0, weighted=False, include_transforms_for_dims=self._hs_dims
+        )
         df = unweighted_n + unweighted_n[self._col_idx] - 2
-        p_vals = 2 * (1 - t.cdf(abs(self._t_stats), df=df))
-        return intersperse_hs_in_std_res(self._slice, self._hs_dims, p_vals)
+        return 2 * (1 - t.cdf(abs(self.t_stats), df=df))
 
     @lazyproperty
     def pairwise_indices(self):
