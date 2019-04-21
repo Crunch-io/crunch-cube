@@ -85,10 +85,10 @@ class _ColumnPairwiseSignificance:
             axis=0, include_transforms_for_dims=self._hs_dims
         )
         diff = props - props[:, [self._col_idx]]
-        margin = self._slice.margin(
-            axis=0, weighted=self._weighted, include_transforms_for_dims=self._hs_dims
+        unweighted_margin = self._slice.margin(
+            axis=0, weighted=False, include_transforms_for_dims=self._hs_dims
         )
-        var_props = props * (1.0 - props) / margin
+        var_props = props * (1.0 - props) / unweighted_margin
         se_diff = np.sqrt(var_props + var_props[:, [self._col_idx]])
         return diff / se_diff
 
