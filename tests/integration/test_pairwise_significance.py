@@ -353,6 +353,19 @@ class TestStandardizedResiduals(TestCase):
         pairwise_indices = cube.slices[0].pairwise_indices(only_larger=False)
         np.testing.assert_array_equal(pairwise_indices, expected_indices)
 
+    def test_summary_pairwise_indices(self):
+        slice_ = CrunchCube(CR.PAIRWISE_HIROTSU_OCCUPATION_X_ILLNESS).slices[0]
+
+        # Only larger
+        pairwise_indices = slice_.summary_pairwise_indices()
+        expected_indices = np.array([(), (0,), ()])
+        np.testing.assert_array_equal(pairwise_indices, expected_indices)
+
+        # Larger and smaller
+        pairwise_indices = slice_.summary_pairwise_indices(only_larger=False)
+        expected_indices = np.array([(), (0,), (0,)])
+        np.testing.assert_array_equal(pairwise_indices, expected_indices)
+
     def test_ttests_use_unweighted_n_for_variance(self):
         """The weights on this cube demonstrate much higher variance (less
         extreme t values, and higher associated p-values) than if weighted_n
