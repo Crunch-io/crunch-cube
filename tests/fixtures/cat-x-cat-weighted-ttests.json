@@ -1,0 +1,227 @@
+{
+    "value": {
+        "query": {
+            "dimensions": [
+                {
+                    "variable": "/api/datasets/123/variables/ac62f49fe0944baf8030839227d7cf06"
+                }, {
+                    "variable": "/api/datasets/123/variables/772559e879734d5dbda31d67bb0e7a2c/"
+                }
+            ],
+            "filters": [],
+            "measures": {
+                "count": {
+                    "args": [],
+                    "function": "cube_count"
+                }
+            },
+            "weight": "/api/datasets/123/variables/c1820eb7befd4704beacfdbcb430969c/"
+        },
+        "result": {
+            "counts": [
+                10,
+                17,
+                110,
+                13,
+                0,
+                19,
+                11,
+                113,
+                11,
+                0,
+                11,
+                17,
+                14,
+                14,
+                0,
+                3,
+                0,
+                3,
+                0,
+                0,
+                18,
+                13,
+                11,
+                3,
+                3,
+                3,
+                3,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "dimensions": [
+                {
+                    "derived": false,
+                    "references": {
+                        "alias": "ShutdownBlame",
+                        "description": "If President Oba",
+                        "discarded": false,
+                        "header_order": 0,
+                        "name": "ShutdownBlame"
+                    },
+                    "type": {
+                        "categories": [
+                            {
+                                "id": 1,
+                                "missing": false,
+                                "name": "President Obama",
+                                "numeric_value": 1
+                            }, {
+                                "id": 2,
+                                "missing": false,
+                                "name": "Republicans",
+                                "numeric_value": 2
+                            }, {
+                                "id": 3,
+                                "missing": false,
+                                "name": "Both",
+                                "numeric_value": 3
+                            }, {
+                                "id": 4,
+                                "missing": false,
+                                "name": "Neither",
+                                "numeric_value": 4
+                            }, {
+                                "id": 5,
+                                "missing": false,
+                                "name": "Not sure",
+                                "numeric_value": 5
+                            }, {
+                                "id": 8,
+                                "missing": true,
+                                "name": "Skipped",
+                                "numeric_value": 8
+                            }, {
+                                "id": 9,
+                                "missing": true,
+                                "name": "Not Asked",
+                                "numeric_value": 9
+                            }, {
+                                "id": -1,
+                                "missing": true,
+                                "name": "No Data",
+                                "numeric_value": null
+                            }
+                        ],
+                        "class": "categorical",
+                        "ordinal": false
+                    }
+                }, {
+                    "derived": false,
+                    "references": {
+                        "alias": "Age4",
+                        "description": "4 Category Age",
+                        "discarded": false,
+                        "header_order": 13,
+                        "name": "Age4"
+                    },
+                    "type": {
+                        "categories": [
+                            {
+                                "id": 1,
+                                "missing": false,
+                                "name": "18-29",
+                                "numeric_value": 1
+                            }, {
+                                "id": 2,
+                                "missing": false,
+                                "name": "30-44",
+                                "numeric_value": 2
+                            }, {
+                                "id": 3,
+                                "missing": false,
+                                "name": "45-64",
+                                "numeric_value": 3
+                            }, {
+                                "id": 4,
+                                "missing": false,
+                                "name": "65+",
+                                "numeric_value": 4
+                            }, {
+                                "id": -1,
+                                "missing": true,
+                                "name": "No Data",
+                                "numeric_value": null
+                            }
+                        ],
+                        "class": "categorical",
+                        "ordinal": false
+                    }
+                }
+            ],
+            "element": "crunch:cube",
+            "measures": {
+                "count": {
+                    "data": [
+                        60.86625141813965,
+                        97.88936399229519,
+                        100.15929984533358,
+                        53.85016845098138,
+                        0,
+                        79.36184123878606,
+                        91.08041828026134,
+                        113.52172513707207,
+                        51.24133618727803,
+                        0,
+                        51.6860301097489,
+                        57.19341887477966,
+                        94.46614309659532,
+                        34.21679409150737,
+                        0,
+                        7.1814887299023,
+                        0.648732097517952,
+                        2.160525278672988,
+                        0,
+                        0,
+                        48.05709086803253,
+                        23.04698949579007,
+                        21.86062399732678,
+                        3.2671706433211516,
+                        1.24732636818006,
+                        4.27630335512173,
+                        2.720958443356048,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                    ],
+                    "metadata": {
+                        "derived": true,
+                        "references": {},
+                        "type": {
+                            "class": "numeric",
+                            "integer": false,
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "missing_rules": {}
+                        }
+                    },
+                    "n_missing": 4
+                }
+            },
+            "missing": 4,
+            "n": 1000
+        }
+    }
+}

@@ -352,3 +352,44 @@ class TestStandardizedResiduals(TestCase):
         )
         pairwise_indices = cube.slices[0].pairwise_indices(only_larger=False)
         np.testing.assert_array_equal(pairwise_indices, expected_indices)
+
+    def test_ttests_use_unweighted_n_for_variance(self):
+        """The weights on this cube demonstrate much higher variance (less
+        extreme t values, and higher associated p-values) than if weighted_n
+        were used in the variance estimate of the test statistic.
+        """
+        cube = CrunchCube(CR.CAT_X_CAT_WEIGHTED_TTESTS)
+        actual = cube.slices[0].pairwise_significance_tests(
+            column_idx=0, hs_dims=(0, 1)
+        )
+        expected_tstats = np.array(
+            [
+                [0.0, 1.3892930788974391, 0.8869425734660505, 1.402945620973322],
+                [0.0, 0.1903540333363253, 0.30894158244285624, 0.3994739596013725],
+                [0.0, 0.03761142927757482, 1.2682277741610029, 0.36476016345069556],
+                [0.0, -1.187392798652706, -1.0206496663686406, -1.35111583891054],
+                [0.0, -1.742783579889951, -2.425391682127969, -3.0738474093706927],
+            ]
+        ).reshape(5, 4)
+        expected_pvals = np.array(
+            [
+                [1.0, 0.1673820620286901, 0.37579738470724267, 0.16373028998420036],
+                [1.0, 0.8493616019040273, 0.7575734897713429, 0.6903959137827367],
+                [1.0, 0.9700615941125716, 0.20566822638024163, 0.7160606992310101],
+                [1.0, 0.23747780923355655, 0.30821629616167123, 0.17970733830083074],
+                [1.0, 0.0839987707197456, 0.015862691173528676, 0.002723927327002773],
+            ]
+        ).reshape(5, 4)
+        np.testing.assert_almost_equal(actual.t_stats, expected_tstats)
+        np.testing.assert_almost_equal(actual.p_vals, expected_pvals)
+        pairwise_indices = cube.slices[0].pairwise_indices()
+        expected_indices = np.array(
+            [
+                [(), (), (), ()],
+                [(), (), (), ()],
+                [(), (), (), ()],
+                [(), (), (), ()],
+                [(2, 3), (), (), ()],
+            ]
+        )
+        np.testing.assert_array_equal(pairwise_indices, expected_indices)
