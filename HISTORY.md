@@ -1,5 +1,20 @@
 # History of Changes
 
+#### 1.9.14
+- Fix how Headings and Subtotals are treated in pairwise indices
+- Row dimension is treated when calculating indices, while the column dimension
+  is treated by inserting NaN placeholders
+
+#### 1.9.13
+- Parametrize pairwise comparisons based on column
+- Add placeholders for insertions
+
+#### 1.9.12
+- Implement pairwise comparisons based on T-Stats
+
+#### 1.9.11
+- Eliminate `memoize` from `Dimension`, and thus reduce probability of threading bugs
+
 #### 1.9.10
 - Fix scale means for cubes with single-element categories
 
