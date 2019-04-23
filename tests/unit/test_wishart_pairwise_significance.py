@@ -111,7 +111,7 @@ class Describe_ColumnPairwiseSignificance:
     )
     def summary_pairwise_indices_fixture(self, request):
         only_larger, col_idx, t_stats, p_vals, expected = request.param
-        return only_larger, col_idx, np.array([t_stats]), np.array([p_vals]), expected
+        return only_larger, col_idx, np.array(t_stats), np.array(p_vals), expected
 
     @pytest.fixture(
         params=[

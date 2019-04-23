@@ -400,12 +400,12 @@ class TestStandardizedResiduals(TestCase):
 
         # Only larger
         pairwise_indices = slice_.summary_pairwise_indices()
-        expected_indices = np.array([(), (0,), ()])
+        expected_indices = np.array([(2,), (0, 2), ()])
         np.testing.assert_array_equal(pairwise_indices, expected_indices)
 
         # Larger and smaller
         pairwise_indices = slice_.summary_pairwise_indices(only_larger=False)
-        expected_indices = np.array([(), (0,), (0,)])
+        expected_indices = np.array([(1, 2), (0, 2), (0, 1)], dtype="i,i")
         np.testing.assert_array_equal(pairwise_indices, expected_indices)
 
     def test_ttests_use_unweighted_n_for_variance(self):

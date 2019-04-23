@@ -59,7 +59,13 @@ class PairwiseSignificance:
     @lazyproperty
     def summary_pairwise_indices(self):
         """ndarray containing tuples of pairwise indices for the column summary."""
-        return np.array([sig.summary_pairwise_indices for sig in self.values]).T
+        summary_pairwise_indices = np.empty(
+            self.values[0].t_stats.shape[1], dtype=object
+        )
+        summary_pairwise_indices[:] = [
+            sig.summary_pairwise_indices for sig in self.values
+        ]
+        return summary_pairwise_indices
 
 
 # pylint: disable=too-few-public-methods
@@ -116,8 +122,7 @@ class _ColumnPairwiseSignificance:
         significance = self.summary_p_vals < self._alpha
         if self._only_larger:
             significance = np.logical_and(self.summary_t_stats < 0, significance)
-        spwi = tuple(np.where(significance[0])[0])
-        return spwi
+        return tuple(np.where(significance)[0])
 
     @lazyproperty
     def summary_t_stats(self):
