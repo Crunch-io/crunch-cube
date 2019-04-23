@@ -134,7 +134,12 @@ class _ColumnPairwiseSignificance:
 
     @lazyproperty
     def _df(self):
-        return self._unweighted_n + self._unweighted_n[self._col_idx] - 2
+        selected_unweighted_n = (
+            self._unweighted_n[self._col_idx]
+            if self._unweighted_n.ndim < 2
+            else self._unweighted_n[:, self._col_idx][:, None]
+        )
+        return self._unweighted_n + selected_unweighted_n - 2
 
     @lazyproperty
     def _unweighted_n(self):

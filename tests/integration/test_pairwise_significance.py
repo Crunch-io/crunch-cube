@@ -315,7 +315,7 @@ class TestStandardizedResiduals(TestCase):
         np.testing.assert_almost_equal(actual.t_stats, expected_tstats)
         np.testing.assert_almost_equal(actual.p_vals, expected_pvals)
 
-    def test_pairwise_indices_only_larger(self):
+    def test_cat_x_cat_pairwise_indices_only_larger(self):
         cube = CrunchCube(CR.PAIRWISE_HIROTSU_OCCUPATION_X_ILLNESS)
         expected_indices = np.array(
             [
@@ -329,6 +329,48 @@ class TestStandardizedResiduals(TestCase):
                 [(), (), ()],
                 [(), (), ()],
                 [(), (0,), (0,)],
+            ]
+        )
+        pairwise_indices = cube.slices[0].pairwise_indices()
+        np.testing.assert_array_equal(pairwise_indices, expected_indices)
+
+    def test_mr_x_cat_pairwise_indices_only_larger(self):
+        cube = CrunchCube(CR.MR_X_CAT_HS)
+        expected_indices = np.array(
+            [
+                [(1, 3, 4), (), (), (), (), ()],
+                [(), (), (), (), (), ()],
+                [(), (), (), (0,), (0,), ()],
+                [(), (), (), (), (1,), ()],
+                [(), (), (), (), (), ()],
+            ]
+        )
+        pairwise_indices = cube.slices[0].pairwise_indices()
+        np.testing.assert_array_equal(pairwise_indices, expected_indices)
+
+    def test_cat_x_mr_pairwise_indices_only_larger(self):
+        cube = CrunchCube(CR.CAT_X_MR_HS)
+        expected_indices = np.array(
+            [
+                [(1, 2, 3, 4), (2, 3), (), (), (2,)],
+                [(), (), (), (), (3,)],
+                [(), (), (), (), ()],
+                [(), (0,), (0,), (0,), (0,)],
+                [(), (), (), (0, 1, 4), ()],
+                [(), (), (), (), ()],
+            ]
+        )
+        pairwise_indices = cube.slices[0].pairwise_indices()
+        np.testing.assert_array_equal(pairwise_indices, expected_indices)
+
+    def test_mr_x_mr_pairwise_indices_only_larger(self):
+        cube = CrunchCube(CR.MR_X_MR)
+        expected_indices = np.array(
+            [
+                [(1, 2, 3), (), (), ()],
+                [(), (0, 2, 3), (), (2,)],
+                [(), (), (0, 1, 3), (1,)],
+                [(), (), (), ()],
             ]
         )
         pairwise_indices = cube.slices[0].pairwise_indices()
@@ -353,7 +395,7 @@ class TestStandardizedResiduals(TestCase):
         pairwise_indices = cube.slices[0].pairwise_indices(only_larger=False)
         np.testing.assert_array_equal(pairwise_indices, expected_indices)
 
-    def test_summary_pairwise_indices(self):
+    def test_cat_x_cat_summary_pairwise_indices(self):
         slice_ = CrunchCube(CR.PAIRWISE_HIROTSU_OCCUPATION_X_ILLNESS).slices[0]
 
         # Only larger
