@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.9.18
+- Pairwise summary as T-Stats
+
 #### 1.9.17
 - Unweighted N as basis for t-stats
 
