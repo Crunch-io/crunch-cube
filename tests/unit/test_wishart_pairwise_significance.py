@@ -57,7 +57,81 @@ class Describe_ColumnPairwiseSignificance:
         cps = _ColumnPairwiseSignificance(slice_, None, only_larger=only_larger)
         assert cps.pairwise_indices == pairwise_indices
 
+    def it_can_calculate_summary_t_stats(
+        self, slice_, _unweighted_col_margin_prop_, summary_t_stats_fixture
+    ):
+        margin, col_idx, expected, _ = summary_t_stats_fixture
+        _unweighted_col_margin_prop_.return_value = margin
+        slice_.margin.return_value = np.sum(margin)
+        np.testing.assert_almost_equal(
+            _ColumnPairwiseSignificance(slice_, col_idx).summary_t_stats, expected
+        )
+
+    def it_can_calculate_summary_p_vals(
+        self,
+        slice_,
+        _unweighted_col_margin_prop_,
+        _unweighted_n_prop,
+        summary_t_stats_fixture,
+    ):
+        margin, col_idx, _, expected = summary_t_stats_fixture
+        _unweighted_col_margin_prop_.return_value = margin
+        slice_.margin.return_value = np.sum(margin)
+        _unweighted_n_prop.return_value = margin
+        np.testing.assert_almost_equal(
+            _ColumnPairwiseSignificance(slice_, col_idx).summary_p_vals, expected
+        )
+
+    def it_can_calculate_summary_pairwise_indices(
+        self,
+        slice_,
+        summary_pairwise_indices_fixture,
+        summary_p_vals_prop,
+        summary_t_stats_prop,
+    ):
+        only_larger, col_idx, t_stats, p_vals, expected = (
+            summary_pairwise_indices_fixture
+        )
+        summary_p_vals_prop.return_value = p_vals
+        summary_t_stats_prop.return_value = t_stats
+        np.testing.assert_array_equal(
+            _ColumnPairwiseSignificance(
+                slice_, col_idx, only_larger=only_larger
+            ).summary_pairwise_indices,
+            expected,
+        )
+
     # fixtures -------------------------------------------------------
+
+    @pytest.fixture(
+        params=[
+            (True, 1, [-0.6793662, 0.0, -1], [0.6201015, 1.0, 0.01], (2,)),
+            (False, 0, None, [1, 0.01, 0.01], (1, 2)),
+        ]
+    )
+    def summary_pairwise_indices_fixture(self, request):
+        only_larger, col_idx, t_stats, p_vals, expected = request.param
+        return only_larger, col_idx, np.array(t_stats), np.array(p_vals), expected
+
+    @pytest.fixture(
+        params=[
+            (
+                [1, 2, 3],
+                0,
+                [0.0, 0.67936622, 1.30930734],
+                [np.nan, 0.62010151, 0.32063378],
+            ),
+            ([1, 2, 3], 1, [-0.6793662, 0.0, 0.5940885], [0.6201015, 1.0, 0.5942728]),
+        ]
+    )
+    def summary_t_stats_fixture(self, request):
+        margin, col_idx, expected_t_stats, expected_p_vals = request.param
+        return (
+            np.array(margin),
+            col_idx,
+            np.array(expected_t_stats),
+            np.array(expected_p_vals),
+        )
 
     @pytest.fixture(
         params=[
@@ -164,7 +238,13 @@ class Describe_ColumnPairwiseSignificance:
                     [0.0, -0.8586079707543924, -1.1774569464270872],
                     [0.0, 4.663801762560106, 3.743253010905157],
                 ],
-            )
+            ),
+            (
+                0,
+                [[0.25, 0.75], [0.75, 0.25]],
+                [[1, 2], [3, 4]],
+                [[0.0, 0.94280904], [0.0, -1.51185789]],
+            ),
         ]
     )
     def t_stats_fixture(self, request):
@@ -178,8 +258,26 @@ class Describe_ColumnPairwiseSignificance:
         return instance_mock(request, CubeSlice)
 
     @pytest.fixture
+    def _unweighted_col_margin_prop_(self, request):
+        return property_mock(
+            request, _ColumnPairwiseSignificance, "_unweighted_col_margin"
+        )
+
+    @pytest.fixture
+    def _unweighted_n_prop(self, request):
+        return property_mock(request, _ColumnPairwiseSignificance, "_unweighted_n")
+
+    @pytest.fixture
     def t_stats_prop_(self, request):
         return property_mock(request, _ColumnPairwiseSignificance, "t_stats")
+
+    @pytest.fixture
+    def summary_p_vals_prop(self, request):
+        return property_mock(request, _ColumnPairwiseSignificance, "summary_p_vals")
+
+    @pytest.fixture
+    def summary_t_stats_prop(self, request):
+        return property_mock(request, _ColumnPairwiseSignificance, "summary_t_stats")
 
     @pytest.fixture
     def p_vals_prop_(self, request):
