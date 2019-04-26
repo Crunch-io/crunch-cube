@@ -13,10 +13,14 @@ class _CatXCatSlice:
 
     @lazyproperty
     def rows(self):
-        return tuple(_CatRow(counts) for counts in self._raw_counts)
+        return tuple(_CategoricalVector(counts) for counts in self._raw_counts)
+
+    @lazyproperty
+    def columns(self):
+        return tuple(_CategoricalVector(counts) for counts in self._raw_counts.T)
 
 
-class _CatRow:
+class _CategoricalVector:
     def __init__(self, raw_counts):
         self._raw_counts = raw_counts
 
@@ -39,14 +43,59 @@ class Insertions:
         self._slice = slice_
 
     @lazyproperty
-    def anchors(self):
+    def intersections(self):
+        intersections = []
+        for row in self._rows:
+            row_col_intersections = []
+            row_idx = (
+                0
+                if row.anchor == "top"
+                else -1
+                if row.anchor == "bottom"
+                else row.anchor
+            )
+            for col in self._columns:
+                col_idx = (
+                    0
+                    if col.anchor == "top"
+                    else -1
+                    if col.anchor == "bottom"
+                    else col.anchor + 1
+                )
+                intersection_value = row.values[col_idx] + col.values[row_idx]
+                row_col_intersections.append(intersection_value)
+            intersections.append(row_col_intersections)
+
+        return np.array(intersections)
+
+    @lazyproperty
+    def _row_dimension(self):
+        return self._dimensions[0]
+
+    @lazyproperty
+    def _column_dimension(self):
+        return self._dimensions[1]
+
+    @lazyproperty
+    def row_anchors(self):
         return tuple(row.anchor for row in self.rows)
+
+    @lazyproperty
+    def column_anchors(self):
+        return tuple(column.anchor for column in self.columns)
 
     @lazyproperty
     def _rows(self):
         return tuple(
             InsertionRow(self._slice, subtotal)
-            for subtotal in self._dimensions[0]._subtotals
+            for subtotal in self._row_dimension._subtotals
+        )
+
+    @lazyproperty
+    def _columns(self):
+        return tuple(
+            InsertionColumn(self._slice, subtotal)
+            for subtotal in self._column_dimension._subtotals
         )
 
     @lazyproperty
@@ -62,18 +111,10 @@ class Insertions:
         return tuple(row for row in self._rows if row.anchor not in ("top", "bottom"))
 
 
-class InsertionRow:
+class _InsertionVector:
     def __init__(self, slice_, subtotal):
         self._slice = slice_
         self._subtotal = subtotal
-
-    @lazyproperty
-    def _addend_rows(self):
-        return tuple(
-            row
-            for i, row in enumerate(self._slice.rows)
-            if i in self._subtotal.addend_idxs
-        )
 
     @lazyproperty
     def anchor(self):
@@ -81,7 +122,7 @@ class InsertionRow:
 
     @lazyproperty
     def values(self):
-        return np.sum(np.array([row.values for row in self._addend_rows]), axis=0)
+        return np.sum(np.array([row.values for row in self._addend_vectors]), axis=0)
 
     @lazyproperty
     def margin(self):
@@ -90,6 +131,26 @@ class InsertionRow:
     @lazyproperty
     def proportions(self):
         return self.values / self.margin
+
+
+class InsertionRow(_InsertionVector):
+    @lazyproperty
+    def _addend_vectors(self):
+        return tuple(
+            row
+            for i, row in enumerate(self._slice.rows)
+            if i in self._subtotal.addend_idxs
+        )
+
+
+class InsertionColumn(_InsertionVector):
+    @lazyproperty
+    def _addend_vectors(self):
+        return tuple(
+            row
+            for i, row in enumerate(self._slice.columns)
+            if i in self._subtotal.addend_idxs
+        )
 
 
 class Assembler:
@@ -113,8 +174,8 @@ class Assembler:
     def _interleaved_rows(self):
         rows = []
         for i in range(len(self._slice.rows)):
-            if i in self._insertions.anchors:
-                insertion_idx = self._insertions.anchors.index(i)
+            if i in self._insertions.row_anchors:
+                insertion_idx = self._insertions.row_anchors.index(i)
                 rows.append(self._slice.rows[i])
                 rows.append(self._insertions.rows[insertion_idx])
             else:

@@ -6,7 +6,7 @@ import pytest
 
 from cr.cube.slices import (
     _CatXCatSlice,
-    _CatRow,
+    _CategoricalVector,
     Insertions,
     InsertionRow,
     Assembler,
@@ -22,9 +22,11 @@ class Describe_CatXCatSlice:
         slice_ = _CatXCatSlice(counts)
         assert slice_._raw_counts == counts
 
-    def it_provides_access_to_rows(self):
+    def it_provides_access_to_rows_and_columns(self):
         counts = np.arange(12).reshape(3, 4)
         slice_ = _CatXCatSlice(counts)
+
+        # Check rows
         assert isinstance(slice_.rows, tuple)
         assert len(slice_.rows) == 3
         np.testing.assert_array_equal(
@@ -37,26 +39,42 @@ class Describe_CatXCatSlice:
             slice_.rows[2]._raw_counts, np.array([8, 9, 10, 11])
         )
 
+        # Check columns
+        assert isinstance(slice_.columns, tuple)
+        assert len(slice_.columns) == 4
+        np.testing.assert_array_equal(
+            slice_.columns[0]._raw_counts, np.array([0, 4, 8])
+        )
+        np.testing.assert_array_equal(
+            slice_.columns[1]._raw_counts, np.array([1, 5, 9])
+        )
+        np.testing.assert_array_equal(
+            slice_.columns[2]._raw_counts, np.array([2, 6, 10])
+        )
+        np.testing.assert_array_equal(
+            slice_.columns[3]._raw_counts, np.array([3, 7, 11])
+        )
 
-class Describe_CatRow:
+
+class Describe_CategoricalVector:
     def it_sets_raw_counts(self):
         counts = Mock()
-        row = _CatRow(counts)
+        row = _CategoricalVector(counts)
         assert row._raw_counts == counts
 
     def it_provides_values(self):
         counts = np.array([1, 2, 3])
-        row = _CatRow(counts)
+        row = _CategoricalVector(counts)
         np.testing.assert_array_equal(row.values, counts)
 
     def it_calculates_margin(self):
         counts = np.array([1, 2, 3])
-        row = _CatRow(counts)
+        row = _CategoricalVector(counts)
         assert row.margin == 6
 
     def it_calculates_proportions(self):
         counts = np.array([1, 2, 3])
-        row = _CatRow(counts)
+        row = _CategoricalVector(counts)
         np.testing.assert_almost_equal(
             row.proportions, np.array([0.1666667, 0.3333333, 0.5])
         )
@@ -75,6 +93,60 @@ class DescribeInsertions:
         insertions = Insertions((Dimension(None, None), None), slice_)
         assert len(insertions._rows) == 1
         np.testing.assert_array_equal(insertions._rows[0].values, [9, 11, 13])
+
+    def it_provides_access_to_columns(self, _subtotals_prop_, addend_idxs_prop_):
+        slice_ = _CatXCatSlice(np.arange(12).reshape(4, 3))
+        _subtotals_prop_.return_value = [_Subtotal(None, None)]
+        addend_idxs_prop_.return_value = (1, 2)
+        insertions = Insertions((None, Dimension(None, None)), slice_)
+        assert len(insertions._columns) == 1
+        np.testing.assert_array_equal(insertions._columns[0].values, [3, 9, 15, 21])
+
+    def it_knows_its_intersections(self, request, intersections_fixture):
+        slice_ = _CatXCatSlice(np.arange(12).reshape(4, 3))
+        row_dimension, col_dimension, expected = intersections_fixture
+        insertions = Insertions((row_dimension, col_dimension), slice_)
+        intersections = insertions.intersections
+        np.testing.assert_array_equal(intersections, expected)
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture(
+        params=[
+            (((2, (2, 3)),), ((1, (0, 1)),), 32),
+            (((0, (0, 1)),), ((0, (0, 1)),), 6),
+            (((0, (0, 1)),), ((0, (0, 1)), (1, (0, 2))), [[6, 9]]),
+            (((0, (0, 1)), (1, (2, 3))), ((0, (0, 1)),), [[6], [24]]),
+            (
+                ((0, (0, 1)), (1, (2, 3))),
+                ((0, (0, 1)), (1, (0, 2))),
+                [[6, 9], [24, 27]],
+            ),
+        ]
+    )
+    def intersections_fixture(self, request):
+        row_subtotals, col_subtotals, expected = request.param
+        row_dimension = instance_mock(
+            request,
+            Dimension,
+            _subtotals=[
+                instance_mock(
+                    request, _Subtotal, anchor_idx=anchor_idx, addend_idxs=addend_idxs
+                )
+                for anchor_idx, addend_idxs in row_subtotals
+            ],
+        )
+        col_dimension = instance_mock(
+            request,
+            Dimension,
+            _subtotals=[
+                instance_mock(
+                    request, _Subtotal, anchor_idx=anchor_idx, addend_idxs=addend_idxs
+                )
+                for anchor_idx, addend_idxs in col_subtotals
+            ],
+        )
+        return row_dimension, col_dimension, np.array(expected)
 
     # fixture components ---------------------------------------------
 
