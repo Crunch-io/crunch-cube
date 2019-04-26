@@ -1,0 +1,256 @@
+# encoding: utf-8
+
+import numpy as np
+from mock import Mock
+import pytest
+
+from cr.cube.slices import (
+    _CatXCatSlice,
+    _CatRow,
+    Insertions,
+    InsertionRow,
+    Assembler,
+    Calculator,
+)
+from cr.cube.dimension import Dimension, _Subtotal
+from ..unitutil import instance_mock, property_mock
+
+
+class Describe_CatXCatSlice:
+    def it_sets_raw_counts(self):
+        counts = Mock()
+        slice_ = _CatXCatSlice(counts)
+        assert slice_._raw_counts == counts
+
+    def it_provides_access_to_rows(self):
+        counts = np.arange(12).reshape(3, 4)
+        slice_ = _CatXCatSlice(counts)
+        assert isinstance(slice_.rows, tuple)
+        assert len(slice_.rows) == 3
+        np.testing.assert_array_equal(
+            slice_.rows[0]._raw_counts, np.array([0, 1, 2, 3])
+        )
+        np.testing.assert_array_equal(
+            slice_.rows[1]._raw_counts, np.array([4, 5, 6, 7])
+        )
+        np.testing.assert_array_equal(
+            slice_.rows[2]._raw_counts, np.array([8, 9, 10, 11])
+        )
+
+
+class Describe_CatRow:
+    def it_sets_raw_counts(self):
+        counts = Mock()
+        row = _CatRow(counts)
+        assert row._raw_counts == counts
+
+    def it_provides_values(self):
+        counts = np.array([1, 2, 3])
+        row = _CatRow(counts)
+        np.testing.assert_array_equal(row.values, counts)
+
+    def it_calculates_margin(self):
+        counts = np.array([1, 2, 3])
+        row = _CatRow(counts)
+        assert row.margin == 6
+
+    def it_calculates_proportions(self):
+        counts = np.array([1, 2, 3])
+        row = _CatRow(counts)
+        np.testing.assert_almost_equal(
+            row.proportions, np.array([0.1666667, 0.3333333, 0.5])
+        )
+
+
+class DescribeInsertions:
+    def it_sets_dimensions_and_slice(self):
+        dimensions, slice_ = Mock(), Mock()
+        insertions = Insertions(dimensions, slice_)
+        assert insertions._dimensions, insertions._slice == (dimensions, slice_)
+
+    def it_provides_access_to_rows(self, _subtotals_prop_, addend_idxs_prop_):
+        slice_ = _CatXCatSlice(np.arange(12).reshape(4, 3))
+        _subtotals_prop_.return_value = [_Subtotal(None, None)]
+        addend_idxs_prop_.return_value = (1, 2)
+        insertions = Insertions((Dimension(None, None), None), slice_)
+        assert len(insertions.rows) == 1
+        np.testing.assert_array_equal(insertions.rows[0].values, [9, 11, 13])
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _subtotals_prop_(self, request):
+        return property_mock(request, Dimension, "_subtotals")
+
+    @pytest.fixture
+    def addend_idxs_prop_(self, request):
+        return property_mock(request, _Subtotal, "addend_idxs")
+
+
+class DescribeInsertionsRow:
+    def it_sets_slice_and_subtotal(self):
+        slice_ = Mock()
+        subtotal = Mock()
+        insertion_row = InsertionRow(slice_, subtotal)
+        assert insertion_row._slice == slice_
+        assert insertion_row._subtotal == subtotal
+
+    def it_provides_values(self, addend_idxs_prop_, values_fixture):
+        slice_, subtotal_indexes, expected_row_counts = values_fixture
+        addend_idxs_prop_.return_value = subtotal_indexes
+        insertion_row = InsertionRow(slice_, _Subtotal(None, None))
+        np.testing.assert_array_equal(insertion_row.values, expected_row_counts)
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture(
+        params=[
+            ([[1, 2, 3], [4, 5, 6]], (0,), [1, 2, 3]),
+            ([[1, 2, 3], [4, 5, 6]], (1,), [4, 5, 6]),
+            ([[1, 2, 3], [4, 5, 6]], (0, 1), [5, 7, 9]),
+            ([[1, 2], [3, 4], [5, 6]], (0, 2), [6, 8]),
+        ]
+    )
+    def values_fixture(self, request):
+        counts, subtotal_indexes, expected_row_counts = request.param
+        return _CatXCatSlice(counts), subtotal_indexes, expected_row_counts
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def addend_idxs_prop_(self, request):
+        return property_mock(request, _Subtotal, "addend_idxs")
+
+
+class DescribeAssembler:
+    def it_sets_slice_and_insertions(self):
+        slice_, insertions = Mock(), Mock()
+        assembler = Assembler(slice_, insertions)
+        assert assembler._slice, assembler._insertions == (slice_, insertions)
+
+    def it_provides_rows(self, counts_fixture):
+        slice_, insertions, expected = counts_fixture
+        assembler = Assembler(slice_, insertions)
+        actual_counts = np.array([row.values for row in assembler.rows])
+        np.testing.assert_array_equal(actual_counts, expected)
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture(
+        params=[
+            ([[1, 2], [3, 4]], [], [[1, 2], [3, 4]]),
+            ([[1, 2], [3, 4]], [(0, (0,))], [[1, 2], [1, 2], [3, 4]]),
+            ([[1, 2], [3, 4]], [(1, (0,))], [[1, 2], [3, 4], [1, 2]]),
+            (
+                [[1, 2], [3, 4], [5, 6]],
+                [(0, (1,)), (2, (1, 2))],
+                [[3, 4], [1, 2], [3, 4], [5, 6], [8, 10]],
+            ),
+        ]
+    )
+    def counts_fixture(self, request, _subtotals_prop_):
+        counts, row_subtotals, expected_counts = request.param
+        slice_ = _CatXCatSlice(counts)
+        dimensions = (Dimension(None, None), None)
+        _subtotals_prop_.return_value = [
+            instance_mock(request, _Subtotal, anchor=anchor, addend_idxs=addend_idxs)
+            for anchor, addend_idxs in row_subtotals
+        ]
+        insertions = Insertions(dimensions, slice_)
+        return slice_, insertions, np.array(expected_counts)
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _subtotals_prop_(self, request):
+        return property_mock(request, Dimension, "_subtotals")
+
+
+class DescribeCalculator:
+    def it_provides_row_proportions(self, row_proportions_fixture):
+        slice_, insertions, expected = row_proportions_fixture
+        calc = Calculator(Assembler(slice_, insertions))
+        row_proportions = calc.row_proportions
+        np.testing.assert_almost_equal(row_proportions, expected)
+
+    def it_provides_row_margin(self, row_margin_fixture):
+        slice_, insertions, expected = row_margin_fixture
+        calc = Calculator(Assembler(slice_, insertions))
+        margin = calc.row_margin
+        np.testing.assert_almost_equal(margin, expected)
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture(
+        params=[
+            (
+                [[1, 2], [3, 4]],
+                [],
+                [[0.33333333, 0.66666667], [0.42857143, 0.57142857]],
+            ),
+            (
+                [[1, 2], [3, 4]],
+                [(0, (0,))],
+                [
+                    [0.33333333, 0.66666667],
+                    [0.33333333, 0.66666667],
+                    [0.42857143, 0.57142857],
+                ],
+            ),
+            (
+                [[1, 2], [3, 4]],
+                [(1, (0,))],
+                [
+                    [0.33333333, 0.66666667],
+                    [0.42857143, 0.57142857],
+                    [0.33333333, 0.66666667],
+                ],
+            ),
+            (
+                [[1, 2], [3, 4], [5, 6]],
+                [(0, (1,)), (2, (1, 2))],
+                [
+                    [0.42857143, 0.57142857],
+                    [0.33333333, 0.66666667],
+                    [0.42857143, 0.57142857],
+                    [0.45454545, 0.54545455],
+                    [0.44444444, 0.55555556],
+                ],
+            ),
+        ]
+    )
+    def row_proportions_fixture(self, request, _subtotals_prop_):
+        counts, row_subtotals, expected_row_proportions = request.param
+        slice_ = _CatXCatSlice(counts)
+        dimensions = (Dimension(None, None), None)
+        _subtotals_prop_.return_value = [
+            instance_mock(request, _Subtotal, anchor=anchor, addend_idxs=addend_idxs)
+            for anchor, addend_idxs in row_subtotals
+        ]
+        insertions = Insertions(dimensions, slice_)
+        return slice_, insertions, np.array(expected_row_proportions)
+
+    @pytest.fixture(
+        params=[
+            ([[1, 2], [3, 4]], [], [3, 7]),
+            ([[1, 2], [3, 4]], [(0, (0,))], [3, 3, 7]),
+            ([[1, 2], [3, 4]], [(1, (0,))], [3, 7, 3]),
+            ([[1, 2], [3, 4], [5, 6]], [(0, (1,)), (2, (1, 2))], [7, 3, 7, 11, 18]),
+        ]
+    )
+    def row_margin_fixture(self, request, _subtotals_prop_):
+        counts, row_subtotals, expected_row_margin = request.param
+        slice_ = _CatXCatSlice(counts)
+        dimensions = (Dimension(None, None), None)
+        _subtotals_prop_.return_value = [
+            instance_mock(request, _Subtotal, anchor=anchor, addend_idxs=addend_idxs)
+            for anchor, addend_idxs in row_subtotals
+        ]
+        insertions = Insertions(dimensions, slice_)
+        return slice_, insertions, np.array(expected_row_margin)
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _subtotals_prop_(self, request):
+        return property_mock(request, Dimension, "_subtotals")
