@@ -73,8 +73,8 @@ class DescribeInsertions:
         _subtotals_prop_.return_value = [_Subtotal(None, None)]
         addend_idxs_prop_.return_value = (1, 2)
         insertions = Insertions((Dimension(None, None), None), slice_)
-        assert len(insertions.rows) == 1
-        np.testing.assert_array_equal(insertions.rows[0].values, [9, 11, 13])
+        assert len(insertions._rows) == 1
+        np.testing.assert_array_equal(insertions._rows[0].values, [9, 11, 13])
 
     # fixture components ---------------------------------------------
 
@@ -143,7 +143,7 @@ class DescribeAssembler:
             ([[1, 2], [3, 4]], [(1, (0,))], [[1, 2], [3, 4], [1, 2]]),
             (
                 [[1, 2], [3, 4], [5, 6]],
-                [(0, (1,)), (2, (1, 2))],
+                [("top", (1,)), (2, (1, 2))],
                 [[3, 4], [1, 2], [3, 4], [5, 6], [8, 10]],
             ),
         ]
@@ -153,8 +153,10 @@ class DescribeAssembler:
         slice_ = _CatXCatSlice(counts)
         dimensions = (Dimension(None, None), None)
         _subtotals_prop_.return_value = [
-            instance_mock(request, _Subtotal, anchor=anchor, addend_idxs=addend_idxs)
-            for anchor, addend_idxs in row_subtotals
+            instance_mock(
+                request, _Subtotal, anchor_idx=anchor_idx, addend_idxs=addend_idxs
+            )
+            for anchor_idx, addend_idxs in row_subtotals
         ]
         insertions = Insertions(dimensions, slice_)
         return slice_, insertions, np.array(expected_counts)
@@ -208,7 +210,7 @@ class DescribeCalculator:
             ),
             (
                 [[1, 2], [3, 4], [5, 6]],
-                [(0, (1,)), (2, (1, 2))],
+                [("top", (1,)), (2, (1, 2))],
                 [
                     [0.42857143, 0.57142857],
                     [0.33333333, 0.66666667],
@@ -224,8 +226,10 @@ class DescribeCalculator:
         slice_ = _CatXCatSlice(counts)
         dimensions = (Dimension(None, None), None)
         _subtotals_prop_.return_value = [
-            instance_mock(request, _Subtotal, anchor=anchor, addend_idxs=addend_idxs)
-            for anchor, addend_idxs in row_subtotals
+            instance_mock(
+                request, _Subtotal, anchor_idx=anchor_idx, addend_idxs=addend_idxs
+            )
+            for anchor_idx, addend_idxs in row_subtotals
         ]
         insertions = Insertions(dimensions, slice_)
         return slice_, insertions, np.array(expected_row_proportions)
@@ -235,7 +239,7 @@ class DescribeCalculator:
             ([[1, 2], [3, 4]], [], [3, 7]),
             ([[1, 2], [3, 4]], [(0, (0,))], [3, 3, 7]),
             ([[1, 2], [3, 4]], [(1, (0,))], [3, 7, 3]),
-            ([[1, 2], [3, 4], [5, 6]], [(0, (1,)), (2, (1, 2))], [7, 3, 7, 11, 18]),
+            ([[1, 2], [3, 4], [5, 6]], [("top", (1,)), (2, (1, 2))], [7, 3, 7, 11, 18]),
         ]
     )
     def row_margin_fixture(self, request, _subtotals_prop_):
@@ -243,8 +247,10 @@ class DescribeCalculator:
         slice_ = _CatXCatSlice(counts)
         dimensions = (Dimension(None, None), None)
         _subtotals_prop_.return_value = [
-            instance_mock(request, _Subtotal, anchor=anchor, addend_idxs=addend_idxs)
-            for anchor, addend_idxs in row_subtotals
+            instance_mock(
+                request, _Subtotal, anchor_idx=anchor_idx, addend_idxs=addend_idxs
+            )
+            for anchor_idx, addend_idxs in row_subtotals
         ]
         insertions = Insertions(dimensions, slice_)
         return slice_, insertions, np.array(expected_row_margin)

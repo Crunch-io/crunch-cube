@@ -43,11 +43,23 @@ class Insertions:
         return tuple(row.anchor for row in self.rows)
 
     @lazyproperty
-    def rows(self):
+    def _rows(self):
         return tuple(
             InsertionRow(self._slice, subtotal)
             for subtotal in self._dimensions[0]._subtotals
         )
+
+    @lazyproperty
+    def top_rows(self):
+        return tuple(row for row in self._rows if row.anchor == "top")
+
+    @lazyproperty
+    def bottom_rows(self):
+        return tuple(row for row in self._rows if row.anchor == "bottom")
+
+    @lazyproperty
+    def rows(self):
+        return tuple(row for row in self._rows if row.anchor not in ("top", "bottom"))
 
 
 class InsertionRow:
@@ -65,7 +77,7 @@ class InsertionRow:
 
     @lazyproperty
     def anchor(self):
-        return self._subtotal.anchor
+        return self._subtotal.anchor_idx
 
     @lazyproperty
     def values(self):
@@ -87,24 +99,26 @@ class Assembler:
 
     @lazyproperty
     def rows(self):
+        insertions = self._insertions
+
         # No insertions - don't assemble
-        if not self._insertions or not self._insertions.rows:
+        if not insertions or not insertions.rows:
             return self._slice.rows
 
-        # Assemble
+        return tuple(
+            insertions.top_rows + self._interleaved_rows + insertions.bottom_rows
+        )
+
+    @lazyproperty
+    def _interleaved_rows(self):
         rows = []
         for i in range(len(self._slice.rows)):
             if i in self._insertions.anchors:
                 insertion_idx = self._insertions.anchors.index(i)
-                if i == 0:
-                    rows.append(self._insertions.rows[insertion_idx])
-                    rows.append(self._slice.rows[i])
-                else:
-                    rows.append(self._slice.rows[i])
-                    rows.append(self._insertions.rows[insertion_idx])
+                rows.append(self._slice.rows[i])
+                rows.append(self._insertions.rows[insertion_idx])
             else:
                 rows.append(self._slice.rows[i])
-
         return tuple(rows)
 
 
@@ -119,3 +133,45 @@ class Calculator:
     @lazyproperty
     def row_margin(self):
         return np.array([row.margin for row in self._assembler.rows])
+
+
+class FrozenSlice:
+    def __init__(self, cube, slice_idx=0, use_insertions=False):
+        self._cube = cube
+        self._slice_idx = slice_idx
+        self._use_insertions = use_insertions
+
+    # API ----------------------------------------------------------------------------
+
+    @lazyproperty
+    def row_proportions(self):
+        return self._calculator.row_proportions
+
+    # Properties ---------------------------------------------------------------------
+
+    @lazyproperty
+    def _assembler(self):
+        return Assembler(self._slice, self._insertions)
+
+    @lazyproperty
+    def _calculator(self):
+        return Calculator(self._assembler)
+
+    @lazyproperty
+    def _dimensions(self):
+        return self._cube.dimensions
+
+    @lazyproperty
+    def _insertions(self):
+        return (
+            Insertions(self._dimensions, self._slice) if self._use_insertions else None
+        )
+
+    @lazyproperty
+    def _slice(self):
+        raw_counts = self._cube._apply_missings(
+            self._cube._measure(False).raw_cube_array
+        )
+        if self._cube.ndim > 2:
+            raw_counts = raw_counts[self._slice_idx]
+        return _CatXCatSlice(raw_counts)
