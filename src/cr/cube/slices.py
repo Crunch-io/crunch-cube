@@ -7,7 +7,7 @@ import numpy as np
 from cr.cube.util import lazyproperty
 
 
-class _CatXCatSlice:
+class _CatXCatSlice(object):
     def __init__(self, raw_counts):
         self._raw_counts = raw_counts
 
@@ -20,7 +20,7 @@ class _CatXCatSlice:
         return tuple(_CategoricalVector(counts) for counts in self._raw_counts.T)
 
 
-class _CategoricalVector:
+class _CategoricalVector(object):
     def __init__(self, raw_counts):
         self._raw_counts = raw_counts
 
@@ -34,10 +34,11 @@ class _CategoricalVector:
 
     @lazyproperty
     def proportions(self):
-        return self._raw_counts / self.margin
+        # return self._raw_counts / self.margin
+        return self.values / self.margin
 
 
-class Insertions:
+class Insertions(object):
     def __init__(self, dimensions, slice_):
         self._dimensions = dimensions
         self._slice = slice_
@@ -111,7 +112,7 @@ class Insertions:
         return tuple(row for row in self._rows if row.anchor not in ("top", "bottom"))
 
 
-class _InsertionVector:
+class _InsertionVector(object):
     def __init__(self, slice_, subtotal):
         self._slice = slice_
         self._subtotal = subtotal
@@ -119,6 +120,10 @@ class _InsertionVector:
     @lazyproperty
     def anchor(self):
         return self._subtotal.anchor_idx
+
+    @lazyproperty
+    def addend_idxs(self):
+        return np.array(self._subtotal.addend_idxs)
 
     @lazyproperty
     def values(self):
@@ -153,7 +158,7 @@ class InsertionColumn(_InsertionVector):
         )
 
 
-class Assembler:
+class Assembler(object):
     def __init__(self, slice_, insertions):
         self._slice = slice_
         self._insertions = insertions
@@ -171,19 +176,77 @@ class Assembler:
         )
 
     @lazyproperty
+    def _insertion_columns(self):
+        return self._insertions._columns
+
+    @lazyproperty
     def _interleaved_rows(self):
         rows = []
         for i in range(len(self._slice.rows)):
             if i in self._insertions.row_anchors:
                 insertion_idx = self._insertions.row_anchors.index(i)
-                rows.append(self._slice.rows[i])
-                rows.append(self._insertions.rows[insertion_idx])
+                rows.append(
+                    _AssembledRow(self._slice.rows[i].values, self._insertion_columns)
+                )
+                rows.append(
+                    _AssembledRow(
+                        self._insertions.rows[insertion_idx].values,
+                        self._insertion_columns,
+                    )
+                )
             else:
-                rows.append(self._slice.rows[i])
+                rows.append(
+                    _AssembledRow(self._slice.rows[i].values, self._insertion_columns)
+                )
         return tuple(rows)
 
 
-class Calculator:
+class _AssembledRow(_CategoricalVector):
+    def __init__(self, raw_counts, inserted_columns):
+        super(_AssembledRow, self).__init__(raw_counts)
+        self._inserted_columns = inserted_columns
+
+    @lazyproperty
+    def values(self):
+        return np.array(
+            self._top_values + self._interleaved_values + self._bottom_values
+        )
+
+    @lazyproperty
+    def _column_anchors(self):
+        return tuple(col.anchor for col in self._inserted_columns)
+
+    @lazyproperty
+    def _top_values(self):
+        return tuple(
+            np.sum(self._raw_counts[col.addend_idxs])
+            for col in self._inserted_columns
+            if col.anchor == "top"
+        )
+
+    @lazyproperty
+    def _bottom_values(self):
+        return tuple(
+            np.sum(self._raw_counts[col.addend_idxs])
+            for col in self._inserted_columns
+            if col.anchor == "bottom"
+        )
+
+    @lazyproperty
+    def _interleaved_values(self):
+        values = []
+        for i in range(len(self._raw_counts)):
+            if i in self._column_anchors:
+                insertion_column = self._inserted_columns[self._column_anchors.index(i)]
+                insertion_value = np.sum(self._raw_counts[insertion_column.addend_idxs])
+                values.append(self._raw_counts[i])
+                values.append(insertion_value)
+            else:
+                values.append(self._raw_counts[i])
+        return tuple(values)
+
+
+class Calculator(object):
     def __init__(self, assembler):
         self._assembler = assembler
 
@@ -196,7 +259,7 @@ class Calculator:
         return np.array([row.margin for row in self._assembler.rows])
 
 
-class FrozenSlice:
+class FrozenSlice(object):
     def __init__(self, cube, slice_idx=0, use_insertions=False):
         self._cube = cube
         self._slice_idx = slice_idx

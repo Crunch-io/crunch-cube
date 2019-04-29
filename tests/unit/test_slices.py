@@ -5,10 +5,12 @@ from mock import Mock
 import pytest
 
 from cr.cube.slices import (
+    _AssembledRow,
     _CatXCatSlice,
     _CategoricalVector,
     Insertions,
     InsertionRow,
+    InsertionColumn,
     Assembler,
     Calculator,
 )
@@ -194,6 +196,66 @@ class DescribeInsertionsRow:
         return property_mock(request, _Subtotal, "addend_idxs")
 
 
+class Describe_AssembledRow:
+    def it_provides_assembled_values(self, assembled_row_fixture):
+        raw_counts, insertion_cols, expected = assembled_row_fixture
+        row = _AssembledRow(raw_counts, insertion_cols)
+        np.testing.assert_array_equal(row.values, expected)
+
+    def it_provides_assembled_proportions(self, assembled_row_proportions_fixture):
+        raw_counts, insertion_cols, expected = assembled_row_proportions_fixture
+        row = _AssembledRow(raw_counts, insertion_cols)
+        np.testing.assert_array_equal(row.proportions, expected)
+
+    # fixtures -------------------------------------------------------
+    @pytest.fixture(
+        params=[
+            ([1, 2, 2], ((1, [0, 1]),), [0.2, 0.4, 0.6, 0.4]),
+            ([1, 2, 2], ((2, [0, 1]),), [0.2, 0.4, 0.4, 0.6]),
+        ]
+    )
+    def assembled_row_proportions_fixture(self, request):
+        raw_counts, insertion_cols_counts, expected = request.param
+        insertion_cols = tuple(
+            instance_mock(
+                request,
+                InsertionColumn,
+                anchor=anchor,
+                addend_idxs=np.array(addend_idxs),
+            )
+            for anchor, addend_idxs in insertion_cols_counts
+        )
+        return np.array(raw_counts), insertion_cols, expected
+
+    @pytest.fixture(
+        params=[
+            ([1, 2, 3], ((1, [0, 1]),), [1, 2, 3, 3]),
+            ([1, 2, 3], ((2, [0, 1]),), [1, 2, 3, 3]),
+            ([1, 2, 3], ((0, [1, 2]),), [1, 5, 2, 3]),
+            ([1, 2, 3], (("top", [1, 2]),), [5, 1, 2, 3]),
+            ([1, 2, 3], (("bottom", [1, 2]),), [1, 2, 3, 5]),
+            ([1, 2, 3], ((0, [0, 1]), ("bottom", [1, 2])), [1, 3, 2, 3, 5]),
+            (
+                [1, 2, 3],
+                (("top", [2]), (0, [0, 1]), ("bottom", [1, 2])),
+                [3, 1, 3, 2, 3, 5],
+            ),
+        ]
+    )
+    def assembled_row_fixture(self, request):
+        raw_counts, insertion_cols_counts, expected = request.param
+        insertion_cols = tuple(
+            instance_mock(
+                request,
+                InsertionColumn,
+                anchor=anchor,
+                addend_idxs=np.array(addend_idxs),
+            )
+            for anchor, addend_idxs in insertion_cols_counts
+        )
+        return np.array(raw_counts), insertion_cols, expected
+
+
 class DescribeAssembler:
     def it_sets_slice_and_insertions(self):
         slice_, insertions = Mock(), Mock()
@@ -220,10 +282,10 @@ class DescribeAssembler:
             ),
         ]
     )
-    def counts_fixture(self, request, _subtotals_prop_):
+    def counts_fixture(self, request, _subtotals_prop_, dimension_):
         counts, row_subtotals, expected_counts = request.param
         slice_ = _CatXCatSlice(counts)
-        dimensions = (Dimension(None, None), None)
+        dimensions = (Dimension(None, None), dimension_)
         _subtotals_prop_.return_value = [
             instance_mock(
                 request, _Subtotal, anchor_idx=anchor_idx, addend_idxs=addend_idxs
@@ -238,6 +300,10 @@ class DescribeAssembler:
     @pytest.fixture
     def _subtotals_prop_(self, request):
         return property_mock(request, Dimension, "_subtotals")
+
+    @pytest.fixture
+    def dimension_(self, request):
+        return instance_mock(request, Dimension, _subtotals=tuple())
 
 
 class DescribeCalculator:
@@ -293,10 +359,10 @@ class DescribeCalculator:
             ),
         ]
     )
-    def row_proportions_fixture(self, request, _subtotals_prop_):
+    def row_proportions_fixture(self, request, _subtotals_prop_, dimension_):
         counts, row_subtotals, expected_row_proportions = request.param
         slice_ = _CatXCatSlice(counts)
-        dimensions = (Dimension(None, None), None)
+        dimensions = (Dimension(None, None), dimension_)
         _subtotals_prop_.return_value = [
             instance_mock(
                 request, _Subtotal, anchor_idx=anchor_idx, addend_idxs=addend_idxs
@@ -314,10 +380,11 @@ class DescribeCalculator:
             ([[1, 2], [3, 4], [5, 6]], [("top", (1,)), (2, (1, 2))], [7, 3, 7, 11, 18]),
         ]
     )
-    def row_margin_fixture(self, request, _subtotals_prop_):
+    def row_margin_fixture(self, request, _subtotals_prop_, dimension_):
         counts, row_subtotals, expected_row_margin = request.param
         slice_ = _CatXCatSlice(counts)
-        dimensions = (Dimension(None, None), None)
+        # dimensions = (Dimension(None, None), None)
+        dimensions = (Dimension(None, None), dimension_)
         _subtotals_prop_.return_value = [
             instance_mock(
                 request, _Subtotal, anchor_idx=anchor_idx, addend_idxs=addend_idxs
@@ -332,3 +399,7 @@ class DescribeCalculator:
     @pytest.fixture
     def _subtotals_prop_(self, request):
         return property_mock(request, Dimension, "_subtotals")
+
+    @pytest.fixture
+    def dimension_(self, request):
+        return instance_mock(request, Dimension, _subtotals=tuple())
