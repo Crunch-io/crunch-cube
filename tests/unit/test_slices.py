@@ -5,7 +5,7 @@ from mock import Mock
 import pytest
 
 from cr.cube.slices import (
-    _AssembledRow,
+    _AssembledVector,
     _CatXCatSlice,
     _CategoricalVector,
     Insertions,
@@ -196,15 +196,15 @@ class DescribeInsertionsRow:
         return property_mock(request, _Subtotal, "addend_idxs")
 
 
-class Describe_AssembledRow:
+class Describe_AssembledVector:
     def it_provides_assembled_values(self, assembled_row_fixture):
         raw_counts, insertion_cols, expected = assembled_row_fixture
-        row = _AssembledRow(raw_counts, insertion_cols)
+        row = _AssembledVector(raw_counts, insertion_cols)
         np.testing.assert_array_equal(row.values, expected)
 
     def it_provides_assembled_proportions(self, assembled_row_proportions_fixture):
         raw_counts, insertion_cols, expected = assembled_row_proportions_fixture
-        row = _AssembledRow(raw_counts, insertion_cols)
+        row = _AssembledVector(raw_counts, insertion_cols)
         np.testing.assert_array_equal(row.proportions, expected)
 
     # fixtures -------------------------------------------------------

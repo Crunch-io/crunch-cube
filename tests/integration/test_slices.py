@@ -15,7 +15,7 @@ class DescribeFrozenSlice:
         expected = np.array([[0.71428571, 0.28571429], [0.625, 0.375]])
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
-    def it_calculates_row_percentages_with_and_without_hs(self):
+    def it_calculates_row_proportions_with_and_without_hs(self):
         cube = CrunchCube(CR.CAT_X_CAT_PRUNING_HS)
 
         # Without insertions
@@ -46,3 +46,19 @@ class DescribeFrozenSlice:
             ]
         )
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
+
+    def it_calculates_column_proportions(self):
+        cube = CrunchCube(CR.CAT_X_CAT_PRUNING_HS)
+        slice_ = FrozenSlice(cube, use_insertions=True)
+        expected = np.array(
+            [
+                [0.77777778, 0.69565217, 0.60606061, 0.52631579, np.nan, 0.33333333],
+                [0.19444444, 0.27536232, 0.36363636, 0.42105263, np.nan, 0.66666667],
+                [0.02777778, 0.01449275, 0.0, 0.05263158, np.nan, 0.0],
+                [0.08333333, 0.10144928, 0.12121212, 0.10526316, np.nan, 0.66666667],
+                [0.08333333, 0.15942029, 0.24242424, 0.26315789, np.nan, 0.0],
+                [0.0, 0.0, 0.0, 0.0, np.nan, 0.0],
+                [0.02777778, 0.02898551, 0.03030303, 0.05263158, np.nan, 0.0],
+            ]
+        )
+        np.testing.assert_almost_equal(slice_.column_proportions, expected)

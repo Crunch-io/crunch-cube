@@ -108,8 +108,22 @@ class Insertions(object):
         return tuple(row for row in self._rows if row.anchor == "bottom")
 
     @lazyproperty
+    def top_columns(self):
+        return tuple(columns for columns in self._columns if columns.anchor == "top")
+
+    @lazyproperty
+    def bottom_columns(self):
+        return tuple(columns for columns in self._columns if columns.anchor == "bottom")
+
+    @lazyproperty
     def rows(self):
         return tuple(row for row in self._rows if row.anchor not in ("top", "bottom"))
+
+    @lazyproperty
+    def columns(self):
+        return tuple(
+            column for column in self._columns if column.anchor not in ("top", "bottom")
+        )
 
 
 class _InsertionVector(object):
@@ -165,19 +179,35 @@ class Assembler(object):
 
     @lazyproperty
     def rows(self):
-        insertions = self._insertions
-
         # No insertions - don't assemble
-        if not insertions or not insertions.rows:
+        if not self._insertions or not self._insertions.rows:
             return self._slice.rows
 
         return tuple(
-            insertions.top_rows + self._interleaved_rows + insertions.bottom_rows
+            self._insertions.top_rows
+            + self._interleaved_rows
+            + self._insertions.bottom_rows
+        )
+
+    @lazyproperty
+    def columns(self):
+        # No insertions - don't assemble
+        if not self._insertions or not self._insertions.columns:
+            return self._slice.columns
+
+        return tuple(
+            self._insertions.top_columns
+            + self._interleaved_columns
+            + self._insertions.bottom_columns
         )
 
     @lazyproperty
     def _insertion_columns(self):
         return self._insertions._columns
+
+    @lazyproperty
+    def _insertion_rows(self):
+        return self._insertions._rows
 
     @lazyproperty
     def _interleaved_rows(self):
@@ -186,25 +216,54 @@ class Assembler(object):
             if i in self._insertions.row_anchors:
                 insertion_idx = self._insertions.row_anchors.index(i)
                 rows.append(
-                    _AssembledRow(self._slice.rows[i].values, self._insertion_columns)
+                    _AssembledVector(
+                        self._slice.rows[i].values, self._insertion_columns
+                    )
                 )
                 rows.append(
-                    _AssembledRow(
+                    _AssembledVector(
                         self._insertions.rows[insertion_idx].values,
                         self._insertion_columns,
                     )
                 )
             else:
                 rows.append(
-                    _AssembledRow(self._slice.rows[i].values, self._insertion_columns)
+                    _AssembledVector(
+                        self._slice.rows[i].values, self._insertion_columns
+                    )
                 )
         return tuple(rows)
 
+    @lazyproperty
+    def _interleaved_columns(self):
+        columns = []
+        for i in range(len(self._slice.columns)):
+            if i in self._insertions.row_anchors:
+                insertion_idx = self._insertions.row_anchors.index(i)
+                columns.append(
+                    _AssembledVector(
+                        self._slice.columns[i].values, self._insertion_rows
+                    )
+                )
+                columns.append(
+                    _AssembledVector(
+                        self._insertions.columns[insertion_idx].values,
+                        self._insertion_rows,
+                    )
+                )
+            else:
+                columns.append(
+                    _AssembledVector(
+                        self._slice.columns[i].values, self._insertion_rows
+                    )
+                )
+        return tuple(columns)
 
-class _AssembledRow(_CategoricalVector):
-    def __init__(self, raw_counts, inserted_columns):
-        super(_AssembledRow, self).__init__(raw_counts)
-        self._inserted_columns = inserted_columns
+
+class _AssembledVector(_CategoricalVector):
+    def __init__(self, raw_counts, opposite_inserted_vectors):
+        super(_AssembledVector, self).__init__(raw_counts)
+        self._opposite_inserted_vectors = opposite_inserted_vectors
 
     @lazyproperty
     def values(self):
@@ -214,13 +273,13 @@ class _AssembledRow(_CategoricalVector):
 
     @lazyproperty
     def _column_anchors(self):
-        return tuple(col.anchor for col in self._inserted_columns)
+        return tuple(col.anchor for col in self._opposite_inserted_vectors)
 
     @lazyproperty
     def _top_values(self):
         return tuple(
             np.sum(self._raw_counts[col.addend_idxs])
-            for col in self._inserted_columns
+            for col in self._opposite_inserted_vectors
             if col.anchor == "top"
         )
 
@@ -228,7 +287,7 @@ class _AssembledRow(_CategoricalVector):
     def _bottom_values(self):
         return tuple(
             np.sum(self._raw_counts[col.addend_idxs])
-            for col in self._inserted_columns
+            for col in self._opposite_inserted_vectors
             if col.anchor == "bottom"
         )
 
@@ -237,7 +296,9 @@ class _AssembledRow(_CategoricalVector):
         values = []
         for i in range(len(self._raw_counts)):
             if i in self._column_anchors:
-                insertion_column = self._inserted_columns[self._column_anchors.index(i)]
+                insertion_column = self._opposite_inserted_vectors[
+                    self._column_anchors.index(i)
+                ]
                 insertion_value = np.sum(self._raw_counts[insertion_column.addend_idxs])
                 values.append(self._raw_counts[i])
                 values.append(insertion_value)
@@ -255,6 +316,10 @@ class Calculator(object):
         return np.array([row.proportions for row in self._assembler.rows])
 
     @lazyproperty
+    def column_proportions(self):
+        return np.array([col.proportions for col in self._assembler.columns]).T
+
+    @lazyproperty
     def row_margin(self):
         return np.array([row.margin for row in self._assembler.rows])
 
@@ -270,6 +335,10 @@ class FrozenSlice(object):
     @lazyproperty
     def row_proportions(self):
         return self._calculator.row_proportions
+
+    @lazyproperty
+    def column_proportions(self):
+        return self._calculator.column_proportions
 
     # Properties ---------------------------------------------------------------------
 
