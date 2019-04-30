@@ -8,6 +8,7 @@ from cr.cube.slices import (
     _AssembledVector,
     _CatXCatSlice,
     _CategoricalVector,
+    _MultipleResponseVector,
     Insertions,
     InsertionRow,
     InsertionColumn,
@@ -18,7 +19,7 @@ from cr.cube.dimension import Dimension, _Subtotal
 from ..unitutil import instance_mock, property_mock
 
 
-class Describe_CatXCatSlice:
+class Describe_CatXCatSlice(object):
     def it_sets_raw_counts(self):
         counts = Mock()
         slice_ = _CatXCatSlice(counts)
@@ -58,7 +59,7 @@ class Describe_CatXCatSlice:
         )
 
 
-class Describe_CategoricalVector:
+class Describe_CategoricalVector(object):
     def it_sets_raw_counts(self):
         counts = Mock()
         row = _CategoricalVector(counts)
@@ -82,7 +83,22 @@ class Describe_CategoricalVector:
         )
 
 
-class DescribeInsertions:
+class Describe_MultipleResponseVector(object):
+    def it_provides_values(self):
+        counts = np.array([[1, 2, 3], [4, 5, 6]])
+        row = _MultipleResponseVector(counts)
+        np.testing.assert_array_equal(row._selected, np.array([1, 2, 3]))
+        np.testing.assert_array_equal(row.values, np.array([1, 2, 3]))
+        np.testing.assert_array_equal(row._not_selected, np.array([4, 5, 6]))
+
+    def it_calculates_margin(self):
+        """Margin needs to be a vector of selected = not-selected values."""
+        counts = np.array([[1, 2, 3], [4, 5, 6]])
+        row = _MultipleResponseVector(counts)
+        np.testing.assert_array_equal(row.margin, np.array([5, 7, 9]))
+
+
+class DescribeInsertions(object):
     def it_sets_dimensions_and_slice(self):
         dimensions, slice_ = Mock(), Mock()
         insertions = Insertions(dimensions, slice_)
@@ -161,7 +177,7 @@ class DescribeInsertions:
         return property_mock(request, _Subtotal, "addend_idxs")
 
 
-class DescribeInsertionsRow:
+class DescribeInsertionsRow(object):
     def it_sets_slice_and_subtotal(self):
         slice_ = Mock()
         subtotal = Mock()
@@ -196,7 +212,7 @@ class DescribeInsertionsRow:
         return property_mock(request, _Subtotal, "addend_idxs")
 
 
-class Describe_AssembledVector:
+class Describe_AssembledVector(object):
     def it_provides_assembled_values(self, assembled_row_fixture):
         raw_counts, insertion_cols, expected = assembled_row_fixture
         row = _AssembledVector(raw_counts, insertion_cols)
@@ -208,6 +224,7 @@ class Describe_AssembledVector:
         np.testing.assert_array_equal(row.proportions, expected)
 
     # fixtures -------------------------------------------------------
+
     @pytest.fixture(
         params=[
             ([1, 2, 2], ((1, [0, 1]),), [0.2, 0.4, 0.6, 0.4]),
@@ -225,7 +242,7 @@ class Describe_AssembledVector:
             )
             for anchor, addend_idxs in insertion_cols_counts
         )
-        return np.array(raw_counts), insertion_cols, expected
+        return _CategoricalVector(np.array(raw_counts)), insertion_cols, expected
 
     @pytest.fixture(
         params=[
@@ -253,10 +270,10 @@ class Describe_AssembledVector:
             )
             for anchor, addend_idxs in insertion_cols_counts
         )
-        return np.array(raw_counts), insertion_cols, expected
+        return _CategoricalVector(np.array(raw_counts)), insertion_cols, expected
 
 
-class DescribeAssembler:
+class DescribeAssembler(object):
     def it_sets_slice_and_insertions(self):
         slice_, insertions = Mock(), Mock()
         assembler = Assembler(slice_, insertions)
@@ -306,7 +323,7 @@ class DescribeAssembler:
         return instance_mock(request, Dimension, _subtotals=tuple())
 
 
-class DescribeCalculator:
+class DescribeCalculator(object):
     def it_provides_row_proportions(self, row_proportions_fixture):
         slice_, insertions, expected = row_proportions_fixture
         calc = Calculator(Assembler(slice_, insertions))
@@ -383,7 +400,6 @@ class DescribeCalculator:
     def row_margin_fixture(self, request, _subtotals_prop_, dimension_):
         counts, row_subtotals, expected_row_margin = request.param
         slice_ = _CatXCatSlice(counts)
-        # dimensions = (Dimension(None, None), None)
         dimensions = (Dimension(None, None), dimension_)
         _subtotals_prop_.return_value = [
             instance_mock(
