@@ -229,9 +229,16 @@ class InsertionColumn(_InsertionVector):
 
 
 class Assembler(object):
-    def __init__(self, slice_, insertions):
+    def __init__(self, slice_, insertions, order_transform=None):
         self._slice = slice_
         self._insertions = insertions
+        self._order_transform = order_transform
+
+    @lazyproperty
+    def slice(self):
+        if self._order_transform:
+            return OrderedSlice(self._slice, self._order_transform)
+        return self._slice
 
     @lazyproperty
     def rows(self):
@@ -272,14 +279,17 @@ class Assembler(object):
     @lazyproperty
     def _assembled_rows(self):
         return tuple(
-            _AssembledVector(row, self._insertion_columns) for row in self._slice.rows
+            # _AssembledVector(row, self._insertion_columns) for row in self._slice.rows
+            _AssembledVector(row, self._insertion_columns)
+            for row in self.slice.rows
         )
 
     @lazyproperty
     def _assembled_columns(self):
         return tuple(
             _AssembledVector(column, self._insertion_rows)
-            for column in self._slice.columns
+            # for column in self._slice.columns
+            for column in self.slice.columns
         )
 
     @lazyproperty
@@ -292,7 +302,8 @@ class Assembler(object):
     @lazyproperty
     def _interleaved_rows(self):
         rows = []
-        for i in range(len(self._slice.rows)):
+        # for i in range(len(self._slice.rows)):
+        for i in range(len(self.slice.rows)):
             rows.append(self._assembled_rows[i])
             if i in self._insertions.row_anchors:
                 insertion_idx = self._insertions.row_anchors.index(i)
@@ -309,7 +320,8 @@ class Assembler(object):
     @lazyproperty
     def _interleaved_columns(self):
         columns = []
-        for i in range(len(self._slice.columns)):
+        # for i in range(len(self._slice.columns)):
+        for i in range(len(self.slice.columns)):
             columns.append(self._assembled_columns[i])
             if i in self._insertions.column_anchors:
                 insertion_idx = self._insertions.column_anchors.index(i)
@@ -390,12 +402,17 @@ class Calculator(object):
     def row_margin(self):
         return np.array([row.margin for row in self._assembler.rows])
 
+    @lazyproperty
+    def counts(self):
+        return np.array([row.values for row in self._assembler.rows])
+
 
 class FrozenSlice(object):
-    def __init__(self, cube, slice_idx=0, use_insertions=False):
+    def __init__(self, cube, slice_idx=0, use_insertions=False, reordered_ids=None):
         self._cube = cube
         self._slice_idx = slice_idx
         self._use_insertions = use_insertions
+        self._reordered_ids = reordered_ids
 
     # API ----------------------------------------------------------------------------
 
@@ -407,11 +424,20 @@ class FrozenSlice(object):
     def column_proportions(self):
         return self._calculator.column_proportions
 
+    @lazyproperty
+    def counts(self):
+        return self._calculator.counts
+
     # Properties ---------------------------------------------------------------------
 
     @lazyproperty
     def _assembler(self):
-        return Assembler(self._slice, self._insertions)
+        order_transform = (
+            OrderTransform(self._cube.dimensions, self._reordered_ids)
+            if self._reordered_ids
+            else None
+        )
+        return Assembler(self._slice, self._insertions, order_transform=order_transform)
 
     @lazyproperty
     def _calculator(self):
@@ -442,3 +468,77 @@ class FrozenSlice(object):
         if type_ == (DT.MR, DT.MR):
             return _MrXMrSlice(raw_counts)
         return _CatXCatSlice(raw_counts)
+
+
+class OrderTransform(object):
+    def __init__(self, dimensions, ordered_ids):
+        self._dimensions = dimensions
+        self._ordered_ids = ordered_ids
+
+    @lazyproperty
+    def _row_dimension(self):
+        return self._dimensions[0]
+
+    @lazyproperty
+    def _column_dimension(self):
+        return self._dimensions[1]
+
+    @lazyproperty
+    def _row_ids(self):
+        return tuple(el.element_id for el in self._row_dimension.valid_elements)
+
+    @lazyproperty
+    def _column_ids(self):
+        return tuple(el.element_id for el in self._column_dimension.valid_elements)
+
+    @lazyproperty
+    def _ordered_row_ids(self):
+        return self._ordered_ids[0]
+
+    @lazyproperty
+    def _ordered_column_ids(self):
+        ids = self._ordered_ids[1]
+        return ids if ids is not None else None
+
+    @lazyproperty
+    def row_order(self):
+        return np.array(
+            [self._row_ids.index(ordered_id) for ordered_id in self._ordered_row_ids]
+        )
+
+    @lazyproperty
+    def column_order(self):
+        if self._ordered_column_ids is None:
+            return None
+        return np.array(
+            [
+                self._column_ids.index(ordered_id)
+                for ordered_id in self._ordered_column_ids
+            ]
+        )
+
+
+class OrderedVector(object):
+    def __init__(self, vector, order):
+        self._vector = vector
+        self._order = order
+
+    @lazyproperty
+    def values(self):
+        return self._vector.values[self._order]
+
+
+class OrderedSlice(object):
+    def __init__(self, slice_, transform):
+        self._slice = slice_
+        self._transform = transform
+
+    @lazyproperty
+    def rows(self):
+        if self._transform.column_order is None:
+            return tuple(np.array(self._slice.rows)[self._transform.row_order])
+
+        return tuple(
+            OrderedVector(row, self._transform.column_order)
+            for row in tuple(np.array(self._slice.rows)[self._transform.row_order])
+        )

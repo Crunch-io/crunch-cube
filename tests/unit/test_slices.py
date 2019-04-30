@@ -14,8 +14,11 @@ from cr.cube.slices import (
     InsertionColumn,
     Assembler,
     Calculator,
+    OrderedVector,
+    OrderedSlice,
+    OrderTransform,
 )
-from cr.cube.dimension import Dimension, _Subtotal
+from cr.cube.dimension import Dimension, _Subtotal, _Category
 from ..unitutil import instance_mock, property_mock
 
 
@@ -419,3 +422,102 @@ class DescribeCalculator(object):
     @pytest.fixture
     def dimension_(self, request):
         return instance_mock(request, Dimension, _subtotals=tuple())
+
+
+class DescribeOrderTransform(object):
+    def it_initiates_dimensions_and_ordered_ids(self):
+        dimensions = Mock()
+        ordered_ids = Mock()
+        transform = OrderTransform(dimensions, ordered_ids)
+        assert transform._dimensions == dimensions
+        assert transform._ordered_ids == ordered_ids
+
+    def it_provides_rows_order(self, rows_order_fixture):
+        row_dimension, ordered_element_ids, expected = rows_order_fixture
+        dimensions = (row_dimension, None)
+        transform = OrderTransform(dimensions, (ordered_element_ids, None))
+        np.testing.assert_array_equal(transform.row_order, expected)
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture(
+        params=[
+            ([1, 2, 3], [1, 2, 3], [0, 1, 2]),
+            ([1, 2, 3], [2, 1, 3], [1, 0, 2]),
+            ([1, 2, 3], [3, 2, 1], [2, 1, 0]),
+        ]
+    )
+    def rows_order_fixture(self, request):
+        element_ids, ordered_element_ids, expected_order = request.param
+        row_dimension = instance_mock(
+            request,
+            Dimension,
+            valid_elements=[
+                instance_mock(request, _Category, element_id=element_id)
+                for element_id in element_ids
+            ],
+        )
+        return row_dimension, ordered_element_ids, np.array(expected_order)
+
+
+class DescribeOrderedSlice(object):
+    def it_initiates_slice_and_reordering(self):
+        slice_ = Mock()
+        order_transform = Mock()
+        ordered_slice = OrderedSlice(slice_, order_transform)
+        assert ordered_slice._slice == slice_
+        assert ordered_slice._transform == order_transform
+
+    def it_reodrders_rows(self, order_rows_fixture):
+        ordered_slice, expected = order_rows_fixture
+        for row, expected_row_values in zip(ordered_slice.rows, expected):
+            assert row.values.tolist() == expected_row_values
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture(
+        params=[
+            ([1, 2, 3], [[1, 2], [3, 4], [5, 6]], [1, 2, 3], [[1, 2], [3, 4], [5, 6]]),
+            ([1, 2, 3], [[1, 2], [3, 4], [5, 6]], [2, 1, 3], [[3, 4], [1, 2], [5, 6]]),
+            ([1, 2, 3], [[1, 2], [3, 4], [5, 6]], [3, 2, 1], [[5, 6], [3, 4], [1, 2]]),
+        ]
+    )
+    def order_rows_fixture(self, request):
+        element_ids, counts, ordered_ids, expected = request.param
+        row_dimension = instance_mock(
+            request,
+            Dimension,
+            valid_elements=[
+                instance_mock(request, _Category, element_id=element_id)
+                for element_id in element_ids
+            ],
+        )
+        transform = OrderTransform((row_dimension, None), (np.array(ordered_ids), None))
+        return OrderedSlice(_CatXCatSlice(np.array(counts)), transform), expected
+
+
+class DescribeOrderedVector(object):
+    def it_sets_order(self):
+        order = Mock()
+        base_vector = Mock()
+        ordered_vector = OrderedVector(base_vector, order)
+        assert ordered_vector._vector == base_vector
+        assert ordered_vector._order == order
+
+    def it_orders_values(self, order_values_fixture):
+        vector, order, expected = order_values_fixture
+        ordered_vector = OrderedVector(vector, order)
+        np.testing.assert_array_equal(ordered_vector.values, expected)
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture(
+        params=[
+            ([1, 2, 3], [0, 1, 2], [1, 2, 3]),
+            ([1, 2, 3], [1, 0, 2], [2, 1, 3]),
+            ([1, 2, 3], [2, 1, 0], [3, 2, 1]),
+        ]
+    )
+    def order_values_fixture(self, request):
+        counts, order, expected = request.param
+        return _CategoricalVector(np.array(counts)), np.array(order), expected

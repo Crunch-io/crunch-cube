@@ -231,3 +231,19 @@ class DescribeFrozenSlice:
             ]
         )
         np.testing.assert_almost_equal(slice_.column_proportions, expected)
+
+    def it_reorders_cat_x_cat(self):
+        cube = CrunchCube(CR.CAT_X_CAT_PRUNING_HS)
+        reordered_ids = ([6, 1, 2, 5, 4, 3], [5, 1, 2, 4, 3])
+        slice_ = FrozenSlice(cube, reordered_ids=reordered_ids)
+        expected = np.array(
+            [
+                [0, 1, 1, 0, 1],
+                [1, 28, 20, 0, 10],
+                [0, 1, 0, 0, 1],
+                [0, 0, 0, 0, 0],
+                [0, 3, 8, 0, 5],
+                [2, 3, 4, 0, 2],
+            ]
+        )
+        np.testing.assert_equal(slice_.counts, expected)
