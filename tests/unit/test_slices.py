@@ -17,6 +17,7 @@ from cr.cube.slices import (
     OrderedVector,
     OrderedSlice,
     OrderTransform,
+    Transforms,
 )
 from cr.cube.dimension import Dimension, _Subtotal, _Category
 from ..unitutil import instance_mock, property_mock
@@ -283,8 +284,8 @@ class DescribeAssembler(object):
         assert assembler._slice, assembler._insertions == (slice_, insertions)
 
     def it_provides_rows(self, counts_fixture):
-        slice_, insertions, expected = counts_fixture
-        assembler = Assembler(slice_, insertions)
+        slice_, transforms, expected = counts_fixture
+        assembler = Assembler(slice_, transforms)
         actual_counts = np.array([row.values for row in assembler.rows])
         np.testing.assert_array_equal(actual_counts, expected)
 
@@ -313,7 +314,8 @@ class DescribeAssembler(object):
             for anchor_idx, addend_idxs in row_subtotals
         ]
         insertions = Insertions(dimensions, slice_)
-        return slice_, insertions, np.array(expected_counts)
+        transforms = Transforms(None, insertions)
+        return slice_, transforms, np.array(expected_counts)
 
     # fixture components ---------------------------------------------
 
@@ -328,14 +330,14 @@ class DescribeAssembler(object):
 
 class DescribeCalculator(object):
     def it_provides_row_proportions(self, row_proportions_fixture):
-        slice_, insertions, expected = row_proportions_fixture
-        calc = Calculator(Assembler(slice_, insertions))
+        slice_, transforms, expected = row_proportions_fixture
+        calc = Calculator(Assembler(slice_, transforms))
         row_proportions = calc.row_proportions
         np.testing.assert_almost_equal(row_proportions, expected)
 
     def it_provides_row_margin(self, row_margin_fixture):
-        slice_, insertions, expected = row_margin_fixture
-        calc = Calculator(Assembler(slice_, insertions))
+        slice_, transforms, expected = row_margin_fixture
+        calc = Calculator(Assembler(slice_, transforms))
         margin = calc.row_margin
         np.testing.assert_almost_equal(margin, expected)
 
@@ -390,7 +392,8 @@ class DescribeCalculator(object):
             for anchor_idx, addend_idxs in row_subtotals
         ]
         insertions = Insertions(dimensions, slice_)
-        return slice_, insertions, np.array(expected_row_proportions)
+        transforms = Transforms(None, insertions)
+        return slice_, transforms, np.array(expected_row_proportions)
 
     @pytest.fixture(
         params=[
@@ -411,7 +414,8 @@ class DescribeCalculator(object):
             for anchor_idx, addend_idxs in row_subtotals
         ]
         insertions = Insertions(dimensions, slice_)
-        return slice_, insertions, np.array(expected_row_margin)
+        transforms = Transforms(None, insertions)
+        return slice_, transforms, np.array(expected_row_margin)
 
     # fixture components ---------------------------------------------
 
@@ -463,10 +467,10 @@ class DescribeOrderTransform(object):
 class DescribeOrderedSlice(object):
     def it_initiates_slice_and_reordering(self):
         slice_ = Mock()
-        order_transform = Mock()
-        ordered_slice = OrderedSlice(slice_, order_transform)
+        ordering = Mock()
+        ordered_slice = OrderedSlice(slice_, ordering)
         assert ordered_slice._slice == slice_
-        assert ordered_slice._transform == order_transform
+        assert ordered_slice._ordering == ordering
 
     def it_reodrders_rows(self, order_rows_fixture):
         ordered_slice, expected = order_rows_fixture
@@ -521,3 +525,12 @@ class DescribeOrderedVector(object):
     def order_values_fixture(self, request):
         counts, order, expected = request.param
         return _CategoricalVector(np.array(counts)), np.array(order), expected
+
+
+class DescribeTransforms(object):
+    def it_initiates_transforms(self):
+        insertions = Mock()
+        ordering = Mock()
+        transforms = Transforms(insertions=insertions, ordering=ordering)
+        assert transforms._insertions == insertions
+        assert transforms._ordering == ordering
