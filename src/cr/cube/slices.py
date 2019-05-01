@@ -75,6 +75,10 @@ class _CategoricalVector(object):
     def proportions(self):
         return self.values / self.margin
 
+    @lazyproperty
+    def pruned(self):
+        return self.margin == 0
+
 
 class _MultipleResponseVector(_CategoricalVector):
     @lazyproperty
@@ -87,6 +91,10 @@ class _MultipleResponseVector(_CategoricalVector):
         return np.array(
             [selected + not_selected for (selected, not_selected) in counts]
         )
+
+    @lazyproperty
+    def pruned(self):
+        return np.all(self.margin == 0)
 
     @lazyproperty
     def _selected(self):
@@ -210,6 +218,11 @@ class _InsertionVector(object):
     def proportions(self):
         return self.values / self.margin
 
+    @lazyproperty
+    def pruned(self):
+        """Insertions are never pruned."""
+        return False
+
 
 class InsertionRow(_InsertionVector):
     @lazyproperty
@@ -245,6 +258,8 @@ class Assembler(object):
             slice_ = OrderedSlice(slice_, self._transforms.ordering)
         if self._transforms.insertions:
             slice_ = SliceWithInsertions(slice_, self._transforms.insertions)
+        if self._transforms.pruning:
+            slice_ = PrunedSlice(slice_)
 
         return slice_
 
@@ -344,6 +359,10 @@ class _AssembledVector(object):
         return self._base_vector.margin
 
     @lazyproperty
+    def pruned(self):
+        return self._base_vector.pruned
+
+    @lazyproperty
     def proportions(self):
         return self.values / self.margin
 
@@ -411,11 +430,14 @@ class Calculator(object):
 
 
 class FrozenSlice(object):
-    def __init__(self, cube, slice_idx=0, use_insertions=False, reordered_ids=None):
+    def __init__(
+        self, cube, slice_idx=0, use_insertions=False, reordered_ids=None, pruning=False
+    ):
         self._cube = cube
         self._slice_idx = slice_idx
         self._use_insertions = use_insertions
         self._reordered_ids = reordered_ids
+        self._pruning = pruning
 
     # API ----------------------------------------------------------------------------
 
@@ -443,7 +465,7 @@ class FrozenSlice(object):
 
     @lazyproperty
     def _transforms(self):
-        return Transforms(self._ordering, self._insertions)
+        return Transforms(self._ordering, self._pruning, self._insertions)
 
     @lazyproperty
     def _assembler(self):
@@ -556,8 +578,9 @@ class OrderedSlice(object):
 
 
 class Transforms(object):
-    def __init__(self, ordering, insertions):
+    def __init__(self, ordering=None, pruning=None, insertions=None):
         self._ordering = ordering
+        self._pruning = pruning
         self._insertions = insertions
 
     @lazyproperty
@@ -565,5 +588,48 @@ class Transforms(object):
         return self._ordering
 
     @lazyproperty
+    def pruning(self):
+        return self._pruning
+
+    @lazyproperty
     def insertions(self):
         return self._insertions
+
+
+class PrunedVector(object):
+    def __init__(self, vector, opposite_vectors):
+        self._vector = vector
+        self._opposite_vectors = opposite_vectors
+
+    @lazyproperty
+    def values(self):
+        return np.array(
+            [
+                value
+                for value, opposite_vector in zip(
+                    self._vector.values, self._opposite_vectors
+                )
+                if np.any(opposite_vector.margin != 0)
+            ]
+        )
+
+
+class PrunedSlice(object):
+    def __init__(self, slice_):
+        self._slice = slice_
+
+    @lazyproperty
+    def rows(self):
+        return tuple(
+            PrunedVector(row, self._slice.columns)
+            for row in self._slice.rows
+            if not row.pruned
+        )
+
+    @lazyproperty
+    def columns(self):
+        return tuple(
+            PrunedVector(column, self._slice.rows)
+            for column in self._slice.columns
+            if not column.pruned
+        )

@@ -7,6 +7,7 @@ import pytest
 from cr.cube.slices import (
     _AssembledVector,
     _CatXCatSlice,
+    _MrXCatSlice,
     _CategoricalVector,
     _MultipleResponseVector,
     Insertions,
@@ -18,6 +19,8 @@ from cr.cube.slices import (
     OrderedSlice,
     OrderTransform,
     Transforms,
+    PrunedVector,
+    PrunedSlice,
 )
 from cr.cube.dimension import Dimension, _Subtotal, _Category
 from ..unitutil import instance_mock, property_mock
@@ -314,7 +317,7 @@ class DescribeAssembler(object):
             for anchor_idx, addend_idxs in row_subtotals
         ]
         insertions = Insertions(dimensions, slice_)
-        transforms = Transforms(None, insertions)
+        transforms = Transforms(None, None, insertions)
         return slice_, transforms, np.array(expected_counts)
 
     # fixture components ---------------------------------------------
@@ -392,7 +395,7 @@ class DescribeCalculator(object):
             for anchor_idx, addend_idxs in row_subtotals
         ]
         insertions = Insertions(dimensions, slice_)
-        transforms = Transforms(None, insertions)
+        transforms = Transforms(None, None, insertions)
         return slice_, transforms, np.array(expected_row_proportions)
 
     @pytest.fixture(
@@ -414,7 +417,7 @@ class DescribeCalculator(object):
             for anchor_idx, addend_idxs in row_subtotals
         ]
         insertions = Insertions(dimensions, slice_)
-        transforms = Transforms(None, insertions)
+        transforms = Transforms(None, None, insertions)
         return slice_, transforms, np.array(expected_row_margin)
 
     # fixture components ---------------------------------------------
@@ -531,6 +534,104 @@ class DescribeTransforms(object):
     def it_initiates_transforms(self):
         insertions = Mock()
         ordering = Mock()
-        transforms = Transforms(insertions=insertions, ordering=ordering)
-        assert transforms._insertions == insertions
+        pruning = Mock()
+        transforms = Transforms(ordering, pruning, insertions)
         assert transforms._ordering == ordering
+        assert transforms._pruning == pruning
+        assert transforms._insertions == insertions
+
+
+class DescribePrunedSlice(object):
+    def it_initiates_slice(self):
+        slice_ = Mock()
+        pruned_slice = PrunedSlice(slice_)
+        assert pruned_slice._slice == slice_
+
+    def it_prunes_rows_and_columns(self, pruned_slice_fixture):
+        pruned_slice, expected = pruned_slice_fixture
+        np.testing.assert_array_equal(
+            np.array([row.values for row in pruned_slice.rows]), expected
+        )
+        np.testing.assert_array_equal(
+            np.array([column.values for column in pruned_slice.columns]).T, expected
+        )
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture(
+        params=[
+            (_CatXCatSlice, [[1, 2], [3, 4]], [[1, 2], [3, 4]]),
+            (_CatXCatSlice, [[1, 2], [0, 0], [3, 4]], [[1, 2], [3, 4]]),
+            (_CatXCatSlice, [[1, 0, 1], [0, 0, 0], [3, 0, 4]], [[1, 1], [3, 4]]),
+            (_MrXCatSlice, [[[1, 2], [0, 1]], [[3, 4], [1, 0]]], [[1, 2], [3, 4]]),
+            (
+                _MrXCatSlice,
+                [[[1, 2, 0], [0, 1, 0]], [[3, 4, 0], [1, 0, 0]]],
+                [[1, 2], [3, 4]],
+            ),
+            (
+                _MrXCatSlice,
+                [
+                    [[1, 2, 0], [0, 1, 0]],
+                    [[3, 4, 0], [1, 0, 0]],
+                    [[0, 0, 0], [0, 0, 0]],
+                ],
+                [[1, 2], [3, 4]],
+            ),
+        ]
+    )
+    def pruned_slice_fixture(self, request):
+        cls_, raw_counts, expected = request.param
+        return PrunedSlice(cls_(np.array(raw_counts))), np.array(expected)
+
+
+class DescribePrunedVector(object):
+    def it_initiates_base_vector_and_opposite_vectors(self):
+        vector = Mock()
+        opposite_vectors = Mock()
+        pruned_vector = PrunedVector(vector, opposite_vectors)
+        assert pruned_vector._vector == vector
+        assert pruned_vector._opposite_vectors == opposite_vectors
+
+    def it_prunes_elements(self, pruned_elements_fixture):
+        vector, opposite_vectors, expected = pruned_elements_fixture
+        pruned_vector = PrunedVector(vector, opposite_vectors)
+        np.testing.assert_array_equal(pruned_vector.values, expected)
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture(
+        params=[
+            (_CategoricalVector, [1, 2, 3], _CategoricalVector, [1, 2, 3], [1, 2, 3]),
+            (_CategoricalVector, [1, 2, 3], _CategoricalVector, [0, 1, 2], [2, 3]),
+            (
+                _MultipleResponseVector,
+                [[1, 2, 3], [4, 5, 6]],
+                _CategoricalVector,
+                [0, 1, 2],
+                [2, 3],
+            ),
+            (
+                _CategoricalVector,
+                [1, 2, 3],
+                _MultipleResponseVector,
+                [[0, 0], [1, 2], [3, 4]],
+                [2, 3],
+            ),
+            (
+                _MultipleResponseVector,
+                [[1, 2, 3], [4, 5, 6]],
+                _MultipleResponseVector,
+                [[3, 4], [0, 0], [3, 4]],
+                [1, 3],
+            ),
+        ]
+    )
+    def pruned_elements_fixture(self, request):
+        cls_, values, opposite_cls, margins, expected = request.param
+        vector = cls_(np.array(values))
+        opposite_vectors = [
+            instance_mock(request, opposite_cls, margin=np.array(margin))
+            for margin in margins
+        ]
+        return vector, opposite_vectors, expected

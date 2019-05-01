@@ -247,3 +247,42 @@ class DescribeFrozenSlice:
             ]
         )
         np.testing.assert_equal(slice_.counts, expected)
+
+    def it_prunes_cat_x_cat_with_hs(self):
+        cube = CrunchCube(CR.CAT_X_CAT_PRUNING_HS)
+
+        # Pruned - without insertions
+        slice_ = FrozenSlice(cube, pruning=True)
+        expected = np.array(
+            [[28, 20, 10, 1], [1, 0, 1, 0], [3, 4, 2, 2], [3, 8, 5, 0], [1, 1, 1, 0]]
+        )
+        np.testing.assert_equal(slice_.counts, expected)
+
+        # Pruned - with insertions
+        slice_ = FrozenSlice(cube, use_insertions=True, pruning=True)
+        expected = np.array(
+            [
+                [28, 48, 20, 10, 1],
+                [7, 19, 12, 8, 2],
+                [1, 1, 0, 1, 0],
+                [3, 7, 4, 2, 2],
+                [3, 11, 8, 5, 0],
+                [1, 2, 1, 1, 0],
+            ]
+        )
+        np.testing.assert_equal(slice_.counts, expected)
+
+        # Not pruned - with insertions
+        slice_ = FrozenSlice(cube, use_insertions=True)
+        expected = np.array(
+            [
+                [28, 48, 20, 10, 0, 1],
+                [7, 19, 12, 8, 0, 2],
+                [1, 1, 0, 1, 0, 0],
+                [3, 7, 4, 2, 0, 2],
+                [3, 11, 8, 5, 0, 0],
+                [0, 0, 0, 0, 0, 0],
+                [1, 2, 1, 1, 0, 0],
+            ]
+        )
+        np.testing.assert_equal(slice_.counts, expected)
