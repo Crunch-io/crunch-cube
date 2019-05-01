@@ -1,5 +1,11 @@
 # History of Changes
 
+#### 1.9.16
+- Proper t-stats for cubes with H&S
+
+#### 1.9.15
+- Implement pairwise indices for Wishart, directly in cube
+
 #### 1.9.14
 - Fix how Headings and Subtotals are treated in pairwise indices
 - Row dimension is treated when calculating indices, while the column dimension

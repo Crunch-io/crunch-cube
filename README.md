@@ -112,16 +112,13 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.9.19
+- Fix `None` anchor
+
 #### 1.9.18
 - Pairwise summary as T-Stats
 
 #### 1.9.17
 - Unweighted N as basis for t-stats
-
-#### 1.9.16
-- Proper t-stats for cubes with H&S
-
-#### 1.9.15
-- Implement pairwise indices for Wishart, directly in cube
 
 For a complete list of changes see [history](https://github.com/Crunch-io/crunch-cube/blob/master/HISTORY.md).
