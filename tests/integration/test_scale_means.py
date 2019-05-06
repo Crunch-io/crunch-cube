@@ -360,3 +360,86 @@ def test_cat_single_element_x_cat():
     scale_means = cs.scale_means()
     np.testing.assert_equal(scale_means[0], np.array([np.nan, np.nan, np.nan, np.nan]))
     np.testing.assert_equal(scale_means[1], np.array([np.nan]))
+
+
+def test_means_univariate_cat():
+    cube = CrunchCube(CR.ECON_BLAME_WITH_HS)
+    expected = [[np.array(2.1735205616850553)]]
+    actual = cube.scale_means()
+    assert_scale_means_equal(actual, expected)
+
+
+def test_means_bivariate_cat():
+    cube = CrunchCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS)
+    expected = [
+        [np.array([2.19444444, 2.19230769, 2.26666667, 1.88990826, 1.76363636, 3.85])]
+    ]
+    actual = cube.scale_means()
+    assert_scale_means_equal(actual, expected)
+
+
+def test_means_cat_x_mr():
+    cube = CrunchCube(CR.FRUIT_X_PETS)
+    expected = [[np.array([1.7, 1.6470588, 1.6842105]), None]]
+    actual = cube.scale_means()
+    assert_scale_means_equal(actual, expected)
+
+
+def test_means_mr_x_cat():
+    cube = CrunchCube(CR.PETS_X_FRUIT)
+    expected = [[None, np.array([1.7, 1.6470588, 1.6842105])]]
+    actual = cube.scale_means()
+    assert_scale_means_equal(actual, expected)
+
+
+def test_means_cat_array_cat_dim_first():
+    cube = CrunchCube(CR.PETS_ARRAY_CAT_FIRST)
+    expected = [[None, np.array([1.44333002, 1.48049069, 1.57881177])]]
+    actual = cube.scale_means()
+    assert_scale_means_equal(actual, expected)
+
+
+def test_means_cat_array_subvar_dim_first():
+    cube = CrunchCube(CR.PETS_ARRAY_SUBVAR_FIRST)
+    expected = [[np.array([1.44333002, 1.48049069, 1.57881177]), None]]
+    actual = cube.scale_means()
+    assert_scale_means_equal(actual, expected)
+
+
+def test_means_cat_x_cat_arr_fruit_first():
+    cube = CrunchCube(CR.FRUIT_X_PETS_ARRAY)
+    expected = [
+        [None, np.array([1.48, 1.42857143, 1.52173913])],
+        [None, np.array([1.40740741, 1.53846154, 1.55319149])],
+    ]
+    actual = cube.scale_means()
+    assert_scale_means_equal(actual, expected)
+
+
+def test_means_cat_x_cat_arr_subvars_first():
+    cube = CrunchCube(CR.FRUIT_X_PETS_ARRAY_SUBVARS_FIRST)
+    expected = [
+        [np.array([1.71111111, 1.6, 1.65625]), None],
+        [np.array([1.64705882, 1.7, 1.68421053]), None],
+    ]
+    actual = cube.scale_means()
+    assert_scale_means_equal(actual, expected)
+
+
+def test_means_cat_x_cat_arr_pets_first():
+    cube = CrunchCube(CR.FRUIT_X_PETS_ARRAY_PETS_FIRST)
+    expected = [
+        [np.array([1.48, 1.40740741]), np.array([1.71111111, 1.64705882])],
+        [np.array([1.42857143, 1.53846154]), np.array([1.6, 1.7])],
+        [np.array([1.52173913, 1.55319149]), np.array([1.65625, 1.68421053])],
+    ]
+    actual = cube.scale_means()
+    assert_scale_means_equal(actual, expected)
+
+
+def test_means_with_null_values():
+    cube = CrunchCube(CR.SCALE_WITH_NULL_VALUES)
+    scale_means = cube.scale_means()
+    assert_scale_means_equal(
+        scale_means, [[np.array([1.2060688, 1.0669344, 1.023199]), None]]
+    )

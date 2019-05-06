@@ -26,65 +26,28 @@ from cr.cube.dimension import Dimension, _Subtotal, _Category
 from ..unitutil import instance_mock, property_mock
 
 
-class Describe_CatXCatSlice(object):
-    def it_sets_raw_counts(self):
-        counts = Mock()
-        slice_ = _CatXCatSlice(counts)
-        assert slice_._raw_counts == counts
-
-    def it_provides_access_to_rows_and_columns(self):
-        counts = np.arange(12).reshape(3, 4)
-        slice_ = _CatXCatSlice(counts)
-
-        # Check rows
-        assert isinstance(slice_.rows, tuple)
-        assert len(slice_.rows) == 3
-        np.testing.assert_array_equal(
-            slice_.rows[0]._raw_counts, np.array([0, 1, 2, 3])
-        )
-        np.testing.assert_array_equal(
-            slice_.rows[1]._raw_counts, np.array([4, 5, 6, 7])
-        )
-        np.testing.assert_array_equal(
-            slice_.rows[2]._raw_counts, np.array([8, 9, 10, 11])
-        )
-
-        # Check columns
-        assert isinstance(slice_.columns, tuple)
-        assert len(slice_.columns) == 4
-        np.testing.assert_array_equal(
-            slice_.columns[0]._raw_counts, np.array([0, 4, 8])
-        )
-        np.testing.assert_array_equal(
-            slice_.columns[1]._raw_counts, np.array([1, 5, 9])
-        )
-        np.testing.assert_array_equal(
-            slice_.columns[2]._raw_counts, np.array([2, 6, 10])
-        )
-        np.testing.assert_array_equal(
-            slice_.columns[3]._raw_counts, np.array([3, 7, 11])
-        )
-
-
 class Describe_CategoricalVector(object):
     def it_sets_raw_counts(self):
-        counts = Mock()
-        row = _CategoricalVector(counts)
-        assert row._raw_counts == counts
+        counts, base_counts, label, margin = Mock(), Mock(), Mock(), Mock()
+        row = _CategoricalVector(counts, base_counts, label, margin)
+        assert row._counts == counts
+        assert row._base_counts == base_counts
+        assert row._label == label
+        assert row._table_margin == margin
 
     def it_provides_values(self):
         counts = np.array([1, 2, 3])
-        row = _CategoricalVector(counts)
+        row = _CategoricalVector(counts, None, None, None)
         np.testing.assert_array_equal(row.values, counts)
 
     def it_calculates_margin(self):
         counts = np.array([1, 2, 3])
-        row = _CategoricalVector(counts)
+        row = _CategoricalVector(counts, None, None, None)
         assert row.margin == 6
 
     def it_calculates_proportions(self):
         counts = np.array([1, 2, 3])
-        row = _CategoricalVector(counts)
+        row = _CategoricalVector(counts, None, None, None)
         np.testing.assert_almost_equal(
             row.proportions, np.array([0.1666667, 0.3333333, 0.5])
         )
@@ -93,7 +56,7 @@ class Describe_CategoricalVector(object):
 class Describe_MultipleResponseVector(object):
     def it_provides_values(self):
         counts = np.array([[1, 2, 3], [4, 5, 6]])
-        row = _MultipleResponseVector(counts)
+        row = _MultipleResponseVector(counts, None, None, None)
         np.testing.assert_array_equal(row._selected, np.array([1, 2, 3]))
         np.testing.assert_array_equal(row.values, np.array([1, 2, 3]))
         np.testing.assert_array_equal(row._not_selected, np.array([4, 5, 6]))
@@ -101,7 +64,7 @@ class Describe_MultipleResponseVector(object):
     def it_calculates_margin(self):
         """Margin needs to be a vector of selected = not-selected values."""
         counts = np.array([[1, 2, 3], [4, 5, 6]])
-        row = _MultipleResponseVector(counts)
+        row = _MultipleResponseVector(counts, None, None, None)
         np.testing.assert_array_equal(row.margin, np.array([5, 7, 9]))
 
 

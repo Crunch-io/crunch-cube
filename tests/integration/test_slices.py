@@ -19,7 +19,7 @@ class DescribeFrozenSlice:
         cube = CrunchCube(CR.CAT_X_CAT_PRUNING_HS)
 
         # Without insertions
-        slice_ = FrozenSlice(cube, use_insertions=False)
+        slice_ = FrozenSlice(cube, use_insertions=False, weighted=False)
         expected = np.array(
             [
                 [0.47457627, 0.33898305, 0.16949153, 0.0, 0.01694915],
@@ -33,7 +33,7 @@ class DescribeFrozenSlice:
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
         # With insertions (only row for now)
-        slice_ = FrozenSlice(cube, use_insertions=True)
+        slice_ = FrozenSlice(cube, use_insertions=True, weighted=False)
         expected = np.array(
             [
                 [0.47457627, 0.81355932, 0.33898305, 0.16949153, 0.0, 0.01694915],
@@ -49,7 +49,7 @@ class DescribeFrozenSlice:
 
     def it_calculates_cat_x_cat_column_proportions(self):
         cube = CrunchCube(CR.CAT_X_CAT_PRUNING_HS)
-        slice_ = FrozenSlice(cube, use_insertions=True)
+        slice_ = FrozenSlice(cube, use_insertions=True, weighted=False)
         expected = np.array(
             [
                 [0.77777778, 0.69565217, 0.60606061, 0.52631579, np.nan, 0.33333333],
@@ -65,7 +65,7 @@ class DescribeFrozenSlice:
 
     def it_calculates_mr_x_cat_row_proportions(self):
         cube = CrunchCube(CR.MR_X_CAT_HS)
-        slice_ = FrozenSlice(cube, use_insertions=True)
+        slice_ = FrozenSlice(cube, use_insertions=True, weighted=False)
         expected = np.array(
             [
                 [
@@ -124,7 +124,7 @@ class DescribeFrozenSlice:
 
     def it_calculates_mr_x_cat_column_proportions(self):
         cube = CrunchCube(CR.MR_X_CAT_HS)
-        slice_ = FrozenSlice(cube, use_insertions=True)
+        slice_ = FrozenSlice(cube, use_insertions=True, weighted=False)
         expected = np.array(
             [
                 [
@@ -174,7 +174,7 @@ class DescribeFrozenSlice:
 
     def it_calculates_cat_x_mr_row_proportions(self):
         cube = CrunchCube(CR.CAT_X_MR_HS)
-        slice_ = FrozenSlice(cube, use_insertions=True)
+        slice_ = FrozenSlice(cube, use_insertions=True, weighted=False)
         expected = np.array(
             [
                 [0.53333333, 0.46666667, 0.30769231, 0.65, 0.84375],
@@ -191,7 +191,7 @@ class DescribeFrozenSlice:
 
     def it_calculates_cat_x_mr_column_proportions(self):
         cube = CrunchCube(CR.CAT_X_MR_HS)
-        slice_ = FrozenSlice(cube, use_insertions=True)
+        slice_ = FrozenSlice(cube, use_insertions=True, weighted=False)
         expected = np.array(
             [
                 [0.30769231, 0.09210526, 0.03389831, 0.03523035, 0.07012987],
@@ -208,7 +208,7 @@ class DescribeFrozenSlice:
 
     def it_calculates_mr_x_mr_row_proportions(self):
         cube = CrunchCube(CR.MR_X_MR)
-        slice_ = FrozenSlice(cube)
+        slice_ = FrozenSlice(cube, weighted=False)
         expected = np.array(
             [
                 [1.0, 0.42857143, 0.3, 1.0],
@@ -221,7 +221,7 @@ class DescribeFrozenSlice:
 
     def it_calculates_mr_x_mr_column_proportions(self):
         cube = CrunchCube(CR.MR_X_MR)
-        slice_ = FrozenSlice(cube)
+        slice_ = FrozenSlice(cube, weighted=False)
         expected = np.array(
             [
                 [1.0, 0.16666667, 0.11538462, 0.27272727],
@@ -235,7 +235,7 @@ class DescribeFrozenSlice:
     def it_reorders_cat_x_cat(self):
         cube = CrunchCube(CR.CAT_X_CAT_PRUNING_HS)
         reordered_ids = ([6, 1, 2, 5, 4, 3], [5, 1, 2, 4, 3])
-        slice_ = FrozenSlice(cube, reordered_ids=reordered_ids)
+        slice_ = FrozenSlice(cube, reordered_ids=reordered_ids, weighted=False)
         expected = np.array(
             [
                 [0, 1, 1, 0, 1],
@@ -252,14 +252,14 @@ class DescribeFrozenSlice:
         cube = CrunchCube(CR.CAT_X_CAT_PRUNING_HS)
 
         # Pruned - without insertions
-        slice_ = FrozenSlice(cube, pruning=True)
+        slice_ = FrozenSlice(cube, pruning=True, weighted=False)
         expected = np.array(
             [[28, 20, 10, 1], [1, 0, 1, 0], [3, 4, 2, 2], [3, 8, 5, 0], [1, 1, 1, 0]]
         )
         np.testing.assert_equal(slice_.counts, expected)
 
         # Pruned - with insertions
-        slice_ = FrozenSlice(cube, use_insertions=True, pruning=True)
+        slice_ = FrozenSlice(cube, use_insertions=True, pruning=True, weighted=False)
         expected = np.array(
             [
                 [28, 48, 20, 10, 1],
@@ -273,7 +273,7 @@ class DescribeFrozenSlice:
         np.testing.assert_equal(slice_.counts, expected)
 
         # Not pruned - with insertions
-        slice_ = FrozenSlice(cube, use_insertions=True)
+        slice_ = FrozenSlice(cube, use_insertions=True, weighted=False)
         expected = np.array(
             [
                 [28, 48, 20, 10, 0, 1],
