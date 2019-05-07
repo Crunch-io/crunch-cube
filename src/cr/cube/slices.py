@@ -11,6 +11,9 @@ from cr.cube.enum import DIMENSION_TYPE as DT
 
 
 class _MeansSlice(object):
+    """Represents slices with means (and no counts)."""
+
+    # TODO: We might need to have 2 of these, one for 0-D, and one for 1-D mean cubes
     def __init__(self, means, base_counts):
         self._means = means
         self._base_counts = base_counts
@@ -25,6 +28,17 @@ class _MeansSlice(object):
 
 
 class _CatXCatSlice(object):
+    """Deals with CAT x CAT data.
+
+    Delegatest most functionality to vectors (rows or columns), but calculates some
+    values by itself (like table_margin).
+
+    This class (or its inheritants) must be instantiated as a starting point when
+    dealing with slices. Other classes that represents various stages of
+    transformations, need to repro a portion of this class' API (like iterating over
+    rows or columns).
+    """
+
     def __init__(self, dimensions, counts, base_counts):
         self._dimensions = dimensions
         self._counts = counts
@@ -98,6 +112,11 @@ class _CatXCatSlice(object):
 
 
 class _1DCatSlice(_CatXCatSlice):
+    """Special case of CAT x CAT, where the 2nd CAT doesn't exist.
+
+    Values are treated as rows, while there's only a single column (vector).
+    """
+
     @lazyproperty
     def _zscores(self):
         # TODO: Fix with real zscores
@@ -115,6 +134,13 @@ class _1DCatSlice(_CatXCatSlice):
 
 
 class _MrXCatSlice(_CatXCatSlice):
+    """Represents MR x CAT slices.
+
+    It's similar to CAT x CAT, other than the way it handles columns. For
+    columns - which correspond to the MR dimension - it needs to handle the indexing
+    of selected/not-selected correctly.
+    """
+
     @lazyproperty
     def rows(self):
         """Use only selected counts."""
@@ -149,6 +175,8 @@ class _MrXCatSlice(_CatXCatSlice):
 
 
 class _1DMrSlice(_MrXCatSlice):
+    """Special case of 1-D MR slice (vector)."""
+
     @lazyproperty
     def columns(self):
         return tuple(
@@ -169,6 +197,12 @@ class _1DMrSlice(_MrXCatSlice):
 
 
 class _CatXMrSlice(_CatXCatSlice):
+    """Handles CAT x MR slices.
+
+    Needs to handle correctly the indexing for the selected/not-selected for rows
+    (which correspond to the MR dimension).
+    """
+
     @lazyproperty
     def _zscores(self):
         # TODO: Fix with real zscores
@@ -206,6 +240,11 @@ class _CatXMrSlice(_CatXCatSlice):
 
 
 class _MrXMrSlice(_CatXCatSlice):
+    """Represents MR x MR slices.
+
+    Needs to properly index both rows and columns (selected/not-selected.
+    """
+
     @lazyproperty
     def _row_generator(self):
         return zip(
@@ -245,6 +284,12 @@ class _MrXMrSlice(_CatXCatSlice):
 
 
 class _CategoricalVector(object):
+    """Main staple of all measures.
+
+    Some of the measures it can calculate by itself, others it needs to receive at
+    construction time (like table margin and zscores).
+    """
+
     def __init__(self, counts, base_counts, label, table_margin, zscore=None):
         self._counts = counts
         self._base_counts = base_counts
@@ -304,6 +349,13 @@ class _CategoricalVector(object):
 
 
 class _MultipleResponseVector(_CategoricalVector):
+    """Handles MR vectors (either rows or columns)
+
+    Needs to handle selected and not-selected properly. Consequently, it calculates
+    the right margin (for itself), but receives table margin on construction
+    time (from the slice).
+    """
+
     @lazyproperty
     def values(self):
         return self._selected
@@ -349,6 +401,12 @@ class _MultipleResponseVector(_CategoricalVector):
 
 
 class Insertions(object):
+    """Represents slice's insertions (inserted rows and columns).
+
+    It generates the inserted rows and columns directly from the
+    slice, based on the subtotals.
+    """
+
     def __init__(self, dimensions, slice_):
         self._dimensions = dimensions
         self._slice = slice_
@@ -446,6 +504,12 @@ class Insertions(object):
 
 
 class _InsertionVector(object):
+    """Represents constituent vectors of the `Insertions` class.
+
+    Needs to repro the API of the more basic vectors - because of
+    composition (and not inheritance)
+    """
+
     def __init__(self, slice_, subtotal):
         self._slice = slice_
         self._subtotal = subtotal
@@ -516,6 +580,8 @@ class InsertionColumn(_InsertionVector):
 
 
 class Assembler(object):
+    """In charge of performing all the transforms sequentially."""
+
     def __init__(self, slice_, transforms):
         self._slice = slice_
         self._transforms = transforms
@@ -553,6 +619,8 @@ class Assembler(object):
 
 
 class SliceWithInsertions(object):
+    """Represents slice with both normal and inserted bits."""
+
     def __init__(self, slice_, insertions):
         self._slice = slice_
         self._insertions = insertions
@@ -660,6 +728,8 @@ class SliceWithInsertions(object):
 
 
 class _AssembledVector(object):
+    """Vector with base, as well as inserted, elements (of the opposite dimension)."""
+
     def __init__(self, base_vector, opposite_inserted_vectors):
         self._base_vector = base_vector
         self._opposite_inserted_vectors = opposite_inserted_vectors
@@ -782,12 +852,22 @@ class _AssembledVector(object):
 
 
 class _AssembledInsertionVector(_AssembledVector):
+    """Inserted row or col, but with elements from opposite dimension insertions.
+
+    Needs to be subclassed from _AssembledVector, because it needs to provide the
+    anchor, in order to know where it (itself) gets inserted.
+    """
+
     @lazyproperty
     def anchor(self):
         return self._base_vector.anchor
 
 
+# TODO: Not sure if Calculator is needed at all. It dupclicates most of the things
+# from Assembler. Maybe just use one of those, and think of a better name.
 class Calculator(object):
+    """Calculates measures."""
+
     def __init__(self, assembler):
         self._assembler = assembler
 
@@ -856,6 +936,8 @@ class Calculator(object):
 
 
 class FrozenSlice(object):
+    """Main point of interaction with the outer world."""
+
     def __init__(
         self,
         cube,
@@ -993,8 +1075,11 @@ class FrozenSlice(object):
     @lazyproperty
     def _dimensions(self):
         dimensions = self._cube.dimensions[-2:]
+
         if self._ca_as_0th:
+            # Represent CA slice as 1-D rather than 2-D
             return tuple([dimensions[-1]])
+
         return dimensions
 
     @lazyproperty
@@ -1005,6 +1090,11 @@ class FrozenSlice(object):
 
     @lazyproperty
     def _slice(self):
+        """This is essentially a factory method.
+
+        Needs to live (probably) in the _BaseSclice (which doesn't yet exist).
+        It also needs to be tidied up a bit.
+        """
         dimensions = self._cube.dimensions[-2:]
         base_counts = self._cube._apply_missings(
             # self._cube._measure(False).raw_cube_array
@@ -1040,6 +1130,8 @@ class FrozenSlice(object):
 
 
 class OrderTransform(object):
+    """Creates ordering indexes for rows and columns based on element ids."""
+
     def __init__(self, dimensions, ordered_ids):
         self._dimensions = dimensions
         self._ordered_ids = ordered_ids
@@ -1088,6 +1180,8 @@ class OrderTransform(object):
 
 
 class OrderedVector(object):
+    """In charge of indexing elements properly, after ordering transform."""
+
     def __init__(self, vector, order):
         self._vector = vector
         self._order = order
@@ -1106,6 +1200,11 @@ class OrderedVector(object):
 
 
 class OrderedSlice(object):
+    """Result of the ordering transform.
+
+    In charge of indexing rows and columns properly.
+    """
+
     def __init__(self, slice_, ordering):
         self._slice = slice_
         self._ordering = ordering
@@ -1119,6 +1218,8 @@ class OrderedSlice(object):
 
 
 class Transforms(object):
+    """Container for the transforms."""
+
     def __init__(self, ordering=None, pruning=None, insertions=None):
         self._ordering = ordering
         self._pruning = pruning
@@ -1138,6 +1239,8 @@ class Transforms(object):
 
 
 class PrunedVector(object):
+    """Vector with elements from the opposide dimensions pruned."""
+
     def __init__(self, vector, opposite_vectors):
         self._vector = vector
         self._opposite_vectors = opposite_vectors
@@ -1208,6 +1311,12 @@ class PrunedVector(object):
 
 
 class PrunedSlice(object):
+    """Slice with rows or columns pruned.
+
+    While the rows and/or columns need to be pruned, each one of the remaining
+    vectors also needs to be pruned based on the opposite dimension's base.
+    """
+
     def __init__(self, slice_):
         self._slice = slice_
 
