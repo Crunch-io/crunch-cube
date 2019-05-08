@@ -183,9 +183,9 @@ class FrozenSlice(object):
         )
         type_ = self._cube.dim_types[-2:]
         if self._cube.ndim == 0 and self._cube.has_means:
-            return _MeansSlice(counts, base_counts)
+            return _0DMeansSlice(counts, base_counts)
         if self._cube.ndim == 1 and self._cube.has_means:
-            return _MeansSlice(counts, base_counts)
+            return _1DMeansSlice(dimensions[0], counts, base_counts)
         if self._cube.ndim > 2 or self._ca_as_0th:
             base_counts = base_counts[self._slice_idx]
             counts = counts[self._slice_idx]
@@ -211,7 +211,7 @@ class FrozenSlice(object):
         return Transforms(self._ordering, self._pruning, self._insertions)
 
 
-class _MeansSlice(object):
+class _0DMeansSlice(object):
     """Represents slices with means (and no counts)."""
 
     # TODO: We might need to have 2 of these, one for 0-D, and one for 1-D mean cubes
@@ -226,6 +226,25 @@ class _MeansSlice(object):
     @lazyproperty
     def table_margin(self):
         return np.sum(self._base_counts)
+
+
+class _1DMeansSlice(_0DMeansSlice):
+    def __init__(self, dimension, means, base_counts):
+        super(_1DMeansSlice, self).__init__(means, base_counts)
+        self._dimension = dimension
+
+    @lazyproperty
+    def rows(self):
+        return tuple(
+            _BaseVector(element.label, base_counts)
+            for element, base_counts in zip(
+                self._dimension.valid_elements, self._base_counts
+            )
+        )
+
+    @lazyproperty
+    def columns(self):
+        return ()
 
 
 class _CatXCatSlice(object):
@@ -271,7 +290,9 @@ class _CatXCatSlice(object):
 
     @lazyproperty
     def _column_generator(self):
-        return zip(self._counts.T, self._base_counts.T, self._column_elements)
+        return zip(
+            self._counts.T, self._base_counts.T, self._column_elements, self._zscores.T
+        )
 
     @lazyproperty
     def rows(self):
@@ -285,8 +306,10 @@ class _CatXCatSlice(object):
     @lazyproperty
     def columns(self):
         return tuple(
-            _CategoricalVector(counts, base_counts, element.label, self.table_margin)
-            for counts, base_counts, element in self._column_generator
+            _CategoricalVector(
+                counts, base_counts, element.label, self.table_margin, zscore
+            )
+            for counts, base_counts, element, zscore in self._column_generator
         )
 
     @lazyproperty
@@ -299,14 +322,26 @@ class _CatXCatSlice(object):
 
     @lazyproperty
     def _zscores(self):
-        total = self.table_margin
-        column_margin = np.sum(self._counts, axis=0)
-        row_margin = np.sum(self._counts, axis=1)
-        expected_counts = expected_freq(self._counts)
-        residuals = self._counts - expected_counts
+        # return tuple([np.nan] * self._counts.shape[0])
+        # __import__("ipdb").set_trace()
+        return self._scalar_type_std_res(
+            self._counts,
+            self.table_margin,
+            np.sum(self._counts, axis=0),
+            np.sum(self._counts, axis=1),
+        )
+
+    @staticmethod
+    def _scalar_type_std_res(counts, total, colsum, rowsum):
+        """Return ndarray containing standard residuals for category values.
+
+        The shape of the return value is the same as that of *counts*.
+        """
+        expected_counts = expected_freq(counts)
+        residuals = counts - expected_counts
         variance = (
-            np.outer(row_margin, column_margin)
-            * np.outer(total - row_margin, total - column_margin)
+            np.outer(rowsum, colsum)
+            * np.outer(total - rowsum, total - colsum)
             / total ** 3
         )
         return residuals / np.sqrt(variance)
@@ -334,7 +369,15 @@ class _1DCatSlice(_CatXCatSlice):
         )
 
 
-class _MrXCatSlice(_CatXCatSlice):
+class _SliceWithMR(_CatXCatSlice):
+    @staticmethod
+    def _array_type_std_res(counts, total, colsum, rowsum):
+        expected_counts = rowsum * colsum / total
+        variance = rowsum * colsum * (total - rowsum) * (total - colsum) / total ** 3
+        return (counts - expected_counts) / np.sqrt(variance)
+
+
+class _MrXCatSlice(_SliceWithMR):
     """Represents MR x CAT slices.
 
     It's similar to CAT x CAT, other than the way it handles columns. For
@@ -343,17 +386,33 @@ class _MrXCatSlice(_CatXCatSlice):
     """
 
     @lazyproperty
+    def _zscores(self):
+        # TODO: Fix with correct zscores
+        # return self._counts[:, 0, :]
+        return self._array_type_std_res(
+            self._counts[:, 0, :],
+            self.table_margin[:, None],
+            np.sum(self._counts, axis=1),
+            np.sum(self._counts[:, 0, :], axis=1)[:, None],
+        )
+
+    @lazyproperty
     def rows(self):
         """Use only selected counts."""
         return tuple(
-            _CategoricalVector(counts[0], base_counts[0], element.label, table_margin)
-            for counts, base_counts, element, table_margin in self._row_generator
+            # _CategoricalVector(counts[0], base_counts[0], element.label, table_margin)
+            _CatXMrVector(counts, base_counts, element.label, table_margin, zscore)
+            for counts, base_counts, element, table_margin, zscore in self._row_generator
         )
 
     @lazyproperty
     def _row_generator(self):
         return zip(
-            self._counts, self._base_counts, self._row_elements, self.table_margin
+            self._counts,
+            self._base_counts,
+            self._row_elements,
+            self.table_margin,
+            self._zscores,
         )
 
     @lazyproperty
@@ -361,9 +420,9 @@ class _MrXCatSlice(_CatXCatSlice):
         """Use bother selected and not-selected counts."""
         return tuple(
             _MultipleResponseVector(
-                counts, base_counts, element.label, self.table_margin
+                counts, base_counts, element.label, self.table_margin, zscore
             )
-            for counts, base_counts, element in self._column_generator
+            for counts, base_counts, element, zscore in self._column_generator
         )
 
     @lazyproperty
@@ -377,6 +436,10 @@ class _MrXCatSlice(_CatXCatSlice):
 
 class _1DMrSlice(_MrXCatSlice):
     """Special case of 1-D MR slice (vector)."""
+
+    @lazyproperty
+    def _zscores(self):
+        return np.array([np.nan] * self._base_counts.shape[0])
 
     @lazyproperty
     def columns(self):
@@ -397,7 +460,8 @@ class _1DMrSlice(_MrXCatSlice):
         return np.sum(self._base_counts, axis=1)
 
 
-class _CatXMrSlice(_CatXCatSlice):
+# class _CatXMrSlice(_CatXCatSlice):
+class _CatXMrSlice(_SliceWithMR):
     """Handles CAT x MR slices.
 
     Needs to handle correctly the indexing for the selected/not-selected for rows
@@ -406,24 +470,29 @@ class _CatXMrSlice(_CatXCatSlice):
 
     @lazyproperty
     def _zscores(self):
-        # TODO: Fix with real zscores
-        return tuple([np.nan for _ in self._counts])
+        return self._array_type_std_res(
+            self._counts[:, :, 0],
+            self.table_margin,
+            np.sum(self._counts[:, :, 0], axis=0),
+            np.sum(self._counts, axis=2),
+        )
 
     @lazyproperty
     def rows(self):
         return tuple(
             _MultipleResponseVector(
-                counts.T, base_counts.T, element.label, self.table_margin
+                counts.T, base_counts.T, element.label, self.table_margin, zscore
             )
             for counts, base_counts, element, zscore in self._row_generator
-            # TODO: Actually use zscores
         )
 
     @lazyproperty
     def _column_generator(self):
         return zip(
-            self._counts.T[0],
-            self._base_counts.T[0],
+            # self._counts.T[0],
+            np.array([self._counts.T[0].T, self._counts.T[1].T]).T,
+            # self._base_counts.T[0],
+            np.array([self._base_counts.T[0].T, self._base_counts.T[1].T]).T,
             self._column_elements,
             self.table_margin,
         )
@@ -431,7 +500,8 @@ class _CatXMrSlice(_CatXCatSlice):
     @lazyproperty
     def columns(self):
         return tuple(
-            _CategoricalVector(counts, base_counts, element.label, table_margin)
+            # _CategoricalVector(counts, base_counts, element.label, table_margin)
+            _CatXMrVector(counts.T, base_counts.T, element.label, table_margin)
             for counts, base_counts, element, table_margin in self._column_generator
         )
 
@@ -444,16 +514,29 @@ class _CatXMrSlice(_CatXCatSlice):
         return np.sum(self._base_counts, axis=(0, 2))
 
 
-class _MrXMrSlice(_CatXCatSlice):
+class _MrXMrSlice(_SliceWithMR):
     """Represents MR x MR slices.
 
     Needs to properly index both rows and columns (selected/not-selected.
     """
 
     @lazyproperty
+    def _zscores(self):
+        return self._array_type_std_res(
+            self._counts[:, 0, :, 0],
+            self.table_margin,
+            np.sum(self._counts, axis=1)[:, :, 0],
+            np.sum(self._counts, axis=3)[:, 0, :],
+        )
+
+    @lazyproperty
     def _row_generator(self):
         return zip(
-            self._counts, self._base_counts, self._row_elements, self.table_margin
+            self._counts,
+            self._base_counts,
+            self._row_elements,
+            self.table_margin,
+            self._zscores,
         )
 
     @lazyproperty
@@ -461,9 +544,9 @@ class _MrXMrSlice(_CatXCatSlice):
         # return tuple(_MultipleResponseVector(counts[0].T) for counts in self._counts)
         return tuple(
             _MultipleResponseVector(
-                counts[0].T, base_counts[0].T, element.label, table_margin
+                counts[0].T, base_counts[0].T, element.label, table_margin, zscore
             )
-            for counts, base_counts, element, table_margin in self._row_generator
+            for counts, base_counts, element, table_margin, zscore in self._row_generator
         )
 
     @lazyproperty
@@ -492,7 +575,25 @@ class _MrXMrSlice(_CatXCatSlice):
         return np.sum(self._base_counts, axis=(1, 3))
 
 
-class _CategoricalVector(object):
+class _BaseVector(object):
+    def __init__(self, label, base_counts):
+        self._label = label
+        self._base_counts = base_counts
+
+    @lazyproperty
+    def label(self):
+        return self._label
+
+    @lazyproperty
+    def base(self):
+        return np.sum(self._base_counts)
+
+    @lazyproperty
+    def pruned(self):
+        return self.base == 0 or np.isnan(self.base)
+
+
+class _CategoricalVector(_BaseVector):
     """Main staple of all measures.
 
     Some of the measures it can calculate by itself, others it needs to receive at
@@ -500,9 +601,8 @@ class _CategoricalVector(object):
     """
 
     def __init__(self, counts, base_counts, label, table_margin, zscore=None):
+        super(_CategoricalVector, self).__init__(label, base_counts)
         self._counts = counts
-        self._base_counts = base_counts
-        self._label = label
         self._table_margin = table_margin
         self._zscore = zscore
 
@@ -531,10 +631,6 @@ class _CategoricalVector(object):
         return self._base_counts
 
     @lazyproperty
-    def base(self):
-        return np.sum(self._base_counts)
-
-    @lazyproperty
     def margin(self):
         return np.sum(self._counts)
 
@@ -551,10 +647,17 @@ class _CategoricalVector(object):
     def table_proportions(self):
         return self.values / self.table_margin
 
+
+class _CatXMrVector(_CategoricalVector):
+    def __init__(self, counts, base_counts, label, table_margin, zscore=None):
+        super(_CatXMrVector, self).__init__(
+            counts[0], base_counts[0], label, table_margin, zscore
+        )
+        self._pruning_bases = base_counts
+
     @lazyproperty
     def pruned(self):
-        # return self.margin == 0
-        return self.base == 0 or np.isnan(self.base)
+        return np.sum(self._pruning_bases) == 0
 
 
 class _MultipleResponseVector(_CategoricalVector):
@@ -589,7 +692,6 @@ class _MultipleResponseVector(_CategoricalVector):
 
     @lazyproperty
     def pruned(self):
-        # return np.all(self.margin == 0)
         return np.all(self.base == 0) or np.all(np.isnan(self.base))
 
     @lazyproperty
@@ -724,6 +826,10 @@ class _InsertionVector(object):
         self._subtotal = subtotal
 
     @lazyproperty
+    def label(self):
+        return self._subtotal.label
+
+    @lazyproperty
     def table_margin(self):
         return self._slice.table_margin
 
@@ -769,6 +875,14 @@ class _InsertionVector(object):
 
 
 class InsertionRow(_InsertionVector):
+    @lazyproperty
+    def pvals(self):
+        return np.array([np.nan] * len(self._slice.columns))
+
+    @lazyproperty
+    def zscore(self):
+        return np.array([np.nan] * len(self._slice.columns))
+
     @lazyproperty
     def _addend_vectors(self):
         return tuple(
@@ -944,10 +1058,22 @@ class _AssembledVector(object):
         self._opposite_inserted_vectors = opposite_inserted_vectors
 
     @lazyproperty
+    def label(self):
+        return self._base_vector.label
+
+    @lazyproperty
     def pvals(self):
         return (
             tuple([np.nan] * len(self._top_values))
             + self._interleaved_pvals
+            + tuple([np.nan] * len(self._bottom_values))
+        )
+
+    @lazyproperty
+    def zscore(self):
+        return (
+            tuple([np.nan] * len(self._top_values))
+            + self._interleaved_zscore
             + tuple([np.nan] * len(self._bottom_values))
         )
 
@@ -960,6 +1086,16 @@ class _AssembledVector(object):
                 if i == inserted_vector.anchor:
                     pvals.append(np.nan)
         return tuple(pvals)
+
+    @lazyproperty
+    def _interleaved_zscore(self):
+        zscore = []
+        for i, value in enumerate(self._base_vector.zscore):
+            zscore.append(value)
+            for inserted_vector in self._opposite_inserted_vectors:
+                if i == inserted_vector.anchor:
+                    zscore.append(np.nan)
+        return tuple(zscore)
 
     @lazyproperty
     def margin(self):
@@ -1139,9 +1275,6 @@ class Calculator(object):
     @lazyproperty
     def zscore(self):
         return np.array([row.zscore for row in self._assembler.rows])
-        # return self._scalar_type_std_res(
-        #     self.counts, self.table_margin, self.column_margin, self.row_margin
-        # )
 
 
 class OrderTransform(object):
@@ -1198,8 +1331,12 @@ class OrderedVector(object):
     """In charge of indexing elements properly, after ordering transform."""
 
     def __init__(self, vector, order):
-        self._vector = vector
+        self._base_vector = vector
         self._order = order
+
+    @lazyproperty
+    def label(self):
+        return self._base_vector.label
 
     @lazyproperty
     def order(self):
@@ -1207,11 +1344,11 @@ class OrderedVector(object):
 
     @lazyproperty
     def values(self):
-        return self._vector.values[self.order]
+        return self._base_vector.values[self.order]
 
     @lazyproperty
     def base_values(self):
-        return self._vector.base_values[self.order]
+        return self._base_vector.base_values[self.order]
 
 
 class OrderedSlice(object):
@@ -1256,9 +1393,25 @@ class Transforms(object):
 class PrunedVector(object):
     """Vector with elements from the opposide dimensions pruned."""
 
-    def __init__(self, vector, opposite_vectors):
-        self._vector = vector
+    def __init__(self, base_vector, opposite_vectors):
+        self._base_vector = base_vector
         self._opposite_vectors = opposite_vectors
+
+    @lazyproperty
+    def zscore(self):
+        return np.array(
+            [
+                zscore
+                for zscore, opposite_vector in zip(
+                    self._base_vector.zscore, self._opposite_vectors
+                )
+                if not opposite_vector.pruned
+            ]
+        )
+
+    @lazyproperty
+    def label(self):
+        return self._base_vector.label
 
     @lazyproperty
     def pvals(self):
@@ -1266,7 +1419,7 @@ class PrunedVector(object):
             [
                 pvals
                 for pvals, opposite_vector in zip(
-                    self._vector.pvals, self._opposite_vectors
+                    self._base_vector.pvals, self._opposite_vectors
                 )
                 if not opposite_vector.pruned
             ]
@@ -1278,7 +1431,7 @@ class PrunedVector(object):
             [
                 value
                 for value, opposite_vector in zip(
-                    self._vector.values, self._opposite_vectors
+                    self._base_vector.values, self._opposite_vectors
                 )
                 if not opposite_vector.pruned
             ]
@@ -1290,7 +1443,7 @@ class PrunedVector(object):
             [
                 value
                 for value, opposite_vector in zip(
-                    self._vector.base_values, self._opposite_vectors
+                    self._base_vector.base_values, self._opposite_vectors
                 )
                 if not opposite_vector.pruned
             ]
@@ -1302,7 +1455,7 @@ class PrunedVector(object):
             [
                 proportion
                 for proportion, opposite_vector in zip(
-                    self._vector.proportions, self._opposite_vectors
+                    self._base_vector.proportions, self._opposite_vectors
                 )
                 if not opposite_vector.pruned
             ]
@@ -1314,7 +1467,7 @@ class PrunedVector(object):
             [
                 proportion
                 for proportion, opposite_vector in zip(
-                    self._vector.table_proportions, self._opposite_vectors
+                    self._base_vector.table_proportions, self._opposite_vectors
                 )
                 if not opposite_vector.pruned
             ]
@@ -1322,7 +1475,31 @@ class PrunedVector(object):
 
     @lazyproperty
     def margin(self):
-        return self._vector.margin
+        if not isinstance(self._base_vector.margin, np.ndarray):
+            return self._base_vector.margin
+        return np.array(
+            [
+                margin
+                for margin, opposite_vector in zip(
+                    self._base_vector.margin, self._opposite_vectors
+                )
+                if not opposite_vector.pruned
+            ]
+        )
+
+    @lazyproperty
+    def base(self):
+        if not isinstance(self._base_vector.base, np.ndarray):
+            return self._base_vector.base
+        return np.array(
+            [
+                base
+                for base, opposite_vector in zip(
+                    self._base_vector.base, self._opposite_vectors
+                )
+                if not opposite_vector.pruned
+            ]
+        )
 
 
 class PrunedSlice(object):
@@ -1360,5 +1537,13 @@ class PrunedSlice(object):
         row_ind = np.any(index, axis=1)
         col_ind = np.any(index, axis=0)
         return margin[np.ix_(row_ind, col_ind)]
-        # pruned_margin = margin[margin != 0]
-        # return pruned_margin if margin.ndim == 1 else pruned_margin[:, None]
+
+    @lazyproperty
+    def table_base(self):
+        margin = self._slice.table_base
+        index = margin != 0
+        if margin.ndim < 2:
+            return margin[index]
+        row_ind = np.any(index, axis=1)
+        col_ind = np.any(index, axis=0)
+        return margin[np.ix_(row_ind, col_ind)]
