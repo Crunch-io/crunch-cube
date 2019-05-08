@@ -5,8 +5,10 @@
 from __future__ import division
 import numpy as np
 
-from cr.cube.util import lazyproperty, compress_pruned
+from cr.cube.util import lazyproperty
 from cr.cube.enum import DIMENSION_TYPE as DT
+
+# from cr.cube.slices import FrozenSlice
 
 
 class MinBaseSizeMask:
@@ -27,78 +29,41 @@ class MinBaseSizeMask:
     @lazyproperty
     def column_mask(self):
         """ndarray, True where column margin <= min_base_size, same shape as slice."""
-        margin = compress_pruned(
-            self._slice.margin(
-                axis=0,
-                weighted=False,
-                include_transforms_for_dims=self._hs_dims,
-                prune=self._prune,
-            )
-        )
-        mask = margin < self._size
+        mask = self._slice.column_base < self._size
 
-        if margin.shape == self._shape:
+        if self._slice.column_base.shape == self._slice.shape:
             # If margin shape is the same as slice's (such as in a col margin for
             # MR x CAT), don't broadcast the mask to the array shape, since
             # they're already the same.
             return mask
 
         # If the row margin is a row vector - broadcast it's mask to the array shape
-        return np.logical_or(np.zeros(self._shape, dtype=bool), mask)
+        return np.logical_or(np.zeros(self._slice.shape, dtype=bool), mask)
 
     @lazyproperty
     def row_mask(self):
         """ndarray, True where row margin <= min_base_size, same shape as slice."""
-        margin = compress_pruned(
-            self._slice.margin(
-                axis=1,
-                weighted=False,
-                include_transforms_for_dims=self._hs_dims,
-                prune=self._prune,
-            )
-        )
-        mask = margin < self._size
+        mask = self._slice.row_base < self._size
 
-        if margin.shape == self._shape:
+        if self._slice.row_base.shape == self._slice.shape:
             # If margin shape is the same as slice's (such as in a row margin for
             # CAT x MR), don't broadcast the mask to the array shape, since
             # they're already the same.
             return mask
 
         # If the row margin is a column vector - broadcast it's mask to the array shape
-        return np.logical_or(np.zeros(self._shape, dtype=bool), mask[:, None])
+        return np.logical_or(np.zeros(self._slice.shape, dtype=bool), mask[:, None])
 
     @lazyproperty
     def table_mask(self):
         """ndarray, True where table margin <= min_base_size, same shape as slice."""
-        margin = compress_pruned(
-            self._slice.margin(
-                axis=None,
-                weighted=False,
-                include_transforms_for_dims=self._hs_dims,
-                prune=self._prune,
-            )
-        )
-        mask = margin < self._size
+        mask = self._slice.table_base < self._size
 
-        if margin.shape == self._shape:
+        if self._slice.table_base.shape == self._slice.shape:
             return mask
 
-        if self._slice.dim_types[0] == DT.MR:
+        if self._slice._dimensions[0].dimension_type == DT.MR:
             # If the margin is a column vector - broadcast it's mask to the array shape
-            return np.logical_or(np.zeros(self._shape, dtype=bool), mask[:, None])
+            return np.logical_or(np.zeros(self._slice.shape, dtype=bool), mask[:, None])
 
-        return np.logical_or(np.zeros(self._shape, dtype=bool), mask)
-
-    @lazyproperty
-    def _shape(self):
-        shape = self._slice.get_shape(hs_dims=self._hs_dims, prune=self._prune)
-
-        if len(shape) != self._slice.ndim:
-            # TODO: This is an ugly hack that needs to happen due to the fact that we
-            # purge dimensions with the count of 1, when getting the slice shape. This
-            # will be addressed in a PR (already on the way) that strives to abandon
-            # the ad-hoc purging of 1-element dimensions altogether.
-            shape = (shape[0], 1) if shape else (1,)
-
-        return shape
+        return np.logical_or(np.zeros(self._slice.shape, dtype=bool), mask)

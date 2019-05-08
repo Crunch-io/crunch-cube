@@ -8,6 +8,7 @@ from scipy.stats import norm
 
 from cr.cube.util import lazyproperty
 from cr.cube.enum import DIMENSION_TYPE as DT
+from cr.cube.min_base_size_mask import MinBaseSizeMask
 
 
 class FrozenSlice(object):
@@ -23,6 +24,7 @@ class FrozenSlice(object):
         weighted=True,
         population=None,
         ca_as_0th=None,
+        mask_size=0,
     ):
         self._cube = cube
         self._slice_idx = slice_idx
@@ -32,8 +34,13 @@ class FrozenSlice(object):
         self._weighted = weighted
         self._population = population
         self._ca_as_0th = ca_as_0th
+        self._mask_size = mask_size
 
     # interface ----------------------------------------------------------------------
+
+    @lazyproperty
+    def min_base_size_mask(self):
+        return MinBaseSizeMask(self, self._mask_size)
 
     @lazyproperty
     def base_counts(self):
@@ -432,6 +439,10 @@ class _CatXMrSlice(_CatXCatSlice):
     def table_margin(self):
         return np.sum(self._counts, axis=(0, 2))
 
+    @lazyproperty
+    def table_base(self):
+        return np.sum(self._base_counts, axis=(0, 2))
+
 
 class _MrXMrSlice(_CatXCatSlice):
     """Represents MR x MR slices.
@@ -475,6 +486,10 @@ class _MrXMrSlice(_CatXCatSlice):
     @lazyproperty
     def table_margin(self):
         return np.sum(self._counts, axis=(1, 3))
+
+    @lazyproperty
+    def table_base(self):
+        return np.sum(self._base_counts, axis=(1, 3))
 
 
 class _CategoricalVector(object):

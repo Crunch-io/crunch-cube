@@ -257,6 +257,7 @@ class CubeSlice(object):
             axis == 0
             and len(baseline.shape) <= 1
             and self.ndim == len(self.get_shape())
+            and not self.dim_types == (DT.MR, DT.MR)
         ):
             baseline = baseline[:, None]
 
