@@ -695,7 +695,7 @@ class CubeSlice(object):
             total_axis = axis if self.mr_dim_ind != 0 else 1 - axis
 
         total = np.sum(baseline, axis=total_axis)
-        baseline = baseline[slice_]
+        baseline = baseline[tuple(slice_)]
 
         if axis == self.mr_dim_ind:
             return baseline / total

@@ -9,6 +9,8 @@ from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
 
 
 class DescribeFrozenSlice:
+    """Integration-test suite for FrozenSlice object."""
+
     def it_loads_from_cat_x_cat_cube(self):
         cube = CrunchCube(CR.CAT_X_CAT)
         slice_ = FrozenSlice(cube)

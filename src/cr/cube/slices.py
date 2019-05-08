@@ -10,6 +10,200 @@ from cr.cube.util import lazyproperty
 from cr.cube.enum import DIMENSION_TYPE as DT
 
 
+class FrozenSlice(object):
+    """Main point of interaction with the outer world."""
+
+    def __init__(
+        self,
+        cube,
+        slice_idx=0,
+        use_insertions=False,
+        reordered_ids=None,
+        pruning=False,
+        weighted=True,
+        population=None,
+        ca_as_0th=None,
+    ):
+        self._cube = cube
+        self._slice_idx = slice_idx
+        self._use_insertions = use_insertions
+        self._reordered_ids = reordered_ids
+        self._pruning = pruning
+        self._weighted = weighted
+        self._population = population
+        self._ca_as_0th = ca_as_0th
+
+    # interface ----------------------------------------------------------------------
+
+    @lazyproperty
+    def base_counts(self):
+        return self._calculator.base_counts
+
+    @lazyproperty
+    def column_base(self):
+        return self._calculator.column_base
+
+    @lazyproperty
+    def column_labels(self):
+        return self._calculator.column_labels
+
+    @lazyproperty
+    def column_margin(self):
+        return self._calculator.column_margin
+
+    @lazyproperty
+    def column_percentages(self):
+        return self.column_proportions * 100
+
+    @lazyproperty
+    def column_proportions(self):
+        return self._calculator.column_proportions
+
+    @lazyproperty
+    def counts(self):
+        return self._calculator.counts
+
+    @lazyproperty
+    def means(self):
+        return self._slice.means
+
+    @lazyproperty
+    def names(self):
+        return self._slice.names
+
+    @lazyproperty
+    def population_counts(self):
+        return (
+            self.table_proportions * self._population * self._cube.population_fraction
+        )
+
+    @lazyproperty
+    def pvals(self):
+        return self._calculator.pvals
+
+    @lazyproperty
+    def row_base(self):
+        return self._calculator.row_base
+
+    @lazyproperty
+    def row_labels(self):
+        return self._calculator.row_labels
+
+    @lazyproperty
+    def row_margin(self):
+        return self._calculator.row_margin
+
+    @lazyproperty
+    def row_percentages(self):
+        return self.row_proportions * 100
+
+    @lazyproperty
+    def row_proportions(self):
+        return self._calculator.row_proportions
+
+    @lazyproperty
+    def shape(self):
+        return self.counts.shape
+
+    @lazyproperty
+    def table_base(self):
+        return self._calculator.table_base
+
+    @lazyproperty
+    def table_margin(self):
+        return self._calculator.table_margin
+
+    @lazyproperty
+    def table_percentages(self):
+        return self.table_proportions * 100
+
+    @lazyproperty
+    def table_proportions(self):
+        return self._calculator.table_proportions
+
+    @lazyproperty
+    def zscore(self):
+        return self._calculator.zscore
+
+    # implementation (helpers)--------------------------------------------------------
+
+    @lazyproperty
+    def _assembler(self):
+        return Assembler(self._slice, self._transforms)
+
+    @lazyproperty
+    def _calculator(self):
+        return Calculator(self._assembler)
+
+    @lazyproperty
+    def _dimensions(self):
+        dimensions = self._cube.dimensions[-2:]
+
+        if self._ca_as_0th:
+            # Represent CA slice as 1-D rather than 2-D
+            return tuple([dimensions[-1]])
+
+        return dimensions
+
+    @lazyproperty
+    def _insertions(self):
+        return (
+            Insertions(self._dimensions, self._slice) if self._use_insertions else None
+        )
+
+    @lazyproperty
+    def _ordering(self):
+        return (
+            OrderTransform(self._cube.dimensions, self._reordered_ids)
+            if self._reordered_ids
+            else None
+        )
+
+    @lazyproperty
+    def _slice(self):
+        """This is essentially a factory method.
+
+        Needs to live (probably) in the _BaseSclice (which doesn't yet exist).
+        It also needs to be tidied up a bit.
+        """
+        dimensions = self._cube.dimensions[-2:]
+        base_counts = self._cube._apply_missings(
+            # self._cube._measure(False).raw_cube_array
+            self._cube._measures.unweighted_counts.raw_cube_array
+        )
+        counts = self._cube._apply_missings(
+            self._cube._measure(self._weighted).raw_cube_array
+        )
+        type_ = self._cube.dim_types[-2:]
+        if self._cube.ndim == 0 and self._cube.has_means:
+            return _MeansSlice(counts, base_counts)
+        if self._cube.ndim == 1 and self._cube.has_means:
+            return _MeansSlice(counts, base_counts)
+        if self._cube.ndim > 2 or self._ca_as_0th:
+            base_counts = base_counts[self._slice_idx]
+            counts = counts[self._slice_idx]
+            if self._cube.dim_types[0] == DT.MR:
+                base_counts = base_counts[0]
+                counts = counts[0]
+            elif self._ca_as_0th:
+                return _1DCatSlice(self._dimensions, counts, base_counts)
+        elif self._cube.ndim < 2:
+            if type_[0] == DT.MR:
+                return _1DMrSlice(dimensions, counts, base_counts)
+            return _1DCatSlice(dimensions, counts, base_counts)
+        if type_ == (DT.MR, DT.MR):
+            return _MrXMrSlice(dimensions, counts, base_counts)
+        elif type_[0] == DT.MR:
+            return _MrXCatSlice(dimensions, counts, base_counts)
+        elif type_[1] == DT.MR:
+            return _CatXMrSlice(dimensions, counts, base_counts)
+        return _CatXCatSlice(dimensions, counts, base_counts)
+
+    @lazyproperty
+    def _transforms(self):
+        return Transforms(self._ordering, self._pruning, self._insertions)
+
+
 class _MeansSlice(object):
     """Represents slices with means (and no counts)."""
 
@@ -933,200 +1127,6 @@ class Calculator(object):
         # return self._scalar_type_std_res(
         #     self.counts, self.table_margin, self.column_margin, self.row_margin
         # )
-
-
-class FrozenSlice(object):
-    """Main point of interaction with the outer world."""
-
-    def __init__(
-        self,
-        cube,
-        slice_idx=0,
-        use_insertions=False,
-        reordered_ids=None,
-        pruning=False,
-        weighted=True,
-        population=None,
-        ca_as_0th=None,
-    ):
-        self._cube = cube
-        self._slice_idx = slice_idx
-        self._use_insertions = use_insertions
-        self._reordered_ids = reordered_ids
-        self._pruning = pruning
-        self._weighted = weighted
-        self._population = population
-        self._ca_as_0th = ca_as_0th
-
-    # API ----------------------------------------------------------------------------
-
-    @lazyproperty
-    def names(self):
-        return self._slice.names
-
-    @lazyproperty
-    def means(self):
-        return self._slice.means
-
-    @lazyproperty
-    def pvals(self):
-        return self._calculator.pvals
-
-    @lazyproperty
-    def shape(self):
-        return self.counts.shape
-
-    @lazyproperty
-    def zscore(self):
-        return self._calculator.zscore
-
-    @lazyproperty
-    def row_proportions(self):
-        return self._calculator.row_proportions
-
-    @lazyproperty
-    def column_proportions(self):
-        return self._calculator.column_proportions
-
-    @lazyproperty
-    def table_proportions(self):
-        return self._calculator.table_proportions
-
-    @lazyproperty
-    def counts(self):
-        return self._calculator.counts
-
-    @lazyproperty
-    def base_counts(self):
-        return self._calculator.base_counts
-
-    @lazyproperty
-    def row_margin(self):
-        return self._calculator.row_margin
-
-    @lazyproperty
-    def column_margin(self):
-        return self._calculator.column_margin
-
-    @lazyproperty
-    def table_margin(self):
-        return self._calculator.table_margin
-
-    @lazyproperty
-    def row_base(self):
-        return self._calculator.row_base
-
-    @lazyproperty
-    def column_base(self):
-        return self._calculator.column_base
-
-    @lazyproperty
-    def table_base(self):
-        return self._calculator.table_base
-
-    @lazyproperty
-    def table_percentages(self):
-        return self.table_proportions * 100
-
-    @lazyproperty
-    def column_percentages(self):
-        return self.column_proportions * 100
-
-    @lazyproperty
-    def row_percentages(self):
-        return self.row_proportions * 100
-
-    @lazyproperty
-    def population_counts(self):
-        return (
-            self.table_proportions * self._population * self._cube.population_fraction
-        )
-
-    @lazyproperty
-    def row_labels(self):
-        return self._calculator.row_labels
-
-    @lazyproperty
-    def column_labels(self):
-        return self._calculator.column_labels
-
-    # Properties ---------------------------------------------------------------------
-
-    @lazyproperty
-    def _ordering(self):
-        return (
-            OrderTransform(self._cube.dimensions, self._reordered_ids)
-            if self._reordered_ids
-            else None
-        )
-
-    @lazyproperty
-    def _transforms(self):
-        return Transforms(self._ordering, self._pruning, self._insertions)
-
-    @lazyproperty
-    def _assembler(self):
-        return Assembler(self._slice, self._transforms)
-
-    @lazyproperty
-    def _calculator(self):
-        return Calculator(self._assembler)
-
-    @lazyproperty
-    def _dimensions(self):
-        dimensions = self._cube.dimensions[-2:]
-
-        if self._ca_as_0th:
-            # Represent CA slice as 1-D rather than 2-D
-            return tuple([dimensions[-1]])
-
-        return dimensions
-
-    @lazyproperty
-    def _insertions(self):
-        return (
-            Insertions(self._dimensions, self._slice) if self._use_insertions else None
-        )
-
-    @lazyproperty
-    def _slice(self):
-        """This is essentially a factory method.
-
-        Needs to live (probably) in the _BaseSclice (which doesn't yet exist).
-        It also needs to be tidied up a bit.
-        """
-        dimensions = self._cube.dimensions[-2:]
-        base_counts = self._cube._apply_missings(
-            # self._cube._measure(False).raw_cube_array
-            self._cube._measures.unweighted_counts.raw_cube_array
-        )
-        counts = self._cube._apply_missings(
-            self._cube._measure(self._weighted).raw_cube_array
-        )
-        type_ = self._cube.dim_types[-2:]
-        if self._cube.ndim == 0 and self._cube.has_means:
-            return _MeansSlice(counts, base_counts)
-        if self._cube.ndim == 1 and self._cube.has_means:
-            return _MeansSlice(counts, base_counts)
-        if self._cube.ndim > 2 or self._ca_as_0th:
-            base_counts = base_counts[self._slice_idx]
-            counts = counts[self._slice_idx]
-            if self._cube.dim_types[0] == DT.MR:
-                base_counts = base_counts[0]
-                counts = counts[0]
-            elif self._ca_as_0th:
-                return _1DCatSlice(self._dimensions, counts, base_counts)
-        elif self._cube.ndim < 2:
-            if type_[0] == DT.MR:
-                return _1DMrSlice(dimensions, counts, base_counts)
-            return _1DCatSlice(dimensions, counts, base_counts)
-        if type_ == (DT.MR, DT.MR):
-            return _MrXMrSlice(dimensions, counts, base_counts)
-        elif type_[0] == DT.MR:
-            return _MrXCatSlice(dimensions, counts, base_counts)
-        elif type_[1] == DT.MR:
-            return _CatXMrSlice(dimensions, counts, base_counts)
-        return _CatXCatSlice(dimensions, counts, base_counts)
 
 
 class OrderTransform(object):
