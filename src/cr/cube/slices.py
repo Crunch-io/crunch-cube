@@ -915,10 +915,9 @@ class _InsertionColumn(_InsertionVector):
             if i in self._subtotal.addend_idxs
         )
 
-    # @lazyproperty
-    # TODO: Uncomment when we encounter failing tests
-    # def pruned(self):
-    #     return not np.any(np.array([row.base for row in self._slice.rows]))
+    @lazyproperty
+    def pruned(self):
+        return not np.any(np.array([row.base for row in self._slice.rows]))
 
 
 class _InsertionRow(_InsertionVector):
