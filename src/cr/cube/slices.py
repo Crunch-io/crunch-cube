@@ -193,6 +193,8 @@ class FrozenSlice(object):
         if self._cube.ndim == 0 and self._cube.has_means:
             return _0DMeansSlice(counts, base_counts)
         if self._cube.ndim == 1 and self._cube.has_means:
+            if dimensions[0].dimension_type == DT.MR:
+                return _1DMrWithMeansSlice(dimensions[0], counts, base_counts)
             return _1DMeansSlice(dimensions[0], counts, base_counts)
         if self._cube.ndim > 2 or self._ca_as_0th:
             base_counts = base_counts[self._slice_idx]
@@ -261,6 +263,21 @@ class _1DMeansSlice(_0DMeansSlice):
     def columns(self):
         """A single vector that is used only for pruning Means slices."""
         return (_BaseVector("Means Summary", self._base_counts),)
+
+    @lazyproperty
+    def table_base(self):
+        return np.sum(self._base_counts)
+
+
+class _1DMrWithMeansSlice(_1DMeansSlice):
+    @lazyproperty
+    def rows(self):
+        return tuple(
+            _MeansWithMrVector(element.label, base_counts)
+            for element, base_counts in zip(
+                self._dimension.valid_elements, self._base_counts
+            )
+        )
 
 
 class _CatXCatSlice(object):
@@ -623,6 +640,20 @@ class _BaseVector(object):
     @lazyproperty
     def pruned(self):
         return self.base == 0 or np.isnan(self.base)
+
+
+class _MeansWithMrVector(_BaseVector):
+    """This is a row of a 1-D MR with Means.
+
+    This vector is special in the sense that it doesn't provide us with the normal
+    base (which is selected + not-selected for a 1-D MR _without_ means). Instead, it
+    calculates the base as _just_ the selected, which is the correct base for
+    the 1-D MR with means.
+    """
+
+    @lazyproperty
+    def base(self):
+        return np.sum(self._base_counts[0])
 
 
 class _CategoricalVector(_BaseVector):
