@@ -121,6 +121,14 @@ class FrozenSlice(object):
         return self._calculator.table_margin
 
     @lazyproperty
+    def table_base_unpruned(self):
+        return self._calculator.table_base_unpruned
+
+    @lazyproperty
+    def table_margin_unpruned(self):
+        return self._calculator.table_margin_unpruned
+
+    @lazyproperty
     def table_percentages(self):
         return self.table_proportions * 100
 
@@ -394,6 +402,14 @@ class _MrXCatSlice(_SliceWithMR):
     """
 
     @lazyproperty
+    def table_base_unpruned(self):
+        return self.table_base
+
+    @lazyproperty
+    def table_margin_unpruned(self):
+        return self.table_margin
+
+    @lazyproperty
     def _zscores(self):
         # TODO: Fix with correct zscores
         # return self._counts[:, 0, :]
@@ -475,6 +491,14 @@ class _CatXMrSlice(_SliceWithMR):
     Needs to handle correctly the indexing for the selected/not-selected for rows
     (which correspond to the MR dimension).
     """
+
+    @lazyproperty
+    def table_base_unpruned(self):
+        return self.table_base
+
+    @lazyproperty
+    def table_margin_unpruned(self):
+        return self.table_margin
 
     @lazyproperty
     def _zscores(self):
@@ -953,9 +977,16 @@ class Assembler(object):
         return self.slice.table_margin
 
     @lazyproperty
+    def table_margin_unpruned(self):
+        return self.slice.table_margin_unpruned
+
+    @lazyproperty
     def table_base(self):
-        # return np.sum([row.base for row in self._slice.rows])
         return self.slice.table_base
+
+    @lazyproperty
+    def table_base_unpruned(self):
+        return self.slice.table_base_unpruned
 
 
 class SliceWithInsertions(object):
@@ -972,6 +1003,14 @@ class SliceWithInsertions(object):
     @lazyproperty
     def table_base(self):
         return self._slice.table_base
+
+    @lazyproperty
+    def table_base_unpruned(self):
+        return self.table_base
+
+    @lazyproperty
+    def table_margin_unpruned(self):
+        return self.table_margin
 
     @lazyproperty
     def rows(self):
@@ -1274,6 +1313,14 @@ class Calculator(object):
         return self._assembler.table_base
 
     @lazyproperty
+    def table_base_unpruned(self):
+        return self._assembler.table_base_unpruned
+
+    @lazyproperty
+    def table_margin_unpruned(self):
+        return self._assembler.table_margin_unpruned
+
+    @lazyproperty
     def counts(self):
         return np.array([row.values for row in self._assembler.rows])
 
@@ -1544,6 +1591,14 @@ class PrunedSlice(object):
             for column in self._slice.columns
             if not column.pruned
         )
+
+    @lazyproperty
+    def table_margin_unpruned(self):
+        return self._slice.table_margin
+
+    @lazyproperty
+    def table_base_unpruned(self):
+        return self._slice.table_base
 
     @lazyproperty
     def table_margin(self):
