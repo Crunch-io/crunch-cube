@@ -235,6 +235,13 @@ class _1DMeansSlice(_0DMeansSlice):
 
     @lazyproperty
     def rows(self):
+        """Rows for Means slice, that enable iteration over labels.
+
+        These vectors are not used for any computations. `means` is used for that,
+        directly. However, for the wirng of the exporter, these mean slices need to
+        support some additional API, such as labels. And for that, they need to
+        support row iteration.
+        """
         return tuple(
             _BaseVector(element.label, base_counts)
             for element, base_counts in zip(
@@ -244,7 +251,8 @@ class _1DMeansSlice(_0DMeansSlice):
 
     @lazyproperty
     def columns(self):
-        return ()
+        """A single vector that is used only for pruning Means slices."""
+        return (_BaseVector("Means Summary", self._base_counts),)
 
 
 class _CatXCatSlice(object):
@@ -878,10 +886,15 @@ class _InsertionColumn(_InsertionVector):
     @lazyproperty
     def _addend_vectors(self):
         return tuple(
-            row
-            for i, row in enumerate(self._slice.columns)
+            column
+            for i, column in enumerate(self._slice.columns)
             if i in self._subtotal.addend_idxs
         )
+
+    # @lazyproperty
+    # TODO: Uncomment when we encounter failing tests
+    # def pruned(self):
+    #     return not np.any(np.array([row.base for row in self._slice.rows]))
 
 
 class _InsertionRow(_InsertionVector):
@@ -900,6 +913,10 @@ class _InsertionRow(_InsertionVector):
             for i, row in enumerate(self._slice.rows)
             if i in self._subtotal.addend_idxs
         )
+
+    @lazyproperty
+    def pruned(self):
+        return not np.any(np.array([column.base for column in self._slice.columns]))
 
 
 class Assembler(object):
