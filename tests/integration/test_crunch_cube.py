@@ -40,8 +40,23 @@ class DescribeIntegratedCrunchCubeAsFrozenSlice(object):
         assert univariate_ca_main_axis == 1
 
     def it_provides_array_for_single_valid_cat_CAT_X_MR(self):
+        """No pruning needs to happen, because the base counts are:
+        >>> slice_._slice._base_counts
+        array([[[0, 108],
+                [14, 94],
+                [94, 14]]])
+
+        whild the weighted counts are:
+
+        >>> slice_._slice._base_counts
+        array([[[0, 0],
+                [0, 0],
+                [0, 0]]])
+
+        therefore we need 3 zeros in the result (no zero gets pruned).
+        """
         slice_ = FrozenSlice(CrunchCube(CR.CAT_X_MR_SENTRY), pruning=True)
-        np.testing.assert_array_equal(slice_.counts, np.array([[0, 0]]))
+        np.testing.assert_array_equal(slice_.counts, np.array([[0, 0, 0]]))
 
     def it_provides_pruned_array_for_CA_CAT_x_CA_SUBVAR(self):
         slice_ = FrozenSlice(CrunchCube(CR.CA_CAT_X_CA_SUBVAR), pruning=True)
@@ -1684,8 +1699,11 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         slice_ = FrozenSlice(
             CrunchCube(CR.MR_X_CAT_X_MR_PRUNE), slice_idx=0, pruning=True
         )
+        # Last column is not pruned, because the not-selected base counts
+        # (for that column) are not all zeros.
         np.testing.assert_array_equal(
-            slice_.counts, [[9, 7, 5], [0, 5, 2], [0, 1, 0], [0, 1, 1], [0, 0, 1]]
+            slice_.counts,
+            [[9, 7, 5, 0], [0, 5, 2, 0], [0, 1, 0, 0], [0, 1, 1, 0], [0, 0, 1, 0]],
         )
 
     def test_gender_x_weight_pruning(self):
