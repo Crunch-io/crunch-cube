@@ -10,9 +10,9 @@ from cr.cube.slices import (
     _MrXCatSlice,
     _CategoricalVector,
     _MultipleResponseVector,
+    _InsertionColumn,
+    _InsertionRow,
     Insertions,
-    InsertionRow,
-    InsertionColumn,
     Assembler,
     Calculator,
     OrderedVector,
@@ -151,14 +151,14 @@ class DescribeInsertionsRow(object):
     def it_sets_slice_and_subtotal(self):
         slice_ = Mock()
         subtotal = Mock()
-        insertion_row = InsertionRow(slice_, subtotal)
+        insertion_row = _InsertionRow(slice_, subtotal)
         assert insertion_row._slice == slice_
         assert insertion_row._subtotal == subtotal
 
     def it_provides_values(self, addend_idxs_prop_, values_fixture):
         slice_, subtotal_indexes, expected_row_counts = values_fixture
         addend_idxs_prop_.return_value = subtotal_indexes
-        insertion_row = InsertionRow(slice_, _Subtotal(None, None))
+        insertion_row = _InsertionRow(slice_, _Subtotal(None, None))
         np.testing.assert_array_equal(insertion_row.values, expected_row_counts)
 
     # fixtures -------------------------------------------------------
@@ -206,7 +206,7 @@ class Describe_AssembledVector(object):
         insertion_cols = tuple(
             instance_mock(
                 request,
-                InsertionColumn,
+                _InsertionColumn,
                 anchor=anchor,
                 addend_idxs=np.array(addend_idxs),
             )
@@ -234,7 +234,7 @@ class Describe_AssembledVector(object):
         insertion_cols = tuple(
             instance_mock(
                 request,
-                InsertionColumn,
+                _InsertionColumn,
                 anchor=anchor,
                 addend_idxs=np.array(addend_idxs),
             )

@@ -714,8 +714,8 @@ class _MultipleResponseVector(_CategoricalVector):
 class Insertions(object):
     """Represents slice's insertions (inserted rows and columns).
 
-    It generates the inserted rows and columns directly from the
-    slice, based on the subtotals.
+    It generates the inserted rows and columns directly from the slice, based on the
+    subtotals.
     """
 
     def __init__(self, dimensions, slice_):
@@ -723,63 +723,16 @@ class Insertions(object):
         self._slice = slice_
 
     @lazyproperty
-    def _row_dimension(self):
-        return self._dimensions[0]
-
-    @lazyproperty
-    def _column_dimension(self):
-        return self._dimensions[1]
-
-    @lazyproperty
-    def row_anchors(self):
-        return tuple(row.anchor for row in self.rows)
-
-    @lazyproperty
-    def column_anchors(self):
-        return tuple(column.anchor for column in self.columns)
-
-    @lazyproperty
-    def _rows(self):
-        if self._row_dimension.dimension_type in (DT.MR, DT.CA):
-            return tuple()
-
-        return tuple(
-            InsertionRow(self._slice, subtotal)
-            for subtotal in self._row_dimension._subtotals
-        )
-
-    @lazyproperty
-    def _columns(self):
-        if len(self._dimensions) < 2 or self._column_dimension.dimension_type in (
-            DT.MR,
-            DT.CA,
-        ):
-            return tuple()
-
-        return tuple(
-            InsertionColumn(self._slice, subtotal)
-            for subtotal in self._column_dimension._subtotals
-        )
-
-    @lazyproperty
-    def top_rows(self):
-        return tuple(row for row in self._rows if row.anchor == "top")
+    def bottom_columns(self):
+        return tuple(columns for columns in self._columns if columns.anchor == "bottom")
 
     @lazyproperty
     def bottom_rows(self):
         return tuple(row for row in self._rows if row.anchor == "bottom")
 
     @lazyproperty
-    def top_columns(self):
-        return tuple(columns for columns in self._columns if columns.anchor == "top")
-
-    @lazyproperty
-    def bottom_columns(self):
-        return tuple(columns for columns in self._columns if columns.anchor == "bottom")
-
-    @lazyproperty
-    def rows(self):
-        return tuple(row for row in self._rows if row.anchor not in ("top", "bottom"))
+    def column_anchors(self):
+        return tuple(column.anchor for column in self.columns)
 
     @lazyproperty
     def columns(self):
@@ -812,6 +765,53 @@ class Insertions(object):
             intersections.append(row_col_intersections)
 
         return np.array(intersections)
+
+    @lazyproperty
+    def row_anchors(self):
+        return tuple(row.anchor for row in self.rows)
+
+    @lazyproperty
+    def rows(self):
+        return tuple(row for row in self._rows if row.anchor not in ("top", "bottom"))
+
+    @lazyproperty
+    def top_columns(self):
+        return tuple(columns for columns in self._columns if columns.anchor == "top")
+
+    @lazyproperty
+    def top_rows(self):
+        return tuple(row for row in self._rows if row.anchor == "top")
+
+    @lazyproperty
+    def _column_dimension(self):
+        return self._dimensions[1]
+
+    @lazyproperty
+    def _columns(self):
+        if len(self._dimensions) < 2 or self._column_dimension.dimension_type in (
+            DT.MR,
+            DT.CA,
+        ):
+            return tuple()
+
+        return tuple(
+            _InsertionColumn(self._slice, subtotal)
+            for subtotal in self._column_dimension._subtotals
+        )
+
+    @lazyproperty
+    def _row_dimension(self):
+        return self._dimensions[0]
+
+    @lazyproperty
+    def _rows(self):
+        if self._row_dimension.dimension_type in (DT.MR, DT.CA):
+            return tuple()
+
+        return tuple(
+            _InsertionRow(self._slice, subtotal)
+            for subtotal in self._row_dimension._subtotals
+        )
 
 
 class _InsertionVector(object):
@@ -874,7 +874,17 @@ class _InsertionVector(object):
         return False
 
 
-class InsertionRow(_InsertionVector):
+class _InsertionColumn(_InsertionVector):
+    @lazyproperty
+    def _addend_vectors(self):
+        return tuple(
+            row
+            for i, row in enumerate(self._slice.columns)
+            if i in self._subtotal.addend_idxs
+        )
+
+
+class _InsertionRow(_InsertionVector):
     @lazyproperty
     def pvals(self):
         return np.array([np.nan] * len(self._slice.columns))
@@ -888,16 +898,6 @@ class InsertionRow(_InsertionVector):
         return tuple(
             row
             for i, row in enumerate(self._slice.rows)
-            if i in self._subtotal.addend_idxs
-        )
-
-
-class InsertionColumn(_InsertionVector):
-    @lazyproperty
-    def _addend_vectors(self):
-        return tuple(
-            row
-            for i, row in enumerate(self._slice.columns)
             if i in self._subtotal.addend_idxs
         )
 

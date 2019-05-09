@@ -256,6 +256,11 @@ class Dimension(object):
         self._dimension_type = dimension_type
 
     @lazyproperty
+    def all_elements(self):
+        """_AllElements object providing cats or subvars of this dimension."""
+        return _AllElements(self._dimension_dict["type"])
+
+    @lazyproperty
     def description(self):
         """str description of this dimension."""
         description = self._dimension_dict["references"].get("description")
@@ -384,9 +389,14 @@ class Dimension(object):
         return len(self.all_elements)
 
     @lazyproperty
-    def all_elements(self):
-        """_AllElements object providing cats or subvars of this dimension."""
-        return _AllElements(self._dimension_dict["type"])
+    def valid_elements(self):
+        """_Elements object providing access to non-missing elements.
+
+        Any categories or subvariables representing missing data are excluded
+        from the collection; this sequence represents a subset of that
+        provided by `.all_elements`.
+        """
+        return self.all_elements.valid_elements
 
     def _iter_interleaved_items(self, elements):
         """Generate element or subtotal items in interleaved order.
@@ -427,15 +437,125 @@ class Dimension(object):
         )
         return _Subtotals(insertion_dicts, self.valid_elements)
 
-    @lazyproperty
-    def valid_elements(self):
-        """_Elements object providing access to non-missing elements.
 
-        Any categories or subvariables representing missing data are excluded
-        from the collection; this sequence represents a subset of that
-        provided by `.all_elements`.
+class NewDimension(Dimension):
+    """A new version of Dimension that knows about its analysis-level transforms.
+
+    The original Dimension object knew about its *base*-transforms. This new version
+    adds the cascading behavior of analysis-specific transforms that elaborate those
+    appearing on the cube-response itself.
+
+    The idea is that soon we can just merge the properties of this class into the main
+    Dimension class and get rid of this one. That will have to wait until FrozenSlice
+    loads its own data and dimensions from the cube response rather than relying on
+    CrunchCube to do that.
+    """
+
+    def __init__(self, dimension, dimension_transforms_dict):
+        super(NewDimension, self).__init__(
+            dimension._dimension_dict, dimension._dimension_type
+        )
+        self._dimension_transforms_dict = dimension_transforms_dict
+
+    # TODO: might need a property like `.cube_result_elements` or something that returns
+    # elements in cube-result order. The data-loader will need to know those to properly
+    # interpret the cube-result data but the "normal" elements property here will be
+    # applying any reordering transformation, so won't necessarily match cube-result
+    # order..
+
+    @lazyproperty
+    def all_elements(self):
+        """_AllElements object providing cats or subvars of this dimension."""
+        return _NewAllElements(
+            self._dimension_dict["type"], self._dimension_transforms_dict
+        )
+
+    @lazyproperty
+    def description(self):
+        """str description of this dimension."""
+        # ---First authority in cascade is analysis-specific dimension transform. None
+        # ---is a legitimate value, indicating suppression of any inherited subtitle.
+        if "description" in self._dimension_transforms_dict:
+            description = self._dimension_transforms_dict["description"]
+        # ---inherited value is base dimension description---
+        else:
+            description = self._dimension_dict["references"].get("description")
+
+        # ---Normalize to "" so return value is always a str and callers don't need to
+        # ---deal with multiple possible return value types.
+        return description if description else ""
+
+    # NOTE: Not needed in FrozenSlice world, remove on integration into Dimension.
+    @lazyproperty
+    def has_transforms(self):
+        raise NotImplementedError("you shouldn't need this")
+
+    # NOTE: Not needed in FrozenSlice world, remove on integration into Dimension.
+    @lazyproperty
+    def hs_indices(self):
+        raise NotImplementedError("you shouldn't need this")
+
+    # NOTE: Not needed in FrozenSlice world, remove on integration into Dimension.
+    @lazyproperty
+    def inserted_hs_indices(self):
+        raise NotImplementedError("you shouldn't need this")
+
+    # NOTE: this becomes a lazyproperty.
+    # `include_cat_ids` is no longer needed by tablewriter because transforms are
+    # applied here, not there. So that parameter goes away.
+    # `include_missing` is not needed as far as I know, should be separate lazyproperty
+    # if so or set in the constructor or something. I'm thinking it would be a transform
+    # and it's not yet, so leaving it out.
+    # `include_transforms` will always effectively be False, so leaving that out. Note
+    # that element-rename transforms *are* included, but those are implemented at the
+    # element level.
+    @lazyproperty
+    def labels(self):
+        """Sequence of str labels for the elements of this dimension.
+
+        Note the return value does not include labels for inserted elements (subtotals).
         """
-        return self.all_elements.valid_elements
+        return tuple(element.label for element in self.valid_elements)
+
+    @lazyproperty
+    def name(self):
+        """str name of this dimension, the empty string ("") if not specified."""
+        references = self._dimension_dict["references"]
+        # ---First authority in cascade is analysis-specific dimension transform. None
+        # ---is a legitimate value, indicating suppression of any inherited title.
+        if "name" in self._dimension_transforms_dict:
+            name = self._dimension_transforms_dict["name"]
+        # ---next authority is base dimension name---
+        elif "name" in references:
+            name = references["name"]
+        else:
+            name = references.get("alias")
+
+        # ---Normalize None value to "" so return value is always a str and callers
+        # ---don't need to deal with multiple possible return value types.
+        return name if name else ""
+
+    # NOTE: this is promoted to an interface property since FrozenSlice needs it now.
+    @lazyproperty
+    def subtotals(self):
+        """_Subtotals sequence object for this dimension.
+
+        The subtotals sequence provides access to any subtotal insertions
+        defined on this dimension.
+        """
+        # TODO: Consider elaborating this such that _Subtotals gets analysis-level
+        # subtotal transforms, even if that's an empty list at the moment.
+        view = self._dimension_dict.get("references", {}).get("view", {})
+        # ---view can be both None and {}, thus the edge case.---
+        insertion_dicts = (
+            [] if view is None else view.get("transform", {}).get("insertions", [])
+        )
+        return _Subtotals(insertion_dicts, self.valid_elements)
+
+    # NOTE: The Assembler object should be the only one doing any interleaving. Remove
+    # this method after FrozenSlice integration.
+    def _iter_interleaved_items(self, elements):
+        raise NotImplementedError("you don't need this")
 
 
 class _BaseElements(Sequence):
@@ -528,6 +648,10 @@ class _AllElements(_BaseElements):
             ElementCls(element_dict, idx, element_dicts)
             for idx, element_dict in enumerate(element_dicts)
         )
+
+
+class _NewAllElements(_AllElements):
+    pass
 
 
 class _ValidElements(_BaseElements):
