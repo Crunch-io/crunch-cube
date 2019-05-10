@@ -1837,6 +1837,11 @@ def test_mr_by_cat_hs_cell_percentage():
 
 def test_mr_x_cat_min_base_size_mask():
 
+    transforms = {
+        "columns_dimension": {"insertions": {}},
+        "rows_dimension": {"insertions": {}},
+    }
+
     # Table margin evaluates to:
     #
     # array([176.36555176, 211.42058767, 247.74073787, 457.05095566, 471.93176847])
@@ -1844,6 +1849,10 @@ def test_mr_x_cat_min_base_size_mask():
     # We thus choose the min base size to be 220, and expeect it to broadcast across
     # columns (in the row direction, i.e. axis=1), sincee the MR is what won't be
     # collapsed after doing the base calculation in the table direction.
+    slice_ = FrozenSlice(
+        CrunchCube(CR.MR_X_CAT_HS), slice_idx=0, transforms=transforms, mask_size=220
+    )
+
     expected = np.array(
         [
             [True, True, True, True, True, True],
@@ -1853,7 +1862,6 @@ def test_mr_x_cat_min_base_size_mask():
             [False, False, False, False, False, False],
         ]
     )
-    slice_ = FrozenSlice(CrunchCube(CR.MR_X_CAT_HS), slice_idx=0, mask_size=220)
     np.testing.assert_array_equal(slice_.min_base_size_mask.table_mask, expected)
 
     # Column margin evaluates to:
@@ -1869,6 +1877,10 @@ def test_mr_x_cat_min_base_size_mask():
     # )
     #
     # We thus choose the min base size to be 30, and expeect it to not be broadcast.
+    slice_ = FrozenSlice(
+        CrunchCube(CR.MR_X_CAT_HS), slice_idx=0, transforms=transforms, mask_size=30
+    )
+
     expected_column_mask = np.array(
         [
             [True, True, True, False, False, True],
@@ -1878,7 +1890,6 @@ def test_mr_x_cat_min_base_size_mask():
             [False, False, True, False, False, True],
         ]
     )
-    slice_ = FrozenSlice(CrunchCube(CR.MR_X_CAT_HS), slice_idx=0, mask_size=30)
     np.testing.assert_array_equal(
         slice_.min_base_size_mask.column_mask, expected_column_mask
     )
@@ -1890,6 +1901,10 @@ def test_mr_x_cat_min_base_size_mask():
     # We thus choose the min base size to be 80, and expeect it to broadcast across
     # columns (in the row direction, i.e. axis=1), sincee the MR is what won't be
     # collapsed after doing the base calculation in the row direction.
+    slice_ = FrozenSlice(
+        CrunchCube(CR.MR_X_CAT_HS), slice_idx=0, transforms=transforms, mask_size=80
+    )
+
     expected_row_mask = np.array(
         [
             [True, True, True, True, True, True],
@@ -1899,7 +1914,6 @@ def test_mr_x_cat_min_base_size_mask():
             [False, False, False, False, False, False],
         ]
     )
-    slice_ = FrozenSlice(CrunchCube(CR.MR_X_CAT_HS), slice_idx=0, mask_size=80)
     np.testing.assert_array_equal(slice_.min_base_size_mask.row_mask, expected_row_mask)
 
 

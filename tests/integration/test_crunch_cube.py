@@ -516,7 +516,13 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.population_counts, expected)
 
     def test_filtered_population_counts(self):
-        slice_ = FrozenSlice(CrunchCube(CR.CAT_X_CAT_FILT), population=100000000)
+        transforms = {
+            "columns_dimension": {"insertions": {}},
+            "rows_dimension": {"insertions": {}},
+        }
+        slice_ = FrozenSlice(
+            CrunchCube(CR.CAT_X_CAT_FILT), population=100000000, transforms=transforms
+        )
         expected = np.array(
             [
                 [300000.0, 1400000.0, 0.0, 0.0, 0.0, 0.0],
@@ -753,9 +759,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         # Test with pruning and H&S
         transforms = {"rows_dimension": {"prune": True}}
         slice_ = FrozenSlice(
-            CrunchCube(CR.CAT_X_CAT_GERMAN_WEIGHTED),
-            transforms=transforms,
-            use_insertions=True,
+            CrunchCube(CR.CAT_X_CAT_GERMAN_WEIGHTED), transforms=transforms
         )
         np.testing.assert_almost_equal(slice_.pvals, expected)
 
@@ -791,9 +795,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
 
         # Test with pruning and H&S
         transforms = {"rows_dimension": {"prune": True}}
-        slice_ = FrozenSlice(
-            CrunchCube(CR.STATS_TEST), transforms=transforms, use_insertions=True
-        )
+        slice_ = FrozenSlice(CrunchCube(CR.STATS_TEST), transforms=transforms)
         np.testing.assert_almost_equal(slice_.pvals, expected)
 
     def test_mean_age_for_blame_x_gender(self):
@@ -1399,11 +1401,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
 
     def test_ca_subvar_x_cat_hs_counts_prune(self):
         transforms = {"rows_dimension": {"prune": True}}
-        slice_ = FrozenSlice(
-            CrunchCube(CR.CA_SUBVAR_X_CAT_HS),
-            use_insertions=True,
-            transforms=transforms,
-        )
+        slice_ = FrozenSlice(CrunchCube(CR.CA_SUBVAR_X_CAT_HS), transforms=transforms)
         expected = np.array([[3, 3, 0, 0, 6], [1, 3, 2, 0, 4], [0, 2, 1, 3, 2]])
         np.testing.assert_array_equal(slice_.counts, expected)
 
@@ -1537,7 +1535,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.column_proportions, expected)
 
     def test_mr_props_with_hs_by_cell(self):
-        slice_ = FrozenSlice(CrunchCube(CR.LETTERS_X_PETS_HS), use_insertions=True)
+        slice_ = FrozenSlice(CrunchCube(CR.LETTERS_X_PETS_HS))
         expected = np.array(
             [
                 [
@@ -1585,7 +1583,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.table_proportions, expected)
 
     def test_mr_props_with_hs_by_row(self):
-        slice_ = FrozenSlice(CrunchCube(CR.LETTERS_X_PETS_HS), use_insertions=True)
+        slice_ = FrozenSlice(CrunchCube(CR.LETTERS_X_PETS_HS))
         expected = np.array(
             [
                 [0.15555556, 0.24444444, 0.4, 0.37777778, 0.22222222, 0.22222222],
@@ -1619,7 +1617,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
     def test_mr_props_with_hs_by_col(self):
-        slice_ = FrozenSlice(CrunchCube(CR.LETTERS_X_PETS_HS), use_insertions=True)
+        slice_ = FrozenSlice(CrunchCube(CR.LETTERS_X_PETS_HS))
         expected = np.array(
             [
                 [
@@ -1669,7 +1667,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         # +----+-----+----+
         #  True False True
 
-        transforms = {"rows_dimension": {"prune": True}}
+        transforms = {"rows_dimension": {"insertions": {}, "prune": True}}
         slice_ = FrozenSlice(CrunchCube(CR.XYZ_SIMPLE_ALLTYPES), transforms=transforms)
         np.testing.assert_array_equal(slice_.counts, [[1]])
 
@@ -1686,10 +1684,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
 
     def test_ca_x_mr_margin(self):
         slice_ = FrozenSlice(
-            CrunchCube(CR.CA_X_MR_WEIGHTED_HS),
-            slice_idx=0,
-            weighted=False,
-            use_insertions=True,
+            CrunchCube(CR.CA_X_MR_WEIGHTED_HS), slice_idx=0, weighted=False
         )
         expected = np.array([504, 215, 224, 76, 8, 439])
         np.testing.assert_array_equal(slice_.column_margin, expected)
@@ -1700,7 +1695,6 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         slice_ = FrozenSlice(
             CrunchCube(CR.CA_X_MR_WEIGHTED_HS),
             slice_idx=0,
-            use_insertions=True,
             weighted=False,
             transforms=transforms,
         )
@@ -1747,7 +1741,6 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         slice_ = FrozenSlice(
             CrunchCube(CR.CAT_X_MR_X_CAT["slides"][0]["cube"]),
             slice_idx=0,
-            use_insertions=True,
             transforms=transforms,
         )
 
@@ -1802,7 +1795,6 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         slice_ = FrozenSlice(
             CrunchCube(CR.CAT_X_MR_X_CAT["slides"][0]["cube"]),
             slice_idx=1,
-            use_insertions=True,
             transforms=transforms,
         )
         expected = np.array(
@@ -1852,9 +1844,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
 
     def test_univ_mr_with_hs_does_not_crash(self):
         """Assert that MR with H&S doesn't crash."""
-        slice_ = FrozenSlice(
-            CrunchCube(CR.UNIV_MR_WITH_HS["slides"][0]["cube"]), use_insertions=True
-        )
+        slice_ = FrozenSlice(CrunchCube(CR.UNIV_MR_WITH_HS["slides"][0]["cube"]))
         slice_.counts
         # If it doesn't crash, the test passes, we don't actually care about
         # the result. We only care that the H&S transform doesn't crash the MR
@@ -1864,8 +1854,16 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         assert True
 
     def test_pop_counts_ca_as_0th(self):
+        transforms = {
+            "columns_dimension": {"insertions": {}},
+            "rows_dimension": {"insertions": {}},
+        }
         slice_ = FrozenSlice(
-            CrunchCube(CR.CA_AS_0TH), slice_idx=0, ca_as_0th=True, population=100000000
+            CrunchCube(CR.CA_AS_0TH),
+            slice_idx=0,
+            transforms=transforms,
+            ca_as_0th=True,
+            population=100000000,
         )
         expected = np.array(
             [

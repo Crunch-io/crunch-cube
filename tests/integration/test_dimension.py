@@ -71,7 +71,6 @@ class DescribeIntegratedNewDimension(object):
         assert isinstance(dimension, NewDimension)
 
     def it_provides_access_to_all_elements_in_its_collection(self, legacy_dimension):
-        legacy_dimension = CrunchCube(CR.ECON_BLAME_WITH_HS).dimensions[0]
         dimension_transforms_dict = {}
         dimension = NewDimension(legacy_dimension, dimension_transforms_dict)
 

@@ -19,23 +19,21 @@ class FrozenSlice(object):
         self,
         cube,
         slice_idx=0,
-        use_insertions=False,
-        transforms=None,
         weighted=True,
+        transforms=None,
         population=None,
         ca_as_0th=None,
         mask_size=0,
     ):
         self._cube = cube
         self._slice_idx = slice_idx
-        self._use_insertions = use_insertions
         self._transforms_dict = {} if transforms is None else transforms
         self._weighted = weighted
         self._population = population
         self._ca_as_0th = ca_as_0th
         self._mask_size = mask_size
 
-    # interface ----------------------------------------------------------------------
+    # ---interface ---------------------------------------------------
 
     @lazyproperty
     def min_base_size_mask(self):
@@ -139,7 +137,7 @@ class FrozenSlice(object):
     def zscore(self):
         return self._calculator.zscore
 
-    # implementation (helpers)--------------------------------------------------------
+    # ---implementation (helpers)-------------------------------------
 
     @lazyproperty
     def _assembler(self):
@@ -160,18 +158,16 @@ class FrozenSlice(object):
             # Represent CA slice as 1-D rather than 2-D
             dimensions = (dimensions[-1],)
 
-        rows_transforms = self._transforms_dict.get("rows_dimension", {})
-        if not self._use_insertions:
-            rows_transforms["insertions"] = {}
-        rows_dimension = NewDimension(dimensions[0], rows_transforms)
+        rows_dimension = NewDimension(
+            dimensions[0], self._transforms_dict.get("rows_dimension", {})
+        )
 
         if len(dimensions) == 1:
             return (rows_dimension,)
 
-        columns_transforms = self._transforms_dict.get("columns_dimension", {})
-        if not self._use_insertions:
-            columns_transforms["insertions"] = {}
-        columns_dimension = NewDimension(dimensions[1], columns_transforms)
+        columns_dimension = NewDimension(
+            dimensions[1], self._transforms_dict.get("columns_dimension", {})
+        )
 
         return (rows_dimension, columns_dimension)
 
