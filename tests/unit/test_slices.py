@@ -424,6 +424,7 @@ class DescribeCalculator(object):
 class DescribeOrderTransform(object):
     """Unit-test suite for `cr.cube.slices.OrderTransform` object."""
 
+    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_initiates_dimensions_and_ordered_ids(self):
         dimensions = Mock()
         ordered_ids = Mock()
@@ -431,6 +432,7 @@ class DescribeOrderTransform(object):
         assert transform._dimensions == dimensions
         assert transform._ordered_ids == ordered_ids
 
+    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_provides_rows_order(self, rows_order_fixture):
         row_dimension, ordered_element_ids, expected = rows_order_fixture
         dimensions = (row_dimension, None)

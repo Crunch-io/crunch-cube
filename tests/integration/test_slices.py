@@ -236,8 +236,16 @@ class DescribeFrozenSlice:
 
     def it_reorders_cat_x_cat(self):
         cube = CrunchCube(CR.CAT_X_CAT_PRUNING_HS)
-        reordered_ids = ([6, 1, 2, 5, 4, 3], [5, 1, 2, 4, 3])
-        slice_ = FrozenSlice(cube, reordered_ids=reordered_ids, weighted=False)
+        transforms = {
+            "rows_dimension": {
+                "order": {"type": "explicit", "element_ids": [6, 1, 2, 5, 4, 3]}
+            },
+            "columns_dimension": {
+                "order": {"type": "explicit", "element_ids": [5, 1, 2, 4, 3]}
+            },
+        }
+        # reordered_ids = ([6, 1, 2, 5, 4, 3], [5, 1, 2, 4, 3])
+        slice_ = FrozenSlice(cube, transforms=transforms, weighted=False)
         expected = np.array(
             [
                 [0, 1, 1, 0, 1],

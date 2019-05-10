@@ -496,6 +496,11 @@ class NewDimension(Dimension):
         """
         return self.all_elements.display_order
 
+    # TODO: Properly extract
+    @lazyproperty
+    def valid_display_order(self):
+        return self.all_elements.valid_display_order
+
     # NOTE: Not needed in FrozenSlice world, remove on integration into Dimension.
     @lazyproperty
     def has_transforms(self):
@@ -710,6 +715,14 @@ class _NewAllElements(_AllElements):
             return explicit_order
         return tuple(range(len(self._element_dicts)))
 
+    # TODO: Need to properly extract this, probably to `NewValidElements`
+    @lazyproperty
+    def valid_display_order(self):
+        explicit_order = self._valid_explicit_order
+        if explicit_order:
+            return explicit_order
+        return tuple(range(len(self.valid_elements)))
+
     @lazyproperty
     def _element_dicts(self):
         """Sequence of element-dicts for this dimension, taken from cube-result."""
@@ -767,6 +780,46 @@ class _NewAllElements(_AllElements):
 
         # ---any remaining element-ids are tacked onto the end of the list in the order
         # ---they originally appeared in the cube-result.
+        for element_id in remaining_element_ids:
+            ordered_idxs.append(cube_result_order.index(element_id))
+
+        return tuple(ordered_idxs)
+
+    # TODO: We should only need this. I've just copy/pasted it. It needs to be
+    # wrapped up nicely
+    @lazyproperty
+    def _valid_explicit_order(self):
+        """Sequence of int element idx or None, reflecting explicit-order transform.
+
+        This value is None if no explicit-order transform is specified. Otherwise, it is
+        an exhaustive collection of element offsets, in the order specified (and in some
+        cases implied) by the order transform.
+        """
+        order_dict = self._dimension_transforms_dict.get("order", {})
+        order_type = order_dict.get("type")
+        if order_type != "explicit":
+            return None
+        ordered_element_ids = order_dict.get("element_ids")
+        if not isinstance(ordered_element_ids, list):
+            return None
+
+        # ---list like [0, 1, 2, -1], perhaps ["0001", "0002", etc.]---
+        cube_result_order = list(
+            element.element_id for element in self if not element.missing
+        )
+        remaining_element_ids = list(
+            element.element_id for element in self if not element.missing
+        )
+
+        # print("default_order == %s" % default_order)
+
+        ordered_idxs = []
+        for element_id in ordered_element_ids:
+            if element_id not in remaining_element_ids:
+                continue
+            ordered_idxs.append(cube_result_order.index(element_id))
+            remaining_element_ids.remove(element_id)
+
         for element_id in remaining_element_ids:
             ordered_idxs.append(cube_result_order.index(element_id))
 

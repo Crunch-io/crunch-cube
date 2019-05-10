@@ -20,8 +20,6 @@ class FrozenSlice(object):
         cube,
         slice_idx=0,
         use_insertions=False,
-        reordered_ids=None,
-        # pruning=False,
         transforms=None,
         weighted=True,
         population=None,
@@ -31,8 +29,6 @@ class FrozenSlice(object):
         self._cube = cube
         self._slice_idx = slice_idx
         self._use_insertions = use_insertions
-        self._reordered_ids = reordered_ids
-        # self._pruning = pruning
         self._transforms_dict = {} if transforms is None else transforms
         self._weighted = weighted
         self._population = population
@@ -185,11 +181,7 @@ class FrozenSlice(object):
 
     @lazyproperty
     def _ordering(self):
-        return (
-            OrderTransform(self._cube.dimensions, self._reordered_ids)
-            if self._reordered_ids
-            else None
-        )
+        return OrderTransform(self._dimensions)
 
     @lazyproperty
     def _pruning(self):
@@ -378,8 +370,6 @@ class _CatXCatSlice(object):
 
     @lazyproperty
     def _zscores(self):
-        # return tuple([np.nan] * self._counts.shape[0])
-        # __import__("ipdb").set_trace()
         return self._scalar_type_std_res(
             self._counts,
             self.table_margin,
@@ -451,8 +441,6 @@ class _MrXCatSlice(_SliceWithMR):
 
     @lazyproperty
     def _zscores(self):
-        # TODO: Fix with correct zscores
-        # return self._counts[:, 0, :]
         return self._array_type_std_res(
             self._counts[:, 0, :],
             self.table_margin[:, None],
@@ -464,9 +452,14 @@ class _MrXCatSlice(_SliceWithMR):
     def rows(self):
         """Use only selected counts."""
         return tuple(
-            # _CategoricalVector(counts[0], base_counts[0], element.label, table_margin)
             _CatXMrVector(counts, base_counts, element.label, table_margin, zscore)
-            for counts, base_counts, element, table_margin, zscore in self._row_generator
+            for (
+                counts,
+                base_counts,
+                element,
+                table_margin,
+                zscore,
+            ) in self._row_generator
         )
 
     @lazyproperty
@@ -618,7 +611,13 @@ class _MrXMrSlice(_SliceWithMR):
             _MultipleResponseVector(
                 counts[0].T, base_counts[0].T, element.label, table_margin, zscore
             )
-            for counts, base_counts, element, table_margin, zscore in self._row_generator
+            for (
+                counts,
+                base_counts,
+                element,
+                table_margin,
+                zscore,
+            ) in self._row_generator
         )
 
     @lazyproperty
@@ -1405,9 +1404,8 @@ class Calculator(object):
 class OrderTransform(object):
     """Creates ordering indexes for rows and columns based on element ids."""
 
-    def __init__(self, dimensions, ordered_ids):
+    def __init__(self, dimensions):
         self._dimensions = dimensions
-        self._ordered_ids = ordered_ids
 
     @lazyproperty
     def _row_dimension(self):
@@ -1436,20 +1434,14 @@ class OrderTransform(object):
 
     @lazyproperty
     def row_order(self):
-        return np.array(
-            [self._row_ids.index(ordered_id) for ordered_id in self._ordered_row_ids]
-        )
+        return np.array(self._row_dimension.valid_display_order)
 
     @lazyproperty
     def column_order(self):
-        if self._ordered_column_ids is None:
-            return None
-        return np.array(
-            [
-                self._column_ids.index(ordered_id)
-                for ordered_id in self._ordered_column_ids
-            ]
-        )
+        # If there's no column dimension, there can be no reordering for it
+        if len(self._dimensions) < 2:
+            return slice(None)
+        return np.array(self._column_dimension.valid_display_order)
 
 
 class OrderedVector(object):
@@ -1475,6 +1467,34 @@ class OrderedVector(object):
     def base_values(self):
         return self._base_vector.base_values[self.order]
 
+    @lazyproperty
+    def margin(self):
+        return self._base_vector.margin
+
+    @lazyproperty
+    def pruned(self):
+        return self._base_vector.pruned
+
+    @lazyproperty
+    def table_margin(self):
+        return self._base_vector.table_margin
+
+    @lazyproperty
+    def table_base(self):
+        return self._base_vector.table_base
+
+    @lazyproperty
+    def zscore(self):
+        return self._base_vector.zscore
+
+    @lazyproperty
+    def pvals(self):
+        return self._base_vector.pvals
+
+    @lazyproperty
+    def base(self):
+        return self._base_vector.base
+
 
 class OrderedSlice(object):
     """Result of the ordering transform.
@@ -1492,6 +1512,23 @@ class OrderedSlice(object):
             OrderedVector(row, self._ordering.column_order)
             for row in tuple(np.array(self._slice.rows)[self._ordering.row_order])
         )
+
+    @lazyproperty
+    def columns(self):
+        return tuple(
+            OrderedVector(column, self._ordering.row_order)
+            for column in tuple(
+                np.array(self._slice.columns)[self._ordering.column_order]
+            )
+        )
+
+    @lazyproperty
+    def table_margin(self):
+        return self._slice.table_margin
+
+    @lazyproperty
+    def table_base(self):
+        return self._slice.table_base
 
 
 class Transforms(object):
