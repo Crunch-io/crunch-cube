@@ -2,19 +2,30 @@
 
 """Integration test suite for the cr.cube.dimension module."""
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import numpy as np
 import pytest
 
 from unittest import TestCase
 
 from cr.cube.crunch_cube import CrunchCube
-from cr.cube.dimension import AllDimensions, Dimension, _Subtotal
+from cr.cube.dimension import (
+    AllDimensions,
+    Dimension,
+    _NewAllElements,
+    NewDimension,
+    _NewElement,
+    _Subtotal,
+)
 from cr.cube.enum import DIMENSION_TYPE as DT
 
 from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
 
 
 class DescribeIntegratedAllDimensions(object):
+    """Integration-test suite for `cr.cube.dimension.AllDimensions` object."""
+
     def it_resolves_the_type_of_each_dimension(self, type_fixture):
         dimension_dicts, expected_types = type_fixture
         all_dimensions = AllDimensions(dimension_dicts)
@@ -47,7 +58,206 @@ class DescribeIntegratedAllDimensions(object):
         return dimension_dicts, expected_types
 
 
+class DescribeIntegratedNewDimension(object):
+    """Integration-test suite for `cr.cube.dimension.NewDimension` object.
+
+    This is a temporary object, roughly a shim, to provide the new Dimension interface
+    to FrozenSlice. Once that work is completed, this will become DescribeDimension and
+    the NewDimension object will be merged into the Dimension object.
+    """
+
+    def it_constructs_from_a_legacy_Dimension_object(self, legacy_dimension):
+        dimension = NewDimension(legacy_dimension, None)
+        assert isinstance(dimension, NewDimension)
+
+    def it_provides_access_to_all_elements_in_its_collection(self, legacy_dimension):
+        legacy_dimension = CrunchCube(CR.ECON_BLAME_WITH_HS).dimensions[0]
+        dimension_transforms_dict = {}
+        dimension = NewDimension(legacy_dimension, dimension_transforms_dict)
+
+        elements = dimension.all_elements
+
+        assert isinstance(elements, _NewAllElements)
+
+    def it_knows_its_transformed_description(self, legacy_dimension):
+        """Including that it resolves the dimension-rename transform cascade."""
+        dimension_transforms_dict = {"description": "foobar"}
+        dimension = NewDimension(legacy_dimension, dimension_transforms_dict)
+
+        description = dimension.description
+
+        assert description == "foobar"
+
+    def but_it_uses_element_description_when_not_transformed(self, legacy_dimension):
+        """Including that it resolves the dimension-rename transform cascade."""
+        dimension_transforms_dict = {}
+        dimension = NewDimension(legacy_dimension, dimension_transforms_dict)
+
+        description = dimension.description
+
+        assert description == (
+            "If President Obama and the Republicans in Congress do not reach a budget"
+            " agreement in time to avoid a shutdown of the federal government, who do"
+            " you think will more to blame--President Obama or the Republican Congres"
+            "s?"
+        )
+
+    def it_knows_the_display_order_of_its_elements(self, legacy_dimension):
+        dimension_transforms_dict = {
+            "order": {"type": "explicit", "element_ids": [3, 5, 42, 8, 2]}
+        }
+        dimension = NewDimension(legacy_dimension, dimension_transforms_dict)
+
+        display_order = dimension.display_order
+
+        assert display_order == (2, 4, 5, 1, 0, 3, 6, 7)
+
+    def it_knows_its_transformed_name(self, legacy_dimension):
+        dimension_transforms_dict = {"name": "barfoo"}
+        dimension = NewDimension(legacy_dimension, dimension_transforms_dict)
+
+        name = dimension.name
+
+        assert name == "barfoo"
+
+    def but_it_uses_element_name_when_not_transformed(self, legacy_dimension):
+        dimension_transforms_dict = {}
+        dimension = NewDimension(legacy_dimension, dimension_transforms_dict)
+
+        name = dimension.name
+
+        assert name == "ShutdownBlame"
+
+    def it_knows_whether_it_should_be_pruned(self, legacy_dimension):
+        dimension_transforms_dict = {"prune": True}
+        dimension = NewDimension(legacy_dimension, dimension_transforms_dict)
+
+        prune = dimension.prune
+
+        assert prune is True
+
+    def it_provides_access_to_its_inserted_subtotal_specs(self, legacy_dimension):
+        dimension_transforms_dict = {}
+        dimension = NewDimension(legacy_dimension, dimension_transforms_dict)
+
+        subtotals = dimension.subtotals
+
+        assert len(subtotals) == 1
+
+    def but_it_uses_transforms_insertions_instead_when_present(self, legacy_dimension):
+        dimension_transforms_dict = {"insertions": []}
+        dimension = NewDimension(legacy_dimension, dimension_transforms_dict)
+
+        subtotals = dimension.subtotals
+
+        assert len(subtotals) == 0
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def legacy_dimension(self):
+        return CrunchCube(CR.ECON_BLAME_WITH_HS).dimensions[0]
+
+
+class DescribeIntegrated_NewAllElements(object):
+    """Integration-test suite for `cr.cube.dimension._NewAllElements` object.
+
+    _NewAllElements is a temporary object, roughly a shim, to provide the new
+    _AllElements interface to FrozenSlice. Once that work is completed, this will become
+    DescribeIntegrated_AllElements and the _NewAllElements object will be merged into
+    the _AllElements object.
+    """
+
+    def it_knows_the_transformed_element_display_order(self, type_dict):
+        dimension_transforms_dict = {
+            "order": {"type": "explicit", "element_ids": [2, 1, 666, 4, 3, 4, 8]}
+        }
+        all_elements = _NewAllElements(type_dict, dimension_transforms_dict)
+
+        display_order = all_elements.display_order
+
+        assert display_order == (1, 0, 3, 2, 5, 4, 6, 7)
+        assert len(display_order) == len(all_elements)
+
+    def but_it_returns_the_default_display_order_when_not_transformed(self, type_dict):
+        dimension_transforms_dict = {}
+        all_elements = _NewAllElements(type_dict, dimension_transforms_dict)
+
+        order = all_elements.display_order
+
+        assert order == (0, 1, 2, 3, 4, 5, 6, 7)
+
+    def it_constructs_its_element_objects_to_help(self, type_dict):
+        dimension_transforms_dict = {}
+        all_elements = _NewAllElements(type_dict, dimension_transforms_dict)
+
+        elements = all_elements._elements
+
+        assert all(isinstance(element, _NewElement) for element in elements)
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def type_dict(self):
+        return CrunchCube(CR.ECON_BLAME_WITH_HS).dimensions[0]._dimension_dict["type"]
+
+
+class DescribeIntegrated_NewElement(object):
+    """Integration-test suite for `cr.cube.dimension._NewElement` object.
+
+    _NewElement is a temporary object, roughly a shim, to provide the new _Element
+    interface to FrozenSlice. Once work on FrozenSlice is completed, this will become
+    DescribeIntegrated_Element and the _NewElement object will be merged into the
+    _BaseElement object and become _Element. Distinct _BaseElement, and _Category
+    classes will go away; only _Element will remain.
+    """
+
+    def it_knows_its_transformed_label(self, element_dict):
+        element_transforms_dict = {"name": "Xfinity Lounge"}
+        element = _NewElement(element_dict, None, None, element_transforms_dict)
+
+        label = element.label
+
+        assert label == "Xfinity Lounge"
+
+    def but_it_uses_its_base_name_if_no_transform_is_present(self, element_dict):
+        element_transforms_dict = {}
+        element = _NewElement(element_dict, None, None, element_transforms_dict)
+
+        label = element.label
+
+        assert label == "President Obama"
+
+    def it_knows_when_it_is_explicitly_hidden(self, element_dict):
+        element_transforms_dict = {"hide": True}
+        element = _NewElement(element_dict, None, None, element_transforms_dict)
+
+        is_hidden = element.is_hidden
+
+        assert is_hidden is True
+
+    def but_it_is_not_hidden_by_default(self):
+        element_transforms_dict = {}
+        element = _NewElement(None, None, None, element_transforms_dict)
+
+        is_hidden = element.is_hidden
+
+        assert is_hidden is False
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def element_dict(self):
+        return (
+            CrunchCube(CR.ECON_BLAME_WITH_HS)
+            .dimensions[0]
+            ._dimension_dict["type"]["categories"][0]
+        )
+
+
 class TestDimension(TestCase):
+    """Legacy integration-test suite for Dimension object."""
+
     def test_subtotals_indices_single_subtotal(self):
         dimension = CrunchCube(CR.ECON_BLAME_WITH_HS).dimensions[0]
         hs_indices = dimension.hs_indices
