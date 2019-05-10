@@ -55,11 +55,13 @@ class DescribeIntegratedCrunchCubeAsFrozenSlice(object):
 
         therefore we need 3 zeros in the result (no zero gets pruned).
         """
-        slice_ = FrozenSlice(CrunchCube(CR.CAT_X_MR_SENTRY), pruning=True)
+        transforms = {"rows_dimension": {"prune": True}}
+        slice_ = FrozenSlice(CrunchCube(CR.CAT_X_MR_SENTRY), transforms=transforms)
         np.testing.assert_array_equal(slice_.counts, np.array([[0, 0, 0]]))
 
     def it_provides_pruned_array_for_CA_CAT_x_CA_SUBVAR(self):
-        slice_ = FrozenSlice(CrunchCube(CR.CA_CAT_X_CA_SUBVAR), pruning=True)
+        transforms = {"rows_dimension": {"prune": True}}
+        slice_ = FrozenSlice(CrunchCube(CR.CA_CAT_X_CA_SUBVAR), transforms=transforms)
         np.testing.assert_array_equal(
             slice_.column_proportions,
             np.array(
@@ -742,12 +744,18 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.pvals, expected)
 
         # Test with pruning
-        slice_ = FrozenSlice(CrunchCube(CR.CAT_X_CAT_GERMAN_WEIGHTED), pruning=True)
+        transforms = {"rows_dimension": {"prune": True}}
+        slice_ = FrozenSlice(
+            CrunchCube(CR.CAT_X_CAT_GERMAN_WEIGHTED), transforms=transforms
+        )
         np.testing.assert_almost_equal(slice_.pvals, expected)
 
         # Test with pruning and H&S
+        transforms = {"rows_dimension": {"prune": True}}
         slice_ = FrozenSlice(
-            CrunchCube(CR.CAT_X_CAT_GERMAN_WEIGHTED), pruning=True, use_insertions=True
+            CrunchCube(CR.CAT_X_CAT_GERMAN_WEIGHTED),
+            transforms=transforms,
+            use_insertions=True,
         )
         np.testing.assert_almost_equal(slice_.pvals, expected)
 
@@ -777,12 +785,14 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.pvals, expected)
 
         # Test with pruning
-        slice_ = FrozenSlice(CrunchCube(CR.STATS_TEST), pruning=True)
+        transforms = {"rows_dimension": {"prune": True}}
+        slice_ = FrozenSlice(CrunchCube(CR.STATS_TEST), transforms=transforms)
         np.testing.assert_almost_equal(slice_.pvals, expected)
 
         # Test with pruning and H&S
+        transforms = {"rows_dimension": {"prune": True}}
         slice_ = FrozenSlice(
-            CrunchCube(CR.STATS_TEST), pruning=True, use_insertions=True
+            CrunchCube(CR.STATS_TEST), transforms=transforms, use_insertions=True
         )
         np.testing.assert_almost_equal(slice_.pvals, expected)
 
@@ -1113,7 +1123,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
 
     def test_cat_x_cat_as_array_prune_cols(self):
         # No pruning
-        slice_ = FrozenSlice(CrunchCube(CR.CAT_X_CAT_WITH_EMPTY_COLS), pruning=False)
+        slice_ = FrozenSlice(CrunchCube(CR.CAT_X_CAT_WITH_EMPTY_COLS))
         expected = np.array(
             [
                 [2, 2, 0, 1],
@@ -1127,13 +1137,16 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_array_equal(slice_.counts, expected)
 
         # With pruning
-        slice_ = FrozenSlice(CrunchCube(CR.CAT_X_CAT_WITH_EMPTY_COLS), pruning=True)
+        transforms = {"rows_dimension": {"prune": True}}
+        slice_ = FrozenSlice(
+            CrunchCube(CR.CAT_X_CAT_WITH_EMPTY_COLS), transforms=transforms
+        )
         expected = np.array([[2, 2, 1], [0, 1, 2], [0, 2, 0], [0, 2, 1], [0, 1, 0]])
         np.testing.assert_array_equal(slice_.counts, expected)
 
     def test_cat_x_cat_props_by_col_prune_cols(self):
         # No pruning
-        slice_ = FrozenSlice(CrunchCube(CR.CAT_X_CAT_WITH_EMPTY_COLS), pruning=False)
+        slice_ = FrozenSlice(CrunchCube(CR.CAT_X_CAT_WITH_EMPTY_COLS))
         expected = np.array(
             [
                 [1.0, 0.25, np.nan, 0.25],
@@ -1147,7 +1160,10 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_array_equal(slice_.column_proportions, expected)
 
         # With pruning
-        slice_ = FrozenSlice(CrunchCube(CR.CAT_X_CAT_WITH_EMPTY_COLS), pruning=True)
+        transforms = {"rows_dimension": {"prune": True}}
+        slice_ = FrozenSlice(
+            CrunchCube(CR.CAT_X_CAT_WITH_EMPTY_COLS), transforms=transforms
+        )
         expected = np.array(
             [
                 [1.0, 0.25, 0.25],
@@ -1161,7 +1177,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
 
     def test_cat_x_cat_props_by_row_prune_cols(self):
         # No pruning
-        slice_ = FrozenSlice(CrunchCube(CR.CAT_X_CAT_WITH_EMPTY_COLS), pruning=False)
+        slice_ = FrozenSlice(CrunchCube(CR.CAT_X_CAT_WITH_EMPTY_COLS))
         expected = np.array(
             [
                 [0.4, 0.4, 0.0, 0.2],
@@ -1175,7 +1191,10 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
         # With pruning
-        slice_ = FrozenSlice(CrunchCube(CR.CAT_X_CAT_WITH_EMPTY_COLS), pruning=True)
+        transforms = {"rows_dimension": {"prune": True}}
+        slice_ = FrozenSlice(
+            CrunchCube(CR.CAT_X_CAT_WITH_EMPTY_COLS), transforms=transforms
+        )
         expected = np.array(
             [
                 [0.4, 0.4, 0.2],
@@ -1189,7 +1208,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
 
     def test_cat_x_cat_props_by_cell_prune_cols(self):
         # No pruning
-        slice_ = FrozenSlice(CrunchCube(CR.CAT_X_CAT_WITH_EMPTY_COLS), pruning=False)
+        slice_ = FrozenSlice(CrunchCube(CR.CAT_X_CAT_WITH_EMPTY_COLS))
         expected = np.array(
             [
                 [0.14285714, 0.14285714, 0.0, 0.07142857],
@@ -1203,7 +1222,10 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.table_proportions, expected)
 
         # With pruning
-        slice_ = FrozenSlice(CrunchCube(CR.CAT_X_CAT_WITH_EMPTY_COLS), pruning=True)
+        transforms = {"rows_dimension": {"prune": True}}
+        slice_ = FrozenSlice(
+            CrunchCube(CR.CAT_X_CAT_WITH_EMPTY_COLS), transforms=transforms
+        )
         expected = np.array(
             [
                 [0.14285714, 0.14285714, 0.07142857],
@@ -1216,7 +1238,8 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.table_proportions, expected)
 
     def test_prune_univariate_cat(self):
-        slice_ = FrozenSlice(CrunchCube(CR.BINNED), pruning=True)
+        transforms = {"rows_dimension": {"prune": True}}
+        slice_ = FrozenSlice(CrunchCube(CR.BINNED), transforms=transforms)
         expected = np.array([[118504.40402204], [155261.2723631], [182923.95470245]])
         np.testing.assert_almost_equal(slice_.counts, expected)
 
@@ -1234,6 +1257,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
             [0.11764706, 0.05882353, 0.0, 0.05882353, 0.0, 0.05882353, 0.0, 0.0],
         ]
         np.testing.assert_almost_equal(slice_.table_proportions, expected)
+
         expected = [
             [0.04761905, 0.0, 0.0, 0.04761905, 0.0, 0.0, 0.0, 0.0],
             [0.14285714, 0.04761905, 0.0952381, 0.04761905, 0.0, 0.04761905, 0.0, 0.0],
@@ -1297,7 +1321,10 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         # not testing cube.prune_indices() because the margin has 6367 cells
 
     def test_ca_with_single_cat_pruning(self):
-        slice_ = FrozenSlice(CrunchCube(CR.CA_SINGLE_CAT), weighted=False, pruning=True)
+        transforms = {"rows_dimension": {"prune": True}}
+        slice_ = FrozenSlice(
+            CrunchCube(CR.CA_SINGLE_CAT), weighted=False, transforms=transforms
+        )
         np.testing.assert_array_equal(slice_.counts, [[79], [80], [70]])
 
     def test_ca_x_single_cat_counts(self):
@@ -1371,8 +1398,11 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_array_equal(slice_.table_margin, expected[2])
 
     def test_ca_subvar_x_cat_hs_counts_prune(self):
+        transforms = {"rows_dimension": {"prune": True}}
         slice_ = FrozenSlice(
-            CrunchCube(CR.CA_SUBVAR_X_CAT_HS), use_insertions=True, pruning=True
+            CrunchCube(CR.CA_SUBVAR_X_CAT_HS),
+            use_insertions=True,
+            transforms=transforms,
         )
         expected = np.array([[3, 3, 0, 0, 6], [1, 3, 2, 0, 4], [0, 2, 1, 3, 2]])
         np.testing.assert_array_equal(slice_.counts, expected)
@@ -1639,7 +1669,8 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         # +----+-----+----+
         #  True False True
 
-        slice_ = FrozenSlice(CrunchCube(CR.XYZ_SIMPLE_ALLTYPES), pruning=True)
+        transforms = {"rows_dimension": {"prune": True}}
+        slice_ = FrozenSlice(CrunchCube(CR.XYZ_SIMPLE_ALLTYPES), transforms=transforms)
         np.testing.assert_array_equal(slice_.counts, [[1]])
 
     def test_mr_x_ca_rows_margin(self):
@@ -1665,12 +1696,13 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
 
     def test_ca_x_mr_margin_prune(self):
         # ---CA x MR---
+        transforms = {"rows_dimension": {"prune": True}}
         slice_ = FrozenSlice(
             CrunchCube(CR.CA_X_MR_WEIGHTED_HS),
             slice_idx=0,
             use_insertions=True,
             weighted=False,
-            pruning=True,
+            transforms=transforms,
         )
         np.testing.assert_array_equal(
             slice_.column_margin, np.array([504, 215, 224, 76, 8, 439])
@@ -1678,9 +1710,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
 
     def test_mr_x_cat_x_mr_pruning(self):
         # No pruning
-        slice_ = FrozenSlice(
-            CrunchCube(CR.MR_X_CAT_X_MR_PRUNE), slice_idx=0, pruning=False
-        )
+        slice_ = FrozenSlice(CrunchCube(CR.MR_X_CAT_X_MR_PRUNE), slice_idx=0)
         np.testing.assert_array_equal(
             slice_.counts,
             [
@@ -1696,8 +1726,9 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         )
 
         # With pruning
+        transforms = {"rows_dimension": {"prune": True}}
         slice_ = FrozenSlice(
-            CrunchCube(CR.MR_X_CAT_X_MR_PRUNE), slice_idx=0, pruning=True
+            CrunchCube(CR.MR_X_CAT_X_MR_PRUNE), slice_idx=0, transforms=transforms
         )
         # Last column is not pruned, because the not-selected base counts
         # (for that column) are not all zeros.
@@ -1707,15 +1738,17 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         )
 
     def test_gender_x_weight_pruning(self):
-        slice_ = FrozenSlice(CrunchCube(CR.GENDER_X_WEIGHT), pruning=True)
+        transforms = {"rows_dimension": {"prune": True}}
+        slice_ = FrozenSlice(CrunchCube(CR.GENDER_X_WEIGHT), transforms=transforms)
         np.testing.assert_array_equal(slice_.table_margin, 208)
 
     def test_proportions_cat_x_mr_x_cat(self):
+        transforms = {"rows_dimension": {"prune": True}}
         slice_ = FrozenSlice(
             CrunchCube(CR.CAT_X_MR_X_CAT["slides"][0]["cube"]),
             slice_idx=0,
             use_insertions=True,
-            pruning=True,
+            transforms=transforms,
         )
 
         # Test first slice
@@ -1765,11 +1798,12 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.column_proportions, expected)
 
         # Test second slice
+        transforms = {"rows_dimension": {"prune": True}}
         slice_ = FrozenSlice(
             CrunchCube(CR.CAT_X_MR_X_CAT["slides"][0]["cube"]),
             slice_idx=1,
             use_insertions=True,
-            pruning=True,
+            transforms=transforms,
         )
         expected = np.array(
             [

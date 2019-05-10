@@ -254,14 +254,18 @@ class DescribeFrozenSlice:
         cube = CrunchCube(CR.CAT_X_CAT_PRUNING_HS)
 
         # Pruned - without insertions
-        slice_ = FrozenSlice(cube, pruning=True, weighted=False)
+        transforms = {"rows_dimension": {"prune": True}}
+        slice_ = FrozenSlice(cube, transforms=transforms, weighted=False)
         expected = np.array(
             [[28, 20, 10, 1], [1, 0, 1, 0], [3, 4, 2, 2], [3, 8, 5, 0], [1, 1, 1, 0]]
         )
         np.testing.assert_equal(slice_.counts, expected)
 
         # Pruned - with insertions
-        slice_ = FrozenSlice(cube, use_insertions=True, pruning=True, weighted=False)
+        transforms = {"rows_dimension": {"prune": True}}
+        slice_ = FrozenSlice(
+            cube, use_insertions=True, transforms=transforms, weighted=False
+        )
         expected = np.array(
             [
                 [28, 48, 20, 10, 1],

@@ -21,7 +21,7 @@ class FrozenSlice(object):
         slice_idx=0,
         use_insertions=False,
         reordered_ids=None,
-        pruning=False,
+        # pruning=False,
         transforms=None,
         weighted=True,
         population=None,
@@ -32,7 +32,7 @@ class FrozenSlice(object):
         self._slice_idx = slice_idx
         self._use_insertions = use_insertions
         self._reordered_ids = reordered_ids
-        self._pruning = pruning
+        # self._pruning = pruning
         self._transforms_dict = {} if transforms is None else transforms
         self._weighted = weighted
         self._population = population
@@ -181,20 +181,7 @@ class FrozenSlice(object):
 
     @lazyproperty
     def _insertions(self):
-        # TODO: @slobodan: This conditional needs to go away pretty soon. Insertions can
-        # just be empty if there are no insertions, but still exist and be processed
-        # unconditionally.
-        return (
-            Insertions(self._dimensions, self._slice) if self._use_insertions else None
-        )
-        # TODO: this should work instead, but raises a handful of exporter errors
-        # rows_subtotals = len(self._dimensions[0].subtotals)
-        # columns_subtotals = (
-        #     0 if len(self._dimensions) < 2 else len(self._dimensions[1].subtotals)
-        # )
-        # if rows_subtotals + columns_subtotals == 0:
-        #     return None
-        # return Insertions(self._dimensions, self._slice)
+        return Insertions(self._dimensions, self._slice)
 
     @lazyproperty
     def _ordering(self):
@@ -203,6 +190,12 @@ class FrozenSlice(object):
             if self._reordered_ids
             else None
         )
+
+    @lazyproperty
+    def _pruning(self):
+        """True if any of dimensions has pruning."""
+        # TODO: Implement separarte pruning for rows and columns
+        return any(dimension.prune for dimension in self._dimensions)
 
     @lazyproperty
     def _slice(self):
