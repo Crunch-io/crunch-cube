@@ -6,9 +6,10 @@ import numpy as np
 from scipy.stats.contingency import expected_freq
 from scipy.stats import norm
 
-from cr.cube.util import lazyproperty
+from cr.cube.dimension import NewDimension
 from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.min_base_size_mask import MinBaseSizeMask
+from cr.cube.util import lazyproperty
 
 
 class FrozenSlice(object):
@@ -21,6 +22,7 @@ class FrozenSlice(object):
         use_insertions=False,
         reordered_ids=None,
         pruning=False,
+        transforms=None,
         weighted=True,
         population=None,
         ca_as_0th=None,
@@ -31,6 +33,7 @@ class FrozenSlice(object):
         self._use_insertions = use_insertions
         self._reordered_ids = reordered_ids
         self._pruning = pruning
+        self._transforms_dict = {} if transforms is None else transforms
         self._weighted = weighted
         self._population = population
         self._ca_as_0th = ca_as_0th
@@ -152,19 +155,46 @@ class FrozenSlice(object):
 
     @lazyproperty
     def _dimensions(self):
+        """tuple of (row,) or (row, col) Dimension objects, depending on 1D or 2D."""
+        # TODO: pretty messy while we're shimming in NewDimensions, should clean up
+        # pretty naturally after FrozenSlice has its own loader.
         dimensions = self._cube.dimensions[-2:]
 
         if self._ca_as_0th:
             # Represent CA slice as 1-D rather than 2-D
-            return tuple([dimensions[-1]])
+            dimensions = (dimensions[-1],)
 
-        return dimensions
+        rows_transforms = self._transforms_dict.get("rows_dimension", {})
+        if not self._use_insertions:
+            rows_transforms["insertions"] = {}
+        rows_dimension = NewDimension(dimensions[0], rows_transforms)
+
+        if len(dimensions) == 1:
+            return (rows_dimension,)
+
+        columns_transforms = self._transforms_dict.get("columns_dimension", {})
+        if not self._use_insertions:
+            columns_transforms["insertions"] = {}
+        columns_dimension = NewDimension(dimensions[1], columns_transforms)
+
+        return (rows_dimension, columns_dimension)
 
     @lazyproperty
     def _insertions(self):
+        # TODO: @slobodan: This conditional needs to go away pretty soon. Insertions can
+        # just be empty if there are no insertions, but still exist and be processed
+        # unconditionally.
         return (
             Insertions(self._dimensions, self._slice) if self._use_insertions else None
         )
+        # TODO: this should work instead, but raises a handful of exporter errors
+        # rows_subtotals = len(self._dimensions[0].subtotals)
+        # columns_subtotals = (
+        #     0 if len(self._dimensions) < 2 else len(self._dimensions[1].subtotals)
+        # )
+        # if rows_subtotals + columns_subtotals == 0:
+        #     return None
+        # return Insertions(self._dimensions, self._slice)
 
     @lazyproperty
     def _ordering(self):
@@ -787,7 +817,9 @@ class Insertions(object):
 
     @lazyproperty
     def bottom_columns(self):
-        return tuple(columns for columns in self._columns if columns.anchor == "bottom")
+        return tuple(
+            columns for columns in self._inserted_columns if columns.anchor == "bottom"
+        )
 
     @lazyproperty
     def bottom_rows(self):
@@ -800,7 +832,9 @@ class Insertions(object):
     @lazyproperty
     def columns(self):
         return tuple(
-            column for column in self._columns if column.anchor not in ("top", "bottom")
+            column
+            for column in self._inserted_columns
+            if column.anchor not in ("top", "bottom")
         )
 
     @lazyproperty
@@ -815,7 +849,7 @@ class Insertions(object):
                 if row.anchor == "bottom"
                 else row.anchor
             )
-            for col in self._columns:
+            for col in self._inserted_columns:
                 col_idx = (
                     0
                     if col.anchor == "top"
@@ -839,7 +873,9 @@ class Insertions(object):
 
     @lazyproperty
     def top_columns(self):
-        return tuple(columns for columns in self._columns if columns.anchor == "top")
+        return tuple(
+            columns for columns in self._inserted_columns if columns.anchor == "top"
+        )
 
     @lazyproperty
     def top_rows(self):
@@ -850,16 +886,18 @@ class Insertions(object):
         return self._dimensions[1]
 
     @lazyproperty
-    def _columns(self):
-        if len(self._dimensions) < 2 or self._column_dimension.dimension_type in (
-            DT.MR,
-            DT.CA,
-        ):
-            return tuple()
+    def _inserted_columns(self):
+        """Sequence of _InsertionColumn objects representing subtotal columns."""
+        # ---a 1D slice (strand) can have no inserted columns---
+        if len(self._dimensions) < 2:
+            return ()
+        # ---an aggregate columns-dimension is not summable---
+        if self._column_dimension.dimension_type in (DT.MR, DT.CA):
+            return ()
 
         return tuple(
             _InsertionColumn(self._slice, subtotal)
-            for subtotal in self._column_dimension._subtotals
+            for subtotal in self._column_dimension.subtotals
         )
 
     @lazyproperty
@@ -873,7 +911,7 @@ class Insertions(object):
 
         return tuple(
             _InsertionRow(self._slice, subtotal)
-            for subtotal in self._row_dimension._subtotals
+            for subtotal in self._row_dimension.subtotals
         )
 
 
@@ -1054,7 +1092,7 @@ class SliceWithInsertions(object):
 
     @lazyproperty
     def _insertion_columns(self):
-        return self._insertions._columns
+        return self._insertions._inserted_columns
 
     @lazyproperty
     def _insertion_rows(self):
