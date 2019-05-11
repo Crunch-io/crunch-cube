@@ -481,7 +481,7 @@ class NewDimension(Dimension):
             description = self._dimension_dict["references"].get("description")
 
         # ---Normalize to "" so return value is always a str and callers don't need to
-        # ---deal with multiple possible return value types.
+        # ---deal with None as a possible return type.
         return description if description else ""
 
     @lazyproperty

@@ -106,6 +106,28 @@ class FrozenSlice(object):
         return self._calculator.row_proportions
 
     @lazyproperty
+    def rows_dimension_description(self):
+        """str description assigned to rows-dimension.
+
+        The empty string ("") for a 0D slice (until we get to all slices being 2D).
+        Reflects the resolved dimension-description transform cascade.
+        """
+        if len(self._dimensions) == 0:
+            return ""
+        return self._dimensions[0].description
+
+    @lazyproperty
+    def rows_dimension_name(self):
+        """str name assigned to rows-dimension.
+
+        The empty string ("") for a 0D slice (until we get to all slices being 2D).
+        Reflects the resolved dimension-name transform cascade.
+        """
+        if len(self._dimensions) == 0:
+            return ""
+        return self._dimensions[0].name
+
+    @lazyproperty
     def shape(self):
         return self.counts.shape
 
@@ -152,7 +174,12 @@ class FrozenSlice(object):
         """tuple of (row,) or (row, col) Dimension objects, depending on 1D or 2D."""
         # TODO: pretty messy while we're shimming in NewDimensions, should clean up
         # pretty naturally after FrozenSlice has its own loader.
+
         dimensions = self._cube.dimensions[-2:]
+
+        # ---special-case for 0D mean cube---
+        if not dimensions:
+            return dimensions
 
         if self._ca_as_0th:
             # Represent CA slice as 1-D rather than 2-D
@@ -192,7 +219,7 @@ class FrozenSlice(object):
         Needs to live (probably) in the _BaseSclice (which doesn't yet exist).
         It also needs to be tidied up a bit.
         """
-        dimensions = self._cube.dimensions[-2:]
+        dimensions = self._dimensions
         base_counts = self._cube._apply_missings(
             # self._cube._measure(False).raw_cube_array
             self._cube._measures.unweighted_counts.raw_cube_array
