@@ -34,6 +34,15 @@ class FrozenSlice(object):
         self._mask_size = mask_size
 
     # ---interface ---------------------------------------------------
+    @lazyproperty
+    def column_index(self):
+        """ndarray of column index percentages.
+
+        The index values represent the difference of the percentages to the
+        corresponding baseline values. The baseline values are the univariate
+        percentages of the corresponding variable.
+        """
+        return self._calculator.column_index
 
     @lazyproperty
     def min_base_size_mask(self):
@@ -224,9 +233,8 @@ class FrozenSlice(object):
             # self._cube._measure(False).raw_cube_array
             self._cube._measures.unweighted_counts.raw_cube_array
         )
-        counts = self._cube._apply_missings(
-            self._cube._measure(self._weighted).raw_cube_array
-        )
+        counts_with_missings = self._cube._measure(self._weighted).raw_cube_array
+        counts = self._cube._apply_missings(counts_with_missings)
         type_ = self._cube.dim_types[-2:]
         if self._cube.ndim == 0 and self._cube.has_means:
             return _0DMeansSlice(counts, base_counts)
@@ -237,9 +245,11 @@ class FrozenSlice(object):
         if self._cube.ndim > 2 or self._ca_as_0th:
             base_counts = base_counts[self._slice_idx]
             counts = counts[self._slice_idx]
+            counts_with_missings = counts_with_missings[self._slice_idx]
             if self._cube.dim_types[0] == DT.MR:
                 base_counts = base_counts[0]
                 counts = counts[0]
+                counts_with_missings = counts_with_missings[0]
             elif self._ca_as_0th:
                 return _1DCatSlice(self._dimensions, counts, base_counts)
         elif self._cube.ndim < 2:
@@ -247,12 +257,12 @@ class FrozenSlice(object):
                 return _1DMrSlice(dimensions, counts, base_counts)
             return _1DCatSlice(dimensions, counts, base_counts)
         if type_ == (DT.MR, DT.MR):
-            return _MrXMrSlice(dimensions, counts, base_counts)
+            return _MrXMrSlice(dimensions, counts, base_counts, counts_with_missings)
         elif type_[0] == DT.MR:
-            return _MrXCatSlice(dimensions, counts, base_counts)
+            return _MrXCatSlice(dimensions, counts, base_counts, counts_with_missings)
         elif type_[1] == DT.MR:
-            return _CatXMrSlice(dimensions, counts, base_counts)
-        return _CatXCatSlice(dimensions, counts, base_counts)
+            return _CatXMrSlice(dimensions, counts, base_counts, counts_with_missings)
+        return _CatXCatSlice(dimensions, counts, base_counts, counts_with_missings)
 
     @lazyproperty
     def _transforms(self):
@@ -330,10 +340,51 @@ class _CatXCatSlice(object):
     rows or columns).
     """
 
-    def __init__(self, dimensions, counts, base_counts):
+    def __init__(self, dimensions, counts, base_counts, counts_with_missings=None):
         self._dimensions = dimensions
         self._counts = counts
         self._base_counts = base_counts
+        self._all_counts = counts_with_missings
+
+    @lazyproperty
+    def _column_index(self):
+
+        # TODO: This is a hack to make it work. It should be addressed properly with
+        # passing `counts_with_missings` in all the right places in the factory.
+        # Also - subclass for proper functionality in various MR cases.
+        if self._all_counts is None:
+            return self._column_proportions
+
+        return self._column_proportions / self._baseline * 100
+
+    @lazyproperty
+    def _baseline(self):
+        """ndarray of baseline values for column index.
+
+        Baseline is obtained by calculating the unconditional row margin (which needs
+        to include missings from the column dimension) and dividint it by the total.
+        Total also needs to include the missings from the column dimension.
+
+        `dim_sum` is the unconditional row margin. For CAT x CAT slice it needs to
+        sum across axis 1, because that's the columns CAT dimension, that gets
+        collapsed. The total is calculated by totaling the unconditional row margin.
+        Please note that the total _doesn't_ include missings for the row dimension.
+        """
+        dim_sum = np.sum(self._all_counts, axis=1)[self._valid_rows_idxs]
+        return dim_sum[:, None] / np.sum(dim_sum)
+
+    @lazyproperty
+    def _valid_rows_idxs(self):
+        """ndarray-style index for only valid rows (out of missing and not-missing)."""
+        return np.ix_(self._dimensions[-2].valid_elements.element_idxs)
+
+    @lazyproperty
+    def _row_margin(self):
+        return np.array([row.margin for row in self.rows])
+
+    @lazyproperty
+    def _column_proportions(self):
+        return np.array([col.proportions for col in self.columns]).T
 
     @lazyproperty
     def names(self):
@@ -357,7 +408,13 @@ class _CatXCatSlice(object):
 
     @lazyproperty
     def _row_generator(self):
-        return zip(self._counts, self._base_counts, self._row_elements, self._zscores)
+        return zip(
+            self._counts,
+            self._base_counts,
+            self._row_elements,
+            self._zscores,
+            self._column_index,
+        )
 
     @lazyproperty
     def _column_generator(self):
@@ -369,9 +426,20 @@ class _CatXCatSlice(object):
     def rows(self):
         return tuple(
             _CategoricalVector(
-                counts, base_counts, element.label, self.table_margin, zscore
+                counts,
+                base_counts,
+                element.label,
+                self.table_margin,
+                zscore,
+                column_index,
             )
-            for counts, base_counts, element, zscore in self._row_generator
+            for (
+                counts,
+                base_counts,
+                element,
+                zscore,
+                column_index,
+            ) in self._row_generator
         )
 
     @lazyproperty
@@ -455,6 +523,25 @@ class _MrXCatSlice(_SliceWithMR):
     """
 
     @lazyproperty
+    def _baseline(self):
+        """ndarray of baseline values for column index.
+
+        Baseline is obtained by calculating the unconditional row margin (which needs
+        to include missings from the column dimension) and dividint it by the total.
+        Total also needs to include the missings from the column dimension.
+
+        `dim_sum` is the unconditional row margin. For MR x CAT slice it needs to
+        sum across axis 2, because that's the CAT dimension, that gets collapsed.
+        Then it needs to select only the selected counts of
+        the MR (hence the `[:, 0]` index). The total needs include missings of the
+        2nd dimension, but not of the first (hence the [:, 0:2] index, which only
+        includes the selected and not-selected of the MR dimension).
+        """
+        dim_sum = np.sum(self._all_counts, axis=2)[:, 0][self._valid_rows_idxs]
+        total = np.sum(self._all_counts[self._valid_rows_idxs][:, 0:2], axis=(1, 2))
+        return (dim_sum / total)[:, None]
+
+    @lazyproperty
     def table_base_unpruned(self):
         return self.table_base
 
@@ -475,13 +562,16 @@ class _MrXCatSlice(_SliceWithMR):
     def rows(self):
         """Use only selected counts."""
         return tuple(
-            _CatXMrVector(counts, base_counts, element.label, table_margin, zscore)
+            _CatXMrVector(
+                counts, base_counts, element.label, table_margin, zscore, column_index
+            )
             for (
                 counts,
                 base_counts,
                 element,
                 table_margin,
                 zscore,
+                column_index,
             ) in self._row_generator
         )
 
@@ -493,6 +583,7 @@ class _MrXCatSlice(_SliceWithMR):
             self._row_elements,
             self.table_margin,
             self._zscores,
+            self._column_index,
         )
 
     @lazyproperty
@@ -540,13 +631,28 @@ class _1DMrSlice(_MrXCatSlice):
         return np.sum(self._base_counts, axis=1)
 
 
-# class _CatXMrSlice(_CatXCatSlice):
 class _CatXMrSlice(_SliceWithMR):
     """Handles CAT x MR slices.
 
     Needs to handle correctly the indexing for the selected/not-selected for rows
     (which correspond to the MR dimension).
     """
+
+    @lazyproperty
+    def _baseline(self):
+        """ndarray of baseline values for column index.
+
+        Baseline is obtained by calculating the unconditional row margin (which needs
+        to include missings from the column dimension) and dividint it by the total.
+        Total also needs to include the missings from the column dimension.
+
+        `dim_sum` is the unconditional row margin. For CAT x MR slice it needs to sum
+        across axis 2, because that's the MR_CAT dimension, that gets collapsed
+        (but the MR subvars don't get collapsed). Then it needs to calculate the total,
+        which is easily obtained by summing across the CAT dimension (hence `axis=0`).
+        """
+        dim_sum = np.sum(self._all_counts, axis=2)[self._valid_rows_idxs]
+        return dim_sum / np.sum(dim_sum, axis=0)
 
     @lazyproperty
     def table_base_unpruned(self):
@@ -569,9 +675,20 @@ class _CatXMrSlice(_SliceWithMR):
     def rows(self):
         return tuple(
             _MultipleResponseVector(
-                counts.T, base_counts.T, element.label, self.table_margin, zscore
+                counts.T,
+                base_counts.T,
+                element.label,
+                self.table_margin,
+                zscore,
+                column_index,
             )
-            for counts, base_counts, element, zscore in self._row_generator
+            for (
+                counts,
+                base_counts,
+                element,
+                zscore,
+                column_index,
+            ) in self._row_generator
         )
 
     @lazyproperty
@@ -618,6 +735,26 @@ class _MrXMrSlice(_SliceWithMR):
         )
 
     @lazyproperty
+    def _baseline(self):
+        """ndarray of baseline values for column index.
+
+        Baseline is obtained by calculating the unconditional row margin (which needs
+        to include missings from the column dimension) and dividint it by the total.
+        Total also needs to include the missings from the column dimension.
+
+        `dim_sum` is the unconditional row margin. For MR x MR slice it needs to sum
+        across axis 3, because that's the MR_CAT dimension, that gets collapsed
+        (but the MR subvars don't get collapsed). Then it needs to calculate the total,
+        which is obtained by summing across both MR_CAT dimensions. However, please
+        note, that in calculating the unconditional total, missing elements need to be
+        included for the column dimension, while they need to be _excluded_ for the row
+        dimension. Hence the `[:, 0:2]` indexing for the first MR_CAT, but not the 2nd.
+        """
+        dim_sum = np.sum(self._all_counts[:, 0:2], axis=3)[self._valid_rows_idxs][:, 0]
+        total = np.sum(self._all_counts[:, 0:2], axis=(1, 3))[self._valid_rows_idxs]
+        return dim_sum / total
+
+    @lazyproperty
     def _row_generator(self):
         return zip(
             self._counts,
@@ -625,6 +762,7 @@ class _MrXMrSlice(_SliceWithMR):
             self._row_elements,
             self.table_margin,
             self._zscores,
+            self._column_index,
         )
 
     @lazyproperty
@@ -632,7 +770,12 @@ class _MrXMrSlice(_SliceWithMR):
         # return tuple(_MultipleResponseVector(counts[0].T) for counts in self._counts)
         return tuple(
             _MultipleResponseVector(
-                counts[0].T, base_counts[0].T, element.label, table_margin, zscore
+                counts[0].T,
+                base_counts[0].T,
+                element.label,
+                table_margin,
+                zscore,
+                column_index,
             )
             for (
                 counts,
@@ -640,6 +783,7 @@ class _MrXMrSlice(_SliceWithMR):
                 element,
                 table_margin,
                 zscore,
+                column_index,
             ) in self._row_generator
         )
 
@@ -708,11 +852,18 @@ class _CategoricalVector(_BaseVector):
     construction time (like table margin and zscores).
     """
 
-    def __init__(self, counts, base_counts, label, table_margin, zscore=None):
+    def __init__(
+        self, counts, base_counts, label, table_margin, zscore=None, column_index=None
+    ):
         super(_CategoricalVector, self).__init__(label, base_counts)
         self._counts = counts
         self._table_margin = table_margin
         self._zscore = zscore
+        self._column_index = column_index
+
+    @lazyproperty
+    def column_index(self):
+        return self._column_index
 
     @lazyproperty
     def pvals(self):
@@ -757,9 +908,11 @@ class _CategoricalVector(_BaseVector):
 
 
 class _CatXMrVector(_CategoricalVector):
-    def __init__(self, counts, base_counts, label, table_margin, zscore=None):
+    def __init__(
+        self, counts, base_counts, label, table_margin, zscore=None, column_index=None
+    ):
         super(_CatXMrVector, self).__init__(
-            counts[0], base_counts[0], label, table_margin, zscore
+            counts[0], base_counts[0], label, table_margin, zscore, column_index
         )
         self._pruning_bases = base_counts
 
@@ -1197,6 +1350,10 @@ class _AssembledVector(object):
         self._opposite_inserted_vectors = opposite_inserted_vectors
 
     @lazyproperty
+    def column_index(self):
+        return self._base_vector.column_index
+
+    @lazyproperty
     def label(self):
         return self._base_vector.label
 
@@ -1356,6 +1513,10 @@ class Calculator(object):
         self._assembler = assembler
 
     @lazyproperty
+    def column_index(self):
+        return np.array([row.column_index for row in self._assembler.rows])
+
+    @lazyproperty
     def pvals(self):
         return np.array([row.pvals for row in self._assembler.rows])
 
@@ -1475,6 +1636,10 @@ class OrderedVector(object):
         self._order = order
 
     @lazyproperty
+    def column_index(self):
+        return self._base_vector.column_index
+
+    @lazyproperty
     def label(self):
         return self._base_vector.label
 
@@ -1581,6 +1746,18 @@ class PrunedVector(object):
     def __init__(self, base_vector, opposite_vectors):
         self._base_vector = base_vector
         self._opposite_vectors = opposite_vectors
+
+    @lazyproperty
+    def column_index(self):
+        return np.array(
+            [
+                column_index
+                for column_index, opposite_vector in zip(
+                    self._base_vector.column_index, self._opposite_vectors
+                )
+                if not opposite_vector.pruned
+            ]
+        )
 
     @lazyproperty
     def zscore(self):
