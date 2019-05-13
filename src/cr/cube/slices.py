@@ -1188,6 +1188,7 @@ class Assembler(object):
 
         slice_ = OrderedSlice(self._slice, self._transforms)
         slice_ = SliceWithInsertions(slice_, self._transforms)
+        # slice_ = SliceWithHidden(slice_, self._transforms)
         slice_ = PrunedSlice(slice_, self._transforms)
 
         return slice_
@@ -1217,24 +1218,26 @@ class Assembler(object):
         return self.slice.table_base_unpruned
 
 
-class SliceWithInsertions(object):
-    """Represents slice with both normal and inserted bits."""
-
-    def __init__(self, slice_, transforms):
-        self._slice = slice_
+class _TransformedSlice(object):
+    def __init__(self, base_slice, transforms):
+        self._base_slice = base_slice
         self._transforms = transforms
+
+    @lazyproperty
+    def table_margin(self):
+        return self._base_slice.table_margin
+
+    @lazyproperty
+    def table_base(self):
+        return self._base_slice.table_base
+
+
+class SliceWithInsertions(_TransformedSlice):
+    """Represents slice with both normal and inserted bits."""
 
     @lazyproperty
     def _insertions(self):
         return self._transforms.insertions
-
-    @lazyproperty
-    def table_margin(self):
-        return self._slice.table_margin
-
-    @lazyproperty
-    def table_base(self):
-        return self._slice.table_base
 
     @lazyproperty
     def table_base_unpruned(self):
@@ -1265,7 +1268,8 @@ class SliceWithInsertions(object):
     @lazyproperty
     def _assembled_rows(self):
         return tuple(
-            _AssembledVector(row, self._insertion_columns) for row in self._slice.rows
+            _AssembledVector(row, self._insertion_columns)
+            for row in self._base_slice.rows
         )
 
     @lazyproperty
@@ -1300,7 +1304,7 @@ class SliceWithInsertions(object):
     def _assembled_columns(self):
         return tuple(
             _AssembledVector(column, self._insertion_rows)
-            for column in self._slice.columns
+            for column in self._base_slice.columns
         )
 
     @lazyproperty
@@ -1313,7 +1317,7 @@ class SliceWithInsertions(object):
     @lazyproperty
     def _interleaved_rows(self):
         rows = []
-        for i in range(len(self._slice.rows)):
+        for i in range(len(self._base_slice.rows)):
             rows.append(self._assembled_rows[i])
             for insertion_row in self._assembled_insertion_rows:
                 if i == insertion_row.anchor:
@@ -1330,7 +1334,7 @@ class SliceWithInsertions(object):
     @lazyproperty
     def _interleaved_columns(self):
         columns = []
-        for i in range(len(self._slice.columns)):
+        for i in range(len(self._base_slice.columns)):
             columns.append(self._assembled_columns[i])
             for insertion_column in self._assembled_insertion_columns:
                 if i == insertion_column.anchor:
@@ -1680,15 +1684,11 @@ class OrderedVector(object):
         return self._base_vector.base
 
 
-class OrderedSlice(object):
+class OrderedSlice(_TransformedSlice):
     """Result of the ordering transform.
 
     In charge of indexing rows and columns properly.
     """
-
-    def __init__(self, slice_, transforms):
-        self._slice = slice_
-        self._transforms = transforms
 
     @lazyproperty
     def _ordering(self):
@@ -1698,7 +1698,7 @@ class OrderedSlice(object):
     def rows(self):
         return tuple(
             OrderedVector(row, self._ordering.column_order)
-            for row in tuple(np.array(self._slice.rows)[self._ordering.row_order])
+            for row in tuple(np.array(self._base_slice.rows)[self._ordering.row_order])
         )
 
     @lazyproperty
@@ -1706,17 +1706,9 @@ class OrderedSlice(object):
         return tuple(
             OrderedVector(column, self._ordering.row_order)
             for column in tuple(
-                np.array(self._slice.columns)[self._ordering.column_order]
+                np.array(self._base_slice.columns)[self._ordering.column_order]
             )
         )
-
-    @lazyproperty
-    def table_margin(self):
-        return self._slice.table_margin
-
-    @lazyproperty
-    def table_base(self):
-        return self._slice.table_base
 
 
 class Transforms(object):
@@ -1864,16 +1856,12 @@ class PrunedVector(object):
         )
 
 
-class PrunedSlice(object):
+class PrunedSlice(_TransformedSlice):
     """Slice with rows or columns pruned.
 
     While the rows and/or columns need to be pruned, each one of the remaining
     vectors also needs to be pruned based on the opposite dimension's base.
     """
-
-    def __init__(self, base_slice, transforms):
-        self._base_slice = base_slice
-        self._transforms = transforms
 
     @lazyproperty
     def _applied(self):
