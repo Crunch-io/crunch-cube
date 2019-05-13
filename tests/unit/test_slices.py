@@ -33,6 +33,7 @@ from ..unitutil import instance_mock, property_mock
 class Describe_CategoricalVector(object):
     """Unit-test suite for `cr.cube.slices._CategoricalVector` object."""
 
+    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_sets_raw_counts(self):
         counts, base_counts, label, margin = Mock(), Mock(), Mock(), Mock()
         row = _CategoricalVector(counts, base_counts, label, margin)

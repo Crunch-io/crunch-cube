@@ -2,6 +2,7 @@
 
 from __future__ import division
 
+from collections import namedtuple
 import numpy as np
 from scipy.stats.contingency import expected_freq
 from scipy.stats import norm
@@ -282,6 +283,11 @@ class _0DMeansSlice(object):
         return np.sum(self._base_counts)
 
 
+# Used to represent the non-existent dimension in case of 1D vectors (that need to be
+# accessed as slices, to support cr.exporter).
+_PlaceholderElement = namedtuple("_PlaceholderElement", "label, is_hidden")
+
+
 class _1DMeansSlice(_0DMeansSlice):
     def __init__(self, dimension, means, base_counts):
         super(_1DMeansSlice, self).__init__(means, base_counts)
@@ -297,7 +303,7 @@ class _1DMeansSlice(_0DMeansSlice):
         support row iteration.
         """
         return tuple(
-            _BaseVector(element.label, base_counts)
+            _BaseVector(element, base_counts)
             for element, base_counts in zip(
                 self._dimension.valid_elements, self._base_counts
             )
@@ -306,7 +312,9 @@ class _1DMeansSlice(_0DMeansSlice):
     @lazyproperty
     def columns(self):
         """A single vector that is used only for pruning Means slices."""
-        return (_BaseVector("Means Summary", self._base_counts),)
+        return (
+            _BaseVector(_PlaceholderElement("Means Summary", False), self._base_counts),
+        )
 
     @lazyproperty
     def table_base(self):
@@ -317,7 +325,7 @@ class _1DMrWithMeansSlice(_1DMeansSlice):
     @lazyproperty
     def rows(self):
         return tuple(
-            _MeansWithMrVector(element.label, base_counts)
+            _MeansWithMrVector(element, base_counts)
             for element, base_counts in zip(
                 self._dimension.valid_elements, self._base_counts
             )
@@ -422,12 +430,7 @@ class _CatXCatSlice(object):
     def rows(self):
         return tuple(
             _CategoricalVector(
-                counts,
-                base_counts,
-                element.label,
-                self.table_margin,
-                zscore,
-                column_index,
+                counts, base_counts, element, self.table_margin, zscore, column_index
             )
             for (
                 counts,
@@ -441,9 +444,7 @@ class _CatXCatSlice(object):
     @lazyproperty
     def columns(self):
         return tuple(
-            _CategoricalVector(
-                counts, base_counts, element.label, self.table_margin, zscore
-            )
+            _CategoricalVector(counts, base_counts, element, self.table_margin, zscore)
             for counts, base_counts, element, zscore in self._column_generator
         )
 
@@ -496,7 +497,10 @@ class _1DCatSlice(_CatXCatSlice):
         return tuple(
             [
                 _CategoricalVector(
-                    self._counts, self._base_counts, "Summary", self.table_margin
+                    self._counts,
+                    self._base_counts,
+                    _PlaceholderElement("Summary", False),
+                    self.table_margin,
                 )
             ]
         )
@@ -559,7 +563,7 @@ class _MrXCatSlice(_SliceWithMR):
         """Use only selected counts."""
         return tuple(
             _CatXMrVector(
-                counts, base_counts, element.label, table_margin, zscore, column_index
+                counts, base_counts, element, table_margin, zscore, column_index
             )
             for (
                 counts,
@@ -587,7 +591,7 @@ class _MrXCatSlice(_SliceWithMR):
         """Use bother selected and not-selected counts."""
         return tuple(
             _MultipleResponseVector(
-                counts, base_counts, element.label, self.table_margin, zscore
+                counts, base_counts, element, self.table_margin, zscore
             )
             for counts, base_counts, element, zscore in self._column_generator
         )
@@ -673,7 +677,7 @@ class _CatXMrSlice(_SliceWithMR):
             _MultipleResponseVector(
                 counts.T,
                 base_counts.T,
-                element.label,
+                element,
                 self.table_margin,
                 zscore,
                 column_index,
@@ -701,8 +705,8 @@ class _CatXMrSlice(_SliceWithMR):
     @lazyproperty
     def columns(self):
         return tuple(
-            # _CategoricalVector(counts, base_counts, element.label, table_margin)
-            _CatXMrVector(counts.T, base_counts.T, element.label, table_margin)
+            # _CategoricalVector(counts, base_counts, element, table_margin)
+            _CatXMrVector(counts.T, base_counts.T, element, table_margin)
             for counts, base_counts, element, table_margin in self._column_generator
         )
 
@@ -768,7 +772,7 @@ class _MrXMrSlice(_SliceWithMR):
             _MultipleResponseVector(
                 counts[0].T,
                 base_counts[0].T,
-                element.label,
+                element,
                 table_margin,
                 zscore,
                 column_index,
@@ -796,7 +800,7 @@ class _MrXMrSlice(_SliceWithMR):
     def columns(self):
         # return tuple(_MultipleResponseVector(counts) for counts in self._counts.T[0])
         return tuple(
-            _MultipleResponseVector(counts, base_counts, element.label, table_margin)
+            _MultipleResponseVector(counts, base_counts, element, table_margin)
             for counts, base_counts, element, table_margin in self._column_generator
         )
 
@@ -810,13 +814,13 @@ class _MrXMrSlice(_SliceWithMR):
 
 
 class _BaseVector(object):
-    def __init__(self, label, base_counts):
-        self._label = label
+    def __init__(self, element, base_counts):
+        self._element = element
         self._base_counts = base_counts
 
     @lazyproperty
     def label(self):
-        return self._label
+        return self._element.label
 
     @lazyproperty
     def base(self):
@@ -825,6 +829,10 @@ class _BaseVector(object):
     @lazyproperty
     def pruned(self):
         return self.base == 0 or np.isnan(self.base)
+
+    @lazyproperty
+    def hidden(self):
+        return self._element.is_hidden
 
 
 class _MeansWithMrVector(_BaseVector):
@@ -849,9 +857,9 @@ class _CategoricalVector(_BaseVector):
     """
 
     def __init__(
-        self, counts, base_counts, label, table_margin, zscore=None, column_index=None
+        self, counts, base_counts, element, table_margin, zscore=None, column_index=None
     ):
-        super(_CategoricalVector, self).__init__(label, base_counts)
+        super(_CategoricalVector, self).__init__(element, base_counts)
         self._counts = counts
         self._table_margin = table_margin
         self._zscore = zscore
@@ -868,10 +876,6 @@ class _CategoricalVector(_BaseVector):
     @lazyproperty
     def zscore(self):
         return self._zscore
-
-    @lazyproperty
-    def label(self):
-        return self._label
 
     @lazyproperty
     def values(self):
@@ -1091,6 +1095,11 @@ class _InsertionVector(object):
         self._subtotal = subtotal
 
     @lazyproperty
+    def hidden(self):
+        """Insertion cannot be hidden."""
+        return False
+
+    @lazyproperty
     def label(self):
         return self._subtotal.label
 
@@ -1188,7 +1197,7 @@ class Assembler(object):
 
         slice_ = OrderedSlice(self._slice, self._transforms)
         slice_ = SliceWithInsertions(slice_, self._transforms)
-        # slice_ = SliceWithHidden(slice_, self._transforms)
+        slice_ = SliceWithHidden(slice_, self._transforms)
         slice_ = PrunedSlice(slice_, self._transforms)
 
         return slice_
@@ -1342,7 +1351,29 @@ class SliceWithInsertions(_TransformedSlice):
         return tuple(columns)
 
 
-class _AssembledVector(object):
+class _TransformedVecvtor(object):
+    @lazyproperty
+    def label(self):
+        return self._base_vector.label
+
+    @lazyproperty
+    def hidden(self):
+        return self._base_vector.hidden
+
+    @lazyproperty
+    def pruned(self):
+        return self._base_vector.pruned
+
+    @lazyproperty
+    def base(self):
+        return self._base_vector.base
+
+    @lazyproperty
+    def margin(self):
+        return self._base_vector.margin
+
+
+class _AssembledVector(_TransformedVecvtor):
     """Vector with base, as well as inserted, elements (of the opposite dimension)."""
 
     def __init__(self, base_vector, opposite_inserted_vectors):
@@ -1628,7 +1659,7 @@ class OrderTransform(object):
         return np.array(self._column_dimension.valid_display_order)
 
 
-class OrderedVector(object):
+class OrderedVector(_TransformedVecvtor):
     """In charge of indexing elements properly, after ordering transform."""
 
     def __init__(self, vector, order):
@@ -1922,3 +1953,35 @@ class PrunedSlice(_TransformedSlice):
         row_ind = np.any(index, axis=1)
         col_ind = np.any(index, axis=0)
         return margin[np.ix_(row_ind, col_ind)]
+
+
+class SliceWithHidden(_TransformedSlice):
+    @lazyproperty
+    def rows(self):
+        return tuple(row for row in self._base_slice.rows if not row.hidden)
+
+    @lazyproperty
+    def columns(self):
+        return tuple(
+            HiddenVector(column, self._base_slice.rows)
+            for column in self._base_slice.columns
+            if not column.hidden
+        )
+
+
+class HiddenVector(_TransformedVecvtor):
+    def __init__(self, base_vector, opposite_vectors):
+        self._base_vector = base_vector
+        self._opposite_vectors = opposite_vectors
+
+    @lazyproperty
+    def proportions(self):
+        return np.array(
+            [
+                proportion
+                for proportion, opposite_vector in zip(
+                    self._base_vector.proportions, self._opposite_vectors
+                )
+                if not opposite_vector.hidden
+            ]
+        )
