@@ -282,6 +282,11 @@ class _0DMeansSlice(object):
     def table_margin(self):
         return np.sum(self._base_counts)
 
+    @lazyproperty
+    def table_base(self):
+        # TODO: Check why we expect mean instead of the real base in this case.
+        return self.means
+
 
 # Used to represent the non-existent dimension in case of 1D vectors (that need to be
 # accessed as slices, to support cr.exporter).
@@ -617,7 +622,10 @@ class _1DMrSlice(_MrXCatSlice):
         return tuple(
             [
                 _MultipleResponseVector(
-                    self._counts.T, self._base_counts.T, "Summary", self.table_margin
+                    self._counts.T,
+                    self._base_counts.T,
+                    _PlaceholderElement("Summary", False),
+                    self.table_margin,
                 )
             ]
         )
