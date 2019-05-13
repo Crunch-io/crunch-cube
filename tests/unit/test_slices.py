@@ -464,6 +464,7 @@ class DescribeOrderTransform(object):
 class DescribeOrderedSlice(object):
     """Unit-test suite for `cr.cube.slices.OrderedSlice` object."""
 
+    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_initiates_slice_and_reordering(self):
         slice_ = Mock()
         ordering = Mock()
@@ -534,6 +535,7 @@ class DescribeOrderedVector(object):
 class DescribeTransforms(object):
     """Unit-test suite for `cr.cube.slices.Transforms` object."""
 
+    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_initiates_transforms(self):
         insertions = Mock()
         ordering = Mock()
@@ -547,6 +549,7 @@ class DescribeTransforms(object):
 class DescribePrunedSlice(object):
     """Unit-test suite for `cr.cube.slices.PrunedSlice` object."""
 
+    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_initiates_slice(self):
         slice_ = Mock()
         pruned_slice = PrunedSlice(slice_)

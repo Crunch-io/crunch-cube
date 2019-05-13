@@ -208,10 +208,6 @@ class FrozenSlice(object):
         return (rows_dimension, columns_dimension)
 
     @lazyproperty
-    def _insertions(self):
-        return Insertions(self._dimensions, self._slice)
-
-    @lazyproperty
     def _ordering(self):
         return OrderTransform(self._dimensions)
 
@@ -266,7 +262,7 @@ class FrozenSlice(object):
 
     @lazyproperty
     def _transforms(self):
-        return Transforms(self._ordering, self._pruning, self._insertions)
+        return Transforms(self._slice, self._dimensions, self._pruning)
 
 
 class _0DMeansSlice(object):
@@ -1189,14 +1185,10 @@ class Assembler(object):
     @lazyproperty
     def slice(self):
         """Apply all transforms sequentially."""
-        slice_ = self._slice
 
-        if self._transforms.ordering:
-            slice_ = OrderedSlice(slice_, self._transforms.ordering)
-        if self._transforms.insertions:
-            slice_ = SliceWithInsertions(slice_, self._transforms.insertions)
-        if self._transforms.pruning:
-            slice_ = PrunedSlice(slice_)
+        slice_ = OrderedSlice(self._slice, self._transforms)
+        slice_ = SliceWithInsertions(slice_, self._transforms)
+        slice_ = PrunedSlice(slice_, self._transforms)
 
         return slice_
 
@@ -1228,9 +1220,13 @@ class Assembler(object):
 class SliceWithInsertions(object):
     """Represents slice with both normal and inserted bits."""
 
-    def __init__(self, slice_, insertions):
+    def __init__(self, slice_, transforms):
         self._slice = slice_
-        self._insertions = insertions
+        self._transforms = transforms
+
+    @lazyproperty
+    def _insertions(self):
+        return self._transforms.insertions
 
     @lazyproperty
     def table_margin(self):
@@ -1690,9 +1686,13 @@ class OrderedSlice(object):
     In charge of indexing rows and columns properly.
     """
 
-    def __init__(self, slice_, ordering):
+    def __init__(self, slice_, transforms):
         self._slice = slice_
-        self._ordering = ordering
+        self._transforms = transforms
+
+    @lazyproperty
+    def _ordering(self):
+        return self._transforms.ordering
 
     @lazyproperty
     def rows(self):
@@ -1722,14 +1722,14 @@ class OrderedSlice(object):
 class Transforms(object):
     """Container for the transforms."""
 
-    def __init__(self, ordering=None, pruning=None, insertions=None):
-        self._ordering = ordering
+    def __init__(self, slice_, dimensions, pruning=None):
+        self._slice = slice_
+        self._dimensions = dimensions
         self._pruning = pruning
-        self._insertions = insertions
 
     @lazyproperty
     def ordering(self):
-        return self._ordering
+        return OrderTransform(self._dimensions)
 
     @lazyproperty
     def pruning(self):
@@ -1737,7 +1737,7 @@ class Transforms(object):
 
     @lazyproperty
     def insertions(self):
-        return self._insertions
+        return Insertions(self._dimensions, self._slice)
 
 
 class PrunedVector(object):
@@ -1871,36 +1871,50 @@ class PrunedSlice(object):
     vectors also needs to be pruned based on the opposite dimension's base.
     """
 
-    def __init__(self, slice_):
-        self._slice = slice_
+    def __init__(self, base_slice, transforms):
+        self._base_slice = base_slice
+        self._transforms = transforms
+
+    @lazyproperty
+    def _applied(self):
+        return self._transforms._pruning
 
     @lazyproperty
     def rows(self):
+        if not self._applied:
+            return self._base_slice.rows
+
         return tuple(
-            PrunedVector(row, self._slice.columns)
-            for row in self._slice.rows
+            PrunedVector(row, self._base_slice.columns)
+            for row in self._base_slice.rows
             if not row.pruned
         )
 
     @lazyproperty
     def columns(self):
+        if not self._applied:
+            return self._base_slice.columns
+
         return tuple(
-            PrunedVector(column, self._slice.rows)
-            for column in self._slice.columns
+            PrunedVector(column, self._base_slice.rows)
+            for column in self._base_slice.columns
             if not column.pruned
         )
 
     @lazyproperty
     def table_margin_unpruned(self):
-        return self._slice.table_margin
+        return self._base_slice.table_margin
 
     @lazyproperty
     def table_base_unpruned(self):
-        return self._slice.table_base
+        return self._base_slice.table_base
 
     @lazyproperty
     def table_margin(self):
-        margin = self._slice.table_margin
+        if not self._applied:
+            return self._base_slice.table_margin
+
+        margin = self._base_slice.table_margin
         index = margin != 0
         if margin.ndim < 2:
             return margin[index]
@@ -1910,7 +1924,10 @@ class PrunedSlice(object):
 
     @lazyproperty
     def table_base(self):
-        margin = self._slice.table_base
+        if not self._applied:
+            return self._base_slice.table_base
+
+        margin = self._base_slice.table_base
         index = margin != 0
         if margin.ndim < 2:
             return margin[index]
