@@ -11,6 +11,7 @@ from cr.cube.dimension import NewDimension
 from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.min_base_size_mask import MinBaseSizeMask
 from cr.cube.util import lazyproperty
+from cr.cube.measures.pairwise_significance import PairwiseSignificance
 
 
 class FrozenSlice(object):
@@ -35,6 +36,39 @@ class FrozenSlice(object):
         self._mask_size = mask_size
 
     # ---interface ---------------------------------------------------
+
+    @lazyproperty
+    def pairwise_indices(self):
+        alpha = self._transforms_dict.get("pairwise_indices", {}).get("alpha", 0.05)
+        only_larger = self._transforms_dict.get("pairwise_indices", {}).get(
+            "only_larger", True
+        )
+        return PairwiseSignificance(
+            self, alpha=alpha, only_larger=only_larger
+        ).pairwise_indices
+
+    @lazyproperty
+    def pairwise_significance_tests(self):
+        """tuple of _ColumnPairwiseSignificance tests.
+
+        Result has as many elements as there are columns in the slice. Each
+        significance test contains `p_vals` and `t_stats` (ndarrays that represent
+        probability values and statistical scores).
+        """
+        return tuple(
+            PairwiseSignificance(self).values[column_idx]
+            for column_idx in range(len(self._assembler.columns))
+        )
+
+    @lazyproperty
+    def summary_pairwise_indices(self):
+        alpha = self._transforms_dict.get("pairwise_indices", {}).get("alpha", 0.05)
+        only_larger = self._transforms_dict.get("pairwise_indices", {}).get(
+            "only_larger", True
+        )
+        return PairwiseSignificance(
+            self, alpha=alpha, only_larger=only_larger
+        ).summary_pairwise_indices
 
     @lazyproperty
     def scale_means_row(self):
