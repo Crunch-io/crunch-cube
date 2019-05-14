@@ -35,6 +35,23 @@ class FrozenSlice(object):
         self._mask_size = mask_size
 
     # ---interface ---------------------------------------------------
+
+    @lazyproperty
+    def scale_means_row(self):
+        return self._calculator.scale_means_row
+
+    @lazyproperty
+    def scale_means_row_margin(self):
+        return self._calculator.scale_means_row_margin
+
+    @lazyproperty
+    def scale_means_column_margin(self):
+        return self._calculator.scale_means_column_margin
+
+    @lazyproperty
+    def scale_means_column(self):
+        return self._calculator.scale_means_column
+
     @lazyproperty
     def column_index(self):
         """ndarray of column index percentages.
@@ -827,6 +844,10 @@ class _BaseVector(object):
         self._base_counts = base_counts
 
     @lazyproperty
+    def numeric(self):
+        return self._element.numeric_value
+
+    @lazyproperty
     def label(self):
         return self._element.label
 
@@ -1101,6 +1122,10 @@ class _InsertionVector(object):
     def __init__(self, slice_, subtotal):
         self._slice = slice_
         self._subtotal = subtotal
+
+    @lazyproperty
+    def numeric(self):
+        return np.nan
 
     @lazyproperty
     def hidden(self):
@@ -1380,6 +1405,10 @@ class _TransformedVecvtor(object):
     def margin(self):
         return self._base_vector.margin
 
+    @lazyproperty
+    def numeric(self):
+        return self._base_vector.numeric
+
 
 class _AssembledVector(_TransformedVecvtor):
     """Vector with base, as well as inserted, elements (of the opposite dimension)."""
@@ -1550,6 +1579,69 @@ class Calculator(object):
 
     def __init__(self, assembler):
         self._assembler = assembler
+
+    @lazyproperty
+    def rows_dimension_numeric(self):
+        return np.array([row.numeric for row in self._assembler.rows])
+
+    @lazyproperty
+    def columns_dimension_numeric(self):
+        return np.array([column.numeric for column in self._assembler.columns])
+
+    @lazyproperty
+    def scale_means_row(self):
+        if np.all(np.isnan(self.rows_dimension_numeric)):
+            return None
+        inner = np.nansum(self.rows_dimension_numeric[:, None] * self.counts, axis=0)
+        not_a_nan_index = ~np.isnan(self.rows_dimension_numeric)
+        denominator = np.sum(self.counts[not_a_nan_index, :], axis=0)
+        return inner / denominator
+
+    @lazyproperty
+    def scale_means_row_margin(self):
+        if np.all(np.isnan(self.rows_dimension_numeric)):
+            return None
+
+        row_margin = self.row_margin
+        if len(row_margin.shape) > 1:
+            # Hack for MR, where row margin is a table. Figure how to
+            # fix with subclassing
+            row_margin = row_margin[:, 0]
+
+        not_a_nan_index = ~np.isnan(self.rows_dimension_numeric)
+        return np.nansum(self.rows_dimension_numeric * row_margin) / np.sum(
+            row_margin[not_a_nan_index]
+        )
+
+    @lazyproperty
+    def scale_means_column_margin(self):
+        if np.all(np.isnan(self.columns_dimension_numeric)):
+            return None
+
+        column_margin = self.column_margin
+        if len(column_margin.shape) > 1:
+            # Hack for MR, where column margin is a table. Figure how to
+            # fix with subclassing
+            column_margin = column_margin[0]
+
+        not_a_nan_index = ~np.isnan(self.columns_dimension_numeric)
+        return np.nansum(self.columns_dimension_numeric * column_margin) / np.sum(
+            column_margin[not_a_nan_index]
+        )
+
+    @lazyproperty
+    def scale_means_column(self):
+        if np.all(np.isnan(self.columns_dimension_numeric)):
+            return None
+
+        inner = np.nansum(self.columns_dimension_numeric * self.counts, axis=1)
+        not_a_nan_index = ~np.isnan(self.columns_dimension_numeric)
+        denominator = np.sum(self.counts[:, not_a_nan_index], axis=1)
+        return inner / denominator
+        # return (
+        #     np.nansum(self.columns_dimension_numeric * self.counts, axis=1)
+        #     / self.row_margin
+        # )
 
     @lazyproperty
     def column_index(self):
@@ -1771,7 +1863,7 @@ class Transforms(object):
         return Insertions(self._dimensions, self._slice)
 
 
-class PrunedVector(object):
+class PrunedVector(_TransformedVecvtor):
     """Vector with elements from the opposide dimensions pruned."""
 
     def __init__(self, base_vector, opposite_vectors):
