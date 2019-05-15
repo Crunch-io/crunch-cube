@@ -16,18 +16,13 @@ except NameError:  # pragma: no cover
     xrange = range
 
 
-class PairwiseSignificance:
+class NewPairwiseSignificance:
     """Implementation of p-vals and t-tests for each column proportions comparison."""
 
-    def __init__(
-        self, slice_, axis=0, weighted=True, alpha=0.05, only_larger=True, hs_dims=None
-    ):
+    def __init__(self, slice_, alpha=0.05, only_larger=True):
         self._slice = slice_
-        self._axis = axis
-        self._weighted = weighted
         self._alpha = alpha
         self._only_larger = only_larger
-        self._hs_dims = hs_dims
 
     @lazyproperty
     def values(self):
@@ -36,19 +31,11 @@ class PairwiseSignificance:
         Result has as many elements as there are coliumns in the slice. Each
         significance test contains `p_vals` and `t_stats` significance tests.
         """
-        # TODO: Figure out how to intersperse pairwise objects for columns
-        # that represent H&S
         return [
             _ColumnPairwiseSignificance(
-                self._slice,
-                col_idx,
-                self._axis,
-                self._weighted,
-                self._alpha,
-                self._only_larger,
-                self._hs_dims,
+                self._slice, col_idx, self._alpha, self._only_larger
             )
-            for col_idx in range(self._slice.get_shape(hs_dims=self._hs_dims)[1])
+            for col_idx in xrange(self._slice.shape[1])
         ]
 
     @lazyproperty
@@ -68,41 +55,20 @@ class PairwiseSignificance:
         return summary_pairwise_indices
 
 
-# pylint: disable=too-few-public-methods
 class _ColumnPairwiseSignificance:
     """Value object providing matrix of T-score based pairwise-comparison P-values"""
 
-    def __init__(
-        self,
-        slice_,
-        col_idx,
-        axis=0,
-        weighted=True,
-        alpha=0.05,
-        only_larger=True,
-        hs_dims=None,
-    ):
+    def __init__(self, slice_, col_idx, alpha=0.05, only_larger=True):
         self._slice = slice_
         self._col_idx = col_idx
-        self._axis = axis
-        self._weighted = weighted
         self._alpha = alpha
         self._only_larger = only_larger
-        self._hs_dims = hs_dims
-
-    @lazyproperty
-    def _unweighted_col_margin(self):
-        return self._slice.margin(
-            axis=0, weighted=False, include_transforms_for_dims=self._hs_dims
-        )
 
     @lazyproperty
     def t_stats(self):
-        props = self._slice.proportions(
-            axis=0, include_transforms_for_dims=self._hs_dims
-        )
+        props = self._slice.column_proportions
         diff = props - props[:, [self._col_idx]]
-        var_props = props * (1.0 - props) / self._unweighted_col_margin
+        var_props = props * (1.0 - props) / self._slice.column_base
         se_diff = np.sqrt(var_props + var_props[:, [self._col_idx]])
         return diff / se_diff
 
@@ -126,10 +92,11 @@ class _ColumnPairwiseSignificance:
 
     @lazyproperty
     def summary_t_stats(self):
-        total_margin = self._slice.margin(weighted=self._weighted)
-        col_margin_props = self._unweighted_col_margin / total_margin
+        col_margin_props = self._slice.column_base / self._slice.table_margin
         diff = col_margin_props - col_margin_props[self._col_idx]
-        var_props = col_margin_props * (1.0 - col_margin_props) / total_margin
+        var_props = (
+            col_margin_props * (1.0 - col_margin_props) / self._slice.table_margin
+        )
         se_diff = np.sqrt(var_props + var_props[self._col_idx])
         return diff / se_diff
 
@@ -140,14 +107,8 @@ class _ColumnPairwiseSignificance:
     @lazyproperty
     def _df(self):
         selected_unweighted_n = (
-            self._unweighted_n[self._col_idx]
-            if self._unweighted_n.ndim < 2
-            else self._unweighted_n[:, self._col_idx][:, None]
+            self._slice.column_base[self._col_idx]
+            if self._slice.column_base.ndim < 2
+            else self._slice.column_base[:, self._col_idx][:, None]
         )
-        return self._unweighted_n + selected_unweighted_n - 2
-
-    @lazyproperty
-    def _unweighted_n(self):
-        return self._slice.margin(
-            axis=0, weighted=False, include_transforms_for_dims=self._hs_dims
-        )
+        return self._slice.column_base + selected_unweighted_n - 2
