@@ -17,7 +17,6 @@ from ..unitutil import instance_mock, method_mock, property_mock
 class DescribeMinBaseSizeMask:
     """Unit-test suite for `cr.cube.min_base_size_mask.MinBaseSizeMask` object."""
 
-    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_provides_access_to_column_direction_mask(
         self, _margin, _get_shape, _ndim, column_mask_fixture
     ):
@@ -28,7 +27,6 @@ class DescribeMinBaseSizeMask:
         row_mask = MinBaseSizeMask(CubeSlice(None, None), size).column_mask
         np.testing.assert_array_equal(row_mask, expected_mask)
 
-    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_provides_access_to_row_direction_mask(
         self, _margin, _get_shape, _ndim, row_mask_fixture
     ):
@@ -39,7 +37,6 @@ class DescribeMinBaseSizeMask:
         row_mask = MinBaseSizeMask(CubeSlice(None, None), size).row_mask
         np.testing.assert_array_equal(row_mask, expected_mask)
 
-    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_provides_access_to_table_direction_mask(
         self, _margin, _get_shape, _ndim, _dim_types, table_mask_fixture
     ):
@@ -51,7 +48,6 @@ class DescribeMinBaseSizeMask:
         table_mask = MinBaseSizeMask(CubeSlice(None, None), size).table_mask
         np.testing.assert_array_equal(table_mask, expected_mask)
 
-    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_retains_single_element_dimension_in_shape(
         self, _ndim, _get_shape, shape_fixture
     ):

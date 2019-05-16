@@ -9,7 +9,7 @@ from scipy.stats import norm
 
 from cr.cube.dimension import NewDimension
 from cr.cube.enum import DIMENSION_TYPE as DT
-from cr.cube.min_base_size_mask import MinBaseSizeMask
+from cr.cube.frozen_min_base_size_mask import MinBaseSizeMask
 from cr.cube.util import lazyproperty
 from cr.cube.measures.new_pairwise_significance import NewPairwiseSignificance
 
@@ -162,14 +162,14 @@ class FrozenSlice(object):
 
     @lazyproperty
     def columns_dimension_name(self):
-        """str name assigned to columns-dimension.
+        """str name assigned to rows-dimension.
 
-        The empty string ("") for a 0D or 1D slice (until we get to all slices being
-        2D). Reflects the resolved dimension-name transform cascade.
+        The empty string ("") for a 0D and 1D slices (until we get to all slices
+        being 2D). Reflects the resolved dimension-name transform cascade.
         """
-        if len(self._dimensions) < 2:
+        if len(self.dimensions) < 2:
             return ""
-        return self._dimensions[1].name
+        return self.dimensions[1].name
 
     @lazyproperty
     def counts(self):
@@ -182,11 +182,6 @@ class FrozenSlice(object):
     @lazyproperty
     def names(self):
         return self._slice.names
-
-    @lazyproperty
-    def ndim(self):
-        """int count of dimensions in this slice, one of 0, 1, or 2."""
-        return len(self._dimensions)
 
     @lazyproperty
     def population_counts(self):
@@ -250,9 +245,15 @@ class FrozenSlice(object):
 
         This value is None for a 0D slice (until we get to all slices being 2D).
         """
-        if len(self._dimensions) == 0:
+        if len(self.dimensions) == 0:
             return None
-        return self._dimensions[0].dimension_type
+        return self.dimensions[0].dimension_type
+
+    @lazyproperty
+    def columns_dimension_type(self):
+        if len(self.dimensions) < 2:
+            return None
+        return self.dimensions[1].dimension_type
 
     @lazyproperty
     def shape(self):
@@ -324,10 +325,6 @@ class FrozenSlice(object):
         )
 
         return (rows_dimension, columns_dimension)
-
-    @lazyproperty
-    def _ordering(self):
-        return OrderTransform(self.dimensions)
 
     @lazyproperty
     def _pruning(self):
@@ -409,18 +406,6 @@ class _0DMeansSlice(object):
     @lazyproperty
     def means(self):
         return self._means
-
-    @lazyproperty
-    def rows(self):
-        return tuple(
-            [
-                _MeansVector(
-                    _PlaceholderElement("0D Mean", False),
-                    self._base_counts,
-                    self._means,
-                )
-            ]
-        )
 
     @lazyproperty
     def table_margin(self):
@@ -530,10 +515,6 @@ class _CatXCatSlice(object):
     def _valid_rows_idxs(self):
         """ndarray-style index for only valid rows (out of missing and not-missing)."""
         return np.ix_(self._dimensions[-2].valid_elements.element_idxs)
-
-    @lazyproperty
-    def _row_margin(self):
-        return np.array([row.margin for row in self.rows])
 
     @lazyproperty
     def _column_proportions(self):
@@ -686,10 +667,6 @@ class _1DCaCatSlice(_1DCatSlice):
         super(_1DCaCatSlice, self).__init__(dimensions, counts, base_counts)
         self._table_name = table_name
 
-    @lazyproperty
-    def name(self):
-        return self._table_name
-
 
 class _SliceWithMR(_CatXCatSlice):
     @staticmethod
@@ -725,14 +702,6 @@ class _MrXCatSlice(_SliceWithMR):
         dim_sum = np.sum(self._all_counts, axis=2)[:, 0][self._valid_rows_idxs]
         total = np.sum(self._all_counts[self._valid_rows_idxs][:, 0:2], axis=(1, 2))
         return (dim_sum / total)[:, None]
-
-    @lazyproperty
-    def table_base_unpruned(self):
-        return self.table_base
-
-    @lazyproperty
-    def table_margin_unpruned(self):
-        return self.table_margin
 
     @lazyproperty
     def _zscores(self):
@@ -857,14 +826,6 @@ class _CatXMrSlice(_SliceWithMR):
         """
         dim_sum = np.sum(self._all_counts, axis=2)[self._valid_rows_idxs]
         return dim_sum / np.sum(dim_sum, axis=0)
-
-    @lazyproperty
-    def table_base_unpruned(self):
-        return self.table_base
-
-    @lazyproperty
-    def table_margin_unpruned(self):
-        return self.table_margin
 
     @lazyproperty
     def _zscores(self):
@@ -1060,6 +1021,10 @@ class _MeansVector(_BaseVector):
     def means(self):
         return self._means
 
+    @lazyproperty
+    def values(self):
+        return self._means
+
 
 class _MeansWithMrVector(_MeansVector):
     """This is a row of a 1-D MR with Means.
@@ -1127,10 +1092,6 @@ class _CategoricalVector(_BaseVector):
     def proportions(self):
         return self.values / self.margin
         # return self.values / self.base
-
-    @lazyproperty
-    def table_proportions(self):
-        return self.values / self.table_margin
 
 
 class _CatXMrVector(_CategoricalVector):
@@ -1220,46 +1181,12 @@ class Insertions(object):
         return tuple(row for row in self._rows if row.anchor == "bottom")
 
     @lazyproperty
-    def column_anchors(self):
-        return tuple(column.anchor for column in self.columns)
-
-    @lazyproperty
     def columns(self):
         return tuple(
             column
             for column in self._inserted_columns
             if column.anchor not in ("top", "bottom")
         )
-
-    @lazyproperty
-    def intersections(self):
-        intersections = []
-        for row in self._rows:
-            row_col_intersections = []
-            row_idx = (
-                0
-                if row.anchor == "top"
-                else -1
-                if row.anchor == "bottom"
-                else row.anchor
-            )
-            for col in self._inserted_columns:
-                col_idx = (
-                    0
-                    if col.anchor == "top"
-                    else -1
-                    if col.anchor == "bottom"
-                    else col.anchor + 1
-                )
-                intersection_value = row.values[col_idx] + col.values[row_idx]
-                row_col_intersections.append(intersection_value)
-            intersections.append(row_col_intersections)
-
-        return np.array(intersections)
-
-    @lazyproperty
-    def row_anchors(self):
-        return tuple(row.anchor for row in self.rows)
 
     @lazyproperty
     def rows(self):
@@ -1375,20 +1302,6 @@ class _InsertionVector(object):
     def base(self):
         return np.sum(np.array([vec.base for vec in self._addend_vectors]), axis=0)
 
-    @lazyproperty
-    def proportions(self):
-        return self.values / self.margin
-        # return self.values / self.base
-
-    @lazyproperty
-    def table_proportions(self):
-        return self.values / self.table_proportions
-
-    @lazyproperty
-    def pruned(self):
-        """Insertions are never pruned."""
-        return False
-
 
 class _InsertionColumn(_InsertionVector):
     @lazyproperty
@@ -1489,14 +1402,6 @@ class SliceWithInsertions(_TransformedSlice):
     @lazyproperty
     def _insertions(self):
         return self._transforms.insertions
-
-    @lazyproperty
-    def table_base_unpruned(self):
-        return self.table_base
-
-    @lazyproperty
-    def table_margin_unpruned(self):
-        return self.table_margin
 
     @lazyproperty
     def rows(self):
@@ -1630,6 +1535,14 @@ class _TransformedVecvtor(object):
     def means(self):
         return self._base_vector.means
 
+    @lazyproperty
+    def table_base(self):
+        return self._base_vector.table_base
+
+    @lazyproperty
+    def table_margin(self):
+        return self._base_vector.table_margin
+
 
 class _AssembledVector(_TransformedVecvtor):
     """Vector with base, as well as inserted, elements (of the opposite dimension)."""
@@ -1717,10 +1630,6 @@ class _AssembledVector(_TransformedVecvtor):
             + self._interleaved_base_values
             + self._bottom_base_values
         )
-
-    @lazyproperty
-    def _column_anchors(self):
-        return tuple(col.anchor for col in self._opposite_inserted_vectors)
 
     @lazyproperty
     def _top_values(self):
@@ -1934,7 +1843,7 @@ class Calculator(object):
 
     @lazyproperty
     def means(self):
-        if isinstance(self._assembler._slice, _0DMeansSlice):
+        if type(self._assembler._slice) is _0DMeansSlice:
             return self._assembler._slice.means
         return np.array([row.means for row in self._assembler.rows])
 
@@ -1978,23 +1887,6 @@ class OrderTransform(object):
         return self._dimensions[1]
 
     @lazyproperty
-    def _row_ids(self):
-        return tuple(el.element_id for el in self._row_dimension.valid_elements)
-
-    @lazyproperty
-    def _column_ids(self):
-        return tuple(el.element_id for el in self._column_dimension.valid_elements)
-
-    @lazyproperty
-    def _ordered_row_ids(self):
-        return self._ordered_ids[0]
-
-    @lazyproperty
-    def _ordered_column_ids(self):
-        ids = self._ordered_ids[1]
-        return ids if ids is not None else None
-
-    @lazyproperty
     def row_order(self):
         return np.array(self._row_dimension.valid_display_order)
 
@@ -2032,22 +1924,6 @@ class OrderedVector(_TransformedVecvtor):
     @lazyproperty
     def base_values(self):
         return self._base_vector.base_values[self.order]
-
-    @lazyproperty
-    def margin(self):
-        return self._base_vector.margin
-
-    @lazyproperty
-    def pruned(self):
-        return self._base_vector.pruned
-
-    @lazyproperty
-    def table_margin(self):
-        return self._base_vector.table_margin
-
-    @lazyproperty
-    def table_base(self):
-        return self._base_vector.table_base
 
     @lazyproperty
     def zscore(self):

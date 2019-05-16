@@ -501,42 +501,6 @@ class NewDimension(Dimension):
     def valid_display_order(self):
         return self.all_elements.valid_display_order
 
-    # NOTE: Not needed in FrozenSlice world, remove on integration into Dimension.
-    @lazyproperty
-    def has_transforms(self):
-        raise NotImplementedError("you shouldn't need this")
-
-    # NOTE: Not needed in FrozenSlice world, remove on integration into Dimension.
-    @lazyproperty
-    def hs_indices(self):
-        raise NotImplementedError("you shouldn't need this")
-
-    # NOTE: Not needed in FrozenSlice world, remove on integration into Dimension.
-    @lazyproperty
-    def inserted_hs_indices(self):
-        raise NotImplementedError("you shouldn't need this")
-
-    # TODO: @slobodan maybe we don't even need this property anymore, because the
-    # FrozenSlice accesses elements directly, and each element is the authority for its
-    # own label (it resolves its own rename cascade).
-    #
-    # NOTE: this becomes a lazyproperty.
-    # `include_cat_ids` is no longer needed by tablewriter because transforms are
-    # applied here, not there. So that parameter goes away.
-    # `include_missing` is not needed as far as I know, should be separate lazyproperty
-    # if so or set in the constructor or something. I'm thinking it would be a transform
-    # and it's not yet, so leaving it out.
-    # `include_transforms` will always effectively be False, so leaving that out. Note
-    # that element-rename transforms *are* included, but those are implemented at the
-    # element level.
-    @lazyproperty
-    def labels(self):
-        """Sequence of str labels for the elements of this dimension.
-
-        Note the return value does not include labels for inserted elements (subtotals).
-        """
-        return tuple(element.label for element in self.valid_elements)
-
     @lazyproperty
     def name(self):
         """str name of this dimension, the empty string ("") if not specified."""

@@ -4,6 +4,7 @@ import numpy as np
 
 from cr.cube.crunch_cube import CrunchCube
 from cr.cube.slices import FrozenSlice
+from cr.cube.enum import DIMENSION_TYPE as DT
 
 from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
 
@@ -52,6 +53,43 @@ class DescribeFrozenSlice:
             ]
         )
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
+        assert slice_.insertion_rows_idxs == (1,)
+        assert slice_.insertion_columns_idxs == (1,)
+        assert slice_.name == "MaritalStatus"
+        assert slice_.dimension_types == (DT.CAT, DT.CAT)
+        assert slice_.ndim == 2
+        assert slice_.table_name is None
+
+    def it_provides_base_counts(self):
+        slice_ = FrozenSlice(CrunchCube(CR.CAT_X_CAT_PRUNING_HS))
+        np.testing.assert_array_equal(
+            slice_.base_counts,
+            [
+                [28, 48, 20, 10, 0, 1],
+                [7, 19, 12, 8, 0, 2],
+                [1, 1, 0, 1, 0, 0],
+                [3, 7, 4, 2, 0, 2],
+                [3, 11, 8, 5, 0, 0],
+                [0, 0, 0, 0, 0, 0],
+                [1, 2, 1, 1, 0, 0],
+            ],
+        )
+        assert slice_.table_base == 91
+
+    def it_provides_various_names_and_labels(self):
+        slice_ = FrozenSlice(CrunchCube(CR.CAT_X_CAT_PRUNING_HS))
+        assert slice_.columns_dimension_name == "ShutdownBlame"
+        assert slice_.column_labels_with_ids == (
+            (u"President Obama", 1),
+            (u"Obama + Republicans", -1),
+            (u"Republicans in Congress", 2),
+            (u"Both", 3),
+            (u"Neither", 4),
+            (u"Not sure", 5),
+        )
+        assert slice_.rows_dimension_description == "What is your marital status?"
+        assert slice_.rows_dimension_type == DT.CAT
+        assert slice_.columns_dimension_type == DT.CAT
 
     def it_calculates_cat_x_cat_column_proportions(self):
         cube = CrunchCube(CR.CAT_X_CAT_PRUNING_HS)
@@ -70,6 +108,16 @@ class DescribeFrozenSlice:
             ]
         )
         np.testing.assert_almost_equal(slice_.column_proportions, expected)
+
+    def it_provides_unpruned_table_margin(self):
+        slice_ = FrozenSlice(CrunchCube(CR.MR_X_CAT_HS))
+        np.testing.assert_array_equal(
+            slice_.table_base_unpruned, [165, 210, 242, 450, 476]
+        )
+        np.testing.assert_almost_equal(
+            slice_.table_margin_unpruned,
+            [176.3655518, 211.4205877, 247.7407379, 457.0509557, 471.9317685],
+        )
 
     def it_calculates_mr_x_cat_row_proportions(self):
         cube = CrunchCube(CR.MR_X_CAT_HS)
