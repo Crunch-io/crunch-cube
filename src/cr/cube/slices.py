@@ -125,6 +125,17 @@ class FrozenSlice(object):
         return self._calculator.column_proportions
 
     @lazyproperty
+    def columns_dimension_name(self):
+        """str name assigned to columns-dimension.
+
+        The empty string ("") for a 0D or 1D slice (until we get to all slices being
+        2D). Reflects the resolved dimension-name transform cascade.
+        """
+        if len(self._dimensions) < 2:
+            return ""
+        return self._dimensions[1].name
+
+    @lazyproperty
     def counts(self):
         return self._calculator.counts
 
@@ -135,6 +146,11 @@ class FrozenSlice(object):
     @lazyproperty
     def names(self):
         return self._slice.names
+
+    @lazyproperty
+    def ndim(self):
+        """int count of dimensions in this slice, one of 0, 1, or 2."""
+        return len(self._dimensions)
 
     @lazyproperty
     def population_counts(self):
@@ -187,6 +203,16 @@ class FrozenSlice(object):
         if len(self._dimensions) == 0:
             return ""
         return self._dimensions[0].name
+
+    @lazyproperty
+    def rows_dimension_type(self):
+        """Member of DIMENSION_TYPE enum describing type of rows dimension, or None.
+
+        This value is None for a 0D slice (until we get to all slices being 2D).
+        """
+        if len(self._dimensions) == 0:
+            return None
+        return self._dimensions[0].dimension_type
 
     @lazyproperty
     def shape(self):
