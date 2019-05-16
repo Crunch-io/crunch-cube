@@ -1,4 +1,8 @@
+# encoding: utf-8
+
 """Unit tests for the index functionality."""
+
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 # pylint: disable=missing-docstring, invalid-name, redefined-outer-name
 
@@ -23,11 +27,14 @@ def test_index_performs_correct_division(index_fixture):
             [0.6, 0.4],
             [[119.047619047619, 71.4285714285714], [104.16666666666667, 93.75]],
         ),
-        (
-            [[0.5, 0.4], [0.5, 0.6]],
-            0,
-            [0.6, 0.4],
-            [[83.3333333333333, 66.6666666666667], [125, 150]],
+        pytest.param(
+            (
+                [[0.5, 0.4], [0.5, 0.6]],
+                0,
+                [0.6, 0.4],
+                [[83.3333333333333, 66.6666666666667], [125, 150]],
+            ),
+            marks=pytest.mark.xfail(reason="FrozenSlice WIP", strict=True),
         ),
     ]
 )

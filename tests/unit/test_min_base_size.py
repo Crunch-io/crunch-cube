@@ -2,6 +2,8 @@
 
 """Unit test suite for cr.cube.min_base_size module."""
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import pytest
 import numpy as np
 
@@ -13,6 +15,8 @@ from ..unitutil import instance_mock, method_mock, property_mock
 
 
 class DescribeMinBaseSizeMask:
+    """Unit-test suite for `cr.cube.min_base_size_mask.MinBaseSizeMask` object."""
+
     def it_provides_access_to_column_direction_mask(
         self, _margin, _get_shape, _ndim, column_mask_fixture
     ):

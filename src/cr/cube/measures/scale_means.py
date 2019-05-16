@@ -69,10 +69,10 @@ class ScaleMeans(object):
         dimension_index = 1 - axis
         margin = self._slice.margin(axis=axis)
         if len(margin.shape) > 1:
-            index = [
+            index = tuple(
                 0 if d.dimension_type == DT.MR else slice(None)
                 for d in self._slice.dimensions
-            ]
+            )
             margin = margin[index]
         total = np.sum(margin)
         values = self.values[dimension_index]

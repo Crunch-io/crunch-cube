@@ -257,6 +257,7 @@ class CubeSlice(object):
             axis == 0
             and len(baseline.shape) <= 1
             and self.ndim == len(self.get_shape())
+            and not self.dim_types == (DT.MR, DT.MR)
         ):
             baseline = baseline[:, None]
 
@@ -595,6 +596,7 @@ class CubeSlice(object):
         are calculated for each of them separately, and then stacked together
         in the resulting array.
         """
+        # __import__("ipdb").set_trace()
         if self.mr_dim_ind == 0:
             # --This is a special case where broadcasting cannot be
             # --automatically done. We need to "inflate" the single dimensional
@@ -695,7 +697,7 @@ class CubeSlice(object):
             total_axis = axis if self.mr_dim_ind != 0 else 1 - axis
 
         total = np.sum(baseline, axis=total_axis)
-        baseline = baseline[slice_]
+        baseline = baseline[tuple(slice_)]
 
         if axis == self.mr_dim_ind:
             return baseline / total
