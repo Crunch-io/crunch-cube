@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.10.0
+- Initial stab at `FrozenSlice`
+
 #### 1.9.19
 - Fix `None` anchor
 
