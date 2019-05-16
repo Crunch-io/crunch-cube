@@ -62,7 +62,7 @@ class MinBaseSizeMask:
         if self._slice.table_base.shape == self._slice.shape:
             return mask
 
-        if self._slice._dimensions[0].dimension_type == DT.MR:
+        if self._slice.dimensions[0].dimension_type == DT.MR:
             # If the margin is a column vector - broadcast it's mask to the array shape
             return np.logical_or(np.zeros(self._slice.shape, dtype=bool), mask[:, None])
 

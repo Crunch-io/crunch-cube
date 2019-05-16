@@ -15,7 +15,6 @@ from ..unitutil import instance_mock, property_mock
 
 
 class DescribePairwiseSignificance:
-    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_provides_access_to_its_values(self, request, slice_):
         shape = (2, 2)
         slice_.get_shape.return_value = shape
@@ -33,7 +32,6 @@ class DescribePairwiseSignificance:
 
 
 class Describe_ColumnPairwiseSignificance:
-    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_can_calculate_t_stats(self, t_stats_fixture, slice_):
         col_idx, props, margin, t_stats = t_stats_fixture
         slice_.proportions.return_value = props
@@ -42,7 +40,6 @@ class Describe_ColumnPairwiseSignificance:
             _ColumnPairwiseSignificance(slice_, col_idx).t_stats, t_stats
         )
 
-    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_can_calculate_p_vals(self, p_vals_fixture, slice_, t_stats_prop_):
         col_idx, t_stats, margin, p_vals = p_vals_fixture
         slice_.margin.return_value = margin
@@ -60,7 +57,6 @@ class Describe_ColumnPairwiseSignificance:
         cps = _ColumnPairwiseSignificance(slice_, None, only_larger=only_larger)
         assert cps.pairwise_indices == pairwise_indices
 
-    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_can_calculate_summary_t_stats(
         self, slice_, _unweighted_col_margin_prop_, summary_t_stats_fixture
     ):
@@ -71,7 +67,6 @@ class Describe_ColumnPairwiseSignificance:
             _ColumnPairwiseSignificance(slice_, col_idx).summary_t_stats, expected
         )
 
-    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_can_calculate_summary_p_vals(
         self,
         slice_,

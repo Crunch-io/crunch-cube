@@ -38,6 +38,42 @@ class FrozenSlice(object):
     # ---interface ---------------------------------------------------
 
     @lazyproperty
+    def insertion_rows_idxs(self):
+        return self._calculator.insertion_rows_idxs
+
+    @lazyproperty
+    def insertion_columns_idxs(self):
+        return self._calculator.insertion_columns_idxs
+
+    @lazyproperty
+    def name(self):
+        return self.rows_dimension_name
+
+    @lazyproperty
+    def table_name(self):
+        if self._cube.ndim < 3 and not self._ca_as_0th:
+            return None
+
+        title = self._cube.name
+        table_name = self._cube.labels()[0][self._slice_idx]
+        return "%s: %s" % (title, table_name)
+
+    @lazyproperty
+    def dimension_types(self):
+        return tuple(dimension.dimension_type for dimension in self.dimensions)
+
+    @lazyproperty
+    def ndim(self):
+        _1D_slice_types = (_1DMrWithMeansSlice, _1DMeansSlice, _1DCatSlice, _1DMrSlice)
+        if isinstance(self._slice, _CatXCatMeansSlice):
+            return 2
+        if isinstance(self._slice, _1D_slice_types):
+            return 1
+        elif isinstance(self._slice, _0DMeansSlice):
+            return 0
+        return 2
+
+    @lazyproperty
     def pairwise_indices(self):
         alpha = self._transforms_dict.get("pairwise_indices", {}).get("alpha", 0.05)
         only_larger = self._transforms_dict.get("pairwise_indices", {}).get(
@@ -141,7 +177,7 @@ class FrozenSlice(object):
 
     @lazyproperty
     def means(self):
-        return self._slice.means
+        return self._calculator.means
 
     @lazyproperty
     def names(self):
@@ -171,6 +207,10 @@ class FrozenSlice(object):
         return self._calculator.row_labels
 
     @lazyproperty
+    def column_labels_with_ids(self):
+        return self._calculator.column_labels_with_ids
+
+    @lazyproperty
     def row_margin(self):
         return self._calculator.row_margin
 
@@ -189,9 +229,9 @@ class FrozenSlice(object):
         The empty string ("") for a 0D slice (until we get to all slices being 2D).
         Reflects the resolved dimension-description transform cascade.
         """
-        if len(self._dimensions) == 0:
+        if len(self.dimensions) == 0:
             return ""
-        return self._dimensions[0].description
+        return self.dimensions[0].description
 
     @lazyproperty
     def rows_dimension_name(self):
@@ -200,9 +240,9 @@ class FrozenSlice(object):
         The empty string ("") for a 0D slice (until we get to all slices being 2D).
         Reflects the resolved dimension-name transform cascade.
         """
-        if len(self._dimensions) == 0:
+        if len(self.dimensions) == 0:
             return ""
-        return self._dimensions[0].name
+        return self.dimensions[0].name
 
     @lazyproperty
     def rows_dimension_type(self):
@@ -257,7 +297,7 @@ class FrozenSlice(object):
         return Calculator(self._assembler)
 
     @lazyproperty
-    def _dimensions(self):
+    def dimensions(self):
         """tuple of (row,) or (row, col) Dimension objects, depending on 1D or 2D."""
         # TODO: pretty messy while we're shimming in NewDimensions, should clean up
         # pretty naturally after FrozenSlice has its own loader.
@@ -287,13 +327,28 @@ class FrozenSlice(object):
 
     @lazyproperty
     def _ordering(self):
-        return OrderTransform(self._dimensions)
+        return OrderTransform(self.dimensions)
 
     @lazyproperty
     def _pruning(self):
         """True if any of dimensions has pruning."""
         # TODO: Implement separarte pruning for rows and columns
-        return any(dimension.prune for dimension in self._dimensions)
+        return any(dimension.prune for dimension in self.dimensions)
+
+    def _create_means_slice(self, counts, base_counts):
+        if self._cube.ndim == 0:
+            return _0DMeansSlice(counts, base_counts)
+        elif self._cube.ndim == 1:
+            if self.dimensions[0].dimension_type == DT.MR:
+                return _1DMrWithMeansSlice(self.dimensions[0], counts, base_counts)
+            return _1DMeansSlice(self.dimensions[0], counts, base_counts)
+        elif self._cube.ndim >= 2:
+            if self._cube.ndim == 3:
+                base_counts = base_counts[self._slice_idx]
+                counts = counts[self._slice_idx]
+            if self.dimensions[0].dimension_type == DT.MR:
+                return _MrXCatMeansSlice(self.dimensions, counts, base_counts)
+            return _CatXCatMeansSlice(self.dimensions, counts, base_counts)
 
     @lazyproperty
     def _slice(self):
@@ -302,7 +357,7 @@ class FrozenSlice(object):
         Needs to live (probably) in the _BaseSclice (which doesn't yet exist).
         It also needs to be tidied up a bit.
         """
-        dimensions = self._dimensions
+        dimensions = self.dimensions
         base_counts = self._cube._apply_missings(
             # self._cube._measure(False).raw_cube_array
             self._cube._measures.unweighted_counts.raw_cube_array
@@ -310,12 +365,8 @@ class FrozenSlice(object):
         counts_with_missings = self._cube._measure(self._weighted).raw_cube_array
         counts = self._cube._apply_missings(counts_with_missings)
         type_ = self._cube.dim_types[-2:]
-        if self._cube.ndim == 0 and self._cube.has_means:
-            return _0DMeansSlice(counts, base_counts)
-        if self._cube.ndim == 1 and self._cube.has_means:
-            if dimensions[0].dimension_type == DT.MR:
-                return _1DMrWithMeansSlice(dimensions[0], counts, base_counts)
-            return _1DMeansSlice(dimensions[0], counts, base_counts)
+        if self._cube.has_means:
+            return self._create_means_slice(counts, base_counts)
         if self._cube.ndim > 2 or self._ca_as_0th:
             base_counts = base_counts[self._slice_idx]
             counts = counts[self._slice_idx]
@@ -325,7 +376,11 @@ class FrozenSlice(object):
                 counts = counts[0]
                 counts_with_missings = counts_with_missings[0]
             elif self._ca_as_0th:
-                return _1DCatSlice(self._dimensions, counts, base_counts)
+                table_name = "%s: %s" % (
+                    self._cube.dimensions[-2:][0].name,
+                    self._cube.dimensions[-2:][0].valid_elements[self._slice_idx].label,
+                )
+                return _1DCaCatSlice(self.dimensions, counts, base_counts, table_name)
         elif self._cube.ndim < 2:
             if type_[0] == DT.MR:
                 return _1DMrSlice(dimensions, counts, base_counts)
@@ -340,7 +395,7 @@ class FrozenSlice(object):
 
     @lazyproperty
     def _transforms(self):
-        return Transforms(self._slice, self._dimensions, self._pruning)
+        return Transforms(self._slice, self.dimensions, self._pruning)
 
 
 class _0DMeansSlice(object):
@@ -354,6 +409,18 @@ class _0DMeansSlice(object):
     @lazyproperty
     def means(self):
         return self._means
+
+    @lazyproperty
+    def rows(self):
+        return tuple(
+            [
+                _MeansVector(
+                    _PlaceholderElement("0D Mean", False),
+                    self._base_counts,
+                    self._means,
+                )
+            ]
+        )
 
     @lazyproperty
     def table_margin(self):
@@ -385,9 +452,9 @@ class _1DMeansSlice(_0DMeansSlice):
         support row iteration.
         """
         return tuple(
-            _BaseVector(element, base_counts)
-            for element, base_counts in zip(
-                self._dimension.valid_elements, self._base_counts
+            _MeansVector(element, base_counts, np.array([means]))
+            for element, base_counts, means in zip(
+                self._dimension.valid_elements, self._base_counts, self._means
             )
         )
 
@@ -407,9 +474,9 @@ class _1DMrWithMeansSlice(_1DMeansSlice):
     @lazyproperty
     def rows(self):
         return tuple(
-            _MeansWithMrVector(element, base_counts)
-            for element, base_counts in zip(
-                self._dimension.valid_elements, self._base_counts
+            _MeansWithMrVector(element, base_counts, means)
+            for element, base_counts, means in zip(
+                self._dimension.valid_elements, self._base_counts, self._means
             )
         )
 
@@ -563,6 +630,32 @@ class _CatXCatSlice(object):
         return residuals / np.sqrt(variance)
 
 
+class _CatXCatMeansSlice(_CatXCatSlice):
+    def __init__(self, dimensions, means, base_counts):
+        super(_CatXCatMeansSlice, self).__init__(dimensions, None, base_counts)
+        self._means = means
+
+    @lazyproperty
+    def rows(self):
+        return tuple(
+            _MeansVector(element, base_counts, means)
+            for element, base_counts, means in zip(
+                self._row_dimension.valid_elements, self._base_counts, self._means
+            )
+        )
+
+    @lazyproperty
+    def columns(self):
+        return tuple(
+            _MeansVector(element, base_counts, means)
+            for element, base_counts, means in zip(
+                self._column_dimension.valid_elements,
+                self._base_counts.T,
+                self._means.T,
+            )
+        )
+
+
 class _1DCatSlice(_CatXCatSlice):
     """Special case of CAT x CAT, where the 2nd CAT doesn't exist.
 
@@ -586,6 +679,16 @@ class _1DCatSlice(_CatXCatSlice):
                 )
             ]
         )
+
+
+class _1DCaCatSlice(_1DCatSlice):
+    def __init__(self, dimensions, counts, base_counts, table_name):
+        super(_1DCaCatSlice, self).__init__(dimensions, counts, base_counts)
+        self._table_name = table_name
+
+    @lazyproperty
+    def name(self):
+        return self._table_name
 
 
 class _SliceWithMR(_CatXCatSlice):
@@ -685,6 +788,22 @@ class _MrXCatSlice(_SliceWithMR):
     @lazyproperty
     def table_base(self):
         return np.sum(self._base_counts, axis=(1, 2))
+
+
+class _MrXCatMeansSlice(_MrXCatSlice):
+    def __init__(self, dimensions, means, base_counts):
+        counts = np.empty(means.shape)
+        super(_MrXCatMeansSlice, self).__init__(dimensions, counts, base_counts)
+        self._means = means
+
+    @lazyproperty
+    def rows(self):
+        return tuple(
+            _MeansWithMrVector(element, base_counts, means[0])
+            for element, base_counts, means in zip(
+                self._row_dimension.valid_elements, self._base_counts, self._means
+            )
+        )
 
 
 class _1DMrSlice(_MrXCatSlice):
@@ -904,6 +1023,10 @@ class _BaseVector(object):
         self._base_counts = base_counts
 
     @lazyproperty
+    def is_insertion(self):
+        return False
+
+    @lazyproperty
     def numeric(self):
         return self._element.numeric_value
 
@@ -923,8 +1046,22 @@ class _BaseVector(object):
     def hidden(self):
         return self._element.is_hidden
 
+    @lazyproperty
+    def cat_id(self):
+        return self._element.element_id
 
-class _MeansWithMrVector(_BaseVector):
+
+class _MeansVector(_BaseVector):
+    def __init__(self, element, base_counts, means):
+        super(_MeansVector, self).__init__(element, base_counts)
+        self._means = means
+
+    @lazyproperty
+    def means(self):
+        return self._means
+
+
+class _MeansWithMrVector(_MeansVector):
     """This is a row of a 1-D MR with Means.
 
     This vector is special in the sense that it doesn't provide us with the normal
@@ -1182,6 +1319,18 @@ class _InsertionVector(object):
     def __init__(self, slice_, subtotal):
         self._slice = slice_
         self._subtotal = subtotal
+
+    @lazyproperty
+    def is_insertion(self):
+        return True
+
+    @lazyproperty
+    def means(self):
+        return np.array([np.nan])
+
+    @lazyproperty
+    def cat_id(self):
+        return -1
 
     @lazyproperty
     def numeric(self):
@@ -1446,6 +1595,10 @@ class SliceWithInsertions(_TransformedSlice):
 
 class _TransformedVecvtor(object):
     @lazyproperty
+    def is_insertion(self):
+        return self._base_vector.is_insertion
+
+    @lazyproperty
     def label(self):
         return self._base_vector.label
 
@@ -1468,6 +1621,14 @@ class _TransformedVecvtor(object):
     @lazyproperty
     def numeric(self):
         return self._base_vector.numeric
+
+    @lazyproperty
+    def cat_id(self):
+        return self._base_vector.cat_id
+
+    @lazyproperty
+    def means(self):
+        return self._base_vector.means
 
 
 class _AssembledVector(_TransformedVecvtor):
@@ -1641,6 +1802,18 @@ class Calculator(object):
         self._assembler = assembler
 
     @lazyproperty
+    def insertion_rows_idxs(self):
+        return tuple(
+            i for i, row in enumerate(self._assembler.rows) if row.is_insertion
+        )
+
+    @lazyproperty
+    def insertion_columns_idxs(self):
+        return tuple(
+            i for i, column in enumerate(self._assembler.columns) if column.is_insertion
+        )
+
+    @lazyproperty
     def rows_dimension_numeric(self):
         return np.array([row.numeric for row in self._assembler.rows])
 
@@ -1760,12 +1933,26 @@ class Calculator(object):
         return np.array([row.values for row in self._assembler.rows])
 
     @lazyproperty
+    def means(self):
+        if isinstance(self._assembler._slice, _0DMeansSlice):
+            return self._assembler._slice.means
+        return np.array([row.means for row in self._assembler.rows])
+
+    @lazyproperty
     def base_counts(self):
         return np.array([row.base_values for row in self._assembler.rows])
 
     @lazyproperty
     def row_labels(self):
         return tuple(row.label for row in self._assembler.rows)
+
+    # TODO: Purge this once we do the transforms properly. It's only needed because of
+    # old-style transforms in exporter
+    @lazyproperty
+    def column_labels_with_ids(self):
+        return tuple(
+            (column.label, column.cat_id) for column in self._assembler.columns
+        )
 
     @lazyproperty
     def column_labels(self):
@@ -1929,6 +2116,18 @@ class PrunedVector(_TransformedVecvtor):
     def __init__(self, base_vector, opposite_vectors):
         self._base_vector = base_vector
         self._opposite_vectors = opposite_vectors
+
+    @lazyproperty
+    def means(self):
+        return np.array(
+            [
+                means
+                for means, opposite_vector in zip(
+                    self._base_vector.means, self._opposite_vectors
+                )
+                if not opposite_vector.pruned
+            ]
+        )
 
     @lazyproperty
     def column_index(self):

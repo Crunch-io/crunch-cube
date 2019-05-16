@@ -809,7 +809,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
                 [37.53846153846155, 39.45238095238095],
             ]
         )
-        np.testing.assert_almost_equal(slice_.counts, expected)
+        np.testing.assert_almost_equal(slice_.means, expected)
 
     def test_mean_no_dims(self):
         slice_ = FrozenSlice(CrunchCube(CR.ECON_MEAN_NO_DIMS))
