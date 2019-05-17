@@ -60,6 +60,20 @@ class DescribeFrozenSlice:
         assert slice_.ndim == 2
         assert slice_.table_name is None
 
+        # Test zscores
+        np.testing.assert_almost_equal(
+            slice_.zscore,
+            [
+                [2.09195801, np.nan, -0.63731253, -1.25244628, np.nan, -1.16202692],
+                [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
+                [0.30530344, np.nan, -1.07865774, 1.02457444, np.nan, -0.26403408],
+                [-0.88889789, np.nan, 0.00735036, -0.23474701, np.nan, 2.94892458],
+                [-1.87516767, np.nan, 1.25889382, 1.12425278, np.nan, -0.81352208],
+                [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
+                [-0.22430299, np.nan, -0.10735883, 0.53970271, np.nan, -0.32520655],
+            ],
+        )
+
     def it_provides_base_counts(self):
         slice_ = FrozenSlice(CrunchCube(CR.CAT_X_CAT_PRUNING_HS))
         np.testing.assert_array_equal(
@@ -356,3 +370,10 @@ class DescribeFrozenSlice:
             ]
         )
         np.testing.assert_equal(slice_.counts, expected)
+
+    def it_provides_nans_for_means_insertions(self):
+        slice_ = FrozenSlice(CrunchCube(CR.CAT_WITH_MEANS_AND_INSERTIONS))
+        np.testing.assert_almost_equal(
+            slice_.means,
+            [[19.85555556], [13.85416667], [52.78947368], [np.nan], [np.nan]],
+        )

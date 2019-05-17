@@ -1,0 +1,374 @@
+{
+    "query": {
+        "dimensions": [
+            {
+                "each": 1
+            },
+            {
+                "args": [
+                    {
+                        "variable": "70c86dab67a64aa99a9896e86cbe1c89"
+                    }
+                ],
+                "function": "as_selected"
+            }
+        ],
+        "measures": {
+            "count": {
+                "args": [],
+                "function": "cube_count"
+            },
+            "mean": {
+                "args": [
+                    {
+                        "variable": "000582"
+                    }
+                ],
+                "function": "cube_mean"
+            }
+        },
+        "weight": "http://127.0.0.1:8080/datasets/aeb5174b8c83471a9239ba68d2d218fd/variables/001063X/"
+    },
+    "query_environment": {
+        "filter": [
+            "http://127.0.0.1:8080/datasets/aeb5174b8c83471a9239ba68d2d218fd/filters/bd11b3ab99934f1c8543e22f3c94a9e8/"
+        ]
+    },
+    "result": {
+        "counts": [
+            336,
+            5501,
+            0,
+            136,
+            5701,
+            0,
+            248,
+            5589,
+            0,
+            5216,
+            621,
+            0
+        ],
+        "dimensions": [
+            {
+                "derived": true,
+                "references": {
+                    "alias": "Accor Pres Brands",
+                    "description": "Combined responses from TH9/TH10 Summary 1+ Nights Past Year Leisure OR Business",
+                    "name": "Accor Pres Brands",
+                    "subreferences": [
+                        {
+                            "alias": "Fairmont-70c86dab67a64aa99a9896e86cbe1c89",
+                            "name": "Fairmont"
+                        },
+                        {
+                            "alias": "Pullman-70c86dab67a64aa99a9896e86cbe1c89",
+                            "name": "Pullman"
+                        },
+                        {
+                            "alias": "Sofitel-70c86dab67a64aa99a9896e86cbe1c89",
+                            "name": "Sofitel"
+                        },
+                        {
+                            "alias": "All Others-70c86dab67a64aa99a9896e86cbe1c89",
+                            "name": "All Others"
+                        }
+                    ]
+                },
+                "type": {
+                    "class": "enum",
+                    "elements": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0001",
+                                "references": {
+                                    "alias": "Fairmont-70c86dab67a64aa99a9896e86cbe1c89",
+                                    "name": "Fairmont"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Other",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0002",
+                                "references": {
+                                    "alias": "Pullman-70c86dab67a64aa99a9896e86cbe1c89",
+                                    "name": "Pullman"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Other",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 3,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0003",
+                                "references": {
+                                    "alias": "Sofitel-70c86dab67a64aa99a9896e86cbe1c89",
+                                    "name": "Sofitel"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Other",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 4,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0004",
+                                "references": {
+                                    "alias": "All Others-70c86dab67a64aa99a9896e86cbe1c89",
+                                    "name": "All Others"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Other",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        }
+                    ],
+                    "subtype": {
+                        "class": "variable"
+                    }
+                }
+            },
+            {
+                "derived": true,
+                "references": {
+                    "alias": "Accor Pres Brands",
+                    "description": "Combined responses from TH9/TH10 Summary 1+ Nights Past Year Leisure OR Business",
+                    "name": "Accor Pres Brands",
+                    "subreferences": [
+                        {
+                            "alias": "Fairmont-70c86dab67a64aa99a9896e86cbe1c89",
+                            "name": "Fairmont"
+                        },
+                        {
+                            "alias": "Pullman-70c86dab67a64aa99a9896e86cbe1c89",
+                            "name": "Pullman"
+                        },
+                        {
+                            "alias": "Sofitel-70c86dab67a64aa99a9896e86cbe1c89",
+                            "name": "Sofitel"
+                        },
+                        {
+                            "alias": "All Others-70c86dab67a64aa99a9896e86cbe1c89",
+                            "name": "All Others"
+                        }
+                    ]
+                },
+                "type": {
+                    "categories": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "name": "Selected",
+                            "numeric_value": 1,
+                            "selected": true
+                        },
+                        {
+                            "id": 0,
+                            "missing": false,
+                            "name": "Other",
+                            "numeric_value": 0
+                        },
+                        {
+                            "id": -1,
+                            "missing": true,
+                            "name": "No Data",
+                            "numeric_value": null
+                        }
+                    ],
+                    "class": "categorical",
+                    "ordinal": false,
+                    "subvariables": [
+                        "0001",
+                        "0002",
+                        "0003",
+                        "0004"
+                    ]
+                }
+            }
+        ],
+        "element": "crunch:cube",
+        "filtered": {
+            "unweighted_n": 5837,
+            "weighted_n": 5836.9999730456
+        },
+        "measures": {
+            "count": {
+                "data": [
+                    245.5716581578,
+                    5591.4283148879,
+                    0.0,
+                    155.1970723879,
+                    5681.8029006578,
+                    0.0,
+                    291.9538113044,
+                    5545.0461617413,
+                    0.0,
+                    5122.8480395536,
+                    714.1519334921,
+                    0.0
+                ],
+                "metadata": {
+                    "derived": true,
+                    "references": {},
+                    "type": {
+                        "class": "numeric",
+                        "integer": false,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {}
+                    }
+                },
+                "n_missing": 0
+            },
+            "mean": {
+                "data": [
+                    3.7240514577,
+                    1.5741458087,
+                    {
+                        "?": -8
+                    },
+                    2.578429295,
+                    1.6396345355,
+                    {
+                        "?": -8
+                    },
+                    2.2185932707,
+                    1.6354269942,
+                    {
+                        "?": -8
+                    },
+                    1.8653349388,
+                    0.2246265761,
+                    {
+                        "?": -8
+                    }
+                ],
+                "metadata": {
+                    "derived": true,
+                    "references": {},
+                    "type": {
+                        "class": "numeric",
+                        "integer": false,
+                        "missing_reasons": {
+                            "NaN": -8,
+                            "No Data": -1
+                        },
+                        "missing_rules": {}
+                    }
+                },
+                "n_missing": 0
+            }
+        },
+        "missing": 0,
+        "n": 5837,
+        "unfiltered": {
+            "unweighted_n": 11190,
+            "weighted_n": 11188.2159489356
+        }
+    }
+}

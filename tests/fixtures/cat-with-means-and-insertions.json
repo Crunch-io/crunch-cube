@@ -1,0 +1,180 @@
+{
+    "query": {
+        "dimensions": [
+            {
+                "variable": "000674"
+            }
+        ],
+        "measures": {
+            "count": {
+                "args": [],
+                "function": "cube_count"
+            },
+            "mean": {
+                "args": [
+                    {
+                        "args": [
+                            {
+                                "variable": "000672"
+                            },
+                            {
+                                "class": "numeric"
+                            }
+                        ],
+                        "function": "cast"
+                    }
+                ],
+                "function": "cube_mean"
+            }
+        },
+        "weight": null
+    },
+    "query_environment": {
+        "filter": []
+    },
+    "result": {
+        "counts": [
+            409,
+            113,
+            139,
+            0,
+            139,
+            0
+        ],
+        "dimensions": [
+            {
+                "derived": false,
+                "references": {
+                    "alias": "Q1t",
+                    "description": "Have you seen this ad recently? ",
+                    "name": "Ever Seen the Ad - Frestea",
+                    "view": {
+                        "column_width": null,
+                        "include_missing": false,
+                        "show_counts": false,
+                        "show_numeric_values": false,
+                        "transform": {
+                            "insertions": [
+                                {
+                                    "anchor": "bottom",
+                                    "args": [
+                                        1
+                                    ],
+                                    "function": "subtotal",
+                                    "name": "Seen the Ad"
+                                },
+                                {
+                                    "anchor": "bottom",
+                                    "args": [
+                                        2,
+                                        99
+                                    ],
+                                    "function": "subtotal",
+                                    "name": "Not Seen the Ad"
+                                }
+                            ]
+                        }
+                    }
+                },
+                "type": {
+                    "categories": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "name": "Yes",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 2,
+                            "missing": false,
+                            "name": "No",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 99,
+                            "missing": false,
+                            "name": "I'm not sure/not remember",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 32766,
+                            "missing": true,
+                            "name": "skipped",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 32767,
+                            "missing": true,
+                            "name": "not asked",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": -1,
+                            "missing": true,
+                            "name": "No Data",
+                            "numeric_value": null
+                        }
+                    ],
+                    "class": "categorical",
+                    "ordinal": false
+                }
+            }
+        ],
+        "element": "crunch:cube",
+        "measures": {
+            "count": {
+                "data": [
+                    409,
+                    113,
+                    139,
+                    0,
+                    139,
+                    0
+                ],
+                "metadata": {
+                    "derived": true,
+                    "references": {},
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {}
+                    }
+                },
+                "n_missing": 139
+            },
+            "mean": {
+                "data": [
+                    19.8555555556,
+                    13.8541666667,
+                    52.7894736842,
+                    {
+                        "?": -8
+                    },
+                    9.1095890411,
+                    {
+                        "?": -8
+                    }
+                ],
+                "metadata": {
+                    "derived": true,
+                    "references": {},
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {
+                            "NaN": -8,
+                            "No Data": -1
+                        },
+                        "missing_rules": {}
+                    }
+                },
+                "n_missing": 605
+            }
+        },
+        "missing": 139,
+        "n": 800
+    }
+}
