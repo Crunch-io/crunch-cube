@@ -202,6 +202,16 @@ class FrozenSlice(object):
         return self.dimensions[0].description
 
     @lazyproperty
+    def rows_dimension_fills(self):
+        """sequence of RGB str like "#def032" fill colors for row elements.
+
+        The values reflect the resolved element-fill transform cascade. The length and
+        ordering of the sequence correspond to the rows in the slice, including
+        accounting for insertions and hidden rows.
+        """
+        return self._calculator.rows_dimension_fills
+
+    @lazyproperty
     def rows_dimension_name(self):
         """str name assigned to rows-dimension.
 
@@ -986,6 +996,16 @@ class _BaseVector(object):
         self._base_counts = base_counts
 
     @lazyproperty
+    def fill(self):
+        """str RGB color like "#def032" or None when not specified.
+
+        The value reflects the resolved element-fill transform cascade. A value of
+        `None` indicates no element-fill transform was specified and the default
+        (theme-specified) color should be used for this element.
+        """
+        return self._element.fill
+
+    @lazyproperty
     def is_insertion(self):
         return False
 
@@ -1250,6 +1270,18 @@ class _InsertionVector(object):
         self._subtotal = subtotal
 
     @lazyproperty
+    def fill(self):
+        """Unconditionally `None` for an insertion vector.
+
+        A `fill` value is normally a str RGB value like "#da09fc", specifying the color
+        to use for a chart category or series representing this element. The value
+        reflects the resolved element-fill transform cascade. Since an insertion cannot
+        (currently) have a fill-transform, the default value of `None` (indicating "use
+        default color") is unconditionally returned.
+        """
+        return None
+
+    @lazyproperty
     def is_insertion(self):
         return True
 
@@ -1502,6 +1534,16 @@ class SliceWithInsertions(_TransformedSlice):
 
 class _TransformedVector(object):
     @lazyproperty
+    def fill(self):
+        """str RGB color like "#def032" or None when not specified.
+
+        The value reflects the resolved element-fill transform cascade. A value of
+        `None` indicates no element-fill transform was specified and the default
+        (theme-specified) color should be used for this element.
+        """
+        return self._base_vector.fill
+
+    @lazyproperty
     def is_insertion(self):
         return self._base_vector.is_insertion
 
@@ -1723,6 +1765,16 @@ class Calculator(object):
         return tuple(
             i for i, column in enumerate(self._assembler.columns) if column.is_insertion
         )
+
+    @lazyproperty
+    def rows_dimension_fills(self):
+        """sequence of RGB str like "#def032" fill colors for rows dimension elements.
+
+        The values reflect the resolved element-fill transform cascade. The length and
+        ordering of the sequence correspond to the rows in the slice, including
+        accounting for insertions and hidden rows.
+        """
+        return tuple(row.fill for row in self._assembler.rows)
 
     @lazyproperty
     def rows_dimension_numeric(self):
