@@ -895,6 +895,21 @@ class _NewElement(_BaseElement):
         self._element_transforms_dict = element_transforms_dict
 
     @lazyproperty
+    def fill(self):
+        """str RGB color like "#af032d" or None if not specified.
+
+        A value of None indicates the default fill should be used for this element.
+        A str value must be a hash character ("#") followed by six hexadecimal digits.
+        Three-character color contractions (like "#D07") are not valid.
+        """
+        # ---first authority is fill transform in element transforms. The base value is
+        # ---the only prior authority and that is None (use default fill color).
+        fill = self._element_transforms_dict.get("fill")
+        if not fill:
+            return None
+        return fill
+
+    @lazyproperty
     def is_hidden(self):
         """True if this element is explicitly hidden in this analysis."""
         # ---first authority is hide transform in element transforms---

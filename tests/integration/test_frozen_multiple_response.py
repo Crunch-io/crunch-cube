@@ -34,6 +34,66 @@ def test_proportions_simple_mr():
     )
 
 
+def test_1D_mr_with_means():
+    slice_ = FrozenSlice(CrunchCube(CR.MR_MEAN_FILT_WGTD))
+    np.testing.assert_almost_equal(
+        slice_.means,
+        [
+            [3.7240515, 1.5741458],
+            [2.5784293, 1.6396345],
+            [2.2185933, 1.635427],
+            [1.8653349, 0.2246266],
+        ],
+    )
+    assert slice_.table_base == 23348
+    assert slice_.table_base_unpruned == 23348
+
+
+def test_deck_with_means():
+    slice_ = FrozenSlice(CrunchCube(CR.DECK_WITH_MEAN))
+    np.testing.assert_array_equal(
+        slice_.table_base_unpruned, [588, 588, 588, 588, 588, 588, 588, 588]
+    )
+    np.testing.assert_almost_equal(
+        slice_.table_margin_unpruned,
+        [585.086, 585.086, 585.086, 585.086, 585.086, 585.086, 585.086, 585.086],
+    )
+
+
+def test_3D_with_means():
+    slice_ = FrozenSlice(CrunchCube(CR.MEANS_3D))
+    np.testing.assert_almost_equal(
+        slice_.means,
+        [
+            [-2.0, np.nan, np.nan, -1.0, 1.0],
+            [-2.0, np.nan, np.nan, np.nan, 0.0],
+            [-2.0, np.nan, 1.0, np.nan, -1.0],
+        ],
+    )
+    assert slice_.table_base == 24
+    np.testing.assert_array_equal(slice_.column_base, [9, 0, 3, 3, 9])
+    np.testing.assert_array_equal(slice_.row_base, [9, 6, 9])
+
+
+def test_cat_x_mr_with_means():
+    transforms = {"columns_dimension": {"prune": True}}
+    slice_ = FrozenSlice(CrunchCube(CR.CAT_X_MR_WITH_MEANS), transforms=transforms)
+    np.testing.assert_almost_equal(
+        slice_.means,
+        [
+            [38.79868092, 37.91146097, 21.56682623, 28.90316683] + [np.nan] * 4,
+            [12.36141735, 10.91788449, 8.55836344, -9.23336151] + [np.nan] * 4,
+            [25.35566536, -1.87323918, -10.45832265, -19.00932593] + [np.nan] * 4,
+            [-1.22773321, -7.99671664, -30.95431483, -18.03417097] + [np.nan] * 4,
+            [-23.80382413, -26.69728288, -61.23218388, -48.49820981] + [np.nan] * 4,
+            [19.6045351, -24.87663078, -52.08108014, 7.63833075] + [np.nan] * 4,
+            [-26.98268155, -9.66231773, -90.91475189, -46.92610738] + [np.nan] * 4,
+            [19.45552783, -27.48308453, -62.33543385, -39.83388919] + [np.nan] * 4,
+            [20.59956268, 17.49911157, 6.29951372, 2.28572239] + [np.nan] * 4,
+        ],
+    )
+
+
 def test_proportions_simple_mr_prune():
     cube = CrunchCube(CR.SIMPLE_MR)
     expected = np.array([0.6, 0.6666667])
@@ -106,17 +166,23 @@ def test_as_array_cat_x_mr_pruned_row_col():
 
 
 def test_as_array_mr_x_cat_pruned_col():
-    cube = CrunchCube(CR.MR_X_CAT_PRUNED_COL)
+    # Pruned and no H&S
+    transforms = {
+        "rows_dimension": {"insertions": {}, "prune": True},
+        "columns_dimension": {"insertions": {}, "prune": True},
+    }
+    slice_ = FrozenSlice(CrunchCube(CR.MR_X_CAT_PRUNED_COL), transforms=transforms)
+    np.testing.assert_array_equal(slice_.counts, [[12], [12], [12]])
 
-    # Not pruned
-    actual = cube.as_array()
-    expected = np.array([[12, 0], [12, 0], [12, 0]])
-    np.testing.assert_array_equal(actual, expected)
-
-    # Pruned
-    expected = np.array([[12], [12], [12]])
-    actual = np.ma.compress_cols(cube.as_array(prune=True))
-    np.testing.assert_array_equal(actual, expected)
+    # Pruned with H&S
+    transforms = {
+        "rows_dimension": {"prune": True},
+        "columns_dimension": {"prune": True},
+    }
+    slice_ = FrozenSlice(CrunchCube(CR.MR_X_CAT_PRUNED_COL), transforms=transforms)
+    np.testing.assert_array_equal(
+        slice_.counts, [[12, 12, 0], [12, 12, 0], [12, 12, 0]]
+    )
 
 
 def test_as_array_mr_x_cat_pruned_row():
@@ -328,40 +394,22 @@ def test_simple_mr_margin_by_col():
 
 
 def test_cat_x_mr_x_mr_proportions_by_row():
-    cube = CrunchCube(CR.CAT_X_MR_X_MR)
-    # Set axis to 2 (and not 1), since 3D cube
-    actual = cube.proportions(axis=2)
-
-    # TODO: Check with Jon and Mike. These numbers correspond to doing
-    # prop.table(cube, 1) in R
-
-    # expected = np.array([
-    #     [[0.1159, 0.3597],
-    #      [0.0197, 0.0604],
-    #      [0.0192, 0.0582]],
-
-    #     [[0.0159, 0.0094],
-    #      [0.1182, 0.0625],
-    #      [0.1142, 0.0623]],
-    # ])
-
-    # TODO: Check with Jon and Mike. This expectation is the same as doing
-    # prop.table(cube, c(1, 2)) in R (same numbers, different slicing).
-    expected = np.array(
-        [
-            [
-                [0.19169699, 0.5949388],
-                [0.19543651, 0.59920635],
-                [0.19712526, 0.59753593],
-            ],
-            [
-                [0.17207792, 0.1017316],
-                [0.1963129, 0.10380335],
-                [0.19141804, 0.10442508],
-            ],
-        ]
+    slice_ = FrozenSlice(CrunchCube(CR.CAT_X_MR_X_MR), slice_idx=0)
+    np.testing.assert_almost_equal(
+        slice_.row_proportions,
+        [[0.19169699, 0.5949388], [0.19543651, 0.59920635], [0.19712526, 0.59753593]],
     )
-    np.testing.assert_almost_equal(actual, expected)
+    np.testing.assert_array_equal(
+        slice_.base_counts, [[1159, 3597], [197, 604], [192, 582]]
+    )
+    slice_ = FrozenSlice(CrunchCube(CR.CAT_X_MR_X_MR), slice_idx=1)
+    np.testing.assert_almost_equal(
+        slice_.row_proportions,
+        [[0.17207792, 0.1017316], [0.1963129, 0.10380335], [0.19141804, 0.10442508]],
+    )
+    np.testing.assert_array_equal(
+        slice_.base_counts, [[159, 94], [1182, 625], [1142, 623]]
+    )
 
 
 def test_cat_x_mr_x_mr_pruned_rows():

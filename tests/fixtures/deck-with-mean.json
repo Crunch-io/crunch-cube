@@ -1,0 +1,532 @@
+{
+    "query": {
+        "dimensions": [
+            {
+                "each": 1
+            },
+            {
+                "args": [
+                    {
+                        "variable": "027493"
+                    }
+                ],
+                "function": "as_selected"
+            }
+        ],
+        "measures": {
+            "count": {
+                "args": [],
+                "function": "cube_count"
+            }
+        },
+        "weight": "http://127.0.0.1:8080/datasets/5ded0a5a2f1a4787ac8f78c48fe0e3df/variables/000001X/"
+    },
+    "query_environment": {
+        "filter": [
+            "http://127.0.0.1:8080/datasets/5ded0a5a2f1a4787ac8f78c48fe0e3df/filters/2ce26c42ec4949a3b9f75dca0b9502df/",
+            "http://127.0.0.1:8080/datasets/5ded0a5a2f1a4787ac8f78c48fe0e3df/filters/dbf7f1bdb00b488887900fef971bcee1/",
+            "http://127.0.0.1:8080/datasets/5ded0a5a2f1a4787ac8f78c48fe0e3df/filters/786c1efd039d443f95bf7c9c8067521f/"
+        ]
+    },
+    "result": {
+        "counts": [
+            130,
+            458,
+            4154,
+            334,
+            254,
+            4154,
+            0,
+            588,
+            4154,
+            77,
+            511,
+            4154,
+            68,
+            520,
+            4154,
+            394,
+            194,
+            4154,
+            32,
+            556,
+            4154,
+            68,
+            520,
+            4154
+        ],
+        "dimensions": [
+            {
+                "derived": true,
+                "references": {
+                    "alias": "GD1",
+                    "description": "Which, if any, of the following websites would you expect to be able to stream documentaries on?",
+                    "name": "Streaming service",
+                    "notes": "All aware of the Guardian",
+                    "subreferences": [
+                        {
+                            "alias": "GD1_1",
+                            "name": "VICE"
+                        },
+                        {
+                            "alias": "GD1_2",
+                            "name": "BBC"
+                        },
+                        {
+                            "alias": "GD1_3",
+                            "name": "Channel 4"
+                        },
+                        {
+                            "alias": "GD1_4",
+                            "name": "The Guardian"
+                        },
+                        {
+                            "alias": "GD1_5",
+                            "name": "New York Times"
+                        },
+                        {
+                            "alias": "GD1_6",
+                            "name": "Netflix"
+                        },
+                        {
+                            "alias": "GD1_97",
+                            "name": "None of these"
+                        },
+                        {
+                            "alias": "GD1_98",
+                            "name": "Don\u2019t know"
+                        }
+                    ]
+                },
+                "type": {
+                    "class": "enum",
+                    "elements": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "27494",
+                                "references": {
+                                    "alias": "GD1_1",
+                                    "name": "VICE"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Other",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "27495",
+                                "references": {
+                                    "alias": "GD1_2",
+                                    "name": "BBC"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Other",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 3,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "27496",
+                                "references": {
+                                    "alias": "GD1_3",
+                                    "name": "Channel 4"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Other",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 4,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "27497",
+                                "references": {
+                                    "alias": "GD1_4",
+                                    "name": "The Guardian"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Other",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 5,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "27498",
+                                "references": {
+                                    "alias": "GD1_5",
+                                    "name": "New York Times"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Other",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 6,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "27499",
+                                "references": {
+                                    "alias": "GD1_6",
+                                    "name": "Netflix"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Other",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 7,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "27500",
+                                "references": {
+                                    "alias": "GD1_97",
+                                    "name": "None of these"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Other",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 8,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "27501",
+                                "references": {
+                                    "alias": "GD1_98",
+                                    "name": "Don\u2019t know"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Other",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        }
+                    ],
+                    "subtype": {
+                        "class": "variable"
+                    }
+                }
+            },
+            {
+                "derived": true,
+                "references": {
+                    "alias": "GD1",
+                    "description": "Which, if any, of the following websites would you expect to be able to stream documentaries on?",
+                    "name": "Streaming service",
+                    "notes": "All aware of the Guardian",
+                    "subreferences": [
+                        {
+                            "alias": "GD1_1",
+                            "name": "VICE"
+                        },
+                        {
+                            "alias": "GD1_2",
+                            "name": "BBC"
+                        },
+                        {
+                            "alias": "GD1_3",
+                            "name": "Channel 4"
+                        },
+                        {
+                            "alias": "GD1_4",
+                            "name": "The Guardian"
+                        },
+                        {
+                            "alias": "GD1_5",
+                            "name": "New York Times"
+                        },
+                        {
+                            "alias": "GD1_6",
+                            "name": "Netflix"
+                        },
+                        {
+                            "alias": "GD1_97",
+                            "name": "None of these"
+                        },
+                        {
+                            "alias": "GD1_98",
+                            "name": "Don\u2019t know"
+                        }
+                    ]
+                },
+                "type": {
+                    "categories": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "name": "Selected",
+                            "numeric_value": 1,
+                            "selected": true
+                        },
+                        {
+                            "id": 0,
+                            "missing": false,
+                            "name": "Other",
+                            "numeric_value": 0
+                        },
+                        {
+                            "id": -1,
+                            "missing": true,
+                            "name": "No Data",
+                            "numeric_value": null
+                        }
+                    ],
+                    "class": "categorical",
+                    "ordinal": false,
+                    "subvariables": [
+                        "27494",
+                        "27495",
+                        "27496",
+                        "27497",
+                        "27498",
+                        "27499",
+                        "27500",
+                        "27501"
+                    ]
+                }
+            }
+        ],
+        "element": "crunch:cube",
+        "measures": {
+            "count": {
+                "data": [
+                    128.2975,
+                    456.7885,
+                    4156.9224,
+                    331.4649,
+                    253.6211,
+                    4156.9224,
+                    0.0,
+                    585.086,
+                    4156.9224,
+                    76.9828,
+                    508.1032,
+                    4156.9224,
+                    69.2425,
+                    515.8435,
+                    4156.9224,
+                    391.3699,
+                    193.7161,
+                    4156.9224,
+                    33.6034,
+                    551.4826,
+                    4156.9224,
+                    67.5592,
+                    517.5268,
+                    4156.9224
+                ],
+                "metadata": {
+                    "derived": true,
+                    "references": {},
+                    "type": {
+                        "class": "numeric",
+                        "integer": false,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {}
+                    }
+                },
+                "n_missing": 4154
+            }
+        },
+        "missing": 4154,
+        "n": 4742
+    }
+}

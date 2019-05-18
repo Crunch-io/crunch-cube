@@ -38,29 +38,93 @@ class FrozenSlice(object):
     # ---interface ---------------------------------------------------
 
     @lazyproperty
-    def insertion_rows_idxs(self):
-        return self._calculator.insertion_rows_idxs
+    def base_counts(self):
+        return self._calculator.base_counts
+
+    @lazyproperty
+    def column_base(self):
+        return self._calculator.column_base
+
+    @lazyproperty
+    def column_index(self):
+        """ndarray of column index percentages.
+
+        The index values represent the difference of the percentages to the
+        corresponding baseline values. The baseline values are the univariate
+        percentages of the corresponding variable.
+        """
+        return self._calculator.column_index
+
+    @lazyproperty
+    def column_labels(self):
+        return self._calculator.column_labels
+
+    @lazyproperty
+    def column_labels_with_ids(self):
+        # TODO: Purge this once we do the transforms properly. It's only needed because of
+        # old-style transforms in exporter
+        return self._calculator.column_labels_with_ids
+
+    @lazyproperty
+    def column_margin(self):
+        return self._calculator.column_margin
+
+    @lazyproperty
+    def column_percentages(self):
+        return self.column_proportions * 100
+
+    @lazyproperty
+    def column_proportions(self):
+        return self._calculator.column_proportions
+
+    @lazyproperty
+    def columns_dimension_name(self):
+        """str name assigned to rows-dimension.
+
+        The empty string ("") for a 0D and 1D slices (until we get to all slices
+        being 2D). Reflects the resolved dimension-name transform cascade.
+        """
+        if len(self.dimensions) < 2:
+            return ""
+        return self.dimensions[1].name
+
+    @lazyproperty
+    def columns_dimension_type(self):
+        if len(self.dimensions) < 2:
+            return None
+        return self.dimensions[1].dimension_type
+
+    @lazyproperty
+    def counts(self):
+        return self._calculator.counts
+
+    @lazyproperty
+    def dimension_types(self):
+        return tuple(dimension.dimension_type for dimension in self.dimensions)
 
     @lazyproperty
     def insertion_columns_idxs(self):
         return self._calculator.insertion_columns_idxs
 
     @lazyproperty
+    def insertion_rows_idxs(self):
+        return self._calculator.insertion_rows_idxs
+
+    @lazyproperty
+    def means(self):
+        return self._calculator.means
+
+    @lazyproperty
+    def min_base_size_mask(self):
+        return MinBaseSizeMask(self, self._mask_size)
+
+    @lazyproperty
     def name(self):
         return self.rows_dimension_name
 
     @lazyproperty
-    def table_name(self):
-        if self._cube.ndim < 3 and not self._ca_as_0th:
-            return None
-
-        title = self._cube.name
-        table_name = self._cube.labels()[0][self._slice_idx]
-        return "%s: %s" % (title, table_name)
-
-    @lazyproperty
-    def dimension_types(self):
-        return tuple(dimension.dimension_type for dimension in self.dimensions)
+    def names(self):
+        return self._slice.names
 
     @lazyproperty
     def ndim(self):
@@ -97,93 +161,6 @@ class FrozenSlice(object):
         )
 
     @lazyproperty
-    def summary_pairwise_indices(self):
-        alpha = self._transforms_dict.get("pairwise_indices", {}).get("alpha", 0.05)
-        only_larger = self._transforms_dict.get("pairwise_indices", {}).get(
-            "only_larger", True
-        )
-        return NewPairwiseSignificance(
-            self, alpha=alpha, only_larger=only_larger
-        ).summary_pairwise_indices
-
-    @lazyproperty
-    def scale_means_row(self):
-        return self._calculator.scale_means_row
-
-    @lazyproperty
-    def scale_means_row_margin(self):
-        return self._calculator.scale_means_row_margin
-
-    @lazyproperty
-    def scale_means_column_margin(self):
-        return self._calculator.scale_means_column_margin
-
-    @lazyproperty
-    def scale_means_column(self):
-        return self._calculator.scale_means_column
-
-    @lazyproperty
-    def column_index(self):
-        """ndarray of column index percentages.
-
-        The index values represent the difference of the percentages to the
-        corresponding baseline values. The baseline values are the univariate
-        percentages of the corresponding variable.
-        """
-        return self._calculator.column_index
-
-    @lazyproperty
-    def min_base_size_mask(self):
-        return MinBaseSizeMask(self, self._mask_size)
-
-    @lazyproperty
-    def base_counts(self):
-        return self._calculator.base_counts
-
-    @lazyproperty
-    def column_base(self):
-        return self._calculator.column_base
-
-    @lazyproperty
-    def column_labels(self):
-        return self._calculator.column_labels
-
-    @lazyproperty
-    def column_margin(self):
-        return self._calculator.column_margin
-
-    @lazyproperty
-    def column_percentages(self):
-        return self.column_proportions * 100
-
-    @lazyproperty
-    def column_proportions(self):
-        return self._calculator.column_proportions
-
-    @lazyproperty
-    def columns_dimension_name(self):
-        """str name assigned to rows-dimension.
-
-        The empty string ("") for a 0D and 1D slices (until we get to all slices
-        being 2D). Reflects the resolved dimension-name transform cascade.
-        """
-        if len(self.dimensions) < 2:
-            return ""
-        return self.dimensions[1].name
-
-    @lazyproperty
-    def counts(self):
-        return self._calculator.counts
-
-    @lazyproperty
-    def means(self):
-        return self._calculator.means
-
-    @lazyproperty
-    def names(self):
-        return self._slice.names
-
-    @lazyproperty
     def population_counts(self):
         return (
             self.table_proportions * self._population * self._cube.population_fraction
@@ -200,10 +177,6 @@ class FrozenSlice(object):
     @lazyproperty
     def row_labels(self):
         return self._calculator.row_labels
-
-    @lazyproperty
-    def column_labels_with_ids(self):
-        return self._calculator.column_labels_with_ids
 
     @lazyproperty
     def row_margin(self):
@@ -229,6 +202,16 @@ class FrozenSlice(object):
         return self.dimensions[0].description
 
     @lazyproperty
+    def rows_dimension_fills(self):
+        """sequence of RGB str like "#def032" fill colors for row elements.
+
+        The values reflect the resolved element-fill transform cascade. The length and
+        ordering of the sequence correspond to the rows in the slice, including
+        accounting for insertions and hidden rows.
+        """
+        return self._calculator.rows_dimension_fills
+
+    @lazyproperty
     def rows_dimension_name(self):
         """str name assigned to rows-dimension.
 
@@ -250,30 +233,59 @@ class FrozenSlice(object):
         return self.dimensions[0].dimension_type
 
     @lazyproperty
-    def columns_dimension_type(self):
-        if len(self.dimensions) < 2:
-            return None
-        return self.dimensions[1].dimension_type
+    def scale_means_column(self):
+        return self._calculator.scale_means_column
+
+    @lazyproperty
+    def scale_means_column_margin(self):
+        return self._calculator.scale_means_column_margin
+
+    @lazyproperty
+    def scale_means_row(self):
+        return self._calculator.scale_means_row
+
+    @lazyproperty
+    def scale_means_row_margin(self):
+        return self._calculator.scale_means_row_margin
 
     @lazyproperty
     def shape(self):
         return self.counts.shape
 
     @lazyproperty
-    def table_base(self):
-        return self._calculator.table_base
+    def summary_pairwise_indices(self):
+        alpha = self._transforms_dict.get("pairwise_indices", {}).get("alpha", 0.05)
+        only_larger = self._transforms_dict.get("pairwise_indices", {}).get(
+            "only_larger", True
+        )
+        return NewPairwiseSignificance(
+            self, alpha=alpha, only_larger=only_larger
+        ).summary_pairwise_indices
 
     @lazyproperty
-    def table_margin(self):
-        return self._calculator.table_margin
+    def table_base(self):
+        return self._calculator.table_base
 
     @lazyproperty
     def table_base_unpruned(self):
         return self._calculator.table_base_unpruned
 
     @lazyproperty
+    def table_margin(self):
+        return self._calculator.table_margin
+
+    @lazyproperty
     def table_margin_unpruned(self):
         return self._calculator.table_margin_unpruned
+
+    @lazyproperty
+    def table_name(self):
+        if self._cube.ndim < 3 and not self._ca_as_0th:
+            return None
+
+        title = self._cube.name
+        table_name = self._cube.labels()[0][self._slice_idx]
+        return "%s: %s" % (title, table_name)
 
     @lazyproperty
     def table_percentages(self):
@@ -296,6 +308,21 @@ class FrozenSlice(object):
     @lazyproperty
     def _calculator(self):
         return Calculator(self._assembler)
+
+    def _create_means_slice(self, counts, base_counts):
+        if self._cube.ndim == 0:
+            return _0DMeansSlice(counts, base_counts)
+        elif self._cube.ndim == 1:
+            if self.dimensions[0].dimension_type == DT.MR:
+                return _1DMrWithMeansSlice(self.dimensions[0], counts, base_counts)
+            return _1DMeansSlice(self.dimensions[0], counts, base_counts)
+        elif self._cube.ndim >= 2:
+            if self._cube.ndim == 3:
+                base_counts = base_counts[self._slice_idx]
+                counts = counts[self._slice_idx]
+            if self.dimensions[0].dimension_type == DT.MR:
+                return _MrXCatMeansSlice(self.dimensions, counts, base_counts)
+            return _CatXCatMeansSlice(self.dimensions, counts, base_counts)
 
     @lazyproperty
     def dimensions(self):
@@ -331,21 +358,6 @@ class FrozenSlice(object):
         """True if any of dimensions has pruning."""
         # TODO: Implement separarte pruning for rows and columns
         return any(dimension.prune for dimension in self.dimensions)
-
-    def _create_means_slice(self, counts, base_counts):
-        if self._cube.ndim == 0:
-            return _0DMeansSlice(counts, base_counts)
-        elif self._cube.ndim == 1:
-            if self.dimensions[0].dimension_type == DT.MR:
-                return _1DMrWithMeansSlice(self.dimensions[0], counts, base_counts)
-            return _1DMeansSlice(self.dimensions[0], counts, base_counts)
-        elif self._cube.ndim >= 2:
-            if self._cube.ndim == 3:
-                base_counts = base_counts[self._slice_idx]
-                counts = counts[self._slice_idx]
-            if self.dimensions[0].dimension_type == DT.MR:
-                return _MrXCatMeansSlice(self.dimensions, counts, base_counts)
-            return _CatXCatMeansSlice(self.dimensions, counts, base_counts)
 
     @lazyproperty
     def _slice(self):
@@ -984,6 +996,16 @@ class _BaseVector(object):
         self._base_counts = base_counts
 
     @lazyproperty
+    def fill(self):
+        """str RGB color like "#def032" or None when not specified.
+
+        The value reflects the resolved element-fill transform cascade. A value of
+        `None` indicates no element-fill transform was specified and the default
+        (theme-specified) color should be used for this element.
+        """
+        return self._element.fill
+
+    @lazyproperty
     def is_insertion(self):
         return False
 
@@ -1248,6 +1270,18 @@ class _InsertionVector(object):
         self._subtotal = subtotal
 
     @lazyproperty
+    def fill(self):
+        """Unconditionally `None` for an insertion vector.
+
+        A `fill` value is normally a str RGB value like "#da09fc", specifying the color
+        to use for a chart category or series representing this element. The value
+        reflects the resolved element-fill transform cascade. Since an insertion cannot
+        (currently) have a fill-transform, the default value of `None` (indicating "use
+        default color") is unconditionally returned.
+        """
+        return None
+
+    @lazyproperty
     def is_insertion(self):
         return True
 
@@ -1498,7 +1532,17 @@ class SliceWithInsertions(_TransformedSlice):
         return tuple(columns)
 
 
-class _TransformedVecvtor(object):
+class _TransformedVector(object):
+    @lazyproperty
+    def fill(self):
+        """str RGB color like "#def032" or None when not specified.
+
+        The value reflects the resolved element-fill transform cascade. A value of
+        `None` indicates no element-fill transform was specified and the default
+        (theme-specified) color should be used for this element.
+        """
+        return self._base_vector.fill
+
     @lazyproperty
     def is_insertion(self):
         return self._base_vector.is_insertion
@@ -1544,7 +1588,7 @@ class _TransformedVecvtor(object):
         return self._base_vector.table_margin
 
 
-class _AssembledVector(_TransformedVecvtor):
+class _AssembledVector(_TransformedVector):
     """Vector with base, as well as inserted, elements (of the opposite dimension)."""
 
     def __init__(self, base_vector, opposite_inserted_vectors):
@@ -1723,6 +1767,16 @@ class Calculator(object):
         )
 
     @lazyproperty
+    def rows_dimension_fills(self):
+        """sequence of RGB str like "#def032" fill colors for rows dimension elements.
+
+        The values reflect the resolved element-fill transform cascade. The length and
+        ordering of the sequence correspond to the rows in the slice, including
+        accounting for insertions and hidden rows.
+        """
+        return tuple(row.fill for row in self._assembler.rows)
+
+    @lazyproperty
     def rows_dimension_numeric(self):
         return np.array([row.numeric for row in self._assembler.rows])
 
@@ -1898,7 +1952,7 @@ class OrderTransform(object):
         return np.array(self._column_dimension.valid_display_order)
 
 
-class OrderedVector(_TransformedVecvtor):
+class OrderedVector(_TransformedVector):
     """In charge of indexing elements properly, after ordering transform."""
 
     def __init__(self, vector, order):
@@ -1986,7 +2040,7 @@ class Transforms(object):
         return Insertions(self._dimensions, self._slice)
 
 
-class PrunedVector(_TransformedVecvtor):
+class PrunedVector(_TransformedVector):
     """Vector with elements from the opposide dimensions pruned."""
 
     def __init__(self, base_vector, opposite_vectors):
@@ -2204,7 +2258,7 @@ class SliceWithHidden(_TransformedSlice):
         )
 
 
-class HiddenVector(_TransformedVecvtor):
+class HiddenVector(_TransformedVector):
     def __init__(self, base_vector, opposite_vectors):
         self._base_vector = base_vector
         self._opposite_vectors = opposite_vectors

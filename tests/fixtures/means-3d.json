@@ -1,0 +1,817 @@
+{
+    "query": {
+        "dimensions": [
+            {
+                "variable": "/api/datasets/8cc85f81ce0849fe93be1ffae4ce456b/variables/000008/"
+            },
+            {
+                "each": "/api/datasets/8cc85f81ce0849fe93be1ffae4ce456b/variables/ef9bff65bcf4411fb8140d4a359edd0a/"
+            },
+            {
+                "variable": "/api/datasets/8cc85f81ce0849fe93be1ffae4ce456b/variables/ef9bff65bcf4411fb8140d4a359edd0a/"
+            }
+        ],
+        "filters": [],
+        "measures": {
+            "count": {
+                "args": [],
+                "function": "cube_count"
+            },
+            "mean": {
+                "args": [
+                    {
+                        "variable": "/api/datasets/8cc85f81ce0849fe93be1ffae4ce456b/variables/000007/"
+                    }
+                ],
+                "function": "cube_mean"
+            }
+        },
+        "weight": null
+    },
+    "result": {
+        "counts": [
+            3,
+            0,
+            0,
+            3,
+            3,
+            3,
+            0,
+            0,
+            0,
+            3,
+            3,
+            0,
+            3,
+            0,
+            3,
+            0,
+            19,
+            14,
+            3,
+            14,
+            0,
+            18,
+            17,
+            14,
+            14,
+            0,
+            16,
+            10,
+            3,
+            14,
+            0,
+            12,
+            110,
+            16,
+            15,
+            0,
+            13,
+            13,
+            110,
+            17,
+            0,
+            10,
+            118,
+            17,
+            118,
+            0,
+            3,
+            3,
+            3,
+            3,
+            0,
+            3,
+            3,
+            12,
+            3,
+            0,
+            1,
+            3,
+            3,
+            3,
+            3,
+            11,
+            119,
+            15,
+            311,
+            1,
+            110,
+            116,
+            116,
+            116,
+            0,
+            17,
+            117,
+            11,
+            314
+        ],
+        "dimensions": [
+            {
+                "derived": false,
+                "references": {
+                    "alias": "imiss_m",
+                    "description": null,
+                    "name": "imiss_m"
+                },
+                "type": {
+                    "categories": [
+                        {
+                            "id": 5,
+                            "missing": false,
+                            "name": "NA",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 3,
+                            "missing": false,
+                            "name": "Not very Important",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "name": "Somewhat Important",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 4,
+                            "missing": false,
+                            "name": "Unimportant",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 2,
+                            "missing": false,
+                            "name": "Very Important",
+                            "numeric_value": null
+                        }
+                    ],
+                    "class": "categorical",
+                    "ordinal": false
+                }
+            },
+            {
+                "derived": true,
+                "references": {
+                    "alias": "fgh array",
+                    "description": "",
+                    "discarded": false,
+                    "header_order": null,
+                    "is_subvar": false,
+                    "name": "fgh array",
+                    "subreferences": {}
+                },
+                "type": {
+                    "class": "enum",
+                    "elements": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "000004",
+                                "references": {
+                                    "alias": "imiss_f",
+                                    "description": null,
+                                    "is_subvar": true,
+                                    "name": "imiss_f"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 5,
+                                            "missing": false,
+                                            "name": "NA",
+                                            "numeric_value": null
+                                        },
+                                        {
+                                            "id": 4,
+                                            "missing": false,
+                                            "name": "Not very Important",
+                                            "numeric_value": null
+                                        },
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Somewhat Important",
+                                            "numeric_value": null
+                                        },
+                                        {
+                                            "id": 2,
+                                            "missing": false,
+                                            "name": "Unimportant",
+                                            "numeric_value": null
+                                        },
+                                        {
+                                            "id": 3,
+                                            "missing": false,
+                                            "name": "Very Important",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "000005",
+                                "references": {
+                                    "alias": "imiss_g",
+                                    "description": null,
+                                    "is_subvar": true,
+                                    "name": "imiss_g"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 5,
+                                            "missing": false,
+                                            "name": "NA",
+                                            "numeric_value": null
+                                        },
+                                        {
+                                            "id": 4,
+                                            "missing": false,
+                                            "name": "Not very Important",
+                                            "numeric_value": null
+                                        },
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Somewhat Important",
+                                            "numeric_value": null
+                                        },
+                                        {
+                                            "id": 2,
+                                            "missing": false,
+                                            "name": "Unimportant",
+                                            "numeric_value": null
+                                        },
+                                        {
+                                            "id": 3,
+                                            "missing": false,
+                                            "name": "Very Important",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 3,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "000006",
+                                "references": {
+                                    "alias": "imiss_h",
+                                    "description": null,
+                                    "is_subvar": true,
+                                    "name": "imiss_h"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 5,
+                                            "missing": false,
+                                            "name": "NA",
+                                            "numeric_value": null
+                                        },
+                                        {
+                                            "id": 4,
+                                            "missing": false,
+                                            "name": "Not very Important",
+                                            "numeric_value": null
+                                        },
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Somewhat Important",
+                                            "numeric_value": null
+                                        },
+                                        {
+                                            "id": 2,
+                                            "missing": false,
+                                            "name": "Unimportant",
+                                            "numeric_value": null
+                                        },
+                                        {
+                                            "id": 3,
+                                            "missing": false,
+                                            "name": "Very Important",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        }
+                    ],
+                    "subtype": {
+                        "class": "variable"
+                    }
+                }
+            },
+            {
+                "derived": true,
+                "references": {
+                    "alias": "fgh array",
+                    "description": "",
+                    "discarded": false,
+                    "header_order": null,
+                    "is_subvar": false,
+                    "name": "fgh array"
+                },
+                "type": {
+                    "categories": [
+                        {
+                            "id": 5,
+                            "missing": false,
+                            "name": "NA",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 4,
+                            "missing": false,
+                            "name": "Not very Important",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "name": "Somewhat Important",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 2,
+                            "missing": false,
+                            "name": "Unimportant",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 3,
+                            "missing": false,
+                            "name": "Very Important",
+                            "numeric_value": null
+                        }
+                    ],
+                    "class": "categorical",
+                    "matrix": [
+                        "000004",
+                        "000005",
+                        "000006"
+                    ],
+                    "ordinal": false
+                }
+            }
+        ],
+        "element": "crunch:cube",
+        "margins": {
+            "0": {
+                "1": {
+                    "data": [
+                        [
+                            8,
+                            8,
+                            8
+                        ],
+                        [
+                            73,
+                            73,
+                            73
+                        ],
+                        [
+                            313,
+                            313,
+                            313
+                        ],
+                        [
+                            17,
+                            17,
+                            17
+                        ],
+                        [
+                            589,
+                            589,
+                            589
+                        ]
+                    ]
+                },
+                "2": {
+                    "data": [
+                        [
+                            18,
+                            0,
+                            1,
+                            1,
+                            4
+                        ],
+                        [
+                            0,
+                            73,
+                            61,
+                            33,
+                            52
+                        ],
+                        [
+                            0,
+                            155,
+                            381,
+                            153,
+                            250
+                        ],
+                        [
+                            0,
+                            6,
+                            6,
+                            28,
+                            11
+                        ],
+                        [
+                            4,
+                            188,
+                            452,
+                            242,
+                            881
+                        ]
+                    ]
+                },
+                "data": [
+                    24,
+                    219,
+                    939,
+                    51,
+                    1767
+                ]
+            },
+            "1": {
+                "0": {
+                    "data": [
+                        [
+                            8,
+                            8,
+                            8
+                        ],
+                        [
+                            73,
+                            73,
+                            73
+                        ],
+                        [
+                            313,
+                            313,
+                            313
+                        ],
+                        [
+                            17,
+                            17,
+                            17
+                        ],
+                        [
+                            589,
+                            589,
+                            589
+                        ]
+                    ]
+                },
+                "2": {
+                    "data": [
+                        [
+                            9,
+                            145,
+                            346,
+                            55,
+                            445
+                        ],
+                        [
+                            7,
+                            193,
+                            237,
+                            352,
+                            211
+                        ],
+                        [
+                            6,
+                            84,
+                            318,
+                            50,
+                            542
+                        ]
+                    ]
+                },
+                "data": [
+                    1000,
+                    1000,
+                    1000
+                ]
+            },
+            "2": {
+                "0": {
+                    "data": [
+                        [
+                            18,
+                            0,
+                            1,
+                            1,
+                            4
+                        ],
+                        [
+                            0,
+                            73,
+                            61,
+                            33,
+                            52
+                        ],
+                        [
+                            0,
+                            155,
+                            381,
+                            153,
+                            250
+                        ],
+                        [
+                            0,
+                            6,
+                            6,
+                            28,
+                            11
+                        ],
+                        [
+                            4,
+                            188,
+                            452,
+                            242,
+                            881
+                        ]
+                    ]
+                },
+                "1": {
+                    "data": [
+                        [
+                            9,
+                            145,
+                            346,
+                            55,
+                            445
+                        ],
+                        [
+                            7,
+                            193,
+                            237,
+                            352,
+                            211
+                        ],
+                        [
+                            6,
+                            84,
+                            318,
+                            50,
+                            542
+                        ]
+                    ]
+                },
+                "data": [
+                    22,
+                    422,
+                    901,
+                    457,
+                    1198
+                ]
+            },
+            "data": [
+                3000
+            ]
+        },
+        "measures": {
+            "count": {
+                "data": [
+                    6,
+                    0,
+                    0,
+                    1,
+                    1,
+                    6,
+                    0,
+                    0,
+                    0,
+                    2,
+                    6,
+                    0,
+                    1,
+                    0,
+                    1,
+                    0,
+                    29,
+                    24,
+                    6,
+                    14,
+                    0,
+                    18,
+                    17,
+                    24,
+                    14,
+                    0,
+                    26,
+                    20,
+                    3,
+                    24,
+                    0,
+                    62,
+                    150,
+                    16,
+                    85,
+                    0,
+                    63,
+                    83,
+                    120,
+                    47,
+                    0,
+                    30,
+                    148,
+                    17,
+                    118,
+                    0,
+                    3,
+                    3,
+                    7,
+                    4,
+                    0,
+                    2,
+                    1,
+                    12,
+                    2,
+                    0,
+                    1,
+                    2,
+                    9,
+                    5,
+                    3,
+                    51,
+                    169,
+                    25,
+                    341,
+                    1,
+                    110,
+                    136,
+                    196,
+                    146,
+                    0,
+                    27,
+                    147,
+                    21,
+                    394
+                ],
+                "metadata": {
+                    "derived": true,
+                    "references": {},
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {}
+                    }
+                },
+                "n_missing": 0
+            },
+            "mean": {
+                "data": [
+                    -2,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    -1,
+                    1,
+                    -2,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    0,
+                    -2,
+                    {
+                        "?": -8
+                    },
+                    1,
+                    {
+                        "?": -8
+                    },
+                    -1,
+                    {
+                        "?": -8
+                    },
+                    -0.10344827586206896,
+                    0.25,
+                    -0.16666666666666666,
+                    -0.5,
+                    {
+                        "?": -8
+                    },
+                    0.1111111111111111,
+                    0.29411764705882354,
+                    -0.2916666666666667,
+                    -0.35714285714285715,
+                    {
+                        "?": -8
+                    },
+                    0,
+                    -0.25,
+                    0.3333333333333333,
+                    -0.041666666666666664,
+                    {
+                        "?": -8
+                    },
+                    -0.3709677419354839,
+                    -0.020134228187919462,
+                    -0.25,
+                    -0.38823529411764707,
+                    {
+                        "?": -8
+                    },
+                    -0.15873015873015872,
+                    -0.0975609756097561,
+                    -0.2,
+                    -0.44680851063829785,
+                    {
+                        "?": -8
+                    },
+                    -0.16666666666666666,
+                    -0.061224489795918366,
+                    -0.35294117647058826,
+                    -0.3644067796610169,
+                    {
+                        "?": -8
+                    },
+                    -0.3333333333333333,
+                    -1.3333333333333333,
+                    -1.4285714285714286,
+                    -0.5,
+                    {
+                        "?": -8
+                    },
+                    -1,
+                    1,
+                    -1.3333333333333333,
+                    0,
+                    {
+                        "?": -8
+                    },
+                    1,
+                    0,
+                    -1.4444444444444444,
+                    -1,
+                    -1,
+                    -0.7254901960784313,
+                    -0.7380952380952381,
+                    -0.875,
+                    -0.8141592920353983,
+                    -1,
+                    -0.7962962962962963,
+                    -0.7573529411764706,
+                    -0.7589743589743589,
+                    -0.8482758620689655,
+                    {
+                        "?": -8
+                    },
+                    -0.5555555555555556,
+                    -0.6413793103448275,
+                    -0.5714285714285714,
+                    -0.8698979591836735
+                ],
+                "metadata": {
+                    "derived": true,
+                    "references": {},
+                    "type": {
+                        "class": "numeric",
+                        "integer": null,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {}
+                    }
+                },
+                "n_missing": 10
+            }
+        },
+        "missing": 0,
+        "n": 1000
+    }
+}

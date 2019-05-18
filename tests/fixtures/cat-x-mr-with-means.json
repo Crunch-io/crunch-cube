@@ -1,0 +1,2257 @@
+{
+    "query": {
+        "dimensions": [
+            {
+                "each": "https://app.crunch.io/api/datasets/be20e95c608e4f62b6d13c594f087c9d/variables/ff599c0748a94ca4bedfc9de96542ca4/"
+            },
+            {
+                "args": [
+                    {
+                        "variable": "https://app.crunch.io/api/datasets/be20e95c608e4f62b6d13c594f087c9d/variables/ff599c0748a94ca4bedfc9de96542ca4/"
+                    }
+                ],
+                "function": "as_selected"
+            },
+            {
+                "variable": "https://app.crunch.io/api/datasets/be20e95c608e4f62b6d13c594f087c9d/variables/be876544a82448029bcea53765381b91/"
+            }
+        ],
+        "measures": {
+            "count": {
+                "args": [],
+                "function": "cube_count"
+            },
+            "mean": {
+                "args": [
+                    {
+                        "variable": "https://app.crunch.io/api/datasets/be20e95c608e4f62b6d13c594f087c9d/variables/4334de39ee5e4d73ad3e147a09c91b14/"
+                    }
+                ],
+                "function": "cube_mean"
+            }
+        },
+        "weight": "https://app.crunch.io/api/datasets/be20e95c608e4f62b6d13c594f087c9d/variables/73ed60581ae146acb01edaf0d6a13433/"
+    },
+    "query_environment": {
+        "filter": []
+    },
+    "result": {
+        "counts": [
+            689,
+            597,
+            683,
+            578,
+            587,
+            577,
+            581,
+            513,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1039,
+            926,
+            887,
+            856,
+            872,
+            852,
+            880,
+            919,
+            0,
+            0,
+            0,
+            0,
+            0,
+            764,
+            562,
+            651,
+            683,
+            626,
+            650,
+            645,
+            661,
+            2091,
+            2067,
+            2073,
+            2066,
+            0,
+            519,
+            437,
+            464,
+            440,
+            430,
+            443,
+            442,
+            439,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1209,
+            1086,
+            1106,
+            994,
+            1029,
+            986,
+            1019,
+            993,
+            0,
+            0,
+            0,
+            0,
+            0,
+            764,
+            562,
+            651,
+            683,
+            626,
+            650,
+            645,
+            661,
+            2091,
+            2067,
+            2073,
+            2066,
+            0,
+            163,
+            154,
+            141,
+            128,
+            145,
+            129,
+            128,
+            168,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1565,
+            1369,
+            1429,
+            1306,
+            1314,
+            1300,
+            1333,
+            1264,
+            0,
+            0,
+            0,
+            0,
+            0,
+            764,
+            562,
+            651,
+            683,
+            626,
+            650,
+            645,
+            661,
+            2091,
+            2067,
+            2073,
+            2066,
+            0,
+            175,
+            150,
+            146,
+            150,
+            151,
+            136,
+            157,
+            135,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1553,
+            1373,
+            1424,
+            1284,
+            1308,
+            1293,
+            1304,
+            1297,
+            0,
+            0,
+            0,
+            0,
+            0,
+            764,
+            562,
+            651,
+            683,
+            626,
+            650,
+            645,
+            661,
+            2091,
+            2067,
+            2073,
+            2066,
+            0,
+            90,
+            85,
+            71,
+            75,
+            70,
+            83,
+            78,
+            92,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1638,
+            1438,
+            1499,
+            1359,
+            1389,
+            1346,
+            1383,
+            1340,
+            0,
+            0,
+            0,
+            0,
+            0,
+            764,
+            562,
+            651,
+            683,
+            626,
+            650,
+            645,
+            661,
+            2091,
+            2067,
+            2073,
+            2066,
+            0,
+            45,
+            33,
+            32,
+            22,
+            29,
+            25,
+            33,
+            39,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1683,
+            1490,
+            1538,
+            1412,
+            1430,
+            1404,
+            1428,
+            1393,
+            0,
+            0,
+            0,
+            0,
+            0,
+            764,
+            562,
+            651,
+            683,
+            626,
+            650,
+            645,
+            661,
+            2091,
+            2067,
+            2073,
+            2066,
+            0,
+            25,
+            23,
+            17,
+            21,
+            21,
+            15,
+            25,
+            20,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1703,
+            1500,
+            1553,
+            1413,
+            1438,
+            1414,
+            1436,
+            1412,
+            0,
+            0,
+            0,
+            0,
+            0,
+            764,
+            562,
+            651,
+            683,
+            626,
+            650,
+            645,
+            661,
+            2091,
+            2067,
+            2073,
+            2066,
+            0,
+            22,
+            22,
+            16,
+            20,
+            26,
+            21,
+            17,
+            26,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1706,
+            1501,
+            1554,
+            1414,
+            1433,
+            1408,
+            1444,
+            1406,
+            0,
+            0,
+            0,
+            0,
+            0,
+            764,
+            562,
+            651,
+            683,
+            626,
+            650,
+            645,
+            661,
+            2091,
+            2067,
+            2073,
+            2066,
+            0,
+            1636,
+            1423,
+            1505,
+            1371,
+            1383,
+            1368,
+            1386,
+            1347,
+            0,
+            0,
+            0,
+            0,
+            0,
+            92,
+            100,
+            65,
+            63,
+            76,
+            61,
+            75,
+            85,
+            0,
+            0,
+            0,
+            0,
+            0,
+            764,
+            562,
+            651,
+            683,
+            626,
+            650,
+            645,
+            661,
+            2091,
+            2067,
+            2073,
+            2066,
+            0
+        ],
+        "dimensions": [
+            {
+                "derived": true,
+                "references": {
+                    "alias": "Q5news_1_rc",
+                    "description": "How often?",
+                    "discarded": true,
+                    "name": "BBC News",
+                    "subreferences": [
+                        {
+                            "alias": "Q5news_1_rc_1",
+                            "name": "Multiple a day"
+                        },
+                        {
+                            "alias": "Q5news_1_rc_2",
+                            "name": "Once a day"
+                        },
+                        {
+                            "alias": "Q5news_1_rc_3",
+                            "name": "4-6 days a week"
+                        },
+                        {
+                            "alias": "Q5news_1_rc_4",
+                            "name": "2-3 days a week"
+                        },
+                        {
+                            "alias": "Q5news_1_rc_5",
+                            "name": "Once a week"
+                        },
+                        {
+                            "alias": "Q5news_1_rc_6",
+                            "name": "Once a fortnight"
+                        },
+                        {
+                            "alias": "Q5news_1_rc_7",
+                            "name": "Once a month"
+                        },
+                        {
+                            "alias": "Q5news_1_rc_98",
+                            "name": "Don't know"
+                        },
+                        {
+                            "alias": "Q5news_1_rc_1_2_3_4_5",
+                            "name": "Net: Weekly"
+                        }
+                    ]
+                },
+                "type": {
+                    "class": "enum",
+                    "elements": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0001",
+                                "references": {
+                                    "alias": "Q5news_1_rc_1",
+                                    "name": "Multiple a day"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Not Selected",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0002",
+                                "references": {
+                                    "alias": "Q5news_1_rc_2",
+                                    "name": "Once a day"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Not Selected",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 3,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0003",
+                                "references": {
+                                    "alias": "Q5news_1_rc_3",
+                                    "name": "4-6 days a week"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Not Selected",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 4,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0004",
+                                "references": {
+                                    "alias": "Q5news_1_rc_4",
+                                    "name": "2-3 days a week"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Not Selected",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 5,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0005",
+                                "references": {
+                                    "alias": "Q5news_1_rc_5",
+                                    "name": "Once a week"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Not Selected",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 6,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0006",
+                                "references": {
+                                    "alias": "Q5news_1_rc_6",
+                                    "name": "Once a fortnight"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Not Selected",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 7,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0007",
+                                "references": {
+                                    "alias": "Q5news_1_rc_7",
+                                    "name": "Once a month"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Not Selected",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 8,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0008",
+                                "references": {
+                                    "alias": "Q5news_1_rc_98",
+                                    "name": "Don't know"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Not Selected",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        },
+                        {
+                            "id": 9,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "0009",
+                                "references": {
+                                    "alias": "Q5news_1_rc_1_2_3_4_5",
+                                    "name": "Net: Weekly"
+                                },
+                                "type": {
+                                    "categories": [
+                                        {
+                                            "id": 1,
+                                            "missing": false,
+                                            "name": "Selected",
+                                            "numeric_value": 1,
+                                            "selected": true
+                                        },
+                                        {
+                                            "id": 0,
+                                            "missing": false,
+                                            "name": "Not Selected",
+                                            "numeric_value": 0
+                                        },
+                                        {
+                                            "id": -1,
+                                            "missing": true,
+                                            "name": "No Data",
+                                            "numeric_value": null
+                                        }
+                                    ],
+                                    "class": "categorical",
+                                    "ordinal": false
+                                }
+                            }
+                        }
+                    ],
+                    "subtype": {
+                        "class": "variable"
+                    }
+                }
+            },
+            {
+                "derived": true,
+                "references": {
+                    "alias": "Q5news_1_rc",
+                    "description": "How often?",
+                    "discarded": true,
+                    "name": "BBC News",
+                    "subreferences": [
+                        {
+                            "alias": "Q5news_1_rc_1",
+                            "name": "Multiple a day"
+                        },
+                        {
+                            "alias": "Q5news_1_rc_2",
+                            "name": "Once a day"
+                        },
+                        {
+                            "alias": "Q5news_1_rc_3",
+                            "name": "4-6 days a week"
+                        },
+                        {
+                            "alias": "Q5news_1_rc_4",
+                            "name": "2-3 days a week"
+                        },
+                        {
+                            "alias": "Q5news_1_rc_5",
+                            "name": "Once a week"
+                        },
+                        {
+                            "alias": "Q5news_1_rc_6",
+                            "name": "Once a fortnight"
+                        },
+                        {
+                            "alias": "Q5news_1_rc_7",
+                            "name": "Once a month"
+                        },
+                        {
+                            "alias": "Q5news_1_rc_98",
+                            "name": "Don't know"
+                        },
+                        {
+                            "alias": "Q5news_1_rc_1_2_3_4_5",
+                            "name": "Net: Weekly"
+                        }
+                    ]
+                },
+                "type": {
+                    "categories": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "name": "Selected",
+                            "numeric_value": 1,
+                            "selected": true
+                        },
+                        {
+                            "id": 0,
+                            "missing": false,
+                            "name": "Not Selected",
+                            "numeric_value": 0
+                        },
+                        {
+                            "id": -1,
+                            "missing": true,
+                            "name": "No Data",
+                            "numeric_value": null
+                        }
+                    ],
+                    "class": "categorical",
+                    "ordinal": false,
+                    "subvariables": [
+                        "0001",
+                        "0002",
+                        "0003",
+                        "0004",
+                        "0005",
+                        "0006",
+                        "0007",
+                        "0008",
+                        "0009"
+                    ]
+                }
+            },
+            {
+                "derived": false,
+                "references": {
+                    "alias": "wave",
+                    "name": "Wave"
+                },
+                "type": {
+                    "categories": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "name": "W1 (April 2017)",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 2,
+                            "missing": false,
+                            "name": "W2 (May 2017)",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 3,
+                            "missing": false,
+                            "name": "W3 (June 2017)",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 4,
+                            "missing": false,
+                            "name": "W4 (July 2017)",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 5,
+                            "missing": false,
+                            "name": "W5 (August 2017)",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 6,
+                            "missing": false,
+                            "name": "W6 (Sep 2017)",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 7,
+                            "missing": false,
+                            "name": "W7 (Oct 2017)",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 8,
+                            "missing": false,
+                            "name": "W8 (Nov 2017)",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 9,
+                            "missing": false,
+                            "name": "W9 (Dec 2017)",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 10,
+                            "missing": false,
+                            "name": "W10 (January 2018)",
+                            "numeric_value": 1
+                        },
+                        {
+                            "id": 11,
+                            "missing": false,
+                            "name": "W11 (February 2018)",
+                            "numeric_value": 1
+                        },
+                        {
+                            "id": 12,
+                            "missing": false,
+                            "name": "W12 (March 2018)",
+                            "numeric_value": 1
+                        },
+                        {
+                            "id": -1,
+                            "missing": true,
+                            "name": "No Data",
+                            "numeric_value": null
+                        }
+                    ],
+                    "class": "categorical",
+                    "ordinal": false
+                }
+            }
+        ],
+        "element": "crunch:cube",
+        "measures": {
+            "count": {
+                "data": [
+                    673.8225999301741,
+                    577.5805905100915,
+                    674.3469660091683,
+                    568.9044264688987,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    1035.7851114741209,
+                    860.9699051228476,
+                    881.729528619211,
+                    850.9469326991122,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    753.3922885957036,
+                    569.4495043670626,
+                    582.9235053716193,
+                    622.1486408319871,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    512.2723448972156,
+                    419.7063447553626,
+                    458.44865543267036,
+                    435.62989871789745,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    1197.3353665070788,
+                    1018.8441508775759,
+                    1097.6278391957076,
+                    984.221460450113,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    753.3922885957036,
+                    569.4495043670626,
+                    582.9235053716193,
+                    622.1486408319871,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    164.8732437754683,
+                    146.59990901130064,
+                    137.88154635907915,
+                    127.0795597792396,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    1544.7344676288258,
+                    1291.9505866216386,
+                    1418.194948269297,
+                    1292.771799388768,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    753.3922885957036,
+                    569.4495043670626,
+                    582.9235053716193,
+                    622.1486408319871,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    174.6883017770789,
+                    140.31938306982823,
+                    143.54124945123553,
+                    150.4355208420827,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    1534.9194096272147,
+                    1298.2311125631102,
+                    1412.5352451771414,
+                    1269.4158383259255,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    753.3922885957036,
+                    569.4495043670626,
+                    582.9235053716193,
+                    622.1486408319871,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    91.07270855912526,
+                    78.38759328393778,
+                    73.2110470554347,
+                    74.57731940475514,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    1618.5350028451685,
+                    1360.162902349002,
+                    1482.8654475729427,
+                    1345.2740397632522,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    753.3922885957036,
+                    569.4495043670626,
+                    582.9235053716193,
+                    622.1486408319871,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    45.472096787659176,
+                    31.510957258663453,
+                    33.590972335684654,
+                    22.19764292032478,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    1664.1356146166333,
+                    1407.0395383742755,
+                    1522.4855222926926,
+                    1397.6537162476814,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    753.3922885957036,
+                    569.4495043670626,
+                    582.9235053716193,
+                    622.1486408319871,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    25.41194703007166,
+                    23.391706318091643,
+                    18.018637834160636,
+                    20.09882546633916,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    1684.195764374221,
+                    1415.1587893148471,
+                    1538.0578567942161,
+                    1399.752533701667,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    753.3922885957036,
+                    569.4495043670626,
+                    582.9235053716193,
+                    622.1486408319871,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    21.99446864750105,
+                    21.05401142566197,
+                    17.037420150946282,
+                    20.92816556847218,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    1687.613242756791,
+                    1417.4964842072773,
+                    1539.0390744774304,
+                    1398.923193599534,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    753.3922885957036,
+                    569.4495043670626,
+                    582.9235053716193,
+                    622.1486408319871,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    1616.7291989390608,
+                    1362.5938206305213,
+                    1487.4294643075852,
+                    1356.6267252128705,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    92.87851246523188,
+                    75.95667500241706,
+                    68.64703032079154,
+                    63.2246339551361,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    753.3922885957036,
+                    569.4495043670626,
+                    582.9235053716193,
+                    622.1486408319871,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "metadata": {
+                    "derived": true,
+                    "references": {},
+                    "type": {
+                        "class": "numeric",
+                        "integer": false,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {}
+                    }
+                },
+                "n_missing": 19397
+            },
+            "mean": {
+                "data": [
+                    38.79868092168848,
+                    37.911460968343384,
+                    21.566826228784073,
+                    28.903166828677023,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    8.531140622233009,
+                    -0.0805083155003449,
+                    -12.469750517404142,
+                    -17.221532829095505,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    12.361417346615546,
+                    10.917884486901682,
+                    8.55836343660059,
+                    -9.233361511954936,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    22.919022284911023,
+                    17.854436023154467,
+                    0.9995909398306255,
+                    5.765313455666309,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    25.355665361847333,
+                    -1.8732391808022093,
+                    -10.458322652141625,
+                    -19.009325927555476,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    18.786319355427217,
+                    17.894918108581,
+                    4.4789822122485585,
+                    3.0718045240611143,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    -1.227733208698524,
+                    -7.996716641982194,
+                    -30.95431482676578,
+                    -18.03417096792156,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    21.454823176907073,
+                    18.050945521526597,
+                    6.362985628330564,
+                    3.5101032990501553,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    -23.803824133140722,
+                    -26.697282878138527,
+                    -61.23218387646827,
+                    -48.49820981263205,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    21.80257128780449,
+                    18.308373677029365,
+                    5.8346355434532375,
+                    4.3378710159709915,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    19.60453509722427,
+                    -24.876630784866492,
+                    -52.08108013616227,
+                    7.638330747500843,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    19.41501700550252,
+                    16.555689020063102,
+                    4.321613886640039,
+                    1.0778374440264669,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    -26.98268155304967,
+                    -9.662317734860315,
+                    -90.91475189122735,
+                    -46.92610737983078,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    20.549334441290153,
+                    16.266607002993617,
+                    4.27684889747115,
+                    1.7891579453776196,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    19.45552783488183,
+                    -27.48308452819968,
+                    -62.33543385309548,
+                    -39.83388919377415,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    19.419906807448,
+                    16.28856310014019,
+                    3.778409408683366,
+                    1.7288195051676878,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    20.599562677755262,
+                    17.499111571449458,
+                    6.299513722727599,
+                    2.285722391598358,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    3.852035423062421,
+                    -19.772711739965885,
+                    -65.29572725951337,
+                    -25.420085820238473,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    }
+                ],
+                "metadata": {
+                    "derived": true,
+                    "references": {},
+                    "type": {
+                        "class": "numeric",
+                        "integer": false,
+                        "missing_reasons": {
+                            "NaN": -8,
+                            "No Data": -1
+                        },
+                        "missing_rules": {}
+                    }
+                },
+                "n_missing": 22796
+            }
+        },
+        "missing": 19397,
+        "n": 25575
+    }
+}
