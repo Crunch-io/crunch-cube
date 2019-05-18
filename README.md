@@ -112,6 +112,10 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.10.1
+- Add `fill` property to `_Element`, and provide fill information through `FrozenSlice` API.
+- Increase test coverage (for various MR and Means cases)
+
 #### 1.10.0
 - Initial stab at `FrozenSlice`
 
