@@ -61,8 +61,8 @@ class FrozenSlice(object):
 
     @lazyproperty
     def column_labels_with_ids(self):
-        # TODO: Purge this once we do the transforms properly. It's only needed because of
-        # old-style transforms in exporter
+        # TODO: Purge this once we do the transforms properly. It's only needed
+        # because of old-style transforms in exporter
         return self._calculator.column_labels_with_ids
 
     @lazyproperty
@@ -1544,6 +1544,10 @@ class _TransformedVector(object):
         return self._base_vector.fill
 
     @lazyproperty
+    def counts(self):
+        return self._base_vector.counts
+
+    @lazyproperty
     def is_insertion(self):
         return self._base_vector.is_insertion
 
@@ -1587,6 +1591,10 @@ class _TransformedVector(object):
     def table_margin(self):
         return self._base_vector.table_margin
 
+    @lazyproperty
+    def values(self):
+        return self.counts
+
 
 class _AssembledVector(_TransformedVector):
     """Vector with base, as well as inserted, elements (of the opposite dimension)."""
@@ -1605,7 +1613,7 @@ class _AssembledVector(_TransformedVector):
 
     @lazyproperty
     def pvals(self):
-        return (
+        return np.array(
             tuple([np.nan] * len(self._top_values))
             + self._interleaved_pvals
             + tuple([np.nan] * len(self._bottom_values))
@@ -1613,7 +1621,7 @@ class _AssembledVector(_TransformedVector):
 
     @lazyproperty
     def zscore(self):
-        return (
+        return np.array(
             tuple([np.nan] * len(self._top_values))
             + self._interleaved_zscore
             + tuple([np.nan] * len(self._bottom_values))
@@ -1834,10 +1842,6 @@ class Calculator(object):
         not_a_nan_index = ~np.isnan(self.columns_dimension_numeric)
         denominator = np.sum(self.counts[:, not_a_nan_index], axis=1)
         return inner / denominator
-        # return (
-        #     np.nansum(self.columns_dimension_numeric * self.counts, axis=1)
-        #     / self.row_margin
-        # )
 
     @lazyproperty
     def column_index(self):
@@ -2040,137 +2044,65 @@ class Transforms(object):
         return Insertions(self._dimensions, self._slice)
 
 
-class PrunedVector(_TransformedVector):
-    """Vector with elements from the opposide dimensions pruned."""
-
+class _BasePrunedOrHiddenVector(_TransformedVector):
     def __init__(self, base_vector, opposite_vectors):
         self._base_vector = base_vector
         self._opposite_vectors = opposite_vectors
 
     @lazyproperty
+    def proportions(self):
+        return self._base_vector.proportions[self._valid_elements_idxs]
+
+    @lazyproperty
     def means(self):
-        return np.array(
-            [
-                means
-                for means, opposite_vector in zip(
-                    self._base_vector.means, self._opposite_vectors
-                )
-                if not opposite_vector.pruned
-            ]
-        )
+        return self._base_vector.means[self._valid_elements_idxs]
 
     @lazyproperty
     def column_index(self):
-        return np.array(
-            [
-                column_index
-                for column_index, opposite_vector in zip(
-                    self._base_vector.column_index, self._opposite_vectors
-                )
-                if not opposite_vector.pruned
-            ]
-        )
+        return self._base_vector.column_index[self._valid_elements_idxs]
 
     @lazyproperty
     def zscore(self):
-        return np.array(
-            [
-                zscore
-                for zscore, opposite_vector in zip(
-                    self._base_vector.zscore, self._opposite_vectors
-                )
-                if not opposite_vector.pruned
-            ]
-        )
-
-    @lazyproperty
-    def label(self):
-        return self._base_vector.label
+        return self._base_vector.zscore[self._valid_elements_idxs]
 
     @lazyproperty
     def pvals(self):
-        return np.array(
-            [
-                pvals
-                for pvals, opposite_vector in zip(
-                    self._base_vector.pvals, self._opposite_vectors
-                )
-                if not opposite_vector.pruned
-            ]
-        )
+        return self._base_vector.pvals[self._valid_elements_idxs]
 
     @lazyproperty
     def values(self):
-        return np.array(
-            [
-                value
-                for value, opposite_vector in zip(
-                    self._base_vector.values, self._opposite_vectors
-                )
-                if not opposite_vector.pruned
-            ]
-        )
+        return self._base_vector.values[self._valid_elements_idxs]
 
     @lazyproperty
     def base_values(self):
-        return np.array(
-            [
-                value
-                for value, opposite_vector in zip(
-                    self._base_vector.base_values, self._opposite_vectors
-                )
-                if not opposite_vector.pruned
-            ]
-        )
-
-    @lazyproperty
-    def proportions(self):
-        return np.array(
-            [
-                proportion
-                for proportion, opposite_vector in zip(
-                    self._base_vector.proportions, self._opposite_vectors
-                )
-                if not opposite_vector.pruned
-            ]
-        )
+        return self._base_vector.base_values[self._valid_elements_idxs]
 
     @lazyproperty
     def table_proportions(self):
-        return np.array(
-            [
-                proportion
-                for proportion, opposite_vector in zip(
-                    self._base_vector.table_proportions, self._opposite_vectors
-                )
-                if not opposite_vector.pruned
-            ]
-        )
+        return self._base_vector.table_proportions[self._valid_elements_idxs]
 
     @lazyproperty
     def margin(self):
         if not isinstance(self._base_vector.margin, np.ndarray):
             return self._base_vector.margin
-        return np.array(
-            [
-                margin
-                for margin, opposite_vector in zip(
-                    self._base_vector.margin, self._opposite_vectors
-                )
-                if not opposite_vector.pruned
-            ]
-        )
+        return self._base_vector.margin[self._valid_elements_idxs]
 
     @lazyproperty
     def base(self):
         if not isinstance(self._base_vector.base, np.ndarray):
             return self._base_vector.base
+        return self._base_vector.base[self._valid_elements_idxs]
+
+
+class PrunedVector(_BasePrunedOrHiddenVector):
+    """Vector with elements from the opposide dimensions pruned."""
+
+    @lazyproperty
+    def _valid_elements_idxs(self):
         return np.array(
             [
-                base
-                for base, opposite_vector in zip(
-                    self._base_vector.base, self._opposite_vectors
-                )
+                index
+                for index, opposite_vector in enumerate(self._opposite_vectors)
                 if not opposite_vector.pruned
             ]
         )
@@ -2246,10 +2178,6 @@ class PrunedSlice(_TransformedSlice):
 
 class SliceWithHidden(_TransformedSlice):
     @lazyproperty
-    def rows(self):
-        return tuple(row for row in self._base_slice.rows if not row.hidden)
-
-    @lazyproperty
     def columns(self):
         return tuple(
             HiddenVector(column, self._base_slice.rows)
@@ -2257,20 +2185,24 @@ class SliceWithHidden(_TransformedSlice):
             if not column.hidden
         )
 
+    @lazyproperty
+    def rows(self):
+        return tuple(
+            HiddenVector(row, self._base_slice.columns)
+            for row in self._base_slice.rows
+            if not row.hidden
+        )
 
-class HiddenVector(_TransformedVector):
-    def __init__(self, base_vector, opposite_vectors):
-        self._base_vector = base_vector
-        self._opposite_vectors = opposite_vectors
+
+class HiddenVector(_BasePrunedOrHiddenVector):
+    """Vector with elements from the opposide dimensions hidden."""
 
     @lazyproperty
-    def proportions(self):
+    def _valid_elements_idxs(self):
         return np.array(
             [
-                proportion
-                for proportion, opposite_vector in zip(
-                    self._base_vector.proportions, self._opposite_vectors
-                )
+                index
+                for index, opposite_vector in enumerate(self._opposite_vectors)
                 if not opposite_vector.hidden
             ]
         )

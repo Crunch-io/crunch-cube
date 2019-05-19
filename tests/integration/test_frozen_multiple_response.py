@@ -37,13 +37,7 @@ def test_proportions_simple_mr():
 def test_1D_mr_with_means():
     slice_ = FrozenSlice(CrunchCube(CR.MR_MEAN_FILT_WGTD))
     np.testing.assert_almost_equal(
-        slice_.means,
-        [
-            [3.7240515, 1.5741458],
-            [2.5784293, 1.6396345],
-            [2.2185933, 1.635427],
-            [1.8653349, 0.2246266],
-        ],
+        slice_.means, [[3.7240515], [2.5784293], [2.2185933], [1.8653349]]
     )
     assert slice_.table_base == 23348
     assert slice_.table_base_unpruned == 23348
