@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.10.3
+- Refactor hidden and pruned slices
+
 #### 1.10.2
 - Fix getting element ids from transforms shim
 - Check for both int and str versions in incoming dictionaries
