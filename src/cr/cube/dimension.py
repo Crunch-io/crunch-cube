@@ -800,7 +800,14 @@ class _NewAllElements(_AllElements):
         elements_transforms = self._dimension_transforms_dict.get("elements", {})
         for idx, element_dict in enumerate(element_dicts):
             element_id = element_dict["id"]
-            element_transforms_dict = elements_transforms.get(element_id, {})
+            # TODO: We should be able to "just" ask for the actual `element_id` here,
+            # which is integer. However, in the settings shim, sometimes a unicode
+            # value will get set as the dictionary key. Hence this hack. When the
+            # corresponding shim code gets updated, remove this hack (or leave it with
+            # a note, since it doesn't do any harm).
+            element_transforms_dict = elements_transforms.get(
+                element_id, elements_transforms.get(str(element_id), {})
+            )
             yield idx, element_dict, element_transforms_dict
 
 
