@@ -112,6 +112,11 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.10.2
+- Fix getting element ids from transforms shim
+- Check for both int and str versions in incoming dictionaries
+- This needs to be properly fixed in the shim code, but this code "just" provides extra safety
+
 #### 1.10.1
 - Add `fill` property to `_Element`, and provide fill information through `FrozenSlice` API.
 - Increase test coverage (for various MR and Means cases)
