@@ -61,8 +61,8 @@ class FrozenSlice(object):
 
     @lazyproperty
     def column_labels_with_ids(self):
-        # TODO: Purge this once we do the transforms properly. It's only needed because of
-        # old-style transforms in exporter
+        # TODO: Purge this once we do the transforms properly. It's only needed
+        # because of old-style transforms in exporter
         return self._calculator.column_labels_with_ids
 
     @lazyproperty
@@ -1544,6 +1544,10 @@ class _TransformedVector(object):
         return self._base_vector.fill
 
     @lazyproperty
+    def counts(self):
+        return self._base_vector.counts
+
+    @lazyproperty
     def is_insertion(self):
         return self._base_vector.is_insertion
 
@@ -1586,6 +1590,10 @@ class _TransformedVector(object):
     @lazyproperty
     def table_margin(self):
         return self._base_vector.table_margin
+
+    @lazyproperty
+    def values(self):
+        return self.counts
 
 
 class _AssembledVector(_TransformedVector):
@@ -2246,15 +2254,19 @@ class PrunedSlice(_TransformedSlice):
 
 class SliceWithHidden(_TransformedSlice):
     @lazyproperty
-    def rows(self):
-        return tuple(row for row in self._base_slice.rows if not row.hidden)
-
-    @lazyproperty
     def columns(self):
         return tuple(
             HiddenVector(column, self._base_slice.rows)
             for column in self._base_slice.columns
             if not column.hidden
+        )
+
+    @lazyproperty
+    def rows(self):
+        return tuple(
+            HiddenVector(row, self._base_slice.columns)
+            for row in self._base_slice.rows
+            if not row.hidden
         )
 
 
@@ -2265,11 +2277,85 @@ class HiddenVector(_TransformedVector):
 
     @lazyproperty
     def proportions(self):
-        return np.array(
+        props = np.array(
             [
                 proportion
                 for proportion, opposite_vector in zip(
                     self._base_vector.proportions, self._opposite_vectors
+                )
+                if not opposite_vector.hidden
+            ]
+        )
+        return props
+
+    @lazyproperty
+    def values(self):
+        counts = np.array(
+            [
+                value
+                for value, opposite_vector in zip(
+                    self._base_vector.values, self._opposite_vectors
+                )
+                if not opposite_vector.hidden
+            ]
+        )
+        return counts
+
+    @lazyproperty
+    def base_values(self):
+        return np.array(
+            [
+                value
+                for value, opposite_vector in zip(
+                    self._base_vector.base_values, self._opposite_vectors
+                )
+                if not opposite_vector.hidden
+            ]
+        )
+
+    @lazyproperty
+    def table_proportions(self):
+        return np.array(
+            [
+                proportion
+                for proportion, opposite_vector in zip(
+                    self._base_vector.table_proportions, self._opposite_vectors
+                )
+                if not opposite_vector.hidden
+            ]
+        )
+
+    @lazyproperty
+    def column_index(self):
+        return np.array(
+            [
+                column_index
+                for column_index, opposite_vector in zip(
+                    self._base_vector.column_index, self._opposite_vectors
+                )
+                if not opposite_vector.hidden
+            ]
+        )
+
+    @lazyproperty
+    def zscore(self):
+        return np.array(
+            [
+                zscore
+                for zscore, opposite_vector in zip(
+                    self._base_vector.zscore, self._opposite_vectors
+                )
+                if not opposite_vector.hidden
+            ]
+        )
+
+    @lazyproperty
+    def pvals(self):
+        return np.array(
+            [
+                pvals
+                for pvals, opposite_vector in zip(
+                    self._base_vector.pvals, self._opposite_vectors
                 )
                 if not opposite_vector.hidden
             ]
