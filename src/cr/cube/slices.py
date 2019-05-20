@@ -345,7 +345,7 @@ class FrozenSlice(object):
             return None
 
         title = self._cube.name
-        table_name = self._cube.labels()[0][self._slice_idx]
+        table_name = self._cube.dimensions[0].valid_elements[self._slice_idx].label
         return "%s: %s" % (title, table_name)
 
     @lazyproperty
