@@ -3,7 +3,6 @@ import numpy as np
 import pytest
 
 from cr.cube.crunch_cube import (
-    CrunchCube,
     _MeanMeasure,
     _Measures,
     _UnweightedCountMeasure,
@@ -15,29 +14,19 @@ from cr.cube.frozen_cube import FrozenCube
 from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
 
 
-class DescribeIntegratedCrunchCubeAsFrozenSlice(object):
+class DescribeIntegratedFrozenCubeAsFrozenSlice(object):
     def it_provides_a_console_friendly_repr_for_a_cube(self):
-        cube = CrunchCube(CR.CAT_X_CAT)
+        cube = FrozenCube(CR.CAT_X_CAT)
         repr_ = repr(cube)
-        assert repr_ == "CrunchCube(name='v4', dim_types='CAT x CAT')"
+        assert repr_ == "FrozenCube(name='v4', dimension_types='CAT x CAT')"
 
     def it_provides_access_to_its_dimensions(self, dimensions_fixture):
         cube_response, expected_dimension_types = dimensions_fixture
-        cube = CrunchCube(cube_response)
+        cube = FrozenCube(cube_response)
 
         dimension_types = tuple(d.dimension_type for d in cube.dimensions)
 
         assert dimension_types == expected_dimension_types
-
-    def it_knows_if_it_is_a_single_ca_cube(self):
-        cube = CrunchCube(CR.SIMPLE_CAT_ARRAY)
-        is_univariate_ca = cube.is_univariate_ca
-        assert is_univariate_ca is True
-
-    def it_knows_the_main_axis_of_a_univariate_ca_cube(self):
-        cube = CrunchCube(CR.SIMPLE_CAT_ARRAY)  # ---CA_SUBVAR x CA_CAT---
-        univariate_ca_main_axis = cube.univariate_ca_main_axis
-        assert univariate_ca_main_axis == 1
 
     def it_provides_array_for_single_valid_cat_CAT_X_MR(self):
         """No pruning needs to happen, because the base counts are:
@@ -217,7 +206,7 @@ class DescribeIntegrated_Measures(object):
 class DescribeIntegrated_MeanMeasure(object):
     def it_provides_access_to_its_raw_cube_array(self):
         cube_dict = CR.CAT_X_CAT_MEAN_WGTD
-        cube = CrunchCube(cube_dict)
+        cube = FrozenCube(cube_dict)
         measure = _MeanMeasure(cube_dict, cube._all_dimensions)
 
         raw_cube_array = measure.raw_cube_array
@@ -240,7 +229,7 @@ class DescribeIntegrated_MeanMeasure(object):
 class DescribeIntegrated_UnweightedCountMeasure(object):
     def it_provides_access_to_its_raw_cube_array(self):
         cube_dict = CR.CAT_X_CAT
-        cube = CrunchCube(cube_dict)
+        cube = FrozenCube(cube_dict)
         measure = _UnweightedCountMeasure(cube_dict, cube._all_dimensions)
 
         raw_cube_array = measure.raw_cube_array
@@ -253,7 +242,7 @@ class DescribeIntegrated_UnweightedCountMeasure(object):
 class DescribeIntegrated_WeightedCountMeasure(object):
     def it_provides_access_to_its_raw_cube_array(self):
         cube_dict = CR.CAT_X_CAT_WGTD
-        cube = CrunchCube(cube_dict)
+        cube = FrozenCube(cube_dict)
         measure = _WeightedCountMeasure(cube_dict, cube._all_dimensions)
 
         raw_cube_array = measure.raw_cube_array
@@ -272,7 +261,7 @@ class DescribeIntegrated_WeightedCountMeasure(object):
 
 class TestCrunchCubeAsFrozenSlice(TestCase):
     def test_crunch_cube_loads_data(self):
-        cube = CrunchCube(CR.CAT_X_CAT)
+        cube = FrozenCube(CR.CAT_X_CAT)
         cube_dict = cube._cube_dict
         self.assertEqual(cube_dict, CR.CAT_X_CAT)
 
@@ -1339,7 +1328,8 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
     def test_row_unweighted_margin_when_has_means(self):
         # TODO: Fix after base is implemented for means slices
         """Tests that total margin is Unweighted N, when cube has means."""
-        cube = CrunchCube(CR.CAT_MEAN_WGTD)
+        transforms = {"rows_dimension": {"prune": True}}
+        slice_ = FrozenCube(CR.CAT_MEAN_WGTD, transforms=transforms).slices[0]
         expected = np.array(
             [
                 806,
@@ -1379,8 +1369,8 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
                 12,
             ]
         )
-        actual = np.ma.compressed(cube.margin(axis=1, weighted=False, prune=True))
-        np.testing.assert_array_equal(actual, expected)
+        # actual = np.ma.compressed(cube.margin(axis=1, weighted=False, prune=True))
+        np.testing.assert_array_equal(slice_.row_base, expected)
         # not testing cube.prune_indices() because the margin has 6367 cells
 
     def test_ca_with_single_cat_pruning(self):

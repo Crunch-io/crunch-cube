@@ -29,6 +29,23 @@ class FrozenCube(object):
         self._population = population
         self._weighted = weighted
 
+    def __repr__(self):
+        """Provide text representation suitable for working at console.
+
+        Falls back to a default repr on exception, such as might occur in
+        unit tests where object need not otherwise be provided with all
+        instance variable values.
+        """
+        try:
+            dimensionality = " x ".join(dt.name for dt in self.dimension_types)
+            return "%s(name='%s', dimension_types='%s')" % (
+                type(self).__name__,
+                self.name,
+                dimensionality,
+            )
+        except Exception:
+            return super(FrozenCube, self).__repr__()
+
     @lazyproperty
     def slices(self):
         return tuple(
@@ -49,22 +66,23 @@ class FrozenCube(object):
             return (0,)
         return range(len(self.dimensions[0].valid_elements))
 
-    def _apply_missings(self, res):
-        """Return ndarray with missing as specified.
+    @lazyproperty
+    def base_counts(self):
+        return self._measures.unweighted_counts.raw_cube_array[self._valid_idxs]
 
-        The return value is the result of the following operations on *res*,
-        which is a raw cube value array (raw meaning it has shape of original
-        cube response).
+    @lazyproperty
+    def counts_with_missings(self):
+        return self._measure(self._weighted).raw_cube_array
 
-        * Remove vectors (rows/cols) for missing elements if *include_missin*
-          is False.
+    @lazyproperty
+    def counts(self):
+        return self.counts_with_missings[self._valid_idxs]
 
-        Note that it does *not* include pruning.
-        """
-        element_idxs = tuple(
-            d.valid_elements.element_idxs for d in self._all_dimensions
+    @lazyproperty
+    def _valid_idxs(self):
+        return np.ix_(
+            *tuple(d.valid_elements.element_idxs for d in self._all_dimensions)
         )
-        return res[np.ix_(*element_idxs)] if element_idxs else res
 
     @lazyproperty
     def description(self):
@@ -74,7 +92,7 @@ class FrozenCube(object):
         return self.dimensions[0].description
 
     @lazyproperty
-    def dim_types(self):
+    def dimension_types(self):
         """Tuple of DIMENSION_TYPE member for each dimension of cube."""
         return tuple(d.dimension_type for d in self.dimensions)
 
