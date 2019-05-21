@@ -1282,6 +1282,11 @@ class _InsertionVector(object):
         return None
 
     @lazyproperty
+    def column_index(self):
+        # TODO: Calculate insertion column index for real. Check with Mike
+        return np.array([np.nan] * len(self.values))
+
+    @lazyproperty
     def is_insertion(self):
         return True
 
@@ -1605,7 +1610,26 @@ class _AssembledVector(_TransformedVector):
 
     @lazyproperty
     def column_index(self):
-        return self._base_vector.column_index
+        # return self._base_vector.column_index
+        return np.array(
+            tuple([np.nan] * len(self._top_values))
+            + self._interleaved_column_index
+            + tuple([np.nan] * len(self._bottom_values))
+        )
+
+    @lazyproperty
+    def _interleaved_column_index(self):
+        # TODO: Replace with real column index values from insertions vectors. This
+        # should be something like:
+        #   col_ind = (ins1.prop + ins2.prop) / (ins1.baseline + ins2.baseline)
+        # ask @mike to confirm
+        column_index = []
+        for i, value in enumerate(self._base_vector.column_index):
+            column_index.append(value)
+            for inserted_vector in self._opposite_inserted_vectors:
+                if i == inserted_vector.anchor:
+                    column_index.append(np.nan)
+        return tuple(column_index)
 
     @lazyproperty
     def label(self):
