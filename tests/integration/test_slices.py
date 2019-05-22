@@ -93,14 +93,6 @@ class DescribeFrozenSlice:
     def it_provides_various_names_and_labels(self):
         slice_ = FrozenSlice(CrunchCube(CR.CAT_X_CAT_PRUNING_HS))
         assert slice_.columns_dimension_name == "ShutdownBlame"
-        assert slice_.column_labels_with_ids == (
-            (u"President Obama", 1),
-            (u"Obama + Republicans", -1),
-            (u"Republicans in Congress", 2),
-            (u"Both", 3),
-            (u"Neither", 4),
-            (u"Not sure", 5),
-        )
         assert slice_.rows_dimension_description == "What is your marital status?"
         assert slice_.rows_dimension_type == DT.CAT
         assert slice_.columns_dimension_type == DT.CAT

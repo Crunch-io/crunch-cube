@@ -18,7 +18,7 @@ from cr.cube.slices import (
     _InsertionRow,
     Insertions,
     Assembler,
-    Calculator,
+    FrozenSlice,
     OrderedVector,
     OrderedSlice,
     OrderTransform,
@@ -28,6 +28,120 @@ from cr.cube.slices import (
 )
 from cr.cube.dimension import Dimension, _Subtotal, _Category
 from ..unitutil import instance_mock, property_mock
+
+
+class DescribeFrozenSlice(object):
+    """Unit-test suite for `cr.cube.slices.FrozenSlice` object."""
+
+    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
+    def it_knows_the_row_proportions(self, row_proportions_fixture, _assembler_prop_):
+        slice_, transforms, expected = row_proportions_fixture
+        _assembler_prop_.return_value = Assembler(slice_, transforms)
+        slice_ = FrozenSlice(None, None)
+
+        row_proportions = slice_.proportions
+
+        np.testing.assert_almost_equal(row_proportions, expected)
+
+    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
+    def it_knows_the_rows_margin(self, row_margin_fixture, _assembler_prop_):
+        slice_, transforms, expected = row_margin_fixture
+        _assembler_prop_.return_value = Assembler(slice_, transforms)
+        slice_ = FrozenSlice(None, None)
+
+        margin = slice_.row_margin
+
+        np.testing.assert_almost_equal(margin, expected)
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture(
+        params=[
+            (
+                [[1, 2], [3, 4]],
+                [],
+                [[0.33333333, 0.66666667], [0.42857143, 0.57142857]],
+            ),
+            (
+                [[1, 2], [3, 4]],
+                [(0, (0,))],
+                [
+                    [0.33333333, 0.66666667],
+                    [0.33333333, 0.66666667],
+                    [0.42857143, 0.57142857],
+                ],
+            ),
+            (
+                [[1, 2], [3, 4]],
+                [(1, (0,))],
+                [
+                    [0.33333333, 0.66666667],
+                    [0.42857143, 0.57142857],
+                    [0.33333333, 0.66666667],
+                ],
+            ),
+            (
+                [[1, 2], [3, 4], [5, 6]],
+                [("top", (1,)), (2, (1, 2))],
+                [
+                    [0.42857143, 0.57142857],
+                    [0.33333333, 0.66666667],
+                    [0.42857143, 0.57142857],
+                    [0.45454545, 0.54545455],
+                    [0.44444444, 0.55555556],
+                ],
+            ),
+        ]
+    )
+    def row_proportions_fixture(self, request, _subtotals_prop_, dimension_):
+        counts, row_subtotals, expected_row_proportions = request.param
+        slice_ = _CatXCatSlice(counts)
+        dimensions = (Dimension(None, None), dimension_)
+        _subtotals_prop_.return_value = [
+            instance_mock(
+                request, _Subtotal, anchor_idx=anchor_idx, addend_idxs=addend_idxs
+            )
+            for anchor_idx, addend_idxs in row_subtotals
+        ]
+        insertions = Insertions(dimensions, slice_)
+        transforms = Transforms(None, None, insertions)
+        return slice_, transforms, np.array(expected_row_proportions)
+
+    @pytest.fixture(
+        params=[
+            ([[1, 2], [3, 4]], [], [3, 7]),
+            ([[1, 2], [3, 4]], [(0, (0,))], [3, 3, 7]),
+            ([[1, 2], [3, 4]], [(1, (0,))], [3, 7, 3]),
+            ([[1, 2], [3, 4], [5, 6]], [("top", (1,)), (2, (1, 2))], [7, 3, 7, 11, 18]),
+        ]
+    )
+    def row_margin_fixture(self, request, _subtotals_prop_, dimension_):
+        counts, row_subtotals, expected_row_margin = request.param
+        slice_ = _CatXCatSlice(counts)
+        dimensions = (Dimension(None, None), dimension_)
+        _subtotals_prop_.return_value = [
+            instance_mock(
+                request, _Subtotal, anchor_idx=anchor_idx, addend_idxs=addend_idxs
+            )
+            for anchor_idx, addend_idxs in row_subtotals
+        ]
+        insertions = Insertions(dimensions, slice_)
+        transforms = Transforms(None, None, insertions)
+        return slice_, transforms, np.array(expected_row_margin)
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _assembler_prop_(self, request):
+        return property_mock(request, FrozenSlice, "_assembler")
+
+    @pytest.fixture
+    def _subtotals_prop_(self, request):
+        return property_mock(request, Dimension, "_subtotals")
+
+    @pytest.fixture
+    def dimension_(self, request):
+        return instance_mock(request, Dimension, _subtotals=tuple())
 
 
 class Describe_CategoricalVector(object):
@@ -306,110 +420,6 @@ class DescribeAssembler(object):
         insertions = Insertions(dimensions, slice_)
         transforms = Transforms(None, None, insertions)
         return slice_, transforms, np.array(expected_counts)
-
-    # fixture components ---------------------------------------------
-
-    @pytest.fixture
-    def _subtotals_prop_(self, request):
-        return property_mock(request, Dimension, "_subtotals")
-
-    @pytest.fixture
-    def dimension_(self, request):
-        return instance_mock(request, Dimension, _subtotals=tuple())
-
-
-class DescribeCalculator(object):
-    """Unit-test suite for `cr.cube.slices.Calculator` object."""
-
-    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
-    def it_provides_row_proportions(self, row_proportions_fixture):
-        slice_, transforms, expected = row_proportions_fixture
-        calc = Calculator(Assembler(slice_, transforms))
-        row_proportions = calc.row_proportions
-        np.testing.assert_almost_equal(row_proportions, expected)
-
-    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
-    def it_provides_row_margin(self, row_margin_fixture):
-        slice_, transforms, expected = row_margin_fixture
-        calc = Calculator(Assembler(slice_, transforms))
-        margin = calc.row_margin
-        np.testing.assert_almost_equal(margin, expected)
-
-    # fixtures -------------------------------------------------------
-
-    @pytest.fixture(
-        params=[
-            (
-                [[1, 2], [3, 4]],
-                [],
-                [[0.33333333, 0.66666667], [0.42857143, 0.57142857]],
-            ),
-            (
-                [[1, 2], [3, 4]],
-                [(0, (0,))],
-                [
-                    [0.33333333, 0.66666667],
-                    [0.33333333, 0.66666667],
-                    [0.42857143, 0.57142857],
-                ],
-            ),
-            (
-                [[1, 2], [3, 4]],
-                [(1, (0,))],
-                [
-                    [0.33333333, 0.66666667],
-                    [0.42857143, 0.57142857],
-                    [0.33333333, 0.66666667],
-                ],
-            ),
-            (
-                [[1, 2], [3, 4], [5, 6]],
-                [("top", (1,)), (2, (1, 2))],
-                [
-                    [0.42857143, 0.57142857],
-                    [0.33333333, 0.66666667],
-                    [0.42857143, 0.57142857],
-                    [0.45454545, 0.54545455],
-                    [0.44444444, 0.55555556],
-                ],
-            ),
-        ]
-    )
-    def row_proportions_fixture(self, request, _subtotals_prop_, dimension_):
-        counts, row_subtotals, expected_row_proportions = request.param
-        slice_ = _CatXCatSlice(counts)
-        dimensions = (Dimension(None, None), dimension_)
-        _subtotals_prop_.return_value = [
-            instance_mock(
-                request, _Subtotal, anchor_idx=anchor_idx, addend_idxs=addend_idxs
-            )
-            for anchor_idx, addend_idxs in row_subtotals
-        ]
-        insertions = Insertions(dimensions, slice_)
-        transforms = Transforms(None, None, insertions)
-        return slice_, transforms, np.array(expected_row_proportions)
-
-    @pytest.fixture(
-        params=[
-            ([[1, 2], [3, 4]], [], [3, 7]),
-            ([[1, 2], [3, 4]], [(0, (0,))], [3, 3, 7]),
-            ([[1, 2], [3, 4]], [(1, (0,))], [3, 7, 3]),
-            ([[1, 2], [3, 4], [5, 6]], [("top", (1,)), (2, (1, 2))], [7, 3, 7, 11, 18]),
-        ]
-    )
-    def row_margin_fixture(self, request, _subtotals_prop_, dimension_):
-        counts, row_subtotals, expected_row_margin = request.param
-        slice_ = _CatXCatSlice(counts)
-        dimensions = (Dimension(None, None), dimension_)
-        _subtotals_prop_.return_value = [
-            instance_mock(
-                request, _Subtotal, anchor_idx=anchor_idx, addend_idxs=addend_idxs
-            )
-            for anchor_idx, addend_idxs in row_subtotals
-        ]
-        insertions = Insertions(dimensions, slice_)
-        transforms = Transforms(None, None, insertions)
-        return slice_, transforms, np.array(expected_row_margin)
 
     # fixture components ---------------------------------------------
 
