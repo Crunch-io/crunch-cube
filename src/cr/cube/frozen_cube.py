@@ -21,13 +21,20 @@ np.seterr(divide="ignore", invalid="ignore")
 
 class FrozenCube(object):
     def __init__(
-        self, response, transforms=None, ca_as_0th=False, population=None, weighted=True
+        self,
+        response,
+        transforms=None,
+        ca_as_0th=False,
+        population=None,
+        weighted=True,
+        mask_size=0,
     ):
         self._cube_response_arg = response
         self._transforms_dict = {} if transforms is None else transforms
         self._ca_as_0th = ca_as_0th
         self._population = population
         self._weighted = weighted
+        self._mask_size = mask_size
 
     def __repr__(self):
         """Provide text representation suitable for working at console.
@@ -56,6 +63,7 @@ class FrozenCube(object):
                 population=self._population,
                 weighted=self._weighted,
                 ca_as_0th=self._ca_as_0th,
+                mask_size=self._mask_size,
             )
             for slice_idx in self._slice_idxs
         )

@@ -4,103 +4,20 @@
 """Integration tests for pairwise comparisons."""
 
 from unittest import TestCase
-import pytest
-import json
 
 import numpy as np
 
-from cr.cube.crunch_cube import CrunchCube
-from cr.cube.measures.wishart_pairwise_significance import WishartPairwiseSignificance
-from cr.cube.slices import FrozenSlice
+from cr.cube.frozen_cube import FrozenCube
 
 from ..fixtures import CR
-from ..util import load_expectation
 
 
 # pylint: disable=missing-docstring, invalid-name, no-self-use
 class TestStandardizedResiduals(TestCase):
     """Test cr.cube implementation of column family pairwise comparisons"""
 
-    def test_mr_x_cat_wishart_residuals(self):
-        expected = np.array(json.loads(load_expectation("mr_x_cat_chi_squared_rows")))
-        cube = CrunchCube(CR.MR_X_CAT_NOT_SO_SIMPLE_ALLTYPES)
-        actual = WishartPairwiseSignificance._factory(
-            cube.slices[0], axis=0, weighted=True
-        )._pairwise_chisq
-        for i in range(len(actual)):
-            np.testing.assert_almost_equal(actual[i], expected[i])
-
-    def test_mr_x_cat_wishart_pvals(self):
-        cube = CrunchCube(CR.MR_X_CAT_NOT_SO_SIMPLE_ALLTYPES)
-        expectation = json.loads(load_expectation("mr_x_cat_pairwise_pvals"))
-        # Take only 0th slice, because it's the only one
-        actual = cube.wishart_pairwise_pvals(axis=0)[0]
-        for act, expected in zip(actual, expectation):
-            np.testing.assert_almost_equal(act, np.array(expected))
-
-    def test_mr_x_cat_wishart_pairwise_indices(self):
-        slice_ = CrunchCube(CR.MR_X_CAT_NOT_SO_SIMPLE_ALLTYPES).slices[0]
-        expected = np.array(
-            [
-                [(2, 4), (), (0,), (), (0,), ()],
-                [(), (), (), (), (), ()],
-                [(), (), (), (), (), ()],
-                [(), (), (), (), (), ()],
-                [(), (), (), (), (), ()],
-            ]
-        )
-        actual_pairwise_indices = slice_.wishart_pairwise_indices(axis=0)
-        np.testing.assert_array_equal(actual_pairwise_indices, expected)
-
-    def test_same_col_counts(self):
-        """Test statistics for columns that are all the same."""
-        cube = CrunchCube(CR.SAME_COUNTS_3x4)
-        pairwise_pvalues = WishartPairwiseSignificance._factory(
-            cube.slices[0], axis=0, weighted=True
-        )
-        expected = np.zeros([4, 4])
-        actual = pairwise_pvalues._pairwise_chisq
-        np.testing.assert_equal(actual, expected)
-
-    def test_hirotsu_chisq(self):
-        """Test statistic for hirotsu data matches R"""
-        cube = CrunchCube(CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION)
-        pairwise_pvalues = WishartPairwiseSignificance._factory(
-            cube.slices[0], axis=0, weighted=True
-        )
-        expected = np.array(
-            json.loads(load_expectation("cat_x_cat_hirotsu_chi_squared"))
-        )
-        actual = pairwise_pvalues._pairwise_chisq
-        np.testing.assert_almost_equal(actual, expected)
-
-    def test_same_col_pvals(self):
-        """P-values for columns that are all the same."""
-        cube = CrunchCube(CR.SAME_COUNTS_3x4)
-        expected = [np.ones([4, 4])]
-        actual = cube.wishart_pairwise_pvals(axis=0)
-        np.testing.assert_equal(actual, expected)
-
-        # Assert correct exception in case of not-implemented direction
-        with pytest.raises(NotImplementedError):
-            cube.wishart_pairwise_pvals(axis=1)
-
-    def test_hirotsu_pvals(self):
-        cube = CrunchCube(CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION)
-        actual = cube.wishart_pairwise_pvals(axis=0)
-        expected = [np.array(json.loads(load_expectation("cat_x_cat_hirotsu_pvals")))]
-        np.testing.assert_almost_equal(actual, expected)
-
-    def test_hirotsu_pairwise_indices(self):
-        slice_ = CrunchCube(CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION).slices[0]
-        actual_pairwise_indices = slice_.wishart_pairwise_indices(axis=0)
-        expected = np.array([(), (), (3, 4, 7, 9), (2,), (2,), (), (), (2,), (), (2,)])
-        np.testing.assert_array_equal(actual_pairwise_indices, expected)
-
     def test_pairwise_t_stats_with_hs(self):
-        slice_ = FrozenSlice(
-            CrunchCube(CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION_WITH_HS)
-        )
+        slice_ = FrozenCube(CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION_WITH_HS).slices[0]
         expected = [
             [
                 0.0,
@@ -146,9 +63,7 @@ class TestStandardizedResiduals(TestCase):
         np.testing.assert_almost_equal(t_stats, expected)
 
     def test_pairwise_p_vals_with_hs(self):
-        slice_ = FrozenSlice(
-            CrunchCube(CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION_WITH_HS)
-        )
+        slice_ = FrozenCube(CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION_WITH_HS).slices[0]
         expected = [
             [
                 1.00000000e00,
@@ -194,9 +109,7 @@ class TestStandardizedResiduals(TestCase):
         np.testing.assert_almost_equal(p_vals, expected)
 
     def test_pairwise_indices_with_hs(self):
-        slice_ = FrozenSlice(
-            CrunchCube(CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION_WITH_HS)
-        )
+        slice_ = FrozenCube(CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION_WITH_HS).slices[0]
         expected = [
             [
                 (3, 4, 5, 8, 10),
@@ -228,61 +141,8 @@ class TestStandardizedResiduals(TestCase):
         ]
         assert slice_.pairwise_indices.tolist() == expected
 
-    def test_hirotsu_pvals_with_hs(self):
-        """The shape of the result should be 11 x 11, with H&S (at index 5)."""
-        cube = CrunchCube(CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION_WITH_HS)
-        expected = [
-            np.array(json.loads(load_expectation("cat_x_cat_with_hs_hirotsu_pvals")))
-        ]
-        actual = cube.wishart_pairwise_pvals(axis=0)
-        np.testing.assert_almost_equal(actual, expected)
-
-    def test_odd_latent_dimensions(self):
-        """Test code path for the pfaffian of an odd-dimensioned matrix
-        Latent matrix size is (n_min - 1) so 3 for a 4x4 table.
-        """
-        cube = CrunchCube(CR.PAIRWISE_4X4)
-        actual = cube.wishart_pairwise_pvals(axis=0)
-        expected = [
-            np.array(
-                [
-                    1,
-                    0.949690252544668,
-                    0.917559534718816,
-                    0.97630069244232,
-                    0.949690252544668,
-                    1,
-                    0.35511045473507,
-                    0.999999119644564,
-                    0.917559534718816,
-                    0.35511045473507,
-                    1,
-                    0.313869429972919,
-                    0.97630069244232,
-                    0.999999119644564,
-                    0.313869429972919,
-                    1,
-                ]
-            ).reshape(4, 4)
-        ]
-        np.testing.assert_almost_equal(actual, expected)
-
-    def test_pairwise_with_zero_margin(self):
-        """Assert pairwise doesn't break when a 0 value is in any slice margin.
-
-        We currently don't know the correct maths behind this. This test needs to be
-        updated once we figure this out.
-        """
-        cube = CrunchCube(CR.PAIRWISE_WITH_ZERO_MARGIN)
-
-        # TODO: Replace with updated expectation when maths is figured out
-        expected = [np.ones((10, 10), dtype=float)]
-
-        actual = cube.wishart_pairwise_pvals(axis=0)
-        np.testing.assert_almost_equal(actual, expected)
-
     def test_compare_to_column(self):
-        slice_ = FrozenSlice(CrunchCube(CR.PAIRWISE_HIROTSU_OCCUPATION_X_ILLNESS))
+        slice_ = FrozenCube(CR.PAIRWISE_HIROTSU_OCCUPATION_X_ILLNESS).slices[0]
         actual = slice_.pairwise_significance_tests[2]
         expected_tstats = [
             [0.926265419379764, -1.06821799614525, 0],
@@ -312,7 +172,7 @@ class TestStandardizedResiduals(TestCase):
         np.testing.assert_almost_equal(actual.p_vals, expected_pvals)
 
     def test_cat_x_cat_pairwise_indices_only_larger(self):
-        slice_ = FrozenSlice(CrunchCube(CR.PAIRWISE_HIROTSU_OCCUPATION_X_ILLNESS))
+        slice_ = FrozenCube(CR.PAIRWISE_HIROTSU_OCCUPATION_X_ILLNESS).slices[0]
         expected_indices = np.array(
             [
                 [(1,), (), ()],
@@ -335,7 +195,7 @@ class TestStandardizedResiduals(TestCase):
             "columns_dimension": {"insertions": {}},
             "rows_dimension": {"insertions": {}},
         }
-        slice_ = FrozenSlice(CrunchCube(CR.MR_X_CAT_HS), transforms=transforms)
+        slice_ = FrozenCube(CR.MR_X_CAT_HS, transforms=transforms).slices[0]
         expected_indices = [
             [(1, 3, 4), (), (), (), (), ()],
             [(), (), (), (), (), ()],
@@ -346,7 +206,7 @@ class TestStandardizedResiduals(TestCase):
         np.testing.assert_array_equal(slice_.pairwise_indices, expected_indices)
 
         # With H&S
-        slice_ = FrozenSlice(CrunchCube(CR.MR_X_CAT_HS))
+        slice_ = FrozenCube(CR.MR_X_CAT_HS).slices[0]
         expected_indices = [
             [(1, 4, 5, 7), (), (4, 5, 7), (), (), (), (), ()],
             [(), (), (), (), (), (), (), ()],
@@ -362,7 +222,7 @@ class TestStandardizedResiduals(TestCase):
             "columns_dimension": {"insertions": {}},
             "rows_dimension": {"insertions": {}},
         }
-        slice_ = FrozenSlice(CrunchCube(CR.CAT_X_MR_HS), transforms=transforms)
+        slice_ = FrozenCube(CR.CAT_X_MR_HS, transforms=transforms).slices[0]
         expected_indices = [
             [(1, 2, 3, 4), (2, 3), (), (), (2,)],
             [(), (), (), (), (3,)],
@@ -374,7 +234,7 @@ class TestStandardizedResiduals(TestCase):
         np.testing.assert_array_equal(slice_.pairwise_indices, expected_indices)
 
         # With H&S
-        slice_ = FrozenSlice(CrunchCube(CR.CAT_X_MR_HS))
+        slice_ = FrozenCube(CR.CAT_X_MR_HS).slices[0]
         expected_indices = [
             [(1, 2, 3, 4), (2, 3), (), (), (2,)],
             [(), (), (), (), (3,)],
@@ -388,7 +248,7 @@ class TestStandardizedResiduals(TestCase):
         np.testing.assert_array_equal(slice_.pairwise_indices, expected_indices)
 
     def test_mr_x_mr_pairwise_indices_only_larger(self):
-        slice_ = FrozenSlice(CrunchCube(CR.MR_X_MR))
+        slice_ = FrozenCube(CR.MR_X_MR).slices[0]
         expected_indices = np.array(
             [
                 [(1, 2, 3), (), (), ()],
@@ -401,9 +261,9 @@ class TestStandardizedResiduals(TestCase):
 
     def test_pairwise_indices_larger_and_smaller(self):
         transforms = {"pairwise_indices": {"only_larger": False}}
-        slice_ = FrozenSlice(
-            CrunchCube(CR.PAIRWISE_HIROTSU_OCCUPATION_X_ILLNESS), transforms=transforms
-        )
+        slice_ = FrozenCube(
+            CR.PAIRWISE_HIROTSU_OCCUPATION_X_ILLNESS, transforms=transforms
+        ).slices[0]
         expected_indices = np.array(
             [
                 [(1,), (0,), ()],
@@ -422,16 +282,16 @@ class TestStandardizedResiduals(TestCase):
 
     def test_cat_x_cat_summary_pairwise_indices(self):
         # Only larger
-        slice_ = FrozenSlice(CrunchCube(CR.PAIRWISE_HIROTSU_OCCUPATION_X_ILLNESS))
+        slice_ = FrozenCube(CR.PAIRWISE_HIROTSU_OCCUPATION_X_ILLNESS).slices[0]
         pairwise_indices = slice_.summary_pairwise_indices
         expected_indices = np.array([(2,), (0, 2), ()])
         np.testing.assert_array_equal(pairwise_indices, expected_indices)
 
         # Larger and smaller
         transforms = {"pairwise_indices": {"only_larger": False}}
-        slice_ = FrozenSlice(
-            CrunchCube(CR.PAIRWISE_HIROTSU_OCCUPATION_X_ILLNESS), transforms=transforms
-        )
+        slice_ = FrozenCube(
+            CR.PAIRWISE_HIROTSU_OCCUPATION_X_ILLNESS, transforms=transforms
+        ).slices[0]
         pairwise_indices = slice_.summary_pairwise_indices
         expected_indices = np.array([(1, 2), (0, 2), (0, 1)], dtype="i,i")
         np.testing.assert_array_equal(pairwise_indices, expected_indices)
@@ -441,7 +301,7 @@ class TestStandardizedResiduals(TestCase):
         extreme t values, and higher associated p-values) than if weighted_n
         were used in the variance estimate of the test statistic.
         """
-        slice_ = FrozenSlice(CrunchCube(CR.CAT_X_CAT_WEIGHTED_TTESTS))
+        slice_ = FrozenCube(CR.CAT_X_CAT_WEIGHTED_TTESTS).slices[0]
         actual = slice_.pairwise_significance_tests[0]
         expected_tstats = np.array(
             [
