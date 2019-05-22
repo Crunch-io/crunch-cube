@@ -39,11 +39,11 @@ class FrozenSlice(object):
 
     @lazyproperty
     def base_counts(self):
-        return self._calculator.base_counts
+        return np.array([row.base_values for row in self._assembler.rows])
 
     @lazyproperty
     def column_base(self):
-        return self._calculator.column_base
+        return np.array([column.base for column in self._assembler.columns]).T
 
     @lazyproperty
     def column_index(self):
@@ -53,21 +53,16 @@ class FrozenSlice(object):
         corresponding baseline values. The baseline values are the univariate
         percentages of the corresponding variable.
         """
-        return self._calculator.column_index
+        return np.array([row.column_index for row in self._assembler.rows])
 
     @lazyproperty
     def column_labels(self):
-        return self._calculator.column_labels
-
-    @lazyproperty
-    def column_labels_with_ids(self):
-        # TODO: Purge this once we do the transforms properly. It's only needed
-        # because of old-style transforms in exporter
-        return self._calculator.column_labels_with_ids
+        """Sequence of str column element names suitable for use as column headings."""
+        return tuple(column.label for column in self._assembler.columns)
 
     @lazyproperty
     def column_margin(self):
-        return self._calculator.column_margin
+        return np.array([column.margin for column in self._assembler.columns]).T
 
     @lazyproperty
     def column_percentages(self):
@@ -75,14 +70,14 @@ class FrozenSlice(object):
 
     @lazyproperty
     def column_proportions(self):
-        return self._calculator.column_proportions
+        return np.array([col.proportions for col in self._assembler.columns]).T
 
     @lazyproperty
     def columns_dimension_name(self):
-        """str name assigned to rows-dimension.
+        """str name assigned to columns-dimension.
 
-        The empty string ("") for a 0D and 1D slices (until we get to all slices
-        being 2D). Reflects the resolved dimension-name transform cascade.
+        The empty string ("") for a 0D or 1D slice (until we get to all slices being
+        2D). Reflects the resolved dimension-name transform cascade.
         """
         if len(self.dimensions) < 2:
             return ""
@@ -90,29 +85,44 @@ class FrozenSlice(object):
 
     @lazyproperty
     def columns_dimension_type(self):
+        """Member of `cr.cube.enum.DIMENSION_TYPE` describing columns dimension.
+
+        This value is None for a slice with fewer than two dimensions.
+        """
         if len(self.dimensions) < 2:
             return None
         return self.dimensions[1].dimension_type
 
     @lazyproperty
     def counts(self):
-        return self._calculator.counts
+        return np.array([row.values for row in self._assembler.rows])
 
     @lazyproperty
     def dimension_types(self):
+        """Sequence of member of `cr.cube.enum.DIMENSION_TYPE` for each dimension.
+
+        Items appear in rows-dimension, columns-dimension order, although there will be
+        fewer than two for a slice with less than two dimensions.
+        """
         return tuple(dimension.dimension_type for dimension in self.dimensions)
 
     @lazyproperty
     def insertion_columns_idxs(self):
-        return self._calculator.insertion_columns_idxs
+        return tuple(
+            i for i, column in enumerate(self._assembler.columns) if column.is_insertion
+        )
 
     @lazyproperty
     def insertion_rows_idxs(self):
-        return self._calculator.insertion_rows_idxs
+        return tuple(
+            i for i, row in enumerate(self._assembler.rows) if row.is_insertion
+        )
 
     @lazyproperty
     def means(self):
-        return self._calculator.means
+        if type(self._assembler._slice) is _0DMeansSlice:
+            return self._assembler._slice.means
+        return np.array([row.means for row in self._assembler.rows])
 
     @lazyproperty
     def min_base_size_mask(self):
@@ -168,19 +178,19 @@ class FrozenSlice(object):
 
     @lazyproperty
     def pvals(self):
-        return self._calculator.pvals
+        return np.array([row.pvals for row in self._assembler.rows])
 
     @lazyproperty
     def row_base(self):
-        return self._calculator.row_base
+        return np.array([row.base for row in self._assembler.rows])
 
     @lazyproperty
     def row_labels(self):
-        return self._calculator.row_labels
+        return tuple(row.label for row in self._assembler.rows)
 
     @lazyproperty
     def row_margin(self):
-        return self._calculator.row_margin
+        return np.array([row.margin for row in self._assembler.rows])
 
     @lazyproperty
     def row_percentages(self):
@@ -188,7 +198,7 @@ class FrozenSlice(object):
 
     @lazyproperty
     def row_proportions(self):
-        return self._calculator.row_proportions
+        return np.array([row.proportions for row in self._assembler.rows])
 
     @lazyproperty
     def rows_dimension_description(self):
@@ -209,7 +219,7 @@ class FrozenSlice(object):
         ordering of the sequence correspond to the rows in the slice, including
         accounting for insertions and hidden rows.
         """
-        return self._calculator.rows_dimension_fills
+        return tuple(row.fill for row in self._assembler.rows)
 
     @lazyproperty
     def rows_dimension_name(self):
@@ -234,19 +244,54 @@ class FrozenSlice(object):
 
     @lazyproperty
     def scale_means_column(self):
-        return self._calculator.scale_means_column
+        if np.all(np.isnan(self._columns_dimension_numeric)):
+            return None
+
+        inner = np.nansum(self._columns_dimension_numeric * self.counts, axis=1)
+        not_a_nan_index = ~np.isnan(self._columns_dimension_numeric)
+        denominator = np.sum(self.counts[:, not_a_nan_index], axis=1)
+        return inner / denominator
 
     @lazyproperty
     def scale_means_column_margin(self):
-        return self._calculator.scale_means_column_margin
+        if np.all(np.isnan(self._columns_dimension_numeric)):
+            return None
+
+        column_margin = self.column_margin
+        if len(column_margin.shape) > 1:
+            # Hack for MR, where column margin is a table. Figure how to
+            # fix with subclassing
+            column_margin = column_margin[0]
+
+        not_a_nan_index = ~np.isnan(self._columns_dimension_numeric)
+        return np.nansum(self._columns_dimension_numeric * column_margin) / np.sum(
+            column_margin[not_a_nan_index]
+        )
 
     @lazyproperty
     def scale_means_row(self):
-        return self._calculator.scale_means_row
+        if np.all(np.isnan(self._rows_dimension_numeric)):
+            return None
+        inner = np.nansum(self._rows_dimension_numeric[:, None] * self.counts, axis=0)
+        not_a_nan_index = ~np.isnan(self._rows_dimension_numeric)
+        denominator = np.sum(self.counts[not_a_nan_index, :], axis=0)
+        return inner / denominator
 
     @lazyproperty
     def scale_means_row_margin(self):
-        return self._calculator.scale_means_row_margin
+        if np.all(np.isnan(self._rows_dimension_numeric)):
+            return None
+
+        row_margin = self.row_margin
+        if len(row_margin.shape) > 1:
+            # Hack for MR, where row margin is a table. Figure how to
+            # fix with subclassing
+            row_margin = row_margin[:, 0]
+
+        not_a_nan_index = ~np.isnan(self._rows_dimension_numeric)
+        return np.nansum(self._rows_dimension_numeric * row_margin) / np.sum(
+            row_margin[not_a_nan_index]
+        )
 
     @lazyproperty
     def shape(self):
@@ -264,19 +309,19 @@ class FrozenSlice(object):
 
     @lazyproperty
     def table_base(self):
-        return self._calculator.table_base
+        return self._assembler.table_base
 
     @lazyproperty
     def table_base_unpruned(self):
-        return self._calculator.table_base_unpruned
+        return self._assembler.table_base_unpruned
 
     @lazyproperty
     def table_margin(self):
-        return self._calculator.table_margin
+        return self._assembler.table_margin
 
     @lazyproperty
     def table_margin_unpruned(self):
-        return self._calculator.table_margin_unpruned
+        return self._assembler.table_margin_unpruned
 
     @lazyproperty
     def table_name(self):
@@ -293,11 +338,11 @@ class FrozenSlice(object):
 
     @lazyproperty
     def table_proportions(self):
-        return self._calculator.table_proportions
+        return np.array([row.table_proportions for row in self._assembler.rows])
 
     @lazyproperty
     def zscore(self):
-        return self._calculator.zscore
+        return np.array([row.zscore for row in self._assembler.rows])
 
     # ---implementation (helpers)-------------------------------------
 
@@ -306,8 +351,8 @@ class FrozenSlice(object):
         return Assembler(self._slice, self._transforms)
 
     @lazyproperty
-    def _calculator(self):
-        return Calculator(self._assembler)
+    def _columns_dimension_numeric(self):
+        return np.array([column.numeric for column in self._assembler.columns])
 
     def _create_means_slice(self, counts, base_counts):
         if self._cube.ndim == 0:
@@ -358,6 +403,10 @@ class FrozenSlice(object):
         """True if any of dimensions has pruning."""
         # TODO: Implement separarte pruning for rows and columns
         return any(dimension.prune for dimension in self.dimensions)
+
+    @lazyproperty
+    def _rows_dimension_numeric(self):
+        return np.array([row.numeric for row in self._assembler.rows])
 
     @lazyproperty
     def _slice(self):
@@ -1282,6 +1331,11 @@ class _InsertionVector(object):
         return None
 
     @lazyproperty
+    def column_index(self):
+        # TODO: Calculate insertion column index for real. Check with Mike
+        return np.array([np.nan] * len(self.values))
+
+    @lazyproperty
     def is_insertion(self):
         return True
 
@@ -1605,7 +1659,26 @@ class _AssembledVector(_TransformedVector):
 
     @lazyproperty
     def column_index(self):
-        return self._base_vector.column_index
+        # return self._base_vector.column_index
+        return np.array(
+            tuple([np.nan] * len(self._top_values))
+            + self._interleaved_column_index
+            + tuple([np.nan] * len(self._bottom_values))
+        )
+
+    @lazyproperty
+    def _interleaved_column_index(self):
+        # TODO: Replace with real column index values from insertions vectors. This
+        # should be something like:
+        #   col_ind = (ins1.prop + ins2.prop) / (ins1.baseline + ins2.baseline)
+        # ask @mike to confirm
+        column_index = []
+        for i, value in enumerate(self._base_vector.column_index):
+            column_index.append(value)
+            for inserted_vector in self._opposite_inserted_vectors:
+                if i == inserted_vector.anchor:
+                    column_index.append(np.nan)
+        return tuple(column_index)
 
     @lazyproperty
     def label(self):
@@ -1752,182 +1825,6 @@ class _AssembledInsertionVector(_AssembledVector):
     @lazyproperty
     def anchor(self):
         return self._base_vector.anchor
-
-
-# TODO: Not sure if Calculator is needed at all. It dupclicates most of the things
-# from Assembler. Maybe just use one of those, and think of a better name.
-class Calculator(object):
-    """Calculates measures."""
-
-    def __init__(self, assembler):
-        self._assembler = assembler
-
-    @lazyproperty
-    def insertion_rows_idxs(self):
-        return tuple(
-            i for i, row in enumerate(self._assembler.rows) if row.is_insertion
-        )
-
-    @lazyproperty
-    def insertion_columns_idxs(self):
-        return tuple(
-            i for i, column in enumerate(self._assembler.columns) if column.is_insertion
-        )
-
-    @lazyproperty
-    def rows_dimension_fills(self):
-        """sequence of RGB str like "#def032" fill colors for rows dimension elements.
-
-        The values reflect the resolved element-fill transform cascade. The length and
-        ordering of the sequence correspond to the rows in the slice, including
-        accounting for insertions and hidden rows.
-        """
-        return tuple(row.fill for row in self._assembler.rows)
-
-    @lazyproperty
-    def rows_dimension_numeric(self):
-        return np.array([row.numeric for row in self._assembler.rows])
-
-    @lazyproperty
-    def columns_dimension_numeric(self):
-        return np.array([column.numeric for column in self._assembler.columns])
-
-    @lazyproperty
-    def scale_means_row(self):
-        if np.all(np.isnan(self.rows_dimension_numeric)):
-            return None
-        inner = np.nansum(self.rows_dimension_numeric[:, None] * self.counts, axis=0)
-        not_a_nan_index = ~np.isnan(self.rows_dimension_numeric)
-        denominator = np.sum(self.counts[not_a_nan_index, :], axis=0)
-        return inner / denominator
-
-    @lazyproperty
-    def scale_means_row_margin(self):
-        if np.all(np.isnan(self.rows_dimension_numeric)):
-            return None
-
-        row_margin = self.row_margin
-        if len(row_margin.shape) > 1:
-            # Hack for MR, where row margin is a table. Figure how to
-            # fix with subclassing
-            row_margin = row_margin[:, 0]
-
-        not_a_nan_index = ~np.isnan(self.rows_dimension_numeric)
-        return np.nansum(self.rows_dimension_numeric * row_margin) / np.sum(
-            row_margin[not_a_nan_index]
-        )
-
-    @lazyproperty
-    def scale_means_column_margin(self):
-        if np.all(np.isnan(self.columns_dimension_numeric)):
-            return None
-
-        column_margin = self.column_margin
-        if len(column_margin.shape) > 1:
-            # Hack for MR, where column margin is a table. Figure how to
-            # fix with subclassing
-            column_margin = column_margin[0]
-
-        not_a_nan_index = ~np.isnan(self.columns_dimension_numeric)
-        return np.nansum(self.columns_dimension_numeric * column_margin) / np.sum(
-            column_margin[not_a_nan_index]
-        )
-
-    @lazyproperty
-    def scale_means_column(self):
-        if np.all(np.isnan(self.columns_dimension_numeric)):
-            return None
-
-        inner = np.nansum(self.columns_dimension_numeric * self.counts, axis=1)
-        not_a_nan_index = ~np.isnan(self.columns_dimension_numeric)
-        denominator = np.sum(self.counts[:, not_a_nan_index], axis=1)
-        return inner / denominator
-
-    @lazyproperty
-    def column_index(self):
-        return np.array([row.column_index for row in self._assembler.rows])
-
-    @lazyproperty
-    def pvals(self):
-        return np.array([row.pvals for row in self._assembler.rows])
-
-    @lazyproperty
-    def row_proportions(self):
-        return np.array([row.proportions for row in self._assembler.rows])
-
-    @lazyproperty
-    def column_proportions(self):
-        return np.array([col.proportions for col in self._assembler.columns]).T
-
-    @lazyproperty
-    def table_proportions(self):
-        return np.array([row.table_proportions for row in self._assembler.rows])
-
-    @lazyproperty
-    def row_margin(self):
-        return np.array([row.margin for row in self._assembler.rows])
-
-    @lazyproperty
-    def column_margin(self):
-        return np.array([column.margin for column in self._assembler.columns]).T
-
-    @lazyproperty
-    def table_margin(self):
-        return self._assembler.table_margin
-
-    @lazyproperty
-    def row_base(self):
-        return np.array([row.base for row in self._assembler.rows])
-
-    @lazyproperty
-    def column_base(self):
-        return np.array([column.base for column in self._assembler.columns]).T
-
-    @lazyproperty
-    def table_base(self):
-        return self._assembler.table_base
-
-    @lazyproperty
-    def table_base_unpruned(self):
-        return self._assembler.table_base_unpruned
-
-    @lazyproperty
-    def table_margin_unpruned(self):
-        return self._assembler.table_margin_unpruned
-
-    @lazyproperty
-    def counts(self):
-        return np.array([row.values for row in self._assembler.rows])
-
-    @lazyproperty
-    def means(self):
-        if type(self._assembler._slice) is _0DMeansSlice:
-            return self._assembler._slice.means
-        return np.array([row.means for row in self._assembler.rows])
-
-    @lazyproperty
-    def base_counts(self):
-        return np.array([row.base_values for row in self._assembler.rows])
-
-    @lazyproperty
-    def row_labels(self):
-        return tuple(row.label for row in self._assembler.rows)
-
-    # TODO: Purge this once we do the transforms properly. It's only needed because of
-    # old-style transforms in exporter
-    @lazyproperty
-    def column_labels_with_ids(self):
-        return tuple(
-            (column.label, column.cat_id) for column in self._assembler.columns
-        )
-
-    @lazyproperty
-    def column_labels(self):
-        return tuple(column.label for column in self._assembler.columns)
-
-    @lazyproperty
-    def zscore(self):
-        return np.array([row.zscore for row in self._assembler.rows])
 
 
 class OrderTransform(object):
