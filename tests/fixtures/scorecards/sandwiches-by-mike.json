@@ -1,0 +1,285 @@
+{
+    "element": "shoji:view",
+    "self": "/api/cube/etc",
+    "value": {
+        "query": {
+            "measures": {
+                "count": {
+                    "function": "cube_count",
+                    "args": []
+                }
+            },
+            "dimensions": [
+                {
+                    "each": "/api/variables/92137844840d4a82b3a298e64e2a995d/"
+                },
+                {
+                    "function": "as_selected",
+                    "args": [
+                        {
+                            "variable": "/api/variables/92137844840d4a82b3a298e64e2a995d/"
+                        }
+                    ]
+                },
+                {
+                    "function": "fuse"
+                }
+            ],
+            "weight": null
+        },
+        "query_environment": {
+            "filter": []
+        },
+        "result": {
+            "dimensions": [
+                {
+                    "derived": true,
+                    "references": {
+                        "alias": "test"
+                    },
+                    "type": {
+                        "subtype": {
+                            "class": "variable"
+                        },
+                        "elements": [
+                            {
+                                "id": 1,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "10230#####",
+                                        "name": "Overall liking of sandwich",
+                                        "view": {
+                                            "show_counts": false,
+                                            "include_missing": false,
+                                            "column_width": null
+                                        }
+                                    },
+                                    "id": "1"
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 2,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "10231#####",
+                                        "name": "Overall taste of sandwich",
+                                        "view": {
+                                            "show_counts": false,
+                                            "include_missing": false,
+                                            "column_width": null
+                                        }
+                                    },
+                                    "id": "2"
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 3,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "10232#####",
+                                        "name": "Overall appearance of sandwich (based on full sandwich display)",
+                                        "view": {
+                                            "show_counts": false,
+                                            "include_missing": false,
+                                            "column_width": null
+                                        }
+                                    },
+                                    "id": "3"
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 4,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "10234#####",
+                                        "name": "Overall liking of the spinach wrap itself",
+                                        "view": {
+                                            "show_counts": false,
+                                            "include_missing": false,
+                                            "column_width": null
+                                        }
+                                    },
+                                    "id": "4"
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 5,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "20233###",
+                                        "name": "Overall liking of the bread itself",
+                                        "view": {
+                                            "show_counts": false,
+                                            "include_missing": false,
+                                            "column_width": null
+                                        }
+                                    },
+                                    "id": "4"
+                                },
+                                "missing": false
+                            }
+                        ],
+                        "class": "enum"
+                    }
+                },
+                {
+                    "derived": true,
+                    "references": {
+                        "alias": "test",
+                        "subreferences": {}
+                    },
+                    "type": {
+                        "ordinal": false,
+                        "class": "categorical",
+                        "categories": [
+                            {
+                                "numeric_value": 1,
+                                "selected": true,
+                                "id": 1,
+                                "missing": false,
+                                "name": "Selected"
+                            },
+                            {
+                                "numeric_value": 0,
+                                "id": 0,
+                                "name": "Other",
+                                "missing": false
+                            },
+                            {
+                                "numeric_value": null,
+                                "id": -1,
+                                "name": "No Data",
+                                "missing": true
+                            }
+                        ]
+                    }
+                },
+                {
+                    "derived": true,
+                    "references": {
+                        "alias": "test"
+                    },
+                    "type": {
+                        "class": "enum",
+                        "subtype": {
+                            "class": "variable"
+                        },
+                        "elements": [
+                            {
+                                "id": 1,
+                                "name": "wrap",
+                                "description": "spinach wrap"
+                            },
+                            {
+                                "id": 2,
+                                "name": "sandwich",
+                                "description": "sandwich on bread"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "missing": 2,
+            "measures": {
+                "count": {
+                    "data": [
+                        49,
+                        37,
+                        53,
+                        63,
+                        2,
+                        4,
+                        42,
+                        40,
+                        60,
+                        60,
+                        2,
+                        4,
+                        35,
+                        45,
+                        67,
+                        55,
+                        2,
+                        4,
+                        40,
+                        0,
+                        62,
+                        0,
+                        2,
+                        104,
+                        0,
+                        41,
+                        0,
+                        59,
+                        104,
+                        4
+                    ],
+                    "n_missing": 2,
+                    "metadata": {
+                        "references": {},
+                        "derived": true,
+                        "type": {
+                            "integer": true,
+                            "missing_rules": {},
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "class": "numeric"
+                        }
+                    }
+                }
+            },
+            "n": 104,
+            "unfiltered": {
+                "unweighted_n": 104,
+                "weighted_n": 104
+            },
+            "filtered": {
+                "unweighted_n": 104,
+                "weighted_n": 104
+            },
+            "counts": [
+                49,
+                37,
+                53,
+                63,
+                2,
+                4,
+                42,
+                40,
+                60,
+                60,
+                2,
+                4,
+                35,
+                45,
+                67,
+                55,
+                2,
+                4,
+                40,
+                0,
+                62,
+                0,
+                2,
+                104,
+                0,
+                41,
+                0,
+                59,
+                104,
+                4
+            ],
+            "element": "crunch:cube"
+        }
+    }
+}
