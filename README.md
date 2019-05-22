@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.10.4
+- Column index with insertions (as dashes)
+
 #### 1.10.3
 - Refactor hidden and pruned slices
 
