@@ -194,19 +194,6 @@ class FrozenCube(object):
                 "(str) or dict." % type(self._cube_response_arg).__name__
             )
 
-    @classmethod
-    def _fix_valid_indices(cls, valid_indices, insertion_index, dim):
-        """Add indices for H&S inserted elements."""
-        # TODO: make this accept an immutable sequence for valid_indices
-        # (a tuple) and return an immutable sequence rather than mutating an
-        # argument.
-        indices = np.array(sorted(valid_indices[dim]))
-        slice_index = np.sum(indices <= insertion_index)
-        indices[slice_index:] += 1
-        indices = np.insert(indices, slice_index, insertion_index + 1)
-        valid_indices[dim] = indices.tolist()
-        return valid_indices
-
     def _measure(self, weighted):
         """_BaseMeasure subclass representing primary measure for this cube.
 
@@ -311,11 +298,6 @@ class _Measures(object):
         return _UnweightedCountMeasure(self._cube_dict, self._all_dimensions)
 
     @lazyproperty
-    def unweighted_n(self):
-        """int count of actual rows represented by query response."""
-        return self._cube_dict["result"]["n"]
-
-    @lazyproperty
     def weighted_counts(self):
         """_WeightedCountMeasure object for this cube.
 
@@ -323,16 +305,7 @@ class _Measures(object):
         available. If the cube response is not weighted, the
         _UnweightedCountMeasure object for this cube is returned.
         """
-        if not self.is_weighted:
-            return self.unweighted_counts
         return _WeightedCountMeasure(self._cube_dict, self._all_dimensions)
-
-    @lazyproperty
-    def weighted_n(self):
-        """float count of returned rows adjusted for weighting."""
-        if not self.is_weighted:
-            return float(self.unweighted_n)
-        return float(sum(self._cube_dict["result"]["measures"]["count"]["data"]))
 
 
 class _BaseMeasure(object):

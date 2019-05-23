@@ -325,13 +325,9 @@ class MultipleResponseVector(CategoricalVector):
 
 
 class _TransformedVector(object):
-    @lazyproperty
-    def base(self):
-        return self._base_vector.base
-
-    @lazyproperty
-    def counts(self):
-        return self._base_vector.counts
+    # @lazyproperty
+    # def counts(self):
+    #     return self._base_vector.counts
 
     @lazyproperty
     def fill(self):
@@ -371,17 +367,17 @@ class _TransformedVector(object):
     def numeric(self):
         return self._base_vector.numeric
 
-    @lazyproperty
-    def table_base(self):
-        return self._base_vector.table_base
+    # @lazyproperty
+    # def table_base(self):
+    #     return self._base_vector.table_base
 
     @lazyproperty
     def table_margin(self):
         return self._base_vector.table_margin
 
-    @lazyproperty
-    def values(self):
-        return self.counts
+    # @lazyproperty
+    # def values(self):
+    #     return self.counts
 
 
 class AssembledVector(_TransformedVector):

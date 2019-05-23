@@ -18,7 +18,15 @@ class DescribeFrozenSlice:
         expected = np.array([[0.71428571, 0.28571429], [0.625, 0.375]])
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
-    def it_calculates_row_proportions_with_and_without_hs(self):
+    def it_provides_fills(self):
+        slice_ = FrozenCube(CR.CAT_X_CAT_PRUNING_HS).slices[0]
+        assert slice_.rows_dimension_fills == (None, None, None, None, None, None, None)
+
+    def it_provides_missing(self):
+        cube = FrozenCube(CR.CAT_X_CAT)
+        assert cube.missing == 5
+
+    def it_calculates_various_measures(self):
         transforms = {
             "columns_dimension": {"insertions": {}},
             "rows_dimension": {"insertions": {}},
@@ -66,6 +74,34 @@ class DescribeFrozenSlice:
                 [-1.85225802, np.nan, 1.24997148, 1.10571507, np.nan, -0.8041707],
                 [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
                 [-0.22728508, np.nan, -0.10690048, 0.5405717, np.nan, -0.31799761],
+            ],
+        )
+
+        # Test pvals
+        np.testing.assert_almost_equal(
+            slice_.pvals,
+            [
+                [0.03851757, np.nan, 0.54097586, 0.21071341, np.nan, 0.23299113],
+                [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
+                [0.73113976, np.nan, 0.28019785, 0.32642279, np.nan, 0.79310382],
+                [0.36684711, np.nan, 0.98652895, 0.85178994, np.nan, 0.00305394],
+                [0.06398878, np.nan, 0.21130996, 0.26884987, np.nan, 0.4212984],
+                [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
+                [0.82020207, np.nan, 0.91486794, 0.58880283, np.nan, 0.75048675],
+            ],
+        )
+
+        # Test column index
+        np.testing.assert_almost_equal(
+            slice_.column_index,
+            [
+                [119.51424328, np.nan, 93.79691922, 81.24002902, np.nan, 50.17378721],
+                [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
+                [129.57286502, np.nan, 0.0, 234.24140666, np.nan, 0.0],
+                [68.74132753, np.nan, 99.37070479, 89.71345927, np.nan, 554.5688323],
+                [48.0063805, np.nan, 137.75263952, 149.33201417, np.nan, 0.0],
+                [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
+                [83.86593205, np.nan, 91.83509301, 160.9906575, np.nan, 0.0],
             ],
         )
 
