@@ -32,7 +32,7 @@ class FrozenCube(object):
         self._cube_response_arg = response
         self._transforms_dict = {} if transforms is None else transforms
         self._first_cube_of_tab = first_cube_of_tab
-        self._population = population
+        self._population = 0 if population is None else population
         self._mask_size = mask_size
 
     def __repr__(self):
