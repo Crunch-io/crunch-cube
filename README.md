@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.10.5
+- Implement `FrozenCube` - responsible for `FrozenSlice` creation
+
 #### 1.10.4
 - Column index with insertions (as dashes)
 
