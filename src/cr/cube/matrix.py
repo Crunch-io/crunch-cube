@@ -11,6 +11,7 @@ from collections import namedtuple
 import numpy as np
 from scipy.stats.contingency import expected_freq
 
+from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.util import lazyproperty
 from cr.cube.vector import (
     AssembledInsertionVector,
@@ -264,6 +265,69 @@ class MatrixWithInsertions(_BaseTransformedMatrix):
 # ---Used to represent the non-existent dimension in case of 1D vectors (that need to be
 # ---accessed as slices, to support cr.exporter).
 _PlaceholderElement = namedtuple("_PlaceholderElement", "label, is_hidden")
+
+
+class MatrixFactory(object):
+    """Encapsulates creation of the right raw (pre-transforms) matrix object."""
+
+    @classmethod
+    def matrix(
+        cls,
+        dimensions,
+        counts,
+        base_counts,
+        counts_with_missings,
+        dim_types,
+        cube,
+        slice_idx,
+        ca_as_0th,
+    ):
+        """Return a matrix object of appropriate type based on parameters."""
+        if cube.has_means:
+            return cls._create_means_matrix(
+                counts, base_counts, cube, dimensions, slice_idx
+            )
+        if cube.ndim > 2 or ca_as_0th:
+            base_counts = base_counts[slice_idx]
+            counts = counts[slice_idx]
+            counts_with_missings = counts_with_missings[slice_idx]
+            if cube.dim_types[0] == DT.MR:
+                base_counts = base_counts[0]
+                counts = counts[0]
+                counts_with_missings = counts_with_missings[0]
+            elif ca_as_0th:
+                table_name = "%s: %s" % (
+                    cube.dimensions[-2:][0].name,
+                    cube.dimensions[-2:][0].valid_elements[slice_idx].label,
+                )
+                return _CaCatMatrix1D(dimensions, counts, base_counts, table_name)
+        elif cube.ndim < 2:
+            if dim_types[0] == DT.MR:
+                return _MrMatrix1D(dimensions, counts, base_counts)
+            return _CatMatrix1D(dimensions, counts, base_counts)
+        if dim_types == (DT.MR, DT.MR):
+            return _MrXMrMatrix(dimensions, counts, base_counts, counts_with_missings)
+        elif dim_types[0] == DT.MR:
+            return _MrXCatMatrix(dimensions, counts, base_counts, counts_with_missings)
+        elif dim_types[1] == DT.MR:
+            return _CatXMrMatrix(dimensions, counts, base_counts, counts_with_missings)
+        return _CatXCatMatrix(dimensions, counts, base_counts, counts_with_missings)
+
+    @classmethod
+    def _create_means_matrix(cls, counts, base_counts, cube, dimensions, slice_idx):
+        if cube.ndim == 0:
+            return _MeansMatrix0D(counts, base_counts)
+        elif cube.ndim == 1:
+            if dimensions[0].dimension_type == DT.MR:
+                return _MrWithMeansMatrix1D(dimensions[0], counts, base_counts)
+            return _MeansMatrix1D(dimensions[0], counts, base_counts)
+        elif cube.ndim >= 2:
+            if cube.ndim == 3:
+                base_counts = base_counts[slice_idx]
+                counts = counts[slice_idx]
+            if dimensions[0].dimension_type == DT.MR:
+                return _MrXCatMeansMatrix(dimensions, counts, base_counts)
+            return _CatXCatMeansMatrix(dimensions, counts, base_counts)
 
 
 class _MeansMatrix0D(object):

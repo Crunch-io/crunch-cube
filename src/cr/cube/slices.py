@@ -9,20 +9,15 @@ from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.frozen_min_base_size_mask import MinBaseSizeMask
 from cr.cube.measures.new_pairwise_significance import NewPairwiseSignificance
 from cr.cube.matrix import (
-    _CaCatMatrix1D,
     _CatMatrix1D,
-    _CatXCatMatrix,
     _CatXCatMeansMatrix,
-    _CatXMrMatrix,
+    MatrixFactory,
     MatrixWithHidden,
     MatrixWithInsertions,
     _MeansMatrix0D,
     _MeansMatrix1D,
     _MrMatrix1D,
     _MrWithMeansMatrix1D,
-    _MrXCatMatrix,
-    _MrXCatMeansMatrix,
-    _MrXMrMatrix,
     OrderedMatrix,
     PrunedMatrix,
 )
@@ -375,21 +370,6 @@ class FrozenSlice(object):
     def _columns_dimension_numeric(self):
         return np.array([column.numeric for column in self._assembler.columns])
 
-    def _create_means_matrix(self, counts, base_counts):
-        if self._cube.ndim == 0:
-            return _MeansMatrix0D(counts, base_counts)
-        elif self._cube.ndim == 1:
-            if self.dimensions[0].dimension_type == DT.MR:
-                return _MrWithMeansMatrix1D(self.dimensions[0], counts, base_counts)
-            return _MeansMatrix1D(self.dimensions[0], counts, base_counts)
-        elif self._cube.ndim >= 2:
-            if self._cube.ndim == 3:
-                base_counts = base_counts[self._slice_idx]
-                counts = counts[self._slice_idx]
-            if self.dimensions[0].dimension_type == DT.MR:
-                return _MrXCatMeansMatrix(self.dimensions, counts, base_counts)
-            return _CatXCatMeansMatrix(self.dimensions, counts, base_counts)
-
     @lazyproperty
     def dimensions(self):
         """tuple of (row,) or (row, col) Dimension objects, depending on 1D or 2D."""
@@ -436,41 +416,23 @@ class FrozenSlice(object):
         Needs to live (probably) in the _BaseMatrix (which doesn't yet exist).
         It also needs to be tidied up a bit.
         """
-        dimensions = self.dimensions
-        base_counts = self._cube._apply_missings(
-            # self._cube._measure(False).raw_cube_array
-            self._cube._measures.unweighted_counts.raw_cube_array
+        cube = self._cube
+        base_counts = cube._apply_missings(
+            cube._measures.unweighted_counts.raw_cube_array
         )
-        counts_with_missings = self._cube._measure(self._weighted).raw_cube_array
-        counts = self._cube._apply_missings(counts_with_missings)
-        type_ = self._cube.dim_types[-2:]
-        if self._cube.has_means:
-            return self._create_means_matrix(counts, base_counts)
-        if self._cube.ndim > 2 or self._ca_as_0th:
-            base_counts = base_counts[self._slice_idx]
-            counts = counts[self._slice_idx]
-            counts_with_missings = counts_with_missings[self._slice_idx]
-            if self._cube.dim_types[0] == DT.MR:
-                base_counts = base_counts[0]
-                counts = counts[0]
-                counts_with_missings = counts_with_missings[0]
-            elif self._ca_as_0th:
-                table_name = "%s: %s" % (
-                    self._cube.dimensions[-2:][0].name,
-                    self._cube.dimensions[-2:][0].valid_elements[self._slice_idx].label,
-                )
-                return _CaCatMatrix1D(self.dimensions, counts, base_counts, table_name)
-        elif self._cube.ndim < 2:
-            if type_[0] == DT.MR:
-                return _MrMatrix1D(dimensions, counts, base_counts)
-            return _CatMatrix1D(dimensions, counts, base_counts)
-        if type_ == (DT.MR, DT.MR):
-            return _MrXMrMatrix(dimensions, counts, base_counts, counts_with_missings)
-        elif type_[0] == DT.MR:
-            return _MrXCatMatrix(dimensions, counts, base_counts, counts_with_missings)
-        elif type_[1] == DT.MR:
-            return _CatXMrMatrix(dimensions, counts, base_counts, counts_with_missings)
-        return _CatXCatMatrix(dimensions, counts, base_counts, counts_with_missings)
+        counts_with_missings = cube._measure(self._weighted).raw_cube_array
+        counts = cube._apply_missings(counts_with_missings)
+        dim_types = cube.dim_types[-2:]
+        return MatrixFactory.matrix(
+            self.dimensions,
+            counts,
+            base_counts,
+            counts_with_missings,
+            dim_types,
+            cube,
+            self._slice_idx,
+            self._ca_as_0th,
+        )
 
     @lazyproperty
     def _transforms(self):
