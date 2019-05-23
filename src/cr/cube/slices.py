@@ -413,11 +413,7 @@ class FrozenSlice(object):
 
     @lazyproperty
     def _matrix(self):
-        """This is essentially a factory method.
-
-        Needs to live (probably) in the _BaseMatrix (which doesn't yet exist).
-        It also needs to be tidied up a bit.
-        """
+        """The pre-transforms matrix for this slice."""
         cube = self._cube
         base_counts = self._cube.base_counts
         counts_with_missings = self._cube.counts_with_missings
@@ -563,21 +559,30 @@ class _OrderTransform(object):
 
     @lazyproperty
     def column_order(self):
-        # If there's no column dimension, there can be no reordering for it
+        """Indexer value identifying columns in order, suitable for slicing an ndarray.
+
+        This value is `slice(None)` when there is no columns dimension. Otherwise it is
+        a 1D ndarray of int column indices, suitable for indexing the columns array to
+        produce an ordered version.
+        """
+        # ---if there's no column dimension, there can be no reordering for it---
         if len(self._dimensions) < 2:
             return slice(None)
-        return np.array(self._column_dimension.valid_display_order)
+
+        # ---Specifying int type prevents failure when there are zero columns. The
+        # ---default type for ndarray is float, which is not valid for indexing.
+        return np.array(self._columns_dimension.valid_display_order, dtype=int)
 
     @lazyproperty
     def row_order(self):
-        return np.array(self._row_dimension.valid_display_order)
+        return np.array(self._rows_dimension.valid_display_order, dtype=int)
 
     @lazyproperty
-    def _column_dimension(self):
+    def _columns_dimension(self):
         return self._dimensions[1]
 
     @lazyproperty
-    def _row_dimension(self):
+    def _rows_dimension(self):
         return self._dimensions[0]
 
 

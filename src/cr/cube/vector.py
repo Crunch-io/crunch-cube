@@ -606,18 +606,24 @@ class _BasePrunedOrHiddenVector(_TransformedVector):
     def zscore(self):
         return self._base_vector.zscore[self._valid_elements_idxs]
 
+    @lazyproperty
+    def _valid_elements_idxs(self):
+        raise NotImplementedError("must be implemented by each subclass")
+
 
 class HiddenVector(_BasePrunedOrHiddenVector):
     """Vector with elements from the opposide dimensions hidden."""
 
     @lazyproperty
     def _valid_elements_idxs(self):
+        """An 1D ndarray of int idxs of visible values, suitable for array indexing."""
         return np.array(
             [
                 index
                 for index, opposite_vector in enumerate(self._opposite_vectors)
                 if not opposite_vector.hidden
-            ]
+            ],
+            dtype=int,
         )
 
 
@@ -666,10 +672,12 @@ class PrunedVector(_BasePrunedOrHiddenVector):
 
     @lazyproperty
     def _valid_elements_idxs(self):
+        """An 1D ndarray of int idxs of unpruned values, suitable for array indexing."""
         return np.array(
             [
                 index
                 for index, opposite_vector in enumerate(self._opposite_vectors)
                 if not opposite_vector.pruned
-            ]
+            ],
+            dtype=int,
         )

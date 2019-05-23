@@ -1,0 +1,150 @@
+{
+    "query": {
+        "dimensions": [
+            {
+                "variable": "https://stable.crunch.io/api/datasets/ab64eee04efb43d4ae9c13e0e71468c4/variables/000003/"
+            },
+            {
+                "variable": "https://stable.crunch.io/api/datasets/ab64eee04efb43d4ae9c13e0e71468c4/variables/000006/"
+            }
+        ],
+        "measures": {
+            "count": {
+                "args": [
+
+                ],
+                "function": "cube_count"
+            }
+        },
+        "weight": null
+    },
+    "query_environment": {
+        "filter": [
+
+        ]
+    },
+    "result": {
+        "counts": [
+            5,
+            3,
+            2,
+            0,
+            5,
+            2,
+            3,
+            0,
+            0,
+            0,
+            0,
+            0
+        ],
+        "dimensions": [
+            {
+                "derived": false,
+                "references": {
+                    "alias": "v4",
+                    "name": "v4"
+                },
+                "type": {
+                    "categories": [
+                        {
+                            "id": 1,
+                            "missing": true,
+                            "name": "B",
+                            "numeric_value": 1
+                        },
+                        {
+                            "id": 2,
+                            "missing": true,
+                            "name": "C",
+                            "numeric_value": 2
+                        },
+                        {
+                            "id": -1,
+                            "missing": true,
+                            "name": "No Data",
+                            "numeric_value": null
+                        }
+                    ],
+                    "class": "categorical",
+                    "ordinal": false
+                }
+            },
+            {
+                "derived": false,
+                "references": {
+                    "alias": "v7",
+                    "name": "v7"
+                },
+                "type": {
+                    "categories": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "name": "C",
+                            "numeric_value": 1
+                        },
+                        {
+                            "id": 2,
+                            "missing": true,
+                            "name": "D",
+                            "numeric_value": 2
+                        },
+                        {
+                            "id": 3,
+                            "missing": false,
+                            "name": "E",
+                            "numeric_value": 3
+                        },
+                        {
+                            "id": -1,
+                            "missing": true,
+                            "name": "No Data",
+                            "numeric_value": null
+                        }
+                    ],
+                    "class": "categorical",
+                    "ordinal": false
+                }
+            }
+        ],
+        "element": "crunch:cube",
+        "measures": {
+            "count": {
+                "data": [
+                    5,
+                    3,
+                    2,
+                    0,
+                    5,
+                    2,
+                    3,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "metadata": {
+                    "derived": true,
+                    "references": {
+
+                    },
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {
+
+                        }
+                    }
+                },
+                "n_missing": 5
+            }
+        },
+        "missing": 5,
+        "n": 20
+    }
+}

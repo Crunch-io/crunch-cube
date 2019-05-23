@@ -9,7 +9,7 @@ from cr.cube.enum import DIMENSION_TYPE as DT
 from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
 
 
-class DescribeFrozenSlice:
+class DescribeFrozenSlice(object):
     """Integration-test suite for FrozenSlice object."""
 
     def it_loads_from_cat_x_cat_cube(self):
@@ -385,3 +385,8 @@ class DescribeFrozenSlice:
             slice_.means,
             [[19.85555556], [13.85416667], [52.78947368], [np.nan], [np.nan]],
         )
+
+    def it_accommodates_an_all_missing_element_rows_dimension(self):
+        slice_ = FrozenSlice(FrozenCube(CR.CAT_X_CAT_ALL_MISSING_ROW_ELEMENTS))
+        row_proportions = slice_.row_proportions
+        np.testing.assert_almost_equal(row_proportions, np.array([]))
