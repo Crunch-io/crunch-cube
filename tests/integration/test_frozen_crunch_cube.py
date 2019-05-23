@@ -20,6 +20,14 @@ class DescribeIntegratedFrozenCubeAsFrozenSlice(object):
         repr_ = repr(cube)
         assert repr_ == "FrozenCube(name='v4', dimension_types='CAT x CAT')"
 
+    def it_provides_description(self):
+        cube = FrozenCube(CR.CAT_X_CAT)
+        assert cube.description == ""
+
+    def it_knows_if_it_is_weighted(self):
+        cube = FrozenCube(CR.CAT_X_CAT)
+        assert cube.is_weighted is False
+
     def it_provides_access_to_its_dimensions(self, dimensions_fixture):
         cube_response, expected_dimension_types = dimensions_fixture
         cube = FrozenCube(cube_response)
@@ -623,11 +631,9 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_array_equal(slice_.column_margin, [1, 2])
 
     def test_as_array_unweighted_gender_x_ideology(self):
-        slice_ = FrozenCube(CR.ECON_GENDER_X_IDEOLOGY_WEIGHTED, weighted=False).slices[
-            0
-        ]
+        slice_ = FrozenCube(CR.ECON_GENDER_X_IDEOLOGY_WEIGHTED).slices[0]
         expected = np.array([[32, 85, 171, 114, 70, 13], [40, 97, 205, 106, 40, 27]])
-        np.testing.assert_array_equal(slice_.counts, expected)
+        np.testing.assert_array_equal(slice_.base_counts, expected)
 
     def test_as_array_weighted_gender_x_ideology(self):
         slice_ = FrozenCube(CR.ECON_GENDER_X_IDEOLOGY_WEIGHTED).slices[0]
@@ -668,18 +674,14 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.column_margin, expected)
 
     def test_margin_unweighted_gender_x_ideology_axis_0(self):
-        slice_ = FrozenCube(CR.ECON_GENDER_X_IDEOLOGY_WEIGHTED, weighted=False).slices[
-            0
-        ]
+        slice_ = FrozenCube(CR.ECON_GENDER_X_IDEOLOGY_WEIGHTED).slices[0]
         expected = np.array([72, 182, 376, 220, 110, 40])
-        np.testing.assert_array_equal(slice_.column_margin, expected)
+        np.testing.assert_array_equal(slice_.column_base, expected)
 
     def test_margin_unweighted_gender_x_ideology_axis_1(self):
-        slice_ = FrozenCube(CR.ECON_GENDER_X_IDEOLOGY_WEIGHTED, weighted=False).slices[
-            0
-        ]
+        slice_ = FrozenCube(CR.ECON_GENDER_X_IDEOLOGY_WEIGHTED).slices[0]
         expected = np.array([485, 515])
-        np.testing.assert_array_equal(slice_.row_margin, expected)
+        np.testing.assert_array_equal(slice_.row_base, expected)
 
     def test_margin_weighted_gender_x_ideology_axis_1(self):
         slice_ = FrozenCube(CR.ECON_GENDER_X_IDEOLOGY_WEIGHTED).slices[0]
@@ -807,7 +809,9 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         assert slice_.ndim == 2
 
     def test_mean_no_dims(self):
-        slice_ = FrozenCube(CR.ECON_MEAN_NO_DIMS).slices[0]
+        cube = FrozenCube(CR.ECON_MEAN_NO_DIMS)
+        assert cube.description is None
+        slice_ = cube.slices[0]
         expected = np.array([49.095])
         np.testing.assert_almost_equal(slice_.means, expected)
         np.testing.assert_almost_equal(slice_.table_base, expected)
@@ -1086,9 +1090,9 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_array_equal(slice_.row_margin, expected)
 
     def test_ca_with_single_cat(self):
-        slice_ = FrozenCube(CR.CA_SINGLE_CAT, weighted=False).slices[0]
+        slice_ = FrozenCube(CR.CA_SINGLE_CAT).slices[0]
         expected = np.array([79, 80, 70, 0])
-        np.testing.assert_almost_equal(slice_.row_margin, expected)
+        np.testing.assert_almost_equal(slice_.row_base, expected)
 
     def test_pets_array_x_pets_by_col(self):
         slice_ = FrozenCube(CR.PETS_ARRAY_X_PETS).slices[0]
@@ -1369,16 +1373,13 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
                 12,
             ]
         )
-        # actual = np.ma.compressed(cube.margin(axis=1, weighted=False, prune=True))
         np.testing.assert_array_equal(slice_.row_base, expected)
         # not testing cube.prune_indices() because the margin has 6367 cells
 
     def test_ca_with_single_cat_pruning(self):
         transforms = {"rows_dimension": {"prune": True}}
-        slice_ = FrozenCube(
-            CR.CA_SINGLE_CAT, weighted=False, transforms=transforms
-        ).slices[0]
-        np.testing.assert_array_equal(slice_.counts, [[79], [80], [70]])
+        slice_ = FrozenCube(CR.CA_SINGLE_CAT, transforms=transforms).slices[0]
+        np.testing.assert_array_equal(slice_.base_counts, [[79], [80], [70]])
 
     def test_ca_x_single_cat_counts(self):
         slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).slices[0]
@@ -1734,18 +1735,16 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_array_equal(slice_.row_margin, expected)
 
     def test_ca_x_mr_margin(self):
-        slice_ = FrozenCube(CR.CA_X_MR_WEIGHTED_HS, weighted=False).slices[0]
+        slice_ = FrozenCube(CR.CA_X_MR_WEIGHTED_HS).slices[0]
         expected = np.array([504, 215, 224, 76, 8, 439])
-        np.testing.assert_array_equal(slice_.column_margin, expected)
+        np.testing.assert_array_equal(slice_.column_base, expected)
 
     def test_ca_x_mr_margin_prune(self):
         # ---CA x MR---
         transforms = {"rows_dimension": {"prune": True}}
-        slice_ = FrozenCube(
-            CR.CA_X_MR_WEIGHTED_HS, weighted=False, transforms=transforms
-        ).slices[0]
+        slice_ = FrozenCube(CR.CA_X_MR_WEIGHTED_HS, transforms=transforms).slices[0]
         np.testing.assert_array_equal(
-            slice_.column_margin, np.array([504, 215, 224, 76, 8, 439])
+            slice_.column_base, np.array([504, 215, 224, 76, 8, 439])
         )
         assert slice_.table_name == u"q1. Aftensmad: K\xf8d (svin/lam/okse)"
 

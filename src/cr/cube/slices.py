@@ -32,7 +32,6 @@ class FrozenSlice(object):
         self,
         cube,
         slice_idx=0,
-        weighted=True,
         transforms=None,
         population=None,
         ca_as_0th=None,
@@ -41,12 +40,15 @@ class FrozenSlice(object):
         self._cube = cube
         self._slice_idx = slice_idx
         self._transforms_dict = {} if transforms is None else transforms
-        self._weighted = weighted
         self._population = population
         self._ca_as_0th = ca_as_0th
         self._mask_size = mask_size
 
     # ---interface ---------------------------------------------------
+
+    @lazyproperty
+    def _weighted(self):
+        return self._cube.is_weighted
 
     @lazyproperty
     def base_counts(self):

@@ -27,14 +27,12 @@ class FrozenCube(object):
         transforms=None,
         first_cube_of_tab=False,
         population=None,
-        weighted=True,
         mask_size=0,
     ):
         self._cube_response_arg = response
         self._transforms_dict = {} if transforms is None else transforms
         self._first_cube_of_tab = first_cube_of_tab
         self._population = population
-        self._weighted = weighted
         self._mask_size = mask_size
 
     def __repr__(self):
@@ -62,7 +60,6 @@ class FrozenCube(object):
                 slice_idx=slice_idx,
                 transforms=self._transforms_dict,
                 population=self._population,
-                weighted=self._weighted,
                 ca_as_0th=self._ca_as_0th,
                 mask_size=self._mask_size,
             )
@@ -85,7 +82,7 @@ class FrozenCube(object):
 
     @lazyproperty
     def counts_with_missings(self):
-        return self._measure(self._weighted).raw_cube_array
+        return self._measure(self.is_weighted).raw_cube_array
 
     @lazyproperty
     def counts(self):
@@ -121,11 +118,6 @@ class FrozenCube(object):
         dimensions than appear in the cube response.
         """
         return self._all_dimensions.apparent_dimensions
-
-    @lazyproperty
-    def filter_annotation(self):
-        """Get cube's filter annotation."""
-        return self._cube_dict.get("filter_names", [])
 
     @lazyproperty
     def has_means(self):
