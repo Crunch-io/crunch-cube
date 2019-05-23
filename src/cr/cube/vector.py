@@ -27,10 +27,6 @@ class BaseVector(object):
         return np.sum(self._base_counts)
 
     @lazyproperty
-    def cat_id(self):
-        return self._element.element_id
-
-    @lazyproperty
     def fill(self):
         """str RGB color like "#def032" or None when not specified.
 
@@ -89,10 +85,6 @@ class _BaseInsertionVector(object):
         return np.sum(
             np.array([row.base_values for row in self._addend_vectors]), axis=0
         )
-
-    @lazyproperty
-    def cat_id(self):
-        return -1
 
     @lazyproperty
     def column_index(self):
@@ -336,10 +328,6 @@ class _TransformedVector(object):
     @lazyproperty
     def base(self):
         return self._base_vector.base
-
-    @lazyproperty
-    def cat_id(self):
-        return self._base_vector.cat_id
 
     @lazyproperty
     def counts(self):
