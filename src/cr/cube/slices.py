@@ -32,7 +32,6 @@ class FrozenSlice(object):
         self,
         cube,
         slice_idx=0,
-        weighted=True,
         transforms=None,
         population=None,
         ca_as_0th=None,
@@ -41,12 +40,15 @@ class FrozenSlice(object):
         self._cube = cube
         self._slice_idx = slice_idx
         self._transforms_dict = {} if transforms is None else transforms
-        self._weighted = weighted
         self._population = population
         self._ca_as_0th = ca_as_0th
         self._mask_size = mask_size
 
     # ---interface ---------------------------------------------------
+
+    @lazyproperty
+    def _weighted(self):
+        return self._cube.is_weighted
 
     @lazyproperty
     def base_counts(self):
@@ -345,7 +347,7 @@ class FrozenSlice(object):
             return None
 
         title = self._cube.name
-        table_name = self._cube.labels()[0][self._slice_idx]
+        table_name = self._cube.dimensions[0].valid_elements[self._slice_idx].label
         return "%s: %s" % (title, table_name)
 
     @lazyproperty
@@ -417,18 +419,14 @@ class FrozenSlice(object):
         It also needs to be tidied up a bit.
         """
         cube = self._cube
-        base_counts = cube._apply_missings(
-            cube._measures.unweighted_counts.raw_cube_array
-        )
-        counts_with_missings = cube._measure(self._weighted).raw_cube_array
-        counts = cube._apply_missings(counts_with_missings)
-        dim_types = cube.dim_types[-2:]
+        base_counts = self._cube.base_counts
+        counts_with_missings = self._cube.counts_with_missings
+        counts = self._cube.counts
         return MatrixFactory.matrix(
             self.dimensions,
             counts,
             base_counts,
             counts_with_missings,
-            dim_types,
             cube,
             self._slice_idx,
             self._ca_as_0th,
