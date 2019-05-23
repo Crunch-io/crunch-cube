@@ -277,21 +277,24 @@ class MatrixFactory(object):
         counts,
         base_counts,
         counts_with_missings,
-        dim_types,
         cube,
         slice_idx,
         ca_as_0th,
     ):
         """Return a matrix object of appropriate type based on parameters."""
+
+        # For cubes with means, cerate one of means-matrix types
         if cube.has_means:
             return cls._create_means_matrix(
                 counts, base_counts, cube, dimensions, slice_idx
             )
+
+        dimension_types = cube.dimension_types[-2:]
         if cube.ndim > 2 or ca_as_0th:
             base_counts = base_counts[slice_idx]
             counts = counts[slice_idx]
             counts_with_missings = counts_with_missings[slice_idx]
-            if cube.dim_types[0] == DT.MR:
+            if cube.dimension_types[0] == DT.MR:
                 base_counts = base_counts[0]
                 counts = counts[0]
                 counts_with_missings = counts_with_missings[0]
@@ -302,14 +305,14 @@ class MatrixFactory(object):
                 )
                 return _CaCatMatrix1D(dimensions, counts, base_counts, table_name)
         elif cube.ndim < 2:
-            if dim_types[0] == DT.MR:
+            if dimension_types[0] == DT.MR:
                 return _MrMatrix1D(dimensions, counts, base_counts)
             return _CatMatrix1D(dimensions, counts, base_counts)
-        if dim_types == (DT.MR, DT.MR):
+        if dimension_types == (DT.MR, DT.MR):
             return _MrXMrMatrix(dimensions, counts, base_counts, counts_with_missings)
-        elif dim_types[0] == DT.MR:
+        elif dimension_types[0] == DT.MR:
             return _MrXCatMatrix(dimensions, counts, base_counts, counts_with_missings)
-        elif dim_types[1] == DT.MR:
+        elif dimension_types[1] == DT.MR:
             return _CatXMrMatrix(dimensions, counts, base_counts, counts_with_missings)
         return _CatXCatMatrix(dimensions, counts, base_counts, counts_with_missings)
 

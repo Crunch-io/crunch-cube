@@ -15,6 +15,7 @@ import numpy as np
 from cr.cube.dimension import AllDimensions
 from cr.cube.slices import FrozenSlice
 from cr.cube.util import lazyproperty
+from cr.cube.enum import DIMENSION_TYPE as DT
 
 np.seterr(divide="ignore", invalid="ignore")
 
@@ -24,14 +25,14 @@ class FrozenCube(object):
         self,
         response,
         transforms=None,
-        ca_as_0th=False,
+        first_cube_of_tab=False,
         population=None,
         weighted=True,
         mask_size=0,
     ):
         self._cube_response_arg = response
         self._transforms_dict = {} if transforms is None else transforms
-        self._ca_as_0th = ca_as_0th
+        self._first_cube_of_tab = first_cube_of_tab
         self._population = population
         self._weighted = weighted
         self._mask_size = mask_size
@@ -69,8 +70,12 @@ class FrozenCube(object):
         )
 
     @lazyproperty
+    def _ca_as_0th(self):
+        return self._first_cube_of_tab and self.dimension_types[0] == DT.CA
+
+    @lazyproperty
     def _slice_idxs(self):
-        if self.ndim < 3:
+        if self.ndim < 3 and not self._ca_as_0th:
             return (0,)
         return range(len(self.dimensions[0].valid_elements))
 

@@ -420,13 +420,11 @@ class FrozenSlice(object):
         base_counts = self._cube.base_counts
         counts_with_missings = self._cube.counts_with_missings
         counts = self._cube.counts
-        dim_types = cube.dim_types[-2:]
         return MatrixFactory.matrix(
             self.dimensions,
             counts,
             base_counts,
             counts_with_missings,
-            dim_types,
             cube,
             self._slice_idx,
             self._ca_as_0th,

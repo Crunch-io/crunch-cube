@@ -1900,7 +1900,10 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
             "rows_dimension": {"insertions": {}},
         }
         slice_ = FrozenCube(
-            CR.CA_AS_0TH, transforms=transforms, ca_as_0th=True, population=100000000
+            CR.CA_AS_0TH,
+            transforms=transforms,
+            first_cube_of_tab=True,
+            population=100000000,
         ).slices[0]
         expected = np.array(
             [
