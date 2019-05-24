@@ -2,11 +2,10 @@
 
 """Provides the FrozenCube class.
 
-FrozenCube is the main API class for manipulating Crunch.io JSON cube
-responses.
+FrozenCube is the main API class for manipulating Crunch.io JSON cube responses.
 """
 
-from __future__ import division
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import json
 
@@ -21,6 +20,11 @@ np.seterr(divide="ignore", invalid="ignore")
 
 
 class FrozenCube(object):
+    """Provides access to individual slices on a cube-result.
+
+    It also provides some attributes of the overall cube-result.
+    """
+
     def __init__(
         self,
         response,
@@ -54,6 +58,7 @@ class FrozenCube(object):
 
     @lazyproperty
     def slices(self):
+        """Sequence of FrozenSlice objects drawn from this cube-result."""
         return tuple(
             FrozenSlice(
                 self,
@@ -67,32 +72,16 @@ class FrozenCube(object):
         )
 
     @lazyproperty
-    def _ca_as_0th(self):
-        return self._first_cube_of_tab and self.dimension_types[0] == DT.CA
-
-    @lazyproperty
-    def _slice_idxs(self):
-        if self.ndim < 3 and not self._ca_as_0th:
-            return (0,)
-        return range(len(self.dimensions[0].valid_elements))
-
-    @lazyproperty
     def base_counts(self):
         return self._measures.unweighted_counts.raw_cube_array[self._valid_idxs]
-
-    @lazyproperty
-    def counts_with_missings(self):
-        return self._measure(self.is_weighted).raw_cube_array
 
     @lazyproperty
     def counts(self):
         return self.counts_with_missings[self._valid_idxs]
 
     @lazyproperty
-    def _valid_idxs(self):
-        return np.ix_(
-            *tuple(d.valid_elements.element_idxs for d in self._all_dimensions)
-        )
+    def counts_with_missings(self):
+        return self._measure(self.is_weighted).raw_cube_array
 
     @lazyproperty
     def description(self):
@@ -166,14 +155,23 @@ class FrozenCube(object):
     def _all_dimensions(self):
         """The AllDimensions object for this cube.
 
-        The AllDimensions object provides access to all the dimensions
-        appearing in the cube response, not only apparent dimensions (those
-        that appear to a user). It also provides access to
-        an _ApparentDimensions object which contains only those user-apparent
-        dimensions (basically the categories dimension of each MR
+        The AllDimensions object provides access to all the dimensions appearing in the
+        cube response, not only apparent dimensions (those that appear to a user). It
+        also provides access to an _ApparentDimensions object which contains only those
+        user-apparent dimensions (basically the categories dimension of each MR
         dimension-pair is suppressed).
         """
         return AllDimensions(dimension_dicts=self._cube_dict["result"]["dimensions"])
+
+    @lazyproperty
+    def _ca_as_0th(self):
+        """True if slicing is to be performed in so-called "CA-as-0th" mode.
+
+        In this mode, a categorical-array (CA) cube (2D) is sliced into a sequence of 1D
+        slices, each of which represents one subvariable of the CA variable. Normally,
+        a 2D cube-result becomes a single slice.
+        """
+        return self._first_cube_of_tab and self.dimension_types[0] == DT.CA
 
     @lazyproperty
     def _cube_dict(self):
@@ -221,6 +219,23 @@ class FrozenCube(object):
         when available.
         """
         return _Measures(self._cube_dict, self._all_dimensions)
+
+    @lazyproperty
+    def _slice_idxs(self):
+        """Iterable of contiguous int indicies for slices to be produced.
+
+        This value is to help FrozenSlice construction which does not by itself know how
+        many slices are in a cube-result.
+        """
+        if self.ndim < 3 and not self._ca_as_0th:
+            return (0,)
+        return range(len(self.dimensions[0].valid_elements))
+
+    @lazyproperty
+    def _valid_idxs(self):
+        return np.ix_(
+            *tuple(d.valid_elements.element_idxs for d in self._all_dimensions)
+        )
 
 
 class _Measures(object):
