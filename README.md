@@ -112,34 +112,13 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.10.6
+- Fix index error by fixing the indexing array type to int (it used to default to float when the indexed array is empty)
+
 #### 1.10.5
 - Implement `FrozenCube` - responsible for `FrozenSlice` creation
 
 #### 1.10.4
 - Column index with insertions (as dashes)
-
-#### 1.10.3
-- Refactor hidden and pruned slices
-
-#### 1.10.2
-- Fix getting element ids from transforms shim
-- Check for both int and str versions in incoming dictionaries
-- This needs to be properly fixed in the shim code, but this code "just" provides extra safety
-
-#### 1.10.1
-- Add `fill` property to `_Element`, and provide fill information through `FrozenSlice` API.
-- Increase test coverage (for various MR and Means cases)
-
-#### 1.10.0
-- Initial stab at `FrozenSlice`
-
-#### 1.9.19
-- Fix `None` anchor
-
-#### 1.9.18
-- Pairwise summary as T-Stats
-
-#### 1.9.17
-- Unweighted N as basis for t-stats
 
 For a complete list of changes see [history](https://github.com/Crunch-io/crunch-cube/blob/master/HISTORY.md).

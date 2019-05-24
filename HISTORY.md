@@ -1,5 +1,29 @@
 # History of Changes
 
+#### 1.10.3
+- Refactor hidden and pruned slices
+
+#### 1.10.2
+- Fix getting element ids from transforms shim
+- Check for both int and str versions in incoming dictionaries
+- This needs to be properly fixed in the shim code, but this code "just" provides extra safety
+
+#### 1.10.1
+- Add `fill` property to `_Element`, and provide fill information through `FrozenSlice` API.
+- Increase test coverage (for various MR and Means cases)
+
+#### 1.10.0
+- Initial stab at `FrozenSlice`
+
+#### 1.9.19
+- Fix `None` anchor
+
+#### 1.9.18
+- Pairwise summary as T-Stats
+
+#### 1.9.17
+- Unweighted N as basis for t-stats
+
 #### 1.9.16
 - Proper t-stats for cubes with H&S
 
