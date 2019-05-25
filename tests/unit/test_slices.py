@@ -8,7 +8,7 @@ import numpy as np
 from mock import Mock
 import pytest
 
-from cr.cube.dimension import _Category, Dimension, NewDimension, _Subtotal
+from cr.cube.dimension import Dimension, _Element, _Subtotal
 from cr.cube.matrix import _CatXCatMatrix, _MrXCatMatrix, OrderedMatrix, PrunedMatrix
 from cr.cube.slices import (
     _Assembler,
@@ -489,7 +489,7 @@ class Describe_OrderTransform(object):
 
     @pytest.fixture
     def dimension_(self, request):
-        return instance_mock(request, NewDimension)
+        return instance_mock(request, Dimension)
 
     @pytest.fixture
     def _rows_dimension_prop_(self, request):
@@ -528,7 +528,7 @@ class DescribeOrderedMatrix(object):
             request,
             Dimension,
             valid_elements=[
-                instance_mock(request, _Category, element_id=element_id)
+                instance_mock(request, _Element, element_id=element_id)
                 for element_id in element_ids
             ],
         )

@@ -4,7 +4,6 @@ from __future__ import division
 
 import numpy as np
 
-from cr.cube.dimension import NewDimension
 from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.frozen_min_base_size_mask import MinBaseSizeMask
 from cr.cube.measures.new_pairwise_significance import NewPairwiseSignificance
@@ -39,7 +38,7 @@ class FrozenSlice(object):
     ):
         self._cube = cube
         self._slice_idx = slice_idx
-        self._transforms_dict = {} if transforms is None else transforms
+        self._transforms_arg = transforms
         self._population = population
         self._ca_as_0th = ca_as_0th
         self._mask_size = mask_size
@@ -375,9 +374,6 @@ class FrozenSlice(object):
     @lazyproperty
     def dimensions(self):
         """tuple of (row,) or (row, col) Dimension objects, depending on 1D or 2D."""
-        # TODO: pretty messy while we're shimming in NewDimensions, should clean up
-        # pretty naturally after FrozenSlice has its own loader.
-
         dimensions = self._cube.dimensions[-2:]
 
         # ---special-case for 0D mean cube---
@@ -388,18 +384,10 @@ class FrozenSlice(object):
             # Represent CA slice as 1-D rather than 2-D
             dimensions = (dimensions[-1],)
 
-        rows_dimension = NewDimension(
-            dimensions[0], self._transforms_dict.get("rows_dimension", {})
+        return tuple(
+            dimension.apply_transforms(transforms)
+            for dimension, transforms in zip(dimensions, self._transform_dicts)
         )
-
-        if len(dimensions) == 1:
-            return (rows_dimension,)
-
-        columns_dimension = NewDimension(
-            dimensions[1], self._transforms_dict.get("columns_dimension", {})
-        )
-
-        return (rows_dimension, columns_dimension)
 
     @lazyproperty
     def _pruning(self):
@@ -429,8 +417,31 @@ class FrozenSlice(object):
         )
 
     @lazyproperty
+    def _transform_dicts(self):
+        """Pair of dict (rows_dimension_transforms, columns_dimension_transforms).
+
+        Resolved from the `transforms` argument provided on construction, it always has
+        two members, even when one or both dimensions have no transforms. The transforms
+        item is an empty dict (`{}`) when no transforms are specified for that
+        dimension.
+        """
+        return (
+            self._transforms_dict.get("rows_dimension", {}),
+            self._transforms_dict.get("columns_dimension", {}),
+        )
+
+    @lazyproperty
     def _transforms(self):
         return _Transforms(self._matrix, self.dimensions, self._pruning)
+
+    @lazyproperty
+    def _transforms_dict(self):
+        """dict containing all transforms for this slice, provided as `transforms` arg.
+
+        This value is an empty dict (`{}`) when no transforms were specified on
+        construction.
+        """
+        return self._transforms_arg if self._transforms_arg is not None else {}
 
 
 class _Assembler(object):
