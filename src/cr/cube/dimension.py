@@ -299,15 +299,28 @@ class Dimension(object):
 
     @lazyproperty
     def display_order(self):
-        """Sequence of int element-idx in order elements should be displayed.
+        """Sequence of int element offsets specifying display order of elements.
 
-        The sequence is exhaustive, containing an element index for each element in the
-        `.all_elements` collection. The sequence reflects the resolved cascade of
-        *explicit* ordering transforms, but does *not* reflect any *sort* transforms,
-        which cannot be resolved by the dimension. Use the `.sort` property to access
-        any sort transform that may apply.
+        The sequence includes only valid elements; missing elements do not appear.
+        Further, each index represents the document-order position of the element in the
+        sequence of valid elements; missing elements are skipped in the assignment of
+        indexes. The returned sequence is exhaustive; all valid elements are
+        represented.
+
+        The sequence reflects the resolved cascade of any *explicit* ordering
+        transforms, but does *not* reflect any *sort* transforms, which cannot be
+        resolved by the dimension. Use the `.sort` property to access any sort transform
+        that may apply.
+
+        Example with explicit-order transform:
+
+            (3, 0, 2, 1, 4)
+
+        Example with no explicit-order transform:
+
+            (0, 1, 2, 3, 4)
         """
-        return self.all_elements.display_order
+        return self.valid_elements.display_order
 
     @lazyproperty
     def name(self):
@@ -374,8 +387,7 @@ class Dimension(object):
         Each item in the sequence is a _Subtotal object specifying a subtotal, including
         its addends and anchor.
         """
-        # ---insertions present in the dimension-transforms override those on the
-        # ---dimension itself.
+        # ---insertions in dimension-transforms override those on dimension itself---
         insertion_dicts = self._dimension_transforms_dict.get("insertions")
         if insertion_dicts is not None:
             return _Subtotals(insertion_dicts, self.valid_elements)
@@ -387,11 +399,6 @@ class Dimension(object):
             [] if view is None else view.get("transform", {}).get("insertions", [])
         )
         return _Subtotals(insertion_dicts, self.valid_elements)
-
-    # TODO: Properly extract, like maybe `dimension.valid_elements.display_order.
-    @lazyproperty
-    def valid_display_order(self):
-        return self.all_elements.valid_display_order
 
     @lazyproperty
     def valid_elements(self):
@@ -419,10 +426,6 @@ class Dimension(object):
 
 class _BaseElements(Sequence):
     """Base class for element sequence containers."""
-
-    def __init__(self, type_dict, dimension_transforms_dict):
-        self._type_dict = type_dict
-        self._dimension_transforms_dict = dimension_transforms_dict
 
     def __getitem__(self, idx_or_slice):
         """Implements indexed access."""
@@ -483,32 +486,14 @@ class _AllElements(_BaseElements):
     Each element is either a category or a subvariable.
     """
 
-    @lazyproperty
-    def display_order(self):
-        """Sequence of int element-idx reflecting order in which to display elements.
-
-        This order reflects the application of any explicit element-order transforms,
-        including resolution of any cascade. It does *not* reflect the results of
-        a *sort* transform, which can only be resolved at a higher level, where vector
-        values are known.
-        """
-        explicit_order = self._explicit_order
-        if explicit_order:
-            return explicit_order
-        return tuple(range(len(self._element_dicts)))
-
-    # TODO: Need to properly extract this, probably to `ValidElements`
-    @lazyproperty
-    def valid_display_order(self):
-        explicit_order = self._valid_explicit_order
-        if explicit_order:
-            return explicit_order
-        return tuple(range(len(self.valid_elements)))
+    def __init__(self, type_dict, dimension_transforms_dict):
+        self._type_dict = type_dict
+        self._dimension_transforms_dict = dimension_transforms_dict
 
     @lazyproperty
     def valid_elements(self):
         """_ValidElements object containing only non-missing elements."""
-        return _ValidElements(self._elements)
+        return _ValidElements(self._elements, self._dimension_transforms_dict)
 
     @lazyproperty
     def _element_dicts(self):
@@ -532,44 +517,6 @@ class _AllElements(_BaseElements):
             ) in self._iter_element_makings()
         )
 
-    # TODO: extract this to a function object. It's too complex the way it is, doing
-    # like seven separate things.
-    @lazyproperty
-    def _explicit_order(self):
-        """Sequence of int element idx or None, reflecting explicit-order transform.
-
-        This value is None if no explicit-order transform is specified. Otherwise, it is
-        an exhaustive collection of element offsets, in the order specified (and in some
-        cases implied) by the order transform.
-        """
-        order_dict = self._dimension_transforms_dict.get("order", {})
-        order_type = order_dict.get("type")
-        if order_type != "explicit":
-            return None
-        ordered_element_ids = order_dict.get("element_ids")
-        if not isinstance(ordered_element_ids, list):
-            return None
-
-        # ---list like [0, 1, 2, -1], perhaps ["0001", "0002", etc.]---
-        cube_result_order = list(element.element_id for element in self)
-        remaining_element_ids = list(element.element_id for element in self)
-
-        ordered_idxs = []
-        for element_id in ordered_element_ids:
-            # ---An element-id appearing in transform but not in dimension is ignored.
-            # ---Also, a duplicated element-id is only used on first encounter.
-            if element_id not in remaining_element_ids:
-                continue
-            ordered_idxs.append(cube_result_order.index(element_id))
-            remaining_element_ids.remove(element_id)
-
-        # ---any remaining element-ids are tacked onto the end of the list in the order
-        # ---they originally appeared in the cube-result.
-        for element_id in remaining_element_ids:
-            ordered_idxs.append(cube_result_order.index(element_id))
-
-        return tuple(ordered_idxs)
-
     def _iter_element_makings(self):
         """Generate tuple of values needed to construct each element object.
 
@@ -589,46 +536,6 @@ class _AllElements(_BaseElements):
             )
             yield idx, element_dict, element_transforms_dict
 
-    # TODO: We should only need this. I've just copy/pasted it. It needs to be
-    # wrapped up nicely
-    @lazyproperty
-    def _valid_explicit_order(self):
-        """Sequence of int element idx or None, reflecting explicit-order transform.
-
-        This value is None if no explicit-order transform is specified. Otherwise, it is
-        an exhaustive collection of element offsets, in the order specified (and in some
-        cases implied) by the order transform.
-        """
-        order_dict = self._dimension_transforms_dict.get("order", {})
-        order_type = order_dict.get("type")
-        if order_type != "explicit":
-            return None
-        ordered_element_ids = order_dict.get("element_ids")
-        if not isinstance(ordered_element_ids, list):
-            return None
-
-        # ---list like [0, 1, 2, -1], perhaps ["0001", "0002", etc.]---
-        cube_result_order = list(
-            element.element_id for element in self if not element.missing
-        )
-        remaining_element_ids = list(
-            element.element_id for element in self if not element.missing
-        )
-
-        # print("default_order == %s" % default_order)
-
-        ordered_idxs = []
-        for element_id in ordered_element_ids:
-            if element_id not in remaining_element_ids:
-                continue
-            ordered_idxs.append(cube_result_order.index(element_id))
-            remaining_element_ids.remove(element_id)
-
-        for element_id in remaining_element_ids:
-            ordered_idxs.append(cube_result_order.index(element_id))
-
-        return tuple(ordered_idxs)
-
 
 class _ValidElements(_BaseElements):
     """Sequence of non-missing element objects for a dimension.
@@ -639,13 +546,71 @@ class _ValidElements(_BaseElements):
     directly.
     """
 
-    def __init__(self, all_elements):
-        self.all_elements = all_elements
+    def __init__(self, all_elements, dimension_transforms_dict):
+        self._all_elements = all_elements
+        self._dimension_transforms_dict = dimension_transforms_dict
+
+    @lazyproperty
+    def display_order(self):
+        """Sequence of int element-idx reflecting order in which to display elements.
+
+        This order reflects the application of any explicit element-order transforms,
+        including resolution of any cascade. It does *not* reflect the results of
+        a *sort* transform, which can only be resolved at a higher level, where vector
+        values are known.
+        """
+        return (
+            self._explicit_order
+            if self._explicit_order
+            else tuple(range(len(self._elements)))
+        )
 
     @lazyproperty
     def _elements(self):
         """tuple containing actual sequence of element objects."""
-        return tuple(element for element in self.all_elements if not element.missing)
+        return tuple(element for element in self._all_elements if not element.missing)
+
+    @lazyproperty
+    def _explicit_order(self):
+        """Sequence of int element-idx or None, reflecting explicit-order transform.
+
+        This value is None if no explicit-order transform is specified. Otherwise, it is
+        an exhaustive collection of (valid) element offsets, in the order specified (and
+        in some cases implied) by the order transform.
+        """
+        # ---get order transform if any, aborting if no explicit order transform---
+        order_dict = self._dimension_transforms_dict.get("order", {})
+        order_type = order_dict.get("type")
+        ordered_element_ids = order_dict.get("element_ids")
+        if order_type != "explicit" or not isinstance(ordered_element_ids, list):
+            return None
+
+        # ---list like [0, 1, 2, -1], perhaps ["0001", "0002", etc.], reflecting element
+        # ---ids in the order they appear in the cube result. We'll use this to map
+        # ---element-id to its index in the valid-elements sequence.
+        cube_result_order = tuple(element.element_id for element in self)
+        # ---this is a copy of the same, but we're going to mutate this one. This is
+        # ---required to implement the "no-duplicates" behavior.
+        remaining_element_ids = list(cube_result_order)
+
+        # ---we'll collect the results in this---
+        ordered_idxs = []
+        # ---append idx of each element mentioned by id in transform, in order. Remove
+        # ---each element-id from remaining as we go to keep track of dups and leftovers
+        for element_id in ordered_element_ids:
+            # ---An element-id appearing in transform but not in dimension is ignored.
+            # ---Also, a duplicated element-id is only used on first encounter.
+            if element_id not in remaining_element_ids:
+                continue
+            ordered_idxs.append(cube_result_order.index(element_id))
+            remaining_element_ids.remove(element_id)
+
+        # ---any remaining elements are tacked onto the end of the list in the order
+        # ---they originally appeared in the cube-result.
+        for element_id in remaining_element_ids:
+            ordered_idxs.append(cube_result_order.index(element_id))
+
+        return tuple(ordered_idxs)
 
 
 class _Element(object):

@@ -14,6 +14,7 @@ from cr.cube.dimension import (
     Dimension,
     _Element,
     _Subtotal,
+    _ValidElements,
 )
 from cr.cube.enum import DIMENSION_TYPE as DT
 
@@ -93,7 +94,7 @@ class DescribeIntegratedDimension(object):
 
         display_order = dimension.display_order
 
-        assert display_order == (2, 4, 5, 1, 0, 3, 6, 7)
+        assert display_order == (2, 4, 1, 0, 3)
 
     def it_knows_its_transformed_name(self, dimension_dict):
         dimension_transforms = {"name": "barfoo"}
@@ -145,25 +146,6 @@ class DescribeIntegratedDimension(object):
 class DescribeIntegrated_AllElements(object):
     """Integration-test suite for `cr.cube.dimension._AllElements` object."""
 
-    def it_knows_the_transformed_element_display_order(self, type_dict):
-        dimension_transforms = {
-            "order": {"type": "explicit", "element_ids": [2, 1, 666, 4, 3, 4, 8]}
-        }
-        all_elements = _AllElements(type_dict, dimension_transforms)
-
-        display_order = all_elements.display_order
-
-        assert display_order == (1, 0, 3, 2, 5, 4, 6, 7)
-        assert len(display_order) == len(all_elements)
-
-    def but_it_returns_the_default_display_order_when_not_transformed(self, type_dict):
-        dimension_transforms = {}
-        all_elements = _AllElements(type_dict, dimension_transforms)
-
-        order = all_elements.display_order
-
-        assert order == (0, 1, 2, 3, 4, 5, 6, 7)
-
     def it_constructs_its_element_objects_to_help(self, type_dict):
         dimension_transforms = {}
         all_elements = _AllElements(type_dict, dimension_transforms)
@@ -177,6 +159,37 @@ class DescribeIntegrated_AllElements(object):
     @pytest.fixture
     def type_dict(self):
         return CrunchCube(CR.ECON_BLAME_WITH_HS).dimensions[0]._dimension_dict["type"]
+
+
+class DescribeIntegrated_ValidElements(object):
+    """Integration-test suite for `cr.cube.dimension._ValidElements` object."""
+
+    def it_knows_the_transformed_element_display_order(self, all_elements):
+        dimension_transforms = {
+            "order": {"type": "explicit", "element_ids": [2, 1, 666, 4, 3, 4, 8]}
+        }
+        valid_elements = _ValidElements(all_elements, dimension_transforms)
+
+        display_order = valid_elements.display_order
+
+        assert display_order == (1, 0, 3, 2, 4)
+        assert len(display_order) == len(valid_elements)
+
+    def but_it_returns_the_cube_result_order_when_not_transformed(self, all_elements):
+        dimension_transforms = {}
+        valid_elements = _ValidElements(all_elements, dimension_transforms)
+
+        order = valid_elements.display_order
+
+        assert order == (0, 1, 2, 3, 4)
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def all_elements(self):
+        return _AllElements(
+            CR.ECON_BLAME_WITH_HS["value"]["result"]["dimensions"][0]["type"], {}
+        )._elements
 
 
 class DescribeIntegrated_Element(object):

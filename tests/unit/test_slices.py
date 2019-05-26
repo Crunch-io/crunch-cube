@@ -437,9 +437,9 @@ class Describe_OrderTransform(object):
     def it_knows_the_column_order(
         self, column_order_fixture, _columns_dimension_prop_, dimension_
     ):
-        valid_display_order, expected_value = column_order_fixture
+        display_order, expected_value = column_order_fixture
         _columns_dimension_prop_.return_value = dimension_
-        dimension_.valid_display_order = valid_display_order
+        dimension_.display_order = display_order
         order_transform = _OrderTransform((None, dimension_))
 
         column_order = order_transform.column_order
@@ -457,9 +457,9 @@ class Describe_OrderTransform(object):
     def it_knows_the_row_order(
         self, row_order_fixture, _rows_dimension_prop_, dimension_
     ):
-        valid_display_order, expected_value = row_order_fixture
+        display_order, expected_value = row_order_fixture
         _rows_dimension_prop_.return_value = dimension_
-        dimension_.valid_display_order = valid_display_order
+        dimension_.display_order = display_order
         order_transform = _OrderTransform((dimension_,))
 
         row_order = order_transform.row_order
@@ -471,15 +471,15 @@ class Describe_OrderTransform(object):
 
     @pytest.fixture(params=[((2, 1, 3), [2, 1, 3]), ((), [])])
     def column_order_fixture(self, request):
-        valid_display_order, idxs = request.param
+        display_order, idxs = request.param
         expected_value = np.array(idxs, dtype=int)
-        return valid_display_order, expected_value
+        return display_order, expected_value
 
     @pytest.fixture(params=[((3, 1, 2), [3, 1, 2]), ((), [])])
     def row_order_fixture(self, request):
-        valid_display_order, idxs = request.param
+        display_order, idxs = request.param
         expected_value = np.array(idxs, dtype=int)
-        return valid_display_order, expected_value
+        return display_order, expected_value
 
     # fixture components ---------------------------------------------
 

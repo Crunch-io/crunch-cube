@@ -582,11 +582,11 @@ class _OrderTransform(object):
 
         # ---Specifying int type prevents failure when there are zero columns. The
         # ---default type for ndarray is float, which is not valid for indexing.
-        return np.array(self._columns_dimension.valid_display_order, dtype=int)
+        return np.array(self._columns_dimension.display_order, dtype=int)
 
     @lazyproperty
     def row_order(self):
-        return np.array(self._rows_dimension.valid_display_order, dtype=int)
+        return np.array(self._rows_dimension.display_order, dtype=int)
 
     @lazyproperty
     def _columns_dimension(self):

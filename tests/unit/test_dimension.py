@@ -471,9 +471,9 @@ class DescribeDimension(object):
         assert dimension_type == DT.CAT
 
     def it_knows_the_numeric_values_of_its_elements(
-        self, request, _valid_elements_prop_
+        self, request, valid_elements_prop_
     ):
-        _valid_elements_prop_.return_value = tuple(
+        valid_elements_prop_.return_value = tuple(
             instance_mock(request, _Element, numeric_value=numeric_value)
             for numeric_value in (1, 2.2, np.nan)
         )
@@ -483,17 +483,16 @@ class DescribeDimension(object):
 
         assert numeric_values == (1, 2.2, np.nan)
 
-    @pytest.mark.xfail(reason="update for new implementation", strict=True)
     def it_provides_access_to_its_subtotals_to_help(
         self,
         subtotals_fixture,
         _Subtotals_,
         subtotals_,
-        _valid_elements_prop_,
+        valid_elements_prop_,
         valid_elements_,
     ):
         dimension_dict, insertion_dicts = subtotals_fixture
-        _valid_elements_prop_.return_value = valid_elements_
+        valid_elements_prop_.return_value = valid_elements_
         _Subtotals_.return_value = subtotals_
         dimension = Dimension(dimension_dict, None)
 
@@ -501,7 +500,19 @@ class DescribeDimension(object):
 
         _Subtotals_.assert_called_once_with(insertion_dicts, valid_elements_)
         assert subtotals is subtotals_
-        assert False
+
+    def but_it_overrides_with_subtotal_transforms_when_present(
+        self, valid_elements_prop_, valid_elements_, _Subtotals_, subtotals_
+    ):
+        dimension_transforms = {"insertions": ["subtotal", "dicts"]}
+        valid_elements_prop_.return_value = valid_elements_
+        _Subtotals_.return_value = subtotals_
+        dimension = Dimension(None, None, dimension_transforms)
+
+        subtotals = dimension.subtotals
+
+        _Subtotals_.assert_called_once_with(["subtotal", "dicts"], valid_elements_)
+        assert subtotals is subtotals_
 
     # fixtures -------------------------------------------------------
 
@@ -561,7 +572,7 @@ class DescribeDimension(object):
         return instance_mock(request, _ValidElements)
 
     @pytest.fixture
-    def _valid_elements_prop_(self, request):
+    def valid_elements_prop_(self, request):
         return property_mock(request, Dimension, "valid_elements")
 
 
@@ -570,7 +581,7 @@ class Describe_BaseElements(object):
 
     def it_has_sequence_behaviors(self, request, _elements_prop_):
         _elements_prop_.return_value = (1, 2, 3)
-        elements = _BaseElements(None, None)
+        elements = _BaseElements()
 
         assert elements[1] == 2
         assert elements[1:3] == (2, 3)
@@ -581,7 +592,7 @@ class Describe_BaseElements(object):
         _elements_prop_.return_value = tuple(
             instance_mock(request, _Element, element_id=n) for n in (1, 2, 5)
         )
-        elements = _BaseElements(None, None)
+        elements = _BaseElements()
 
         element_ids = elements.element_ids
 
@@ -591,7 +602,7 @@ class Describe_BaseElements(object):
         _elements_prop_.return_value = tuple(
             instance_mock(request, _Element, index=index) for index in (1, 3, 4)
         )
-        elements = _BaseElements(None, None)
+        elements = _BaseElements()
 
         element_idxs = elements.element_idxs
 
@@ -605,22 +616,11 @@ class Describe_BaseElements(object):
         _elements_by_id_prop_.return_value = {
             element_.element_id: element_ for element_ in elements_
         }
-        elements = _BaseElements(None, None)
+        elements = _BaseElements()
 
         element = elements.get_by_id(7)
 
         assert element is elements_[1]
-
-    @pytest.mark.xfail(reason="rework", strict=True)
-    def it_provides_element_factory_inputs_to_help(self, makings_fixture):
-        type_dict, expected_element_class = makings_fixture[:2]
-        expected_element_dicts = makings_fixture[2]
-        elements = _BaseElements(type_dict, None)
-
-        ElementCls, element_dicts = elements._element_makings
-
-        assert ElementCls == expected_element_class
-        assert element_dicts == expected_element_dicts
 
     def it_maintains_a_dict_of_elements_by_id_to_help(self, request, _elements_prop_):
         elements_ = tuple(
@@ -628,37 +628,17 @@ class Describe_BaseElements(object):
             for element_id in (4, 6, 7)
         )
         _elements_prop_.return_value = elements_
-        elements = _BaseElements(None, None)
+        elements = _BaseElements()
 
         elements_by_id = elements._elements_by_id
 
         assert elements_by_id == {4: elements_[0], 6: elements_[1], 7: elements_[2]}
 
     def it_stores_its_elements_in_a_tuple_to_help(self):
-        base_elements = _BaseElements(None, None)
+        base_elements = _BaseElements()
         # ---must be implemented by each subclass---
         with pytest.raises(NotImplementedError):
             base_elements._elements
-
-    # fixtures -------------------------------------------------------
-
-    @pytest.fixture(
-        params=[
-            (
-                {"class": "categorical", "categories": ["cat", "dicts"]},
-                _Element,
-                ["cat", "dicts"],
-            ),
-            (
-                {"class": "enum", "elements": ["element", "dicts"]},
-                _Element,
-                ["element", "dicts"],
-            ),
-        ]
-    )
-    def makings_fixture(self, request):
-        type_dict, expected_element_cls, expected_element_dicts = request.param
-        return type_dict, expected_element_cls, expected_element_dicts
 
     # fixture components ---------------------------------------------
 
@@ -680,16 +660,17 @@ class Describe_AllElements(object):
         elements_ = tuple(
             instance_mock(request, _Element, name="el%s" % idx) for idx in range(3)
         )
+        dimension_transforms_dict = {"dimension": "transforms"}
         _elements_prop_.return_value = elements_
         _ValidElements_.return_value = valid_elements_
-        all_elements = _AllElements(None, None)
+        all_elements = _AllElements(None, dimension_transforms_dict)
 
         valid_elements = all_elements.valid_elements
 
-        _ValidElements_.assert_called_once_with(elements_)
+        _ValidElements_.assert_called_once_with(elements_, dimension_transforms_dict)
         assert valid_elements is valid_elements_
 
-    def it_creates_its_Element_objects_in_its_local_factory(
+    def it_creates_its_Element_objects_in_a_local_factory_to_help(
         self, request, _element_dicts_prop_, _Element_, _iter_element_makings_
     ):
         element_dicts_ = "element-dicts-that-shouldn't-be-needed"
@@ -716,6 +697,25 @@ class Describe_AllElements(object):
             call({"element": "dict-C"}, 2, element_dicts_, {"xfrms": 2}),
         ]
         assert elements == (elements_[0], elements_[1], elements_[2])
+
+    def it_generates_element_factory_inputs_to_help(self, _element_dicts_prop_):
+        dimension_transforms_dict = {
+            "elements": {"6": {"element": "xfrms_6"}, "4": {"element": "xfrms_4"}}
+        }
+        _element_dicts_prop_.return_value = (
+            {"id": 4, "element": "dict_4"},
+            {"id": 2, "element": "dict_2"},
+            {"id": 6, "element": "dict_6"},
+        )
+        all_elements = _AllElements(None, dimension_transforms_dict)
+
+        element_makings = tuple(all_elements._iter_element_makings())
+
+        assert element_makings == (
+            (0, {"id": 4, "element": "dict_4"}, {"element": "xfrms_4"}),
+            (1, {"id": 2, "element": "dict_2"}, {}),
+            (2, {"id": 6, "element": "dict_6"}, {"element": "xfrms_6"}),
+        )
 
     # fixture components ---------------------------------------------
 
@@ -745,6 +745,8 @@ class Describe_AllElements(object):
 
 
 class Describe_ValidElements(object):
+    """Unit-test suite for `cr.cube.dimension._ValidElements` object."""
+
     def it_gets_its_Element_objects_from_an_AllElements_object(
         self, request, all_elements_
     ):
@@ -753,7 +755,7 @@ class Describe_ValidElements(object):
             for idx, missing in enumerate([False, True, False])
         )
         all_elements_.__iter__.return_value = iter(elements_)
-        valid_elements = _ValidElements(all_elements_)
+        valid_elements = _ValidElements(all_elements_, None)
 
         elements = valid_elements._elements
 
