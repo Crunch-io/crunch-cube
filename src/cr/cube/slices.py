@@ -8,15 +8,15 @@ from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.frozen_min_base_size_mask import MinBaseSizeMask
 from cr.cube.measures.new_pairwise_significance import NewPairwiseSignificance
 from cr.cube.matrix import (
-    _CatMatrix1D,
+    _CatStripe,
     _CatXCatMeansMatrix,
     MatrixFactory,
     MatrixWithHidden,
     MatrixWithInsertions,
-    _MeansMatrix0D,
-    _MeansMatrix1D,
-    _MrMatrix1D,
-    _MrWithMeansMatrix1D,
+    _MeansScalar,
+    _MeansStripe,
+    _MrStripe,
+    _MrWithMeansStripe,
     OrderedMatrix,
     PrunedMatrix,
 )
@@ -44,10 +44,6 @@ class FrozenSlice(object):
         self._mask_size = mask_size
 
     # ---interface ---------------------------------------------------
-
-    @lazyproperty
-    def _weighted(self):
-        return self._cube.is_weighted
 
     @lazyproperty
     def base_counts(self):
@@ -132,7 +128,7 @@ class FrozenSlice(object):
 
     @lazyproperty
     def means(self):
-        if type(self._assembler._matrix) is _MeansMatrix0D:
+        if type(self._assembler._matrix) is _MeansScalar:
             return self._assembler._matrix.means
         return np.array([row.means for row in self._assembler.rows])
 
@@ -150,17 +146,12 @@ class FrozenSlice(object):
 
     @lazyproperty
     def ndim(self):
-        _1D_matrix_types = (
-            _MrWithMeansMatrix1D,
-            _MeansMatrix1D,
-            _CatMatrix1D,
-            _MrMatrix1D,
-        )
+        _1D_matrix_types = (_MrWithMeansStripe, _MeansStripe, _CatStripe, _MrStripe)
         if isinstance(self._matrix, _CatXCatMeansMatrix):
             return 2
         if isinstance(self._matrix, _1D_matrix_types):
             return 1
-        elif isinstance(self._matrix, _MeansMatrix0D):
+        elif isinstance(self._matrix, _MeansScalar):
             return 0
         return 2
 
@@ -442,6 +433,10 @@ class FrozenSlice(object):
         construction.
         """
         return self._transforms_arg if self._transforms_arg is not None else {}
+
+    @lazyproperty
+    def _weighted(self):
+        return self._cube.is_weighted
 
 
 class _Assembler(object):
