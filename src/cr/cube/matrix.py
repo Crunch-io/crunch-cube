@@ -290,7 +290,7 @@ class MatrixFactory(object):
             )
 
         dimension_types = cube.dimension_types[-2:]
-        if cube.ndim > 2 or ca_as_0th:
+        if cube.ndim > 2:
             base_counts = base_counts[slice_idx]
             counts = counts[slice_idx]
             counts_with_missings = counts_with_missings[slice_idx]
@@ -298,12 +298,6 @@ class MatrixFactory(object):
                 base_counts = base_counts[0]
                 counts = counts[0]
                 counts_with_missings = counts_with_missings[0]
-            elif ca_as_0th:
-                return _CatStripe(dimensions[0], counts, base_counts)
-        elif cube.ndim < 2:
-            if dimension_types[0] == DT.MR:
-                return _MrStripe(dimensions[0], counts, base_counts)
-            return _CatStripe(dimensions[0], counts, base_counts)
         if dimension_types == (DT.MR, DT.MR):
             return _MrXMrMatrix(dimensions, counts, base_counts, counts_with_missings)
         elif dimension_types[0] == DT.MR:
@@ -316,17 +310,12 @@ class MatrixFactory(object):
     def _create_means_matrix(cls, counts, base_counts, cube, dimensions, slice_idx):
         if cube.ndim == 0:
             return _MeansScalar(counts, base_counts)
-        elif cube.ndim == 1:
-            if dimensions[0].dimension_type == DT.MR:
-                return _MeansWithMrStripe(dimensions[0], counts, base_counts)
-            return _MeansStripe(dimensions[0], counts, base_counts)
-        elif cube.ndim >= 2:
-            if cube.ndim == 3:
-                base_counts = base_counts[slice_idx]
-                counts = counts[slice_idx]
-            if dimensions[0].dimension_type == DT.MR:
-                return _MrXCatMeansMatrix(dimensions, counts, base_counts)
-            return _CatXCatMeansMatrix(dimensions, counts, base_counts)
+        if cube.ndim == 3:
+            base_counts = base_counts[slice_idx]
+            counts = counts[slice_idx]
+        if dimensions[0].dimension_type == DT.MR:
+            return _MrXCatMeansMatrix(dimensions, counts, base_counts)
+        return _CatXCatMeansMatrix(dimensions, counts, base_counts)
 
 
 class _BaseMatrix(object):
@@ -831,6 +820,27 @@ class _MeansScalar(object):
 
 
 # ===STRIPE (1D) OBJECTS====
+
+
+class StripeFactory(object):
+    """Encapsulates creation of the right raw (pre-transforms) stripe object."""
+
+    @classmethod
+    def stripe(cls, cube, rows_dimension, counts, base_counts, ca_as_0th, slice_idx):
+        """Return a matrix object of appropriate type based on parameters."""
+        # ---for cubes with means, create one of the means-stripe types---
+        if cube.has_means:
+            if rows_dimension.dimension_type == DT.MR:
+                return _MeansWithMrStripe(rows_dimension, counts, base_counts)
+            return _MeansStripe(rows_dimension, counts, base_counts)
+
+        if ca_as_0th:
+            return _CatStripe(rows_dimension, counts[slice_idx], base_counts[slice_idx])
+
+        if rows_dimension.dimension_type == DT.MR:
+            return _MrStripe(rows_dimension, counts, base_counts)
+
+        return _CatStripe(rows_dimension, counts, base_counts)
 
 
 class _BaseStripe(object):

@@ -14,16 +14,21 @@ from cr.cube.matrix import (
     _MeansScalar,
     OrderedMatrix,
     PrunedMatrix,
+    StripeFactory,
 )
 from cr.cube.util import lazyproperty
 from cr.cube.vector import _InsertionColumn, _InsertionRow
 
 
-class FrozenSlice(object):
-    """Main point of interaction with the outer world."""
+class CubeSection(object):
+    """A slice, a strand, or a nub drawn from a cube-response.
 
-    def __init__(
-        self,
+    These are 2, 1, or 0 dimensions of a cube, respectively.
+    """
+
+    @classmethod
+    def factory(
+        cls,
         cube,
         slice_idx=0,
         transforms=None,
@@ -31,6 +36,20 @@ class FrozenSlice(object):
         ca_as_0th=None,
         mask_size=0,
     ):
+        """Return slice, strand, or nub object appropriate to passed parameters."""
+        if cube.ndim == 1 or ca_as_0th:
+            return _Strand(
+                cube, transforms, population, ca_as_0th, slice_idx, mask_size
+            )
+        return FrozenSlice(
+            cube, slice_idx, transforms, population, ca_as_0th, mask_size
+        )
+
+
+class FrozenSlice(object):
+    """Main point of interaction with the outer world."""
+
+    def __init__(self, cube, slice_idx, transforms, population, ca_as_0th, mask_size):
         self._cube = cube
         self._slice_idx = slice_idx
         self._transforms_arg = transforms
@@ -82,9 +101,8 @@ class FrozenSlice(object):
         The empty string ("") for a 0D or 1D slice (until we get to all slices being
         2D). Reflects the resolved dimension-name transform cascade.
         """
-        if len(self.dimensions) < 2:
-            return ""
-        return self.dimensions[1].name
+        # TODO: conditional goes away when Nub (0D slice) is extracted.
+        return self._dimensions[1].name if self._dimensions else ""
 
     @lazyproperty
     def columns_dimension_type(self):
@@ -92,9 +110,8 @@ class FrozenSlice(object):
 
         This value is None for a slice with fewer than two dimensions.
         """
-        if len(self.dimensions) < 2:
-            return None
-        return self.dimensions[1].dimension_type
+        # TODO: conditional goes away when Nub (0D slice) is extracted.
+        return self._dimensions[1].dimension_type if self._dimensions else None
 
     @lazyproperty
     def counts(self):
@@ -108,6 +125,16 @@ class FrozenSlice(object):
         fewer than two for a slice with less than two dimensions.
         """
         return tuple(dimension.dimension_type for dimension in self.dimensions)
+
+    @lazyproperty
+    def dimensions(self):
+        """tuple of (row,) or (row, col) Dimension objects, depending on 1D or 2D."""
+        # TODO: I question whether the dimensions should be published. Whatever folks
+        # might need to know, like types or whatever, should be available as individual
+        # properties. The dimensions are kind of an internal, especially since they
+        # won't necessarily match the returned data-matrix in terms of element-order and
+        # presence.
+        return self._dimensions
 
     @lazyproperty
     def insertion_columns_idxs(self):
@@ -133,15 +160,16 @@ class FrozenSlice(object):
 
     @lazyproperty
     def name(self):
+        """str name assigned to this slice.
+
+        A slice takes the name of its rows-dimension.
+        """
         return self.rows_dimension_name
 
     @lazyproperty
-    def names(self):
-        return self._matrix.names
-
-    @lazyproperty
     def ndim(self):
-        """int count of dimensions for this slice, one of (0, 1, 2)."""
+        """int count of dimensions for this slice, one of 0 or 2."""
+        # TODO: make unconditionally 2 when Nub is extracted.
         return self._matrix.ndim
 
     @lazyproperty
@@ -204,9 +232,8 @@ class FrozenSlice(object):
         The empty string ("") for a 0D slice (until we get to all slices being 2D).
         Reflects the resolved dimension-description transform cascade.
         """
-        if len(self.dimensions) == 0:
-            return ""
-        return self.dimensions[0].description
+        # TODO: conditional goes away when Nub (0D slice) is extracted.
+        return self._dimensions[0].description if self._dimensions else ""
 
     @lazyproperty
     def rows_dimension_fills(self):
@@ -225,9 +252,8 @@ class FrozenSlice(object):
         The empty string ("") for a 0D slice (until we get to all slices being 2D).
         Reflects the resolved dimension-name transform cascade.
         """
-        if len(self.dimensions) == 0:
-            return ""
-        return self.dimensions[0].name
+        # TODO: conditional goes away when Nub (0D slice) is extracted.
+        return self._dimensions[0].name if self.dimensions else ""
 
     @lazyproperty
     def rows_dimension_type(self):
@@ -235,9 +261,8 @@ class FrozenSlice(object):
 
         This value is None for a 0D slice (until we get to all slices being 2D).
         """
-        if len(self.dimensions) == 0:
-            return None
-        return self.dimensions[0].dimension_type
+        # TODO: conditional goes away when Nub (0D slice) is extracted.
+        return self._dimensions[0].dimension_type if self.dimensions else None
 
     @lazyproperty
     def scale_means_column(self):
@@ -322,7 +347,8 @@ class FrozenSlice(object):
 
     @lazyproperty
     def table_name(self):
-        if self._cube.ndim < 3 and not self._ca_as_0th:
+        """Provides differentiated name for each stacked table of a 3D cube."""
+        if self._cube.ndim < 3:
             return None
 
         title = self._cube.name
@@ -352,21 +378,31 @@ class FrozenSlice(object):
         return np.array([column.numeric for column in self._assembler.columns])
 
     @lazyproperty
-    def dimensions(self):
+    def _dimensions(self):
         """tuple of (row,) or (row, col) Dimension objects, depending on 1D or 2D."""
+        # TODO: 0D case goes away when Nub is extracted
         dimensions = self._cube.dimensions[-2:]
 
         # ---special-case for 0D mean cube---
         if not dimensions:
             return dimensions
 
-        if self._ca_as_0th:
-            # Represent CA slice as 1-D rather than 2-D
-            dimensions = (dimensions[-1],)
-
         return tuple(
             dimension.apply_transforms(transforms)
             for dimension, transforms in zip(dimensions, self._transform_dicts)
+        )
+
+    @lazyproperty
+    def _matrix(self):
+        """The pre-transforms matrix for this slice."""
+        return MatrixFactory.matrix(
+            self.dimensions,
+            self._cube.counts,
+            self._cube.base_counts,
+            self._cube.counts_with_missings,
+            self._cube,
+            self._slice_idx,
+            self._ca_as_0th,
         )
 
     @lazyproperty
@@ -378,23 +414,6 @@ class FrozenSlice(object):
     @lazyproperty
     def _rows_dimension_numeric(self):
         return np.array([row.numeric for row in self._assembler.rows])
-
-    @lazyproperty
-    def _matrix(self):
-        """The pre-transforms matrix for this slice."""
-        cube = self._cube
-        base_counts = self._cube.base_counts
-        counts_with_missings = self._cube.counts_with_missings
-        counts = self._cube.counts
-        return MatrixFactory.matrix(
-            self.dimensions,
-            counts,
-            base_counts,
-            counts_with_missings,
-            cube,
-            self._slice_idx,
-            self._ca_as_0th,
-        )
 
     @lazyproperty
     def _transform_dicts(self):
@@ -426,6 +445,226 @@ class FrozenSlice(object):
     @lazyproperty
     def _weighted(self):
         return self._cube.is_weighted
+
+
+class _Strand(object):
+    """1D slice."""
+
+    def __init__(self, cube, transforms, population, ca_as_0th, slice_idx, mask_size):
+        self._cube = cube
+        self._transforms_arg = transforms
+        self._population = population
+        self._ca_as_0th = ca_as_0th
+        # TODO: see if we really need this.
+        self._slice_idx = slice_idx
+        self._mask_size = mask_size
+
+    @lazyproperty
+    def base_counts(self):
+        return np.array([row.base_values for row in self._assembler.rows])
+
+    @lazyproperty
+    def column_base(self):
+        # TODO: I think remove need for this in exporter. What is the meaning of
+        # a column base in a thing that has no columns?
+        return np.array([column.base for column in self._assembler.columns]).T
+
+    @lazyproperty
+    def column_margin(self):
+        # TODO: Does a strand really have a columns margin? Isn't that really
+        # table-total or something like that in strand case?
+        return np.array([column.margin for column in self._assembler.columns]).T
+
+    @lazyproperty
+    def column_proportions(self):
+        # TODO: remove need for this in exporter.
+        return np.array([col.proportions for col in self._assembler.columns]).T
+
+    @lazyproperty
+    def columns_dimension_name(self):
+        # TODO: remove this from the interface. A strand object has no columns
+        # dimension.
+        return ""
+
+    @lazyproperty
+    def counts(self):
+        return np.array([row.values for row in self._assembler.rows])
+
+    @lazyproperty
+    def dimension_types(self):
+        """Sequence of `cr.cube.enum.DIMENSION_TYPE` member for each dimension.
+
+        Length one in this case, containing only rows-dimension type.
+        """
+        # TODO: remove need for this in exporter, at least for 1D case.
+        return (self._rows_dimension.dimension_type,)
+
+    @lazyproperty
+    def dimensions(self):
+        """tuple of (row,) Dimension object."""
+        # TODO: I question whether the dimensions should be published. Whatever folks
+        # might need to know, like types or whatever, should be available as individual
+        # properties. The dimensions are kind of an internal, especially since they
+        # won't necessarily match the returned data-matrix in terms of element-order and
+        # presence.
+        return (self._rows_dimension,)
+
+    @lazyproperty
+    def insertion_columns_idxs(self):
+        # TODO: pretty sure the need for this should come out of exporter.
+        return ()
+
+    @lazyproperty
+    def insertion_rows_idxs(self):
+        # TODO: add integration-test coverage for this.
+        return tuple(
+            i for i, row in enumerate(self._assembler.rows) if row.is_insertion
+        )
+
+    @lazyproperty
+    def means(self):
+        return np.array([row.means for row in self._assembler.rows])
+
+    @lazyproperty
+    def min_base_size_mask(self):
+        # TODO: add integration test that exercises this.
+        return MinBaseSizeMask(self, self._mask_size)
+
+    @lazyproperty
+    def name(self):
+        return self.rows_dimension_name
+
+    @lazyproperty
+    def ndim(self):
+        """int count of dimensions for this strand, unconditionally 1."""
+        return 1
+
+    @lazyproperty
+    def population_counts(self):
+        return (
+            self.table_proportions * self._population * self._cube.population_fraction
+        )
+
+    @lazyproperty
+    def row_base(self):
+        return np.array([row.base for row in self._assembler.rows])
+
+    @lazyproperty
+    def row_labels(self):
+        return tuple(row.label for row in self._assembler.rows)
+
+    @lazyproperty
+    def row_margin(self):
+        return np.array([row.margin for row in self._assembler.rows])
+
+    @lazyproperty
+    def rows_dimension_fills(self):
+        """sequence of RGB str like "#def032" fill colors for row elements.
+
+        The values reflect the resolved element-fill transform cascade. The length and
+        ordering of the sequence correspond to the rows in the slice, including
+        accounting for insertions and hidden rows.
+        """
+        return tuple(row.fill for row in self._assembler.rows)
+
+    @lazyproperty
+    def rows_dimension_name(self):
+        """str name assigned to rows-dimension.
+
+        Reflects the resolved dimension-name transform cascade.
+        """
+        return self._rows_dimension.name
+
+    @lazyproperty
+    def rows_dimension_type(self):
+        """Member of DIMENSION_TYPE enum describing type of rows dimension."""
+        return self._rows_dimension.dimension_type
+
+    @lazyproperty
+    def scale_means_row(self):
+        if np.all(np.isnan(self._rows_dimension_numeric)):
+            return None
+        inner = np.nansum(self._rows_dimension_numeric[:, None] * self.counts, axis=0)
+        not_a_nan_index = ~np.isnan(self._rows_dimension_numeric)
+        denominator = np.sum(self.counts[not_a_nan_index, :], axis=0)
+        return inner / denominator
+
+    @lazyproperty
+    def shape(self):
+        return self.counts.shape
+
+    @lazyproperty
+    def table_base(self):
+        return self._assembler.table_base
+
+    @lazyproperty
+    def table_base_unpruned(self):
+        return self._assembler.table_base_unpruned
+
+    @lazyproperty
+    def table_margin(self):
+        return self._assembler.table_margin
+
+    @lazyproperty
+    def table_margin_unpruned(self):
+        return self._assembler.table_margin_unpruned
+
+    @lazyproperty
+    def table_name(self):
+        """Only for CA-as-0th case, provides differentiated names for stacked tables."""
+        if not self._ca_as_0th:
+            return None
+
+        title = self._cube.name
+        table_name = self._cube.dimensions[0].valid_elements[self._slice_idx].label
+        return "%s: %s" % (title, table_name)
+
+    @lazyproperty
+    def table_percentages(self):
+        return self.table_proportions * 100
+
+    @lazyproperty
+    def table_proportions(self):
+        return np.array([row.table_proportions for row in self._assembler.rows])
+
+    # ---implementation (helpers)-------------------------------------
+
+    @lazyproperty
+    def _assembler(self):
+        return _Assembler(self._stripe, self._transforms)
+
+    @lazyproperty
+    def _rows_dimension(self):
+        """Dimension object for the single dimension of this strand."""
+        return self._cube.dimensions[-1].apply_transforms(self._row_transforms_dict)
+
+    @lazyproperty
+    def _rows_dimension_numeric(self):
+        return np.array([row.numeric for row in self._assembler.rows])
+
+    @lazyproperty
+    def _row_transforms_dict(self):
+        """Transforms dict for the single (rows) dimension of this strand."""
+        transforms_dict = {} if self._transforms_arg is None else self._transforms_arg
+        return transforms_dict.get("rows_dimension", {})
+
+    @lazyproperty
+    def _stripe(self):
+        """The pre-transforms 1D matrix for this strand."""
+        return StripeFactory.stripe(
+            self._cube,
+            self._rows_dimension,
+            self._cube.counts,
+            self._cube.base_counts,
+            self._ca_as_0th,
+            self._slice_idx,
+        )
+
+    @lazyproperty
+    def _transforms(self):
+        return _Transforms(
+            self._stripe, (self._rows_dimension,), self._rows_dimension.prune
+        )
 
 
 class _Assembler(object):

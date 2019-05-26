@@ -12,7 +12,7 @@ import json
 import numpy as np
 
 from cr.cube.dimension import AllDimensions
-from cr.cube.slices import FrozenSlice
+from cr.cube.slices import CubeSection
 from cr.cube.util import lazyproperty
 from cr.cube.enum import DIMENSION_TYPE as DT
 
@@ -58,9 +58,9 @@ class FrozenCube(object):
 
     @lazyproperty
     def slices(self):
-        """Sequence of FrozenSlice objects drawn from this cube-result."""
+        """Sequence of FrozenSlice, Strand, or Nub objects from this cube-result."""
         return tuple(
-            FrozenSlice(
+            CubeSection.factory(
                 self,
                 slice_idx=slice_idx,
                 transforms=self._transforms_dict,
@@ -224,8 +224,8 @@ class FrozenCube(object):
     def _slice_idxs(self):
         """Iterable of contiguous int indicies for slices to be produced.
 
-        This value is to help FrozenSlice construction which does not by itself know how
-        many slices are in a cube-result.
+        This value is to help cube-section construction which does not by itself know
+        how many slices are in a cube-result.
         """
         if self.ndim < 3 and not self._ca_as_0th:
             return (0,)

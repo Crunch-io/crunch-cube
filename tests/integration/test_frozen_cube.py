@@ -2,6 +2,8 @@
 
 """Unit test suite for `cr.cube.frozen_cube` module."""
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from unittest import TestCase
 import numpy as np
 import pytest
@@ -850,11 +852,6 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
             ]
         )
         np.testing.assert_almost_equal(slice_.zscore, expected)
-
-    def test_selected_crosstab_dim_names(self):
-        slice_ = FrozenCube(CR.SELECTED_CROSSTAB_4).slices[0]
-        expected = tuple(["Statements agreed with about Climate", "Gender"])
-        self.assertEqual(slice_.names, expected)
 
     def test_selected_crosstab_as_array(self):
         slice_ = FrozenCube(CR.SELECTED_CROSSTAB_4).slices[0]
@@ -1734,7 +1731,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_array_equal(
             slice_.column_base, np.array([504, 215, 224, 76, 8, 439])
         )
-        assert slice_.table_name == u"q1. Aftensmad: K\xf8d (svin/lam/okse)"
+        assert slice_.table_name == "q1. Aftensmad: K\xf8d (svin/lam/okse)"
 
     def test_mr_x_cat_x_mr_pruning(self):
         # No pruning
