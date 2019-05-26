@@ -299,11 +299,11 @@ class MatrixFactory(object):
                 counts = counts[0]
                 counts_with_missings = counts_with_missings[0]
             elif ca_as_0th:
-                return _CatStripe(dimensions, counts, base_counts)
+                return _CatStripe(dimensions[0], counts, base_counts)
         elif cube.ndim < 2:
             if dimension_types[0] == DT.MR:
-                return _MrStripe(dimensions, counts, base_counts)
-            return _CatStripe(dimensions, counts, base_counts)
+                return _MrStripe(dimensions[0], counts, base_counts)
+            return _CatStripe(dimensions[0], counts, base_counts)
         if dimension_types == (DT.MR, DT.MR):
             return _MrXMrMatrix(dimensions, counts, base_counts, counts_with_missings)
         elif dimension_types[0] == DT.MR:
@@ -318,7 +318,7 @@ class MatrixFactory(object):
             return _MeansScalar(counts, base_counts)
         elif cube.ndim == 1:
             if dimensions[0].dimension_type == DT.MR:
-                return _MrWithMeansStripe(dimensions[0], counts, base_counts)
+                return _MeansWithMrStripe(dimensions[0], counts, base_counts)
             return _MeansStripe(dimensions[0], counts, base_counts)
         elif cube.ndim >= 2:
             if cube.ndim == 3:
@@ -804,16 +804,24 @@ class _MeansScalar(object):
 # ===STRIPE (1D) OBJECTS====
 
 
-class _CatStripe(object):
+class _BaseStripe(object):
+    """Base class for all stipe objects."""
+
+    def __init__(self, rows_dimension, measure, base_counts):
+        self._rows_dimension = rows_dimension
+        self._measure = measure
+        self._base_counts = base_counts
+
+
+class _CatStripe(_BaseStripe):
     """Special case of CAT x CAT, where the 2nd CAT doesn't exist.
 
     Values are treated as rows, while there's only a single column (vector).
     """
 
-    def __init__(self, dimensions, counts, base_counts):
-        self._dimensions = dimensions
+    def __init__(self, rows_dimension, counts, base_counts):
+        super(_CatStripe, self).__init__(rows_dimension, counts, base_counts)
         self._counts = counts
-        self._base_counts = base_counts
 
     @lazyproperty
     def columns(self):
@@ -831,16 +839,8 @@ class _CatStripe(object):
     @lazyproperty
     def rows(self):
         return tuple(
-            CategoricalVector(
-                counts, base_counts, element, self.table_margin, zscore, column_index
-            )
-            for (
-                counts,
-                base_counts,
-                element,
-                zscore,
-                column_index,
-            ) in self._row_generator
+            CategoricalVector(counts, base_counts, element, self.table_margin, zscore)
+            for (counts, base_counts, element, zscore) in self._row_generator
         )
 
     @lazyproperty
@@ -860,22 +860,12 @@ class _CatStripe(object):
         return np.array([col.proportions for col in self.columns]).T
 
     @lazyproperty
-    def _row_dimension(self):
-        return self._dimensions[0]
-
-    @lazyproperty
     def _row_elements(self):
-        return self._row_dimension.valid_elements
+        return self._rows_dimension.valid_elements
 
     @lazyproperty
     def _row_generator(self):
-        return zip(
-            self._counts,
-            self._base_counts,
-            self._row_elements,
-            self._zscores,
-            self._column_index,
-        )
+        return zip(self._counts, self._base_counts, self._row_elements, self._zscores)
 
     @lazyproperty
     def _zscores(self):
@@ -883,13 +873,12 @@ class _CatStripe(object):
         return tuple([np.nan for _ in self._counts])
 
 
-class _MeansStripe(object):
+class _MeansStripe(_BaseStripe):
     """A 1D calculator for a strand containing mean first-order measure."""
 
-    def __init__(self, dimension, means, base_counts):
-        self._dimension = dimension
+    def __init__(self, rows_dimension, means, base_counts):
+        super(_MeansStripe, self).__init__(rows_dimension, means, base_counts)
         self._means = means
-        self._base_counts = base_counts
 
     @lazyproperty
     def columns(self):
@@ -910,7 +899,7 @@ class _MeansStripe(object):
         return tuple(
             MeansVector(element, base_counts, np.array([means]))
             for element, base_counts, means in zip(
-                self._dimension.valid_elements, self._base_counts, self._means
+                self._rows_dimension.valid_elements, self._base_counts, self._means
             )
         )
 
@@ -923,14 +912,25 @@ class _MeansStripe(object):
         return np.sum(self._base_counts)
 
 
-class _MrStripe(object):
+class _MeansWithMrStripe(_MeansStripe):
+    """Means behavior differs when dimension is MR."""
+
+    @lazyproperty
+    def rows(self):
+        return tuple(
+            MeansWithMrVector(element, base_counts, means)
+            for element, base_counts, means in zip(
+                self._rows_dimension.valid_elements, self._base_counts, self._means
+            )
+        )
+
+
+class _MrStripe(_BaseStripe):
     """Special case of 1-D MR slice (vector)."""
 
-    def __init__(self, dimensions, counts, base_counts, counts_with_missings=None):
-        self._dimensions = dimensions
+    def __init__(self, rows_dimension, counts, base_counts):
+        super(_MrStripe, self).__init__(rows_dimension, counts, base_counts)
         self._counts = counts
-        self._base_counts = base_counts
-        self._all_counts = counts_with_missings
 
     @lazyproperty
     def columns(self):
@@ -949,16 +949,13 @@ class _MrStripe(object):
     def rows(self):
         """Use only selected counts."""
         return tuple(
-            CatXMrVector(
-                counts, base_counts, element, table_margin, zscore, column_index
-            )
+            CatXMrVector(counts, base_counts, element, table_margin, zscore)
             for (
                 counts,
                 base_counts,
                 element,
                 table_margin,
                 zscore,
-                column_index,
             ) in self._row_generator
         )
 
@@ -971,26 +968,12 @@ class _MrStripe(object):
         return np.sum(self._counts, axis=1)
 
     @lazyproperty
-    def _column_index(self):
-        # TODO: This is a hack to make it work. It should be addressed properly with
-        # passing `counts_with_missings` in all the right places in the factory.
-        # Also - subclass for proper functionality in various MR cases.
-        if self._all_counts is None:
-            return self._column_proportions
-
-        return self._column_proportions / self._baseline * 100
-
-    @lazyproperty
     def _column_proportions(self):
         return np.array([col.proportions for col in self.columns]).T
 
     @lazyproperty
-    def _row_dimension(self):
-        return self._dimensions[0]
-
-    @lazyproperty
     def _row_elements(self):
-        return self._row_dimension.valid_elements
+        return self._rows_dimension.valid_elements
 
     @lazyproperty
     def _row_generator(self):
@@ -1000,20 +983,8 @@ class _MrStripe(object):
             self._row_elements,
             self.table_margin,
             self._zscores,
-            self._column_index,
         )
 
     @lazyproperty
     def _zscores(self):
         return np.array([np.nan] * self._base_counts.shape[0])
-
-
-class _MrWithMeansStripe(_MeansStripe):
-    @lazyproperty
-    def rows(self):
-        return tuple(
-            MeansWithMrVector(element, base_counts, means)
-            for element, base_counts, means in zip(
-                self._dimension.valid_elements, self._base_counts, self._means
-            )
-        )

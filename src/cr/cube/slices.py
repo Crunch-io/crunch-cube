@@ -16,7 +16,7 @@ from cr.cube.matrix import (
     _MeansScalar,
     _MeansStripe,
     _MrStripe,
-    _MrWithMeansStripe,
+    _MeansWithMrStripe,
     OrderedMatrix,
     PrunedMatrix,
 )
@@ -146,7 +146,7 @@ class FrozenSlice(object):
 
     @lazyproperty
     def ndim(self):
-        _1D_matrix_types = (_MrWithMeansStripe, _MeansStripe, _CatStripe, _MrStripe)
+        _1D_matrix_types = (_MeansWithMrStripe, _MeansStripe, _CatStripe, _MrStripe)
         if isinstance(self._matrix, _CatXCatMeansMatrix):
             return 2
         if isinstance(self._matrix, _1D_matrix_types):
