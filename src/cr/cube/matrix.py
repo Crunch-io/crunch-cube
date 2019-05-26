@@ -342,6 +342,14 @@ class _BaseMatrix(object):
         return tuple([dimension.name for dimension in self._dimensions])
 
     @lazyproperty
+    def ndim(self):
+        """int count of dimensions in this matrix, unconditionally 2.
+
+        A matrix is by definition two-dimensional.
+        """
+        return 2
+
+    @lazyproperty
     def _column_elements(self):
         return self._columns_dimension.valid_elements
 
@@ -805,6 +813,14 @@ class _MeansScalar(object):
         return self._means
 
     @lazyproperty
+    def ndim(self):
+        """int count of dimensions in this scalar, unconditionally 0.
+
+        A scalar is by definition zero-dimensional.
+        """
+        return 0
+
+    @lazyproperty
     def table_base(self):
         # TODO: Check why we expect mean instead of the real base in this case.
         return self.means
@@ -824,6 +840,22 @@ class _BaseStripe(object):
         self._rows_dimension = rows_dimension
         self._measure = measure
         self._base_counts = base_counts
+
+    @lazyproperty
+    def ndim(self):
+        """int count of dimensions in this stripe, unconditionally 1.
+
+        A stripe is by definition one-dimensional.
+        """
+        return 1
+
+    @lazyproperty
+    def table_base(self):
+        return np.sum(self._base_counts)
+
+    @lazyproperty
+    def _row_elements(self):
+        return self._rows_dimension.valid_elements
 
 
 class _CatStripe(_BaseStripe):
@@ -857,24 +889,8 @@ class _CatStripe(_BaseStripe):
         )
 
     @lazyproperty
-    def table_base(self):
-        return np.sum(self._base_counts)
-
-    @lazyproperty
     def table_margin(self):
         return np.sum(self._counts)
-
-    @lazyproperty
-    def _column_index(self):
-        return self._column_proportions
-
-    @lazyproperty
-    def _column_proportions(self):
-        return np.array([col.proportions for col in self.columns]).T
-
-    @lazyproperty
-    def _row_elements(self):
-        return self._rows_dimension.valid_elements
 
     @lazyproperty
     def _row_generator(self):
@@ -911,18 +927,16 @@ class _MeansStripe(_BaseStripe):
         """
         return tuple(
             MeansVector(element, base_counts, np.array([means]))
-            for element, base_counts, means in zip(
-                self._rows_dimension.valid_elements, self._base_counts, self._means
-            )
+            for element, base_counts, means in self._row_generator
         )
-
-    @lazyproperty
-    def table_base(self):
-        return np.sum(self._base_counts)
 
     @lazyproperty
     def table_margin(self):
         return np.sum(self._base_counts)
+
+    @lazyproperty
+    def _row_generator(self):
+        return zip(self._rows_dimension.valid_elements, self._base_counts, self._means)
 
 
 class _MeansWithMrStripe(_MeansStripe):
@@ -932,9 +946,7 @@ class _MeansWithMrStripe(_MeansStripe):
     def rows(self):
         return tuple(
             MeansWithMrVector(element, base_counts, means)
-            for element, base_counts, means in zip(
-                self._rows_dimension.valid_elements, self._base_counts, self._means
-            )
+            for element, base_counts, means in self._row_generator
         )
 
 
@@ -963,13 +975,13 @@ class _MrStripe(_BaseStripe):
         """Use only selected counts."""
         return tuple(
             CatXMrVector(counts, base_counts, element, table_margin, zscore)
-            for (
-                counts,
-                base_counts,
-                element,
-                table_margin,
-                zscore,
-            ) in self._row_generator
+            for (counts, base_counts, element, table_margin, zscore) in zip(
+                self._counts,
+                self._base_counts,
+                self._row_elements,
+                self.table_margin,
+                self._zscores,
+            )
         )
 
     @lazyproperty
@@ -979,24 +991,6 @@ class _MrStripe(_BaseStripe):
     @lazyproperty
     def table_margin(self):
         return np.sum(self._counts, axis=1)
-
-    @lazyproperty
-    def _column_proportions(self):
-        return np.array([col.proportions for col in self.columns]).T
-
-    @lazyproperty
-    def _row_elements(self):
-        return self._rows_dimension.valid_elements
-
-    @lazyproperty
-    def _row_generator(self):
-        return zip(
-            self._counts,
-            self._base_counts,
-            self._row_elements,
-            self.table_margin,
-            self._zscores,
-        )
 
     @lazyproperty
     def _zscores(self):

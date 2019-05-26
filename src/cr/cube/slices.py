@@ -8,15 +8,10 @@ from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.frozen_min_base_size_mask import MinBaseSizeMask
 from cr.cube.measures.new_pairwise_significance import NewPairwiseSignificance
 from cr.cube.matrix import (
-    _CatStripe,
-    _CatXCatMeansMatrix,
     MatrixFactory,
     MatrixWithHidden,
     MatrixWithInsertions,
     _MeansScalar,
-    _MeansStripe,
-    _MrStripe,
-    _MeansWithMrStripe,
     OrderedMatrix,
     PrunedMatrix,
 )
@@ -146,14 +141,8 @@ class FrozenSlice(object):
 
     @lazyproperty
     def ndim(self):
-        _1D_matrix_types = (_MeansWithMrStripe, _MeansStripe, _CatStripe, _MrStripe)
-        if isinstance(self._matrix, _CatXCatMeansMatrix):
-            return 2
-        if isinstance(self._matrix, _1D_matrix_types):
-            return 1
-        elif isinstance(self._matrix, _MeansScalar):
-            return 0
-        return 2
+        """int count of dimensions for this slice, one of (0, 1, 2)."""
+        return self._matrix.ndim
 
     @lazyproperty
     def pairwise_indices(self):
