@@ -329,7 +329,51 @@ class MatrixFactory(object):
             return _CatXCatMeansMatrix(dimensions, counts, base_counts)
 
 
-class _CatXCatMatrix(object):
+class _BaseMatrix(object):
+    """Base class for all matrix (2D secondary-analyzer) objects."""
+
+    def __init__(self, dimensions, counts, base_counts):
+        self._dimensions = dimensions
+        self._counts = counts
+        self._base_counts = base_counts
+
+    @lazyproperty
+    def names(self):
+        return tuple([dimension.name for dimension in self._dimensions])
+
+    @lazyproperty
+    def _column_elements(self):
+        return self._columns_dimension.valid_elements
+
+    @lazyproperty
+    def _column_generator(self):
+        return zip(
+            self._counts.T, self._base_counts.T, self._column_elements, self._zscores.T
+        )
+
+    @lazyproperty
+    def _column_proportions(self):
+        return np.array([col.proportions for col in self.columns]).T
+
+    @lazyproperty
+    def _columns_dimension(self):
+        return self._dimensions[1]
+
+    @lazyproperty
+    def _row_elements(self):
+        return self._rows_dimension.valid_elements
+
+    @lazyproperty
+    def _rows_dimension(self):
+        return self._dimensions[0]
+
+    @lazyproperty
+    def _valid_rows_idxs(self):
+        """ndarray-style index for only valid rows (out of missing and not-missing)."""
+        return np.ix_(self._dimensions[-2].valid_elements.element_idxs)
+
+
+class _CatXCatMatrix(_BaseMatrix):
     """Deals with CAT x CAT data.
 
     Delegates most functionality to vectors (rows or columns), but calculates some
@@ -342,9 +386,7 @@ class _CatXCatMatrix(object):
     """
 
     def __init__(self, dimensions, counts, base_counts, counts_with_missings=None):
-        self._dimensions = dimensions
-        self._counts = counts
-        self._base_counts = base_counts
+        super(_CatXCatMatrix, self).__init__(dimensions, counts, base_counts)
         self._all_counts = counts_with_missings
 
     @lazyproperty
@@ -353,10 +395,6 @@ class _CatXCatMatrix(object):
             CategoricalVector(counts, base_counts, element, self.table_margin, zscore)
             for counts, base_counts, element, zscore in self._column_generator
         )
-
-    @lazyproperty
-    def names(self):
-        return tuple([dimension.name for dimension in self._dimensions])
 
     @lazyproperty
     def rows(self):
@@ -398,14 +436,6 @@ class _CatXCatMatrix(object):
         return dim_sum[:, None] / np.sum(dim_sum)
 
     @lazyproperty
-    def _column_dimension(self):
-        return self._dimensions[1]
-
-    @lazyproperty
-    def _column_elements(self):
-        return self._column_dimension.valid_elements
-
-    @lazyproperty
     def _column_index(self):
         # TODO: This is a hack to make it work. It should be addressed properly with
         # passing `counts_with_missings` in all the right places in the factory.
@@ -414,24 +444,6 @@ class _CatXCatMatrix(object):
             return self._column_proportions
 
         return self._column_proportions / self._baseline * 100
-
-    @lazyproperty
-    def _column_generator(self):
-        return zip(
-            self._counts.T, self._base_counts.T, self._column_elements, self._zscores.T
-        )
-
-    @lazyproperty
-    def _column_proportions(self):
-        return np.array([col.proportions for col in self.columns]).T
-
-    @lazyproperty
-    def _row_dimension(self):
-        return self._dimensions[0]
-
-    @lazyproperty
-    def _row_elements(self):
-        return self._row_dimension.valid_elements
 
     @lazyproperty
     def _row_generator(self):
@@ -459,11 +471,6 @@ class _CatXCatMatrix(object):
         return residuals / np.sqrt(variance)
 
     @lazyproperty
-    def _valid_rows_idxs(self):
-        """ndarray-style index for only valid rows (out of missing and not-missing)."""
-        return np.ix_(self._dimensions[-2].valid_elements.element_idxs)
-
-    @lazyproperty
     def _zscores(self):
         return self._scalar_type_std_res(
             self._counts,
@@ -474,6 +481,8 @@ class _CatXCatMatrix(object):
 
 
 class _CatXCatMeansMatrix(_CatXCatMatrix):
+    """Cat-x-cat matrix for means measure."""
+
     def __init__(self, dimensions, means, base_counts):
         super(_CatXCatMeansMatrix, self).__init__(dimensions, None, base_counts)
         self._means = means
@@ -483,7 +492,7 @@ class _CatXCatMeansMatrix(_CatXCatMatrix):
         return tuple(
             MeansVector(element, base_counts, means)
             for element, base_counts, means in zip(
-                self._column_dimension.valid_elements,
+                self._columns_dimension.valid_elements,
                 self._base_counts.T,
                 self._means.T,
             )
@@ -494,12 +503,14 @@ class _CatXCatMeansMatrix(_CatXCatMatrix):
         return tuple(
             MeansVector(element, base_counts, means)
             for element, base_counts, means in zip(
-                self._row_dimension.valid_elements, self._base_counts, self._means
+                self._rows_dimension.valid_elements, self._base_counts, self._means
             )
         )
 
 
 class _MatrixWithMR(_CatXCatMatrix):
+    """ ... """
+
     @staticmethod
     def _array_type_std_res(counts, total, colsum, rowsum):
         expected_counts = rowsum * colsum / total
@@ -591,6 +602,8 @@ class _MrXCatMatrix(_MatrixWithMR):
 
 
 class _MrXCatMeansMatrix(_MrXCatMatrix):
+    """ ... """
+
     def __init__(self, dimensions, means, base_counts):
         counts = np.empty(means.shape)
         super(_MrXCatMeansMatrix, self).__init__(dimensions, counts, base_counts)
@@ -601,7 +614,7 @@ class _MrXCatMeansMatrix(_MrXCatMatrix):
         return tuple(
             MeansWithMrVector(element, base_counts, means[0])
             for element, base_counts, means in zip(
-                self._row_dimension.valid_elements, self._base_counts, self._means
+                self._rows_dimension.valid_elements, self._base_counts, self._means
             )
         )
 
@@ -688,7 +701,7 @@ class _CatXMrMatrix(_MatrixWithMR):
 class _MrXMrMatrix(_MatrixWithMR):
     """Represents MR x MR slices.
 
-    Needs to properly index both rows and columns (selected/not-selected.
+    Needs to properly index both rows and columns (selected/not-selected).
     """
 
     @lazyproperty
