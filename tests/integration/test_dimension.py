@@ -13,12 +13,14 @@ from cr.cube.dimension import (
     _AllElements,
     Dimension,
     _Element,
+    _ElementTransforms,
     _Subtotal,
     _ValidElements,
 )
 from cr.cube.enum import DIMENSION_TYPE as DT
 
 from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
+from ..unitutil import instance_mock
 
 
 class DescribeIntegratedAllDimensions(object):
@@ -195,33 +197,35 @@ class DescribeIntegrated_ValidElements(object):
 class DescribeIntegrated_Element(object):
     """Integration-test suite for `cr.cube.dimension._Element` object."""
 
-    def it_knows_its_transformed_label(self, element_dict):
-        element_transforms_dict = {"name": "Xfinity Lounge"}
-        element = _Element(element_dict, None, None, element_transforms_dict)
+    def it_knows_its_transformed_label(self, element_dict, element_transforms_):
+        element_transforms_.name = "Xfinity Lounge"
+        element = _Element(element_dict, None, None, element_transforms_)
 
         label = element.label
 
         assert label == "Xfinity Lounge"
 
-    def but_it_uses_its_base_name_if_no_transform_is_present(self, element_dict):
-        element_transforms_dict = {}
-        element = _Element(element_dict, None, None, element_transforms_dict)
+    def but_it_uses_its_base_name_if_no_transform_is_present(
+        self, element_dict, element_transforms_
+    ):
+        element_transforms_.name = None
+        element = _Element(element_dict, None, None, element_transforms_)
 
         label = element.label
 
         assert label == "President Obama"
 
-    def it_knows_when_it_is_explicitly_hidden(self, element_dict):
-        element_transforms_dict = {"hide": True}
-        element = _Element(element_dict, None, None, element_transforms_dict)
+    def it_knows_when_it_is_explicitly_hidden(self, element_dict, element_transforms_):
+        element_transforms_.hide = True
+        element = _Element(element_dict, None, None, element_transforms_)
 
         is_hidden = element.is_hidden
 
         assert is_hidden is True
 
-    def but_it_is_not_hidden_by_default(self):
-        element_transforms_dict = {}
-        element = _Element(None, None, None, element_transforms_dict)
+    def but_it_is_not_hidden_by_default(self, element_transforms_):
+        element_transforms_.hide = None
+        element = _Element(None, None, None, element_transforms_)
 
         is_hidden = element.is_hidden
 
@@ -236,6 +240,10 @@ class DescribeIntegrated_Element(object):
             .dimensions[0]
             ._dimension_dict["type"]["categories"][0]
         )
+
+    @pytest.fixture
+    def element_transforms_(self, request):
+        return instance_mock(request, _ElementTransforms)
 
 
 class TestDimension(object):

@@ -16,6 +16,7 @@ from cr.cube.dimension import (
     Dimension,
     _DimensionFactory,
     _Element,
+    _ElementTransforms,
     _RawDimension,
     _Subtotal,
     _Subtotals,
@@ -671,10 +672,22 @@ class Describe_AllElements(object):
         assert valid_elements is valid_elements_
 
     def it_creates_its_Element_objects_in_a_local_factory_to_help(
-        self, request, _element_dicts_prop_, _Element_, _iter_element_makings_
+        self,
+        request,
+        _element_dicts_prop_,
+        _prune_prop_,
+        _ElementTransforms_,
+        _Element_,
+        _iter_element_makings_,
     ):
         element_dicts_ = "element-dicts-that-shouldn't-be-needed"
         _element_dicts_prop_.return_value = element_dicts_
+        _prune_prop_.return_value = True
+        element_transforms_ = tuple(
+            instance_mock(request, _ElementTransforms, name="element-xfrms-%s" % idx)
+            for idx in range(3)
+        )
+        _ElementTransforms_.side_effect = iter(element_transforms_)
         _iter_element_makings_.return_value = iter(
             (
                 (0, {"element": "dict-A"}, {"xfrms": 0}),
@@ -691,10 +704,15 @@ class Describe_AllElements(object):
 
         elements = all_elements._elements
 
+        assert _ElementTransforms_.call_args_list == [
+            call({"xfrms": 0}, True),
+            call({"xfrms": 1}, True),
+            call({"xfrms": 2}, True),
+        ]
         assert _Element_.call_args_list == [
-            call({"element": "dict-A"}, 0, element_dicts_, {"xfrms": 0}),
-            call({"element": "dict-B"}, 1, element_dicts_, {"xfrms": 1}),
-            call({"element": "dict-C"}, 2, element_dicts_, {"xfrms": 2}),
+            call({"element": "dict-A"}, 0, element_dicts_, element_transforms_[0]),
+            call({"element": "dict-B"}, 1, element_dicts_, element_transforms_[1]),
+            call({"element": "dict-C"}, 2, element_dicts_, element_transforms_[2]),
         ]
         assert elements == (elements_[0], elements_[1], elements_[2])
 
@@ -732,8 +750,16 @@ class Describe_AllElements(object):
         return property_mock(request, _AllElements, "_elements")
 
     @pytest.fixture
+    def _ElementTransforms_(self, request):
+        return class_mock(request, "cr.cube.dimension._ElementTransforms")
+
+    @pytest.fixture
     def _iter_element_makings_(self, request):
         return method_mock(request, _AllElements, "_iter_element_makings")
+
+    @pytest.fixture
+    def _prune_prop_(self, request):
+        return property_mock(request, _AllElements, "_prune")
 
     @pytest.fixture
     def _ValidElements_(self, request):
@@ -779,19 +805,28 @@ class Describe_Element(object):
 
         assert element_id == 42
 
+    @pytest.mark.xfail(reason="implement me", strict=True)
+    def it_knows_its_fill_RGB_color_str(self):
+        assert False
+
     def it_knows_its_position_among_all_the_dimension_elements(self):
         element = _Element(None, 17, None, None)
         index = element.index
         assert index == 17
 
     # TODO: add test cases that exercise element-name transform
-    def it_knows_its_label(self, label_fixture):
+    def it_knows_its_label(self, label_fixture, element_transforms_):
         element_dict, expected_value = label_fixture
-        element = _Element(element_dict, None, None, {})
+        element_transforms_.name = None
+        element = _Element(element_dict, None, None, element_transforms_)
 
         label = element.label
 
         assert label == expected_value
+
+    @pytest.mark.xfail(reason="implement me", strict=True)
+    def it_knows_whether_it_is_explicitly_hidden(self):
+        assert False
 
     def it_knows_whether_its_missing_or_valid(self, missing_fixture):
         element_dict, expected_value = missing_fixture
@@ -866,6 +901,12 @@ class Describe_Element(object):
     def numeric_value_fixture(self, request):
         element_dict, expected_value = request.param
         return element_dict, expected_value
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def element_transforms_(self, request):
+        return instance_mock(request, _ElementTransforms)
 
 
 class Describe_Subtotals(object):

@@ -509,7 +509,12 @@ class _AllElements(_BaseElements):
         """tuple storing actual sequence of element objects."""
         element_dicts = self._element_dicts
         return tuple(
-            _Element(element_dict, idx, element_dicts, element_transforms_dict)
+            _Element(
+                element_dict,
+                idx,
+                element_dicts,
+                _ElementTransforms(element_transforms_dict, self._prune),
+            )
             for (
                 idx,
                 element_dict,
@@ -535,6 +540,11 @@ class _AllElements(_BaseElements):
                 element_id, elements_transforms.get(str(element_id), {})
             )
             yield idx, element_dict, element_transforms_dict
+
+    @lazyproperty
+    def _prune(self):
+        """True if empty elements in this dimension should be automatically hidden."""
+        return True if self._dimension_transforms_dict.get("prune") is True else False
 
 
 class _ValidElements(_BaseElements):
@@ -619,12 +629,12 @@ class _Element(object):
     This object resolves the transform cascade for element-level transforms.
     """
 
-    def __init__(self, element_dict, index, element_dicts, element_transforms_dict):
+    def __init__(self, element_dict, index, element_dicts, element_transforms):
         self._element_dict = element_dict
         self._index = index
         # TODO: Remove this hack. An element should not need to know of its peers.
         self._element_dicts = element_dicts
-        self._element_transforms_dict = element_transforms_dict
+        self._element_transforms = element_transforms
 
     @lazyproperty
     def element_id(self):
@@ -641,10 +651,7 @@ class _Element(object):
         """
         # ---first authority is fill transform in element transforms. The base value is
         # ---the only prior authority and that is None (use default fill color).
-        fill = self._element_transforms_dict.get("fill")
-        if not fill:
-            return None
-        return fill
+        return self._element_transforms.fill
 
     @lazyproperty
     def index(self):
@@ -665,10 +672,8 @@ class _Element(object):
     def is_hidden(self):
         """True if this element is explicitly hidden in this analysis."""
         # ---first authority is hide transform in element transforms---
-        if "hide" in self._element_transforms_dict:
-            return self._element_transforms_dict["hide"] is True
         # ---default is not hidden, there is currently no prior-level hide transform---
-        return False
+        return {True: True, False: False, None: False}[self._element_transforms.hide]
 
     @lazyproperty
     def label(self):
@@ -681,8 +686,8 @@ class _Element(object):
         categorical, array (subvariable), numeric, datetime and text.
         """
         # ---first authority is name transform in element transforms---
-        if "name" in self._element_transforms_dict:
-            name = self._element_transforms_dict["name"]
+        name = self._element_transforms.name
+        if name is not None:
             return name if name else ""
 
         # ---otherwise base-name from element-dict is used---
@@ -728,6 +733,63 @@ class _Element(object):
         """Numeric value assigned to element by user, np.nan if absent."""
         numeric_value = self._element_dict.get("numeric_value")
         return np.nan if numeric_value is None else numeric_value
+
+    @lazyproperty
+    def _transforms(self):
+        """_ElementTransforms object for this element."""
+        return _ElementTransforms(self._element_transforms_dict, self._prune)
+
+
+class _ElementTransforms(object):
+    """A value object providing convenient access to transforms for a single element."""
+
+    def __init__(self, element_transforms_dict, prune):
+        self._element_transforms_dict = element_transforms_dict
+        self._prune = prune
+
+    @lazyproperty
+    def fill(self):
+        """str RGB color like "#af032d" or None if not specified.
+
+        A value of None indicates no fill transform was specified for this element.
+        A str value must be a hash character ("#") followed by six hexadecimal digits.
+        Three-character color contractions (like "#D07") are not valid.
+        """
+        fill = self._element_transforms_dict.get("fill")
+        if not fill:
+            return None
+        return fill
+
+    @lazyproperty
+    def hide(self):
+        """Tri-value, True if this element has been explicitly hidden in this analysis.
+
+        False overrides any prior "hide" transform with "show" and None signifies
+        "inherit".
+        """
+        hide = self._element_transforms_dict.get("hide")
+        # ---cover all of "omitted", "==None", and odd "==[]" or "==''" cases---
+        if hide is True:
+            return True
+        if hide is False:
+            return False
+        return None
+
+    @lazyproperty
+    def name(self):
+        """str display-name for this element or None if not specified."""
+        # ---if "name": element is omitted, no transform is specified---
+        if "name" not in self._element_transforms_dict:
+            return None
+        # ---otherwise normalize value to str, with an explicit value of None, [], 0,
+        # ---etc. becoming the empty string ("").
+        name = self._element_transforms_dict["name"]
+        return str(name) if name else ""
+
+    @lazyproperty
+    def prune(self):
+        """True if this element should be hidden when empty."""
+        return self._prune
 
 
 class _Subtotals(Sequence):
