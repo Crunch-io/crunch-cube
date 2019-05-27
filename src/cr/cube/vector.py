@@ -312,8 +312,8 @@ class HiddenVector(_BasePrunedOrHiddenVector):
 class OrderedVector(_BaseTransformationVector):
     """In charge of indexing elements properly, after ordering transform."""
 
-    def __init__(self, vector, order):
-        self._base_vector = vector
+    def __init__(self, base_vector, order):
+        self._base_vector = base_vector
         self._order = order
 
     @lazyproperty
@@ -392,6 +392,12 @@ class BaseVector(object):
     @lazyproperty
     def hidden(self):
         return self._element.is_hidden
+
+    # TODO: combine pruned as just a different sort of hidden. Hide is hide, regardless
+    # of how it came about.
+    #     @lazyproperty
+    #     def hidden(self):
+    #         return self._element.is_hidden or (self._element.prune and self.pruned)
 
     @lazyproperty
     def is_insertion(self):

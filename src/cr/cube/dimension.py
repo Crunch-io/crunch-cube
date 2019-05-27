@@ -390,7 +390,7 @@ class Dimension(object):
         # ---insertions in dimension-transforms override those on dimension itself---
         insertion_dicts = self._dimension_transforms_dict.get("insertions")
         if insertion_dicts is not None:
-            return _Subtotals(insertion_dicts, self.valid_elements)
+            return _Subtotals(insertion_dicts, self.valid_elements, self.prune)
 
         # ---otherwise, insertions defined as default transforms apply---
         view = self._dimension_dict.get("references", {}).get("view", {})
@@ -398,7 +398,7 @@ class Dimension(object):
         insertion_dicts = (
             [] if view is None else view.get("transform", {}).get("insertions", [])
         )
-        return _Subtotals(insertion_dicts, self.valid_elements)
+        return _Subtotals(insertion_dicts, self.valid_elements, self.prune)
 
     @lazyproperty
     def valid_elements(self):
@@ -735,6 +735,11 @@ class _Element(object):
         return np.nan if numeric_value is None else numeric_value
 
     @lazyproperty
+    def prune(self):
+        """True if this element should be hidden when empty, False otherwise."""
+        return self._element_transforms.prune
+
+    @lazyproperty
     def _transforms(self):
         """_ElementTransforms object for this element."""
         return _ElementTransforms(self._element_transforms_dict, self._prune)
@@ -801,9 +806,10 @@ class _Subtotals(Sequence):
     A subtotal can only involve valid (i.e. non-missing) elements.
     """
 
-    def __init__(self, insertion_dicts, valid_elements):
+    def __init__(self, insertion_dicts, valid_elements, prune):
         self._insertion_dicts = insertion_dicts
-        self.valid_elements = valid_elements
+        self._valid_elements = valid_elements
+        self._prune = prune
 
     def __getitem__(self, idx_or_slice):
         """Implements indexed access."""
@@ -824,7 +830,7 @@ class _Subtotals(Sequence):
     @lazyproperty
     def _element_ids(self):
         """frozenset of int id of each non-missing cat or subvar in dim."""
-        return frozenset(self.valid_elements.element_ids)
+        return frozenset(self._valid_elements.element_ids)
 
     def _iter_valid_subtotal_dicts(self):
         """Generate each insertion dict that represents a valid subtotal."""
@@ -853,7 +859,7 @@ class _Subtotals(Sequence):
     def _subtotals(self):
         """Composed tuple storing actual sequence of _Subtotal objects."""
         return tuple(
-            _Subtotal(subtotal_dict, self.valid_elements)
+            _Subtotal(subtotal_dict, self._valid_elements, self._prune)
             for subtotal_dict in self._iter_valid_subtotal_dicts()
         )
 
@@ -861,9 +867,10 @@ class _Subtotals(Sequence):
 class _Subtotal(object):
     """A subtotal insertion on a cube dimension."""
 
-    def __init__(self, subtotal_dict, valid_elements):
+    def __init__(self, subtotal_dict, valid_elements, prune):
         self._subtotal_dict = subtotal_dict
-        self.valid_elements = valid_elements
+        self._valid_elements = valid_elements
+        self._prune = prune
 
     @lazyproperty
     def anchor(self):
@@ -885,7 +892,7 @@ class _Subtotal(object):
 
         try:
             anchor = int(anchor)
-            if anchor not in self.valid_elements.element_ids:
+            if anchor not in self._valid_elements.element_ids:
                 # In the case of a non-valid int id, default to "bottom"
                 return "bottom"
             return anchor
@@ -901,7 +908,7 @@ class _Subtotal(object):
         anchor = self.anchor
         if anchor in ["top", "bottom"]:
             return anchor
-        return self.valid_elements.get_by_id(anchor).index_in_valids
+        return self._valid_elements.get_by_id(anchor).index_in_valids
 
     @lazyproperty
     def addend_ids(self):
@@ -913,7 +920,7 @@ class _Subtotal(object):
         return tuple(
             arg
             for arg in self._subtotal_dict.get("args", [])
-            if arg in self.valid_elements.element_ids
+            if arg in self._valid_elements.element_ids
         )
 
     @lazyproperty
@@ -925,7 +932,7 @@ class _Subtotal(object):
         rather than its element id.
         """
         return tuple(
-            self.valid_elements.get_by_id(addend_id).index_in_valids
+            self._valid_elements.get_by_id(addend_id).index_in_valids
             for addend_id in self.addend_ids
         )
 
@@ -942,3 +949,8 @@ class _Subtotal(object):
         """str display name for this subtotal, suitable for use as label."""
         name = self._subtotal_dict.get("name")
         return name if name else ""
+
+    @lazyproperty
+    def prune(self):
+        """True if this subtotal should not appear when empty."""
+        return self._prune

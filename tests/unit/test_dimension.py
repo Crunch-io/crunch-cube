@@ -491,28 +491,38 @@ class DescribeDimension(object):
         subtotals_,
         valid_elements_prop_,
         valid_elements_,
+        prune_prop_,
     ):
         dimension_dict, insertion_dicts = subtotals_fixture
         valid_elements_prop_.return_value = valid_elements_
         _Subtotals_.return_value = subtotals_
+        prune_prop_.return_value = True
         dimension = Dimension(dimension_dict, None)
 
         subtotals = dimension.subtotals
 
-        _Subtotals_.assert_called_once_with(insertion_dicts, valid_elements_)
+        _Subtotals_.assert_called_once_with(insertion_dicts, valid_elements_, True)
         assert subtotals is subtotals_
 
     def but_it_overrides_with_subtotal_transforms_when_present(
-        self, valid_elements_prop_, valid_elements_, _Subtotals_, subtotals_
+        self,
+        valid_elements_prop_,
+        valid_elements_,
+        _Subtotals_,
+        subtotals_,
+        prune_prop_,
     ):
         dimension_transforms = {"insertions": ["subtotal", "dicts"]}
         valid_elements_prop_.return_value = valid_elements_
         _Subtotals_.return_value = subtotals_
+        prune_prop_.return_value = False
         dimension = Dimension(None, None, dimension_transforms)
 
         subtotals = dimension.subtotals
 
-        _Subtotals_.assert_called_once_with(["subtotal", "dicts"], valid_elements_)
+        _Subtotals_.assert_called_once_with(
+            ["subtotal", "dicts"], valid_elements_, False
+        )
         assert subtotals is subtotals_
 
     # fixtures -------------------------------------------------------
@@ -559,6 +569,10 @@ class DescribeDimension(object):
         return dimension_dict, insertion_dicts
 
     # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def prune_prop_(self, request):
+        return property_mock(request, Dimension, "prune")
 
     @pytest.fixture
     def _Subtotals_(self, request):
@@ -910,9 +924,11 @@ class Describe_Element(object):
 
 
 class Describe_Subtotals(object):
+    """Unit-test suite for `cr.cube.dimension._Subtotals` object."""
+
     def it_has_sequence_behaviors(self, request, _subtotals_prop_):
         _subtotals_prop_.return_value = (1, 2, 3)
-        subtotals = _Subtotals(None, None)
+        subtotals = _Subtotals(None, None, None)
 
         assert subtotals[1] == 2
         assert subtotals[1:3] == (2, 3)
@@ -925,7 +941,7 @@ class Describe_Subtotals(object):
             for idx, anchor in enumerate(["bottom", 2, "bottom"])
         )
         _subtotals_prop_.return_value = subtotals_
-        subtotals = _Subtotals(None, None)
+        subtotals = _Subtotals(None, None, None)
 
         subtotals_with_anchor = tuple(subtotals.iter_for_anchor("bottom"))
 
@@ -933,7 +949,7 @@ class Describe_Subtotals(object):
 
     def it_provides_the_element_ids_as_a_set_to_help(self, request, valid_elements_):
         valid_elements_.element_ids = tuple(range(3))
-        subtotals = _Subtotals(None, valid_elements_)
+        subtotals = _Subtotals(None, valid_elements_, None)
 
         element_ids = subtotals._element_ids
 
@@ -944,7 +960,7 @@ class Describe_Subtotals(object):
     ):
         insertion_dicts, element_ids, expected_value = iter_valid_fixture
         _element_ids_prop_.return_value = element_ids
-        subtotals = _Subtotals(insertion_dicts, None)
+        subtotals = _Subtotals(insertion_dicts, None, None)
 
         subtotal_dicts = tuple(subtotals._iter_valid_subtotal_dicts())
 
@@ -960,12 +976,13 @@ class Describe_Subtotals(object):
         )
         _iter_valid_subtotal_dicts_.return_value = iter(subtotal_dicts_)
         _Subtotal_.side_effect = iter(subtotal_objs_)
-        subtotals = _Subtotals(None, valid_elements_)
+        subtotals = _Subtotals(None, valid_elements_, True)
 
         subtotal_objs = subtotals._subtotals
 
         assert _Subtotal_.call_args_list == [
-            call(subtot_dict_, valid_elements_) for subtot_dict_ in subtotal_dicts_
+            call(subtot_dict_, valid_elements_, True)
+            for subtot_dict_ in subtotal_dicts_
         ]
         assert subtotal_objs == subtotal_objs_
 
@@ -1030,10 +1047,12 @@ class Describe_Subtotals(object):
 
 
 class Describe_Subtotal(object):
+    """Unit-test suite for `cr.cube.dimension._Subtotal` object."""
+
     def it_knows_the_insertion_anchor(self, anchor_fixture, valid_elements_):
         subtotal_dict, element_ids, expected_value = anchor_fixture
         valid_elements_.element_ids = element_ids
-        subtotal = _Subtotal(subtotal_dict, valid_elements_)
+        subtotal = _Subtotal(subtotal_dict, valid_elements_, None)
 
         anchor = subtotal.anchor
 
@@ -1046,7 +1065,7 @@ class Describe_Subtotal(object):
         anchor_prop_.return_value = anchor
         valid_elements_.get_by_id.return_value = element_
         element_.index_in_valids = index
-        subtotal = _Subtotal(None, valid_elements_)
+        subtotal = _Subtotal(None, valid_elements_, None)
 
         anchor_idx = subtotal.anchor_idx
 
@@ -1058,7 +1077,7 @@ class Describe_Subtotal(object):
     ):
         subtotal_dict, element_ids, expected_value = addend_ids_fixture
         valid_elements_.element_ids = element_ids
-        subtotal = _Subtotal(subtotal_dict, valid_elements_)
+        subtotal = _Subtotal(subtotal_dict, valid_elements_, None)
 
         addend_ids = subtotal.addend_ids
 
@@ -1072,7 +1091,7 @@ class Describe_Subtotal(object):
             instance_mock(request, _Element, index_in_valids=index)
             for index in (2, 4, 6)
         )
-        subtotal = _Subtotal(None, valid_elements_)
+        subtotal = _Subtotal(None, valid_elements_, None)
 
         addend_idxs = subtotal.addend_idxs
 
@@ -1081,7 +1100,7 @@ class Describe_Subtotal(object):
 
     def it_knows_the_subtotal_label(self, label_fixture):
         subtotal_dict, expected_value = label_fixture
-        subtotal = _Subtotal(subtotal_dict, None)
+        subtotal = _Subtotal(subtotal_dict, None, None)
 
         label = subtotal.label
 
