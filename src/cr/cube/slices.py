@@ -699,36 +699,36 @@ class _Assembler(object):
 
     @lazyproperty
     def columns(self):
-        return self.matrix.columns
+        return self._transformed_matrix.columns
 
     @lazyproperty
-    def matrix(self):
+    def rows(self):
+        return self._transformed_matrix.rows
+
+    @lazyproperty
+    def table_base(self):
+        return self._transformed_matrix.table_base
+
+    @lazyproperty
+    def table_base_unpruned(self):
+        return self._transformed_matrix.table_base_unpruned
+
+    @lazyproperty
+    def table_margin(self):
+        return self._transformed_matrix.table_margin
+
+    @lazyproperty
+    def table_margin_unpruned(self):
+        return self._transformed_matrix.table_margin_unpruned
+
+    @lazyproperty
+    def _transformed_matrix(self):
         """Apply all transforms sequentially."""
         matrix = OrderedMatrix(self._matrix, self._transforms)
         matrix = MatrixWithInsertions(matrix, self._transforms)
         matrix = MatrixWithHidden(matrix, self._transforms)
         matrix = PrunedMatrix(matrix, self._transforms)
         return matrix
-
-    @lazyproperty
-    def rows(self):
-        return self.matrix.rows
-
-    @lazyproperty
-    def table_base(self):
-        return self.matrix.table_base
-
-    @lazyproperty
-    def table_base_unpruned(self):
-        return self.matrix.table_base_unpruned
-
-    @lazyproperty
-    def table_margin(self):
-        return self.matrix.table_margin
-
-    @lazyproperty
-    def table_margin_unpruned(self):
-        return self.matrix.table_margin_unpruned
 
 
 class _StrandAssembler(object):
