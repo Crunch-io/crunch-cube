@@ -666,7 +666,7 @@ class _Nub(object):
 
     @lazyproperty
     def means(self):
-        return self._assembler._matrix.means
+        return self._scalar.means
 
     @lazyproperty
     def ndim(self):
@@ -675,22 +675,14 @@ class _Nub(object):
 
     @lazyproperty
     def table_base(self):
-        return self._assembler.table_base
+        return self._scalar.table_base
 
     # ---implementation (helpers)-------------------------------------
-
-    @lazyproperty
-    def _assembler(self):
-        return _Assembler(self._scalar, self._transforms)
 
     @lazyproperty
     def _scalar(self):
         """The pre-transforms data-array for this slice."""
         return MeansScalar(self._cube.counts, self._cube.base_counts)
-
-    @lazyproperty
-    def _transforms(self):
-        return _Transforms(self._scalar, (), False)
 
 
 class _Assembler(object):
@@ -753,7 +745,7 @@ class _Insertions(object):
 
     @lazyproperty
     def bottom_rows(self):
-        return tuple(row for row in self._rows if row.anchor == "bottom")
+        return tuple(row for row in self._inserted_rows if row.anchor == "bottom")
 
     @lazyproperty
     def columns(self):
@@ -765,7 +757,9 @@ class _Insertions(object):
 
     @lazyproperty
     def rows(self):
-        return tuple(row for row in self._rows if row.anchor not in ("top", "bottom"))
+        return tuple(
+            row for row in self._inserted_rows if row.anchor not in ("top", "bottom")
+        )
 
     @lazyproperty
     def top_columns(self):
@@ -775,7 +769,7 @@ class _Insertions(object):
 
     @lazyproperty
     def top_rows(self):
-        return tuple(row for row in self._rows if row.anchor == "top")
+        return tuple(row for row in self._inserted_rows if row.anchor == "top")
 
     @lazyproperty
     def _column_dimension(self):
@@ -797,18 +791,18 @@ class _Insertions(object):
         )
 
     @lazyproperty
-    def _row_dimension(self):
-        return self._dimensions[0]
-
-    @lazyproperty
-    def _rows(self):
-        if self._row_dimension.dimension_type in (DT.MR, DT.CA):
+    def _inserted_rows(self):
+        if self._rows_dimension.dimension_type in (DT.MR, DT.CA):
             return tuple()
 
         return tuple(
             _InsertionRow(self._matrix, subtotal)
-            for subtotal in self._row_dimension.subtotals
+            for subtotal in self._rows_dimension.subtotals
         )
+
+    @lazyproperty
+    def _rows_dimension(self):
+        return self._dimensions[0]
 
 
 class _OrderTransform(object):

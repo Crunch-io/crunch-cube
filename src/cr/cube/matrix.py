@@ -218,7 +218,7 @@ class MatrixWithInsertions(_BaseTransformedMatrix):
 
     @lazyproperty
     def _insertion_rows(self):
-        return self._insertions._rows
+        return self._insertions._inserted_rows
 
     @lazyproperty
     def _insertions(self):
