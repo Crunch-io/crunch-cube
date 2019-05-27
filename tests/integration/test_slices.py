@@ -14,7 +14,7 @@ class DescribeFrozenSlice(object):
 
     def it_loads_from_cat_x_cat_cube(self):
         cube = FrozenCube(CR.CAT_X_CAT)
-        slice_ = FrozenSlice(cube, 0, None, None, None, 0)
+        slice_ = FrozenSlice(cube, 0, None, None, 0)
         expected = np.array([[0.71428571, 0.28571429], [0.625, 0.375]])
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
@@ -106,9 +106,7 @@ class DescribeFrozenSlice(object):
         )
 
     def it_provides_base_counts(self):
-        slice_ = FrozenSlice(
-            FrozenCube(CR.CAT_X_CAT_PRUNING_HS), 0, None, None, None, 0
-        )
+        slice_ = FrozenSlice(FrozenCube(CR.CAT_X_CAT_PRUNING_HS), 0, None, None, 0)
         np.testing.assert_array_equal(
             slice_.base_counts,
             [
@@ -124,9 +122,7 @@ class DescribeFrozenSlice(object):
         assert slice_.table_base == 91
 
     def it_provides_various_names_and_labels(self):
-        slice_ = FrozenSlice(
-            FrozenCube(CR.CAT_X_CAT_PRUNING_HS), 0, None, None, None, 0
-        )
+        slice_ = FrozenSlice(FrozenCube(CR.CAT_X_CAT_PRUNING_HS), 0, None, None, 0)
         assert slice_.columns_dimension_name == "ShutdownBlame"
         assert slice_.rows_dimension_description == "What is your marital status?"
         assert slice_.rows_dimension_type == DT.CAT
@@ -146,7 +142,7 @@ class DescribeFrozenSlice(object):
         np.testing.assert_almost_equal(slice_.column_proportions, expected)
 
     def it_provides_unpruned_table_margin(self):
-        slice_ = FrozenSlice(FrozenCube(CR.MR_X_CAT_HS), 0, None, None, None, 0)
+        slice_ = FrozenSlice(FrozenCube(CR.MR_X_CAT_HS), 0, None, None, 0)
         np.testing.assert_array_equal(
             slice_.table_base_unpruned, [165, 210, 242, 450, 476]
         )
@@ -394,7 +390,7 @@ class DescribeFrozenSlice(object):
 
     def it_accommodates_an_all_missing_element_rows_dimension(self):
         slice_ = FrozenSlice(
-            FrozenCube(CR.CAT_X_CAT_ALL_MISSING_ROW_ELEMENTS), 0, None, None, None, 0
+            FrozenCube(CR.CAT_X_CAT_ALL_MISSING_ROW_ELEMENTS), 0, None, None, 0
         )
         row_proportions = slice_.row_proportions
         np.testing.assert_almost_equal(row_proportions, np.array([]))

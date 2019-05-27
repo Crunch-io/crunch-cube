@@ -136,7 +136,7 @@ class PrunedMatrix(_BaseTransformedMatrix):
 
     @lazyproperty
     def _applied(self):
-        return self._transforms._pruning
+        return self._transforms._prune
 
 
 class MatrixWithHidden(_BaseTransformedMatrix):
@@ -272,14 +272,7 @@ class MatrixFactory(object):
 
     @classmethod
     def matrix(
-        cls,
-        dimensions,
-        counts,
-        base_counts,
-        counts_with_missings,
-        cube,
-        slice_idx,
-        ca_as_0th,
+        cls, dimensions, counts, base_counts, counts_with_missings, cube, slice_idx
     ):
         """Return a matrix object of appropriate type based on parameters."""
 
@@ -308,8 +301,6 @@ class MatrixFactory(object):
 
     @classmethod
     def _create_means_matrix(cls, counts, base_counts, cube, dimensions, slice_idx):
-        if cube.ndim == 0:
-            return _MeansScalar(counts, base_counts)
         if cube.ndim == 3:
             base_counts = base_counts[slice_idx]
             counts = counts[slice_idx]
@@ -790,7 +781,7 @@ class _MrXMrMatrix(_MatrixWithMR):
 # ===SCALAR (0D) OBJECTS====
 
 
-class _MeansScalar(object):
+class MeansScalar(object):
     """Represents slices with means (and no counts)."""
 
     def __init__(self, means, base_counts):

@@ -255,6 +255,21 @@ class DescribeIntegrated_WeightedCountMeasure(object):
         )
 
 
+class TestCrunchCubeAsNub(TestCase):
+    """Legacy unit-tests for 0D cube."""
+
+    def test_mean_no_dims(self):
+        cube = FrozenCube(CR.ECON_MEAN_NO_DIMS)
+        assert cube.description is None
+        assert cube.name is None
+        assert cube.missing == 0
+        nub = cube.slices[0]
+        expected = np.array([49.095])
+        np.testing.assert_almost_equal(nub.means, expected)
+        np.testing.assert_almost_equal(nub.table_base, expected)
+        assert nub.ndim == 0
+
+
 class TestCrunchCubeAsFrozenSlice(TestCase):
     def test_crunch_cube_loads_data(self):
         cube = FrozenCube(CR.CAT_X_CAT)
@@ -795,21 +810,6 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         )
         np.testing.assert_almost_equal(slice_.means, expected)
         assert slice_.ndim == 2
-
-    def test_mean_no_dims(self):
-        cube = FrozenCube(CR.ECON_MEAN_NO_DIMS)
-        assert cube.description is None
-        assert cube.name is None
-        assert cube.missing == 0
-        slice_ = cube.slices[0]
-        expected = np.array([49.095])
-        np.testing.assert_almost_equal(slice_.means, expected)
-        np.testing.assert_almost_equal(slice_.table_base, expected)
-        assert slice_.ndim == 0
-        assert slice_.rows_dimension_description == ""
-        assert slice_.rows_dimension_name == ""
-        assert slice_.rows_dimension_type is None
-        assert slice_.columns_dimension_type is None
 
     def test_z_scores_admit_by_dept_unweighted_rows(self):
         """see
