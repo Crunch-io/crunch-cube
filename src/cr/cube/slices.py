@@ -456,26 +456,26 @@ class _Strand(object):
 
     @lazyproperty
     def column_base(self):
-        # TODO: I think remove need for this in exporter. What is the meaning of
-        # a column base in a thing that has no columns?
-        return np.array([column.base for column in self._assembler.columns]).T
+        """Single-element 1D ndarray of int, like [455388]."""
+        # TODO: I think remove the need for this in exporter. What is the meaning of
+        # a column base in a thing that has no columns? If needed, deliver as simple
+        # int, removing ndarray wrapper.
+        return np.array([self._assembler.column.base]).T
 
     @lazyproperty
     def column_margin(self):
+        """Single-element 1D ndarray of float, like [993.0027]."""
         # TODO: Does a strand really have a columns margin? Isn't that really
-        # table-total or something like that in strand case?
-        return np.array([column.margin for column in self._assembler.columns]).T
+        # table-total or something like that in strand case? If really needed, deliver
+        # as simple float rather than wrapped in ndarray.
+        return np.array([self._assembler.column.margin]).T
 
     @lazyproperty
     def column_proportions(self):
-        # TODO: remove need for this in exporter.
-        return np.array([col.proportions for col in self._assembler.columns]).T
-
-    @lazyproperty
-    def columns_dimension_name(self):
-        # TODO: remove this from the interface. A strand object has no columns
-        # dimension.
-        return ""
+        """2D ndarray like [[0.25], [0.33], [0.42]]"""
+        # TODO: wouldn't exporter prefer this as a simple sequence of float? Maybe
+        # that's why we have to have that weird rotation code in exporter for 1D case.
+        return np.array([self._assembler.column.proportions]).T
 
     @lazyproperty
     def counts(self):
@@ -586,6 +586,11 @@ class _Strand(object):
 
     @lazyproperty
     def table_base(self):
+        """1D, single-element ndarray (like [3770])."""
+        # TODO: shouldn't this just be the regular value for a strand? Maybe change to
+        # that if exporter always knows when it's getting this from a strand. The
+        # ndarray "wrapper" seems like unnecessary baggage when we know it will always
+        # be a scalar.
         return self._assembler.table_base
 
     @lazyproperty
@@ -622,7 +627,7 @@ class _Strand(object):
 
     @lazyproperty
     def _assembler(self):
-        return _Assembler(self._stripe, self._transforms)
+        return _StrandAssembler(self._stripe, self._transforms)
 
     @lazyproperty
     def _rows_dimension(self):
@@ -724,6 +729,53 @@ class _Assembler(object):
     @lazyproperty
     def table_margin_unpruned(self):
         return self.matrix.table_margin_unpruned
+
+
+class _StrandAssembler(object):
+    """Perform transforms on a 1D cube-section."""
+
+    def __init__(self, stripe, transforms):
+        self._stripe = stripe
+        self._transforms = transforms
+
+    @lazyproperty
+    def column(self):
+        """Single post-transformation column vector."""
+        return self._transformed_stripe.columns[0]
+
+    @lazyproperty
+    def rows(self):
+        """Sequence of post-transformation row vectors."""
+        return self._transformed_stripe.rows
+
+    @lazyproperty
+    def table_base(self):
+        """1D, single-element ndarray with int value."""
+        return self._transformed_stripe.table_base
+
+    @lazyproperty
+    def table_base_unpruned(self):
+        """Hmm, weird 1D ndarray with same int value repeated for each row."""
+        return self._transformed_stripe.table_base_unpruned
+
+    @lazyproperty
+    def table_margin(self):
+        """1D, single-element ndarray with float value."""
+        return self._transformed_stripe.table_margin
+
+    @lazyproperty
+    def table_margin_unpruned(self):
+        """Hmm, weird 1D ndarray with same float value repeated for each row."""
+        return self._transformed_stripe.table_margin_unpruned
+
+    @lazyproperty
+    def _transformed_stripe(self):
+        """Apply all transforms sequentially."""
+        stripe = OrderedMatrix(self._stripe, self._transforms)
+        stripe = MatrixWithInsertions(stripe, self._transforms)
+        stripe = MatrixWithHidden(stripe, self._transforms)
+        stripe = PrunedMatrix(stripe, self._transforms)
+        return stripe
 
 
 class _Insertions(object):

@@ -279,7 +279,6 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
     def test_as_array_univariate_cat_exclude_missing(self):
         slice_ = FrozenCube(CR.UNIVARIATE_CATEGORICAL).slices[0]
         np.testing.assert_array_equal(slice_.counts, np.array([[10], [5]]))
-        assert slice_.columns_dimension_name == ""
         np.testing.assert_array_equal(slice_.base_counts, np.array([[10], [5]]))
 
     def test_as_array_numeric(self):
