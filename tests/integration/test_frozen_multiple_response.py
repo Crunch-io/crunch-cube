@@ -37,6 +37,7 @@ def test_1D_mr_with_means():
     )
     assert slice_.table_base == 23348
     assert slice_.table_base_unpruned == 23348
+    assert slice_.ndim == 1
 
 
 def test_deck_with_means():
@@ -324,7 +325,6 @@ def test_array_x_mr_by_cell():
 def test_simple_mr_margin_by_col():
     slice_ = FrozenCube(CR.SIMPLE_MR).slices[0]
     np.testing.assert_array_equal(slice_.row_margin, [3, 4, 0])
-    np.testing.assert_array_equal(slice_.column_margin, [[5], [6], [6]])
 
 
 def test_cat_x_mr_x_mr_proportions_by_row():

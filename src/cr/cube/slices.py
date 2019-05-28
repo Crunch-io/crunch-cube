@@ -62,11 +62,6 @@ class FrozenSlice(object):
         return np.array([row.base_values for row in self._assembler.rows])
 
     @lazyproperty
-    def _ca_as_0th(self):
-        # TODO: remove use of this internal (which is otherwise not needed) by exporter.
-        return False
-
-    @lazyproperty
     def column_base(self):
         return np.array([column.base for column in self._assembler.columns]).T
 
@@ -166,7 +161,7 @@ class FrozenSlice(object):
     @lazyproperty
     def ndim(self):
         """int count of dimensions for this slice, unconditionally 2."""
-        return 2
+        return self._matrix.ndim
 
     @lazyproperty
     def pairwise_indices(self):
@@ -432,10 +427,6 @@ class FrozenSlice(object):
         """
         return self._transforms_arg if self._transforms_arg is not None else {}
 
-    @lazyproperty
-    def _weighted(self):
-        return self._cube.is_weighted
-
 
 class _Strand(object):
     """1D slice."""
@@ -452,29 +443,6 @@ class _Strand(object):
     @lazyproperty
     def base_counts(self):
         return np.array([row.base_values for row in self._assembler.rows])
-
-    @lazyproperty
-    def column_base(self):
-        """Single-element 1D ndarray of int, like [455388]."""
-        # TODO: I think remove the need for this in exporter. What is the meaning of
-        # a column base in a thing that has no columns? If needed, deliver as simple
-        # int, removing ndarray wrapper.
-        return np.array([self._assembler.column.base]).T
-
-    @lazyproperty
-    def column_margin(self):
-        """Single-element 1D ndarray of float, like [993.0027]."""
-        # TODO: Does a strand really have a columns margin? Isn't that really
-        # table-total or something like that in strand case? If really needed, deliver
-        # as simple float rather than wrapped in ndarray.
-        return np.array([self._assembler.column.margin]).T
-
-    @lazyproperty
-    def column_proportions(self):
-        """2D ndarray like [[0.25], [0.33], [0.42]]"""
-        # TODO: wouldn't exporter prefer this as a simple sequence of float? Maybe
-        # that's why we have to have that weird rotation code in exporter for 1D case.
-        return np.array([self._assembler.column.proportions]).T
 
     @lazyproperty
     def counts(self):
@@ -527,7 +495,9 @@ class _Strand(object):
     @lazyproperty
     def ndim(self):
         """int count of dimensions for this strand, unconditionally 1."""
-        return 1
+
+        # The value of the `ndim` on the `self._stipe` is also unconditionally 1
+        return self._stripe.ndim
 
     @lazyproperty
     def population_counts(self):
@@ -675,7 +645,9 @@ class _Nub(object):
     @lazyproperty
     def ndim(self):
         """int count of dimensions, unconditionally 0 for a Nub."""
-        return 0
+
+        # The ndim on the underlying _scalar is also unconditionally 0
+        return self._scalar.ndim
 
     @lazyproperty
     def table_base(self):

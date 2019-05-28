@@ -293,10 +293,6 @@ class _BaseMatrix(object):
         self._base_counts = base_counts
 
     @lazyproperty
-    def names(self):
-        return tuple([dimension.name for dimension in self._dimensions])
-
-    @lazyproperty
     def ndim(self):
         """int count of dimensions in this matrix, unconditionally 2.
 
@@ -400,12 +396,6 @@ class _CatXCatMatrix(_BaseMatrix):
 
     @lazyproperty
     def _column_index(self):
-        # TODO: This is a hack to make it work. It should be addressed properly with
-        # passing `counts_with_missings` in all the right places in the factory.
-        # Also - subclass for proper functionality in various MR cases.
-        if self._all_counts is None:
-            return self._column_proportions
-
         return self._column_proportions / self._baseline * 100
 
     @lazyproperty
@@ -779,10 +769,6 @@ class MeansScalar(object):
     def table_base(self):
         # TODO: Check why we expect mean instead of the real base in this case.
         return self.means
-
-    @lazyproperty
-    def table_margin(self):
-        return np.sum(self._base_counts)
 
 
 # ===STRIPE (1D) OBJECTS====

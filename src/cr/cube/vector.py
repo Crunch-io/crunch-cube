@@ -42,10 +42,6 @@ class _BaseTransformationVector(object):
         return self._base_vector.label
 
     @lazyproperty
-    def pruned(self):
-        return self._base_vector.pruned
-
-    @lazyproperty
     def margin(self):
         return self._base_vector.margin
 
@@ -103,10 +99,6 @@ class AssembledVector(_BaseTransformationVector):
     def proportions(self):
         # return self.values / self.base
         return self.values / self.margin
-
-    @lazyproperty
-    def pruned(self):
-        return self._base_vector.pruned
 
     @lazyproperty
     def pvals(self):
