@@ -238,60 +238,64 @@ class PrunedVector(_BaseTransformationVector):
         self._prune = prune
 
     @lazyproperty
-    def _valid_elements_idxs(self):
-        """An 1D ndarray of int idxs of non-hidden values, suitable for indexing."""
-        return np.array(
-            [
-                index
-                for index, opposite_vector in enumerate(self._opposite_vectors)
-                if not opposite_vector.hidden
-            ],
-            dtype=int,
-        )
-
-    @lazyproperty
     def base(self):
         if not isinstance(self._base_vector.base, np.ndarray):
             return self._base_vector.base
-        return self._base_vector.base[self._valid_elements_idxs]
+        return self._base_vector.base[self._visible_element_idxs]
 
     @lazyproperty
     def base_values(self):
-        return self._base_vector.base_values[self._valid_elements_idxs]
+        return self._base_vector.base_values[self._visible_element_idxs]
 
     @lazyproperty
     def column_index(self):
-        return self._base_vector.column_index[self._valid_elements_idxs]
+        return self._base_vector.column_index[self._visible_element_idxs]
 
     @lazyproperty
     def margin(self):
         if not isinstance(self._base_vector.margin, np.ndarray):
             return self._base_vector.margin
-        return self._base_vector.margin[self._valid_elements_idxs]
+        return self._base_vector.margin[self._visible_element_idxs]
 
     @lazyproperty
     def means(self):
-        return self._base_vector.means[self._valid_elements_idxs]
+        return self._base_vector.means[self._visible_element_idxs]
 
     @lazyproperty
     def proportions(self):
-        return self._base_vector.proportions[self._valid_elements_idxs]
+        return self._base_vector.proportions[self._visible_element_idxs]
 
     @lazyproperty
     def pvals(self):
-        return self._base_vector.pvals[self._valid_elements_idxs]
+        return self._base_vector.pvals[self._visible_element_idxs]
 
     @lazyproperty
     def table_proportions(self):
-        return self._base_vector.table_proportions[self._valid_elements_idxs]
+        return self._base_vector.table_proportions[self._visible_element_idxs]
 
     @lazyproperty
     def values(self):
-        return self._base_vector.values[self._valid_elements_idxs]
+        return self._base_vector.values[self._visible_element_idxs]
 
     @lazyproperty
     def zscore(self):
-        return self._base_vector.zscore[self._valid_elements_idxs]
+        return self._base_vector.zscore[self._visible_element_idxs]
+
+    @lazyproperty
+    def _visible_element_idxs(self):
+        """An 1D ndarray of int idxs of non-hidden values, suitable for indexing.
+
+        This value is derived from the opposing vectors collection, based on the hidden
+        status of its elements.
+        """
+        return np.array(
+            [
+                idx
+                for idx, opposite_vector in enumerate(self._opposite_vectors)
+                if not opposite_vector.hidden
+            ],
+            dtype=int,
+        )
 
 
 class OrderedVector(_BaseTransformationVector):
