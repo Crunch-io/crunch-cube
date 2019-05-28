@@ -23,7 +23,7 @@ from cr.cube.vector import (
     MeansWithMrVector,
     MultipleResponseVector,
     OrderedVector,
-    PrunedVector,
+    VectorAfterHiding,
 )
 
 
@@ -88,7 +88,7 @@ class MatrixWithHidden(_BaseTransformedMatrix):
     @lazyproperty
     def columns(self):
         return tuple(
-            PrunedVector(column, self._base_slice.rows, self._prune)
+            VectorAfterHiding(column, self._base_slice.rows)
             for column in self._base_slice.columns
             if not column.hidden
         )
@@ -96,7 +96,7 @@ class MatrixWithHidden(_BaseTransformedMatrix):
     @lazyproperty
     def rows(self):
         return tuple(
-            PrunedVector(row, self._base_slice.columns, self._prune)
+            VectorAfterHiding(row, self._base_slice.columns)
             for row in self._base_slice.rows
             if not row.hidden
         )

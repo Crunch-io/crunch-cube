@@ -231,11 +231,12 @@ class AssembledInsertionVector(AssembledVector):
         return self._base_vector.anchor
 
 
-class PrunedVector(_BaseTransformationVector):
-    def __init__(self, base_vector, opposite_vectors, prune=True):
+class VectorAfterHiding(_BaseTransformationVector):
+    """Reflects a row or column with hidden elements removed."""
+
+    def __init__(self, base_vector, opposite_vectors):
         self._base_vector = base_vector
         self._opposite_vectors = opposite_vectors
-        self._prune = prune
 
     @lazyproperty
     def base(self):

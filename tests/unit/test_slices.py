@@ -23,7 +23,7 @@ from cr.cube.vector import (
     _InsertionColumn,
     _InsertionRow,
     OrderedVector,
-    PrunedVector,
+    VectorAfterHiding,
 )
 from ..unitutil import instance_mock, property_mock
 
@@ -608,21 +608,21 @@ class DescribeMatrixWithHidden(object):
         return MatrixWithHidden(cls_(np.array(raw_counts))), np.array(expected)
 
 
-class DescribePrunedVector(object):
-    """Unit-test suite for `cr.cube.slices.PrunedVector` object."""
+class DescribeVectorAfterHiding(object):
+    """Unit-test suite for `cr.cube.slices.VectorAfterHiding` object."""
 
     @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_initiates_base_vector_and_opposite_vectors(self):
         vector = Mock()
         opposite_vectors = Mock()
-        pruned_vector = PrunedVector(vector, opposite_vectors)
+        pruned_vector = VectorAfterHiding(vector, opposite_vectors)
         assert pruned_vector._vector == vector
         assert pruned_vector._opposite_vectors == opposite_vectors
 
     @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_prunes_elements(self, pruned_elements_fixture):
         vector, opposite_vectors, expected = pruned_elements_fixture
-        pruned_vector = PrunedVector(vector, opposite_vectors)
+        pruned_vector = VectorAfterHiding(vector, opposite_vectors)
         np.testing.assert_array_equal(pruned_vector.values, expected)
 
     # fixtures -------------------------------------------------------
