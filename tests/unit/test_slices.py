@@ -19,9 +19,9 @@ from cr.cube.slices import _Assembler, FrozenSlice, _Insertions, _OrderTransform
 from cr.cube.vector import (
     AssembledVector,
     CategoricalVector,
+    InsertionColumn,
+    InsertionRow,
     MultipleResponseVector,
-    _InsertionColumn,
-    _InsertionRow,
     OrderedVector,
     VectorAfterHiding,
 )
@@ -141,7 +141,7 @@ class DescribeIntegratedFrozenSlice(object):
 
 
 class DescribeCategoricalVector(object):
-    """Unit-test suite for `cr.cube.slices.CategoricalVector` object."""
+    """Unit-test suite for `cr.cube.vector.CategoricalVector` object."""
 
     @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_sets_raw_counts(self):
@@ -171,7 +171,7 @@ class DescribeCategoricalVector(object):
 
 
 class DescribeMultipleResponseVector(object):
-    """Unit-test suite for `cr.cube.slices.MultipleResponseVector` object."""
+    """Unit-test suite for `cr.cube.vector.MultipleResponseVector` object."""
 
     def it_provides_values(self):
         counts = np.array([[1, 2, 3], [4, 5, 6]])
@@ -271,13 +271,13 @@ class Describe_Insertions(object):
         return property_mock(request, _Subtotal, "addend_idxs")
 
 
-class DescribeInsertionsRow(object):
-    """Unit-test suite for `cr.cube.slices._InsertionRow` object."""
+class DescribeInsertionRow(object):
+    """Unit-test suite for `cr.cube.vector.InsertionRow` object."""
 
     def it_sets_slice_and_subtotal(self):
         slice_ = Mock()
         subtotal = Mock()
-        insertion_row = _InsertionRow(slice_, subtotal)
+        insertion_row = InsertionRow(slice_, subtotal)
         assert insertion_row._slice == slice_
         assert insertion_row._subtotal == subtotal
 
@@ -285,7 +285,7 @@ class DescribeInsertionsRow(object):
     def it_provides_values(self, addend_idxs_prop_, values_fixture):
         slice_, subtotal_indexes, expected_row_counts = values_fixture
         addend_idxs_prop_.return_value = subtotal_indexes
-        insertion_row = _InsertionRow(slice_, _Subtotal(None, None))
+        insertion_row = InsertionRow(slice_, _Subtotal(None, None))
         np.testing.assert_array_equal(insertion_row.values, expected_row_counts)
 
     # fixtures -------------------------------------------------------
@@ -310,7 +310,7 @@ class DescribeInsertionsRow(object):
 
 
 class DescribeAssembledVector(object):
-    """Unit-test suite for `cr.cube.slices.AssembledVector` object."""
+    """Unit-test suite for `cr.cube.vector.AssembledVector` object."""
 
     @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_provides_assembled_values(self, assembled_row_fixture):
@@ -337,7 +337,7 @@ class DescribeAssembledVector(object):
         insertion_cols = tuple(
             instance_mock(
                 request,
-                _InsertionColumn,
+                InsertionColumn,
                 anchor=anchor,
                 addend_idxs=np.array(addend_idxs),
             )
@@ -365,7 +365,7 @@ class DescribeAssembledVector(object):
         insertion_cols = tuple(
             instance_mock(
                 request,
-                _InsertionColumn,
+                InsertionColumn,
                 anchor=anchor,
                 addend_idxs=np.array(addend_idxs),
             )
@@ -374,7 +374,7 @@ class DescribeAssembledVector(object):
         return CategoricalVector(np.array(raw_counts)), insertion_cols, expected
 
 
-class Describe_IntegratedAssembler(object):
+class DescribeIntegrated_Assembler(object):
     """Partial-integration test suite for `cr.cube.slices._Assembler` object."""
 
     @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
@@ -488,7 +488,7 @@ class Describe_OrderTransform(object):
 
 
 class DescribeOrderedMatrix(object):
-    """Unit-test suite for `cr.cube.slices.OrderedMatrix` object."""
+    """Unit-test suite for `cr.cube.matrix.OrderedMatrix` object."""
 
     @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_initiates_slice_and_reordering(self):
@@ -530,7 +530,7 @@ class DescribeOrderedMatrix(object):
 
 
 class DescribeOrderedVector(object):
-    """Unit-test suite for `cr.cube.slices.OrderedVector` object."""
+    """Unit-test suite for `cr.cube.vector.OrderedVector` object."""
 
     @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_sets_order(self):
@@ -561,7 +561,7 @@ class DescribeOrderedVector(object):
 
 
 class DescribeMatrixWithHidden(object):
-    """Unit-test suite for `cr.cube.slices.MatrixWithHidden` object."""
+    """Unit-test suite for `cr.cube.matrix.MatrixWithHidden` object."""
 
     @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_initiates_slice(self):
@@ -609,7 +609,7 @@ class DescribeMatrixWithHidden(object):
 
 
 class DescribeVectorAfterHiding(object):
-    """Unit-test suite for `cr.cube.slices.VectorAfterHiding` object."""
+    """Unit-test suite for `cr.cube.vector.VectorAfterHiding` object."""
 
     @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_initiates_base_vector_and_opposite_vectors(self):

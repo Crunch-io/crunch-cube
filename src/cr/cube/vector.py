@@ -18,6 +18,147 @@ from cr.cube.util import lazyproperty
 # ===TRANSFORMATION VECTORS===
 
 
+class _BaseInsertionVector(object):
+    """Represents constituent vectors of the `Insertions` class.
+
+    Needs to repro the API of the more basic vectors - because of
+    composition (and not inheritance)
+    """
+
+    def __init__(self, slice_, subtotal):
+        self._slice = slice_
+        self._subtotal = subtotal
+
+    @lazyproperty
+    def addend_idxs(self):
+        return np.array(self._subtotal.addend_idxs)
+
+    @lazyproperty
+    def anchor(self):
+        return self._subtotal.anchor_idx
+
+    @lazyproperty
+    def base(self):
+        return np.sum(np.array([vec.base for vec in self._addend_vectors]), axis=0)
+
+    @lazyproperty
+    def base_values(self):
+        return np.sum(
+            np.array([row.base_values for row in self._addend_vectors]), axis=0
+        )
+
+    @lazyproperty
+    def column_index(self):
+        # TODO: Calculate insertion column index for real. Check with Mike
+        return np.array([np.nan] * len(self.values))
+
+    @lazyproperty
+    def fill(self):
+        """Unconditionally `None` for an insertion vector.
+
+        A `fill` value is normally a str RGB value like "#da09fc", specifying the color
+        to use for a chart category or series representing this element. The value
+        reflects the resolved element-fill transform cascade. Since an insertion cannot
+        (currently) have a fill-transform, the default value of `None` (indicating "use
+        default color") is unconditionally returned.
+        """
+        return None
+
+    @lazyproperty
+    def hidden(self):
+        """True if vector is pruned.
+
+        Insertions can never be hidden explicitly (for now). They can also almost never
+        be pruned, except in the case when all of the opposite vectors are also pruned
+        (thus leaving no elements for this insertion vector).
+        """
+        return self.pruned
+
+    @lazyproperty
+    def is_insertion(self):
+        return True
+
+    @lazyproperty
+    def label(self):
+        return self._subtotal.label
+
+    @lazyproperty
+    def margin(self):
+        return np.sum(np.array([vec.margin for vec in self._addend_vectors]), axis=0)
+
+    @lazyproperty
+    def means(self):
+        return np.array([np.nan])
+
+    @lazyproperty
+    def numeric(self):
+        return np.nan
+
+    @lazyproperty
+    def table_margin(self):
+        return self._slice.table_margin
+
+    @lazyproperty
+    def values(self):
+        return np.sum(np.array([row.values for row in self._addend_vectors]), axis=0)
+
+
+class InsertionColumn(_BaseInsertionVector):
+    """Represents an inserted (subtotal) column."""
+
+    @lazyproperty
+    def pruned(self):
+        """True if vector is pruned.
+
+        Insertions can almost never be pruned, except in the case when all of the
+        opposite vectors are also pruned (thus leaving no elements for this
+        insertion vector).
+        """
+        return self._subtotal.prune and not np.any(
+            np.array([row.base for row in self._slice.rows])
+        )
+
+    @lazyproperty
+    def _addend_vectors(self):
+        return tuple(
+            column
+            for i, column in enumerate(self._slice.columns)
+            if i in self._subtotal.addend_idxs
+        )
+
+
+class InsertionRow(_BaseInsertionVector):
+    """Represents an inserted (subtotal) row."""
+
+    @lazyproperty
+    def pruned(self):
+        """True if vector is pruned.
+
+        Insertions can almost never be pruned, except in the case when all of the
+        opposite vectors are also pruned (thus leaving no elements for this
+        insertion vector).
+        """
+        return self._subtotal.prune and not np.any(
+            np.array([column.base for column in self._slice.columns])
+        )
+
+    @lazyproperty
+    def pvals(self):
+        return np.array([np.nan] * len(self._slice.columns))
+
+    @lazyproperty
+    def zscore(self):
+        return np.array([np.nan] * len(self._slice.columns))
+
+    @lazyproperty
+    def _addend_vectors(self):
+        return tuple(
+            row
+            for i, row in enumerate(self._slice.rows)
+            if i in self._subtotal.addend_idxs
+        )
+
+
 class _BaseTransformationVector(object):
     @lazyproperty
     def fill(self):
@@ -395,91 +536,6 @@ class BaseVector(object):
         return self.base == 0 or np.isnan(self.base)
 
 
-class _BaseInsertionVector(object):
-    """Represents constituent vectors of the `Insertions` class.
-
-    Needs to repro the API of the more basic vectors - because of
-    composition (and not inheritance)
-    """
-
-    def __init__(self, slice_, subtotal):
-        self._slice = slice_
-        self._subtotal = subtotal
-
-    @lazyproperty
-    def addend_idxs(self):
-        return np.array(self._subtotal.addend_idxs)
-
-    @lazyproperty
-    def anchor(self):
-        return self._subtotal.anchor_idx
-
-    @lazyproperty
-    def base(self):
-        return np.sum(np.array([vec.base for vec in self._addend_vectors]), axis=0)
-
-    @lazyproperty
-    def base_values(self):
-        return np.sum(
-            np.array([row.base_values for row in self._addend_vectors]), axis=0
-        )
-
-    @lazyproperty
-    def column_index(self):
-        # TODO: Calculate insertion column index for real. Check with Mike
-        return np.array([np.nan] * len(self.values))
-
-    @lazyproperty
-    def fill(self):
-        """Unconditionally `None` for an insertion vector.
-
-        A `fill` value is normally a str RGB value like "#da09fc", specifying the color
-        to use for a chart category or series representing this element. The value
-        reflects the resolved element-fill transform cascade. Since an insertion cannot
-        (currently) have a fill-transform, the default value of `None` (indicating "use
-        default color") is unconditionally returned.
-        """
-        return None
-
-    @lazyproperty
-    def hidden(self):
-        """True if vector is pruned.
-
-        Insertions can never be hidden explicitly (for now). They can also almost never
-        be pruned, except in the case when all of the opposite vectors are also pruned
-        (thus leaving no elements for this insertion vector).
-        """
-        return self.pruned
-
-    @lazyproperty
-    def is_insertion(self):
-        return True
-
-    @lazyproperty
-    def label(self):
-        return self._subtotal.label
-
-    @lazyproperty
-    def margin(self):
-        return np.sum(np.array([vec.margin for vec in self._addend_vectors]), axis=0)
-
-    @lazyproperty
-    def means(self):
-        return np.array([np.nan])
-
-    @lazyproperty
-    def numeric(self):
-        return np.nan
-
-    @lazyproperty
-    def table_margin(self):
-        return self._slice.table_margin
-
-    @lazyproperty
-    def values(self):
-        return np.sum(np.array([row.values for row in self._addend_vectors]), axis=0)
-
-
 class CategoricalVector(BaseVector):
     """Main staple of all measures.
 
@@ -546,62 +602,6 @@ class CatXMrVector(CategoricalVector):
     @lazyproperty
     def pruned(self):
         return np.sum(self._pruning_bases) == 0
-
-
-class _InsertionColumn(_BaseInsertionVector):
-    """Represents an inserted (subtotal) column."""
-
-    @lazyproperty
-    def pruned(self):
-        """True if vector is pruned.
-
-        Insertions can almost never be pruned, except in the case when all of the
-        opposite vectors are also pruned (thus leaving no elements for this
-        insertion vector).
-        """
-        return self._subtotal.prune and not np.any(
-            np.array([row.base for row in self._slice.rows])
-        )
-
-    @lazyproperty
-    def _addend_vectors(self):
-        return tuple(
-            column
-            for i, column in enumerate(self._slice.columns)
-            if i in self._subtotal.addend_idxs
-        )
-
-
-class _InsertionRow(_BaseInsertionVector):
-    """Represents an inserted (subtotal) row."""
-
-    @lazyproperty
-    def pruned(self):
-        """True if vector is pruned.
-
-        Insertions can almost never be pruned, except in the case when all of the
-        opposite vectors are also pruned (thus leaving no elements for this
-        insertion vector).
-        """
-        return self._subtotal.prune and not np.any(
-            np.array([column.base for column in self._slice.columns])
-        )
-
-    @lazyproperty
-    def pvals(self):
-        return np.array([np.nan] * len(self._slice.columns))
-
-    @lazyproperty
-    def zscore(self):
-        return np.array([np.nan] * len(self._slice.columns))
-
-    @lazyproperty
-    def _addend_vectors(self):
-        return tuple(
-            row
-            for i, row in enumerate(self._slice.rows)
-            if i in self._subtotal.addend_idxs
-        )
 
 
 class MeansVector(BaseVector):

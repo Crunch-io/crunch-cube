@@ -16,7 +16,7 @@ from cr.cube.matrix import (
     StripeFactory,
 )
 from cr.cube.util import lazyproperty
-from cr.cube.vector import _InsertionColumn, _InsertionRow
+from cr.cube.vector import InsertionColumn, InsertionRow
 
 
 class CubeSection(object):
@@ -811,7 +811,7 @@ class _Insertions(object):
             return ()
 
         return tuple(
-            _InsertionColumn(self._matrix, subtotal)
+            InsertionColumn(self._matrix, subtotal)
             for subtotal in self._column_dimension.subtotals
         )
 
@@ -821,7 +821,7 @@ class _Insertions(object):
             return tuple()
 
         return tuple(
-            _InsertionRow(self._matrix, subtotal)
+            InsertionRow(self._matrix, subtotal)
             for subtotal in self._rows_dimension.subtotals
         )
 
