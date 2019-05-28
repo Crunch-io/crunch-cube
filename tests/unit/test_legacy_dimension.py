@@ -1,22 +1,27 @@
 # encoding: utf-8
 
-"""Unit test suite for cr.cube.dimension module."""
+"""Unit test suite for cr.cube.legacy_dimension module.
+
+This test module can simply be deleted when CrunchCube is retired and the
+legacy_dimension module is dropped.
+"""
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
 import pytest
 
-from cr.cube.dimension import (
+from cr.cube.legacy_dimension import (
     AllDimensions,
     _AllElements,
     _ApparentDimensions,
     _BaseDimensions,
+    _BaseElement,
     _BaseElements,
+    _Category,
     Dimension,
     _DimensionFactory,
     _Element,
-    _ElementTransforms,
     _RawDimension,
     _Subtotal,
     _Subtotals,
@@ -58,8 +63,6 @@ class Describe_BaseDimensions(object):
 
 
 class DescribeAllDimensions(object):
-    """Unit-test suite for `cr.cube.dimension.AllDimensions` object."""
-
     def it_provides_access_to_its_ApparentDimensions(
         self,
         _ApparentDimensions_,
@@ -108,7 +111,7 @@ class DescribeAllDimensions(object):
 
     @pytest.fixture
     def _ApparentDimensions_(self, request):
-        return class_mock(request, "cr.cube.dimension._ApparentDimensions")
+        return class_mock(request, "cr.cube.legacy_dimension._ApparentDimensions")
 
     @pytest.fixture
     def apparent_dimensions_(self, request):
@@ -116,7 +119,7 @@ class DescribeAllDimensions(object):
 
     @pytest.fixture
     def _DimensionFactory_(self, request):
-        return class_mock(request, "cr.cube.dimension._DimensionFactory")
+        return class_mock(request, "cr.cube.legacy_dimension._DimensionFactory")
 
     @pytest.fixture
     def _dimensions_prop_(self, request):
@@ -205,7 +208,7 @@ class Describe_DimensionFactory(object):
 
     @pytest.fixture
     def Dimension_(self, request):
-        return class_mock(request, "cr.cube.dimension.Dimension")
+        return class_mock(request, "cr.cube.legacy_dimension.Dimension")
 
     @pytest.fixture
     def dimension_dicts_(self, request):
@@ -222,7 +225,7 @@ class Describe_DimensionFactory(object):
 
     @pytest.fixture
     def _RawDimension_(self, request):
-        return class_mock(request, "cr.cube.dimension._RawDimension")
+        return class_mock(request, "cr.cube.legacy_dimension._RawDimension")
 
     @pytest.fixture
     def _raw_dimensions_prop_(self, request):
@@ -456,8 +459,6 @@ class Describe_RawDimension(object):
 
 
 class DescribeDimension(object):
-    """Unit-test suite for `cr.cube.dimension.Dimension` object."""
-
     def it_knows_its_description(self, description_fixture):
         dimension_dict, expected_value = description_fixture
         dimension = Dimension(dimension_dict, None)
@@ -471,11 +472,31 @@ class DescribeDimension(object):
         dimension_type = dimension.dimension_type
         assert dimension_type == DT.CAT
 
-    def it_knows_the_numeric_values_of_its_elements(
-        self, request, valid_elements_prop_
+    def it_provides_subtotal_indices(
+        self, hs_indices_fixture, dimension_type_prop_, _subtotals_prop_
     ):
-        valid_elements_prop_.return_value = tuple(
-            instance_mock(request, _Element, numeric_value=numeric_value)
+        dimension_type, subtotals_, expected_value = hs_indices_fixture
+        dimension_type_prop_.return_value = dimension_type
+        _subtotals_prop_.return_value = subtotals_
+        dimension = Dimension(None, None)
+
+        hs_indices = dimension.hs_indices
+
+        assert hs_indices == expected_value
+
+    def it_knows_whether_it_is_marginable(self, marginable_fixture):
+        dimension_type, expected_value = marginable_fixture
+        dimension = Dimension(None, dimension_type)
+
+        is_marginable = dimension.is_marginable
+
+        assert is_marginable is expected_value
+
+    def it_knows_the_numeric_values_of_its_elements(
+        self, request, _valid_elements_prop_
+    ):
+        _valid_elements_prop_.return_value = tuple(
+            instance_mock(request, _BaseElement, numeric_value=numeric_value)
             for numeric_value in (1, 2.2, np.nan)
         )
         dimension = Dimension(None, None)
@@ -489,40 +510,17 @@ class DescribeDimension(object):
         subtotals_fixture,
         _Subtotals_,
         subtotals_,
-        valid_elements_prop_,
+        _valid_elements_prop_,
         valid_elements_,
-        prune_prop_,
     ):
         dimension_dict, insertion_dicts = subtotals_fixture
-        valid_elements_prop_.return_value = valid_elements_
+        _valid_elements_prop_.return_value = valid_elements_
         _Subtotals_.return_value = subtotals_
-        prune_prop_.return_value = True
         dimension = Dimension(dimension_dict, None)
 
-        subtotals = dimension.subtotals
+        subtotals = dimension._subtotals
 
-        _Subtotals_.assert_called_once_with(insertion_dicts, valid_elements_, True)
-        assert subtotals is subtotals_
-
-    def but_it_overrides_with_subtotal_transforms_when_present(
-        self,
-        valid_elements_prop_,
-        valid_elements_,
-        _Subtotals_,
-        subtotals_,
-        prune_prop_,
-    ):
-        dimension_transforms = {"insertions": ["subtotal", "dicts"]}
-        valid_elements_prop_.return_value = valid_elements_
-        _Subtotals_.return_value = subtotals_
-        prune_prop_.return_value = False
-        dimension = Dimension(None, None, dimension_transforms)
-
-        subtotals = dimension.subtotals
-
-        _Subtotals_.assert_called_once_with(
-            ["subtotal", "dicts"], valid_elements_, False
-        )
+        _Subtotals_.assert_called_once_with(insertion_dicts, valid_elements_)
         assert subtotals is subtotals_
 
     # fixtures -------------------------------------------------------
@@ -538,6 +536,39 @@ class DescribeDimension(object):
     def description_fixture(self, request):
         dimension_dict, expected_value = request.param
         return dimension_dict, expected_value
+
+    @pytest.fixture(
+        params=[(DT.MR_CAT, ()), (DT.LOGICAL, ()), (DT.CAT, ((0, (1, 2)), (3, (4, 5))))]
+    )
+    def hs_indices_fixture(self, request):
+        dimension_type, expected_value = request.param
+        subtotals_ = (
+            instance_mock(
+                request,
+                _Subtotal,
+                anchor_idx=idx * 3,
+                addend_idxs=(idx + 1 + (2 * idx), idx + 2 + (2 * idx)),
+            )
+            for idx in range(2)
+        )
+        return dimension_type, subtotals_, expected_value
+
+    @pytest.fixture(
+        params=[
+            (DT.CAT, True),
+            (DT.CA_SUBVAR, False),
+            (DT.CA_CAT, True),
+            (DT.MR_SUBVAR, False),
+            (DT.MR_CAT, False),
+            (DT.LOGICAL, False),
+            (DT.BINNED_NUMERIC, True),
+            (DT.DATETIME, True),
+            (DT.TEXT, True),
+        ]
+    )
+    def marginable_fixture(self, request):
+        dimension_type, expected_value = request.param
+        return dimension_type, expected_value
 
     @pytest.fixture(
         params=[
@@ -571,32 +602,34 @@ class DescribeDimension(object):
     # fixture components ---------------------------------------------
 
     @pytest.fixture
-    def prune_prop_(self, request):
-        return property_mock(request, Dimension, "prune")
+    def dimension_type_prop_(self, request):
+        return property_mock(request, Dimension, "dimension_type")
 
     @pytest.fixture
     def _Subtotals_(self, request):
-        return class_mock(request, "cr.cube.dimension._Subtotals")
+        return class_mock(request, "cr.cube.legacy_dimension._Subtotals")
 
     @pytest.fixture
     def subtotals_(self, request):
         return instance_mock(request, _Subtotals)
 
     @pytest.fixture
+    def _subtotals_prop_(self, request):
+        return property_mock(request, Dimension, "_subtotals")
+
+    @pytest.fixture
     def valid_elements_(self, request):
         return instance_mock(request, _ValidElements)
 
     @pytest.fixture
-    def valid_elements_prop_(self, request):
+    def _valid_elements_prop_(self, request):
         return property_mock(request, Dimension, "valid_elements")
 
 
 class Describe_BaseElements(object):
-    """Unit-test suite for `cr.cube.dimension._BaseElements` object."""
-
     def it_has_sequence_behaviors(self, request, _elements_prop_):
         _elements_prop_.return_value = (1, 2, 3)
-        elements = _BaseElements()
+        elements = _BaseElements(None)
 
         assert elements[1] == 2
         assert elements[1:3] == (2, 3)
@@ -605,9 +638,9 @@ class Describe_BaseElements(object):
 
     def it_knows_the_element_ids(self, request, _elements_prop_):
         _elements_prop_.return_value = tuple(
-            instance_mock(request, _Element, element_id=n) for n in (1, 2, 5)
+            instance_mock(request, _BaseElement, element_id=n) for n in (1, 2, 5)
         )
-        elements = _BaseElements()
+        elements = _BaseElements(None)
 
         element_ids = elements.element_ids
 
@@ -615,9 +648,9 @@ class Describe_BaseElements(object):
 
     def it_knows_the_element_indices(self, request, _elements_prop_):
         _elements_prop_.return_value = tuple(
-            instance_mock(request, _Element, index=index) for index in (1, 3, 4)
+            instance_mock(request, _BaseElement, index=index) for index in (1, 3, 4)
         )
-        elements = _BaseElements()
+        elements = _BaseElements(None)
 
         element_idxs = elements.element_idxs
 
@@ -625,35 +658,65 @@ class Describe_BaseElements(object):
 
     def it_can_find_an_element_by_id(self, request, _elements_by_id_prop_):
         elements_ = tuple(
-            instance_mock(request, _Element, element_id=element_id)
+            instance_mock(request, _BaseElement, element_id=element_id)
             for element_id in (3, 7, 11)
         )
         _elements_by_id_prop_.return_value = {
             element_.element_id: element_ for element_ in elements_
         }
-        elements = _BaseElements()
+        elements = _BaseElements(None)
 
         element = elements.get_by_id(7)
 
         assert element is elements_[1]
 
+    def it_provides_element_factory_inputs_to_help(self, makings_fixture):
+        type_dict, expected_element_class = makings_fixture[:2]
+        expected_element_dicts = makings_fixture[2]
+        elements = _BaseElements(type_dict)
+
+        ElementCls, element_dicts = elements._element_makings
+
+        assert ElementCls == expected_element_class
+        assert element_dicts == expected_element_dicts
+
     def it_maintains_a_dict_of_elements_by_id_to_help(self, request, _elements_prop_):
         elements_ = tuple(
-            instance_mock(request, _Element, element_id=element_id)
+            instance_mock(request, _BaseElement, element_id=element_id)
             for element_id in (4, 6, 7)
         )
         _elements_prop_.return_value = elements_
-        elements = _BaseElements()
+        elements = _BaseElements(None)
 
         elements_by_id = elements._elements_by_id
 
         assert elements_by_id == {4: elements_[0], 6: elements_[1], 7: elements_[2]}
 
     def it_stores_its_elements_in_a_tuple_to_help(self):
-        base_elements = _BaseElements()
+        base_elements = _BaseElements(None)
         # ---must be implemented by each subclass---
         with pytest.raises(NotImplementedError):
             base_elements._elements
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture(
+        params=[
+            (
+                {"class": "categorical", "categories": ["cat", "dicts"]},
+                _Category,
+                ["cat", "dicts"],
+            ),
+            (
+                {"class": "enum", "elements": ["element", "dicts"]},
+                _Element,
+                ["element", "dicts"],
+            ),
+        ]
+    )
+    def makings_fixture(self, request):
+        type_dict, expected_element_cls, expected_element_dicts = request.param
+        return type_dict, expected_element_cls, expected_element_dicts
 
     # fixture components ---------------------------------------------
 
@@ -667,117 +730,63 @@ class Describe_BaseElements(object):
 
 
 class Describe_AllElements(object):
-    """Unit-test suite for `cr.cube.dimension._AllElements` object."""
-
     def it_provides_access_to_the_ValidElements_object(
         self, request, _elements_prop_, _ValidElements_, valid_elements_
     ):
         elements_ = tuple(
-            instance_mock(request, _Element, name="el%s" % idx) for idx in range(3)
+            instance_mock(request, _BaseElement, name="el%s" % idx) for idx in range(3)
         )
-        dimension_transforms_dict = {"dimension": "transforms"}
         _elements_prop_.return_value = elements_
         _ValidElements_.return_value = valid_elements_
-        all_elements = _AllElements(None, dimension_transforms_dict)
+        all_elements = _AllElements(None)
 
         valid_elements = all_elements.valid_elements
 
-        _ValidElements_.assert_called_once_with(elements_, dimension_transforms_dict)
+        _ValidElements_.assert_called_once_with(elements_)
         assert valid_elements is valid_elements_
 
-    def it_creates_its_Element_objects_in_a_local_factory_to_help(
-        self,
-        request,
-        _element_dicts_prop_,
-        _prune_prop_,
-        _ElementTransforms_,
-        _Element_,
-        _iter_element_makings_,
+    def it_creates_its_Element_objects_in_its_local_factory(
+        self, request, _element_makings_prop_, _BaseElement_
     ):
-        element_dicts_ = "element-dicts-that-shouldn't-be-needed"
-        _element_dicts_prop_.return_value = element_dicts_
-        _prune_prop_.return_value = True
-        element_transforms_ = tuple(
-            instance_mock(request, _ElementTransforms, name="element-xfrms-%s" % idx)
-            for idx in range(3)
-        )
-        _ElementTransforms_.side_effect = iter(element_transforms_)
-        _iter_element_makings_.return_value = iter(
-            (
-                (0, {"element": "dict-A"}, {"xfrms": 0}),
-                (1, {"element": "dict-B"}, {"xfrms": 1}),
-                (2, {"element": "dict-C"}, {"xfrms": 2}),
-            )
+        element_dicts_ = (
+            {"element": "dict-A"},
+            {"element": "dict-B"},
+            {"element": "dict-C"},
         )
         elements_ = tuple(
-            instance_mock(request, _Element, name="element-%s" % idx)
+            instance_mock(request, _BaseElement, name="element-%s" % idx)
             for idx in range(3)
         )
-        _Element_.side_effect = iter(elements_)
-        all_elements = _AllElements(None, None)
+        _element_makings_prop_.return_value = _BaseElement_, element_dicts_
+        _BaseElement_.side_effect = iter(elements_)
+        all_elements = _AllElements(None)
 
         elements = all_elements._elements
 
-        assert _ElementTransforms_.call_args_list == [
-            call({"xfrms": 0}, True),
-            call({"xfrms": 1}, True),
-            call({"xfrms": 2}, True),
-        ]
-        assert _Element_.call_args_list == [
-            call({"element": "dict-A"}, 0, element_dicts_, element_transforms_[0]),
-            call({"element": "dict-B"}, 1, element_dicts_, element_transforms_[1]),
-            call({"element": "dict-C"}, 2, element_dicts_, element_transforms_[2]),
+        assert _BaseElement_.call_args_list == [
+            call({"element": "dict-A"}, 0, element_dicts_),
+            call({"element": "dict-B"}, 1, element_dicts_),
+            call({"element": "dict-C"}, 2, element_dicts_),
         ]
         assert elements == (elements_[0], elements_[1], elements_[2])
-
-    def it_generates_element_factory_inputs_to_help(self, _element_dicts_prop_):
-        dimension_transforms_dict = {
-            "elements": {"6": {"element": "xfrms_6"}, "4": {"element": "xfrms_4"}}
-        }
-        _element_dicts_prop_.return_value = (
-            {"id": 4, "element": "dict_4"},
-            {"id": 2, "element": "dict_2"},
-            {"id": 6, "element": "dict_6"},
-        )
-        all_elements = _AllElements(None, dimension_transforms_dict)
-
-        element_makings = tuple(all_elements._iter_element_makings())
-
-        assert element_makings == (
-            (0, {"id": 4, "element": "dict_4"}, {"element": "xfrms_4"}),
-            (1, {"id": 2, "element": "dict_2"}, {}),
-            (2, {"id": 6, "element": "dict_6"}, {"element": "xfrms_6"}),
-        )
 
     # fixture components ---------------------------------------------
 
     @pytest.fixture
-    def _Element_(self, request):
-        return class_mock(request, "cr.cube.dimension._Element")
+    def _BaseElement_(self, request):
+        return class_mock(request, "cr.cube.legacy_dimension._BaseElement")
 
     @pytest.fixture
-    def _element_dicts_prop_(self, request):
-        return property_mock(request, _AllElements, "_element_dicts")
+    def _element_makings_prop_(self, request):
+        return property_mock(request, _AllElements, "_element_makings")
 
     @pytest.fixture
     def _elements_prop_(self, request):
         return property_mock(request, _AllElements, "_elements")
 
     @pytest.fixture
-    def _ElementTransforms_(self, request):
-        return class_mock(request, "cr.cube.dimension._ElementTransforms")
-
-    @pytest.fixture
-    def _iter_element_makings_(self, request):
-        return method_mock(request, _AllElements, "_iter_element_makings")
-
-    @pytest.fixture
-    def _prune_prop_(self, request):
-        return property_mock(request, _AllElements, "_prune")
-
-    @pytest.fixture
     def _ValidElements_(self, request):
-        return class_mock(request, "cr.cube.dimension._ValidElements")
+        return class_mock(request, "cr.cube.legacy_dimension._ValidElements")
 
     @pytest.fixture
     def valid_elements_(self, request):
@@ -785,17 +794,17 @@ class Describe_AllElements(object):
 
 
 class Describe_ValidElements(object):
-    """Unit-test suite for `cr.cube.dimension._ValidElements` object."""
-
     def it_gets_its_Element_objects_from_an_AllElements_object(
         self, request, all_elements_
     ):
         elements_ = tuple(
-            instance_mock(request, _Element, name="element-%s" % idx, missing=missing)
+            instance_mock(
+                request, _BaseElement, name="element-%s" % idx, missing=missing
+            )
             for idx, missing in enumerate([False, True, False])
         )
         all_elements_.__iter__.return_value = iter(elements_)
-        valid_elements = _ValidElements(all_elements_, None)
+        valid_elements = _ValidElements(all_elements_)
 
         elements = valid_elements._elements
 
@@ -808,43 +817,23 @@ class Describe_ValidElements(object):
         return instance_mock(request, _AllElements)
 
 
-class Describe_Element(object):
-    """Unit-test suite for `cr.cube.dimension._Element` object."""
-
+class Describe_BaseElement(object):
     def it_knows_its_element_id(self):
         element_dict = {"id": 42}
-        element = _Element(element_dict, None, None, None)
+        element = _BaseElement(element_dict, None, element_dict)
 
         element_id = element.element_id
 
         assert element_id == 42
 
-    @pytest.mark.xfail(reason="implement me", strict=True)
-    def it_knows_its_fill_RGB_color_str(self):
-        assert False
-
     def it_knows_its_position_among_all_the_dimension_elements(self):
-        element = _Element(None, 17, None, None)
+        element = _BaseElement(None, 17, {})
         index = element.index
         assert index == 17
 
-    # TODO: add test cases that exercise element-name transform
-    def it_knows_its_label(self, label_fixture, element_transforms_):
-        element_dict, expected_value = label_fixture
-        element_transforms_.name = None
-        element = _Element(element_dict, None, None, element_transforms_)
-
-        label = element.label
-
-        assert label == expected_value
-
-    @pytest.mark.xfail(reason="implement me", strict=True)
-    def it_knows_whether_it_is_explicitly_hidden(self):
-        assert False
-
     def it_knows_whether_its_missing_or_valid(self, missing_fixture):
         element_dict, expected_value = missing_fixture
-        element = _Element(element_dict, None, None, None)
+        element = _BaseElement(element_dict, None, None)
 
         missing = element.missing
 
@@ -853,7 +842,7 @@ class Describe_Element(object):
 
     def it_knows_its_numeric_value(self, numeric_value_fixture):
         element_dict, expected_value = numeric_value_fixture
-        element = _Element(element_dict, None, None, None)
+        element = _BaseElement(element_dict, None, None)
 
         numeric_value = element.numeric_value
 
@@ -861,27 +850,6 @@ class Describe_Element(object):
         assert numeric_value in [expected_value]
 
     # fixtures -------------------------------------------------------
-
-    @pytest.fixture(
-        params=[
-            ({}, ""),
-            ({"name": ""}, ""),
-            ({"name": None}, ""),
-            ({"name": "Bob"}, "Bob"),
-            ({"name": "Hinzufägen"}, "Hinzufägen"),
-            ({"value": ["A", "F"]}, "A-F"),
-            ({"value": [1.2, 3.4]}, "1.2-3.4"),
-            ({"value": 42}, "42"),
-            ({"value": 4.2}, "4.2"),
-            ({"value": "Bill"}, "Bill"),
-            ({"value": "Fähig"}, "Fähig"),
-            ({"value": {"references": {}}}, ""),
-            ({"value": {"references": {"name": "Tom"}}}, "Tom"),
-        ]
-    )
-    def label_fixture(self, request):
-        element_dict, expected_value = request.param
-        return element_dict, expected_value
 
     @pytest.fixture(
         params=[
@@ -916,19 +884,65 @@ class Describe_Element(object):
         element_dict, expected_value = request.param
         return element_dict, expected_value
 
-    # fixture components ---------------------------------------------
 
-    @pytest.fixture
-    def element_transforms_(self, request):
-        return instance_mock(request, _ElementTransforms)
+class Describe_Category(object):
+    def it_knows_its_label(self, label_fixture):
+        category_dict, expected_value = label_fixture
+        category = _Category(category_dict, None, None)
+
+        label = category.label
+
+        assert label == expected_value
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture(
+        params=[
+            ({}, ""),
+            ({"name": ""}, ""),
+            ({"name": None}, ""),
+            ({"name": "Bob"}, "Bob"),
+            ({"name": "Hinzufägen"}, "Hinzufägen"),
+        ]
+    )
+    def label_fixture(self, request):
+        category_dict, expected_value = request.param
+        return category_dict, expected_value
+
+
+class Describe_Element(object):
+    def it_knows_its_label(self, label_fixture):
+        element_dict, expected_value = label_fixture
+        element = _Element(element_dict, None, None)
+
+        label = element.label
+
+        assert label == expected_value
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture(
+        params=[
+            ({}, ""),
+            ({"value": ["A", "F"]}, "A-F"),
+            ({"value": [1.2, 3.4]}, "1.2-3.4"),
+            ({"value": 42}, "42"),
+            ({"value": 4.2}, "4.2"),
+            ({"value": "Bill"}, "Bill"),
+            ({"value": "Fähig"}, "Fähig"),
+            ({"value": {"references": {}}}, ""),
+            ({"value": {"references": {"name": "Tom"}}}, "Tom"),
+        ]
+    )
+    def label_fixture(self, request):
+        element_dict, expected_value = request.param
+        return element_dict, expected_value
 
 
 class Describe_Subtotals(object):
-    """Unit-test suite for `cr.cube.dimension._Subtotals` object."""
-
     def it_has_sequence_behaviors(self, request, _subtotals_prop_):
         _subtotals_prop_.return_value = (1, 2, 3)
-        subtotals = _Subtotals(None, None, None)
+        subtotals = _Subtotals(None, None)
 
         assert subtotals[1] == 2
         assert subtotals[1:3] == (2, 3)
@@ -941,7 +955,7 @@ class Describe_Subtotals(object):
             for idx, anchor in enumerate(["bottom", 2, "bottom"])
         )
         _subtotals_prop_.return_value = subtotals_
-        subtotals = _Subtotals(None, None, None)
+        subtotals = _Subtotals(None, None)
 
         subtotals_with_anchor = tuple(subtotals.iter_for_anchor("bottom"))
 
@@ -949,7 +963,7 @@ class Describe_Subtotals(object):
 
     def it_provides_the_element_ids_as_a_set_to_help(self, request, valid_elements_):
         valid_elements_.element_ids = tuple(range(3))
-        subtotals = _Subtotals(None, valid_elements_, None)
+        subtotals = _Subtotals(None, valid_elements_)
 
         element_ids = subtotals._element_ids
 
@@ -960,7 +974,7 @@ class Describe_Subtotals(object):
     ):
         insertion_dicts, element_ids, expected_value = iter_valid_fixture
         _element_ids_prop_.return_value = element_ids
-        subtotals = _Subtotals(insertion_dicts, None, None)
+        subtotals = _Subtotals(insertion_dicts, None)
 
         subtotal_dicts = tuple(subtotals._iter_valid_subtotal_dicts())
 
@@ -976,13 +990,12 @@ class Describe_Subtotals(object):
         )
         _iter_valid_subtotal_dicts_.return_value = iter(subtotal_dicts_)
         _Subtotal_.side_effect = iter(subtotal_objs_)
-        subtotals = _Subtotals(None, valid_elements_, True)
+        subtotals = _Subtotals(None, valid_elements_)
 
         subtotal_objs = subtotals._subtotals
 
         assert _Subtotal_.call_args_list == [
-            call(subtot_dict_, valid_elements_, True)
-            for subtot_dict_ in subtotal_dicts_
+            call(subtot_dict_, valid_elements_) for subtot_dict_ in subtotal_dicts_
         ]
         assert subtotal_objs == subtotal_objs_
 
@@ -1035,7 +1048,7 @@ class Describe_Subtotals(object):
 
     @pytest.fixture
     def _Subtotal_(self, request):
-        return class_mock(request, "cr.cube.dimension._Subtotal")
+        return class_mock(request, "cr.cube.legacy_dimension._Subtotal")
 
     @pytest.fixture
     def _subtotals_prop_(self, request):
@@ -1047,12 +1060,10 @@ class Describe_Subtotals(object):
 
 
 class Describe_Subtotal(object):
-    """Unit-test suite for `cr.cube.dimension._Subtotal` object."""
-
     def it_knows_the_insertion_anchor(self, anchor_fixture, valid_elements_):
         subtotal_dict, element_ids, expected_value = anchor_fixture
         valid_elements_.element_ids = element_ids
-        subtotal = _Subtotal(subtotal_dict, valid_elements_, None)
+        subtotal = _Subtotal(subtotal_dict, valid_elements_)
 
         anchor = subtotal.anchor
 
@@ -1065,7 +1076,7 @@ class Describe_Subtotal(object):
         anchor_prop_.return_value = anchor
         valid_elements_.get_by_id.return_value = element_
         element_.index_in_valids = index
-        subtotal = _Subtotal(None, valid_elements_, None)
+        subtotal = _Subtotal(None, valid_elements_)
 
         anchor_idx = subtotal.anchor_idx
 
@@ -1077,7 +1088,7 @@ class Describe_Subtotal(object):
     ):
         subtotal_dict, element_ids, expected_value = addend_ids_fixture
         valid_elements_.element_ids = element_ids
-        subtotal = _Subtotal(subtotal_dict, valid_elements_, None)
+        subtotal = _Subtotal(subtotal_dict, valid_elements_)
 
         addend_ids = subtotal.addend_ids
 
@@ -1088,10 +1099,10 @@ class Describe_Subtotal(object):
     ):
         addend_ids_prop_.return_value = (3, 6, 9)
         valid_elements_.get_by_id.side_effect = iter(
-            instance_mock(request, _Element, index_in_valids=index)
+            instance_mock(request, _BaseElement, index_in_valids=index)
             for index in (2, 4, 6)
         )
-        subtotal = _Subtotal(None, valid_elements_, None)
+        subtotal = _Subtotal(None, valid_elements_)
 
         addend_idxs = subtotal.addend_idxs
 
@@ -1100,7 +1111,7 @@ class Describe_Subtotal(object):
 
     def it_knows_the_subtotal_label(self, label_fixture):
         subtotal_dict, expected_value = label_fixture
-        subtotal = _Subtotal(subtotal_dict, None, None)
+        subtotal = _Subtotal(subtotal_dict, None)
 
         label = subtotal.label
 
@@ -1168,7 +1179,7 @@ class Describe_Subtotal(object):
 
     @pytest.fixture
     def element_(self, request):
-        return instance_mock(request, _Element)
+        return instance_mock(request, _BaseElement)
 
     @pytest.fixture
     def valid_elements_(self, request):

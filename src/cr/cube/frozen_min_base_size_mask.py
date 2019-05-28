@@ -8,10 +8,8 @@ import numpy as np
 from cr.cube.util import lazyproperty
 from cr.cube.enum import DIMENSION_TYPE as DT
 
-# from cr.cube.slices import FrozenSlice
 
-
-class MinBaseSizeMask:
+class MinBaseSizeMask(object):
     """Helper for deciding which rows/columns to suppress, based on min base size.
 
     If a base value, that is used when calculating percentages, is less than a given

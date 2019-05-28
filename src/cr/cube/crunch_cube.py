@@ -14,7 +14,7 @@ import warnings
 import numpy as np
 
 from cr.cube.cube_slice import CubeSlice
-from cr.cube.dimension import AllDimensions
+from cr.cube.legacy_dimension import AllDimensions
 from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.measures.index import Index
 from cr.cube.measures.scale_means import ScaleMeans

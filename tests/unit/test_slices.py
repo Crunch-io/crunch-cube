@@ -8,7 +8,7 @@ import numpy as np
 from mock import Mock
 import pytest
 
-from cr.cube.dimension import _Category, Dimension, NewDimension, _Subtotal
+from cr.cube.dimension import Dimension, _Element, _Subtotal
 from cr.cube.matrix import _CatXCatMatrix, _MrXCatMatrix, OrderedMatrix, PrunedMatrix
 from cr.cube.slices import (
     _Assembler,
@@ -437,9 +437,9 @@ class Describe_OrderTransform(object):
     def it_knows_the_column_order(
         self, column_order_fixture, _columns_dimension_prop_, dimension_
     ):
-        valid_display_order, expected_value = column_order_fixture
+        display_order, expected_value = column_order_fixture
         _columns_dimension_prop_.return_value = dimension_
-        dimension_.valid_display_order = valid_display_order
+        dimension_.display_order = display_order
         order_transform = _OrderTransform((None, dimension_))
 
         column_order = order_transform.column_order
@@ -457,9 +457,9 @@ class Describe_OrderTransform(object):
     def it_knows_the_row_order(
         self, row_order_fixture, _rows_dimension_prop_, dimension_
     ):
-        valid_display_order, expected_value = row_order_fixture
+        display_order, expected_value = row_order_fixture
         _rows_dimension_prop_.return_value = dimension_
-        dimension_.valid_display_order = valid_display_order
+        dimension_.display_order = display_order
         order_transform = _OrderTransform((dimension_,))
 
         row_order = order_transform.row_order
@@ -471,15 +471,15 @@ class Describe_OrderTransform(object):
 
     @pytest.fixture(params=[((2, 1, 3), [2, 1, 3]), ((), [])])
     def column_order_fixture(self, request):
-        valid_display_order, idxs = request.param
+        display_order, idxs = request.param
         expected_value = np.array(idxs, dtype=int)
-        return valid_display_order, expected_value
+        return display_order, expected_value
 
     @pytest.fixture(params=[((3, 1, 2), [3, 1, 2]), ((), [])])
     def row_order_fixture(self, request):
-        valid_display_order, idxs = request.param
+        display_order, idxs = request.param
         expected_value = np.array(idxs, dtype=int)
-        return valid_display_order, expected_value
+        return display_order, expected_value
 
     # fixture components ---------------------------------------------
 
@@ -489,7 +489,7 @@ class Describe_OrderTransform(object):
 
     @pytest.fixture
     def dimension_(self, request):
-        return instance_mock(request, NewDimension)
+        return instance_mock(request, Dimension)
 
     @pytest.fixture
     def _rows_dimension_prop_(self, request):
@@ -528,7 +528,7 @@ class DescribeOrderedMatrix(object):
             request,
             Dimension,
             valid_elements=[
-                instance_mock(request, _Category, element_id=element_id)
+                instance_mock(request, _Element, element_id=element_id)
                 for element_id in element_ids
             ],
         )

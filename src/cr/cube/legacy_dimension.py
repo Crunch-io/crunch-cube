@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-"""Provides the Dimension class."""
+"""Provides the Dimension class for legacy clients such as CrunchCube."""
 
 from collections import Sequence
 
@@ -251,45 +251,19 @@ class Dimension(object):
     :attr:`.CrunchCube.dimensions`.
     """
 
-    def __init__(self, dimension_dict, dimension_type, dimension_transforms=None):
+    def __init__(self, dimension_dict, dimension_type):
         self._dimension_dict = dimension_dict
         self._dimension_type = dimension_type
-        self._dimension_transforms_arg = dimension_transforms
 
     @lazyproperty
     def all_elements(self):
-        """_AllElements object providing cats or subvars of this dimension.
-
-        Elements in this sequence appear in cube-result order. Display order (including
-        resolution of the explicit-reordering transforms cascade) is provided by
-        a separate `.display_order` attribute on _AllElements.
-        """
-        return _AllElements(
-            self._dimension_dict["type"], self._dimension_transforms_dict
-        )
-
-    def apply_transforms(self, dimension_transforms):
-        """Return a new `Dimension` object with `dimension_transforms` applied.
-
-        The new dimension object is the same as this one in all other respects.
-        """
-        return Dimension(
-            self._dimension_dict, self._dimension_type, dimension_transforms
-        )
+        """_AllElements object providing cats or subvars of this dimension."""
+        return _AllElements(self._dimension_dict["type"])
 
     @lazyproperty
     def description(self):
         """str description of this dimension."""
-        # ---First authority in cascade is analysis-specific dimension transform. None
-        # ---is a legitimate value, indicating suppression of any inherited subtitle.
-        if "description" in self._dimension_transforms_dict:
-            description = self._dimension_transforms_dict["description"]
-        # ---inherited value is base dimension description---
-        else:
-            description = self._dimension_dict["references"].get("description")
-
-        # ---Normalize to "" so return value is always a str and callers don't need to
-        # ---deal with None as a possible return type.
+        description = self._dimension_dict["references"].get("description")
         return description if description else ""
 
     @lazyproperty
@@ -298,47 +272,100 @@ class Dimension(object):
         return self._dimension_type
 
     @lazyproperty
-    def display_order(self):
-        """Sequence of int element offsets specifying display order of elements.
+    def has_transforms(self):
+        """True if there are subtotals on this dimension, False otherwise."""
+        return len(self._subtotals) > 0
 
-        The sequence includes only valid elements; missing elements do not appear.
-        Further, each index represents the document-order position of the element in the
-        sequence of valid elements; missing elements are skipped in the assignment of
-        indexes. The returned sequence is exhaustive; all valid elements are
-        represented.
+    @lazyproperty
+    def hs_indices(self):
+        """tuple of (anchor_idx, addend_idxs) pair for each subtotal.
 
-        The sequence reflects the resolved cascade of any *explicit* ordering
-        transforms, but does *not* reflect any *sort* transforms, which cannot be
-        resolved by the dimension. Use the `.sort` property to access any sort transform
-        that may apply.
+        Example::
 
-        Example with explicit-order transform:
+            (
+                (2, (0, 1, 2)),
+                (3, (3,)),
+                ('bottom', (4, 5))
+            )
 
-            (3, 0, 2, 1, 4)
-
-        Example with no explicit-order transform:
-
-            (0, 1, 2, 3, 4)
+        Note that the `anchor_idx` item in the first position of each pair
+        can be 'top' or 'bottom' as well as an int. The `addend_idxs` tuple
+        will always contains at least one index (a subtotal with no addends
+        is ignored).
         """
-        return self.valid_elements.display_order
+        if self.dimension_type in {DT.MR_CAT, DT.LOGICAL}:
+            return ()
+
+        return tuple(
+            (subtotal.anchor_idx, subtotal.addend_idxs) for subtotal in self._subtotals
+        )
+
+    @lazyproperty
+    def inserted_hs_indices(self):
+        """list of int index of each inserted subtotal for the dimension.
+
+        Each value represents the position of a subtotal in the interleaved
+        sequence of elements and subtotals items.
+        """
+        # ---don't do H&S insertions for CA and MR subvar dimensions---
+        if self.dimension_type in DT.ARRAY_TYPES:
+            return []
+
+        return [
+            idx
+            for idx, item in enumerate(
+                self._iter_interleaved_items(self.valid_elements)
+            )
+            if item.is_insertion
+        ]
+
+    @lazyproperty
+    def is_marginable(self):
+        """True if adding counts across this dimension axis is meaningful."""
+        return self.dimension_type not in {DT.CA, DT.MR, DT.MR_CAT, DT.LOGICAL}
+
+    def labels(
+        self, include_missing=False, include_transforms=False, include_cat_ids=False
+    ):
+        """Return list of str labels for the elements of this dimension.
+
+        Returns a list of (label, element_id) pairs if *include_cat_ids* is
+        True. The `element_id` value in the second position of the pair is
+        None for subtotal items (which don't have an element-id).
+        """
+        # TODO: Having an alternate return type triggered by a flag-parameter
+        # (`include_cat_ids` in this case) is poor practice. Using flags like
+        # that effectively squashes what should be two methods into one.
+        # Either get rid of the need for that alternate return value type or
+        # create a separate method for it.
+        elements = self.all_elements if include_missing else self.valid_elements
+
+        include_subtotals = include_transforms and self.dimension_type != DT.CA_SUBVAR
+
+        # ---items are elements or subtotals, interleaved in display order---
+        interleaved_items = tuple(self._iter_interleaved_items(elements))
+
+        labels = list(
+            item.label
+            for item in interleaved_items
+            if include_subtotals or not item.is_insertion
+        )
+
+        if include_cat_ids:
+            element_ids = tuple(
+                None if item.is_insertion else item.element_id
+                for item in interleaved_items
+                if include_subtotals or not item.is_insertion
+            )
+            return list(zip(labels, element_ids))
+
+        return labels
 
     @lazyproperty
     def name(self):
-        """str name of this dimension, the empty string ("") if not specified."""
-        references = self._dimension_dict["references"]
-        # ---First authority in cascade is analysis-specific dimension transform. None
-        # ---is a legitimate value, indicating suppression of any inherited title.
-        if "name" in self._dimension_transforms_dict:
-            name = self._dimension_transforms_dict["name"]
-        # ---next authority is base dimension name---
-        elif "name" in references:
-            name = references["name"]
-        else:
-            name = references.get("alias")
-
-        # ---Normalize None value to "" so return value is always a str and callers
-        # ---don't need to deal with multiple possible return value types.
-        return name if name else ""
+        """Name of a cube's dimension."""
+        refs = self._dimension_dict["references"]
+        return refs.get("name", refs.get("alias"))
 
     @lazyproperty
     def numeric_values(self):
@@ -358,47 +385,8 @@ class Dimension(object):
         return tuple(element.numeric_value for element in self.valid_elements)
 
     @lazyproperty
-    def prune(self):
-        """True if empty elements should be automatically hidden on this dimension."""
-        prune = self._dimension_transforms_dict.get("prune")
-        if prune is True:
-            return True
-        return False
-
-    @lazyproperty
     def shape(self):
         return len(self.all_elements)
-
-    @lazyproperty
-    def sort(self):
-        """A _BaseSort-subclass object or None, describing the applied sort method.
-
-        This value is None if no sort transform was specified for this dimension.
-        Currently that is its only possible value. The returned sort object describes
-        the sort method which can include sorting on the value of an opposing element or
-        on the margin and specify ascending or descending order.
-        """
-        return None
-
-    @lazyproperty
-    def subtotals(self):
-        """_Subtotals sequence object for this dimension.
-
-        Each item in the sequence is a _Subtotal object specifying a subtotal, including
-        its addends and anchor.
-        """
-        # ---insertions in dimension-transforms override those on dimension itself---
-        insertion_dicts = self._dimension_transforms_dict.get("insertions")
-        if insertion_dicts is not None:
-            return _Subtotals(insertion_dicts, self.valid_elements, self.prune)
-
-        # ---otherwise, insertions defined as default transforms apply---
-        view = self._dimension_dict.get("references", {}).get("view", {})
-        # ---view can be both None and {}, thus the edge case.---
-        insertion_dicts = (
-            [] if view is None else view.get("transform", {}).get("insertions", [])
-        )
-        return _Subtotals(insertion_dicts, self.valid_elements, self.prune)
 
     @lazyproperty
     def valid_elements(self):
@@ -410,22 +398,51 @@ class Dimension(object):
         """
         return self.all_elements.valid_elements
 
-    @lazyproperty
-    def _dimension_transforms_dict(self):
-        """dict complying with dimension-transforms schema for this dimension.
+    def _iter_interleaved_items(self, elements):
+        """Generate element or subtotal items in interleaved order.
 
-        This value derives from the `dimension_transforms` argument passed on
-        construction. When that argument is not specified, this value is an empty dict.
+        This ordering corresponds to how value "rows" (or columns) are to
+        appear after subtotals have been inserted at their anchor locations.
+        Where more than one subtotal is anchored to the same location, they
+        appear in their document order in the cube response.
+
+        Only elements in the passed *elements* collection appear, which
+        allows control over whether missing elements are included by choosing
+        `.all_elements` or `.valid_elements`.
         """
-        return (
-            self._dimension_transforms_arg
-            if self._dimension_transforms_arg is not None
-            else {}
+        subtotals = self._subtotals
+
+        for subtotal in subtotals.iter_for_anchor("top"):
+            yield subtotal
+
+        for element in elements:
+            yield element
+            for subtotal in subtotals.iter_for_anchor(element.element_id):
+                yield subtotal
+
+        for subtotal in subtotals.iter_for_anchor("bottom"):
+            yield subtotal
+
+    @lazyproperty
+    def _subtotals(self):
+        """_Subtotals sequence object for this dimension.
+
+        The subtotals sequence provides access to any subtotal insertions
+        defined on this dimension.
+        """
+        view = self._dimension_dict.get("references", {}).get("view", {})
+        # ---view can be both None and {}, thus the edge case.---
+        insertion_dicts = (
+            [] if view is None else view.get("transform", {}).get("insertions", [])
         )
+        return _Subtotals(insertion_dicts, self.valid_elements)
 
 
 class _BaseElements(Sequence):
     """Base class for element sequence containers."""
+
+    def __init__(self, type_dict):
+        self._type_dict = type_dict
 
     def __getitem__(self, idx_or_slice):
         """Implements indexed access."""
@@ -475,6 +492,18 @@ class _BaseElements(Sequence):
         raise NotImplementedError("must be implemented by each subclass")
 
     @lazyproperty
+    def _element_makings(self):
+        """(ElementCls, element_dicts) pair for this dimension's elements.
+
+        All the elements of a given dimension are the same type. This method
+        determines the type (class) and source dicts for the elements of this
+        dimension and provides them for the element factory.
+        """
+        if self._type_dict["class"] == "categorical":
+            return _Category, self._type_dict["categories"]
+        return _Element, self._type_dict["elements"]
+
+    @lazyproperty
     def _elements_by_id(self):
         """dict mapping each element by its id."""
         return {element.element_id: element for element in self._elements}
@@ -486,65 +515,19 @@ class _AllElements(_BaseElements):
     Each element is either a category or a subvariable.
     """
 
-    def __init__(self, type_dict, dimension_transforms_dict):
-        self._type_dict = type_dict
-        self._dimension_transforms_dict = dimension_transforms_dict
-
     @lazyproperty
     def valid_elements(self):
         """_ValidElements object containing only non-missing elements."""
-        return _ValidElements(self._elements, self._dimension_transforms_dict)
-
-    @lazyproperty
-    def _element_dicts(self):
-        """Sequence of element-dicts for this dimension, taken from cube-result."""
-        return (
-            self._type_dict["categories"]
-            if self._type_dict["class"] == "categorical"
-            else self._type_dict["elements"]
-        )
+        return _ValidElements(self._elements)
 
     @lazyproperty
     def _elements(self):
-        """tuple storing actual sequence of element objects."""
-        element_dicts = self._element_dicts
+        """Composed tuple storing actual sequence of element objects."""
+        ElementCls, element_dicts = self._element_makings
         return tuple(
-            _Element(
-                element_dict,
-                idx,
-                element_dicts,
-                _ElementTransforms(element_transforms_dict, self._prune),
-            )
-            for (
-                idx,
-                element_dict,
-                element_transforms_dict,
-            ) in self._iter_element_makings()
+            ElementCls(element_dict, idx, element_dicts)
+            for idx, element_dict in enumerate(element_dicts)
         )
-
-    def _iter_element_makings(self):
-        """Generate tuple of values needed to construct each element object.
-
-        An (idx, element_dict, element_transforms_dict) tuple is generated for each
-        element in this dimension, in the order they appear in the cube-result. All
-        elements are included (including missing).
-        """
-        element_dicts = self._element_dicts
-        elements_transforms = self._dimension_transforms_dict.get("elements", {})
-        for idx, element_dict in enumerate(element_dicts):
-            element_id = element_dict["id"]
-            # TODO: Each element transforms dict is keyed by the str() version of it int
-            # value as a consequence of JSON serialization (which does not allow
-            # non-string keys). Hence the str(element_id) here.
-            element_transforms_dict = elements_transforms.get(
-                element_id, elements_transforms.get(str(element_id), {})
-            )
-            yield idx, element_dict, element_transforms_dict
-
-    @lazyproperty
-    def _prune(self):
-        """True if empty elements in this dimension should be automatically hidden."""
-        return True if self._dimension_transforms_dict.get("prune") is True else False
 
 
 class _ValidElements(_BaseElements):
@@ -556,102 +539,27 @@ class _ValidElements(_BaseElements):
     directly.
     """
 
-    def __init__(self, all_elements, dimension_transforms_dict):
-        self._all_elements = all_elements
-        self._dimension_transforms_dict = dimension_transforms_dict
-
-    @lazyproperty
-    def display_order(self):
-        """Sequence of int element-idx reflecting order in which to display elements.
-
-        This order reflects the application of any explicit element-order transforms,
-        including resolution of any cascade. It does *not* reflect the results of
-        a *sort* transform, which can only be resolved at a higher level, where vector
-        values are known.
-        """
-        return (
-            self._explicit_order
-            if self._explicit_order
-            else tuple(range(len(self._elements)))
-        )
+    def __init__(self, all_elements):
+        self.all_elements = all_elements
 
     @lazyproperty
     def _elements(self):
         """tuple containing actual sequence of element objects."""
-        return tuple(element for element in self._all_elements if not element.missing)
-
-    @lazyproperty
-    def _explicit_order(self):
-        """Sequence of int element-idx or None, reflecting explicit-order transform.
-
-        This value is None if no explicit-order transform is specified. Otherwise, it is
-        an exhaustive collection of (valid) element offsets, in the order specified (and
-        in some cases implied) by the order transform.
-        """
-        # ---get order transform if any, aborting if no explicit order transform---
-        order_dict = self._dimension_transforms_dict.get("order", {})
-        order_type = order_dict.get("type")
-        ordered_element_ids = order_dict.get("element_ids")
-        if order_type != "explicit" or not isinstance(ordered_element_ids, list):
-            return None
-
-        # ---list like [0, 1, 2, -1], perhaps ["0001", "0002", etc.], reflecting element
-        # ---ids in the order they appear in the cube result. We'll use this to map
-        # ---element-id to its index in the valid-elements sequence.
-        cube_result_order = tuple(element.element_id for element in self)
-        # ---this is a copy of the same, but we're going to mutate this one. This is
-        # ---required to implement the "no-duplicates" behavior.
-        remaining_element_ids = list(cube_result_order)
-
-        # ---we'll collect the results in this---
-        ordered_idxs = []
-        # ---append idx of each element mentioned by id in transform, in order. Remove
-        # ---each element-id from remaining as we go to keep track of dups and leftovers
-        for element_id in ordered_element_ids:
-            # ---An element-id appearing in transform but not in dimension is ignored.
-            # ---Also, a duplicated element-id is only used on first encounter.
-            if element_id not in remaining_element_ids:
-                continue
-            ordered_idxs.append(cube_result_order.index(element_id))
-            remaining_element_ids.remove(element_id)
-
-        # ---any remaining elements are tacked onto the end of the list in the order
-        # ---they originally appeared in the cube-result.
-        for element_id in remaining_element_ids:
-            ordered_idxs.append(cube_result_order.index(element_id))
-
-        return tuple(ordered_idxs)
+        return tuple(element for element in self.all_elements if not element.missing)
 
 
-class _Element(object):
-    """A category or subvariable of a dimension.
+class _BaseElement(object):
+    """Base class for element objects."""
 
-    This object resolves the transform cascade for element-level transforms.
-    """
-
-    def __init__(self, element_dict, index, element_dicts, element_transforms):
+    def __init__(self, element_dict, index, element_dicts):
         self._element_dict = element_dict
         self._index = index
-        # TODO: Remove this hack. An element should not need to know of its peers.
         self._element_dicts = element_dicts
-        self._element_transforms = element_transforms
 
     @lazyproperty
     def element_id(self):
         """int identifier for this category or subvariable."""
         return self._element_dict["id"]
-
-    @lazyproperty
-    def fill(self):
-        """str RGB color like "#af032d" or None if not specified.
-
-        A value of None indicates the default fill should be used for this element.
-        A str value must be a hash character ("#") followed by six hexadecimal digits.
-        Three-character color contractions (like "#D07") are not valid.
-        """
-        # ---first authority is fill transform in element transforms. The base value is
-        # ---the only prior authority and that is None (use default fill color).
-        return self._element_transforms.fill
 
     @lazyproperty
     def index(self):
@@ -662,44 +570,60 @@ class _Element(object):
         """
         return self._index
 
-    # TODO: Find a more elegant solution and make this go away.
     @lazyproperty
     def index_in_valids(self):
         valid_ids = [el["id"] for el in self._element_dicts if not el.get("missing")]
         return valid_ids.index(self.element_id)
 
+    @property
+    def is_insertion(self):
+        """True if this item represents an insertion (e.g. subtotal).
+
+        Unconditionally False for all element types.
+        """
+        return False
+
     @lazyproperty
-    def is_hidden(self):
-        """True if this element is explicitly hidden in this analysis."""
-        # ---first authority is hide transform in element transforms---
-        # ---default is not hidden, there is currently no prior-level hide transform---
-        return {True: True, False: False, None: False}[self._element_transforms.hide]
+    def missing(self):
+        """True if this element represents missing data.
+
+        False if this category or subvariable represents valid (collected)
+        data.
+        """
+        return bool(self._element_dict.get("missing"))
+
+    @lazyproperty
+    def numeric_value(self):
+        """Numeric value assigned to element by user, np.nan if absent."""
+        numeric_value = self._element_dict.get("numeric_value")
+        return np.nan if numeric_value is None else numeric_value
+
+
+class _Category(_BaseElement):
+    """A category on a categorical dimension."""
+
+    def __init__(self, category_dict, index, element_dicts):
+        super(_Category, self).__init__(category_dict, index, element_dicts)
+        self._category_dict = category_dict
 
     @lazyproperty
     def label(self):
-        """str display-name for this element.
+        """str display name assigned to this category by user."""
+        name = self._category_dict.get("name")
+        return name if name else ""
 
-        This value is the empty string when no value has been specified or display of
-        the name has been suppressed.
 
-        This property handles elements for variables of all types, including
-        categorical, array (subvariable), numeric, datetime and text.
+class _Element(_BaseElement):
+    """A subvariable on an MR or CA enum dimension."""
+
+    @lazyproperty
+    def label(self):
+        """str display-name for this element, '' when absent from cube response.
+
+        This property handles numeric, datetime and text variables, but also
+        subvar dimensions
         """
-        # ---first authority is name transform in element transforms---
-        name = self._element_transforms.name
-        if name is not None:
-            return name if name else ""
-
-        # ---otherwise base-name from element-dict is used---
-        element_dict = self._element_dict
-
-        # ---category elements have a name item---
-        if "name" in element_dict:
-            name = element_dict["name"]
-            return name if name else ""
-
-        # ---other types are more complicated---
-        value = element_dict.get("value")
+        value = self._element_dict.get("value")
         type_name = type(value).__name__
 
         if type_name == "NoneType":
@@ -719,83 +643,6 @@ class _Element(object):
         name = value.get("references", {}).get("name")
         return name if name else ""
 
-    @lazyproperty
-    def missing(self):
-        """True if this element represents missing data.
-
-        False if this category or subvariable represents valid (collected)
-        data.
-        """
-        return bool(self._element_dict.get("missing"))
-
-    @lazyproperty
-    def numeric_value(self):
-        """Numeric value assigned to element by user, np.nan if absent."""
-        numeric_value = self._element_dict.get("numeric_value")
-        return np.nan if numeric_value is None else numeric_value
-
-    @lazyproperty
-    def prune(self):
-        """True if this element should be hidden when empty, False otherwise."""
-        return self._element_transforms.prune
-
-    @lazyproperty
-    def _transforms(self):
-        """_ElementTransforms object for this element."""
-        return _ElementTransforms(self._element_transforms_dict, self._prune)
-
-
-class _ElementTransforms(object):
-    """A value object providing convenient access to transforms for a single element."""
-
-    def __init__(self, element_transforms_dict, prune):
-        self._element_transforms_dict = element_transforms_dict
-        self._prune = prune
-
-    @lazyproperty
-    def fill(self):
-        """str RGB color like "#af032d" or None if not specified.
-
-        A value of None indicates no fill transform was specified for this element.
-        A str value must be a hash character ("#") followed by six hexadecimal digits.
-        Three-character color contractions (like "#D07") are not valid.
-        """
-        fill = self._element_transforms_dict.get("fill")
-        if not fill:
-            return None
-        return fill
-
-    @lazyproperty
-    def hide(self):
-        """Tri-value, True if this element has been explicitly hidden in this analysis.
-
-        False overrides any prior "hide" transform with "show" and None signifies
-        "inherit".
-        """
-        hide = self._element_transforms_dict.get("hide")
-        # ---cover all of "omitted", "==None", and odd "==[]" or "==''" cases---
-        if hide is True:
-            return True
-        if hide is False:
-            return False
-        return None
-
-    @lazyproperty
-    def name(self):
-        """str display-name for this element or None if not specified."""
-        # ---if "name": element is omitted, no transform is specified---
-        if "name" not in self._element_transforms_dict:
-            return None
-        # ---otherwise normalize value to str, with an explicit value of None, [], 0,
-        # ---etc. becoming the empty string ("").
-        name = self._element_transforms_dict["name"]
-        return str(name) if name else ""
-
-    @lazyproperty
-    def prune(self):
-        """True if this element should be hidden when empty."""
-        return self._prune
-
 
 class _Subtotals(Sequence):
     """Sequence of _Subtotal objects for a dimension.
@@ -806,10 +653,9 @@ class _Subtotals(Sequence):
     A subtotal can only involve valid (i.e. non-missing) elements.
     """
 
-    def __init__(self, insertion_dicts, valid_elements, prune):
+    def __init__(self, insertion_dicts, valid_elements):
         self._insertion_dicts = insertion_dicts
-        self._valid_elements = valid_elements
-        self._prune = prune
+        self.valid_elements = valid_elements
 
     def __getitem__(self, idx_or_slice):
         """Implements indexed access."""
@@ -830,7 +676,7 @@ class _Subtotals(Sequence):
     @lazyproperty
     def _element_ids(self):
         """frozenset of int id of each non-missing cat or subvar in dim."""
-        return frozenset(self._valid_elements.element_ids)
+        return frozenset(self.valid_elements.element_ids)
 
     def _iter_valid_subtotal_dicts(self):
         """Generate each insertion dict that represents a valid subtotal."""
@@ -859,7 +705,7 @@ class _Subtotals(Sequence):
     def _subtotals(self):
         """Composed tuple storing actual sequence of _Subtotal objects."""
         return tuple(
-            _Subtotal(subtotal_dict, self._valid_elements, self._prune)
+            _Subtotal(subtotal_dict, self.valid_elements)
             for subtotal_dict in self._iter_valid_subtotal_dicts()
         )
 
@@ -867,10 +713,9 @@ class _Subtotals(Sequence):
 class _Subtotal(object):
     """A subtotal insertion on a cube dimension."""
 
-    def __init__(self, subtotal_dict, valid_elements, prune):
+    def __init__(self, subtotal_dict, valid_elements):
         self._subtotal_dict = subtotal_dict
-        self._valid_elements = valid_elements
-        self._prune = prune
+        self.valid_elements = valid_elements
 
     @lazyproperty
     def anchor(self):
@@ -892,7 +737,7 @@ class _Subtotal(object):
 
         try:
             anchor = int(anchor)
-            if anchor not in self._valid_elements.element_ids:
+            if anchor not in self.valid_elements.element_ids:
                 # In the case of a non-valid int id, default to "bottom"
                 return "bottom"
             return anchor
@@ -908,7 +753,7 @@ class _Subtotal(object):
         anchor = self.anchor
         if anchor in ["top", "bottom"]:
             return anchor
-        return self._valid_elements.get_by_id(anchor).index_in_valids
+        return self.valid_elements.get_by_id(anchor).index_in_valids
 
     @lazyproperty
     def addend_ids(self):
@@ -920,7 +765,7 @@ class _Subtotal(object):
         return tuple(
             arg
             for arg in self._subtotal_dict.get("args", [])
-            if arg in self._valid_elements.element_ids
+            if arg in self.valid_elements.element_ids
         )
 
     @lazyproperty
@@ -932,7 +777,7 @@ class _Subtotal(object):
         rather than its element id.
         """
         return tuple(
-            self._valid_elements.get_by_id(addend_id).index_in_valids
+            self.valid_elements.get_by_id(addend_id).index_in_valids
             for addend_id in self.addend_ids
         )
 
@@ -949,8 +794,3 @@ class _Subtotal(object):
         """str display name for this subtotal, suitable for use as label."""
         name = self._subtotal_dict.get("name")
         return name if name else ""
-
-    @lazyproperty
-    def prune(self):
-        """True if this subtotal should not appear when empty."""
-        return self._prune

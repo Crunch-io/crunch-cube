@@ -136,7 +136,7 @@ class PrunedMatrix(_BaseTransformedMatrix):
 
     @lazyproperty
     def _applied(self):
-        return self._transforms._pruning
+        return self._transforms._prune
 
 
 class MatrixWithHidden(_BaseTransformedMatrix):
@@ -218,7 +218,7 @@ class MatrixWithInsertions(_BaseTransformedMatrix):
 
     @lazyproperty
     def _insertion_rows(self):
-        return self._insertions._rows
+        return self._insertions._inserted_rows
 
     @lazyproperty
     def _insertions(self):
@@ -272,25 +272,18 @@ class MatrixFactory(object):
 
     @classmethod
     def matrix(
-        cls,
-        dimensions,
-        counts,
-        base_counts,
-        counts_with_missings,
-        cube,
-        slice_idx,
-        ca_as_0th,
+        cls, dimensions, counts, base_counts, counts_with_missings, cube, slice_idx
     ):
         """Return a matrix object of appropriate type based on parameters."""
 
-        # For cubes with means, cerate one of means-matrix types
+        # For cubes with means, create one of the means-matrix types
         if cube.has_means:
             return cls._create_means_matrix(
                 counts, base_counts, cube, dimensions, slice_idx
             )
 
         dimension_types = cube.dimension_types[-2:]
-        if cube.ndim > 2 or ca_as_0th:
+        if cube.ndim > 2:
             base_counts = base_counts[slice_idx]
             counts = counts[slice_idx]
             counts_with_missings = counts_with_missings[slice_idx]
@@ -298,16 +291,6 @@ class MatrixFactory(object):
                 base_counts = base_counts[0]
                 counts = counts[0]
                 counts_with_missings = counts_with_missings[0]
-            elif ca_as_0th:
-                table_name = "%s: %s" % (
-                    cube.dimensions[-2:][0].name,
-                    cube.dimensions[-2:][0].valid_elements[slice_idx].label,
-                )
-                return _CaCatMatrix1D(dimensions, counts, base_counts, table_name)
-        elif cube.ndim < 2:
-            if dimension_types[0] == DT.MR:
-                return _MrMatrix1D(dimensions, counts, base_counts)
-            return _CatMatrix1D(dimensions, counts, base_counts)
         if dimension_types == (DT.MR, DT.MR):
             return _MrXMrMatrix(dimensions, counts, base_counts, counts_with_missings)
         elif dimension_types[0] == DT.MR:
@@ -318,88 +301,67 @@ class MatrixFactory(object):
 
     @classmethod
     def _create_means_matrix(cls, counts, base_counts, cube, dimensions, slice_idx):
-        if cube.ndim == 0:
-            return _MeansMatrix0D(counts, base_counts)
-        elif cube.ndim == 1:
-            if dimensions[0].dimension_type == DT.MR:
-                return _MrWithMeansMatrix1D(dimensions[0], counts, base_counts)
-            return _MeansMatrix1D(dimensions[0], counts, base_counts)
-        elif cube.ndim >= 2:
-            if cube.ndim == 3:
-                base_counts = base_counts[slice_idx]
-                counts = counts[slice_idx]
-            if dimensions[0].dimension_type == DT.MR:
-                return _MrXCatMeansMatrix(dimensions, counts, base_counts)
-            return _CatXCatMeansMatrix(dimensions, counts, base_counts)
+        if cube.ndim == 3:
+            base_counts = base_counts[slice_idx]
+            counts = counts[slice_idx]
+        if dimensions[0].dimension_type == DT.MR:
+            return _MrXCatMeansMatrix(dimensions, counts, base_counts)
+        return _CatXCatMeansMatrix(dimensions, counts, base_counts)
 
 
-class _MeansMatrix0D(object):
-    """Represents slices with means (and no counts)."""
+class _BaseMatrix(object):
+    """Base class for all matrix (2D secondary-analyzer) objects."""
 
-    # TODO: We might need to have 2 of these, one for 0-D, and one for 1-D mean cubes
-    def __init__(self, means, base_counts):
-        self._means = means
+    def __init__(self, dimensions, counts, base_counts):
+        self._dimensions = dimensions
+        self._counts = counts
         self._base_counts = base_counts
 
     @lazyproperty
-    def means(self):
-        return self._means
+    def names(self):
+        return tuple([dimension.name for dimension in self._dimensions])
 
     @lazyproperty
-    def table_base(self):
-        # TODO: Check why we expect mean instead of the real base in this case.
-        return self.means
+    def ndim(self):
+        """int count of dimensions in this matrix, unconditionally 2.
 
-    @lazyproperty
-    def table_margin(self):
-        return np.sum(self._base_counts)
-
-
-class _MeansMatrix1D(_MeansMatrix0D):
-    def __init__(self, dimension, means, base_counts):
-        super(_MeansMatrix1D, self).__init__(means, base_counts)
-        self._dimension = dimension
-
-    @lazyproperty
-    def columns(self):
-        """A single vector that is used only for pruning Means slices."""
-        return (
-            BaseVector(_PlaceholderElement("Means Summary", False), self._base_counts),
-        )
-
-    @lazyproperty
-    def rows(self):
-        """Rows for Means slice, that enable iteration over labels.
-
-        These vectors are not used for any computations. `means` is used for that,
-        directly. However, for the wirng of the exporter, these mean slices need to
-        support some additional API, such as labels. And for that, they need to
-        support row iteration.
+        A matrix is by definition two-dimensional.
         """
-        return tuple(
-            MeansVector(element, base_counts, np.array([means]))
-            for element, base_counts, means in zip(
-                self._dimension.valid_elements, self._base_counts, self._means
-            )
+        return 2
+
+    @lazyproperty
+    def _column_elements(self):
+        return self._columns_dimension.valid_elements
+
+    @lazyproperty
+    def _column_generator(self):
+        return zip(
+            self._counts.T, self._base_counts.T, self._column_elements, self._zscores.T
         )
 
     @lazyproperty
-    def table_base(self):
-        return np.sum(self._base_counts)
+    def _column_proportions(self):
+        return np.array([col.proportions for col in self.columns]).T
 
-
-class _MrWithMeansMatrix1D(_MeansMatrix1D):
     @lazyproperty
-    def rows(self):
-        return tuple(
-            MeansWithMrVector(element, base_counts, means)
-            for element, base_counts, means in zip(
-                self._dimension.valid_elements, self._base_counts, self._means
-            )
-        )
+    def _columns_dimension(self):
+        return self._dimensions[1]
+
+    @lazyproperty
+    def _row_elements(self):
+        return self._rows_dimension.valid_elements
+
+    @lazyproperty
+    def _rows_dimension(self):
+        return self._dimensions[0]
+
+    @lazyproperty
+    def _valid_rows_idxs(self):
+        """ndarray-style index for only valid rows (out of missing and not-missing)."""
+        return np.ix_(self._dimensions[-2].valid_elements.element_idxs)
 
 
-class _CatXCatMatrix(object):
+class _CatXCatMatrix(_BaseMatrix):
     """Deals with CAT x CAT data.
 
     Delegates most functionality to vectors (rows or columns), but calculates some
@@ -412,9 +374,7 @@ class _CatXCatMatrix(object):
     """
 
     def __init__(self, dimensions, counts, base_counts, counts_with_missings=None):
-        self._dimensions = dimensions
-        self._counts = counts
-        self._base_counts = base_counts
+        super(_CatXCatMatrix, self).__init__(dimensions, counts, base_counts)
         self._all_counts = counts_with_missings
 
     @lazyproperty
@@ -423,10 +383,6 @@ class _CatXCatMatrix(object):
             CategoricalVector(counts, base_counts, element, self.table_margin, zscore)
             for counts, base_counts, element, zscore in self._column_generator
         )
-
-    @lazyproperty
-    def names(self):
-        return tuple([dimension.name for dimension in self._dimensions])
 
     @lazyproperty
     def rows(self):
@@ -468,14 +424,6 @@ class _CatXCatMatrix(object):
         return dim_sum[:, None] / np.sum(dim_sum)
 
     @lazyproperty
-    def _column_dimension(self):
-        return self._dimensions[1]
-
-    @lazyproperty
-    def _column_elements(self):
-        return self._column_dimension.valid_elements
-
-    @lazyproperty
     def _column_index(self):
         # TODO: This is a hack to make it work. It should be addressed properly with
         # passing `counts_with_missings` in all the right places in the factory.
@@ -484,24 +432,6 @@ class _CatXCatMatrix(object):
             return self._column_proportions
 
         return self._column_proportions / self._baseline * 100
-
-    @lazyproperty
-    def _column_generator(self):
-        return zip(
-            self._counts.T, self._base_counts.T, self._column_elements, self._zscores.T
-        )
-
-    @lazyproperty
-    def _column_proportions(self):
-        return np.array([col.proportions for col in self.columns]).T
-
-    @lazyproperty
-    def _row_dimension(self):
-        return self._dimensions[0]
-
-    @lazyproperty
-    def _row_elements(self):
-        return self._row_dimension.valid_elements
 
     @lazyproperty
     def _row_generator(self):
@@ -529,11 +459,6 @@ class _CatXCatMatrix(object):
         return residuals / np.sqrt(variance)
 
     @lazyproperty
-    def _valid_rows_idxs(self):
-        """ndarray-style index for only valid rows (out of missing and not-missing)."""
-        return np.ix_(self._dimensions[-2].valid_elements.element_idxs)
-
-    @lazyproperty
     def _zscores(self):
         return self._scalar_type_std_res(
             self._counts,
@@ -544,6 +469,8 @@ class _CatXCatMatrix(object):
 
 
 class _CatXCatMeansMatrix(_CatXCatMatrix):
+    """Cat-x-cat matrix for means measure."""
+
     def __init__(self, dimensions, means, base_counts):
         super(_CatXCatMeansMatrix, self).__init__(dimensions, None, base_counts)
         self._means = means
@@ -553,7 +480,7 @@ class _CatXCatMeansMatrix(_CatXCatMatrix):
         return tuple(
             MeansVector(element, base_counts, means)
             for element, base_counts, means in zip(
-                self._column_dimension.valid_elements,
+                self._columns_dimension.valid_elements,
                 self._base_counts.T,
                 self._means.T,
             )
@@ -564,43 +491,14 @@ class _CatXCatMeansMatrix(_CatXCatMatrix):
         return tuple(
             MeansVector(element, base_counts, means)
             for element, base_counts, means in zip(
-                self._row_dimension.valid_elements, self._base_counts, self._means
+                self._rows_dimension.valid_elements, self._base_counts, self._means
             )
         )
 
 
-class _CatMatrix1D(_CatXCatMatrix):
-    """Special case of CAT x CAT, where the 2nd CAT doesn't exist.
-
-    Values are treated as rows, while there's only a single column (vector).
-    """
-
-    @lazyproperty
-    def columns(self):
-        return tuple(
-            [
-                CategoricalVector(
-                    self._counts,
-                    self._base_counts,
-                    _PlaceholderElement("Summary", False),
-                    self.table_margin,
-                )
-            ]
-        )
-
-    @lazyproperty
-    def _zscores(self):
-        # TODO: Fix with real zscores
-        return tuple([np.nan for _ in self._counts])
-
-
-class _CaCatMatrix1D(_CatMatrix1D):
-    def __init__(self, dimensions, counts, base_counts, table_name):
-        super(_CaCatMatrix1D, self).__init__(dimensions, counts, base_counts)
-        self._table_name = table_name
-
-
 class _MatrixWithMR(_CatXCatMatrix):
+    """ ... """
+
     @staticmethod
     def _array_type_std_res(counts, total, colsum, rowsum):
         expected_counts = rowsum * colsum / total
@@ -692,6 +590,8 @@ class _MrXCatMatrix(_MatrixWithMR):
 
 
 class _MrXCatMeansMatrix(_MrXCatMatrix):
+    """ ... """
+
     def __init__(self, dimensions, means, base_counts):
         counts = np.empty(means.shape)
         super(_MrXCatMeansMatrix, self).__init__(dimensions, counts, base_counts)
@@ -702,38 +602,9 @@ class _MrXCatMeansMatrix(_MrXCatMatrix):
         return tuple(
             MeansWithMrVector(element, base_counts, means[0])
             for element, base_counts, means in zip(
-                self._row_dimension.valid_elements, self._base_counts, self._means
+                self._rows_dimension.valid_elements, self._base_counts, self._means
             )
         )
-
-
-class _MrMatrix1D(_MrXCatMatrix):
-    """Special case of 1-D MR slice (vector)."""
-
-    @lazyproperty
-    def columns(self):
-        return tuple(
-            [
-                MultipleResponseVector(
-                    self._counts.T,
-                    self._base_counts.T,
-                    _PlaceholderElement("Summary", False),
-                    self.table_margin,
-                )
-            ]
-        )
-
-    @lazyproperty
-    def table_base(self):
-        return np.sum(self._base_counts, axis=1)
-
-    @lazyproperty
-    def table_margin(self):
-        return np.sum(self._counts, axis=1)
-
-    @lazyproperty
-    def _zscores(self):
-        return np.array([np.nan] * self._base_counts.shape[0])
 
 
 class _CatXMrMatrix(_MatrixWithMR):
@@ -818,7 +689,7 @@ class _CatXMrMatrix(_MatrixWithMR):
 class _MrXMrMatrix(_MatrixWithMR):
     """Represents MR x MR slices.
 
-    Needs to properly index both rows and columns (selected/not-selected.
+    Needs to properly index both rows and columns (selected/not-selected).
     """
 
     @lazyproperty
@@ -905,3 +776,223 @@ class _MrXMrMatrix(_MatrixWithMR):
             np.sum(self._counts, axis=1)[:, :, 0],
             np.sum(self._counts, axis=3)[:, 0, :],
         )
+
+
+# ===SCALAR (0D) OBJECTS====
+
+
+class MeansScalar(object):
+    """Represents slices with means (and no counts)."""
+
+    def __init__(self, means, base_counts):
+        self._means = means
+        self._base_counts = base_counts
+
+    @lazyproperty
+    def means(self):
+        return self._means
+
+    @lazyproperty
+    def ndim(self):
+        """int count of dimensions in this scalar, unconditionally 0.
+
+        A scalar is by definition zero-dimensional.
+        """
+        return 0
+
+    @lazyproperty
+    def table_base(self):
+        # TODO: Check why we expect mean instead of the real base in this case.
+        return self.means
+
+    @lazyproperty
+    def table_margin(self):
+        return np.sum(self._base_counts)
+
+
+# ===STRIPE (1D) OBJECTS====
+
+
+class StripeFactory(object):
+    """Encapsulates creation of the right raw (pre-transforms) stripe object."""
+
+    @classmethod
+    def stripe(cls, cube, rows_dimension, counts, base_counts, ca_as_0th, slice_idx):
+        """Return a matrix object of appropriate type based on parameters."""
+        # ---for cubes with means, create one of the means-stripe types---
+        if cube.has_means:
+            if rows_dimension.dimension_type == DT.MR:
+                return _MeansWithMrStripe(rows_dimension, counts, base_counts)
+            return _MeansStripe(rows_dimension, counts, base_counts)
+
+        if ca_as_0th:
+            return _CatStripe(rows_dimension, counts[slice_idx], base_counts[slice_idx])
+
+        if rows_dimension.dimension_type == DT.MR:
+            return _MrStripe(rows_dimension, counts, base_counts)
+
+        return _CatStripe(rows_dimension, counts, base_counts)
+
+
+class _BaseStripe(object):
+    """Base class for all stipe objects."""
+
+    def __init__(self, rows_dimension, measure, base_counts):
+        self._rows_dimension = rows_dimension
+        self._measure = measure
+        self._base_counts = base_counts
+
+    @lazyproperty
+    def ndim(self):
+        """int count of dimensions in this stripe, unconditionally 1.
+
+        A stripe is by definition one-dimensional.
+        """
+        return 1
+
+    @lazyproperty
+    def table_base(self):
+        return np.sum(self._base_counts)
+
+    @lazyproperty
+    def _row_elements(self):
+        return self._rows_dimension.valid_elements
+
+
+class _CatStripe(_BaseStripe):
+    """Special case of CAT x CAT, where the 2nd CAT doesn't exist.
+
+    Values are treated as rows, while there's only a single column (vector).
+    """
+
+    def __init__(self, rows_dimension, counts, base_counts):
+        super(_CatStripe, self).__init__(rows_dimension, counts, base_counts)
+        self._counts = counts
+
+    @lazyproperty
+    def columns(self):
+        return tuple(
+            [
+                CategoricalVector(
+                    self._counts,
+                    self._base_counts,
+                    _PlaceholderElement("Summary", False),
+                    self.table_margin,
+                )
+            ]
+        )
+
+    @lazyproperty
+    def rows(self):
+        return tuple(
+            CategoricalVector(counts, base_counts, element, self.table_margin, zscore)
+            for (counts, base_counts, element, zscore) in self._row_generator
+        )
+
+    @lazyproperty
+    def table_margin(self):
+        return np.sum(self._counts)
+
+    @lazyproperty
+    def _row_generator(self):
+        return zip(self._counts, self._base_counts, self._row_elements, self._zscores)
+
+    @lazyproperty
+    def _zscores(self):
+        # TODO: Fix with real zscores
+        return tuple([np.nan for _ in self._counts])
+
+
+class _MeansStripe(_BaseStripe):
+    """A 1D calculator for a strand containing mean first-order measure."""
+
+    def __init__(self, rows_dimension, means, base_counts):
+        super(_MeansStripe, self).__init__(rows_dimension, means, base_counts)
+        self._means = means
+
+    @lazyproperty
+    def columns(self):
+        """A single vector that is used only for pruning Means slices."""
+        return (
+            BaseVector(_PlaceholderElement("Means Summary", False), self._base_counts),
+        )
+
+    @lazyproperty
+    def rows(self):
+        """Rows for Means slice, that enable iteration over labels.
+
+        These vectors are not used for any computations. `means` is used for that,
+        directly. However, for the wirng of the exporter, these mean slices need to
+        support some additional API, such as labels. And for that, they need to
+        support row iteration.
+        """
+        return tuple(
+            MeansVector(element, base_counts, np.array([means]))
+            for element, base_counts, means in self._row_generator
+        )
+
+    @lazyproperty
+    def table_margin(self):
+        return np.sum(self._base_counts)
+
+    @lazyproperty
+    def _row_generator(self):
+        return zip(self._rows_dimension.valid_elements, self._base_counts, self._means)
+
+
+class _MeansWithMrStripe(_MeansStripe):
+    """Means behavior differs when dimension is MR."""
+
+    @lazyproperty
+    def rows(self):
+        return tuple(
+            MeansWithMrVector(element, base_counts, means)
+            for element, base_counts, means in self._row_generator
+        )
+
+
+class _MrStripe(_BaseStripe):
+    """Special case of 1-D MR slice (vector)."""
+
+    def __init__(self, rows_dimension, counts, base_counts):
+        super(_MrStripe, self).__init__(rows_dimension, counts, base_counts)
+        self._counts = counts
+
+    @lazyproperty
+    def columns(self):
+        return tuple(
+            [
+                MultipleResponseVector(
+                    self._counts.T,
+                    self._base_counts.T,
+                    _PlaceholderElement("Summary", False),
+                    self.table_margin,
+                )
+            ]
+        )
+
+    @lazyproperty
+    def rows(self):
+        """Use only selected counts."""
+        return tuple(
+            CatXMrVector(counts, base_counts, element, table_margin, zscore)
+            for (counts, base_counts, element, table_margin, zscore) in zip(
+                self._counts,
+                self._base_counts,
+                self._row_elements,
+                self.table_margin,
+                self._zscores,
+            )
+        )
+
+    @lazyproperty
+    def table_base(self):
+        return np.sum(self._base_counts, axis=1)
+
+    @lazyproperty
+    def table_margin(self):
+        return np.sum(self._counts, axis=1)
+
+    @lazyproperty
+    def _zscores(self):
+        return np.array([np.nan] * self._base_counts.shape[0])
