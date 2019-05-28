@@ -282,7 +282,10 @@ def test_mr_single_cat_x_mr():
     # np.testing.assert_array_equal(cube_slice.index_table(axis=1), expected)
 
     # With pruning
-    transforms = {"rows_dimension": {"prune": True}}
+    transforms = {
+        "rows_dimension": {"prune": True},
+        "columns_dimension": {"prune": True},
+    }
     slice_ = FrozenCube(CR.MR_SINGLE_CAT_X_MR, transforms=transforms).slices[0]
     expected = [[100, 100]]
     np.testing.assert_array_equal(slice_.column_index, expected)
@@ -294,7 +297,10 @@ def test_mr_x_mr_single_cat():
     np.testing.assert_array_equal(slice_.column_index, expected)
 
     # With pruning
-    transforms = {"rows_dimension": {"prune": True}}
+    transforms = {
+        "rows_dimension": {"prune": True},
+        "columns_dimension": {"prune": True},
+    }
     slice_ = FrozenCube(CR.MR_X_MR_SINGLE_CAT, transforms=transforms).slices[0]
     expected = [[100], [100]]
     np.testing.assert_array_equal(slice_.column_index, expected)

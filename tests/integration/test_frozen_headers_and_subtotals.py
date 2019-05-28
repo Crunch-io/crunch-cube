@@ -534,7 +534,10 @@ class TestHeadersAndSubtotals(TestCase):
         assert actual == expected
 
     def test_cat_x_num_counts_pruned_with_hs(self):
-        transforms = {"rows_dimension": {"prune": True}}
+        transforms = {
+            "rows_dimension": {"prune": True},
+            "columns_dimension": {"prune": True},
+        }
         slice_ = FrozenCube(CR.CAT_X_NUM_HS_PRUNE, transforms=transforms).slices[0]
         expected = [[0], [1], [1], [0]]
         np.testing.assert_array_equal(slice_.counts, expected)
@@ -889,7 +892,10 @@ class TestHeadersAndSubtotals(TestCase):
         )
 
     def test_ca_cat_x_mr_x_ca_subvar_counts_pruning(self):
-        transforms = {"rows_dimension": {"prune": True}}
+        transforms = {
+            "rows_dimension": {"prune": True},
+            "columns_dimension": {"prune": True},
+        }
         slice_ = FrozenCube(
             CR.CA_CAT_X_MR_X_CA_SUBVAR_HS, transforms=transforms
         ).slices[0]
@@ -903,7 +909,10 @@ class TestHeadersAndSubtotals(TestCase):
         )
 
     def test_ca_cat_x_mr_x_ca_subvar_proportions_pruning(self):
-        transforms = {"rows_dimension": {"prune": True}}
+        transforms = {
+            "rows_dimension": {"prune": True},
+            "columns_dimension": {"prune": True},
+        }
         slice_ = FrozenCube(
             CR.CA_CAT_X_MR_X_CA_SUBVAR_HS, transforms=transforms
         ).slices[0]

@@ -66,7 +66,10 @@ def test_3D_with_means():
 
 
 def test_cat_x_mr_with_means():
-    transforms = {"columns_dimension": {"prune": True}}
+    transforms = {
+        "rows_dimension": {"prune": True},
+        "columns_dimension": {"prune": True},
+    }
     slice_ = FrozenCube(CR.CAT_X_MR_WITH_MEANS, transforms=transforms).slices[0]
     np.testing.assert_almost_equal(
         slice_.means,
@@ -85,7 +88,10 @@ def test_cat_x_mr_with_means():
 
 
 def test_proportions_simple_mr_prune():
-    transforms = {"rows_dimension": {"prune": True}}
+    transforms = {
+        "rows_dimension": {"prune": True},
+        "columns_dimension": {"prune": True},
+    }
     slice_ = FrozenCube(CR.SIMPLE_MR, transforms=transforms).slices[0]
     # Nothing actually gets pruned because not-selected are not 0
     expected = [[0.6], [0.6666667], [0]]
@@ -111,7 +117,10 @@ def test_as_array_cat_x_mr_pruned_row():
     np.testing.assert_array_equal(slice_.counts, expected)
 
     # Pruned, with H&S
-    transforms = {"rows_dimension": {"prune": True}}
+    transforms = {
+        "rows_dimension": {"prune": True},
+        "columns_dimension": {"prune": True},
+    }
     slice_ = FrozenCube(CR.CAT_X_MR_PRUNED_ROW, transforms=transforms).slices[0]
     expected = [[12, 12, 12], [12, 12, 12], [0, 0, 0]]
     np.testing.assert_array_equal(slice_.counts, expected)
@@ -124,7 +133,10 @@ def test_as_array_cat_x_mr_pruned_col():
     np.testing.assert_array_equal(slice_.counts, expected)
 
     # Pruned
-    transforms = {"rows_dimension": {"prune": True}}
+    transforms = {
+        "rows_dimension": {"prune": True},
+        "columns_dimension": {"prune": True},
+    }
     slice_ = FrozenCube(CR.CAT_X_MR_PRUNED_COL, transforms=transforms).slices[0]
     expected = [[6, 6, 0], [6, 6, 0], [16, 12, 0], [16, 12, 0]]
     np.testing.assert_array_equal(slice_.counts, expected)
@@ -137,7 +149,10 @@ def test_as_array_cat_x_mr_pruned_row_col():
     np.testing.assert_array_equal(slice_.counts, expected)
 
     # Pruned
-    transforms = {"rows_dimension": {"prune": True}}
+    transforms = {
+        "rows_dimension": {"prune": True},
+        "columns_dimension": {"prune": True},
+    }
     slice_ = FrozenCube(CR.CAT_X_MR_PRUNED_ROW_COL, transforms=transforms).slices[0]
     expected = [[6, 6, 0], [6, 6, 0], [0, 0, 0]]
     np.testing.assert_array_equal(slice_.counts, expected)
@@ -170,7 +185,10 @@ def test_as_array_mr_x_cat_pruned_row():
     np.testing.assert_array_equal(slice_.counts, expected)
 
     # Pruned
-    transforms = {"rows_dimension": {"prune": True}}
+    transforms = {
+        "rows_dimension": {"prune": True},
+        "columns_dimension": {"prune": True},
+    }
     slice_ = FrozenCube(CR.MR_X_CAT_PRUNED_ROW, transforms=transforms).slices[0]
     expected = [[6, 6, 16, 16], [6, 6, 12, 12], [0, 0, 0, 0]]
     np.testing.assert_array_equal(slice_.counts, expected)
@@ -183,7 +201,10 @@ def test_as_array_mr_x_cat_pruned_row_col():
     np.testing.assert_array_equal(slice_.counts, expected)
 
     # Pruned
-    transforms = {"rows_dimension": {"prune": True}}
+    transforms = {
+        "rows_dimension": {"prune": True},
+        "columns_dimension": {"prune": True},
+    }
     slice_ = FrozenCube(CR.MR_X_CAT_PRUNED_ROW_COL, transforms=transforms).slices[0]
     expected = [[6, 6, 0], [6, 6, 0], [0, 0, 0]]
     np.testing.assert_array_equal(slice_.counts, expected)
@@ -825,7 +846,10 @@ def test_mr_x_num_cols_margin_pruned_unweighted():
 
 
 def test_num_x_mr_props_by_row():
-    transforms = {"columns_dimension": {"prune": True}}
+    transforms = {
+        "rows_dimension": {"prune": True},
+        "columns_dimension": {"prune": True},
+    }
     slice_ = FrozenCube(CR.AGE_X_ACCRPIPE, transforms=transforms).slices[0]
     expected = [
         [0.33333333, 0.44444444, 0.18518519, 0.03703704],
@@ -849,7 +873,10 @@ def test_num_x_mr_props_by_row():
 
 
 def test_num_x_mr_props_by_col():
-    transforms = {"columns_dimension": {"prune": True}}
+    transforms = {
+        "rows_dimension": {"prune": True},
+        "columns_dimension": {"prune": True},
+    }
     slice_ = FrozenCube(CR.AGE_X_ACCRPIPE, transforms=transforms).slices[0]
     expected = [
         [0.00707547, 0.00676437, 0.00472144, 0.00413223],
@@ -873,7 +900,10 @@ def test_num_x_mr_props_by_col():
 
 
 def test_num_x_mr_props_by_cell():
-    transforms = {"columns_dimension": {"prune": True}}
+    transforms = {
+        "rows_dimension": {"prune": True},
+        "columns_dimension": {"prune": True},
+    }
     slice_ = FrozenCube(CR.AGE_X_ACCRPIPE, transforms=transforms).slices[0]
     expected = [
         [0.00207039, 0.00276052, 0.00115022, 0.00023004],

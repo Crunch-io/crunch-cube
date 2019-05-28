@@ -58,12 +58,18 @@ class DescribeIntegratedFrozenCubeAsFrozenSlice(object):
 
         therefore we need 3 zeros in the result (no zero gets pruned).
         """
-        transforms = {"rows_dimension": {"prune": True}}
+        transforms = {
+            "rows_dimension": {"prune": True},
+            "columns_dimension": {"prune": True},
+        }
         slice_ = FrozenCube(CR.CAT_X_MR_SENTRY, transforms=transforms).slices[0]
         np.testing.assert_array_equal(slice_.counts, np.array([[0, 0, 0]]))
 
     def it_provides_pruned_array_for_CA_CAT_x_CA_SUBVAR(self):
-        transforms = {"rows_dimension": {"prune": True}}
+        transforms = {
+            "rows_dimension": {"prune": True},
+            "columns_dimension": {"prune": True},
+        }
         slice_ = FrozenCube(CR.CA_CAT_X_CA_SUBVAR, transforms=transforms).slices[0]
         np.testing.assert_array_equal(
             slice_.column_proportions,
@@ -1128,7 +1134,10 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_array_equal(slice_.counts, expected)
 
         # With pruning
-        transforms = {"rows_dimension": {"prune": True}}
+        transforms = {
+            "rows_dimension": {"prune": True},
+            "columns_dimension": {"prune": True},
+        }
         slice_ = FrozenCube(CR.CAT_X_CAT_WITH_EMPTY_COLS, transforms=transforms).slices[
             0
         ]
@@ -1151,7 +1160,10 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_array_equal(slice_.column_proportions, expected)
 
         # With pruning
-        transforms = {"rows_dimension": {"prune": True}}
+        transforms = {
+            "rows_dimension": {"prune": True},
+            "columns_dimension": {"prune": True},
+        }
         slice_ = FrozenCube(CR.CAT_X_CAT_WITH_EMPTY_COLS, transforms=transforms).slices[
             0
         ]
@@ -1182,7 +1194,10 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
         # With pruning
-        transforms = {"rows_dimension": {"prune": True}}
+        transforms = {
+            "rows_dimension": {"prune": True},
+            "columns_dimension": {"prune": True},
+        }
         slice_ = FrozenCube(CR.CAT_X_CAT_WITH_EMPTY_COLS, transforms=transforms).slices[
             0
         ]
@@ -1213,7 +1228,10 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.table_proportions, expected)
 
         # With pruning
-        transforms = {"rows_dimension": {"prune": True}}
+        transforms = {
+            "rows_dimension": {"prune": True},
+            "columns_dimension": {"prune": True},
+        }
         slice_ = FrozenCube(CR.CAT_X_CAT_WITH_EMPTY_COLS, transforms=transforms).slices[
             0
         ]
@@ -1703,9 +1721,25 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         # +----+-----+----+
         #  True False True
 
-        transforms = {"rows_dimension": {"insertions": {}, "prune": True}}
+        # Both rows and columns get pruned
+        transforms = {
+            "rows_dimension": {"insertions": {}, "prune": True},
+            "columns_dimension": {"insertions": {}, "prune": True},
+        }
         slice_ = FrozenCube(CR.XYZ_SIMPLE_ALLTYPES, transforms=transforms).slices[0]
         np.testing.assert_array_equal(slice_.counts, [[1]])
+
+        # Just columns get pruned
+        transforms = {"columns_dimension": {"insertions": {}, "prune": True}}
+        slice_ = FrozenCube(CR.XYZ_SIMPLE_ALLTYPES, transforms=transforms).slices[0]
+        np.testing.assert_array_equal(
+            slice_.counts, [[1], [0], [0], [1], [1], [0], [0], [1]]
+        )
+
+        # Just rows get pruned
+        transforms = {"rows_dimension": {"insertions": {}, "prune": True}}
+        slice_ = FrozenCube(CR.XYZ_SIMPLE_ALLTYPES, transforms=transforms).slices[0]
+        np.testing.assert_array_equal(slice_.counts, [[0, 1, 0]])
 
     def test_mr_x_ca_rows_margin(self):
         slice_ = FrozenCube(CR.MR_X_CA_HS).slices[0]
@@ -1725,7 +1759,10 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
 
     def test_ca_x_mr_margin_prune(self):
         # ---CA x MR---
-        transforms = {"rows_dimension": {"prune": True}}
+        transforms = {
+            "rows_dimension": {"insertions": {}, "prune": True},
+            "columns_dimension": {"insertions": {}, "prune": True},
+        }
         slice_ = FrozenCube(CR.CA_X_MR_WEIGHTED_HS, transforms=transforms).slices[0]
         np.testing.assert_array_equal(
             slice_.column_base, np.array([504, 215, 224, 76, 8, 439])
@@ -1765,7 +1802,10 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_array_equal(slice_.table_margin, 208)
 
     def test_proportions_cat_x_mr_x_cat(self):
-        transforms = {"rows_dimension": {"prune": True}}
+        transforms = {
+            "rows_dimension": {"prune": True},
+            "columns_dimension": {"prune": True},
+        }
         slice_ = FrozenCube(
             CR.CAT_X_MR_X_CAT["slides"][0]["cube"], transforms=transforms
         ).slices[0]
@@ -1817,7 +1857,10 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.column_proportions, expected)
 
         # Test second slice
-        transforms = {"rows_dimension": {"prune": True}}
+        transforms = {
+            "rows_dimension": {"prune": True},
+            "columns_dimension": {"prune": True},
+        }
         slice_ = FrozenCube(
             CR.CAT_X_MR_X_CAT["slides"][0]["cube"], transforms=transforms
         ).slices[1]

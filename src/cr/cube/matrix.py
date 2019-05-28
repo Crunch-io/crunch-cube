@@ -19,7 +19,6 @@ from cr.cube.vector import (
     BaseVector,
     CategoricalVector,
     CatXMrVector,
-    HiddenVector,
     MeansVector,
     MeansWithMrVector,
     MultipleResponseVector,
@@ -80,24 +79,18 @@ class PrunedMatrix(_BaseTransformedMatrix):
 
     @lazyproperty
     def columns(self):
-        if not self._applied:
-            return self._base_slice.columns
-
         return tuple(
-            PrunedVector(column, self._base_slice.rows)
+            PrunedVector(column, self._base_slice.rows, self._applied)
             for column in self._base_slice.columns
-            if not column.pruned
+            if not column.hidden
         )
 
     @lazyproperty
     def rows(self):
-        if not self._applied:
-            return self._base_slice.rows
-
         return tuple(
-            PrunedVector(row, self._base_slice.columns)
+            PrunedVector(row, self._base_slice.columns, self._applied)
             for row in self._base_slice.rows
-            if not row.pruned
+            if not row.hidden
         )
 
     @lazyproperty
@@ -137,24 +130,6 @@ class PrunedMatrix(_BaseTransformedMatrix):
     @lazyproperty
     def _applied(self):
         return self._transforms._prune
-
-
-class MatrixWithHidden(_BaseTransformedMatrix):
-    @lazyproperty
-    def columns(self):
-        return tuple(
-            HiddenVector(column, self._base_slice.rows)
-            for column in self._base_slice.columns
-            if not column.hidden
-        )
-
-    @lazyproperty
-    def rows(self):
-        return tuple(
-            HiddenVector(row, self._base_slice.columns)
-            for row in self._base_slice.rows
-            if not row.hidden
-        )
 
 
 class MatrixWithInsertions(_BaseTransformedMatrix):
@@ -264,7 +239,7 @@ class MatrixWithInsertions(_BaseTransformedMatrix):
 
 # ---Used to represent the non-existent dimension in case of 1D vectors (that need to be
 # ---accessed as slices, to support cr.exporter).
-_PlaceholderElement = namedtuple("_PlaceholderElement", "label, is_hidden")
+_PlaceholderElement = namedtuple("_PlaceholderElement", "label, is_hidden, prune")
 
 
 class MatrixFactory(object):
@@ -876,7 +851,7 @@ class _CatStripe(_BaseStripe):
                 CategoricalVector(
                     self._counts,
                     self._base_counts,
-                    _PlaceholderElement("Summary", False),
+                    _PlaceholderElement("Summary", False, False),
                     self.table_margin,
                 )
             ]
@@ -914,7 +889,9 @@ class _MeansStripe(_BaseStripe):
     def columns(self):
         """A single vector that is used only for pruning Means slices."""
         return (
-            BaseVector(_PlaceholderElement("Means Summary", False), self._base_counts),
+            BaseVector(
+                _PlaceholderElement("Means Summary", False, False), self._base_counts
+            ),
         )
 
     @lazyproperty
@@ -965,7 +942,7 @@ class _MrStripe(_BaseStripe):
                 MultipleResponseVector(
                     self._counts.T,
                     self._base_counts.T,
-                    _PlaceholderElement("Summary", False),
+                    _PlaceholderElement("Summary", False, False),
                     self.table_margin,
                 )
             ]

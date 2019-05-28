@@ -349,8 +349,42 @@ class DescribeFrozenSlice(object):
         )
         np.testing.assert_equal(slice_.base_counts, expected)
 
-        # Pruned - with insertions
+        # Pruned (just rows) - with insertions
         transforms = {"rows_dimension": {"prune": True}}
+        slice_ = FrozenCube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).slices[0]
+        expected = np.array(
+            [
+                [28, 48, 20, 10, 0, 1],
+                [7, 19, 12, 8, 0, 2],
+                [1, 1, 0, 1, 0, 0],
+                [3, 7, 4, 2, 0, 2],
+                [3, 11, 8, 5, 0, 0],
+                [1, 2, 1, 1, 0, 0],
+            ]
+        )
+        np.testing.assert_equal(slice_.base_counts, expected)
+
+        # Pruned (just columns) - with insertions
+        transforms = {"columns_dimension": {"prune": True}}
+        slice_ = FrozenCube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).slices[0]
+        expected = np.array(
+            [
+                [28, 48, 20, 10, 1],
+                [7, 19, 12, 8, 2],
+                [1, 1, 0, 1, 0],
+                [3, 7, 4, 2, 2],
+                [3, 11, 8, 5, 0],
+                [0, 0, 0, 0, 0],
+                [1, 2, 1, 1, 0],
+            ]
+        )
+        np.testing.assert_equal(slice_.base_counts, expected)
+
+        # Pruned (rows and columns) - with insertions
+        transforms = {
+            "rows_dimension": {"prune": True},
+            "columns_dimension": {"prune": True},
+        }
         slice_ = FrozenCube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).slices[0]
         expected = np.array(
             [

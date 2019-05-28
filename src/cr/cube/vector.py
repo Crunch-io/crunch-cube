@@ -239,10 +239,23 @@ class AssembledInsertionVector(AssembledVector):
         return self._base_vector.anchor
 
 
-class _BasePrunedOrHiddenVector(_BaseTransformationVector):
-    def __init__(self, base_vector, opposite_vectors):
+class PrunedVector(_BaseTransformationVector):
+    def __init__(self, base_vector, opposite_vectors, prune=True):
         self._base_vector = base_vector
         self._opposite_vectors = opposite_vectors
+        self._prune = prune
+
+    @lazyproperty
+    def _valid_elements_idxs(self):
+        """An 1D ndarray of int idxs of non-hidden values, suitable for indexing."""
+        return np.array(
+            [
+                index
+                for index, opposite_vector in enumerate(self._opposite_vectors)
+                if not opposite_vector.hidden
+            ],
+            dtype=int,
+        )
 
     @lazyproperty
     def base(self):
@@ -288,26 +301,6 @@ class _BasePrunedOrHiddenVector(_BaseTransformationVector):
     def zscore(self):
         return self._base_vector.zscore[self._valid_elements_idxs]
 
-    @lazyproperty
-    def _valid_elements_idxs(self):
-        raise NotImplementedError("must be implemented by each subclass")
-
-
-class HiddenVector(_BasePrunedOrHiddenVector):
-    """Vector with elements from the opposide dimensions hidden."""
-
-    @lazyproperty
-    def _valid_elements_idxs(self):
-        """An 1D ndarray of int idxs of visible values, suitable for array indexing."""
-        return np.array(
-            [
-                index
-                for index, opposite_vector in enumerate(self._opposite_vectors)
-                if not opposite_vector.hidden
-            ],
-            dtype=int,
-        )
-
 
 class OrderedVector(_BaseTransformationVector):
     """In charge of indexing elements properly, after ordering transform."""
@@ -349,22 +342,6 @@ class OrderedVector(_BaseTransformationVector):
         return self._base_vector.zscore
 
 
-class PrunedVector(_BasePrunedOrHiddenVector):
-    """Vector with elements from the opposide dimensions pruned."""
-
-    @lazyproperty
-    def _valid_elements_idxs(self):
-        """An 1D ndarray of int idxs of unpruned values, suitable for array indexing."""
-        return np.array(
-            [
-                index
-                for index, opposite_vector in enumerate(self._opposite_vectors)
-                if not opposite_vector.pruned
-            ],
-            dtype=int,
-        )
-
-
 # ===OPERAND VECTORS===
 
 
@@ -391,13 +368,18 @@ class BaseVector(object):
 
     @lazyproperty
     def hidden(self):
-        return self._element.is_hidden
+        """True if vector is hidden.
 
-    # TODO: combine pruned as just a different sort of hidden. Hide is hide, regardless
-    # of how it came about.
-    #     @lazyproperty
-    #     def hidden(self):
-    #         return self._element.is_hidden or (self._element.prune and self.pruned)
+        Vectors are hidden in two ways:
+
+            1. Explicitly via transforms
+            2. Implicitly when the base is 0 (also called pruning)
+
+        This property checks whether a vector needs to be hidden, either implicitly or
+        explicitly. It is used when iterating through rows or columns, to form the
+        correct result.
+        """
+        return self._element.is_hidden or (self._element.prune and self.pruned)
 
     @lazyproperty
     def is_insertion(self):
@@ -464,8 +446,13 @@ class _BaseInsertionVector(object):
 
     @lazyproperty
     def hidden(self):
-        """Insertion cannot be hidden."""
-        return False
+        """True if vector is pruned.
+
+        Insertions can never be hidden explicitly (for now). They can also almost never
+        be pruned, except in the case when all of the opposite vectors are also pruned
+        (thus leaving no elements for this insertion vector).
+        """
+        return self.pruned
 
     @lazyproperty
     def is_insertion(self):
@@ -569,7 +556,15 @@ class _InsertionColumn(_BaseInsertionVector):
 
     @lazyproperty
     def pruned(self):
-        return not np.any(np.array([row.base for row in self._slice.rows]))
+        """True if vector is pruned.
+
+        Insertions can almost never be pruned, except in the case when all of the
+        opposite vectors are also pruned (thus leaving no elements for this
+        insertion vector).
+        """
+        return self._subtotal.prune and not np.any(
+            np.array([row.base for row in self._slice.rows])
+        )
 
     @lazyproperty
     def _addend_vectors(self):
@@ -585,7 +580,15 @@ class _InsertionRow(_BaseInsertionVector):
 
     @lazyproperty
     def pruned(self):
-        return not np.any(np.array([column.base for column in self._slice.columns]))
+        """True if vector is pruned.
+
+        Insertions can almost never be pruned, except in the case when all of the
+        opposite vectors are also pruned (thus leaving no elements for this
+        insertion vector).
+        """
+        return self._subtotal.prune and not np.any(
+            np.array([column.base for column in self._slice.columns])
+        )
 
     @lazyproperty
     def pvals(self):

@@ -9,7 +9,6 @@ from cr.cube.frozen_min_base_size_mask import MinBaseSizeMask
 from cr.cube.measures.new_pairwise_significance import NewPairwiseSignificance
 from cr.cube.matrix import (
     MatrixFactory,
-    MatrixWithHidden,
     MatrixWithInsertions,
     MeansScalar,
     OrderedMatrix,
@@ -726,7 +725,6 @@ class _Assembler(object):
         """Apply all transforms sequentially."""
         matrix = OrderedMatrix(self._matrix, self._transforms)
         matrix = MatrixWithInsertions(matrix, self._transforms)
-        matrix = MatrixWithHidden(matrix, self._transforms)
         matrix = PrunedMatrix(matrix, self._transforms)
         return matrix
 
@@ -773,7 +771,6 @@ class _StrandAssembler(object):
         """Apply all transforms sequentially."""
         stripe = OrderedMatrix(self._stripe, self._transforms)
         stripe = MatrixWithInsertions(stripe, self._transforms)
-        stripe = MatrixWithHidden(stripe, self._transforms)
         stripe = PrunedMatrix(stripe, self._transforms)
         return stripe
 
