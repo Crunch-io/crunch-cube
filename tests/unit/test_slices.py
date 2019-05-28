@@ -9,14 +9,13 @@ from mock import Mock
 import pytest
 
 from cr.cube.dimension import Dimension, _Element, _Subtotal
-from cr.cube.matrix import _CatXCatMatrix, _MrXCatMatrix, OrderedMatrix, PrunedMatrix
-from cr.cube.slices import (
-    _Assembler,
-    FrozenSlice,
-    _Insertions,
-    _OrderTransform,
-    _Transforms,
+from cr.cube.matrix import (
+    _CatXCatMatrix,
+    _MrXCatMatrix,
+    OrderedMatrix,
+    MatrixWithHidden,
 )
+from cr.cube.slices import _Assembler, FrozenSlice, _Insertions, _OrderTransform
 from cr.cube.vector import (
     AssembledVector,
     CategoricalVector,
@@ -29,23 +28,23 @@ from cr.cube.vector import (
 from ..unitutil import instance_mock, property_mock
 
 
-class DescribeFrozenSlice(object):
-    """Unit-test suite for `cr.cube.slices.FrozenSlice` object."""
+class DescribeIntegratedFrozenSlice(object):
+    """Partial-integration test suite for `cr.cube.slices.FrozenSlice` object."""
 
     @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_knows_the_row_proportions(self, row_proportions_fixture, _assembler_prop_):
-        slice_, transforms, expected = row_proportions_fixture
-        _assembler_prop_.return_value = _Assembler(slice_, transforms)
-        slice_ = FrozenSlice(None, None)
+        slice_, insertions, expected = row_proportions_fixture
+        _assembler_prop_.return_value = _Assembler(slice_, None, insertions, None)
+        slice_ = FrozenSlice(None, None, None, None, None)
 
-        row_proportions = slice_.proportions
+        row_proportions = slice_.row_proportions
 
         np.testing.assert_almost_equal(row_proportions, expected)
 
     @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_knows_the_rows_margin(self, row_margin_fixture, _assembler_prop_):
-        slice_, transforms, expected = row_margin_fixture
-        _assembler_prop_.return_value = _Assembler(slice_, transforms)
+        slice_, insertions, expected = row_margin_fixture
+        _assembler_prop_.return_value = _Assembler(slice_, None, insertions, None)
         slice_ = FrozenSlice(None, None)
 
         margin = slice_.row_margin
@@ -92,19 +91,18 @@ class DescribeFrozenSlice(object):
             ),
         ]
     )
-    def row_proportions_fixture(self, request, _subtotals_prop_, dimension_):
+    def row_proportions_fixture(self, request, subtotals_prop_, dimension_):
         counts, row_subtotals, expected_row_proportions = request.param
-        slice_ = _CatXCatMatrix(counts)
         dimensions = (Dimension(None, None), dimension_)
-        _subtotals_prop_.return_value = [
+        slice_ = _CatXCatMatrix(dimensions, counts, None)
+        subtotals_prop_.return_value = [
             instance_mock(
                 request, _Subtotal, anchor_idx=anchor_idx, addend_idxs=addend_idxs
             )
             for anchor_idx, addend_idxs in row_subtotals
         ]
         insertions = _Insertions(dimensions, slice_)
-        transforms = _Transforms(None, None, insertions)
-        return slice_, transforms, np.array(expected_row_proportions)
+        return slice_, insertions, np.array(expected_row_proportions)
 
     @pytest.fixture(
         params=[
@@ -125,8 +123,7 @@ class DescribeFrozenSlice(object):
             for anchor_idx, addend_idxs in row_subtotals
         ]
         insertions = _Insertions(dimensions, slice_)
-        transforms = _Transforms(None, None, insertions)
-        return slice_, transforms, np.array(expected_row_margin)
+        return slice_, insertions, np.array(expected_row_margin)
 
     # fixture components ---------------------------------------------
 
@@ -135,12 +132,12 @@ class DescribeFrozenSlice(object):
         return property_mock(request, FrozenSlice, "_assembler")
 
     @pytest.fixture
-    def _subtotals_prop_(self, request):
-        return property_mock(request, Dimension, "_subtotals")
+    def subtotals_prop_(self, request):
+        return property_mock(request, Dimension, "subtotals")
 
     @pytest.fixture
     def dimension_(self, request):
-        return instance_mock(request, Dimension, _subtotals=tuple())
+        return instance_mock(request, Dimension, subtotals=tuple())
 
 
 class DescribeCategoricalVector(object):
@@ -377,18 +374,13 @@ class DescribeAssembledVector(object):
         return CategoricalVector(np.array(raw_counts)), insertion_cols, expected
 
 
-class Describe_Assembler(object):
-    """Unit-test suite for `cr.cube.slices._Assembler` object."""
-
-    def it_sets_matrix_and_insertions(self):
-        matrix_, insertions = Mock(), Mock()
-        assembler = _Assembler(matrix_, insertions)
-        assert assembler._matrix, assembler._insertions == (matrix_, insertions)
+class Describe_IntegratedAssembler(object):
+    """Partial-integration test suite for `cr.cube.slices._Assembler` object."""
 
     @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_provides_rows(self, counts_fixture):
-        slice_, transforms, expected = counts_fixture
-        assembler = _Assembler(slice_, transforms)
+        slice_, insertions, expected = counts_fixture
+        assembler = _Assembler(slice_, None, insertions, None)
         actual_counts = np.array([row.values for row in assembler.rows])
         np.testing.assert_array_equal(actual_counts, expected)
 
@@ -417,8 +409,7 @@ class Describe_Assembler(object):
             for anchor_idx, addend_idxs in row_subtotals
         ]
         insertions = _Insertions(dimensions, slice_)
-        transforms = _Transforms(None, None, insertions)
-        return slice_, transforms, np.array(expected_counts)
+        return slice_, insertions, np.array(expected_counts)
 
     # fixture components ---------------------------------------------
 
@@ -569,27 +560,13 @@ class DescribeOrderedVector(object):
         return CategoricalVector(np.array(counts)), np.array(order), expected
 
 
-class Describe_Transforms(object):
-    """Unit-test suite for `cr.cube.slices._Transforms` object."""
-
-    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
-    def it_initiates_transforms(self):
-        insertions = Mock()
-        ordering = Mock()
-        pruning = Mock()
-        transforms = _Transforms(ordering, pruning, insertions)
-        assert transforms._ordering == ordering
-        assert transforms._pruning == pruning
-        assert transforms._insertions == insertions
-
-
-class DescribePrunedMatrix(object):
-    """Unit-test suite for `cr.cube.slices.PrunedMatrix` object."""
+class DescribeMatrixWithHidden(object):
+    """Unit-test suite for `cr.cube.slices.MatrixWithHidden` object."""
 
     @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_initiates_slice(self):
         slice_ = Mock()
-        pruned_slice = PrunedMatrix(slice_)
+        pruned_slice = MatrixWithHidden(slice_)
         assert pruned_slice._slice == slice_
 
     @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
@@ -628,7 +605,7 @@ class DescribePrunedMatrix(object):
     )
     def pruned_slice_fixture(self, request):
         cls_, raw_counts, expected = request.param
-        return PrunedMatrix(cls_(np.array(raw_counts))), np.array(expected)
+        return MatrixWithHidden(cls_(np.array(raw_counts))), np.array(expected)
 
 
 class DescribePrunedVector(object):

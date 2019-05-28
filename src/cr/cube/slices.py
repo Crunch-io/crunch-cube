@@ -9,10 +9,10 @@ from cr.cube.frozen_min_base_size_mask import MinBaseSizeMask
 from cr.cube.measures.new_pairwise_significance import NewPairwiseSignificance
 from cr.cube.matrix import (
     MatrixFactory,
+    MatrixWithHidden,
     MatrixWithInsertions,
     MeansScalar,
     OrderedMatrix,
-    PrunedMatrix,
     StripeFactory,
 )
 from cr.cube.util import lazyproperty
@@ -354,7 +354,12 @@ class FrozenSlice(object):
 
     @lazyproperty
     def _assembler(self):
-        return _Assembler(self._matrix, self._transforms)
+        return _Assembler(
+            self._matrix,
+            _OrderTransform(self._dimensions),
+            _Insertions(self._dimensions, self._matrix),
+            self._prune,
+        )
 
     @lazyproperty
     def _columns_dimension(self):
@@ -413,10 +418,6 @@ class FrozenSlice(object):
             self._transforms_dict.get("rows_dimension", {}),
             self._transforms_dict.get("columns_dimension", {}),
         )
-
-    @lazyproperty
-    def _transforms(self):
-        return _Transforms(self._matrix, self.dimensions, self._prune)
 
     @lazyproperty
     def _transforms_dict(self):
@@ -596,7 +597,12 @@ class _Strand(object):
 
     @lazyproperty
     def _assembler(self):
-        return _StrandAssembler(self._stripe, self._transforms)
+        return _StrandAssembler(
+            self._stripe,
+            _OrderTransform((self._rows_dimension,)),
+            _Insertions((self._rows_dimension,), self._stripe),
+            self._rows_dimension.prune,
+        )
 
     @lazyproperty
     def _rows_dimension(self):
@@ -623,12 +629,6 @@ class _Strand(object):
             self._cube.base_counts,
             self._ca_as_0th,
             self._slice_idx,
-        )
-
-    @lazyproperty
-    def _transforms(self):
-        return _Transforms(
-            self._stripe, (self._rows_dimension,), self._rows_dimension.prune
         )
 
 
@@ -664,9 +664,11 @@ class _Nub(object):
 class _Assembler(object):
     """In charge of performing all the transforms sequentially."""
 
-    def __init__(self, matrix, transforms):
+    def __init__(self, matrix, ordering, insertions, prune):
         self._matrix = matrix
-        self._transforms = transforms
+        self._ordering = ordering
+        self._insertions = insertions
+        self._prune = prune
 
     @lazyproperty
     def columns(self):
@@ -695,18 +697,20 @@ class _Assembler(object):
     @lazyproperty
     def _transformed_matrix(self):
         """Apply all transforms sequentially."""
-        matrix = OrderedMatrix(self._matrix, self._transforms)
-        matrix = MatrixWithInsertions(matrix, self._transforms)
-        matrix = PrunedMatrix(matrix, self._transforms)
+        matrix = OrderedMatrix(self._matrix, self._ordering)
+        matrix = MatrixWithInsertions(matrix, self._insertions)
+        matrix = MatrixWithHidden(matrix, self._prune)
         return matrix
 
 
 class _StrandAssembler(object):
     """Perform transforms on a 1D cube-section."""
 
-    def __init__(self, stripe, transforms):
+    def __init__(self, stripe, ordering, insertions, prune):
         self._stripe = stripe
-        self._transforms = transforms
+        self._ordering = ordering
+        self._insertions = insertions
+        self._prune = prune
 
     @lazyproperty
     def column(self):
@@ -741,9 +745,9 @@ class _StrandAssembler(object):
     @lazyproperty
     def _transformed_stripe(self):
         """Apply all transforms sequentially."""
-        stripe = OrderedMatrix(self._stripe, self._transforms)
-        stripe = MatrixWithInsertions(stripe, self._transforms)
-        stripe = PrunedMatrix(stripe, self._transforms)
+        stripe = OrderedMatrix(self._stripe, self._ordering)
+        stripe = MatrixWithInsertions(stripe, self._insertions)
+        stripe = MatrixWithHidden(stripe, self._prune)
         return stripe
 
 
@@ -859,24 +863,3 @@ class _OrderTransform(object):
     @lazyproperty
     def _rows_dimension(self):
         return self._dimensions[0]
-
-
-class _Transforms(object):
-    """Container for the transforms."""
-
-    def __init__(self, matrix, dimensions, prune):
-        self._matrix = matrix
-        self._dimensions = dimensions
-        self._prune = prune
-
-    @lazyproperty
-    def insertions(self):
-        return _Insertions(self._dimensions, self._matrix)
-
-    @lazyproperty
-    def ordering(self):
-        return _OrderTransform(self._dimensions)
-
-    @lazyproperty
-    def prune(self):
-        return self._prune

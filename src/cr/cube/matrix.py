@@ -30,9 +30,8 @@ from cr.cube.vector import (
 class _BaseTransformedMatrix(object):
     """Base class for late-stage matrices that transform a base matrix."""
 
-    def __init__(self, base_slice, transforms):
+    def __init__(self, base_slice):
         self._base_slice = base_slice
-        self._transforms = transforms
 
     @lazyproperty
     def table_base(self):
@@ -48,6 +47,10 @@ class OrderedMatrix(_BaseTransformedMatrix):
 
     In charge of indexing rows and columns properly.
     """
+
+    def __init__(self, base_slice, ordering):
+        super(OrderedMatrix, self).__init__(base_slice)
+        self._ordering = ordering
 
     @lazyproperty
     def columns(self):
@@ -65,22 +68,27 @@ class OrderedMatrix(_BaseTransformedMatrix):
             for row in tuple(np.array(self._base_slice.rows)[self._ordering.row_order])
         )
 
-    @lazyproperty
-    def _ordering(self):
-        return self._transforms.ordering
 
+class MatrixWithHidden(_BaseTransformedMatrix):
+    """Matrix with hidden vectors removed.
 
-class PrunedMatrix(_BaseTransformedMatrix):
-    """Matrix with rows or columns pruned.
-
-    While the rows and/or columns need to be pruned, each one of the remaining
-    vectors also needs to be pruned based on the opposite dimension's base.
+    A vector can be hidden explicitly by the user, or it can be automatically hidden
+    when it is empty and the prune option for the dimension is selected.
     """
+
+    # ---Note that hiding a vector requires not just removing that vector, but also
+    # ---the element the removed vector contributes to each of the *opposing* vectors.
+    # ---For example, hiding a row is removing that row-vector from `.rows`, but also
+    # ---removing an element from each column-vector in `.columns`.
+
+    def __init__(self, base_slice, prune):
+        super(MatrixWithHidden, self).__init__(base_slice)
+        self._prune = prune
 
     @lazyproperty
     def columns(self):
         return tuple(
-            PrunedVector(column, self._base_slice.rows, self._applied)
+            PrunedVector(column, self._base_slice.rows, self._prune)
             for column in self._base_slice.columns
             if not column.hidden
         )
@@ -88,14 +96,14 @@ class PrunedMatrix(_BaseTransformedMatrix):
     @lazyproperty
     def rows(self):
         return tuple(
-            PrunedVector(row, self._base_slice.columns, self._applied)
+            PrunedVector(row, self._base_slice.columns, self._prune)
             for row in self._base_slice.rows
             if not row.hidden
         )
 
     @lazyproperty
     def table_base(self):
-        if not self._applied:
+        if not self._prune:
             return self._base_slice.table_base
 
         margin = self._base_slice.table_base
@@ -112,7 +120,7 @@ class PrunedMatrix(_BaseTransformedMatrix):
 
     @lazyproperty
     def table_margin(self):
-        if not self._applied:
+        if not self._prune:
             return self._base_slice.table_margin
 
         margin = self._base_slice.table_margin
@@ -127,13 +135,13 @@ class PrunedMatrix(_BaseTransformedMatrix):
     def table_margin_unpruned(self):
         return self._base_slice.table_margin
 
-    @lazyproperty
-    def _applied(self):
-        return self._transforms._prune
-
 
 class MatrixWithInsertions(_BaseTransformedMatrix):
     """Represents slice with both normal and inserted bits."""
+
+    def __init__(self, base_slice, insertions):
+        super(MatrixWithInsertions, self).__init__(base_slice)
+        self._insertions = insertions
 
     @lazyproperty
     def columns(self):
@@ -194,10 +202,6 @@ class MatrixWithInsertions(_BaseTransformedMatrix):
     @lazyproperty
     def _insertion_rows(self):
         return self._insertions._inserted_rows
-
-    @lazyproperty
-    def _insertions(self):
-        return self._transforms.insertions
 
     @lazyproperty
     def _interleaved_columns(self):
