@@ -11,11 +11,11 @@ import pytest
 from cr.cube.dimension import Dimension, _Element, _Subtotal
 from cr.cube.matrix import (
     _CatXCatMatrix,
+    _MatrixWithHidden,
     _MrXCatMatrix,
-    OrderedMatrix,
-    MatrixWithHidden,
+    _OrderedMatrix,
 )
-from cr.cube.slices import _Assembler, FrozenSlice, _OrderTransform
+from cr.cube.slices import FrozenSlice, _OrderTransform, TransformedMatrix
 from cr.cube.vector import (
     AssembledVector,
     CategoricalVector,
@@ -34,7 +34,9 @@ class DescribeIntegratedFrozenSlice(object):
     @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_knows_the_row_proportions(self, row_proportions_fixture, _assembler_prop_):
         slice_, insertions, expected = row_proportions_fixture
-        _assembler_prop_.return_value = _Assembler(slice_, None, insertions, None)
+        _assembler_prop_.return_value = TransformedMatrix(
+            slice_, None, insertions, None
+        )
         slice_ = FrozenSlice(None, None, None, None, None)
 
         row_proportions = slice_.row_proportions
@@ -44,7 +46,9 @@ class DescribeIntegratedFrozenSlice(object):
     @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_knows_the_rows_margin(self, row_margin_fixture, _assembler_prop_):
         slice_, insertions, expected = row_margin_fixture
-        _assembler_prop_.return_value = _Assembler(slice_, None, insertions, None)
+        _assembler_prop_.return_value = TransformedMatrix(
+            slice_, None, insertions, None
+        )
         slice_ = FrozenSlice(None, None)
 
         margin = slice_.row_margin
@@ -287,13 +291,13 @@ class DescribeAssembledVector(object):
         return CategoricalVector(np.array(raw_counts)), insertion_cols, expected
 
 
-class DescribeIntegrated_Assembler(object):
-    """Partial-integration test suite for `cr.cube.slices._Assembler` object."""
+class DescribeIntegratedTransformedMatrix(object):
+    """Partial-integration test suite for `cr.cube.slices.TransformedMatrix` object."""
 
     @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_provides_rows(self, counts_fixture):
         slice_, insertions, expected = counts_fixture
-        assembler = _Assembler(slice_, None, insertions, None)
+        assembler = TransformedMatrix(slice_, None, insertions, None)
         actual_counts = np.array([row.values for row in assembler.rows])
         np.testing.assert_array_equal(actual_counts, expected)
 
@@ -398,14 +402,14 @@ class Describe_OrderTransform(object):
         return property_mock(request, _OrderTransform, "_rows_dimension")
 
 
-class DescribeOrderedMatrix(object):
-    """Unit-test suite for `cr.cube.matrix.OrderedMatrix` object."""
+class Describe_OrderedMatrix(object):
+    """Unit-test suite for `cr.cube.matrix._OrderedMatrix` object."""
 
     @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_initiates_slice_and_reordering(self):
         slice_ = Mock()
         ordering = Mock()
-        ordered_slice = OrderedMatrix(slice_, ordering)
+        ordered_slice = _OrderedMatrix(slice_, ordering)
         assert ordered_slice._slice == slice_
         assert ordered_slice._ordering == ordering
 
@@ -437,7 +441,7 @@ class DescribeOrderedMatrix(object):
         transform = _OrderTransform(
             (row_dimension, None), (np.array(ordered_ids), None)
         )
-        return OrderedMatrix(_CatXCatMatrix(np.array(counts)), transform), expected
+        return _OrderedMatrix(_CatXCatMatrix(np.array(counts)), transform), expected
 
 
 class DescribeOrderedVector(object):
@@ -471,13 +475,13 @@ class DescribeOrderedVector(object):
         return CategoricalVector(np.array(counts)), np.array(order), expected
 
 
-class DescribeMatrixWithHidden(object):
-    """Unit-test suite for `cr.cube.matrix.MatrixWithHidden` object."""
+class Describe_MatrixWithHidden(object):
+    """Unit-test suite for `cr.cube.matrix._MatrixWithHidden` object."""
 
     @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_initiates_slice(self):
         slice_ = Mock()
-        pruned_slice = MatrixWithHidden(slice_)
+        pruned_slice = _MatrixWithHidden(slice_)
         assert pruned_slice._slice == slice_
 
     @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
@@ -516,7 +520,7 @@ class DescribeMatrixWithHidden(object):
     )
     def pruned_slice_fixture(self, request):
         cls_, raw_counts, expected = request.param
-        return MatrixWithHidden(cls_(np.array(raw_counts))), np.array(expected)
+        return _MatrixWithHidden(cls_(np.array(raw_counts))), np.array(expected)
 
 
 class DescribeVectorAfterHiding(object):

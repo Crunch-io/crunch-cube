@@ -29,15 +29,106 @@ from cr.cube.vector import (
 )
 
 
-class _BaseTransformedMatrix(object):
-    """Base class for late-stage matrices that transform a base matrix."""
+class TransformedMatrix(object):
+    """Matrix reflection application of all transforms."""
 
-    def __init__(self, base_matrix):
+    def __init__(self, matrix, ordering):
+        self._matrix = matrix
+        self._ordering = ordering
+
+    @lazyproperty
+    def columns(self):
+        return self._transformed_matrix.columns
+
+    @lazyproperty
+    def rows(self):
+        return self._transformed_matrix.rows
+
+    @lazyproperty
+    def table_base(self):
+        return self._transformed_matrix.table_base
+
+    @lazyproperty
+    def table_base_unpruned(self):
+        return self._transformed_matrix.table_base_unpruned
+
+    @lazyproperty
+    def table_margin(self):
+        return self._transformed_matrix.table_margin
+
+    @lazyproperty
+    def table_margin_unpruned(self):
+        return self._transformed_matrix.table_margin_unpruned
+
+    @lazyproperty
+    def _transformed_matrix(self):
+        """Apply all transforms sequentially."""
+        matrix = _OrderedMatrix(self._matrix, self._ordering)
+        matrix = _MatrixWithInsertions(matrix)
+        matrix = _MatrixWithHidden(matrix)
+        return matrix
+
+
+class TransformedStripe(object):
+    """Stripe reflecting application of all transforms."""
+
+    def __init__(self, stripe, ordering):
+        self._stripe = stripe
+        self._ordering = ordering
+
+    @lazyproperty
+    def rows(self):
+        """Sequence of post-transformation row vectors."""
+        return self._transformed_stripe.rows
+
+    @lazyproperty
+    def table_base_unpruned(self):
+        """Hmm, weird 1D ndarray with same int value repeated for each row."""
+        return self._transformed_stripe.table_base_unpruned
+
+    @lazyproperty
+    def table_margin_unpruned(self):
+        """Hmm, weird 1D ndarray with same float value repeated for each row."""
+        return self._transformed_stripe.table_margin_unpruned
+
+    @lazyproperty
+    def _transformed_stripe(self):
+        """Apply all transforms sequentially."""
+        stripe = _OrderedMatrix(self._stripe, self._ordering)
+        stripe = _StripeWithInsertions(stripe)
+        stripe = _StripeWithHidden(stripe)
+        return stripe
+
+
+class _OrderedMatrix(object):
+    """Result of the ordering transform.
+
+    In charge of indexing rows and columns properly.
+    """
+
+    def __init__(self, base_matrix, ordering):
         self._base_matrix = base_matrix
+        self._ordering = ordering
+
+    @lazyproperty
+    def columns(self):
+        return tuple(
+            OrderedVector(column, self._ordering.row_order)
+            for column in tuple(
+                np.array(self._base_matrix.columns)[self._ordering.column_order]
+            )
+        )
 
     @lazyproperty
     def columns_dimension(self):
         return self._base_matrix.columns_dimension
+
+    @lazyproperty
+    def rows(self):
+        return tuple(
+            OrderedVector(row, self._ordering.column_order)
+            for row in tuple(np.array(self._base_matrix.rows)[self._ordering.row_order])
+        )
 
     @lazyproperty
     def rows_dimension(self):
@@ -52,34 +143,7 @@ class _BaseTransformedMatrix(object):
         return self._base_matrix.table_margin
 
 
-class OrderedMatrix(_BaseTransformedMatrix):
-    """Result of the ordering transform.
-
-    In charge of indexing rows and columns properly.
-    """
-
-    def __init__(self, base_matrix, ordering):
-        super(OrderedMatrix, self).__init__(base_matrix)
-        self._ordering = ordering
-
-    @lazyproperty
-    def columns(self):
-        return tuple(
-            OrderedVector(column, self._ordering.row_order)
-            for column in tuple(
-                np.array(self._base_matrix.columns)[self._ordering.column_order]
-            )
-        )
-
-    @lazyproperty
-    def rows(self):
-        return tuple(
-            OrderedVector(row, self._ordering.column_order)
-            for row in tuple(np.array(self._base_matrix.rows)[self._ordering.row_order])
-        )
-
-
-class MatrixWithHidden(_BaseTransformedMatrix):
+class _MatrixWithHidden(object):
     """Matrix with hidden vectors removed.
 
     A vector can be hidden explicitly by the user, or it can be automatically hidden
@@ -92,7 +156,7 @@ class MatrixWithHidden(_BaseTransformedMatrix):
     # ---removing an element from each column-vector in `.columns`.
 
     def __init__(self, base_matrix):
-        super(MatrixWithHidden, self).__init__(base_matrix)
+        self._base_matrix = base_matrix
 
     @lazyproperty
     def columns(self):
@@ -139,7 +203,7 @@ class MatrixWithHidden(_BaseTransformedMatrix):
         return self._base_matrix.table_margin
 
 
-class StripeWithHidden(object):
+class _StripeWithHidden(object):
     """Stripe with hidden rows removed.
 
     A row can be hidden explicitly by the user, or it can be automatically hidden when
@@ -257,11 +321,11 @@ class _BasePartitionWithInsertions(object):
         return tuple(row for row in self._all_inserted_rows if row.anchor == "bottom")
 
 
-class MatrixWithInsertions(_BasePartitionWithInsertions):
+class _MatrixWithInsertions(_BasePartitionWithInsertions):
     """Represents slice with both normal and inserted bits."""
 
     def __init__(self, base_matrix):
-        super(MatrixWithInsertions, self).__init__(base_matrix)
+        super(_MatrixWithInsertions, self).__init__(base_matrix)
         self._base_matrix = base_matrix
 
     @lazyproperty
@@ -320,11 +384,11 @@ class MatrixWithInsertions(_BasePartitionWithInsertions):
         )
 
 
-class StripeWithInsertions(_BasePartitionWithInsertions):
+class _StripeWithInsertions(_BasePartitionWithInsertions):
     """Represents stripe with both base and inserted row vectors."""
 
     def __init__(self, base_stripe):
-        super(StripeWithInsertions, self).__init__(base_stripe)
+        super(_StripeWithInsertions, self).__init__(base_stripe)
         self._base_stripe = base_stripe
 
     @lazyproperty

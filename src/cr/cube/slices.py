@@ -9,13 +9,10 @@ from cr.cube.frozen_min_base_size_mask import MinBaseSizeMask
 from cr.cube.measures.new_pairwise_significance import NewPairwiseSignificance
 from cr.cube.matrix import (
     MatrixFactory,
-    MatrixWithHidden,
-    MatrixWithInsertions,
     MeansScalar,
-    OrderedMatrix,
     StripeFactory,
-    StripeWithHidden,
-    StripeWithInsertions,
+    TransformedMatrix,
+    TransformedStripe,
 )
 from cr.cube.util import lazyproperty
 
@@ -60,11 +57,11 @@ class FrozenSlice(object):
 
     @lazyproperty
     def base_counts(self):
-        return np.array([row.base_values for row in self._assembler.rows])
+        return np.array([row.base_values for row in self._matrix.rows])
 
     @lazyproperty
     def column_base(self):
-        return np.array([column.base for column in self._assembler.columns]).T
+        return np.array([column.base for column in self._matrix.columns]).T
 
     @lazyproperty
     def column_index(self):
@@ -74,16 +71,16 @@ class FrozenSlice(object):
         corresponding baseline values. The baseline values are the univariate
         percentages of the corresponding variable.
         """
-        return np.array([row.column_index for row in self._assembler.rows])
+        return np.array([row.column_index for row in self._matrix.rows])
 
     @lazyproperty
     def column_labels(self):
         """Sequence of str column element names suitable for use as column headings."""
-        return tuple(column.label for column in self._assembler.columns)
+        return tuple(column.label for column in self._matrix.columns)
 
     @lazyproperty
     def column_margin(self):
-        return np.array([column.margin for column in self._assembler.columns]).T
+        return np.array([column.margin for column in self._matrix.columns]).T
 
     @lazyproperty
     def column_percentages(self):
@@ -91,7 +88,7 @@ class FrozenSlice(object):
 
     @lazyproperty
     def column_proportions(self):
-        return np.array([col.proportions for col in self._assembler.columns]).T
+        return np.array([col.proportions for col in self._matrix.columns]).T
 
     @lazyproperty
     def columns_dimension_name(self):
@@ -108,7 +105,7 @@ class FrozenSlice(object):
 
     @lazyproperty
     def counts(self):
-        return np.array([row.values for row in self._assembler.rows])
+        return np.array([row.values for row in self._matrix.rows])
 
     @lazyproperty
     def dimension_types(self):
@@ -134,18 +131,16 @@ class FrozenSlice(object):
     @lazyproperty
     def insertion_columns_idxs(self):
         return tuple(
-            i for i, column in enumerate(self._assembler.columns) if column.is_insertion
+            i for i, column in enumerate(self._matrix.columns) if column.is_insertion
         )
 
     @lazyproperty
     def insertion_rows_idxs(self):
-        return tuple(
-            i for i, row in enumerate(self._assembler.rows) if row.is_insertion
-        )
+        return tuple(i for i, row in enumerate(self._matrix.rows) if row.is_insertion)
 
     @lazyproperty
     def means(self):
-        return np.array([row.means for row in self._assembler.rows])
+        return np.array([row.means for row in self._matrix.rows])
 
     @lazyproperty
     def min_base_size_mask(self):
@@ -162,7 +157,7 @@ class FrozenSlice(object):
     @lazyproperty
     def ndim(self):
         """int count of dimensions for this slice, unconditionally 2."""
-        return self._matrix.ndim
+        return 2
 
     @lazyproperty
     def pairwise_indices(self):
@@ -184,7 +179,7 @@ class FrozenSlice(object):
         """
         return tuple(
             NewPairwiseSignificance(self).values[column_idx]
-            for column_idx in range(len(self._assembler.columns))
+            for column_idx in range(len(self._matrix.columns))
         )
 
     @lazyproperty
@@ -195,19 +190,19 @@ class FrozenSlice(object):
 
     @lazyproperty
     def pvals(self):
-        return np.array([row.pvals for row in self._assembler.rows])
+        return np.array([row.pvals for row in self._matrix.rows])
 
     @lazyproperty
     def row_base(self):
-        return np.array([row.base for row in self._assembler.rows])
+        return np.array([row.base for row in self._matrix.rows])
 
     @lazyproperty
     def row_labels(self):
-        return tuple(row.label for row in self._assembler.rows)
+        return tuple(row.label for row in self._matrix.rows)
 
     @lazyproperty
     def row_margin(self):
-        return np.array([row.margin for row in self._assembler.rows])
+        return np.array([row.margin for row in self._matrix.rows])
 
     @lazyproperty
     def row_percentages(self):
@@ -215,7 +210,7 @@ class FrozenSlice(object):
 
     @lazyproperty
     def row_proportions(self):
-        return np.array([row.proportions for row in self._assembler.rows])
+        return np.array([row.proportions for row in self._matrix.rows])
 
     @lazyproperty
     def rows_dimension_description(self):
@@ -233,7 +228,7 @@ class FrozenSlice(object):
         ordering of the sequence correspond to the rows in the slice, including
         accounting for insertions and hidden rows.
         """
-        return tuple(row.fill for row in self._assembler.rows)
+        return tuple(row.fill for row in self._matrix.rows)
 
     @lazyproperty
     def rows_dimension_name(self):
@@ -320,22 +315,22 @@ class FrozenSlice(object):
         if self.dimension_types == (DT.MR, DT.MR):
             # TODO: Remove property from the assembler, when we figure out the pruning
             # by both rows and columns
-            return self._assembler.table_base
+            return self._matrix.table_base
 
         # We need to prune/order by rows
         if self.dimension_types[0] == DT.MR:
-            return np.array([row.table_base for row in self._assembler.rows])
+            return np.array([row.table_base for row in self._matrix.rows])
 
         # We need to prune/order by columns
         if self.dimension_types[1] == DT.MR:
-            return np.array([column.table_base for column in self._assembler.columns])
+            return np.array([column.table_base for column in self._matrix.columns])
 
         # No pruning or reordering since single value
-        return self._assembler.table_base_unpruned
+        return self._matrix.table_base_unpruned
 
     @lazyproperty
     def table_base_unpruned(self):
-        return self._assembler.table_base_unpruned
+        return self._matrix.table_base_unpruned
 
     @lazyproperty
     def table_margin(self):
@@ -343,23 +338,23 @@ class FrozenSlice(object):
         if self.dimension_types == (DT.MR, DT.MR):
             # TODO: Remove property from the assembler, when we figure out the pruning
             # by both rows and columns
-            return self._assembler.table_margin
+            return self._matrix.table_margin
 
         # We need to prune/order by rows
         if self.dimension_types[0] == DT.MR:
-            return np.array([row.table_margin for row in self._assembler.rows])
+            return np.array([row.table_margin for row in self._matrix.rows])
 
         # We need to prune/order by columns
         if self.dimension_types[1] == DT.MR:
-            return np.array([column.table_margin for column in self._assembler.columns])
+            return np.array([column.table_margin for column in self._matrix.columns])
 
         # No pruning or reordering since single value
-        return self._assembler.table_margin_unpruned
-        # return self._assembler.table_margin
+        return self._matrix.table_margin_unpruned
+        # return self._matrix.table_margin
 
     @lazyproperty
     def table_margin_unpruned(self):
-        return self._assembler.table_margin_unpruned
+        return self._matrix.table_margin_unpruned
 
     @lazyproperty
     def table_name(self):
@@ -377,17 +372,13 @@ class FrozenSlice(object):
 
     @lazyproperty
     def table_proportions(self):
-        return np.array([row.table_proportions for row in self._assembler.rows])
+        return np.array([row.table_proportions for row in self._matrix.rows])
 
     @lazyproperty
     def zscore(self):
-        return np.array([row.zscore for row in self._assembler.rows])
+        return np.array([row.zscore for row in self._matrix.rows])
 
     # ---implementation (helpers)-------------------------------------
-
-    @lazyproperty
-    def _assembler(self):
-        return _Assembler(self._matrix, _OrderTransform(self._dimensions))
 
     @lazyproperty
     def _columns_dimension(self):
@@ -395,7 +386,7 @@ class FrozenSlice(object):
 
     @lazyproperty
     def _columns_dimension_numeric(self):
-        return np.array([column.numeric for column in self._assembler.columns])
+        return np.array([column.numeric for column in self._matrix.columns])
 
     @lazyproperty
     def _dimensions(self):
@@ -410,13 +401,16 @@ class FrozenSlice(object):
     @lazyproperty
     def _matrix(self):
         """The pre-transforms matrix for this slice."""
-        return MatrixFactory.matrix(
-            self.dimensions,
-            self._cube.counts,
-            self._cube.base_counts,
-            self._cube.counts_with_missings,
-            self._cube,
-            self._slice_idx,
+        return TransformedMatrix(
+            MatrixFactory.matrix(
+                self.dimensions,
+                self._cube.counts,
+                self._cube.base_counts,
+                self._cube.counts_with_missings,
+                self._cube,
+                self._slice_idx,
+            ),
+            _OrderTransform(self._dimensions),
         )
 
     @lazyproperty
@@ -425,7 +419,7 @@ class FrozenSlice(object):
 
     @lazyproperty
     def _rows_dimension_numeric(self):
-        return np.array([row.numeric for row in self._assembler.rows])
+        return np.array([row.numeric for row in self._matrix.rows])
 
     @lazyproperty
     def _transform_dicts(self):
@@ -465,11 +459,11 @@ class _Strand(object):
 
     @lazyproperty
     def base_counts(self):
-        return np.array([row.base_values for row in self._assembler.rows])
+        return np.array([row.base_values for row in self._stripe.rows])
 
     @lazyproperty
     def counts(self):
-        return np.array([row.values for row in self._assembler.rows])
+        return np.array([row.values for row in self._stripe.rows])
 
     @lazyproperty
     def dimension_types(self):
@@ -498,13 +492,11 @@ class _Strand(object):
     @lazyproperty
     def insertion_rows_idxs(self):
         # TODO: add integration-test coverage for this.
-        return tuple(
-            i for i, row in enumerate(self._assembler.rows) if row.is_insertion
-        )
+        return tuple(i for i, row in enumerate(self._stripe.rows) if row.is_insertion)
 
     @lazyproperty
     def means(self):
-        return np.array([row.means for row in self._assembler.rows])
+        return np.array([row.means for row in self._stripe.rows])
 
     @lazyproperty
     def min_base_size_mask(self):
@@ -518,9 +510,7 @@ class _Strand(object):
     @lazyproperty
     def ndim(self):
         """int count of dimensions for this strand, unconditionally 1."""
-
-        # The value of the `ndim` on the `self._stipe` is also unconditionally 1
-        return self._stripe.ndim
+        return 1
 
     @lazyproperty
     def population_counts(self):
@@ -530,15 +520,15 @@ class _Strand(object):
 
     @lazyproperty
     def row_base(self):
-        return np.array([row.base for row in self._assembler.rows])
+        return np.array([row.base for row in self._stripe.rows])
 
     @lazyproperty
     def row_labels(self):
-        return tuple(row.label for row in self._assembler.rows)
+        return tuple(row.label for row in self._stripe.rows)
 
     @lazyproperty
     def row_margin(self):
-        return np.array([row.margin for row in self._assembler.rows])
+        return np.array([row.margin for row in self._stripe.rows])
 
     @lazyproperty
     def rows_dimension_fills(self):
@@ -548,7 +538,7 @@ class _Strand(object):
         ordering of the sequence correspond to the rows in the slice, including
         accounting for insertions and hidden rows.
         """
-        return tuple(row.fill for row in self._assembler.rows)
+        return tuple(row.fill for row in self._stripe.rows)
 
     @lazyproperty
     def rows_dimension_name(self):
@@ -583,35 +573,35 @@ class _Strand(object):
         # For MR strands, table base is also a strand, since subvars never collapse.
         # We need to keep the ordering and hiding as in rows dimension. All this
         # information is already accessible in the underlying rows property
-        # of the `_assembler`.
+        # of the `_stripe`.
         if self.dimension_types[0] == DT.MR:
-            return np.array([row.table_base for row in self._assembler.rows])
+            return np.array([row.table_base for row in self._stripe.rows])
 
         # TODO: shouldn't this just be the regular value for a strand? Maybe change to
         # that if exporter always knows when it's getting this from a strand. The
         # ndarray "wrapper" seems like unnecessary baggage when we know it will always
         # be a scalar.
-        return self._assembler.table_base_unpruned
+        return self._stripe.table_base_unpruned
 
     @lazyproperty
     def table_base_unpruned(self):
-        return self._assembler.table_base_unpruned
+        return self._stripe.table_base_unpruned
 
     @lazyproperty
     def table_margin(self):
         # For MR strands, table base is also a strand, since subvars never collapse.
         # We need to keep the ordering and hiding as in rows dimension. All this
         # information is already accessible in the underlying rows property
-        # of the `_assembler`.
+        # of the `_stripe`.
         if self.dimension_types[0] == DT.MR:
-            return np.array([row.table_margin for row in self._assembler.rows])
+            return np.array([row.table_margin for row in self._stripe.rows])
 
-        return self._assembler.table_margin_unpruned
-        # return self._assembler.table_margin
+        return self._stripe.table_margin_unpruned
+        # return self._stripe.table_margin
 
     @lazyproperty
     def table_margin_unpruned(self):
-        return self._assembler.table_margin_unpruned
+        return self._stripe.table_margin_unpruned
 
     @lazyproperty
     def table_name(self):
@@ -629,13 +619,9 @@ class _Strand(object):
 
     @lazyproperty
     def table_proportions(self):
-        return np.array([row.table_proportions for row in self._assembler.rows])
+        return np.array([row.table_proportions for row in self._stripe.rows])
 
     # ---implementation (helpers)-------------------------------------
-
-    @lazyproperty
-    def _assembler(self):
-        return _StrandAssembler(self._stripe, _OrderTransform((self._rows_dimension,)))
 
     @lazyproperty
     def _rows_dimension(self):
@@ -644,7 +630,7 @@ class _Strand(object):
 
     @lazyproperty
     def _rows_dimension_numeric(self):
-        return np.array([row.numeric for row in self._assembler.rows])
+        return np.array([row.numeric for row in self._stripe.rows])
 
     @lazyproperty
     def _row_transforms_dict(self):
@@ -654,14 +640,17 @@ class _Strand(object):
 
     @lazyproperty
     def _stripe(self):
-        """The pre-transforms 1D matrix for this strand."""
-        return StripeFactory.stripe(
-            self._cube,
-            self._rows_dimension,
-            self._cube.counts,
-            self._cube.base_counts,
-            self._ca_as_0th,
-            self._slice_idx,
+        """The post-transforms 1D data-partition for this strand."""
+        return TransformedStripe(
+            StripeFactory.stripe(
+                self._cube,
+                self._rows_dimension,
+                self._cube.counts,
+                self._cube.base_counts,
+                self._ca_as_0th,
+                self._slice_idx,
+            ),
+            _OrderTransform((self._rows_dimension,)),
         )
 
 
@@ -678,9 +667,7 @@ class _Nub(object):
     @lazyproperty
     def ndim(self):
         """int count of dimensions, unconditionally 0 for a Nub."""
-
-        # The ndim on the underlying _scalar is also unconditionally 0
-        return self._scalar.ndim
+        return 0
 
     @lazyproperty
     def table_base(self):
@@ -692,77 +679,6 @@ class _Nub(object):
     def _scalar(self):
         """The pre-transforms data-array for this slice."""
         return MeansScalar(self._cube.counts, self._cube.base_counts)
-
-
-class _Assembler(object):
-    """In charge of performing all the transforms sequentially."""
-
-    def __init__(self, matrix, ordering):
-        self._matrix = matrix
-        self._ordering = ordering
-
-    @lazyproperty
-    def columns(self):
-        return self._transformed_matrix.columns
-
-    @lazyproperty
-    def rows(self):
-        return self._transformed_matrix.rows
-
-    @lazyproperty
-    def table_base(self):
-        return self._transformed_matrix.table_base
-
-    @lazyproperty
-    def table_base_unpruned(self):
-        return self._transformed_matrix.table_base_unpruned
-
-    @lazyproperty
-    def table_margin(self):
-        return self._transformed_matrix.table_margin
-
-    @lazyproperty
-    def table_margin_unpruned(self):
-        return self._transformed_matrix.table_margin_unpruned
-
-    @lazyproperty
-    def _transformed_matrix(self):
-        """Apply all transforms sequentially."""
-        matrix = OrderedMatrix(self._matrix, self._ordering)
-        matrix = MatrixWithInsertions(matrix)
-        matrix = MatrixWithHidden(matrix)
-        return matrix
-
-
-class _StrandAssembler(object):
-    """Perform transforms on a 1D cube-section."""
-
-    def __init__(self, stripe, ordering):
-        self._stripe = stripe
-        self._ordering = ordering
-
-    @lazyproperty
-    def rows(self):
-        """Sequence of post-transformation row vectors."""
-        return self._transformed_stripe.rows
-
-    @lazyproperty
-    def table_base_unpruned(self):
-        """Hmm, weird 1D ndarray with same int value repeated for each row."""
-        return self._transformed_stripe.table_base_unpruned
-
-    @lazyproperty
-    def table_margin_unpruned(self):
-        """Hmm, weird 1D ndarray with same float value repeated for each row."""
-        return self._transformed_stripe.table_margin_unpruned
-
-    @lazyproperty
-    def _transformed_stripe(self):
-        """Apply all transforms sequentially."""
-        stripe = OrderedMatrix(self._stripe, self._ordering)
-        stripe = StripeWithInsertions(stripe)
-        stripe = StripeWithHidden(stripe)
-        return stripe
 
 
 class _OrderTransform(object):
