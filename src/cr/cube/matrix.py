@@ -139,6 +139,33 @@ class MatrixWithHidden(_BaseTransformedMatrix):
         return self._base_matrix.table_margin
 
 
+class StripeWithHidden(object):
+    """Stripe with hidden rows removed.
+
+    A row can be hidden explicitly by the user, or it can be automatically hidden when
+    it is empty and the prune option for the dimension is selected.
+    """
+
+    def __init__(self, base_stripe):
+        self._base_stripe = base_stripe
+
+    @lazyproperty
+    def rows(self):
+        return tuple(
+            VectorAfterHiding(row, self._base_stripe.columns)
+            for row in self._base_stripe.rows
+            if not row.hidden
+        )
+
+    @lazyproperty
+    def table_base_unpruned(self):
+        return self._base_stripe.table_base
+
+    @lazyproperty
+    def table_margin_unpruned(self):
+        return self._base_stripe.table_margin
+
+
 class _BasePartitionWithInsertions(object):
     """Base class for "with-insertions" transformation partition objects."""
 

@@ -14,6 +14,7 @@ from cr.cube.matrix import (
     MeansScalar,
     OrderedMatrix,
     StripeFactory,
+    StripeWithHidden,
     StripeWithInsertions,
 )
 from cr.cube.util import lazyproperty
@@ -741,29 +742,14 @@ class _StrandAssembler(object):
         self._ordering = ordering
 
     @lazyproperty
-    def column(self):
-        """Single post-transformation column vector."""
-        return self._transformed_stripe.columns[0]
-
-    @lazyproperty
     def rows(self):
         """Sequence of post-transformation row vectors."""
         return self._transformed_stripe.rows
 
     @lazyproperty
-    def table_base(self):
-        """1D, single-element ndarray with int value."""
-        # return self._transformed_stripe.table_base
-
-    @lazyproperty
     def table_base_unpruned(self):
         """Hmm, weird 1D ndarray with same int value repeated for each row."""
         return self._transformed_stripe.table_base_unpruned
-
-    @lazyproperty
-    def table_margin(self):
-        """1D, single-element ndarray with float value."""
-        return self._transformed_stripe.table_margin
 
     @lazyproperty
     def table_margin_unpruned(self):
@@ -775,7 +761,7 @@ class _StrandAssembler(object):
         """Apply all transforms sequentially."""
         stripe = OrderedMatrix(self._stripe, self._ordering)
         stripe = StripeWithInsertions(stripe)
-        stripe = MatrixWithHidden(stripe)
+        stripe = StripeWithHidden(stripe)
         return stripe
 
 
