@@ -7,7 +7,6 @@ A matrix object has rows and (usually) columns.
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from collections import namedtuple
 import numpy as np
 from scipy.stats.contingency import expected_freq
 
@@ -16,7 +15,6 @@ from cr.cube.util import lazyproperty
 from cr.cube.vector import (
     AssembledInsertionVector,
     AssembledVector,
-    BaseVector,
     CategoricalVector,
     CatXMrVector,
     InsertionColumn,
@@ -25,6 +23,7 @@ from cr.cube.vector import (
     MeansWithMrVector,
     MultipleResponseVector,
     OrderedVector,
+    StripeColumnVector,
     VectorAfterHiding,
 )
 
@@ -449,11 +448,6 @@ class _StripeWithInsertions(_BasePartitionWithInsertions):
 
 
 # === BASE PARTITION OBJECTS ===
-
-
-# ---Used to represent the non-existent dimension in case of 1D vectors (that need to be
-# ---accessed as slices, to support cr.exporter).
-_PlaceholderElement = namedtuple("_PlaceholderElement", "label, is_hidden, prune")
 
 
 class MatrixFactory(object):
@@ -1018,6 +1012,10 @@ class _BaseStripe(object):
         self._base_counts = base_counts
 
     @lazyproperty
+    def columns(self):
+        return (StripeColumnVector(self._base_counts),)
+
+    @lazyproperty
     def ndim(self):
         """int count of dimensions in this stripe, unconditionally 1.
 
@@ -1050,19 +1048,6 @@ class _CatStripe(_BaseStripe):
         self._counts = counts
 
     @lazyproperty
-    def columns(self):
-        return tuple(
-            [
-                CategoricalVector(
-                    self._counts,
-                    self._base_counts,
-                    _PlaceholderElement("Summary", False, False),
-                    self.table_margin,
-                )
-            ]
-        )
-
-    @lazyproperty
     def rows(self):
         return tuple(
             CategoricalVector(counts, base_counts, element, self.table_margin, zscore)
@@ -1089,15 +1074,6 @@ class _MeansStripe(_BaseStripe):
     def __init__(self, rows_dimension, means, base_counts):
         super(_MeansStripe, self).__init__(rows_dimension, means, base_counts)
         self._means = means
-
-    @lazyproperty
-    def columns(self):
-        """A single vector that is used only for pruning Means slices."""
-        return (
-            BaseVector(
-                _PlaceholderElement("Means Summary", False, False), self._base_counts
-            ),
-        )
 
     @lazyproperty
     def rows(self):
@@ -1139,19 +1115,6 @@ class _MrStripe(_BaseStripe):
     def __init__(self, rows_dimension, counts, base_counts):
         super(_MrStripe, self).__init__(rows_dimension, counts, base_counts)
         self._counts = counts
-
-    @lazyproperty
-    def columns(self):
-        return tuple(
-            [
-                MultipleResponseVector(
-                    self._counts.T,
-                    self._base_counts.T,
-                    _PlaceholderElement("Summary", False, False),
-                    self.table_margin,
-                )
-            ]
-        )
 
     @lazyproperty
     def rows(self):
