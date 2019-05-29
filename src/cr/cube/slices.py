@@ -4,7 +4,6 @@ from __future__ import division
 
 import numpy as np
 
-from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.frozen_min_base_size_mask import MinBaseSizeMask
 from cr.cube.measures.new_pairwise_significance import NewPairwiseSignificance
 from cr.cube.matrix import (
@@ -17,7 +16,6 @@ from cr.cube.matrix import (
     StripeWithInsertions,
 )
 from cr.cube.util import lazyproperty
-from cr.cube.vector import InsertionColumn, InsertionRow
 
 
 class CubeSection(object):
@@ -355,14 +353,7 @@ class FrozenSlice(object):
 
     @lazyproperty
     def _assembler(self):
-        return _Assembler(
-            self._matrix,
-            _OrderTransform(self._dimensions),
-            _MatrixInsertions(
-                self._rows_dimension, self._columns_dimension, self._matrix
-            ),
-            self._prune,
-        )
+        return _Assembler(self._matrix, _OrderTransform(self._dimensions), self._prune)
 
     @lazyproperty
     def _columns_dimension(self):
@@ -603,7 +594,6 @@ class _Strand(object):
         return _StrandAssembler(
             self._stripe,
             _OrderTransform((self._rows_dimension,)),
-            _StrandInsertions(self._rows_dimension, self._stripe),
             self._rows_dimension.prune,
         )
 
@@ -667,10 +657,9 @@ class _Nub(object):
 class _Assembler(object):
     """In charge of performing all the transforms sequentially."""
 
-    def __init__(self, matrix, ordering, insertions, prune):
+    def __init__(self, matrix, ordering, prune):
         self._matrix = matrix
         self._ordering = ordering
-        self._insertions = insertions
         self._prune = prune
 
     @lazyproperty
@@ -701,7 +690,7 @@ class _Assembler(object):
     def _transformed_matrix(self):
         """Apply all transforms sequentially."""
         matrix = OrderedMatrix(self._matrix, self._ordering)
-        matrix = MatrixWithInsertions(matrix, self._insertions)
+        matrix = MatrixWithInsertions(matrix)
         matrix = MatrixWithHidden(matrix, self._prune)
         return matrix
 
@@ -709,10 +698,9 @@ class _Assembler(object):
 class _StrandAssembler(object):
     """Perform transforms on a 1D cube-section."""
 
-    def __init__(self, stripe, ordering, insertions, prune):
+    def __init__(self, stripe, ordering, prune):
         self._stripe = stripe
         self._ordering = ordering
-        self._insertions = insertions
         self._prune = prune
 
     @lazyproperty
@@ -749,138 +737,9 @@ class _StrandAssembler(object):
     def _transformed_stripe(self):
         """Apply all transforms sequentially."""
         stripe = OrderedMatrix(self._stripe, self._ordering)
-        stripe = StripeWithInsertions(stripe, self._insertions)
+        stripe = StripeWithInsertions(stripe)
         stripe = MatrixWithHidden(stripe, self._prune)
         return stripe
-
-
-class _MatrixInsertions(object):
-    """Represents subtotal rows and columns inserted into a slice."""
-
-    def __init__(self, rows_dimension, columns_dimension, matrix):
-        self._rows_dimension = rows_dimension
-        self._columns_dimension = columns_dimension
-        self._matrix = matrix
-
-    @lazyproperty
-    def all_inserted_columns(self):
-        """Sequence of _InsertionColumn objects representing subtotal columns.
-
-        The returned vectors are in the order subtotals were specified in the cube
-        result, which is no particular order. All subtotals defined on the column
-        dimension appear in the sequence.
-        """
-        # ---an aggregate columns-dimension is not summable---
-        if self._columns_dimension.dimension_type in (DT.MR, DT.CA):
-            return ()
-
-        return tuple(
-            InsertionColumn(self._matrix, subtotal)
-            for subtotal in self._columns_dimension.subtotals
-        )
-
-    @lazyproperty
-    def all_inserted_rows(self):
-        """Sequence of _InsertionRow objects representing inserted subtotal rows.
-
-        The returned vectors are in the order subtotals were specified in the cube
-        result, which is no particular order.
-        """
-        # ---an aggregate rows-dimension is not summable---
-        if self._rows_dimension.dimension_type in (DT.MR, DT.CA):
-            return tuple()
-
-        return tuple(
-            InsertionRow(self._matrix, subtotal)
-            for subtotal in self._rows_dimension.subtotals
-        )
-
-    @lazyproperty
-    def columns_inserted_at_left(self):
-        """Sequence of InsertionColumn vectors that appear before any body columns."""
-        return tuple(
-            column for column in self.all_inserted_columns if column.anchor == "top"
-        )
-
-    @lazyproperty
-    def columns_inserted_in_body(self):
-        """Sequence of InsertionColumn vectors anchored to a table body column."""
-        return tuple(
-            column
-            for column in self.all_inserted_columns
-            if column.anchor not in ("top", "bottom")
-        )
-
-    @lazyproperty
-    def columns_inserted_at_right(self):
-        """Sequence of InsertionColumn vectors appended as the last table columns."""
-        return tuple(
-            column for column in self.all_inserted_columns if column.anchor == "bottom"
-        )
-
-    @lazyproperty
-    def rows_inserted_at_top(self):
-        """Sequence of InsertionRow vectors that appear before any other table rows."""
-        return tuple(row for row in self.all_inserted_rows if row.anchor == "top")
-
-    @lazyproperty
-    def rows_inserted_in_body(self):
-        """Sequence of InsertionRow vectors that are anchored to a particular element.
-
-        These are in no particular order and must be associated with their element using
-        the element-id available on their `.anchor` property.
-        """
-        return tuple(
-            row for row in self.all_inserted_rows if row.anchor not in ("top", "bottom")
-        )
-
-    @lazyproperty
-    def rows_inserted_at_bottom(self):
-        """Sequence of InsertionRow vectors that appear after any other table rows."""
-        return tuple(row for row in self.all_inserted_rows if row.anchor == "bottom")
-
-
-class _StrandInsertions(object):
-    """Represents subtotals inserted into rows-dimension of univariate."""
-
-    def __init__(self, rows_dimension, stripe):
-        self._rows_dimension = rows_dimension
-        self._stripe = stripe
-
-    @lazyproperty
-    def all_inserted_rows(self):
-        """Sequence of all InsertionRow vectors for this strand.
-
-        These appear in no particular order.
-        """
-        if self._rows_dimension.dimension_type in (DT.MR, DT.CA):
-            return tuple()
-
-        return tuple(
-            InsertionRow(self._stripe, subtotal)
-            for subtotal in self._rows_dimension.subtotals
-        )
-
-    @lazyproperty
-    def rows_inserted_at_top(self):
-        """Sequence of InsertionRow vectors that appear before any other table rows."""
-        return tuple(row for row in self.all_inserted_rows if row.anchor == "top")
-
-    @lazyproperty
-    def rows_inserted_in_body(self):
-        """Sequence of InsertionRow vectors that are anchored to a particular element.
-
-        These are in no particular order and must be associated with their element using
-        the element-id available on their `.anchor` property.
-        """
-        return tuple(
-            row for row in self.all_inserted_rows if row.anchor not in ("top", "bottom")
-        )
-
-    @lazyproperty
-    def rows_inserted_at_bottom(self):
-        """Sequence of InsertionRow vectors that appear after any other table rows."""
-        return tuple(row for row in self.all_inserted_rows if row.anchor == "bottom")
 
 
 class _OrderTransform(object):

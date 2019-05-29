@@ -15,7 +15,7 @@ from cr.cube.matrix import (
     OrderedMatrix,
     MatrixWithHidden,
 )
-from cr.cube.slices import _Assembler, FrozenSlice, _MatrixInsertions, _OrderTransform
+from cr.cube.slices import _Assembler, FrozenSlice, _OrderTransform
 from cr.cube.vector import (
     AssembledVector,
     CategoricalVector,
@@ -101,8 +101,7 @@ class DescribeIntegratedFrozenSlice(object):
             )
             for anchor_idx, addend_idxs in row_subtotals
         ]
-        insertions = _MatrixInsertions(dimensions, slice_)
-        return slice_, insertions, np.array(expected_row_proportions)
+        return slice_, np.array(expected_row_proportions)
 
     @pytest.fixture(
         params=[
@@ -115,15 +114,13 @@ class DescribeIntegratedFrozenSlice(object):
     def row_margin_fixture(self, request, _subtotals_prop_, dimension_):
         counts, row_subtotals, expected_row_margin = request.param
         slice_ = _CatXCatMatrix(counts)
-        dimensions = (Dimension(None, None), dimension_)
         _subtotals_prop_.return_value = [
             instance_mock(
                 request, _Subtotal, anchor_idx=anchor_idx, addend_idxs=addend_idxs
             )
             for anchor_idx, addend_idxs in row_subtotals
         ]
-        insertions = _MatrixInsertions(dimensions, slice_)
-        return slice_, insertions, np.array(expected_row_margin)
+        return slice_, np.array(expected_row_margin)
 
     # fixture components ---------------------------------------------
 
@@ -185,85 +182,6 @@ class DescribeMultipleResponseVector(object):
         counts = np.array([[1, 2, 3], [4, 5, 6]])
         row = MultipleResponseVector(counts, None, None, None)
         np.testing.assert_array_equal(row.margin, np.array([5, 7, 9]))
-
-
-class Describe_Insertions(object):
-    """Unit-test suite for `cr.cube.slices._Insertions` object."""
-
-    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
-    def it_provides_access_to_rows(self, _subtotals_prop_, addend_idxs_prop_):
-        slice_ = _CatXCatMatrix(np.arange(12).reshape(4, 3))
-        _subtotals_prop_.return_value = [_Subtotal(None, None)]
-        addend_idxs_prop_.return_value = (1, 2)
-        insertions = _MatrixInsertions((Dimension(None, None), None), slice_)
-        assert len(insertions._rows) == 1
-        np.testing.assert_array_equal(insertions._rows[0].values, [9, 11, 13])
-
-    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
-    def it_provides_access_to_columns(self, _subtotals_prop_, addend_idxs_prop_):
-        slice_ = _CatXCatMatrix(np.arange(12).reshape(4, 3))
-        _subtotals_prop_.return_value = [_Subtotal(None, None)]
-        addend_idxs_prop_.return_value = (1, 2)
-        insertions = _MatrixInsertions((None, Dimension(None, None)), slice_)
-        assert len(insertions._columns) == 1
-        np.testing.assert_array_equal(insertions._columns[0].values, [3, 9, 15, 21])
-
-    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
-    def it_knows_its_intersections(self, request, intersections_fixture):
-        slice_ = _CatXCatMatrix(np.arange(12).reshape(4, 3))
-        row_dimension, col_dimension, expected = intersections_fixture
-        insertions = _MatrixInsertions((row_dimension, col_dimension), slice_)
-        intersections = insertions.intersections
-        np.testing.assert_array_equal(intersections, expected)
-
-    # fixtures -------------------------------------------------------
-
-    @pytest.fixture(
-        params=[
-            (((2, (2, 3)),), ((1, (0, 1)),), 32),
-            (((0, (0, 1)),), ((0, (0, 1)),), 6),
-            (((0, (0, 1)),), ((0, (0, 1)), (1, (0, 2))), [[6, 9]]),
-            (((0, (0, 1)), (1, (2, 3))), ((0, (0, 1)),), [[6], [24]]),
-            (
-                ((0, (0, 1)), (1, (2, 3))),
-                ((0, (0, 1)), (1, (0, 2))),
-                [[6, 9], [24, 27]],
-            ),
-        ]
-    )
-    def intersections_fixture(self, request):
-        row_subtotals, col_subtotals, expected = request.param
-        row_dimension = instance_mock(
-            request,
-            Dimension,
-            _subtotals=[
-                instance_mock(
-                    request, _Subtotal, anchor_idx=anchor_idx, addend_idxs=addend_idxs
-                )
-                for anchor_idx, addend_idxs in row_subtotals
-            ],
-        )
-        col_dimension = instance_mock(
-            request,
-            Dimension,
-            _subtotals=[
-                instance_mock(
-                    request, _Subtotal, anchor_idx=anchor_idx, addend_idxs=addend_idxs
-                )
-                for anchor_idx, addend_idxs in col_subtotals
-            ],
-        )
-        return row_dimension, col_dimension, np.array(expected)
-
-    # fixture components ---------------------------------------------
-
-    @pytest.fixture
-    def _subtotals_prop_(self, request):
-        return property_mock(request, Dimension, "_subtotals")
-
-    @pytest.fixture
-    def addend_idxs_prop_(self, request):
-        return property_mock(request, _Subtotal, "addend_idxs")
 
 
 class DescribeInsertionRow(object):
@@ -396,15 +314,13 @@ class DescribeIntegrated_Assembler(object):
     def counts_fixture(self, request, _subtotals_prop_, dimension_):
         counts, row_subtotals, expected_counts = request.param
         slice_ = _CatXCatMatrix(counts)
-        dimensions = (Dimension(None, None), dimension_)
         _subtotals_prop_.return_value = [
             instance_mock(
                 request, _Subtotal, anchor_idx=anchor_idx, addend_idxs=addend_idxs
             )
             for anchor_idx, addend_idxs in row_subtotals
         ]
-        insertions = _MatrixInsertions(dimensions, slice_)
-        return slice_, insertions, np.array(expected_counts)
+        return slice_, np.array(expected_counts)
 
     # fixture components ---------------------------------------------
 
