@@ -15,7 +15,7 @@ from cr.cube.matrix import (
     OrderedMatrix,
     MatrixWithHidden,
 )
-from cr.cube.slices import _Assembler, FrozenSlice, _Insertions, _OrderTransform
+from cr.cube.slices import _Assembler, FrozenSlice, _MatrixInsertions, _OrderTransform
 from cr.cube.vector import (
     AssembledVector,
     CategoricalVector,
@@ -101,7 +101,7 @@ class DescribeIntegratedFrozenSlice(object):
             )
             for anchor_idx, addend_idxs in row_subtotals
         ]
-        insertions = _Insertions(dimensions, slice_)
+        insertions = _MatrixInsertions(dimensions, slice_)
         return slice_, insertions, np.array(expected_row_proportions)
 
     @pytest.fixture(
@@ -122,7 +122,7 @@ class DescribeIntegratedFrozenSlice(object):
             )
             for anchor_idx, addend_idxs in row_subtotals
         ]
-        insertions = _Insertions(dimensions, slice_)
+        insertions = _MatrixInsertions(dimensions, slice_)
         return slice_, insertions, np.array(expected_row_margin)
 
     # fixture components ---------------------------------------------
@@ -190,17 +190,12 @@ class DescribeMultipleResponseVector(object):
 class Describe_Insertions(object):
     """Unit-test suite for `cr.cube.slices._Insertions` object."""
 
-    def it_sets_dimensions_and_slice(self):
-        dimensions, slice_ = Mock(), Mock()
-        insertions = _Insertions(dimensions, slice_)
-        assert insertions._dimensions, insertions._slice == (dimensions, slice_)
-
     @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_provides_access_to_rows(self, _subtotals_prop_, addend_idxs_prop_):
         slice_ = _CatXCatMatrix(np.arange(12).reshape(4, 3))
         _subtotals_prop_.return_value = [_Subtotal(None, None)]
         addend_idxs_prop_.return_value = (1, 2)
-        insertions = _Insertions((Dimension(None, None), None), slice_)
+        insertions = _MatrixInsertions((Dimension(None, None), None), slice_)
         assert len(insertions._rows) == 1
         np.testing.assert_array_equal(insertions._rows[0].values, [9, 11, 13])
 
@@ -209,7 +204,7 @@ class Describe_Insertions(object):
         slice_ = _CatXCatMatrix(np.arange(12).reshape(4, 3))
         _subtotals_prop_.return_value = [_Subtotal(None, None)]
         addend_idxs_prop_.return_value = (1, 2)
-        insertions = _Insertions((None, Dimension(None, None)), slice_)
+        insertions = _MatrixInsertions((None, Dimension(None, None)), slice_)
         assert len(insertions._columns) == 1
         np.testing.assert_array_equal(insertions._columns[0].values, [3, 9, 15, 21])
 
@@ -217,7 +212,7 @@ class Describe_Insertions(object):
     def it_knows_its_intersections(self, request, intersections_fixture):
         slice_ = _CatXCatMatrix(np.arange(12).reshape(4, 3))
         row_dimension, col_dimension, expected = intersections_fixture
-        insertions = _Insertions((row_dimension, col_dimension), slice_)
+        insertions = _MatrixInsertions((row_dimension, col_dimension), slice_)
         intersections = insertions.intersections
         np.testing.assert_array_equal(intersections, expected)
 
@@ -408,7 +403,7 @@ class DescribeIntegrated_Assembler(object):
             )
             for anchor_idx, addend_idxs in row_subtotals
         ]
-        insertions = _Insertions(dimensions, slice_)
+        insertions = _MatrixInsertions(dimensions, slice_)
         return slice_, insertions, np.array(expected_counts)
 
     # fixture components ---------------------------------------------

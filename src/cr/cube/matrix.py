@@ -136,109 +136,125 @@ class MatrixWithHidden(_BaseTransformedMatrix):
         return self._base_slice.table_margin
 
 
-class MatrixWithInsertions(_BaseTransformedMatrix):
-    """Represents slice with both normal and inserted bits."""
+class _BasePartitionWithInsertions(object):
+    """Base class for "with-insertions" transformation partition objects."""
 
-    def __init__(self, base_slice, insertions):
-        super(MatrixWithInsertions, self).__init__(base_slice)
+    def __init__(self, base_partition, insertions):
+        self._base_partition = base_partition
         self._insertions = insertions
 
     @lazyproperty
     def columns(self):
-        return tuple(
-            self._top_columns + self._interleaved_columns + self._bottom_columns
-        )
+        """Sequence of column vectors including inserted columns.
+
+        Each column vector also includes any new elements introduced by inserted rows.
+        """
+        return tuple(self._iter_columns())
 
     @lazyproperty
     def rows(self):
-        return tuple(self._top_rows + self._interleaved_rows + self._bottom_rows)
+        """Sequence of row vectors including inserted rows.
+
+        Each row vector also reflects any new elements introduced by inserted columns.
+        """
+        return tuple(self._iter_rows())
 
     @lazyproperty
-    def _assembled_columns(self):
-        return tuple(
-            AssembledVector(column, self._insertion_rows)
-            for column in self._base_slice.columns
+    def table_base(self):
+        return self._base_partition.table_base
+
+    @lazyproperty
+    def table_margin(self):
+        return self._base_partition.table_margin
+
+
+class MatrixWithInsertions(_BasePartitionWithInsertions):
+    """Represents slice with both normal and inserted bits."""
+
+    def __init__(self, base_matrix, insertions):
+        super(MatrixWithInsertions, self).__init__(base_matrix, insertions)
+        self._base_matrix = base_matrix
+
+    def _iter_columns(self):
+        """Generate all column vectors with insertions interleaved at right spot."""
+        opposing_insertions = self._insertions.all_inserted_rows
+        # ---subtotals inserted at top---
+        for column in self._insertions.columns_inserted_at_left:
+            yield AssembledVector(column, opposing_insertions)
+        # ---body columns with subtotals anchored to specific body positions---
+        for idx, column in enumerate(self._base_matrix.columns):
+            yield AssembledVector(column, opposing_insertions)
+            for inserted_column in self._iter_inserted_columns_anchored_at(idx):
+                yield AssembledInsertionVector(inserted_column, opposing_insertions)
+        # ---subtotals appended at bottom---
+        for column in self._insertions.columns_inserted_at_right:
+            yield AssembledInsertionVector(column, opposing_insertions)
+
+    def _iter_inserted_columns_anchored_at(self, anchor):
+        """Generate all inserted column vectors with matching `anchor`."""
+        return (
+            column
+            for column in self._insertions.all_inserted_columns
+            if column.anchor == anchor
         )
 
-    @lazyproperty
-    def _assembled_insertion_columns(self):
-        return tuple(
-            AssembledInsertionVector(column, self._insertion_rows)
-            for column in self._insertions.columns
+    def _iter_inserted_rows_anchored_at(self, anchor):
+        """Generate all inserted row vectors with matching `anchor`."""
+        return (
+            row for row in self._insertions.all_inserted_rows if row.anchor == anchor
         )
 
-    @lazyproperty
-    def _assembled_insertion_rows(self):
-        return tuple(
-            AssembledInsertionVector(row, self._insertion_columns)
-            for row in self._insertions.rows
+    def _iter_rows(self):
+        """Generate all row vectors with insertions interleaved at right spot."""
+        opposing_insertions = self._insertions.all_inserted_columns
+        # ---subtotals inserted at top---
+        for row in self._insertions.rows_inserted_at_top:
+            yield AssembledVector(row, opposing_insertions)
+        # ---body rows with subtotals anchored to specific body positions---
+        for idx, row in enumerate(self._base_matrix.rows):
+            yield AssembledVector(row, opposing_insertions)
+            for inserted_row in self._iter_inserted_rows_anchored_at(idx):
+                yield AssembledInsertionVector(inserted_row, opposing_insertions)
+        # ---subtotals appended at bottom---
+        for row in self._insertions.rows_inserted_at_bottom:
+            yield AssembledInsertionVector(row, opposing_insertions)
+
+
+class StripeWithInsertions(_BasePartitionWithInsertions):
+    """Represents stripe with both base and inserted row vectors."""
+
+    def __init__(self, base_stripe, insertions):
+        super(StripeWithInsertions, self).__init__(base_stripe, insertions)
+        self._base_stripe = base_stripe
+
+    def _iter_columns(self):
+        """Generate all column vectors with insertions interleaved at right spot."""
+        yield AssembledVector(
+            self._base_stripe.columns[0], self._insertions.all_inserted_rows
         )
 
-    @lazyproperty
-    def _assembled_rows(self):
-        return tuple(
-            AssembledVector(row, self._insertion_columns)
-            for row in self._base_slice.rows
+    def _iter_inserted_rows_anchored_at(self, anchor):
+        """Generate all inserted row vectors with matching `anchor`."""
+        return (
+            row for row in self._insertions.all_inserted_rows if row.anchor == anchor
         )
 
-    @lazyproperty
-    def _bottom_columns(self):
-        return tuple(
-            AssembledInsertionVector(column, self._insertion_rows)
-            for column in self._insertions.bottom_columns
-        )
-
-    @lazyproperty
-    def _bottom_rows(self):
-        return tuple(
-            AssembledInsertionVector(row, self._insertion_columns)
-            for row in self._insertions.bottom_rows
-        )
-
-    @lazyproperty
-    def _insertion_columns(self):
-        return self._insertions._inserted_columns
-
-    @lazyproperty
-    def _insertion_rows(self):
-        return self._insertions._inserted_rows
-
-    @lazyproperty
-    def _interleaved_columns(self):
-        columns = []
-        for i in range(len(self._base_slice.columns)):
-            columns.append(self._assembled_columns[i])
-            for insertion_column in self._assembled_insertion_columns:
-                if i == insertion_column.anchor:
-                    columns.append(insertion_column)
-        return tuple(columns)
-
-    @lazyproperty
-    def _interleaved_rows(self):
-        rows = []
-        for i in range(len(self._base_slice.rows)):
-            rows.append(self._assembled_rows[i])
-            for insertion_row in self._assembled_insertion_rows:
-                if i == insertion_row.anchor:
-                    rows.append(insertion_row)
-        return tuple(rows)
-
-    @lazyproperty
-    def _top_rows(self):
-        return tuple(
-            AssembledVector(row, self._insertion_columns)
-            for row in self._insertions.top_rows
-        )
-
-    @lazyproperty
-    def _top_columns(self):
-        return tuple(
-            AssembledInsertionVector(column, self._insertion_rows)
-            for column in self._insertions.top_columns
-        )
+    def _iter_rows(self):
+        """Generate all row vectors with insertions interleaved at right spot."""
+        # ---subtotals inserted at top---
+        for row in self._insertions.rows_inserted_at_top:
+            yield AssembledVector(row, ())
+        # ---body rows with subtotals anchored to specific body positions---
+        for idx, row in enumerate(self._base_stripe.rows):
+            yield AssembledVector(row, ())
+            for inserted_row in self._iter_inserted_rows_anchored_at(idx):
+                yield AssembledInsertionVector(inserted_row, ())
+        # ---subtotals appended at bottom---
+        for row in self._insertions.rows_inserted_at_bottom:
+            yield AssembledInsertionVector(row, ())
 
 
-# === pre-transform Matrix objects ===
+# === BASE PARTITION OBJECTS ===
 
 
 # ---Used to represent the non-existent dimension in case of 1D vectors (that need to be
