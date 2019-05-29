@@ -386,7 +386,7 @@ class FrozenSlice(object):
 
     @lazyproperty
     def _assembler(self):
-        return _Assembler(self._matrix, _OrderTransform(self._dimensions), self._prune)
+        return _Assembler(self._matrix, _OrderTransform(self._dimensions))
 
     @lazyproperty
     def _columns_dimension(self):
@@ -417,12 +417,6 @@ class FrozenSlice(object):
             self._cube,
             self._slice_idx,
         )
-
-    @lazyproperty
-    def _prune(self):
-        """True if any of dimensions has pruning."""
-        # TODO: Implement separarte pruning for rows and columns
-        return any(dimension.prune for dimension in self.dimensions)
 
     @lazyproperty
     def _rows_dimension(self):
@@ -640,11 +634,7 @@ class _Strand(object):
 
     @lazyproperty
     def _assembler(self):
-        return _StrandAssembler(
-            self._stripe,
-            _OrderTransform((self._rows_dimension,)),
-            self._rows_dimension.prune,
-        )
+        return _StrandAssembler(self._stripe, _OrderTransform((self._rows_dimension,)))
 
     @lazyproperty
     def _rows_dimension(self):
@@ -706,10 +696,9 @@ class _Nub(object):
 class _Assembler(object):
     """In charge of performing all the transforms sequentially."""
 
-    def __init__(self, matrix, ordering, prune):
+    def __init__(self, matrix, ordering):
         self._matrix = matrix
         self._ordering = ordering
-        self._prune = prune
 
     @lazyproperty
     def columns(self):
@@ -740,17 +729,16 @@ class _Assembler(object):
         """Apply all transforms sequentially."""
         matrix = OrderedMatrix(self._matrix, self._ordering)
         matrix = MatrixWithInsertions(matrix)
-        matrix = MatrixWithHidden(matrix, self._prune)
+        matrix = MatrixWithHidden(matrix)
         return matrix
 
 
 class _StrandAssembler(object):
     """Perform transforms on a 1D cube-section."""
 
-    def __init__(self, stripe, ordering, prune):
+    def __init__(self, stripe, ordering):
         self._stripe = stripe
         self._ordering = ordering
-        self._prune = prune
 
     @lazyproperty
     def column(self):
@@ -787,7 +775,7 @@ class _StrandAssembler(object):
         """Apply all transforms sequentially."""
         stripe = OrderedMatrix(self._stripe, self._ordering)
         stripe = StripeWithInsertions(stripe)
-        stripe = MatrixWithHidden(stripe, self._prune)
+        stripe = MatrixWithHidden(stripe)
         return stripe
 
 

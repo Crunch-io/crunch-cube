@@ -91,9 +91,8 @@ class MatrixWithHidden(_BaseTransformedMatrix):
     # ---For example, hiding a row is removing that row-vector from `.rows`, but also
     # ---removing an element from each column-vector in `.columns`.
 
-    def __init__(self, base_matrix, prune):
+    def __init__(self, base_matrix):
         super(MatrixWithHidden, self).__init__(base_matrix)
-        self._prune = prune
 
     @lazyproperty
     def columns(self):
@@ -127,9 +126,6 @@ class MatrixWithHidden(_BaseTransformedMatrix):
 
     @lazyproperty
     def table_margin(self):
-        # if not self._prune:
-        #     return self._base_matrix.table_margin
-
         margin = self._base_matrix.table_margin
         index = margin != 0
         if margin.ndim < 2:
