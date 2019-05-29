@@ -32,24 +32,24 @@ from cr.cube.vector import (
 class _BaseTransformedMatrix(object):
     """Base class for late-stage matrices that transform a base matrix."""
 
-    def __init__(self, base_slice):
-        self._base_slice = base_slice
+    def __init__(self, base_matrix):
+        self._base_matrix = base_matrix
 
     @lazyproperty
     def columns_dimension(self):
-        return self._base_slice.columns_dimension
+        return self._base_matrix.columns_dimension
 
     @lazyproperty
     def rows_dimension(self):
-        return self._base_slice.rows_dimension
+        return self._base_matrix.rows_dimension
 
     @lazyproperty
     def table_base(self):
-        return self._base_slice.table_base
+        return self._base_matrix.table_base
 
     @lazyproperty
     def table_margin(self):
-        return self._base_slice.table_margin
+        return self._base_matrix.table_margin
 
 
 class OrderedMatrix(_BaseTransformedMatrix):
@@ -58,8 +58,8 @@ class OrderedMatrix(_BaseTransformedMatrix):
     In charge of indexing rows and columns properly.
     """
 
-    def __init__(self, base_slice, ordering):
-        super(OrderedMatrix, self).__init__(base_slice)
+    def __init__(self, base_matrix, ordering):
+        super(OrderedMatrix, self).__init__(base_matrix)
         self._ordering = ordering
 
     @lazyproperty
@@ -67,7 +67,7 @@ class OrderedMatrix(_BaseTransformedMatrix):
         return tuple(
             OrderedVector(column, self._ordering.row_order)
             for column in tuple(
-                np.array(self._base_slice.columns)[self._ordering.column_order]
+                np.array(self._base_matrix.columns)[self._ordering.column_order]
             )
         )
 
@@ -75,7 +75,7 @@ class OrderedMatrix(_BaseTransformedMatrix):
     def rows(self):
         return tuple(
             OrderedVector(row, self._ordering.column_order)
-            for row in tuple(np.array(self._base_slice.rows)[self._ordering.row_order])
+            for row in tuple(np.array(self._base_matrix.rows)[self._ordering.row_order])
         )
 
 
@@ -91,29 +91,29 @@ class MatrixWithHidden(_BaseTransformedMatrix):
     # ---For example, hiding a row is removing that row-vector from `.rows`, but also
     # ---removing an element from each column-vector in `.columns`.
 
-    def __init__(self, base_slice, prune):
-        super(MatrixWithHidden, self).__init__(base_slice)
+    def __init__(self, base_matrix, prune):
+        super(MatrixWithHidden, self).__init__(base_matrix)
         self._prune = prune
 
     @lazyproperty
     def columns(self):
         return tuple(
-            VectorAfterHiding(column, self._base_slice.rows)
-            for column in self._base_slice.columns
+            VectorAfterHiding(column, self._base_matrix.rows)
+            for column in self._base_matrix.columns
             if not column.hidden
         )
 
     @lazyproperty
     def rows(self):
         return tuple(
-            VectorAfterHiding(row, self._base_slice.columns)
-            for row in self._base_slice.rows
+            VectorAfterHiding(row, self._base_matrix.columns)
+            for row in self._base_matrix.rows
             if not row.hidden
         )
 
     @lazyproperty
     def table_base(self):
-        margin = self._base_slice.table_base
+        margin = self._base_matrix.table_base
         index = margin != 0
         if margin.ndim < 2:
             return margin[index]
@@ -123,14 +123,14 @@ class MatrixWithHidden(_BaseTransformedMatrix):
 
     @lazyproperty
     def table_base_unpruned(self):
-        return self._base_slice.table_base
+        return self._base_matrix.table_base
 
     @lazyproperty
     def table_margin(self):
         # if not self._prune:
-        #     return self._base_slice.table_margin
+        #     return self._base_matrix.table_margin
 
-        margin = self._base_slice.table_margin
+        margin = self._base_matrix.table_margin
         index = margin != 0
         if margin.ndim < 2:
             return margin[index]
@@ -140,7 +140,7 @@ class MatrixWithHidden(_BaseTransformedMatrix):
 
     @lazyproperty
     def table_margin_unpruned(self):
-        return self._base_slice.table_margin
+        return self._base_matrix.table_margin
 
 
 class _BasePartitionWithInsertions(object):
