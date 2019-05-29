@@ -409,8 +409,7 @@ class FrozenSlice(object):
                 self._cube.counts_with_missings,
                 self._cube,
                 self._slice_idx,
-            ),
-            _OrderTransform(self._dimensions),
+            )
         )
 
     @lazyproperty
@@ -649,8 +648,7 @@ class _Strand(object):
                 self._cube.base_counts,
                 self._ca_as_0th,
                 self._slice_idx,
-            ),
-            _OrderTransform((self._rows_dimension,)),
+            )
         )
 
 
@@ -679,38 +677,3 @@ class _Nub(object):
     def _scalar(self):
         """The pre-transforms data-array for this slice."""
         return MeansScalar(self._cube.counts, self._cube.base_counts)
-
-
-class _OrderTransform(object):
-    """Creates ordering indexes for rows and columns based on element ids."""
-
-    def __init__(self, dimensions):
-        self._dimensions = dimensions
-
-    @lazyproperty
-    def column_order(self):
-        """Indexer value identifying columns in order, suitable for slicing an ndarray.
-
-        This value is `slice(None)` when there is no columns dimension. Otherwise it is
-        a 1D ndarray of int column indices, suitable for indexing the columns array to
-        produce an ordered version.
-        """
-        # ---if there's no column dimension, there can be no reordering for it---
-        if len(self._dimensions) < 2:
-            return slice(None)
-
-        # ---Specifying int type prevents failure when there are zero columns. The
-        # ---default type for ndarray is float, which is not valid for indexing.
-        return np.array(self._columns_dimension.display_order, dtype=int)
-
-    @lazyproperty
-    def row_order(self):
-        return np.array(self._rows_dimension.display_order, dtype=int)
-
-    @lazyproperty
-    def _columns_dimension(self):
-        return self._dimensions[1]
-
-    @lazyproperty
-    def _rows_dimension(self):
-        return self._dimensions[0]

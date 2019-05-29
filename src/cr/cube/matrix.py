@@ -32,9 +32,8 @@ from cr.cube.vector import (
 class TransformedMatrix(object):
     """Matrix reflection application of all transforms."""
 
-    def __init__(self, matrix, ordering):
-        self._matrix = matrix
-        self._ordering = ordering
+    def __init__(self, base_matrix):
+        self._base_matrix = base_matrix
 
     @lazyproperty
     def columns(self):
@@ -63,7 +62,7 @@ class TransformedMatrix(object):
     @lazyproperty
     def _transformed_matrix(self):
         """Apply all transforms sequentially."""
-        matrix = _OrderedMatrix(self._matrix, self._ordering)
+        matrix = _OrderedMatrix(self._base_matrix)
         matrix = _MatrixWithInsertions(matrix)
         matrix = _MatrixWithHidden(matrix)
         return matrix
@@ -72,9 +71,8 @@ class TransformedMatrix(object):
 class TransformedStripe(object):
     """Stripe reflecting application of all transforms."""
 
-    def __init__(self, stripe, ordering):
-        self._stripe = stripe
-        self._ordering = ordering
+    def __init__(self, base_stripe):
+        self._base_stripe = base_stripe
 
     @lazyproperty
     def rows(self):
@@ -94,29 +92,60 @@ class TransformedStripe(object):
     @lazyproperty
     def _transformed_stripe(self):
         """Apply all transforms sequentially."""
-        stripe = _OrderedMatrix(self._stripe, self._ordering)
+        stripe = _OrderedStripe(self._base_stripe)
         stripe = _StripeWithInsertions(stripe)
         stripe = _StripeWithHidden(stripe)
         return stripe
 
 
-class _OrderedMatrix(object):
-    """Result of the ordering transform.
+class _BaseOrderedPartition(object):
+    """Base class for ordering partitions."""
 
-    In charge of indexing rows and columns properly.
-    """
+    def __init__(self, base_partition):
+        self._base_partition = base_partition
 
-    def __init__(self, base_matrix, ordering):
+    @lazyproperty
+    def rows(self):
+        return tuple(
+            OrderedVector(row, self._column_order)
+            for row in tuple(np.array(self._base_partition.rows)[self._row_order])
+        )
+
+    @lazyproperty
+    def rows_dimension(self):
+        return self._base_partition.rows_dimension
+
+    @lazyproperty
+    def table_base(self):
+        return self._base_partition.table_base
+
+    @lazyproperty
+    def table_margin(self):
+        return self._base_partition.table_margin
+
+    @lazyproperty
+    def _row_order(self):
+        """Indexer value identifying rows in order, suitable for slicing an ndarray.
+
+        This value is a 1D ndarray of int row indices, suitable for indexing the rows
+        array to produce an ordered version.
+        """
+        # ---Specifying int type prevents failure when there are zero columns---
+        return np.array(self.rows_dimension.display_order, dtype=int)
+
+
+class _OrderedMatrix(_BaseOrderedPartition):
+    """Matrix reflecting result of element-ordering transforms."""
+
+    def __init__(self, base_matrix):
+        super(_OrderedMatrix, self).__init__(base_matrix)
         self._base_matrix = base_matrix
-        self._ordering = ordering
 
     @lazyproperty
     def columns(self):
         return tuple(
-            OrderedVector(column, self._ordering.row_order)
-            for column in tuple(
-                np.array(self._base_matrix.columns)[self._ordering.column_order]
-            )
+            OrderedVector(column, self._row_order)
+            for column in tuple(np.array(self._base_matrix.columns)[self._column_order])
         )
 
     @lazyproperty
@@ -124,23 +153,41 @@ class _OrderedMatrix(object):
         return self._base_matrix.columns_dimension
 
     @lazyproperty
-    def rows(self):
+    def _column_order(self):
+        """Indexer value identifying columns in order, suitable for slicing an ndarray.
+
+        This value is a 1D ndarray of int column indices, suitable for indexing the
+        columns array to produce an ordered version.
+        """
+        # ---Specifying int type prevents failure when there are zero columns. The
+        # ---default type for ndarray is float, which is not valid for indexing.
+        return np.array(self.columns_dimension.display_order, dtype=int)
+
+
+class _OrderedStripe(_BaseOrderedPartition):
+    """Result of the ordering transform.
+
+    In charge of indexing rows and columns properly.
+    """
+
+    def __init__(self, base_stripe):
+        super(_OrderedStripe, self).__init__(base_stripe)
+        self._base_stripe = base_stripe
+
+    # TODO: this one should be able to be much simpler, maybe that has to wait until we
+    # get rid of a stripe having columns.
+    @lazyproperty
+    def columns(self):
         return tuple(
-            OrderedVector(row, self._ordering.column_order)
-            for row in tuple(np.array(self._base_matrix.rows)[self._ordering.row_order])
+            OrderedVector(column, self._row_order)
+            for column in tuple(np.array(self._base_stripe.columns)[self._column_order])
         )
 
     @lazyproperty
-    def rows_dimension(self):
-        return self._base_matrix.rows_dimension
-
-    @lazyproperty
-    def table_base(self):
-        return self._base_matrix.table_base
-
-    @lazyproperty
-    def table_margin(self):
-        return self._base_matrix.table_margin
+    def _column_order(self):
+        """ndarray indexer value suitable for slicing columns in order."""
+        # ---there's no slicing to be done when there's no columns dimension---
+        return slice(None)
 
 
 class _MatrixWithHidden(object):

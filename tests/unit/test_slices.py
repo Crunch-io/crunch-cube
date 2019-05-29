@@ -8,14 +8,14 @@ import numpy as np
 from mock import Mock
 import pytest
 
-from cr.cube.dimension import Dimension, _Element, _Subtotal
+from cr.cube.dimension import Dimension, _Subtotal
 from cr.cube.matrix import (
     _CatXCatMatrix,
     _MatrixWithHidden,
     _MrXCatMatrix,
     _OrderedMatrix,
 )
-from cr.cube.slices import FrozenSlice, _OrderTransform, TransformedMatrix
+from cr.cube.slices import FrozenSlice, TransformedMatrix
 from cr.cube.vector import (
     AssembledVector,
     CategoricalVector,
@@ -337,81 +337,8 @@ class DescribeIntegratedTransformedMatrix(object):
         return instance_mock(request, Dimension, _subtotals=tuple())
 
 
-class Describe_OrderTransform(object):
-    """Unit-test suite for `cr.cube.slices._OrderTransform` object."""
-
-    def it_knows_the_column_order(
-        self, column_order_fixture, _columns_dimension_prop_, dimension_
-    ):
-        display_order, expected_value = column_order_fixture
-        _columns_dimension_prop_.return_value = dimension_
-        dimension_.display_order = display_order
-        order_transform = _OrderTransform((None, dimension_))
-
-        column_order = order_transform.column_order
-
-        assert column_order.dtype == np.dtype("int")
-        np.testing.assert_array_equal(column_order, expected_value)
-
-    def but_returns_a_None_slice_when_there_is_no_columns_dimension(self, dimension_):
-        order_transform = _OrderTransform((dimension_,))
-
-        column_order = order_transform.column_order
-
-        assert column_order == slice(None)
-
-    def it_knows_the_row_order(
-        self, row_order_fixture, _rows_dimension_prop_, dimension_
-    ):
-        display_order, expected_value = row_order_fixture
-        _rows_dimension_prop_.return_value = dimension_
-        dimension_.display_order = display_order
-        order_transform = _OrderTransform((dimension_,))
-
-        row_order = order_transform.row_order
-
-        assert row_order.dtype == np.dtype("int")
-        np.testing.assert_array_equal(row_order, expected_value)
-
-    # fixtures -------------------------------------------------------
-
-    @pytest.fixture(params=[((2, 1, 3), [2, 1, 3]), ((), [])])
-    def column_order_fixture(self, request):
-        display_order, idxs = request.param
-        expected_value = np.array(idxs, dtype=int)
-        return display_order, expected_value
-
-    @pytest.fixture(params=[((3, 1, 2), [3, 1, 2]), ((), [])])
-    def row_order_fixture(self, request):
-        display_order, idxs = request.param
-        expected_value = np.array(idxs, dtype=int)
-        return display_order, expected_value
-
-    # fixture components ---------------------------------------------
-
-    @pytest.fixture
-    def _columns_dimension_prop_(self, request):
-        return property_mock(request, _OrderTransform, "_columns_dimension")
-
-    @pytest.fixture
-    def dimension_(self, request):
-        return instance_mock(request, Dimension)
-
-    @pytest.fixture
-    def _rows_dimension_prop_(self, request):
-        return property_mock(request, _OrderTransform, "_rows_dimension")
-
-
 class Describe_OrderedMatrix(object):
     """Unit-test suite for `cr.cube.matrix._OrderedMatrix` object."""
-
-    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
-    def it_initiates_slice_and_reordering(self):
-        slice_ = Mock()
-        ordering = Mock()
-        ordered_slice = _OrderedMatrix(slice_, ordering)
-        assert ordered_slice._slice == slice_
-        assert ordered_slice._ordering == ordering
 
     @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_reorders_rows(self, order_rows_fixture):
@@ -430,18 +357,18 @@ class Describe_OrderedMatrix(object):
     )
     def order_rows_fixture(self, request):
         element_ids, counts, ordered_ids, expected = request.param
-        row_dimension = instance_mock(
-            request,
-            Dimension,
-            valid_elements=[
-                instance_mock(request, _Element, element_id=element_id)
-                for element_id in element_ids
-            ],
-        )
-        transform = _OrderTransform(
-            (row_dimension, None), (np.array(ordered_ids), None)
-        )
-        return _OrderedMatrix(_CatXCatMatrix(np.array(counts)), transform), expected
+        # row_dimension = instance_mock(
+        #     request,
+        #     Dimension,
+        #     valid_elements=[
+        #         instance_mock(request, _Element, element_id=element_id)
+        #         for element_id in element_ids
+        #     ],
+        # )
+        # transform = _OrderTransform(
+        #     (row_dimension, None), (np.array(ordered_ids), None)
+        # )
+        return _OrderedMatrix(_CatXCatMatrix(np.array(counts))), expected
 
 
 class DescribeOrderedVector(object):
