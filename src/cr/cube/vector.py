@@ -198,6 +198,10 @@ class _BaseTransformationVector(object):
     def table_margin(self):
         return self._base_vector.table_margin
 
+    @lazyproperty
+    def table_base(self):
+        return self._base_vector.table_base
+
 
 class AssembledVector(_BaseTransformationVector):
     """Vector with base, as well as inserted, elements (of the opposite dimension)."""
@@ -597,11 +601,20 @@ class CatXMrVector(CategoricalVector):
         super(CatXMrVector, self).__init__(
             counts[0], base_counts[0], label, table_margin, zscore, column_index
         )
-        self._pruning_bases = base_counts
+        self._all_bases = base_counts
+        self._all_counts = counts
 
     @lazyproperty
     def pruned(self):
-        return np.sum(self._pruning_bases) == 0
+        return self.table_base == 0
+
+    @lazyproperty
+    def table_base(self):
+        return np.sum(self._all_bases)
+
+    @lazyproperty
+    def table_margin(self):
+        return np.sum(self._all_counts)
 
 
 class MeansVector(BaseVector):
@@ -630,6 +643,10 @@ class MeansWithMrVector(MeansVector):
     @lazyproperty
     def base(self):
         return np.sum(self._base_counts[0])
+
+    @lazyproperty
+    def table_base(self):
+        return self.base
 
 
 class MultipleResponseVector(CategoricalVector):

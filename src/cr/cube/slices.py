@@ -4,6 +4,7 @@ from __future__ import division
 
 import numpy as np
 
+from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.frozen_min_base_size_mask import MinBaseSizeMask
 from cr.cube.measures.new_pairwise_significance import NewPairwiseSignificance
 from cr.cube.matrix import (
@@ -313,7 +314,23 @@ class FrozenSlice(object):
 
     @lazyproperty
     def table_base(self):
-        return self._assembler.table_base
+
+        # We need to prune/order by both dimensions
+        if self.dimension_types == (DT.MR, DT.MR):
+            # TODO: Remove property from the assembler, when we figure out the pruning
+            # by both rows and columns
+            return self._assembler.table_base
+
+        # We need to prune/order by rows
+        if self.dimension_types[0] == DT.MR:
+            return np.array([row.table_base for row in self._assembler.rows])
+
+        # We need to prune/order by columns
+        if self.dimension_types[1] == DT.MR:
+            return np.array([column.table_base for column in self._assembler.columns])
+
+        # No pruning or reordering since single value
+        return self._assembler.table_base_unpruned
 
     @lazyproperty
     def table_base_unpruned(self):
@@ -551,11 +568,19 @@ class _Strand(object):
     @lazyproperty
     def table_base(self):
         """1D, single-element ndarray (like [3770])."""
+
+        # For MR strands, table base is also a strand, since subvars never collapse.
+        # We need to keep the ordering and hiding as in rows dimension. All this
+        # information is already accessible in the underlying rows property
+        # of the `_assembler`.
+        if self.dimension_types[0] == DT.MR:
+            return np.array([row.table_base for row in self._assembler.rows])
+
         # TODO: shouldn't this just be the regular value for a strand? Maybe change to
         # that if exporter always knows when it's getting this from a strand. The
         # ndarray "wrapper" seems like unnecessary baggage when we know it will always
         # be a scalar.
-        return self._assembler.table_base
+        return self._assembler.table_base_unpruned
 
     @lazyproperty
     def table_base_unpruned(self):
@@ -563,7 +588,15 @@ class _Strand(object):
 
     @lazyproperty
     def table_margin(self):
-        return self._assembler.table_margin
+        # For MR strands, table base is also a strand, since subvars never collapse.
+        # We need to keep the ordering and hiding as in rows dimension. All this
+        # information is already accessible in the underlying rows property
+        # of the `_assembler`.
+        if self.dimension_types[0] == DT.MR:
+            return np.array([row.table_margin for row in self._assembler.rows])
+
+        return self._assembler.table_margin_unpruned
+        # return self._assembler.table_margin
 
     @lazyproperty
     def table_margin_unpruned(self):
@@ -716,7 +749,7 @@ class _StrandAssembler(object):
     @lazyproperty
     def table_base(self):
         """1D, single-element ndarray with int value."""
-        return self._transformed_stripe.table_base
+        # return self._transformed_stripe.table_base
 
     @lazyproperty
     def table_base_unpruned(self):

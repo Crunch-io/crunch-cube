@@ -35,7 +35,7 @@ def test_1D_mr_with_means():
     np.testing.assert_almost_equal(
         slice_.means, [[3.7240515], [2.5784293], [2.2185933], [1.8653349]]
     )
-    assert slice_.table_base == 23348
+    np.testing.assert_array_equal(slice_.table_base, [336, 136, 248, 5216])
     assert slice_.table_base_unpruned == 23348
     assert slice_.ndim == 1
 

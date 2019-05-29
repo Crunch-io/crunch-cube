@@ -113,9 +113,6 @@ class MatrixWithHidden(_BaseTransformedMatrix):
 
     @lazyproperty
     def table_base(self):
-        if not self._prune:
-            return self._base_slice.table_base
-
         margin = self._base_slice.table_base
         index = margin != 0
         if margin.ndim < 2:

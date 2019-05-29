@@ -1329,7 +1329,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
                 [54.20533614],
             ],
         )
-        assert slice_.table_base[0] == 17615
+        assert slice_.table_base == 17615
 
     def test_row_unweighted_margin_when_has_means(self):
         # TODO: Fix after base is implemented for means slices
