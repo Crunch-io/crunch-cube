@@ -338,7 +338,23 @@ class FrozenSlice(object):
 
     @lazyproperty
     def table_margin(self):
-        return self._assembler.table_margin
+        # We need to prune/order by both dimensions
+        if self.dimension_types == (DT.MR, DT.MR):
+            # TODO: Remove property from the assembler, when we figure out the pruning
+            # by both rows and columns
+            return self._assembler.table_margin
+
+        # We need to prune/order by rows
+        if self.dimension_types[0] == DT.MR:
+            return np.array([row.table_margin for row in self._assembler.rows])
+
+        # We need to prune/order by columns
+        if self.dimension_types[1] == DT.MR:
+            return np.array([column.table_margin for column in self._assembler.columns])
+
+        # No pruning or reordering since single value
+        return self._assembler.table_margin_unpruned
+        # return self._assembler.table_margin
 
     @lazyproperty
     def table_margin_unpruned(self):

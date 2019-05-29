@@ -151,6 +151,34 @@ class DescribeFrozenSlice(object):
             [176.3655518, 211.4205877, 247.7407379, 457.0509557, 471.9317685],
         )
 
+    def it_reorders_various_measures_on_mr_x_cat(self):
+        transforms = {
+            "rows_dimension": {
+                "order": {"type": "explicit", "element_ids": [5, 1, 4, 2, 3]}
+            }
+        }
+        slice_ = FrozenCube(CR.MR_X_CAT_HS, transforms=transforms).slices[0]
+        np.testing.assert_almost_equal(
+            slice_.base_counts,
+            [
+                [27, 58, 85, 0, 134, 166, 0, 300],
+                [8, 7, 15, 0, 6, 5, 0, 11],
+                [13, 36, 49, 0, 130, 190, 0, 320],
+                [7, 16, 23, 0, 26, 27, 0, 53],
+                [4, 21, 25, 0, 39, 54, 0, 93],
+            ],
+        )
+        np.testing.assert_almost_equal(slice_.row_base, [385, 26, 369, 76, 118])
+        np.testing.assert_almost_equal(
+            slice_.row_margin,
+            [376.76564059, 31.63152104, 366.88839144, 70.73073413, 125.75911351],
+        )
+        np.testing.assert_almost_equal(slice_.table_base, [476, 165, 450, 210, 242])
+        np.testing.assert_almost_equal(
+            slice_.table_margin,
+            [471.93176847, 176.36555176, 457.05095566, 211.42058767, 247.74073787],
+        )
+
     def it_calculates_mr_x_cat_row_proportions(self):
         slice_ = FrozenCube(CR.MR_X_CAT_HS).slices[0]
         expected = [

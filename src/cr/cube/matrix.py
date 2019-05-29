@@ -127,8 +127,8 @@ class MatrixWithHidden(_BaseTransformedMatrix):
 
     @lazyproperty
     def table_margin(self):
-        if not self._prune:
-            return self._base_slice.table_margin
+        # if not self._prune:
+        #     return self._base_slice.table_margin
 
         margin = self._base_slice.table_margin
         index = margin != 0
