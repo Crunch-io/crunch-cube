@@ -76,7 +76,7 @@ class TransformedStripe(object):
     @lazyproperty
     def rows(self):
         """Sequence of post-transformation row vectors."""
-        return tuple(row for row in self._iter_rows_with_insertions() if not row.hidden)
+        return tuple(_StripeInsertionHelper.iter_interleaved_rows(self._ordered_stripe))
 
     @lazyproperty
     def table_base_unpruned(self):
@@ -87,6 +87,26 @@ class TransformedStripe(object):
     def table_margin_unpruned(self):
         """Hmm, weird 1D ndarray with same float value repeated for each row."""
         return self._ordered_stripe.table_margin
+
+    @lazyproperty
+    def _ordered_stripe(self):
+        return _OrderedStripe(self._base_stripe)
+
+
+class _StripeInsertionHelper(object):
+    """Base class for ordering partitions."""
+
+    def __init__(self, ordered_stripe):
+        self._ordered_stripe = ordered_stripe
+
+    @classmethod
+    def iter_interleaved_rows(cls, ordered_stripe):
+        """Generate rows with subtotals in correct position."""
+        return cls(ordered_stripe)._iter_interleaved_rows()
+
+    def _iter_interleaved_rows(self):
+        """Generate rows with subtotals in correct position."""
+        return (row for row in self._iter_rows_with_insertions() if not row.hidden)
 
     @lazyproperty
     def _all_inserted_rows(self):
@@ -111,8 +131,9 @@ class TransformedStripe(object):
     def _iter_rows_with_insertions(self):
         """Generate all row vectors with insertions interleaved at right spot."""
         # ---subtotals inserted at top---
-        for row in self._rows_inserted_at_top:
-            yield row
+        for row in self._all_inserted_rows:
+            if row.anchor == "top":
+                yield row
 
         # ---body rows with subtotals anchored to specific body positions---
         for idx, row in enumerate(self._ordered_stripe.rows):
@@ -121,26 +142,13 @@ class TransformedStripe(object):
                 yield inserted_row
 
         # ---subtotals appended at bottom---
-        for row in self._rows_inserted_at_bottom:
-            yield row
-
-    @lazyproperty
-    def _ordered_stripe(self):
-        return _OrderedStripe(self._base_stripe)
+        for row in self._all_inserted_rows:
+            if row.anchor == "bottom":
+                yield row
 
     @lazyproperty
     def _rows_dimension(self):
         return self._ordered_stripe.rows_dimension
-
-    @lazyproperty
-    def _rows_inserted_at_bottom(self):
-        """Sequence of StripeInsertionRow vectors that appear after any other rows."""
-        return tuple(row for row in self._all_inserted_rows if row.anchor == "bottom")
-
-    @lazyproperty
-    def _rows_inserted_at_top(self):
-        """Sequence of StripeInsertionRow vectors that appear before any other rows."""
-        return tuple(row for row in self._all_inserted_rows if row.anchor == "top")
 
 
 class _BaseOrderedPartition(object):
