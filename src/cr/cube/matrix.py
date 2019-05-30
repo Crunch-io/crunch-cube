@@ -25,6 +25,7 @@ from cr.cube.vector import (
     OrderedStripeColumnVector,
     OrderedVector,
     StripeColumnVector,
+    StripeInsertionRow,
     StripeVectorAfterHiding,
     VectorAfterHiding,
 )
@@ -298,22 +299,6 @@ class _BasePartitionWithInsertions(object):
         return self._base_partition.table_margin
 
     @lazyproperty
-    def _all_inserted_rows(self):
-        """Sequence of _InsertionRow objects representing inserted subtotal rows.
-
-        The returned vectors are in the order subtotals were specified in the cube
-        result, which is no particular order.
-        """
-        # ---an aggregate rows-dimension is not summable---
-        if self._rows_dimension.dimension_type in (DT.MR, DT.CA):
-            return tuple()
-
-        return tuple(
-            InsertionRow(self._base_partition, subtotal)
-            for subtotal in self._rows_dimension.subtotals
-        )
-
-    @lazyproperty
     def _columns_dimension(self):
         return self._base_partition.columns_dimension
 
@@ -391,6 +376,22 @@ class _MatrixWithInsertions(_BasePartitionWithInsertions):
         )
 
     @lazyproperty
+    def _all_inserted_rows(self):
+        """Sequence of _InsertionRow objects representing inserted subtotal rows.
+
+        The returned vectors are in the order subtotals were specified in the cube
+        result, which is no particular order.
+        """
+        # ---an aggregate rows-dimension is not summable---
+        if self._rows_dimension.dimension_type in (DT.MR, DT.CA):
+            return tuple()
+
+        return tuple(
+            InsertionRow(self._base_partition, subtotal)
+            for subtotal in self._rows_dimension.subtotals
+        )
+
+    @lazyproperty
     def _columns_inserted_at_left(self):
         """Sequence of InsertionColumn vectors that appear before any body columns."""
         return tuple(
@@ -432,10 +433,30 @@ class _MatrixWithInsertions(_BasePartitionWithInsertions):
 class _StripeWithInsertions(_BasePartitionWithInsertions):
     """Represents stripe with both base and inserted row vectors."""
 
+    def __init__(self, base_stripe):
+        super(_StripeWithInsertions, self).__init__(base_stripe)
+        self._base_stripe = base_stripe
+
     @lazyproperty
     def _all_inserted_columns(self):
         """An empty sequence for a stripe, which can have no inserted columns."""
         return ()
+
+    @lazyproperty
+    def _all_inserted_rows(self):
+        """Sequence of _InsertionRow objects representing inserted subtotal rows.
+
+        The returned vectors are in the order subtotals were specified in the cube
+        result, which is no particular order.
+        """
+        # ---an aggregate rows-dimension is not summable---
+        if self._rows_dimension.dimension_type in (DT.MR, DT.CA):
+            return tuple()
+
+        return tuple(
+            StripeInsertionRow(self._base_stripe, subtotal)
+            for subtotal in self._rows_dimension.subtotals
+        )
 
 
 # === BASE PARTITION OBJECTS ===

@@ -191,13 +191,6 @@ class DescribeMultipleResponseVector(object):
 class DescribeInsertionRow(object):
     """Unit-test suite for `cr.cube.vector.InsertionRow` object."""
 
-    def it_sets_slice_and_subtotal(self):
-        slice_ = Mock()
-        subtotal = Mock()
-        insertion_row = InsertionRow(slice_, subtotal)
-        assert insertion_row._slice == slice_
-        assert insertion_row._subtotal == subtotal
-
     @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_provides_values(self, addend_idxs_prop_, values_fixture):
         slice_, subtotal_indexes, expected_row_counts = values_fixture
