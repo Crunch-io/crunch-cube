@@ -749,17 +749,3 @@ class MultipleResponseVector(CategoricalVector):
     @lazyproperty
     def _selected_unweighted(self):
         return self._base_counts[0, :]
-
-
-# ===STRIPE VECTORS===
-
-
-class StripeColumnVector(object):
-    """Pseudo-vector for use as stripe column."""
-
-    def __init__(self, base_counts):
-        self._base_counts = base_counts
-
-    @lazyproperty
-    def base(self):
-        return np.sum(self._base_counts)

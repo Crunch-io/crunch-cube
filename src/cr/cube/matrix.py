@@ -23,7 +23,6 @@ from cr.cube.vector import (
     MeansWithMrVector,
     MultipleResponseVector,
     OrderedVector,
-    StripeColumnVector,
     StripeInsertionRow,
     StripeVectorAfterHiding,
     VectorAfterHiding,
@@ -1015,10 +1014,6 @@ class _BaseStripe(object):
         self._rows_dimension = rows_dimension
         self._measure = measure
         self._base_counts = base_counts
-
-    @lazyproperty
-    def columns(self):
-        return (StripeColumnVector(self._base_counts),)
 
     @lazyproperty
     def ndim(self):
