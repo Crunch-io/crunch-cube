@@ -160,6 +160,8 @@ class InsertionRow(_BaseInsertionVector):
 
 
 class _BaseTransformationVector(object):
+    """Base class for most transformation vectors."""
+
     @lazyproperty
     def fill(self):
         """str RGB color like "#def032" or None when not specified.
@@ -195,12 +197,12 @@ class _BaseTransformationVector(object):
         return self._base_vector.numeric
 
     @lazyproperty
-    def table_margin(self):
-        return self._base_vector.table_margin
-
-    @lazyproperty
     def table_base(self):
         return self._base_vector.table_base
+
+    @lazyproperty
+    def table_margin(self):
+        return self._base_vector.table_margin
 
 
 class AssembledVector(_BaseTransformationVector):
@@ -376,12 +378,11 @@ class AssembledInsertionVector(AssembledVector):
         return self._base_vector.anchor
 
 
-class VectorAfterHiding(_BaseTransformationVector):
+class _BaseVectorAfterHiding(_BaseTransformationVector):
     """Reflects a row or column with hidden elements removed."""
 
-    def __init__(self, base_vector, opposite_vectors):
+    def __init__(self, base_vector):
         self._base_vector = base_vector
-        self._opposite_vectors = opposite_vectors
 
     @lazyproperty
     def base(self):
@@ -394,10 +395,6 @@ class VectorAfterHiding(_BaseTransformationVector):
         return self._base_vector.base_values[self._visible_element_idxs]
 
     @lazyproperty
-    def column_index(self):
-        return self._base_vector.column_index[self._visible_element_idxs]
-
-    @lazyproperty
     def margin(self):
         if not isinstance(self._base_vector.margin, np.ndarray):
             return self._base_vector.margin
@@ -408,20 +405,32 @@ class VectorAfterHiding(_BaseTransformationVector):
         return self._base_vector.means[self._visible_element_idxs]
 
     @lazyproperty
-    def proportions(self):
-        return self._base_vector.proportions[self._visible_element_idxs]
-
-    @lazyproperty
-    def pvals(self):
-        return self._base_vector.pvals[self._visible_element_idxs]
-
-    @lazyproperty
     def table_proportions(self):
         return self._base_vector.table_proportions[self._visible_element_idxs]
 
     @lazyproperty
     def values(self):
         return self._base_vector.values[self._visible_element_idxs]
+
+
+class VectorAfterHiding(_BaseVectorAfterHiding):
+    """Reflects a row or column with hidden elements removed."""
+
+    def __init__(self, base_vector, opposite_vectors):
+        super(VectorAfterHiding, self).__init__(base_vector)
+        self._opposite_vectors = opposite_vectors
+
+    @lazyproperty
+    def column_index(self):
+        return self._base_vector.column_index[self._visible_element_idxs]
+
+    @lazyproperty
+    def proportions(self):
+        return self._base_vector.proportions[self._visible_element_idxs]
+
+    @lazyproperty
+    def pvals(self):
+        return self._base_vector.pvals[self._visible_element_idxs]
 
     @lazyproperty
     def zscore(self):
@@ -484,11 +493,42 @@ class OrderedVector(_BaseTransformationVector):
         return self._base_vector.zscore
 
 
+# ===STRIPE TRANSFORMATION VECTORS===
+
+
+class OrderedStripeColumnVector(object):
+    """In charge of indexing elements properly, after ordering transform."""
+
+    def __init__(self, base_vector):
+        self._base_vector = base_vector
+
+    @lazyproperty
+    def base(self):
+        return self._base_vector.base
+
+    @lazyproperty
+    def hidden(self):
+        return False
+
+
+class StripeVectorAfterHiding(_BaseVectorAfterHiding):
+    """Reflects a row or column with hidden elements removed."""
+
+    @lazyproperty
+    def _visible_element_idxs(self):
+        """An 1D ndarray of int idxs of non-hidden values, suitable for indexing.
+
+        This value is derived from the opposing vectors collection, based on the hidden
+        status of its elements.
+        """
+        return [0]
+
+
 # ===OPERAND VECTORS===
 
 
-class BaseVector(object):
-    """Base class for all vector objects, although is used directly in some cases."""
+class _BaseVector(object):
+    """Base class for all vector objects."""
 
     def __init__(self, element, base_counts):
         self._element = element
@@ -540,7 +580,7 @@ class BaseVector(object):
         return self.base == 0 or np.isnan(self.base)
 
 
-class CategoricalVector(BaseVector):
+class CategoricalVector(_BaseVector):
     """Main staple of all measures.
 
     Some of the measures it can calculate by itself, others it needs to receive at
@@ -573,7 +613,6 @@ class CategoricalVector(BaseVector):
     @lazyproperty
     def proportions(self):
         return self.values / self.margin
-        # return self.values / self.base
 
     @lazyproperty
     def pvals(self):
@@ -617,7 +656,7 @@ class CatXMrVector(CategoricalVector):
         return np.sum(self._all_counts)
 
 
-class MeansVector(BaseVector):
+class MeansVector(_BaseVector):
     def __init__(self, element, base_counts, means):
         super(MeansVector, self).__init__(element, base_counts)
         self._means = means
@@ -712,8 +751,3 @@ class StripeColumnVector(object):
     @lazyproperty
     def base(self):
         return np.sum(self._base_counts)
-
-    @lazyproperty
-    def hidden(self):
-        """True if vector is hidden. A stripe column vector is never hidden."""
-        return False

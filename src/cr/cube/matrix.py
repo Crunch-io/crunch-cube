@@ -22,8 +22,10 @@ from cr.cube.vector import (
     MeansVector,
     MeansWithMrVector,
     MultipleResponseVector,
+    OrderedStripeColumnVector,
     OrderedVector,
     StripeColumnVector,
+    StripeVectorAfterHiding,
     VectorAfterHiding,
 )
 
@@ -177,10 +179,7 @@ class _OrderedStripe(_BaseOrderedPartition):
     # get rid of a stripe having columns.
     @lazyproperty
     def columns(self):
-        return tuple(
-            OrderedVector(column, self._row_order)
-            for column in tuple(np.array(self._base_stripe.columns)[self._column_order])
-        )
+        return (OrderedStripeColumnVector(self._base_stripe.columns[0]),)
 
     @lazyproperty
     def _column_order(self):
@@ -262,7 +261,7 @@ class _StripeWithHidden(object):
     @lazyproperty
     def rows(self):
         return tuple(
-            VectorAfterHiding(row, self._base_stripe.columns)
+            StripeVectorAfterHiding(row)
             for row in self._base_stripe.rows
             if not row.hidden
         )
@@ -1110,7 +1109,7 @@ class _MeansWithMrStripe(_MeansStripe):
 
 
 class _MrStripe(_BaseStripe):
-    """Special case of 1-D MR slice (vector)."""
+    """Special case of 1-D MR slice (stripe)."""
 
     def __init__(self, rows_dimension, counts, base_counts):
         super(_MrStripe, self).__init__(rows_dimension, counts, base_counts)
