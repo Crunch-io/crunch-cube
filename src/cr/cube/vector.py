@@ -180,6 +180,10 @@ class StripeInsertionRow(_BaseInsertionVector):
         return False
 
     @lazyproperty
+    def table_proportions(self):
+        return self.values / self.table_margin
+
+    @lazyproperty
     def _addend_vectors(self):
         return tuple(
             row
@@ -261,14 +265,6 @@ class AssembledVector(_BaseTransformationVector):
             + self._interleaved_column_index
             + tuple([np.nan] * len(self._bottom_values))
         )
-
-    @lazyproperty
-    def label(self):
-        return self._base_vector.label
-
-    @lazyproperty
-    def margin(self):
-        return self._base_vector.margin
 
     @lazyproperty
     def proportions(self):
@@ -393,18 +389,6 @@ class AssembledVector(_BaseTransformationVector):
         )
 
 
-class AssembledInsertionVector(AssembledVector):
-    """Inserted row or col, but with elements from opposite dimension insertions.
-
-    Needs to be subclassed from _AssembledVector, because it needs to provide the
-    anchor, in order to know where it (itself) gets inserted.
-    """
-
-    @lazyproperty
-    def anchor(self):
-        return self._base_vector.anchor
-
-
 class _BaseVectorAfterHiding(_BaseTransformationVector):
     """Reflects a row or column with hidden elements removed."""
 
@@ -483,9 +467,9 @@ class VectorAfterHiding(_BaseVectorAfterHiding):
 class OrderedVector(_BaseTransformationVector):
     """In charge of indexing elements properly, after ordering transform."""
 
-    def __init__(self, base_vector, order):
+    def __init__(self, base_vector, opposing_order):
         self._base_vector = base_vector
-        self._order = order
+        self._opposing_order_arg = opposing_order
 
     @lazyproperty
     def base(self):
@@ -493,7 +477,7 @@ class OrderedVector(_BaseTransformationVector):
 
     @lazyproperty
     def base_values(self):
-        return self._base_vector.base_values[self.order]
+        return self._base_vector.base_values[self._opposing_order]
 
     @lazyproperty
     def column_index(self):
@@ -504,8 +488,12 @@ class OrderedVector(_BaseTransformationVector):
         return self._base_vector.label
 
     @lazyproperty
-    def order(self):
-        return self._order if self._order is not None else slice(None)
+    def _opposing_order(self):
+        return (
+            slice(None)
+            if self._opposing_order_arg is None
+            else self._opposing_order_arg
+        )
 
     @lazyproperty
     def pvals(self):
@@ -513,11 +501,23 @@ class OrderedVector(_BaseTransformationVector):
 
     @lazyproperty
     def values(self):
-        return self._base_vector.values[self.order]
+        return self._base_vector.values[self._opposing_order]
 
     @lazyproperty
     def zscore(self):
         return self._base_vector.zscore
+
+
+class OrderedStripeRowVector(OrderedVector):
+    """In charge of indexing elements properly, after ordering transform."""
+
+    def __init__(self, base_vector):
+        self._base_vector = base_vector
+        self._opposing_order_arg = slice(None)
+
+    @lazyproperty
+    def table_proportions(self):
+        return self.values / self._base_vector.table_margin
 
 
 # ===STRIPE TRANSFORMATION VECTORS===
