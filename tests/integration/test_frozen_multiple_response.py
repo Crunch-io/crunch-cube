@@ -31,13 +31,13 @@ def test_proportions_simple_mr():
 
 
 def test_1D_mr_with_means():
-    slice_ = FrozenCube(CR.MR_MEAN_FILT_WGTD).slices[0]
+    strand = FrozenCube(CR.MR_MEAN_FILT_WGTD).slices[0]
     np.testing.assert_almost_equal(
-        slice_.means, [[3.7240515], [2.5784293], [2.2185933], [1.8653349]]
+        strand.means, [3.7240515, 2.5784293, 2.2185933, 1.8653349]
     )
-    np.testing.assert_array_equal(slice_.table_base, [336, 136, 248, 5216])
-    assert slice_.table_base_unpruned == 23348
-    assert slice_.ndim == 1
+    np.testing.assert_array_equal(strand.table_base, [336, 136, 248, 5216])
+    assert strand.table_base_unpruned == 23348
+    assert strand.ndim == 1
 
 
 def test_deck_with_means():

@@ -508,79 +508,6 @@ class OrderedVector(_BaseTransformationVector):
         return self._base_vector.zscore
 
 
-# ===STRIPE TRANSFORMATION VECTORS===
-
-
-class StripeVectorAfterHiding(object):
-    """Reflects a row or column with hidden elements removed."""
-
-    def __init__(self, base_vector):
-        self._base_vector = base_vector
-
-    @lazyproperty
-    def base(self):
-        if not isinstance(self._base_vector.base, np.ndarray):
-            return self._base_vector.base
-        return self._base_vector.base[self._opposing_visible_idxs]
-
-    @lazyproperty
-    def base_values(self):
-        return self._base_vector.base_values[self._opposing_visible_idxs]
-
-    @lazyproperty
-    def margin(self):
-        if not isinstance(self._base_vector.margin, np.ndarray):
-            return self._base_vector.margin
-        return self._base_vector.margin[self._opposing_visible_idxs]
-
-    @lazyproperty
-    def means(self):
-        return self._base_vector.means[self._opposing_visible_idxs]
-
-    @lazyproperty
-    def table_proportions(self):
-        return self._base_vector.table_proportions[self._opposing_visible_idxs]
-
-    @lazyproperty
-    def values(self):
-        return self._base_vector.values[self._opposing_visible_idxs]
-
-    @lazyproperty
-    def _opposing_visible_idxs(self):
-        """An 1D ndarray of int idxs of non-hidden values, suitable for indexing.
-
-        This value is derived from the opposing vectors collection, based on the hidden
-        status of its elements.
-        """
-        return [0]
-
-    # ===STRAIGHT PASS-THRUS====
-
-    @lazyproperty
-    def fill(self):
-        return self._base_vector.fill
-
-    @lazyproperty
-    def is_insertion(self):
-        return self._base_vector.is_insertion
-
-    @lazyproperty
-    def label(self):
-        return self._base_vector.label
-
-    @lazyproperty
-    def numeric(self):
-        return self._base_vector.numeric
-
-    @lazyproperty
-    def table_base(self):
-        return self._base_vector.table_base
-
-    @lazyproperty
-    def table_margin(self):
-        return self._base_vector.table_margin
-
-
 # ===OPERAND VECTORS===
 
 
@@ -732,13 +659,7 @@ class MeansVector(_BaseVector):
 
 
 class MeansWithMrVector(MeansVector):
-    """This is a row of a 1-D MR with Means.
-
-    This vector is special in the sense that it doesn't provide us with the normal base
-    (which is selected + not-selected for a 1-D MR *without* means). Instead, it
-    calculates the base as *just* the selected, which is the correct base for the 1-D MR
-    with means.
-    """
+    """MR vector with means for use in a matrix."""
 
     @lazyproperty
     def base(self):
@@ -747,6 +668,15 @@ class MeansWithMrVector(MeansVector):
     @lazyproperty
     def table_base(self):
         return self.base
+
+
+class MeansWithMrStripeVector(MeansWithMrVector):
+    """This is a row of a 1-D MR with Means."""
+
+    @lazyproperty
+    def means(self):
+        """1D ndarray of length 2 (shape == 2)"""
+        return self._means[0]
 
 
 class MultipleResponseVector(CategoricalVector):

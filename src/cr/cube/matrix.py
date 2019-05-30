@@ -19,11 +19,11 @@ from cr.cube.vector import (
     InsertionColumn,
     InsertionRow,
     MeansVector,
+    MeansWithMrStripeVector,
     MeansWithMrVector,
     MultipleResponseVector,
     OrderedVector,
     StripeInsertionRow,
-    StripeVectorAfterHiding,
     VectorAfterHiding,
 )
 
@@ -76,11 +76,7 @@ class TransformedStripe(object):
     @lazyproperty
     def rows(self):
         """Sequence of post-transformation row vectors."""
-        return tuple(
-            StripeVectorAfterHiding(row)
-            for row in self._stripe_with_insertions.rows
-            if not row.hidden
-        )
+        return tuple(row for row in self._stripe_with_insertions.rows if not row.hidden)
 
     @lazyproperty
     def table_base_unpruned(self):
@@ -1089,7 +1085,7 @@ class _MeansWithMrStripe(_MeansStripe):
     @lazyproperty
     def rows(self):
         return tuple(
-            MeansWithMrVector(element, base_counts, means)
+            MeansWithMrStripeVector(element, base_counts, means)
             for element, base_counts, means in self._row_generator
         )
 
