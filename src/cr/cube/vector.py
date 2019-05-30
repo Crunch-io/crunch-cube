@@ -511,17 +511,74 @@ class OrderedVector(_BaseTransformationVector):
 # ===STRIPE TRANSFORMATION VECTORS===
 
 
-class StripeVectorAfterHiding(_BaseVectorAfterHiding):
+class StripeVectorAfterHiding(object):
     """Reflects a row or column with hidden elements removed."""
 
+    def __init__(self, base_vector):
+        self._base_vector = base_vector
+
     @lazyproperty
-    def _visible_element_idxs(self):
+    def base(self):
+        if not isinstance(self._base_vector.base, np.ndarray):
+            return self._base_vector.base
+        return self._base_vector.base[self._opposing_visible_idxs]
+
+    @lazyproperty
+    def base_values(self):
+        return self._base_vector.base_values[self._opposing_visible_idxs]
+
+    @lazyproperty
+    def margin(self):
+        if not isinstance(self._base_vector.margin, np.ndarray):
+            return self._base_vector.margin
+        return self._base_vector.margin[self._opposing_visible_idxs]
+
+    @lazyproperty
+    def means(self):
+        return self._base_vector.means[self._opposing_visible_idxs]
+
+    @lazyproperty
+    def table_proportions(self):
+        return self._base_vector.table_proportions[self._opposing_visible_idxs]
+
+    @lazyproperty
+    def values(self):
+        return self._base_vector.values[self._opposing_visible_idxs]
+
+    @lazyproperty
+    def _opposing_visible_idxs(self):
         """An 1D ndarray of int idxs of non-hidden values, suitable for indexing.
 
         This value is derived from the opposing vectors collection, based on the hidden
         status of its elements.
         """
         return [0]
+
+    # ===STRAIGHT PASS-THRUS====
+
+    @lazyproperty
+    def fill(self):
+        return self._base_vector.fill
+
+    @lazyproperty
+    def is_insertion(self):
+        return self._base_vector.is_insertion
+
+    @lazyproperty
+    def label(self):
+        return self._base_vector.label
+
+    @lazyproperty
+    def numeric(self):
+        return self._base_vector.numeric
+
+    @lazyproperty
+    def table_base(self):
+        return self._base_vector.table_base
+
+    @lazyproperty
+    def table_margin(self):
+        return self._base_vector.table_margin
 
 
 # ===OPERAND VECTORS===

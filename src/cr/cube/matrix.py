@@ -76,25 +76,29 @@ class TransformedStripe(object):
     @lazyproperty
     def rows(self):
         """Sequence of post-transformation row vectors."""
-        return self._transformed_stripe.rows
+        return tuple(
+            StripeVectorAfterHiding(row)
+            for row in self._stripe_with_insertions.rows
+            if not row.hidden
+        )
 
     @lazyproperty
     def table_base_unpruned(self):
         """Hmm, weird 1D ndarray with same int value repeated for each row."""
-        return self._transformed_stripe.table_base_unpruned
+        return self._stripe_with_insertions.table_base
 
     @lazyproperty
     def table_margin_unpruned(self):
         """Hmm, weird 1D ndarray with same float value repeated for each row."""
-        return self._transformed_stripe.table_margin_unpruned
+        return self._stripe_with_insertions.table_margin
 
     @lazyproperty
-    def _transformed_stripe(self):
-        """Apply all transforms sequentially."""
-        stripe = _OrderedStripe(self._base_stripe)
-        stripe = _StripeWithInsertions(stripe)
-        stripe = _StripeWithHidden(stripe)
-        return stripe
+    def _ordered_stripe(self):
+        return _OrderedStripe(self._base_stripe)
+
+    @lazyproperty
+    def _stripe_with_insertions(self):
+        return _StripeWithInsertions(self._ordered_stripe)
 
 
 class _BaseOrderedPartition(object):
@@ -236,33 +240,6 @@ class _MatrixWithHidden(object):
     @lazyproperty
     def table_margin_unpruned(self):
         return self._base_matrix.table_margin
-
-
-class _StripeWithHidden(object):
-    """Stripe with hidden rows removed.
-
-    A row can be hidden explicitly by the user, or it can be automatically hidden when
-    it is empty and the prune option for the dimension is selected.
-    """
-
-    def __init__(self, base_stripe):
-        self._base_stripe = base_stripe
-
-    @lazyproperty
-    def rows(self):
-        return tuple(
-            StripeVectorAfterHiding(row)
-            for row in self._base_stripe.rows
-            if not row.hidden
-        )
-
-    @lazyproperty
-    def table_base_unpruned(self):
-        return self._base_stripe.table_base
-
-    @lazyproperty
-    def table_margin_unpruned(self):
-        return self._base_stripe.table_margin
 
 
 class _BasePartitionWithInsertions(object):
