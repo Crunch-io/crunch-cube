@@ -227,7 +227,6 @@ class AssembledVector(_BaseTransformationVector):
 
     @lazyproperty
     def column_index(self):
-        # return self._base_vector.column_index
         return np.array(
             tuple([np.nan] * len(self._top_values))
             + self._interleaved_column_index
@@ -244,7 +243,6 @@ class AssembledVector(_BaseTransformationVector):
 
     @lazyproperty
     def proportions(self):
-        # return self.values / self.base
         return self.values / self.margin
 
     @lazyproperty

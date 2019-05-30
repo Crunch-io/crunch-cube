@@ -282,14 +282,6 @@ class _BasePartitionWithInsertions(object):
         self._base_partition = base_partition
 
     @lazyproperty
-    def columns(self):
-        """Sequence of column vectors including inserted columns.
-
-        Each column vector also includes any new elements introduced by inserted rows.
-        """
-        return tuple(self._iter_columns())
-
-    @lazyproperty
     def rows(self):
         """Sequence of row vectors including inserted rows.
 
@@ -374,6 +366,14 @@ class _MatrixWithInsertions(_BasePartitionWithInsertions):
         self._base_matrix = base_matrix
 
     @lazyproperty
+    def columns(self):
+        """Sequence of column vectors including inserted columns.
+
+        Each column vector also includes any new elements introduced by inserted rows.
+        """
+        return tuple(self._iter_columns())
+
+    @lazyproperty
     def _all_inserted_columns(self):
         """Sequence of _InsertionColumn objects representing subtotal columns.
 
@@ -432,18 +432,10 @@ class _MatrixWithInsertions(_BasePartitionWithInsertions):
 class _StripeWithInsertions(_BasePartitionWithInsertions):
     """Represents stripe with both base and inserted row vectors."""
 
-    def __init__(self, base_stripe):
-        super(_StripeWithInsertions, self).__init__(base_stripe)
-        self._base_stripe = base_stripe
-
     @lazyproperty
     def _all_inserted_columns(self):
         """An empty sequence for a stripe, which can have no inserted columns."""
         return ()
-
-    def _iter_columns(self):
-        """Generate all column vectors with insertions interleaved at right spot."""
-        yield AssembledVector(self._base_stripe.columns[0], self._all_inserted_rows)
 
 
 # === BASE PARTITION OBJECTS ===
