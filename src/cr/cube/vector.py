@@ -508,18 +508,6 @@ class OrderedVector(_BaseTransformationVector):
         return self._base_vector.zscore
 
 
-class OrderedStripeRowVector(OrderedVector):
-    """In charge of indexing elements properly, after ordering transform."""
-
-    def __init__(self, base_vector):
-        self._base_vector = base_vector
-        self._opposing_order_arg = slice(None)
-
-    @lazyproperty
-    def table_proportions(self):
-        return self.values / self._base_vector.table_margin
-
-
 # ===STRIPE TRANSFORMATION VECTORS===
 
 
@@ -633,6 +621,10 @@ class CategoricalVector(_BaseVector):
     @lazyproperty
     def table_margin(self):
         return self._table_margin
+
+    @lazyproperty
+    def table_proportions(self):
+        return self.values / self._table_margin
 
     @lazyproperty
     def values(self):

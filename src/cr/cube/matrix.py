@@ -21,7 +21,6 @@ from cr.cube.vector import (
     MeansVector,
     MeansWithMrVector,
     MultipleResponseVector,
-    OrderedStripeRowVector,
     OrderedVector,
     StripeInsertionRow,
     StripeVectorAfterHiding,
@@ -123,7 +122,7 @@ class _BaseOrderedPartition(object):
         This value is a 1D ndarray of int row indices, suitable for indexing the rows
         array to produce an ordered version.
         """
-        # ---Specifying int type prevents failure when there are zero columns---
+        # ---Specifying int type prevents failure when there are zero rows---
         return np.array(self.rows_dimension.display_order, dtype=int)
 
 
@@ -176,10 +175,7 @@ class _OrderedStripe(_BaseOrderedPartition):
 
     @lazyproperty
     def rows(self):
-        return tuple(
-            OrderedStripeRowVector(row)
-            for row in tuple(np.array(self._base_partition.rows)[self._row_order])
-        )
+        return tuple(np.array(self._base_stripe.rows)[self._row_order])
 
 
 class _MatrixWithHidden(object):
