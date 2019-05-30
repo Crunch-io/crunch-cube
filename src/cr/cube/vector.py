@@ -523,17 +523,6 @@ class OrderedVector(_BaseTransformationVector):
 # ===STRIPE TRANSFORMATION VECTORS===
 
 
-class OrderedStripeColumnVector(object):
-    """In charge of indexing elements properly, after ordering transform."""
-
-    def __init__(self, base_vector):
-        self._base_vector = base_vector
-
-    @lazyproperty
-    def base(self):
-        return self._base_vector.base
-
-
 class StripeVectorAfterHiding(_BaseVectorAfterHiding):
     """Reflects a row or column with hidden elements removed."""
 

@@ -22,7 +22,6 @@ from cr.cube.vector import (
     MeansVector,
     MeansWithMrVector,
     MultipleResponseVector,
-    OrderedStripeColumnVector,
     OrderedVector,
     StripeColumnVector,
     StripeInsertionRow,
@@ -175,12 +174,6 @@ class _OrderedStripe(_BaseOrderedPartition):
     def __init__(self, base_stripe):
         super(_OrderedStripe, self).__init__(base_stripe)
         self._base_stripe = base_stripe
-
-    # TODO: this one should be able to be much simpler, maybe that has to wait until we
-    # get rid of a stripe having columns.
-    @lazyproperty
-    def columns(self):
-        return (OrderedStripeColumnVector(self._base_stripe.columns[0]),)
 
     @lazyproperty
     def _column_order(self):
