@@ -76,25 +76,71 @@ class TransformedStripe(object):
     @lazyproperty
     def rows(self):
         """Sequence of post-transformation row vectors."""
-        return tuple(row for row in self._stripe_with_insertions.rows if not row.hidden)
+        return tuple(row for row in self._iter_rows_with_insertions() if not row.hidden)
 
     @lazyproperty
     def table_base_unpruned(self):
         """Hmm, weird 1D ndarray with same int value repeated for each row."""
-        return self._stripe_with_insertions.table_base
+        return self._ordered_stripe.table_base
 
     @lazyproperty
     def table_margin_unpruned(self):
         """Hmm, weird 1D ndarray with same float value repeated for each row."""
-        return self._stripe_with_insertions.table_margin
+        return self._ordered_stripe.table_margin
+
+    @lazyproperty
+    def _all_inserted_rows(self):
+        """Sequence of _StripeInsertionRow objects representing inserted subtotal rows.
+
+        The returned vectors are in the order subtotals were specified in the cube
+        result, which is no particular order.
+        """
+        # ---an aggregate rows-dimension is not summable---
+        if self._rows_dimension.dimension_type in (DT.MR, DT.CA):
+            return tuple()
+
+        return tuple(
+            StripeInsertionRow(self._ordered_stripe, subtotal)
+            for subtotal in self._rows_dimension.subtotals
+        )
+
+    def _iter_inserted_rows_anchored_at(self, anchor):
+        """Generate all inserted row vectors with matching `anchor`."""
+        return (row for row in self._all_inserted_rows if row.anchor == anchor)
+
+    def _iter_rows_with_insertions(self):
+        """Generate all row vectors with insertions interleaved at right spot."""
+        # ---subtotals inserted at top---
+        for row in self._rows_inserted_at_top:
+            yield row
+
+        # ---body rows with subtotals anchored to specific body positions---
+        for idx, row in enumerate(self._ordered_stripe.rows):
+            yield row
+            for inserted_row in self._iter_inserted_rows_anchored_at(idx):
+                yield inserted_row
+
+        # ---subtotals appended at bottom---
+        for row in self._rows_inserted_at_bottom:
+            yield row
 
     @lazyproperty
     def _ordered_stripe(self):
         return _OrderedStripe(self._base_stripe)
 
     @lazyproperty
-    def _stripe_with_insertions(self):
-        return _StripeWithInsertions(self._ordered_stripe)
+    def _rows_dimension(self):
+        return self._ordered_stripe.rows_dimension
+
+    @lazyproperty
+    def _rows_inserted_at_bottom(self):
+        """Sequence of StripeInsertionRow vectors that appear after any other rows."""
+        return tuple(row for row in self._all_inserted_rows if row.anchor == "bottom")
+
+    @lazyproperty
+    def _rows_inserted_at_top(self):
+        """Sequence of StripeInsertionRow vectors that appear before any other rows."""
+        return tuple(row for row in self._all_inserted_rows if row.anchor == "top")
 
 
 class _BaseOrderedPartition(object):
@@ -238,11 +284,19 @@ class _MatrixWithHidden(object):
         return self._base_matrix.table_margin
 
 
-class _BasePartitionWithInsertions(object):
-    """Base class for "with-insertions" transformation partition objects."""
+class _MatrixWithInsertions(object):
+    """Represents slice with both normal and inserted bits."""
 
-    def __init__(self, base_partition):
-        self._base_partition = base_partition
+    def __init__(self, base_matrix):
+        self._base_matrix = base_matrix
+
+    @lazyproperty
+    def columns(self):
+        """Sequence of column vectors including inserted columns.
+
+        Each column vector also includes any new elements introduced by inserted rows.
+        """
+        return tuple(self._iter_columns())
 
     @lazyproperty
     def rows(self):
@@ -254,53 +308,11 @@ class _BasePartitionWithInsertions(object):
 
     @lazyproperty
     def table_base(self):
-        return self._base_partition.table_base
+        return self._base_matrix.table_base
 
     @lazyproperty
     def table_margin(self):
-        return self._base_partition.table_margin
-
-    @lazyproperty
-    def _columns_dimension(self):
-        return self._base_partition.columns_dimension
-
-    def _iter_columns(self):
-        """Generate all column vectors with insertions interleaved at right spot."""
-        raise NotImplementedError("must be implemented by each subclass")
-
-    def _iter_inserted_rows_anchored_at(self, anchor):
-        """Generate all inserted row vectors with matching `anchor`."""
-        return (row for row in self._all_inserted_rows if row.anchor == anchor)
-
-    @lazyproperty
-    def _rows_dimension(self):
-        return self._base_partition.rows_dimension
-
-    @lazyproperty
-    def _rows_inserted_at_top(self):
-        """Sequence of InsertionRow vectors that appear before any other table rows."""
-        return tuple(row for row in self._all_inserted_rows if row.anchor == "top")
-
-    @lazyproperty
-    def _rows_inserted_at_bottom(self):
-        """Sequence of InsertionRow vectors that appear after any other table rows."""
-        return tuple(row for row in self._all_inserted_rows if row.anchor == "bottom")
-
-
-class _MatrixWithInsertions(_BasePartitionWithInsertions):
-    """Represents slice with both normal and inserted bits."""
-
-    def __init__(self, base_matrix):
-        super(_MatrixWithInsertions, self).__init__(base_matrix)
-        self._base_matrix = base_matrix
-
-    @lazyproperty
-    def columns(self):
-        """Sequence of column vectors including inserted columns.
-
-        Each column vector also includes any new elements introduced by inserted rows.
-        """
-        return tuple(self._iter_columns())
+        return self._base_matrix.table_margin
 
     @lazyproperty
     def _all_inserted_columns(self):
@@ -331,9 +343,13 @@ class _MatrixWithInsertions(_BasePartitionWithInsertions):
             return tuple()
 
         return tuple(
-            InsertionRow(self._base_partition, subtotal)
+            InsertionRow(self._base_matrix, subtotal)
             for subtotal in self._rows_dimension.subtotals
         )
+
+    @lazyproperty
+    def _columns_dimension(self):
+        return self._base_matrix.columns_dimension
 
     @lazyproperty
     def _columns_inserted_at_left(self):
@@ -367,6 +383,10 @@ class _MatrixWithInsertions(_BasePartitionWithInsertions):
         for column in self._columns_inserted_at_right:
             yield AssembledVector(column, opposing_insertions)
 
+    def _iter_inserted_rows_anchored_at(self, anchor):
+        """Generate all inserted row vectors with matching `anchor`."""
+        return (row for row in self._all_inserted_rows if row.anchor == anchor)
+
     def _iter_rows(self):
         """Generate all row vectors with insertions interleaved at right spot."""
         opposing_insertions = self._all_inserted_columns
@@ -376,7 +396,7 @@ class _MatrixWithInsertions(_BasePartitionWithInsertions):
             yield AssembledVector(row, opposing_insertions)
 
         # ---body rows with subtotals anchored to specific body positions---
-        for idx, row in enumerate(self._base_partition.rows):
+        for idx, row in enumerate(self._base_matrix.rows):
             yield AssembledVector(row, opposing_insertions)
             for inserted_row in self._iter_inserted_rows_anchored_at(idx):
                 yield AssembledVector(inserted_row, opposing_insertions)
@@ -391,45 +411,19 @@ class _MatrixWithInsertions(_BasePartitionWithInsertions):
             column for column in self._all_inserted_columns if column.anchor == anchor
         )
 
-
-class _StripeWithInsertions(_BasePartitionWithInsertions):
-    """Represents stripe with both base and inserted row vectors."""
-
-    def __init__(self, base_stripe):
-        super(_StripeWithInsertions, self).__init__(base_stripe)
-        self._base_stripe = base_stripe
+    @lazyproperty
+    def _rows_dimension(self):
+        return self._base_matrix.rows_dimension
 
     @lazyproperty
-    def _all_inserted_rows(self):
-        """Sequence of _InsertionRow objects representing inserted subtotal rows.
+    def _rows_inserted_at_bottom(self):
+        """Sequence of InsertionRow vectors that appear after any other table rows."""
+        return tuple(row for row in self._all_inserted_rows if row.anchor == "bottom")
 
-        The returned vectors are in the order subtotals were specified in the cube
-        result, which is no particular order.
-        """
-        # ---an aggregate rows-dimension is not summable---
-        if self._rows_dimension.dimension_type in (DT.MR, DT.CA):
-            return tuple()
-
-        return tuple(
-            StripeInsertionRow(self._base_stripe, subtotal)
-            for subtotal in self._rows_dimension.subtotals
-        )
-
-    def _iter_rows(self):
-        """Generate all row vectors with insertions interleaved at right spot."""
-        # ---subtotals inserted at top---
-        for row in self._rows_inserted_at_top:
-            yield row
-
-        # ---body rows with subtotals anchored to specific body positions---
-        for idx, row in enumerate(self._base_partition.rows):
-            yield row
-            for inserted_row in self._iter_inserted_rows_anchored_at(idx):
-                yield inserted_row
-
-        # ---subtotals appended at bottom---
-        for row in self._rows_inserted_at_bottom:
-            yield row
+    @lazyproperty
+    def _rows_inserted_at_top(self):
+        """Sequence of InsertionRow vectors that appear before any other table rows."""
+        return tuple(row for row in self._all_inserted_rows if row.anchor == "top")
 
 
 # === BASE PARTITION OBJECTS ===
