@@ -7,7 +7,8 @@ import numpy as np
 from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.frozen_min_base_size_mask import MinBaseSizeMask
 from cr.cube.measures.new_pairwise_significance import NewPairwiseSignificance
-from cr.cube.matrix import MatrixFactory, MeansScalar, TransformedMatrix
+from cr.cube.matrix import MatrixFactory, TransformedMatrix
+from cr.cube.scalar import MeansScalar
 from cr.cube.stripe import TransformedStripe
 from cr.cube.util import lazyproperty
 
