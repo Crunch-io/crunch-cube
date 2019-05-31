@@ -15,18 +15,13 @@ from cr.cube.util import lazyproperty
 from cr.cube.vector import (
     AssembledVector,
     CategoricalVector,
-    CatStripeRow,
     CatXMrVector,
     InsertionColumn,
     InsertionRow,
-    MeansMrStripeRow,
-    MeansStripeRow,
     MeansVector,
     MeansWithMrVector,
-    MrStripeRow,
     MultipleResponseVector,
     OrderedVector,
-    StripeInsertionRow,
     VectorAfterHiding,
 )
 
@@ -70,112 +65,7 @@ class TransformedMatrix(object):
         return matrix
 
 
-class TransformedStripe(object):
-    """Stripe reflecting application of all transforms."""
-
-    def __init__(self, base_stripe):
-        self._base_stripe = base_stripe
-
-    @lazyproperty
-    def rows(self):
-        """Sequence of post-transformation row vectors.
-
-        All transforms are applied in this unit. `._ordered_rows` applies ordering,
-        _StripeInsertionHelper creates and interleaves subtotal rows, and hidden rows
-        are removed directly in this main row iterator.
-        """
-        return tuple(
-            row
-            for row in _StripeInsertionHelper.iter_interleaved_rows(
-                self._rows_dimension, self._ordered_rows, self._table_margin
-            )
-            if not row.hidden
-        )
-
-    @lazyproperty
-    def table_base_unpruned(self):
-        """Hmm, weird 1D ndarray with same int value repeated for each row."""
-        return self._base_stripe.table_base
-
-    @lazyproperty
-    def table_margin_unpruned(self):
-        """Hmm, weird 1D ndarray with same float value repeated for each row."""
-        return self._base_stripe.table_margin
-
-    @lazyproperty
-    def _ordered_rows(self):
-        return tuple(np.array(self._base_stripe.rows)[self._row_order])
-
-    @lazyproperty
-    def _row_order(self):
-        """Indexer value identifying rows in order, suitable for slicing an ndarray.
-
-        This value is a 1D ndarray of int row indices, used for indexing the rows array
-        to produce an ordered version.
-        """
-        # ---Specifying int type prevents failure when there are zero rows---
-        return np.array(self._rows_dimension.display_order, dtype=int)
-
-    @lazyproperty
-    def _rows_dimension(self):
-        return self._base_stripe.rows_dimension
-
-    @lazyproperty
-    def _table_margin(self):
-        """Needed by inserted rows."""
-        return self._base_stripe.table_margin
-
-
-class _StripeInsertionHelper(object):
-    """Base class for ordering partitions."""
-
-    def __init__(self, rows_dimension, ordered_rows, table_margin):
-        self._rows_dimension = rows_dimension
-        self._ordered_rows = ordered_rows
-        self._table_margin = table_margin
-
-    @classmethod
-    def iter_interleaved_rows(cls, rows_dimension, ordered_rows, table_margin):
-        """Generate rows with subtotals in correct position."""
-        return cls(rows_dimension, ordered_rows, table_margin)._iter_interleaved_rows()
-
-    def _iter_interleaved_rows(self):
-        """Generate all row vectors with insertions interleaved at right spot."""
-        # ---subtotals inserted at top---
-        for row in self._all_inserted_rows:
-            if row.anchor == "top":
-                yield row
-
-        # ---body rows with subtotals anchored to specific body positions---
-        for idx, row in enumerate(self._ordered_rows):
-            yield row
-            for inserted_row in self._iter_inserted_rows_anchored_at(idx):
-                yield inserted_row
-
-        # ---subtotals appended at bottom---
-        for row in self._all_inserted_rows:
-            if row.anchor == "bottom":
-                yield row
-
-    @lazyproperty
-    def _all_inserted_rows(self):
-        """Sequence of _StripeInsertionRow objects representing inserted subtotal rows.
-
-        The returned vectors are in the order subtotals were specified in the cube
-        result, which is no particular order.
-        """
-        # ---an aggregate rows-dimension is not summable---
-        if self._rows_dimension.dimension_type in (DT.MR, DT.CA):
-            return tuple()
-
-        return tuple(
-            StripeInsertionRow(subtotal, self._ordered_rows, self._table_margin)
-            for subtotal in self._rows_dimension.subtotals
-        )
-
-    def _iter_inserted_rows_anchored_at(self, anchor):
-        """Generate all inserted row vectors with matching `anchor`."""
-        return (row for row in self._all_inserted_rows if row.anchor == anchor)
+# === TRANSFORMATION-MATRIX OBJECTS ===
 
 
 class _OrderedMatrix(object):
@@ -438,7 +328,7 @@ class _MatrixWithInsertions(object):
         return tuple(row for row in self._all_inserted_rows if row.anchor == "top")
 
 
-# === BASE PARTITION OBJECTS ===
+# === BASE-MATRIX OBJECTS ===
 
 
 class MatrixFactory(object):
@@ -969,141 +859,3 @@ class MeansScalar(object):
     def table_base(self):
         # TODO: Check why we expect mean instead of the real base in this case.
         return self.means
-
-
-# ===STRIPE (1D) OBJECTS====
-
-
-class StripeFactory(object):
-    """Encapsulates creation of the right raw (pre-transforms) stripe object."""
-
-    @classmethod
-    def stripe(cls, cube, rows_dimension, counts, base_counts, ca_as_0th, slice_idx):
-        """Return a matrix object of appropriate type based on parameters."""
-        # ---for cubes with means, create one of the means-stripe types---
-        if cube.has_means:
-            if rows_dimension.dimension_type == DT.MR:
-                return _MeansWithMrStripe(rows_dimension, counts, base_counts)
-            return _MeansStripe(rows_dimension, counts, base_counts)
-
-        if ca_as_0th:
-            return _CatStripe(rows_dimension, counts[slice_idx], base_counts[slice_idx])
-
-        if rows_dimension.dimension_type == DT.MR:
-            return _MrStripe(rows_dimension, counts, base_counts)
-
-        return _CatStripe(rows_dimension, counts, base_counts)
-
-
-class _BaseStripe(object):
-    """Base class for all stripe objects."""
-
-    def __init__(self, rows_dimension, base_counts):
-        self._rows_dimension = rows_dimension
-        self._base_counts = base_counts
-
-    @lazyproperty
-    def rows_dimension(self):
-        """Dimension object describing the rows of this stripe."""
-        return self._rows_dimension
-
-    @lazyproperty
-    def table_base(self):
-        return np.sum(self._base_counts)
-
-    @lazyproperty
-    def _row_elements(self):
-        return self._rows_dimension.valid_elements
-
-
-class _CatStripe(_BaseStripe):
-    """Special case of CAT x CAT, where the 2nd CAT doesn't exist.
-
-    Values are treated as rows, while there's only a single column (vector).
-    """
-
-    def __init__(self, rows_dimension, counts, base_counts):
-        super(_CatStripe, self).__init__(rows_dimension, base_counts)
-        self._counts = counts
-
-    @lazyproperty
-    def rows(self):
-        table_margin = self.table_margin
-        return tuple(
-            CatStripeRow(element, count, base_count, table_margin)
-            for (element, count, base_count) in zip(
-                self._row_elements, self._counts, self._base_counts
-            )
-        )
-
-    @lazyproperty
-    def table_margin(self):
-        """Needed by inserted rows in later transformation step."""
-        return np.sum(self._counts)
-
-
-class _MeansStripe(_BaseStripe):
-    """A 1D calculator for a strand containing mean first-order measure."""
-
-    def __init__(self, rows_dimension, means, base_counts):
-        super(_MeansStripe, self).__init__(rows_dimension, base_counts)
-        self._means = means
-
-    @lazyproperty
-    def rows(self):
-        return tuple(
-            MeansStripeRow(element, base_count, mean)
-            for element, base_count, mean in zip(
-                self._rows_dimension.valid_elements, self._base_counts, self._means
-            )
-        )
-
-    @lazyproperty
-    def table_margin(self):
-        return np.sum(self._base_counts)
-
-
-class _MeansWithMrStripe(_BaseStripe):
-    """Means behavior differs when dimension is MR."""
-
-    def __init__(self, rows_dimension, means, base_counts):
-        super(_MeansWithMrStripe, self).__init__(rows_dimension, base_counts)
-        self._means = means
-
-    @lazyproperty
-    def rows(self):
-        return tuple(
-            MeansMrStripeRow(element, base_counts, means)
-            for element, base_counts, means in zip(
-                self._rows_dimension.valid_elements, self._base_counts, self._means
-            )
-        )
-
-    @lazyproperty
-    def table_margin(self):
-        return np.sum(self._base_counts)
-
-
-class _MrStripe(_BaseStripe):
-    """Special case of 1-D MR slice (stripe)."""
-
-    def __init__(self, rows_dimension, counts, base_counts):
-        super(_MrStripe, self).__init__(rows_dimension, base_counts)
-        self._counts = counts
-
-    @lazyproperty
-    def rows(self):
-        return tuple(
-            MrStripeRow(element, counts, base_counts, table_margin)
-            for (element, counts, base_counts, table_margin) in zip(
-                self._row_elements, self._counts, self._base_counts, self.table_margin
-            )
-        )
-
-    @lazyproperty
-    def table_base(self):
-        return np.sum(self._base_counts, axis=1)
-
-    @lazyproperty
-    def table_margin(self):
-        return np.sum(self._counts, axis=1)

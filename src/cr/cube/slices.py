@@ -7,13 +7,8 @@ import numpy as np
 from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.frozen_min_base_size_mask import MinBaseSizeMask
 from cr.cube.measures.new_pairwise_significance import NewPairwiseSignificance
-from cr.cube.matrix import (
-    MatrixFactory,
-    MeansScalar,
-    StripeFactory,
-    TransformedMatrix,
-    TransformedStripe,
-)
+from cr.cube.matrix import MatrixFactory, MeansScalar, TransformedMatrix
+from cr.cube.stripe import TransformedStripe
 from cr.cube.util import lazyproperty
 
 
@@ -44,7 +39,12 @@ class CubeSection(object):
 
 
 class FrozenSlice(object):
-    """Main point of interaction with the outer world."""
+    """2D cube partition.
+
+    A slice represents the cross-tabulation of two dimensions, often, but not
+    necessarily contributed by two different variables. A CA variable has two dimensions
+    which can be crosstabbed in a slice.
+    """
 
     def __init__(self, cube, slice_idx, transforms, population, mask_size):
         self._cube = cube
@@ -445,7 +445,11 @@ class FrozenSlice(object):
 
 
 class _Strand(object):
-    """1D slice."""
+    """1D cube-partition.
+
+    A strand can arise from a 1D cube (non-CA univariate), or as a partition of
+    a CA-cube (CAs are 2D) into a sequence of 1D partitions, one for each subvariable.
+    """
 
     def __init__(self, cube, transforms, population, ca_as_0th, slice_idx, mask_size):
         self._cube = cube
@@ -643,15 +647,8 @@ class _Strand(object):
     @lazyproperty
     def _stripe(self):
         """The post-transforms 1D data-partition for this strand."""
-        return TransformedStripe(
-            StripeFactory.stripe(
-                self._cube,
-                self._rows_dimension,
-                self._cube.counts,
-                self._cube.base_counts,
-                self._ca_as_0th,
-                self._slice_idx,
-            )
+        return TransformedStripe.stripe(
+            self._cube, self._rows_dimension, self._ca_as_0th, self._slice_idx
         )
 
 
