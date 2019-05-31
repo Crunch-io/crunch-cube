@@ -27,7 +27,7 @@ class TransformedStripe(object):
     def stripe(cls, cube, rows_dimension, ca_as_0th, slice_idx):
         """Return a TransformedStripe object constructed from this cube result."""
         base_stripe = _BaseBaseStripe.factory(
-            cube, rows_dimension, cube.counts, cube.base_counts, ca_as_0th, slice_idx
+            cube, rows_dimension, ca_as_0th, slice_idx
         )
         return cls(rows_dimension, base_stripe)
 
@@ -140,8 +140,11 @@ class _BaseBaseStripe(object):
         self._base_counts = base_counts
 
     @classmethod
-    def factory(cls, cube, rows_dimension, counts, base_counts, ca_as_0th, slice_idx):
+    def factory(cls, cube, rows_dimension, ca_as_0th, slice_idx):
         """Return a base-slice object of appropriate type based on parameters."""
+        counts = cube.counts
+        base_counts = cube.base_counts
+
         # ---for cubes with means, create one of the means-stripe types---
         if cube.has_means:
             if rows_dimension.dimension_type == DT.MR:

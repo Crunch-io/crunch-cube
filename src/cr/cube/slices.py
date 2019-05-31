@@ -7,7 +7,7 @@ import numpy as np
 from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.frozen_min_base_size_mask import MinBaseSizeMask
 from cr.cube.measures.new_pairwise_significance import NewPairwiseSignificance
-from cr.cube.matrix import MatrixFactory, TransformedMatrix
+from cr.cube.matrix import TransformedMatrix
 from cr.cube.scalar import MeansScalar
 from cr.cube.stripe import TransformedStripe
 from cr.cube.util import lazyproperty
@@ -401,17 +401,8 @@ class FrozenSlice(object):
 
     @lazyproperty
     def _matrix(self):
-        """The pre-transforms matrix for this slice."""
-        return TransformedMatrix(
-            MatrixFactory.matrix(
-                self.dimensions,
-                self._cube.counts,
-                self._cube.base_counts,
-                self._cube.counts_with_missings,
-                self._cube,
-                self._slice_idx,
-            )
-        )
+        """The TransformedMatrix object for this slice."""
+        return TransformedMatrix.matrix(self._cube, self._dimensions, self._slice_idx)
 
     @lazyproperty
     def _rows_dimension(self):

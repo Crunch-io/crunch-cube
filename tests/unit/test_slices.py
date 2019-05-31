@@ -10,21 +10,19 @@ import pytest
 
 from cr.cube.dimension import Dimension, _Subtotal
 from cr.cube.matrix import (
+    _AssembledVector,
     _CatXCatMatrix,
+    _CategoricalVector,
+    _InsertionColumn,
+    _InsertionRow,
     _MatrixWithHidden,
     _MrXCatMatrix,
+    _MultipleResponseVector,
     _OrderedMatrix,
+    _OrderedVector,
+    _VectorAfterHiding,
 )
 from cr.cube.slices import FrozenSlice, TransformedMatrix
-from cr.cube.vector import (
-    AssembledVector,
-    CategoricalVector,
-    InsertionColumn,
-    InsertionRow,
-    MultipleResponseVector,
-    OrderedVector,
-    VectorAfterHiding,
-)
 from ..unitutil import instance_mock, property_mock
 
 
@@ -141,13 +139,13 @@ class DescribeIntegratedFrozenSlice(object):
         return instance_mock(request, Dimension, subtotals=tuple())
 
 
-class DescribeCategoricalVector(object):
-    """Unit-test suite for `cr.cube.vector.CategoricalVector` object."""
+class Describe_CategoricalVector(object):
+    """Unit-test suite for `cr.cube.vector._CategoricalVector` object."""
 
     @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_sets_raw_counts(self):
         counts, base_counts, label, margin = Mock(), Mock(), Mock(), Mock()
-        row = CategoricalVector(counts, base_counts, label, margin)
+        row = _CategoricalVector(counts, base_counts, label, margin)
         assert row._counts == counts
         assert row._base_counts == base_counts
         assert row._label == label
@@ -155,28 +153,28 @@ class DescribeCategoricalVector(object):
 
     def it_provides_values(self):
         counts = np.array([1, 2, 3])
-        row = CategoricalVector(counts, None, None, None)
+        row = _CategoricalVector(counts, None, None, None)
         np.testing.assert_array_equal(row.values, counts)
 
     def it_calculates_margin(self):
         counts = np.array([1, 2, 3])
-        row = CategoricalVector(counts, None, None, None)
+        row = _CategoricalVector(counts, None, None, None)
         assert row.margin == 6
 
     def it_calculates_proportions(self):
         counts = np.array([1, 2, 3])
-        row = CategoricalVector(counts, None, None, None)
+        row = _CategoricalVector(counts, None, None, None)
         np.testing.assert_almost_equal(
             row.proportions, np.array([0.1666667, 0.3333333, 0.5])
         )
 
 
-class DescribeMultipleResponseVector(object):
-    """Unit-test suite for `cr.cube.vector.MultipleResponseVector` object."""
+class Describe_MultipleResponseVector(object):
+    """Unit-test suite for `cr.cube.vector._MultipleResponseVector` object."""
 
     def it_provides_values(self):
         counts = np.array([[1, 2, 3], [4, 5, 6]])
-        row = MultipleResponseVector(counts, None, None, None)
+        row = _MultipleResponseVector(counts, None, None, None)
         np.testing.assert_array_equal(row._selected, np.array([1, 2, 3]))
         np.testing.assert_array_equal(row.values, np.array([1, 2, 3]))
         np.testing.assert_array_equal(row._not_selected, np.array([4, 5, 6]))
@@ -184,18 +182,18 @@ class DescribeMultipleResponseVector(object):
     def it_calculates_margin(self):
         """Margin needs to be a vector of selected = not-selected values."""
         counts = np.array([[1, 2, 3], [4, 5, 6]])
-        row = MultipleResponseVector(counts, None, None, None)
+        row = _MultipleResponseVector(counts, None, None, None)
         np.testing.assert_array_equal(row.margin, np.array([5, 7, 9]))
 
 
-class DescribeInsertionRow(object):
-    """Unit-test suite for `cr.cube.vector.InsertionRow` object."""
+class Describe_InsertionRow(object):
+    """Unit-test suite for `cr.cube.vector._InsertionRow` object."""
 
     @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_provides_values(self, addend_idxs_prop_, values_fixture):
         slice_, subtotal_indexes, expected_row_counts = values_fixture
         addend_idxs_prop_.return_value = subtotal_indexes
-        insertion_row = InsertionRow(slice_, _Subtotal(None, None))
+        insertion_row = _InsertionRow(slice_, _Subtotal(None, None))
         np.testing.assert_array_equal(insertion_row.values, expected_row_counts)
 
     # fixtures -------------------------------------------------------
@@ -219,19 +217,19 @@ class DescribeInsertionRow(object):
         return property_mock(request, _Subtotal, "addend_idxs")
 
 
-class DescribeAssembledVector(object):
-    """Unit-test suite for `cr.cube.vector.AssembledVector` object."""
+class Describe_AssembledVector(object):
+    """Unit-test suite for `cr.cube.vector._AssembledVector` object."""
 
     @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_provides_assembled_values(self, assembled_row_fixture):
         raw_counts, insertion_cols, expected = assembled_row_fixture
-        row = AssembledVector(raw_counts, insertion_cols)
+        row = _AssembledVector(raw_counts, insertion_cols)
         np.testing.assert_array_equal(row.values, expected)
 
     @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_provides_assembled_proportions(self, assembled_row_proportions_fixture):
         raw_counts, insertion_cols, expected = assembled_row_proportions_fixture
-        row = AssembledVector(raw_counts, insertion_cols)
+        row = _AssembledVector(raw_counts, insertion_cols)
         np.testing.assert_array_equal(row.proportions, expected)
 
     # fixtures -------------------------------------------------------
@@ -247,13 +245,13 @@ class DescribeAssembledVector(object):
         insertion_cols = tuple(
             instance_mock(
                 request,
-                InsertionColumn,
+                _InsertionColumn,
                 anchor=anchor,
                 addend_idxs=np.array(addend_idxs),
             )
             for anchor, addend_idxs in insertion_cols_counts
         )
-        return CategoricalVector(np.array(raw_counts)), insertion_cols, expected
+        return _CategoricalVector(np.array(raw_counts)), insertion_cols, expected
 
     @pytest.fixture(
         params=[
@@ -275,13 +273,13 @@ class DescribeAssembledVector(object):
         insertion_cols = tuple(
             instance_mock(
                 request,
-                InsertionColumn,
+                _InsertionColumn,
                 anchor=anchor,
                 addend_idxs=np.array(addend_idxs),
             )
             for anchor, addend_idxs in insertion_cols_counts
         )
-        return CategoricalVector(np.array(raw_counts)), insertion_cols, expected
+        return _CategoricalVector(np.array(raw_counts)), insertion_cols, expected
 
 
 class DescribeIntegratedTransformedMatrix(object):
@@ -364,21 +362,21 @@ class Describe_OrderedMatrix(object):
         return _OrderedMatrix(_CatXCatMatrix(np.array(counts))), expected
 
 
-class DescribeOrderedVector(object):
-    """Unit-test suite for `cr.cube.vector.OrderedVector` object."""
+class Describe_OrderedVector(object):
+    """Unit-test suite for `cr.cube.vector._OrderedVector` object."""
 
     @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_sets_order(self):
         order = Mock()
         base_vector = Mock()
-        ordered_vector = OrderedVector(base_vector, order)
+        ordered_vector = _OrderedVector(base_vector, order)
         assert ordered_vector._vector == base_vector
         assert ordered_vector._order == order
 
     @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_orders_values(self, order_values_fixture):
         vector, order, expected = order_values_fixture
-        ordered_vector = OrderedVector(vector, order)
+        ordered_vector = _OrderedVector(vector, order)
         np.testing.assert_array_equal(ordered_vector.values, expected)
 
     # fixtures -------------------------------------------------------
@@ -392,7 +390,7 @@ class DescribeOrderedVector(object):
     )
     def order_values_fixture(self, request):
         counts, order, expected = request.param
-        return CategoricalVector(np.array(counts)), np.array(order), expected
+        return _CategoricalVector(np.array(counts)), np.array(order), expected
 
 
 class Describe_MatrixWithHidden(object):
@@ -443,47 +441,47 @@ class Describe_MatrixWithHidden(object):
         return _MatrixWithHidden(cls_(np.array(raw_counts))), np.array(expected)
 
 
-class DescribeVectorAfterHiding(object):
-    """Unit-test suite for `cr.cube.vector.VectorAfterHiding` object."""
+class Describe_VectorAfterHiding(object):
+    """Unit-test suite for `cr.cube.vector._VectorAfterHiding` object."""
 
     @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_initiates_base_vector_and_opposite_vectors(self):
         vector = Mock()
         opposite_vectors = Mock()
-        pruned_vector = VectorAfterHiding(vector, opposite_vectors)
+        pruned_vector = _VectorAfterHiding(vector, opposite_vectors)
         assert pruned_vector._vector == vector
         assert pruned_vector._opposite_vectors == opposite_vectors
 
     @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
     def it_prunes_elements(self, pruned_elements_fixture):
         vector, opposite_vectors, expected = pruned_elements_fixture
-        pruned_vector = VectorAfterHiding(vector, opposite_vectors)
+        pruned_vector = _VectorAfterHiding(vector, opposite_vectors)
         np.testing.assert_array_equal(pruned_vector.values, expected)
 
     # fixtures -------------------------------------------------------
 
     @pytest.fixture(
         params=[
-            (CategoricalVector, [1, 2, 3], CategoricalVector, [1, 2, 3], [1, 2, 3]),
-            (CategoricalVector, [1, 2, 3], CategoricalVector, [0, 1, 2], [2, 3]),
+            (_CategoricalVector, [1, 2, 3], _CategoricalVector, [1, 2, 3], [1, 2, 3]),
+            (_CategoricalVector, [1, 2, 3], _CategoricalVector, [0, 1, 2], [2, 3]),
             (
-                MultipleResponseVector,
+                _MultipleResponseVector,
                 [[1, 2, 3], [4, 5, 6]],
-                CategoricalVector,
+                _CategoricalVector,
                 [0, 1, 2],
                 [2, 3],
             ),
             (
-                CategoricalVector,
+                _CategoricalVector,
                 [1, 2, 3],
-                MultipleResponseVector,
+                _MultipleResponseVector,
                 [[0, 0], [1, 2], [3, 4]],
                 [2, 3],
             ),
             (
-                MultipleResponseVector,
+                _MultipleResponseVector,
                 [[1, 2, 3], [4, 5, 6]],
-                MultipleResponseVector,
+                _MultipleResponseVector,
                 [[3, 4], [0, 0], [3, 4]],
                 [1, 3],
             ),
