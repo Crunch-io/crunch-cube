@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-"""Unit test suite for `cr.cube.slices` module."""
+"""Unit test suite for `cr.cube.cubepart` module."""
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
@@ -8,6 +8,7 @@ import numpy as np
 from mock import Mock
 import pytest
 
+from cr.cube.cubepart import _Slice
 from cr.cube.dimension import Dimension, _Subtotal
 from cr.cube.matrix import (
     _AssembledVector,
@@ -20,34 +21,34 @@ from cr.cube.matrix import (
     _MultipleResponseVector,
     _OrderedMatrix,
     _OrderedVector,
+    TransformedMatrix,
     _VectorAfterHiding,
 )
-from cr.cube.slices import FrozenSlice, TransformedMatrix
 from ..unitutil import instance_mock, property_mock
 
 
-class DescribeIntegratedFrozenSlice(object):
-    """Partial-integration test suite for `cr.cube.slices.FrozenSlice` object."""
+class DescribeIntegrated_Slice(object):
+    """Partial-integration test suite for `cr.cube.cubepart._Slice` object."""
 
-    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
+    @pytest.mark.xfail(reason="_Slice WIP", strict=True)
     def it_knows_the_row_proportions(self, row_proportions_fixture, _assembler_prop_):
         slice_, insertions, expected = row_proportions_fixture
         _assembler_prop_.return_value = TransformedMatrix(
             slice_, None, insertions, None
         )
-        slice_ = FrozenSlice(None, None, None, None, None)
+        slice_ = _Slice(None, None, None, None, None)
 
         row_proportions = slice_.row_proportions
 
         np.testing.assert_almost_equal(row_proportions, expected)
 
-    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
+    @pytest.mark.xfail(reason="_Slice WIP", strict=True)
     def it_knows_the_rows_margin(self, row_margin_fixture, _assembler_prop_):
         slice_, insertions, expected = row_margin_fixture
         _assembler_prop_.return_value = TransformedMatrix(
             slice_, None, insertions, None
         )
-        slice_ = FrozenSlice(None, None)
+        slice_ = _Slice(None, None)
 
         margin = slice_.row_margin
 
@@ -128,7 +129,7 @@ class DescribeIntegratedFrozenSlice(object):
 
     @pytest.fixture
     def _assembler_prop_(self, request):
-        return property_mock(request, FrozenSlice, "_assembler")
+        return property_mock(request, _Slice, "_assembler")
 
     @pytest.fixture
     def subtotals_prop_(self, request):
@@ -142,7 +143,7 @@ class DescribeIntegratedFrozenSlice(object):
 class Describe_CategoricalVector(object):
     """Unit-test suite for `cr.cube.vector._CategoricalVector` object."""
 
-    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
+    @pytest.mark.xfail(reason="_Slice WIP", strict=True)
     def it_sets_raw_counts(self):
         counts, base_counts, label, margin = Mock(), Mock(), Mock(), Mock()
         row = _CategoricalVector(counts, base_counts, label, margin)
@@ -189,7 +190,7 @@ class Describe_MultipleResponseVector(object):
 class Describe_InsertionRow(object):
     """Unit-test suite for `cr.cube.vector._InsertionRow` object."""
 
-    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
+    @pytest.mark.xfail(reason="_Slice WIP", strict=True)
     def it_provides_values(self, addend_idxs_prop_, values_fixture):
         slice_, subtotal_indexes, expected_row_counts = values_fixture
         addend_idxs_prop_.return_value = subtotal_indexes
@@ -220,13 +221,13 @@ class Describe_InsertionRow(object):
 class Describe_AssembledVector(object):
     """Unit-test suite for `cr.cube.vector._AssembledVector` object."""
 
-    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
+    @pytest.mark.xfail(reason="_Slice WIP", strict=True)
     def it_provides_assembled_values(self, assembled_row_fixture):
         raw_counts, insertion_cols, expected = assembled_row_fixture
         row = _AssembledVector(raw_counts, insertion_cols)
         np.testing.assert_array_equal(row.values, expected)
 
-    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
+    @pytest.mark.xfail(reason="_Slice WIP", strict=True)
     def it_provides_assembled_proportions(self, assembled_row_proportions_fixture):
         raw_counts, insertion_cols, expected = assembled_row_proportions_fixture
         row = _AssembledVector(raw_counts, insertion_cols)
@@ -283,9 +284,9 @@ class Describe_AssembledVector(object):
 
 
 class DescribeIntegratedTransformedMatrix(object):
-    """Partial-integration test suite for `cr.cube.slices.TransformedMatrix` object."""
+    """Partial-integration test suite for `cr.cube.matrix.TransformedMatrix` object."""
 
-    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
+    @pytest.mark.xfail(reason="_Slice WIP", strict=True)
     def it_provides_rows(self, counts_fixture):
         slice_, insertions, expected = counts_fixture
         assembler = TransformedMatrix(slice_, None, insertions, None)
@@ -331,7 +332,7 @@ class DescribeIntegratedTransformedMatrix(object):
 class Describe_OrderedMatrix(object):
     """Unit-test suite for `cr.cube.matrix._OrderedMatrix` object."""
 
-    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
+    @pytest.mark.xfail(reason="_Slice WIP", strict=True)
     def it_reorders_rows(self, order_rows_fixture):
         ordered_slice, expected = order_rows_fixture
         for row, expected_row_values in zip(ordered_slice.rows, expected):
@@ -365,7 +366,7 @@ class Describe_OrderedMatrix(object):
 class Describe_OrderedVector(object):
     """Unit-test suite for `cr.cube.vector._OrderedVector` object."""
 
-    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
+    @pytest.mark.xfail(reason="_Slice WIP", strict=True)
     def it_sets_order(self):
         order = Mock()
         base_vector = Mock()
@@ -373,7 +374,7 @@ class Describe_OrderedVector(object):
         assert ordered_vector._vector == base_vector
         assert ordered_vector._order == order
 
-    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
+    @pytest.mark.xfail(reason="_Slice WIP", strict=True)
     def it_orders_values(self, order_values_fixture):
         vector, order, expected = order_values_fixture
         ordered_vector = _OrderedVector(vector, order)
@@ -396,13 +397,13 @@ class Describe_OrderedVector(object):
 class Describe_MatrixWithHidden(object):
     """Unit-test suite for `cr.cube.matrix._MatrixWithHidden` object."""
 
-    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
+    @pytest.mark.xfail(reason="_Slice WIP", strict=True)
     def it_initiates_slice(self):
         slice_ = Mock()
         pruned_slice = _MatrixWithHidden(slice_)
         assert pruned_slice._slice == slice_
 
-    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
+    @pytest.mark.xfail(reason="_Slice WIP", strict=True)
     def it_prunes_rows_and_columns(self, pruned_slice_fixture):
         pruned_slice, expected = pruned_slice_fixture
         np.testing.assert_array_equal(
@@ -444,7 +445,7 @@ class Describe_MatrixWithHidden(object):
 class Describe_VectorAfterHiding(object):
     """Unit-test suite for `cr.cube.vector._VectorAfterHiding` object."""
 
-    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
+    @pytest.mark.xfail(reason="_Slice WIP", strict=True)
     def it_initiates_base_vector_and_opposite_vectors(self):
         vector = Mock()
         opposite_vectors = Mock()
@@ -452,7 +453,7 @@ class Describe_VectorAfterHiding(object):
         assert pruned_vector._vector == vector
         assert pruned_vector._opposite_vectors == opposite_vectors
 
-    @pytest.mark.xfail(reason="FrozenSlice WIP", strict=True)
+    @pytest.mark.xfail(reason="_Slice WIP", strict=True)
     def it_prunes_elements(self, pruned_elements_fixture):
         vector, opposite_vectors, expected = pruned_elements_fixture
         pruned_vector = _VectorAfterHiding(vector, opposite_vectors)

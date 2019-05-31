@@ -2,24 +2,24 @@
 
 import numpy as np
 
+from cr.cube.cubepart import CubePartition, _Slice
 from cr.cube.frozen_cube import FrozenCube
-from cr.cube.slices import CubeSection, FrozenSlice
 from cr.cube.enum import DIMENSION_TYPE as DT
 
 from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
 
 
-class DescribeFrozenSlice(object):
-    """Integration-test suite for FrozenSlice object."""
+class Describe_Slice(object):
+    """Integration-test suite for _Slice object."""
 
     def it_loads_from_cat_x_cat_cube(self):
         cube = FrozenCube(CR.CAT_X_CAT)
-        slice_ = FrozenSlice(cube, 0, None, None, 0)
+        slice_ = _Slice(cube, 0, None, None, 0)
         expected = np.array([[0.71428571, 0.28571429], [0.625, 0.375]])
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
     def it_provides_fills(self):
-        slice_ = FrozenCube(CR.CAT_X_CAT_PRUNING_HS).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_CAT_PRUNING_HS).partitions[0]
         assert slice_.rows_dimension_fills == (None, None, None, None, None, None, None)
 
     def it_provides_missing(self):
@@ -33,7 +33,9 @@ class DescribeFrozenSlice(object):
         }
 
         # Without insertions
-        slice_ = FrozenCube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[
+            0
+        ]
         expected = [
             [0.47502103, 0.34045416, 0.16820858, 0.0, 0.01631623],
             [0.515, 0.0, 0.485, 0.0, 0.0],
@@ -45,7 +47,7 @@ class DescribeFrozenSlice(object):
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
         # With insertions (only row for now)
-        slice_ = FrozenCube(CR.CAT_X_CAT_PRUNING_HS).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_CAT_PRUNING_HS).partitions[0]
         expected = [
             [0.47502103, 0.81547519, 0.34045416, 0.16820858, 0.0, 0.01631623],
             [0.24473593, 0.65688643, 0.4121505, 0.27407663, 0.0, 0.06903693],
@@ -106,7 +108,7 @@ class DescribeFrozenSlice(object):
         )
 
     def it_provides_base_counts(self):
-        slice_ = FrozenSlice(FrozenCube(CR.CAT_X_CAT_PRUNING_HS), 0, None, None, 0)
+        slice_ = _Slice(FrozenCube(CR.CAT_X_CAT_PRUNING_HS), 0, None, None, 0)
         np.testing.assert_array_equal(
             slice_.base_counts,
             [
@@ -122,14 +124,14 @@ class DescribeFrozenSlice(object):
         assert slice_.table_base == 91
 
     def it_provides_various_names_and_labels(self):
-        slice_ = FrozenSlice(FrozenCube(CR.CAT_X_CAT_PRUNING_HS), 0, None, None, 0)
+        slice_ = _Slice(FrozenCube(CR.CAT_X_CAT_PRUNING_HS), 0, None, None, 0)
         assert slice_.columns_dimension_name == "ShutdownBlame"
         assert slice_.rows_dimension_description == "What is your marital status?"
         assert slice_.rows_dimension_type == DT.CAT
         assert slice_.columns_dimension_type == DT.CAT
 
     def it_calculates_cat_x_cat_column_proportions(self):
-        slice_ = FrozenCube(CR.CAT_X_CAT_PRUNING_HS).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_CAT_PRUNING_HS).partitions[0]
         expected = [
             [0.77796143, 0.69805616, 0.61055807, 0.52882073, np.nan, 0.32659933],
             [0.1953168, 0.27401008, 0.360181, 0.41988366, np.nan, 0.67340067],
@@ -142,7 +144,7 @@ class DescribeFrozenSlice(object):
         np.testing.assert_almost_equal(slice_.column_proportions, expected)
 
     def it_provides_unpruned_table_margin(self):
-        slice_ = FrozenSlice(FrozenCube(CR.MR_X_CAT_HS), 0, None, None, 0)
+        slice_ = _Slice(FrozenCube(CR.MR_X_CAT_HS), 0, None, None, 0)
         np.testing.assert_array_equal(
             slice_.table_base_unpruned, [165, 210, 242, 450, 476]
         )
@@ -157,7 +159,7 @@ class DescribeFrozenSlice(object):
                 "order": {"type": "explicit", "element_ids": [5, 1, 4, 2, 3]}
             }
         }
-        slice_ = FrozenCube(CR.MR_X_CAT_HS, transforms=transforms).slices[0]
+        slice_ = FrozenCube(CR.MR_X_CAT_HS, transforms=transforms).partitions[0]
         np.testing.assert_almost_equal(
             slice_.base_counts,
             [
@@ -180,7 +182,7 @@ class DescribeFrozenSlice(object):
         )
 
     def it_calculates_mr_x_cat_row_proportions(self):
-        slice_ = FrozenCube(CR.MR_X_CAT_HS).slices[0]
+        slice_ = FrozenCube(CR.MR_X_CAT_HS).partitions[0]
         expected = [
             [
                 0.44079255,
@@ -236,7 +238,7 @@ class DescribeFrozenSlice(object):
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
     def it_calculates_mr_x_cat_column_proportions(self):
-        slice_ = FrozenCube(CR.MR_X_CAT_HS).slices[0]
+        slice_ = FrozenCube(CR.MR_X_CAT_HS).partitions[0]
         expected = [
             [
                 0.63991606,
@@ -292,7 +294,7 @@ class DescribeFrozenSlice(object):
         np.testing.assert_almost_equal(slice_.column_proportions, expected)
 
     def it_calculates_cat_x_mr_row_proportions(self):
-        slice_ = FrozenCube(CR.CAT_X_MR_HS).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_MR_HS).partitions[0]
         expected = [
             [0.63991606, 0.57106291, 0.23101896, 0.6728815, 0.78206694],
             [0.18579712, 0.30796582, 0.47698573, 0.6856928, 0.83094212],
@@ -306,7 +308,7 @@ class DescribeFrozenSlice(object):
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
     def it_calculates_cat_x_mr_column_proportions(self):
-        slice_ = FrozenCube(CR.CAT_X_MR_HS).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_MR_HS).partitions[0]
         expected = [
             [0.44079255, 0.12706997, 0.02245085, 0.03842827, 0.06423004],
             [0.1927531, 0.17758354, 0.15543673, 0.11799739, 0.19460845],
@@ -320,7 +322,7 @@ class DescribeFrozenSlice(object):
         np.testing.assert_almost_equal(slice_.column_proportions, expected)
 
     def it_calculates_mr_x_mr_row_proportions(self):
-        slice_ = FrozenCube(CR.MR_X_MR).slices[0]
+        slice_ = FrozenCube(CR.MR_X_MR).partitions[0]
         expected = [
             [1.0, 0.28566937, 0.43456698, 1.0],
             [0.13302403, 1.0, 0.34959546, 1.0],
@@ -330,7 +332,7 @@ class DescribeFrozenSlice(object):
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
     def it_calculates_mr_x_mr_column_proportions(self):
-        slice_ = FrozenCube(CR.MR_X_MR).slices[0]
+        slice_ = FrozenCube(CR.MR_X_MR).partitions[0]
         expected = [
             [1.0, 0.13302403, 0.12391245, 0.22804396],
             [0.28566937, 1.0, 0.23498805, 0.47751837],
@@ -340,7 +342,7 @@ class DescribeFrozenSlice(object):
         np.testing.assert_almost_equal(slice_.column_proportions, expected)
 
     def it_reorders_cat_x_cat(self):
-        slice_ = FrozenCube(CR.CAT_X_CAT_PRUNING_HS).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_CAT_PRUNING_HS).partitions[0]
         transforms = {
             "rows_dimension": {
                 "insertions": {},
@@ -351,7 +353,9 @@ class DescribeFrozenSlice(object):
                 "order": {"type": "explicit", "element_ids": [5, 1, 2, 4, 3]},
             },
         }
-        slice_ = FrozenCube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[
+            0
+        ]
         expected = np.array(
             [
                 [0, 1, 1, 0, 1],
@@ -365,13 +369,15 @@ class DescribeFrozenSlice(object):
         np.testing.assert_equal(slice_.base_counts, expected)
 
     def it_prunes_cat_x_cat_with_hs(self):
-        slice_ = FrozenCube(CR.CAT_X_CAT_PRUNING_HS).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_CAT_PRUNING_HS).partitions[0]
         # Pruned - without insertions
         transforms = {
             "rows_dimension": {"insertions": {}, "prune": True},
             "columns_dimension": {"insertions": {}, "prune": True},
         }
-        slice_ = FrozenCube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[
+            0
+        ]
         expected = np.array(
             [[28, 20, 10, 1], [1, 0, 1, 0], [3, 4, 2, 2], [3, 8, 5, 0], [1, 1, 1, 0]]
         )
@@ -379,7 +385,9 @@ class DescribeFrozenSlice(object):
 
         # Pruned (just rows) - with insertions
         transforms = {"rows_dimension": {"prune": True}}
-        slice_ = FrozenCube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[
+            0
+        ]
         expected = np.array(
             [
                 [28, 48, 20, 10, 0, 1],
@@ -394,7 +402,9 @@ class DescribeFrozenSlice(object):
 
         # Pruned (just columns) - with insertions
         transforms = {"columns_dimension": {"prune": True}}
-        slice_ = FrozenCube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[
+            0
+        ]
         expected = np.array(
             [
                 [28, 48, 20, 10, 1],
@@ -413,7 +423,9 @@ class DescribeFrozenSlice(object):
             "rows_dimension": {"prune": True},
             "columns_dimension": {"prune": True},
         }
-        slice_ = FrozenCube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[
+            0
+        ]
         expected = np.array(
             [
                 [28, 48, 20, 10, 1],
@@ -427,7 +439,7 @@ class DescribeFrozenSlice(object):
         np.testing.assert_equal(slice_.base_counts, expected)
 
         # Not pruned - with insertions
-        slice_ = FrozenCube(CR.CAT_X_CAT_PRUNING_HS).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_CAT_PRUNING_HS).partitions[0]
         expected = np.array(
             [
                 [28, 48, 20, 10, 0, 1],
@@ -442,7 +454,7 @@ class DescribeFrozenSlice(object):
         np.testing.assert_equal(slice_.base_counts, expected)
 
     def it_provides_nans_for_means_insertions(self):
-        strand = CubeSection.factory(
+        strand = CubePartition.factory(
             FrozenCube(CR.CAT_WITH_MEANS_AND_INSERTIONS), 0, None, None, None, 0
         )
         np.testing.assert_almost_equal(
@@ -450,7 +462,7 @@ class DescribeFrozenSlice(object):
         )
 
     def it_accommodates_an_all_missing_element_rows_dimension(self):
-        slice_ = FrozenSlice(
+        slice_ = _Slice(
             FrozenCube(CR.CAT_X_CAT_ALL_MISSING_ROW_ELEMENTS), 0, None, None, 0
         )
         row_proportions = slice_.row_proportions

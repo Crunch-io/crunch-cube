@@ -6,29 +6,29 @@ from ..fixtures import CR
 
 
 def test_labels_simple_mr_exclude_missing():
-    slice_ = FrozenCube(CR.SIMPLE_MR).slices[0]
+    slice_ = FrozenCube(CR.SIMPLE_MR).partitions[0]
     assert slice_.row_labels == ("Response #1", "Response #2", "Response #3")
 
 
 def test_as_array_simple_mr_exclude_missing():
-    slice_ = FrozenCube(CR.SIMPLE_MR).slices[0]
+    slice_ = FrozenCube(CR.SIMPLE_MR).partitions[0]
     np.testing.assert_array_equal(slice_.counts, [[3], [4], [0]])
 
 
 def test_margin_simple_mr_axis_none():
-    slice_ = FrozenCube(CR.SIMPLE_MR).slices[0]
+    slice_ = FrozenCube(CR.SIMPLE_MR).partitions[0]
     np.testing.assert_array_equal(slice_.table_margin, [5, 6, 6])
 
 
 def test_proportions_simple_mr():
-    slice_ = FrozenCube(CR.SIMPLE_MR).slices[0]
+    slice_ = FrozenCube(CR.SIMPLE_MR).partitions[0]
     np.testing.assert_almost_equal(
         slice_.table_proportions, [[0.6], [0.6666667], [0.0]]
     )
 
 
 def test_1D_mr_with_means():
-    strand = FrozenCube(CR.MR_MEAN_FILT_WGTD).slices[0]
+    strand = FrozenCube(CR.MR_MEAN_FILT_WGTD).partitions[0]
     np.testing.assert_almost_equal(
         strand.means, [3.7240515, 2.5784293, 2.2185933, 1.8653349]
     )
@@ -38,7 +38,7 @@ def test_1D_mr_with_means():
 
 
 def test_deck_with_means():
-    slice_ = FrozenCube(CR.DECK_WITH_MEAN).slices[0]
+    slice_ = FrozenCube(CR.DECK_WITH_MEAN).partitions[0]
     np.testing.assert_array_equal(
         slice_.table_base_unpruned, [588, 588, 588, 588, 588, 588, 588, 588]
     )
@@ -49,7 +49,7 @@ def test_deck_with_means():
 
 
 def test_3D_with_means():
-    slice_ = FrozenCube(CR.MEANS_3D).slices[0]
+    slice_ = FrozenCube(CR.MEANS_3D).partitions[0]
     np.testing.assert_almost_equal(
         slice_.means,
         [
@@ -68,7 +68,7 @@ def test_cat_x_mr_with_means():
         "rows_dimension": {"prune": True},
         "columns_dimension": {"prune": True},
     }
-    slice_ = FrozenCube(CR.CAT_X_MR_WITH_MEANS, transforms=transforms).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_MR_WITH_MEANS, transforms=transforms).partitions[0]
     np.testing.assert_almost_equal(
         slice_.means,
         [
@@ -90,27 +90,27 @@ def test_proportions_simple_mr_prune():
         "rows_dimension": {"prune": True},
         "columns_dimension": {"prune": True},
     }
-    slice_ = FrozenCube(CR.SIMPLE_MR, transforms=transforms).slices[0]
+    slice_ = FrozenCube(CR.SIMPLE_MR, transforms=transforms).partitions[0]
     # Nothing actually gets pruned because not-selected are not 0
     expected = [[0.6], [0.6666667], [0]]
     np.testing.assert_almost_equal(slice_.table_proportions, expected)
 
 
 def test_labels_cat_x_mr_exclude_missing():
-    slice_ = FrozenCube(CR.CAT_X_MR).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_MR).partitions[0]
     assert slice_.row_labels == ("rambutan", "satsuma")
     assert slice_.column_labels == ("dog", "cat", "wombat")
 
 
 def test_as_array_cat_x_mr():
-    slice_ = FrozenCube(CR.CAT_X_MR).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_MR).partitions[0]
     expected = [[12, 12, 12], [28, 22, 26]]
     np.testing.assert_array_equal(slice_.counts, expected)
 
 
 def test_as_array_cat_x_mr_pruned_row():
     # Not pruned, with H&S
-    slice_ = FrozenCube(CR.CAT_X_MR_PRUNED_ROW).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_MR_PRUNED_ROW).partitions[0]
     expected = [[12, 12, 12], [12, 12, 12], [0, 0, 0], [0, 0, 0]]
     np.testing.assert_array_equal(slice_.counts, expected)
 
@@ -119,14 +119,14 @@ def test_as_array_cat_x_mr_pruned_row():
         "rows_dimension": {"prune": True},
         "columns_dimension": {"prune": True},
     }
-    slice_ = FrozenCube(CR.CAT_X_MR_PRUNED_ROW, transforms=transforms).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_MR_PRUNED_ROW, transforms=transforms).partitions[0]
     expected = [[12, 12, 12], [12, 12, 12], [0, 0, 0]]
     np.testing.assert_array_equal(slice_.counts, expected)
 
 
 def test_as_array_cat_x_mr_pruned_col():
     # Not pruned
-    slice_ = FrozenCube(CR.CAT_X_MR_PRUNED_COL).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_MR_PRUNED_COL).partitions[0]
     expected = [[6, 6, 0], [6, 6, 0], [16, 12, 0], [16, 12, 0]]
     np.testing.assert_array_equal(slice_.counts, expected)
 
@@ -135,14 +135,14 @@ def test_as_array_cat_x_mr_pruned_col():
         "rows_dimension": {"prune": True},
         "columns_dimension": {"prune": True},
     }
-    slice_ = FrozenCube(CR.CAT_X_MR_PRUNED_COL, transforms=transforms).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_MR_PRUNED_COL, transforms=transforms).partitions[0]
     expected = [[6, 6, 0], [6, 6, 0], [16, 12, 0], [16, 12, 0]]
     np.testing.assert_array_equal(slice_.counts, expected)
 
 
 def test_as_array_cat_x_mr_pruned_row_col():
     # Not pruned
-    slice_ = FrozenCube(CR.CAT_X_MR_PRUNED_ROW_COL).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_MR_PRUNED_ROW_COL).partitions[0]
     expected = [[6, 6, 0], [6, 6, 0], [0, 0, 0], [0, 0, 0]]
     np.testing.assert_array_equal(slice_.counts, expected)
 
@@ -151,7 +151,7 @@ def test_as_array_cat_x_mr_pruned_row_col():
         "rows_dimension": {"prune": True},
         "columns_dimension": {"prune": True},
     }
-    slice_ = FrozenCube(CR.CAT_X_MR_PRUNED_ROW_COL, transforms=transforms).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_MR_PRUNED_ROW_COL, transforms=transforms).partitions[0]
     expected = [[6, 6, 0], [6, 6, 0], [0, 0, 0]]
     np.testing.assert_array_equal(slice_.counts, expected)
 
@@ -162,7 +162,7 @@ def test_as_array_mr_x_cat_pruned_col():
         "rows_dimension": {"insertions": {}, "prune": True},
         "columns_dimension": {"insertions": {}, "prune": True},
     }
-    slice_ = FrozenCube(CR.MR_X_CAT_PRUNED_COL, transforms=transforms).slices[0]
+    slice_ = FrozenCube(CR.MR_X_CAT_PRUNED_COL, transforms=transforms).partitions[0]
     np.testing.assert_array_equal(slice_.counts, [[12], [12], [12]])
 
     # Pruned with H&S
@@ -170,7 +170,7 @@ def test_as_array_mr_x_cat_pruned_col():
         "rows_dimension": {"prune": True},
         "columns_dimension": {"prune": True},
     }
-    slice_ = FrozenCube(CR.MR_X_CAT_PRUNED_COL, transforms=transforms).slices[0]
+    slice_ = FrozenCube(CR.MR_X_CAT_PRUNED_COL, transforms=transforms).partitions[0]
     np.testing.assert_array_equal(
         slice_.counts, [[12, 12, 0], [12, 12, 0], [12, 12, 0]]
     )
@@ -178,7 +178,7 @@ def test_as_array_mr_x_cat_pruned_col():
 
 def test_as_array_mr_x_cat_pruned_row():
     # Not pruned
-    slice_ = FrozenCube(CR.MR_X_CAT_PRUNED_ROW).slices[0]
+    slice_ = FrozenCube(CR.MR_X_CAT_PRUNED_ROW).partitions[0]
     expected = [[6, 6, 16, 16], [6, 6, 12, 12], [0, 0, 0, 0]]
     np.testing.assert_array_equal(slice_.counts, expected)
 
@@ -187,14 +187,14 @@ def test_as_array_mr_x_cat_pruned_row():
         "rows_dimension": {"prune": True},
         "columns_dimension": {"prune": True},
     }
-    slice_ = FrozenCube(CR.MR_X_CAT_PRUNED_ROW, transforms=transforms).slices[0]
+    slice_ = FrozenCube(CR.MR_X_CAT_PRUNED_ROW, transforms=transforms).partitions[0]
     expected = [[6, 6, 16, 16], [6, 6, 12, 12], [0, 0, 0, 0]]
     np.testing.assert_array_equal(slice_.counts, expected)
 
 
 def test_as_array_mr_x_cat_pruned_row_col():
     # Not pruned
-    slice_ = FrozenCube(CR.MR_X_CAT_PRUNED_ROW_COL).slices[0]
+    slice_ = FrozenCube(CR.MR_X_CAT_PRUNED_ROW_COL).partitions[0]
     expected = [[6, 6, 0, 0], [6, 6, 0, 0], [0, 0, 0, 0]]
     np.testing.assert_array_equal(slice_.counts, expected)
 
@@ -203,43 +203,43 @@ def test_as_array_mr_x_cat_pruned_row_col():
         "rows_dimension": {"prune": True},
         "columns_dimension": {"prune": True},
     }
-    slice_ = FrozenCube(CR.MR_X_CAT_PRUNED_ROW_COL, transforms=transforms).slices[0]
+    slice_ = FrozenCube(CR.MR_X_CAT_PRUNED_ROW_COL, transforms=transforms).partitions[0]
     expected = [[6, 6, 0], [6, 6, 0], [0, 0, 0]]
     np.testing.assert_array_equal(slice_.counts, expected)
 
 
 def test_margin_cat_x_mr_axis_none():
-    slice_ = FrozenCube(CR.CAT_X_MR).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_MR).partitions[0]
     expected = np.array([80, 79, 70])
     np.testing.assert_array_equal(slice_.table_margin, expected)
 
 
 def test_margin_cat_x_mr_by_col():
-    slice_ = FrozenCube(CR.CAT_X_MR).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_MR).partitions[0]
     expected = np.array([40, 34, 38])
     np.testing.assert_array_equal(slice_.column_margin, expected)
 
 
 def test_proportions_cat_x_mr_by_cell():
-    slice_ = FrozenCube(CR.CAT_X_MR).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_MR).partitions[0]
     expected = [[0.15, 0.15189873, 0.17142857], [0.35, 0.27848101, 0.37142857]]
     np.testing.assert_almost_equal(slice_.table_proportions, expected)
 
 
 def test_proportions_cat_x_mr_by_col():
-    slice_ = FrozenCube(CR.CAT_X_MR).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_MR).partitions[0]
     expected = [[0.3, 0.3529412, 0.3157895], [0.7, 0.6470588, 0.6842105]]
     np.testing.assert_almost_equal(slice_.column_proportions, expected)
 
 
 def test_proportions_cat_x_mr_by_row():
-    slice_ = FrozenCube(CR.CAT_X_MR).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_MR).partitions[0]
     expected = [[0.42857143, 0.48, 0.52173913], [0.53846154, 0.40740741, 0.55319149]]
     np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
 
 def test_z_scores_from_r_row_margin():
-    slice_ = FrozenCube(CR.MR_X_CAT_PROFILES_STATS_WEIGHTED).slices[0]
+    slice_ = FrozenCube(CR.MR_X_CAT_PROFILES_STATS_WEIGHTED).partitions[0]
     expected = [
         [
             -1.465585354569577,
@@ -266,7 +266,7 @@ def test_z_scores_from_r_row_margin():
 
 
 def test_mr_x_single_wave():
-    slice_ = FrozenCube(CR.MR_X_SINGLE_WAVE).slices[0]
+    slice_ = FrozenCube(CR.MR_X_SINGLE_WAVE).partitions[0]
     expected = [
         308.32755712,
         187.06825269,
@@ -296,7 +296,7 @@ def test_mr_x_single_wave():
 
 
 def test_array_x_mr_by_col():
-    slice_ = FrozenCube(CR.CA_SUBVAR_X_CA_CAT_X_MR).slices[0]
+    slice_ = FrozenCube(CR.CA_SUBVAR_X_CA_CAT_X_MR).partitions[0]
     expected = [
         [0.5146153267487166, 0.04320534228100489, 0.5933354514113938],
         [0.4853846732512835, 0.9567946577189951, 0.4066645485886063],
@@ -305,7 +305,7 @@ def test_array_x_mr_by_col():
 
 
 def test_array_x_mr_by_row():
-    slice_ = FrozenCube(CR.CA_SUBVAR_X_CA_CAT_X_MR).slices[0]
+    slice_ = FrozenCube(CR.CA_SUBVAR_X_CA_CAT_X_MR).partitions[0]
     expected = [
         [0.41922353375674093, 0.03471395310157275, 0.5832027484767315],
         [0.5143557893611596, 1, 0.5199603338915276],
@@ -314,18 +314,18 @@ def test_array_x_mr_by_row():
 
 
 def test_array_x_mr_by_cell():
-    slice_ = FrozenCube(CR.CA_SUBVAR_X_CA_CAT_X_MR).slices[0]
+    slice_ = FrozenCube(CR.CA_SUBVAR_X_CA_CAT_X_MR).partitions[0]
     expected = [[0.23701678, 0.01962626, 0.32972586], [0.223554, 0.43462911, 0.2259899]]
     np.testing.assert_almost_equal(slice_.table_proportions, expected)
 
 
 def test_simple_mr_margin_by_col():
-    slice_ = FrozenCube(CR.SIMPLE_MR).slices[0]
+    slice_ = FrozenCube(CR.SIMPLE_MR).partitions[0]
     np.testing.assert_array_equal(slice_.row_margin, [3, 4, 0])
 
 
 def test_cat_x_mr_x_mr_proportions_by_row():
-    slice_ = FrozenCube(CR.CAT_X_MR_X_MR).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_MR_X_MR).partitions[0]
     np.testing.assert_almost_equal(
         slice_.row_proportions,
         [[0.19169699, 0.5949388], [0.19543651, 0.59920635], [0.19712526, 0.59753593]],
@@ -333,7 +333,7 @@ def test_cat_x_mr_x_mr_proportions_by_row():
     np.testing.assert_array_equal(
         slice_.base_counts, [[1159, 3597], [197, 604], [192, 582]]
     )
-    slice_ = FrozenCube(CR.CAT_X_MR_X_MR).slices[1]
+    slice_ = FrozenCube(CR.CAT_X_MR_X_MR).partitions[1]
     np.testing.assert_almost_equal(
         slice_.row_proportions,
         [[0.17207792, 0.1017316], [0.1963129, 0.10380335], [0.19141804, 0.10442508]],
@@ -345,22 +345,26 @@ def test_cat_x_mr_x_mr_proportions_by_row():
 
 def test_cat_x_mr_x_mr_pruned_rows():
     # Not pruned
-    slice_ = FrozenCube(CR.CAT_X_MR_X_MR_PRUNED_ROWS).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_MR_X_MR_PRUNED_ROWS).partitions[0]
     np.testing.assert_array_equal(slice_.counts, [[0, 2, 2], [1, 3, 2], [0, 0, 0]])
-    slice_ = FrozenCube(CR.CAT_X_MR_X_MR_PRUNED_ROWS).slices[1]
+    slice_ = FrozenCube(CR.CAT_X_MR_X_MR_PRUNED_ROWS).partitions[1]
     np.testing.assert_array_equal(slice_.counts, [[3, 3, 6], [0, 3, 4], [0, 0, 0]])
 
     # Pruned
     transforms = {"rows_dimension": {"prune": True}}
-    slice_ = FrozenCube(CR.CAT_X_MR_X_MR_PRUNED_ROWS, transforms=transforms).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_MR_X_MR_PRUNED_ROWS, transforms=transforms).partitions[
+        0
+    ]
     np.testing.assert_array_equal(slice_.counts, [[0, 2, 2], [1, 3, 2]])
-    slice_ = FrozenCube(CR.CAT_X_MR_X_MR_PRUNED_ROWS, transforms=transforms).slices[1]
+    slice_ = FrozenCube(CR.CAT_X_MR_X_MR_PRUNED_ROWS, transforms=transforms).partitions[
+        1
+    ]
     np.testing.assert_array_equal(slice_.counts, [[3, 3, 6], [0, 3, 4]])
 
 
 def test_cat_x_mr_x_mr_pruned_cols():
     # Not pruned
-    slice_ = FrozenCube(CR.CAT_X_MR_X_MR_EMPTY_COLS).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_MR_X_MR_EMPTY_COLS).partitions[0]
     expected = [
         [1.42180119, 5.67259693, 0.00000000, 0.0],
         [5.96105631, 1.46479350, 22.51724162, 0.0],
@@ -375,7 +379,9 @@ def test_cat_x_mr_x_mr_pruned_cols():
         "rows_dimension": {"prune": True},
         "columns_dimension": {"prune": True},
     }
-    slice_ = FrozenCube(CR.CAT_X_MR_X_MR_EMPTY_COLS, transforms=transforms).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_MR_X_MR_EMPTY_COLS, transforms=transforms).partitions[
+        0
+    ]
     expected = [
         [1.42180119, 5.67259693, 0.0],
         [5.96105631, 1.46479350, 22.51724162],
@@ -387,12 +393,12 @@ def test_cat_x_mr_x_mr_pruned_cols():
 
 
 def test_cat_x_mr_x_mr_proportions_by_col():
-    slice_ = FrozenCube(CR.CAT_X_MR_X_MR).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_MR_X_MR).partitions[0]
     np.testing.assert_almost_equal(
         slice_.column_proportions,
         [[0.60553814, 0.60372608], [0.10292581, 0.1013763], [0.10031348, 0.09768379]],
     )
-    slice_ = FrozenCube(CR.CAT_X_MR_X_MR).slices[1]
+    slice_ = FrozenCube(CR.CAT_X_MR_X_MR).partitions[1]
     np.testing.assert_almost_equal(
         slice_.column_proportions,
         [[0.08141321, 0.09003831], [0.60522273, 0.598659], [0.58474142, 0.5967433]],
@@ -400,11 +406,11 @@ def test_cat_x_mr_x_mr_proportions_by_col():
 
 
 def test_cat_x_mr_x_mr_proportions_by_cell():
-    slice_ = FrozenCube(CR.CAT_X_MR_X_MR).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_MR_X_MR).partitions[0]
     np.testing.assert_almost_equal(
         slice_.table_proportions, [[0.1159, 0.3597], [0.0197, 0.0604], [0.0192, 0.0582]]
     )
-    slice_ = FrozenCube(CR.CAT_X_MR_X_MR).slices[1]
+    slice_ = FrozenCube(CR.CAT_X_MR_X_MR).partitions[1]
     np.testing.assert_almost_equal(
         slice_.table_proportions, [[0.0159, 0.0094], [0.1182, 0.0625], [0.1142, 0.0623]]
     )
@@ -412,7 +418,7 @@ def test_cat_x_mr_x_mr_proportions_by_cell():
 
 def test_mr_x_cat_x_cat_by_col():
     # TODO: Check expectations with Mike and Jon
-    slice_ = FrozenCube(CR.SELECTED_3WAY_2_FILLEDMISSING).slices[0]
+    slice_ = FrozenCube(CR.SELECTED_3WAY_2_FILLEDMISSING).partitions[0]
     expected = [
         [0.5923110874002918, 0.3758961399306439],
         [0, 0],
@@ -422,7 +428,7 @@ def test_mr_x_cat_x_cat_by_col():
 
 
 def test_cat_x_mr_x_cat_by_col():
-    slice_ = FrozenCube(CR.SELECTED_3WAY_FILLEDMISSING).slices[0]
+    slice_ = FrozenCube(CR.SELECTED_3WAY_FILLEDMISSING).partitions[0]
     expected = [
         [0.0997975162008577, np.nan],
         [0.20327963774693497, np.nan],
@@ -432,13 +438,13 @@ def test_cat_x_mr_x_cat_by_col():
 
 
 def test_cat_x_mr_x_cat_by_row():
-    slice_ = FrozenCube(CR.SELECTED_3WAY_FILLEDMISSING).slices[0]
+    slice_ = FrozenCube(CR.SELECTED_3WAY_FILLEDMISSING).partitions[0]
     expected = [[1, 0], [1, 0], [1, 0]]
     np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
 
 def test_cat_x_mr_x_cat_by_cell():
-    slice_ = FrozenCube(CR.SELECTED_3WAY_FILLEDMISSING).slices[0]
+    slice_ = FrozenCube(CR.SELECTED_3WAY_FILLEDMISSING).partitions[0]
     expected = [
         [0.0997975162008577, 0],
         [0.20327963774693497, 0],
@@ -499,11 +505,11 @@ def test_mr_props_pruned():
         [1.86531215e-01],
     ]
     # Not pruned
-    slice_ = FrozenCube(CR.PROMPTED_AWARENESS).slices[0]
+    slice_ = FrozenCube(CR.PROMPTED_AWARENESS).partitions[0]
     np.testing.assert_almost_equal(slice_.table_proportions, expected)
     # Pruned (nothing gets pruned because of not-selected != 0)
     transforms = {"columns_dimension": {"prune": True}}
-    slice_ = FrozenCube(CR.PROMPTED_AWARENESS, transforms=transforms).slices[0]
+    slice_ = FrozenCube(CR.PROMPTED_AWARENESS, transforms=transforms).partitions[0]
     np.testing.assert_almost_equal(slice_.table_proportions, expected)
 
 
@@ -559,17 +565,17 @@ def test_mr_counts_not_pruned():
         42843,
     ]
     # Not pruned
-    slice_ = FrozenCube(CR.PROMPTED_AWARENESS).slices[0]
+    slice_ = FrozenCube(CR.PROMPTED_AWARENESS).partitions[0]
     np.testing.assert_array_equal(slice_.base_counts, expected)
     # Pruned (actuall nothing is pruned because not-selected != 0)
     transforms = {"columns_dimension": {"prune": True}}
-    slice_ = FrozenCube(CR.PROMPTED_AWARENESS, transforms=transforms).slices[0]
+    slice_ = FrozenCube(CR.PROMPTED_AWARENESS, transforms=transforms).partitions[0]
     np.testing.assert_array_equal(slice_.base_counts, expected)
 
 
 def test_mr_x_cat_x_mr_pruned_rows():
     # Not pruned
-    slice_ = FrozenCube(CR.MR_X_CAT_X_MR).slices[3]
+    slice_ = FrozenCube(CR.MR_X_CAT_X_MR).partitions[3]
     expected = [
         [4.67364825, 18.28952353, 8.07855047, 14.86987594],
         [8.02124010, 17.29617716, 7.15665312, 15.44355489],
@@ -583,7 +589,7 @@ def test_mr_x_cat_x_mr_pruned_rows():
         "rows_dimension": {"prune": True},
         "columns_dimension": {"prune": True},
     }
-    slice_ = FrozenCube(CR.MR_X_CAT_X_MR, transforms=transforms).slices[3]
+    slice_ = FrozenCube(CR.MR_X_CAT_X_MR, transforms=transforms).partitions[3]
     expected = [
         [4.67364825, 18.28952353, 8.07855047, 14.86987594],
         [8.02124010, 17.29617716, 7.15665312, 15.44355489],
@@ -594,7 +600,7 @@ def test_mr_x_cat_x_mr_pruned_rows():
 
 def test_mr_x_num_with_means_pruned():
     transforms = {"columns_dimension": {"prune": True}}
-    slice_ = FrozenCube(CR.BBC_NEWS, transforms=transforms).slices[0]
+    slice_ = FrozenCube(CR.BBC_NEWS, transforms=transforms).partitions[0]
     expected = [
         [
             38.79868092168848,
@@ -691,7 +697,7 @@ def test_mr_x_num_with_means_pruned():
 
 
 def test_mr_x_num_with_means_not_pruned():
-    slice_ = FrozenCube(CR.BBC_NEWS).slices[0]
+    slice_ = FrozenCube(CR.BBC_NEWS).partitions[0]
     expected = [
         [
             38.79868092,
@@ -824,20 +830,20 @@ def test_mr_x_num_with_means_not_pruned():
 
 
 def test_mr_x_num_rows_margin():
-    slice_ = FrozenCube(CR.BBC_NEWS).slices[0]
+    slice_ = FrozenCube(CR.BBC_NEWS).partitions[0]
     expected = [4805, 3614, 1156, 1200, 644, 258, 167, 170, 11419]
     np.testing.assert_array_equal(slice_.row_base, expected)
 
 
 def test_mr_x_num_cols_margin_not_pruned_unweighted():
-    slice_ = FrozenCube(CR.BBC_NEWS).slices[0]
+    slice_ = FrozenCube(CR.BBC_NEWS).partitions[0]
     expected = [1728, 1523, 1570, 1434, 1459, 1429, 1461, 1432, 0, 0, 0, 0]
     np.testing.assert_array_equal(slice_.column_base[0], expected)
 
 
 def test_mr_x_num_cols_margin_pruned_unweighted():
     transforms = {"columns_dimension": {"prune": True}}
-    slice_ = FrozenCube(CR.BBC_NEWS, transforms=transforms).slices[0]
+    slice_ = FrozenCube(CR.BBC_NEWS, transforms=transforms).partitions[0]
     expected = [1728, 1523, 1570, 1434, 1459, 1429, 1461, 1432]
     np.testing.assert_array_equal(slice_.column_base[0], expected)
 
@@ -847,7 +853,7 @@ def test_num_x_mr_props_by_row():
         "rows_dimension": {"prune": True},
         "columns_dimension": {"prune": True},
     }
-    slice_ = FrozenCube(CR.AGE_X_ACCRPIPE, transforms=transforms).slices[0]
+    slice_ = FrozenCube(CR.AGE_X_ACCRPIPE, transforms=transforms).partitions[0]
     expected = [
         [0.33333333, 0.44444444, 0.18518519, 0.03703704],
         [0.512, 0.24, 0.208, 0.04],
@@ -874,7 +880,7 @@ def test_num_x_mr_props_by_col():
         "rows_dimension": {"prune": True},
         "columns_dimension": {"prune": True},
     }
-    slice_ = FrozenCube(CR.AGE_X_ACCRPIPE, transforms=transforms).slices[0]
+    slice_ = FrozenCube(CR.AGE_X_ACCRPIPE, transforms=transforms).partitions[0]
     expected = [
         [0.00707547, 0.00676437, 0.00472144, 0.00413223],
         [0.05031447, 0.01691094, 0.02455146, 0.02066116],
@@ -901,7 +907,7 @@ def test_num_x_mr_props_by_cell():
         "rows_dimension": {"prune": True},
         "columns_dimension": {"prune": True},
     }
-    slice_ = FrozenCube(CR.AGE_X_ACCRPIPE, transforms=transforms).slices[0]
+    slice_ = FrozenCube(CR.AGE_X_ACCRPIPE, transforms=transforms).partitions[0]
     expected = [
         [0.00207039, 0.00276052, 0.00115022, 0.00023004],
         [0.0147228, 0.00690131, 0.00598114, 0.00115022],
@@ -924,7 +930,7 @@ def test_num_x_mr_props_by_cell():
 
 
 def test_cat_x_mr_x_cat_missing_proportions_by_cell():
-    slice_ = FrozenCube(CR.CAT_X_MR_X_CAT_MISSING).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_MR_X_CAT_MISSING).partitions[0]
     expected = [
         [
             0.07211986,
@@ -1006,7 +1012,7 @@ def test_cat_x_mr_x_cat_missing_proportions_by_cell():
 
 
 def test_cat_x_mr_x_cat_missing_proportions_by_row():
-    slice_ = FrozenCube(CR.CAT_X_MR_X_CAT_MISSING).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_MR_X_CAT_MISSING).partitions[0]
     expected = [
         [
             0.10215990,
@@ -1088,7 +1094,7 @@ def test_cat_x_mr_x_cat_missing_proportions_by_row():
 
 
 def test_cat_x_mr_x_cat_missing_proportions_by_col():
-    slice_ = FrozenCube(CR.CAT_X_MR_X_CAT_MISSING).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_MR_X_CAT_MISSING).partitions[0]
     expected = [
         [
             0.67814114,
@@ -1170,7 +1176,7 @@ def test_cat_x_mr_x_cat_missing_proportions_by_col():
 
 
 def test_cat_by_mr_hs_col_percentage():
-    slice_ = FrozenCube(CR.CAT_X_MR_HS).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_MR_HS).partitions[0]
     expected = [
         [
             0.44079255048452126,
@@ -1221,7 +1227,7 @@ def test_cat_by_mr_hs_col_percentage():
 
 
 def test_cat_by_mr_hs_row_percentage():
-    slice_ = FrozenCube(CR.CAT_X_MR_HS).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_MR_HS).partitions[0]
     expected = [
         [
             0.6399160598631669,
@@ -1272,7 +1278,7 @@ def test_cat_by_mr_hs_row_percentage():
 
 
 def test_cat_by_mr_hs_cell_percentage():
-    slice_ = FrozenCube(CR.CAT_X_MR_HS).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_MR_HS).partitions[0]
     expected = [
         [
             0.07905704201278009,
@@ -1323,7 +1329,7 @@ def test_cat_by_mr_hs_cell_percentage():
 
 
 def test_mr_by_cat_hs_col_percentage():
-    slice_ = FrozenCube(CR.MR_X_CAT_HS).slices[0]
+    slice_ = FrozenCube(CR.MR_X_CAT_HS).partitions[0]
     expected = [
         [
             0.6399160598631669,
@@ -1380,7 +1386,7 @@ def test_mr_by_cat_hs_col_percentage():
 
 
 def test_mr_by_cat_hs_row_percentage():
-    slice_ = FrozenCube(CR.MR_X_CAT_HS).slices[0]
+    slice_ = FrozenCube(CR.MR_X_CAT_HS).partitions[0]
     expected = [
         [
             0.44079255048452126,
@@ -1437,7 +1443,7 @@ def test_mr_by_cat_hs_row_percentage():
 
 
 def test_mr_by_cat_hs_cell_percentage():
-    slice_ = FrozenCube(CR.MR_X_CAT_HS).slices[0]
+    slice_ = FrozenCube(CR.MR_X_CAT_HS).partitions[0]
     expected = [
         [
             0.07905704201278009,
@@ -1507,7 +1513,9 @@ def test_mr_x_cat_min_base_size_mask():
     # We thus choose the min base size to be 220, and expeect it to broadcast across
     # columns (in the row direction, i.e. axis=1), sincee the MR is what won't be
     # collapsed after doing the base calculation in the table direction.
-    slice_ = FrozenCube(CR.MR_X_CAT_HS, transforms=transforms, mask_size=220).slices[0]
+    slice_ = FrozenCube(
+        CR.MR_X_CAT_HS, transforms=transforms, mask_size=220
+    ).partitions[0]
 
     expected = np.array(
         [
@@ -1533,7 +1541,9 @@ def test_mr_x_cat_min_base_size_mask():
     # )
     #
     # We thus choose the min base size to be 30, and expeect it to not be broadcast.
-    slice_ = FrozenCube(CR.MR_X_CAT_HS, transforms=transforms, mask_size=30).slices[0]
+    slice_ = FrozenCube(CR.MR_X_CAT_HS, transforms=transforms, mask_size=30).partitions[
+        0
+    ]
 
     expected_column_mask = np.array(
         [
@@ -1555,7 +1565,9 @@ def test_mr_x_cat_min_base_size_mask():
     # We thus choose the min base size to be 80, and expeect it to broadcast across
     # columns (in the row direction, i.e. axis=1), sincee the MR is what won't be
     # collapsed after doing the base calculation in the row direction.
-    slice_ = FrozenCube(CR.MR_X_CAT_HS, transforms=transforms, mask_size=80).slices[0]
+    slice_ = FrozenCube(CR.MR_X_CAT_HS, transforms=transforms, mask_size=80).partitions[
+        0
+    ]
 
     expected_row_mask = np.array(
         [
@@ -1578,7 +1590,7 @@ def test_cat_x_mr_min_base_size_mask():
     # rows (in the col direction, i.e. axis=0), sincee the MR is what won't be
     # collapsed after doing the base calculation in the table direction.
     expected = np.array([[False, False, True], [False, False, True]])
-    slice_ = FrozenCube(CR.CAT_X_MR, mask_size=75).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_MR, mask_size=75).partitions[0]
     np.testing.assert_array_equal(slice_.min_base_size_mask.table_mask, expected)
 
     # Column margin evaluates to:
@@ -1589,7 +1601,7 @@ def test_cat_x_mr_min_base_size_mask():
     # rows (in the col direction, i.e. axis=0), sincee the MR is what won't be
     # collapsed after doing the base calculation in the table direction.
     expected = np.array([[False, True, False], [False, True, False]])
-    slice_ = FrozenCube(CR.CAT_X_MR, mask_size=35).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_MR, mask_size=35).partitions[0]
     np.testing.assert_array_equal(slice_.min_base_size_mask.column_mask, expected)
 
     # Row margin evaluates to:
@@ -1598,7 +1610,7 @@ def test_cat_x_mr_min_base_size_mask():
     #
     # We thus choose the min base size to be 25, and expeect it to not be broadcast
     expected_row_mask = np.array([[False, False, True], [False, False, False]])
-    slice_ = FrozenCube(CR.CAT_X_MR, mask_size=25).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_MR, mask_size=25).partitions[0]
     np.testing.assert_array_equal(slice_.min_base_size_mask.row_mask, expected_row_mask)
 
 
@@ -1612,7 +1624,7 @@ def test_mr_x_mr_min_base_size_mask():
     # We thus choose the min base size to be 11000, and expeect it to be broadcast
     # across all values
     expected = np.array([[True, True], [True, True], [True, True]])
-    slice_ = FrozenCube(CR.CAT_X_MR_X_MR, mask_size=11000).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_MR_X_MR, mask_size=11000).partitions[0]
     np.testing.assert_array_equal(slice_.min_base_size_mask.table_mask, expected)
 
     # Column margin evaluates to:
@@ -1625,7 +1637,7 @@ def test_mr_x_mr_min_base_size_mask():
     # rows (in the col direction, i.e. axis=0), sincee the MR is what won't be
     # collapsed after doing the base calculation in the table direction.
     expected = np.array([[True, False], [True, False], [True, False]])
-    slice_ = FrozenCube(CR.CAT_X_MR_X_MR, mask_size=2000).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_MR_X_MR, mask_size=2000).partitions[0]
     np.testing.assert_array_equal(slice_.min_base_size_mask.column_mask, expected)
 
     # Row margin evaluates to:
@@ -1638,5 +1650,5 @@ def test_mr_x_mr_min_base_size_mask():
     # rows (in the col direction, i.e. axis=0), sincee the MR is what won't be
     # collapsed after doing the base calculation in the table direction.
     expected = np.array([[False, False], [False, False], [True, True]])
-    slice_ = FrozenCube(CR.CAT_X_MR_X_MR, mask_size=1000).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_MR_X_MR, mask_size=1000).partitions[0]
     np.testing.assert_array_equal(slice_.min_base_size_mask.row_mask, expected)

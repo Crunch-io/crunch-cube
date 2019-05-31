@@ -11,10 +11,10 @@ import json
 
 import numpy as np
 
+from cr.cube.cubepart import CubePartition
 from cr.cube.dimension import AllDimensions
-from cr.cube.slices import CubeSection
-from cr.cube.util import lazyproperty
 from cr.cube.enum import DIMENSION_TYPE as DT
+from cr.cube.util import lazyproperty
 
 np.seterr(divide="ignore", invalid="ignore")
 
@@ -57,10 +57,10 @@ class FrozenCube(object):
             return super(FrozenCube, self).__repr__()
 
     @lazyproperty
-    def slices(self):
-        """Sequence of FrozenSlice, Strand, or Nub objects from this cube-result."""
+    def partitions(self):
+        """Sequence of _Slice, _Strand, or _Nub objects from this cube-result."""
         return tuple(
-            CubeSection.factory(
+            CubePartition.factory(
                 self,
                 slice_idx=slice_idx,
                 transforms=self._transforms_dict,

@@ -1,5 +1,20 @@
 # encoding: utf-8
 
+"""Cube-partition objects.
+
+A cube-partition allows cubes of various dimensionality to be processed in a uniform
+way. For example, a 2D cube becomes a `_Slice` object, but a 3D cube is "sliced" into
+a sequence of `_Slice` objects; a `_Slice` object corresponds to a crosstab, and can be
+operated on consistently whether it is "alone" or one of a sequence that came from a 3D
+cube.
+
+Cube-partition objects are typically used for display of secondary analysis, often in an
+Excel spreadsheet but also other formats.
+
+The three types of cube partition are the *slice*, *strand*, and *nub*, which are 2D,
+1D, and 0D respectively.
+"""
+
 from __future__ import division
 
 import numpy as np
@@ -13,10 +28,10 @@ from cr.cube.stripe import TransformedStripe
 from cr.cube.util import lazyproperty
 
 
-class CubeSection(object):
+class CubePartition(object):
     """A slice, a strand, or a nub drawn from a cube-response.
 
-    These are 2, 1, or 0 dimensions of a cube, respectively.
+    These represent 2, 1, or 0 dimensions of a cube, respectively.
     """
 
     @classmethod
@@ -36,10 +51,10 @@ class CubeSection(object):
             return _Strand(
                 cube, transforms, population, ca_as_0th, slice_idx, mask_size
             )
-        return FrozenSlice(cube, slice_idx, transforms, population, mask_size)
+        return _Slice(cube, slice_idx, transforms, population, mask_size)
 
 
-class FrozenSlice(object):
+class _Slice(object):
     """2D cube partition.
 
     A slice represents the cross-tabulation of two dimensions, often, but not

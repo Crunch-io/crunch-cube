@@ -62,7 +62,7 @@ class DescribeIntegratedFrozenCubeAsFrozenSlice(object):
             "rows_dimension": {"prune": True},
             "columns_dimension": {"prune": True},
         }
-        slice_ = FrozenCube(CR.CAT_X_MR_SENTRY, transforms=transforms).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_MR_SENTRY, transforms=transforms).partitions[0]
         np.testing.assert_array_equal(slice_.counts, np.array([[0, 0, 0]]))
 
     def it_provides_pruned_array_for_CA_CAT_x_CA_SUBVAR(self):
@@ -70,7 +70,7 @@ class DescribeIntegratedFrozenCubeAsFrozenSlice(object):
             "rows_dimension": {"prune": True},
             "columns_dimension": {"prune": True},
         }
-        slice_ = FrozenCube(CR.CA_CAT_X_CA_SUBVAR, transforms=transforms).slices[0]
+        slice_ = FrozenCube(CR.CA_CAT_X_CA_SUBVAR, transforms=transforms).partitions[0]
         np.testing.assert_array_equal(
             slice_.column_proportions,
             np.array(
@@ -269,7 +269,7 @@ class TestCrunchCubeAsNub(TestCase):
         assert cube.description is None
         assert cube.name is None
         assert cube.missing == 0
-        nub = cube.slices[0]
+        nub = cube.partitions[0]
         expected = np.array([49.095])
         np.testing.assert_almost_equal(nub.means, expected)
         np.testing.assert_almost_equal(nub.table_base, expected)
@@ -283,107 +283,107 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         self.assertEqual(cube_dict, CR.CAT_X_CAT)
 
     def test_as_array_univariate_cat_exclude_missing(self):
-        strand = FrozenCube(CR.UNIVARIATE_CATEGORICAL).slices[0]
+        strand = FrozenCube(CR.UNIVARIATE_CATEGORICAL).partitions[0]
         np.testing.assert_array_equal(strand.counts, np.array([[10], [5]]))
         np.testing.assert_array_equal(strand.base_counts, np.array([10, 5]))
 
     def test_as_array_numeric(self):
-        slice_ = FrozenCube(CR.VOTER_REGISTRATION).slices[0]
+        slice_ = FrozenCube(CR.VOTER_REGISTRATION).partitions[0]
         np.testing.assert_array_equal(slice_.counts, [[885], [105], [10]])
 
     def test_as_array_datetime(self):
-        slice_ = FrozenCube(CR.SIMPLE_DATETIME).slices[0]
+        slice_ = FrozenCube(CR.SIMPLE_DATETIME).partitions[0]
         np.testing.assert_array_equal(slice_.counts, [[1], [1], [1], [1]])
 
     def test_as_array_text(self):
-        slice_ = FrozenCube(CR.SIMPLE_TEXT).slices[0]
+        slice_ = FrozenCube(CR.SIMPLE_TEXT).partitions[0]
         expected = np.array([[1], [1], [1], [1], [1], [1]])
         np.testing.assert_array_equal(slice_.counts, expected)
 
     def test_as_array_cat_x_cat_exclude_missing(self):
-        slice_ = FrozenCube(CR.CAT_X_CAT).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_CAT).partitions[0]
         expected = np.array([[5, 2], [5, 3]])
         np.testing.assert_array_equal(slice_.counts, expected)
 
     def test_as_array_cat_x_cat_unweighted(self):
-        slice_ = FrozenCube(CR.CAT_X_CAT).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_CAT).partitions[0]
         expected = np.array([[5, 2], [5, 3]])
         np.testing.assert_array_equal(slice_.counts, expected)
 
     def test_as_array_cat_x_datetime_exclude_missing(self):
-        slice_ = FrozenCube(CR.CAT_X_DATETIME).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_DATETIME).partitions[0]
         expected = np.array(
             [[0, 0, 1, 0], [0, 0, 0, 1], [0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 0]]
         )
         np.testing.assert_array_equal(slice_.counts, expected)
 
     def test_margin_univariate_cat_axis_none(self):
-        slice_ = FrozenCube(CR.UNIVARIATE_CATEGORICAL).slices[0]
+        slice_ = FrozenCube(CR.UNIVARIATE_CATEGORICAL).partitions[0]
         expected = np.array([15])
         np.testing.assert_array_equal(slice_.table_margin, expected)
 
     def test_margin_numeric(self):
-        slice_ = FrozenCube(CR.VOTER_REGISTRATION).slices[0]
+        slice_ = FrozenCube(CR.VOTER_REGISTRATION).partitions[0]
         expected = np.array([1000])
         np.testing.assert_array_equal(slice_.table_margin, expected)
 
     def test_margin_datetime(self):
-        slice_ = FrozenCube(CR.SIMPLE_DATETIME).slices[0]
+        slice_ = FrozenCube(CR.SIMPLE_DATETIME).partitions[0]
         expected = np.array([4])
         np.testing.assert_array_equal(slice_.table_margin, expected)
 
     def test_margin_text(self):
-        slice_ = FrozenCube(CR.SIMPLE_TEXT).slices[0]
+        slice_ = FrozenCube(CR.SIMPLE_TEXT).partitions[0]
         expected = np.array([6])
         np.testing.assert_array_equal(slice_.table_margin, expected)
 
     def test_cat_x_cat_table_margin(self):
-        slice_ = FrozenCube(CR.CAT_X_CAT).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_CAT).partitions[0]
         expected = np.array([15])
         np.testing.assert_array_equal(slice_.table_margin, expected)
 
     def test_margin_cat_x_datetime_axis_none(self):
-        slice_ = FrozenCube(CR.CAT_X_DATETIME).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_DATETIME).partitions[0]
         expected = np.array([4])
         np.testing.assert_array_equal(slice_.table_margin, expected)
 
     def test_margin_cat_x_cat_axis_0(self):
-        slice_ = FrozenCube(CR.CAT_X_CAT).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_CAT).partitions[0]
         expected = np.array([10, 5])
         np.testing.assert_array_equal(slice_.column_margin, expected)
 
     def test_margin_cat_x_datetime_axis_0(self):
-        slice_ = FrozenCube(CR.CAT_X_DATETIME).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_DATETIME).partitions[0]
         expected = np.array([1, 1, 1, 1])
         np.testing.assert_array_equal(slice_.column_margin, expected)
 
     def test_margin_cat_x_cat_axis_1(self):
-        slice_ = FrozenCube(CR.CAT_X_CAT).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_CAT).partitions[0]
         expected = np.array([7, 8])
         np.testing.assert_array_equal(slice_.row_margin, expected)
 
     def test_margin_cat_x_datetime_axis_1(self):
-        slice_ = FrozenCube(CR.CAT_X_DATETIME).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_DATETIME).partitions[0]
         expected = np.array([1, 1, 1, 1, 0])
         np.testing.assert_array_equal(slice_.row_margin, expected)
 
     def test_proportions_univariate_cat_axis_none(self):
-        slice_ = FrozenCube(CR.UNIVARIATE_CATEGORICAL).slices[0]
+        slice_ = FrozenCube(CR.UNIVARIATE_CATEGORICAL).partitions[0]
         expected = np.array([[0.6666667], [0.3333333]])
         np.testing.assert_almost_equal(slice_.table_proportions, expected)
 
     def test_proportions_numeric(self):
-        slice_ = FrozenCube(CR.VOTER_REGISTRATION).slices[0]
+        slice_ = FrozenCube(CR.VOTER_REGISTRATION).partitions[0]
         expected = np.array([[0.885], [0.105], [0.010]])
         np.testing.assert_almost_equal(slice_.table_proportions, expected)
 
     def test_proportions_datetime(self):
-        slice_ = FrozenCube(CR.SIMPLE_DATETIME).slices[0]
+        slice_ = FrozenCube(CR.SIMPLE_DATETIME).partitions[0]
         expected = np.array([[0.25], [0.25], [0.25], [0.25]])
         np.testing.assert_almost_equal(slice_.table_proportions, expected)
 
     def test_proportions_text(self):
-        slice_ = FrozenCube(CR.SIMPLE_TEXT).slices[0]
+        slice_ = FrozenCube(CR.SIMPLE_TEXT).partitions[0]
         expected = np.array(
             [
                 [0.1666667],
@@ -397,12 +397,12 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.table_proportions, expected)
 
     def test_proportions_cat_x_cat_axis_none(self):
-        slice_ = FrozenCube(CR.CAT_X_CAT).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_CAT).partitions[0]
         expected = np.array([[0.3333333, 0.1333333], [0.3333333, 0.2000000]])
         np.testing.assert_almost_equal(slice_.table_proportions, expected)
 
     def test_proportions_cat_x_datetime_axis_none(self):
-        slice_ = FrozenCube(CR.CAT_X_DATETIME).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_DATETIME).partitions[0]
         expected = np.array(
             [
                 [0.0, 0.0, 0.25, 0.0],
@@ -415,24 +415,24 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.table_proportions, expected)
 
     def test_proportions_cat_x_cat_axis_0(self):
-        slice_ = FrozenCube(CR.CAT_X_CAT).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_CAT).partitions[0]
         expected = np.array([[0.5, 0.4], [0.5, 0.6]])
         np.testing.assert_almost_equal(slice_.column_proportions, expected)
 
     def test_proportions_cat_x_datetime_axis_0(self):
-        slice_ = FrozenCube(CR.CAT_X_DATETIME).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_DATETIME).partitions[0]
         expected = np.array(
             [[0, 0, 1, 0], [0, 0, 0, 1], [0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 0]]
         )
         np.testing.assert_almost_equal(slice_.column_proportions, expected)
 
     def test_proportions_cat_x_cat_axis_1(self):
-        slice_ = FrozenCube(CR.CAT_X_CAT).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_CAT).partitions[0]
         expected = np.array([[0.7142857, 0.2857143], [0.6250000, 0.3750000]])
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
     def test_proportions_cat_x_datetime_axis_1(self):
-        slice_ = FrozenCube(CR.CAT_X_DATETIME).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_DATETIME).partitions[0]
         expected = np.array(
             [
                 [0, 0, 1, 0],
@@ -445,22 +445,22 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
     def test_percentages_univariate_cat_axis_none(self):
-        slice_ = FrozenCube(CR.UNIVARIATE_CATEGORICAL).slices[0]
+        slice_ = FrozenCube(CR.UNIVARIATE_CATEGORICAL).partitions[0]
         expected = np.array([[66.6666667], [33.3333333]])
         np.testing.assert_almost_equal(slice_.table_percentages, expected)
 
     def test_percentages_numeric(self):
-        slice_ = FrozenCube(CR.VOTER_REGISTRATION).slices[0]
+        slice_ = FrozenCube(CR.VOTER_REGISTRATION).partitions[0]
         expected = np.array([[88.5], [10.5], [1.0]])
         np.testing.assert_almost_equal(slice_.table_percentages, expected)
 
     def test_percentages_datetime(self):
-        slice_ = FrozenCube(CR.SIMPLE_DATETIME).slices[0]
+        slice_ = FrozenCube(CR.SIMPLE_DATETIME).partitions[0]
         expected = np.array([[25.0], [25.0], [25.0], [25.0]])
         np.testing.assert_almost_equal(slice_.table_percentages, expected)
 
     def test_percentages_text(self):
-        slice_ = FrozenCube(CR.SIMPLE_TEXT).slices[0]
+        slice_ = FrozenCube(CR.SIMPLE_TEXT).partitions[0]
         expected = np.array(
             [
                 [16.6666667],
@@ -474,37 +474,37 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.table_percentages, expected)
 
     def test_percentages_cat_x_cat_axis_none(self):
-        slice_ = FrozenCube(CR.CAT_X_CAT).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_CAT).partitions[0]
         expected = np.array([[33.3333333, 13.3333333], [33.3333333, 20.0]])
         np.testing.assert_almost_equal(slice_.table_percentages, expected)
 
     def test_percentages_cat_x_cat_axis_0(self):
-        slice_ = FrozenCube(CR.CAT_X_CAT).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_CAT).partitions[0]
         expected = np.array([[50, 40], [50, 60]])
         np.testing.assert_almost_equal(slice_.column_percentages, expected)
 
     def test_percentages_cat_x_cat_axis_1(self):
-        slice_ = FrozenCube(CR.CAT_X_CAT).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_CAT).partitions[0]
         expected = np.array([[71.4285714, 28.5714286], [62.50000, 37.50000]])
         np.testing.assert_almost_equal(slice_.row_percentages, expected)
 
     def test_population_counts_univariate_cat(self):
-        slice_ = FrozenCube(CR.UNIVARIATE_CATEGORICAL, population=9001).slices[0]
+        slice_ = FrozenCube(CR.UNIVARIATE_CATEGORICAL, population=9001).partitions[0]
         expected = np.array([[6000.6666667], [3000.3333333]])
         np.testing.assert_almost_equal(slice_.population_counts, expected)
 
     def test_population_counts_numeric(self):
-        slice_ = FrozenCube(CR.VOTER_REGISTRATION, population=9001).slices[0]
+        slice_ = FrozenCube(CR.VOTER_REGISTRATION, population=9001).partitions[0]
         expected = np.array([[7965.885], [945.105], [90.01]])
         np.testing.assert_almost_equal(slice_.population_counts, expected)
 
     def test_population_counts_datetime(self):
-        slice_ = FrozenCube(CR.SIMPLE_DATETIME, population=9001).slices[0]
+        slice_ = FrozenCube(CR.SIMPLE_DATETIME, population=9001).partitions[0]
         expected = np.array([[2250.25], [2250.25], [2250.25], [2250.25]])
         np.testing.assert_almost_equal(slice_.population_counts, expected)
 
     def test_population_counts_text(self):
-        slice_ = FrozenCube(CR.SIMPLE_TEXT, population=9001).slices[0]
+        slice_ = FrozenCube(CR.SIMPLE_TEXT, population=9001).partitions[0]
         expected = np.array(
             [
                 [1500.1666667],
@@ -518,7 +518,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.population_counts, expected)
 
     def test_population_counts_cat_x_cat(self):
-        slice_ = FrozenCube(CR.CAT_X_CAT, population=9001).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_CAT, population=9001).partitions[0]
         expected = np.array([[3000.3333333, 1200.1333333], [3000.3333333, 1800.2]])
         np.testing.assert_almost_equal(slice_.population_counts, expected)
 
@@ -529,7 +529,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         }
         slice_ = FrozenCube(
             CR.CAT_X_CAT_FILT, transforms=transforms, population=100000000
-        ).slices[0]
+        ).partitions[0]
         expected = np.array(
             [
                 [300000.0, 1400000.0, 0.0, 0.0, 0.0, 0.0],
@@ -542,12 +542,12 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.population_counts, expected)
 
     def test_labels_cat_x_cat_exclude_missing(self):
-        slice_ = FrozenCube(CR.CAT_X_CAT).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_CAT).partitions[0]
         self.assertEqual(slice_.row_labels, ("B", "C"))
         self.assertEqual(slice_.column_labels, ("C", "E"))
 
     def test_labels_cat_x_datetime_exclude_missing(self):
-        slice_ = FrozenCube(CR.CAT_X_DATETIME).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_DATETIME).partitions[0]
         assert slice_.row_labels == ("red", "green", "blue", "4", "9")
         assert slice_.column_labels == (
             "1776-07-04T00:00:00",
@@ -557,94 +557,94 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         )
 
     def test_labels_simple_cat_array_exclude_missing(self):
-        slice_ = FrozenCube(CR.SIMPLE_CAT_ARRAY).slices[0]
+        slice_ = FrozenCube(CR.SIMPLE_CAT_ARRAY).partitions[0]
         assert slice_.row_labels == ("ca_subvar_1", "ca_subvar_2", "ca_subvar_3")
         assert slice_.column_labels == ("a", "b", "c", "d")
 
     def test_as_array_simple_cat_array_exclude_missing(self):
-        slice_ = FrozenCube(CR.SIMPLE_CAT_ARRAY).slices[0]
+        slice_ = FrozenCube(CR.SIMPLE_CAT_ARRAY).partitions[0]
         expected = np.array([[3, 3, 0, 0], [1, 3, 2, 0], [0, 2, 1, 3]])
         np.testing.assert_array_equal(slice_.counts, expected)
 
     def test_as_array_cat_x_num_x_datetime(self):
         """Test 3D cube, slicing accross first (numerical) variable."""
-        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).partitions[0]
         np.testing.assert_array_equal(slice_.counts, [[1, 1], [0, 0], [0, 0], [0, 0]])
-        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).slices[1]
+        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).partitions[1]
         np.testing.assert_array_equal(slice_.counts, [[2, 1], [1, 1], [0, 0], [0, 0]])
-        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).slices[2]
+        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).partitions[2]
         np.testing.assert_array_equal(slice_.counts, [[0, 0], [2, 3], [0, 0], [0, 0]])
-        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).slices[3]
+        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).partitions[3]
         np.testing.assert_array_equal(slice_.counts, [[0, 0], [0, 0], [3, 2], [0, 0]])
-        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).slices[4]
+        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).partitions[4]
         np.testing.assert_array_equal(slice_.counts, [[0, 0], [0, 0], [1, 1], [0, 1]])
 
     def test_proportions_cat_x_num_datetime(self):
-        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).partitions[0]
         np.testing.assert_almost_equal(
             slice_.table_proportions, [[0.5, 0.5], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]
         )
-        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).slices[1]
+        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).partitions[1]
         np.testing.assert_almost_equal(
             slice_.table_proportions, [[0.4, 0.2], [0.2, 0.2], [0.0, 0.0], [0.0, 0.0]]
         )
-        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).slices[2]
+        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).partitions[2]
         np.testing.assert_almost_equal(
             slice_.table_proportions, [[0.0, 0.0], [0.4, 0.6], [0.0, 0.0], [0.0, 0.0]]
         )
-        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).slices[3]
+        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).partitions[3]
         np.testing.assert_almost_equal(
             slice_.table_proportions, [[0.0, 0.0], [0.0, 0.0], [0.6, 0.4], [0.0, 0.0]]
         )
-        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).slices[4]
+        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).partitions[4]
         np.testing.assert_almost_equal(
             slice_.table_proportions,
             [[0.0, 0.0], [0.0, 0.0], [0.33333333, 0.33333333], [0.0, 0.33333333]],
         )
 
     def test_cat_x_num_x_datetime_margin_by_table(self):
-        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).partitions[0]
         np.testing.assert_array_equal(slice_.table_margin, 2)
-        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).slices[1]
+        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).partitions[1]
         np.testing.assert_array_equal(slice_.table_margin, 5)
-        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).slices[2]
+        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).partitions[2]
         np.testing.assert_array_equal(slice_.table_margin, 5)
-        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).slices[3]
+        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).partitions[3]
         np.testing.assert_array_equal(slice_.table_margin, 5)
-        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).slices[4]
+        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).partitions[4]
         np.testing.assert_array_equal(slice_.table_margin, 3)
 
     def test_margin_cat_x_num_x_datetime_axis_0(self):
-        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).partitions[0]
         np.testing.assert_array_equal(slice_.row_margin, [2, 0, 0, 0])
-        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).slices[1]
+        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).partitions[1]
         np.testing.assert_array_equal(slice_.row_margin, [3, 2, 0, 0])
-        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).slices[2]
+        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).partitions[2]
         np.testing.assert_array_equal(slice_.row_margin, [0, 5, 0, 0])
-        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).slices[3]
+        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).partitions[3]
         np.testing.assert_array_equal(slice_.row_margin, [0, 0, 5, 0])
-        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).slices[4]
+        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).partitions[4]
         np.testing.assert_array_equal(slice_.row_margin, [0, 0, 2, 1])
 
     def test_margin_cat_x_num_x_datetime_axis_1(self):
-        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).partitions[0]
         np.testing.assert_array_equal(slice_.column_margin, [1, 1])
-        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).slices[1]
+        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).partitions[1]
         np.testing.assert_array_equal(slice_.column_margin, [3, 2])
-        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).slices[2]
+        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).partitions[2]
         np.testing.assert_array_equal(slice_.column_margin, [2, 3])
-        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).slices[3]
+        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).partitions[3]
         np.testing.assert_array_equal(slice_.column_margin, [3, 2])
-        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).slices[4]
+        slice_ = FrozenCube(CR.CAT_X_NUM_X_DATETIME).partitions[4]
         np.testing.assert_array_equal(slice_.column_margin, [1, 2])
 
     def test_as_array_unweighted_gender_x_ideology(self):
-        slice_ = FrozenCube(CR.ECON_GENDER_X_IDEOLOGY_WEIGHTED).slices[0]
+        slice_ = FrozenCube(CR.ECON_GENDER_X_IDEOLOGY_WEIGHTED).partitions[0]
         expected = np.array([[32, 85, 171, 114, 70, 13], [40, 97, 205, 106, 40, 27]])
         np.testing.assert_array_equal(slice_.base_counts, expected)
 
     def test_as_array_weighted_gender_x_ideology(self):
-        slice_ = FrozenCube(CR.ECON_GENDER_X_IDEOLOGY_WEIGHTED).slices[0]
+        slice_ = FrozenCube(CR.ECON_GENDER_X_IDEOLOGY_WEIGHTED).partitions[0]
         expected = np.array(
             [
                 [
@@ -668,7 +668,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.counts, expected)
 
     def test_margin_weighted_gender_x_ideology_axis_0(self):
-        slice_ = FrozenCube(CR.ECON_GENDER_X_IDEOLOGY_WEIGHTED).slices[0]
+        slice_ = FrozenCube(CR.ECON_GENDER_X_IDEOLOGY_WEIGHTED).partitions[0]
         expected = np.array(
             [
                 71.82464218,
@@ -682,23 +682,23 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.column_margin, expected)
 
     def test_margin_unweighted_gender_x_ideology_axis_0(self):
-        slice_ = FrozenCube(CR.ECON_GENDER_X_IDEOLOGY_WEIGHTED).slices[0]
+        slice_ = FrozenCube(CR.ECON_GENDER_X_IDEOLOGY_WEIGHTED).partitions[0]
         expected = np.array([72, 182, 376, 220, 110, 40])
         np.testing.assert_array_equal(slice_.column_base, expected)
 
     def test_margin_unweighted_gender_x_ideology_axis_1(self):
-        slice_ = FrozenCube(CR.ECON_GENDER_X_IDEOLOGY_WEIGHTED).slices[0]
+        slice_ = FrozenCube(CR.ECON_GENDER_X_IDEOLOGY_WEIGHTED).partitions[0]
         expected = np.array([485, 515])
         np.testing.assert_array_equal(slice_.row_base, expected)
 
     def test_margin_weighted_gender_x_ideology_axis_1(self):
-        slice_ = FrozenCube(CR.ECON_GENDER_X_IDEOLOGY_WEIGHTED).slices[0]
+        slice_ = FrozenCube(CR.ECON_GENDER_X_IDEOLOGY_WEIGHTED).partitions[0]
         expected = np.array([500, 500])
         np.testing.assert_almost_equal(slice_.row_margin, expected)
 
     def test_calculate_standard_error_axis_0(self):
         """Calculate standard error across columns."""
-        slice_ = FrozenCube(CR.ECON_GENDER_X_IDEOLOGY_WEIGHTED).slices[0]
+        slice_ = FrozenCube(CR.ECON_GENDER_X_IDEOLOGY_WEIGHTED).partitions[0]
         expected = np.array(
             [
                 [
@@ -747,21 +747,21 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
             ]
         )
         # Test without pruning
-        slice_ = FrozenCube(CR.CAT_X_CAT_GERMAN_WEIGHTED).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_CAT_GERMAN_WEIGHTED).partitions[0]
         np.testing.assert_almost_equal(slice_.pvals, expected)
 
         # Test with pruning
         transforms = {"rows_dimension": {"prune": True}}
-        slice_ = FrozenCube(CR.CAT_X_CAT_GERMAN_WEIGHTED, transforms=transforms).slices[
-            0
-        ]
+        slice_ = FrozenCube(
+            CR.CAT_X_CAT_GERMAN_WEIGHTED, transforms=transforms
+        ).partitions[0]
         np.testing.assert_almost_equal(slice_.pvals, expected)
 
         # Test with pruning and H&S
         transforms = {"rows_dimension": {"prune": True}}
-        slice_ = FrozenCube(CR.CAT_X_CAT_GERMAN_WEIGHTED, transforms=transforms).slices[
-            0
-        ]
+        slice_ = FrozenCube(
+            CR.CAT_X_CAT_GERMAN_WEIGHTED, transforms=transforms
+        ).partitions[0]
         np.testing.assert_almost_equal(slice_.pvals, expected)
 
     def test_pvals_stats(self):
@@ -786,24 +786,24 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
             ]
         )
         # Test without pruning
-        slice_ = FrozenCube(CR.STATS_TEST).slices[0]
+        slice_ = FrozenCube(CR.STATS_TEST).partitions[0]
         np.testing.assert_almost_equal(slice_.pvals, expected)
 
         # Test with pruning
         transforms = {"rows_dimension": {"prune": True}}
-        slice_ = FrozenCube(CR.STATS_TEST, transforms=transforms).slices[0]
+        slice_ = FrozenCube(CR.STATS_TEST, transforms=transforms).partitions[0]
         np.testing.assert_almost_equal(slice_.pvals, expected)
 
         # Test with pruning and H&S
         transforms = {"rows_dimension": {"prune": True}}
-        slice_ = FrozenCube(CR.STATS_TEST, transforms=transforms).slices[0]
+        slice_ = FrozenCube(CR.STATS_TEST, transforms=transforms).partitions[0]
         np.testing.assert_almost_equal(slice_.pvals, expected)
 
     def test_mean_age_for_blame_x_gender(self):
         transforms = {"rows_dimension": {"prune": True}}
         slice_ = FrozenCube(
             CR.ECON_MEAN_AGE_BLAME_X_GENDER, transforms=transforms
-        ).slices[0]
+        ).partitions[0]
         expected = np.array(
             [
                 [52.78205128205122, 49.9069767441861],
@@ -821,7 +821,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         https://github.com/Crunch-io/whaam/blob/master/base/stats/tests/
         zvalues-spec.js#L42
         """
-        slice_ = FrozenCube(CR.ADMIT_X_DEPT_UNWEIGHTED).slices[0]
+        slice_ = FrozenCube(CR.ADMIT_X_DEPT_UNWEIGHTED).partitions[0]
         expected = np.array(
             [
                 [
@@ -849,7 +849,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         https://github.com/Crunch-io/whaam/blob/master/base/stats/tests/
         zvalues-spec.js#L67
         """
-        slice_ = FrozenCube(CR.ADMIT_X_GENDER_WEIGHTED).slices[0]
+        slice_ = FrozenCube(CR.ADMIT_X_GENDER_WEIGHTED).partitions[0]
         expected = np.array(
             [
                 [9.42561984520692, -9.425619845206922],
@@ -859,7 +859,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.zscore, expected)
 
     def test_selected_crosstab_as_array(self):
-        slice_ = FrozenCube(CR.SELECTED_CROSSTAB_4).slices[0]
+        slice_ = FrozenCube(CR.SELECTED_CROSSTAB_4).partitions[0]
         expected = np.array(
             [
                 [9928.20954289002, 11524.821237084192],
@@ -873,7 +873,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.counts, expected)
 
     def test_selected_crosstab_margin_by_rows(self):
-        slice_ = FrozenCube(CR.SELECTED_CROSSTAB_4).slices[0]
+        slice_ = FrozenCube(CR.SELECTED_CROSSTAB_4).partitions[0]
         expected = np.array(
             [
                 21453.03077997421,
@@ -887,7 +887,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.row_margin, expected)
 
     def test_selected_crosstab_margin_by_cols(self):
-        slice_ = FrozenCube(CR.SELECTED_CROSSTAB_4).slices[0]
+        slice_ = FrozenCube(CR.SELECTED_CROSSTAB_4).partitions[0]
         expected = np.array(
             [
                 [14566.261567907562, 15607.301233922663],
@@ -901,7 +901,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.column_margin, expected)
 
     def test_selected_crosstab_margin_total(self):
-        slice_ = FrozenCube(CR.SELECTED_CROSSTAB_4).slices[0]
+        slice_ = FrozenCube(CR.SELECTED_CROSSTAB_4).partitions[0]
         expected = np.array(
             [
                 30173.5628018302,
@@ -915,7 +915,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.table_margin, expected)
 
     def test_selected_crosstab_proportions_by_rows(self):
-        slice_ = FrozenCube(CR.SELECTED_CROSSTAB_4).slices[0]
+        slice_ = FrozenCube(CR.SELECTED_CROSSTAB_4).partitions[0]
         expected = np.array(
             [
                 [0.4627882020361299, 0.5372117979638701],
@@ -929,7 +929,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
     def test_selected_crosstab_proportions_by_cols(self):
-        slice_ = FrozenCube(CR.SELECTED_CROSSTAB_4).slices[0]
+        slice_ = FrozenCube(CR.SELECTED_CROSSTAB_4).partitions[0]
         expected = np.array(
             [
                 [0.6815894041587091, 0.7384249886863752],
@@ -943,7 +943,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.column_proportions, expected)
 
     def test_selected_crosstab_proportions_by_cell(self):
-        slice_ = FrozenCube(CR.SELECTED_CROSSTAB_4).slices[0]
+        slice_ = FrozenCube(CR.SELECTED_CROSSTAB_4).partitions[0]
         expected = np.array(
             [
                 [0.329036700375595, 0.381950958618156],
@@ -957,12 +957,12 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.table_proportions, expected)
 
     def test_pets_x_pets_as_array(self):
-        slice_ = FrozenCube(CR.PETS_X_PETS).slices[0]
+        slice_ = FrozenCube(CR.PETS_X_PETS).partitions[0]
         expected = np.array([[40, 14, 18], [14, 34, 16], [18, 16, 38]])
         np.testing.assert_array_equal(slice_.counts, expected)
 
     def test_pets_x_pets_proportions_by_cell(self):
-        slice_ = FrozenCube(CR.PETS_X_PETS).slices[0]
+        slice_ = FrozenCube(CR.PETS_X_PETS).partitions[0]
         expected = np.array(
             [
                 [0.5, 0.2, 0.2571429],
@@ -973,7 +973,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.table_proportions, expected)
 
     def test_pets_x_pets_proportions_by_col(self):
-        slice_ = FrozenCube(CR.PETS_X_PETS).slices[0]
+        slice_ = FrozenCube(CR.PETS_X_PETS).partitions[0]
         expected = np.array(
             [
                 [1.0, 0.4827586, 0.4736842],
@@ -984,7 +984,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.column_proportions, expected)
 
     def test_pets_x_pets_proportions_by_row(self):
-        slice_ = FrozenCube(CR.PETS_X_PETS).slices[0]
+        slice_ = FrozenCube(CR.PETS_X_PETS).partitions[0]
         expected = np.array(
             [
                 [1.0, 0.4117647, 0.5294118],
@@ -995,67 +995,67 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
     def test_pets_x_fruit_as_array(self):
-        slice_ = FrozenCube(CR.PETS_X_FRUIT).slices[0]
+        slice_ = FrozenCube(CR.PETS_X_FRUIT).partitions[0]
         expected = np.array([[12, 28], [12, 22], [12, 26]])
         np.testing.assert_array_equal(slice_.counts, expected)
 
     def test_pets_x_fruit_margin_row(self):
-        slice_ = FrozenCube(CR.PETS_X_FRUIT).slices[0]
+        slice_ = FrozenCube(CR.PETS_X_FRUIT).partitions[0]
         expected = np.array([40, 34, 38])
         np.testing.assert_array_equal(slice_.row_margin, expected)
 
     def test_pets_array_as_array(self):
-        slice_ = FrozenCube(CR.PETS_ARRAY).slices[0]
+        slice_ = FrozenCube(CR.PETS_ARRAY).partitions[0]
         expected = np.array([[45, 34], [40, 40], [32, 38]])
         np.testing.assert_array_equal(slice_.counts, expected)
 
     def test_pets_array_proportions(self):
-        slice_ = FrozenCube(CR.PETS_ARRAY).slices[0]
+        slice_ = FrozenCube(CR.PETS_ARRAY).partitions[0]
         expected = np.array(
             [[0.5696203, 0.4303797], [0.5000000, 0.500000], [0.4571429, 0.5428571]]
         )
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
     def test_pets_array_margin_by_row(self):
-        slice_ = FrozenCube(CR.PETS_ARRAY).slices[0]
+        slice_ = FrozenCube(CR.PETS_ARRAY).partitions[0]
         expected = np.array([79, 80, 70])
         np.testing.assert_array_equal(slice_.row_margin, expected)
 
     def test_fruit_x_pets_proportions_by_cell(self):
-        slice_ = FrozenCube(CR.FRUIT_X_PETS).slices[0]
+        slice_ = FrozenCube(CR.FRUIT_X_PETS).partitions[0]
         expected = np.array(
             [[0.15, 0.15189873, 0.17142857], [0.35, 0.27848101, 0.37142857]]
         )
         np.testing.assert_almost_equal(slice_.table_proportions, expected)
 
     def test_fruit_x_pets_proportions_by_row(self):
-        slice_ = FrozenCube(CR.FRUIT_X_PETS).slices[0]
+        slice_ = FrozenCube(CR.FRUIT_X_PETS).partitions[0]
         expected = np.array(
             [[0.4285714, 0.48, 0.5217391], [0.5384615, 0.4074074, 0.5531915]]
         )
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
     def test_fruit_x_pets_proportions_by_col(self):
-        slice_ = FrozenCube(CR.FRUIT_X_PETS).slices[0]
+        slice_ = FrozenCube(CR.FRUIT_X_PETS).partitions[0]
         expected = np.array([[0.3, 0.3529412, 0.3157895], [0.7, 0.6470588, 0.6842105]])
         np.testing.assert_almost_equal(slice_.column_proportions, expected)
 
     def test_pets_x_fruit_proportions_by_cell(self):
-        slice_ = FrozenCube(CR.PETS_X_FRUIT).slices[0]
+        slice_ = FrozenCube(CR.PETS_X_FRUIT).partitions[0]
         expected = np.array(
             [[0.15, 0.35], [0.15189873, 0.27848101], [0.17142857, 0.37142857]]
         )
         np.testing.assert_almost_equal(slice_.table_proportions, expected)
 
     def test_pets_x_fruit_proportions_by_col(self):
-        slice_ = FrozenCube(CR.PETS_X_FRUIT).slices[0]
+        slice_ = FrozenCube(CR.PETS_X_FRUIT).partitions[0]
         expected = np.array(
             [[0.4285714, 0.5384615], [0.48, 0.4074074], [0.5217391, 0.5531915]]
         )
         np.testing.assert_almost_equal(slice_.column_proportions, expected)
 
     def test_pets_x_fruit_proportions_by_row(self):
-        slice_ = FrozenCube(CR.PETS_X_FRUIT).slices[0]
+        slice_ = FrozenCube(CR.PETS_X_FRUIT).partitions[0]
         expected = np.array(
             [[0.3, 0.7], [0.3529412, 0.6470588], [0.3157895, 0.6842105]]
         )
@@ -1063,10 +1063,10 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
 
     def test_cat_x_cat_array_proportions_by_row(self):
         """Get the proportions for each slice of the 3D cube."""
-        slice_ = FrozenCube(CR.FRUIT_X_PETS_ARRAY).slices[0]
+        slice_ = FrozenCube(CR.FRUIT_X_PETS_ARRAY).partitions[0]
         expected = [[0.52, 0.48], [0.57142857, 0.42857143], [0.47826087, 0.52173913]]
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
-        slice_ = FrozenCube(CR.FRUIT_X_PETS_ARRAY).slices[1]
+        slice_ = FrozenCube(CR.FRUIT_X_PETS_ARRAY).partitions[1]
         expected = [
             [0.59259259, 0.40740741],
             [0.46153846, 0.53846154],
@@ -1075,27 +1075,27 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
     def test_identity_x_period_axis_out_of_bounds(self):
-        slice_ = FrozenCube(CR.NUM_X_NUM_EMPTY).slices[0]
+        slice_ = FrozenCube(CR.NUM_X_NUM_EMPTY).partitions[0]
         expected = np.array([94, 0, 248, 210, 102, 0, 0, 0, 286, 60])
         np.testing.assert_array_equal(slice_.row_margin, expected)
 
     def test_ca_with_single_cat(self):
-        slice_ = FrozenCube(CR.CA_SINGLE_CAT).slices[0]
+        slice_ = FrozenCube(CR.CA_SINGLE_CAT).partitions[0]
         expected = np.array([79, 80, 70, 0])
         np.testing.assert_almost_equal(slice_.row_base, expected)
 
     def test_pets_array_x_pets_by_col(self):
-        slice_ = FrozenCube(CR.PETS_ARRAY_X_PETS).slices[0]
+        slice_ = FrozenCube(CR.PETS_ARRAY_X_PETS).partitions[0]
         expected = [0.59097127, 0.0, 0.55956679], [0.40902873, 1.0, 0.44043321]
         np.testing.assert_almost_equal(slice_.column_proportions, expected)
 
     def test_pets_array_x_pets_row(self):
-        slice_ = FrozenCube(CR.PETS_ARRAY_X_PETS).slices[0]
+        slice_ = FrozenCube(CR.PETS_ARRAY_X_PETS).partitions[0]
         expected = [0.44836533, 0.0, 0.48261546], [0.39084967, 1.0, 0.47843137]
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
     def test_pets_array_x_pets_cell(self):
-        slice_ = FrozenCube(CR.PETS_ARRAY_X_PETS).slices[0]
+        slice_ = FrozenCube(CR.PETS_ARRAY_X_PETS).partitions[0]
         expected = (
             [0.24992768, 0.00000000, 0.26901938],
             [0.17298235, 0.44258027, 0.21174429],
@@ -1103,7 +1103,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.table_proportions, expected)
 
     def test_pets_x_pets_array_percentages(self):
-        slice_ = FrozenCube(CR.PETS_X_PETS_ARRAY).slices[0]
+        slice_ = FrozenCube(CR.PETS_X_PETS_ARRAY).partitions[0]
         expected = [
             [0.58823529, 0.41176471],
             [0.00000000, 1.00000000],
@@ -1112,7 +1112,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
     def test_profiles_percentages_add_up_to_100(self):
-        slice_ = FrozenCube(CR.PROFILES_PERCENTS).slices[0]
+        slice_ = FrozenCube(CR.PROFILES_PERCENTS).partitions[0]
         props = slice_.row_percentages
         actual_sum = np.sum(props, axis=1)
         expected_sum = np.ones(props.shape[0]) * 100
@@ -1120,7 +1120,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
 
     def test_cat_x_cat_as_array_prune_cols(self):
         # No pruning
-        slice_ = FrozenCube(CR.CAT_X_CAT_WITH_EMPTY_COLS).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_CAT_WITH_EMPTY_COLS).partitions[0]
         expected = np.array(
             [
                 [2, 2, 0, 1],
@@ -1138,15 +1138,15 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
             "rows_dimension": {"prune": True},
             "columns_dimension": {"prune": True},
         }
-        slice_ = FrozenCube(CR.CAT_X_CAT_WITH_EMPTY_COLS, transforms=transforms).slices[
-            0
-        ]
+        slice_ = FrozenCube(
+            CR.CAT_X_CAT_WITH_EMPTY_COLS, transforms=transforms
+        ).partitions[0]
         expected = np.array([[2, 2, 1], [0, 1, 2], [0, 2, 0], [0, 2, 1], [0, 1, 0]])
         np.testing.assert_array_equal(slice_.counts, expected)
 
     def test_cat_x_cat_props_by_col_prune_cols(self):
         # No pruning
-        slice_ = FrozenCube(CR.CAT_X_CAT_WITH_EMPTY_COLS).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_CAT_WITH_EMPTY_COLS).partitions[0]
         expected = np.array(
             [
                 [1.0, 0.25, np.nan, 0.25],
@@ -1164,9 +1164,9 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
             "rows_dimension": {"prune": True},
             "columns_dimension": {"prune": True},
         }
-        slice_ = FrozenCube(CR.CAT_X_CAT_WITH_EMPTY_COLS, transforms=transforms).slices[
-            0
-        ]
+        slice_ = FrozenCube(
+            CR.CAT_X_CAT_WITH_EMPTY_COLS, transforms=transforms
+        ).partitions[0]
         expected = np.array(
             [
                 [1.0, 0.25, 0.25],
@@ -1180,7 +1180,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
 
     def test_cat_x_cat_props_by_row_prune_cols(self):
         # No pruning
-        slice_ = FrozenCube(CR.CAT_X_CAT_WITH_EMPTY_COLS).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_CAT_WITH_EMPTY_COLS).partitions[0]
         expected = np.array(
             [
                 [0.4, 0.4, 0.0, 0.2],
@@ -1198,9 +1198,9 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
             "rows_dimension": {"prune": True},
             "columns_dimension": {"prune": True},
         }
-        slice_ = FrozenCube(CR.CAT_X_CAT_WITH_EMPTY_COLS, transforms=transforms).slices[
-            0
-        ]
+        slice_ = FrozenCube(
+            CR.CAT_X_CAT_WITH_EMPTY_COLS, transforms=transforms
+        ).partitions[0]
         expected = np.array(
             [
                 [0.4, 0.4, 0.2],
@@ -1214,7 +1214,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
 
     def test_cat_x_cat_props_by_cell_prune_cols(self):
         # No pruning
-        slice_ = FrozenCube(CR.CAT_X_CAT_WITH_EMPTY_COLS).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_CAT_WITH_EMPTY_COLS).partitions[0]
         expected = np.array(
             [
                 [0.14285714, 0.14285714, 0.0, 0.07142857],
@@ -1232,9 +1232,9 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
             "rows_dimension": {"prune": True},
             "columns_dimension": {"prune": True},
         }
-        slice_ = FrozenCube(CR.CAT_X_CAT_WITH_EMPTY_COLS, transforms=transforms).slices[
-            0
-        ]
+        slice_ = FrozenCube(
+            CR.CAT_X_CAT_WITH_EMPTY_COLS, transforms=transforms
+        ).partitions[0]
         expected = np.array(
             [
                 [0.14285714, 0.14285714, 0.07142857],
@@ -1248,17 +1248,17 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
 
     def test_prune_univariate_cat(self):
         transforms = {"rows_dimension": {"prune": True}}
-        slice_ = FrozenCube(CR.BINNED, transforms=transforms).slices[0]
+        slice_ = FrozenCube(CR.BINNED, transforms=transforms).partitions[0]
         expected = np.array([[118504.40402204], [155261.2723631], [182923.95470245]])
         np.testing.assert_almost_equal(slice_.counts, expected)
 
     def test_single_col_margin_not_iterable(self):
-        slice_ = FrozenCube(CR.SINGLE_COL_MARGIN_NOT_ITERABLE).slices[0]
+        slice_ = FrozenCube(CR.SINGLE_COL_MARGIN_NOT_ITERABLE).partitions[0]
         assert slice_.column_margin == 1634
 
     def test_3d_percentages_by_col(self):
         # ---CAT x CAT x CAT---
-        slice_ = FrozenCube(CR.GENDER_PARTY_RACE).slices[0]
+        slice_ = FrozenCube(CR.GENDER_PARTY_RACE).partitions[0]
         expected = [
             [0.17647059, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
             [0.17647059, 0.05882353, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
@@ -1273,13 +1273,13 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
             [0.23809524, 0.0, 0.04761905, 0.0, 0.0, 0.0, 0.0, 0.0],
             [0.19047619, 0.0, 0.04761905, 0.0, 0.0, 0.0, 0.0, 0.0],
         ]
-        slice_ = FrozenCube(CR.GENDER_PARTY_RACE).slices[1]
+        slice_ = FrozenCube(CR.GENDER_PARTY_RACE).partitions[1]
         np.testing.assert_almost_equal(slice_.table_proportions, expected)
 
     def test_total_unweighted_margin_when_has_means(self):
         """Tests that total margin is Unweighted N, when cube has means."""
-        strand = FrozenCube(CR.CAT_MEAN_WGTD).slices[0]
-        # TODO: Fix after base is implemented for means slices
+        strand = FrozenCube(CR.CAT_MEAN_WGTD).partitions[0]
+        # TODO: Fix after base is implemented for means partitions
         assert strand.means.shape == (6367,)
         assert strand.table_margin == 17615
         assert strand.ndim == 1
@@ -1288,7 +1288,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
     def test_1D_means_pruned(self):
         """Tests that total margin is Unweighted N, when cube has means."""
         transforms = {"rows_dimension": {"prune": True}}
-        slice_ = FrozenCube(CR.CAT_MEAN_WGTD, transforms=transforms).slices[0]
+        slice_ = FrozenCube(CR.CAT_MEAN_WGTD, transforms=transforms).partitions[0]
         np.testing.assert_almost_equal(
             slice_.means,
             [
@@ -1332,10 +1332,10 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         assert slice_.table_base == 17615
 
     def test_row_unweighted_margin_when_has_means(self):
-        # TODO: Fix after base is implemented for means slices
+        # TODO: Fix after base is implemented for means partitions
         """Tests that total margin is Unweighted N, when cube has means."""
         transforms = {"rows_dimension": {"prune": True}}
-        slice_ = FrozenCube(CR.CAT_MEAN_WGTD, transforms=transforms).slices[0]
+        slice_ = FrozenCube(CR.CAT_MEAN_WGTD, transforms=transforms).partitions[0]
         expected = np.array(
             [
                 806,
@@ -1380,37 +1380,37 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
 
     def test_ca_with_single_cat_pruning(self):
         transforms = {"rows_dimension": {"prune": True}}
-        slice_ = FrozenCube(CR.CA_SINGLE_CAT, transforms=transforms).slices[0]
+        slice_ = FrozenCube(CR.CA_SINGLE_CAT, transforms=transforms).partitions[0]
         np.testing.assert_array_equal(slice_.base_counts, [[79], [80], [70]])
 
     def test_ca_x_single_cat_counts(self):
-        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).slices[0]
+        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).partitions[0]
         expected = [[13], [12]]
-        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).slices[1]
+        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).partitions[1]
         expected = [[16], [12]]
-        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).slices[2]
+        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).partitions[2]
         expected = [[11], [12]]
         np.testing.assert_array_equal(slice_.counts, expected)
 
     def test_ca_x_single_cat_props_by_col(self):
-        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).slices[0]
+        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).partitions[0]
         expected = [[0.52], [0.48]]
         np.testing.assert_almost_equal(slice_.column_proportions, expected)
-        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).slices[1]
+        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).partitions[1]
         expected = [[0.57142857], [0.42857143]]
         np.testing.assert_almost_equal(slice_.column_proportions, expected)
-        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).slices[2]
+        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).partitions[2]
         expected = [[0.47826087], [0.52173913]]
         np.testing.assert_almost_equal(slice_.column_proportions, expected)
 
     def test_ca_x_single_cat_props_by_row(self):
-        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).slices[0]
+        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).partitions[0]
         expected = np.array([[1.0], [1.0]])
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
-        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).slices[1]
+        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).partitions[1]
         expected = np.array([[1.0], [1.0]])
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
-        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).slices[2]
+        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).partitions[2]
         expected = np.array([[1.0], [1.0]])
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
@@ -1420,47 +1420,47 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
             [[0.57142857], [0.42857143]],
             [[0.47826087], [0.52173913]],
         ]
-        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).slices[0]
+        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).partitions[0]
         np.testing.assert_almost_equal(slice_.table_proportions, expected[0])
-        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).slices[1]
+        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).partitions[1]
         np.testing.assert_almost_equal(slice_.table_proportions, expected[1])
-        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).slices[2]
+        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).partitions[2]
         np.testing.assert_almost_equal(slice_.table_proportions, expected[2])
 
     def test_ca_x_single_cat_col_margins(self):
         expected = [25, 28, 23]
-        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).slices[0]
+        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).partitions[0]
         np.testing.assert_array_equal(slice_.column_margin, expected[0])
-        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).slices[1]
+        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).partitions[1]
         np.testing.assert_array_equal(slice_.column_margin, expected[1])
-        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).slices[2]
+        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).partitions[2]
         np.testing.assert_array_equal(slice_.column_margin, expected[2])
 
     def test_ca_x_single_cat_row_margins(self):
-        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).slices[0]
+        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).partitions[0]
         np.testing.assert_array_equal(slice_.row_margin, [13, 12])
-        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).slices[1]
+        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).partitions[1]
         np.testing.assert_array_equal(slice_.row_margin, [16, 12])
-        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).slices[2]
+        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).partitions[2]
         np.testing.assert_array_equal(slice_.row_margin, [11, 12])
 
     def test_ca_x_single_cat_cell_margins(self):
         expected = [25, 28, 23]
-        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).slices[0]
+        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).partitions[0]
         np.testing.assert_array_equal(slice_.table_margin, expected[0])
-        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).slices[1]
+        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).partitions[1]
         np.testing.assert_array_equal(slice_.table_margin, expected[1])
-        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).slices[2]
+        slice_ = FrozenCube(CR.CA_X_SINGLE_CAT).partitions[2]
         np.testing.assert_array_equal(slice_.table_margin, expected[2])
 
     def test_ca_subvar_x_cat_hs_counts_prune(self):
         transforms = {"rows_dimension": {"prune": True}}
-        slice_ = FrozenCube(CR.CA_SUBVAR_X_CAT_HS, transforms=transforms).slices[0]
+        slice_ = FrozenCube(CR.CA_SUBVAR_X_CAT_HS, transforms=transforms).partitions[0]
         expected = np.array([[3, 3, 0, 0, 6], [1, 3, 2, 0, 4], [0, 2, 1, 3, 2]])
         np.testing.assert_array_equal(slice_.counts, expected)
 
     def test_values_services(self):
-        slice_ = FrozenCube(CR.MR_X_CA_CAT_X_CA_SUBVAR).slices[0]
+        slice_ = FrozenCube(CR.MR_X_CA_CAT_X_CA_SUBVAR).partitions[0]
         expected = np.array(
             [
                 [
@@ -1589,7 +1589,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.column_proportions, expected)
 
     def test_mr_props_with_hs_by_cell(self):
-        slice_ = FrozenCube(CR.LETTERS_X_PETS_HS).slices[0]
+        slice_ = FrozenCube(CR.LETTERS_X_PETS_HS).partitions[0]
         expected = np.array(
             [
                 [
@@ -1637,7 +1637,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.table_proportions, expected)
 
     def test_mr_props_with_hs_by_row(self):
-        slice_ = FrozenCube(CR.LETTERS_X_PETS_HS).slices[0]
+        slice_ = FrozenCube(CR.LETTERS_X_PETS_HS).partitions[0]
         expected = np.array(
             [
                 [0.15555556, 0.24444444, 0.4, 0.37777778, 0.22222222, 0.22222222],
@@ -1671,7 +1671,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
     def test_mr_props_with_hs_by_col(self):
-        slice_ = FrozenCube(CR.LETTERS_X_PETS_HS).slices[0]
+        slice_ = FrozenCube(CR.LETTERS_X_PETS_HS).partitions[0]
         expected = np.array(
             [
                 [
@@ -1726,34 +1726,34 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
             "rows_dimension": {"insertions": {}, "prune": True},
             "columns_dimension": {"insertions": {}, "prune": True},
         }
-        slice_ = FrozenCube(CR.XYZ_SIMPLE_ALLTYPES, transforms=transforms).slices[0]
+        slice_ = FrozenCube(CR.XYZ_SIMPLE_ALLTYPES, transforms=transforms).partitions[0]
         np.testing.assert_array_equal(slice_.counts, [[1]])
 
         # Just columns get pruned
         transforms = {"columns_dimension": {"insertions": {}, "prune": True}}
-        slice_ = FrozenCube(CR.XYZ_SIMPLE_ALLTYPES, transforms=transforms).slices[0]
+        slice_ = FrozenCube(CR.XYZ_SIMPLE_ALLTYPES, transforms=transforms).partitions[0]
         np.testing.assert_array_equal(
             slice_.counts, [[1], [0], [0], [1], [1], [0], [0], [1]]
         )
 
         # Just rows get pruned
         transforms = {"rows_dimension": {"insertions": {}, "prune": True}}
-        slice_ = FrozenCube(CR.XYZ_SIMPLE_ALLTYPES, transforms=transforms).slices[0]
+        slice_ = FrozenCube(CR.XYZ_SIMPLE_ALLTYPES, transforms=transforms).partitions[0]
         np.testing.assert_array_equal(slice_.counts, [[0, 1, 0]])
 
     def test_mr_x_ca_rows_margin(self):
-        slice_ = FrozenCube(CR.MR_X_CA_HS).slices[0]
+        slice_ = FrozenCube(CR.MR_X_CA_HS).partitions[0]
         expected = np.array([3, 3, 3])
         np.testing.assert_array_equal(slice_.row_margin, expected)
-        slice_ = FrozenCube(CR.MR_X_CA_HS).slices[1]
+        slice_ = FrozenCube(CR.MR_X_CA_HS).partitions[1]
         expected = np.array([4, 4, 4])
         np.testing.assert_array_equal(slice_.row_margin, expected)
-        slice_ = FrozenCube(CR.MR_X_CA_HS).slices[2]
+        slice_ = FrozenCube(CR.MR_X_CA_HS).partitions[2]
         expected = np.array([0, 0, 0])
         np.testing.assert_array_equal(slice_.row_margin, expected)
 
     def test_ca_x_mr_margin(self):
-        slice_ = FrozenCube(CR.CA_X_MR_WEIGHTED_HS).slices[0]
+        slice_ = FrozenCube(CR.CA_X_MR_WEIGHTED_HS).partitions[0]
         expected = np.array([504, 215, 224, 76, 8, 439])
         np.testing.assert_array_equal(slice_.column_base, expected)
 
@@ -1763,7 +1763,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
             "rows_dimension": {"insertions": {}, "prune": True},
             "columns_dimension": {"insertions": {}, "prune": True},
         }
-        slice_ = FrozenCube(CR.CA_X_MR_WEIGHTED_HS, transforms=transforms).slices[0]
+        slice_ = FrozenCube(CR.CA_X_MR_WEIGHTED_HS, transforms=transforms).partitions[0]
         np.testing.assert_array_equal(
             slice_.column_base, np.array([504, 215, 224, 76, 8, 439])
         )
@@ -1771,7 +1771,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
 
     def test_mr_x_cat_x_mr_pruning(self):
         # No pruning
-        slice_ = FrozenCube(CR.MR_X_CAT_X_MR_PRUNE).slices[0]
+        slice_ = FrozenCube(CR.MR_X_CAT_X_MR_PRUNE).partitions[0]
         np.testing.assert_array_equal(
             slice_.counts,
             [
@@ -1788,7 +1788,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
 
         # With pruning
         transforms = {"rows_dimension": {"prune": True}}
-        slice_ = FrozenCube(CR.MR_X_CAT_X_MR_PRUNE, transforms=transforms).slices[0]
+        slice_ = FrozenCube(CR.MR_X_CAT_X_MR_PRUNE, transforms=transforms).partitions[0]
         # Last column is not pruned, because the not-selected base counts
         # (for that column) are not all zeros.
         np.testing.assert_array_equal(
@@ -1798,7 +1798,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
 
     def test_gender_x_weight_pruning(self):
         transforms = {"rows_dimension": {"prune": True}}
-        slice_ = FrozenCube(CR.GENDER_X_WEIGHT, transforms=transforms).slices[0]
+        slice_ = FrozenCube(CR.GENDER_X_WEIGHT, transforms=transforms).partitions[0]
         np.testing.assert_array_equal(slice_.table_margin, 208)
 
     def test_proportions_cat_x_mr_x_cat(self):
@@ -1808,7 +1808,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         }
         slice_ = FrozenCube(
             CR.CAT_X_MR_X_CAT["slides"][0]["cube"], transforms=transforms
-        ).slices[0]
+        ).partitions[0]
 
         # Test first slice
         expected = np.array(
@@ -1863,7 +1863,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         }
         slice_ = FrozenCube(
             CR.CAT_X_MR_X_CAT["slides"][0]["cube"], transforms=transforms
-        ).slices[1]
+        ).partitions[1]
         expected = np.array(
             [
                 [0.4031214008509537, 0.4056176483118717],
@@ -1911,7 +1911,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
 
     def test_univ_mr_with_hs_does_not_crash(self):
         """Assert that MR with H&S doesn't crash."""
-        slice_ = FrozenCube(CR.UNIV_MR_WITH_HS["slides"][0]["cube"]).slices[0]
+        slice_ = FrozenCube(CR.UNIV_MR_WITH_HS["slides"][0]["cube"]).partitions[0]
         slice_.counts
         # If it doesn't crash, the test passes, we don't actually care about
         # the result. We only care that the H&S transform doesn't crash the MR
@@ -1930,7 +1930,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
             transforms=transforms,
             first_cube_of_tab=True,
             population=100000000,
-        ).slices[0]
+        ).partitions[0]
         expected = np.array(
             [
                 [54523323.46453754],
@@ -1941,8 +1941,8 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         )
         np.testing.assert_almost_equal(slice_.population_counts, expected)
 
-    def test_pop_counts_for_multiple_slices(self):
-        slice_ = FrozenCube(CR.PETS_ARRAY_X_PETS, population=100000000).slices[0]
+    def partitions(self):
+        slice_ = FrozenCube(CR.PETS_ARRAY_X_PETS, population=100000000).partitions[0]
         np.testing.assert_almost_equal(
             slice_.population_counts,
             [
@@ -1950,7 +1950,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
                 [17298235.46427536, 44258027.19120625, 21174428.69540066],
             ],
         )
-        slice_ = FrozenCube(CR.PETS_ARRAY_X_PETS, population=100000000).slices[1]
+        slice_ = FrozenCube(CR.PETS_ARRAY_X_PETS, population=100000000).partitions[1]
         np.testing.assert_almost_equal(
             slice_.population_counts,
             [
@@ -1958,7 +1958,7 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
                 [48106904.23162583, 16648106.90423161, 22216035.63474388],
             ],
         )
-        slice_ = FrozenCube(CR.PETS_ARRAY_X_PETS, population=100000000).slices[2]
+        slice_ = FrozenCube(CR.PETS_ARRAY_X_PETS, population=100000000).partitions[2]
         np.testing.assert_almost_equal(
             slice_.population_counts,
             [

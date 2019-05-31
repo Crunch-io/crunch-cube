@@ -11,25 +11,25 @@ from ..fixtures import CR
 
 
 def test_cat_x_cat_slice_column_index():
-    slice_ = FrozenCube(CR.CAT_X_CAT).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_CAT).partitions[0]
     expected = np.array([[100, 80], [100, 120]])
     np.testing.assert_almost_equal(slice_.column_index, expected)
 
 
 @pytest.mark.xfail(reason="Row index not implemented in frozen slice", strict=True)
 def test_cat_x_cat_slice_row_index():
-    slice_ = FrozenCube(CR.CAT_X_CAT).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_CAT).partitions[0]
     expected = np.array([[107.142857142857, 85.7142857142857], [93.75, 112.5]])
     np.testing.assert_almost_equal(slice_.row_index, expected)
 
 
 @pytest.mark.xfail(reason="Row index not implemented in frozen slice", strict=True)
 def test_cat_x_cat_slice_row_index_with_baseline():
-    slice_ = FrozenCube(CR.CAT_X_CAT).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_CAT).partitions[0]
     expected = np.array(
         [[119.047619047619, 71.4285714285714], [104.16666666666667, 93.75]]
     )
-    # actual = cube.slices[0].index_table(axis=1, baseline=np.array([0.6, 0.4]))
+    # actual = cube.partitions[0].index_table(axis=1, baseline=np.array([0.6, 0.4]))
     np.testing.assert_almost_equal(slice_.row_index, expected)
 
 
@@ -37,14 +37,14 @@ def test_cat_x_cat_slice_row_index_with_baseline():
     reason="Custom baseline not implemented in frozen slice", strict=True
 )
 def test_cat_x_cat_slice_column_index_with_baseline():
-    slice_ = FrozenCube(CR.CAT_X_CAT).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_CAT).partitions[0]
     expected = np.array([[83.3333333333333, 66.6666666666667], [125, 150]])
-    # actual = cube.slices[0].index_table(axis=0, baseline=np.array([0.6, 0.4]))
+    # actual = cube.partitions[0].index_table(axis=0, baseline=np.array([0.6, 0.4]))
     np.testing.assert_almost_equal(slice_.column_index, expected)
 
 
 def test_mr_x_cat_slice_column_index():
-    slice_ = FrozenCube(CR.SELECTED_CROSSTAB_4).slices[0]
+    slice_ = FrozenCube(CR.SELECTED_CROSSTAB_4).partitions[0]
     expected = np.array(
         [
             [95.8651525855387, 103.859044435659],
@@ -60,7 +60,7 @@ def test_mr_x_cat_slice_column_index():
 
 @pytest.mark.xfail(reason="Row index not implemented in frozen slice", strict=True)
 def test_mr_x_cat_slice_row_index():
-    slice_ = FrozenCube(CR.SELECTED_CROSSTAB_4).slices[0]
+    slice_ = FrozenCube(CR.SELECTED_CROSSTAB_4).partitions[0]
     expected = np.array(
         [
             [95.3416155822363, 104.394053238208],
@@ -75,15 +75,15 @@ def test_mr_x_cat_slice_row_index():
 
 
 def test_mr_x_mr_slice_column_index():
-    mr_x_mr = FrozenCube(CR.FULL_CUBE).slices[0]
-    mr_alone = FrozenCube(CR.MR_WGTD).slices[0]
+    mr_x_mr = FrozenCube(CR.FULL_CUBE).partitions[0]
+    mr_alone = FrozenCube(CR.MR_WGTD).partitions[0]
     expected = mr_x_mr.column_proportions / mr_alone.table_proportions * 100
     np.testing.assert_almost_equal(mr_x_mr.column_index, expected)
 
 
 @pytest.mark.xfail(reason="Row index not implemented in frozen slice", strict=True)
 def test_mr_x_mr_slice_row_index():
-    slice_ = FrozenCube(CR.FULL_CUBE).slices[0]
+    slice_ = FrozenCube(CR.FULL_CUBE).partitions[0]
     expected = [
         96.5399786,
         101.08725891,
@@ -117,7 +117,7 @@ def test_mr_x_mr_slice_row_index():
 
 
 def test_cat_x_mr_slice_column_index():
-    slice_ = FrozenCube(CR.CAT_X_MR).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_MR).partitions[0]
     expected = np.array(
         [[90.9090909, 106.9518717, 95.6937799], [104.4776119, 96.5759438, 102.1209741]]
     )
@@ -126,7 +126,7 @@ def test_cat_x_mr_slice_column_index():
 
 @pytest.mark.xfail(reason="Row index not implemented in frozen slice", strict=True)
 def test_cat_x_mr_slice_row_index():
-    slice_ = FrozenCube(CR.CAT_X_MR).slices[0]
+    slice_ = FrozenCube(CR.CAT_X_MR).partitions[0]
     expected = np.array(
         [[85.7142857, 111.5294118, 96.1098398], [107.6923077, 94.6623094, 101.9036954]]
     )
@@ -134,7 +134,7 @@ def test_cat_x_mr_slice_row_index():
 
 
 def test_mr_x_mr_index_tables_parity_with_whaam_and_r():
-    slice_ = FrozenCube(CR.MR_X_MR_INDEX_TABLE).slices[0]
+    slice_ = FrozenCube(CR.MR_X_MR_INDEX_TABLE).partitions[0]
     # Test column direction
     expected = np.array(
         [
@@ -154,12 +154,12 @@ def test_mr_x_mr_index_tables_parity_with_whaam_and_r():
     #         [89.687996, 95.9909692, 182.3155665],
     #     ]
     # )
-    # actual = cat_x_mr.slices[0].index_table(axis=1)
+    # actual = cat_x_mr.partitions[0].index_table(axis=1)
     # np.testing.assert_almost_equal(actual, expected)
 
 
 def test_mr_x_3vl_index_tables_parity_with_nssat():
-    slice_ = FrozenCube(CR.NSSAT_MR_X_3vl).slices[0]
+    slice_ = FrozenCube(CR.NSSAT_MR_X_3vl).partitions[0]
     # Test column direction
     expected = np.array(
         [
@@ -181,12 +181,12 @@ def test_mr_x_3vl_index_tables_parity_with_nssat():
     #         [np.nan, np.nan],
     #     ]
     # )
-    # actual = mr_x_3vl.slices[0].index_table(axis=1)
+    # actual = mr_x_3vl.partitions[0].index_table(axis=1)
     # np.testing.assert_almost_equal(actual, expected)
 
 
 def test_mr_x_mr_index_tables_parity_with_nssat():
-    slice_ = FrozenCube(CR.NSSAT_MR_X_MR).slices[0]
+    slice_ = FrozenCube(CR.NSSAT_MR_X_MR).partitions[0]
 
     # Test column direction
     expected = np.array(
@@ -269,13 +269,13 @@ def test_mr_x_mr_index_tables_parity_with_nssat():
     #         [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
     #     ]
     # )
-    # actual = mr_x_mr.slices[0].index_table(axis=1)
+    # actual = mr_x_mr.partitions[0].index_table(axis=1)
     # np.testing.assert_almost_equal(actual, expected)
 
 
 def test_mr_single_cat_x_mr():
     # No pruning
-    slice_ = FrozenCube(CR.MR_SINGLE_CAT_X_MR).slices[0]
+    slice_ = FrozenCube(CR.MR_SINGLE_CAT_X_MR).partitions[0]
     expected = [[100, 100, np.nan]]
     np.testing.assert_array_equal(slice_.column_index, expected)
     # TODO: Implement row index table
@@ -286,13 +286,13 @@ def test_mr_single_cat_x_mr():
         "rows_dimension": {"prune": True},
         "columns_dimension": {"prune": True},
     }
-    slice_ = FrozenCube(CR.MR_SINGLE_CAT_X_MR, transforms=transforms).slices[0]
+    slice_ = FrozenCube(CR.MR_SINGLE_CAT_X_MR, transforms=transforms).partitions[0]
     expected = [[100, 100]]
     np.testing.assert_array_equal(slice_.column_index, expected)
 
 
 def test_mr_x_mr_single_cat():
-    slice_ = FrozenCube(CR.MR_X_MR_SINGLE_CAT).slices[0]
+    slice_ = FrozenCube(CR.MR_X_MR_SINGLE_CAT).partitions[0]
     expected = [[100], [100], [np.nan]]
     np.testing.assert_array_equal(slice_.column_index, expected)
 
@@ -301,6 +301,6 @@ def test_mr_x_mr_single_cat():
         "rows_dimension": {"prune": True},
         "columns_dimension": {"prune": True},
     }
-    slice_ = FrozenCube(CR.MR_X_MR_SINGLE_CAT, transforms=transforms).slices[0]
+    slice_ = FrozenCube(CR.MR_X_MR_SINGLE_CAT, transforms=transforms).partitions[0]
     expected = [[100], [100]]
     np.testing.assert_array_equal(slice_.column_index, expected)
