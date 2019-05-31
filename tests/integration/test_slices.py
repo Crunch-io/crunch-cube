@@ -442,12 +442,11 @@ class DescribeFrozenSlice(object):
         np.testing.assert_equal(slice_.base_counts, expected)
 
     def it_provides_nans_for_means_insertions(self):
-        slice_ = CubeSection.factory(
+        strand = CubeSection.factory(
             FrozenCube(CR.CAT_WITH_MEANS_AND_INSERTIONS), 0, None, None, None, 0
         )
         np.testing.assert_almost_equal(
-            slice_.means,
-            [[19.85555556], [13.85416667], [52.78947368], [np.nan], [np.nan]],
+            strand.means, [19.85555556, 13.85416667, 52.78947368, np.nan, np.nan]
         )
 
     def it_accommodates_an_all_missing_element_rows_dimension(self):

@@ -458,11 +458,14 @@ class _Strand(object):
 
     @lazyproperty
     def base_counts(self):
-        return np.array([row.base_values for row in self._stripe.rows])
+        return np.array([row.base_value for row in self._stripe.rows])
 
     @lazyproperty
     def counts(self):
-        return np.array([row.values for row in self._stripe.rows])
+        # TODO: This should be a normal sequence (tuple) of scalar (not array) values.
+        # fix exporter breakage that occurs on that change and fix including down to
+        # stripe-row.value properties.
+        return np.array([row.value for row in self._stripe.rows])
 
     @lazyproperty
     def dimension_types(self):
@@ -495,7 +498,7 @@ class _Strand(object):
 
     @lazyproperty
     def means(self):
-        return np.array([row.means for row in self._stripe.rows])
+        return np.array([row.mean for row in self._stripe.rows])
 
     @lazyproperty
     def min_base_size_mask(self):

@@ -15,12 +15,15 @@ from cr.cube.util import lazyproperty
 from cr.cube.vector import (
     AssembledVector,
     CategoricalVector,
+    CatStripeRow,
     CatXMrVector,
     InsertionColumn,
     InsertionRow,
+    MeansMrStripeRow,
+    MeansStripeRow,
     MeansVector,
-    MeansWithMrStripeVector,
     MeansWithMrVector,
+    MrStripeRow,
     MultipleResponseVector,
     OrderedVector,
     StripeInsertionRow,
@@ -663,6 +666,7 @@ class _MatrixWithMR(_CatXCatMatrix):
     @staticmethod
     def _array_type_std_res(counts, total, colsum, rowsum):
         expected_counts = rowsum * colsum / total
+        # TODO: this line occasionally raises overflow warnings in the tests.
         variance = rowsum * colsum * (total - rowsum) * (total - colsum) / total ** 3
         return (counts - expected_counts) / np.sqrt(variance)
 
@@ -992,20 +996,11 @@ class StripeFactory(object):
 
 
 class _BaseStripe(object):
-    """Base class for all stipe objects."""
+    """Base class for all stripe objects."""
 
-    def __init__(self, rows_dimension, measure, base_counts):
+    def __init__(self, rows_dimension, base_counts):
         self._rows_dimension = rows_dimension
-        self._measure = measure
         self._base_counts = base_counts
-
-    @lazyproperty
-    def ndim(self):
-        """int count of dimensions in this stripe, unconditionally 1.
-
-        A stripe is by definition one-dimensional.
-        """
-        return 1
 
     @lazyproperty
     def rows_dimension(self):
@@ -1028,89 +1023,80 @@ class _CatStripe(_BaseStripe):
     """
 
     def __init__(self, rows_dimension, counts, base_counts):
-        super(_CatStripe, self).__init__(rows_dimension, counts, base_counts)
+        super(_CatStripe, self).__init__(rows_dimension, base_counts)
         self._counts = counts
 
     @lazyproperty
     def rows(self):
+        table_margin = self.table_margin
         return tuple(
-            CategoricalVector(counts, base_counts, element, self.table_margin, zscore)
-            for (counts, base_counts, element, zscore) in self._row_generator
+            CatStripeRow(element, count, base_count, table_margin)
+            for (element, count, base_count) in zip(
+                self._row_elements, self._counts, self._base_counts
+            )
         )
 
     @lazyproperty
     def table_margin(self):
+        """Needed by inserted rows in later transformation step."""
         return np.sum(self._counts)
-
-    @lazyproperty
-    def _row_generator(self):
-        return zip(self._counts, self._base_counts, self._row_elements, self._zscores)
-
-    @lazyproperty
-    def _zscores(self):
-        # TODO: Fix with real zscores
-        return tuple([np.nan for _ in self._counts])
 
 
 class _MeansStripe(_BaseStripe):
     """A 1D calculator for a strand containing mean first-order measure."""
 
     def __init__(self, rows_dimension, means, base_counts):
-        super(_MeansStripe, self).__init__(rows_dimension, means, base_counts)
+        super(_MeansStripe, self).__init__(rows_dimension, base_counts)
         self._means = means
 
     @lazyproperty
     def rows(self):
-        """Rows for Means slice, that enable iteration over labels.
-
-        These vectors are not used for any computations. `means` is used for that,
-        directly. However, for the wirng of the exporter, these mean slices need to
-        support some additional API, such as labels. And for that, they need to
-        support row iteration.
-        """
         return tuple(
-            MeansVector(element, base_counts, np.array([means]))
-            for element, base_counts, means in self._row_generator
+            MeansStripeRow(element, base_count, mean)
+            for element, base_count, mean in zip(
+                self._rows_dimension.valid_elements, self._base_counts, self._means
+            )
         )
 
     @lazyproperty
     def table_margin(self):
         return np.sum(self._base_counts)
 
-    @lazyproperty
-    def _row_generator(self):
-        return zip(self._rows_dimension.valid_elements, self._base_counts, self._means)
 
-
-class _MeansWithMrStripe(_MeansStripe):
+class _MeansWithMrStripe(_BaseStripe):
     """Means behavior differs when dimension is MR."""
+
+    def __init__(self, rows_dimension, means, base_counts):
+        super(_MeansWithMrStripe, self).__init__(rows_dimension, base_counts)
+        self._means = means
 
     @lazyproperty
     def rows(self):
         return tuple(
-            MeansWithMrStripeVector(element, base_counts, means)
-            for element, base_counts, means in self._row_generator
+            MeansMrStripeRow(element, base_counts, means)
+            for element, base_counts, means in zip(
+                self._rows_dimension.valid_elements, self._base_counts, self._means
+            )
         )
+
+    @lazyproperty
+    def table_margin(self):
+        return np.sum(self._base_counts)
 
 
 class _MrStripe(_BaseStripe):
     """Special case of 1-D MR slice (stripe)."""
 
     def __init__(self, rows_dimension, counts, base_counts):
-        super(_MrStripe, self).__init__(rows_dimension, counts, base_counts)
+        super(_MrStripe, self).__init__(rows_dimension, base_counts)
         self._counts = counts
 
     @lazyproperty
     def rows(self):
-        """Use only selected counts."""
         return tuple(
-            CatXMrVector(counts, base_counts, element, table_margin, zscore)
-            for (counts, base_counts, element, table_margin, zscore) in zip(
-                self._counts,
-                self._base_counts,
-                self._row_elements,
-                self.table_margin,
-                self._zscores,
+            MrStripeRow(element, counts, base_counts, table_margin)
+            for (element, counts, base_counts, table_margin) in zip(
+                self._row_elements, self._counts, self._base_counts, self.table_margin
             )
         )
 
@@ -1121,7 +1107,3 @@ class _MrStripe(_BaseStripe):
     @lazyproperty
     def table_margin(self):
         return np.sum(self._counts, axis=1)
-
-    @lazyproperty
-    def _zscores(self):
-        return np.array([np.nan] * self._base_counts.shape[0])

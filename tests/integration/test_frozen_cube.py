@@ -283,9 +283,9 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         self.assertEqual(cube_dict, CR.CAT_X_CAT)
 
     def test_as_array_univariate_cat_exclude_missing(self):
-        slice_ = FrozenCube(CR.UNIVARIATE_CATEGORICAL).slices[0]
-        np.testing.assert_array_equal(slice_.counts, np.array([[10], [5]]))
-        np.testing.assert_array_equal(slice_.base_counts, np.array([[10], [5]]))
+        strand = FrozenCube(CR.UNIVARIATE_CATEGORICAL).slices[0]
+        np.testing.assert_array_equal(strand.counts, np.array([[10], [5]]))
+        np.testing.assert_array_equal(strand.base_counts, np.array([10, 5]))
 
     def test_as_array_numeric(self):
         slice_ = FrozenCube(CR.VOTER_REGISTRATION).slices[0]
@@ -1278,12 +1278,12 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
 
     def test_total_unweighted_margin_when_has_means(self):
         """Tests that total margin is Unweighted N, when cube has means."""
-        slice_ = FrozenCube(CR.CAT_MEAN_WGTD).slices[0]
+        strand = FrozenCube(CR.CAT_MEAN_WGTD).slices[0]
         # TODO: Fix after base is implemented for means slices
-        assert slice_.means.shape == (6367, 1)
-        assert slice_.table_margin == 17615
-        assert slice_.ndim == 1
-        assert slice_.shape == (6367, 1)
+        assert strand.means.shape == (6367,)
+        assert strand.table_margin == 17615
+        assert strand.ndim == 1
+        assert strand.shape == (6367,)
 
     def test_1D_means_pruned(self):
         """Tests that total margin is Unweighted N, when cube has means."""
@@ -1292,41 +1292,41 @@ class TestCrunchCubeAsFrozenSlice(TestCase):
         np.testing.assert_almost_equal(
             slice_.means,
             [
-                [74.50346622],
-                [83.41506223],
-                [83.82949734],
-                [80.44269781],
-                [79.38796217],
-                [68.23023886],
-                [77.02288763],
-                [78.86549638],
-                [85.31353177],
-                [83.61415346],
-                [83.0],
-                [65.89693441],
-                [61.7454857],
-                [83.28116575],
-                [82.88105494],
-                [84.12529155],
-                [71.36926833],
-                [77.92065684],
-                [77.29306375],
-                [79.73236992],
-                [84.49053524],
-                [67.86766862],
-                [72.94684356],
-                [82.56469913],
-                [71.05086738],
-                [83.85586938],
-                [81.74092388],
-                [57.6486009],
-                [82.98626745],
-                [78.11554074],
-                [76.16142377],
-                [76.43885371],
-                [71.04143565],
-                [82.79687964],
-                [54.20533614],
+                74.50346622,
+                83.41506223,
+                83.82949734,
+                80.44269781,
+                79.38796217,
+                68.23023886,
+                77.02288763,
+                78.86549638,
+                85.31353177,
+                83.61415346,
+                83.0,
+                65.89693441,
+                61.7454857,
+                83.28116575,
+                82.88105494,
+                84.12529155,
+                71.36926833,
+                77.92065684,
+                77.29306375,
+                79.73236992,
+                84.49053524,
+                67.86766862,
+                72.94684356,
+                82.56469913,
+                71.05086738,
+                83.85586938,
+                81.74092388,
+                57.6486009,
+                82.98626745,
+                78.11554074,
+                76.16142377,
+                76.43885371,
+                71.04143565,
+                82.79687964,
+                54.20533614,
             ],
         )
         assert slice_.table_base == 17615
