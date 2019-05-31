@@ -18,12 +18,20 @@ from cr.cube.util import lazyproperty
 # ===TRANSFORMATION VECTORS===
 
 
-class _BaseInsertionVector(object):
-    """Base class for all insertion vectors."""
+class _BaseMatrixInsertionVector(object):
+    """Base class for matrix insertion vectors.
 
-    def __init__(self, partition, subtotal):
-        self._partition = partition
+    There are some differences that arise when there are rows *and* columns, which
+    entails the complication of insertion *intersections*.
+    """
+
+    def __init__(self, matrix, subtotal):
+        self._matrix = matrix
         self._subtotal = subtotal
+
+    @lazyproperty
+    def addend_idxs(self):
+        return np.array(self._subtotal.addend_idxs)
 
     @lazyproperty
     def anchor(self):
@@ -38,46 +46,6 @@ class _BaseInsertionVector(object):
         return np.sum(
             np.array([row.base_values for row in self._addend_vectors]), axis=0
         )
-
-    @lazyproperty
-    def is_insertion(self):
-        return True
-
-    @lazyproperty
-    def label(self):
-        return self._subtotal.label
-
-    @lazyproperty
-    def means(self):
-        return np.array([np.nan])
-
-    @lazyproperty
-    def numeric(self):
-        return np.nan
-
-    @lazyproperty
-    def table_margin(self):
-        return self._partition.table_margin
-
-    @lazyproperty
-    def values(self):
-        return np.sum(np.array([row.values for row in self._addend_vectors]), axis=0)
-
-
-class _BaseMatrixInsertionVector(_BaseInsertionVector):
-    """Base class for matrix insertion vectors.
-
-    There are some differences that arise when there are rows *and* columns, which
-    entails the complication of insertion *intersections*.
-    """
-
-    def __init__(self, matrix, subtotal):
-        super(_BaseMatrixInsertionVector, self).__init__(matrix, subtotal)
-        self._matrix = matrix
-
-    @lazyproperty
-    def addend_idxs(self):
-        return np.array(self._subtotal.addend_idxs)
 
     @lazyproperty
     def column_index(self):
@@ -107,8 +75,32 @@ class _BaseMatrixInsertionVector(_BaseInsertionVector):
         return self.pruned
 
     @lazyproperty
+    def is_insertion(self):
+        return True
+
+    @lazyproperty
+    def label(self):
+        return self._subtotal.label
+
+    @lazyproperty
     def margin(self):
         return np.sum(np.array([vec.margin for vec in self._addend_vectors]), axis=0)
+
+    @lazyproperty
+    def means(self):
+        return np.array([np.nan])
+
+    @lazyproperty
+    def numeric(self):
+        return np.nan
+
+    @lazyproperty
+    def table_margin(self):
+        return self._matrix.table_margin
+
+    @lazyproperty
+    def values(self):
+        return np.sum(np.array([row.values for row in self._addend_vectors]), axis=0)
 
 
 class InsertionColumn(_BaseMatrixInsertionVector):
@@ -167,12 +159,31 @@ class InsertionRow(_BaseMatrixInsertionVector):
         )
 
 
-class StripeInsertionRow(_BaseInsertionVector):
-    """Represents an inserted (subtotal) row."""
+class StripeInsertionRow(object):
+    """Represents an inserted (subtotal) row.
 
-    def __init__(self, stripe, subtotal):
-        super(StripeInsertionRow, self).__init__(stripe, subtotal)
-        self._stripe = stripe
+    This row item participates like any other row item, and a lot of its public
+    properties are used by the strand object to form aggregate values across all rows.
+    """
+
+    def __init__(self, subtotal, base_rows, table_margin):
+        self._subtotal = subtotal
+        self._base_rows = base_rows
+        self._table_margin = table_margin
+
+    @lazyproperty
+    def anchor(self):
+        return self._subtotal.anchor_idx
+
+    @lazyproperty
+    def base(self):
+        return np.sum(np.array([vec.base for vec in self._addend_vectors]), axis=0)
+
+    @lazyproperty
+    def base_values(self):
+        return np.sum(
+            np.array([row.base_values for row in self._addend_vectors]), axis=0
+        )
 
     @lazyproperty
     def hidden(self):
@@ -180,14 +191,38 @@ class StripeInsertionRow(_BaseInsertionVector):
         return False
 
     @lazyproperty
+    def is_insertion(self):
+        return True
+
+    @lazyproperty
+    def label(self):
+        return self._subtotal.label
+
+    @lazyproperty
+    def means(self):
+        return np.array([np.nan])
+
+    @lazyproperty
+    def numeric(self):
+        return np.nan
+
+    @lazyproperty
+    def table_margin(self):
+        return self._table_margin
+
+    @lazyproperty
     def table_proportions(self):
         return self.values / self.table_margin
+
+    @lazyproperty
+    def values(self):
+        return np.sum(np.array([row.values for row in self._addend_vectors]), axis=0)
 
     @lazyproperty
     def _addend_vectors(self):
         return tuple(
             row
-            for i, row in enumerate(self._stripe.rows)
+            for i, row in enumerate(self._base_rows)
             if i in self._subtotal.addend_idxs
         )
 

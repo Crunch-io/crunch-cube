@@ -75,38 +75,84 @@ class TransformedStripe(object):
 
     @lazyproperty
     def rows(self):
-        """Sequence of post-transformation row vectors."""
-        return tuple(_StripeInsertionHelper.iter_interleaved_rows(self._ordered_stripe))
+        """Sequence of post-transformation row vectors.
+
+        All transforms are applied in this unit. `._ordered_rows` applies ordering,
+        _StripeInsertionHelper creates and interleaves subtotal rows, and hidden rows
+        are removed directly in this main row iterator.
+        """
+        return tuple(
+            row
+            for row in _StripeInsertionHelper.iter_interleaved_rows(
+                self._rows_dimension, self._ordered_rows, self._table_margin
+            )
+            if not row.hidden
+        )
 
     @lazyproperty
     def table_base_unpruned(self):
         """Hmm, weird 1D ndarray with same int value repeated for each row."""
-        return self._ordered_stripe.table_base
+        return self._base_stripe.table_base
 
     @lazyproperty
     def table_margin_unpruned(self):
         """Hmm, weird 1D ndarray with same float value repeated for each row."""
-        return self._ordered_stripe.table_margin
+        return self._base_stripe.table_margin
 
     @lazyproperty
-    def _ordered_stripe(self):
-        return _OrderedStripe(self._base_stripe)
+    def _ordered_rows(self):
+        return tuple(np.array(self._base_stripe.rows)[self._row_order])
+
+    @lazyproperty
+    def _row_order(self):
+        """Indexer value identifying rows in order, suitable for slicing an ndarray.
+
+        This value is a 1D ndarray of int row indices, used for indexing the rows array
+        to produce an ordered version.
+        """
+        # ---Specifying int type prevents failure when there are zero rows---
+        return np.array(self._rows_dimension.display_order, dtype=int)
+
+    @lazyproperty
+    def _rows_dimension(self):
+        return self._base_stripe.rows_dimension
+
+    @lazyproperty
+    def _table_margin(self):
+        """Needed by inserted rows."""
+        return self._base_stripe.table_margin
 
 
 class _StripeInsertionHelper(object):
     """Base class for ordering partitions."""
 
-    def __init__(self, ordered_stripe):
-        self._ordered_stripe = ordered_stripe
+    def __init__(self, rows_dimension, ordered_rows, table_margin):
+        self._rows_dimension = rows_dimension
+        self._ordered_rows = ordered_rows
+        self._table_margin = table_margin
 
     @classmethod
-    def iter_interleaved_rows(cls, ordered_stripe):
+    def iter_interleaved_rows(cls, rows_dimension, ordered_rows, table_margin):
         """Generate rows with subtotals in correct position."""
-        return cls(ordered_stripe)._iter_interleaved_rows()
+        return cls(rows_dimension, ordered_rows, table_margin)._iter_interleaved_rows()
 
     def _iter_interleaved_rows(self):
-        """Generate rows with subtotals in correct position."""
-        return (row for row in self._iter_rows_with_insertions() if not row.hidden)
+        """Generate all row vectors with insertions interleaved at right spot."""
+        # ---subtotals inserted at top---
+        for row in self._all_inserted_rows:
+            if row.anchor == "top":
+                yield row
+
+        # ---body rows with subtotals anchored to specific body positions---
+        for idx, row in enumerate(self._ordered_rows):
+            yield row
+            for inserted_row in self._iter_inserted_rows_anchored_at(idx):
+                yield inserted_row
+
+        # ---subtotals appended at bottom---
+        for row in self._all_inserted_rows:
+            if row.anchor == "bottom":
+                yield row
 
     @lazyproperty
     def _all_inserted_rows(self):
@@ -120,7 +166,7 @@ class _StripeInsertionHelper(object):
             return tuple()
 
         return tuple(
-            StripeInsertionRow(self._ordered_stripe, subtotal)
+            StripeInsertionRow(subtotal, self._ordered_rows, self._table_margin)
             for subtotal in self._rows_dimension.subtotals
         )
 
@@ -128,63 +174,11 @@ class _StripeInsertionHelper(object):
         """Generate all inserted row vectors with matching `anchor`."""
         return (row for row in self._all_inserted_rows if row.anchor == anchor)
 
-    def _iter_rows_with_insertions(self):
-        """Generate all row vectors with insertions interleaved at right spot."""
-        # ---subtotals inserted at top---
-        for row in self._all_inserted_rows:
-            if row.anchor == "top":
-                yield row
 
-        # ---body rows with subtotals anchored to specific body positions---
-        for idx, row in enumerate(self._ordered_stripe.rows):
-            yield row
-            for inserted_row in self._iter_inserted_rows_anchored_at(idx):
-                yield inserted_row
-
-        # ---subtotals appended at bottom---
-        for row in self._all_inserted_rows:
-            if row.anchor == "bottom":
-                yield row
-
-    @lazyproperty
-    def _rows_dimension(self):
-        return self._ordered_stripe.rows_dimension
-
-
-class _BaseOrderedPartition(object):
-    """Base class for ordering partitions."""
-
-    def __init__(self, base_partition):
-        self._base_partition = base_partition
-
-    @lazyproperty
-    def rows_dimension(self):
-        return self._base_partition.rows_dimension
-
-    @lazyproperty
-    def table_base(self):
-        return self._base_partition.table_base
-
-    @lazyproperty
-    def table_margin(self):
-        return self._base_partition.table_margin
-
-    @lazyproperty
-    def _row_order(self):
-        """Indexer value identifying rows in order, suitable for slicing an ndarray.
-
-        This value is a 1D ndarray of int row indices, suitable for indexing the rows
-        array to produce an ordered version.
-        """
-        # ---Specifying int type prevents failure when there are zero rows---
-        return np.array(self.rows_dimension.display_order, dtype=int)
-
-
-class _OrderedMatrix(_BaseOrderedPartition):
+class _OrderedMatrix(object):
     """Matrix reflecting result of element-ordering transforms."""
 
     def __init__(self, base_matrix):
-        super(_OrderedMatrix, self).__init__(base_matrix)
         self._base_matrix = base_matrix
 
     @lazyproperty
@@ -202,8 +196,20 @@ class _OrderedMatrix(_BaseOrderedPartition):
     def rows(self):
         return tuple(
             OrderedVector(row, self._column_order)
-            for row in tuple(np.array(self._base_partition.rows)[self._row_order])
+            for row in tuple(np.array(self._base_matrix.rows)[self._row_order])
         )
+
+    @lazyproperty
+    def rows_dimension(self):
+        return self._base_matrix.rows_dimension
+
+    @lazyproperty
+    def table_base(self):
+        return self._base_matrix.table_base
+
+    @lazyproperty
+    def table_margin(self):
+        return self._base_matrix.table_margin
 
     @lazyproperty
     def _column_order(self):
@@ -216,20 +222,15 @@ class _OrderedMatrix(_BaseOrderedPartition):
         # ---default type for ndarray is float, which is not valid for indexing.
         return np.array(self.columns_dimension.display_order, dtype=int)
 
-
-class _OrderedStripe(_BaseOrderedPartition):
-    """Result of the ordering transform.
-
-    In charge of indexing rows and columns properly.
-    """
-
-    def __init__(self, base_stripe):
-        super(_OrderedStripe, self).__init__(base_stripe)
-        self._base_stripe = base_stripe
-
     @lazyproperty
-    def rows(self):
-        return tuple(np.array(self._base_stripe.rows)[self._row_order])
+    def _row_order(self):
+        """Indexer value identifying rows in order, suitable for slicing an ndarray.
+
+        This value is a 1D ndarray of int row indices, suitable for indexing the rows
+        array to produce an ordered version.
+        """
+        # ---Specifying int type prevents failure when there are zero rows---
+        return np.array(self.rows_dimension.display_order, dtype=int)
 
 
 class _MatrixWithHidden(object):
