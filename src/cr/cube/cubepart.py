@@ -145,13 +145,13 @@ class _Slice(object):
         return self._dimensions
 
     @lazyproperty
-    def insertion_columns_idxs(self):
+    def inserted_column_idxs(self):
         return tuple(
             i for i, column in enumerate(self._matrix.columns) if column.is_insertion
         )
 
     @lazyproperty
-    def insertion_rows_idxs(self):
+    def inserted_row_idxs(self):
         return tuple(i for i, row in enumerate(self._matrix.rows) if row.is_insertion)
 
     @lazyproperty
@@ -498,12 +498,7 @@ class _Strand(object):
         return (self._rows_dimension,)
 
     @lazyproperty
-    def insertion_columns_idxs(self):
-        # TODO: pretty sure the need for this should come out of exporter.
-        return ()
-
-    @lazyproperty
-    def insertion_rows_idxs(self):
+    def inserted_row_idxs(self):
         # TODO: add integration-test coverage for this.
         return tuple(i for i, row in enumerate(self._stripe.rows) if row.is_insertion)
 
@@ -536,6 +531,10 @@ class _Strand(object):
         return np.array([row.base for row in self._stripe.rows])
 
     @lazyproperty
+    def row_count(self):
+        return len(self._stripe.rows)
+
+    @lazyproperty
     def row_labels(self):
         return tuple(row.label for row in self._stripe.rows)
 
@@ -566,17 +565,24 @@ class _Strand(object):
         """Member of DIMENSION_TYPE enum describing type of rows dimension."""
         return self._rows_dimension.dimension_type
 
+    # TODO: @slobodan: what do we mean "scale-means *row*"? Does this mean *summary*
+    # value of scale means calculated in row direction or something? On reflection, I'm
+    # thinking this is always expected to be a single value (for a strand) and
+    # represents the overall mean of the numeric values for the rows dimension.
     @lazyproperty
-    def scale_means_row(self):
+    def scale_mean(self):
+        """... or None."""
         if np.all(np.isnan(self._rows_dimension_numeric)):
             return None
         inner = np.nansum(self._rows_dimension_numeric[:, None] * self.counts, axis=0)
         not_a_nan_index = ~np.isnan(self._rows_dimension_numeric)
         denominator = np.sum(self.counts[not_a_nan_index, :], axis=0)
-        return inner / denominator
+        return (inner / denominator)[0]
 
     @lazyproperty
     def shape(self):
+        # TODO: This property should probably go away as we modify exporter to deal in
+        # a distinct way with _Strand objects.
         return self.counts.shape
 
     @lazyproperty
@@ -643,6 +649,7 @@ class _Strand(object):
 
     @lazyproperty
     def _rows_dimension_numeric(self):
+        """Array of numeric or np.nan numeric value for each row-category."""
         return np.array([row.numeric for row in self._stripe.rows])
 
     @lazyproperty

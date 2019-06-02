@@ -122,8 +122,8 @@ def test_mr_x_cat():
 
 
 def test_univariate_cat():
-    slice_ = FrozenCube(SM.UNIVARIATE_CAT).partitions[0]
-    np.testing.assert_almost_equal(slice_.scale_means_row, [2.6865854])
+    strand = FrozenCube(SM.UNIVARIATE_CAT).partitions[0]
+    np.testing.assert_almost_equal(strand.scale_mean, [2.6865854])
 
 
 def test_cat_x_cat_with_hs():
@@ -163,12 +163,12 @@ def test_univariate_with_hs():
         "columns_dimension": {"insertions": {}},
         "rows_dimension": {"insertions": {}},
     }
-    slice_ = FrozenCube(CR.ECON_BLAME_WITH_HS, transforms).partitions[0]
-    np.testing.assert_almost_equal(slice_.scale_means_row, [2.17352056])
+    strand = FrozenCube(CR.ECON_BLAME_WITH_HS, transforms).partitions[0]
+    np.testing.assert_almost_equal(strand.scale_mean, [2.17352056])
 
     # Test with H&S
-    slice_ = FrozenCube(CR.ECON_BLAME_WITH_HS).partitions[0]
-    np.testing.assert_almost_equal(slice_.scale_means_row, [2.17352056])
+    strand = FrozenCube(CR.ECON_BLAME_WITH_HS).partitions[0]
+    np.testing.assert_almost_equal(strand.scale_mean, [2.17352056])
 
 
 def test_cat_x_cat_with_hs_on_both_dims():
@@ -306,8 +306,8 @@ def test_cat_single_element_x_cat():
 
 
 def test_means_univariate_cat():
-    slice_ = FrozenCube(CR.ECON_BLAME_WITH_HS).partitions[0]
-    np.testing.assert_almost_equal(slice_.scale_means_row, [2.1735205616850553])
+    strand = FrozenCube(CR.ECON_BLAME_WITH_HS).partitions[0]
+    np.testing.assert_almost_equal(strand.scale_mean, [2.1735205616850553])
 
 
 def test_means_bivariate_cat():

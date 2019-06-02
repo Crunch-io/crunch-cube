@@ -58,8 +58,8 @@ class Describe_Slice(object):
             [0.33333333, 0.66666667, 0.33333333, 0.33333333, 0.0, 0.0],
         ]
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
-        assert slice_.insertion_rows_idxs == (1,)
-        assert slice_.insertion_columns_idxs == (1,)
+        assert slice_.inserted_row_idxs == (1,)
+        assert slice_.inserted_column_idxs == (1,)
         assert slice_.name == "MaritalStatus"
         assert slice_.dimension_types == (DT.CAT, DT.CAT)
         assert slice_.ndim == 2
