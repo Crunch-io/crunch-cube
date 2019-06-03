@@ -294,6 +294,10 @@ class _StripeInsertionRow(object):
         return np.sum(np.array([row.base_value for row in self._addend_rows]))
 
     @lazyproperty
+    def count(self):
+        return np.sum(np.array([row.count for row in self._addend_rows]), axis=0)
+
+    @lazyproperty
     def hidden(self):
         """True if subtotal is pruned. Unconditionally False for stripe subtotal row."""
         return False
@@ -311,7 +315,11 @@ class _StripeInsertionRow(object):
         return np.nan
 
     @lazyproperty
-    def numeric(self):
+    def numeric_value(self):
+        """Numeric value (or np.nan) assigned to the element of this row.
+
+        This is unconditionally np.nan for a subtotal row.
+        """
         return np.nan
 
     @lazyproperty
@@ -378,7 +386,17 @@ class _BaseStripeRow(object):
         return self._element.label
 
     @lazyproperty
-    def numeric(self):
+    def numeric_value(self):
+        """Numeric value (or np.nan) assigned to the element of this row.
+
+        This allows a categorical value to participate in certain quantitative
+        representations. For example, very-x to not-at-all-x could be assigned the
+        values from 5 to 1, allowing a mean numeric sentiment like "3.5 on scale of 5"
+        to be calculated.
+
+        This value is np.nan when no numeric value has been assigned or numeric value is
+        not applicable (such as for a numeric variable).
+        """
         return self._element.numeric_value
 
 
@@ -402,6 +420,11 @@ class _CatStripeRow(_BaseStripeRow):
     @lazyproperty
     def base_value(self):
         return self._base_count
+
+    @lazyproperty
+    def count(self):
+        """Weighted count for this row."""
+        return self._count
 
     @lazyproperty
     def margin(self):
@@ -443,6 +466,11 @@ class _MeansStripeRow(_BaseStripeRow):
     @lazyproperty
     def base(self):
         return self._base_count
+
+    @lazyproperty
+    def count(self):
+        """It's a programming error if this is ever called."""
+        raise NotImplementedError("Mean measure has no unweighted count.")
 
     @lazyproperty
     def mean(self):

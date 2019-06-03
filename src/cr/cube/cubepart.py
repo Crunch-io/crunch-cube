@@ -565,19 +565,31 @@ class _Strand(object):
         """Member of DIMENSION_TYPE enum describing type of rows dimension."""
         return self._rows_dimension.dimension_type
 
-    # TODO: @slobodan: what do we mean "scale-means *row*"? Does this mean *summary*
-    # value of scale means calculated in row direction or something? On reflection, I'm
-    # thinking this is always expected to be a single value (for a strand) and
-    # represents the overall mean of the numeric values for the rows dimension.
     @lazyproperty
     def scale_mean(self):
-        """... or None."""
-        if np.all(np.isnan(self._rows_dimension_numeric)):
+        """float mean of numeric-value applied to elements, or None.
+
+        This value is `None` when no row-elements have a numeric-value assigned.
+        """
+        numeric_values = self._numeric_values
+
+        # ---return None when no row-element has been assigned a numeric value. This
+        # ---avoids a division-by-zero error.
+        if np.all(np.isnan(numeric_values)):
             return None
-        inner = np.nansum(self._rows_dimension_numeric[:, None] * self.counts, axis=0)
-        not_a_nan_index = ~np.isnan(self._rows_dimension_numeric)
-        denominator = np.sum(self.counts[not_a_nan_index, :], axis=0)
-        return (inner / denominator)[0]
+
+        # ---produce operands with rows without numeric values removed. Notably, this
+        # ---excludes subtotal rows.
+        is_a_number_mask = ~np.isnan(numeric_values)
+        numeric_values = numeric_values[is_a_number_mask]
+        counts = self._counts_as_array[is_a_number_mask]
+
+        # ---calculate numerator and denominator---
+        total_numeric_value = np.sum(numeric_values * counts)
+        total_count = np.sum(counts)
+
+        # ---overall scale-mean is the quotient---
+        return total_numeric_value / total_count
 
     @lazyproperty
     def shape(self):
@@ -643,14 +655,23 @@ class _Strand(object):
     # ---implementation (helpers)-------------------------------------
 
     @lazyproperty
+    def _counts_as_array(self):
+        """1D ndarray of count for each row."""
+        return np.array([row.count for row in self._stripe.rows])
+
+    @lazyproperty
+    def _numeric_values(self):
+        """Array of numeric-value for each element in rows dimension.
+
+        The items in the array can be numeric or np.nan, which appears for an inserted
+        row (subtotal) or where the row-element has been assigned no numeric value.
+        """
+        return np.array([row.numeric_value for row in self._stripe.rows])
+
+    @lazyproperty
     def _rows_dimension(self):
         """Dimension object for the single dimension of this strand."""
         return self._cube.dimensions[-1].apply_transforms(self._row_transforms_dict)
-
-    @lazyproperty
-    def _rows_dimension_numeric(self):
-        """Array of numeric or np.nan numeric value for each row-category."""
-        return np.array([row.numeric for row in self._stripe.rows])
 
     @lazyproperty
     def _row_transforms_dict(self):
