@@ -1,111 +1,159 @@
 # encoding: utf-8
 
-"""The matrix objects used by frozen-slice.
+"""A matrix is the 2D cube-data partition used by a slice.
 
-A matrix object has rows and (usually) columns.
+A matrix object has rows and columns.
 """
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from collections import namedtuple
 import numpy as np
+from scipy.stats import norm
 from scipy.stats.contingency import expected_freq
 
 from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.util import lazyproperty
-from cr.cube.vector import (
-    AssembledInsertionVector,
-    AssembledVector,
-    BaseVector,
-    CategoricalVector,
-    CatXMrVector,
-    HiddenVector,
-    MeansVector,
-    MeansWithMrVector,
-    MultipleResponseVector,
-    OrderedVector,
-    PrunedVector,
-)
 
 
-class _BaseTransformedMatrix(object):
-    """Base class for late-stage matrices that transform a base matrix."""
+class TransformedMatrix(object):
+    """Matrix reflection application of all transforms."""
 
-    def __init__(self, base_slice, transforms):
-        self._base_slice = base_slice
-        self._transforms = transforms
+    def __init__(self, base_matrix):
+        self._base_matrix = base_matrix
+
+    @classmethod
+    def matrix(cls, cube, dimensions, slice_idx):
+        """Return a TransformedMatrix object constructed from this cube result."""
+        return cls(_BaseBaseMatrix.factory(cube, dimensions, slice_idx))
+
+    @lazyproperty
+    def columns(self):
+        return self._transformed_matrix.columns
+
+    @lazyproperty
+    def rows(self):
+        return self._transformed_matrix.rows
 
     @lazyproperty
     def table_base(self):
-        return self._base_slice.table_base
+        return self._transformed_matrix.table_base
+
+    @lazyproperty
+    def table_base_unpruned(self):
+        return self._transformed_matrix.table_base_unpruned
 
     @lazyproperty
     def table_margin(self):
-        return self._base_slice.table_margin
+        return self._transformed_matrix.table_margin
+
+    @lazyproperty
+    def table_margin_unpruned(self):
+        return self._transformed_matrix.table_margin_unpruned
+
+    @lazyproperty
+    def _transformed_matrix(self):
+        """Apply all transforms sequentially."""
+        matrix = _OrderedMatrix(self._base_matrix)
+        matrix = _MatrixWithInsertions(matrix)
+        matrix = _MatrixWithHidden(matrix)
+        return matrix
 
 
-class OrderedMatrix(_BaseTransformedMatrix):
-    """Result of the ordering transform.
+# === TRANSFORMATION-MATRIX OBJECTS ===
 
-    In charge of indexing rows and columns properly.
-    """
+
+class _OrderedMatrix(object):
+    """Matrix reflecting result of element-ordering transforms."""
+
+    def __init__(self, base_matrix):
+        self._base_matrix = base_matrix
 
     @lazyproperty
     def columns(self):
         return tuple(
-            OrderedVector(column, self._ordering.row_order)
-            for column in tuple(
-                np.array(self._base_slice.columns)[self._ordering.column_order]
-            )
+            _OrderedVector(column, self._row_order)
+            for column in tuple(np.array(self._base_matrix.columns)[self._column_order])
+        )
+
+    @lazyproperty
+    def columns_dimension(self):
+        return self._base_matrix.columns_dimension
+
+    @lazyproperty
+    def rows(self):
+        return tuple(
+            _OrderedVector(row, self._column_order)
+            for row in tuple(np.array(self._base_matrix.rows)[self._row_order])
+        )
+
+    @lazyproperty
+    def rows_dimension(self):
+        return self._base_matrix.rows_dimension
+
+    @lazyproperty
+    def table_base(self):
+        return self._base_matrix.table_base
+
+    @lazyproperty
+    def table_margin(self):
+        return self._base_matrix.table_margin
+
+    @lazyproperty
+    def _column_order(self):
+        """Indexer value identifying columns in order, suitable for slicing an ndarray.
+
+        This value is a 1D ndarray of int column indices, suitable for indexing the
+        columns array to produce an ordered version.
+        """
+        # ---Specifying int type prevents failure when there are zero columns. The
+        # ---default type for ndarray is float, which is not valid for indexing.
+        return np.array(self.columns_dimension.display_order, dtype=int)
+
+    @lazyproperty
+    def _row_order(self):
+        """Indexer value identifying rows in order, suitable for slicing an ndarray.
+
+        This value is a 1D ndarray of int row indices, suitable for indexing the rows
+        array to produce an ordered version.
+        """
+        # ---Specifying int type prevents failure when there are zero rows---
+        return np.array(self.rows_dimension.display_order, dtype=int)
+
+
+class _MatrixWithHidden(object):
+    """Matrix with hidden vectors removed.
+
+    A vector can be hidden explicitly by the user, or it can be automatically hidden
+    when it is empty and the prune option for the dimension is selected.
+    """
+
+    # ---Note that hiding a vector requires not just removing that vector, but also
+    # ---the element the removed vector contributes to each of the *opposing* vectors.
+    # ---For example, hiding a row is removing that row-vector from `.rows`, but also
+    # ---removing an element from each column-vector in `.columns`.
+
+    def __init__(self, base_matrix):
+        self._base_matrix = base_matrix
+
+    @lazyproperty
+    def columns(self):
+        return tuple(
+            _VectorAfterHiding(column, self._base_matrix.rows)
+            for column in self._base_matrix.columns
+            if not column.hidden
         )
 
     @lazyproperty
     def rows(self):
         return tuple(
-            OrderedVector(row, self._ordering.column_order)
-            for row in tuple(np.array(self._base_slice.rows)[self._ordering.row_order])
-        )
-
-    @lazyproperty
-    def _ordering(self):
-        return self._transforms.ordering
-
-
-class PrunedMatrix(_BaseTransformedMatrix):
-    """Matrix with rows or columns pruned.
-
-    While the rows and/or columns need to be pruned, each one of the remaining
-    vectors also needs to be pruned based on the opposite dimension's base.
-    """
-
-    @lazyproperty
-    def columns(self):
-        if not self._applied:
-            return self._base_slice.columns
-
-        return tuple(
-            PrunedVector(column, self._base_slice.rows)
-            for column in self._base_slice.columns
-            if not column.pruned
-        )
-
-    @lazyproperty
-    def rows(self):
-        if not self._applied:
-            return self._base_slice.rows
-
-        return tuple(
-            PrunedVector(row, self._base_slice.columns)
-            for row in self._base_slice.rows
-            if not row.pruned
+            _VectorAfterHiding(row, self._base_matrix.columns)
+            for row in self._base_matrix.rows
+            if not row.hidden
         )
 
     @lazyproperty
     def table_base(self):
-        if not self._applied:
-            return self._base_slice.table_base
-
-        margin = self._base_slice.table_base
+        margin = self._base_matrix.table_base
         index = margin != 0
         if margin.ndim < 2:
             return margin[index]
@@ -115,14 +163,11 @@ class PrunedMatrix(_BaseTransformedMatrix):
 
     @lazyproperty
     def table_base_unpruned(self):
-        return self._base_slice.table_base
+        return self._base_matrix.table_base
 
     @lazyproperty
     def table_margin(self):
-        if not self._applied:
-            return self._base_slice.table_margin
-
-        margin = self._base_slice.table_margin
+        margin = self._base_matrix.table_margin
         index = margin != 0
         if margin.ndim < 2:
             return margin[index]
@@ -132,155 +177,177 @@ class PrunedMatrix(_BaseTransformedMatrix):
 
     @lazyproperty
     def table_margin_unpruned(self):
-        return self._base_slice.table_margin
-
-    @lazyproperty
-    def _applied(self):
-        return self._transforms._prune
+        return self._base_matrix.table_margin
 
 
-class MatrixWithHidden(_BaseTransformedMatrix):
-    @lazyproperty
-    def columns(self):
-        return tuple(
-            HiddenVector(column, self._base_slice.rows)
-            for column in self._base_slice.columns
-            if not column.hidden
-        )
-
-    @lazyproperty
-    def rows(self):
-        return tuple(
-            HiddenVector(row, self._base_slice.columns)
-            for row in self._base_slice.rows
-            if not row.hidden
-        )
-
-
-class MatrixWithInsertions(_BaseTransformedMatrix):
+class _MatrixWithInsertions(object):
     """Represents slice with both normal and inserted bits."""
 
+    def __init__(self, base_matrix):
+        self._base_matrix = base_matrix
+
     @lazyproperty
     def columns(self):
-        return tuple(
-            self._top_columns + self._interleaved_columns + self._bottom_columns
-        )
+        """Sequence of column vectors including inserted columns.
+
+        Each column vector also includes any new elements introduced by inserted rows.
+        """
+        return tuple(self._iter_columns())
 
     @lazyproperty
     def rows(self):
-        return tuple(self._top_rows + self._interleaved_rows + self._bottom_rows)
+        """Sequence of row vectors including inserted rows.
+
+        Each row vector also reflects any new elements introduced by inserted columns.
+        """
+        return tuple(self._iter_rows())
 
     @lazyproperty
-    def _assembled_columns(self):
+    def table_base(self):
+        return self._base_matrix.table_base
+
+    @lazyproperty
+    def table_margin(self):
+        return self._base_matrix.table_margin
+
+    @lazyproperty
+    def _all_inserted_columns(self):
+        """Sequence of _InsertionColumn objects representing subtotal columns.
+
+        The returned vectors are in the order subtotals were specified in the cube
+        result, which is no particular order. All subtotals defined on the column
+        dimension appear in the sequence.
+        """
+        # ---an aggregate columns-dimension is not summable---
+        if self._columns_dimension.dimension_type in (DT.MR, DT.CA):
+            return ()
+
         return tuple(
-            AssembledVector(column, self._insertion_rows)
-            for column in self._base_slice.columns
+            _InsertionColumn(self._base_matrix, subtotal)
+            for subtotal in self._columns_dimension.subtotals
         )
 
     @lazyproperty
-    def _assembled_insertion_columns(self):
+    def _all_inserted_rows(self):
+        """Sequence of _InsertionRow objects representing inserted subtotal rows.
+
+        The returned vectors are in the order subtotals were specified in the cube
+        result, which is no particular order.
+        """
+        # ---an aggregate rows-dimension is not summable---
+        if self._rows_dimension.dimension_type in (DT.MR, DT.CA):
+            return tuple()
+
         return tuple(
-            AssembledInsertionVector(column, self._insertion_rows)
-            for column in self._insertions.columns
+            _InsertionRow(self._base_matrix, subtotal)
+            for subtotal in self._rows_dimension.subtotals
         )
 
     @lazyproperty
-    def _assembled_insertion_rows(self):
+    def _columns_dimension(self):
+        return self._base_matrix.columns_dimension
+
+    @lazyproperty
+    def _columns_inserted_at_left(self):
+        """Sequence of _InsertionColumn vectors that appear before any body columns."""
         return tuple(
-            AssembledInsertionVector(row, self._insertion_columns)
-            for row in self._insertions.rows
+            column for column in self._all_inserted_columns if column.anchor == "top"
         )
 
     @lazyproperty
-    def _assembled_rows(self):
+    def _columns_inserted_at_right(self):
+        """Sequence of _InsertionColumn vectors appended as the last table columns."""
         return tuple(
-            AssembledVector(row, self._insertion_columns)
-            for row in self._base_slice.rows
+            column for column in self._all_inserted_columns if column.anchor == "bottom"
+        )
+
+    def _iter_columns(self):
+        """Generate all column vectors with insertions interleaved at right spot."""
+        opposing_insertions = self._all_inserted_rows
+
+        # ---subtotals inserted at top---
+        for column in self._columns_inserted_at_left:
+            yield _AssembledVector(column, opposing_insertions)
+
+        # ---body columns with subtotals anchored to specific body positions---
+        for idx, column in enumerate(self._base_matrix.columns):
+            yield _AssembledVector(column, opposing_insertions)
+            for inserted_column in self._iter_inserted_columns_anchored_at(idx):
+                yield _AssembledVector(inserted_column, opposing_insertions)
+
+        # ---subtotals appended at bottom---
+        for column in self._columns_inserted_at_right:
+            yield _AssembledVector(column, opposing_insertions)
+
+    def _iter_inserted_rows_anchored_at(self, anchor):
+        """Generate all inserted row vectors with matching `anchor`."""
+        return (row for row in self._all_inserted_rows if row.anchor == anchor)
+
+    def _iter_rows(self):
+        """Generate all row vectors with insertions interleaved at right spot."""
+        opposing_insertions = self._all_inserted_columns
+
+        # ---subtotals inserted at top---
+        for row in self._rows_inserted_at_top:
+            yield _AssembledVector(row, opposing_insertions)
+
+        # ---body rows with subtotals anchored to specific body positions---
+        for idx, row in enumerate(self._base_matrix.rows):
+            yield _AssembledVector(row, opposing_insertions)
+            for inserted_row in self._iter_inserted_rows_anchored_at(idx):
+                yield _AssembledVector(inserted_row, opposing_insertions)
+
+        # ---subtotals appended at bottom---
+        for row in self._rows_inserted_at_bottom:
+            yield _AssembledVector(row, opposing_insertions)
+
+    def _iter_inserted_columns_anchored_at(self, anchor):
+        """Generate all inserted column vectors with matching `anchor`."""
+        return (
+            column for column in self._all_inserted_columns if column.anchor == anchor
         )
 
     @lazyproperty
-    def _bottom_columns(self):
-        return tuple(
-            AssembledInsertionVector(column, self._insertion_rows)
-            for column in self._insertions.bottom_columns
-        )
+    def _rows_dimension(self):
+        return self._base_matrix.rows_dimension
 
     @lazyproperty
-    def _bottom_rows(self):
-        return tuple(
-            AssembledInsertionVector(row, self._insertion_columns)
-            for row in self._insertions.bottom_rows
-        )
+    def _rows_inserted_at_bottom(self):
+        """Sequence of _InsertionRow vectors that appear after any other table rows."""
+        return tuple(row for row in self._all_inserted_rows if row.anchor == "bottom")
 
     @lazyproperty
-    def _insertion_columns(self):
-        return self._insertions._inserted_columns
-
-    @lazyproperty
-    def _insertion_rows(self):
-        return self._insertions._inserted_rows
-
-    @lazyproperty
-    def _insertions(self):
-        return self._transforms.insertions
-
-    @lazyproperty
-    def _interleaved_columns(self):
-        columns = []
-        for i in range(len(self._base_slice.columns)):
-            columns.append(self._assembled_columns[i])
-            for insertion_column in self._assembled_insertion_columns:
-                if i == insertion_column.anchor:
-                    columns.append(insertion_column)
-        return tuple(columns)
-
-    @lazyproperty
-    def _interleaved_rows(self):
-        rows = []
-        for i in range(len(self._base_slice.rows)):
-            rows.append(self._assembled_rows[i])
-            for insertion_row in self._assembled_insertion_rows:
-                if i == insertion_row.anchor:
-                    rows.append(insertion_row)
-        return tuple(rows)
-
-    @lazyproperty
-    def _top_rows(self):
-        return tuple(
-            AssembledVector(row, self._insertion_columns)
-            for row in self._insertions.top_rows
-        )
-
-    @lazyproperty
-    def _top_columns(self):
-        return tuple(
-            AssembledInsertionVector(column, self._insertion_rows)
-            for column in self._insertions.top_columns
-        )
+    def _rows_inserted_at_top(self):
+        """Sequence of _InsertionRow vectors that appear before any other table rows."""
+        return tuple(row for row in self._all_inserted_rows if row.anchor == "top")
 
 
-# === pre-transform Matrix objects ===
+# === BASE-MATRIX OBJECTS ===
 
 
-# ---Used to represent the non-existent dimension in case of 1D vectors (that need to be
-# ---accessed as slices, to support cr.exporter).
-_PlaceholderElement = namedtuple("_PlaceholderElement", "label, is_hidden")
+class _BaseBaseMatrix(object):
+    """Base class for all matrix (2D secondary-analyzer) objects."""
 
-
-class MatrixFactory(object):
-    """Encapsulates creation of the right raw (pre-transforms) matrix object."""
+    def __init__(self, dimensions, counts, base_counts):
+        self._dimensions = dimensions
+        self._counts = counts
+        self._base_counts = base_counts
 
     @classmethod
-    def matrix(
-        cls, dimensions, counts, base_counts, counts_with_missings, cube, slice_idx
-    ):
-        """Return a matrix object of appropriate type based on parameters."""
+    def factory(cls, cube, dimensions, slice_idx):
+        """Return a base-matrix object of appropriate type for `cube`."""
+        counts = cube.counts
+        base_counts = cube.base_counts
+        counts_with_missings = cube.counts_with_missings
 
         # For cubes with means, create one of the means-matrix types
         if cube.has_means:
-            return cls._create_means_matrix(
-                counts, base_counts, cube, dimensions, slice_idx
-            )
+            if cube.ndim == 3:
+                base_counts = base_counts[slice_idx]
+                counts = counts[slice_idx]
+            if dimensions[0].dimension_type == DT.MR:
+                return _MrXCatMeansMatrix(dimensions, counts, base_counts)
+            return _CatXCatMeansMatrix(dimensions, counts, base_counts)
 
         dimension_types = cube.dimension_types[-2:]
         if cube.ndim > 2:
@@ -299,27 +366,9 @@ class MatrixFactory(object):
             return _CatXMrMatrix(dimensions, counts, base_counts, counts_with_missings)
         return _CatXCatMatrix(dimensions, counts, base_counts, counts_with_missings)
 
-    @classmethod
-    def _create_means_matrix(cls, counts, base_counts, cube, dimensions, slice_idx):
-        if cube.ndim == 3:
-            base_counts = base_counts[slice_idx]
-            counts = counts[slice_idx]
-        if dimensions[0].dimension_type == DT.MR:
-            return _MrXCatMeansMatrix(dimensions, counts, base_counts)
-        return _CatXCatMeansMatrix(dimensions, counts, base_counts)
-
-
-class _BaseMatrix(object):
-    """Base class for all matrix (2D secondary-analyzer) objects."""
-
-    def __init__(self, dimensions, counts, base_counts):
-        self._dimensions = dimensions
-        self._counts = counts
-        self._base_counts = base_counts
-
     @lazyproperty
-    def names(self):
-        return tuple([dimension.name for dimension in self._dimensions])
+    def columns_dimension(self):
+        return self._dimensions[1]
 
     @lazyproperty
     def ndim(self):
@@ -330,8 +379,12 @@ class _BaseMatrix(object):
         return 2
 
     @lazyproperty
+    def rows_dimension(self):
+        return self._dimensions[0]
+
+    @lazyproperty
     def _column_elements(self):
-        return self._columns_dimension.valid_elements
+        return self.columns_dimension.valid_elements
 
     @lazyproperty
     def _column_generator(self):
@@ -344,16 +397,8 @@ class _BaseMatrix(object):
         return np.array([col.proportions for col in self.columns]).T
 
     @lazyproperty
-    def _columns_dimension(self):
-        return self._dimensions[1]
-
-    @lazyproperty
     def _row_elements(self):
-        return self._rows_dimension.valid_elements
-
-    @lazyproperty
-    def _rows_dimension(self):
-        return self._dimensions[0]
+        return self.rows_dimension.valid_elements
 
     @lazyproperty
     def _valid_rows_idxs(self):
@@ -361,7 +406,7 @@ class _BaseMatrix(object):
         return np.ix_(self._dimensions[-2].valid_elements.element_idxs)
 
 
-class _CatXCatMatrix(_BaseMatrix):
+class _CatXCatMatrix(_BaseBaseMatrix):
     """Deals with CAT x CAT data.
 
     Delegates most functionality to vectors (rows or columns), but calculates some
@@ -380,14 +425,14 @@ class _CatXCatMatrix(_BaseMatrix):
     @lazyproperty
     def columns(self):
         return tuple(
-            CategoricalVector(counts, base_counts, element, self.table_margin, zscore)
+            _CategoricalVector(counts, base_counts, element, self.table_margin, zscore)
             for counts, base_counts, element, zscore in self._column_generator
         )
 
     @lazyproperty
     def rows(self):
         return tuple(
-            CategoricalVector(
+            _CategoricalVector(
                 counts, base_counts, element, self.table_margin, zscore, column_index
             )
             for (
@@ -425,12 +470,6 @@ class _CatXCatMatrix(_BaseMatrix):
 
     @lazyproperty
     def _column_index(self):
-        # TODO: This is a hack to make it work. It should be addressed properly with
-        # passing `counts_with_missings` in all the right places in the factory.
-        # Also - subclass for proper functionality in various MR cases.
-        if self._all_counts is None:
-            return self._column_proportions
-
         return self._column_proportions / self._baseline * 100
 
     @lazyproperty
@@ -478,9 +517,9 @@ class _CatXCatMeansMatrix(_CatXCatMatrix):
     @lazyproperty
     def columns(self):
         return tuple(
-            MeansVector(element, base_counts, means)
+            _MeansVector(element, base_counts, means)
             for element, base_counts, means in zip(
-                self._columns_dimension.valid_elements,
+                self.columns_dimension.valid_elements,
                 self._base_counts.T,
                 self._means.T,
             )
@@ -489,9 +528,9 @@ class _CatXCatMeansMatrix(_CatXCatMatrix):
     @lazyproperty
     def rows(self):
         return tuple(
-            MeansVector(element, base_counts, means)
+            _MeansVector(element, base_counts, means)
             for element, base_counts, means in zip(
-                self._rows_dimension.valid_elements, self._base_counts, self._means
+                self.rows_dimension.valid_elements, self._base_counts, self._means
             )
         )
 
@@ -502,6 +541,7 @@ class _MatrixWithMR(_CatXCatMatrix):
     @staticmethod
     def _array_type_std_res(counts, total, colsum, rowsum):
         expected_counts = rowsum * colsum / total
+        # TODO: this line occasionally raises overflow warnings in the tests.
         variance = rowsum * colsum * (total - rowsum) * (total - colsum) / total ** 3
         return (counts - expected_counts) / np.sqrt(variance)
 
@@ -518,7 +558,7 @@ class _MrXCatMatrix(_MatrixWithMR):
     def columns(self):
         """Use bother selected and not-selected counts."""
         return tuple(
-            MultipleResponseVector(
+            _MultipleResponseVector(
                 counts, base_counts, element, self.table_margin, zscore
             )
             for counts, base_counts, element, zscore in self._column_generator
@@ -528,7 +568,7 @@ class _MrXCatMatrix(_MatrixWithMR):
     def rows(self):
         """Use only selected counts."""
         return tuple(
-            CatXMrVector(
+            _CatXMrVector(
                 counts, base_counts, element, table_margin, zscore, column_index
             )
             for (
@@ -600,9 +640,9 @@ class _MrXCatMeansMatrix(_MrXCatMatrix):
     @lazyproperty
     def rows(self):
         return tuple(
-            MeansWithMrVector(element, base_counts, means[0])
+            _MeansWithMrVector(element, base_counts, means[0])
             for element, base_counts, means in zip(
-                self._rows_dimension.valid_elements, self._base_counts, self._means
+                self.rows_dimension.valid_elements, self._base_counts, self._means
             )
         )
 
@@ -617,14 +657,14 @@ class _CatXMrMatrix(_MatrixWithMR):
     @lazyproperty
     def columns(self):
         return tuple(
-            CatXMrVector(counts.T, base_counts.T, element, table_margin)
+            _CatXMrVector(counts.T, base_counts.T, element, table_margin)
             for counts, base_counts, element, table_margin in self._column_generator
         )
 
     @lazyproperty
     def rows(self):
         return tuple(
-            MultipleResponseVector(
+            _MultipleResponseVector(
                 counts.T,
                 base_counts.T,
                 element,
@@ -695,14 +735,14 @@ class _MrXMrMatrix(_MatrixWithMR):
     @lazyproperty
     def columns(self):
         return tuple(
-            MultipleResponseVector(counts, base_counts, element, table_margin)
+            _MultipleResponseVector(counts, base_counts, element, table_margin)
             for counts, base_counts, element, table_margin in self._column_generator
         )
 
     @lazyproperty
     def rows(self):
         return tuple(
-            MultipleResponseVector(
+            _MultipleResponseVector(
                 counts[0].T,
                 base_counts[0].T,
                 element,
@@ -778,221 +818,683 @@ class _MrXMrMatrix(_MatrixWithMR):
         )
 
 
-# ===SCALAR (0D) OBJECTS====
+# ===TRANSFORMATION VECTORS===
 
 
-class MeansScalar(object):
-    """Represents slices with means (and no counts)."""
+class _BaseMatrixInsertionVector(object):
+    """Base class for matrix insertion vectors.
 
-    def __init__(self, means, base_counts):
-        self._means = means
+    There are some differences that arise when there are rows *and* columns, which
+    entails the complication of insertion *intersections*.
+    """
+
+    def __init__(self, matrix, subtotal):
+        self._matrix = matrix
+        self._subtotal = subtotal
+
+    @lazyproperty
+    def addend_idxs(self):
+        return np.array(self._subtotal.addend_idxs)
+
+    @lazyproperty
+    def anchor(self):
+        return self._subtotal.anchor_idx
+
+    @lazyproperty
+    def base(self):
+        return np.sum(np.array([vec.base for vec in self._addend_vectors]), axis=0)
+
+    @lazyproperty
+    def base_values(self):
+        return np.sum(
+            np.array([row.base_values for row in self._addend_vectors]), axis=0
+        )
+
+    @lazyproperty
+    def column_index(self):
+        # TODO: Calculate insertion column index for real. Check with Mike
+        return np.array([np.nan] * len(self.values))
+
+    @lazyproperty
+    def fill(self):
+        """Unconditionally `None` for an insertion vector.
+
+        A `fill` value is normally a str RGB value like "#da09fc", specifying the color
+        to use for a chart category or series representing this element. The value
+        reflects the resolved element-fill transform cascade. Since an insertion cannot
+        (currently) have a fill-transform, the default value of `None` (indicating "use
+        default color") is unconditionally returned.
+        """
+        return None
+
+    @lazyproperty
+    def hidden(self):
+        """True if vector is pruned.
+
+        Insertions can never be hidden explicitly (for now). They can also almost never
+        be pruned, except in the case when all of the opposite vectors are also pruned
+        (thus leaving no elements for this insertion vector).
+        """
+        return self.pruned
+
+    @lazyproperty
+    def is_insertion(self):
+        return True
+
+    @lazyproperty
+    def label(self):
+        return self._subtotal.label
+
+    @lazyproperty
+    def margin(self):
+        return np.sum(np.array([vec.margin for vec in self._addend_vectors]), axis=0)
+
+    @lazyproperty
+    def means(self):
+        return np.array([np.nan])
+
+    @lazyproperty
+    def numeric(self):
+        return np.nan
+
+    @lazyproperty
+    def table_margin(self):
+        return self._matrix.table_margin
+
+    @lazyproperty
+    def values(self):
+        return np.sum(np.array([row.values for row in self._addend_vectors]), axis=0)
+
+
+class _InsertionColumn(_BaseMatrixInsertionVector):
+    """Represents an inserted (subtotal) column."""
+
+    @lazyproperty
+    def pruned(self):
+        """True if vector is pruned.
+
+        Insertions can almost never be pruned, except in the case when all of the
+        opposite vectors are also pruned (thus leaving no elements for this
+        insertion vector).
+        """
+        return self._subtotal.prune and not np.any(
+            np.array([row.base for row in self._matrix.rows])
+        )
+
+    @lazyproperty
+    def _addend_vectors(self):
+        return tuple(
+            column
+            for i, column in enumerate(self._matrix.columns)
+            if i in self._subtotal.addend_idxs
+        )
+
+
+class _InsertionRow(_BaseMatrixInsertionVector):
+    """Represents an inserted (subtotal) row."""
+
+    @lazyproperty
+    def pruned(self):
+        """True if vector is pruned.
+
+        Insertions can almost never be pruned, except in the case when all of the
+        opposite vectors are also pruned (thus leaving no elements for this
+        insertion vector).
+        """
+        return self._subtotal.prune and not np.any(
+            np.array([column.base for column in self._matrix.columns])
+        )
+
+    @lazyproperty
+    def pvals(self):
+        return np.array([np.nan] * len(self._matrix.columns))
+
+    @lazyproperty
+    def zscore(self):
+        return np.array([np.nan] * len(self._matrix.columns))
+
+    @lazyproperty
+    def _addend_vectors(self):
+        return tuple(
+            row
+            for i, row in enumerate(self._matrix.rows)
+            if i in self._subtotal.addend_idxs
+        )
+
+
+class _BaseTransformationVector(object):
+    """Base class for most transformation vectors."""
+
+    @lazyproperty
+    def fill(self):
+        """str RGB color like "#def032" or None when not specified.
+
+        The value reflects the resolved element-fill transform cascade. A value of
+        `None` indicates no element-fill transform was specified and the default
+        (theme-specified) color should be used for this element.
+        """
+        return self._base_vector.fill
+
+    @lazyproperty
+    def hidden(self):
+        return self._base_vector.hidden
+
+    @lazyproperty
+    def is_insertion(self):
+        return self._base_vector.is_insertion
+
+    @lazyproperty
+    def label(self):
+        return self._base_vector.label
+
+    @lazyproperty
+    def margin(self):
+        return self._base_vector.margin
+
+    @lazyproperty
+    def means(self):
+        return self._base_vector.means
+
+    @lazyproperty
+    def numeric(self):
+        return self._base_vector.numeric
+
+    @lazyproperty
+    def table_base(self):
+        return self._base_vector.table_base
+
+    @lazyproperty
+    def table_margin(self):
+        return self._base_vector.table_margin
+
+
+class _AssembledVector(_BaseTransformationVector):
+    """Vector with base, as well as inserted, elements (of the opposite dimension)."""
+
+    def __init__(self, base_vector, opposite_inserted_vectors):
+        self._base_vector = base_vector
+        self._opposite_inserted_vectors = opposite_inserted_vectors
+
+    @lazyproperty
+    def base(self):
+        return self._base_vector.base
+
+    @lazyproperty
+    def base_values(self):
+        # TODO: Do for real
+        return np.array(
+            self._top_base_values
+            + self._interleaved_base_values
+            + self._bottom_base_values
+        )
+
+    @lazyproperty
+    def column_index(self):
+        return np.array(
+            tuple([np.nan] * len(self._top_values))
+            + self._interleaved_column_index
+            + tuple([np.nan] * len(self._bottom_values))
+        )
+
+    @lazyproperty
+    def proportions(self):
+        return self.values / self.margin
+
+    @lazyproperty
+    def pvals(self):
+        return np.array(
+            tuple([np.nan] * len(self._top_values))
+            + self._interleaved_pvals
+            + tuple([np.nan] * len(self._bottom_values))
+        )
+
+    @lazyproperty
+    def table_proportions(self):
+        return self.values / self._base_vector.table_margin
+
+    @lazyproperty
+    def values(self):
+        return np.array(
+            self._top_values + self._interleaved_values + self._bottom_values
+        )
+
+    @lazyproperty
+    def zscore(self):
+        return np.array(
+            tuple([np.nan] * len(self._top_values))
+            + self._interleaved_zscore
+            + tuple([np.nan] * len(self._bottom_values))
+        )
+
+    @lazyproperty
+    def _bottom_base_values(self):
+        return tuple(
+            np.sum(self._base_vector.base_values[col.addend_idxs])
+            for col in self._opposite_inserted_vectors
+            if col.anchor == "bottom"
+        )
+
+    @lazyproperty
+    def _bottom_values(self):
+        return tuple(
+            np.sum(self._base_vector.values[col.addend_idxs])
+            for col in self._opposite_inserted_vectors
+            if col.anchor == "bottom"
+        )
+
+    @lazyproperty
+    def _interleaved_base_values(self):
+        base_values = []
+        for i in range(len(self._base_vector.base_values)):
+            base_values.append(self._base_vector.base_values[i])
+            for inserted_vector in self._opposite_inserted_vectors:
+                if i == inserted_vector.anchor:
+                    insertion_value = np.sum(
+                        self._base_vector.base_values[inserted_vector.addend_idxs]
+                    )
+                    base_values.append(insertion_value)
+        return tuple(base_values)
+
+    @lazyproperty
+    def _interleaved_column_index(self):
+        # TODO: Replace with real column index values from insertions vectors. This
+        # should be something like:
+        #   col_ind = (ins1.prop + ins2.prop) / (ins1.baseline + ins2.baseline)
+        # ask @mike to confirm
+        column_index = []
+        for i, value in enumerate(self._base_vector.column_index):
+            column_index.append(value)
+            for inserted_vector in self._opposite_inserted_vectors:
+                if i == inserted_vector.anchor:
+                    column_index.append(np.nan)
+        return tuple(column_index)
+
+    @lazyproperty
+    def _interleaved_pvals(self):
+        pvals = []
+        for i, value in enumerate(self._base_vector.pvals):
+            pvals.append(value)
+            for inserted_vector in self._opposite_inserted_vectors:
+                if i == inserted_vector.anchor:
+                    pvals.append(np.nan)
+        return tuple(pvals)
+
+    @lazyproperty
+    def _interleaved_values(self):
+        values = []
+        for i in range(len(self._base_vector.values)):
+            values.append(self._base_vector.values[i])
+            for inserted_vector in self._opposite_inserted_vectors:
+                if i == inserted_vector.anchor:
+                    insertion_value = np.sum(
+                        self._base_vector.values[inserted_vector.addend_idxs]
+                    )
+                    values.append(insertion_value)
+        return tuple(values)
+
+    @lazyproperty
+    def _interleaved_zscore(self):
+        zscore = []
+        for i, value in enumerate(self._base_vector.zscore):
+            zscore.append(value)
+            for inserted_vector in self._opposite_inserted_vectors:
+                if i == inserted_vector.anchor:
+                    zscore.append(np.nan)
+        return tuple(zscore)
+
+    @lazyproperty
+    def _top_base_values(self):
+        return tuple(
+            np.sum(self._base_vector.base_values[col.addend_idxs])
+            for col in self._opposite_inserted_vectors
+            if col.anchor == "top"
+        )
+
+    @lazyproperty
+    def _top_values(self):
+        return tuple(
+            np.sum(self._base_vector.values[col.addend_idxs])
+            for col in self._opposite_inserted_vectors
+            if col.anchor == "top"
+        )
+
+
+class _BaseVectorAfterHiding(_BaseTransformationVector):
+    """Reflects a row or column with hidden elements removed."""
+
+    def __init__(self, base_vector):
+        self._base_vector = base_vector
+
+    @lazyproperty
+    def base(self):
+        if not isinstance(self._base_vector.base, np.ndarray):
+            return self._base_vector.base
+        return self._base_vector.base[self._visible_element_idxs]
+
+    @lazyproperty
+    def base_values(self):
+        return self._base_vector.base_values[self._visible_element_idxs]
+
+    @lazyproperty
+    def margin(self):
+        if not isinstance(self._base_vector.margin, np.ndarray):
+            return self._base_vector.margin
+        return self._base_vector.margin[self._visible_element_idxs]
+
+    @lazyproperty
+    def means(self):
+        return self._base_vector.means[self._visible_element_idxs]
+
+    @lazyproperty
+    def table_proportions(self):
+        return self._base_vector.table_proportions[self._visible_element_idxs]
+
+    @lazyproperty
+    def values(self):
+        return self._base_vector.values[self._visible_element_idxs]
+
+
+class _VectorAfterHiding(_BaseVectorAfterHiding):
+    """Reflects a row or column with hidden elements removed."""
+
+    def __init__(self, base_vector, opposite_vectors):
+        super(_VectorAfterHiding, self).__init__(base_vector)
+        self._opposite_vectors = opposite_vectors
+
+    @lazyproperty
+    def column_index(self):
+        return self._base_vector.column_index[self._visible_element_idxs]
+
+    @lazyproperty
+    def proportions(self):
+        return self._base_vector.proportions[self._visible_element_idxs]
+
+    @lazyproperty
+    def pvals(self):
+        return self._base_vector.pvals[self._visible_element_idxs]
+
+    @lazyproperty
+    def zscore(self):
+        return self._base_vector.zscore[self._visible_element_idxs]
+
+    @lazyproperty
+    def _visible_element_idxs(self):
+        """An 1D ndarray of int idxs of non-hidden values, suitable for indexing.
+
+        This value is derived from the opposing vectors collection, based on the hidden
+        status of its elements.
+        """
+        return np.array(
+            [
+                idx
+                for idx, opposite_vector in enumerate(self._opposite_vectors)
+                if not opposite_vector.hidden
+            ],
+            dtype=int,
+        )
+
+
+class _OrderedVector(_BaseTransformationVector):
+    """In charge of indexing elements properly, after ordering transform."""
+
+    def __init__(self, base_vector, opposing_order):
+        self._base_vector = base_vector
+        self._opposing_order_arg = opposing_order
+
+    @lazyproperty
+    def base(self):
+        return self._base_vector.base
+
+    @lazyproperty
+    def base_values(self):
+        return self._base_vector.base_values[self._opposing_order]
+
+    @lazyproperty
+    def column_index(self):
+        return self._base_vector.column_index
+
+    @lazyproperty
+    def label(self):
+        return self._base_vector.label
+
+    @lazyproperty
+    def _opposing_order(self):
+        return (
+            slice(None)
+            if self._opposing_order_arg is None
+            else self._opposing_order_arg
+        )
+
+    @lazyproperty
+    def pvals(self):
+        return self._base_vector.pvals
+
+    @lazyproperty
+    def values(self):
+        return self._base_vector.values[self._opposing_order]
+
+    @lazyproperty
+    def zscore(self):
+        return self._base_vector.zscore
+
+
+# ===OPERAND VECTORS===
+
+
+class _BaseVector(object):
+    """Base class for all vector objects.
+
+    A vector represents a row or column of data in the overall data matrix. It composes
+    the element that corresponds to the row or column and so knows the name, element_id,
+    numeric value, etc. for the row or column.
+    """
+
+    def __init__(self, element, base_counts):
+        self._element = element
         self._base_counts = base_counts
+
+    @lazyproperty
+    def base(self):
+        return np.sum(self._base_counts)
+
+    @lazyproperty
+    def fill(self):
+        """str RGB color like "#def032" or None when not specified.
+
+        The value reflects the resolved element-fill transform cascade. A value of
+        `None` indicates no element-fill transform was specified and the default
+        (theme-specified) color should be used for this element.
+        """
+        return self._element.fill
+
+    @lazyproperty
+    def hidden(self):
+        """True if vector is hidden.
+
+        Vectors are hidden in two ways:
+
+            1. Explicitly via transforms
+            2. Implicitly when the base is 0 (also called pruning)
+
+        This property checks whether a vector needs to be hidden, either implicitly or
+        explicitly. It is used when iterating through rows or columns, to form the
+        correct result.
+        """
+        return self._element.is_hidden or (self._element.prune and self.pruned)
+
+    @lazyproperty
+    def is_insertion(self):
+        return False
+
+    @lazyproperty
+    def label(self):
+        return self._element.label
+
+    @lazyproperty
+    def numeric(self):
+        return self._element.numeric_value
+
+    @lazyproperty
+    def pruned(self):
+        return self.base == 0 or np.isnan(self.base)
+
+
+class _CategoricalVector(_BaseVector):
+    """Main staple of all measures.
+
+    Some of the measures it can calculate by itself, others it needs to receive at
+    construction time (like table margin and zscores).
+    """
+
+    def __init__(
+        self, counts, base_counts, element, table_margin, zscore=None, column_index=None
+    ):
+        super(_CategoricalVector, self).__init__(element, base_counts)
+        self._counts = counts
+        self._table_margin = table_margin
+        self._zscore = zscore
+        self._column_index = column_index
+
+    @lazyproperty
+    def base_values(self):
+        if not isinstance(self._base_counts, np.ndarray):
+            return np.array([self._base_counts])
+        return self._base_counts
+
+    @lazyproperty
+    def column_index(self):
+        return self._column_index
+
+    @lazyproperty
+    def margin(self):
+        return np.sum(self._counts)
+
+    @lazyproperty
+    def proportions(self):
+        return self.values / self.margin
+
+    @lazyproperty
+    def pvals(self):
+        return 2 * (1 - norm.cdf(np.abs(self._zscore)))
+
+    @lazyproperty
+    def table_margin(self):
+        return self._table_margin
+
+    @lazyproperty
+    def table_proportions(self):
+        return self.values / self._table_margin
+
+    @lazyproperty
+    def values(self):
+        if not isinstance(self._counts, np.ndarray):
+            return np.array([self._counts])
+        return self._counts
+
+    @lazyproperty
+    def zscore(self):
+        return self._zscore
+
+
+class _CatXMrVector(_CategoricalVector):
+    """Used for categorical dimension when opposing dimension is multiple-response."""
+
+    def __init__(
+        self, counts, base_counts, label, table_margin, zscore=None, column_index=None
+    ):
+        super(_CatXMrVector, self).__init__(
+            counts[0], base_counts[0], label, table_margin, zscore, column_index
+        )
+        self._all_bases = base_counts
+        self._all_counts = counts
+
+    @lazyproperty
+    def pruned(self):
+        return self.table_base == 0
+
+    @lazyproperty
+    def table_base(self):
+        return np.sum(self._all_bases)
+
+    @lazyproperty
+    def table_margin(self):
+        return np.sum(self._all_counts)
+
+
+class _MeansVector(_BaseVector):
+    """Used on a non-MR dimension when cube-result contains means."""
+
+    def __init__(self, element, base_counts, means):
+        super(_MeansVector, self).__init__(element, base_counts)
+        self._means = means
 
     @lazyproperty
     def means(self):
         return self._means
 
     @lazyproperty
-    def ndim(self):
-        """int count of dimensions in this scalar, unconditionally 0.
+    def values(self):
+        return self._means
 
-        A scalar is by definition zero-dimensional.
-        """
-        return 0
+
+class _MeansWithMrVector(_MeansVector):
+    """MR vector with means for use in a matrix."""
+
+    @lazyproperty
+    def base(self):
+        return np.sum(self._base_counts[0])
 
     @lazyproperty
     def table_base(self):
-        # TODO: Check why we expect mean instead of the real base in this case.
-        return self.means
-
-    @lazyproperty
-    def table_margin(self):
-        return np.sum(self._base_counts)
+        return self.base
 
 
-# ===STRIPE (1D) OBJECTS====
+class _MultipleResponseVector(_CategoricalVector):
+    """Handles MR vectors (either rows or columns)
 
-
-class StripeFactory(object):
-    """Encapsulates creation of the right raw (pre-transforms) stripe object."""
-
-    @classmethod
-    def stripe(cls, cube, rows_dimension, counts, base_counts, ca_as_0th, slice_idx):
-        """Return a matrix object of appropriate type based on parameters."""
-        # ---for cubes with means, create one of the means-stripe types---
-        if cube.has_means:
-            if rows_dimension.dimension_type == DT.MR:
-                return _MeansWithMrStripe(rows_dimension, counts, base_counts)
-            return _MeansStripe(rows_dimension, counts, base_counts)
-
-        if ca_as_0th:
-            return _CatStripe(rows_dimension, counts[slice_idx], base_counts[slice_idx])
-
-        if rows_dimension.dimension_type == DT.MR:
-            return _MrStripe(rows_dimension, counts, base_counts)
-
-        return _CatStripe(rows_dimension, counts, base_counts)
-
-
-class _BaseStripe(object):
-    """Base class for all stipe objects."""
-
-    def __init__(self, rows_dimension, measure, base_counts):
-        self._rows_dimension = rows_dimension
-        self._measure = measure
-        self._base_counts = base_counts
-
-    @lazyproperty
-    def ndim(self):
-        """int count of dimensions in this stripe, unconditionally 1.
-
-        A stripe is by definition one-dimensional.
-        """
-        return 1
-
-    @lazyproperty
-    def table_base(self):
-        return np.sum(self._base_counts)
-
-    @lazyproperty
-    def _row_elements(self):
-        return self._rows_dimension.valid_elements
-
-
-class _CatStripe(_BaseStripe):
-    """Special case of CAT x CAT, where the 2nd CAT doesn't exist.
-
-    Values are treated as rows, while there's only a single column (vector).
+    Needs to handle selected and not-selected properly. Consequently, it calculates the
+    right margin (for itself), but receives table margin on construction time (from the
+    slice).
     """
 
-    def __init__(self, rows_dimension, counts, base_counts):
-        super(_CatStripe, self).__init__(rows_dimension, counts, base_counts)
-        self._counts = counts
-
     @lazyproperty
-    def columns(self):
-        return tuple(
-            [
-                CategoricalVector(
-                    self._counts,
-                    self._base_counts,
-                    _PlaceholderElement("Summary", False),
-                    self.table_margin,
-                )
-            ]
+    def base(self):
+        counts = zip(self._selected_unweighted, self._not_selected_unweighted)
+        return np.array(
+            [selected + not_selected for (selected, not_selected) in counts]
         )
 
     @lazyproperty
-    def rows(self):
-        return tuple(
-            CategoricalVector(counts, base_counts, element, self.table_margin, zscore)
-            for (counts, base_counts, element, zscore) in self._row_generator
+    def base_values(self):
+        return self._base_counts[0, :]
+
+    @lazyproperty
+    def margin(self):
+        counts = zip(self._selected, self._not_selected)
+        return np.array(
+            [selected + not_selected for (selected, not_selected) in counts]
         )
 
     @lazyproperty
-    def table_margin(self):
-        return np.sum(self._counts)
+    def pruned(self):
+        return np.all(self.base == 0) or np.all(np.isnan(self.base))
 
     @lazyproperty
-    def _row_generator(self):
-        return zip(self._counts, self._base_counts, self._row_elements, self._zscores)
+    def values(self):
+        return self._selected
 
     @lazyproperty
-    def _zscores(self):
-        # TODO: Fix with real zscores
-        return tuple([np.nan for _ in self._counts])
-
-
-class _MeansStripe(_BaseStripe):
-    """A 1D calculator for a strand containing mean first-order measure."""
-
-    def __init__(self, rows_dimension, means, base_counts):
-        super(_MeansStripe, self).__init__(rows_dimension, means, base_counts)
-        self._means = means
+    def _not_selected(self):
+        return self._counts[1, :]
 
     @lazyproperty
-    def columns(self):
-        """A single vector that is used only for pruning Means slices."""
-        return (
-            BaseVector(_PlaceholderElement("Means Summary", False), self._base_counts),
-        )
+    def _not_selected_unweighted(self):
+        return self._base_counts[1, :]
 
     @lazyproperty
-    def rows(self):
-        """Rows for Means slice, that enable iteration over labels.
-
-        These vectors are not used for any computations. `means` is used for that,
-        directly. However, for the wirng of the exporter, these mean slices need to
-        support some additional API, such as labels. And for that, they need to
-        support row iteration.
-        """
-        return tuple(
-            MeansVector(element, base_counts, np.array([means]))
-            for element, base_counts, means in self._row_generator
-        )
+    def _selected(self):
+        return self._counts[0, :]
 
     @lazyproperty
-    def table_margin(self):
-        return np.sum(self._base_counts)
-
-    @lazyproperty
-    def _row_generator(self):
-        return zip(self._rows_dimension.valid_elements, self._base_counts, self._means)
-
-
-class _MeansWithMrStripe(_MeansStripe):
-    """Means behavior differs when dimension is MR."""
-
-    @lazyproperty
-    def rows(self):
-        return tuple(
-            MeansWithMrVector(element, base_counts, means)
-            for element, base_counts, means in self._row_generator
-        )
-
-
-class _MrStripe(_BaseStripe):
-    """Special case of 1-D MR slice (vector)."""
-
-    def __init__(self, rows_dimension, counts, base_counts):
-        super(_MrStripe, self).__init__(rows_dimension, counts, base_counts)
-        self._counts = counts
-
-    @lazyproperty
-    def columns(self):
-        return tuple(
-            [
-                MultipleResponseVector(
-                    self._counts.T,
-                    self._base_counts.T,
-                    _PlaceholderElement("Summary", False),
-                    self.table_margin,
-                )
-            ]
-        )
-
-    @lazyproperty
-    def rows(self):
-        """Use only selected counts."""
-        return tuple(
-            CatXMrVector(counts, base_counts, element, table_margin, zscore)
-            for (counts, base_counts, element, table_margin, zscore) in zip(
-                self._counts,
-                self._base_counts,
-                self._row_elements,
-                self.table_margin,
-                self._zscores,
-            )
-        )
-
-    @lazyproperty
-    def table_base(self):
-        return np.sum(self._base_counts, axis=1)
-
-    @lazyproperty
-    def table_margin(self):
-        return np.sum(self._counts, axis=1)
-
-    @lazyproperty
-    def _zscores(self):
-        return np.array([np.nan] * self._base_counts.shape[0])
+    def _selected_unweighted(self):
+        return self._base_counts[0, :]

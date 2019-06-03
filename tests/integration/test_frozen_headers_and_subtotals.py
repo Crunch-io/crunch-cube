@@ -7,14 +7,14 @@ import numpy as np
 from cr.cube.crunch_cube import CrunchCube
 from cr.cube.frozen_cube import FrozenCube
 
-from unittest import TestCase
-
 from ..fixtures import CR
 
 
-class TestHeadersAndSubtotals(TestCase):
+class TestHeadersAndSubtotals(object):
+    """Legacy unit-test suite for inserted rows and columns."""
+
     def test_headings_econ_blame_one_subtotal(self):
-        slice_ = FrozenCube(CR.ECON_BLAME_WITH_HS).slices[0]
+        slice_ = FrozenCube(CR.ECON_BLAME_WITH_HS).partitions[0]
         expected = (
             "President Obama",
             "Republicans in Congress",
@@ -23,14 +23,14 @@ class TestHeadersAndSubtotals(TestCase):
             "Neither",
             "Not sure",
         )
-        self.assertEqual(slice_.row_labels, expected)
+        assert slice_.row_labels == expected
 
     def test_headings_econ_blame_one_subtotal_do_not_fetch(self):
         transforms = {
             "columns_dimension": {"insertions": {}},
             "rows_dimension": {"insertions": {}},
         }
-        slice_ = FrozenCube(CR.ECON_BLAME_WITH_HS, transforms=transforms).slices[0]
+        slice_ = FrozenCube(CR.ECON_BLAME_WITH_HS, transforms=transforms).partitions[0]
         expected = (
             "President Obama",
             "Republicans in Congress",
@@ -38,10 +38,10 @@ class TestHeadersAndSubtotals(TestCase):
             "Neither",
             "Not sure",
         )
-        self.assertEqual(slice_.row_labels, expected)
+        assert slice_.row_labels == expected
 
     def test_headings_econ_blame_two_subtotal_without_missing(self):
-        slice_ = FrozenCube(CR.ECON_BLAME_WITH_HS_MISSING).slices[0]
+        slice_ = FrozenCube(CR.ECON_BLAME_WITH_HS_MISSING).partitions[0]
         expected = (
             "President Obama",
             "Republicans in Congress",
@@ -51,7 +51,7 @@ class TestHeadersAndSubtotals(TestCase):
             "Not sure",
             "Test Heading with Skipped",
         )
-        self.assertEqual(slice_.row_labels, expected)
+        assert slice_.row_labels == expected
 
     def test_headings_two_subtotal_without_missing_do_not_fetch(self):
         transforms = {
@@ -60,7 +60,7 @@ class TestHeadersAndSubtotals(TestCase):
         }
         slice_ = FrozenCube(
             CR.ECON_BLAME_WITH_HS_MISSING, transforms=transforms
-        ).slices[0]
+        ).partitions[0]
         expected = (
             "President Obama",
             "Republicans in Congress",
@@ -68,69 +68,68 @@ class TestHeadersAndSubtotals(TestCase):
             "Neither",
             "Not sure",
         )
-        self.assertEqual(slice_.row_labels, expected)
+        assert slice_.row_labels == expected
 
-    def test_subtotals_as_array_one_transform(self):
-        slice_ = FrozenCube(CR.ECON_BLAME_WITH_HS).slices[0]
-        expected = np.array([[285], [396], [681], [242], [6], [68]])
-        np.testing.assert_array_equal(slice_.counts, expected)
+    def test_1D_one_subtotal(self):
+        strand = FrozenCube(CR.ECON_BLAME_WITH_HS).partitions[0]
+        counts = strand.counts
+        np.testing.assert_array_equal(counts, (285, 396, 681, 242, 6, 68))
 
-    def test_subtotals_as_array_one_transform_do_not_fetch(self):
+    def test_1D_one_subtotal_suppressed(self):
         transforms = {
             "columns_dimension": {"insertions": {}},
             "rows_dimension": {"insertions": {}},
         }
-        slice_ = FrozenCube(CR.ECON_BLAME_WITH_HS, transforms=transforms).slices[0]
-        expected = np.array([[285], [396], [242], [6], [68]])
-        np.testing.assert_array_equal(slice_.counts, expected)
+        strand = FrozenCube(CR.ECON_BLAME_WITH_HS, transforms=transforms).partitions[0]
 
-    def test_subtotals_as_array_two_transforms_missing_excluded(self):
-        slice_ = FrozenCube(CR.ECON_BLAME_WITH_HS_MISSING).slices[0]
-        expected = np.array([[285], [396], [681], [242], [6], [68], [74]])
-        np.testing.assert_array_equal(slice_.counts, expected)
+        counts = strand.counts
 
-    def test_subtotals_proportions_one_transform(self):
-        slice_ = FrozenCube(CR.ECON_BLAME_WITH_HS).slices[0]
-        expected = np.array(
-            [
-                [0.2858576],
-                [0.3971916],
-                [0.6830491],
-                [0.2427282],
-                [0.0060181],
-                [0.0682046],
-            ]
+        np.testing.assert_array_equal(counts, (285, 396, 242, 6, 68))
+
+    def test_1D_subtotals_counts_missing_excluded(self):
+        strand = FrozenCube(CR.ECON_BLAME_WITH_HS_MISSING).partitions[0]
+        counts = strand.counts
+        np.testing.assert_array_equal(counts, (285, 396, 681, 242, 6, 68, 74))
+
+    def test_1D_subtotals_proportions(self):
+        strand = FrozenCube(CR.ECON_BLAME_WITH_HS).partitions[0]
+        table_proportions = strand.table_proportions
+        np.testing.assert_almost_equal(
+            table_proportions,
+            (0.2858576, 0.3971916, 0.6830491, 0.2427282, 0.0060181, 0.0682046),
         )
-        np.testing.assert_almost_equal(slice_.table_proportions, expected)
 
-    def test_subtotals_proportions_one_transform_do_not_fetch(self):
+    def test_1D_subtotals_proportions_one_transform_do_not_fetch(self):
         transforms = {
             "columns_dimension": {"insertions": {}},
             "rows_dimension": {"insertions": {}},
         }
-        slice_ = FrozenCube(CR.ECON_BLAME_WITH_HS, transforms=transforms).slices[0]
-        expected = np.array(
-            [[0.2858576], [0.3971916], [0.2427282], [0.0060181], [0.0682046]]
-        )
-        np.testing.assert_almost_equal(slice_.table_proportions, expected)
+        strand = FrozenCube(CR.ECON_BLAME_WITH_HS, transforms=transforms).partitions[0]
 
-    def test_subtotals_proportions_two_transforms_missing_excluded(self):
-        slice_ = FrozenCube(CR.ECON_BLAME_WITH_HS_MISSING).slices[0]
-        expected = np.array(
-            [
-                [0.2858576],
-                [0.3971916],
-                [0.6830491],
-                [0.2427282],
-                [0.0060181],
-                [0.0682046],
-                [0.0742227],
-            ]
+        table_proportions = strand.table_proportions
+
+        np.testing.assert_almost_equal(
+            table_proportions, (0.2858576, 0.3971916, 0.2427282, 0.0060181, 0.0682046)
         )
-        np.testing.assert_almost_equal(slice_.table_proportions, expected)
+
+    def test_1D_subtotals_proportions_missing_excluded(self):
+        strand = FrozenCube(CR.ECON_BLAME_WITH_HS_MISSING).partitions[0]
+        table_proportions = strand.table_proportions
+        np.testing.assert_almost_equal(
+            table_proportions,
+            (
+                0.2858576,
+                0.3971916,
+                0.6830491,
+                0.2427282,
+                0.0060181,
+                0.0682046,
+                0.0742227,
+            ),
+        )
 
     def test_labels_on_2d_cube_with_hs_on_1st_dim(self):
-        slice_ = FrozenCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS).slices[0]
+        slice_ = FrozenCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS).partitions[0]
         assert slice_.row_labels == (
             "President Obama",
             "Republicans in Congress",
@@ -149,7 +148,7 @@ class TestHeadersAndSubtotals(TestCase):
         )
 
     def test_labels_on_2d_cube_with_hs_on_both_dim(self):
-        slice_ = FrozenCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS).slices[0]
+        slice_ = FrozenCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS).partitions[0]
         assert slice_.row_labels == (
             "President Obama",
             "Republicans in Congress",
@@ -175,7 +174,7 @@ class TestHeadersAndSubtotals(TestCase):
         }
         slice_ = FrozenCube(
             CR.ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS, transforms=transforms
-        ).slices[0]
+        ).partitions[0]
         assert slice_.row_labels == (
             "President Obama",
             "Republicans in Congress",
@@ -193,7 +192,7 @@ class TestHeadersAndSubtotals(TestCase):
         )
 
     def test_subtotals_as_array_2d_cube_with_hs_on_row(self):
-        slice_ = FrozenCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS).slices[0]
+        slice_ = FrozenCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS).partitions[0]
         expected = np.array(
             [
                 [3, 14, 80, 114, 67, 7],
@@ -207,7 +206,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_array_equal(slice_.counts, expected)
 
     def test_subtotals_as_array_2d_cube_with_hs_on_col(self):
-        slice_ = FrozenCube(CR.ECON_BLAME_X_IDEOLOGY_COL_HS).slices[0]
+        slice_ = FrozenCube(CR.ECON_BLAME_X_IDEOLOGY_COL_HS).partitions[0]
         expected = np.array(
             [
                 [3, 14, 80, 94, 114, 67, 7],
@@ -220,7 +219,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_array_equal(slice_.counts, expected)
 
     def test_subtotals_as_array_2d_cube_with_hs_on_both_dim(self):
-        slice_ = FrozenCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS).slices[0]
+        slice_ = FrozenCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS).partitions[0]
         expected = np.array(
             [
                 [3, 14, 80, 94, 114, 67, 7],
@@ -240,7 +239,7 @@ class TestHeadersAndSubtotals(TestCase):
         }
         slice_ = FrozenCube(
             CR.ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS, transforms=transforms
-        ).slices[0]
+        ).partitions[0]
         expected = np.array(
             [
                 [3, 14, 80, 114, 67, 7],
@@ -253,27 +252,27 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_array_equal(slice_.counts, expected)
 
     def test_subtotals_margin_2d_cube_with_hs_on_row_by_col(self):
-        slice_ = FrozenCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS).slices[0]
+        slice_ = FrozenCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS).partitions[0]
         expected = np.array([72, 182, 375, 218, 110, 40])
         np.testing.assert_almost_equal(slice_.column_margin, expected)
 
     def test_subtotals_margin_2d_cube_with_hs_on_row_by_row(self):
-        slice_ = FrozenCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS).slices[0]
+        slice_ = FrozenCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS).partitions[0]
         expected = np.array([285, 396, 681, 242, 6, 68])
         np.testing.assert_almost_equal(slice_.row_margin, expected)
 
     def test_subtotals_margin_2d_cube_with_hs_on_two_dim_by_col(self):
-        slice_ = FrozenCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS).slices[0]
+        slice_ = FrozenCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS).partitions[0]
         expected = np.array([72, 182, 375, 557, 218, 110, 40])
         np.testing.assert_almost_equal(slice_.column_margin, expected)
 
     def test_subtotals_margin_2d_cube_with_hs_on_two_dim_by_row(self):
-        slice_ = FrozenCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS).slices[0]
+        slice_ = FrozenCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS).partitions[0]
         expected = np.array([285, 396, 681, 242, 6, 68])
         np.testing.assert_almost_equal(slice_.row_margin, expected)
 
     def test_subtotals_proportions_2d_cube_with_hs_on_row_by_cell(self):
-        slice_ = FrozenCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS).slices[0]
+        slice_ = FrozenCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS).partitions[0]
         expected = [
             [0.00300903, 0.01404213, 0.08024072, 0.11434303, 0.0672016, 0.00702106],
             [0.05917753, 0.13239719, 0.16248746, 0.02908726, 0.01203611, 0.00200602],
@@ -285,7 +284,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_almost_equal(slice_.table_proportions, expected)
 
     def test_subtotals_proportions_2d_cube_with_hs_on_row_by_col(self):
-        slice_ = FrozenCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS).slices[0]
+        slice_ = FrozenCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS).partitions[0]
         expected = [
             [0.04166667, 0.07692308, 0.21333333, 0.52293578, 0.60909091, 0.175],
             [0.81944444, 0.72527473, 0.432, 0.13302752, 0.10909091, 0.05],
@@ -297,7 +296,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_almost_equal(slice_.column_proportions, expected)
 
     def test_subtotals_proportions_2d_cube_with_hs_on_row_by_row(self):
-        slice_ = FrozenCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS).slices[0]
+        slice_ = FrozenCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS).partitions[0]
         expected = [
             [0.01052632, 0.04912281, 0.28070175, 0.4, 0.23508772, 0.0245614],
             [0.1489899, 0.33333333, 0.40909091, 0.07323232, 0.03030303, 0.00505051],
@@ -309,7 +308,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
     def test_subtotals_proportions_2d_cube_with_hs_on_two_dim_by_cell(self):
-        slice_ = FrozenCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS).slices[0]
+        slice_ = FrozenCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS).partitions[0]
         expected = [
             [
                 0.00300903,
@@ -361,17 +360,17 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_almost_equal(slice_.table_proportions, expected)
 
     def test_ca_labels_with_hs(self):
-        slice_ = FrozenCube(CR.SIMPLE_CA_HS).slices[0]
+        slice_ = FrozenCube(CR.SIMPLE_CA_HS).partitions[0]
         assert slice_.row_labels == ("ca_subvar_1", "ca_subvar_2", "ca_subvar_3")
         assert slice_.column_labels == ("a", "b", "Test A and B combined", "c", "d")
 
     def test_ca_as_array_with_hs(self):
-        slice_ = FrozenCube(CR.SIMPLE_CA_HS).slices[0]
+        slice_ = FrozenCube(CR.SIMPLE_CA_HS).partitions[0]
         expected = [[3, 3, 6, 0, 0], [1, 3, 4, 2, 0], [0, 2, 2, 1, 3]]
         np.testing.assert_array_equal(slice_.counts, expected)
 
     def test_ca_proportions_with_hs(self):
-        slice_ = FrozenCube(CR.SIMPLE_CA_HS).slices[0]
+        slice_ = FrozenCube(CR.SIMPLE_CA_HS).partitions[0]
         expected = [
             [0.5, 0.5, 1, 0, 0],
             [0.16666667, 0.5, 0.66666667, 0.33333333, 0],
@@ -380,12 +379,12 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
     def test_ca_margin_with_hs(self):
-        slice_ = FrozenCube(CR.SIMPLE_CA_HS).slices[0]
+        slice_ = FrozenCube(CR.SIMPLE_CA_HS).partitions[0]
         expected = [6, 6, 6]
         np.testing.assert_almost_equal(slice_.row_margin, expected)
 
     def test_hs_with_anchor_on_zero_position_labels(self):
-        slice_ = FrozenCube(CR.ECON_US_PROBLEM_X_BIGGER_PROBLEM).slices[0]
+        slice_ = FrozenCube(CR.ECON_US_PROBLEM_X_BIGGER_PROBLEM).partitions[0]
         assert slice_.row_labels == (
             "Serious net",
             "Very serious",
@@ -400,7 +399,7 @@ class TestHeadersAndSubtotals(TestCase):
         )
 
     def test_hs_with_anchor_on_zero_position_as_props_by_col(self):
-        slice_ = FrozenCube(CR.ECON_US_PROBLEM_X_BIGGER_PROBLEM).slices[0]
+        slice_ = FrozenCube(CR.ECON_US_PROBLEM_X_BIGGER_PROBLEM).partitions[0]
         expected = [
             [0.93244626, 0.66023166],
             [0.63664278, 0.23166023],
@@ -412,7 +411,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_almost_equal(slice_.column_proportions, expected)
 
     def test_hs_with_anchor_on_zero_position_as_props_by_row(self):
-        slice_ = FrozenCube(CR.ECON_US_PROBLEM_X_BIGGER_PROBLEM).slices[0]
+        slice_ = FrozenCube(CR.ECON_US_PROBLEM_X_BIGGER_PROBLEM).partitions[0]
         expected = [
             [0.72705507, 0.27294493],
             [0.83827493, 0.16172507],
@@ -424,7 +423,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
     def test_hs_with_anchor_on_zero_position_as_props_by_cell(self):
-        slice_ = FrozenCube(CR.ECON_US_PROBLEM_X_BIGGER_PROBLEM).slices[0]
+        slice_ = FrozenCube(CR.ECON_US_PROBLEM_X_BIGGER_PROBLEM).partitions[0]
         expected = [
             [0.60936455, 0.22876254],
             [0.41605351, 0.08026756],
@@ -437,7 +436,7 @@ class TestHeadersAndSubtotals(TestCase):
 
     def test_subtotals_pvals_2d_cube_with_hs_on_row(self):
         """Ensure that pvals shape is the same as table shape with H%S"""
-        slice_ = FrozenCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS).slices[0]
+        slice_ = FrozenCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS).partitions[0]
         expected = [
             [
                 1.92562832e-06,
@@ -477,7 +476,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_almost_equal(slice_.pvals, expected)
 
     def test_fruit_hs_top_bottom_labels(self):
-        slice_ = FrozenCube(CR.FRUIT_HS_TOP_BOTTOM).slices[0]
+        slice_ = FrozenCube(CR.FRUIT_HS_TOP_BOTTOM).partitions[0]
         assert slice_.row_labels == ("TOP", "rambutan", "MIDDLE", "satsuma", "BOTTOM")
 
     def test_fruit_hs_top_bottom_inserted_indices(self):
@@ -488,12 +487,12 @@ class TestHeadersAndSubtotals(TestCase):
         assert actual == expected
 
     def test_fruit_hs_top_bottom_counts(self):
-        slice_ = FrozenCube(CR.FRUIT_HS_TOP_BOTTOM).slices[0]
-        expected = [[100], [33], [100], [67], [100]]
-        np.testing.assert_array_equal(slice_.counts, expected)
+        strand = FrozenCube(CR.FRUIT_HS_TOP_BOTTOM).partitions[0]
+        counts = strand.counts
+        np.testing.assert_array_equal(counts, (100, 33, 100, 67, 100))
 
     def test_fruit_x_pets_hs_top_bottom_middle_props(self):
-        slice_ = FrozenCube(CR.FRUIT_X_PETS_HS_TOP_BOTTOM).slices[0]
+        slice_ = FrozenCube(CR.FRUIT_X_PETS_HS_TOP_BOTTOM).partitions[0]
         expected = [
             [1.0, 1.0, 1.0],
             [0.3, 0.35294118, 0.31578947],
@@ -504,7 +503,7 @@ class TestHeadersAndSubtotals(TestCase):
         np.testing.assert_almost_equal(slice_.column_proportions, expected)
 
     def test_fruit_x_pets_hs_top_bottom_middle_counts(self):
-        slice_ = FrozenCube(CR.FRUIT_X_PETS_HS_TOP_BOTTOM).slices[0]
+        slice_ = FrozenCube(CR.FRUIT_X_PETS_HS_TOP_BOTTOM).partitions[0]
         expected = [
             [40, 34, 38],
             [12, 12, 12],
@@ -534,8 +533,11 @@ class TestHeadersAndSubtotals(TestCase):
         assert actual == expected
 
     def test_cat_x_num_counts_pruned_with_hs(self):
-        transforms = {"rows_dimension": {"prune": True}}
-        slice_ = FrozenCube(CR.CAT_X_NUM_HS_PRUNE, transforms=transforms).slices[0]
+        transforms = {
+            "rows_dimension": {"prune": True},
+            "columns_dimension": {"prune": True},
+        }
+        slice_ = FrozenCube(CR.CAT_X_NUM_HS_PRUNE, transforms=transforms).partitions[0]
         expected = [[0], [1], [1], [0]]
         np.testing.assert_array_equal(slice_.counts, expected)
 
@@ -544,17 +546,17 @@ class TestHeadersAndSubtotals(TestCase):
             "rows_dimension": {"insertions": {}, "prune": True},
             "columns_dimension": {"insertions": {}, "prune": True},
         }
-        slice_ = FrozenCube(CR.CAT_X_NUM_HS_PRUNE, transforms=transforms).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_NUM_HS_PRUNE, transforms=transforms).partitions[0]
         expected = [[1]]
         np.testing.assert_array_equal(slice_.counts, expected)
 
     def test_mr_x_cat_hs_counts(self):
-        slice_ = FrozenCube(CR.PETS_X_FRUIT_HS).slices[0]
+        slice_ = FrozenCube(CR.PETS_X_FRUIT_HS).partitions[0]
         expected = [[12, 28, 40], [12, 22, 34], [12, 26, 38]]
         np.testing.assert_array_equal(slice_.counts, expected)
 
     def test_mr_x_cat_proportions_with_insertions(self):
-        slice_ = FrozenCube(CR.PETS_X_FRUIT_HS).slices[0]
+        slice_ = FrozenCube(CR.PETS_X_FRUIT_HS).partitions[0]
         np.testing.assert_almost_equal(
             slice_.table_proportions,
             [
@@ -581,7 +583,7 @@ class TestHeadersAndSubtotals(TestCase):
         )
 
     def test_missing_cat_hs_labels(self):
-        slice_ = FrozenCube(CR.MISSING_CAT_HS).slices[0]
+        slice_ = FrozenCube(CR.MISSING_CAT_HS).partitions[0]
         assert slice_.row_labels == (
             "Whites",
             "White college women voters",
@@ -598,24 +600,24 @@ class TestHeadersAndSubtotals(TestCase):
             "columns_dimension": {"insertions": {}},
             "rows_dimension": {"insertions": {}},
         }
-        slice_ = FrozenCube(CR.CA_X_CAT_HS, transforms=transforms).slices[0]
+        slice_ = FrozenCube(CR.CA_X_CAT_HS, transforms=transforms).partitions[0]
         np.testing.assert_array_equal(
             slice_.counts,
             [[1, 1, 0, 0, 0], [0, 0, 1, 1, 1], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]],
         )
-        slice_ = FrozenCube(CR.CA_X_CAT_HS, transforms=transforms).slices[1]
+        slice_ = FrozenCube(CR.CA_X_CAT_HS, transforms=transforms).partitions[1]
         np.testing.assert_array_equal(
             slice_.counts,
             [[1, 0, 0, 0, 0], [0, 1, 0, 1, 0], [0, 0, 1, 0, 1], [0, 0, 0, 0, 0]],
         )
-        slice_ = FrozenCube(CR.CA_X_CAT_HS, transforms=transforms).slices[2]
+        slice_ = FrozenCube(CR.CA_X_CAT_HS, transforms=transforms).partitions[2]
         np.testing.assert_array_equal(
             slice_.counts,
             [[0, 0, 0, 0, 0], [1, 0, 0, 1, 0], [0, 1, 0, 0, 0], [0, 0, 1, 0, 1]],
         )
 
         # Assert counts with H&S
-        slice_ = FrozenCube(CR.CA_X_CAT_HS).slices[0]
+        slice_ = FrozenCube(CR.CA_X_CAT_HS).partitions[0]
         np.testing.assert_array_equal(
             slice_.counts,
             [
@@ -625,7 +627,7 @@ class TestHeadersAndSubtotals(TestCase):
                 [0, 0, 0, 0, 0, 0, 0],
             ],
         )
-        slice_ = FrozenCube(CR.CA_X_CAT_HS).slices[1]
+        slice_ = FrozenCube(CR.CA_X_CAT_HS).partitions[1]
         np.testing.assert_array_equal(
             slice_.counts,
             [
@@ -635,7 +637,7 @@ class TestHeadersAndSubtotals(TestCase):
                 [0, 0, 0, 0, 0, 0, 0],
             ],
         )
-        slice_ = FrozenCube(CR.CA_X_CAT_HS).slices[2]
+        slice_ = FrozenCube(CR.CA_X_CAT_HS).partitions[2]
         np.testing.assert_array_equal(
             slice_.counts,
             [
@@ -651,11 +653,11 @@ class TestHeadersAndSubtotals(TestCase):
             "columns_dimension": {"insertions": {}},
             "rows_dimension": {"insertions": {}},
         }
-        slice_ = FrozenCube(CR.CA_X_CAT_HS, transforms=transforms).slices[0]
+        slice_ = FrozenCube(CR.CA_X_CAT_HS, transforms=transforms).partitions[0]
         np.testing.assert_array_equal(slice_.column_margin, [1, 1, 1, 1, 1])
-        slice_ = FrozenCube(CR.CA_X_CAT_HS, transforms=transforms).slices[0]
+        slice_ = FrozenCube(CR.CA_X_CAT_HS, transforms=transforms).partitions[0]
         np.testing.assert_array_equal(slice_.column_margin, [1, 1, 1, 1, 1])
-        slice_ = FrozenCube(CR.CA_X_CAT_HS, transforms=transforms).slices[0]
+        slice_ = FrozenCube(CR.CA_X_CAT_HS, transforms=transforms).partitions[0]
         np.testing.assert_array_equal(slice_.column_margin, [1, 1, 1, 1, 1])
 
     def test_cat_x_items_x_cats_margin_with_hs(self):
@@ -663,7 +665,9 @@ class TestHeadersAndSubtotals(TestCase):
             "columns_dimension": {"insertions": {}},
             "rows_dimension": {"insertions": {}},
         }
-        slice_ = FrozenCube(CR.CAT_X_ITEMS_X_CATS_HS, transforms=transforms).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_ITEMS_X_CATS_HS, transforms=transforms).partitions[
+            0
+        ]
         np.testing.assert_almost_equal(
             slice_.row_margin,
             [
@@ -677,7 +681,9 @@ class TestHeadersAndSubtotals(TestCase):
                 373.8221357520375,
             ],
         )
-        slice_ = FrozenCube(CR.CAT_X_ITEMS_X_CATS_HS, transforms=transforms).slices[1]
+        slice_ = FrozenCube(CR.CAT_X_ITEMS_X_CATS_HS, transforms=transforms).partitions[
+            1
+        ]
         np.testing.assert_almost_equal(
             slice_.row_margin,
             [
@@ -691,7 +697,9 @@ class TestHeadersAndSubtotals(TestCase):
                 419.5110527202654,
             ],
         )
-        slice_ = FrozenCube(CR.CAT_X_ITEMS_X_CATS_HS, transforms=transforms).slices[2]
+        slice_ = FrozenCube(CR.CAT_X_ITEMS_X_CATS_HS, transforms=transforms).partitions[
+            2
+        ]
         np.testing.assert_almost_equal(
             slice_.row_margin,
             [
@@ -707,7 +715,7 @@ class TestHeadersAndSubtotals(TestCase):
         )
 
     def test_cat_x_mr_weighted_with_hs(self):
-        slice_ = FrozenCube(CR.CAT_X_MR_WEIGHTED_HS).slices[0]
+        slice_ = FrozenCube(CR.CAT_X_MR_WEIGHTED_HS).partitions[0]
         np.testing.assert_almost_equal(
             slice_.column_proportions,
             [
@@ -735,7 +743,7 @@ class TestHeadersAndSubtotals(TestCase):
                 [0.80703735, 0.8827121, 0.90466028, 0.83365501, 0.87559391, 0.89345428],
             ],
         )
-        slice_ = FrozenCube(CR.CAT_X_MR_WEIGHTED_HS).slices[1]
+        slice_ = FrozenCube(CR.CAT_X_MR_WEIGHTED_HS).partitions[1]
         np.testing.assert_almost_equal(
             slice_.column_proportions,
             [
@@ -749,7 +757,7 @@ class TestHeadersAndSubtotals(TestCase):
                 [0.78668155, 0.85192649, 0.85622634, 0.67805982, 1.0, 0.85403098],
             ],
         )
-        slice_ = FrozenCube(CR.CAT_X_MR_WEIGHTED_HS).slices[2]
+        slice_ = FrozenCube(CR.CAT_X_MR_WEIGHTED_HS).partitions[2]
         np.testing.assert_almost_equal(
             slice_.column_proportions,
             [
@@ -783,7 +791,7 @@ class TestHeadersAndSubtotals(TestCase):
             "columns_dimension": {"insertions": {}},
             "rows_dimension": {"insertions": {}},
         }
-        slice_ = FrozenCube(CR.MR_X_CA_HS, transforms=transforms).slices[0]
+        slice_ = FrozenCube(CR.MR_X_CA_HS, transforms=transforms).partitions[0]
         np.testing.assert_almost_equal(
             slice_.row_proportions,
             [
@@ -792,7 +800,7 @@ class TestHeadersAndSubtotals(TestCase):
                 [0.00000000, 0.33333333, 0.33333333, 0.33333333],
             ],
         )
-        slice_ = FrozenCube(CR.MR_X_CA_HS, transforms=transforms).slices[1]
+        slice_ = FrozenCube(CR.MR_X_CA_HS, transforms=transforms).partitions[1]
         np.testing.assert_almost_equal(
             slice_.row_proportions,
             [
@@ -801,7 +809,7 @@ class TestHeadersAndSubtotals(TestCase):
                 [0.00000000, 0.25000000, 0.00000000, 0.75000000],
             ],
         )
-        slice_ = FrozenCube(CR.MR_X_CA_HS, transforms=transforms).slices[2]
+        slice_ = FrozenCube(CR.MR_X_CA_HS, transforms=transforms).partitions[2]
         np.testing.assert_almost_equal(
             slice_.row_proportions,
             [
@@ -812,7 +820,7 @@ class TestHeadersAndSubtotals(TestCase):
         )
 
     def test_mr_x_ca_props_by_row_with_hs(self):
-        slice_ = FrozenCube(CR.MR_X_CA_HS).slices[0]
+        slice_ = FrozenCube(CR.MR_X_CA_HS).partitions[0]
         np.testing.assert_almost_equal(
             slice_.row_proportions,
             [
@@ -845,7 +853,7 @@ class TestHeadersAndSubtotals(TestCase):
                 ],
             ],
         )
-        slice_ = FrozenCube(CR.MR_X_CA_HS).slices[1]
+        slice_ = FrozenCube(CR.MR_X_CA_HS).partitions[1]
         np.testing.assert_almost_equal(
             slice_.row_proportions,
             [
@@ -878,7 +886,7 @@ class TestHeadersAndSubtotals(TestCase):
                 ],
             ],
         )
-        slice_ = FrozenCube(CR.MR_X_CA_HS).slices[2]
+        slice_ = FrozenCube(CR.MR_X_CA_HS).partitions[2]
         np.testing.assert_almost_equal(
             slice_.row_proportions,
             [
@@ -889,10 +897,13 @@ class TestHeadersAndSubtotals(TestCase):
         )
 
     def test_ca_cat_x_mr_x_ca_subvar_counts_pruning(self):
-        transforms = {"rows_dimension": {"prune": True}}
+        transforms = {
+            "rows_dimension": {"prune": True},
+            "columns_dimension": {"prune": True},
+        }
         slice_ = FrozenCube(
             CR.CA_CAT_X_MR_X_CA_SUBVAR_HS, transforms=transforms
-        ).slices[0]
+        ).partitions[0]
         np.testing.assert_almost_equal(
             slice_.counts,
             [
@@ -903,10 +914,13 @@ class TestHeadersAndSubtotals(TestCase):
         )
 
     def test_ca_cat_x_mr_x_ca_subvar_proportions_pruning(self):
-        transforms = {"rows_dimension": {"prune": True}}
+        transforms = {
+            "rows_dimension": {"prune": True},
+            "columns_dimension": {"prune": True},
+        }
         slice_ = FrozenCube(
             CR.CA_CAT_X_MR_X_CA_SUBVAR_HS, transforms=transforms
-        ).slices[0]
+        ).partitions[0]
         np.testing.assert_almost_equal(
             slice_.column_proportions,
             [
@@ -921,7 +935,7 @@ class TestHeadersAndSubtotals(TestCase):
             "rows_dimension": {"insertions": {}, "prune": True},
             "columns_dimension": {"insertions": {}, "prune": True},
         }
-        slice_ = FrozenCube(CR.CA_X_MR_HS, transforms=transforms).slices[0]
+        slice_ = FrozenCube(CR.CA_X_MR_HS, transforms=transforms).partitions[0]
         np.testing.assert_almost_equal(
             slice_.counts,
             [
@@ -938,7 +952,7 @@ class TestHeadersAndSubtotals(TestCase):
             "rows_dimension": {"insertions": {}, "prune": True},
             "columns_dimension": {"insertions": {}, "prune": True},
         }
-        slice_ = FrozenCube(CR.CA_X_MR_HS, transforms=transforms).slices[0]
+        slice_ = FrozenCube(CR.CA_X_MR_HS, transforms=transforms).partitions[0]
         np.testing.assert_almost_equal(
             slice_.table_proportions,
             [

@@ -299,7 +299,6 @@ class TestDimension(TestCase):
 
         hs_indices = dimension.hs_indices
 
-        print("hs_indices == %s" % [hs_indices])
         assert hs_indices == ((1, (0, 1)), (2, (2, 3)))
 
     def test_subtotals(self):
