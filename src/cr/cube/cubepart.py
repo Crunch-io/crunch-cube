@@ -476,7 +476,7 @@ class _Strand(object):
         # TODO: This should be a normal sequence (tuple) of scalar (not array) values.
         # fix exporter breakage that occurs on that change and fix including down to
         # stripe-row.value properties.
-        return np.array([row.value for row in self._stripe.rows])
+        return np.array([row.count for row in self._stripe.rows])
 
     @lazyproperty
     def dimension_types(self):
@@ -595,7 +595,7 @@ class _Strand(object):
     def shape(self):
         # TODO: This property should probably go away as we modify exporter to deal in
         # a distinct way with _Strand objects.
-        return self.counts.shape
+        return (len(self._stripe.rows), 1)
 
     @lazyproperty
     def table_base(self):

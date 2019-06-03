@@ -546,6 +546,10 @@ class _MrStripeRow(_BaseStripeRow):
         return self._base_count
 
     @lazyproperty
+    def count(self):
+        return self._count
+
+    @lazyproperty
     def margin(self):
         return self._count
 
