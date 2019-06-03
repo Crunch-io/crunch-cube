@@ -469,14 +469,16 @@ class _Strand(object):
 
     @lazyproperty
     def base_counts(self):
-        return np.array([row.base_value for row in self._stripe.rows])
+        return tuple(row.base_value for row in self._stripe.rows)
+
+    @lazyproperty
+    def bases(self):
+        """Sequence of weighted base for each row."""
+        return tuple(np.broadcast_to(self.table_margin, self._shape))
 
     @lazyproperty
     def counts(self):
-        # TODO: This should be a normal sequence (tuple) of scalar (not array) values.
-        # fix exporter breakage that occurs on that change and fix including down to
-        # stripe-row.value properties.
-        return np.array([row.count for row in self._stripe.rows])
+        return tuple(row.count for row in self._stripe.rows)
 
     @lazyproperty
     def dimension_types(self):
@@ -504,12 +506,17 @@ class _Strand(object):
 
     @lazyproperty
     def means(self):
-        return np.array([row.mean for row in self._stripe.rows])
+        return tuple(row.mean for row in self._stripe.rows)
 
     @lazyproperty
     def min_base_size_mask(self):
-        # TODO: add integration test that exercises this.
-        return MinBaseSizeMask(self, self._mask_size)
+        mask = self.table_base < self._mask_size
+        strand_shape = (self.row_count,)
+
+        if self.table_base.shape == strand_shape:
+            return mask
+
+        return np.logical_or(np.zeros(strand_shape, dtype=bool), mask)
 
     @lazyproperty
     def name(self):
@@ -522,8 +529,10 @@ class _Strand(object):
 
     @lazyproperty
     def population_counts(self):
-        return (
-            self.table_proportions * self._population * self._cube.population_fraction
+        return tuple(
+            self._table_proportions_as_array
+            * self._population
+            * self._cube.population_fraction
         )
 
     @lazyproperty
@@ -592,15 +601,8 @@ class _Strand(object):
         return total_numeric_value / total_count
 
     @lazyproperty
-    def shape(self):
-        # TODO: This property should probably go away as we modify exporter to deal in
-        # a distinct way with _Strand objects.
-        return (len(self._stripe.rows), 1)
-
-    @lazyproperty
     def table_base(self):
         """1D, single-element ndarray (like [3770])."""
-
         # For MR strands, table base is also a strand, since subvars never collapse.
         # We need to keep the ordering and hiding as in rows dimension. All this
         # information is already accessible in the underlying rows property
@@ -646,11 +648,21 @@ class _Strand(object):
 
     @lazyproperty
     def table_percentages(self):
-        return self.table_proportions * 100
+        return tuple(self._table_proportions_as_array * 100)
 
     @lazyproperty
     def table_proportions(self):
-        return np.array([row.table_proportions for row in self._stripe.rows])
+        return tuple(row.table_proportions for row in self._stripe.rows)
+
+    @lazyproperty
+    def unweighted_bases(self):
+        """Sequence of base count for each row, before weighting.
+
+        When the rows dimension is multiple-response, each value is different,
+        reflecting the base for that individual subvariable. In all other cases, the
+        table base is repeated for each row.
+        """
+        return tuple(np.broadcast_to(self.table_base, self._shape))
 
     # ---implementation (helpers)-------------------------------------
 
@@ -680,11 +692,20 @@ class _Strand(object):
         return transforms_dict.get("rows_dimension", {})
 
     @lazyproperty
+    def _shape(self):
+        """The shape this strand would have it it were an array (which it isn't)."""
+        return (self.row_count,)
+
+    @lazyproperty
     def _stripe(self):
         """The post-transforms 1D data-partition for this strand."""
         return TransformedStripe.stripe(
             self._cube, self._rows_dimension, self._ca_as_0th, self._slice_idx
         )
+
+    @lazyproperty
+    def _table_proportions_as_array(self):
+        return np.array([row.table_proportions for row in self._stripe.rows])
 
 
 class _Nub(object):

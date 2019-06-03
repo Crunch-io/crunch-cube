@@ -7,12 +7,12 @@ import numpy as np
 from cr.cube.crunch_cube import CrunchCube
 from cr.cube.frozen_cube import FrozenCube
 
-from unittest import TestCase
-
 from ..fixtures import CR
 
 
-class TestHeadersAndSubtotals(TestCase):
+class TestHeadersAndSubtotals(object):
+    """Legacy unit-test suite for inserted rows and columns."""
+
     def test_headings_econ_blame_one_subtotal(self):
         slice_ = FrozenCube(CR.ECON_BLAME_WITH_HS).partitions[0]
         expected = (
@@ -23,7 +23,7 @@ class TestHeadersAndSubtotals(TestCase):
             "Neither",
             "Not sure",
         )
-        self.assertEqual(slice_.row_labels, expected)
+        assert slice_.row_labels == expected
 
     def test_headings_econ_blame_one_subtotal_do_not_fetch(self):
         transforms = {
@@ -38,7 +38,7 @@ class TestHeadersAndSubtotals(TestCase):
             "Neither",
             "Not sure",
         )
-        self.assertEqual(slice_.row_labels, expected)
+        assert slice_.row_labels == expected
 
     def test_headings_econ_blame_two_subtotal_without_missing(self):
         slice_ = FrozenCube(CR.ECON_BLAME_WITH_HS_MISSING).partitions[0]
@@ -51,7 +51,7 @@ class TestHeadersAndSubtotals(TestCase):
             "Not sure",
             "Test Heading with Skipped",
         )
-        self.assertEqual(slice_.row_labels, expected)
+        assert slice_.row_labels == expected
 
     def test_headings_two_subtotal_without_missing_do_not_fetch(self):
         transforms = {
@@ -68,66 +68,65 @@ class TestHeadersAndSubtotals(TestCase):
             "Neither",
             "Not sure",
         )
-        self.assertEqual(slice_.row_labels, expected)
+        assert slice_.row_labels == expected
 
-    def test_subtotals_as_array_one_transform(self):
-        slice_ = FrozenCube(CR.ECON_BLAME_WITH_HS).partitions[0]
-        expected = np.array([[285], [396], [681], [242], [6], [68]])
-        np.testing.assert_array_equal(slice_.counts, expected)
+    def test_1D_one_subtotal(self):
+        strand = FrozenCube(CR.ECON_BLAME_WITH_HS).partitions[0]
+        counts = strand.counts
+        np.testing.assert_array_equal(counts, (285, 396, 681, 242, 6, 68))
 
-    def test_subtotals_as_array_one_transform_do_not_fetch(self):
+    def test_1D_one_subtotal_suppressed(self):
         transforms = {
             "columns_dimension": {"insertions": {}},
             "rows_dimension": {"insertions": {}},
         }
-        slice_ = FrozenCube(CR.ECON_BLAME_WITH_HS, transforms=transforms).partitions[0]
-        expected = np.array([[285], [396], [242], [6], [68]])
-        np.testing.assert_array_equal(slice_.counts, expected)
+        strand = FrozenCube(CR.ECON_BLAME_WITH_HS, transforms=transforms).partitions[0]
 
-    def test_subtotals_as_array_two_transforms_missing_excluded(self):
-        slice_ = FrozenCube(CR.ECON_BLAME_WITH_HS_MISSING).partitions[0]
-        expected = np.array([[285], [396], [681], [242], [6], [68], [74]])
-        np.testing.assert_array_equal(slice_.counts, expected)
+        counts = strand.counts
 
-    def test_subtotals_proportions_one_transform(self):
-        slice_ = FrozenCube(CR.ECON_BLAME_WITH_HS).partitions[0]
-        expected = np.array(
-            [
-                [0.2858576],
-                [0.3971916],
-                [0.6830491],
-                [0.2427282],
-                [0.0060181],
-                [0.0682046],
-            ]
+        np.testing.assert_array_equal(counts, (285, 396, 242, 6, 68))
+
+    def test_1D_subtotals_counts_missing_excluded(self):
+        strand = FrozenCube(CR.ECON_BLAME_WITH_HS_MISSING).partitions[0]
+        counts = strand.counts
+        np.testing.assert_array_equal(counts, (285, 396, 681, 242, 6, 68, 74))
+
+    def test_1D_subtotals_proportions(self):
+        strand = FrozenCube(CR.ECON_BLAME_WITH_HS).partitions[0]
+        table_proportions = strand.table_proportions
+        np.testing.assert_almost_equal(
+            table_proportions,
+            (0.2858576, 0.3971916, 0.6830491, 0.2427282, 0.0060181, 0.0682046),
         )
-        np.testing.assert_almost_equal(slice_.table_proportions, expected)
 
-    def test_subtotals_proportions_one_transform_do_not_fetch(self):
+    def test_1D_subtotals_proportions_one_transform_do_not_fetch(self):
         transforms = {
             "columns_dimension": {"insertions": {}},
             "rows_dimension": {"insertions": {}},
         }
-        slice_ = FrozenCube(CR.ECON_BLAME_WITH_HS, transforms=transforms).partitions[0]
-        expected = np.array(
-            [[0.2858576], [0.3971916], [0.2427282], [0.0060181], [0.0682046]]
-        )
-        np.testing.assert_almost_equal(slice_.table_proportions, expected)
+        strand = FrozenCube(CR.ECON_BLAME_WITH_HS, transforms=transforms).partitions[0]
 
-    def test_subtotals_proportions_two_transforms_missing_excluded(self):
-        slice_ = FrozenCube(CR.ECON_BLAME_WITH_HS_MISSING).partitions[0]
-        expected = np.array(
-            [
-                [0.2858576],
-                [0.3971916],
-                [0.6830491],
-                [0.2427282],
-                [0.0060181],
-                [0.0682046],
-                [0.0742227],
-            ]
+        table_proportions = strand.table_proportions
+
+        np.testing.assert_almost_equal(
+            table_proportions, (0.2858576, 0.3971916, 0.2427282, 0.0060181, 0.0682046)
         )
-        np.testing.assert_almost_equal(slice_.table_proportions, expected)
+
+    def test_1D_subtotals_proportions_missing_excluded(self):
+        strand = FrozenCube(CR.ECON_BLAME_WITH_HS_MISSING).partitions[0]
+        table_proportions = strand.table_proportions
+        np.testing.assert_almost_equal(
+            table_proportions,
+            (
+                0.2858576,
+                0.3971916,
+                0.6830491,
+                0.2427282,
+                0.0060181,
+                0.0682046,
+                0.0742227,
+            ),
+        )
 
     def test_labels_on_2d_cube_with_hs_on_1st_dim(self):
         slice_ = FrozenCube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS).partitions[0]
@@ -488,9 +487,9 @@ class TestHeadersAndSubtotals(TestCase):
         assert actual == expected
 
     def test_fruit_hs_top_bottom_counts(self):
-        slice_ = FrozenCube(CR.FRUIT_HS_TOP_BOTTOM).partitions[0]
-        expected = [[100], [33], [100], [67], [100]]
-        np.testing.assert_array_equal(slice_.counts, expected)
+        strand = FrozenCube(CR.FRUIT_HS_TOP_BOTTOM).partitions[0]
+        counts = strand.counts
+        np.testing.assert_array_equal(counts, (100, 33, 100, 67, 100))
 
     def test_fruit_x_pets_hs_top_bottom_middle_props(self):
         slice_ = FrozenCube(CR.FRUIT_X_PETS_HS_TOP_BOTTOM).partitions[0]

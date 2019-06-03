@@ -11,8 +11,9 @@ def test_labels_simple_mr_exclude_missing():
 
 
 def test_as_array_simple_mr_exclude_missing():
-    slice_ = FrozenCube(CR.SIMPLE_MR).partitions[0]
-    np.testing.assert_array_equal(slice_.counts, [[3], [4], [0]])
+    strand = FrozenCube(CR.SIMPLE_MR).partitions[0]
+    counts = strand.counts
+    np.testing.assert_array_equal(counts, (3, 4, 0))
 
 
 def test_margin_simple_mr_axis_none():
@@ -21,10 +22,9 @@ def test_margin_simple_mr_axis_none():
 
 
 def test_proportions_simple_mr():
-    slice_ = FrozenCube(CR.SIMPLE_MR).partitions[0]
-    np.testing.assert_almost_equal(
-        slice_.table_proportions, [[0.6], [0.6666667], [0.0]]
-    )
+    strand = FrozenCube(CR.SIMPLE_MR).partitions[0]
+    table_proportions = strand.table_proportions
+    np.testing.assert_almost_equal(table_proportions, (0.6, 0.6666667, 0.0))
 
 
 def test_1D_mr_with_means():
@@ -90,10 +90,12 @@ def test_proportions_simple_mr_prune():
         "rows_dimension": {"prune": True},
         "columns_dimension": {"prune": True},
     }
-    slice_ = FrozenCube(CR.SIMPLE_MR, transforms=transforms).partitions[0]
+    strand = FrozenCube(CR.SIMPLE_MR, transforms=transforms).partitions[0]
+
+    table_proportions = strand.table_proportions
+
     # Nothing actually gets pruned because not-selected are not 0
-    expected = [[0.6], [0.6666667], [0]]
-    np.testing.assert_almost_equal(slice_.table_proportions, expected)
+    np.testing.assert_almost_equal(table_proportions, (0.6, 0.6666667, 0.0))
 
 
 def test_labels_cat_x_mr_exclude_missing():
@@ -454,63 +456,63 @@ def test_cat_x_mr_x_cat_by_cell():
 
 
 def test_mr_props_pruned():
-    expected = [
-        [9.70083312e-01],
-        [9.53131845e-01],
-        [9.64703914e-01],
-        [9.59703205e-01],
-        [9.37891446e-01],
-        [8.84137923e-01],
-        [7.77056917e-01],
-        [7.15135296e-01],
-        [9.03057657e-01],
-        [8.67103783e-01],
-        [8.38011719e-01],
-        [8.60897234e-01],
-        [7.68101070e-01],
-        [7.59030477e-01],
-        [8.66127931e-01],
-        [6.89111039e-01],
-        [7.39338305e-01],
-        [1.89895586e-01],
-        [1.95866187e-01],
-        [8.90452848e-01],
-        [6.10278144e-01],
-        [6.35237428e-01],
-        [6.54874171e-01],
-        [6.89736947e-01],
-        [2.31607423e-01],
-        [4.44608376e-01],
-        [6.06987388e-01],
-        [4.16165746e-01],
-        [2.06262071e-01],
-        [2.08512519e-01],
-        [1.59533129e-01],
-        [1.86245154e-01],
-        [1.01661334e-01],
-        [1.82235674e-01],
-        [7.30060936e-01],
-        [4.45912391e-01],
-        [4.87037442e-01],
-        [1.29527814e-01],
-        [0.00000000e00],
-        [0.00000000e00],
-        [4.95486986e-01],
-        [2.84392427e-01],
-        [3.93962082e-01],
-        [3.91279968e-01],
-        [8.96639874e-02],
-        [9.50985735e-04],
-        [1.35477929e-01],
-        [1.86531215e-01],
-    ]
+    expected = (
+        9.70083312e-01,
+        9.53131845e-01,
+        9.64703914e-01,
+        9.59703205e-01,
+        9.37891446e-01,
+        8.84137923e-01,
+        7.77056917e-01,
+        7.15135296e-01,
+        9.03057657e-01,
+        8.67103783e-01,
+        8.38011719e-01,
+        8.60897234e-01,
+        7.68101070e-01,
+        7.59030477e-01,
+        8.66127931e-01,
+        6.89111039e-01,
+        7.39338305e-01,
+        1.89895586e-01,
+        1.95866187e-01,
+        8.90452848e-01,
+        6.10278144e-01,
+        6.35237428e-01,
+        6.54874171e-01,
+        6.89736947e-01,
+        2.31607423e-01,
+        4.44608376e-01,
+        6.06987388e-01,
+        4.16165746e-01,
+        2.06262071e-01,
+        2.08512519e-01,
+        1.59533129e-01,
+        1.86245154e-01,
+        1.01661334e-01,
+        1.82235674e-01,
+        7.30060936e-01,
+        4.45912391e-01,
+        4.87037442e-01,
+        1.29527814e-01,
+        0.00000000e00,
+        0.00000000e00,
+        4.95486986e-01,
+        2.84392427e-01,
+        3.93962082e-01,
+        3.91279968e-01,
+        8.96639874e-02,
+        9.50985735e-04,
+        1.35477929e-01,
+        1.86531215e-01,
+    )
     # Not pruned
-    slice_ = FrozenCube(CR.PROMPTED_AWARENESS).partitions[0]
-    np.testing.assert_almost_equal(slice_.table_proportions, expected)
+    strand = FrozenCube(CR.PROMPTED_AWARENESS).partitions[0]
+    np.testing.assert_almost_equal(strand.table_proportions, expected)
     # Pruned (nothing gets pruned because of not-selected != 0)
     transforms = {"columns_dimension": {"prune": True}}
-    slice_ = FrozenCube(CR.PROMPTED_AWARENESS, transforms=transforms).partitions[0]
-    np.testing.assert_almost_equal(slice_.table_proportions, expected)
+    strand = FrozenCube(CR.PROMPTED_AWARENESS, transforms=transforms).partitions[0]
+    np.testing.assert_almost_equal(strand.table_proportions, expected)
 
 
 def test_mr_counts_not_pruned():

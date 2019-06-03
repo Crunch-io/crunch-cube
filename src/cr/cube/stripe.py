@@ -287,15 +287,15 @@ class _StripeInsertionRow(object):
 
     @lazyproperty
     def base(self):
-        return np.sum(np.array([row.base for row in self._addend_rows]))
+        return sum(row.base for row in self._addend_rows)
 
     @lazyproperty
     def base_value(self):
-        return np.sum(np.array([row.base_value for row in self._addend_rows]))
+        return sum(row.base_value for row in self._addend_rows)
 
     @lazyproperty
     def count(self):
-        return np.sum(np.array([row.count for row in self._addend_rows]), axis=0)
+        return sum(row.count for row in self._addend_rows)
 
     @lazyproperty
     def hidden(self):
@@ -332,7 +332,7 @@ class _StripeInsertionRow(object):
 
     @lazyproperty
     def value(self):
-        return np.sum(np.array([row.value for row in self._addend_rows]), axis=0)
+        return sum(row.value for row in self._addend_rows)
 
     @lazyproperty
     def _addend_rows(self):
@@ -449,8 +449,7 @@ class _CatStripeRow(_BaseStripeRow):
     @lazyproperty
     def value(self):
         """Weighted count for this row."""
-        # TODO: remove ndarray wrapper from this scalar and fix small exporter breakage
-        return np.array([self._count])
+        return self._count
 
 
 class _MeansStripeRow(_BaseStripeRow):
@@ -571,8 +570,7 @@ class _MrStripeRow(_BaseStripeRow):
 
     @lazyproperty
     def value(self):
-        # TODO: remove array wrapper and fix minor exporter breakage that results
-        return np.array([self._count])
+        return self._count
 
     @lazyproperty
     def _base_count(self):
