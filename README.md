@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.11.1
+- Fix `fill` for insertions
+
 #### 1.11.0
 - Significant refactor of the frozen cube code (even thought most of the logic is the same)
 
