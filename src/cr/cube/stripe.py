@@ -298,6 +298,11 @@ class _StripeInsertionRow(object):
         return sum(row.count for row in self._addend_rows)
 
     @lazyproperty
+    def fill(self):
+        """An insertion row can have no element-fill-color transform."""
+        return None
+
+    @lazyproperty
     def hidden(self):
         """True if subtotal is pruned. Unconditionally False for stripe subtotal row."""
         return False
