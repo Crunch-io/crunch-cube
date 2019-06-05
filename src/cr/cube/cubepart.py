@@ -715,6 +715,15 @@ class _Nub(object):
         self._cube = cube
 
     @lazyproperty
+    def dimension_types(self):
+        """Sequence of `cr.cube.enum.DIMENSION_TYPE` member for each dimension.
+
+        Length zero in this case.
+        """
+        # TODO: remove need for this in exporter
+        return ()
+
+    @lazyproperty
     def means(self):
         return self._scalar.means
 
