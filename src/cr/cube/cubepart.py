@@ -95,10 +95,6 @@ class _Slice(object):
         return tuple(column.label for column in self._matrix.columns)
 
     @lazyproperty
-    def column_margin(self):
-        return np.array([column.margin for column in self._matrix.columns]).T
-
-    @lazyproperty
     def column_percentages(self):
         return self.column_proportions * 100
 
@@ -118,6 +114,10 @@ class _Slice(object):
     def columns_dimension_type(self):
         """Member of `cr.cube.enum.DIMENSION_TYPE` describing columns dimension."""
         return self._columns_dimension.dimension_type
+
+    @lazyproperty
+    def columns_margin(self):
+        return np.array([column.margin for column in self._matrix.columns]).T
 
     @lazyproperty
     def counts(self):
@@ -217,10 +217,6 @@ class _Slice(object):
         return tuple(row.label for row in self._matrix.rows)
 
     @lazyproperty
-    def row_margin(self):
-        return np.array([row.margin for row in self._matrix.rows])
-
-    @lazyproperty
     def row_percentages(self):
         return self.row_proportions * 100
 
@@ -260,6 +256,10 @@ class _Slice(object):
         return self._rows_dimension.dimension_type
 
     @lazyproperty
+    def rows_margin(self):
+        return np.array([row.margin for row in self._matrix.rows])
+
+    @lazyproperty
     def scale_means_column(self):
         if np.all(np.isnan(self._columns_dimension_numeric)):
             return None
@@ -270,19 +270,19 @@ class _Slice(object):
         return inner / denominator
 
     @lazyproperty
-    def scale_means_column_margin(self):
+    def scale_means_columns_margin(self):
         if np.all(np.isnan(self._columns_dimension_numeric)):
             return None
 
-        column_margin = self.column_margin
-        if len(column_margin.shape) > 1:
+        columns_margin = self.columns_margin
+        if len(columns_margin.shape) > 1:
             # Hack for MR, where column margin is a table. Figure how to
             # fix with subclassing
-            column_margin = column_margin[0]
+            columns_margin = columns_margin[0]
 
         not_a_nan_index = ~np.isnan(self._columns_dimension_numeric)
-        return np.nansum(self._columns_dimension_numeric * column_margin) / np.sum(
-            column_margin[not_a_nan_index]
+        return np.nansum(self._columns_dimension_numeric * columns_margin) / np.sum(
+            columns_margin[not_a_nan_index]
         )
 
     @lazyproperty
@@ -295,19 +295,19 @@ class _Slice(object):
         return inner / denominator
 
     @lazyproperty
-    def scale_means_row_margin(self):
+    def scale_means_rows_margin(self):
         if np.all(np.isnan(self._rows_dimension_numeric)):
             return None
 
-        row_margin = self.row_margin
-        if len(row_margin.shape) > 1:
+        rows_margin = self.rows_margin
+        if len(rows_margin.shape) > 1:
             # Hack for MR, where row margin is a table. Figure how to
             # fix with subclassing
-            row_margin = row_margin[:, 0]
+            rows_margin = rows_margin[:, 0]
 
         not_a_nan_index = ~np.isnan(self._rows_dimension_numeric)
-        return np.nansum(self._rows_dimension_numeric * row_margin) / np.sum(
-            row_margin[not_a_nan_index]
+        return np.nansum(self._rows_dimension_numeric * rows_margin) / np.sum(
+            rows_margin[not_a_nan_index]
         )
 
     @lazyproperty
@@ -548,10 +548,6 @@ class _Strand(object):
         return tuple(row.label for row in self._stripe.rows)
 
     @lazyproperty
-    def row_margin(self):
-        return np.array([row.margin for row in self._stripe.rows])
-
-    @lazyproperty
     def rows_dimension_fills(self):
         """sequence of RGB str like "#def032" fill colors for row elements.
 
@@ -573,6 +569,10 @@ class _Strand(object):
     def rows_dimension_type(self):
         """Member of DIMENSION_TYPE enum describing type of rows dimension."""
         return self._rows_dimension.dimension_type
+
+    @lazyproperty
+    def rows_margin(self):
+        return np.array([row.margin for row in self._stripe.rows])
 
     @lazyproperty
     def scale_mean(self):

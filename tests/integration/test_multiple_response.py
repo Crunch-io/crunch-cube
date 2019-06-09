@@ -219,7 +219,7 @@ def test_margin_cat_x_mr_axis_none():
 def test_margin_cat_x_mr_by_col():
     slice_ = Cube(CR.CAT_X_MR).partitions[0]
     expected = np.array([40, 34, 38])
-    np.testing.assert_array_equal(slice_.column_margin, expected)
+    np.testing.assert_array_equal(slice_.columns_margin, expected)
 
 
 def test_proportions_cat_x_mr_by_cell():
@@ -240,7 +240,7 @@ def test_proportions_cat_x_mr_by_row():
     np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
 
-def test_z_scores_from_r_row_margin():
+def test_z_scores_from_r_rows_margin():
     slice_ = Cube(CR.MR_X_CAT_PROFILES_STATS_WEIGHTED).partitions[0]
     expected = [
         [
@@ -294,7 +294,7 @@ def test_mr_x_single_wave():
         123.22747266,
         142.42909713,
     ]
-    np.testing.assert_almost_equal(slice_.row_margin, expected)
+    np.testing.assert_almost_equal(slice_.rows_margin, expected)
 
 
 def test_array_x_mr_by_col():
@@ -323,7 +323,7 @@ def test_array_x_mr_by_cell():
 
 def test_simple_mr_margin_by_col():
     slice_ = Cube(CR.SIMPLE_MR).partitions[0]
-    np.testing.assert_array_equal(slice_.row_margin, [3, 4, 0])
+    np.testing.assert_array_equal(slice_.rows_margin, [3, 4, 0])
 
 
 def test_cat_x_mr_x_mr_proportions_by_row():

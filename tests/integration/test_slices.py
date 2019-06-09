@@ -170,7 +170,7 @@ class Describe_Slice(object):
         )
         np.testing.assert_almost_equal(slice_.row_base, [385, 26, 369, 76, 118])
         np.testing.assert_almost_equal(
-            slice_.row_margin,
+            slice_.rows_margin,
             [376.76564059, 31.63152104, 366.88839144, 70.73073413, 125.75911351],
         )
         np.testing.assert_almost_equal(slice_.table_base, [476, 165, 450, 210, 242])

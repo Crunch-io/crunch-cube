@@ -11,7 +11,7 @@ def test_ca_cat_x_items():
         slice_.scale_means_row, [1.50454821, 3.11233766, 3.35788192, 3.33271833]
     )
     assert slice_.scale_means_column is None
-    assert slice_.scale_means_column_margin is None
+    assert slice_.scale_means_columns_margin is None
 
 
 def test_ca_items_x_cat():
@@ -20,7 +20,7 @@ def test_ca_items_x_cat():
     np.testing.assert_almost_equal(
         slice_.scale_means_column, [1.50454821, 3.11233766, 3.35788192, 3.33271833]
     )
-    assert slice_.scale_means_row_margin is None
+    assert slice_.scale_means_rows_margin is None
 
 
 def test_ca_x_mr():
@@ -29,8 +29,8 @@ def test_ca_x_mr():
         slice_.scale_means_row, [1.29787234, 1.8, 1.48730964, np.nan]
     )
     assert slice_.scale_means_column is None
-    assert slice_.scale_means_column_margin is None
-    assert slice_.scale_means_row_margin == 1.504548211036992
+    assert slice_.scale_means_columns_margin is None
+    assert slice_.scale_means_rows_margin == 1.504548211036992
 
     slice_ = Cube(SM.CA_X_MR).partitions[1]
     np.testing.assert_almost_equal(
@@ -95,8 +95,8 @@ def test_cat_x_cat():
     )
 
     # Test ScaleMeans marginal
-    assert slice_.scale_means_column_margin == 2.536319612590799
-    assert slice_.scale_means_row_margin == 2.6846246973365617
+    assert slice_.scale_means_columns_margin == 2.536319612590799
+    assert slice_.scale_means_rows_margin == 2.6846246973365617
 
 
 def test_cat_x_mr():
@@ -106,8 +106,8 @@ def test_cat_x_mr():
     )
     assert slice_.scale_means_column is None
 
-    assert slice_.scale_means_column_margin is None
-    assert slice_.scale_means_row_margin == 2.5323565323565322
+    assert slice_.scale_means_columns_margin is None
+    assert slice_.scale_means_rows_margin == 2.5323565323565322
 
 
 def test_mr_x_cat():
@@ -117,8 +117,8 @@ def test_mr_x_cat():
         slice_.scale_means_column, [2.45070423, 2.54471545, 2.54263006, np.nan]
     )
 
-    assert slice_.scale_means_column_margin == 2.5323565323565322
-    assert slice_.scale_means_row_margin is None
+    assert slice_.scale_means_columns_margin == 2.5323565323565322
+    assert slice_.scale_means_rows_margin is None
 
 
 def test_univariate_cat():
@@ -293,8 +293,8 @@ def test_cat_x_cat_pruning_and_hs():
 
 def test_cat_x_cat_scale_means_margin():
     slice_ = Cube(SM.CAT_X_CAT_SM_MARGIN).partitions[0]
-    assert slice_.scale_means_row_margin == 2.6846246973365617
-    assert slice_.scale_means_column_margin == 2.536319612590799
+    assert slice_.scale_means_rows_margin == 2.6846246973365617
+    assert slice_.scale_means_columns_margin == 2.536319612590799
 
 
 def test_cat_single_element_x_cat():

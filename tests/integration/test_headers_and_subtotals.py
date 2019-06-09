@@ -254,22 +254,22 @@ class TestHeadersAndSubtotals(object):
     def test_subtotals_margin_2d_cube_with_hs_on_row_by_col(self):
         slice_ = Cube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS).partitions[0]
         expected = np.array([72, 182, 375, 218, 110, 40])
-        np.testing.assert_almost_equal(slice_.column_margin, expected)
+        np.testing.assert_almost_equal(slice_.columns_margin, expected)
 
     def test_subtotals_margin_2d_cube_with_hs_on_row_by_row(self):
         slice_ = Cube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS).partitions[0]
         expected = np.array([285, 396, 681, 242, 6, 68])
-        np.testing.assert_almost_equal(slice_.row_margin, expected)
+        np.testing.assert_almost_equal(slice_.rows_margin, expected)
 
     def test_subtotals_margin_2d_cube_with_hs_on_two_dim_by_col(self):
         slice_ = Cube(CR.ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS).partitions[0]
         expected = np.array([72, 182, 375, 557, 218, 110, 40])
-        np.testing.assert_almost_equal(slice_.column_margin, expected)
+        np.testing.assert_almost_equal(slice_.columns_margin, expected)
 
     def test_subtotals_margin_2d_cube_with_hs_on_two_dim_by_row(self):
         slice_ = Cube(CR.ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS).partitions[0]
         expected = np.array([285, 396, 681, 242, 6, 68])
-        np.testing.assert_almost_equal(slice_.row_margin, expected)
+        np.testing.assert_almost_equal(slice_.rows_margin, expected)
 
     def test_subtotals_proportions_2d_cube_with_hs_on_row_by_cell(self):
         slice_ = Cube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS).partitions[0]
@@ -381,7 +381,7 @@ class TestHeadersAndSubtotals(object):
     def test_ca_margin_with_hs(self):
         slice_ = Cube(CR.SIMPLE_CA_HS).partitions[0]
         expected = [6, 6, 6]
-        np.testing.assert_almost_equal(slice_.row_margin, expected)
+        np.testing.assert_almost_equal(slice_.rows_margin, expected)
 
     def test_hs_with_anchor_on_zero_position_labels(self):
         slice_ = Cube(CR.ECON_US_PROBLEM_X_BIGGER_PROBLEM).partitions[0]
@@ -654,11 +654,11 @@ class TestHeadersAndSubtotals(object):
             "rows_dimension": {"insertions": {}},
         }
         slice_ = Cube(CR.CA_X_CAT_HS, transforms=transforms).partitions[0]
-        np.testing.assert_array_equal(slice_.column_margin, [1, 1, 1, 1, 1])
+        np.testing.assert_array_equal(slice_.columns_margin, [1, 1, 1, 1, 1])
         slice_ = Cube(CR.CA_X_CAT_HS, transforms=transforms).partitions[0]
-        np.testing.assert_array_equal(slice_.column_margin, [1, 1, 1, 1, 1])
+        np.testing.assert_array_equal(slice_.columns_margin, [1, 1, 1, 1, 1])
         slice_ = Cube(CR.CA_X_CAT_HS, transforms=transforms).partitions[0]
-        np.testing.assert_array_equal(slice_.column_margin, [1, 1, 1, 1, 1])
+        np.testing.assert_array_equal(slice_.columns_margin, [1, 1, 1, 1, 1])
 
     def test_cat_x_items_x_cats_margin_with_hs(self):
         transforms = {
@@ -667,7 +667,7 @@ class TestHeadersAndSubtotals(object):
         }
         slice_ = Cube(CR.CAT_X_ITEMS_X_CATS_HS, transforms=transforms).partitions[0]
         np.testing.assert_almost_equal(
-            slice_.row_margin,
+            slice_.rows_margin,
             [
                 1287.9364594075469,
                 2050.0571926339885,
@@ -681,7 +681,7 @@ class TestHeadersAndSubtotals(object):
         )
         slice_ = Cube(CR.CAT_X_ITEMS_X_CATS_HS, transforms=transforms).partitions[1]
         np.testing.assert_almost_equal(
-            slice_.row_margin,
+            slice_.rows_margin,
             [
                 1147.3697583254452,
                 2557.8859179678857,
@@ -695,7 +695,7 @@ class TestHeadersAndSubtotals(object):
         )
         slice_ = Cube(CR.CAT_X_ITEMS_X_CATS_HS, transforms=transforms).partitions[2]
         np.testing.assert_almost_equal(
-            slice_.row_margin,
+            slice_.rows_margin,
             [
                 1053.855075581148,
                 2699.612841209989,
