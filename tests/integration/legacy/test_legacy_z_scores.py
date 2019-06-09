@@ -1,13 +1,14 @@
+# encoding: utf-8
+
 from unittest import TestCase
 
 import numpy as np
 
-from ..fixtures import CR
-
 from cr.cube.crunch_cube import CrunchCube
 
+from ...fixtures import CR
 
-# pylint: disable=missing-docstring, invalid-name, no-self-use
+
 class TestStandardizedResiduals(TestCase):
     """Test cr.cube implementation of Z-Scores."""
 

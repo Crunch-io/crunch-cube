@@ -12,7 +12,7 @@ from scipy.stats import norm
 from scipy.stats.contingency import expected_freq
 
 from cr.cube.enum import DIMENSION_TYPE as DT
-from cr.cube.min_base_size_mask import MinBaseSizeMask
+from cr.cube.legacy_min_base_size_mask import MinBaseSizeMask
 from cr.cube.measures.scale_means import ScaleMeans
 from cr.cube.measures.wishart_pairwise_significance import WishartPairwiseSignificance
 from cr.cube.measures.pairwise_significance import PairwiseSignificance

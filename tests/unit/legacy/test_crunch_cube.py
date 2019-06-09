@@ -19,7 +19,7 @@ from cr.cube.cube_slice import CubeSlice
 from cr.cube.dimension import AllDimensions, _ApparentDimensions, Dimension
 from cr.cube.enum import DIMENSION_TYPE as DT
 
-from ..unitutil import (
+from ...unitutil import (
     class_mock,
     function_mock,
     instance_mock,

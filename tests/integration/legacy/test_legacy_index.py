@@ -7,7 +7,7 @@ from unittest import TestCase
 from cr.cube.crunch_cube import CrunchCube
 from cr.cube.measures.index import Index
 
-from ..fixtures import CR
+from ...fixtures import CR
 
 
 class TestIndex(TestCase):

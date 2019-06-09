@@ -6,7 +6,7 @@ import numpy as np
 
 from cr.cube.crunch_cube import CrunchCube
 
-from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
+from ...fixtures import CR  # ---mnemonic: CR = 'cube-response'---
 
 
 class DescribeIntegratedCubeSlice(object):

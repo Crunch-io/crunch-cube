@@ -122,7 +122,7 @@ The detailed description can be found
 - Fix index error by fixing the indexing array type to int (it used to default to float when the indexed array is empty)
 
 #### 1.10.5
-- Implement `FrozenCube` - responsible for `FrozenSlice` creation
+- Implement (frozen) `Cube` - responsible for (frozen) `_Slice` creation
 
 #### 1.10.4
 - Column index with insertions (as dashes)
