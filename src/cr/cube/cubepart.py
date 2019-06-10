@@ -697,6 +697,10 @@ class _Nub(CubePartition):
     """0D slice."""
 
     @lazyproperty
+    def base_count(self):
+        return self._cube.base_counts
+
+    @lazyproperty
     def means(self):
         return self._scalar.means
 
