@@ -473,7 +473,7 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def base_counts(self):
-        return tuple(row.base_value for row in self._stripe.rows)
+        return tuple(row.base for row in self._stripe.rows)
 
     @lazyproperty
     def bases(self):
