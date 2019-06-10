@@ -171,7 +171,11 @@ class Cube(object):
         slices, each of which represents one subvariable of the CA variable. Normally,
         a 2D cube-result becomes a single slice.
         """
-        return self._first_cube_of_tab and self.dimension_types[0] == DT.CA
+        return (
+            self._first_cube_of_tab
+            and len(self.dimension_types) > 0
+            and self.dimension_types[0] == DT.CA
+        )
 
     @lazyproperty
     def _cube_dict(self):
