@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.11.2
+- Mostly renaming and support for numeric means in tabbooks
+
 #### 1.11.1
 - Fix `fill` for insertions
 
