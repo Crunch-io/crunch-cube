@@ -20,7 +20,7 @@ from __future__ import division
 import numpy as np
 
 from cr.cube.enum import DIMENSION_TYPE as DT
-from cr.cube.frozen_min_base_size_mask import MinBaseSizeMask
+from cr.cube.min_base_size_mask import MinBaseSizeMask
 from cr.cube.measures.new_pairwise_significance import NewPairwiseSignificance
 from cr.cube.matrix import TransformedMatrix
 from cr.cube.scalar import MeansScalar
@@ -33,6 +33,9 @@ class CubePartition(object):
 
     These represent 2, 1, or 0 dimensions of a cube, respectively.
     """
+
+    def __init__(self, cube):
+        self._cube = cube
 
     @classmethod
     def factory(
@@ -53,8 +56,35 @@ class CubePartition(object):
             )
         return _Slice(cube, slice_idx, transforms, population, mask_size)
 
+    # TODO: I question whether the dimensions should be published. Whatever folks might
+    # need to know, like types or whatever, should be available as individual
+    # properties. The dimensions are kind of an internal, especially since they won't
+    # necessarily match the returned data-matrix in terms of element-order and presence.
+    @lazyproperty
+    def dimensions(self):
+        """Sequence of `cr.cube.dimension.Dimension` objects for this partition."""
+        return self._dimensions
 
-class _Slice(object):
+    @lazyproperty
+    def dimension_types(self):
+        """Sequence of member of `cr.cube.enum.DIMENSION_TYPE` for each dimension.
+
+        Items appear in rows-dimension, columns-dimension order.
+        """
+        return tuple(d.dimension_type for d in self._dimensions)
+
+    @lazyproperty
+    def has_means(self):
+        """True if cube-result includes means values."""
+        return self._cube.has_means
+
+    @lazyproperty
+    def ndim(self):
+        """int count of dimensions for this partition."""
+        return len(self._dimensions)
+
+
+class _Slice(CubePartition):
     """2D cube partition.
 
     A slice represents the cross-tabulation of two dimensions, often, but not
@@ -63,7 +93,7 @@ class _Slice(object):
     """
 
     def __init__(self, cube, slice_idx, transforms, population, mask_size):
-        self._cube = cube
+        super(_Slice, self).__init__(cube)
         self._slice_idx = slice_idx
         self._transforms_arg = transforms
         self._population = population
@@ -95,10 +125,6 @@ class _Slice(object):
         return tuple(column.label for column in self._matrix.columns)
 
     @lazyproperty
-    def column_margin(self):
-        return np.array([column.margin for column in self._matrix.columns]).T
-
-    @lazyproperty
     def column_percentages(self):
         return self.column_proportions * 100
 
@@ -120,29 +146,12 @@ class _Slice(object):
         return self._columns_dimension.dimension_type
 
     @lazyproperty
+    def columns_margin(self):
+        return np.array([column.margin for column in self._matrix.columns]).T
+
+    @lazyproperty
     def counts(self):
         return np.array([row.values for row in self._matrix.rows])
-
-    @lazyproperty
-    def dimension_types(self):
-        """Sequence of member of `cr.cube.enum.DIMENSION_TYPE` for each dimension.
-
-        Items appear in rows-dimension, columns-dimension order.
-        """
-        return tuple(dimension.dimension_type for dimension in self.dimensions)
-
-    @lazyproperty
-    def dimensions(self):
-        """tuple containing (rows_dimension, columns_dimension) for this slice.
-
-        Both items are `cr.cube.dimension.Dimension` objects.
-        """
-        # TODO: I question whether the dimensions should be published. Whatever folks
-        # might need to know, like types or whatever, should be available as individual
-        # properties. The dimensions are kind of an internal, especially since they
-        # won't necessarily match the returned data-matrix in terms of element-order and
-        # presence.
-        return self._dimensions
 
     @lazyproperty
     def inserted_column_idxs(self):
@@ -169,11 +178,6 @@ class _Slice(object):
         A slice takes the name of its rows-dimension.
         """
         return self.rows_dimension_name
-
-    @lazyproperty
-    def ndim(self):
-        """int count of dimensions for this slice, unconditionally 2."""
-        return 2
 
     @lazyproperty
     def pairwise_indices(self):
@@ -217,10 +221,6 @@ class _Slice(object):
         return tuple(row.label for row in self._matrix.rows)
 
     @lazyproperty
-    def row_margin(self):
-        return np.array([row.margin for row in self._matrix.rows])
-
-    @lazyproperty
     def row_percentages(self):
         return self.row_proportions * 100
 
@@ -260,6 +260,10 @@ class _Slice(object):
         return self._rows_dimension.dimension_type
 
     @lazyproperty
+    def rows_margin(self):
+        return np.array([row.margin for row in self._matrix.rows])
+
+    @lazyproperty
     def scale_means_column(self):
         if np.all(np.isnan(self._columns_dimension_numeric)):
             return None
@@ -270,19 +274,19 @@ class _Slice(object):
         return inner / denominator
 
     @lazyproperty
-    def scale_means_column_margin(self):
+    def scale_means_columns_margin(self):
         if np.all(np.isnan(self._columns_dimension_numeric)):
             return None
 
-        column_margin = self.column_margin
-        if len(column_margin.shape) > 1:
+        columns_margin = self.columns_margin
+        if len(columns_margin.shape) > 1:
             # Hack for MR, where column margin is a table. Figure how to
             # fix with subclassing
-            column_margin = column_margin[0]
+            columns_margin = columns_margin[0]
 
         not_a_nan_index = ~np.isnan(self._columns_dimension_numeric)
-        return np.nansum(self._columns_dimension_numeric * column_margin) / np.sum(
-            column_margin[not_a_nan_index]
+        return np.nansum(self._columns_dimension_numeric * columns_margin) / np.sum(
+            columns_margin[not_a_nan_index]
         )
 
     @lazyproperty
@@ -295,19 +299,19 @@ class _Slice(object):
         return inner / denominator
 
     @lazyproperty
-    def scale_means_row_margin(self):
+    def scale_means_rows_margin(self):
         if np.all(np.isnan(self._rows_dimension_numeric)):
             return None
 
-        row_margin = self.row_margin
-        if len(row_margin.shape) > 1:
+        rows_margin = self.rows_margin
+        if len(rows_margin.shape) > 1:
             # Hack for MR, where row margin is a table. Figure how to
             # fix with subclassing
-            row_margin = row_margin[:, 0]
+            rows_margin = rows_margin[:, 0]
 
         not_a_nan_index = ~np.isnan(self._rows_dimension_numeric)
-        return np.nansum(self._rows_dimension_numeric * row_margin) / np.sum(
-            row_margin[not_a_nan_index]
+        return np.nansum(self._rows_dimension_numeric * rows_margin) / np.sum(
+            rows_margin[not_a_nan_index]
         )
 
     @lazyproperty
@@ -451,7 +455,7 @@ class _Slice(object):
         return self._transforms_arg if self._transforms_arg is not None else {}
 
 
-class _Strand(object):
+class _Strand(CubePartition):
     """1D cube-partition.
 
     A strand can arise from a 1D cube (non-CA univariate), or as a partition of
@@ -459,7 +463,7 @@ class _Strand(object):
     """
 
     def __init__(self, cube, transforms, population, ca_as_0th, slice_idx, mask_size):
-        self._cube = cube
+        super(_Strand, self).__init__(cube)
         self._transforms_arg = transforms
         self._population = population
         self._ca_as_0th = ca_as_0th
@@ -469,7 +473,7 @@ class _Strand(object):
 
     @lazyproperty
     def base_counts(self):
-        return tuple(row.base_value for row in self._stripe.rows)
+        return tuple(row.base for row in self._stripe.rows)
 
     @lazyproperty
     def bases(self):
@@ -479,25 +483,6 @@ class _Strand(object):
     @lazyproperty
     def counts(self):
         return tuple(row.count for row in self._stripe.rows)
-
-    @lazyproperty
-    def dimension_types(self):
-        """Sequence of `cr.cube.enum.DIMENSION_TYPE` member for each dimension.
-
-        Length one in this case, containing only rows-dimension type.
-        """
-        # TODO: remove need for this in exporter, at least for 1D case.
-        return (self._rows_dimension.dimension_type,)
-
-    @lazyproperty
-    def dimensions(self):
-        """tuple of (row,) Dimension object."""
-        # TODO: I question whether the dimensions should be published. Whatever folks
-        # might need to know, like types or whatever, should be available as individual
-        # properties. The dimensions are kind of an internal, especially since they
-        # won't necessarily match the returned data-matrix in terms of element-order and
-        # presence.
-        return (self._rows_dimension,)
 
     @lazyproperty
     def inserted_row_idxs(self):
@@ -523,11 +508,6 @@ class _Strand(object):
         return self.rows_dimension_name
 
     @lazyproperty
-    def ndim(self):
-        """int count of dimensions for this strand, unconditionally 1."""
-        return 1
-
-    @lazyproperty
     def population_counts(self):
         return tuple(
             self._table_proportions_as_array
@@ -546,10 +526,6 @@ class _Strand(object):
     @lazyproperty
     def row_labels(self):
         return tuple(row.label for row in self._stripe.rows)
-
-    @lazyproperty
-    def row_margin(self):
-        return np.array([row.margin for row in self._stripe.rows])
 
     @lazyproperty
     def rows_dimension_fills(self):
@@ -573,6 +549,10 @@ class _Strand(object):
     def rows_dimension_type(self):
         """Member of DIMENSION_TYPE enum describing type of rows dimension."""
         return self._rows_dimension.dimension_type
+
+    @lazyproperty
+    def rows_margin(self):
+        return np.array([row.margin for row in self._stripe.rows])
 
     @lazyproperty
     def scale_mean(self):
@@ -672,6 +652,11 @@ class _Strand(object):
         return np.array([row.count for row in self._stripe.rows])
 
     @lazyproperty
+    def _dimensions(self):
+        """tuple of (row,) Dimension object."""
+        return (self._rows_dimension,)
+
+    @lazyproperty
     def _numeric_values(self):
         """Array of numeric-value for each element in rows dimension.
 
@@ -708,35 +693,26 @@ class _Strand(object):
         return np.array([row.table_proportions for row in self._stripe.rows])
 
 
-class _Nub(object):
+class _Nub(CubePartition):
     """0D slice."""
 
-    def __init__(self, cube):
-        self._cube = cube
-
     @lazyproperty
-    def dimension_types(self):
-        """Sequence of `cr.cube.enum.DIMENSION_TYPE` member for each dimension.
-
-        Length zero in this case.
-        """
-        # TODO: remove need for this in exporter
-        return ()
+    def base_count(self):
+        return self._cube.base_counts
 
     @lazyproperty
     def means(self):
         return self._scalar.means
 
     @lazyproperty
-    def ndim(self):
-        """int count of dimensions, unconditionally 0 for a Nub."""
-        return 0
-
-    @lazyproperty
     def table_base(self):
         return self._scalar.table_base
 
     # ---implementation (helpers)-------------------------------------
+
+    @lazyproperty
+    def _dimensions(self):
+        return ()
 
     @lazyproperty
     def _scalar(self):

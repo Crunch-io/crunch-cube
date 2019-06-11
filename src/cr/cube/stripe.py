@@ -290,10 +290,6 @@ class _StripeInsertionRow(object):
         return sum(row.base for row in self._addend_rows)
 
     @lazyproperty
-    def base_value(self):
-        return sum(row.base_value for row in self._addend_rows)
-
-    @lazyproperty
     def count(self):
         return sum(row.count for row in self._addend_rows)
 
@@ -423,10 +419,6 @@ class _CatStripeRow(_BaseStripeRow):
         return self._base_count
 
     @lazyproperty
-    def base_value(self):
-        return self._base_count
-
-    @lazyproperty
     def count(self):
         """Weighted count for this row."""
         return self._count
@@ -542,11 +534,6 @@ class _MrStripeRow(_BaseStripeRow):
     @lazyproperty
     def base(self):
         """np.int64 unweighted count of selected."""
-        return self._base_count
-
-    @lazyproperty
-    def base_value(self):
-        """np.int64 ... selected-only."""
         return self._base_count
 
     @lazyproperty

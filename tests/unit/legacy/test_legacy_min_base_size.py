@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-"""Unit test suite for cr.cube.min_base_size module."""
+"""Unit test suite for cr.cube.legacy_min_base_size module."""
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
@@ -8,10 +8,10 @@ import pytest
 import numpy as np
 
 from cr.cube.cube_slice import CubeSlice
-from cr.cube.min_base_size_mask import MinBaseSizeMask
+from cr.cube.legacy_min_base_size_mask import MinBaseSizeMask
 from cr.cube.enum import DIMENSION_TYPE as DT
 
-from ..unitutil import instance_mock, method_mock, property_mock
+from ...unitutil import instance_mock, method_mock, property_mock
 
 
 class DescribeMinBaseSizeMask:

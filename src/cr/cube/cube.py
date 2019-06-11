@@ -1,8 +1,8 @@
 # encoding: utf-8
 
-"""Provides the FrozenCube class.
+"""Provides the Cube class.
 
-FrozenCube is the main API class for manipulating Crunch.io JSON cube responses.
+Cube is the main API class for manipulating Crunch.io JSON cube responses.
 """
 
 from __future__ import absolute_import, division, print_function, unicode_literals
@@ -19,7 +19,7 @@ from cr.cube.util import lazyproperty
 np.seterr(divide="ignore", invalid="ignore")
 
 
-class FrozenCube(object):
+class Cube(object):
     """Provides access to individual slices on a cube-result.
 
     It also provides some attributes of the overall cube-result.
@@ -54,7 +54,7 @@ class FrozenCube(object):
                 dimensionality,
             )
         except Exception:
-            return super(FrozenCube, self).__repr__()
+            return super(Cube, self).__repr__()
 
     @lazyproperty
     def partitions(self):
@@ -171,7 +171,11 @@ class FrozenCube(object):
         slices, each of which represents one subvariable of the CA variable. Normally,
         a 2D cube-result becomes a single slice.
         """
-        return self._first_cube_of_tab and self.dimension_types[0] == DT.CA
+        return (
+            self._first_cube_of_tab
+            and len(self.dimension_types) > 0
+            and self.dimension_types[0] == DT.CA
+        )
 
     @lazyproperty
     def _cube_dict(self):

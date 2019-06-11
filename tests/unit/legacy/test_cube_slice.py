@@ -11,7 +11,7 @@ from cr.cube.cube_slice import CubeSlice
 from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.dimension import Dimension
 
-from ..unitutil import instance_mock, method_mock, property_mock
+from ...unitutil import instance_mock, method_mock, property_mock
 
 
 class DescribeCubeSlice(object):
@@ -403,8 +403,6 @@ class DescribeCubeSlice(object):
         return method_mock(request, CubeSlice, "_scalar_type_std_res")
 
 
-# pylint: disable=invalid-name, no-self-use, protected-access
-# pylint: disable=too-many-public-methods, missing-docstring
 class TestCubeSlice(object):
     """Test class for the CubeSlice unit tests."""
 

@@ -13,7 +13,7 @@ from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.measures.index import Index
 from cr.cube.util import compress_pruned
 
-from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
+from ...fixtures import CR  # ---mnemonic: CR = 'cube-response'---
 from . import assert_scale_means_equal
 
 
