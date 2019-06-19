@@ -19,6 +19,79 @@ from cr.cube.util import lazyproperty
 np.seterr(divide="ignore", invalid="ignore")
 
 
+class CubeSet(object):
+    """Represents a multi-cube cube-response.
+
+    Also works just fine for a single cube-response passed inside a sequence, allowing
+    uniform handling of single and multi-cube responses.
+
+    `cube_responses` is a sequence of cube-response dicts received from Crunch. The
+    sequence can contain a single item, such as a cube-response for a slide, but it must
+    be contained in a sequence. A tabbook cube-response sequence can be passed as it was
+    received.
+
+    `transforms` is a sequence of transforms dicts corresponding in order to the
+    cube-responses. `population` is the estimated target population and is used when
+    a population-projection measure is requested. `min_base` is an integer representing
+    the minimum sample-size used for indicating values that are unreliable by reason of
+    insufficient sample (base).
+    """
+
+    def __init__(self, cube_responses, transforms, population, min_base):
+        self._cube_responses = cube_responses
+        self._transforms_dicts = transforms
+        self._population = population
+        self._min_base = min_base
+
+    @lazyproperty
+    def is_ca_as_0th(self):
+        """True for multi-cube when first cube represents a categorical-array.
+
+        A "CA-as-0th" tabbook tab is "3D" in the sense it is "sliced" into one table
+        (partition-set) for each of the CA subvariables.
+        """
+        # ---can only be true for multi-cube case---
+        if not self._is_multi_cube:
+            return False
+        # ---the rest depends on the row-var cube---
+        cube = self._cubes[0]
+        # ---True if row-var cube is CA---
+        return cube.dimension_types[0] == DT.CA_SUBVAR
+
+    @lazyproperty
+    def _cubes(self):
+        """Sequence of Cube objects containing data for this analysis."""
+        return tuple(self._iter_cubes())
+
+    @lazyproperty
+    def _is_multi_cube(self):
+        """True if more than one cube-response was provided on construction."""
+        return len(self._cube_responses) > 1
+
+    def _iter_cubes(self):
+        """Generate a Cube object for each of cube_responses.
+
+        0D cube-responses and 1D second-and-later cubes are "inflated" to add their
+        missing row dimension.
+        """
+        for idx, cube_response in enumerate(self._cube_responses):
+            cube = Cube(
+                cube_response,
+                self._transforms_dicts[idx],
+                first_cube_of_tab=(self._is_multi_cube and idx == 0),
+                population=self._population,
+                mask_size=self._min_base,
+            )
+            # ---a 0D rows-var cube gets inflated, as does a 1D cols-var cube---
+            if self._is_multi_cube and (
+                (idx == 0 and cube.ndim == 0) or (idx > 0 and cube.ndim == 1)
+            ):
+                yield cube.inflate()
+                continue
+            # ---others don't---
+            yield cube
+
+
 class Cube(object):
     """Provides access to individual slices on a cube-result.
 
@@ -55,6 +128,30 @@ class Cube(object):
             )
         except Exception:
             return super(Cube, self).__repr__()
+
+    def inflate(self):
+        """Return new Cube object with rows-dimension added.
+
+        A multi-cube (tabbook) response formed from a function (e.g. mean()) on
+        a numeric variable arrives without a rows-dimension.
+        """
+        cube_dict = self._cube_dict
+        dimensions = cube_dict["result"]["dimensions"]
+        rows_dimension = {
+            "references": {"alias": "mean", "name": "mean"},
+            "type": {
+                "categories": [{"id": 1, "missing": False, "name": "Mean"}],
+                "class": "categorical",
+            },
+        }
+        dimensions.insert(0, rows_dimension)
+        return Cube(
+            cube_dict,
+            self._transforms_dict,
+            self._first_cube_of_tab,
+            self._population,
+            self._mask_size,
+        )
 
     @lazyproperty
     def partitions(self):
