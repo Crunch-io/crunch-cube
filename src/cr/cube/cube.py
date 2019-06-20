@@ -44,6 +44,33 @@ class CubeSet(object):
         self._min_base = min_base
 
     @lazyproperty
+    def can_show_pairwise(self):
+        """True if all 2D cubes in a multi-cube set can provide pairwise comparison."""
+        if len(self._cubes) < 2:
+            return False
+
+        return all(
+            all(dt in DT.ALLOWED_PAIRWISE_TYPES for dt in cube.dimension_types[-2:])
+            and cube.ndim >= 2
+            for cube in self._cubes[1:]
+        )
+
+    @lazyproperty
+    def description(self):
+        """str description of first cube in this set."""
+        return self._cubes[0].description
+
+    @lazyproperty
+    def has_means(self):
+        """True if cubes in this set include a means measure."""
+        return self._cubes[0].has_means
+
+    @lazyproperty
+    def has_weighted_counts(self):
+        """True if cube-responses include a weighted-count measure."""
+        return self._cubes[0].is_weighted
+
+    @lazyproperty
     def is_ca_as_0th(self):
         """True for multi-cube when first cube represents a categorical-array.
 
@@ -57,6 +84,52 @@ class CubeSet(object):
         cube = self._cubes[0]
         # ---True if row-var cube is CA---
         return cube.dimension_types[0] == DT.CA_SUBVAR
+
+    @lazyproperty
+    def missing_count(self):
+        """The number of missing values from first cube in this set."""
+        return self._cubes[0].missing
+
+    @lazyproperty
+    def name(self):
+        """str name of first cube in this set."""
+        return self._cubes[0].name
+
+    @lazyproperty
+    def partition_sets(self):
+        """Sequence of cube-partition collections across all cubes of this cube-set.
+
+        This value might look like the following for a ca-as-0th tabbook, for example:
+
+            (
+                (_Strand, _Slice, _Slice),
+                (_Strand, _Slice, _Slice),
+                (_Strand, _Slice, _Slice),
+            )
+
+        and might often look like this for a typical slide:
+
+            ((_Slice,))
+
+        Each partition set represents the partitions for a single "stacked" table. A 2D
+        slide has a single partition-set of a single _Slice object, as in the second
+        example above. A 3D slide would have multiple partition sets, each of a single
+        _Slice. A tabook will have multiple partitions in each set, the first being
+        a _Strand and the rest being _Slice objects. Multiple partition sets only arise
+        for a tabbook in the CA-as-0th case.
+        """
+        return tuple(zip(*(cube.partitions for cube in self._cubes)))
+
+    @lazyproperty
+    def population_fraction(self):
+        """The filtered/unfiltered ratio for this cube-set.
+
+        This value is required for properly calculating population on a cube where
+        a filter has been applied. Returns 1.0 for an unfiltered cube. Returns `np.nan`
+        if the unfiltered count is zero, which would otherwise result in
+        a divide-by-zero error.
+        """
+        return self._cubes[0].population_fraction
 
     @lazyproperty
     def _cubes(self):
@@ -129,45 +202,6 @@ class Cube(object):
         except Exception:
             return super(Cube, self).__repr__()
 
-    def inflate(self):
-        """Return new Cube object with rows-dimension added.
-
-        A multi-cube (tabbook) response formed from a function (e.g. mean()) on
-        a numeric variable arrives without a rows-dimension.
-        """
-        cube_dict = self._cube_dict
-        dimensions = cube_dict["result"]["dimensions"]
-        rows_dimension = {
-            "references": {"alias": "mean", "name": "mean"},
-            "type": {
-                "categories": [{"id": 1, "missing": False, "name": "Mean"}],
-                "class": "categorical",
-            },
-        }
-        dimensions.insert(0, rows_dimension)
-        return Cube(
-            cube_dict,
-            self._transforms_dict,
-            self._first_cube_of_tab,
-            self._population,
-            self._mask_size,
-        )
-
-    @lazyproperty
-    def partitions(self):
-        """Sequence of _Slice, _Strand, or _Nub objects from this cube-result."""
-        return tuple(
-            CubePartition.factory(
-                self,
-                slice_idx=slice_idx,
-                transforms=self._transforms_dict,
-                population=self._population,
-                ca_as_0th=self._ca_as_0th,
-                mask_size=self._mask_size,
-            )
-            for slice_idx in self._slice_idxs
-        )
-
     @lazyproperty
     def base_counts(self):
         return self._measures.unweighted_counts.raw_cube_array[self._valid_idxs]
@@ -210,6 +244,30 @@ class Cube(object):
         """True if cube includes a means measure."""
         return self._measures.means is not None
 
+    def inflate(self):
+        """Return new Cube object with rows-dimension added.
+
+        A multi-cube (tabbook) response formed from a function (e.g. mean()) on
+        a numeric variable arrives without a rows-dimension.
+        """
+        cube_dict = self._cube_dict
+        dimensions = cube_dict["result"]["dimensions"]
+        rows_dimension = {
+            "references": {"alias": "mean", "name": "mean"},
+            "type": {
+                "categories": [{"id": 1, "missing": False, "name": "Mean"}],
+                "class": "categorical",
+            },
+        }
+        dimensions.insert(0, rows_dimension)
+        return Cube(
+            cube_dict,
+            self._transforms_dict,
+            self._first_cube_of_tab,
+            self._population,
+            self._mask_size,
+        )
+
     @lazyproperty
     def is_weighted(self):
         """True if cube response contains weighted data."""
@@ -236,6 +294,21 @@ class Cube(object):
     def ndim(self):
         """int count of dimensions for this cube."""
         return len(self.dimensions)
+
+    @lazyproperty
+    def partitions(self):
+        """Sequence of _Slice, _Strand, or _Nub objects from this cube-result."""
+        return tuple(
+            CubePartition.factory(
+                self,
+                slice_idx=slice_idx,
+                transforms=self._transforms_dict,
+                population=self._population,
+                ca_as_0th=self._ca_as_0th,
+                mask_size=self._mask_size,
+            )
+            for slice_idx in self._slice_idxs
+        )
 
     @lazyproperty
     def population_fraction(self):
