@@ -83,6 +83,22 @@ class CubePartition(object):
         """int count of dimensions for this partition."""
         return len(self._dimensions)
 
+    @lazyproperty
+    def shape(self):
+        """Tuple of int vector counts for this partition.
+
+        Not to be confused with `numpy.ndarray.shape`, this represent the count of rows
+        and columns respectively, in this partition. It does not necessarily represent
+        the shape of any underlying `numpy.ndarray` object that may arise in the
+        implementation of the cube partition. In particular, the value of any count in
+        the shape can be zero.
+
+        A _Slice has a shape like (2, 3) representing (row-count, col-count). A _Strand
+        has a shape like (5,) which represents its row-count. The shape of a _Nub is
+        unconditionally () (an empty tuple).
+        """
+        raise NotImplementedError("must be implemented by each subclass")
+
 
 class _Slice(CubePartition):
     """2D cube partition.
@@ -152,6 +168,11 @@ class _Slice(CubePartition):
     @lazyproperty
     def counts(self):
         return np.array([row.values for row in self._matrix.rows])
+
+    @lazyproperty
+    def description(self):
+        """str description of this slice, which it takes from its rows-dimension."""
+        return self._rows_dimension.description
 
     @lazyproperty
     def inserted_column_idxs(self):

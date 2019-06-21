@@ -339,17 +339,22 @@ class _BaseBaseMatrix(object):
         counts = cube.counts
         base_counts = cube.base_counts
         counts_with_missings = cube.counts_with_missings
+        dimension_types = cube.dimension_types[-2:]
 
         # For cubes with means, create one of the means-matrix types
         if cube.has_means:
             if cube.ndim == 3:
                 base_counts = base_counts[slice_idx]
                 counts = counts[slice_idx]
+            if dimension_types == (DT.MR, DT.MR):
+                # TODO: Potentially address this case, which didn't arise yet
+                raise NotImplementedError("MR x MR with means is not implemented.")
+            if dimension_types[1] == DT.MR:
+                return _CatXMrMeansMatrix(dimensions, counts, base_counts)
             if dimensions[0].dimension_type == DT.MR:
                 return _MrXCatMeansMatrix(dimensions, counts, base_counts)
             return _CatXCatMeansMatrix(dimensions, counts, base_counts)
 
-        dimension_types = cube.dimension_types[-2:]
         if cube.ndim > 2:
             base_counts = base_counts[slice_idx]
             counts = counts[slice_idx]
@@ -723,6 +728,26 @@ class _CatXMrMatrix(_MatrixWithMR):
             self.table_margin,
             np.sum(self._counts[:, :, 0], axis=0),
             np.sum(self._counts, axis=2),
+        )
+
+
+class _CatXMrMeansMatrix(_CatXMrMatrix):
+    def __init__(self, dimensions, means, base_counts):
+        counts = np.empty(means.shape)
+        super(_CatXMrMeansMatrix, self).__init__(dimensions, counts, base_counts)
+        self._means = means
+
+    @lazyproperty
+    def rows(self):
+        """rows of CAT x MR matrix."""
+
+        return tuple(
+            # We must inflate the means with [:, 0], because the values are oriented
+            # like columns (0th is selected while 1st is other)
+            _MeansWithMrVector(element, base_counts, means[:, 0])
+            for element, base_counts, means in zip(
+                self.rows_dimension.valid_elements, self._base_counts, self._means
+            )
         )
 
 
