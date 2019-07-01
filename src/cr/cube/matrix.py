@@ -1184,11 +1184,12 @@ class _AssembledVector(_BaseTransformationVector):
         )
 
 
-class _BaseVectorAfterHiding(_BaseTransformationVector):
+class _VectorAfterHiding(_BaseTransformationVector):
     """Reflects a row or column with hidden elements removed."""
 
-    def __init__(self, base_vector):
+    def __init__(self, base_vector, opposite_vectors):
         self._base_vector = base_vector
+        self._opposite_vectors = opposite_vectors
 
     @lazyproperty
     def base(self):
@@ -1201,6 +1202,10 @@ class _BaseVectorAfterHiding(_BaseTransformationVector):
         return self._base_vector.base_values[self._visible_element_idxs]
 
     @lazyproperty
+    def column_index(self):
+        return self._base_vector.column_index[self._visible_element_idxs]
+
+    @lazyproperty
     def margin(self):
         if not isinstance(self._base_vector.margin, np.ndarray):
             return self._base_vector.margin
@@ -1211,32 +1216,20 @@ class _BaseVectorAfterHiding(_BaseTransformationVector):
         return self._base_vector.means[self._visible_element_idxs]
 
     @lazyproperty
-    def table_proportions(self):
-        return self._base_vector.table_proportions[self._visible_element_idxs]
-
-    @lazyproperty
-    def values(self):
-        return self._base_vector.values[self._visible_element_idxs]
-
-
-class _VectorAfterHiding(_BaseVectorAfterHiding):
-    """Reflects a row or column with hidden elements removed."""
-
-    def __init__(self, base_vector, opposite_vectors):
-        super(_VectorAfterHiding, self).__init__(base_vector)
-        self._opposite_vectors = opposite_vectors
-
-    @lazyproperty
-    def column_index(self):
-        return self._base_vector.column_index[self._visible_element_idxs]
-
-    @lazyproperty
     def proportions(self):
         return self._base_vector.proportions[self._visible_element_idxs]
 
     @lazyproperty
     def pvals(self):
         return self._base_vector.pvals[self._visible_element_idxs]
+
+    @lazyproperty
+    def table_proportions(self):
+        return self._base_vector.table_proportions[self._visible_element_idxs]
+
+    @lazyproperty
+    def values(self):
+        return self._base_vector.values[self._visible_element_idxs]
 
     @lazyproperty
     def zscore(self):
