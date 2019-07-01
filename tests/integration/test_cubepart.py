@@ -329,15 +329,17 @@ class Describe_Slice(object):
         ]
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
-    def it_calculates_mr_x_mr_column_proportions(self):
+    def it_knows_mr_x_mr_column_proportions(self):
         slice_ = Cube(CR.MR_X_MR).partitions[0]
-        expected = [
-            [1.0, 0.13302403, 0.12391245, 0.22804396],
-            [0.28566937, 1.0, 0.23498805, 0.47751837],
-            [0.43456698, 0.34959546, 1.0, 0.72838875],
-            [1.0, 1.0, 1.0, 1.0],
-        ]
-        np.testing.assert_almost_equal(slice_.column_proportions, expected)
+        np.testing.assert_almost_equal(
+            slice_.column_proportions,
+            [
+                [1.0, 0.13302403, 0.12391245, 0.22804396],
+                [0.28566937, 1.0, 0.23498805, 0.47751837],
+                [0.43456698, 0.34959546, 1.0, 0.72838875],
+                [1.0, 1.0, 1.0, 1.0],
+            ],
+        )
 
     def it_reorders_cat_x_cat(self):
         slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS).partitions[0]
@@ -441,6 +443,24 @@ class Describe_Slice(object):
         )
         np.testing.assert_equal(slice_.base_counts, expected)
 
+    def it_accommodates_an_all_missing_element_rows_dimension(self):
+        slice_ = _Slice(Cube(CR.CAT_X_CAT_ALL_MISSING_ROW_ELEMENTS), 0, None, None, 0)
+        row_proportions = slice_.row_proportions
+        np.testing.assert_almost_equal(row_proportions, np.array([]))
+
+    def it_knows_means_with_subtotals_on_cat_x_cat(self):
+        slice_ = _Slice(Cube(CR.CAT_X_CAT_MEAN_SUBTOT), 0, None, None, 0)
+
+        means = slice_.means
+
+        np.testing.assert_almost_equal(
+            means, np.array([[38.3333333, np.nan, 65.0, 55.0, 34.0]])
+        )
+
+
+class Describe_Strand(object):
+    """Integration-test suite for `cr.cube.cubepart._Strand` object."""
+
     def it_provides_nans_for_means_insertions(self):
         strand = CubePartition.factory(
             Cube(CR.CAT_WITH_MEANS_AND_INSERTIONS), 0, None, None, None, 0
@@ -448,8 +468,3 @@ class Describe_Slice(object):
         np.testing.assert_almost_equal(
             strand.means, [19.85555556, 13.85416667, 52.78947368, np.nan, np.nan]
         )
-
-    def it_accommodates_an_all_missing_element_rows_dimension(self):
-        slice_ = _Slice(Cube(CR.CAT_X_CAT_ALL_MISSING_ROW_ELEMENTS), 0, None, None, 0)
-        row_proportions = slice_.row_proportions
-        np.testing.assert_almost_equal(row_proportions, np.array([]))

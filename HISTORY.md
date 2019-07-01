@@ -1,5 +1,8 @@
 # History of Changes
 
+#### 1.10.4
+- Fix means on `_Slice` having subtotals.
+
 #### 1.10.3
 - Refactor hidden and pruned slices
 
