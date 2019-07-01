@@ -448,6 +448,15 @@ class Describe_Slice(object):
         row_proportions = slice_.row_proportions
         np.testing.assert_almost_equal(row_proportions, np.array([]))
 
+    def it_knows_means_with_subtotals_on_cat_x_cat(self):
+        slice_ = _Slice(Cube(CR.CAT_X_CAT_MEAN_SUBTOT), 0, None, None, 0)
+
+        means = slice_.means
+
+        np.testing.assert_almost_equal(
+            means, np.array([[38.3333333, np.nan, 65.0, 55.0, 34.0]])
+        )
+
 
 class Describe_Strand(object):
     """Integration-test suite for `cr.cube.cubepart._Strand` object."""

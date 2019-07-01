@@ -1062,6 +1062,14 @@ class _AssembledVector(_BaseTransformationVector):
         )
 
     @lazyproperty
+    def means(self):
+        return np.array(
+            tuple([np.nan] * len(self._top_values))
+            + self._interleaved_means
+            + tuple([np.nan] * len(self._bottom_values))
+        )
+
+    @lazyproperty
     def proportions(self):
         return self.values / self.margin
 
@@ -1133,6 +1141,16 @@ class _AssembledVector(_BaseTransformationVector):
                 if i == inserted_vector.anchor:
                     column_index.append(np.nan)
         return tuple(column_index)
+
+    @lazyproperty
+    def _interleaved_means(self):
+        means = []
+        for i, value in enumerate(self._base_vector.means):
+            means.append(value)
+            for inserted_vector in self._opposite_inserted_vectors:
+                if i == inserted_vector.anchor:
+                    means.append(np.nan)
+        return tuple(means)
 
     @lazyproperty
     def _interleaved_pvals(self):

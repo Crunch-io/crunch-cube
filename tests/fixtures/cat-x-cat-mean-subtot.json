@@ -1,0 +1,120 @@
+{
+    "result": {
+        "counts": [
+            3,
+            3,
+            2,
+            2,
+            0
+        ],
+        "dimensions": [
+            {
+                "references": {"alias": "mean", "name": "mean"},
+                "type": {
+                    "categories": [{"id": 1, "missing": false, "name": "Mean"}],
+                    "class": "categorical"
+                }
+            },
+            {
+                "derived": false,
+                "references": {
+                    "alias": "Education",
+                    "description": "Education",
+                    "name": "Education",
+                    "view": {
+                        "column_width": null,
+                        "include_missing": false,
+                        "show_counts": false,
+                        "show_numeric_values": false,
+                        "transform": {
+                            "insertions": [
+                                {
+                                    "anchor": 1,
+                                    "args": [
+                                        2,
+                                        3,
+                                        4
+                                    ],
+                                    "function": "subtotal",
+                                    "name": "Any College"
+                                }
+                            ]
+                        }
+                    }
+                },
+                "type": {
+                    "categories": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "name": "HS or Less",
+                            "numeric_value": 1
+                        },
+                        {
+                            "id": 2,
+                            "missing": false,
+                            "name": "Some College",
+                            "numeric_value": 2
+                        },
+                        {
+                            "id": 3,
+                            "missing": false,
+                            "name": "College Grad",
+                            "numeric_value": 3
+                        },
+                        {
+                            "id": 4,
+                            "missing": false,
+                            "name": "Grad School",
+                            "numeric_value": 4
+                        },
+                        {
+                            "id": -1,
+                            "missing": true,
+                            "name": "No Data",
+                            "numeric_value": null
+                        }
+                    ],
+                    "class": "categorical",
+                    "ordinal": false
+                }
+            }
+        ],
+        "filtered": {
+            "unweighted_n": 10,
+            "weighted_n": 10
+        },
+        "measures": {
+            "mean": {
+                "data": [
+                    38.3333333333,
+                    65.0,
+                    55.0,
+                    34.0,
+                    {
+                        "?": -8
+                    }
+                ],
+                "metadata": {
+                    "derived": true,
+                    "references": {},
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {
+                            "NaN": -8,
+                            "No Data": -1
+                        },
+                        "missing_rules": {}
+                    }
+                },
+                "n_missing": 0
+            }
+        },
+        "n": 10,
+        "unfiltered": {
+            "unweighted_n": 10,
+            "weighted_n": 10
+        }
+    }
+}
