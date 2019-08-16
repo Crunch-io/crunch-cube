@@ -638,7 +638,7 @@ class _MrXCatMeansMatrix(_MrXCatMatrix):
     """ ... """
 
     def __init__(self, dimensions, means, base_counts):
-        counts = np.empty(means.shape)
+        counts = np.zeros(means.shape)
         super(_MrXCatMeansMatrix, self).__init__(dimensions, counts, base_counts)
         self._means = means
 
@@ -733,7 +733,7 @@ class _CatXMrMatrix(_MatrixWithMR):
 
 class _CatXMrMeansMatrix(_CatXMrMatrix):
     def __init__(self, dimensions, means, base_counts):
-        counts = np.empty(means.shape)
+        counts = np.zeros(means.shape)
         super(_CatXMrMeansMatrix, self).__init__(dimensions, counts, base_counts)
         self._means = means
 
