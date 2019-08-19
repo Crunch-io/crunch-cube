@@ -493,6 +493,11 @@ class _CatXCatMatrix(_BaseBaseMatrix):
 
         The shape of the return value is the same as that of *counts*.
         """
+        if not np.all(counts.shape) or np.linalg.matrix_rank(counts) < 2:
+            # If the matrix is "defective", in the sense that it doesn't have at least
+            # two rows and two columns that are "full" of data, don't calculate zscores.
+            return np.zeros(counts.shape)
+
         expected_counts = expected_freq(counts)
         residuals = counts - expected_counts
         variance = (
@@ -545,6 +550,11 @@ class _MatrixWithMR(_CatXCatMatrix):
 
     @staticmethod
     def _array_type_std_res(counts, total, colsum, rowsum):
+        if not np.all(counts.shape) or np.linalg.matrix_rank(counts) < 2:
+            # If the matrix is "defective", in the sense that it doesn't have at least
+            # two rows and two columns that are "full" of data, don't calculate zscores.
+            return np.zeros(counts.shape)
+
         expected_counts = rowsum * colsum / total
         # TODO: this line occasionally raises overflow warnings in the tests.
         variance = rowsum * colsum * (total - rowsum) * (total - colsum) / total ** 3
