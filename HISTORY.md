@@ -1,5 +1,23 @@
 # History of Changes
 
+#### 1.11.2
+- Mostly renaming and support for numeric means in tabbooks
+
+#### 1.11.1
+- Fix `fill` for insertions
+
+#### 1.11.0
+- Significant refactor of the frozen cube code (even thought most of the logic is the same)
+
+#### 1.10.6
+- Fix index error by fixing the indexing array type to int (it used to default to float when the indexed array is empty)
+
+#### 1.10.5
+- Implement (frozen) `Cube` - responsible for (frozen) `_Slice` creation
+
+#### 1.10.4
+- Column index with insertions (as dashes)
+
 #### 1.10.4
 - Fix means on `_Slice` having subtotals.
 
