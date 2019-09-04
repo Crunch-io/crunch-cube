@@ -181,6 +181,8 @@ class DescribeIntegrated_Measures(object):
             (CR.CAT_X_CAT_FILT, 0.254),
             # ---unfiltered case---
             (CR.CAT_X_CAT, 1.0),
+            # ---complete cases---
+            (CR.CAT_X_CAT_FILT_COMPLETE, 0.5760869565217391),
         ]
     )
     def pop_frac_fixture(self, request):

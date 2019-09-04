@@ -1,0 +1,367 @@
+{
+    "query": {
+        "measures": {
+            "count": {
+                "function": "cube_count",
+                "args": []
+            }
+        },
+        "dimensions": [
+            {
+                "variable": "https://app.crunch.io/api/datasets/7af9b5a206054cc38c84b73ab700e201/variables/000026/"
+            },
+            {
+                "variable": "https://app.crunch.io/api/datasets/7af9b5a206054cc38c84b73ab700e201/variables/000067/"
+            }
+        ],
+        "weight": null
+    },
+    "query_environment": {
+        "filter": [
+            "https://app.crunch.io/api/datasets/7af9b5a206054cc38c84b73ab700e201/filters/2a72a38bf8b54b69a75e49a69868c65c/"
+        ]
+    },
+    "result": {
+        "dimensions": [
+            {
+                "references": {
+                    "alias": "pasta",
+                    "notes": "A categorical variable",
+                    "view": {
+                        "show_counts": false,
+                        "column_width": null,
+                        "transform": {
+                            "insertions": []
+                        },
+                        "include_missing": false,
+                        "show_numeric_values": false
+                    },
+                    "description": "The geometry of pasta",
+                    "name": "Shapes of pasta"
+                },
+                "derived": false,
+                "type": {
+                    "ordinal": false,
+                    "class": "categorical",
+                    "categories": [
+                        {
+                            "numeric_value": 1,
+                            "id": 1,
+                            "name": "Bucatini",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 2,
+                            "id": 2,
+                            "name": "Chitarra",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 0,
+                            "id": 0,
+                            "name": "Boccoli",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 4,
+                            "id": 4,
+                            "name": "Orecchiette",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 5,
+                            "id": 5,
+                            "name": "Quadrefiore",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 6,
+                            "id": 6,
+                            "name": "Fileja",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 32766,
+                            "id": 32766,
+                            "name": "Skipped",
+                            "missing": true
+                        },
+                        {
+                            "numeric_value": 32767,
+                            "id": 32767,
+                            "name": "Not asked",
+                            "missing": true
+                        },
+                        {
+                            "numeric_value": null,
+                            "id": -1,
+                            "name": "No Data",
+                            "missing": true
+                        }
+                    ]
+                }
+            },
+            {
+                "references": {
+                    "alias": "food_groups",
+                    "notes": "A categorical variable where the missing categories are interspersed throughout the non-missing categories",
+                    "description": "Four of the five USDA food groups",
+                    "name": "Food groups",
+                    "view": {
+                        "show_counts": false,
+                        "show_numeric_values": false,
+                        "transform": {
+                            "insertions": [
+                                {
+                                    "function": "subtotal",
+                                    "args": [
+                                        5,
+                                        2,
+                                        0
+                                    ],
+                                    "name": "non animal",
+                                    "anchor": 5
+                                }
+                            ]
+                        },
+                        "include_missing": false,
+                        "column_width": null
+                    }
+                },
+                "derived": false,
+                "type": {
+                    "ordinal": false,
+                    "class": "categorical",
+                    "categories": [
+                        {
+                            "numeric_value": 0,
+                            "id": 0,
+                            "name": "Vegetables",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 32766,
+                            "id": 32766,
+                            "name": "Don't know",
+                            "missing": true
+                        },
+                        {
+                            "numeric_value": 2,
+                            "id": 2,
+                            "name": "Fruit",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 5,
+                            "id": 5,
+                            "name": "Grain",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": null,
+                            "id": -1,
+                            "name": "No Data",
+                            "missing": true
+                        },
+                        {
+                            "numeric_value": 4,
+                            "id": 4,
+                            "name": "Meat",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 32767,
+                            "id": 32767,
+                            "name": "Not asked",
+                            "missing": true
+                        }
+                    ]
+                }
+            }
+        ],
+        "missing": 4,
+        "measures": {
+            "count": {
+                "data": [
+                    9,
+                    0,
+                    2,
+                    0,
+                    0,
+                    6,
+                    0,
+                    14,
+                    0,
+                    21,
+                    8,
+                    0,
+                    10,
+                    0,
+                    63,
+                    0,
+                    97,
+                    62,
+                    0,
+                    58,
+                    0,
+                    26,
+                    0,
+                    55,
+                    32,
+                    0,
+                    47,
+                    0,
+                    40,
+                    1,
+                    36,
+                    24,
+                    0,
+                    125,
+                    0,
+                    10,
+                    1,
+                    19,
+                    6,
+                    0,
+                    6,
+                    0,
+                    1,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "n_missing": 4,
+                "metadata": {
+                    "references": {},
+                    "derived": true,
+                    "type": {
+                        "integer": true,
+                        "missing_rules": {},
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "class": "numeric"
+                    }
+                }
+            }
+        },
+        "n": 780,
+        "filter_stats": {
+            "filtered_complete": {
+                "unweighted": {
+                    "selected": 159,
+                    "other": 117,
+                    "missing": 1386
+                },
+                "weighted": {
+                    "selected": 159,
+                    "other": 117,
+                    "missing": 1386
+                }
+            },
+            "filtered": {
+                "unweighted": {
+                    "selected": 780,
+                    "other": 882,
+                    "missing": 0
+                },
+                "weighted": {
+                    "selected": 780,
+                    "other": 882,
+                    "missing": 0
+                }
+            }
+        },
+        "unfiltered": {
+            "unweighted_n": 1662,
+            "weighted_n": 1662
+        },
+        "filtered": {
+            "unweighted_n": 780,
+            "weighted_n": 780
+        },
+        "counts": [
+            9,
+            0,
+            2,
+            0,
+            0,
+            6,
+            0,
+            14,
+            0,
+            21,
+            8,
+            0,
+            10,
+            0,
+            63,
+            0,
+            97,
+            62,
+            0,
+            58,
+            0,
+            26,
+            0,
+            55,
+            32,
+            0,
+            47,
+            0,
+            40,
+            1,
+            36,
+            24,
+            0,
+            125,
+            0,
+            10,
+            1,
+            19,
+            6,
+            0,
+            6,
+            0,
+            1,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ],
+        "element": "crunch:cube"
+    }
+}
