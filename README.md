@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.11.6
+- Calculate population size fraction using complete cases
+
 #### 1.11.5
 - Fix pval calculation issues with defective matrices (rank < 2)
 - Fix occasional overflowing issues, that arise from `np.empty` usage (use `np.zeros` instead)
