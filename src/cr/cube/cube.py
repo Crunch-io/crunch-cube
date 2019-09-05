@@ -463,13 +463,35 @@ class _Measures(object):
     def population_fraction(self):
         """The filtered/unfiltered ratio for cube response.
 
+        The filtered counts are calculated for complete-cases. This means that only the
+        non-missing entries are included in the filtered counts. Complete cases are
+        used only if the corresponding cases are included in the cube response. If not,
+        the old-style default calculation is used.
+
         This value is required for properly calculating population on a cube
         where a filter has been applied. Returns 1.0 for an unfiltered cube.
         Returns `np.nan` if the unfiltered count is zero, which would
         otherwise result in a divide-by-zero error.
         """
-        numerator = self._cube_dict["result"].get("filtered", {}).get("weighted_n")
-        denominator = self._cube_dict["result"].get("unfiltered", {}).get("weighted_n")
+
+        # Try and get the new-style complete-cases filtered counts
+        filter_stats = (
+            self._cube_dict["result"]
+            .get("filter_stats", {})
+            .get("filtered_complete", {})
+            .get("weighted")
+        )
+        if filter_stats:
+            # If new format is present in response json, use that for pop fraction
+            numerator = filter_stats["selected"]
+            denominator = numerator + filter_stats["other"]
+        else:
+            # If new format is not available, default to old-style calculation
+            numerator = self._cube_dict["result"].get("filtered", {}).get("weighted_n")
+            denominator = (
+                self._cube_dict["result"].get("unfiltered", {}).get("weighted_n")
+            )
+
         try:
             return numerator / denominator
         except ZeroDivisionError:
