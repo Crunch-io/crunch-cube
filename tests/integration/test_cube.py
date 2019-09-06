@@ -194,12 +194,7 @@ class DescribeIntegrated_Measures(object):
             # ---weighted case---
             (CR.CAT_X_CAT_WGTD, "_WeightedCountMeasure"),
             # ---unweighted case---
-            pytest.param(
-                (CR.CAT_X_CAT, "_UnweightedCountMeasure"),
-                marks=pytest.mark.xfail(
-                    reason="@slobodan please check unexpected behavior", strict=True
-                ),
-            ),
+            (CR.CAT_X_CAT, "_UnweightedCountMeasure"),
         ]
     )
     def wgtd_counts_fixture(self, request):
