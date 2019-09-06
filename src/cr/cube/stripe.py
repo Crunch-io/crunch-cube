@@ -160,11 +160,6 @@ class _BaseBaseStripe(object):
         return _CatStripe(rows_dimension, counts, base_counts)
 
     @lazyproperty
-    def rows_dimension(self):
-        """Dimension object describing the rows of this stripe."""
-        return self._rows_dimension
-
-    @lazyproperty
     def table_base(self):
         return np.sum(self._base_counts)
 
@@ -424,19 +419,9 @@ class _CatStripeRow(_BaseStripeRow):
         return self._count
 
     @lazyproperty
-    def margin(self):
-        """float total weighted count for this row."""
-        return self._count
-
-    @lazyproperty
     def pruned(self):
         """True if this row is "empty"."""
         return self.base == 0 or np.isnan(self.base)
-
-    @lazyproperty
-    def table_margin(self):
-        """int or float sum of weighted counts for this row's stripe."""
-        return self._table_margin
 
     @lazyproperty
     def table_proportions(self):
@@ -466,7 +451,9 @@ class _MeansStripeRow(_BaseStripeRow):
     @lazyproperty
     def count(self):
         """It's a programming error if this is ever called."""
-        raise NotImplementedError("Mean measure has no unweighted count.")
+        raise NotImplementedError(
+            "Mean measure has no unweighted count."
+        )  # pragma: no cover
 
     @lazyproperty
     def mean(self):
@@ -475,10 +462,6 @@ class _MeansStripeRow(_BaseStripeRow):
     @lazyproperty
     def pruned(self):
         return self.base == 0 or np.isnan(self.base)
-
-    @lazyproperty
-    def value(self):
-        return self._mean
 
 
 class _MeansMrStripeRow(_BaseStripeRow):
