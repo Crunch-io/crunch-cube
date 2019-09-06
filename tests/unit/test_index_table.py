@@ -11,6 +11,7 @@ from mock import Mock
 import numpy as np
 
 from cr.cube.cube_slice import CubeSlice
+from cr.cube.enum import DIMENSION_TYPE as DT
 
 
 def test_index_performs_correct_division(index_fixture):
@@ -27,20 +28,17 @@ def test_index_performs_correct_division(index_fixture):
             [0.6, 0.4],
             [[119.047619047619, 71.4285714285714], [104.16666666666667, 93.75]],
         ),
-        pytest.param(
-            (
-                [[0.5, 0.4], [0.5, 0.6]],
-                0,
-                [0.6, 0.4],
-                [[83.3333333333333, 66.6666666666667], [125, 150]],
-            ),
-            marks=pytest.mark.xfail(reason="FrozenSlice WIP", strict=True),
+        (
+            [[0.5, 0.4], [0.5, 0.6]],
+            0,
+            [0.6, 0.4],
+            [[83.3333333333333, 66.6666666666667], [125, 150]],
         ),
     ]
 )
 def index_fixture(request):
     proportions, axis, base, expected = request.param
-    cc = Mock()
+    cc = Mock(dim_types=(DT.CAT, DT.CAT))
     cc.ndim = 2
     cc.mr_dim_ind = None
     cc.proportions.return_value = np.array(proportions)
