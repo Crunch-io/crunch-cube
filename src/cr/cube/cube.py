@@ -516,7 +516,11 @@ class _Measures(object):
         available. If the cube response is not weighted, the
         _UnweightedCountMeasure object for this cube is returned.
         """
-        return _WeightedCountMeasure(self._cube_dict, self._all_dimensions)
+        return (
+            _WeightedCountMeasure(self._cube_dict, self._all_dimensions)
+            if self.is_weighted
+            else _UnweightedCountMeasure(self._cube_dict, self._all_dimensions)
+        )
 
 
 class _BaseMeasure(object):
