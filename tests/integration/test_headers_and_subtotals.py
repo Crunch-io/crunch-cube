@@ -977,3 +977,15 @@ class TestHeadersAndSubtotals(object):
                 [0.01846321, 0.03026176, 0.14013355],
             ],
         )
+
+    def test_col_labels_with_top_hs(self):
+        slice_ = Cube(CR.CAT_X_CAT_HS_MISSING).partitions[0]
+        assert slice_.column_labels == (
+            "Whites",
+            "White college women voters",
+            "White non-college women voters",
+            "White college men voters",
+            "White non-college men voters",
+            "Black voters",
+            "Latino and other voters",
+        )

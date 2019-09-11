@@ -1,0 +1,289 @@
+{
+    "query": {
+        "dimensions": [
+            {
+                "variable": "https://app.crunch.io/api/datasets/1ac271769c1b4af381e8437717afbb56/variables/000023/"
+            },
+            {
+                "variable": "https://app.crunch.io/api/datasets/1ac271769c1b4af381e8437717afbb56/variables/000045/"
+            }
+        ],
+        "measures": {
+            "count": {
+                "args": [],
+                "function": "cube_count"
+            }
+        },
+        "weight": null
+    },
+    "query_environment": {
+        "filter": []
+    },
+    "result": {
+        "counts": [
+            116,
+            0,
+            0,
+            171,
+            251,
+            54,
+            85,
+            0,
+            0,
+            0,
+            208,
+            181,
+            275,
+            0,
+            0,
+            77,
+            82,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ],
+        "dimensions": [
+            {
+                "derived": false,
+                "references": {
+                    "alias": "gender",
+                    "description": "What is your gender?",
+                    "name": "gender"
+                },
+                "type": {
+                    "categories": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "name": "Male",
+                            "numeric_value": 1
+                        },
+                        {
+                            "id": 2,
+                            "missing": false,
+                            "name": "Female",
+                            "numeric_value": 2
+                        },
+                        {
+                            "id": 32766,
+                            "missing": true,
+                            "name": "skipped",
+                            "numeric_value": 32766
+                        },
+                        {
+                            "id": 32767,
+                            "missing": true,
+                            "name": "not asked",
+                            "numeric_value": 32767
+                        },
+                        {
+                            "id": -1,
+                            "missing": true,
+                            "name": "No Data",
+                            "numeric_value": null
+                        }
+                    ],
+                    "class": "categorical",
+                    "ordinal": false
+                }
+            },
+            {
+                "derived": false,
+                "references": {
+                    "alias": "exitpoll16",
+                    "description": "National Exit Poll Demographic Groups",
+                    "name": "exitpoll16",
+                    "view": {
+                        "column_width": null,
+                        "include_missing": false,
+                        "show_counts": false,
+                        "show_numeric_values": false,
+                        "transform": {
+                            "insertions": [
+                                {
+                                    "anchor": "top",
+                                    "args": [
+                                        1,
+                                        2,
+                                        3,
+                                        4
+                                    ],
+                                    "function": "subtotal",
+                                    "name": "Whites"
+                                }
+                            ]
+                        }
+                    }
+                },
+                "type": {
+                    "categories": [
+                        {
+                            "id": 7,
+                            "missing": true,
+                            "name": "Non-voters",
+                            "numeric_value": 7
+                        },
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "name": "White college women voters",
+                            "numeric_value": 1
+                        },
+                        {
+                            "id": 2,
+                            "missing": false,
+                            "name": "White non-college women voters",
+                            "numeric_value": 2
+                        },
+                        {
+                            "id": 3,
+                            "missing": false,
+                            "name": "White college men voters",
+                            "numeric_value": 3
+                        },
+                        {
+                            "id": 4,
+                            "missing": false,
+                            "name": "White non-college men voters",
+                            "numeric_value": 4
+                        },
+                        {
+                            "id": 5,
+                            "missing": false,
+                            "name": "Black voters",
+                            "numeric_value": 5
+                        },
+                        {
+                            "id": 6,
+                            "missing": false,
+                            "name": "Latino and other voters",
+                            "numeric_value": 6
+                        },
+                        {
+                            "id": 32766,
+                            "missing": true,
+                            "name": "skipped",
+                            "numeric_value": 32766
+                        },
+                        {
+                            "id": 32767,
+                            "missing": true,
+                            "name": "not asked",
+                            "numeric_value": 32767
+                        },
+                        {
+                            "id": -1,
+                            "missing": true,
+                            "name": "No Data",
+                            "numeric_value": null
+                        }
+                    ],
+                    "class": "categorical",
+                    "ordinal": false
+                }
+            }
+        ],
+        "element": "crunch:cube",
+        "measures": {
+            "count": {
+                "data": [
+                    116,
+                    0,
+                    0,
+                    171,
+                    251,
+                    54,
+                    85,
+                    0,
+                    0,
+                    0,
+                    208,
+                    181,
+                    275,
+                    0,
+                    0,
+                    77,
+                    82,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "metadata": {
+                    "derived": true,
+                    "references": {},
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {}
+                    }
+                },
+                "n_missing": 324
+            }
+        },
+        "missing": 324,
+        "n": 1500
+    }
+}

@@ -43,10 +43,6 @@ class TransformedMatrix(object):
         return self._transformed_matrix.table_base_unpruned
 
     @lazyproperty
-    def table_margin(self):
-        return self._transformed_matrix.table_margin
-
-    @lazyproperty
     def table_margin_unpruned(self):
         return self._transformed_matrix.table_margin_unpruned
 
@@ -155,8 +151,6 @@ class _MatrixWithHidden(object):
     def table_base(self):
         margin = self._base_matrix.table_base
         index = margin != 0
-        if margin.ndim < 2:
-            return margin[index]
         return margin[np.ix_(self._rows_ind, self._cols_ind)]
 
     @lazyproperty
@@ -352,7 +346,9 @@ class _BaseBaseMatrix(object):
                 counts = counts[slice_idx]
             if dimension_types == (DT.MR, DT.MR):
                 # TODO: Potentially address this case, which didn't arise yet
-                raise NotImplementedError("MR x MR with means is not implemented.")
+                raise NotImplementedError(
+                    "MR x MR with means is not implemented."
+                )  # pragma: no cover
             if dimension_types[1] == DT.MR:
                 return _CatXMrMeansMatrix(dimensions, counts, base_counts)
             if dimensions[0].dimension_type == DT.MR:
@@ -378,14 +374,6 @@ class _BaseBaseMatrix(object):
     @lazyproperty
     def columns_dimension(self):
         return self._dimensions[1]
-
-    @lazyproperty
-    def ndim(self):
-        """int count of dimensions in this matrix, unconditionally 2.
-
-        A matrix is by definition two-dimensional.
-        """
-        return 2
 
     @lazyproperty
     def rows_dimension(self):
