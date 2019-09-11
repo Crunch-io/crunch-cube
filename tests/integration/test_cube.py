@@ -224,6 +224,16 @@ class DescribeIntegrated_MeanMeasure(object):
             ],
         )
 
+    def it_handles_cat_x_mr_with_means(self):
+        slice_ = Cube(CR.CAT_X_MR_WITH_MEANS).partitions[0]
+        assert slice_.column_labels == (
+            "Denmark",
+            "Finland",
+            "Iceland",
+            "Norway",
+            "Sweden",
+        )
+
 
 class DescribeIntegrated_UnweightedCountMeasure(object):
     def it_provides_access_to_its_raw_cube_array(self):

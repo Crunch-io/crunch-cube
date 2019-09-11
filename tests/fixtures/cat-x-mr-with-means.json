@@ -1,2257 +1,862 @@
 {
-    "query": {
-        "dimensions": [
-            {
-                "each": "https://app.crunch.io/api/datasets/be20e95c608e4f62b6d13c594f087c9d/variables/ff599c0748a94ca4bedfc9de96542ca4/"
+    "element": "shoji:view",
+    "self": "https://app.crunch.io/api/datasets/7af9b5a206054cc38c84b73ab700e201/cube/?query=%7B%22dimensions%22:%5B%7B%22variable%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2F7af9b5a206054cc38c84b73ab700e201%2Fvariables%2F000026%2F%22%7D,%7B%22each%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2F7af9b5a206054cc38c84b73ab700e201%2Fvariables%2F0000dc%2F%22%7D,%7B%22function%22:%22as_selected%22,%22args%22:%5B%7B%22variable%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2F7af9b5a206054cc38c84b73ab700e201%2Fvariables%2F0000dc%2F%22%7D%5D%7D%5D,%22measures%22:%7B%22count%22:%7B%22function%22:%22cube_count%22,%22args%22:%5B%5D%7D,%22mean%22:%7B%22function%22:%22cube_mean%22,%22args%22:%5B%7B%22variable%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2F7af9b5a206054cc38c84b73ab700e201%2Fvariables%2F0000a1%2F%22%7D%5D%7D%7D,%22weight%22:null%7D",
+    "value": {
+        "query": {
+            "dimensions": [
+                {
+                    "variable": "https://app.crunch.io/api/datasets/7af9b5a206054cc38c84b73ab700e201/variables/000026/"
+                },
+                {
+                    "each": "https://app.crunch.io/api/datasets/7af9b5a206054cc38c84b73ab700e201/variables/0000dc/"
+                },
+                {
+                    "args": [
+                        {
+                            "variable": "https://app.crunch.io/api/datasets/7af9b5a206054cc38c84b73ab700e201/variables/0000dc/"
+                        }
+                    ],
+                    "function": "as_selected"
+                }
+            ],
+            "measures": {
+                "count": {
+                    "args": [],
+                    "function": "cube_count"
+                },
+                "mean": {
+                    "args": [
+                        {
+                            "variable": "https://app.crunch.io/api/datasets/7af9b5a206054cc38c84b73ab700e201/variables/0000a1/"
+                        }
+                    ],
+                    "function": "cube_mean"
+                }
             },
-            {
-                "args": [
-                    {
-                        "variable": "https://app.crunch.io/api/datasets/be20e95c608e4f62b6d13c594f087c9d/variables/ff599c0748a94ca4bedfc9de96542ca4/"
-                    }
-                ],
-                "function": "as_selected"
-            },
-            {
-                "variable": "https://app.crunch.io/api/datasets/be20e95c608e4f62b6d13c594f087c9d/variables/be876544a82448029bcea53765381b91/"
-            }
-        ],
-        "measures": {
-            "count": {
-                "args": [],
-                "function": "cube_count"
-            },
-            "mean": {
-                "args": [
-                    {
-                        "variable": "https://app.crunch.io/api/datasets/be20e95c608e4f62b6d13c594f087c9d/variables/4334de39ee5e4d73ad3e147a09c91b14/"
-                    }
-                ],
-                "function": "cube_mean"
-            }
+            "weight": null
         },
-        "weight": "https://app.crunch.io/api/datasets/be20e95c608e4f62b6d13c594f087c9d/variables/73ed60581ae146acb01edaf0d6a13433/"
-    },
-    "query_environment": {
-        "filter": []
-    },
-    "result": {
-        "counts": [
-            689,
-            597,
-            683,
-            578,
-            587,
-            577,
-            581,
-            513,
-            0,
-            0,
-            0,
-            0,
-            0,
-            1039,
-            926,
-            887,
-            856,
-            872,
-            852,
-            880,
-            919,
-            0,
-            0,
-            0,
-            0,
-            0,
-            764,
-            562,
-            651,
-            683,
-            626,
-            650,
-            645,
-            661,
-            2091,
-            2067,
-            2073,
-            2066,
-            0,
-            519,
-            437,
-            464,
-            440,
-            430,
-            443,
-            442,
-            439,
-            0,
-            0,
-            0,
-            0,
-            0,
-            1209,
-            1086,
-            1106,
-            994,
-            1029,
-            986,
-            1019,
-            993,
-            0,
-            0,
-            0,
-            0,
-            0,
-            764,
-            562,
-            651,
-            683,
-            626,
-            650,
-            645,
-            661,
-            2091,
-            2067,
-            2073,
-            2066,
-            0,
-            163,
-            154,
-            141,
-            128,
-            145,
-            129,
-            128,
-            168,
-            0,
-            0,
-            0,
-            0,
-            0,
-            1565,
-            1369,
-            1429,
-            1306,
-            1314,
-            1300,
-            1333,
-            1264,
-            0,
-            0,
-            0,
-            0,
-            0,
-            764,
-            562,
-            651,
-            683,
-            626,
-            650,
-            645,
-            661,
-            2091,
-            2067,
-            2073,
-            2066,
-            0,
-            175,
-            150,
-            146,
-            150,
-            151,
-            136,
-            157,
-            135,
-            0,
-            0,
-            0,
-            0,
-            0,
-            1553,
-            1373,
-            1424,
-            1284,
-            1308,
-            1293,
-            1304,
-            1297,
-            0,
-            0,
-            0,
-            0,
-            0,
-            764,
-            562,
-            651,
-            683,
-            626,
-            650,
-            645,
-            661,
-            2091,
-            2067,
-            2073,
-            2066,
-            0,
-            90,
-            85,
-            71,
-            75,
-            70,
-            83,
-            78,
-            92,
-            0,
-            0,
-            0,
-            0,
-            0,
-            1638,
-            1438,
-            1499,
-            1359,
-            1389,
-            1346,
-            1383,
-            1340,
-            0,
-            0,
-            0,
-            0,
-            0,
-            764,
-            562,
-            651,
-            683,
-            626,
-            650,
-            645,
-            661,
-            2091,
-            2067,
-            2073,
-            2066,
-            0,
-            45,
-            33,
-            32,
-            22,
-            29,
-            25,
-            33,
-            39,
-            0,
-            0,
-            0,
-            0,
-            0,
-            1683,
-            1490,
-            1538,
-            1412,
-            1430,
-            1404,
-            1428,
-            1393,
-            0,
-            0,
-            0,
-            0,
-            0,
-            764,
-            562,
-            651,
-            683,
-            626,
-            650,
-            645,
-            661,
-            2091,
-            2067,
-            2073,
-            2066,
-            0,
-            25,
-            23,
-            17,
-            21,
-            21,
-            15,
-            25,
-            20,
-            0,
-            0,
-            0,
-            0,
-            0,
-            1703,
-            1500,
-            1553,
-            1413,
-            1438,
-            1414,
-            1436,
-            1412,
-            0,
-            0,
-            0,
-            0,
-            0,
-            764,
-            562,
-            651,
-            683,
-            626,
-            650,
-            645,
-            661,
-            2091,
-            2067,
-            2073,
-            2066,
-            0,
-            22,
-            22,
-            16,
-            20,
-            26,
-            21,
-            17,
-            26,
-            0,
-            0,
-            0,
-            0,
-            0,
-            1706,
-            1501,
-            1554,
-            1414,
-            1433,
-            1408,
-            1444,
-            1406,
-            0,
-            0,
-            0,
-            0,
-            0,
-            764,
-            562,
-            651,
-            683,
-            626,
-            650,
-            645,
-            661,
-            2091,
-            2067,
-            2073,
-            2066,
-            0,
-            1636,
-            1423,
-            1505,
-            1371,
-            1383,
-            1368,
-            1386,
-            1347,
-            0,
-            0,
-            0,
-            0,
-            0,
-            92,
-            100,
-            65,
-            63,
-            76,
-            61,
-            75,
-            85,
-            0,
-            0,
-            0,
-            0,
-            0,
-            764,
-            562,
-            651,
-            683,
-            626,
-            650,
-            645,
-            661,
-            2091,
-            2067,
-            2073,
-            2066,
-            0
-        ],
-        "dimensions": [
-            {
-                "derived": true,
-                "references": {
-                    "alias": "Q5news_1_rc",
-                    "description": "How often?",
-                    "discarded": true,
-                    "name": "BBC News",
-                    "subreferences": [
-                        {
-                            "alias": "Q5news_1_rc_1",
-                            "name": "Multiple a day"
-                        },
-                        {
-                            "alias": "Q5news_1_rc_2",
-                            "name": "Once a day"
-                        },
-                        {
-                            "alias": "Q5news_1_rc_3",
-                            "name": "4-6 days a week"
-                        },
-                        {
-                            "alias": "Q5news_1_rc_4",
-                            "name": "2-3 days a week"
-                        },
-                        {
-                            "alias": "Q5news_1_rc_5",
-                            "name": "Once a week"
-                        },
-                        {
-                            "alias": "Q5news_1_rc_6",
-                            "name": "Once a fortnight"
-                        },
-                        {
-                            "alias": "Q5news_1_rc_7",
-                            "name": "Once a month"
-                        },
-                        {
-                            "alias": "Q5news_1_rc_98",
-                            "name": "Don't know"
-                        },
-                        {
-                            "alias": "Q5news_1_rc_1_2_3_4_5",
-                            "name": "Net: Weekly"
-                        }
-                    ]
-                },
-                "type": {
-                    "class": "enum",
-                    "elements": [
-                        {
-                            "id": 1,
-                            "missing": false,
-                            "value": {
-                                "derived": false,
-                                "id": "0001",
-                                "references": {
-                                    "alias": "Q5news_1_rc_1",
-                                    "name": "Multiple a day"
-                                },
-                                "type": {
-                                    "categories": [
-                                        {
-                                            "id": 1,
-                                            "missing": false,
-                                            "name": "Selected",
-                                            "numeric_value": 1,
-                                            "selected": true
-                                        },
-                                        {
-                                            "id": 0,
-                                            "missing": false,
-                                            "name": "Not Selected",
-                                            "numeric_value": 0
-                                        },
-                                        {
-                                            "id": -1,
-                                            "missing": true,
-                                            "name": "No Data",
-                                            "numeric_value": null
-                                        }
-                                    ],
-                                    "class": "categorical",
-                                    "ordinal": false
-                                }
-                            }
-                        },
-                        {
-                            "id": 2,
-                            "missing": false,
-                            "value": {
-                                "derived": false,
-                                "id": "0002",
-                                "references": {
-                                    "alias": "Q5news_1_rc_2",
-                                    "name": "Once a day"
-                                },
-                                "type": {
-                                    "categories": [
-                                        {
-                                            "id": 1,
-                                            "missing": false,
-                                            "name": "Selected",
-                                            "numeric_value": 1,
-                                            "selected": true
-                                        },
-                                        {
-                                            "id": 0,
-                                            "missing": false,
-                                            "name": "Not Selected",
-                                            "numeric_value": 0
-                                        },
-                                        {
-                                            "id": -1,
-                                            "missing": true,
-                                            "name": "No Data",
-                                            "numeric_value": null
-                                        }
-                                    ],
-                                    "class": "categorical",
-                                    "ordinal": false
-                                }
-                            }
-                        },
-                        {
-                            "id": 3,
-                            "missing": false,
-                            "value": {
-                                "derived": false,
-                                "id": "0003",
-                                "references": {
-                                    "alias": "Q5news_1_rc_3",
-                                    "name": "4-6 days a week"
-                                },
-                                "type": {
-                                    "categories": [
-                                        {
-                                            "id": 1,
-                                            "missing": false,
-                                            "name": "Selected",
-                                            "numeric_value": 1,
-                                            "selected": true
-                                        },
-                                        {
-                                            "id": 0,
-                                            "missing": false,
-                                            "name": "Not Selected",
-                                            "numeric_value": 0
-                                        },
-                                        {
-                                            "id": -1,
-                                            "missing": true,
-                                            "name": "No Data",
-                                            "numeric_value": null
-                                        }
-                                    ],
-                                    "class": "categorical",
-                                    "ordinal": false
-                                }
-                            }
-                        },
-                        {
-                            "id": 4,
-                            "missing": false,
-                            "value": {
-                                "derived": false,
-                                "id": "0004",
-                                "references": {
-                                    "alias": "Q5news_1_rc_4",
-                                    "name": "2-3 days a week"
-                                },
-                                "type": {
-                                    "categories": [
-                                        {
-                                            "id": 1,
-                                            "missing": false,
-                                            "name": "Selected",
-                                            "numeric_value": 1,
-                                            "selected": true
-                                        },
-                                        {
-                                            "id": 0,
-                                            "missing": false,
-                                            "name": "Not Selected",
-                                            "numeric_value": 0
-                                        },
-                                        {
-                                            "id": -1,
-                                            "missing": true,
-                                            "name": "No Data",
-                                            "numeric_value": null
-                                        }
-                                    ],
-                                    "class": "categorical",
-                                    "ordinal": false
-                                }
-                            }
-                        },
-                        {
-                            "id": 5,
-                            "missing": false,
-                            "value": {
-                                "derived": false,
-                                "id": "0005",
-                                "references": {
-                                    "alias": "Q5news_1_rc_5",
-                                    "name": "Once a week"
-                                },
-                                "type": {
-                                    "categories": [
-                                        {
-                                            "id": 1,
-                                            "missing": false,
-                                            "name": "Selected",
-                                            "numeric_value": 1,
-                                            "selected": true
-                                        },
-                                        {
-                                            "id": 0,
-                                            "missing": false,
-                                            "name": "Not Selected",
-                                            "numeric_value": 0
-                                        },
-                                        {
-                                            "id": -1,
-                                            "missing": true,
-                                            "name": "No Data",
-                                            "numeric_value": null
-                                        }
-                                    ],
-                                    "class": "categorical",
-                                    "ordinal": false
-                                }
-                            }
-                        },
-                        {
-                            "id": 6,
-                            "missing": false,
-                            "value": {
-                                "derived": false,
-                                "id": "0006",
-                                "references": {
-                                    "alias": "Q5news_1_rc_6",
-                                    "name": "Once a fortnight"
-                                },
-                                "type": {
-                                    "categories": [
-                                        {
-                                            "id": 1,
-                                            "missing": false,
-                                            "name": "Selected",
-                                            "numeric_value": 1,
-                                            "selected": true
-                                        },
-                                        {
-                                            "id": 0,
-                                            "missing": false,
-                                            "name": "Not Selected",
-                                            "numeric_value": 0
-                                        },
-                                        {
-                                            "id": -1,
-                                            "missing": true,
-                                            "name": "No Data",
-                                            "numeric_value": null
-                                        }
-                                    ],
-                                    "class": "categorical",
-                                    "ordinal": false
-                                }
-                            }
-                        },
-                        {
-                            "id": 7,
-                            "missing": false,
-                            "value": {
-                                "derived": false,
-                                "id": "0007",
-                                "references": {
-                                    "alias": "Q5news_1_rc_7",
-                                    "name": "Once a month"
-                                },
-                                "type": {
-                                    "categories": [
-                                        {
-                                            "id": 1,
-                                            "missing": false,
-                                            "name": "Selected",
-                                            "numeric_value": 1,
-                                            "selected": true
-                                        },
-                                        {
-                                            "id": 0,
-                                            "missing": false,
-                                            "name": "Not Selected",
-                                            "numeric_value": 0
-                                        },
-                                        {
-                                            "id": -1,
-                                            "missing": true,
-                                            "name": "No Data",
-                                            "numeric_value": null
-                                        }
-                                    ],
-                                    "class": "categorical",
-                                    "ordinal": false
-                                }
-                            }
-                        },
-                        {
-                            "id": 8,
-                            "missing": false,
-                            "value": {
-                                "derived": false,
-                                "id": "0008",
-                                "references": {
-                                    "alias": "Q5news_1_rc_98",
-                                    "name": "Don't know"
-                                },
-                                "type": {
-                                    "categories": [
-                                        {
-                                            "id": 1,
-                                            "missing": false,
-                                            "name": "Selected",
-                                            "numeric_value": 1,
-                                            "selected": true
-                                        },
-                                        {
-                                            "id": 0,
-                                            "missing": false,
-                                            "name": "Not Selected",
-                                            "numeric_value": 0
-                                        },
-                                        {
-                                            "id": -1,
-                                            "missing": true,
-                                            "name": "No Data",
-                                            "numeric_value": null
-                                        }
-                                    ],
-                                    "class": "categorical",
-                                    "ordinal": false
-                                }
-                            }
-                        },
-                        {
-                            "id": 9,
-                            "missing": false,
-                            "value": {
-                                "derived": false,
-                                "id": "0009",
-                                "references": {
-                                    "alias": "Q5news_1_rc_1_2_3_4_5",
-                                    "name": "Net: Weekly"
-                                },
-                                "type": {
-                                    "categories": [
-                                        {
-                                            "id": 1,
-                                            "missing": false,
-                                            "name": "Selected",
-                                            "numeric_value": 1,
-                                            "selected": true
-                                        },
-                                        {
-                                            "id": 0,
-                                            "missing": false,
-                                            "name": "Not Selected",
-                                            "numeric_value": 0
-                                        },
-                                        {
-                                            "id": -1,
-                                            "missing": true,
-                                            "name": "No Data",
-                                            "numeric_value": null
-                                        }
-                                    ],
-                                    "class": "categorical",
-                                    "ordinal": false
-                                }
-                            }
-                        }
-                    ],
-                    "subtype": {
-                        "class": "variable"
-                    }
-                }
-            },
-            {
-                "derived": true,
-                "references": {
-                    "alias": "Q5news_1_rc",
-                    "description": "How often?",
-                    "discarded": true,
-                    "name": "BBC News",
-                    "subreferences": [
-                        {
-                            "alias": "Q5news_1_rc_1",
-                            "name": "Multiple a day"
-                        },
-                        {
-                            "alias": "Q5news_1_rc_2",
-                            "name": "Once a day"
-                        },
-                        {
-                            "alias": "Q5news_1_rc_3",
-                            "name": "4-6 days a week"
-                        },
-                        {
-                            "alias": "Q5news_1_rc_4",
-                            "name": "2-3 days a week"
-                        },
-                        {
-                            "alias": "Q5news_1_rc_5",
-                            "name": "Once a week"
-                        },
-                        {
-                            "alias": "Q5news_1_rc_6",
-                            "name": "Once a fortnight"
-                        },
-                        {
-                            "alias": "Q5news_1_rc_7",
-                            "name": "Once a month"
-                        },
-                        {
-                            "alias": "Q5news_1_rc_98",
-                            "name": "Don't know"
-                        },
-                        {
-                            "alias": "Q5news_1_rc_1_2_3_4_5",
-                            "name": "Net: Weekly"
-                        }
-                    ]
-                },
-                "type": {
-                    "categories": [
-                        {
-                            "id": 1,
-                            "missing": false,
-                            "name": "Selected",
-                            "numeric_value": 1,
-                            "selected": true
-                        },
-                        {
-                            "id": 0,
-                            "missing": false,
-                            "name": "Not Selected",
-                            "numeric_value": 0
-                        },
-                        {
-                            "id": -1,
-                            "missing": true,
-                            "name": "No Data",
-                            "numeric_value": null
-                        }
-                    ],
-                    "class": "categorical",
-                    "ordinal": false,
-                    "subvariables": [
-                        "0001",
-                        "0002",
-                        "0003",
-                        "0004",
-                        "0005",
-                        "0006",
-                        "0007",
-                        "0008",
-                        "0009"
-                    ]
-                }
-            },
-            {
-                "derived": false,
-                "references": {
-                    "alias": "wave",
-                    "name": "Wave"
-                },
-                "type": {
-                    "categories": [
-                        {
-                            "id": 1,
-                            "missing": false,
-                            "name": "W1 (April 2017)",
-                            "numeric_value": null
-                        },
-                        {
-                            "id": 2,
-                            "missing": false,
-                            "name": "W2 (May 2017)",
-                            "numeric_value": null
-                        },
-                        {
-                            "id": 3,
-                            "missing": false,
-                            "name": "W3 (June 2017)",
-                            "numeric_value": null
-                        },
-                        {
-                            "id": 4,
-                            "missing": false,
-                            "name": "W4 (July 2017)",
-                            "numeric_value": null
-                        },
-                        {
-                            "id": 5,
-                            "missing": false,
-                            "name": "W5 (August 2017)",
-                            "numeric_value": null
-                        },
-                        {
-                            "id": 6,
-                            "missing": false,
-                            "name": "W6 (Sep 2017)",
-                            "numeric_value": null
-                        },
-                        {
-                            "id": 7,
-                            "missing": false,
-                            "name": "W7 (Oct 2017)",
-                            "numeric_value": null
-                        },
-                        {
-                            "id": 8,
-                            "missing": false,
-                            "name": "W8 (Nov 2017)",
-                            "numeric_value": null
-                        },
-                        {
-                            "id": 9,
-                            "missing": false,
-                            "name": "W9 (Dec 2017)",
-                            "numeric_value": null
-                        },
-                        {
-                            "id": 10,
-                            "missing": false,
-                            "name": "W10 (January 2018)",
-                            "numeric_value": 1
-                        },
-                        {
-                            "id": 11,
-                            "missing": false,
-                            "name": "W11 (February 2018)",
-                            "numeric_value": 1
-                        },
-                        {
-                            "id": 12,
-                            "missing": false,
-                            "name": "W12 (March 2018)",
-                            "numeric_value": 1
-                        },
-                        {
-                            "id": -1,
-                            "missing": true,
-                            "name": "No Data",
-                            "numeric_value": null
-                        }
-                    ],
-                    "class": "categorical",
-                    "ordinal": false
-                }
-            }
-        ],
-        "element": "crunch:cube",
-        "measures": {
-            "count": {
-                "data": [
-                    673.8225999301741,
-                    577.5805905100915,
-                    674.3469660091683,
-                    568.9044264688987,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    1035.7851114741209,
-                    860.9699051228476,
-                    881.729528619211,
-                    850.9469326991122,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    753.3922885957036,
-                    569.4495043670626,
-                    582.9235053716193,
-                    622.1486408319871,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    512.2723448972156,
-                    419.7063447553626,
-                    458.44865543267036,
-                    435.62989871789745,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    1197.3353665070788,
-                    1018.8441508775759,
-                    1097.6278391957076,
-                    984.221460450113,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    753.3922885957036,
-                    569.4495043670626,
-                    582.9235053716193,
-                    622.1486408319871,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    164.8732437754683,
-                    146.59990901130064,
-                    137.88154635907915,
-                    127.0795597792396,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    1544.7344676288258,
-                    1291.9505866216386,
-                    1418.194948269297,
-                    1292.771799388768,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    753.3922885957036,
-                    569.4495043670626,
-                    582.9235053716193,
-                    622.1486408319871,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    174.6883017770789,
-                    140.31938306982823,
-                    143.54124945123553,
-                    150.4355208420827,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    1534.9194096272147,
-                    1298.2311125631102,
-                    1412.5352451771414,
-                    1269.4158383259255,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    753.3922885957036,
-                    569.4495043670626,
-                    582.9235053716193,
-                    622.1486408319871,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    91.07270855912526,
-                    78.38759328393778,
-                    73.2110470554347,
-                    74.57731940475514,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    1618.5350028451685,
-                    1360.162902349002,
-                    1482.8654475729427,
-                    1345.2740397632522,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    753.3922885957036,
-                    569.4495043670626,
-                    582.9235053716193,
-                    622.1486408319871,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    45.472096787659176,
-                    31.510957258663453,
-                    33.590972335684654,
-                    22.19764292032478,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    1664.1356146166333,
-                    1407.0395383742755,
-                    1522.4855222926926,
-                    1397.6537162476814,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    753.3922885957036,
-                    569.4495043670626,
-                    582.9235053716193,
-                    622.1486408319871,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    25.41194703007166,
-                    23.391706318091643,
-                    18.018637834160636,
-                    20.09882546633916,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    1684.195764374221,
-                    1415.1587893148471,
-                    1538.0578567942161,
-                    1399.752533701667,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    753.3922885957036,
-                    569.4495043670626,
-                    582.9235053716193,
-                    622.1486408319871,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    21.99446864750105,
-                    21.05401142566197,
-                    17.037420150946282,
-                    20.92816556847218,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    1687.613242756791,
-                    1417.4964842072773,
-                    1539.0390744774304,
-                    1398.923193599534,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    753.3922885957036,
-                    569.4495043670626,
-                    582.9235053716193,
-                    622.1486408319871,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    1616.7291989390608,
-                    1362.5938206305213,
-                    1487.4294643075852,
-                    1356.6267252128705,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    92.87851246523188,
-                    75.95667500241706,
-                    68.64703032079154,
-                    63.2246339551361,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    753.3922885957036,
-                    569.4495043670626,
-                    582.9235053716193,
-                    622.1486408319871,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "metadata": {
-                    "derived": true,
-                    "references": {},
-                    "type": {
-                        "class": "numeric",
-                        "integer": false,
-                        "missing_reasons": {
-                            "No Data": -1
-                        },
-                        "missing_rules": {}
-                    }
-                },
-                "n_missing": 19397
-            },
-            "mean": {
-                "data": [
-                    38.79868092168848,
-                    37.911460968343384,
-                    21.566826228784073,
-                    28.903166828677023,
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    8.531140622233009,
-                    -0.0805083155003449,
-                    -12.469750517404142,
-                    -17.221532829095505,
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    12.361417346615546,
-                    10.917884486901682,
-                    8.55836343660059,
-                    -9.233361511954936,
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    22.919022284911023,
-                    17.854436023154467,
-                    0.9995909398306255,
-                    5.765313455666309,
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    25.355665361847333,
-                    -1.8732391808022093,
-                    -10.458322652141625,
-                    -19.009325927555476,
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    18.786319355427217,
-                    17.894918108581,
-                    4.4789822122485585,
-                    3.0718045240611143,
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    -1.227733208698524,
-                    -7.996716641982194,
-                    -30.95431482676578,
-                    -18.03417096792156,
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    21.454823176907073,
-                    18.050945521526597,
-                    6.362985628330564,
-                    3.5101032990501553,
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    -23.803824133140722,
-                    -26.697282878138527,
-                    -61.23218387646827,
-                    -48.49820981263205,
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    21.80257128780449,
-                    18.308373677029365,
-                    5.8346355434532375,
-                    4.3378710159709915,
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    19.60453509722427,
-                    -24.876630784866492,
-                    -52.08108013616227,
-                    7.638330747500843,
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    19.41501700550252,
-                    16.555689020063102,
-                    4.321613886640039,
-                    1.0778374440264669,
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    -26.98268155304967,
-                    -9.662317734860315,
-                    -90.91475189122735,
-                    -46.92610737983078,
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    20.549334441290153,
-                    16.266607002993617,
-                    4.27684889747115,
-                    1.7891579453776196,
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    19.45552783488183,
-                    -27.48308452819968,
-                    -62.33543385309548,
-                    -39.83388919377415,
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    19.419906807448,
-                    16.28856310014019,
-                    3.778409408683366,
-                    1.7288195051676878,
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    20.599562677755262,
-                    17.499111571449458,
-                    6.299513722727599,
-                    2.285722391598358,
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    3.852035423062421,
-                    -19.772711739965885,
-                    -65.29572725951337,
-                    -25.420085820238473,
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    },
-                    {
-                        "?": -8
-                    }
-                ],
-                "metadata": {
-                    "derived": true,
-                    "references": {},
-                    "type": {
-                        "class": "numeric",
-                        "integer": false,
-                        "missing_reasons": {
-                            "NaN": -8,
-                            "No Data": -1
-                        },
-                        "missing_rules": {}
-                    }
-                },
-                "n_missing": 22796
-            }
+        "query_environment": {
+            "filter": []
         },
-        "missing": 19397,
-        "n": 25575
+        "result": {
+            "counts": [
+                8,
+                7,
+                40,
+                7,
+                8,
+                40,
+                4,
+                9,
+                42,
+                13,
+                7,
+                35,
+                27,
+                5,
+                23,
+                7,
+                17,
+                102,
+                16,
+                18,
+                92,
+                21,
+                16,
+                89,
+                36,
+                14,
+                76,
+                58,
+                11,
+                57,
+                5,
+                68,
+                543,
+                56,
+                65,
+                495,
+                71,
+                64,
+                481,
+                230,
+                43,
+                343,
+                307,
+                39,
+                270,
+                6,
+                51,
+                253,
+                26,
+                49,
+                235,
+                39,
+                42,
+                229,
+                130,
+                29,
+                151,
+                134,
+                33,
+                143,
+                5,
+                64,
+                332,
+                27,
+                59,
+                315,
+                54,
+                57,
+                290,
+                190,
+                31,
+                180,
+                166,
+                42,
+                193,
+                2,
+                15,
+                133,
+                11,
+                12,
+                127,
+                11,
+                14,
+                125,
+                36,
+                10,
+                104,
+                101,
+                8,
+                41,
+                0,
+                0,
+                4,
+                0,
+                0,
+                4,
+                0,
+                0,
+                4,
+                2,
+                0,
+                2,
+                2,
+                0,
+                2,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "dimensions": [
+                {
+                    "derived": false,
+                    "references": {
+                        "alias": "pasta",
+                        "description": "The geometry of pasta",
+                        "name": "Shapes of pasta",
+                        "notes": "A categorical variable",
+                        "view": {
+                            "column_width": null,
+                            "include_missing": false,
+                            "show_counts": false,
+                            "show_numeric_values": false,
+                            "transform": {
+                                "insertions": []
+                            }
+                        }
+                    },
+                    "type": {
+                        "categories": [
+                            {
+                                "id": 1,
+                                "missing": false,
+                                "name": "Bucatini",
+                                "numeric_value": 1
+                            },
+                            {
+                                "id": 2,
+                                "missing": false,
+                                "name": "Chitarra",
+                                "numeric_value": 2
+                            },
+                            {
+                                "id": 0,
+                                "missing": false,
+                                "name": "Boccoli",
+                                "numeric_value": 0
+                            },
+                            {
+                                "id": 4,
+                                "missing": false,
+                                "name": "Orecchiette",
+                                "numeric_value": 4
+                            },
+                            {
+                                "id": 5,
+                                "missing": false,
+                                "name": "Quadrefiore",
+                                "numeric_value": 5
+                            },
+                            {
+                                "id": 6,
+                                "missing": false,
+                                "name": "Fileja",
+                                "numeric_value": 6
+                            },
+                            {
+                                "id": 32766,
+                                "missing": true,
+                                "name": "Skipped",
+                                "numeric_value": 32766
+                            },
+                            {
+                                "id": 32767,
+                                "missing": true,
+                                "name": "Not asked",
+                                "numeric_value": 32767
+                            },
+                            {
+                                "id": -1,
+                                "missing": true,
+                                "name": "No Data",
+                                "numeric_value": null
+                            }
+                        ],
+                        "class": "categorical",
+                        "ordinal": false
+                    }
+                },
+                {
+                    "derived": true,
+                    "references": {
+                        "alias": "nordics",
+                        "description": "Which of the following Nordic countries have you visited? (select all that apply)",
+                        "is_dichotomous": true,
+                        "name": "Nordic countries",
+                        "notes": "A multiple response variable",
+                        "subreferences": [
+                            {
+                                "alias": "dk",
+                                "description": "milstat_1",
+                                "name": "Denmark"
+                            },
+                            {
+                                "alias": "fi",
+                                "description": "milstat_2",
+                                "name": "Finland"
+                            },
+                            {
+                                "alias": "is",
+                                "description": "milstat_3",
+                                "name": "Iceland"
+                            },
+                            {
+                                "alias": "no",
+                                "description": "milstat_4",
+                                "name": "Norway"
+                            },
+                            {
+                                "alias": "se",
+                                "description": "milstat_5",
+                                "name": "Sweden"
+                            }
+                        ],
+                        "uniform_basis": false
+                    },
+                    "type": {
+                        "class": "enum",
+                        "elements": [
+                            {
+                                "id": 1,
+                                "missing": false,
+                                "value": {
+                                    "derived": false,
+                                    "id": "00c0",
+                                    "references": {
+                                        "alias": "dk",
+                                        "description": "milstat_1",
+                                        "name": "Denmark"
+                                    }
+                                }
+                            },
+                            {
+                                "id": 2,
+                                "missing": false,
+                                "value": {
+                                    "derived": false,
+                                    "id": "00c1",
+                                    "references": {
+                                        "alias": "fi",
+                                        "description": "milstat_2",
+                                        "name": "Finland"
+                                    }
+                                }
+                            },
+                            {
+                                "id": 3,
+                                "missing": false,
+                                "value": {
+                                    "derived": false,
+                                    "id": "00c2",
+                                    "references": {
+                                        "alias": "is",
+                                        "description": "milstat_3",
+                                        "name": "Iceland"
+                                    }
+                                }
+                            },
+                            {
+                                "id": 4,
+                                "missing": false,
+                                "value": {
+                                    "derived": false,
+                                    "id": "00c3",
+                                    "references": {
+                                        "alias": "no",
+                                        "description": "milstat_4",
+                                        "name": "Norway"
+                                    }
+                                }
+                            },
+                            {
+                                "id": 5,
+                                "missing": false,
+                                "value": {
+                                    "derived": false,
+                                    "id": "00c4",
+                                    "references": {
+                                        "alias": "se",
+                                        "description": "milstat_5",
+                                        "name": "Sweden"
+                                    }
+                                }
+                            }
+                        ],
+                        "subtype": {
+                            "class": "variable"
+                        }
+                    }
+                },
+                {
+                    "derived": true,
+                    "references": {
+                        "alias": "nordics",
+                        "description": "Which of the following Nordic countries have you visited? (select all that apply)",
+                        "is_dichotomous": true,
+                        "name": "Nordic countries",
+                        "notes": "A multiple response variable",
+                        "subreferences": [
+                            {
+                                "alias": "dk",
+                                "description": "milstat_1",
+                                "name": "Denmark"
+                            },
+                            {
+                                "alias": "fi",
+                                "description": "milstat_2",
+                                "name": "Finland"
+                            },
+                            {
+                                "alias": "is",
+                                "description": "milstat_3",
+                                "name": "Iceland"
+                            },
+                            {
+                                "alias": "no",
+                                "description": "milstat_4",
+                                "name": "Norway"
+                            },
+                            {
+                                "alias": "se",
+                                "description": "milstat_5",
+                                "name": "Sweden"
+                            }
+                        ],
+                        "uniform_basis": false
+                    },
+                    "type": {
+                        "categories": [
+                            {
+                                "id": 1,
+                                "missing": false,
+                                "name": "Selected",
+                                "numeric_value": 1,
+                                "selected": true
+                            },
+                            {
+                                "id": 0,
+                                "missing": false,
+                                "name": "Other",
+                                "numeric_value": 0
+                            },
+                            {
+                                "id": -1,
+                                "missing": true,
+                                "name": "No Data",
+                                "numeric_value": null
+                            }
+                        ],
+                        "class": "categorical",
+                        "ordinal": false,
+                        "subvariables": [
+                            "00c0",
+                            "00c1",
+                            "00c2",
+                            "00c3",
+                            "00c4"
+                        ]
+                    }
+                }
+            ],
+            "element": "crunch:cube",
+            "filter_stats": {
+                "filtered": {
+                    "unweighted": {
+                        "missing": 0,
+                        "other": 0,
+                        "selected": 1662
+                    },
+                    "weighted": {
+                        "missing": 0,
+                        "other": 0,
+                        "selected": 1662
+                    }
+                },
+                "filtered_complete": {
+                    "unweighted": {
+                        "missing": 0,
+                        "other": 0,
+                        "selected": 1662
+                    },
+                    "weighted": {
+                        "missing": 0,
+                        "other": 0,
+                        "selected": 1662
+                    }
+                }
+            },
+            "filtered": {
+                "unweighted_n": 1662,
+                "weighted_n": 1662
+            },
+            "measures": {
+                "count": {
+                    "data": [
+                        8,
+                        7,
+                        40,
+                        7,
+                        8,
+                        40,
+                        4,
+                        9,
+                        42,
+                        13,
+                        7,
+                        35,
+                        27,
+                        5,
+                        23,
+                        7,
+                        17,
+                        102,
+                        16,
+                        18,
+                        92,
+                        21,
+                        16,
+                        89,
+                        36,
+                        14,
+                        76,
+                        58,
+                        11,
+                        57,
+                        5,
+                        68,
+                        543,
+                        56,
+                        65,
+                        495,
+                        71,
+                        64,
+                        481,
+                        230,
+                        43,
+                        343,
+                        307,
+                        39,
+                        270,
+                        6,
+                        51,
+                        253,
+                        26,
+                        49,
+                        235,
+                        39,
+                        42,
+                        229,
+                        130,
+                        29,
+                        151,
+                        134,
+                        33,
+                        143,
+                        5,
+                        64,
+                        332,
+                        27,
+                        59,
+                        315,
+                        54,
+                        57,
+                        290,
+                        190,
+                        31,
+                        180,
+                        166,
+                        42,
+                        193,
+                        2,
+                        15,
+                        133,
+                        11,
+                        12,
+                        127,
+                        11,
+                        14,
+                        125,
+                        36,
+                        10,
+                        104,
+                        101,
+                        8,
+                        41,
+                        0,
+                        0,
+                        4,
+                        0,
+                        0,
+                        4,
+                        0,
+                        0,
+                        4,
+                        2,
+                        0,
+                        2,
+                        2,
+                        0,
+                        2,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                    ],
+                    "metadata": {
+                        "derived": true,
+                        "references": {},
+                        "type": {
+                            "class": "numeric",
+                            "integer": true,
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "missing_rules": {}
+                        }
+                    },
+                    "n_missing": 4
+                },
+                "mean": {
+                    "data": [
+                        29.0,
+                        39.42857142857143,
+                        41.575,
+                        30.714285714285715,
+                        41.625,
+                        40.575,
+                        48.0,
+                        39.333333333333336,
+                        38.69047619047619,
+                        49.76923076923077,
+                        36.285714285714285,
+                        36.285714285714285,
+                        37.2962962962963,
+                        39.8,
+                        41.95652173913044,
+                        35.57142857142857,
+                        51.294117647058826,
+                        48.14705882352941,
+                        45.0,
+                        49.666666666666664,
+                        48.02173913043478,
+                        61.23809523809524,
+                        47.8125,
+                        44.73033707865169,
+                        48.0,
+                        50.0,
+                        47.421052631578945,
+                        45.741379310344826,
+                        49.72727272727273,
+                        49.68421052631579,
+                        32.0,
+                        49.1764705882353,
+                        46.54696132596685,
+                        42.517857142857146,
+                        49.646153846153844,
+                        46.81010101010101,
+                        59.42253521126761,
+                        46.796875,
+                        44.83367983367983,
+                        51.95217391304348,
+                        43.97674418604651,
+                        43.55393586005831,
+                        41.57654723127036,
+                        52.48717948717949,
+                        51.733333333333334,
+                        28.166666666666668,
+                        49.431372549019606,
+                        50.22924901185771,
+                        50.46153846153846,
+                        47.285714285714285,
+                        50.08085106382979,
+                        55.282051282051285,
+                        46.714285714285715,
+                        49.25764192139738,
+                        54.73076923076923,
+                        46.310344827586206,
+                        45.96026490066225,
+                        44.16417910447761,
+                        49.90909090909091,
+                        54.77622377622377,
+                        32.6,
+                        51.0625,
+                        50.93072289156626,
+                        47.148148148148145,
+                        50.152542372881356,
+                        51.13650793650794,
+                        62.388888888888886,
+                        48.40350877192982,
+                        49.00689655172414,
+                        53.90526315789474,
+                        44.645161290322584,
+                        48.41111111111111,
+                        45.4277108433735,
+                        55.785714285714285,
+                        54.17616580310881,
+                        24.5,
+                        42.93333333333333,
+                        38.30827067669173,
+                        39.09090909090909,
+                        43.333333333333336,
+                        38.09448818897638,
+                        51.18181818181818,
+                        40.857142857142854,
+                        37.224,
+                        44.19444444444444,
+                        39.7,
+                        36.53846153846154,
+                        35.960396039603964,
+                        46.375,
+                        43.53658536585366,
+                        {
+                            "?": -8
+                        },
+                        {
+                            "?": -8
+                        },
+                        47.75,
+                        {
+                            "?": -8
+                        },
+                        {
+                            "?": -8
+                        },
+                        47.75,
+                        {
+                            "?": -8
+                        },
+                        {
+                            "?": -8
+                        },
+                        47.75,
+                        58.0,
+                        {
+                            "?": -8
+                        },
+                        37.5,
+                        37.5,
+                        {
+                            "?": -8
+                        },
+                        58.0,
+                        {
+                            "?": -8
+                        },
+                        {
+                            "?": -8
+                        },
+                        {
+                            "?": -8
+                        },
+                        {
+                            "?": -8
+                        },
+                        {
+                            "?": -8
+                        },
+                        {
+                            "?": -8
+                        },
+                        {
+                            "?": -8
+                        },
+                        {
+                            "?": -8
+                        },
+                        {
+                            "?": -8
+                        },
+                        {
+                            "?": -8
+                        },
+                        {
+                            "?": -8
+                        },
+                        {
+                            "?": -8
+                        },
+                        {
+                            "?": -8
+                        },
+                        {
+                            "?": -8
+                        },
+                        {
+                            "?": -8
+                        },
+                        {
+                            "?": -8
+                        },
+                        {
+                            "?": -8
+                        },
+                        {
+                            "?": -8
+                        },
+                        {
+                            "?": -8
+                        },
+                        {
+                            "?": -8
+                        },
+                        {
+                            "?": -8
+                        },
+                        {
+                            "?": -8
+                        },
+                        {
+                            "?": -8
+                        },
+                        {
+                            "?": -8
+                        },
+                        {
+                            "?": -8
+                        },
+                        {
+                            "?": -8
+                        },
+                        {
+                            "?": -8
+                        },
+                        {
+                            "?": -8
+                        },
+                        {
+                            "?": -8
+                        },
+                        {
+                            "?": -8
+                        }
+                    ],
+                    "metadata": {
+                        "derived": true,
+                        "references": {},
+                        "type": {
+                            "class": "numeric",
+                            "integer": true,
+                            "missing_reasons": {
+                                "NaN": -8,
+                                "No Data": -1
+                            },
+                            "missing_rules": {}
+                        }
+                    },
+                    "n_missing": 4
+                }
+            },
+            "missing": 4,
+            "n": 1662,
+            "unfiltered": {
+                "unweighted_n": 1662,
+                "weighted_n": 1662
+            }
+        }
     }
 }

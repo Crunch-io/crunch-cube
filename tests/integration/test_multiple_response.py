@@ -63,12 +63,12 @@ def test_3D_with_means():
     np.testing.assert_array_equal(slice_.row_base, [9, 6, 9])
 
 
-def test_cat_x_mr_with_means():
+def test_mr_x_cat_with_means():
     transforms = {
         "rows_dimension": {"prune": True},
         "columns_dimension": {"prune": True},
     }
-    slice_ = Cube(CR.CAT_X_MR_WITH_MEANS, transforms=transforms).partitions[0]
+    slice_ = Cube(CR.MR_X_CAT_WITH_MEANS, transforms=transforms).partitions[0]
     np.testing.assert_almost_equal(
         slice_.means,
         [
@@ -238,6 +238,12 @@ def test_proportions_cat_x_mr_by_row():
     slice_ = Cube(CR.CAT_X_MR).partitions[0]
     expected = [[0.42857143, 0.48, 0.52173913], [0.53846154, 0.40740741, 0.55319149]]
     np.testing.assert_almost_equal(slice_.row_proportions, expected)
+
+
+def test_table_base_unpruned_cat_x_mr():
+    slice_ = Cube(CR.CAT_X_MR).partitions[0]
+    expected = np.array([80, 79, 70])
+    np.testing.assert_array_equal(slice_.table_base_unpruned, expected)
 
 
 def test_z_scores_from_r_rows_margin():
