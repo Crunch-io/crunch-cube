@@ -918,7 +918,11 @@ class _BaseMatrixInsertionVector(object):
 
     @lazyproperty
     def means(self):
-        return np.array([np.nan])
+        """ndarray of NaN values, of the same shape as values.
+
+        Insertions are not defined for means, this is just a placeholder.
+        """
+        return np.full(self.values.shape, np.nan)
 
     @lazyproperty
     def numeric(self):

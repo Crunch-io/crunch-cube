@@ -234,6 +234,21 @@ class DescribeIntegrated_MeanMeasure(object):
             "Sweden",
         )
 
+    def it_handles_cat_x_cat_means_with_insertions(self):
+        slice_ = Cube(CR.CAT_X_CAT_MEANS_WITH_HS).partitions[0]
+        np.testing.assert_array_almost_equal(
+            slice_.means,
+            [
+                [41.96875, 30.875, 25.66666667, np.nan, 42.0],
+                [51.51515152, 47.95555556, 45.44444444, np.nan, 45.0952381],
+                [46.17088608, 44.55504587, 48.09090909, np.nan, 50.8],
+                [np.nan, np.nan, np.nan, np.nan, np.nan],
+                [44.03030303, 45.21568627, 54.53333333, np.nan, 56.19512195],
+                [45.64516129, 47.41428571, 46.89361702, np.nan, 55.27894737],
+                [34.20408163, 43.2745098, 41.2, np.nan, 35.26086957],
+            ],
+        )
+
 
 class DescribeIntegrated_UnweightedCountMeasure(object):
     def it_provides_access_to_its_raw_cube_array(self):
