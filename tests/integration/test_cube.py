@@ -170,6 +170,10 @@ class DescribeIntegrated_Measures(object):
 
         assert type(weighted_counts).__name__ == expected_type_name
 
+    def it_provides_access_to_the_bases_measure(self):
+        slice_ = Cube(CR.UNIVARIATE_CATEGORICAL).partitions[0]
+        assert slice_.bases == (15, 15)
+
     # fixtures -------------------------------------------------------
 
     @pytest.fixture(
