@@ -56,14 +56,10 @@ class CubePartition(object):
             )
         return _Slice(cube, slice_idx, transforms, population, mask_size)
 
-    # TODO: I question whether the dimensions should be published. Whatever folks might
-    # need to know, like types or whatever, should be available as individual
-    # properties. The dimensions are kind of an internal, especially since they won't
-    # necessarily match the returned data-matrix in terms of element-order and presence.
     @lazyproperty
-    def dimensions(self):
-        """Sequence of `cr.cube.dimension.Dimension` objects for this partition."""
-        return self._dimensions
+    def variable_name(self):
+        """str representing the name of the superheading variable."""
+        return self._dimensions[0 if self.ndim < 2 else 1].name
 
     @lazyproperty
     def dimension_types(self):
@@ -97,7 +93,9 @@ class CubePartition(object):
         has a shape like (5,) which represents its row-count. The shape of a _Nub is
         unconditionally () (an empty tuple).
         """
-        raise NotImplementedError("must be implemented by each subclass")
+        raise NotImplementedError(
+            "must be implemented by each subclass"
+        )  # pragma: no cover
 
 
 class _Slice(CubePartition):
