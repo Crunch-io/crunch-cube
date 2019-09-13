@@ -373,12 +373,6 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def table_margin(self):
-        # We need to prune/order by both dimensions
-        if self.dimension_types == (DT.MR, DT.MR):
-            # TODO: Remove property from the assembler, when we figure out the pruning
-            # by both rows and columns
-            return self._matrix.table_margin
-
         # We need to prune/order by rows
         if self.dimension_types[0] == DT.MR:
             return np.array([row.table_margin for row in self._matrix.rows])
