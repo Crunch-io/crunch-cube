@@ -632,9 +632,6 @@ class _Strand(CubePartition):
     @lazyproperty
     def table_name(self):
         """Only for CA-as-0th case, provides differentiated names for stacked tables."""
-        if not self._ca_as_0th:
-            return None
-
         title = self._cube.name
         table_name = self._cube.dimensions[0].valid_elements[self._slice_idx].label
         return "%s: %s" % (title, table_name)

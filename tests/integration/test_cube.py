@@ -174,6 +174,37 @@ class DescribeIntegrated_Measures(object):
         slice_ = Cube(CR.UNIVARIATE_CATEGORICAL).partitions[0]
         assert slice_.bases == (15, 15)
 
+    def it_provides_access_to_min_base_size_mask(self):
+        slice_ = Cube(CR.UNIVARIATE_CATEGORICAL).partitions[0]
+        np.testing.assert_array_equal(slice_.min_base_size_mask, [False, False])
+
+    def it_provides_access_univariate_mr_min_base_size_mask(self):
+        slice_ = Cube(CR.UNIV_MR_WITH_HS["slides"][0]["cube"]).partitions[0]
+        np.testing.assert_array_equal(
+            slice_.min_base_size_mask,
+            [False, False, False, False, False, False, False, False, False],
+        )
+
+    def it_provides_access_to_its_name(self):
+        slice_ = Cube(CR.UNIV_MR_WITH_HS["slides"][0]["cube"]).partitions[0]
+        assert slice_.name == "Paid for news in the last year"
+
+    def it_provides_access_to_its_rows_dimension_type(self):
+        slice_ = Cube(CR.UNIV_MR_WITH_HS["slides"][0]["cube"]).partitions[0]
+        assert slice_.rows_dimension_type == DT.MR
+
+    def it_provides_access_to_its_scale_mean_when_it_is_none(self):
+        slice_ = Cube(CR.UNIV_MR_WITH_HS["slides"][0]["cube"]).partitions[0]
+        assert slice_.scale_mean is None
+
+    def it_provides_access_to_table_name_when_it_is_ca_as_0th(self):
+        slice_ = Cube(CR.CA_AS_0TH, first_cube_of_tab=True).partitions[0]
+        assert slice_.table_name == "Level of interest: ATP Men's Tennis"
+
+    def it_knows_unweighted_bases(self):
+        slice_ = Cube(CR.UNIV_MR_WITH_HS["slides"][0]["cube"]).partitions[0]
+        assert slice_.unweighted_bases == (33358,) * 9
+
     # fixtures -------------------------------------------------------
 
     @pytest.fixture(
@@ -316,6 +347,7 @@ class TestCrunchCubeAsNub(TestCase):
         np.testing.assert_almost_equal(nub.means, expected)
         np.testing.assert_almost_equal(nub.table_base, expected)
         assert nub.ndim == 0
+        np.testing.assert_array_equal(nub.base_count, 1000)
 
 
 class TestCrunchCubeAs_Slice(object):
