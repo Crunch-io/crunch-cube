@@ -84,6 +84,18 @@ class DescribeIntegratedCubeAs_Slice(object):
             ),
         )
 
+    def it_knows_its_columns_dimension_is_its_variable_name(self):
+        slice_ = Cube(CR.CAT_X_CAT).partitions[0]
+        assert slice_.variable_name == "v7"
+
+    def it_knows_its_only_dimension_is_its_variable_name(self):
+        slice_ = Cube(CR.UNIVARIATE_CATEGORICAL).partitions[0]
+        assert slice_.variable_name == "v7"
+
+    def it_knows_its_description(self):
+        slice_ = Cube(CR.CAT_X_CAT).partitions[0]
+        assert slice_.description == ""
+
     # fixtures -------------------------------------------------------
 
     @pytest.fixture(
@@ -248,6 +260,10 @@ class DescribeIntegrated_MeanMeasure(object):
                 [34.20408163, 43.2745098, 41.2, np.nan, 35.26086957],
             ],
         )
+
+    def it_knows_if_it_has_means(self):
+        slice_ = Cube(CR.CAT_X_CAT_MEANS_WITH_HS).partitions[0]
+        assert slice_.has_means
 
 
 class DescribeIntegrated_UnweightedCountMeasure(object):

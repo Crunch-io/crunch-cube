@@ -1385,8 +1385,6 @@ class _CategoricalVector(_BaseVector):
 
     @lazyproperty
     def base_values(self):
-        if not isinstance(self._base_counts, np.ndarray):
-            return np.array([self._base_counts])
         return self._base_counts
 
     @lazyproperty
@@ -1410,13 +1408,7 @@ class _CategoricalVector(_BaseVector):
         return self._table_margin
 
     @lazyproperty
-    def table_proportions(self):
-        return self.values / self._table_margin
-
-    @lazyproperty
     def values(self):
-        if not isinstance(self._counts, np.ndarray):
-            return np.array([self._counts])
         return self._counts
 
     @lazyproperty
@@ -1471,10 +1463,6 @@ class _MeansWithMrVector(_MeansVector):
     @lazyproperty
     def base(self):
         return np.sum(self._base_counts[0])
-
-    @lazyproperty
-    def table_base(self):
-        return self.base
 
 
 class _MultipleResponseVector(_CategoricalVector):
