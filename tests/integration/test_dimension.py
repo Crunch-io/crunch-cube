@@ -114,6 +114,15 @@ class DescribeIntegratedDimension(object):
 
         assert name == "ShutdownBlame"
 
+    def and_it_uses_alias_when_no_name(self, dimension_dict):
+        dimension_dict["references"].pop("name")
+        dimension_transforms = {}
+        dimension = Dimension(dimension_dict, None, dimension_transforms)
+
+        name = dimension.name
+
+        assert name == "ShutdownBlame"
+
     def it_knows_whether_it_should_be_pruned(self, dimension_dict):
         dimension_transforms = {"prune": True}
         dimension = Dimension(dimension_dict, None, dimension_transforms)
