@@ -345,6 +345,32 @@ class TestCrunchCubeAs_Slice(object):
         expected = np.array([15])
         np.testing.assert_array_equal(slice_.table_margin, expected)
 
+    def test_mr_x_mr_table_base_and_margin(self):
+        transforms = {
+            "rows_dimension": {"prune": True},
+            "columns_dimension": {"prune": True},
+        }
+        slice_ = Cube(CR.MR_X_MR_WITH_PRUNING, transforms=transforms).partitions[0]
+
+        # Assert table base
+        expected = np.full((10, 10), 6490)
+        np.testing.assert_array_equal(slice_.table_base, expected)
+
+        # Assert table margin
+        expected = np.full((10, 10), 6456.761929)
+        np.testing.assert_almost_equal(slice_.table_margin, expected)
+
+    def test_mr_x_mr_table_base_and_margin_unpruned(self):
+        slice_ = Cube(CR.MR_X_MR_WITH_PRUNING).partitions[0]
+
+        # Assert table base
+        expected = np.full((12, 12), 6490)
+        np.testing.assert_array_equal(slice_.table_base_unpruned, expected)
+
+        # Assert table margin
+        expected = np.full((12, 12), 6456.761929)
+        np.testing.assert_almost_equal(slice_.table_margin_unpruned, expected)
+
     def test_margin_cat_x_datetime_axis_none(self):
         slice_ = Cube(CR.CAT_X_DATETIME).partitions[0]
         expected = np.array([4])
