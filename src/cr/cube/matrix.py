@@ -157,9 +157,7 @@ class _MatrixWithHidden(object):
         index = margin != 0
         if margin.ndim < 2:
             return margin[index]
-        row_ind = np.any(index, axis=1)
-        col_ind = np.any(index, axis=0)
-        return margin[np.ix_(row_ind, col_ind)]
+        return margin[np.ix_(self._rows_ind, self._cols_ind)]
 
     @lazyproperty
     def table_base_unpruned(self):
@@ -171,13 +169,19 @@ class _MatrixWithHidden(object):
         index = margin != 0
         if margin.ndim < 2:
             return margin[index]
-        row_ind = np.any(index, axis=1)
-        col_ind = np.any(index, axis=0)
-        return margin[np.ix_(row_ind, col_ind)]
+        return margin[np.ix_(self._rows_ind, self._cols_ind)]
 
     @lazyproperty
     def table_margin_unpruned(self):
         return self._base_matrix.table_margin
+
+    @lazyproperty
+    def _rows_ind(self):
+        return [not row.hidden for row in self._base_matrix.rows]
+
+    @lazyproperty
+    def _cols_ind(self):
+        return [not col.hidden for col in self._base_matrix.columns]
 
 
 class _MatrixWithInsertions(object):
