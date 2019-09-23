@@ -1,5 +1,13 @@
 # History of Changes
 
+#### 1.11.5
+- Fix pval calculation issues with defective matrices (rank < 2)
+- Fix occasional overflowing issues, that arise from `np.empty` usage (use `np.zeros` instead)
+
+#### 1.11.3
+- Add `cr.cube.cube.CubeSet` and automatic dimension inflation for (0D, 1D, 1D, ...)
+  cube sets.
+
 #### 1.11.2
 - Mostly renaming and support for numeric means in tabbooks
 

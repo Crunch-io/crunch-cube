@@ -112,15 +112,10 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.11.7
+- Fix a bug when MR x MR table is pruned on both dimensions
+
 #### 1.11.6
 - Calculate population size fraction using complete cases
-
-#### 1.11.5
-- Fix pval calculation issues with defective matrices (rank < 2)
-- Fix occasional overflowing issues, that arise from `np.empty` usage (use `np.zeros` instead)
-
-#### 1.11.3
-- Add `cr.cube.cube.CubeSet` and automatic dimension inflation for (0D, 1D, 1D, ...)
-  cube sets.
 
 For a complete list of changes see [history](https://github.com/Crunch-io/crunch-cube/blob/master/HISTORY.md).
