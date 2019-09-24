@@ -112,6 +112,10 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.11.8
+- Increase test coverage
+- Fix 2D cubes that have means with insertions
+
 #### 1.11.7
 - Fix a bug when MR x MR table is pruned on both dimensions
 
