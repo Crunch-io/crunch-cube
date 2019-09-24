@@ -88,6 +88,8 @@ celerybeat-schedule
 venv/
 venv3/
 ENV/
+Pipenv
+Pipenv.lock
 
 # Spyder project settings
 .spyderproject

@@ -123,6 +123,10 @@ class CrunchCube(object):
         if prune:
             array = self._prune_body(array, transforms=include_transforms_for_dims)
 
+        warnings.warn(
+            "Deprecated. Use `cr.cube.cube.base_counts or cr.cube.cube.counts` instead.",
+            DeprecationWarning,
+        )
         return self._drop_mr_cat_dims(array)
 
     @lazyproperty
