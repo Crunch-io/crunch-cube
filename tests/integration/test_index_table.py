@@ -74,11 +74,12 @@ def test_mr_x_cat_slice_row_index():
     np.testing.assert_almost_equal(slice_.row_index, expected)
 
 
-@pytest.mark.xfail(reason="Broke with strand changes", strict=True)
 def test_mr_x_mr_slice_column_index():
     mr_x_mr = Cube(CR.FULL_CUBE).partitions[0]
     mr_alone = Cube(CR.MR_WGTD).partitions[0]
-    expected = mr_x_mr.column_proportions / mr_alone._table_proportions_as_array * 100
+    expected = (
+        mr_x_mr.column_proportions / mr_alone._table_proportions_as_array[:, None] * 100
+    )
     np.testing.assert_almost_equal(mr_x_mr.column_index, expected)
 
 

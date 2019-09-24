@@ -84,6 +84,18 @@ class DescribeIntegratedCubeAs_Slice(object):
             ),
         )
 
+    def it_knows_its_columns_dimension_is_its_variable_name(self):
+        slice_ = Cube(CR.CAT_X_CAT).partitions[0]
+        assert slice_.variable_name == "v7"
+
+    def it_knows_its_only_dimension_is_its_variable_name(self):
+        slice_ = Cube(CR.UNIVARIATE_CATEGORICAL).partitions[0]
+        assert slice_.variable_name == "v7"
+
+    def it_knows_its_description(self):
+        slice_ = Cube(CR.CAT_X_CAT).partitions[0]
+        assert slice_.description == ""
+
     # fixtures -------------------------------------------------------
 
     @pytest.fixture(
@@ -158,6 +170,41 @@ class DescribeIntegrated_Measures(object):
 
         assert type(weighted_counts).__name__ == expected_type_name
 
+    def it_provides_access_to_the_bases_measure(self):
+        slice_ = Cube(CR.UNIVARIATE_CATEGORICAL).partitions[0]
+        assert slice_.bases == (15, 15)
+
+    def it_provides_access_to_min_base_size_mask(self):
+        slice_ = Cube(CR.UNIVARIATE_CATEGORICAL).partitions[0]
+        np.testing.assert_array_equal(slice_.min_base_size_mask, [False, False])
+
+    def it_provides_access_univariate_mr_min_base_size_mask(self):
+        slice_ = Cube(CR.UNIV_MR_WITH_HS["slides"][0]["cube"]).partitions[0]
+        np.testing.assert_array_equal(
+            slice_.min_base_size_mask,
+            [False, False, False, False, False, False, False, False, False],
+        )
+
+    def it_provides_access_to_its_name(self):
+        slice_ = Cube(CR.UNIV_MR_WITH_HS["slides"][0]["cube"]).partitions[0]
+        assert slice_.name == "Paid for news in the last year"
+
+    def it_provides_access_to_its_rows_dimension_type(self):
+        slice_ = Cube(CR.UNIV_MR_WITH_HS["slides"][0]["cube"]).partitions[0]
+        assert slice_.rows_dimension_type == DT.MR
+
+    def it_provides_access_to_its_scale_mean_when_it_is_none(self):
+        slice_ = Cube(CR.UNIV_MR_WITH_HS["slides"][0]["cube"]).partitions[0]
+        assert slice_.scale_mean is None
+
+    def it_provides_access_to_table_name_when_it_is_ca_as_0th(self):
+        slice_ = Cube(CR.CA_AS_0TH, first_cube_of_tab=True).partitions[0]
+        assert slice_.table_name == "Level of interest: ATP Men's Tennis"
+
+    def it_knows_unweighted_bases(self):
+        slice_ = Cube(CR.UNIV_MR_WITH_HS["slides"][0]["cube"]).partitions[0]
+        assert slice_.unweighted_bases == (33358,) * 9
+
     # fixtures -------------------------------------------------------
 
     @pytest.fixture(
@@ -194,12 +241,7 @@ class DescribeIntegrated_Measures(object):
             # ---weighted case---
             (CR.CAT_X_CAT_WGTD, "_WeightedCountMeasure"),
             # ---unweighted case---
-            pytest.param(
-                (CR.CAT_X_CAT, "_UnweightedCountMeasure"),
-                marks=pytest.mark.xfail(
-                    reason="@slobodan please check unexpected behavior", strict=True
-                ),
-            ),
+            (CR.CAT_X_CAT, "_UnweightedCountMeasure"),
         ]
     )
     def wgtd_counts_fixture(self, request):
@@ -228,6 +270,35 @@ class DescribeIntegrated_MeanMeasure(object):
                 [np.nan, np.nan, np.nan, np.nan, np.nan],
             ],
         )
+
+    def it_handles_cat_x_mr_with_means(self):
+        slice_ = Cube(CR.CAT_X_MR_WITH_MEANS).partitions[0]
+        assert slice_.column_labels == (
+            "Denmark",
+            "Finland",
+            "Iceland",
+            "Norway",
+            "Sweden",
+        )
+
+    def it_handles_cat_x_cat_means_with_insertions(self):
+        slice_ = Cube(CR.CAT_X_CAT_MEANS_WITH_HS).partitions[0]
+        np.testing.assert_array_almost_equal(
+            slice_.means,
+            [
+                [41.96875, 30.875, 25.66666667, np.nan, 42.0],
+                [51.51515152, 47.95555556, 45.44444444, np.nan, 45.0952381],
+                [46.17088608, 44.55504587, 48.09090909, np.nan, 50.8],
+                [np.nan, np.nan, np.nan, np.nan, np.nan],
+                [44.03030303, 45.21568627, 54.53333333, np.nan, 56.19512195],
+                [45.64516129, 47.41428571, 46.89361702, np.nan, 55.27894737],
+                [34.20408163, 43.2745098, 41.2, np.nan, 35.26086957],
+            ],
+        )
+
+    def it_knows_if_it_has_means(self):
+        slice_ = Cube(CR.CAT_X_CAT_MEANS_WITH_HS).partitions[0]
+        assert slice_.has_means
 
 
 class DescribeIntegrated_UnweightedCountMeasure(object):
@@ -276,6 +347,7 @@ class TestCrunchCubeAsNub(TestCase):
         np.testing.assert_almost_equal(nub.means, expected)
         np.testing.assert_almost_equal(nub.table_base, expected)
         assert nub.ndim == 0
+        np.testing.assert_array_equal(nub.base_count, 1000)
 
 
 class TestCrunchCubeAs_Slice(object):

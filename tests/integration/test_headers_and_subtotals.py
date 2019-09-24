@@ -128,6 +128,26 @@ class TestHeadersAndSubtotals(object):
             ),
         )
 
+    def test_1D_subtotals_row_base(self):
+        strand = Cube(CR.ECON_BLAME_WITH_HS_MISSING).partitions[0]
+        np.testing.assert_equal(strand.row_base, [285, 396, 681, 242, 6, 68, 74])
+
+    def test_1D_subtotals_rows_dimension_fills(self):
+        strand = Cube(CR.ECON_BLAME_WITH_HS_MISSING).partitions[0]
+        assert strand.rows_dimension_fills == (None,) * 7
+
+    def test_1D_subtotals_inserted_row_idxs(self):
+        strand = Cube(CR.ECON_BLAME_WITH_HS_MISSING).partitions[0]
+        assert strand.inserted_row_idxs == (2, 6)
+
+    def test_1D_means_mr_subtotals_hidden(self):
+        transforms = {
+            "rows_dimension": {"prune": True},
+            "columns_dimension": {"prune": True},
+        }
+        strand = Cube(CR.MR_MEAN_FILT_WGTD, transforms=transforms).partitions[0]
+        assert strand.inserted_row_idxs == ()
+
     def test_labels_on_2d_cube_with_hs_on_1st_dim(self):
         slice_ = Cube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS).partitions[0]
         assert slice_.row_labels == (
@@ -956,4 +976,16 @@ class TestHeadersAndSubtotals(object):
                 [0.1198606, 0.11984537, 0.30937245],
                 [0.01846321, 0.03026176, 0.14013355],
             ],
+        )
+
+    def test_col_labels_with_top_hs(self):
+        slice_ = Cube(CR.CAT_X_CAT_HS_MISSING).partitions[0]
+        assert slice_.column_labels == (
+            "Whites",
+            "White college women voters",
+            "White non-college women voters",
+            "White college men voters",
+            "White non-college men voters",
+            "Black voters",
+            "Latino and other voters",
         )

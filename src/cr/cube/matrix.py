@@ -153,11 +153,7 @@ class _MatrixWithHidden(object):
 
     @lazyproperty
     def table_base(self):
-        margin = self._base_matrix.table_base
-        index = margin != 0
-        if margin.ndim < 2:
-            return margin[index]
-        return margin[np.ix_(self._rows_ind, self._cols_ind)]
+        return self.table_base_unpruned[np.ix_(self._rows_ind, self._cols_ind)]
 
     @lazyproperty
     def table_base_unpruned(self):
@@ -165,11 +161,7 @@ class _MatrixWithHidden(object):
 
     @lazyproperty
     def table_margin(self):
-        margin = self._base_matrix.table_margin
-        index = margin != 0
-        if margin.ndim < 2:
-            return margin[index]
-        return margin[np.ix_(self._rows_ind, self._cols_ind)]
+        return self.table_margin_unpruned[np.ix_(self._rows_ind, self._cols_ind)]
 
     @lazyproperty
     def table_margin_unpruned(self):
@@ -352,7 +344,9 @@ class _BaseBaseMatrix(object):
                 counts = counts[slice_idx]
             if dimension_types == (DT.MR, DT.MR):
                 # TODO: Potentially address this case, which didn't arise yet
-                raise NotImplementedError("MR x MR with means is not implemented.")
+                raise NotImplementedError(
+                    "MR x MR with means is not implemented."
+                )  # pragma: no cover
             if dimension_types[1] == DT.MR:
                 return _CatXMrMeansMatrix(dimensions, counts, base_counts)
             if dimensions[0].dimension_type == DT.MR:
@@ -378,14 +372,6 @@ class _BaseBaseMatrix(object):
     @lazyproperty
     def columns_dimension(self):
         return self._dimensions[1]
-
-    @lazyproperty
-    def ndim(self):
-        """int count of dimensions in this matrix, unconditionally 2.
-
-        A matrix is by definition two-dimensional.
-        """
-        return 2
 
     @lazyproperty
     def rows_dimension(self):
@@ -930,7 +916,10 @@ class _BaseMatrixInsertionVector(object):
 
     @lazyproperty
     def means(self):
-        return np.array([np.nan])
+        """ndarray of NaN values, of the same shape as values.
+        Insertions are not defined for means, this is just a placeholder.
+        """
+        return np.full(self.values.shape, np.nan)
 
     @lazyproperty
     def numeric(self):
@@ -1407,8 +1396,6 @@ class _CategoricalVector(_BaseVector):
 
     @lazyproperty
     def base_values(self):
-        if not isinstance(self._base_counts, np.ndarray):
-            return np.array([self._base_counts])
         return self._base_counts
 
     @lazyproperty
@@ -1432,13 +1419,7 @@ class _CategoricalVector(_BaseVector):
         return self._table_margin
 
     @lazyproperty
-    def table_proportions(self):
-        return self.values / self._table_margin
-
-    @lazyproperty
     def values(self):
-        if not isinstance(self._counts, np.ndarray):
-            return np.array([self._counts])
         return self._counts
 
     @lazyproperty
@@ -1493,10 +1474,6 @@ class _MeansWithMrVector(_MeansVector):
     @lazyproperty
     def base(self):
         return np.sum(self._base_counts[0])
-
-    @lazyproperty
-    def table_base(self):
-        return self.base
 
 
 class _MultipleResponseVector(_CategoricalVector):

@@ -378,7 +378,7 @@ class Dimension(object):
         the sort method which can include sorting on the value of an opposing element or
         on the margin and specify ascending or descending order.
         """
-        return None
+        return None  # pragma: no cover
 
     @lazyproperty
     def subtotals(self):
@@ -738,11 +738,6 @@ class _Element(object):
     def prune(self):
         """True if this element should be hidden when empty, False otherwise."""
         return self._element_transforms.prune
-
-    @lazyproperty
-    def _transforms(self):
-        """_ElementTransforms object for this element."""
-        return _ElementTransforms(self._element_transforms_dict, self._prune)
 
 
 class _ElementTransforms(object):
