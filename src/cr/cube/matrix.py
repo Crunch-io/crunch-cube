@@ -153,11 +153,7 @@ class _MatrixWithHidden(object):
 
     @lazyproperty
     def table_base(self):
-        margin = self._base_matrix.table_base
-        index = margin != 0
-        if margin.ndim < 2:
-            return margin[index]
-        return margin[np.ix_(self._rows_ind, self._cols_ind)]
+        return self.table_base_unpruned[np.ix_(self._rows_ind, self._cols_ind)]
 
     @lazyproperty
     def table_base_unpruned(self):
@@ -165,11 +161,7 @@ class _MatrixWithHidden(object):
 
     @lazyproperty
     def table_margin(self):
-        margin = self._base_matrix.table_margin
-        index = margin != 0
-        if margin.ndim < 2:
-            return margin[index]
-        return margin[np.ix_(self._rows_ind, self._cols_ind)]
+        return self.table_margin_unpruned[np.ix_(self._rows_ind, self._cols_ind)]
 
     @lazyproperty
     def table_margin_unpruned(self):
@@ -1404,8 +1396,6 @@ class _CategoricalVector(_BaseVector):
 
     @lazyproperty
     def base_values(self):
-        if not isinstance(self._base_counts, np.ndarray):
-            return np.array([self._base_counts])
         return self._base_counts
 
     @lazyproperty
@@ -1429,13 +1419,7 @@ class _CategoricalVector(_BaseVector):
         return self._table_margin
 
     @lazyproperty
-    def table_proportions(self):
-        return self.values / self._table_margin
-
-    @lazyproperty
     def values(self):
-        if not isinstance(self._counts, np.ndarray):
-            return np.array([self._counts])
         return self._counts
 
     @lazyproperty
@@ -1490,10 +1474,6 @@ class _MeansWithMrVector(_MeansVector):
     @lazyproperty
     def base(self):
         return np.sum(self._base_counts[0])
-
-    @lazyproperty
-    def table_base(self):
-        return self.base
 
 
 class _MultipleResponseVector(_CategoricalVector):
