@@ -11,6 +11,7 @@ from cr.cube.crunch_cube import CrunchCube
 from cr.cube.dimension import (
     AllDimensions,
     _AllElements,
+    _BaseDimensions,
     Dimension,
     _Element,
     _ElementTransforms,
@@ -240,6 +241,22 @@ class DescribeIntegrated_Element(object):
 
         assert is_hidden is False
 
+    def it_has_fill_transform_value(self, element_transforms_):
+        element_transforms_.fill = "#e3e3e3"
+        element = _Element(None, None, None, element_transforms_)
+
+        fill = element.fill
+
+        assert fill == "#e3e3e3"
+
+    def it_has_no_fill_transform_value(self, element_transforms_):
+        element_transforms_.fill = None
+        element = _Element(None, None, None, element_transforms_)
+
+        fill = element.fill
+
+        assert fill is None
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -330,3 +347,12 @@ class TestDimension(object):
         numeric_values = dimension.numeric_values
 
         assert numeric_values == (1, 2, np.nan, np.nan)
+
+    def it_requires_each_subclass_to_implement__dimensions(self):
+        base_dimensions = _BaseDimensions()
+
+        with pytest.raises(NotImplementedError) as pt_exc_info:
+            base_dimensions._dimensions
+
+        exception = pt_exc_info.value
+        assert str(exception) == "must be implemented by each subclass"

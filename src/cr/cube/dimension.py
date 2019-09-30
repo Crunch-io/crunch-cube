@@ -32,7 +32,7 @@ class _BaseDimensions(Sequence):
         This composed tuple is the source for the dimension objects in this
         collection.
         """
-        raise NotImplementedError("must be implemented by each sublass")
+        raise NotImplementedError("must be implemented by each subclass")
 
 
 class AllDimensions(_BaseDimensions):
