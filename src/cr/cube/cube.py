@@ -544,7 +544,7 @@ class _BaseMeasure(object):
         return array
 
     @lazyproperty
-    def _flat_values(self):
+    def _flat_values(self):  # pragma: no cover
         """Return tuple of mean values as found in cube response.
 
         This property must be implemented by each subclass.

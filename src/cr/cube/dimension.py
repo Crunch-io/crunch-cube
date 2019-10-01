@@ -748,7 +748,7 @@ class _ElementTransforms(object):
         self._prune = prune
 
     @lazyproperty
-    def fill(self):
+    def fill(self):  # pragma: no cover
         """str RGB color like "#af032d" or None if not specified.
 
         A value of None indicates no fill transform was specified for this element.

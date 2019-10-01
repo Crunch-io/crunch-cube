@@ -10,7 +10,6 @@ import pytest
 
 from cr.cube.cube import (
     Cube,
-    _BaseMeasure,
     _MeanMeasure,
     _Measures,
     _UnweightedCountMeasure,
@@ -21,32 +20,11 @@ from cr.cube.enum import DIMENSION_TYPE as DT
 from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
 
 
-class DescribeBaseMeasure(object):
-    def it_requires_each_subclass_to_implement_flat_values(self):
-        base_measure = _BaseMeasure(None, None)
-
-        with pytest.raises(NotImplementedError) as pt_exc_info:
-            base_measure._flat_values
-
-        exception = pt_exc_info.value
-        assert str(exception) == "must be implemented by each subclass"
-
-
 class DescribeIntegratedCubeAs_Slice(object):
     def it_provides_a_console_friendly_repr_for_a_cube(self):
         cube = Cube(CR.CAT_X_CAT)
         repr_ = repr(cube)
         assert repr_ == "Cube(name='v4', dimension_types='CAT x CAT')"
-
-    def it_raises_a_type_error_if_not_serializable_object_provided(self):
-        cube = Cube(None)
-        with pytest.raises(TypeError) as pt_exc_info:
-            cube._cube_dict
-        exception = pt_exc_info.value
-        assert (
-            str(exception)
-            == "Unsupported type <NoneType> provided. Cube response must be JSON (str) or dict."
-        )
 
     def it_provides_description(self):
         cube = Cube(CR.CAT_X_CAT)

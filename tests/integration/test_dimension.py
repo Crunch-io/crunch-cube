@@ -241,22 +241,6 @@ class DescribeIntegrated_Element(object):
 
         assert is_hidden is False
 
-    def it_has_fill_transform_value(self, element_transforms_):
-        element_transforms_.fill = "#e3e3e3"
-        element = _Element(None, None, None, element_transforms_)
-
-        fill = element.fill
-
-        assert fill == "#e3e3e3"
-
-    def it_has_no_fill_transform_value(self, element_transforms_):
-        element_transforms_.fill = None
-        element = _Element(None, None, None, element_transforms_)
-
-        fill = element.fill
-
-        assert fill is None
-
     # fixture components ---------------------------------------------
 
     @pytest.fixture

@@ -7,216 +7,170 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import pytest
 import numpy as np
 
-from cr.cube.cube import CubeSet
-from cr.cube.cubepart import _Slice, _Strand
+from cr.cube.cube import CubeSet, Cube
+from cr.cube.cubepart import _Slice, _Strand, _Nub
+from cr.cube.enum import DIMENSION_TYPE as DT
 
-from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
+from ..unitutil import instance_mock, property_mock
 
 
-class TestCrunchCubeSet(object):
+class DescribeCrunchCubeSet(object):
+    def it_knows_whether_it_has_means(self, has_means_fixture, _cubes_prop_, cube_):
+        first_cube_has_means, expected_value = has_means_fixture
+        cube_.has_means = first_cube_has_means
+        _cubes_prop_.return_value = (cube_,)
+        cube_set = CubeSet(None, None, None, None)
 
-    default_transforms = [
-        {"columns_dimension": {"insertions": {}}, "rows_dimension": {"insertions": {}}}
-    ]
+        has_means = cube_set.has_means
 
-    def it_has_means(self):
-        response_sequence = [CR.CAT_X_DATETIME]
-        cubeset = CubeSet(
-            response_sequence,
-            transforms=self.default_transforms,
-            population=1000,
-            min_base=0,
-        )
-        mean_measure_dict = (
-            CR.CAT_X_DATETIME.get("result", {}).get("measures", {}).get("mean")
-        )
-        assert cubeset.has_means is False
-        assert mean_measure_dict is None
+        assert has_means == expected_value
 
-    def it_has_weighted_counts(self):
-        response_sequence = [CR.CA_X_MR_WEIGHTED_HS]
-        cubeset = CubeSet(
-            response_sequence,
-            transforms=self.default_transforms,
-            population=1000,
-            min_base=0,
-        )
-        unweighted_counts = CR.CA_X_MR_WEIGHTED_HS["result"]["counts"]
-        count_data = (
-            CR.CA_X_MR_WEIGHTED_HS["result"]["measures"].get("count", {}).get("data")
-        )
-        assert (unweighted_counts != count_data) is True
-        assert cubeset.has_weighted_counts is True
-
-    def it_knows_its_name(self, multiple_response_fixture_with_name_and_description):
-        response_sequence = [multiple_response_fixture_with_name_and_description]
-        cubeset = CubeSet(
-            response_sequence,
-            transforms=self.default_transforms,
-            population=1000,
-            min_base=0,
-        )
-        assert (
-            cubeset.name
-            == response_sequence[0]["value"]["result"]["dimensions"][0]["references"][
-                "name"
-            ]
-        )
-
-    def it_can_show_pairwise(self, can_show_pairwise_fixture):
-        response_sequence, transforms, expected = can_show_pairwise_fixture
-        cubeset = CubeSet(
-            response_sequence, transforms=transforms, population=10000, min_base=0
-        )
-        assert cubeset.can_show_pairwise is expected
-
-    def it_knows_its_missing_count(self):
-        response_sequence = [CR.ECON_MEAN_AGE_BLAME_X_GENDER, CR.CAT_X_DATETIME]
-        transforms = [self.default_transforms] * 2
-        cubeset = CubeSet(
-            response_sequence, transforms=transforms, population=10000, min_base=0
-        )
-        assert cubeset.missing_count == response_sequence[0]["value"]["result"][
-            "measures"
-        ]["mean"].get("n_missing")
-
-    def it_knows_when_it_is_ca_as_0th(self, is_ca_as_0th_fixture):
-        response_sequence, transforms, expected_value = is_ca_as_0th_fixture
-        cubeset = CubeSet(
-            response_sequence, transforms=transforms, population=10000, min_base=0
-        )
-        assert cubeset.is_ca_as_0th is expected_value
-
-    def it_has_the_right_partition_set(self, partition_set_fixture):
-        response, transforms, expected = partition_set_fixture
-        cubeset = CubeSet(response, transforms=transforms, population=10000, min_base=0)
-        assert [True] * len(response) == map(
-            lambda types: isinstance(types[0], types[1]),
-            zip(cubeset.partition_sets[0], expected),
-        )
-
-    def it_has_proper_population_fraction(self, population_fraction_fixture):
-        """
-        Must return 1.0 for an unfiltered cube. Returns `np.nan`
-        if the unfiltered count is zero, which would otherwise result in
-        a divide - by - zero error.
-        """
-        response_sequence, expected_value = population_fraction_fixture
-        cubeset = CubeSet(
-            response_sequence,
-            transforms=self.default_transforms,
-            population=1000,
-            min_base=0,
-        )
-        np.testing.assert_almost_equal(cubeset.population_fraction, expected_value)
-
-    # ----------------------------------------- fixtures ----------------------------------------------
-    @pytest.fixture(params=[CR.CAT_X_DATETIME, CR.CAT_X_CAT_GERMAN_WEIGHTED])
-    def multiple_response_fixture_with_name_and_description(self, request):
-        return request.param
-
-    def it_knows_its_description(
-        self, multiple_response_fixture_with_name_and_description
+    def it_knows_whether_it_has_weighted_counts(
+        self, has_weighted_counts_fixture, _cubes_prop_, cube_
     ):
-        response_sequence = [multiple_response_fixture_with_name_and_description]
-        cubeset = CubeSet(
-            response_sequence,
-            transforms=self.default_transforms,
-            population=1000,
-            min_base=0,
-        )
-        assert (
-            cubeset.description
-            == response_sequence[0]["value"]["result"]["dimensions"][0]["references"][
-                "description"
-            ]
-        )
+        first_cube_has_w_counts, expected_value = has_weighted_counts_fixture
+        cube_.is_weighted = first_cube_has_w_counts
+        _cubes_prop_.return_value = (cube_,)
+        cube_set = CubeSet(None, None, None, None)
 
-    @pytest.fixture(
-        params=[
-            ([CR.CAT_X_CAT_FILT_COMPLETE], 0.576086956522),
-            ([CR.CA_SUBVAR_HS_X_MR_X_CA_CAT], 1.0),
-            (
-                [
-                    {
-                        "result": {
-                            "dimensions": [],
-                            "filter_stats": {
-                                "filtered_complete": {
-                                    "weighted": {
-                                        "selected": 0,
-                                        "other": 0,
-                                        "missing": 1386,
-                                    }
-                                }
-                            },
-                        }
-                    }
-                ],
-                np.nan,
-            ),
-        ]
-    )
+        is_weighted = cube_set.has_weighted_counts
+
+        assert is_weighted == expected_value
+
+    def it_knows_its_name(self, has_name_fixture, _cubes_prop_, cube_):
+        first_cube_name, expected_value = has_name_fixture
+        cube_.name = first_cube_name
+        _cubes_prop_.return_value = (cube_,)
+        cube_set = CubeSet(None, None, None, None)
+
+        name = cube_set.name
+
+        assert name == expected_value
+
+    def it_knows_its_description(self, has_description_fixture, _cubes_prop_, cube_):
+        first_cube_description, expected_value = has_description_fixture
+        cube_.description = first_cube_description
+        _cubes_prop_.return_value = (cube_,)
+        cube_set = CubeSet(None, None, None, None)
+
+        description = cube_set.description
+
+        assert description == expected_value
+
+    def it_can_show_pairwise(self, can_show_pairwise_fixture, _cubes_prop_, cube_):
+        ndim, expected_value = can_show_pairwise_fixture
+        cube_.ndim = ndim
+        _cubes_prop_.return_value = ndim * (cube_,)
+        cube_set = CubeSet(None, None, None, None)
+
+        can_show_pairwise = cube_set.can_show_pairwise
+
+        assert can_show_pairwise == expected_value
+
+    def it_knows_its_missing_count(self, missing_count_fixture, _cubes_prop_, cube_):
+        first_cube_missing_count, expected_value = missing_count_fixture
+        cube_.missing = first_cube_missing_count
+        _cubes_prop_.return_value = (cube_,)
+        cube_set = CubeSet(None, None, None, None)
+
+        missing_count = cube_set.missing_count
+
+        assert missing_count == expected_value
+
+    def it_knows_when_it_is_ca_as_0th(self, is_ca_as_0th_fixture, _cubes_prop_, cube_):
+        ncubes, expected_value = is_ca_as_0th_fixture
+        cubes_ = (cube_,) * ncubes
+        cubes_[0].dimension_types = (DT.CA_SUBVAR,) * ncubes
+        _cubes_prop_.return_value = cubes_
+        cube_set = CubeSet(cubes_, None, None, None)
+
+        isca_as_0th = cube_set.is_ca_as_0th
+
+        assert isca_as_0th == expected_value
+
+    def it_has_the_right_partition_set(
+        self, partition_set_fixture, _cubes_prop_, cube_
+    ):
+        partition_set, expected_value = partition_set_fixture
+        cube_.partitions = partition_set
+        _cubes_prop_.return_value = (cube_,)
+        cube_set = CubeSet(None, None, None, None)
+
+        partitions_set = cube_set.partition_sets
+
+        assert partitions_set == expected_value
+
+    def it_has_proper_population_fraction(
+        self, population_fraction_fixture, cube_, _cubes_prop_
+    ):
+        population_fraction, expected_value = population_fraction_fixture
+        cube_.population_fraction = population_fraction
+        _cubes_prop_.return_value = (cube_,)
+        cube_set = CubeSet(None, None, None, None)
+
+        cubeset_population_fraction = cube_set.population_fraction
+
+        np.testing.assert_almost_equal(cubeset_population_fraction, expected_value)
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture(params=[(1.0, 1.0), (0.54, 0.54), (np.nan, np.nan)])
     def population_fraction_fixture(self, request):
-        response_sequence, expected_value = request.param
-        return response_sequence, expected_value
+        population_fraction, expected_value = request.param
+        return population_fraction, expected_value
 
     @pytest.fixture(
-        # 3D, 2D, 1D
+        # 3D, 2D, 1D, Nub
         params=[
-            (
-                [
-                    CR.CA_SUBVAR_HS_X_MR_X_CA_CAT,
-                    CR.ECON_MEAN_AGE_BLAME_X_GENDER,
-                    CR.CAT_X_DATETIME,
-                ],
-                [default_transforms] * 3,
-                (_Strand, _Slice, _Slice),
-            ),
-            (
-                [CR.CA_SUBVAR_HS_X_MR_X_CA_CAT, CR.ECON_MEAN_AGE_BLAME_X_GENDER],
-                default_transforms * 2,
-                (_Strand, _Slice),
-            ),
-            ([CR.CAT_X_DATETIME], default_transforms, (_Slice,)),
+            ((_Strand, _Slice, _Slice), ((_Strand,), (_Slice,), (_Slice,))),
+            ((_Slice, _Slice), ((_Slice,), (_Slice,))),
+            ((_Slice,), ((_Slice,),)),
+            ((_Nub,), ((_Nub,),)),
         ]
     )
     def partition_set_fixture(self, request):
-        response, transforms, expected_value = request.param
-        return response, transforms, expected_value
+        partition_set, expected_value = request.param
+        return partition_set, expected_value
 
-    @pytest.fixture(
-        params=[
-            (
-                [CR.CA_SUBVAR_HS_X_MR_X_CA_CAT, CR.CA_SUBVAR_X_CA_CAT_X_MR],
-                [default_transforms] * 2,
-                True,
-            ),
-            ([CR.CA_SUBVAR_HS_X_MR_X_CA_CAT], default_transforms, False),
-            (
-                [CR.ECON_MEAN_AGE_BLAME_X_GENDER, CR.CAT_X_DATETIME],
-                [default_transforms] * 2,
-                False,
-            ),
-        ]
-    )
+    @pytest.fixture(params=[(2, True), (1, False)])
     def is_ca_as_0th_fixture(self, request):
-        responses, transforms, expected_value = request.param
-        return responses, transforms, expected_value
+        ncubes, expected_value = request.param
+        return ncubes, expected_value
 
-    @pytest.fixture(
-        params=[
-            (
-                [
-                    CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION,
-                    CR.PAIRWISE_HIROTSU_OCCUPATION_X_ILLNESS,
-                ],
-                [default_transforms] * 2,
-                True,
-            ),
-            ([CR.CAT_X_DATETIME], default_transforms, False),
-        ]
-    )
+    @pytest.fixture(params=[(True, True), (False, False)])
+    def has_means_fixture(self, request):
+        first_cube_has_means, expected_value = request.param
+        return first_cube_has_means, expected_value
+
+    @pytest.fixture(params=[(True, True), (False, False)])
+    def has_weighted_counts_fixture(self, request):
+        first_cube_has_w_counts, expected_value = request.param
+        return first_cube_has_w_counts, expected_value
+
+    @pytest.fixture(params=[("MyCube", "MyCube"), (None, None)])
+    def has_name_fixture(self, request):
+        first_cube_name, expected_value = request.param
+        return first_cube_name, expected_value
+
+    @pytest.fixture(params=[("MyCube Description", "MyCube Description"), (None, None)])
+    def has_description_fixture(self, request):
+        first_cube_description, expected_value = request.param
+        return first_cube_description, expected_value
+
+    @pytest.fixture(params=[(3, True), (1, False)])
     def can_show_pairwise_fixture(self, request):
-        responses, transforms, expected_value = request.param
-        return responses, transforms, expected_value
+        ndim, expected_value = request.param
+        return ndim, expected_value
+
+    @pytest.fixture(params=[(34, 34), (0, 0)])
+    def missing_count_fixture(self, request):
+        first_cube_missing_count, expected_value = request.param
+        return first_cube_missing_count, expected_value
+
+    @pytest.fixture
+    def cube_(self, request):
+        return instance_mock(request, Cube)
+
+    @pytest.fixture
+    def _cubes_prop_(self, request):
+        return property_mock(request, CubeSet, "_cubes")
