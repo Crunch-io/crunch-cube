@@ -15,6 +15,14 @@ from ..unitutil import instance_mock, property_mock
 
 
 class DescribeCubeSet(object):
+    def it_has_sequence_of_cube_objects(self):
+        cube = Cube(None, None, None, None)
+        cube_set = CubeSet((cube,), ({},), None, None)
+
+        cube_objects = cube_set._cubes
+
+        assert len(cube_objects) == 1
+
     def it_can_show_pairwise(self, can_show_pairwise_fixture, _cubes_prop_, cube_):
         ndim, expected_value = can_show_pairwise_fixture
         cube_.ndim = ndim

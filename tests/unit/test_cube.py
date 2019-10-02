@@ -9,9 +9,18 @@ import pytest
 from cr.cube.cube import Cube
 
 from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
+from ..unitutil import instance_mock, property_mock
 
 
 class DescribeCube(object):
+    def it_provides_the_default_repr_when_enhanced_repr_fails(
+        self, dimension_types_prop_
+    ):
+        dimension_types_prop_.return_value = [1, 2, 3]
+        cube = Cube(None, None, None, None)
+        cube_repr = cube.__repr__()
+        assert cube_repr.startswith("<cr.cube.cube.Cube object at 0x")
+
     def it_provides_access_to_the_cube_response_dict_to_help(self):
         cube = Cube({"cube": "dict"})
         cube_dict = cube._cube_dict
@@ -66,3 +75,11 @@ class DescribeCube(object):
     def json_cube_response_type_fixtures(self, request):
         cube_response, expected_value = request.param
         return cube_response, expected_value
+
+    @pytest.fixture
+    def cube_(self, request):
+        return instance_mock(request, Cube)
+
+    @pytest.fixture
+    def dimension_types_prop_(self, request):
+        return property_mock(request, Cube, "dimension_types")
