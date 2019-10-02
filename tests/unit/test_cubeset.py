@@ -14,7 +14,56 @@ from cr.cube.enum import DIMENSION_TYPE as DT
 from ..unitutil import instance_mock, property_mock
 
 
-class DescribeCrunchCubeSet(object):
+class DescribeCubeSet(object):
+    def it_can_show_pairwise(self, can_show_pairwise_fixture, _cubes_prop_, cube_):
+        ndim, expected_value = can_show_pairwise_fixture
+        cube_.ndim = ndim
+        _cubes_prop_.return_value = ndim * (cube_,)
+        cube_set = CubeSet(None, None, None, None)
+
+        can_show_pairwise = cube_set.can_show_pairwise
+
+        assert can_show_pairwise == expected_value
+
+    def it_knows_its_name(self, _cubes_prop_, cube_):
+        cube_.name = "Beverage"
+        _cubes_prop_.return_value = (cube_,)
+        cube_set = CubeSet(None, None, None, None)
+
+        name = cube_set.name
+
+        assert name == "Beverage"
+
+    def it_knows_its_description(self, _cubes_prop_, cube_):
+        cube_.description = "Are you male or female?"
+        _cubes_prop_.return_value = (cube_,)
+        cube_set = CubeSet(None, None, None, None)
+
+        description = cube_set.description
+
+        assert description == "Are you male or female?"
+
+    def it_knows_its_missing_count(self, missing_count_fixture, _cubes_prop_, cube_):
+        first_cube_missing_count, expected_value = missing_count_fixture
+        cube_.missing = first_cube_missing_count
+        _cubes_prop_.return_value = (cube_,)
+        cube_set = CubeSet(None, None, None, None)
+
+        missing_count = cube_set.missing_count
+
+        assert missing_count == expected_value
+
+    def it_knows_its_sequence_of_cube_objects(self, cube_, _cubedict_):
+        cubes_ = (cube_,) * 3
+        _cubedict_.return_value = cube_._cube_dict
+        transforms_ = [{}, {}, {}]
+        cube_set = CubeSet(cubes_, transforms_, None, None)
+
+        cube_sequence = tuple(cube_set._iter_cubes())
+
+        assert len(cube_sequence) == 3
+        assert all(isinstance(cube, Cube) for cube in cube_sequence)
+
     def it_knows_whether_it_has_means(self, has_means_fixture, _cubes_prop_, cube_):
         first_cube_has_means, expected_value = has_means_fixture
         cube_.has_means = first_cube_has_means
@@ -36,44 +85,6 @@ class DescribeCrunchCubeSet(object):
         has_weighted_counts = cube_set.has_weighted_counts
 
         assert has_weighted_counts == expected_value
-
-    def it_knows_its_name(self, _cubes_prop_, cube_):
-        cube_.name = "Beverage"
-        _cubes_prop_.return_value = (cube_,)
-        cube_set = CubeSet(None, None, None, None)
-
-        name = cube_set.name
-
-        assert name == "Beverage"
-
-    def it_knows_its_description(self, _cubes_prop_, cube_):
-        cube_.description = "Are you male or female?"
-        _cubes_prop_.return_value = (cube_,)
-        cube_set = CubeSet(None, None, None, None)
-
-        description = cube_set.description
-
-        assert description == "Are you male or female?"
-
-    def it_can_show_pairwise(self, can_show_pairwise_fixture, _cubes_prop_, cube_):
-        ndim, expected_value = can_show_pairwise_fixture
-        cube_.ndim = ndim
-        _cubes_prop_.return_value = ndim * (cube_,)
-        cube_set = CubeSet(None, None, None, None)
-
-        can_show_pairwise = cube_set.can_show_pairwise
-
-        assert can_show_pairwise == expected_value
-
-    def it_knows_its_missing_count(self, missing_count_fixture, _cubes_prop_, cube_):
-        first_cube_missing_count, expected_value = missing_count_fixture
-        cube_.missing = first_cube_missing_count
-        _cubes_prop_.return_value = (cube_,)
-        cube_set = CubeSet(None, None, None, None)
-
-        missing_count = cube_set.missing_count
-
-        assert missing_count == expected_value
 
     def it_knows_when_it_is_ca_as_0th(self, is_ca_as_0th_fixture, _cubes_prop_, cube_):
         ncubes, expected_value = is_ca_as_0th_fixture
@@ -160,6 +171,10 @@ class DescribeCrunchCubeSet(object):
     @pytest.fixture
     def cube_(self, request):
         return instance_mock(request, Cube)
+
+    @pytest.fixture
+    def _cubedict_(self, request):
+        return property_mock(request, Cube, "_cube_dict")
 
     @pytest.fixture
     def _cubes_prop_(self, request):

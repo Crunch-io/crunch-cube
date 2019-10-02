@@ -819,9 +819,13 @@ class Describe_Element(object):
 
         assert element_id == 42
 
-    @pytest.mark.xfail(reason="implement me", strict=True)
-    def it_knows_its_fill_RGB_color_str(self):
-        assert False
+    def it_knows_its_fill_RGB_color_str(self, element_transforms_):
+        element_transforms_.fill = [255, 255, 248]
+        element = _Element(None, None, None, element_transforms_)
+
+        rgb_color_fill = element.fill
+
+        assert rgb_color_fill == [255, 255, 248]
 
     def it_knows_its_position_among_all_the_dimension_elements(self):
         element = _Element(None, 17, None, None)
@@ -921,6 +925,71 @@ class Describe_Element(object):
     @pytest.fixture
     def element_transforms_(self, request):
         return instance_mock(request, _ElementTransforms)
+
+
+class DescribeElementTransforms(object):
+    """Unit-test suite for `cr.cube.dimension._ElementTransforms` object."""
+
+    def it_knows_its_fill_color_value(self, element_transforms_fill_color_fixture):
+        element_transforms_dict, expected_value = element_transforms_fill_color_fixture
+        element_transforms = _ElementTransforms(element_transforms_dict, None)
+
+        fill_color_value = element_transforms.fill
+
+        assert fill_color_value == expected_value
+
+    def it_knows_when_it_is_explicitly_hidden(self, element_transforms_hide_fixture):
+        element_transforms_dict, expected_value = element_transforms_hide_fixture
+        element_transforms = _ElementTransforms(element_transforms_dict, None)
+
+        is_hidden = element_transforms.hide
+
+        assert is_hidden is expected_value
+
+    def it_knows_its_name(self, element_transforms_name_fixture):
+        element_transforms_dict, expected_value = element_transforms_name_fixture
+        element_transforms = _ElementTransforms(element_transforms_dict, None)
+
+        name = element_transforms.name
+
+        assert name == expected_value
+
+    # fixtures ---------------------------------------------
+
+    @pytest.fixture(
+        params=[
+            ({"name": "Zillow", "fill": "#316395"}, "#316395"),
+            ({"name": "Zillow", "fill": None}, None),
+            ({"name": "Zillow", "fill": [255, 255, 0]}, [255, 255, 0]),
+        ]
+    )
+    def element_transforms_fill_color_fixture(self, request):
+        element_transforms_dict, expected_value = request.param
+        return element_transforms_dict, expected_value
+
+    @pytest.fixture(
+        params=[
+            ({"hide": True}, True),
+            ({"hide": False}, False),
+            ({"hide": None}, None),
+            ({"hide": 0}, None),
+        ]
+    )
+    def element_transforms_hide_fixture(self, request):
+        element_transforms_dict, expected_value = request.param
+        return element_transforms_dict, expected_value
+
+    @pytest.fixture(
+        params=[
+            ({"name": "MyDisplayName"}, "MyDisplayName"),
+            ({"name": ""}, ""),
+            ({"name": None}, ""),
+            ({"foo": "foo"}, None),
+        ]
+    )
+    def element_transforms_name_fixture(self, request):
+        element_transforms_dict, expected_value = request.param
+        return element_transforms_dict, expected_value
 
 
 class Describe_Subtotals(object):

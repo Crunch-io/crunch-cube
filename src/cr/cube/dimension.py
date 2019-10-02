@@ -757,7 +757,9 @@ class _ElementTransforms(object):
         A str value must be a hash character ("#") followed by six hexadecimal digits.
         Three-character color contractions (like "#D07") are not valid.
         """
+
         fill = self._element_transforms_dict.get("fill")
+
         if not fill:
             return None
         return fill
@@ -939,7 +941,7 @@ class _Subtotal(object):
 
         Unconditionally True for _Subtotal objects.
         """
-        return True
+        return True  # pragma: no cover
 
     @lazyproperty
     def label(self):

@@ -11,7 +11,6 @@ from cr.cube.crunch_cube import CrunchCube
 from cr.cube.dimension import (
     AllDimensions,
     _AllElements,
-    _BaseDimensions,
     Dimension,
     _Element,
     _ElementTransforms,
@@ -240,22 +239,6 @@ class DescribeIntegrated_Element(object):
         is_hidden = element.is_hidden
 
         assert is_hidden is False
-
-    def it_has_fill_transform_value(self, element_dict, element_transforms_):
-        element_transforms_.fill = "#e3e3e3"
-        element = _Element(element_dict, None, None, element_transforms_)
-
-        is_filled = element.fill
-
-        assert is_filled == "#e3e3e3"
-
-    def it_has_no_fill_transform_value(self, element_dict, element_transforms_):
-        element_transforms_.fill = None
-        element = _Element(element_dict, None, None, element_transforms_)
-
-        is_filled = element.fill
-
-        assert is_filled is None
 
     # fixture components ---------------------------------------------
 
