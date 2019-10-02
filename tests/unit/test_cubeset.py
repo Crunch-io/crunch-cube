@@ -33,29 +33,27 @@ class DescribeCrunchCubeSet(object):
         _cubes_prop_.return_value = (cube_,)
         cube_set = CubeSet(None, None, None, None)
 
-        is_weighted = cube_set.has_weighted_counts
+        has_weighted_counts = cube_set.has_weighted_counts
 
-        assert is_weighted == expected_value
+        assert has_weighted_counts == expected_value
 
-    def it_knows_its_name(self, has_name_fixture, _cubes_prop_, cube_):
-        first_cube_name, expected_value = has_name_fixture
-        cube_.name = first_cube_name
+    def it_knows_its_name(self, _cubes_prop_, cube_):
+        cube_.name = "Beverage"
         _cubes_prop_.return_value = (cube_,)
         cube_set = CubeSet(None, None, None, None)
 
         name = cube_set.name
 
-        assert name == expected_value
+        assert name == "Beverage"
 
-    def it_knows_its_description(self, has_description_fixture, _cubes_prop_, cube_):
-        first_cube_description, expected_value = has_description_fixture
-        cube_.description = first_cube_description
+    def it_knows_its_description(self, _cubes_prop_, cube_):
+        cube_.description = "Are you male or female?"
         _cubes_prop_.return_value = (cube_,)
         cube_set = CubeSet(None, None, None, None)
 
         description = cube_set.description
 
-        assert description == expected_value
+        assert description == "Are you male or female?"
 
     def it_can_show_pairwise(self, can_show_pairwise_fixture, _cubes_prop_, cube_):
         ndim, expected_value = can_show_pairwise_fixture
@@ -84,21 +82,21 @@ class DescribeCrunchCubeSet(object):
         _cubes_prop_.return_value = cubes_
         cube_set = CubeSet(cubes_, None, None, None)
 
-        isca_as_0th = cube_set.is_ca_as_0th
+        is_ca_as_0th = cube_set.is_ca_as_0th
 
-        assert isca_as_0th == expected_value
+        assert is_ca_as_0th == expected_value
 
-    def it_has_the_right_partition_set(
+    def it_provides_access_to_the_partition_sets(
         self, partition_set_fixture, _cubes_prop_, cube_
     ):
-        partition_set, expected_value = partition_set_fixture
-        cube_.partitions = partition_set
+        cube_partition, expected_value = partition_set_fixture
+        cube_.partitions = cube_partition
         _cubes_prop_.return_value = (cube_,)
         cube_set = CubeSet(None, None, None, None)
 
-        partitions_set = cube_set.partition_sets
+        partition_sets = cube_set.partition_sets
 
-        assert partitions_set == expected_value
+        assert partition_sets == expected_value
 
     def it_has_proper_population_fraction(
         self, population_fraction_fixture, cube_, _cubes_prop_
@@ -112,30 +110,12 @@ class DescribeCrunchCubeSet(object):
 
         np.testing.assert_almost_equal(cubeset_population_fraction, expected_value)
 
-    # fixture components ---------------------------------------------
+    # fixtures ---------------------------------------------
 
-    @pytest.fixture(params=[(1.0, 1.0), (0.54, 0.54), (np.nan, np.nan)])
-    def population_fraction_fixture(self, request):
-        population_fraction, expected_value = request.param
-        return population_fraction, expected_value
-
-    @pytest.fixture(
-        # 3D, 2D, 1D, Nub
-        params=[
-            ((_Strand, _Slice, _Slice), ((_Strand,), (_Slice,), (_Slice,))),
-            ((_Slice, _Slice), ((_Slice,), (_Slice,))),
-            ((_Slice,), ((_Slice,),)),
-            ((_Nub,), ((_Nub,),)),
-        ]
-    )
-    def partition_set_fixture(self, request):
-        partition_set, expected_value = request.param
-        return partition_set, expected_value
-
-    @pytest.fixture(params=[(2, True), (1, False)])
-    def is_ca_as_0th_fixture(self, request):
-        ncubes, expected_value = request.param
-        return ncubes, expected_value
+    @pytest.fixture(params=[(3, True), (1, False)])
+    def can_show_pairwise_fixture(self, request):
+        ndim, expected_value = request.param
+        return ndim, expected_value
 
     @pytest.fixture(params=[(True, True), (False, False)])
     def has_means_fixture(self, request):
@@ -147,25 +127,35 @@ class DescribeCrunchCubeSet(object):
         first_cube_has_w_counts, expected_value = request.param
         return first_cube_has_w_counts, expected_value
 
-    @pytest.fixture(params=[("MyCube", "MyCube"), (None, None)])
-    def has_name_fixture(self, request):
-        first_cube_name, expected_value = request.param
-        return first_cube_name, expected_value
-
-    @pytest.fixture(params=[("MyCube Description", "MyCube Description"), (None, None)])
-    def has_description_fixture(self, request):
-        first_cube_description, expected_value = request.param
-        return first_cube_description, expected_value
-
-    @pytest.fixture(params=[(3, True), (1, False)])
-    def can_show_pairwise_fixture(self, request):
-        ndim, expected_value = request.param
-        return ndim, expected_value
+    @pytest.fixture(params=[(2, True), (1, False)])
+    def is_ca_as_0th_fixture(self, request):
+        ncubes, expected_value = request.param
+        return ncubes, expected_value
 
     @pytest.fixture(params=[(34, 34), (0, 0)])
     def missing_count_fixture(self, request):
         first_cube_missing_count, expected_value = request.param
         return first_cube_missing_count, expected_value
+
+    @pytest.fixture(
+        # 3D, 2D, 1D, Nub
+        params=[
+            ((_Strand, _Slice, _Slice), ((_Strand,), (_Slice,), (_Slice,))),
+            ((_Slice, _Slice), ((_Slice,), (_Slice,))),
+            ((_Slice,), ((_Slice,),)),
+            ((_Nub,), ((_Nub,),)),
+        ]
+    )
+    def partition_set_fixture(self, request):
+        cube_partitions, expected_value = request.param
+        return cube_partitions, expected_value
+
+    @pytest.fixture(params=[(1.0, 1.0), (0.54, 0.54), (np.nan, np.nan)])
+    def population_fraction_fixture(self, request):
+        population_fraction, expected_value = request.param
+        return population_fraction, expected_value
+
+    # fixture components ---------------------------------------------
 
     @pytest.fixture
     def cube_(self, request):

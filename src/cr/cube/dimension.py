@@ -32,7 +32,9 @@ class _BaseDimensions(Sequence):
         This composed tuple is the source for the dimension objects in this
         collection.
         """
-        raise NotImplementedError("must be implemented by each subclass")
+        raise NotImplementedError(
+            "must be implemented by each subclass"
+        )  # pragma: no cover
 
 
 class AllDimensions(_BaseDimensions):
@@ -748,7 +750,7 @@ class _ElementTransforms(object):
         self._prune = prune
 
     @lazyproperty
-    def fill(self):  # pragma: no cover
+    def fill(self):
         """str RGB color like "#af032d" or None if not specified.
 
         A value of None indicates no fill transform was specified for this element.
