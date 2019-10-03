@@ -941,7 +941,7 @@ class _Subtotal(object):
 
         Unconditionally True for _Subtotal objects.
         """
-        return True  # pragma: no cover
+        return True
 
     @lazyproperty
     def label(self):
