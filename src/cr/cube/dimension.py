@@ -935,14 +935,6 @@ class _Subtotal(object):
             for addend_id in self.addend_ids
         )
 
-    @property
-    def is_insertion(self):
-        """True if this item represents an insertion (e.g. subtotal).
-
-        Unconditionally True for _Subtotal objects.
-        """
-        return True
-
     @lazyproperty
     def label(self):
         """str display name for this subtotal, suitable for use as label."""

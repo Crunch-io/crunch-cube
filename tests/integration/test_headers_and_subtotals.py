@@ -139,13 +139,8 @@ class TestHeadersAndSubtotals(object):
     def test_1D_subtotals_inserted_row_idxs(self):
         cube = Cube(CR.ECON_BLAME_WITH_HS_MISSING)
         strand = cube.partitions[0]
-        subtotals_is_insertion = [s.is_insertion for s in cube.dimensions[0].subtotals]
-        stripe_rows_insertion = [row.is_insertion for row in strand._stripe.rows]
 
-        assert subtotals_is_insertion == [True, True]
-        assert len(subtotals_is_insertion) == len(strand.inserted_row_idxs)
         assert strand.inserted_row_idxs == (2, 6)
-        assert [stripe_rows_insertion[idx] is True for idx in strand.inserted_row_idxs]
 
     def test_1D_means_mr_subtotals_hidden(self):
         transforms = {
