@@ -5,8 +5,9 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import pytest
+import numpy as np
 
-from cr.cube.cube import Cube
+from cr.cube.cube import Cube, _Measures
 
 from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
 from ..unitutil import instance_mock, property_mock
@@ -83,3 +84,21 @@ class DescribeCube(object):
     @pytest.fixture
     def dimension_types_prop_(self, request):
         return property_mock(request, Cube, "dimension_types")
+
+
+class DescribeMeasures(object):
+    def it_returns_nan_if_the_unfiltered_count_is_zero(self):
+        cube_dict, expected_value = (
+            {
+                "result": {
+                    "filtered": {"weighted_n": 0},
+                    "unfiltered": {"weighted_n": 0},
+                }
+            },
+            np.nan,
+        )
+        measures = _Measures(cube_dict, None)
+
+        population_fraction = measures.population_fraction
+
+        np.testing.assert_equal(population_fraction, expected_value)
