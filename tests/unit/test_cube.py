@@ -27,10 +27,8 @@ class DescribeCube(object):
         cube_dict = cube._cube_dict
         assert cube_dict == {"cube": "dict"}
 
-    def and_it_accepts_a_JSON_format_cube_response(
-        self, json_cube_response_type_fixtures
-    ):
-        cube_response, expected_value = json_cube_response_type_fixtures
+    def and_it_accepts_a_JSON_format_cube_response(self, cube_response_type_fixture):
+        cube_response, expected_value = cube_response_type_fixture
         cube = Cube(cube_response)
 
         cube_dict = cube._cube_dict
@@ -49,7 +47,7 @@ class DescribeCube(object):
 
         assert str(exception) == expected_value
 
-    # fixture components ---------------------------------------------
+    # fixtures ---------------------------------------------
 
     @pytest.fixture(
         params=[
@@ -73,9 +71,11 @@ class DescribeCube(object):
             ({"value": "val"}, "val"),
         ]
     )
-    def json_cube_response_type_fixtures(self, request):
+    def cube_response_type_fixture(self, request):
         cube_response, expected_value = request.param
         return cube_response, expected_value
+
+    # fixture components ---------------------------------------------
 
     @pytest.fixture
     def cube_(self, request):
@@ -87,7 +87,23 @@ class DescribeCube(object):
 
 
 class DescribeMeasures(object):
-    def it_returns_nan_if_the_unfiltered_count_is_zero(self):
+    def it_knows_the_population_fraction(self):
+        cube_dict, expected_value = (
+            {
+                "result": {
+                    "filtered": {"weighted_n": 10},
+                    "unfiltered": {"weighted_n": 9},
+                }
+            },
+            1.1111111111111112,
+        )
+        measures = _Measures(cube_dict, None)
+
+        population_fraction = measures.population_fraction
+
+        assert population_fraction == expected_value
+
+    def but_the_fraction_is_NaN_for_unfiltered_count_zero(self):
         cube_dict, expected_value = (
             {
                 "result": {

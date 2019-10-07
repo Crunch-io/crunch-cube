@@ -11,27 +11,33 @@ from cr.cube.cube import CubeSet, Cube
 from cr.cube.cubepart import _Slice, _Strand, _Nub
 from cr.cube.enum import DIMENSION_TYPE as DT
 
-from ..unitutil import instance_mock, property_mock
+from ..unitutil import instance_mock, property_mock, method_mock
 
 
 class DescribeCubeSet(object):
-    def it_has_sequence_of_cube_objects(self):
-        cube = Cube(None, None, None, None)
-        cube_set = CubeSet((cube,), ({},), None, None)
+    def it_provides_access_to_its_Cube_objects_to_help(self, _iter_cubes_, cube_):
+        _iter_cubes_.return_value = (c for c in (cube_, cube_, cube_))
+        cube_set = CubeSet(None, None, None, None)
 
-        cube_objects = cube_set._cubes
+        cubes = cube_set._cubes
 
-        assert len(cube_objects) == 1
+        assert cubes == (cube_, cube_, cube_)
 
-    def it_can_show_pairwise(self, can_show_pairwise_fixture, _cubes_prop_, cube_):
-        ndim, expected_value = can_show_pairwise_fixture
-        cube_.ndim = ndim
-        _cubes_prop_.return_value = ndim * (cube_,)
+    def it_knows_whether_it_can_show_pairwise(
+        self, request, can_show_pairwise_fixture, _cubes_prop_
+    ):
+        cubes_dimtypes, expected_value = can_show_pairwise_fixture
+        _cubes_prop_.return_value = tuple(
+            instance_mock(
+                request, Cube, dimension_types=cube_dimtypes, ndim=len(cube_dimtypes)
+            )
+            for cube_dimtypes in cubes_dimtypes
+        )
         cube_set = CubeSet(None, None, None, None)
 
         can_show_pairwise = cube_set.can_show_pairwise
 
-        assert can_show_pairwise == expected_value
+        assert can_show_pairwise is expected_value
 
     def it_knows_its_name(self, _cubes_prop_, cube_):
         cube_.name = "Beverage"
@@ -131,10 +137,24 @@ class DescribeCubeSet(object):
 
     # fixtures ---------------------------------------------
 
-    @pytest.fixture(params=[(3, True), (1, False)])
+    @pytest.fixture(
+        params=[
+            ((), False),
+            (((DT.CAT, DT.CAT),), False),
+            (((DT.TEXT,), (DT.TEXT,)), False),
+            (((DT.CAT,), (DT.CAT, DT.CAT)), True),
+            (((DT.TEXT,), (DT.CAT, DT.CAT)), True),
+            (((DT.MR_CAT,), (DT.CAT, DT.CAT)), True),
+            (((DT.CAT,), (DT.CAT, DT.MR_CAT)), False),
+            (((DT.CAT, DT.CAT), (DT.CAT, DT.MR_CAT)), False),
+            (((DT.DATETIME,), (DT.DATETIME, DT.DATETIME)), True),
+            (((DT.DATETIME, DT.DATETIME), (DT.DATETIME, DT.DATETIME)), True),
+            (((DT.DATETIME, DT.DATETIME), (DT.DATETIME, DT.MR_CAT)), False),
+        ]
+    )
     def can_show_pairwise_fixture(self, request):
-        ndim, expected_value = request.param
-        return ndim, expected_value
+        cubes_dimtypes, expected_value = request.param
+        return cubes_dimtypes, expected_value
 
     @pytest.fixture(params=[(True, True), (False, False)])
     def has_means_fixture(self, request):
@@ -187,3 +207,7 @@ class DescribeCubeSet(object):
     @pytest.fixture
     def _cubes_prop_(self, request):
         return property_mock(request, CubeSet, "_cubes")
+
+    @pytest.fixture
+    def _iter_cubes_(self, request):
+        return method_mock(request, CubeSet, "_iter_cubes")

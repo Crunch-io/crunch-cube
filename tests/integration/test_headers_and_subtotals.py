@@ -137,9 +137,7 @@ class TestHeadersAndSubtotals(object):
         assert strand.rows_dimension_fills == (None,) * 7
 
     def test_1D_subtotals_inserted_row_idxs(self):
-        cube = Cube(CR.ECON_BLAME_WITH_HS_MISSING)
-        strand = cube.partitions[0]
-
+        strand = Cube(CR.ECON_BLAME_WITH_HS_MISSING).partitions[0]
         assert strand.inserted_row_idxs == (2, 6)
 
     def test_1D_means_mr_subtotals_hidden(self):
