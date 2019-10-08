@@ -32,7 +32,9 @@ class _BaseDimensions(Sequence):
         This composed tuple is the source for the dimension objects in this
         collection.
         """
-        raise NotImplementedError("must be implemented by each sublass")
+        raise NotImplementedError(
+            "must be implemented by each subclass"
+        )  # pragma: no cover
 
 
 class AllDimensions(_BaseDimensions):
@@ -755,7 +757,9 @@ class _ElementTransforms(object):
         A str value must be a hash character ("#") followed by six hexadecimal digits.
         Three-character color contractions (like "#D07") are not valid.
         """
+
         fill = self._element_transforms_dict.get("fill")
+
         if not fill:
             return None
         return fill
@@ -930,14 +934,6 @@ class _Subtotal(object):
             self._valid_elements.get_by_id(addend_id).index_in_valids
             for addend_id in self.addend_ids
         )
-
-    @property
-    def is_insertion(self):
-        """True if this item represents an insertion (e.g. subtotal).
-
-        Unconditionally True for _Subtotal objects.
-        """
-        return True
 
     @lazyproperty
     def label(self):

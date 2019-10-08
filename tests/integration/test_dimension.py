@@ -20,7 +20,7 @@ from cr.cube.dimension import (
 from cr.cube.enum import DIMENSION_TYPE as DT
 
 from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
-from ..unitutil import instance_mock
+from ..unitutil import instance_mock, property_mock
 
 
 class DescribeIntegratedAllDimensions(object):

@@ -215,6 +215,10 @@ class DescribeIntegrated_Measures(object):
             (CR.CAT_X_CAT_X_CAT_WGTD, True),
             # ---unweighted_counts == measure_count_data---
             (CR.ADMIT_X_DEPT_UNWEIGHTED, False),
+            # ---has {'weight_var': weight_name_str} and no {'query':{'weight': val}}---
+            (CR.CAT_X_CAT_X_CAT_WGTD_NO_QUERY_WEIGHT, True),
+            # ---has {'query': {'weight_utl': url}}---
+            ({"weight_url": "https://y"}, True),
         ]
     )
     def is_weighted_fixture(self, request):
