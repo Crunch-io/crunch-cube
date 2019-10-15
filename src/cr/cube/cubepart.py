@@ -183,8 +183,8 @@ class _Slice(CubePartition):
         return tuple(i for i, row in enumerate(self._matrix.rows) if row.is_insertion)
 
     @lazyproperty
-    def has_valid_data(self):
-        return not any(s == 0 for s in self.shape)
+    def is_empty(self):
+        return any(s == 0 for s in self.shape)
 
     @lazyproperty
     def means(self):
@@ -509,8 +509,8 @@ class _Strand(CubePartition):
         return tuple(row.count for row in self._stripe.rows)
 
     @lazyproperty
-    def has_valid_data(self):
-        return not any(s == 0 for s in self._shape)
+    def is_empty(self):
+        return any(s == 0 for s in self._shape)
 
     @lazyproperty
     def inserted_row_idxs(self):
@@ -726,8 +726,8 @@ class _Nub(CubePartition):
         return self._cube.base_counts
 
     @lazyproperty
-    def has_valid_data(self):
-        return True if self.base_count else False
+    def is_empty(self):
+        return False if self.base_count else True
 
     @lazyproperty
     def means(self):

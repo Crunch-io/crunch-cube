@@ -15,14 +15,14 @@ from ..unitutil import instance_mock, property_mock
 class Describe_Slice(object):
     """Unit test suite for `cr.cube.cubepart._Slice` object."""
 
-    def it_knows_its_data_validity(self, _slice_prop_, slice_has_valid_data_fixture):
-        slice_shape, expected_value = slice_has_valid_data_fixture
+    def it_knows_its_data_status(self, _slice_prop_, slice_is_empty_fixture):
+        slice_shape, expected_value = slice_is_empty_fixture
         _slice_prop_.return_value = slice_shape
         slice_ = _Slice(None, None, None, None, None)
 
-        has_valid_data = slice_.has_valid_data
+        is_empty = slice_.is_empty
 
-        assert has_valid_data is expected_value
+        assert is_empty is expected_value
 
     def it_knows_the_row_proportions(self, request, _matrix_prop_, matrix_):
         _matrix_prop_.return_value = matrix_
@@ -67,9 +67,9 @@ class Describe_Slice(object):
     # fixtures ---------------------------------------------
 
     @pytest.fixture(
-        params=[((1,), True), ((0,), False), ((7, 6), True), ((0, 0), False)]
+        params=[((1,), False), ((0,), True), ((7, 6), False), ((0, 0), True)]
     )
-    def slice_has_valid_data_fixture(self, request):
+    def slice_is_empty_fixture(self, request):
         slice_shape, expected_value = request.param
         return slice_shape, expected_value
 
@@ -77,14 +77,14 @@ class Describe_Slice(object):
 class Describe_Strand(object):
     """Unit test suite for `cr.cube.cubepart._Strand` object."""
 
-    def it_knows_its_data_validity(self, _strand_prop_, strand_has_valid_data_fixture):
-        strand_shape, expected_value = strand_has_valid_data_fixture
+    def it_knows_its_data_status(self, _strand_prop_, strand_is_empty_fixture):
+        strand_shape, expected_value = strand_is_empty_fixture
         _strand_prop_.return_value = strand_shape
         strand_ = _Strand(None, None, None, None, None, None)
 
-        has_valid_data = strand_.has_valid_data
+        is_empty = strand_.is_empty
 
-        assert has_valid_data is expected_value
+        assert is_empty is expected_value
 
     # fixture components ---------------------------------------------
 
@@ -95,9 +95,9 @@ class Describe_Strand(object):
     # fixtures ---------------------------------------------
 
     @pytest.fixture(
-        params=[((1,), True), ((0,), False), ((7, 6), True), ((0, 0), False)]
+        params=[((1,), False), ((0,), True), ((7, 6), False), ((0, 0), True)]
     )
-    def strand_has_valid_data_fixture(self, request):
+    def strand_is_empty_fixture(self, request):
         slice_shape, expected_value = request.param
         return slice_shape, expected_value
 
@@ -105,14 +105,14 @@ class Describe_Strand(object):
 class Describe_Nub(object):
     """Unit test suite for `cr.cube.cubepart._Nub` object."""
 
-    def it_knows_its_data_validity(self, _nub_prop_, nub_has_valid_data_fixture):
-        base_count, expected_value = nub_has_valid_data_fixture
+    def it_knows_its_data_status(self, _nub_prop_, nub_is_empty_fixture):
+        base_count, expected_value = nub_is_empty_fixture
         _nub_prop_.return_value = base_count
         nub_ = _Nub(None)
 
-        has_valid_data = nub_.has_valid_data
+        is_empty = nub_.is_empty
 
-        assert has_valid_data == expected_value
+        assert is_empty == expected_value
 
     # fixture components ---------------------------------------------
 
@@ -122,7 +122,7 @@ class Describe_Nub(object):
 
     # fixtures ---------------------------------------------
 
-    @pytest.fixture(params=[(None, False), (45.4, True)])
-    def nub_has_valid_data_fixture(self, request):
+    @pytest.fixture(params=[(None, True), (45.4, False)])
+    def nub_is_empty_fixture(self, request):
         base_count, expected_value = request.param
         return base_count, expected_value
