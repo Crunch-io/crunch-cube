@@ -112,6 +112,10 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.11.9
+- 100% test coverage
+- New `is_empty` property in each of cube partition
+
 #### 1.11.8
 - Increase test coverage
 - Fix 2D cubes that have means with insertions
