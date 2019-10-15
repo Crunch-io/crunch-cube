@@ -1,0 +1,90 @@
+{
+    "element": "shoji:view",
+    "self": "https://app.crunch.io/api/datasets/43f0d19eb1f241a39b7d5c547a0a6b6e/cube/?filter=%5B%5D&query=%7B%22dimensions%22:%5B%5D,%22measures%22:%7B%22count%22:%7B%22function%22:%22cube_count%22,%22args%22:%5B%5D%7D,%22mean%22:%7B%22function%22:%22cube_mean%22,%22args%22:%5B%7B%22variable%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2F43f0d19eb1f241a39b7d5c547a0a6b6e%2Fvariables%2F00000c%2F%22%7D%5D%7D%7D,%22weight%22:null%7D",
+    "value": {
+        "query": {
+            "measures": {
+                "count": {
+                    "function": "cube_count",
+                    "args": [
+
+                    ]
+                },
+                "mean": {
+                    "function": "cube_mean",
+                    "args": [
+                        {
+                            "variable": "https://app.crunch.io/api/datasets/43f0d19eb1f241a39b7d5c547a0a6b6e/variables/00000c/"
+                        }
+                    ]
+                }
+            },
+            "dimensions": [
+
+            ],
+            "weight": null
+        },
+        "query_environment": {
+            "filter": [
+
+            ]
+        },
+        "result": {
+            "dimensions": [
+
+            ],
+            "missing": 0,
+            "measures": {
+                "count": {
+                    "data": [
+                        null
+                    ],
+                    "n_missing": 0,
+                    "metadata": {
+                        "references": {
+
+                        },
+                        "derived": true,
+                        "type": {
+                            "integer": true,
+                            "missing_rules": {
+
+                            },
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "class": "numeric"
+                        }
+                    }
+                },
+                "mean": {
+                    "data": [
+                        null
+                    ],
+                    "n_missing": 0,
+                    "metadata": {
+                        "references": {
+
+                        },
+                        "derived": true,
+                        "type": {
+                            "integer": null,
+                            "missing_rules": {
+
+                            },
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "class": "numeric"
+                        }
+                    }
+                }
+            },
+            "element": "crunch:cube",
+            "counts": [
+                null
+            ],
+            "n": null
+        }
+    }
+}

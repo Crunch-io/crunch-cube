@@ -12,6 +12,14 @@ from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
 class Describe_Slice(object):
     """Integration-test suite for _Slice object."""
 
+    def it_has_valid_data(self):
+        slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS).partitions[0]
+        assert slice_.has_valid_data is True
+
+    def it_has_no_valid_data(self):
+        slice_ = Cube(CR.OM_SGP8334215_VN_2019_SEP_19).partitions[0]
+        assert slice_.has_valid_data is False
+
     def it_loads_from_cat_x_cat_cube(self):
         cube = Cube(CR.CAT_X_CAT)
         slice_ = _Slice(cube, 0, None, None, 0)
@@ -468,3 +476,29 @@ class Describe_Strand(object):
         np.testing.assert_almost_equal(
             strand.means, [19.85555556, 13.85416667, 52.78947368, np.nan, np.nan]
         )
+
+    def it_has_valid_data(self):
+        strand = CubePartition.factory(
+            Cube(CR.CAT_WITH_MEANS_AND_INSERTIONS), 0, None, None, None, 0
+        )
+        assert strand.has_valid_data is True
+
+    def it_has_no_valid_data(self):
+        strand = CubePartition.factory(
+            Cube(CR.OM_SGP8334215_VN_2019_SEP_19_STRAND), 0, None, None, None, 0
+        )
+        assert strand.has_valid_data is False
+
+
+class Describe_Nub(object):
+    """Integration-test suite for `cr.cube.cubepart._Nub` object."""
+
+    def it_has_valid_data(self):
+        cube = Cube(CR.ECON_MEAN_NO_DIMS)
+        nub = cube.partitions[0]
+        assert nub.has_valid_data is True
+
+    def it_has_no_valid_data(self):
+        cube = Cube(CR.ECON_NODATA_NO_DIMS)
+        nub = cube.partitions[0]
+        assert nub.has_valid_data is False
