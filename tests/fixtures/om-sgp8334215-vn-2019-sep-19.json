@@ -1,0 +1,405 @@
+{
+  "result": {
+    "dimensions": [
+      {
+        "derived": true,
+        "references": {
+          "alias": "VCAO2_open1",
+          "notes": "Base: Those using other specified streaming platforms",
+          "name": "Device for consumption of free TV and video content - Other specified",
+          "description": "Which of the following devices do you use to watch free television and video content? Please select all that apply. : Other Specify"
+        },
+        "type": {
+          "subtype": {
+            "missing_rules": {
+              "No data": {
+                "function": "==",
+                "args": [
+                  {
+                    "variable": "000009"
+                  },
+                  {
+                    "value": "__NA__"
+                  }
+                ]
+              }
+            },
+            "missing_reasons": {
+              "No Data": -1,
+              "No data": 1
+            },
+            "class": "text"
+          },
+          "elements": [
+            {
+              "id": 0,
+              "value": {
+                "?": -1
+              },
+              "missing": true
+            }
+          ],
+          "class": "enum"
+        }
+      },
+      {
+        "references": {
+          "uniform_basis": false,
+          "description": "",
+          "subreferences": [
+            {
+              "alias": "VCAO1_cb_1",
+              "name": "IndoXXI Lite"
+            },
+            {
+              "alias": "VCAO1_cb_2",
+              "name": "Vua Xem Phim HD"
+            },
+            {
+              "alias": "VCAO1_cb_3",
+              "name": "VungTV"
+            },
+            {
+              "alias": "VCAO1_cb_4",
+              "name": "Dang Cap HD"
+            },
+            {
+              "alias": "VCAO1_cb_5",
+              "name": "VSport TV"
+            },
+            {
+              "alias": "VCAO1_cb_6",
+              "name": "Zam TV"
+            },
+            {
+              "alias": "VCAO1_cb_7",
+              "name": "Phim HD Xem Phim Viet Online"
+            },
+            {
+              "alias": "VCAO1_cb_8",
+              "name": "Bong Da TV"
+            },
+            {
+              "alias": "VCAO1_cb_9",
+              "name": "Other online video platforms or other services on set top boxes"
+            }
+          ],
+          "notes": "",
+          "alias": "VCAO1_cb",
+          "name": "Apps and services usage for streaming content"
+        },
+        "derived": true,
+        "type": {
+          "subtype": {
+            "class": "variable"
+          },
+          "elements": [
+            {
+              "id": 1,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "VCAO1_cb_1",
+                  "name": "IndoXXI Lite"
+                },
+                "id": "0001"
+              },
+              "missing": false
+            },
+            {
+              "id": 2,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "VCAO1_cb_2",
+                  "name": "Vua Xem Phim HD"
+                },
+                "id": "0002"
+              },
+              "missing": false
+            },
+            {
+              "id": 3,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "VCAO1_cb_3",
+                  "name": "VungTV"
+                },
+                "id": "0003"
+              },
+              "missing": false
+            },
+            {
+              "id": 4,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "VCAO1_cb_4",
+                  "name": "Dang Cap HD"
+                },
+                "id": "0004"
+              },
+              "missing": false
+            },
+            {
+              "id": 5,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "VCAO1_cb_5",
+                  "name": "VSport TV"
+                },
+                "id": "0005"
+              },
+              "missing": false
+            },
+            {
+              "id": 6,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "VCAO1_cb_6",
+                  "name": "Zam TV"
+                },
+                "id": "0006"
+              },
+              "missing": false
+            },
+            {
+              "id": 7,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "VCAO1_cb_7",
+                  "name": "Phim HD Xem Phim Viet Online"
+                },
+                "id": "0007"
+              },
+              "missing": false
+            },
+            {
+              "id": 8,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "VCAO1_cb_8",
+                  "name": "Bong Da TV"
+                },
+                "id": "0008"
+              },
+              "missing": false
+            },
+            {
+              "id": 9,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "VCAO1_cb_9",
+                  "name": "Other online video platforms or other services on set top boxes"
+                },
+                "id": "0009"
+              },
+              "missing": false
+            }
+          ],
+          "class": "enum"
+        }
+      },
+      {
+        "derived": true,
+        "references": {
+          "uniform_basis": false,
+          "description": "",
+          "subreferences": [
+            {
+              "alias": "VCAO1_cb_1",
+              "name": "IndoXXI Lite"
+            },
+            {
+              "alias": "VCAO1_cb_2",
+              "name": "Vua Xem Phim HD"
+            },
+            {
+              "alias": "VCAO1_cb_3",
+              "name": "VungTV"
+            },
+            {
+              "alias": "VCAO1_cb_4",
+              "name": "Dang Cap HD"
+            },
+            {
+              "alias": "VCAO1_cb_5",
+              "name": "VSport TV"
+            },
+            {
+              "alias": "VCAO1_cb_6",
+              "name": "Zam TV"
+            },
+            {
+              "alias": "VCAO1_cb_7",
+              "name": "Phim HD Xem Phim Viet Online"
+            },
+            {
+              "alias": "VCAO1_cb_8",
+              "name": "Bong Da TV"
+            },
+            {
+              "alias": "VCAO1_cb_9",
+              "name": "Other online video platforms or other services on set top boxes"
+            }
+          ],
+          "notes": "",
+          "alias": "VCAO1_cb",
+          "name": "Apps and services usage for streaming content"
+        },
+        "type": {
+          "ordinal": false,
+          "subvariables": [
+            "0001",
+            "0002",
+            "0003",
+            "0004",
+            "0005",
+            "0006",
+            "0007",
+            "0008",
+            "0009"
+          ],
+          "class": "categorical",
+          "categories": [
+            {
+              "numeric_value": 1,
+              "selected": true,
+              "id": 1,
+              "missing": false,
+              "name": "Selected"
+            },
+            {
+              "numeric_value": 0,
+              "id": 0,
+              "name": "Other",
+              "missing": false
+            },
+            {
+              "numeric_value": null,
+              "id": -1,
+              "name": "No Data",
+              "missing": true
+            }
+          ]
+        }
+      }
+    ],
+    "measures": {
+      "count": {
+        "data": [
+          58.0879956743,
+          986.9120043257,
+          0.0,
+          224.0156021741,
+          820.9843978259,
+          0.0,
+          212.7206408334,
+          832.2793591665,
+          0.0,
+          125.5352062187,
+          919.4647937812,
+          0.0,
+          119.1137688741,
+          925.8862311259,
+          0.0,
+          95.937314861,
+          949.0626851389,
+          0.0,
+          381.6430087752,
+          663.3569912247,
+          0.0,
+          331.5300133092,
+          713.4699866907,
+          0.0,
+          49.7427167023,
+          995.2572832976,
+          0.0
+        ],
+        "n_missing": 1045,
+        "metadata": {
+          "references": {},
+          "derived": true,
+          "type": {
+            "integer": false,
+            "class": "numeric",
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "missing_rules": {}
+          }
+        }
+      }
+    },
+    "n": 1045,
+    "filter_stats": {
+      "filtered_complete": {
+        "unweighted": {
+          "selected": 1045,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 1044.9999999999,
+          "other": 0,
+          "missing": 0
+        }
+      },
+      "filtered": {
+        "unweighted": {
+          "selected": 1045,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 1044.9999999999,
+          "other": 0,
+          "missing": 0
+        }
+      }
+    },
+    "unfiltered": {
+      "unweighted_n": 1045,
+      "weighted_n": 1044.9999999999
+    },
+    "filtered": {
+      "unweighted_n": 1045,
+      "weighted_n": 1044.9999999999
+    },
+    "counts": [
+      60,
+      985,
+      0,
+      226,
+      819,
+      0,
+      210,
+      835,
+      0,
+      129,
+      916,
+      0,
+      121,
+      924,
+      0,
+      99,
+      946,
+      0,
+      383,
+      662,
+      0,
+      339,
+      706,
+      0,
+      50,
+      995,
+      0
+    ]
+  }
+}

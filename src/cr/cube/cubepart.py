@@ -183,6 +183,10 @@ class _Slice(CubePartition):
         return tuple(i for i, row in enumerate(self._matrix.rows) if row.is_insertion)
 
     @lazyproperty
+    def is_empty(self):
+        return any(s == 0 for s in self.shape)
+
+    @lazyproperty
     def means(self):
         return np.array([row.means for row in self._matrix.rows])
 
@@ -505,6 +509,10 @@ class _Strand(CubePartition):
         return tuple(row.count for row in self._stripe.rows)
 
     @lazyproperty
+    def is_empty(self):
+        return any(s == 0 for s in self._shape)
+
+    @lazyproperty
     def inserted_row_idxs(self):
         # TODO: add integration-test coverage for this.
         return tuple(i for i, row in enumerate(self._stripe.rows) if row.is_insertion)
@@ -716,6 +724,10 @@ class _Nub(CubePartition):
     @lazyproperty
     def base_count(self):
         return self._cube.base_counts
+
+    @lazyproperty
+    def is_empty(self):
+        return False if self.base_count else True
 
     @lazyproperty
     def means(self):

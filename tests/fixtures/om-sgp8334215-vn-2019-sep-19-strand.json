@@ -1,0 +1,105 @@
+{
+  "result": {
+    "dimensions": [
+      {
+        "derived": true,
+        "references": {
+          "alias": "VCAO2_open1",
+          "notes": "Base: Those using other specified streaming platforms",
+          "name": "Device for consumption of free TV and video content - Other specified",
+          "description": "Which of the following devices do you use to watch free television and video content? Please select all that apply. : Other Specify"
+        },
+        "type": {
+          "subtype": {
+            "missing_rules": {
+              "No data": {
+                "function": "==",
+                "args": [
+                  {
+                    "variable": "000009"
+                  },
+                  {
+                    "value": "__NA__"
+                  }
+                ]
+              }
+            },
+            "missing_reasons": {
+              "No Data": -1,
+              "No data": 1
+            },
+            "class": "text"
+          },
+          "elements": [
+            {
+              "id": 0,
+              "value": {
+                "?": -1
+              },
+              "missing": true
+            }
+          ],
+          "class": "enum"
+        }
+      }
+    ],
+    "measures": {
+      "count": {
+        "data": [
+          1044.9999999999
+        ],
+        "n_missing": 1045,
+        "metadata": {
+          "references": {},
+          "derived": true,
+          "type": {
+            "integer": false,
+            "class": "numeric",
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "missing_rules": {}
+          }
+        }
+      }
+    },
+    "n": 1045,
+    "filter_stats": {
+      "filtered_complete": {
+        "unweighted": {
+          "selected": 1045,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 1044.9999999999,
+          "other": 0,
+          "missing": 0
+        }
+      },
+      "filtered": {
+        "unweighted": {
+          "selected": 1045,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 1044.9999999999,
+          "other": 0,
+          "missing": 0
+        }
+      }
+    },
+    "unfiltered": {
+      "unweighted_n": 1045,
+      "weighted_n": 1044.9999999999
+    },
+    "filtered": {
+      "unweighted_n": 1045,
+      "weighted_n": 1044.9999999999
+    },
+    "counts": [
+      1045
+    ]
+  }
+}
