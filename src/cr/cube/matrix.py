@@ -420,7 +420,14 @@ class _CatXCatMatrix(_BaseBaseMatrix):
     @lazyproperty
     def columns(self):
         return tuple(
-            _CategoricalVector(counts, base_counts, element, self.table_margin, zscore)
+            _CategoricalVector(
+                counts,
+                base_counts,
+                element,
+                self.table_margin,
+                zscore,
+                np.sum(self._counts, axis=1),
+            )
             for counts, base_counts, element, zscore in self._column_generator
         )
 
@@ -428,7 +435,13 @@ class _CatXCatMatrix(_BaseBaseMatrix):
     def rows(self):
         return tuple(
             _CategoricalVector(
-                counts, base_counts, element, self.table_margin, zscore, column_index
+                counts,
+                base_counts,
+                element,
+                self.table_margin,
+                zscore,
+                column_index,
+                np.sum(self._counts, axis=0),
             )
             for (
                 counts,
@@ -1386,13 +1399,21 @@ class _CategoricalVector(_BaseVector):
     """
 
     def __init__(
-        self, counts, base_counts, element, table_margin, zscore=None, column_index=None
+        self,
+        counts,
+        base_counts,
+        element,
+        table_margin,
+        zscore=None,
+        column_index=None,
+        opposite_margins=None,
     ):
         super(_CategoricalVector, self).__init__(element, base_counts)
         self._counts = counts
         self._table_margin = table_margin
         self._zscore = zscore
         self._column_index = column_index
+        self._opposite_margins = opposite_margins
 
     @lazyproperty
     def base_values(self):
@@ -1423,8 +1444,21 @@ class _CategoricalVector(_BaseVector):
         return self._counts
 
     @lazyproperty
+    def _residuals(self):
+        return self.values - self._expected_counts
+
+    @lazyproperty
+    def _expected_counts(self):
+        return self._opposite_margins * self.margin / self.table_margin
+
+    @lazyproperty
     def zscore(self):
-        return self._zscore
+        residuals = self._residuals
+        total = self.table_margin
+        rowsum = self._opposite_margins
+        colsum = self.margin
+        variance = rowsum * colsum * ((total - rowsum) * (total - colsum)) / total ** 3
+        return residuals / np.sqrt(variance)
 
 
 class _CatXMrVector(_CategoricalVector):
