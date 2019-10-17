@@ -1166,9 +1166,6 @@ class _AssembledVector(_BaseTransformationVector):
 
     @lazyproperty
     def zscore(self):
-        import ipdb
-
-        ipdb.set_trace()
         return np.array(
             tuple([np.nan] * len(self._top_values))
             + self._interleaved_zscore
