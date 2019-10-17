@@ -19,7 +19,6 @@ from ...unitutil import instance_mock, method_mock, property_mock
 
 class DescribeCubeSlice(object):
     def it_calculates_various_measures(self):
-
         slice_ = Cube(CR.CA_SUBVAR_X_CAT_HS).partitions[0]
 
         np.testing.assert_almost_equal(
