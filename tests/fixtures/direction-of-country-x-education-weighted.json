@@ -1,0 +1,238 @@
+{
+  "element": "shoji:view",
+  "self": "https://app.crunch.io/api/datasets/a11dca97f3dc4581a01071c2887c6001/cube/?query=%7B%22dimensions%22:%5B%7B%22variable%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2Fa11dca97f3dc4581a01071c2887c6001%2Fvariables%2F9eadaf2743364f68b2c1fed808ff741e%2F%22%7D,%7B%22variable%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2Fa11dca97f3dc4581a01071c2887c6001%2Fvariables%2F4de0e5e59da14b4f8e4ef8d7196731c3%2F%22%7D%5D,%22measures%22:%7B%22count%22:%7B%22function%22:%22cube_count%22,%22args%22:%5B%5D%7D%7D,%22weight%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2Fa11dca97f3dc4581a01071c2887c6001%2Fvariables%2Ff3506fe1c79944609909ff0285610d1c%2F%22%7D",
+  "value": {
+    "query": {
+      "measures": {
+        "count": {
+          "function": "cube_count",
+          "args": []
+        }
+      },
+      "dimensions": [
+        {
+          "variable": "https://app.crunch.io/api/datasets/a11dca97f3dc4581a01071c2887c6001/variables/9eadaf2743364f68b2c1fed808ff741e/"
+        },
+        {
+          "variable": "https://app.crunch.io/api/datasets/a11dca97f3dc4581a01071c2887c6001/variables/4de0e5e59da14b4f8e4ef8d7196731c3/"
+        }
+      ],
+      "weight": "https://app.crunch.io/api/datasets/a11dca97f3dc4581a01071c2887c6001/variables/f3506fe1c79944609909ff0285610d1c/"
+    },
+    "query_environment": {
+      "filter": []
+    },
+    "result": {
+      "dimensions": [
+        {
+          "derived": false,
+          "references": {
+            "alias": "track",
+            "name": "Direction of country",
+            "description": "Would you say things in this country today are..."
+          },
+          "type": {
+            "ordinal": false,
+            "class": "categorical",
+            "categories": [
+              {
+                "numeric_value": 1,
+                "id": 1,
+                "name": "Generally headed in the right direction",
+                "missing": false
+              },
+              {
+                "numeric_value": 2,
+                "id": 2,
+                "name": "Off on the wrong track",
+                "missing": false
+              },
+              {
+                "numeric_value": 3,
+                "id": 3,
+                "name": "Not sure",
+                "missing": false
+              },
+              {
+                "numeric_value": null,
+                "id": -1,
+                "name": "No Data",
+                "missing": true
+              }
+            ]
+          }
+        },
+        {
+          "derived": false,
+          "references": {
+            "alias": "educ",
+            "name": "Education",
+            "description": "Education"
+          },
+          "type": {
+            "ordinal": false,
+            "class": "categorical",
+            "categories": [
+              {
+                "numeric_value": 1,
+                "id": 1,
+                "name": "No high school",
+                "missing": false
+              },
+              {
+                "numeric_value": 2,
+                "id": 2,
+                "name": "High school graduate",
+                "missing": false
+              },
+              {
+                "numeric_value": 3,
+                "id": 3,
+                "name": "Some college",
+                "missing": false
+              },
+              {
+                "numeric_value": 4,
+                "id": 4,
+                "name": "2-year college",
+                "missing": false
+              },
+              {
+                "numeric_value": 5,
+                "id": 5,
+                "name": "4-year college",
+                "missing": false
+              },
+              {
+                "numeric_value": 6,
+                "id": 6,
+                "name": "Post-graduate",
+                "missing": false
+              },
+              {
+                "numeric_value": null,
+                "id": -1,
+                "name": "No Data",
+                "missing": true
+              }
+            ]
+          }
+        }
+      ],
+      "missing": 2,
+      "measures": {
+        "count": {
+          "data": [
+            35.687454195628035,
+            125.87962227831271,
+            74.84418836700306,
+            20.67880546921185,
+            44.23545836867777,
+            29.50096388873022,
+            0.0,
+            60.30245422185597,
+            163.76474742948184,
+            131.14220649363025,
+            55.127884308419084,
+            96.61878010079649,
+            41.566211822583455,
+            0.0,
+            10.486588471171522,
+            24.83824887539049,
+            42.10756651397298,
+            14.580338991071944,
+            20.762574015885495,
+            6.275732530451295,
+            0.0,
+            0.0,
+            0.575207763239918,
+            1.02496589448582,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "n_missing": 2,
+          "metadata": {
+            "references": {},
+            "derived": true,
+            "type": {
+              "integer": false,
+              "missing_rules": {},
+              "missing_reasons": {
+                "No Data": -1
+              },
+              "class": "numeric"
+            }
+          }
+        }
+      },
+      "n": 1000,
+      "filter_stats": {
+        "filtered_complete": {
+          "unweighted": {
+            "selected": 1000,
+            "other": 0,
+            "missing": 0
+          },
+          "weighted": {
+            "selected": 1000.0000000000001,
+            "other": 0,
+            "missing": 0
+          }
+        },
+        "filtered": {
+          "unweighted": {
+            "selected": 1000,
+            "other": 0,
+            "missing": 0
+          },
+          "weighted": {
+            "selected": 1000.0000000000001,
+            "other": 0,
+            "missing": 0
+          }
+        }
+      },
+      "unfiltered": {
+        "unweighted_n": 1000,
+        "weighted_n": 1000.0000000000001
+      },
+      "filtered": {
+        "unweighted_n": 1000,
+        "weighted_n": 1000.0000000000001
+      },
+      "counts": [
+        20,
+        105,
+        71,
+        33,
+        63,
+        35,
+        0,
+        30,
+        172,
+        139,
+        54,
+        111,
+        36,
+        0,
+        8,
+        40,
+        39,
+        13,
+        22,
+        7,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "element": "crunch:cube"
+    }
+  }
+}
