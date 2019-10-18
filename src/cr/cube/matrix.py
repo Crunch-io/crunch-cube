@@ -426,7 +426,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
                 element,
                 self.table_margin,
                 zscore,
-                np.sum(self._counts, axis=1),
+                **{"opposite_margins": np.sum(self._counts, axis=1)}
             )
             for counts, base_counts, element, zscore in self._column_generator
         )
@@ -441,7 +441,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
                 self.table_margin,
                 zscore,
                 column_index,
-                np.sum(self._counts, axis=0),
+                **{"opposite_margins": np.sum(self._counts, axis=0)}
             )
             for (
                 counts,
@@ -993,16 +993,10 @@ class _InsertionColumn(_BaseMatrixInsertionVector):
 
     @lazyproperty
     def _opposite_margins(self):
-        return np.sum(self._real_matrix_with_insertions, axis=1)
+        return self._addend_vectors[0].opposite_margins
 
     @lazyproperty
-    def _real_matrix_with_insertions(self):
-        return np.hstack(
-            (self._matrix._base_matrix._counts, np.atleast_2d(self.base_values).T)
-        )
-
-    @lazyproperty
-    def insertions_zscore(self):
+    def zscore(self):
         return self._zscore
 
 
@@ -1027,10 +1021,6 @@ class _InsertionRow(_BaseMatrixInsertionVector):
 
     @lazyproperty
     def zscore(self):
-        return np.array([np.nan] * len(self._matrix.columns))
-
-    @lazyproperty
-    def insertions_zscore(self):
         return self._zscore
 
     @lazyproperty
@@ -1051,13 +1041,7 @@ class _InsertionRow(_BaseMatrixInsertionVector):
 
     @lazyproperty
     def _opposite_margins(self):
-        return np.sum(self._real_matrix_with_insertions, axis=0)
-
-    @lazyproperty
-    def _real_matrix_with_insertions(self):
-        return np.vstack(
-            (self._matrix._base_matrix._counts, np.atleast_2d(self.base_values))
-        )
+        return self._addend_vectors[0].opposite_margins
 
 
 class _BaseTransformationVector(object):
@@ -1096,6 +1080,10 @@ class _BaseTransformationVector(object):
     @lazyproperty
     def numeric(self):
         return self._base_vector.numeric
+
+    @lazyproperty
+    def opposite_margins(self):
+        return self._base_vector._opposite_margins
 
     @lazyproperty
     def table_base(self):
@@ -1170,12 +1158,6 @@ class _AssembledVector(_BaseTransformationVector):
             tuple([np.nan] * len(self._top_values))
             + self._interleaved_zscore
             + tuple([np.nan] * len(self._bottom_values))
-        )
-
-    @lazyproperty
-    def insertions_zscore(self):
-        return tuple(
-            insertion.insertions_zscore for insertion in self._opposite_inserted_vectors
         )
 
     @lazyproperty
@@ -1469,14 +1451,14 @@ class _CategoricalVector(_BaseVector):
         table_margin,
         zscore=None,
         column_index=None,
-        opposite_margins=None,
+        **kwargs
     ):
         super(_CategoricalVector, self).__init__(element, base_counts)
         self._counts = counts
         self._table_margin = table_margin
         self._zscore = zscore
         self._column_index = column_index
-        self._opposite_margins = opposite_margins
+        self._opposite_margins = kwargs.get("opposite_margins", None)
 
     @lazyproperty
     def base_values(self):

@@ -29,6 +29,14 @@ class DescribeCubeSlice(object):
                 [0.10880943, 0.50233495, 1.0, 0.00729036, np.nan],
             ],
         )
+        np.testing.assert_almost_equal(
+            slice_.zscore,
+            [
+                [2.00445931, 0.3354102, -1.34164079, -1.34164079, np.nan],
+                [-0.40089186, 0.3354102, 1.34164079, -1.34164079, np.nan],
+                [-1.60356745, -0.67082039, 0.0, 2.68328157, np.nan],
+            ],
+        )
 
     def it_can_calculate_correct_axis_for_cube(self, axis_fixture, cube_):
         axis, ndim, ca_as_0th, expected_value = axis_fixture
