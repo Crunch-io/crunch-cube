@@ -989,3 +989,455 @@ class TestHeadersAndSubtotals(object):
             "Black voters",
             "Latino and other voters",
         )
+
+    def it_calculates_zscore_for_multiple_insertions(self):
+        slice_ = Cube(CR.FOOD_GROUP_X_SHAPE_PASTA_2ROWS1COL_INSERTION).partitions[0]
+
+        assert slice_.inserted_column_idxs == (3,)
+        assert len(slice_.inserted_column_idxs) == 1
+        assert slice_.inserted_row_idxs == (2, 5)
+        assert len(slice_.inserted_row_idxs) == 2
+        assert slice_.row_proportions.shape == slice_.zscore.shape
+
+        # Test 1 col and 2 rows insertions
+        np.testing.assert_almost_equal(
+            slice_.zscore,
+            [
+                [
+                    4.52186866,
+                    -1.14595453,
+                    -1.15583579,
+                    -1.75776465,
+                    -2.40088226,
+                    -0.35476272,
+                    2.97099107,
+                    3.02077733,
+                ],
+                [
+                    -1.17059976,
+                    2.81759967,
+                    3.02086262,
+                    4.49354286,
+                    0.56410083,
+                    -6.35971905,
+                    1.38849055,
+                    -0.57237387,
+                ],
+                [
+                    2.73069348,
+                    1.60707866,
+                    1.78415497,
+                    -1.75776465,
+                    -1.50223393,
+                    -6.09807527,
+                    3.76188322,
+                    2.01538897,
+                ],
+                [
+                    -2.48155861,
+                    1.06725936,
+                    3.90153206,
+                    4.34683015,
+                    2.00604609,
+                    -4.79806048,
+                    -1.31477798,
+                    -1.02860297,
+                ],
+                [
+                    -0.85351687,
+                    -2.70945332,
+                    -5.38012857,
+                    -6.69526684,
+                    -0.09004579,
+                    10.93447341,
+                    -3.01289341,
+                    -1.33102084,
+                ],
+                [
+                    -2.73069348,
+                    -1.60707866,
+                    -1.78415497,
+                    -1.75776465,
+                    1.50223393,
+                    6.09807527,
+                    -3.76188322,
+                    -2.01538897,
+                ],
+            ],
+        )
+
+        slice_ = Cube(CR.CAT_X_CAT_HS_TOTAL_BOTTOM).partitions[0]
+
+        # Test 2 rows and 2 cols insertions (1 col a bottom)
+        np.testing.assert_almost_equal(
+            slice_.zscore,
+            [
+                [
+                    4.52186866,
+                    -1.14595453,
+                    -1.15583579,
+                    -1.75776465,
+                    -2.40088226,
+                    -0.35476272,
+                    2.97099107,
+                    3.02077733,
+                    2.04273365,
+                ],
+                [
+                    -1.17059976,
+                    2.81759967,
+                    3.02086262,
+                    4.49354286,
+                    0.56410083,
+                    -6.35971905,
+                    1.38849055,
+                    -0.57237387,
+                    -4.68606473,
+                ],
+                [
+                    2.73069348,
+                    1.60707866,
+                    1.78415497,
+                    -1.75776465,
+                    -1.50223393,
+                    -6.09807527,
+                    3.76188322,
+                    2.01538897,
+                    2.04273365,
+                ],
+                [
+                    -2.48155861,
+                    1.06725936,
+                    3.90153206,
+                    4.34683015,
+                    2.00604609,
+                    -4.79806048,
+                    -1.31477798,
+                    -1.02860297,
+                    -5.21045616,
+                ],
+                [
+                    -0.85351687,
+                    -2.70945332,
+                    -5.38012857,
+                    -6.69526684,
+                    -0.09004579,
+                    10.93447341,
+                    -3.01289341,
+                    -1.33102084,
+                    7.37880896,
+                ],
+                [
+                    -2.73069348,
+                    -1.60707866,
+                    -1.78415497,
+                    -1.75776465,
+                    1.50223393,
+                    6.09807527,
+                    -3.76188322,
+                    -2.01538897,
+                    2.04273365,
+                ],
+            ],
+        )
+
+    def it_calculates_zscore_for_columns_insertions(self):
+        slice_ = Cube(CR.CA_SUBVAR_X_CAT_HS).partitions[0]
+
+        # Test 1 column insertion
+        assert slice_.inserted_column_idxs == (4,)
+        assert len(slice_.inserted_column_idxs) == 1
+        np.testing.assert_almost_equal(
+            slice_.zscore,
+            [
+                [2.00445931, 0.3354102, -1.34164079, -1.34164079, 2.12132034],
+                [-0.40089186, 0.3354102, 1.34164079, -1.34164079, 0.0],
+                [-1.60356745, -0.67082039, 0.0, 2.68328157, -2.12132034],
+            ],
+        )
+
+        slice_ = Cube(CR.CA_X_CAT_HS).partitions[0]
+
+        # Test 2 columns insertion bottom and interleaved
+        assert slice_.inserted_column_idxs == (3, 6)
+        assert len(slice_.inserted_column_idxs) == 2
+        np.testing.assert_almost_equal(
+            slice_.zscore,
+            [
+                [
+                    1.36930639,
+                    1.36930639,
+                    -0.91287093,
+                    1.49071198,
+                    -0.91287093,
+                    -0.91287093,
+                    -1.49071198,
+                ],
+                [
+                    -1.36930639,
+                    -1.36930639,
+                    0.91287093,
+                    -1.49071198,
+                    0.91287093,
+                    0.91287093,
+                    1.49071198,
+                ],
+                [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
+                [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
+            ],
+        )
+
+    def it_calculates_zscore_for_rows_insertions(self):
+        transforms = {"columns_dimension": {"insertions": {}}}
+        slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[0]
+
+        # Test 1 row insertion
+        assert slice_.inserted_row_idxs == (1,)
+        np.testing.assert_almost_equal(
+            slice_.zscore,
+            [
+                [2.06930398, -0.61133797, -1.25160615, np.nan, -1.19268916],
+                [-2.03371753, 0.66650907, 1.07795469, np.nan, 1.34162721],
+                [0.3436098, -1.079875, 0.98134469, np.nan, -0.26228228],
+                [-0.90239493, -0.01688425, -0.18683508, np.nan, 2.962256],
+                [-1.85225802, 1.24997148, 1.10571507, np.nan, -0.8041707],
+                [np.nan, np.nan, np.nan, np.nan, np.nan],
+                [-0.22728508, -0.10690048, 0.5405717, np.nan, -0.31799761],
+            ],
+        )
+
+        slice_ = Cube(CR.FOOD_GROUP_X_SHAPE_OF_PASTA_2ROWS_INSERTION).partitions[0]
+
+        # Test 2 rows insertions (interleaved and bottom)
+        assert slice_.inserted_row_idxs == (2, 5)
+        assert len(slice_.inserted_row_idxs) == 2
+        np.testing.assert_almost_equal(
+            slice_.zscore,
+            [
+                [
+                    4.52186866,
+                    -1.14595453,
+                    -1.15583579,
+                    -2.40088226,
+                    -0.35476272,
+                    2.97099107,
+                    3.02077733,
+                ],
+                [
+                    -1.17059976,
+                    2.81759967,
+                    3.02086262,
+                    0.56410083,
+                    -6.35971905,
+                    1.38849055,
+                    -0.57237387,
+                ],
+                [
+                    2.73069348,
+                    1.60707866,
+                    1.78415497,
+                    -1.50223393,
+                    -6.09807527,
+                    3.76188322,
+                    2.01538897,
+                ],
+                [
+                    -2.48155861,
+                    1.06725936,
+                    3.90153206,
+                    2.00604609,
+                    -4.79806048,
+                    -1.31477798,
+                    -1.02860297,
+                ],
+                [
+                    -0.85351687,
+                    -2.70945332,
+                    -5.38012857,
+                    -0.09004579,
+                    10.93447341,
+                    -3.01289341,
+                    -1.33102084,
+                ],
+                [
+                    -2.73069348,
+                    -1.60707866,
+                    -1.78415497,
+                    1.50223393,
+                    6.09807527,
+                    -3.76188322,
+                    -2.01538897,
+                ],
+            ],
+        )
+
+    def it_calculates_zscore_top_col_insertion_for_cat_x_cat_with_missing(self):
+        slice_ = Cube(CR.CAT_X_CAT_HS_MISSING).partitions[0]
+
+        assert slice_.inserted_column_idxs == (0,)
+        assert slice_.inserted_row_idxs == ()
+
+        np.testing.assert_almost_equal(
+            slice_.zscore,
+            [
+                [
+                    0.42390758,
+                    -13.96932047,
+                    -18.09470408,
+                    14.81067365,
+                    18.70362483,
+                    -1.57589011,
+                    0.89218751,
+                ],
+                [
+                    -0.42390758,
+                    13.96932047,
+                    18.09470408,
+                    -14.81067365,
+                    -18.70362483,
+                    1.57589011,
+                    -0.89218751,
+                ],
+            ],
+        )
+
+    def it_calculates_zscore_for_cat_x_num_hs_pruned_with_3_rows_insertions(self):
+        transforms = {
+            "rows_dimension": {"prune": True},
+            "columns_dimension": {"prune": True},
+        }
+        slice_ = Cube(CR.CAT_X_NUM_HS_PRUNE, transforms=transforms).partitions[0]
+
+        assert slice_.inserted_row_idxs == (0, 1, 3)
+        np.testing.assert_almost_equal(
+            slice_.zscore, np.tile(np.nan, slice_.row_proportions.shape)
+        )
+
+        slice_ = Cube(CR.CAT_X_NUM_HS_PRUNE).partitions[0]
+        assert slice_.inserted_row_idxs == (0, 3, 7)
+        np.testing.assert_almost_equal(
+            slice_.zscore, np.tile(np.nan, slice_.row_proportions.shape)
+        )
+
+    def it_calculates_zscore_for_cat_x_items_x_cats_with_col_insertion(self):
+        slice_ = Cube(CR.CAT_X_ITEMS_X_CATS_HS).partitions[2]
+
+        np.testing.assert_almost_equal(
+            slice_.zscore,
+            [
+                [
+                    -1.41314157,
+                    0.7194691,
+                    3.32108915,
+                    0.59216028,
+                    1.9336029,
+                    1.82082302,
+                    3.22592648,
+                    0.33151107,
+                    -3.85652314,
+                    -2.07626205,
+                    -4.98161407,
+                ],
+                [
+                    -0.43808855,
+                    -0.47996405,
+                    -1.1006254,
+                    0.78673655,
+                    -2.19826999,
+                    -2.26731388,
+                    -3.26371775,
+                    2.17216147,
+                    1.70425587,
+                    1.49053686,
+                    4.94790819,
+                ],
+                [
+                    0.05348129,
+                    0.45491103,
+                    0.71843222,
+                    1.2463471,
+                    0.72367382,
+                    1.00097907,
+                    0.45574899,
+                    -0.30156157,
+                    -1.8988183,
+                    0.08307639,
+                    -1.789589,
+                ],
+                [
+                    -0.53082169,
+                    1.13935624,
+                    -0.40216969,
+                    -1.24950071,
+                    1.88766548,
+                    0.60975054,
+                    1.97668314,
+                    -0.9757069,
+                    -0.37995499,
+                    -1.15590753,
+                    -2.38363265,
+                ],
+                [
+                    0.54705913,
+                    -0.79251309,
+                    -1.87065586,
+                    -2.89476439,
+                    -1.78545168,
+                    -0.42363372,
+                    -0.38265964,
+                    -2.48501892,
+                    2.36851523,
+                    2.86400302,
+                    2.49835292,
+                ],
+                [
+                    1.31184119,
+                    -1.03522621,
+                    -0.87149941,
+                    0.03842022,
+                    -1.21587579,
+                    0.39147125,
+                    -0.58168782,
+                    -0.42238394,
+                    2.61921944,
+                    -0.96180943,
+                    0.83888703,
+                ],
+                [
+                    1.4497716,
+                    0.38201864,
+                    -0.02478521,
+                    1.04601785,
+                    2.47224023,
+                    0.92685756,
+                    0.13699958,
+                    0.5161739,
+                    -1.44745069,
+                    -1.70416866,
+                    -2.42196891,
+                ],
+                [
+                    0.04778726,
+                    0.23461714,
+                    0.36507151,
+                    0.04563621,
+                    1.19270052,
+                    -0.9922388,
+                    0.58190295,
+                    0.28565055,
+                    0.34036671,
+                    -1.15545471,
+                    -0.59631166,
+                ],
+            ],
+        )
+
+        transforms = {"columns_dimension": {"insertions": {}}}
+        slice_no_col_insertion_ = Cube(
+            CR.CAT_X_ITEMS_X_CATS_HS, transforms=transforms
+        ).partitions[2]
+
+        np.testing.assert_almost_equal(
+            slice_no_col_insertion_.zscore,
+            slice_.zscore[:, : slice_.zscore.shape[1] - 1],
+        )
