@@ -951,6 +951,10 @@ class _BaseMatrixInsertionVector(object):
         return np.sum(np.array([row.values for row in self._addend_vectors]), axis=0)
 
     @lazyproperty
+    def _pvals(self):
+        return 2 * (1 - norm.cdf(np.abs(self._zscore)))
+
+    @lazyproperty
     def _zscore(self):
         variance = (
             self._opposite_margins
@@ -980,6 +984,14 @@ class _InsertionColumn(_BaseMatrixInsertionVector):
         )
 
     @lazyproperty
+    def pvals(self):
+        return self._pvals
+
+    @lazyproperty
+    def zscore(self):
+        return self._zscore
+
+    @lazyproperty
     def _addend_vectors(self):
         return tuple(
             column
@@ -999,10 +1011,6 @@ class _InsertionColumn(_BaseMatrixInsertionVector):
     def _opposite_margins(self):
         return self._addend_vectors[0].opposite_margins
 
-    @lazyproperty
-    def zscore(self):
-        return self._zscore
-
 
 class _InsertionRow(_BaseMatrixInsertionVector):
     """Represents an inserted (subtotal) row."""
@@ -1021,7 +1029,7 @@ class _InsertionRow(_BaseMatrixInsertionVector):
 
     @lazyproperty
     def pvals(self):
-        return np.array([np.nan] * len(self._matrix.columns))
+        return self._pvals
 
     @lazyproperty
     def zscore(self):
@@ -1141,11 +1149,7 @@ class _AssembledVector(_BaseTransformationVector):
 
     @lazyproperty
     def pvals(self):
-        return np.array(
-            tuple([np.nan] * len(self._top_values))
-            + self._interleaved_pvals
-            + tuple([np.nan] * len(self._bottom_values))
-        )
+        return np.array(self._top_pvals + self._interleaved_pvals + self._bottom_pvals)
 
     @lazyproperty
     def table_proportions(self):
@@ -1176,6 +1180,12 @@ class _AssembledVector(_BaseTransformationVector):
         return tuple(
             np.sum(self._base_vector.base_values[col.addend_idxs])
             for col in self._bottom_insertions
+        )
+
+    @lazyproperty
+    def _bottom_pvals(self):
+        return tuple(
+            vector.pvals[self._vector_idx] for vector in self._bottom_insertions
         )
 
     @lazyproperty
@@ -1235,7 +1245,7 @@ class _AssembledVector(_BaseTransformationVector):
             pvals.append(value)
             for inserted_vector in self._opposite_inserted_vectors:
                 if i == inserted_vector.anchor:
-                    pvals.append(np.nan)
+                    pvals.append(inserted_vector.pvals[self._vector_idx])
         return tuple(pvals)
 
     @lazyproperty
@@ -1262,6 +1272,13 @@ class _AssembledVector(_BaseTransformationVector):
         return tuple(zscore)
 
     @lazyproperty
+    def _top_base_values(self):
+        return tuple(
+            np.sum(self._base_vector.base_values[col.addend_idxs])
+            for col in self._top_insertions
+        )
+
+    @lazyproperty
     def _top_insertions(self):
         return tuple(
             vector
@@ -1270,15 +1287,8 @@ class _AssembledVector(_BaseTransformationVector):
         )
 
     @lazyproperty
-    def _top_zscores(self):
-        return tuple(vector.zscore[self._vector_idx] for vector in self._top_insertions)
-
-    @lazyproperty
-    def _top_base_values(self):
-        return tuple(
-            np.sum(self._base_vector.base_values[col.addend_idxs])
-            for col in self._top_insertions
-        )
+    def _top_pvals(self):
+        return tuple(vector.pvals[self._vector_idx] for vector in self._top_insertions)
 
     @lazyproperty
     def _top_values(self):
@@ -1286,6 +1296,10 @@ class _AssembledVector(_BaseTransformationVector):
             np.sum(self._base_vector.values[col.addend_idxs])
             for col in self._top_insertions
         )
+
+    @lazyproperty
+    def _top_zscores(self):
+        return tuple(vector.zscore[self._vector_idx] for vector in self._top_insertions)
 
 
 class _VectorAfterHiding(_BaseTransformationVector):
@@ -1380,14 +1394,6 @@ class _OrderedVector(_BaseTransformationVector):
         return self._base_vector.label
 
     @lazyproperty
-    def _opposing_order(self):
-        return (
-            slice(None)
-            if self._opposing_order_arg is None
-            else self._opposing_order_arg
-        )
-
-    @lazyproperty
     def pvals(self):
         return self._base_vector.pvals
 
@@ -1398,6 +1404,14 @@ class _OrderedVector(_BaseTransformationVector):
     @lazyproperty
     def zscore(self):
         return self._base_vector.zscore
+
+    @lazyproperty
+    def _opposing_order(self):
+        return (
+            slice(None)
+            if self._opposing_order_arg is None
+            else self._opposing_order_arg
+        )
 
 
 # ===OPERAND VECTORS===
@@ -1514,14 +1528,6 @@ class _CategoricalVector(_BaseVector):
         return self._counts
 
     @lazyproperty
-    def _residuals(self):
-        return self.values - self._expected_counts
-
-    @lazyproperty
-    def _expected_counts(self):
-        return self._opposite_margins * self.margin / self.table_margin
-
-    @lazyproperty
     def zscore(self):
         variance = (
             self._opposite_margins
@@ -1534,6 +1540,14 @@ class _CategoricalVector(_BaseVector):
         )
 
         return self._residuals / np.sqrt(variance)
+
+    @lazyproperty
+    def _residuals(self):
+        return self.values - self._expected_counts
+
+    @lazyproperty
+    def _expected_counts(self):
+        return self._opposite_margins * self.margin / self.table_margin
 
 
 class _CatXMrVector(_CategoricalVector):

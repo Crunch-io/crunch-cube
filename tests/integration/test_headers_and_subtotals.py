@@ -462,12 +462,26 @@ class TestHeadersAndSubtotals(object):
                 1.92562832e-06,
                 5.20117283e-12,
                 8.30737469e-05,
-                0,
+                0.00000000e00,
                 1.77635684e-15,
                 1.13223165e-01,
             ],
-            [2.90878432e-14, 0, 8.11477145e-02, 0, 5.87376814e-11, 4.64141147e-06],
-            [np.nan] * 6,
+            [
+                2.90878432e-14,
+                0.00000000e00,
+                8.11477145e-02,
+                0.00000000e00,
+                5.87376814e-11,
+                4.64141147e-06,
+            ],
+            [
+                7.48253449e-04,
+                1.32937094e-04,
+                4.68860522e-02,
+                3.30870975e-01,
+                4.01133883e-01,
+                2.08502104e-10,
+            ],
             [
                 1.05605732e-03,
                 3.70613426e-03,
@@ -490,9 +504,10 @@ class TestHeadersAndSubtotals(object):
                 5.03974440e-01,
                 1.67769523e-02,
                 3.15641644e-01,
-                0,
+                0.00000000e00,
             ],
         ]
+
         np.testing.assert_almost_equal(slice_.pvals, expected)
 
     def test_fruit_hs_top_bottom_labels(self):
@@ -990,7 +1005,7 @@ class TestHeadersAndSubtotals(object):
             "Latino and other voters",
         )
 
-    def it_calculates_zscore_for_multiple_insertions(self):
+    def it_calculates_various_measures_for_multiple_insertions(self):
         slice_ = Cube(CR.FOOD_GROUP_X_SHAPE_PASTA_2ROWS1COL_INSERTION).partitions[0]
 
         assert slice_.inserted_column_idxs == (3,)
@@ -999,7 +1014,7 @@ class TestHeadersAndSubtotals(object):
         assert len(slice_.inserted_row_idxs) == 2
         assert slice_.row_proportions.shape == slice_.zscore.shape
 
-        # Test 1 col and 2 rows insertions
+        # Test zscore for 1 col and 2 rows insertions
         np.testing.assert_almost_equal(
             slice_.zscore,
             [
@@ -1066,9 +1081,76 @@ class TestHeadersAndSubtotals(object):
             ],
         )
 
+        # Test pvals for 1 col and 2 rows insertions
+        np.testing.assert_almost_equal(
+            slice_.pvals,
+            [
+                [
+                    6.12960904e-06,
+                    2.51813966e-01,
+                    2.47748332e-01,
+                    7.87875627e-02,
+                    1.63555979e-02,
+                    7.22767363e-01,
+                    2.96840408e-03,
+                    2.52126696e-03,
+                ],
+                [
+                    2.41759696e-01,
+                    4.83840956e-03,
+                    2.52055696e-03,
+                    7.00479138e-06,
+                    5.72685511e-01,
+                    2.02123207e-10,
+                    1.64987721e-01,
+                    5.67068716e-01,
+                ],
+                [
+                    6.32012234e-03,
+                    1.08037114e-01,
+                    7.43984876e-02,
+                    7.87875627e-02,
+                    1.33036705e-01,
+                    1.07353193e-09,
+                    1.68638788e-04,
+                    4.38639092e-02,
+                ],
+                [
+                    1.30809196e-02,
+                    2.85854735e-01,
+                    9.55857972e-05,
+                    1.38119093e-05,
+                    4.48513304e-02,
+                    1.60209410e-06,
+                    1.88584530e-01,
+                    3.03666283e-01,
+                ],
+                [
+                    3.93372735e-01,
+                    6.73941888e-03,
+                    7.44326611e-08,
+                    2.15278906e-11,
+                    9.28250831e-01,
+                    0.00000000e00,
+                    2.58769793e-03,
+                    1.83182153e-01,
+                ],
+                [
+                    6.32012234e-03,
+                    1.08037114e-01,
+                    7.43984876e-02,
+                    7.87875627e-02,
+                    1.33036705e-01,
+                    1.07353193e-09,
+                    1.68638788e-04,
+                    4.38639092e-02,
+                ],
+            ],
+        )
+
         slice_ = Cube(CR.CAT_X_CAT_HS_TOTAL_BOTTOM).partitions[0]
 
-        # Test 2 rows and 2 cols insertions (1 col a bottom)
+        # Test zscore for 2 rows and 2 cols insertions (1 col at bottom)
         np.testing.assert_almost_equal(
             slice_.zscore,
             [
@@ -1141,10 +1223,83 @@ class TestHeadersAndSubtotals(object):
             ],
         )
 
-    def it_calculates_zscore_for_columns_insertions(self):
+        # Test pvals for 2 rows and 2 cols insertions (1 col at bottom)
+        np.testing.assert_almost_equal(
+            slice_.pvals,
+            [
+                [
+                    6.12960904e-06,
+                    2.51813966e-01,
+                    2.47748332e-01,
+                    7.87875627e-02,
+                    1.63555979e-02,
+                    7.22767363e-01,
+                    2.96840408e-03,
+                    2.52126696e-03,
+                    4.10788114e-02,
+                ],
+                [
+                    2.41759696e-01,
+                    4.83840956e-03,
+                    2.52055696e-03,
+                    7.00479138e-06,
+                    5.72685511e-01,
+                    2.02123207e-10,
+                    1.64987721e-01,
+                    5.67068716e-01,
+                    2.78508208e-06,
+                ],
+                [
+                    6.32012234e-03,
+                    1.08037114e-01,
+                    7.43984876e-02,
+                    7.87875627e-02,
+                    1.33036705e-01,
+                    1.07353193e-09,
+                    1.68638788e-04,
+                    4.38639092e-02,
+                    4.10788114e-02,
+                ],
+                [
+                    1.30809196e-02,
+                    2.85854735e-01,
+                    9.55857972e-05,
+                    1.38119093e-05,
+                    4.48513304e-02,
+                    1.60209410e-06,
+                    1.88584530e-01,
+                    3.03666283e-01,
+                    1.88376891e-07,
+                ],
+                [
+                    3.93372735e-01,
+                    6.73941888e-03,
+                    7.44326611e-08,
+                    2.15278906e-11,
+                    9.28250831e-01,
+                    0.00000000e00,
+                    2.58769793e-03,
+                    1.83182153e-01,
+                    1.59650071e-13,
+                ],
+                [
+                    6.32012234e-03,
+                    1.08037114e-01,
+                    7.43984876e-02,
+                    7.87875627e-02,
+                    1.33036705e-01,
+                    1.07353193e-09,
+                    1.68638788e-04,
+                    4.38639092e-02,
+                    4.10788114e-02,
+                ],
+            ],
+        )
+
+    def it_calculates_various_measures_for_columns_insertion(self):
         slice_ = Cube(CR.CA_SUBVAR_X_CAT_HS).partitions[0]
 
-        # Test 1 column insertion
+        # Test zscores for 1 column insertion
         assert slice_.inserted_column_idxs == (4,)
         assert len(slice_.inserted_column_idxs) == 1
         np.testing.assert_almost_equal(
@@ -1156,9 +1311,19 @@ class TestHeadersAndSubtotals(object):
             ],
         )
 
+        # Test pvals for 1 column insertion
+        np.testing.assert_almost_equal(
+            slice_.pvals,
+            [
+                [0.04502088, 0.73731568, 0.17971249, 0.17971249, 0.03389485],
+                [0.68849974, 0.73731568, 0.17971249, 0.17971249, 1.0],
+                [0.10880943, 0.50233495, 1.0, 0.00729036, 0.03389485],
+            ],
+        )
+
         slice_ = Cube(CR.CA_X_CAT_HS).partitions[0]
 
-        # Test 2 columns insertion bottom and interleaved
+        # Test zscores for 2 columns insertion bottom and interleaved
         assert slice_.inserted_column_idxs == (3, 6)
         assert len(slice_.inserted_column_idxs) == 2
         np.testing.assert_almost_equal(
@@ -1187,11 +1352,38 @@ class TestHeadersAndSubtotals(object):
             ],
         )
 
-    def it_calculates_zscore_for_rows_insertions(self):
+        # Test pvals for 2 columns insertion bottom and interleaved
+        np.testing.assert_almost_equal(
+            slice_.pvals,
+            [
+                [
+                    0.17090352,
+                    0.17090352,
+                    0.36131043,
+                    0.13603713,
+                    0.36131043,
+                    0.36131043,
+                    0.13603713,
+                ],
+                [
+                    0.17090352,
+                    0.17090352,
+                    0.36131043,
+                    0.13603713,
+                    0.36131043,
+                    0.36131043,
+                    0.13603713,
+                ],
+                [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
+                [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
+            ],
+        )
+
+    def it_calculates_various_measures_for_rows_insertion(self):
         transforms = {"columns_dimension": {"insertions": {}}}
         slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[0]
 
-        # Test 1 row insertion
+        # Test zscores for 1 row insertion
         assert slice_.inserted_row_idxs == (1,)
         np.testing.assert_almost_equal(
             slice_.zscore,
@@ -1206,9 +1398,23 @@ class TestHeadersAndSubtotals(object):
             ],
         )
 
+        # Test pvals for 1 row insertion
+        np.testing.assert_almost_equal(
+            slice_.pvals,
+            [
+                [0.03851757, 0.54097586, 0.21071341, np.nan, 0.23299113],
+                [0.04198008, 0.50508577, 0.28105398, np.nan, 0.1797169],
+                [0.73113976, 0.28019785, 0.32642279, np.nan, 0.79310382],
+                [0.36684711, 0.98652895, 0.85178994, np.nan, 0.00305394],
+                [0.06398878, 0.21130996, 0.26884987, np.nan, 0.4212984],
+                [np.nan, np.nan, np.nan, np.nan, np.nan],
+                [0.82020207, 0.91486794, 0.58880283, np.nan, 0.75048675],
+            ],
+        )
+
         slice_ = Cube(CR.FOOD_GROUP_X_SHAPE_OF_PASTA_2ROWS_INSERTION).partitions[0]
 
-        # Test 2 rows insertions (interleaved and bottom)
+        # Test zscores for 2 rows insertions (interleaved and bottom)
         assert slice_.inserted_row_idxs == (2, 5)
         assert len(slice_.inserted_row_idxs) == 2
         np.testing.assert_almost_equal(
@@ -1271,12 +1477,74 @@ class TestHeadersAndSubtotals(object):
             ],
         )
 
-    def it_calculates_zscore_top_col_insertion_for_cat_x_cat_with_missing(self):
+        # Test pvals for 2 rows insertions (interleaved and bottom)
+        np.testing.assert_almost_equal(
+            slice_.pvals,
+            [
+                [
+                    6.12960904e-06,
+                    2.51813966e-01,
+                    2.47748332e-01,
+                    1.63555979e-02,
+                    7.22767363e-01,
+                    2.96840408e-03,
+                    2.52126696e-03,
+                ],
+                [
+                    2.41759696e-01,
+                    4.83840956e-03,
+                    2.52055696e-03,
+                    5.72685511e-01,
+                    2.02123207e-10,
+                    1.64987721e-01,
+                    5.67068716e-01,
+                ],
+                [
+                    6.32012234e-03,
+                    1.08037114e-01,
+                    7.43984876e-02,
+                    1.33036705e-01,
+                    1.07353193e-09,
+                    1.68638788e-04,
+                    4.38639092e-02,
+                ],
+                [
+                    1.30809196e-02,
+                    2.85854735e-01,
+                    9.55857972e-05,
+                    4.48513304e-02,
+                    1.60209410e-06,
+                    1.88584530e-01,
+                    3.03666283e-01,
+                ],
+                [
+                    3.93372735e-01,
+                    6.73941888e-03,
+                    7.44326611e-08,
+                    9.28250831e-01,
+                    0.00000000e00,
+                    2.58769793e-03,
+                    1.83182153e-01,
+                ],
+                [
+                    6.32012234e-03,
+                    1.08037114e-01,
+                    7.43984876e-02,
+                    1.33036705e-01,
+                    1.07353193e-09,
+                    1.68638788e-04,
+                    4.38639092e-02,
+                ],
+            ],
+        )
+
+    def it_calculates_various_measures_for_cat_x_cat_with_missing_1_col_insertion(self):
         slice_ = Cube(CR.CAT_X_CAT_HS_MISSING).partitions[0]
 
         assert slice_.inserted_column_idxs == (0,)
         assert slice_.inserted_row_idxs == ()
 
+        # Test szcores for 1 column insertion at left
         np.testing.assert_almost_equal(
             slice_.zscore,
             [
@@ -1301,27 +1569,62 @@ class TestHeadersAndSubtotals(object):
             ],
         )
 
-    def it_calculates_zscore_for_cat_x_num_hs_pruned_with_3_rows_insertions(self):
+        # Test pvals for 1 column insertion at left
+        np.testing.assert_almost_equal(
+            slice_.pvals,
+            [
+                [0.67163322, 0.0, 0.0, 0.0, 0.0, 0.11505113, 0.37229243],
+                [0.67163322, 0.0, 0.0, 0.0, 0.0, 0.11505113, 0.37229243],
+            ],
+        )
+
+    def it_calculates_various_measures_for_cat_x_num_hs_pruned_with_3_rows_insertions(
+        self
+    ):
         transforms = {
             "rows_dimension": {"prune": True},
             "columns_dimension": {"prune": True},
         }
         slice_ = Cube(CR.CAT_X_NUM_HS_PRUNE, transforms=transforms).partitions[0]
 
+        # Test zscore for 3 rows insertions
         assert slice_.inserted_row_idxs == (0, 1, 3)
         np.testing.assert_almost_equal(
             slice_.zscore, np.tile(np.nan, slice_.row_proportions.shape)
         )
 
+        # Test pvals for 3 rows insertions
+        np.testing.assert_almost_equal(
+            slice_.pvals, [[np.nan], [np.nan], [1.0], [np.nan]]
+        )
+
         slice_ = Cube(CR.CAT_X_NUM_HS_PRUNE).partitions[0]
+
+        # Test zscore for 3 rows insertions (1 at left)
         assert slice_.inserted_row_idxs == (0, 3, 7)
         np.testing.assert_almost_equal(
             slice_.zscore, np.tile(np.nan, slice_.row_proportions.shape)
         )
 
-    def it_calculates_zscore_for_cat_x_items_x_cats_with_col_insertion(self):
+        # Test pvals for 3 rows insertions (1 at left)
+        np.testing.assert_almost_equal(
+            slice_.pvals,
+            [
+                [np.nan, np.nan, np.nan, np.nan, np.nan],
+                [1.0, 1.0, 1.0, 1.0, 1.0],
+                [1.0, 1.0, 1.0, 1.0, 1.0],
+                [np.nan, np.nan, np.nan, np.nan, np.nan],
+                [1.0, 1.0, 1.0, 1.0, 1.0],
+                [1.0, 1.0, 1.0, 1.0, 1.0],
+                [1.0, 1.0, 1.0, 1.0, 1.0],
+                [np.nan, np.nan, np.nan, np.nan, np.nan],
+            ],
+        )
+
+    def it_calculates_various_measures_for_cat_x_items_x_cats_with_col_insertion(self):
         slice_ = Cube(CR.CAT_X_ITEMS_X_CATS_HS).partitions[2]
 
+        # Test zscores
         np.testing.assert_almost_equal(
             slice_.zscore,
             [
@@ -1432,6 +1735,117 @@ class TestHeadersAndSubtotals(object):
             ],
         )
 
+        # Test pvals
+        np.testing.assert_almost_equal(
+            slice_.pvals,
+            [
+                [
+                    1.57614104e-01,
+                    4.71851932e-01,
+                    8.96668906e-04,
+                    5.53743267e-01,
+                    5.31619710e-02,
+                    6.86337632e-02,
+                    1.25565606e-03,
+                    7.40258478e-01,
+                    1.15011214e-04,
+                    3.78697212e-02,
+                    6.30560949e-07,
+                ],
+                [
+                    6.61322091e-01,
+                    6.31252954e-01,
+                    2.71059728e-01,
+                    4.31436104e-01,
+                    2.79298719e-02,
+                    2.33710584e-02,
+                    1.09960650e-03,
+                    2.98434855e-02,
+                    8.83332958e-02,
+                    1.36083131e-01,
+                    7.50152757e-07,
+                ],
+                [
+                    9.57348438e-01,
+                    6.49173248e-01,
+                    4.72490824e-01,
+                    2.12636993e-01,
+                    4.69266012e-01,
+                    3.16836929e-01,
+                    6.48570490e-01,
+                    7.62986307e-01,
+                    5.75883707e-02,
+                    9.33790796e-01,
+                    7.35200075e-02,
+                ],
+                [
+                    5.95542346e-01,
+                    2.54554600e-01,
+                    6.87559148e-01,
+                    2.11481996e-01,
+                    5.90708730e-02,
+                    5.42027073e-01,
+                    4.80774576e-02,
+                    3.29209733e-01,
+                    7.03978826e-01,
+                    2.47718983e-01,
+                    1.71427052e-02,
+                ],
+                [
+                    5.84338110e-01,
+                    4.28061562e-01,
+                    6.13927960e-02,
+                    3.79443218e-03,
+                    7.41880816e-02,
+                    6.71832962e-01,
+                    7.01972145e-01,
+                    1.29544548e-02,
+                    1.78596452e-02,
+                    4.18324018e-03,
+                    1.24771908e-02,
+                ],
+                [
+                    1.89573723e-01,
+                    3.00563283e-01,
+                    3.83481527e-01,
+                    9.69352639e-01,
+                    2.24032243e-01,
+                    6.95448936e-01,
+                    5.60776974e-01,
+                    6.72744802e-01,
+                    8.81312357e-03,
+                    3.36145342e-01,
+                    4.01532705e-01,
+                ],
+                [
+                    1.47122221e-01,
+                    7.02447540e-01,
+                    9.80226288e-01,
+                    2.95552789e-01,
+                    1.34269254e-02,
+                    3.54000494e-01,
+                    8.91031123e-01,
+                    6.05732961e-01,
+                    1.47770738e-01,
+                    8.83495822e-02,
+                    1.54366710e-02,
+                ],
+                [
+                    9.61885788e-01,
+                    8.14505905e-01,
+                    7.15058023e-01,
+                    9.63600206e-01,
+                    2.32986683e-01,
+                    3.21081049e-01,
+                    5.60632052e-01,
+                    7.75145783e-01,
+                    7.33580388e-01,
+                    2.47904267e-01,
+                    5.50967041e-01,
+                ],
+            ],
+        )
+
         transforms = {"columns_dimension": {"insertions": {}}}
         slice_no_col_insertion_ = Cube(
             CR.CAT_X_ITEMS_X_CATS_HS, transforms=transforms
@@ -1440,4 +1854,293 @@ class TestHeadersAndSubtotals(object):
         np.testing.assert_almost_equal(
             slice_no_col_insertion_.zscore,
             slice_.zscore[:, : slice_.zscore.shape[1] - 1],
+        )
+        np.testing.assert_almost_equal(
+            slice_no_col_insertion_.pvals, slice_.pvals[:, : slice_.pvals.shape[1] - 1]
+        )
+
+    def it_calculates_various_measures_for_ca_as_0th_with_1_col_insertion(self):
+        slice_ = Cube(CR.CA_AS_0TH).partitions[0]
+
+        # Test zscore
+        assert slice_.inserted_column_idxs == (4,)
+        np.testing.assert_almost_equal(
+            slice_.zscore,
+            [
+                [1.4384278496e02, np.nan, -8.4743683791e01, np.nan, -1.4384278496e02],
+                [-3.3776223679e02, np.nan, 1.7103706996e02, np.nan, 3.3776223679e02],
+                [-1.2814934144e03, np.nan, 5.9098301224e02, np.nan, 1.2814934144e03],
+                [-7.3548887670e02, np.nan, 3.9190486507e02, np.nan, 7.3548887670e02],
+                [7.0872989672e02, np.nan, -3.9004636470e02, np.nan, -7.0872989672e02],
+                [1.3410335200e02, np.nan, -7.1620373095e01, np.nan, -1.3410335200e02],
+                [4.5252318065e02, np.nan, -2.6995569135e02, np.nan, -4.5252318065e02],
+                [7.8922929161e02, np.nan, -4.0539816212e02, np.nan, -7.8922929161e02],
+                [-1.3248239528e03, np.nan, 8.0070837374e02, np.nan, 1.3248239528e03],
+                [-1.2133173836e03, np.nan, 7.2716831191e02, np.nan, 1.2133173836e03],
+                [5.7039019588e02, np.nan, -2.5955608665e02, np.nan, -5.7039019588e02],
+                [1.5099828673e02, np.nan, -1.0405723538e02, np.nan, -1.5099828673e02],
+                [np.nan, np.nan, 3.2420688167e02, 5.3796991420e02, np.nan],
+                [-1.7354768750e01, np.nan, 6.5307755488e01, np.nan, 1.7354768750e01],
+                [6.2425522308e02, np.nan, -3.6280930476e02, np.nan, -6.2425522308e02],
+                [3.1239460437e02, np.nan, -1.8799690191e02, np.nan, -3.1239460437e02],
+                [5.9781961932e02, np.nan, -3.0957323307e02, np.nan, -5.9781961932e02],
+                [8.7966688339e02, np.nan, -4.5120594474e02, np.nan, -8.7966688339e02],
+                [6.0517388503e02, np.nan, -3.1155411016e02, np.nan, -6.0517388503e02],
+                [np.nan, -2.2443369826e01, 1.0998128581e01, np.nan, np.nan],
+                [np.nan, -4.8981413860e01, 3.1343267444e00, np.nan, np.nan],
+                [np.nan, -1.2279863600e01, -1.7734993515e01, np.nan, np.nan],
+                [np.nan, -3.5994711460e01, 5.5539580789e00, np.nan, np.nan],
+                [np.nan, -4.3899660747e01, 1.9245110772e00, np.nan, np.nan],
+                [-6.8023067787e01, np.nan, np.nan, np.nan, 6.8023067787e01],
+                [-3.2651193534e01, np.nan, np.nan, np.nan, 3.2651193534e01],
+                [
+                    -2.5660773147e02,
+                    2.1418205760e02,
+                    np.nan,
+                    -5.6733555096e01,
+                    2.5660773147e02,
+                ],
+                [
+                    3.2812124740e02,
+                    4.5735057025e01,
+                    np.nan,
+                    -1.1799439341e02,
+                    -3.2812124740e02,
+                ],
+                [
+                    -4.4233316630e02,
+                    2.7180866305e02,
+                    np.nan,
+                    -5.1712174907e01,
+                    4.4233316630e02,
+                ],
+                [
+                    -9.0766722278e02,
+                    3.3652777380e02,
+                    np.nan,
+                    2.5617080011e01,
+                    9.0766722278e02,
+                ],
+                [np.nan, -1.0085258765e02, np.nan, np.nan, np.nan],
+                [np.nan, -4.2467074626e01, -2.9815026356e02, np.nan, np.nan],
+                [np.nan, 4.5477279604e01, -1.0708633335e02, np.nan, np.nan],
+                [np.nan, 2.6481299091e01, -1.6558491939e02, np.nan, np.nan],
+                [
+                    -7.1488546585e01,
+                    np.nan,
+                    2.1628267512e01,
+                    1.2596810374e01,
+                    7.1488546585e01,
+                ],
+                [
+                    -4.0614755952e00,
+                    np.nan,
+                    2.4771762782e00,
+                    -1.5116867265e00,
+                    4.0614755952e00,
+                ],
+                [
+                    -7.4115575325e01,
+                    np.nan,
+                    1.8927472595e01,
+                    1.5482639326e01,
+                    7.4115575325e01,
+                ],
+                [
+                    -8.3748014038e01,
+                    np.nan,
+                    2.0155106648e01,
+                    1.7406525294e01,
+                    8.3748014038e01,
+                ],
+                [np.nan, np.nan, 7.4577100516e01, 3.6726993476e01, np.nan],
+                [np.nan, np.nan, 1.4206276890e01, -1.6908070609e01, np.nan],
+                [
+                    -2.3488280771e02,
+                    2.0900124008e02,
+                    1.3915693119e02,
+                    -9.2635755452e00,
+                    2.3488280771e02,
+                ],
+                [np.nan, np.nan, 2.2479315683e01, -9.7225117840e00, np.nan],
+                [np.nan, np.nan, 5.9819788074e01, 1.4913689901e01, np.nan],
+                [np.nan, 2.5811339746e01, np.nan, -2.3046606416e01, np.nan],
+                [np.nan, 3.3919529385e01, np.nan, 5.3421672113e01, np.nan],
+                [np.nan, 5.1294221470e01, np.nan, 8.3465407102e-01, np.nan],
+                [np.nan, 5.1873377873e01, np.nan, 3.9671855469e01, np.nan],
+                [-9.1108917087e01, np.nan, np.nan, np.nan, 9.1108917087e01],
+                [-8.2656990544e01, np.nan, np.nan, np.nan, 8.2656990544e01],
+                [
+                    1.4267773881e02,
+                    -8.3353302495e01,
+                    np.nan,
+                    4.8349904938e00,
+                    -1.4267773881e02,
+                ],
+                [
+                    1.8313465940e02,
+                    -7.4554570247e01,
+                    np.nan,
+                    -1.2007539044e02,
+                    -1.8313465940e02,
+                ],
+                [
+                    -1.4327127898e02,
+                    np.nan,
+                    3.8997895966e01,
+                    3.2873649739e01,
+                    1.4327127898e02,
+                ],
+                [
+                    -5.4027797535e01,
+                    np.nan,
+                    2.1541918342e01,
+                    7.7287663457e00,
+                    5.4027797535e01,
+                ],
+                [
+                    8.9319544542e01,
+                    np.nan,
+                    -6.4430616588e00,
+                    -2.3624730231e01,
+                    -8.9319544542e01,
+                ],
+                [
+                    -3.7294644763e01,
+                    np.nan,
+                    9.3504419061e00,
+                    3.1011065784e01,
+                    3.7294644763e01,
+                ],
+                [
+                    4.0557613193e02,
+                    np.nan,
+                    -7.4604498097e01,
+                    -4.3802723077e01,
+                    -4.0557613193e02,
+                ],
+                [np.nan, np.nan, 7.5419970636e-01, -2.2727871868e01, np.nan],
+                [np.nan, np.nan, np.nan, -7.1657702639e01, np.nan],
+                [
+                    6.2248620699e02,
+                    -1.8416144299e02,
+                    np.nan,
+                    -1.7558752705e02,
+                    -6.2248620699e02,
+                ],
+                [np.nan, -1.0646207700e01, np.nan, np.nan, np.nan],
+                [np.nan, -3.9963319461e01, np.nan, np.nan, np.nan],
+                [np.nan, -3.2226859413e01, np.nan, np.nan, np.nan],
+                [np.nan, -2.0011396180e01, np.nan, np.nan, np.nan],
+                [np.nan, -1.8789849856e01, np.nan, np.nan, np.nan],
+                [np.nan, -5.2178782695e01, np.nan, np.nan, np.nan],
+                [
+                    -8.6951552411e01,
+                    2.6820253146e00,
+                    1.1988726047e01,
+                    np.nan,
+                    8.6951552411e01,
+                ],
+                [
+                    -9.0848015208e01,
+                    4.5442739110e00,
+                    1.4191957607e01,
+                    np.nan,
+                    9.0848015208e01,
+                ],
+                [
+                    -2.3435847246e01,
+                    -3.6990146410e-01,
+                    np.nan,
+                    1.1825276005e01,
+                    2.3435847246e01,
+                ],
+            ],
+        )
+
+        # Test pvals
+        np.testing.assert_almost_equal(
+            slice_.pvals,
+            [
+                [0.00000000e00, np.nan, 0.00000000e00, np.nan, 0.00000000e00],
+                [0.00000000e00, np.nan, 0.00000000e00, np.nan, 0.00000000e00],
+                [0.00000000e00, np.nan, 0.00000000e00, np.nan, 0.00000000e00],
+                [0.00000000e00, np.nan, 0.00000000e00, np.nan, 0.00000000e00],
+                [0.00000000e00, np.nan, 0.00000000e00, np.nan, 0.00000000e00],
+                [0.00000000e00, np.nan, 0.00000000e00, np.nan, 0.00000000e00],
+                [0.00000000e00, np.nan, 0.00000000e00, np.nan, 0.00000000e00],
+                [0.00000000e00, np.nan, 0.00000000e00, np.nan, 0.00000000e00],
+                [0.00000000e00, np.nan, 0.00000000e00, np.nan, 0.00000000e00],
+                [0.00000000e00, np.nan, 0.00000000e00, np.nan, 0.00000000e00],
+                [0.00000000e00, np.nan, 0.00000000e00, np.nan, 0.00000000e00],
+                [0.00000000e00, np.nan, 0.00000000e00, np.nan, 0.00000000e00],
+                [np.nan, np.nan, 0.00000000e00, 0.00000000e00, np.nan],
+                [0.00000000e00, np.nan, 0.00000000e00, np.nan, 0.00000000e00],
+                [0.00000000e00, np.nan, 0.00000000e00, np.nan, 0.00000000e00],
+                [0.00000000e00, np.nan, 0.00000000e00, np.nan, 0.00000000e00],
+                [0.00000000e00, np.nan, 0.00000000e00, np.nan, 0.00000000e00],
+                [0.00000000e00, np.nan, 0.00000000e00, np.nan, 0.00000000e00],
+                [0.00000000e00, np.nan, 0.00000000e00, np.nan, 0.00000000e00],
+                [np.nan, 0.00000000e00, 0.00000000e00, np.nan, np.nan],
+                [np.nan, 0.00000000e00, 1.72248938e-03, np.nan, np.nan],
+                [np.nan, 0.00000000e00, 0.00000000e00, np.nan, np.nan],
+                [np.nan, 0.00000000e00, 2.79272485e-08, np.nan, np.nan],
+                [np.nan, 0.00000000e00, 5.42905536e-02, np.nan, np.nan],
+                [0.00000000e00, np.nan, np.nan, np.nan, 0.00000000e00],
+                [0.00000000e00, np.nan, np.nan, np.nan, 0.00000000e00],
+                [0.00000000e00, 0.00000000e00, np.nan, 0.00000000e00, 0.00000000e00],
+                [0.00000000e00, 0.00000000e00, np.nan, 0.00000000e00, 0.00000000e00],
+                [0.00000000e00, 0.00000000e00, np.nan, 0.00000000e00, 0.00000000e00],
+                [0.00000000e00, 0.00000000e00, np.nan, 0.00000000e00, 0.00000000e00],
+                [np.nan, 0.00000000e00, np.nan, np.nan, np.nan],
+                [np.nan, 0.00000000e00, 0.00000000e00, np.nan, np.nan],
+                [np.nan, 0.00000000e00, 0.00000000e00, np.nan, np.nan],
+                [np.nan, 0.00000000e00, 0.00000000e00, np.nan, np.nan],
+                [0.00000000e00, np.nan, 0.00000000e00, 0.00000000e00, 0.00000000e00],
+                [
+                    4.87635166e-05,
+                    np.nan,
+                    1.32426479e-02,
+                    1.30613577e-01,
+                    4.87635166e-05,
+                ],
+                [0.00000000e00, np.nan, 0.00000000e00, 0.00000000e00, 0.00000000e00],
+                [0.00000000e00, np.nan, 0.00000000e00, 0.00000000e00, 0.00000000e00],
+                [np.nan, np.nan, 0.00000000e00, 0.00000000e00, np.nan],
+                [np.nan, np.nan, 0.00000000e00, 0.00000000e00, np.nan],
+                [
+                    0.00000000e00,
+                    0.00000000e00,
+                    0.00000000e00,
+                    0.00000000e00,
+                    0.00000000e00,
+                ],
+                [np.nan, np.nan, 0.00000000e00, 0.00000000e00, np.nan],
+                [np.nan, np.nan, 0.00000000e00, 0.00000000e00, np.nan],
+                [np.nan, 0.00000000e00, np.nan, 0.00000000e00, np.nan],
+                [np.nan, 0.00000000e00, np.nan, 0.00000000e00, np.nan],
+                [np.nan, 0.00000000e00, np.nan, 4.03912509e-01, np.nan],
+                [np.nan, 0.00000000e00, np.nan, 0.00000000e00, np.nan],
+                [0.00000000e00, np.nan, np.nan, np.nan, 0.00000000e00],
+                [0.00000000e00, np.nan, np.nan, np.nan, 0.00000000e00],
+                [0.00000000e00, 0.00000000e00, np.nan, 1.33151998e-06, 0.00000000e00],
+                [0.00000000e00, 0.00000000e00, np.nan, 0.00000000e00, 0.00000000e00],
+                [0.00000000e00, np.nan, 0.00000000e00, 0.00000000e00, 0.00000000e00],
+                [0.00000000e00, np.nan, 0.00000000e00, 1.08801856e-14, 0.00000000e00],
+                [0.00000000e00, np.nan, 1.17087007e-10, 0.00000000e00, 0.00000000e00],
+                [0.00000000e00, np.nan, 0.00000000e00, 0.00000000e00, 0.00000000e00],
+                [0.00000000e00, np.nan, 0.00000000e00, 0.00000000e00, 0.00000000e00],
+                [np.nan, np.nan, 4.50729314e-01, 0.00000000e00, np.nan],
+                [np.nan, np.nan, np.nan, 0.00000000e00, np.nan],
+                [0.00000000e00, 0.00000000e00, np.nan, 0.00000000e00, 0.00000000e00],
+                [np.nan, 0.00000000e00, np.nan, np.nan, np.nan],
+                [np.nan, 0.00000000e00, np.nan, np.nan, np.nan],
+                [np.nan, 0.00000000e00, np.nan, np.nan, np.nan],
+                [np.nan, 0.00000000e00, np.nan, np.nan, np.nan],
+                [np.nan, 0.00000000e00, np.nan, np.nan, np.nan],
+                [np.nan, 0.00000000e00, np.nan, np.nan, np.nan],
+                [0.00000000e00, 7.31779221e-03, 0.00000000e00, np.nan, 0.00000000e00],
+                [0.00000000e00, 5.51249381e-06, 0.00000000e00, np.nan, 0.00000000e00],
+                [0.00000000e00, 7.11455911e-01, np.nan, 0.00000000e00, 0.00000000e00],
+            ],
         )
