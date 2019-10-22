@@ -28,54 +28,6 @@ class TransformedMatrix(object):
 
     @lazyproperty
     def columns(self):
-        return self._matrix_with_hidden.columns
-
-    @lazyproperty
-    def rows(self):
-        return self._matrix_with_hidden.rows
-
-    @lazyproperty
-    def table_base(self):
-        return self._matrix_with_hidden.table_base
-
-    @lazyproperty
-    def table_base_unpruned(self):
-        return self._matrix_with_hidden.table_base_unpruned
-
-    @lazyproperty
-    def table_margin(self):
-        return self._matrix_with_hidden.table_margin
-
-    @lazyproperty
-    def table_margin_unpruned(self):
-        return self._matrix_with_hidden.table_margin_unpruned
-
-    @lazyproperty
-    def _matrix_with_hidden(self):
-        """Apply all transforms sequentially."""
-        return _MatrixWithHidden(self._unordered_matrix)
-
-
-# === TRANSFORMATION-MATRIX OBJECTS ===
-
-
-class _MatrixWithHidden(object):
-    """Matrix with hidden vectors removed.
-
-    A vector can be hidden explicitly by the user, or it can be automatically hidden
-    when it is empty and the prune option for the dimension is selected.
-    """
-
-    # ---Note that hiding a vector requires not just removing that vector, but also
-    # ---the element the removed vector contributes to each of the *opposing* vectors.
-    # ---For example, hiding a row is removing that row-vector from `.rows`, but also
-    # ---removing an element from each column-vector in `.columns`.
-
-    def __init__(self, unordered_matrix):
-        self._unordered_matrix = unordered_matrix
-
-    @lazyproperty
-    def columns(self):
         return tuple(
             _VectorAfterHiding(column, self._matrix_with_insertions.rows)
             for column in self._matrix_with_insertions.columns
@@ -118,6 +70,9 @@ class _MatrixWithHidden(object):
     @lazyproperty
     def _cols_ind(self):
         return [not col.hidden for col in self._matrix_with_insertions.columns]
+
+
+# === TRANSFORMATION-MATRIX OBJECTS ===
 
 
 class _MatrixWithInsertions(object):
