@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.11.10
+- zscore and pval measures for headers and subtotals
+
 #### 1.11.9
 - 100% test coverage
 - New `is_empty` property in each of cube partition
