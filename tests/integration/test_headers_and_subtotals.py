@@ -1860,9 +1860,10 @@ class TestHeadersAndSubtotals(object):
         )
 
     def it_calculates_various_measures_for_ca_as_0th_with_1_col_insertion(self):
+        # Test for multi-cube when first cube represents a categorical-array
         slice_ = Cube(CR.CA_AS_0TH).partitions[0]
 
-        # Test zscore
+        # Test zscore for subtotal as 5 col (idx=4)
         assert slice_.inserted_column_idxs == (4,)
         np.testing.assert_almost_equal(
             slice_.zscore,

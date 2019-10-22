@@ -1264,9 +1264,6 @@ class _AssembledVector(_BaseTransformationVector):
 
     @lazyproperty
     def _interleaved_zscore(self):
-        # TODO: remove this if statement - temporary hack until MR zscore implementation
-        if self.opposite_margins is None:
-            return tuple([np.nan] * len(self.values))
         zscore = []
         for i, value in enumerate(self._base_vector.zscore):
             zscore.append(value)

@@ -329,7 +329,58 @@ class Describe_Slice(object):
 
     def it_calculates_mr_x_cat_various_measures(self):
         slice_ = Cube(CR.MR_X_CAT_HS).partitions[0]
-        expected_zscore = np.tile(np.nan, slice_.counts.shape)
+        expected_zscore = [
+            [
+                5.98561407,
+                0.10667037,
+                np.nan,
+                np.nan,
+                -2.65642772,
+                -1.58344064,
+                np.nan,
+                np.nan,
+            ],
+            [
+                2.06703905,
+                -0.40052278,
+                np.nan,
+                np.nan,
+                -0.26977425,
+                -0.52803412,
+                np.nan,
+                np.nan,
+            ],
+            [
+                -1.98375582,
+                -0.4294405,
+                np.nan,
+                np.nan,
+                1.14820815,
+                0.06992955,
+                np.nan,
+                np.nan,
+            ],
+            [
+                -1.52909314,
+                -2.51725298,
+                np.nan,
+                np.nan,
+                -0.24776194,
+                2.62630708,
+                np.nan,
+                np.nan,
+            ],
+            [
+                -0.23349936,
+                0.84630085,
+                np.nan,
+                np.nan,
+                -0.62837448,
+                0.05687326,
+                np.nan,
+                np.nan,
+            ],
+        ]
         expected_pvals = [
             [
                 2.15574980e-09,
@@ -388,7 +439,16 @@ class Describe_Slice(object):
 
     def it_calculates_cat_x_mr_various_measures(self):
         slice_ = Cube(CR.CAT_X_MR_HS).partitions[0]
-        expected_zscore = np.tile(np.nan, slice_.counts.shape)
+        expected_zscore = [
+            [5.98561407, 2.06703905, -1.98375582, -1.52909314, -0.23349936],
+            [0.10667037, -0.40052278, -0.4294405, -2.51725298, 0.84630085],
+            [np.nan, np.nan, np.nan, np.nan, np.nan],
+            [np.nan, np.nan, np.nan, np.nan, np.nan],
+            [-2.65642772, -0.26977425, 1.14820815, -0.24776194, -0.62837448],
+            [-1.58344064, -0.52803412, 0.06992955, 2.62630708, 0.05687326],
+            [np.nan, np.nan, np.nan, np.nan, np.nan],
+            [np.nan, np.nan, np.nan, np.nan, np.nan],
+        ]
         expected_pvals = [
             [
                 2.15574980e-09,
