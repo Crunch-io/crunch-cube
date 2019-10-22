@@ -75,13 +75,13 @@ class Describe_Slice(object):
         np.testing.assert_almost_equal(
             slice_.zscore,
             [
-                [2.06930398, np.nan, -0.61133797, -1.25160615, np.nan, -1.19268916],
+                [2.06930398, 1.68383013, -0.61133797, -1.25160615, np.nan, -1.19268916],
+                [-2.03371753, 1.68383013, 0.66650907, 1.07795469, np.nan, 1.34162721],
+                [0.3436098, -0.82261857, -1.079875, 0.98134469, np.nan, -0.26228228],
+                [-0.90239493, -1.05366336, -0.01688425, -0.18683508, np.nan, 2.962256],
+                [-1.85225802, -0.7154929, 1.24997148, 1.10571507, np.nan, -0.8041707],
                 [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
-                [0.3436098, np.nan, -1.079875, 0.98134469, np.nan, -0.26228228],
-                [-0.90239493, np.nan, -0.01688425, -0.18683508, np.nan, 2.962256],
-                [-1.85225802, np.nan, 1.24997148, 1.10571507, np.nan, -0.8041707],
-                [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
-                [-0.22728508, np.nan, -0.10690048, 0.5405717, np.nan, -0.31799761],
+                [-0.22728508, -0.3810277, -0.10690048, 0.5405717, np.nan, -0.31799761],
             ],
         )
 
@@ -89,13 +89,13 @@ class Describe_Slice(object):
         np.testing.assert_almost_equal(
             slice_.pvals,
             [
-                [0.03851757, np.nan, 0.54097586, 0.21071341, np.nan, 0.23299113],
+                [0.03851757, 0.0922145, 0.54097586, 0.21071341, np.nan, 0.23299113],
+                [0.04198008, 0.0922145, 0.50508577, 0.28105398, np.nan, 0.1797169],
+                [0.73113976, 0.41072494, 0.28019785, 0.32642279, np.nan, 0.79310382],
+                [0.36684711, 0.29203707, 0.98652895, 0.85178994, np.nan, 0.00305394],
+                [0.06398878, 0.47430453, 0.21130996, 0.26884987, np.nan, 0.4212984],
                 [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
-                [0.73113976, np.nan, 0.28019785, 0.32642279, np.nan, 0.79310382],
-                [0.36684711, np.nan, 0.98652895, 0.85178994, np.nan, 0.00305394],
-                [0.06398878, np.nan, 0.21130996, 0.26884987, np.nan, 0.4212984],
-                [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
-                [0.82020207, np.nan, 0.91486794, 0.58880283, np.nan, 0.75048675],
+                [0.82020207, 0.70318269, 0.91486794, 0.58880283, np.nan, 0.75048675],
             ],
         )
 
@@ -326,6 +326,165 @@ class Describe_Slice(object):
             [0.36645435, 0.69534649, 0.82211242, 0.84357434, 0.74116151],
         ]
         np.testing.assert_almost_equal(slice_.column_proportions, expected)
+
+    def it_calculates_mr_x_cat_various_measures(self):
+        slice_ = Cube(CR.MR_X_CAT_HS).partitions[0]
+        expected_zscore = [
+            [
+                5.98561407,
+                0.10667037,
+                np.nan,
+                np.nan,
+                -2.65642772,
+                -1.58344064,
+                np.nan,
+                np.nan,
+            ],
+            [
+                2.06703905,
+                -0.40052278,
+                np.nan,
+                np.nan,
+                -0.26977425,
+                -0.52803412,
+                np.nan,
+                np.nan,
+            ],
+            [
+                -1.98375582,
+                -0.4294405,
+                np.nan,
+                np.nan,
+                1.14820815,
+                0.06992955,
+                np.nan,
+                np.nan,
+            ],
+            [
+                -1.52909314,
+                -2.51725298,
+                np.nan,
+                np.nan,
+                -0.24776194,
+                2.62630708,
+                np.nan,
+                np.nan,
+            ],
+            [
+                -0.23349936,
+                0.84630085,
+                np.nan,
+                np.nan,
+                -0.62837448,
+                0.05687326,
+                np.nan,
+                np.nan,
+            ],
+        ]
+        expected_pvals = [
+            [
+                2.15574980e-09,
+                9.15050488e-01,
+                np.nan,
+                np.nan,
+                7.89733774e-03,
+                1.13321065e-01,
+                np.nan,
+                np.nan,
+            ],
+            [
+                3.87304749e-02,
+                6.88771512e-01,
+                np.nan,
+                np.nan,
+                7.87333931e-01,
+                5.97475651e-01,
+                np.nan,
+                np.nan,
+            ],
+            [
+                4.72830679e-02,
+                6.67602683e-01,
+                np.nan,
+                np.nan,
+                2.50882647e-01,
+                9.44249733e-01,
+                np.nan,
+                np.nan,
+            ],
+            [
+                1.26241357e-01,
+                1.18273874e-02,
+                np.nan,
+                np.nan,
+                8.04318606e-01,
+                8.63169073e-03,
+                np.nan,
+                np.nan,
+            ],
+            [
+                8.15373669e-01,
+                3.97384931e-01,
+                np.nan,
+                np.nan,
+                5.29758649e-01,
+                9.54646158e-01,
+                np.nan,
+                np.nan,
+            ],
+        ]
+
+        np.testing.assert_almost_equal(slice_.zscore, expected_zscore)
+        np.testing.assert_almost_equal(slice_.pvals, expected_pvals)
+
+    def it_calculates_cat_x_mr_various_measures(self):
+        slice_ = Cube(CR.CAT_X_MR_HS).partitions[0]
+        expected_zscore = [
+            [5.98561407, 2.06703905, -1.98375582, -1.52909314, -0.23349936],
+            [0.10667037, -0.40052278, -0.4294405, -2.51725298, 0.84630085],
+            [np.nan, np.nan, np.nan, np.nan, np.nan],
+            [np.nan, np.nan, np.nan, np.nan, np.nan],
+            [-2.65642772, -0.26977425, 1.14820815, -0.24776194, -0.62837448],
+            [-1.58344064, -0.52803412, 0.06992955, 2.62630708, 0.05687326],
+            [np.nan, np.nan, np.nan, np.nan, np.nan],
+            [np.nan, np.nan, np.nan, np.nan, np.nan],
+        ]
+        expected_pvals = [
+            [
+                2.15574980e-09,
+                3.87304749e-02,
+                4.72830679e-02,
+                1.26241357e-01,
+                8.15373669e-01,
+            ],
+            [
+                9.15050488e-01,
+                6.88771512e-01,
+                6.67602683e-01,
+                1.18273874e-02,
+                3.97384931e-01,
+            ],
+            [np.nan, np.nan, np.nan, np.nan, np.nan],
+            [np.nan, np.nan, np.nan, np.nan, np.nan],
+            [
+                7.89733774e-03,
+                7.87333931e-01,
+                2.50882647e-01,
+                8.04318606e-01,
+                5.29758649e-01,
+            ],
+            [
+                1.13321065e-01,
+                5.97475651e-01,
+                9.44249733e-01,
+                8.63169073e-03,
+                9.54646158e-01,
+            ],
+            [np.nan, np.nan, np.nan, np.nan, np.nan],
+            [np.nan, np.nan, np.nan, np.nan, np.nan],
+        ]
+        np.testing.assert_almost_equal(slice_.zscore, expected_zscore)
+        np.testing.assert_almost_equal(slice_.pvals, expected_pvals)
 
     def it_calculates_mr_x_mr_row_proportions(self):
         slice_ = Cube(CR.MR_X_MR).partitions[0]

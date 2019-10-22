@@ -8,8 +8,8 @@ import pytest
 
 from cr.cube.crunch_cube import CrunchCube
 from cr.cube.cube_slice import CubeSlice
-from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.dimension import Dimension
+from cr.cube.enum import DIMENSION_TYPE as DT
 
 from ...unitutil import instance_mock, method_mock, property_mock
 
