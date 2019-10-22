@@ -53,10 +53,7 @@ class TransformedMatrix(object):
     @lazyproperty
     def _transformed_matrix(self):
         """Apply all transforms sequentially."""
-        matrix = _OrderedMatrix(self._base_matrix)
-        matrix = _MatrixWithInsertions(matrix)
-        matrix = _MatrixWithHidden(matrix)
-        return matrix
+        return _MatrixWithHidden(self._base_matrix)
 
 
 # === TRANSFORMATION-MATRIX OBJECTS ===
@@ -74,8 +71,8 @@ class _MatrixWithHidden(object):
     # ---For example, hiding a row is removing that row-vector from `.rows`, but also
     # ---removing an element from each column-vector in `.columns`.
 
-    def __init__(self, base_matrix):
-        self._base_matrix = base_matrix
+    def __init__(self, unordered_matrix):
+        self._unordered_matrix = unordered_matrix
 
     @lazyproperty
     def columns(self):
@@ -108,6 +105,13 @@ class _MatrixWithHidden(object):
     @lazyproperty
     def table_margin_unpruned(self):
         return self._base_matrix.table_margin
+
+    @lazyproperty
+    def _base_matrix(self):
+        """Apply all transforms sequentially."""
+        matrix = _OrderedMatrix(self._unordered_matrix)
+        matrix = _MatrixWithInsertions(matrix)
+        return matrix
 
     @lazyproperty
     def _rows_ind(self):
