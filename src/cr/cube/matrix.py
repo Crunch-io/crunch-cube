@@ -109,9 +109,7 @@ class _MatrixWithHidden(object):
     @lazyproperty
     def _base_matrix(self):
         """Apply all transforms sequentially."""
-        matrix = _OrderedMatrix(self._unordered_matrix)
-        matrix = _MatrixWithInsertions(matrix)
-        return matrix
+        return _MatrixWithInsertions(self._unordered_matrix)
 
     @lazyproperty
     def _rows_ind(self):
@@ -125,8 +123,8 @@ class _MatrixWithHidden(object):
 class _MatrixWithInsertions(object):
     """Represents slice with both normal and inserted bits."""
 
-    def __init__(self, base_matrix):
-        self._base_matrix = base_matrix
+    def __init__(self, unordered_matrix):
+        self._unordered_matrix = unordered_matrix
 
     @lazyproperty
     def columns(self):
@@ -184,6 +182,10 @@ class _MatrixWithInsertions(object):
             _InsertionRow(self._base_matrix, subtotal)
             for subtotal in self._rows_dimension.subtotals
         )
+
+    @lazyproperty
+    def _base_matrix(self):
+        return _OrderedMatrix(self._unordered_matrix)
 
     @lazyproperty
     def _columns_dimension(self):
