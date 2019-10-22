@@ -48,7 +48,7 @@ class TransformedMatrix(object):
 
     @lazyproperty
     def table_base_unpruned(self):
-        return self._matrix_with_insertions.table_base
+        return self._unordered_matrix.table_base
 
     @lazyproperty
     def table_margin(self):
@@ -56,7 +56,7 @@ class TransformedMatrix(object):
 
     @lazyproperty
     def table_margin_unpruned(self):
-        return self._matrix_with_insertions.table_margin
+        return self._unordered_matrix.table_margin
 
     @lazyproperty
     def _matrix_with_insertions(self):
@@ -98,14 +98,6 @@ class _MatrixWithInsertions(object):
         return tuple(self._iter_rows())
 
     @lazyproperty
-    def table_base(self):
-        return self._ordered_matrix.table_base
-
-    @lazyproperty
-    def table_margin(self):
-        return self._ordered_matrix.table_margin
-
-    @lazyproperty
     def _all_inserted_columns(self):
         """Sequence of _InsertionColumn objects representing subtotal columns.
 
@@ -140,7 +132,7 @@ class _MatrixWithInsertions(object):
 
     @lazyproperty
     def _columns_dimension(self):
-        return self._ordered_matrix.columns_dimension
+        return self._unordered_matrix.columns_dimension
 
     @lazyproperty
     def _columns_inserted_at_left(self):
@@ -208,7 +200,7 @@ class _MatrixWithInsertions(object):
 
     @lazyproperty
     def _rows_dimension(self):
-        return self._ordered_matrix.rows_dimension
+        return self._unordered_matrix.rows_dimension
 
     @lazyproperty
     def _rows_inserted_at_bottom(self):
@@ -237,23 +229,11 @@ class _OrderedMatrix(object):
         )
 
     @lazyproperty
-    def columns_dimension(self):
-        return self._unordered_matrix.columns_dimension
-
-    @lazyproperty
     def rows(self):
         return tuple(
             _OrderedVector(row, self._column_order)
             for row in tuple(np.array(self._unordered_matrix.rows)[self._row_order])
         )
-
-    @lazyproperty
-    def rows_dimension(self):
-        return self._unordered_matrix.rows_dimension
-
-    @lazyproperty
-    def table_base(self):
-        return self._unordered_matrix.table_base
 
     @lazyproperty
     def table_margin(self):
@@ -268,7 +248,11 @@ class _OrderedMatrix(object):
         """
         # ---Specifying int type prevents failure when there are zero columns. The
         # ---default type for ndarray is float, which is not valid for indexing.
-        return np.array(self.columns_dimension.display_order, dtype=int)
+        return np.array(self._columns_dimension.display_order, dtype=int)
+
+    @lazyproperty
+    def _columns_dimension(self):
+        return self._unordered_matrix.columns_dimension
 
     @lazyproperty
     def _row_order(self):
@@ -278,7 +262,11 @@ class _OrderedMatrix(object):
         array to produce an ordered version.
         """
         # ---Specifying int type prevents failure when there are zero rows---
-        return np.array(self.rows_dimension.display_order, dtype=int)
+        return np.array(self._rows_dimension.display_order, dtype=int)
+
+    @lazyproperty
+    def _rows_dimension(self):
+        return self._unordered_matrix.rows_dimension
 
 
 # === BASE-MATRIX OBJECTS ===
