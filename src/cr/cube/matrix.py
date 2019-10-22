@@ -62,64 +62,6 @@ class TransformedMatrix(object):
 # === TRANSFORMATION-MATRIX OBJECTS ===
 
 
-class _OrderedMatrix(object):
-    """Matrix reflecting result of element-ordering transforms."""
-
-    def __init__(self, base_matrix):
-        self._base_matrix = base_matrix
-
-    @lazyproperty
-    def columns(self):
-        return tuple(
-            _OrderedVector(column, self._row_order)
-            for column in tuple(np.array(self._base_matrix.columns)[self._column_order])
-        )
-
-    @lazyproperty
-    def columns_dimension(self):
-        return self._base_matrix.columns_dimension
-
-    @lazyproperty
-    def rows(self):
-        return tuple(
-            _OrderedVector(row, self._column_order)
-            for row in tuple(np.array(self._base_matrix.rows)[self._row_order])
-        )
-
-    @lazyproperty
-    def rows_dimension(self):
-        return self._base_matrix.rows_dimension
-
-    @lazyproperty
-    def table_base(self):
-        return self._base_matrix.table_base
-
-    @lazyproperty
-    def table_margin(self):
-        return self._base_matrix.table_margin
-
-    @lazyproperty
-    def _column_order(self):
-        """Indexer value identifying columns in order, suitable for slicing an ndarray.
-
-        This value is a 1D ndarray of int column indices, suitable for indexing the
-        columns array to produce an ordered version.
-        """
-        # ---Specifying int type prevents failure when there are zero columns. The
-        # ---default type for ndarray is float, which is not valid for indexing.
-        return np.array(self.columns_dimension.display_order, dtype=int)
-
-    @lazyproperty
-    def _row_order(self):
-        """Indexer value identifying rows in order, suitable for slicing an ndarray.
-
-        This value is a 1D ndarray of int row indices, suitable for indexing the rows
-        array to produce an ordered version.
-        """
-        # ---Specifying int type prevents failure when there are zero rows---
-        return np.array(self.rows_dimension.display_order, dtype=int)
-
-
 class _MatrixWithHidden(object):
     """Matrix with hidden vectors removed.
 
@@ -318,6 +260,64 @@ class _MatrixWithInsertions(object):
     def _rows_inserted_at_top(self):
         """Sequence of _InsertionRow vectors that appear before any other table rows."""
         return tuple(row for row in self._all_inserted_rows if row.anchor == "top")
+
+
+class _OrderedMatrix(object):
+    """Matrix reflecting result of element-ordering transforms."""
+
+    def __init__(self, base_matrix):
+        self._base_matrix = base_matrix
+
+    @lazyproperty
+    def columns(self):
+        return tuple(
+            _OrderedVector(column, self._row_order)
+            for column in tuple(np.array(self._base_matrix.columns)[self._column_order])
+        )
+
+    @lazyproperty
+    def columns_dimension(self):
+        return self._base_matrix.columns_dimension
+
+    @lazyproperty
+    def rows(self):
+        return tuple(
+            _OrderedVector(row, self._column_order)
+            for row in tuple(np.array(self._base_matrix.rows)[self._row_order])
+        )
+
+    @lazyproperty
+    def rows_dimension(self):
+        return self._base_matrix.rows_dimension
+
+    @lazyproperty
+    def table_base(self):
+        return self._base_matrix.table_base
+
+    @lazyproperty
+    def table_margin(self):
+        return self._base_matrix.table_margin
+
+    @lazyproperty
+    def _column_order(self):
+        """Indexer value identifying columns in order, suitable for slicing an ndarray.
+
+        This value is a 1D ndarray of int column indices, suitable for indexing the
+        columns array to produce an ordered version.
+        """
+        # ---Specifying int type prevents failure when there are zero columns. The
+        # ---default type for ndarray is float, which is not valid for indexing.
+        return np.array(self.columns_dimension.display_order, dtype=int)
+
+    @lazyproperty
+    def _row_order(self):
+        """Indexer value identifying rows in order, suitable for slicing an ndarray.
+
+        This value is a 1D ndarray of int row indices, suitable for indexing the rows
+        array to produce an ordered version.
+        """
+        # ---Specifying int type prevents failure when there are zero rows---
+        return np.array(self.rows_dimension.display_order, dtype=int)
 
 
 # === BASE-MATRIX OBJECTS ===
