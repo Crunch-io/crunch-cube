@@ -1578,7 +1578,7 @@ class _CatXMrVector(_CategoricalVector):
     @lazyproperty
     def zscore(self):
         # TODO: Implement the real zscore calc for MR
-        return self._zscore  # pragma: no cover
+        return self._zscore
 
 
 class _MeansVector(_BaseVector):
@@ -1658,4 +1658,4 @@ class _MultipleResponseVector(_CategoricalVector):
     @lazyproperty
     def zscore(self):
         # TODO: Implement the real zscore calc for MR
-        return self._zscore  # pragma: no cover
+        return self._zscore
