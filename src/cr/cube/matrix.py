@@ -18,8 +18,8 @@ from cr.cube.util import lazyproperty
 class TransformedMatrix(object):
     """Matrix reflection application of all transforms."""
 
-    def __init__(self, base_matrix):
-        self._base_matrix = base_matrix
+    def __init__(self, unordered_matrix):
+        self._unordered_matrix = unordered_matrix
 
     @classmethod
     def matrix(cls, cube, dimensions, slice_idx):
@@ -28,32 +28,32 @@ class TransformedMatrix(object):
 
     @lazyproperty
     def columns(self):
-        return self._transformed_matrix.columns
+        return self._matrix_with_hidden.columns
 
     @lazyproperty
     def rows(self):
-        return self._transformed_matrix.rows
+        return self._matrix_with_hidden.rows
 
     @lazyproperty
     def table_base(self):
-        return self._transformed_matrix.table_base
+        return self._matrix_with_hidden.table_base
 
     @lazyproperty
     def table_base_unpruned(self):
-        return self._transformed_matrix.table_base_unpruned
+        return self._matrix_with_hidden.table_base_unpruned
 
     @lazyproperty
     def table_margin(self):
-        return self._transformed_matrix.table_margin
+        return self._matrix_with_hidden.table_margin
 
     @lazyproperty
     def table_margin_unpruned(self):
-        return self._transformed_matrix.table_margin_unpruned
+        return self._matrix_with_hidden.table_margin_unpruned
 
     @lazyproperty
-    def _transformed_matrix(self):
+    def _matrix_with_hidden(self):
         """Apply all transforms sequentially."""
-        return _MatrixWithHidden(self._base_matrix)
+        return _MatrixWithHidden(self._unordered_matrix)
 
 
 # === TRANSFORMATION-MATRIX OBJECTS ===
@@ -77,16 +77,16 @@ class _MatrixWithHidden(object):
     @lazyproperty
     def columns(self):
         return tuple(
-            _VectorAfterHiding(column, self._base_matrix.rows)
-            for column in self._base_matrix.columns
+            _VectorAfterHiding(column, self._matrix_with_insertions.rows)
+            for column in self._matrix_with_insertions.columns
             if not column.hidden
         )
 
     @lazyproperty
     def rows(self):
         return tuple(
-            _VectorAfterHiding(row, self._base_matrix.columns)
-            for row in self._base_matrix.rows
+            _VectorAfterHiding(row, self._matrix_with_insertions.columns)
+            for row in self._matrix_with_insertions.rows
             if not row.hidden
         )
 
@@ -96,7 +96,7 @@ class _MatrixWithHidden(object):
 
     @lazyproperty
     def table_base_unpruned(self):
-        return self._base_matrix.table_base
+        return self._matrix_with_insertions.table_base
 
     @lazyproperty
     def table_margin(self):
@@ -104,20 +104,20 @@ class _MatrixWithHidden(object):
 
     @lazyproperty
     def table_margin_unpruned(self):
-        return self._base_matrix.table_margin
+        return self._matrix_with_insertions.table_margin
 
     @lazyproperty
-    def _base_matrix(self):
+    def _matrix_with_insertions(self):
         """Apply all transforms sequentially."""
         return _MatrixWithInsertions(self._unordered_matrix)
 
     @lazyproperty
     def _rows_ind(self):
-        return [not row.hidden for row in self._base_matrix.rows]
+        return [not row.hidden for row in self._matrix_with_insertions.rows]
 
     @lazyproperty
     def _cols_ind(self):
-        return [not col.hidden for col in self._base_matrix.columns]
+        return [not col.hidden for col in self._matrix_with_insertions.columns]
 
 
 class _MatrixWithInsertions(object):
@@ -144,11 +144,11 @@ class _MatrixWithInsertions(object):
 
     @lazyproperty
     def table_base(self):
-        return self._base_matrix.table_base
+        return self._ordered_matrix.table_base
 
     @lazyproperty
     def table_margin(self):
-        return self._base_matrix.table_margin
+        return self._ordered_matrix.table_margin
 
     @lazyproperty
     def _all_inserted_columns(self):
@@ -163,7 +163,7 @@ class _MatrixWithInsertions(object):
             return ()
 
         return tuple(
-            _InsertionColumn(self._base_matrix, subtotal)
+            _InsertionColumn(self._ordered_matrix, subtotal)
             for subtotal in self._columns_dimension.subtotals
         )
 
@@ -179,17 +179,13 @@ class _MatrixWithInsertions(object):
             return tuple()
 
         return tuple(
-            _InsertionRow(self._base_matrix, subtotal)
+            _InsertionRow(self._ordered_matrix, subtotal)
             for subtotal in self._rows_dimension.subtotals
         )
 
     @lazyproperty
-    def _base_matrix(self):
-        return _OrderedMatrix(self._unordered_matrix)
-
-    @lazyproperty
     def _columns_dimension(self):
-        return self._base_matrix.columns_dimension
+        return self._ordered_matrix.columns_dimension
 
     @lazyproperty
     def _columns_inserted_at_left(self):
@@ -214,11 +210,9 @@ class _MatrixWithInsertions(object):
             yield _AssembledVector(column, opposing_insertions)
 
         # ---body columns with subtotals anchored to specific body positions---
-        for column_index, column in enumerate(self._base_matrix.columns):
-            yield _AssembledVector(column, opposing_insertions, column_index)
-            for inserted_column in self._iter_inserted_columns_anchored_at(
-                column_index
-            ):
+        for idx, column in enumerate(self._ordered_matrix.columns):
+            yield _AssembledVector(column, opposing_insertions, idx)
+            for inserted_column in self._iter_inserted_columns_anchored_at(idx):
                 yield _AssembledVector(inserted_column, opposing_insertions)
 
         # ---subtotals appended at bottom---
@@ -238,9 +232,9 @@ class _MatrixWithInsertions(object):
             yield _AssembledVector(row, opposing_insertions)
 
         # ---body rows with subtotals anchored to specific body positions---
-        for row_index, row in enumerate(self._base_matrix.rows):
-            yield _AssembledVector(row, opposing_insertions, row_index)
-            for inserted_row in self._iter_inserted_rows_anchored_at(row_index):
+        for idx, row in enumerate(self._ordered_matrix.rows):
+            yield _AssembledVector(row, opposing_insertions, idx)
+            for inserted_row in self._iter_inserted_rows_anchored_at(idx):
                 yield _AssembledVector(inserted_row, opposing_insertions)
 
         # ---subtotals appended at bottom---
@@ -254,8 +248,12 @@ class _MatrixWithInsertions(object):
         )
 
     @lazyproperty
+    def _ordered_matrix(self):
+        return _OrderedMatrix(self._unordered_matrix)
+
+    @lazyproperty
     def _rows_dimension(self):
-        return self._base_matrix.rows_dimension
+        return self._ordered_matrix.rows_dimension
 
     @lazyproperty
     def _rows_inserted_at_bottom(self):
@@ -271,38 +269,40 @@ class _MatrixWithInsertions(object):
 class _OrderedMatrix(object):
     """Matrix reflecting result of element-ordering transforms."""
 
-    def __init__(self, base_matrix):
-        self._base_matrix = base_matrix
+    def __init__(self, unordered_matrix):
+        self._unordered_matrix = unordered_matrix
 
     @lazyproperty
     def columns(self):
         return tuple(
             _OrderedVector(column, self._row_order)
-            for column in tuple(np.array(self._base_matrix.columns)[self._column_order])
+            for column in tuple(
+                np.array(self._unordered_matrix.columns)[self._column_order]
+            )
         )
 
     @lazyproperty
     def columns_dimension(self):
-        return self._base_matrix.columns_dimension
+        return self._unordered_matrix.columns_dimension
 
     @lazyproperty
     def rows(self):
         return tuple(
             _OrderedVector(row, self._column_order)
-            for row in tuple(np.array(self._base_matrix.rows)[self._row_order])
+            for row in tuple(np.array(self._unordered_matrix.rows)[self._row_order])
         )
 
     @lazyproperty
     def rows_dimension(self):
-        return self._base_matrix.rows_dimension
+        return self._unordered_matrix.rows_dimension
 
     @lazyproperty
     def table_base(self):
-        return self._base_matrix.table_base
+        return self._unordered_matrix.table_base
 
     @lazyproperty
     def table_margin(self):
-        return self._base_matrix.table_margin
+        return self._unordered_matrix.table_margin
 
     @lazyproperty
     def _column_order(self):
