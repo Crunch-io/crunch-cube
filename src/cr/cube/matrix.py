@@ -1101,9 +1101,15 @@ class _AssembledVector(_BaseTransformationVector):
 
     @lazyproperty
     def values(self):
-        return np.array(
-            self._top_values + self._interleaved_values + self._bottom_values
-        )
+        base_values = self._base_vector.values
+
+        def fbase(idx):
+            return base_values[idx]
+
+        def fsubtot(subtotal):
+            return np.sum(base_values[subtotal.addend_idxs])
+
+        return self._apply_interleaved(fbase, fsubtot)
 
     @lazyproperty
     def zscore(self):
@@ -1137,13 +1143,6 @@ class _AssembledVector(_BaseTransformationVector):
             vector
             for vector in self._opposite_inserted_vectors
             if vector.anchor == "bottom"
-        )
-
-    @lazyproperty
-    def _bottom_values(self):
-        return tuple(
-            np.sum(self._base_vector.values[col.addend_idxs])
-            for col in self._bottom_insertions
         )
 
     @lazyproperty
@@ -1195,19 +1194,6 @@ class _AssembledVector(_BaseTransformationVector):
         )
 
     @lazyproperty
-    def _interleaved_values(self):
-        values = []
-        for i in range(len(self._base_vector.values)):
-            values.append(self._base_vector.values[i])
-            for inserted_vector in self._opposite_inserted_vectors:
-                if i == inserted_vector.anchor:
-                    insertion_value = np.sum(
-                        self._base_vector.values[inserted_vector.addend_idxs]
-                    )
-                    values.append(insertion_value)
-        return tuple(values)
-
-    @lazyproperty
     def _interleaved_zscore(self):
         zscore = []
         for i, value in enumerate(self._base_vector.zscore):
@@ -1223,13 +1209,6 @@ class _AssembledVector(_BaseTransformationVector):
             vector
             for vector in self._opposite_inserted_vectors
             if vector.anchor == "top"
-        )
-
-    @lazyproperty
-    def _top_values(self):
-        return tuple(
-            np.sum(self._base_vector.values[col.addend_idxs])
-            for col in self._top_insertions
         )
 
     @lazyproperty
