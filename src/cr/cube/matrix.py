@@ -1113,9 +1113,16 @@ class _AssembledVector(_BaseTransformationVector):
 
     @lazyproperty
     def zscore(self):
-        return np.array(
-            self._top_zscores + self._interleaved_zscore + self._bottom_zscores
-        )
+        # ---defeference for tight-loop---
+        zscores = self._base_vector.zscore
+
+        def fbase(idx):
+            return zscores[idx]
+
+        def fsubtot(subtotal):
+            return subtotal.zscore[self._vector_idx]
+
+        return self._apply_interleaved(fbase, fsubtot)
 
     def _apply_interleaved(self, fbase, fsubtot):
         """ -> 1D array of result of applying fbase or fsubtot to each interleaved item.
@@ -1135,20 +1142,6 @@ class _AssembledVector(_BaseTransformationVector):
                 fsubtot(subtotals[idx]) if idx < 0 else fbase(idx)
                 for idx in self._interleaved_idxs
             )
-        )
-
-    @lazyproperty
-    def _bottom_insertions(self):
-        return tuple(
-            vector
-            for vector in self._opposite_inserted_vectors
-            if vector.anchor == "bottom"
-        )
-
-    @lazyproperty
-    def _bottom_zscores(self):
-        return tuple(
-            vector.zscore[self._vector_idx] for vector in self._bottom_insertions
         )
 
     @lazyproperty
@@ -1192,28 +1185,6 @@ class _AssembledVector(_BaseTransformationVector):
                 itertools.chain(iter_insertion_orderings(), iter_base_value_orderings())
             )
         )
-
-    @lazyproperty
-    def _interleaved_zscore(self):
-        zscore = []
-        for i, value in enumerate(self._base_vector.zscore):
-            zscore.append(value)
-            for inserted_vector in self._opposite_inserted_vectors:
-                if i == inserted_vector.anchor:
-                    zscore.append(inserted_vector.zscore[self._vector_idx])
-        return tuple(zscore)
-
-    @lazyproperty
-    def _top_insertions(self):
-        return tuple(
-            vector
-            for vector in self._opposite_inserted_vectors
-            if vector.anchor == "top"
-        )
-
-    @lazyproperty
-    def _top_zscores(self):
-        return tuple(vector.zscore[self._vector_idx] for vector in self._top_insertions)
 
 
 class _VectorAfterHiding(_BaseTransformationVector):
