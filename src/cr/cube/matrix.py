@@ -1056,11 +1056,19 @@ class _AssembledVector(_BaseTransformationVector):
 
     @lazyproperty
     def column_index(self):
-        return np.array(
-            tuple([np.nan] * len(self._top_values))
-            + self._interleaved_column_index
-            + tuple([np.nan] * len(self._bottom_values))
-        )
+        column_indexes = self._base_vector.column_index
+
+        def fbase(idx):
+            return column_indexes[idx]
+
+        def fsubtot(subtotal):
+            # TODO: Replace with real column index values from insertions vectors. This
+            # should be something like:
+            #   col_ind = (ins1.prop + ins2.prop) / (ins1.baseline + ins2.baseline)
+            # ask @mike to confirm
+            return np.nan
+
+        return self._apply_interleaved(fbase, fsubtot)
 
     @lazyproperty
     def means(self):
@@ -1140,20 +1148,6 @@ class _AssembledVector(_BaseTransformationVector):
         return tuple(
             vector.zscore[self._vector_idx] for vector in self._bottom_insertions
         )
-
-    @lazyproperty
-    def _interleaved_column_index(self):
-        # TODO: Replace with real column index values from insertions vectors. This
-        # should be something like:
-        #   col_ind = (ins1.prop + ins2.prop) / (ins1.baseline + ins2.baseline)
-        # ask @mike to confirm
-        column_index = []
-        for i, value in enumerate(self._base_vector.column_index):
-            column_index.append(value)
-            for inserted_vector in self._opposite_inserted_vectors:
-                if i == inserted_vector.anchor:
-                    column_index.append(np.nan)
-        return tuple(column_index)
 
     @lazyproperty
     def _interleaved_idxs(self):
