@@ -106,7 +106,7 @@ class _MatrixWithInsertions(_BaseTransformMatrix):
             for _, idx, column in sorted(
                 itertools.chain(
                     (column.ordering for column in self._inserted_columns),
-                    (column.ordering for column in self._ordered_matrix.columns),
+                    (column.ordering for column in self._base_columns),
                 )
             )
         )
@@ -124,8 +124,26 @@ class _MatrixWithInsertions(_BaseTransformMatrix):
             for _, idx, row in sorted(
                 itertools.chain(
                     (row.ordering for row in self._inserted_rows),
-                    (row.ordering for row in self._ordered_matrix.rows),
+                    (row.ordering for row in self._base_rows),
                 )
+            )
+        )
+
+    @lazyproperty
+    def _base_columns(self):
+        return tuple(
+            _OrderedVector(column, self._row_order, idx)
+            for idx, column in enumerate(
+                tuple(np.array(self._unordered_matrix.columns)[self._column_order])
+            )
+        )
+
+    @lazyproperty
+    def _base_rows(self):
+        return tuple(
+            _OrderedVector(row, self._column_order, idx)
+            for idx, row in enumerate(
+                tuple(np.array(self._unordered_matrix.rows)[self._row_order])
             )
         )
 
@@ -143,9 +161,9 @@ class _MatrixWithInsertions(_BaseTransformMatrix):
 
         subtotals = self._columns_dimension.subtotals
         neg_idxs = range(-len(subtotals), 0)  # ---like [-3, -2, -1]---
-        table_margin = self._ordered_matrix.table_margin
-        base_rows = self._ordered_matrix.rows
-        base_cols = self._ordered_matrix.columns
+        table_margin = self._unordered_matrix.table_margin
+        base_rows = self._base_rows
+        base_cols = self._base_columns
 
         return tuple(
             _InsertionColumn(subtotal, neg_idx, table_margin, base_rows, base_cols)
@@ -165,9 +183,9 @@ class _MatrixWithInsertions(_BaseTransformMatrix):
 
         subtotals = self._rows_dimension.subtotals
         neg_idxs = range(-len(subtotals), 0)  # ---like [-3, -2, -1]---
-        table_margin = self._ordered_matrix.table_margin
-        base_rows = self._ordered_matrix.rows
-        base_cols = self._ordered_matrix.columns
+        table_margin = self._unordered_matrix.table_margin
+        base_rows = self._base_rows
+        base_cols = self._base_columns
 
         return tuple(
             _InsertionRow(subtotal, neg_idx, table_margin, base_rows, base_cols)
@@ -175,53 +193,15 @@ class _MatrixWithInsertions(_BaseTransformMatrix):
         )
 
     @lazyproperty
-    def _ordered_matrix(self):
-        return _OrderedMatrix(self._unordered_matrix)
-
-
-class _OrderedMatrix(_BaseTransformMatrix):
-    """Matrix reflecting result of element-ordering transforms."""
-
-    @lazyproperty
-    def columns(self):
-        return tuple(
-            _OrderedVector(column, self._row_order, idx)
-            for idx, column in enumerate(
-                tuple(np.array(self._unordered_matrix.columns)[self._column_order])
-            )
-        )
-
-    @lazyproperty
-    def rows(self):
-        return tuple(
-            _OrderedVector(row, self._column_order, idx)
-            for idx, row in enumerate(
-                tuple(np.array(self._unordered_matrix.rows)[self._row_order])
-            )
-        )
-
-    @lazyproperty
-    def table_margin(self):
-        return self._unordered_matrix.table_margin
-
-    @lazyproperty
     def _column_order(self):
-        """Indexer value identifying columns in order, suitable for slicing an ndarray.
-
-        This value is a 1D ndarray of int column indices, suitable for indexing the
-        columns array to produce an ordered version.
-        """
+        """ -> 1D ndarray of int col idx specifying order of unordered-array columns."""
         # ---Specifying int type prevents failure when there are zero columns. The
         # ---default type for ndarray is float, which is not valid for indexing.
         return np.array(self._columns_dimension.display_order, dtype=int)
 
     @lazyproperty
     def _row_order(self):
-        """Indexer value identifying rows in order, suitable for slicing an ndarray.
-
-        This value is a 1D ndarray of int row indices, suitable for indexing the rows
-        array to produce an ordered version.
-        """
+        """ -> 1D ndarray of int row idx specifying order of unordered-array rows."""
         # ---Specifying int type prevents failure when there are zero rows---
         return np.array(self._rows_dimension.display_order, dtype=int)
 
