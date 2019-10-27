@@ -1072,10 +1072,11 @@ class _AssembledVector(_BaseTransformationVector):
 
     @lazyproperty
     def means(self):
-        return np.array(
-            tuple([np.nan] * len(self._top_values))
-            + self._interleaved_means
-            + tuple([np.nan] * len(self._bottom_values))
+        base_means = self._base_vector.means
+
+        # ---just np.nan for insertions for now---
+        return self._apply_interleaved(
+            fbase=lambda idx: base_means[idx], fsubtot=lambda _: np.nan
         )
 
     @lazyproperty
@@ -1190,16 +1191,6 @@ class _AssembledVector(_BaseTransformationVector):
                 itertools.chain(iter_insertion_orderings(), iter_base_value_orderings())
             )
         )
-
-    @lazyproperty
-    def _interleaved_means(self):
-        means = []
-        for i, value in enumerate(self._base_vector.means):
-            means.append(value)
-            for inserted_vector in self._opposite_inserted_vectors:
-                if i == inserted_vector.anchor:
-                    means.append(np.nan)
-        return tuple(means)
 
     @lazyproperty
     def _interleaved_pvals(self):
