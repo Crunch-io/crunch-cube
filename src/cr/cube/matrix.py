@@ -7,6 +7,8 @@ A matrix object has rows and columns.
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import sys
+
 import numpy as np
 from scipy.stats import norm
 from scipy.stats.contingency import expected_freq
@@ -118,9 +120,11 @@ class _MatrixWithInsertions(_BaseTransformMatrix):
         if self._columns_dimension.dimension_type in (DT.MR, DT.CA):
             return ()
 
+        subtotals = self._columns_dimension.subtotals
+        neg_idxs = range(-len(subtotals), 0)  # ---like [-3, -2, -1]---
         return tuple(
-            _InsertionColumn(self._ordered_matrix, subtotal)
-            for subtotal in self._columns_dimension.subtotals
+            _InsertionColumn(self._ordered_matrix, subtotal, neg_idx)
+            for subtotal, neg_idx in zip(subtotals, neg_idxs)
         )
 
     @lazyproperty
@@ -134,9 +138,11 @@ class _MatrixWithInsertions(_BaseTransformMatrix):
         if self._rows_dimension.dimension_type in (DT.MR, DT.CA):
             return tuple()
 
+        subtotals = self._rows_dimension.subtotals
+        neg_idxs = range(-len(subtotals), 0)  # ---like [-3, -2, -1]---
         return tuple(
-            _InsertionRow(self._ordered_matrix, subtotal)
-            for subtotal in self._rows_dimension.subtotals
+            _InsertionRow(self._ordered_matrix, subtotal, neg_idx)
+            for subtotal, neg_idx in zip(subtotals, neg_idxs)
         )
 
     @lazyproperty
@@ -220,17 +226,19 @@ class _OrderedMatrix(_BaseTransformMatrix):
     @lazyproperty
     def columns(self):
         return tuple(
-            _OrderedVector(column, self._row_order)
-            for column in tuple(
-                np.array(self._unordered_matrix.columns)[self._column_order]
+            _OrderedVector(column, self._row_order, idx)
+            for idx, column in enumerate(
+                tuple(np.array(self._unordered_matrix.columns)[self._column_order])
             )
         )
 
     @lazyproperty
     def rows(self):
         return tuple(
-            _OrderedVector(row, self._column_order)
-            for row in tuple(np.array(self._unordered_matrix.rows)[self._row_order])
+            _OrderedVector(row, self._column_order, idx)
+            for idx, row in enumerate(
+                tuple(np.array(self._unordered_matrix.rows)[self._row_order])
+            )
         )
 
     @lazyproperty
@@ -805,7 +813,7 @@ class _MrXMrMatrix(_MatrixWithMR):
         )
 
 
-# ===TRANSFORMATION VECTORS===
+# ===INSERTION (SUBTOTAL) VECTORS===
 
 
 class _BaseMatrixInsertionVector(object):
@@ -815,9 +823,11 @@ class _BaseMatrixInsertionVector(object):
     entails the complication of insertion *intersections*.
     """
 
-    def __init__(self, matrix, subtotal):
+    def __init__(self, matrix, subtotal, neg_idx):
         self._matrix = matrix
         self._subtotal = subtotal
+        # ---the *negative* idx of this vector among its peer insertions---
+        self._neg_idx = neg_idx
 
     @lazyproperty
     def addend_idxs(self):
@@ -888,6 +898,26 @@ class _BaseMatrixInsertionVector(object):
         return np.nan
 
     @lazyproperty
+    def ordering(self):
+        """ -> (position, index, self) tuple used for interleaving with base vectors.
+
+        This value allows the interleaving of insertions with base vectors to be reduced
+        to a sorting operation.
+
+        The int position value is roughly equivalent to the notion of "anchor". It is
+        0 for anchor=="top", sys.maxsize for anchor=="bottom", and int(anchor) + 1
+        otherwise. The +1 ensures insertions appear *after* the vector they are anchored
+        to.
+
+        The `index` value is the *negative* index of this subtotal in its collection
+        (i.e. the "distance from the end" of this insertion). This ensures that an
+        insertion will always sort *prior* to a base vector with the same position while
+        preserving the payload order of the insertion when two or more are anchored to
+        the same vector.
+        """
+        return (self._anchor_n, self._neg_idx, self)
+
+    @lazyproperty
     def pvals(self):
         return self._pvals
 
@@ -902,6 +932,22 @@ class _BaseMatrixInsertionVector(object):
     @lazyproperty
     def zscore(self):
         return self._zscore
+
+    @lazyproperty
+    def _anchor_n(self):
+        """Anchor expressed as an int.
+
+        An anchor to a column is incremented by 1 to ensure it applies *after* the
+        anchor column rather than before. See `.ordering` for more.
+        """
+        anchor = self.anchor
+        return (
+            0
+            if anchor == "top"
+            else sys.maxsize
+            if anchor == "bottom"
+            else int(self.anchor) + 1
+        )
 
     @lazyproperty
     def _pvals(self):
@@ -994,6 +1040,9 @@ class _InsertionRow(_BaseMatrixInsertionVector):
     @lazyproperty
     def _expected_counts(self):
         return self.opposite_margins * self.margin / self.table_margin
+
+
+# ===TRANSFORMATION VECTORS===
 
 
 class _BaseTransformationVector(object):
@@ -1311,11 +1360,15 @@ class _VectorAfterHiding(_BaseTransformationVector):
 
 
 class _OrderedVector(_BaseTransformationVector):
-    """In charge of indexing elements properly, after ordering transform."""
+    """Rearranges its "cells" to the order of its opposing-vectors.
 
-    def __init__(self, base_vector, opposing_order):
+    For example, the cells in a row appear in the order of the column vectors.
+    """
+
+    def __init__(self, base_vector, opposing_order, index):
         self._base_vector = base_vector
         self._opposing_order_arg = opposing_order
+        self._index = index
 
     @lazyproperty
     def base(self):
@@ -1332,6 +1385,18 @@ class _OrderedVector(_BaseTransformationVector):
     @lazyproperty
     def label(self):
         return self._base_vector.label
+
+    @lazyproperty
+    def ordering(self):
+        """ -> (position, index, self) tuple used for interleaving with insertions.
+
+        This value allows the interleaving of base vectors with insertions to be reduced
+        to a sorting operation.
+
+        The position and index of a base vector are both its index within its ordered
+        collection.
+        """
+        return (self._index, self._index, self)
 
     @lazyproperty
     def pvals(self):
