@@ -143,8 +143,12 @@ class _MatrixWithInsertions(_BaseTransformMatrix):
 
         subtotals = self._columns_dimension.subtotals
         neg_idxs = range(-len(subtotals), 0)  # ---like [-3, -2, -1]---
+        table_margin = self._ordered_matrix.table_margin
+        base_rows = self._ordered_matrix.rows
+        base_cols = self._ordered_matrix.columns
+
         return tuple(
-            _InsertionColumn(self._ordered_matrix, subtotal, neg_idx)
+            _InsertionColumn(subtotal, neg_idx, table_margin, base_rows, base_cols)
             for subtotal, neg_idx in zip(subtotals, neg_idxs)
         )
 
@@ -161,8 +165,12 @@ class _MatrixWithInsertions(_BaseTransformMatrix):
 
         subtotals = self._rows_dimension.subtotals
         neg_idxs = range(-len(subtotals), 0)  # ---like [-3, -2, -1]---
+        table_margin = self._ordered_matrix.table_margin
+        base_rows = self._ordered_matrix.rows
+        base_cols = self._ordered_matrix.columns
+
         return tuple(
-            _InsertionRow(self._ordered_matrix, subtotal, neg_idx)
+            _InsertionRow(subtotal, neg_idx, table_margin, base_rows, base_cols)
             for subtotal, neg_idx in zip(subtotals, neg_idxs)
         )
 
@@ -774,11 +782,13 @@ class _BaseMatrixInsertionVector(object):
     entails the complication of insertion *intersections*.
     """
 
-    def __init__(self, matrix, subtotal, neg_idx):
-        self._matrix = matrix
+    def __init__(self, subtotal, neg_idx, table_margin, base_rows, base_columns):
         self._subtotal = subtotal
         # ---the *negative* idx of this vector among its peer insertions---
         self._neg_idx = neg_idx
+        self._table_margin = table_margin
+        self._base_rows = base_rows
+        self._base_columns = base_columns
 
     @lazyproperty
     def addend_idxs(self):
@@ -874,7 +884,7 @@ class _BaseMatrixInsertionVector(object):
 
     @lazyproperty
     def table_margin(self):
-        return self._matrix.table_margin
+        return self._table_margin
 
     @lazyproperty
     def values(self):
@@ -937,14 +947,14 @@ class _InsertionColumn(_BaseMatrixInsertionVector):
         insertion vector).
         """
         return self._subtotal.prune and not np.any(
-            np.array([row.base for row in self._matrix.rows])
+            np.array([row.base for row in self._base_rows])
         )
 
     @lazyproperty
     def _addend_vectors(self):
         return tuple(
             column
-            for i, column in enumerate(self._matrix.columns)
+            for i, column in enumerate(self._base_columns)
             if i in self._subtotal.addend_idxs
         )
 
@@ -973,14 +983,14 @@ class _InsertionRow(_BaseMatrixInsertionVector):
         insertion vector).
         """
         return self._subtotal.prune and not np.any(
-            np.array([column.base for column in self._matrix.columns])
+            np.array([column.base for column in self._base_columns])
         )
 
     @lazyproperty
     def _addend_vectors(self):
         return tuple(
             row
-            for i, row in enumerate(self._matrix.rows)
+            for i, row in enumerate(self._base_rows)
             if i in self._subtotal.addend_idxs
         )
 
