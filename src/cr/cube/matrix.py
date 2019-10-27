@@ -1091,6 +1091,26 @@ class _AssembledVector(_BaseTransformationVector):
             self._top_zscores + self._interleaved_zscore + self._bottom_zscores
         )
 
+    def _apply_interleaved(self, fbase, fsubtot):
+        """ -> 1D array of result of applying fbase or fsubtot to each interleaved item.
+
+        `fbase(idx)` :: idx -> base_value
+        `fsubtot(subtot)` :: subtotal -> intersection_value
+
+        Takes care of the details of getting vector "cells" interleaved in the right
+        order, you just provide two closures. `fbase()` does the right thing for an idx
+        on the underlying (non-insertion) vector and `fsubtot()` gives the right value
+        for a subtotal.
+        """
+        subtotals = self._opposite_inserted_vectors
+
+        return np.array(
+            tuple(
+                fsubtot(subtotals[idx]) if idx < 0 else fbase(idx)
+                for idx in self._interleaved_idxs
+            )
+        )
+
     @lazyproperty
     def _bottom_insertions(self):
         return tuple(
@@ -1151,6 +1171,47 @@ class _AssembledVector(_BaseTransformationVector):
                 if i == inserted_vector.anchor:
                     column_index.append(np.nan)
         return tuple(column_index)
+
+    def _interleaved_idxs(self):
+        """ -> tuple of int: idx for base and inserted values, in display order.
+
+        Inserted value indicies are negative, to distinguish them from base vector
+        indices. The indexes are interleaved simply by sorting their orderings. An
+        ordering is a (position, idx) pair.
+        """
+
+        def iter_insertion_orderings():
+            """Generate (int: position, int: idx) for each opposing insertion.
+
+            The position for an insertion is an int representation of its anchor and its
+            idx is the *negative* offset of its position in the opposing insertions
+            sequence (like -3, -2, -1 for a sequence of length 3). The negative idx
+            works just as well as the normal one for accessing the subtotal but insures
+            that an insertion at the same position as a base row always sorts *before*
+            the base row.
+
+            The `position` int for a subtotal is 0 for anchor "top", sys.maxsize for
+            anchor "bottom", and int(anchor) + 1 for all others. The +1 ensures
+            a subtotal appears *after* the vector it is anchored to.
+            """
+            for v in self._opposite_inserted_vectors:
+                pos, idx, _ = v.ordering
+                yield pos, idx
+
+        def iter_base_value_orderings():
+            """Generate (int: position, int: idx) for each base value.
+
+            The position of a base value is simply it's index in the vector.
+            """
+            for idx in range(len(self._base_vector.values)):
+                yield idx, idx
+
+        return tuple(
+            idx
+            for pos, idx in sorted(
+                itertools.chain(iter_insertion_orderings(), iter_base_value_orderings())
+            )
+        )
 
     @lazyproperty
     def _interleaved_means(self):
