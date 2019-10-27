@@ -1046,21 +1046,13 @@ class _AssembledVector(_BaseTransformationVector):
     def base_values(self):
         base_values = self._base_vector.base_values
 
-        def fbase(idx):
-            return base_values[idx]
-
         def fsubtot(subtotal):
             return np.sum(base_values[subtotal.addend_idxs])
 
-        return self._apply_interleaved(fbase, fsubtot)
+        return self._apply_interleaved(base_values, fsubtot)
 
     @lazyproperty
     def column_index(self):
-        column_indexes = self._base_vector.column_index
-
-        def fbase(idx):
-            return column_indexes[idx]
-
         def fsubtot(subtotal):
             # TODO: Replace with real column index values from insertions vectors. This
             # should be something like:
@@ -1068,15 +1060,13 @@ class _AssembledVector(_BaseTransformationVector):
             # ask @mike to confirm
             return np.nan
 
-        return self._apply_interleaved(fbase, fsubtot)
+        return self._apply_interleaved(self._base_vector.column_index, fsubtot)
 
     @lazyproperty
     def means(self):
-        base_means = self._base_vector.means
-
         # ---just np.nan for insertions for now---
         return self._apply_interleaved(
-            fbase=lambda idx: base_means[idx], fsubtot=lambda _: np.nan
+            self._base_vector.means, fsubtot=lambda _: np.nan
         )
 
     @lazyproperty
@@ -1085,15 +1075,10 @@ class _AssembledVector(_BaseTransformationVector):
 
     @lazyproperty
     def pvals(self):
-        base_values = self._base_vector.pvals
-
-        def fbase(idx):
-            return base_values[idx]
-
         def fsubtot(subtotal):
             return subtotal.pvals[self._vector_idx]
 
-        return self._apply_interleaved(fbase, fsubtot)
+        return self._apply_interleaved(self._base_vector.pvals, fsubtot)
 
     @lazyproperty
     def table_proportions(self):
@@ -1101,45 +1086,36 @@ class _AssembledVector(_BaseTransformationVector):
 
     @lazyproperty
     def values(self):
-        base_values = self._base_vector.values
-
-        def fbase(idx):
-            return base_values[idx]
+        values = self._base_vector.values
 
         def fsubtot(subtotal):
-            return np.sum(base_values[subtotal.addend_idxs])
+            return np.sum(values[subtotal.addend_idxs])
 
-        return self._apply_interleaved(fbase, fsubtot)
+        return self._apply_interleaved(values, fsubtot)
 
     @lazyproperty
     def zscore(self):
-        # ---defeference for tight-loop---
-        zscores = self._base_vector.zscore
-
-        def fbase(idx):
-            return zscores[idx]
-
         def fsubtot(subtotal):
             return subtotal.zscore[self._vector_idx]
 
-        return self._apply_interleaved(fbase, fsubtot)
+        return self._apply_interleaved(self._base_vector.zscore, fsubtot)
 
-    def _apply_interleaved(self, fbase, fsubtot):
+    def _apply_interleaved(self, base_values, fsubtot):
         """ -> 1D array of result of applying fbase or fsubtot to each interleaved item.
 
-        `fbase(idx)` :: idx -> base_value
+        `base_values` is the "unassembled" vector measure values.
+
         `fsubtot(subtot)` :: subtotal -> intersection_value
 
         Takes care of the details of getting vector "cells" interleaved in the right
-        order, you just provide two closures. `fbase()` does the right thing for an idx
-        on the underlying (non-insertion) vector and `fsubtot()` gives the right value
-        for a subtotal.
+        order, you just provide the "unassembled" values and a function to apply to each
+        subtotal to get its value.
         """
         subtotals = self._opposite_inserted_vectors
 
         return np.array(
             tuple(
-                fsubtot(subtotals[idx]) if idx < 0 else fbase(idx)
+                fsubtot(subtotals[idx]) if idx < 0 else base_values[idx]
                 for idx in self._interleaved_idxs
             )
         )
