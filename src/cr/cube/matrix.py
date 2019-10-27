@@ -1085,7 +1085,15 @@ class _AssembledVector(_BaseTransformationVector):
 
     @lazyproperty
     def pvals(self):
-        return np.array(self._top_pvals + self._interleaved_pvals + self._bottom_pvals)
+        base_values = self._base_vector.pvals
+
+        def fbase(idx):
+            return base_values[idx]
+
+        def fsubtot(subtotal):
+            return subtotal.pvals[self._vector_idx]
+
+        return self._apply_interleaved(fbase, fsubtot)
 
     @lazyproperty
     def table_proportions(self):
@@ -1129,12 +1137,6 @@ class _AssembledVector(_BaseTransformationVector):
             vector
             for vector in self._opposite_inserted_vectors
             if vector.anchor == "bottom"
-        )
-
-    @lazyproperty
-    def _bottom_pvals(self):
-        return tuple(
-            vector.pvals[self._vector_idx] for vector in self._bottom_insertions
         )
 
     @lazyproperty
@@ -1193,16 +1195,6 @@ class _AssembledVector(_BaseTransformationVector):
         )
 
     @lazyproperty
-    def _interleaved_pvals(self):
-        pvals = []
-        for i, value in enumerate(self._base_vector.pvals):
-            pvals.append(value)
-            for inserted_vector in self._opposite_inserted_vectors:
-                if i == inserted_vector.anchor:
-                    pvals.append(inserted_vector.pvals[self._vector_idx])
-        return tuple(pvals)
-
-    @lazyproperty
     def _interleaved_values(self):
         values = []
         for i in range(len(self._base_vector.values)):
@@ -1232,10 +1224,6 @@ class _AssembledVector(_BaseTransformationVector):
             for vector in self._opposite_inserted_vectors
             if vector.anchor == "top"
         )
-
-    @lazyproperty
-    def _top_pvals(self):
-        return tuple(vector.pvals[self._vector_idx] for vector in self._top_insertions)
 
     @lazyproperty
     def _top_values(self):
