@@ -7,6 +7,7 @@ A matrix object has rows and columns.
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import itertools
 import sys
 
 import numpy as np
@@ -98,7 +99,17 @@ class _MatrixWithInsertions(_BaseTransformMatrix):
 
         Each column vector also includes any new elements introduced by inserted rows.
         """
-        return tuple(self._iter_columns())
+        opposing_insertions = self._inserted_rows
+
+        return tuple(
+            _AssembledVector(column, opposing_insertions, 0 if idx < 0 else idx)
+            for _, idx, column in sorted(
+                itertools.chain(
+                    (column.ordering for column in self._inserted_columns),
+                    (column.ordering for column in self._ordered_matrix.columns),
+                )
+            )
+        )
 
     @lazyproperty
     def rows(self):
@@ -106,10 +117,20 @@ class _MatrixWithInsertions(_BaseTransformMatrix):
 
         Each row vector also reflects any new elements introduced by inserted columns.
         """
-        return tuple(self._iter_rows())
+        opposing_insertions = self._inserted_columns
+
+        return tuple(
+            _AssembledVector(row, opposing_insertions, 0 if idx < 0 else idx)
+            for _, idx, row in sorted(
+                itertools.chain(
+                    (row.ordering for row in self._inserted_rows),
+                    (row.ordering for row in self._ordered_matrix.rows),
+                )
+            )
+        )
 
     @lazyproperty
-    def _all_inserted_columns(self):
+    def _inserted_columns(self):
         """Sequence of _InsertionColumn objects representing subtotal columns.
 
         The returned vectors are in the order subtotals were specified in the cube
@@ -128,7 +149,7 @@ class _MatrixWithInsertions(_BaseTransformMatrix):
         )
 
     @lazyproperty
-    def _all_inserted_rows(self):
+    def _inserted_rows(self):
         """Sequence of _InsertionRow objects representing inserted subtotal rows.
 
         The returned vectors are in the order subtotals were specified in the cube
@@ -146,78 +167,8 @@ class _MatrixWithInsertions(_BaseTransformMatrix):
         )
 
     @lazyproperty
-    def _columns_inserted_at_left(self):
-        """Sequence of _InsertionColumn vectors that appear before any body columns."""
-        return tuple(
-            column for column in self._all_inserted_columns if column.anchor == "top"
-        )
-
-    @lazyproperty
-    def _columns_inserted_at_right(self):
-        """Sequence of _InsertionColumn vectors appended as the last table columns."""
-        return tuple(
-            column for column in self._all_inserted_columns if column.anchor == "bottom"
-        )
-
-    def _iter_columns(self):
-        """Generate all column vectors with insertions interleaved at right spot."""
-        opposing_insertions = self._all_inserted_rows
-
-        # ---subtotals inserted at top---
-        for column in self._columns_inserted_at_left:
-            yield _AssembledVector(column, opposing_insertions)
-
-        # ---body columns with subtotals anchored to specific body positions---
-        for idx, column in enumerate(self._ordered_matrix.columns):
-            yield _AssembledVector(column, opposing_insertions, idx)
-            for inserted_column in self._iter_inserted_columns_anchored_at(idx):
-                yield _AssembledVector(inserted_column, opposing_insertions)
-
-        # ---subtotals appended at bottom---
-        for column in self._columns_inserted_at_right:
-            yield _AssembledVector(column, opposing_insertions)
-
-    def _iter_inserted_rows_anchored_at(self, anchor):
-        """Generate all inserted row vectors with matching `anchor`."""
-        return (row for row in self._all_inserted_rows if row.anchor == anchor)
-
-    def _iter_rows(self):
-        """Generate all row vectors with insertions interleaved at right spot."""
-        opposing_insertions = self._all_inserted_columns
-
-        # ---subtotals inserted at top---
-        for row in self._rows_inserted_at_top:
-            yield _AssembledVector(row, opposing_insertions)
-
-        # ---body rows with subtotals anchored to specific body positions---
-        for idx, row in enumerate(self._ordered_matrix.rows):
-            yield _AssembledVector(row, opposing_insertions, idx)
-            for inserted_row in self._iter_inserted_rows_anchored_at(idx):
-                yield _AssembledVector(inserted_row, opposing_insertions)
-
-        # ---subtotals appended at bottom---
-        for row in self._rows_inserted_at_bottom:
-            yield _AssembledVector(row, opposing_insertions)
-
-    def _iter_inserted_columns_anchored_at(self, anchor):
-        """Generate all inserted column vectors with matching `anchor`."""
-        return (
-            column for column in self._all_inserted_columns if column.anchor == anchor
-        )
-
-    @lazyproperty
     def _ordered_matrix(self):
         return _OrderedMatrix(self._unordered_matrix)
-
-    @lazyproperty
-    def _rows_inserted_at_bottom(self):
-        """Sequence of _InsertionRow vectors that appear after any other table rows."""
-        return tuple(row for row in self._all_inserted_rows if row.anchor == "bottom")
-
-    @lazyproperty
-    def _rows_inserted_at_top(self):
-        """Sequence of _InsertionRow vectors that appear before any other table rows."""
-        return tuple(row for row in self._all_inserted_rows if row.anchor == "top")
 
 
 class _OrderedMatrix(_BaseTransformMatrix):
