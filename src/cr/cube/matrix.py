@@ -18,26 +18,11 @@ from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.util import lazyproperty
 
 
-# === TRANSFORMATION-MATRIX OBJECTS ===
-
-
-class _BaseTransformMatrix(object):
-    """Base class for the three transform-applying matrix levels."""
+class TransformedMatrix(object):
+    """Matrix reflecting application of ordering, insertion, and hiding transforms."""
 
     def __init__(self, unordered_matrix):
         self._unordered_matrix = unordered_matrix
-
-    @lazyproperty
-    def _columns_dimension(self):
-        return self._unordered_matrix.columns_dimension
-
-    @lazyproperty
-    def _rows_dimension(self):
-        return self._unordered_matrix.rows_dimension
-
-
-class TransformedMatrix(_BaseTransformMatrix):
-    """Matrix reflection application of all transforms."""
 
     @classmethod
     def matrix(cls, cube, dimensions, slice_idx):
@@ -47,22 +32,24 @@ class TransformedMatrix(_BaseTransformMatrix):
     @lazyproperty
     def columns(self):
         return tuple(
-            _VectorAfterHiding(column, self._matrix_with_insertions.rows)
-            for column in self._matrix_with_insertions.columns
+            _VectorAfterHiding(column, self._assembled_rows)
+            for column in self._assembled_columns
             if not column.hidden
         )
 
     @lazyproperty
     def rows(self):
         return tuple(
-            _VectorAfterHiding(row, self._matrix_with_insertions.columns)
-            for row in self._matrix_with_insertions.rows
+            _VectorAfterHiding(row, self._assembled_columns)
+            for row in self._assembled_rows
             if not row.hidden
         )
 
     @lazyproperty
     def table_base(self):
-        return self.table_base_unpruned[np.ix_(self._rows_ind, self._cols_ind)]
+        return self.table_base_unpruned[
+            np.ix_(self._visible_rows_mask, self._visible_cols_mask)
+        ]
 
     @lazyproperty
     def table_base_unpruned(self):
@@ -70,31 +57,16 @@ class TransformedMatrix(_BaseTransformMatrix):
 
     @lazyproperty
     def table_margin(self):
-        return self.table_margin_unpruned[np.ix_(self._rows_ind, self._cols_ind)]
+        return self.table_margin_unpruned[
+            np.ix_(self._visible_rows_mask, self._visible_cols_mask)
+        ]
 
     @lazyproperty
     def table_margin_unpruned(self):
         return self._unordered_matrix.table_margin
 
     @lazyproperty
-    def _matrix_with_insertions(self):
-        """Apply all transforms sequentially."""
-        return _MatrixWithInsertions(self._unordered_matrix)
-
-    @lazyproperty
-    def _rows_ind(self):
-        return [not row.hidden for row in self._matrix_with_insertions.rows]
-
-    @lazyproperty
-    def _cols_ind(self):
-        return [not col.hidden for col in self._matrix_with_insertions.columns]
-
-
-class _MatrixWithInsertions(_BaseTransformMatrix):
-    """Represents slice with both normal and inserted bits."""
-
-    @lazyproperty
-    def columns(self):
+    def _assembled_columns(self):
         """Sequence of column vectors including inserted columns.
 
         Each column vector also includes any new elements introduced by inserted rows.
@@ -112,7 +84,7 @@ class _MatrixWithInsertions(_BaseTransformMatrix):
         )
 
     @lazyproperty
-    def rows(self):
+    def _assembled_rows(self):
         """Sequence of row vectors including inserted rows.
 
         Each row vector also reflects any new elements introduced by inserted columns.
@@ -131,6 +103,7 @@ class _MatrixWithInsertions(_BaseTransformMatrix):
 
     @lazyproperty
     def _base_columns(self):
+        """columns after ordering but prior to insertions"""
         return tuple(
             _OrderedVector(column, self._row_order, idx)
             for idx, column in enumerate(
@@ -140,6 +113,7 @@ class _MatrixWithInsertions(_BaseTransformMatrix):
 
     @lazyproperty
     def _base_rows(self):
+        """rows after ordering but prior to insertions"""
         return tuple(
             _OrderedVector(row, self._column_order, idx)
             for idx, row in enumerate(
@@ -148,8 +122,19 @@ class _MatrixWithInsertions(_BaseTransformMatrix):
         )
 
     @lazyproperty
+    def _column_order(self):
+        """ -> 1D ndarray of int col idx specifying order of unordered-array columns."""
+        # ---Specifying int type prevents failure when there are zero columns. The
+        # ---default type for ndarray is float, which is not valid for indexing.
+        return np.array(self._columns_dimension.display_order, dtype=int)
+
+    @lazyproperty
+    def _columns_dimension(self):
+        return self._unordered_matrix.columns_dimension
+
+    @lazyproperty
     def _inserted_columns(self):
-        """Sequence of _InsertionColumn objects representing subtotal columns.
+        """ -> tuple of _InsertionColumn objects representing subtotal columns.
 
         The returned vectors are in the order subtotals were specified in the cube
         result, which is no particular order. All subtotals defined on the column
@@ -160,6 +145,10 @@ class _MatrixWithInsertions(_BaseTransformMatrix):
             return ()
 
         subtotals = self._columns_dimension.subtotals
+        # ---insertions are indexed using their *negative* idx, i.e. their "distance"
+        # ---from the end of the subtotals sequence. This insures their ordering tuple
+        # ---sorts before all base-columns with the same position while still providing
+        # ---an idx that works for indexed access (if required).
         neg_idxs = range(-len(subtotals), 0)  # ---like [-3, -2, -1]---
         table_margin = self._unordered_matrix.table_margin
         base_rows = self._base_rows
@@ -172,7 +161,7 @@ class _MatrixWithInsertions(_BaseTransformMatrix):
 
     @lazyproperty
     def _inserted_rows(self):
-        """Sequence of _InsertionRow objects representing inserted subtotal rows.
+        """ -> tuple of _InsertionRow objects representing inserted subtotal rows.
 
         The returned vectors are in the order subtotals were specified in the cube
         result, which is no particular order.
@@ -193,17 +182,22 @@ class _MatrixWithInsertions(_BaseTransformMatrix):
         )
 
     @lazyproperty
-    def _column_order(self):
-        """ -> 1D ndarray of int col idx specifying order of unordered-array columns."""
-        # ---Specifying int type prevents failure when there are zero columns. The
-        # ---default type for ndarray is float, which is not valid for indexing.
-        return np.array(self._columns_dimension.display_order, dtype=int)
-
-    @lazyproperty
     def _row_order(self):
         """ -> 1D ndarray of int row idx specifying order of unordered-array rows."""
         # ---Specifying int type prevents failure when there are zero rows---
         return np.array(self._rows_dimension.display_order, dtype=int)
+
+    @lazyproperty
+    def _rows_dimension(self):
+        return self._unordered_matrix.rows_dimension
+
+    @lazyproperty
+    def _visible_cols_mask(self):
+        return [not col.hidden for col in self._assembled_columns]
+
+    @lazyproperty
+    def _visible_rows_mask(self):
+        return [not row.hidden for row in self._assembled_rows]
 
 
 # === BASE-MATRIX OBJECTS ===
