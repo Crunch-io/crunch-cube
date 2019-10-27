@@ -1044,12 +1044,15 @@ class _AssembledVector(_BaseTransformationVector):
 
     @lazyproperty
     def base_values(self):
-        # TODO: Do for real
-        return np.array(
-            self._top_base_values
-            + self._interleaved_base_values
-            + self._bottom_base_values
-        )
+        base_values = self._base_vector.base_values
+
+        def fbase(idx):
+            return base_values[idx]
+
+        def fsubtot(subtotal):
+            return np.sum(base_values[subtotal.addend_idxs])
+
+        return self._apply_interleaved(fbase, fsubtot)
 
     @lazyproperty
     def column_index(self):
@@ -1120,13 +1123,6 @@ class _AssembledVector(_BaseTransformationVector):
         )
 
     @lazyproperty
-    def _bottom_base_values(self):
-        return tuple(
-            np.sum(self._base_vector.base_values[col.addend_idxs])
-            for col in self._bottom_insertions
-        )
-
-    @lazyproperty
     def _bottom_pvals(self):
         return tuple(
             vector.pvals[self._vector_idx] for vector in self._bottom_insertions
@@ -1146,19 +1142,6 @@ class _AssembledVector(_BaseTransformationVector):
         )
 
     @lazyproperty
-    def _interleaved_base_values(self):
-        base_values = []
-        for i in range(len(self._base_vector.base_values)):
-            base_values.append(self._base_vector.base_values[i])
-            for inserted_vector in self._opposite_inserted_vectors:
-                if i == inserted_vector.anchor:
-                    insertion_value = np.sum(
-                        self._base_vector.base_values[inserted_vector.addend_idxs]
-                    )
-                    base_values.append(insertion_value)
-        return tuple(base_values)
-
-    @lazyproperty
     def _interleaved_column_index(self):
         # TODO: Replace with real column index values from insertions vectors. This
         # should be something like:
@@ -1172,6 +1155,7 @@ class _AssembledVector(_BaseTransformationVector):
                     column_index.append(np.nan)
         return tuple(column_index)
 
+    @lazyproperty
     def _interleaved_idxs(self):
         """ -> tuple of int: idx for base and inserted values, in display order.
 
@@ -1255,13 +1239,6 @@ class _AssembledVector(_BaseTransformationVector):
                 if i == inserted_vector.anchor:
                     zscore.append(inserted_vector.zscore[self._vector_idx])
         return tuple(zscore)
-
-    @lazyproperty
-    def _top_base_values(self):
-        return tuple(
-            np.sum(self._base_vector.base_values[col.addend_idxs])
-            for col in self._top_insertions
-        )
 
     @lazyproperty
     def _top_insertions(self):
