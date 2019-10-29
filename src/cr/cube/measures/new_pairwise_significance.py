@@ -73,6 +73,18 @@ class _ColumnPairwiseSignificance:
         return diff / se_diff
 
     @lazyproperty
+    def t_stats_scale_means(self):
+        scale_means = self._slice.scale_means_row
+        diff = scale_means - scale_means[self._col_idx]
+        variance = self._slice.var_scale_means_row
+        se_diff = np.sqrt(variance + variance[self._col_idx])
+        return diff / se_diff
+
+    @lazyproperty
+    def p_vals_scale_means(self):
+        return 2 * (1 - t.cdf(abs(self.t_stats_scale_means), df=self._df))
+
+    @lazyproperty
     def p_vals(self):
         return 2 * (1 - t.cdf(abs(self.t_stats), df=self._df))
 
