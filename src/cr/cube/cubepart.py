@@ -283,6 +283,10 @@ class _Slice(CubePartition):
         return self._rows_dimension.dimension_type
 
     @lazyproperty
+    def rows_dimension_numeric(self):
+        return self._rows_dimension_numeric
+
+    @lazyproperty
     def rows_margin(self):
         return np.array([row.margin for row in self._matrix.rows])
 

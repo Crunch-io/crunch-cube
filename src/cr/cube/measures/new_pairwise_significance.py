@@ -5,7 +5,7 @@
 from __future__ import division
 
 import numpy as np
-from scipy.stats import t
+from scipy.stats import t, norm
 
 from cr.cube.util import lazyproperty
 
@@ -74,11 +74,37 @@ class _ColumnPairwiseSignificance:
 
     @lazyproperty
     def t_stats_scale_means(self):
-        scale_means = self._slice.scale_means_row
-        diff = scale_means - scale_means[self._col_idx]
+        # This property calculates the Two-Sample t-test using the formula:
+        # t = X1 - X2 / Sx1x2 * sqrt(1/n1 + 1/n2)
+        # where X1 and X2 are the scale mean value for the 2 sample we're
+        # comparing, n1 and n2 are the number of people from the 1st ans 2nd
+        # sample who provided a response to the survey, Sx1x2 is the standard
+        # deviation. In this case the standard deviation is:
+        # Sx1x2 = sqrt(((n1-1)*s2x1 + (n2-2)*s2x2)/(n1+n2+2)), where s2x1 and
+        # s2x2 are the is the standard deviation for sample 1 and 2.
+
+        not_a_nan_index = ~np.isnan(self._slice.rows_dimension_numeric)
         variance = self._slice.var_scale_means_row
-        se_diff = np.sqrt(variance + variance[self._col_idx])
-        return diff / se_diff
+        counts = self._slice.counts[not_a_nan_index, :]
+
+        standard_deviation = np.sqrt(
+            np.divide(
+                (np.sum(counts, axis=0)[self._col_idx] - 1) * variance[self._col_idx]
+                + ((np.sum(counts, axis=0) - 1) * np.array(variance)),
+                (np.sum(counts, axis=0)[self._col_idx] + np.sum(counts, axis=0) - 2),
+            )
+        )
+
+        tstats_scale_means = (
+            self._slice.scale_means_row[self._col_idx] - self._slice.scale_means_row
+        ) / (
+            standard_deviation
+            * np.sqrt(
+                (1 / np.sum(counts, axis=0)[self._col_idx])
+                + (1 / np.sum(counts, axis=0))
+            )
+        )
+        return tstats_scale_means
 
     @lazyproperty
     def p_vals_scale_means(self):

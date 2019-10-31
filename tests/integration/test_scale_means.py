@@ -606,3 +606,12 @@ def test_var_scale_means_cat_x_cat_pruning_and_hs():
         slice_.var_scale_means_column,
         [0.72358198, 0.9991, 1.87633763, 0.4859843, 0.66666667],
     )
+
+
+def test_var_scale_means_nps_type():
+    slice_ = Cube(SM.FACEBOOK_APPS_X_AGE).partitions[0]
+    np.testing.assert_almost_equal(
+        slice_.var_scale_means_row,
+        [1905.11600238, 2111.67820069, 1655.65636907, 981.86821176],
+    )
+    assert slice_.var_scale_means_column is None
