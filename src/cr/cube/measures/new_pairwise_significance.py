@@ -83,27 +83,24 @@ class _ColumnPairwiseSignificance:
         # Sx1x2 = sqrt(((n1-1)*s2x1 + (n2-2)*s2x2)/(n1+n2+2)), where s2x1 and
         # s2x2 are the is the standard deviation for sample 1 and 2.
 
-        not_a_nan_index = ~np.isnan(self._slice.rows_dimension_numeric)
         variance = self._slice.var_scale_means_row
-        counts = self._slice.counts[not_a_nan_index, :]
+        # Sum for each column of the counts that have not a nan index in the
+        # related numeric counts
+        not_a_nan_index = ~np.isnan(self._slice.rows_dimension_numeric)
+        counts = np.sum(self._slice.counts[not_a_nan_index, :], axis=0)
 
         standard_deviation = np.sqrt(
             np.divide(
-                (np.sum(counts, axis=0)[self._col_idx] - 1) * variance[self._col_idx]
-                + ((np.sum(counts, axis=0) - 1) * np.array(variance)),
-                (np.sum(counts, axis=0)[self._col_idx] + np.sum(counts, axis=0) - 2),
+                (counts[self._col_idx] - 1) * variance[self._col_idx]
+                + ((counts - 1) * np.array(variance)),
+                (counts[self._col_idx] + counts - 2),
             )
         )
 
         tstats_scale_means = (
             self._slice.scale_means_row[self._col_idx] - self._slice.scale_means_row
-        ) / (
-            standard_deviation
-            * np.sqrt(
-                (1 / np.sum(counts, axis=0)[self._col_idx])
-                + (1 / np.sum(counts, axis=0))
-            )
-        )
+        ) / (standard_deviation * np.sqrt((1 / counts[self._col_idx]) + (1 / counts)))
+
         return tstats_scale_means
 
     @lazyproperty
