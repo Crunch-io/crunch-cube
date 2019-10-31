@@ -7,6 +7,9 @@ A matrix object has rows and columns.
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import itertools
+import sys
+
 import numpy as np
 from scipy.stats import norm
 from scipy.stats.contingency import expected_freq
@@ -16,10 +19,10 @@ from cr.cube.util import lazyproperty
 
 
 class TransformedMatrix(object):
-    """Matrix reflection application of all transforms."""
+    """Matrix reflecting application of ordering, insertion, and hiding transforms."""
 
-    def __init__(self, base_matrix):
-        self._base_matrix = base_matrix
+    def __init__(self, unordered_matrix):
+        self._unordered_matrix = unordered_matrix
 
     @classmethod
     def matrix(cls, cube, dimensions, slice_idx):
@@ -28,187 +31,110 @@ class TransformedMatrix(object):
 
     @lazyproperty
     def columns(self):
-        return self._transformed_matrix.columns
-
-    @lazyproperty
-    def rows(self):
-        return self._transformed_matrix.rows
-
-    @lazyproperty
-    def table_base(self):
-        return self._transformed_matrix.table_base
-
-    @lazyproperty
-    def table_base_unpruned(self):
-        return self._transformed_matrix.table_base_unpruned
-
-    @lazyproperty
-    def table_margin(self):
-        return self._transformed_matrix.table_margin
-
-    @lazyproperty
-    def table_margin_unpruned(self):
-        return self._transformed_matrix.table_margin_unpruned
-
-    @lazyproperty
-    def _transformed_matrix(self):
-        """Apply all transforms sequentially."""
-        matrix = _OrderedMatrix(self._base_matrix)
-        matrix = _MatrixWithInsertions(matrix)
-        matrix = _MatrixWithHidden(matrix)
-        return matrix
-
-
-# === TRANSFORMATION-MATRIX OBJECTS ===
-
-
-class _OrderedMatrix(object):
-    """Matrix reflecting result of element-ordering transforms."""
-
-    def __init__(self, base_matrix):
-        self._base_matrix = base_matrix
-
-    @lazyproperty
-    def columns(self):
         return tuple(
-            _OrderedVector(column, self._row_order)
-            for column in tuple(np.array(self._base_matrix.columns)[self._column_order])
-        )
-
-    @lazyproperty
-    def columns_dimension(self):
-        return self._base_matrix.columns_dimension
-
-    @lazyproperty
-    def rows(self):
-        return tuple(
-            _OrderedVector(row, self._column_order)
-            for row in tuple(np.array(self._base_matrix.rows)[self._row_order])
-        )
-
-    @lazyproperty
-    def rows_dimension(self):
-        return self._base_matrix.rows_dimension
-
-    @lazyproperty
-    def table_base(self):
-        return self._base_matrix.table_base
-
-    @lazyproperty
-    def table_margin(self):
-        return self._base_matrix.table_margin
-
-    @lazyproperty
-    def _column_order(self):
-        """Indexer value identifying columns in order, suitable for slicing an ndarray.
-
-        This value is a 1D ndarray of int column indices, suitable for indexing the
-        columns array to produce an ordered version.
-        """
-        # ---Specifying int type prevents failure when there are zero columns. The
-        # ---default type for ndarray is float, which is not valid for indexing.
-        return np.array(self.columns_dimension.display_order, dtype=int)
-
-    @lazyproperty
-    def _row_order(self):
-        """Indexer value identifying rows in order, suitable for slicing an ndarray.
-
-        This value is a 1D ndarray of int row indices, suitable for indexing the rows
-        array to produce an ordered version.
-        """
-        # ---Specifying int type prevents failure when there are zero rows---
-        return np.array(self.rows_dimension.display_order, dtype=int)
-
-
-class _MatrixWithHidden(object):
-    """Matrix with hidden vectors removed.
-
-    A vector can be hidden explicitly by the user, or it can be automatically hidden
-    when it is empty and the prune option for the dimension is selected.
-    """
-
-    # ---Note that hiding a vector requires not just removing that vector, but also
-    # ---the element the removed vector contributes to each of the *opposing* vectors.
-    # ---For example, hiding a row is removing that row-vector from `.rows`, but also
-    # ---removing an element from each column-vector in `.columns`.
-
-    def __init__(self, base_matrix):
-        self._base_matrix = base_matrix
-
-    @lazyproperty
-    def columns(self):
-        return tuple(
-            _VectorAfterHiding(column, self._base_matrix.rows)
-            for column in self._base_matrix.columns
+            _VectorAfterHiding(column, self._assembled_rows)
+            for column in self._assembled_columns
             if not column.hidden
         )
 
     @lazyproperty
     def rows(self):
         return tuple(
-            _VectorAfterHiding(row, self._base_matrix.columns)
-            for row in self._base_matrix.rows
+            _VectorAfterHiding(row, self._assembled_columns)
+            for row in self._assembled_rows
             if not row.hidden
         )
 
     @lazyproperty
     def table_base(self):
-        return self.table_base_unpruned[np.ix_(self._rows_ind, self._cols_ind)]
+        return self.table_base_unpruned[
+            np.ix_(self._visible_rows_mask, self._visible_cols_mask)
+        ]
 
     @lazyproperty
     def table_base_unpruned(self):
-        return self._base_matrix.table_base
+        return self._unordered_matrix.table_base
 
     @lazyproperty
     def table_margin(self):
-        return self.table_margin_unpruned[np.ix_(self._rows_ind, self._cols_ind)]
+        return self.table_margin_unpruned[
+            np.ix_(self._visible_rows_mask, self._visible_cols_mask)
+        ]
 
     @lazyproperty
     def table_margin_unpruned(self):
-        return self._base_matrix.table_margin
+        return self._unordered_matrix.table_margin
 
     @lazyproperty
-    def _rows_ind(self):
-        return [not row.hidden for row in self._base_matrix.rows]
-
-    @lazyproperty
-    def _cols_ind(self):
-        return [not col.hidden for col in self._base_matrix.columns]
-
-
-class _MatrixWithInsertions(object):
-    """Represents slice with both normal and inserted bits."""
-
-    def __init__(self, base_matrix):
-        self._base_matrix = base_matrix
-
-    @lazyproperty
-    def columns(self):
+    def _assembled_columns(self):
         """Sequence of column vectors including inserted columns.
 
         Each column vector also includes any new elements introduced by inserted rows.
         """
-        return tuple(self._iter_columns())
+        opposing_insertions = self._inserted_rows
+
+        return tuple(
+            _AssembledVector(column, opposing_insertions, 0 if idx < 0 else idx)
+            for _, idx, column in sorted(
+                itertools.chain(
+                    (column.ordering for column in self._inserted_columns),
+                    (column.ordering for column in self._base_columns),
+                )
+            )
+        )
 
     @lazyproperty
-    def rows(self):
+    def _assembled_rows(self):
         """Sequence of row vectors including inserted rows.
 
         Each row vector also reflects any new elements introduced by inserted columns.
         """
-        return tuple(self._iter_rows())
+        opposing_insertions = self._inserted_columns
+
+        return tuple(
+            _AssembledVector(row, opposing_insertions, 0 if idx < 0 else idx)
+            for _, idx, row in sorted(
+                itertools.chain(
+                    (row.ordering for row in self._inserted_rows),
+                    (row.ordering for row in self._base_rows),
+                )
+            )
+        )
 
     @lazyproperty
-    def table_base(self):
-        return self._base_matrix.table_base
+    def _base_columns(self):
+        """columns after ordering but prior to insertions"""
+        return tuple(
+            _OrderedVector(column, self._row_order, idx)
+            for idx, column in enumerate(
+                tuple(np.array(self._unordered_matrix.columns)[self._column_order])
+            )
+        )
 
     @lazyproperty
-    def table_margin(self):
-        return self._base_matrix.table_margin
+    def _base_rows(self):
+        """rows after ordering but prior to insertions"""
+        return tuple(
+            _OrderedVector(row, self._column_order, idx)
+            for idx, row in enumerate(
+                tuple(np.array(self._unordered_matrix.rows)[self._row_order])
+            )
+        )
 
     @lazyproperty
-    def _all_inserted_columns(self):
-        """Sequence of _InsertionColumn objects representing subtotal columns.
+    def _column_order(self):
+        """ -> 1D ndarray of int col idx specifying order of unordered-array columns."""
+        # ---Specifying int type prevents failure when there are zero columns. The
+        # ---default type for ndarray is float, which is not valid for indexing.
+        return np.array(self._columns_dimension.display_order, dtype=int)
+
+    @lazyproperty
+    def _columns_dimension(self):
+        return self._unordered_matrix.columns_dimension
+
+    @lazyproperty
+    def _inserted_columns(self):
+        """ -> tuple of _InsertionColumn objects representing subtotal columns.
 
         The returned vectors are in the order subtotals were specified in the cube
         result, which is no particular order. All subtotals defined on the column
@@ -218,14 +144,24 @@ class _MatrixWithInsertions(object):
         if self._columns_dimension.dimension_type in (DT.MR, DT.CA):
             return ()
 
+        subtotals = self._columns_dimension.subtotals
+        # ---insertions are indexed using their *negative* idx, i.e. their "distance"
+        # ---from the end of the subtotals sequence. This insures their ordering tuple
+        # ---sorts before all base-columns with the same position while still providing
+        # ---an idx that works for indexed access (if required).
+        neg_idxs = range(-len(subtotals), 0)  # ---like [-3, -2, -1]---
+        table_margin = self._unordered_matrix.table_margin
+        base_rows = self._base_rows
+        base_cols = self._base_columns
+
         return tuple(
-            _InsertionColumn(self._base_matrix, subtotal)
-            for subtotal in self._columns_dimension.subtotals
+            _InsertionColumn(subtotal, neg_idx, table_margin, base_rows, base_cols)
+            for subtotal, neg_idx in zip(subtotals, neg_idxs)
         )
 
     @lazyproperty
-    def _all_inserted_rows(self):
-        """Sequence of _InsertionRow objects representing inserted subtotal rows.
+    def _inserted_rows(self):
+        """ -> tuple of _InsertionRow objects representing inserted subtotal rows.
 
         The returned vectors are in the order subtotals were specified in the cube
         result, which is no particular order.
@@ -234,90 +170,34 @@ class _MatrixWithInsertions(object):
         if self._rows_dimension.dimension_type in (DT.MR, DT.CA):
             return tuple()
 
+        subtotals = self._rows_dimension.subtotals
+        neg_idxs = range(-len(subtotals), 0)  # ---like [-3, -2, -1]---
+        table_margin = self._unordered_matrix.table_margin
+        base_rows = self._base_rows
+        base_cols = self._base_columns
+
         return tuple(
-            _InsertionRow(self._base_matrix, subtotal)
-            for subtotal in self._rows_dimension.subtotals
+            _InsertionRow(subtotal, neg_idx, table_margin, base_rows, base_cols)
+            for subtotal, neg_idx in zip(subtotals, neg_idxs)
         )
 
     @lazyproperty
-    def _columns_dimension(self):
-        return self._base_matrix.columns_dimension
-
-    @lazyproperty
-    def _columns_inserted_at_left(self):
-        """Sequence of _InsertionColumn vectors that appear before any body columns."""
-        return tuple(
-            column for column in self._all_inserted_columns if column.anchor == "top"
-        )
-
-    @lazyproperty
-    def _columns_inserted_at_right(self):
-        """Sequence of _InsertionColumn vectors appended as the last table columns."""
-        return tuple(
-            column for column in self._all_inserted_columns if column.anchor == "bottom"
-        )
-
-    def _iter_columns(self):
-        """Generate all column vectors with insertions interleaved at right spot."""
-        opposing_insertions = self._all_inserted_rows
-
-        # ---subtotals inserted at top---
-        for column in self._columns_inserted_at_left:
-            yield _AssembledVector(column, opposing_insertions)
-
-        # ---body columns with subtotals anchored to specific body positions---
-        for column_index, column in enumerate(self._base_matrix.columns):
-            yield _AssembledVector(column, opposing_insertions, column_index)
-            for inserted_column in self._iter_inserted_columns_anchored_at(
-                column_index
-            ):
-                yield _AssembledVector(inserted_column, opposing_insertions)
-
-        # ---subtotals appended at bottom---
-        for column in self._columns_inserted_at_right:
-            yield _AssembledVector(column, opposing_insertions)
-
-    def _iter_inserted_rows_anchored_at(self, anchor):
-        """Generate all inserted row vectors with matching `anchor`."""
-        return (row for row in self._all_inserted_rows if row.anchor == anchor)
-
-    def _iter_rows(self):
-        """Generate all row vectors with insertions interleaved at right spot."""
-        opposing_insertions = self._all_inserted_columns
-
-        # ---subtotals inserted at top---
-        for row in self._rows_inserted_at_top:
-            yield _AssembledVector(row, opposing_insertions)
-
-        # ---body rows with subtotals anchored to specific body positions---
-        for row_index, row in enumerate(self._base_matrix.rows):
-            yield _AssembledVector(row, opposing_insertions, row_index)
-            for inserted_row in self._iter_inserted_rows_anchored_at(row_index):
-                yield _AssembledVector(inserted_row, opposing_insertions)
-
-        # ---subtotals appended at bottom---
-        for row in self._rows_inserted_at_bottom:
-            yield _AssembledVector(row, opposing_insertions)
-
-    def _iter_inserted_columns_anchored_at(self, anchor):
-        """Generate all inserted column vectors with matching `anchor`."""
-        return (
-            column for column in self._all_inserted_columns if column.anchor == anchor
-        )
+    def _row_order(self):
+        """ -> 1D ndarray of int row idx specifying order of unordered-array rows."""
+        # ---Specifying int type prevents failure when there are zero rows---
+        return np.array(self._rows_dimension.display_order, dtype=int)
 
     @lazyproperty
     def _rows_dimension(self):
-        return self._base_matrix.rows_dimension
+        return self._unordered_matrix.rows_dimension
 
     @lazyproperty
-    def _rows_inserted_at_bottom(self):
-        """Sequence of _InsertionRow vectors that appear after any other table rows."""
-        return tuple(row for row in self._all_inserted_rows if row.anchor == "bottom")
+    def _visible_cols_mask(self):
+        return [not col.hidden for col in self._assembled_columns]
 
     @lazyproperty
-    def _rows_inserted_at_top(self):
-        """Sequence of _InsertionRow vectors that appear before any other table rows."""
-        return tuple(row for row in self._all_inserted_rows if row.anchor == "top")
+    def _visible_rows_mask(self):
+        return [not row.hidden for row in self._assembled_rows]
 
 
 # === BASE-MATRIX OBJECTS ===
@@ -866,7 +746,7 @@ class _MrXMrMatrix(_MatrixWithMR):
         )
 
 
-# ===TRANSFORMATION VECTORS===
+# ===INSERTION (SUBTOTAL) VECTORS===
 
 
 class _BaseMatrixInsertionVector(object):
@@ -876,9 +756,13 @@ class _BaseMatrixInsertionVector(object):
     entails the complication of insertion *intersections*.
     """
 
-    def __init__(self, matrix, subtotal):
-        self._matrix = matrix
+    def __init__(self, subtotal, neg_idx, table_margin, base_rows, base_columns):
         self._subtotal = subtotal
+        # ---the *negative* idx of this vector among its peer insertions---
+        self._neg_idx = neg_idx
+        self._table_margin = table_margin
+        self._base_rows = base_rows
+        self._base_columns = base_columns
 
     @lazyproperty
     def addend_idxs(self):
@@ -949,12 +833,32 @@ class _BaseMatrixInsertionVector(object):
         return np.nan
 
     @lazyproperty
+    def ordering(self):
+        """ -> (position, index, self) tuple used for interleaving with base vectors.
+
+        This value allows the interleaving of insertions with base vectors to be reduced
+        to a sorting operation.
+
+        The int position value is roughly equivalent to the notion of "anchor". It is
+        0 for anchor=="top", sys.maxsize for anchor=="bottom", and int(anchor) + 1
+        otherwise. The +1 ensures insertions appear *after* the vector they are anchored
+        to.
+
+        The `index` value is the *negative* index of this subtotal in its collection
+        (i.e. the "distance from the end" of this insertion). This ensures that an
+        insertion will always sort *prior* to a base vector with the same position while
+        preserving the payload order of the insertion when two or more are anchored to
+        the same vector.
+        """
+        return (self._anchor_n, self._neg_idx, self)
+
+    @lazyproperty
     def pvals(self):
         return self._pvals
 
     @lazyproperty
     def table_margin(self):
-        return self._matrix.table_margin
+        return self._table_margin
 
     @lazyproperty
     def values(self):
@@ -963,6 +867,22 @@ class _BaseMatrixInsertionVector(object):
     @lazyproperty
     def zscore(self):
         return self._zscore
+
+    @lazyproperty
+    def _anchor_n(self):
+        """Anchor expressed as an int.
+
+        An anchor to a column is incremented by 1 to ensure it applies *after* the
+        anchor column rather than before. See `.ordering` for more.
+        """
+        anchor = self.anchor
+        return (
+            0
+            if anchor == "top"
+            else sys.maxsize
+            if anchor == "bottom"
+            else int(self.anchor) + 1
+        )
 
     @lazyproperty
     def _pvals(self):
@@ -1001,14 +921,14 @@ class _InsertionColumn(_BaseMatrixInsertionVector):
         insertion vector).
         """
         return self._subtotal.prune and not np.any(
-            np.array([row.base for row in self._matrix.rows])
+            np.array([row.base for row in self._base_rows])
         )
 
     @lazyproperty
     def _addend_vectors(self):
         return tuple(
             column
-            for i, column in enumerate(self._matrix.columns)
+            for i, column in enumerate(self._base_columns)
             if i in self._subtotal.addend_idxs
         )
 
@@ -1037,14 +957,14 @@ class _InsertionRow(_BaseMatrixInsertionVector):
         insertion vector).
         """
         return self._subtotal.prune and not np.any(
-            np.array([column.base for column in self._matrix.columns])
+            np.array([column.base for column in self._base_columns])
         )
 
     @lazyproperty
     def _addend_vectors(self):
         return tuple(
             row
-            for i, row in enumerate(self._matrix.rows)
+            for i, row in enumerate(self._base_rows)
             if i in self._subtotal.addend_idxs
         )
 
@@ -1055,6 +975,9 @@ class _InsertionRow(_BaseMatrixInsertionVector):
     @lazyproperty
     def _expected_counts(self):
         return self.opposite_margins * self.margin / self.table_margin
+
+
+# ===TRANSFORMATION VECTORS===
 
 
 class _BaseTransformationVector(object):
@@ -1121,27 +1044,29 @@ class _AssembledVector(_BaseTransformationVector):
 
     @lazyproperty
     def base_values(self):
-        # TODO: Do for real
-        return np.array(
-            self._top_base_values
-            + self._interleaved_base_values
-            + self._bottom_base_values
-        )
+        base_values = self._base_vector.base_values
+
+        def fsubtot(subtotal):
+            return np.sum(base_values[subtotal.addend_idxs])
+
+        return self._apply_interleaved(base_values, fsubtot)
 
     @lazyproperty
     def column_index(self):
-        return np.array(
-            tuple([np.nan] * len(self._top_values))
-            + self._interleaved_column_index
-            + tuple([np.nan] * len(self._bottom_values))
-        )
+        def fsubtot(subtotal):
+            # TODO: Replace with real column index values from insertions vectors. This
+            # should be something like:
+            #   col_ind = (ins1.prop + ins2.prop) / (ins1.baseline + ins2.baseline)
+            # ask @mike to confirm
+            return np.nan
+
+        return self._apply_interleaved(self._base_vector.column_index, fsubtot)
 
     @lazyproperty
     def means(self):
-        return np.array(
-            tuple([np.nan] * len(self._top_values))
-            + self._interleaved_means
-            + tuple([np.nan] * len(self._bottom_values))
+        # ---just np.nan for insertions for now---
+        return self._apply_interleaved(
+            self._base_vector.means, fsubtot=lambda _: np.nan
         )
 
     @lazyproperty
@@ -1150,7 +1075,10 @@ class _AssembledVector(_BaseTransformationVector):
 
     @lazyproperty
     def pvals(self):
-        return np.array(self._top_pvals + self._interleaved_pvals + self._bottom_pvals)
+        def fsubtot(subtotal):
+            return subtotal.pvals[self._vector_idx]
+
+        return self._apply_interleaved(self._base_vector.pvals, fsubtot)
 
     @lazyproperty
     def table_proportions(self):
@@ -1158,149 +1086,81 @@ class _AssembledVector(_BaseTransformationVector):
 
     @lazyproperty
     def values(self):
-        return np.array(
-            self._top_values + self._interleaved_values + self._bottom_values
-        )
+        values = self._base_vector.values
+
+        def fsubtot(subtotal):
+            return np.sum(values[subtotal.addend_idxs])
+
+        return self._apply_interleaved(values, fsubtot)
 
     @lazyproperty
     def zscore(self):
+        def fsubtot(subtotal):
+            return subtotal.zscore[self._vector_idx]
+
+        return self._apply_interleaved(self._base_vector.zscore, fsubtot)
+
+    def _apply_interleaved(self, base_values, fsubtot):
+        """ -> 1D array of result of applying fbase or fsubtot to each interleaved item.
+
+        `base_values` is the "unassembled" vector measure values.
+
+        `fsubtot(subtot)` :: subtotal -> intersection_value
+
+        Takes care of the details of getting vector "cells" interleaved in the right
+        order, you just provide the "unassembled" values and a function to apply to each
+        subtotal to get its value.
+        """
+        subtotals = self._opposite_inserted_vectors
+
         return np.array(
-            self._top_zscores + self._interleaved_zscore + self._bottom_zscores
+            tuple(
+                fsubtot(subtotals[idx]) if idx < 0 else base_values[idx]
+                for idx in self._interleaved_idxs
+            )
         )
 
     @lazyproperty
-    def _bottom_insertions(self):
+    def _interleaved_idxs(self):
+        """ -> tuple of int: idx for base and inserted values, in display order.
+
+        Inserted value indicies are negative, to distinguish them from base vector
+        indices. The indexes are interleaved simply by sorting their orderings. An
+        ordering is a (position, idx) pair.
+        """
+
+        def iter_insertion_orderings():
+            """Generate (int: position, int: idx) for each opposing insertion.
+
+            The position for an insertion is an int representation of its anchor and its
+            idx is the *negative* offset of its position in the opposing insertions
+            sequence (like -3, -2, -1 for a sequence of length 3). The negative idx
+            works just as well as the normal one for accessing the subtotal but insures
+            that an insertion at the same position as a base row always sorts *before*
+            the base row.
+
+            The `position` int for a subtotal is 0 for anchor "top", sys.maxsize for
+            anchor "bottom", and int(anchor) + 1 for all others. The +1 ensures
+            a subtotal appears *after* the vector it is anchored to.
+            """
+            for v in self._opposite_inserted_vectors:
+                pos, idx, _ = v.ordering
+                yield pos, idx
+
+        def iter_base_value_orderings():
+            """Generate (int: position, int: idx) for each base value.
+
+            The position of a base value is simply it's index in the vector.
+            """
+            for idx in range(len(self._base_vector.values)):
+                yield idx, idx
+
         return tuple(
-            vector
-            for vector in self._opposite_inserted_vectors
-            if vector.anchor == "bottom"
+            idx
+            for pos, idx in sorted(
+                itertools.chain(iter_insertion_orderings(), iter_base_value_orderings())
+            )
         )
-
-    @lazyproperty
-    def _bottom_base_values(self):
-        return tuple(
-            np.sum(self._base_vector.base_values[col.addend_idxs])
-            for col in self._bottom_insertions
-        )
-
-    @lazyproperty
-    def _bottom_pvals(self):
-        return tuple(
-            vector.pvals[self._vector_idx] for vector in self._bottom_insertions
-        )
-
-    @lazyproperty
-    def _bottom_values(self):
-        return tuple(
-            np.sum(self._base_vector.values[col.addend_idxs])
-            for col in self._bottom_insertions
-        )
-
-    @lazyproperty
-    def _bottom_zscores(self):
-        return tuple(
-            vector.zscore[self._vector_idx] for vector in self._bottom_insertions
-        )
-
-    @lazyproperty
-    def _interleaved_base_values(self):
-        base_values = []
-        for i in range(len(self._base_vector.base_values)):
-            base_values.append(self._base_vector.base_values[i])
-            for inserted_vector in self._opposite_inserted_vectors:
-                if i == inserted_vector.anchor:
-                    insertion_value = np.sum(
-                        self._base_vector.base_values[inserted_vector.addend_idxs]
-                    )
-                    base_values.append(insertion_value)
-        return tuple(base_values)
-
-    @lazyproperty
-    def _interleaved_column_index(self):
-        # TODO: Replace with real column index values from insertions vectors. This
-        # should be something like:
-        #   col_ind = (ins1.prop + ins2.prop) / (ins1.baseline + ins2.baseline)
-        # ask @mike to confirm
-        column_index = []
-        for i, value in enumerate(self._base_vector.column_index):
-            column_index.append(value)
-            for inserted_vector in self._opposite_inserted_vectors:
-                if i == inserted_vector.anchor:
-                    column_index.append(np.nan)
-        return tuple(column_index)
-
-    @lazyproperty
-    def _interleaved_means(self):
-        means = []
-        for i, value in enumerate(self._base_vector.means):
-            means.append(value)
-            for inserted_vector in self._opposite_inserted_vectors:
-                if i == inserted_vector.anchor:
-                    means.append(np.nan)
-        return tuple(means)
-
-    @lazyproperty
-    def _interleaved_pvals(self):
-        pvals = []
-        for i, value in enumerate(self._base_vector.pvals):
-            pvals.append(value)
-            for inserted_vector in self._opposite_inserted_vectors:
-                if i == inserted_vector.anchor:
-                    pvals.append(inserted_vector.pvals[self._vector_idx])
-        return tuple(pvals)
-
-    @lazyproperty
-    def _interleaved_values(self):
-        values = []
-        for i in range(len(self._base_vector.values)):
-            values.append(self._base_vector.values[i])
-            for inserted_vector in self._opposite_inserted_vectors:
-                if i == inserted_vector.anchor:
-                    insertion_value = np.sum(
-                        self._base_vector.values[inserted_vector.addend_idxs]
-                    )
-                    values.append(insertion_value)
-        return tuple(values)
-
-    @lazyproperty
-    def _interleaved_zscore(self):
-        zscore = []
-        for i, value in enumerate(self._base_vector.zscore):
-            zscore.append(value)
-            for inserted_vector in self._opposite_inserted_vectors:
-                if i == inserted_vector.anchor:
-                    zscore.append(inserted_vector.zscore[self._vector_idx])
-        return tuple(zscore)
-
-    @lazyproperty
-    def _top_base_values(self):
-        return tuple(
-            np.sum(self._base_vector.base_values[col.addend_idxs])
-            for col in self._top_insertions
-        )
-
-    @lazyproperty
-    def _top_insertions(self):
-        return tuple(
-            vector
-            for vector in self._opposite_inserted_vectors
-            if vector.anchor == "top"
-        )
-
-    @lazyproperty
-    def _top_pvals(self):
-        return tuple(vector.pvals[self._vector_idx] for vector in self._top_insertions)
-
-    @lazyproperty
-    def _top_values(self):
-        return tuple(
-            np.sum(self._base_vector.values[col.addend_idxs])
-            for col in self._top_insertions
-        )
-
-    @lazyproperty
-    def _top_zscores(self):
-        return tuple(vector.zscore[self._vector_idx] for vector in self._top_insertions)
 
 
 class _VectorAfterHiding(_BaseTransformationVector):
@@ -1372,11 +1232,15 @@ class _VectorAfterHiding(_BaseTransformationVector):
 
 
 class _OrderedVector(_BaseTransformationVector):
-    """In charge of indexing elements properly, after ordering transform."""
+    """Rearranges its "cells" to the order of its opposing-vectors.
 
-    def __init__(self, base_vector, opposing_order):
+    For example, the cells in a row appear in the order of the column vectors.
+    """
+
+    def __init__(self, base_vector, opposing_order, index):
         self._base_vector = base_vector
         self._opposing_order_arg = opposing_order
+        self._index = index
 
     @lazyproperty
     def base(self):
@@ -1393,6 +1257,18 @@ class _OrderedVector(_BaseTransformationVector):
     @lazyproperty
     def label(self):
         return self._base_vector.label
+
+    @lazyproperty
+    def ordering(self):
+        """ -> (position, index, self) tuple used for interleaving with insertions.
+
+        This value allows the interleaving of base vectors with insertions to be reduced
+        to a sorting operation.
+
+        The position and index of a base vector are both its index within its ordered
+        collection.
+        """
+        return (self._index, self._index, self)
 
     @lazyproperty
     def pvals(self):
