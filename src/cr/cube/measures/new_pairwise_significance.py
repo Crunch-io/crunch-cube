@@ -105,7 +105,7 @@ class _ColumnPairwiseSignificance:
 
     @lazyproperty
     def p_vals_scale_means(self):
-        return 2 * (1 - t.cdf(abs(self.t_stats_scale_means), df=self._df))
+        return 2 * (1 - t.cdf(abs(self.t_stats_scale_means), df=self._two_sample_df))
 
     @lazyproperty
     def p_vals(self):
@@ -147,3 +147,9 @@ class _ColumnPairwiseSignificance:
             else self._slice.column_base[:, self._col_idx][:, None]
         )
         return self._slice.column_base + selected_unweighted_n - 2
+
+    @lazyproperty
+    def _two_sample_df(self):
+        not_a_nan_index = ~np.isnan(self._slice.rows_dimension_numeric)
+        counts = np.sum(self._slice.counts[not_a_nan_index, :], axis=0)
+        return counts[0] + counts - 2

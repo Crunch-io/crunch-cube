@@ -26,7 +26,7 @@ class TestStandardizedResiduals(TestCase):
         )
         np.testing.assert_almost_equal(
             actual.p_vals_scale_means,
-            [1.00000000e00, 2.76321156e-01, 2.02993396e-01, 3.98355709e-05],
+            [1.0000000e00, 2.7638510e-01, 2.0302047e-01, 4.0226310e-05],
         )
 
         # Testing col 1 with others
@@ -36,7 +36,7 @@ class TestStandardizedResiduals(TestCase):
         assert actual.t_stats_scale_means[1] == 0
         np.testing.assert_almost_equal(
             actual.p_vals_scale_means,
-            [2.76321156e-01, 1.00000000e00, 1.43051931e-03, 1.71489600e-09],
+            [2.7666712e-01, 1.0000000e00, 1.4460467e-03, 2.1880509e-09],
         )
         np.testing.assert_almost_equal(
             actual.t_stats_scale_means, [1.08966143, 0.0, 3.19741668, 6.10466696]
@@ -55,7 +55,7 @@ class TestStandardizedResiduals(TestCase):
             [0.0, -1.64461503, -1.92387847, np.nan, -1.06912069],
         )
         np.testing.assert_almost_equal(
-            actual.p_vals_scale_means, [1.0, 0.10473357, 0.0597474, np.nan, 0.29194082]
+            actual.p_vals_scale_means, [1.0, 0.1046981, 0.059721, np.nan, 0.2918845]
         )
 
         # Just H&S
@@ -64,11 +64,12 @@ class TestStandardizedResiduals(TestCase):
 
         np.testing.assert_almost_equal(
             actual.t_stats_scale_means,
-            [0.0, -0.93879579, -1.64461503, -1.92387847, np.nan, -1.06912069],
+            [0.0, -0.9387958, -1.644615, -1.9238785, np.nan, -1.0691207],
         )
+
         np.testing.assert_almost_equal(
             actual.p_vals_scale_means,
-            [1.0, 0.35003189, 0.10473357, 0.0597474, np.nan, 0.29194082],
+            [1.0, 0.3500141, 0.1046981, 0.059721, np.nan, 0.2918845],
         )
 
         # Just pruning
@@ -84,8 +85,7 @@ class TestStandardizedResiduals(TestCase):
             [0.0, -0.93879579, -1.64461503, -1.92387847, -1.06912069],
         )
         np.testing.assert_almost_equal(
-            actual.p_vals_scale_means,
-            [1.0, 0.35003189, 0.10473357, 0.0597474, 0.29194082],
+            actual.p_vals_scale_means, [1.0, 0.3500141, 0.1046981, 0.059721, 0.2918845]
         )
 
         # Pruning and H&S
@@ -100,7 +100,7 @@ class TestStandardizedResiduals(TestCase):
             actual.t_stats_scale_means, [0.0, -1.64461503, -1.92387847, -1.06912069]
         )
         np.testing.assert_almost_equal(
-            actual.p_vals_scale_means, [1.0, 0.10473357, 0.0597474, 0.29194082]
+            actual.p_vals_scale_means, [1.0, 0.1046981, 0.059721, 0.2918845]
         )
 
     def test_pairwise_t_stats_scale_means_with_hs(self):
@@ -150,7 +150,7 @@ class TestStandardizedResiduals(TestCase):
         )
         np.testing.assert_almost_equal(
             actual.p_vals_scale_means,
-            [1.00000000e00, 2.51204933e-05, 8.24823700e-05, 1.27203240e-06],
+            [1.0000000e00, 1.3839564e-05, 7.4552516e-05, 4.0145665e-07],
         )
 
     def test_pairwise_t_stats_with_hs(self):
