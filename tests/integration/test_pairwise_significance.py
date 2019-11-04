@@ -477,7 +477,7 @@ class TestStandardizedResiduals(TestCase):
         pairwise_indices_scale_mean = slice_.pairwise_indices_scale_mean
 
         np.testing.assert_array_equal(
-            pairwise_indices_scale_mean, np.array([(), (), (1,), (0, 1, 2)])
+            pairwise_indices_scale_mean, np.array([(3,), (2, 3), (3,), ()])
         )
 
         transforms = {"pairwise_indices": {"only_larger": False}}
@@ -497,17 +497,17 @@ class TestStandardizedResiduals(TestCase):
             pairwise_indices_scale_mean,
             np.array(
                 [
+                    (3, 4, 5, 8, 10),
+                    (3, 4, 10),
+                    (3, 4, 5, 8, 10),
                     (),
                     (),
                     (),
-                    (0, 1, 2, 6, 7),
-                    (0, 1, 2, 6, 7),
-                    (0, 2, 6),
+                    (3, 4, 5, 8, 10),
+                    (3, 4, 10),
                     (),
+                    (10,),
                     (),
-                    (0, 2, 6),
-                    (),
-                    (0, 1, 2, 6, 7, 9),
                 ]
             ),
         )
@@ -527,16 +527,16 @@ class TestStandardizedResiduals(TestCase):
             pairwise_indices_scale_mean,
             np.array(
                 [
+                    (3, 4, 7, 9),
+                    (3, 4, 9),
+                    (3, 4, 7, 9),
                     (),
                     (),
+                    (3, 4, 7, 9),
+                    (3, 4, 9),
                     (),
-                    (0, 1, 2, 5, 6),
-                    (0, 1, 2, 5, 6),
+                    (9,),
                     (),
-                    (),
-                    (0, 2, 5),
-                    (),
-                    (0, 1, 2, 5, 6, 8),
                 ]
             ),
         )
