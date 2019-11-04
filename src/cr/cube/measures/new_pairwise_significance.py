@@ -44,6 +44,11 @@ class NewPairwiseSignificance:
         return np.array([sig.pairwise_indices for sig in self.values]).T
 
     @lazyproperty
+    def pairwise_indices_scale_means(self):
+        """ndarray containing tuples of pairwise indices."""
+        return np.array([sig.pairwise_indices_scale_mean for sig in self.values]).T
+
+    @lazyproperty
     def summary_pairwise_indices(self):
         """ndarray containing tuples of pairwise indices for the column summary."""
         summary_pairwise_indices = np.empty(
@@ -119,6 +124,21 @@ class _ColumnPairwiseSignificance:
         return [tuple(np.where(sig_row)[0]) for sig_row in significance]
 
     @lazyproperty
+    def pairwise_indices_scale_mean(self):
+        # Returns a list of n tuples where n is the number of the columns
+        # of the slice. Each tuple contains the indices of the significant
+        # column compared with the col ix where ix is the index of the tuple
+        # in the list. e.g [(), (), (1,), (0, 1, 2)]
+        significance = self.p_vals_scale_means < self._alpha
+        if self._only_larger:
+            significance = np.logical_and(self.t_stats_scale_means < 0, significance)
+        # import ipdb
+        #
+        # ipdb.set_trace()
+        # return [tuple(np.where(sig_row)[0]) for sig_row in significance]
+        return tuple(np.where(significance)[0])
+
+    @lazyproperty
     def summary_pairwise_indices(self):
         significance = self.summary_p_vals < self._alpha
         if self._only_larger:
@@ -152,4 +172,4 @@ class _ColumnPairwiseSignificance:
     def _two_sample_df(self):
         not_a_nan_index = ~np.isnan(self._slice.rows_dimension_numeric)
         counts = np.sum(self._slice.counts[not_a_nan_index, :], axis=0)
-        return counts[0] + counts - 2
+        return counts[self._col_idx] + counts - 2

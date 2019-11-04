@@ -36,7 +36,7 @@ class TestStandardizedResiduals(TestCase):
         assert actual.t_stats_scale_means[1] == 0
         np.testing.assert_almost_equal(
             actual.p_vals_scale_means,
-            [2.7666712e-01, 1.0000000e00, 1.4460467e-03, 2.1880509e-09],
+            [2.7638510e-01, 1.0000000e00, 1.4344585e-03, 1.7905266e-09],
         )
         np.testing.assert_almost_equal(
             actual.t_stats_scale_means, [1.08966143, 0.0, 3.19741668, 6.10466696]
@@ -471,3 +471,72 @@ class TestStandardizedResiduals(TestCase):
             ]
         )
         np.testing.assert_array_equal(pairwise_indices, expected_indices)
+
+    def test_pairwise_significance_scale_means_nps_type(self):
+        slice_ = Cube(SM.FACEBOOK_APPS_X_AGE).partitions[0]
+        pairwise_indices_scale_mean = slice_.pairwise_indices_scale_mean
+
+        np.testing.assert_array_equal(
+            pairwise_indices_scale_mean, np.array([(), (), (1,), (0, 1, 2)])
+        )
+
+        transforms = {"pairwise_indices": {"only_larger": False}}
+        slice_ = Cube(SM.FACEBOOK_APPS_X_AGE, transforms=transforms).partitions[0]
+        pairwise_indices_scale_mean = slice_.pairwise_indices_scale_mean
+
+        np.testing.assert_array_equal(
+            pairwise_indices_scale_mean, np.array([(3,), (2, 3), (1, 3), (0, 1, 2)])
+        )
+
+    def test_pairwise_indices_scale_means_with_hs(self):
+        slice_ = Cube(CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION_WITH_HS).partitions[0]
+        pairwise_indices_scale_mean = slice_.pairwise_indices_scale_mean
+
+        assert pairwise_indices_scale_mean.shape == (slice_.counts.shape[1],)
+        np.testing.assert_array_equal(
+            pairwise_indices_scale_mean,
+            np.array(
+                [
+                    (),
+                    (),
+                    (),
+                    (0, 1, 2, 6, 7),
+                    (0, 1, 2, 6, 7),
+                    (0, 2, 6),
+                    (),
+                    (),
+                    (0, 2, 6),
+                    (),
+                    (0, 1, 2, 6, 7, 9),
+                ]
+            ),
+        )
+
+        transforms = {
+            "columns_dimension": {"insertions": {}},
+            "rows_dimension": {"insertions": {}},
+        }
+
+        slice_without_hs_ = Cube(
+            CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION_WITH_HS, transforms=transforms
+        ).partitions[0]
+        pairwise_indices_scale_mean = slice_without_hs_.pairwise_indices_scale_mean
+
+        assert pairwise_indices_scale_mean.shape == (slice_.counts.shape[1] - 1,)
+        np.testing.assert_array_equal(
+            pairwise_indices_scale_mean,
+            np.array(
+                [
+                    (),
+                    (),
+                    (),
+                    (0, 1, 2, 5, 6),
+                    (0, 1, 2, 5, 6),
+                    (),
+                    (),
+                    (0, 2, 5),
+                    (),
+                    (0, 1, 2, 5, 6, 8),
+                ]
+            ),
+        )
