@@ -132,10 +132,6 @@ class _ColumnPairwiseSignificance:
         significance = self.p_vals_scale_means < self._alpha
         if self._only_larger:
             significance = np.logical_and(self.t_stats_scale_means < 0, significance)
-        # import ipdb
-        #
-        # ipdb.set_trace()
-        # return [tuple(np.where(sig_row)[0]) for sig_row in significance]
         return tuple(np.where(significance)[0])
 
     @lazyproperty
