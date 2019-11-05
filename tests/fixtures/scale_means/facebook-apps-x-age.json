@@ -1,0 +1,298 @@
+{
+  "element": "shoji:view",
+  "self": "https://app.crunch.io/api/datasets/bc6e2c22a8c14638ae584afaca816311/cube/?query=%7B%22dimensions%22:%5B%7B%22variable%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2Fbc6e2c22a8c14638ae584afaca816311%2Fvariables%2F000020%2F%22%7D,%7B%22variable%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2Fbc6e2c22a8c14638ae584afaca816311%2Fvariables%2F000029%2F%22%7D%5D,%22measures%22:%7B%22count%22:%7B%22function%22:%22cube_count%22,%22args%22:%5B%5D%7D%7D,%22weight%22:null%7D",
+  "value": {
+    "query": {
+      "measures": {
+        "count": {
+          "function": "cube_count",
+          "args": []
+        }
+      },
+      "dimensions": [
+        {
+          "variable": "https://app.crunch.io/api/datasets/bc6e2c22a8c14638ae584afaca816311/variables/000020/"
+        },
+        {
+          "variable": "https://app.crunch.io/api/datasets/bc6e2c22a8c14638ae584afaca816311/variables/000029/"
+        }
+      ],
+      "weight": null
+    },
+    "query_environment": {
+      "filter": []
+    },
+    "result": {
+      "dimensions": [
+        {
+          "references": {
+            "alias": "facebook_apps",
+            "name": "facebook_apps",
+            "description": "Have you ever downloaded any of the free apps (eg FarmVille, Airport City, etc.) on Facebook?"
+          },
+          "derived": false,
+          "type": {
+            "ordinal": false,
+            "class": "categorical",
+            "categories": [
+              {
+                "numeric_value": 100,
+                "id": 1,
+                "name": "Yes",
+                "missing": false
+              },
+              {
+                "numeric_value": 0,
+                "id": 2,
+                "name": "No",
+                "missing": false
+              },
+              {
+                "numeric_value": null,
+                "id": 3,
+                "name": "Don't remember",
+                "missing": false
+              },
+              {
+                "numeric_value": null,
+                "id": 4,
+                "name": "Prefer not to say",
+                "missing": false
+              },
+              {
+                "numeric_value": 32766,
+                "id": 32766,
+                "name": "skipped",
+                "missing": true
+              },
+              {
+                "numeric_value": 32767,
+                "id": 32767,
+                "name": "not asked",
+                "missing": true
+              },
+              {
+                "numeric_value": null,
+                "id": -1,
+                "name": "No Data",
+                "missing": true
+              }
+            ]
+          }
+        },
+        {
+          "references": {
+            "alias": "age4",
+            "name": "age4",
+            "description": "Respondent age by category"
+          },
+          "derived": false,
+          "type": {
+            "ordinal": false,
+            "class": "categorical",
+            "categories": [
+              {
+                "numeric_value": null,
+                "id": 1,
+                "name": "Under 30",
+                "missing": false
+              },
+              {
+                "numeric_value": null,
+                "id": 2,
+                "name": "30-44",
+                "missing": false
+              },
+              {
+                "numeric_value": null,
+                "id": 3,
+                "name": "45-64",
+                "missing": false
+              },
+              {
+                "numeric_value": null,
+                "id": 4,
+                "name": "65+",
+                "missing": false
+              },
+              {
+                "numeric_value": null,
+                "id": 32766,
+                "name": "skipped",
+                "missing": true
+              },
+              {
+                "numeric_value": null,
+                "id": 32767,
+                "name": "not asked",
+                "missing": true
+              },
+              {
+                "numeric_value": null,
+                "id": -1,
+                "name": "No Data",
+                "missing": true
+              }
+            ]
+          }
+        }
+      ],
+      "missing": 15,
+      "measures": {
+        "count": {
+          "data": [
+            42,
+            103,
+            120,
+            33,
+            0,
+            0,
+            0,
+            122,
+            237,
+            453,
+            266,
+            0,
+            0,
+            0,
+            14,
+            33,
+            29,
+            6,
+            0,
+            0,
+            0,
+            7,
+            16,
+            3,
+            1,
+            0,
+            0,
+            0,
+            4,
+            6,
+            1,
+            4,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "n_missing": 15,
+          "metadata": {
+            "references": {},
+            "derived": true,
+            "type": {
+              "integer": true,
+              "missing_rules": {},
+              "missing_reasons": {
+                "No Data": -1
+              },
+              "class": "numeric"
+            }
+          }
+        }
+      },
+      "n": 1500,
+      "filter_stats": {
+        "filtered_complete": {
+          "unweighted": {
+            "selected": 1500,
+            "other": 0,
+            "missing": 0
+          },
+          "weighted": {
+            "selected": 1500,
+            "other": 0,
+            "missing": 0
+          }
+        },
+        "filtered": {
+          "unweighted": {
+            "selected": 1500,
+            "other": 0,
+            "missing": 0
+          },
+          "weighted": {
+            "selected": 1500,
+            "other": 0,
+            "missing": 0
+          }
+        }
+      },
+      "unfiltered": {
+        "unweighted_n": 1500,
+        "weighted_n": 1500
+      },
+      "filtered": {
+        "unweighted_n": 1500,
+        "weighted_n": 1500
+      },
+      "counts": [
+        42,
+        103,
+        120,
+        33,
+        0,
+        0,
+        0,
+        122,
+        237,
+        453,
+        266,
+        0,
+        0,
+        0,
+        14,
+        33,
+        29,
+        6,
+        0,
+        0,
+        0,
+        7,
+        16,
+        3,
+        1,
+        0,
+        0,
+        0,
+        4,
+        6,
+        1,
+        4,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "element": "crunch:cube"
+    }
+  }
+}

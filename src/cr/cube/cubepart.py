@@ -213,6 +213,16 @@ class _Slice(CubePartition):
         ).pairwise_indices
 
     @lazyproperty
+    def pairwise_indices_scale_mean(self):
+        alpha = self._transforms_dict.get("pairwise_indices", {}).get("alpha", 0.05)
+        only_larger = self._transforms_dict.get("pairwise_indices", {}).get(
+            "only_larger", True
+        )
+        return NewPairwiseSignificance(
+            self, alpha=alpha, only_larger=only_larger
+        ).pairwise_indices_scale_means
+
+    @lazyproperty
     def pairwise_significance_tests(self):
         """tuple of _ColumnPairwiseSignificance tests.
 
@@ -283,6 +293,10 @@ class _Slice(CubePartition):
         return self._rows_dimension.dimension_type
 
     @lazyproperty
+    def rows_dimension_numeric(self):
+        return self._rows_dimension_numeric
+
+    @lazyproperty
     def rows_margin(self):
         return np.array([row.margin for row in self._matrix.rows])
 
@@ -295,6 +309,22 @@ class _Slice(CubePartition):
         not_a_nan_index = ~np.isnan(self._columns_dimension_numeric)
         denominator = np.sum(self.counts[:, not_a_nan_index], axis=1)
         return inner / denominator
+
+    @lazyproperty
+    def var_scale_means_column(self):
+        if np.all(np.isnan(self._columns_dimension_numeric)):
+            return None
+
+        not_a_nan_index = ~np.isnan(self._columns_dimension_numeric)
+        col_dim_numeric = self._columns_dimension_numeric[not_a_nan_index]
+
+        numerator = self.counts[:, not_a_nan_index] * pow(
+            np.broadcast_to(col_dim_numeric, self.counts[:, not_a_nan_index].shape)
+            - self.scale_means_column.reshape(-1, 1),
+            2,
+        )
+        denominator = np.sum(self.counts[:, not_a_nan_index], axis=1)
+        return np.nansum(numerator, axis=1) / denominator
 
     @lazyproperty
     def scale_means_columns_margin(self):
@@ -320,6 +350,26 @@ class _Slice(CubePartition):
         not_a_nan_index = ~np.isnan(self._rows_dimension_numeric)
         denominator = np.sum(self.counts[not_a_nan_index, :], axis=0)
         return inner / denominator
+
+    @lazyproperty
+    def var_scale_means_row(self):
+        if np.all(np.isnan(self._rows_dimension_numeric)):
+            return None
+
+        not_a_nan_index = ~np.isnan(self._rows_dimension_numeric)
+        row_dim_numeric = self._rows_dimension_numeric[not_a_nan_index]
+        numerator = (
+            self.counts[not_a_nan_index, :]
+            * pow(
+                np.broadcast_to(
+                    row_dim_numeric, self.counts[not_a_nan_index, :].T.shape
+                )
+                - self.scale_means_row.reshape(-1, 1),
+                2,
+            ).T
+        )
+        denominator = np.sum(self.counts[not_a_nan_index, :], axis=0)
+        return np.nansum(numerator, axis=0) / denominator
 
     @lazyproperty
     def scale_means_rows_margin(self):
@@ -588,18 +638,15 @@ class _Strand(CubePartition):
 
         This value is `None` when no row-elements have a numeric-value assigned.
         """
-        numeric_values = self._numeric_values
-
         # ---return None when no row-element has been assigned a numeric value. This
         # ---avoids a division-by-zero error.
-        if np.all(np.isnan(numeric_values)):
+        if np.all(np.isnan(self._numeric_values)):
             return None
 
         # ---produce operands with rows without numeric values removed. Notably, this
         # ---excludes subtotal rows.
-        is_a_number_mask = ~np.isnan(numeric_values)
-        numeric_values = numeric_values[is_a_number_mask]
-        counts = self._counts_as_array[is_a_number_mask]
+        numeric_values = self._numeric_values[self._numeric_values_mask]
+        counts = self._counts_as_array[self._numeric_values_mask]
 
         # ---calculate numerator and denominator---
         total_numeric_value = np.sum(numeric_values * counts)
@@ -669,6 +716,18 @@ class _Strand(CubePartition):
         """
         return tuple(np.broadcast_to(self.table_base, self._shape))
 
+    @lazyproperty
+    def var_scale_mean(self):
+        if np.all(np.isnan(self._numeric_values)):
+            return None
+
+        numeric_values = self._numeric_values[self._numeric_values_mask]
+        counts = self._counts_as_array[self._numeric_values_mask]
+
+        return np.nansum(counts * pow((numeric_values - self.scale_mean), 2)) / np.sum(
+            counts
+        )
+
     # ---implementation (helpers)-------------------------------------
 
     @lazyproperty
@@ -689,6 +748,15 @@ class _Strand(CubePartition):
         row (subtotal) or where the row-element has been assigned no numeric value.
         """
         return np.array([row.numeric_value for row in self._stripe.rows])
+
+    @lazyproperty
+    def _numeric_values_mask(self):
+        """Array of boolean elements for each element in rows dimension."
+
+        This array contains True or False according to the nan in the numeric_values array
+        """
+        is_a_number_mask = ~np.isnan(self._numeric_values)
+        return is_a_number_mask
 
     @lazyproperty
     def _rows_dimension(self):

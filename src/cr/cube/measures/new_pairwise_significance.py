@@ -5,7 +5,7 @@
 from __future__ import division
 
 import numpy as np
-from scipy.stats import t
+from scipy.stats import t, norm
 
 from cr.cube.util import lazyproperty
 
@@ -44,6 +44,11 @@ class NewPairwiseSignificance:
         return np.array([sig.pairwise_indices for sig in self.values]).T
 
     @lazyproperty
+    def pairwise_indices_scale_means(self):
+        """ndarray containing tuples of pairwise indices."""
+        return np.array([sig.pairwise_indices_scale_mean for sig in self.values]).T
+
+    @lazyproperty
     def summary_pairwise_indices(self):
         """ndarray containing tuples of pairwise indices for the column summary."""
         summary_pairwise_indices = np.empty(
@@ -73,6 +78,46 @@ class _ColumnPairwiseSignificance:
         return diff / se_diff
 
     @lazyproperty
+    def t_stats_scale_means(self):
+
+        """
+        This property calculates the Two-tailed t-test using the formula:
+        t = X1 - X2 / Sx1x2 * sqrt(1/n1 + 1/n2)
+        where X1 and X2 are the scale mean value for the 2 sample we're
+        comparing, n1 and n2 are the number of people from the 1st ans 2nd
+        sample who provided a response to the survey, Sx1x2 is the standard
+        deviation. In this case the standard deviation is:
+        Sx1x2 = sqrt(((n1-1)*s2x1 + (n2-2)*s2x2)/(n1+n2+2)), where s2x1 and
+        s2x2 are the is the standard deviation for sample 1 and 2.
+
+        :return: numpy 1D array of tstats
+        """
+
+        variance = self._slice.var_scale_means_row
+        # Sum for each column of the counts that have not a nan index in the
+        # related numeric counts
+        not_a_nan_index = ~np.isnan(self._slice.rows_dimension_numeric)
+        counts = np.sum(self._slice.counts[not_a_nan_index, :], axis=0)
+
+        standard_deviation = np.sqrt(
+            np.divide(
+                (counts[self._col_idx] - 1) * variance[self._col_idx]
+                + ((counts - 1) * np.array(variance)),
+                (counts[self._col_idx] + counts - 2),
+            )
+        )
+
+        tstats_scale_means = (
+            self._slice.scale_means_row[self._col_idx] - self._slice.scale_means_row
+        ) / (standard_deviation * np.sqrt((1 / counts[self._col_idx]) + (1 / counts)))
+
+        return tstats_scale_means
+
+    @lazyproperty
+    def p_vals_scale_means(self):
+        return 2 * (1 - t.cdf(abs(self.t_stats_scale_means), df=self._two_sample_df))
+
+    @lazyproperty
     def p_vals(self):
         return 2 * (1 - t.cdf(abs(self.t_stats), df=self._df))
 
@@ -82,6 +127,22 @@ class _ColumnPairwiseSignificance:
         if self._only_larger:
             significance = np.logical_and(self.t_stats < 0, significance)
         return [tuple(np.where(sig_row)[0]) for sig_row in significance]
+
+    @lazyproperty
+    def pairwise_indices_scale_mean(self):
+        """
+        List of tuples indicating the significance
+
+        Considreing this output: [(3,), (2, 3), (3,), ()] and scale_means values
+        [26, 30, 21, 11], each element contains a tuple of other element
+        indices that are significantly different from the present element's index
+        in a two-tailed test with alpha=.05 by default. The element at index 0 (26)
+        indicates that it differs significantly only from the element at index 3 (11)
+        """
+        significance = self.p_vals_scale_means < self._alpha
+        if self._only_larger:
+            significance = np.logical_and(self.t_stats_scale_means > 0, significance)
+        return tuple(np.where(significance)[0])
 
     @lazyproperty
     def summary_pairwise_indices(self):
@@ -112,3 +173,9 @@ class _ColumnPairwiseSignificance:
             else self._slice.column_base[:, self._col_idx][:, None]
         )
         return self._slice.column_base + selected_unweighted_n - 2
+
+    @lazyproperty
+    def _two_sample_df(self):
+        not_a_nan_index = ~np.isnan(self._slice.rows_dimension_numeric)
+        counts = np.sum(self._slice.counts[not_a_nan_index, :], axis=0)
+        return counts[self._col_idx] + counts - 2

@@ -1,0 +1,146 @@
+{
+    "element": "shoji:view",
+    "self": "https://app.crunch.io/api/datasets/ddc1b8a25c454689911d3d7a59c97aee/cube/?filter=%7B%22filter%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2Fddc1b8a25c454689911d3d7a59c97aee%2Ffilters%2F06b4deb17519405ebe4581dd8dbe9eba%2F%22%7D&query=%7B%22dimensions%22:%5B%7B%22variable%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2Fddc1b8a25c454689911d3d7a59c97aee%2Fvariables%2F000026%2F%22%7D%5D,%22measures%22:%7B%22count%22:%7B%22function%22:%22cube_count%22,%22args%22:%5B%5D%7D%7D,%22weight%22:null%7D",
+    "value": {
+        "query": {
+            "measures": {
+                "count": {
+                    "function": "cube_count",
+                    "args": [
+
+                    ]
+                }
+            },
+            "dimensions": [
+                {
+                    "variable": "https://app.crunch.io/api/datasets/ddc1b8a25c454689911d3d7a59c97aee/variables/000026/"
+                }
+            ],
+            "weight": null
+        },
+        "query_environment": {
+            "filter": [
+                "https://app.crunch.io/api/datasets/ddc1b8a25c454689911d3d7a59c97aee/filters/06b4deb17519405ebe4581dd8dbe9eba/"
+            ]
+        },
+        "result": {
+            "dimensions": [
+                {
+                    "references": {
+                        "alias": "pasta",
+                        "notes": "A categorical variable",
+                        "name": "Shapes of pasta",
+                        "description": "The geometry of pasta"
+                    },
+                    "derived": false,
+                    "type": {
+                        "ordinal": false,
+                        "class": "categorical",
+                        "categories": [
+                            {
+                                "numeric_value": null,
+                                "missing": false,
+                                "id": 1,
+                                "name": "Bucatini"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": false,
+                                "id": 2,
+                                "name": "Chitarra"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": false,
+                                "id": 0,
+                                "name": "Boccoli"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": false,
+                                "id": 4,
+                                "name": "Orecchiette"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": false,
+                                "id": 5,
+                                "name": "Quadrefiore"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": false,
+                                "id": 6,
+                                "name": "Fileja"
+                            },
+                            {
+                                "numeric_value": 32766,
+                                "missing": true,
+                                "id": 32766,
+                                "name": "Skipped"
+                            },
+                            {
+                                "numeric_value": 32767,
+                                "missing": true,
+                                "id": 32767,
+                                "name": "Not asked"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": true,
+                                "id": -1,
+                                "name": "No Data"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "missing": 4,
+            "measures": {
+                "count": {
+                    "data": [
+                        54,
+                        124,
+                        610,
+                        306,
+                        396,
+                        150,
+                        4,
+                        0,
+                        0
+                    ],
+                    "n_missing": 4,
+                    "metadata": {
+                        "references": {
+
+                        },
+                        "derived": true,
+                        "type": {
+                            "integer": true,
+                            "missing_rules": {
+
+                            },
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "class": "numeric"
+                        }
+                    }
+                }
+            },
+            "element": "crunch:cube",
+            "counts": [
+                54,
+                124,
+                610,
+                306,
+                396,
+                150,
+                4,
+                0,
+                0
+            ],
+            "n": 1644
+        }
+    }
+}
