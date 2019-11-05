@@ -79,14 +79,19 @@ class _ColumnPairwiseSignificance:
 
     @lazyproperty
     def t_stats_scale_means(self):
-        # This property calculates the Two-Sample t-test using the formula:
-        # t = X1 - X2 / Sx1x2 * sqrt(1/n1 + 1/n2)
-        # where X1 and X2 are the scale mean value for the 2 sample we're
-        # comparing, n1 and n2 are the number of people from the 1st ans 2nd
-        # sample who provided a response to the survey, Sx1x2 is the standard
-        # deviation. In this case the standard deviation is:
-        # Sx1x2 = sqrt(((n1-1)*s2x1 + (n2-2)*s2x2)/(n1+n2+2)), where s2x1 and
-        # s2x2 are the is the standard deviation for sample 1 and 2.
+
+        """
+        This property calculates the Two-tailed t-test using the formula:
+        t = X1 - X2 / Sx1x2 * sqrt(1/n1 + 1/n2)
+        where X1 and X2 are the scale mean value for the 2 sample we're
+        comparing, n1 and n2 are the number of people from the 1st ans 2nd
+        sample who provided a response to the survey, Sx1x2 is the standard
+        deviation. In this case the standard deviation is:
+        Sx1x2 = sqrt(((n1-1)*s2x1 + (n2-2)*s2x2)/(n1+n2+2)), where s2x1 and
+        s2x2 are the is the standard deviation for sample 1 and 2.
+
+        :return: numpy 1D array of tstats
+        """
 
         variance = self._slice.var_scale_means_row
         # Sum for each column of the counts that have not a nan index in the
@@ -125,10 +130,15 @@ class _ColumnPairwiseSignificance:
 
     @lazyproperty
     def pairwise_indices_scale_mean(self):
-        # Returns a list of n tuples where n is the number of the columns
-        # of the slice. Each tuple contains the indices of the significant
-        # column compared with the col ix where ix is the index of the tuple
-        # in the list. e.g [(), (), (1,), (0, 1, 2)]
+        """
+        List of tuples indicating the significance
+
+        Considreing this output: [(3,), (2, 3), (3,), ()] and scale_means values
+        [26, 30, 21, 11], each element contains a tuple of other element
+        indices that are significantly different from the present element's index
+        in a two-tailed test with alpha=.05 by default. The element at index 0 (26)
+        indicates that it differs significantly only from the element at index 3 (11)
+        """
         significance = self.p_vals_scale_means < self._alpha
         if self._only_larger:
             significance = np.logical_and(self.t_stats_scale_means > 0, significance)
