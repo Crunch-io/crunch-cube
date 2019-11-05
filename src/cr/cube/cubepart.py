@@ -102,8 +102,8 @@ class _Slice(CubePartition):
     """2D cube partition.
 
     A slice represents the cross-tabulation of two dimensions, often, but not
-    necessarily contributed by two different variables. A CA variable has two dimensions
-    which can be crosstabbed in a slice.
+    necessarily contributed by two different variables. A single CA variable has two
+    dimensions which can be crosstabbed in a slice.
     """
 
     def __init__(self, cube, slice_idx, transforms, population, mask_size):
