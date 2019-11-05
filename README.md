@@ -112,6 +112,10 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.11.11
+- Two-tailed t-tests for scale means
+- Pairwise significance measure for scale means
+
 #### 1.11.10
 - zscore and pval measures for headers and subtotals
 
