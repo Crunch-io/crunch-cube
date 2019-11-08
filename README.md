@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.11.12
+- Bug fix on residuals for subtotals
+
 #### 1.11.11
 - Two-tailed t-tests for scale means
 - Pairwise significance measure for scale means
