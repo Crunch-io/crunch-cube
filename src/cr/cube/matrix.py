@@ -853,10 +853,6 @@ class _BaseMatrixInsertionVector(object):
         return (self._anchor_n, self._neg_idx, self)
 
     @lazyproperty
-    def pvals(self):
-        return self._pvals
-
-    @lazyproperty
     def table_margin(self):
         return self._table_margin
 
@@ -883,10 +879,6 @@ class _BaseMatrixInsertionVector(object):
             if anchor == "bottom"
             else int(self.anchor) + 1
         )
-
-    @lazyproperty
-    def _pvals(self):
-        return 2 * (1 - norm.cdf(np.abs(self._zscore)))
 
     @lazyproperty
     def _zscore(self):
@@ -1287,10 +1279,6 @@ class _OrderedVector(_BaseTransformationVector):
         return (self._index, self._index, self)
 
     @lazyproperty
-    def pvals(self):
-        return self._base_vector.pvals
-
-    @lazyproperty
     def values(self):
         return self._base_vector.values[self._opposing_order]
 
@@ -1366,10 +1354,6 @@ class _BaseVector(object):
     @lazyproperty
     def pruned(self):
         return self.base == 0 or np.isnan(self.base)
-
-    @lazyproperty
-    def pvals(self):
-        return 2 * (1 - norm.cdf(np.abs(self._zscore)))
 
     @lazyproperty
     def zscore(self):
