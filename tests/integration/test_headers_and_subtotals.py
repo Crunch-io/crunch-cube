@@ -1005,7 +1005,130 @@ class TestHeadersAndSubtotals(object):
             "Latino and other voters",
         )
 
-    def it_calculates_various_measures_for_multiple_insertions(self):
+    def it_calculate_residuals_for_subtotals_1col_2rows(self):
+        slice_ = Cube(CR.CAT_X_CAT_HS_2ROWS_1COL).partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_.zscore,
+            [
+                [
+                    5.51248445,
+                    0.02683276,
+                    -0.22374462,
+                    -2.13500054,
+                    -1.48559975,
+                    -2.96936015,
+                    2.0378446,
+                ],
+                [
+                    -2.53018445,
+                    1.48240375,
+                    3.85931276,
+                    1.28007219,
+                    -6.22382047,
+                    -4.37603499,
+                    1.26887162,
+                ],
+                [
+                    2.54284314,
+                    1.39098139,
+                    3.3615757,
+                    -0.70804042,
+                    -7.05452463,
+                    -6.66285184,
+                    2.97302533,
+                ],
+                [
+                    -2.43393077,
+                    1.10902345,
+                    3.05012432,
+                    0.79584274,
+                    -3.63187854,
+                    -2.51507523,
+                    -0.30158645,
+                ],
+                [
+                    -4.18311635,
+                    2.20809445,
+                    5.87331384,
+                    1.7828024,
+                    -8.48620633,
+                    -5.93723152,
+                    0.93214709,
+                ],
+                [
+                    -0.75336796,
+                    -2.53458647,
+                    -6.44707428,
+                    0.1070329,
+                    11.12139895,
+                    9.70800153,
+                    -3.09346517,
+                ],
+            ],
+        )
+
+        np.testing.assert_almost_equal(
+            slice_.pvals,
+            [
+                [
+                    3.53803455e-08,
+                    9.78593126e-01,
+                    8.22956022e-01,
+                    3.27609659e-02,
+                    1.37385020e-01,
+                    2.98420609e-03,
+                    4.15654768e-02,
+                ],
+                [
+                    1.14002576e-02,
+                    1.38232896e-01,
+                    1.13706338e-04,
+                    2.00519750e-01,
+                    4.85192331e-10,
+                    1.20857620e-05,
+                    2.04486857e-01,
+                ],
+                [
+                    1.09954577e-02,
+                    1.64231069e-01,
+                    7.74991104e-04,
+                    4.78920155e-01,
+                    1.73194792e-12,
+                    2.68565170e-11,
+                    2.94880115e-03,
+                ],
+                [
+                    1.49358517e-02,
+                    2.67420068e-01,
+                    2.28746655e-03,
+                    4.26123447e-01,
+                    2.81365556e-04,
+                    1.19006985e-02,
+                    7.62967342e-01,
+                ],
+                [
+                    2.87540141e-05,
+                    2.72376900e-02,
+                    4.27168678e-09,
+                    7.46184742e-02,
+                    0.00000000e00,
+                    2.89875191e-09,
+                    3.51260516e-01,
+                ],
+                [
+                    4.51228831e-01,
+                    1.12580138e-02,
+                    1.14029897e-10,
+                    9.14762883e-01,
+                    0.00000000e00,
+                    0.00000000e00,
+                    1.97833774e-03,
+                ],
+            ],
+        )
+
+    def it_calculates_residuals_for_multiple_insertions(self):
         slice_ = Cube(CR.FOOD_GROUP_X_SHAPE_PASTA_2ROWS1COL_INSERTION).partitions[0]
 
         assert slice_.inserted_column_idxs == (3,)
@@ -1013,7 +1136,6 @@ class TestHeadersAndSubtotals(object):
         assert slice_.inserted_row_idxs == (2, 5)
         assert len(slice_.inserted_row_idxs) == 2
         assert slice_.row_proportions.shape == slice_.zscore.shape
-
         # Test zscore for 1 col and 2 rows insertions
         np.testing.assert_almost_equal(
             slice_.zscore,
@@ -1042,7 +1164,7 @@ class TestHeadersAndSubtotals(object):
                     2.73069348,
                     1.60707866,
                     1.78415497,
-                    -1.75776465,
+                    2.62163462,
                     -1.50223393,
                     -6.09807527,
                     3.76188322,
@@ -1072,7 +1194,7 @@ class TestHeadersAndSubtotals(object):
                     -2.73069348,
                     -1.60707866,
                     -1.78415497,
-                    -1.75776465,
+                    -2.62163462,
                     1.50223393,
                     6.09807527,
                     -3.76188322,
@@ -1109,7 +1231,7 @@ class TestHeadersAndSubtotals(object):
                     6.32012234e-03,
                     1.08037114e-01,
                     7.43984876e-02,
-                    7.87875627e-02,
+                    8.75091931e-03,
                     1.33036705e-01,
                     1.07353193e-09,
                     1.68638788e-04,
@@ -1139,7 +1261,7 @@ class TestHeadersAndSubtotals(object):
                     6.32012234e-03,
                     1.08037114e-01,
                     7.43984876e-02,
-                    7.87875627e-02,
+                    8.75091931e-03,
                     1.33036705e-01,
                     1.07353193e-09,
                     1.68638788e-04,
@@ -1180,12 +1302,12 @@ class TestHeadersAndSubtotals(object):
                     2.73069348,
                     1.60707866,
                     1.78415497,
-                    -1.75776465,
+                    2.62163462,
                     -1.50223393,
                     -6.09807527,
                     3.76188322,
                     2.01538897,
-                    2.04273365,
+                    -2.55784655,
                 ],
                 [
                     -2.48155861,
@@ -1213,12 +1335,12 @@ class TestHeadersAndSubtotals(object):
                     -2.73069348,
                     -1.60707866,
                     -1.78415497,
-                    -1.75776465,
+                    -2.62163462,
                     1.50223393,
                     6.09807527,
                     -3.76188322,
                     -2.01538897,
-                    2.04273365,
+                    2.55784655,
                 ],
             ],
         )
@@ -1253,12 +1375,12 @@ class TestHeadersAndSubtotals(object):
                     6.32012234e-03,
                     1.08037114e-01,
                     7.43984876e-02,
-                    7.87875627e-02,
+                    8.75091931e-03,
                     1.33036705e-01,
                     1.07353193e-09,
                     1.68638788e-04,
                     4.38639092e-02,
-                    4.10788114e-02,
+                    1.05322556e-02,
                 ],
                 [
                     1.30809196e-02,
@@ -1286,17 +1408,17 @@ class TestHeadersAndSubtotals(object):
                     6.32012234e-03,
                     1.08037114e-01,
                     7.43984876e-02,
-                    7.87875627e-02,
+                    8.75091931e-03,
                     1.33036705e-01,
                     1.07353193e-09,
                     1.68638788e-04,
                     4.38639092e-02,
-                    4.10788114e-02,
+                    1.05322556e-02,
                 ],
             ],
         )
 
-    def it_calculates_various_measures_for_columns_insertion(self):
+    def it_calculates_residuals_for_columns_insertion(self):
         slice_ = Cube(CR.CA_SUBVAR_X_CAT_HS).partitions[0]
 
         # Test zscores for 1 column insertion
@@ -1379,7 +1501,7 @@ class TestHeadersAndSubtotals(object):
             ],
         )
 
-    def it_calculates_various_measures_for_rows_insertion(self):
+    def it_calculates_residuals_for_rows_insertion(self):
         transforms = {"columns_dimension": {"insertions": {}}}
         slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[0]
 
@@ -1538,7 +1660,7 @@ class TestHeadersAndSubtotals(object):
             ],
         )
 
-    def it_calculates_various_measures_for_cat_x_cat_with_missing_1_col_insertion(self):
+    def it_calculates_residuals_for_cat_x_cat_with_missing_1_col_insertion(self):
         slice_ = Cube(CR.CAT_X_CAT_HS_MISSING).partitions[0]
 
         assert slice_.inserted_column_idxs == (0,)
@@ -1578,9 +1700,7 @@ class TestHeadersAndSubtotals(object):
             ],
         )
 
-    def it_calculates_various_measures_for_cat_x_num_hs_pruned_with_3_rows_insertions(
-        self
-    ):
+    def it_calculates_residuals_for_cat_x_num_hs_pruned_with_3_rows_insertions(self):
         transforms = {
             "rows_dimension": {"prune": True},
             "columns_dimension": {"prune": True},
@@ -1595,7 +1715,7 @@ class TestHeadersAndSubtotals(object):
 
         # Test pvals for 3 rows insertions
         np.testing.assert_almost_equal(
-            slice_.pvals, [[np.nan], [np.nan], [1.0], [np.nan]]
+            slice_.pvals, [[np.nan], [np.nan], [np.nan], [np.nan]]
         )
 
         slice_ = Cube(CR.CAT_X_NUM_HS_PRUNE).partitions[0]
@@ -1611,17 +1731,17 @@ class TestHeadersAndSubtotals(object):
             slice_.pvals,
             [
                 [np.nan, np.nan, np.nan, np.nan, np.nan],
-                [1.0, 1.0, 1.0, 1.0, 1.0],
-                [1.0, 1.0, 1.0, 1.0, 1.0],
                 [np.nan, np.nan, np.nan, np.nan, np.nan],
-                [1.0, 1.0, 1.0, 1.0, 1.0],
-                [1.0, 1.0, 1.0, 1.0, 1.0],
-                [1.0, 1.0, 1.0, 1.0, 1.0],
+                [np.nan, np.nan, np.nan, np.nan, np.nan],
+                [np.nan, np.nan, np.nan, np.nan, np.nan],
+                [np.nan, np.nan, np.nan, np.nan, np.nan],
+                [np.nan, np.nan, np.nan, np.nan, np.nan],
+                [np.nan, np.nan, np.nan, np.nan, np.nan],
                 [np.nan, np.nan, np.nan, np.nan, np.nan],
             ],
         )
 
-    def it_calculates_various_measures_for_cat_x_items_x_cats_with_col_insertion(self):
+    def it_calculates_residuals_for_cat_x_items_x_cats_with_col_insertion(self):
         slice_ = Cube(CR.CAT_X_ITEMS_X_CATS_HS).partitions[2]
 
         # Test zscores
@@ -1859,7 +1979,7 @@ class TestHeadersAndSubtotals(object):
             slice_no_col_insertion_.pvals, slice_.pvals[:, : slice_.pvals.shape[1] - 1]
         )
 
-    def it_calculates_various_measures_for_ca_as_0th_with_1_col_insertion(self):
+    def it_calculates_residuals_for_ca_as_0th_with_1_col_insertion(self):
         # Test for multi-cube when first cube represents a categorical-array
         slice_ = Cube(CR.CA_AS_0TH).partitions[0]
 

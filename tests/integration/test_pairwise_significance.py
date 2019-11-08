@@ -474,27 +474,27 @@ class TestStandardizedResiduals(TestCase):
 
     def test_pairwise_significance_scale_means_nps_type(self):
         slice_ = Cube(SM.FACEBOOK_APPS_X_AGE).partitions[0]
-        pairwise_indices_scale_mean = slice_.pairwise_indices_scale_mean
+        scale_mean_pairwise_indices = slice_.scale_mean_pairwise_indices
 
         np.testing.assert_array_equal(
-            pairwise_indices_scale_mean, np.array([(3,), (2, 3), (3,), ()])
+            scale_mean_pairwise_indices, np.array([(3,), (2, 3), (3,), ()])
         )
 
         transforms = {"pairwise_indices": {"only_larger": False}}
         slice_ = Cube(SM.FACEBOOK_APPS_X_AGE, transforms=transforms).partitions[0]
-        pairwise_indices_scale_mean = slice_.pairwise_indices_scale_mean
+        scale_mean_pairwise_indices = slice_.scale_mean_pairwise_indices
 
         np.testing.assert_array_equal(
-            pairwise_indices_scale_mean, np.array([(3,), (2, 3), (1, 3), (0, 1, 2)])
+            scale_mean_pairwise_indices, np.array([(3,), (2, 3), (1, 3), (0, 1, 2)])
         )
 
     def test_pairwise_indices_scale_means_with_hs(self):
         slice_ = Cube(CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION_WITH_HS).partitions[0]
-        pairwise_indices_scale_mean = slice_.pairwise_indices_scale_mean
+        scale_mean_pairwise_indices = slice_.scale_mean_pairwise_indices
 
-        assert pairwise_indices_scale_mean.shape == (slice_.counts.shape[1],)
+        assert scale_mean_pairwise_indices.shape == (slice_.counts.shape[1],)
         np.testing.assert_array_equal(
-            pairwise_indices_scale_mean,
+            scale_mean_pairwise_indices,
             np.array(
                 [
                     (3, 4, 5, 8, 10),
@@ -520,11 +520,11 @@ class TestStandardizedResiduals(TestCase):
         slice_without_hs_ = Cube(
             CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION_WITH_HS, transforms=transforms
         ).partitions[0]
-        pairwise_indices_scale_mean = slice_without_hs_.pairwise_indices_scale_mean
+        scale_mean_pairwise_indices = slice_without_hs_.scale_mean_pairwise_indices
 
-        assert pairwise_indices_scale_mean.shape == (slice_.counts.shape[1] - 1,)
+        assert scale_mean_pairwise_indices.shape == (slice_.counts.shape[1] - 1,)
         np.testing.assert_array_equal(
-            pairwise_indices_scale_mean,
+            scale_mean_pairwise_indices,
             np.array(
                 [
                     (3, 4, 7, 9),

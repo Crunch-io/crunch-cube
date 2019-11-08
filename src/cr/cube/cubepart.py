@@ -213,14 +213,14 @@ class _Slice(CubePartition):
         ).pairwise_indices
 
     @lazyproperty
-    def pairwise_indices_scale_mean(self):
+    def scale_mean_pairwise_indices(self):
         alpha = self._transforms_dict.get("pairwise_indices", {}).get("alpha", 0.05)
         only_larger = self._transforms_dict.get("pairwise_indices", {}).get(
             "only_larger", True
         )
         return NewPairwiseSignificance(
             self, alpha=alpha, only_larger=only_larger
-        ).pairwise_indices_scale_means
+        ).scale_mean_pairwise_indices
 
     @lazyproperty
     def pairwise_significance_tests(self):

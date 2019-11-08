@@ -1075,10 +1075,7 @@ class _AssembledVector(_BaseTransformationVector):
 
     @lazyproperty
     def pvals(self):
-        def fsubtot(subtotal):
-            return subtotal.pvals[self._vector_idx]
-
-        return self._apply_interleaved(self._base_vector.pvals, fsubtot)
+        return 2 * (1 - norm.cdf(np.abs(self.zscore)))
 
     @lazyproperty
     def table_proportions(self):
@@ -1096,7 +1093,26 @@ class _AssembledVector(_BaseTransformationVector):
     @lazyproperty
     def zscore(self):
         def fsubtot(subtotal):
-            return subtotal.zscore[self._vector_idx]
+            if self.is_insertion:
+                opposite_margin = np.sum(self.opposite_margins[subtotal.addend_idxs])
+                variance = (
+                    opposite_margin
+                    * self.margin
+                    * (
+                        (self.table_margin - opposite_margin)
+                        * (self.table_margin - self.margin)
+                    )
+                    / self.table_margin ** 3
+                )
+                expected_count = opposite_margin * self.margin / self.table_margin
+                cell_value = np.sum(self._base_vector.values[subtotal.addend_idxs])
+                residuals = cell_value - expected_count
+                zscore = residuals / np.sqrt(variance)
+
+            else:
+                zscore = subtotal.zscore[self._vector_idx]
+
+            return zscore
 
         return self._apply_interleaved(self._base_vector.zscore, fsubtot)
 
