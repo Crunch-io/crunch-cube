@@ -853,10 +853,6 @@ class _BaseMatrixInsertionVector(object):
         return (self._anchor_n, self._neg_idx, self)
 
     @lazyproperty
-    def pvals(self):
-        return self._pvals
-
-    @lazyproperty
     def table_margin(self):
         return self._table_margin
 
@@ -883,10 +879,6 @@ class _BaseMatrixInsertionVector(object):
             if anchor == "bottom"
             else int(self.anchor) + 1
         )
-
-    @lazyproperty
-    def _pvals(self):
-        return 2 * (1 - norm.cdf(np.abs(self._zscore)))
 
     @lazyproperty
     def _zscore(self):
@@ -1075,10 +1067,7 @@ class _AssembledVector(_BaseTransformationVector):
 
     @lazyproperty
     def pvals(self):
-        def fsubtot(subtotal):
-            return subtotal.pvals[self._vector_idx]
-
-        return self._apply_interleaved(self._base_vector.pvals, fsubtot)
+        return 2 * (1 - norm.cdf(np.abs(self.zscore)))
 
     @lazyproperty
     def table_proportions(self):
@@ -1096,7 +1085,26 @@ class _AssembledVector(_BaseTransformationVector):
     @lazyproperty
     def zscore(self):
         def fsubtot(subtotal):
-            return subtotal.zscore[self._vector_idx]
+            if self.is_insertion:
+                opposite_margin = np.sum(self.opposite_margins[subtotal.addend_idxs])
+                variance = (
+                    opposite_margin
+                    * self.margin
+                    * (
+                        (self.table_margin - opposite_margin)
+                        * (self.table_margin - self.margin)
+                    )
+                    / self.table_margin ** 3
+                )
+                expected_count = opposite_margin * self.margin / self.table_margin
+                cell_value = np.sum(self._base_vector.values[subtotal.addend_idxs])
+                residuals = cell_value - expected_count
+                zscore = residuals / np.sqrt(variance)
+
+            else:
+                zscore = subtotal.zscore[self._vector_idx]
+
+            return zscore
 
         return self._apply_interleaved(self._base_vector.zscore, fsubtot)
 
@@ -1271,10 +1279,6 @@ class _OrderedVector(_BaseTransformationVector):
         return (self._index, self._index, self)
 
     @lazyproperty
-    def pvals(self):
-        return self._base_vector.pvals
-
-    @lazyproperty
     def values(self):
         return self._base_vector.values[self._opposing_order]
 
@@ -1350,10 +1354,6 @@ class _BaseVector(object):
     @lazyproperty
     def pruned(self):
         return self.base == 0 or np.isnan(self.base)
-
-    @lazyproperty
-    def pvals(self):
-        return 2 * (1 - norm.cdf(np.abs(self._zscore)))
 
     @lazyproperty
     def zscore(self):

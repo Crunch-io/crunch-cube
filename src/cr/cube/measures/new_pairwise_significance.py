@@ -44,9 +44,9 @@ class NewPairwiseSignificance:
         return np.array([sig.pairwise_indices for sig in self.values]).T
 
     @lazyproperty
-    def pairwise_indices_scale_means(self):
+    def scale_mean_pairwise_indices(self):
         """ndarray containing tuples of pairwise indices."""
-        return np.array([sig.pairwise_indices_scale_mean for sig in self.values]).T
+        return np.array([sig.scale_mean_pairwise_indices for sig in self.values]).T
 
     @lazyproperty
     def summary_pairwise_indices(self):
@@ -129,7 +129,7 @@ class _ColumnPairwiseSignificance:
         return [tuple(np.where(sig_row)[0]) for sig_row in significance]
 
     @lazyproperty
-    def pairwise_indices_scale_mean(self):
+    def scale_mean_pairwise_indices(self):
         """
         List of tuples indicating the significance
 
