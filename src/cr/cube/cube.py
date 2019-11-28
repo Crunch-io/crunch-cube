@@ -269,6 +269,22 @@ class Cube(object):
         )
 
     @lazyproperty
+    def is_mr_by_itself(self):
+        """
+        It identify if the cube contains MRxItself as last 2 dimensions.
+
+        If the last 2 dimensions in cube (ndim>=3) are MR and they have
+        the same alias returns True
+        """
+        return (
+            True
+            if len(set([dimension.alias for dimension in self.dimensions[-2:]])) == 1
+            and all(dim_type == DT.MR for dim_type in self.dimension_types[-2:])
+            and self.ndim >= 3
+            else False
+        )
+
+    @lazyproperty
     def is_weighted(self):
         """True if cube response contains weighted data."""
         return self._measures.is_weighted

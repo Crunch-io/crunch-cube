@@ -86,6 +86,11 @@ class Describe_Strand(object):
 
         assert is_empty is expected_value
 
+    def it_knows_if_cube_is_mr_by_itself(self):
+        strand_ = _Strand(None, None, None, None, None, None)
+
+        assert strand_.cube_is_mr_by_itself is False
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -113,6 +118,11 @@ class Describe_Nub(object):
         is_empty = nub_.is_empty
 
         assert is_empty == expected_value
+
+    def it_knows_if_cube_is_mr_by_itself(self):
+        nub_ = _Nub(None)
+
+        assert nub_.cube_is_mr_by_itself is False
 
     # fixture components ---------------------------------------------
 

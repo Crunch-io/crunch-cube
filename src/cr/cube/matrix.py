@@ -15,7 +15,7 @@ from scipy.stats import norm
 from scipy.stats.contingency import expected_freq
 
 from cr.cube.enum import DIMENSION_TYPE as DT
-from cr.cube.util import lazyproperty
+from cr.cube.util import lazyproperty, calculate_overlap_tstats
 
 
 class TransformedMatrix(object):
@@ -43,6 +43,14 @@ class TransformedMatrix(object):
             _VectorAfterHiding(row, self._assembled_columns)
             for row in self._assembled_rows
             if not row.hidden
+        )
+
+    @lazyproperty
+    def overlaps_tstats(self):
+        return (
+            self._unordered_matrix.overlaps_tstats
+            if self._unordered_matrix._is_cat_x_mr_x_itself
+            else None
         )
 
     @lazyproperty
@@ -218,7 +226,24 @@ class _BaseBaseMatrix(object):
         base_counts = cube.base_counts
         counts_with_missings = cube.counts_with_missings
         dimension_types = cube.dimension_types[-2:]
+        if cube.dimension_types == (DT.CAT, DT.MR, DT.MR) and cube.is_mr_by_itself:
 
+            overlap_tstats = calculate_overlap_tstats(
+                _MrXMrMatrix, dimensions, counts, base_counts, counts_with_missings
+            )
+
+            # These are apparent dimensions (user dimensions). Do we need to get all the dims?
+            dimensions = cube.dimensions[:-1]
+            counts = np.sum(counts[:, :, :, 0], axis=3)
+            base_counts = np.sum(base_counts[:, :, :, 0], axis=3)
+            counts_with_missings = np.sum(counts_with_missings[:, :, :, 0], axis=3)
+            return _CatXMrMatrix(
+                dimensions,
+                counts,
+                base_counts,
+                counts_with_missings,
+                overlaps=overlap_tstats,
+            )
         # For cubes with means, create one of the means-matrix types
         if cube.has_means:
             if cube.ndim == 3:
@@ -562,12 +587,24 @@ class _CatXMrMatrix(_MatrixWithMR):
     (which correspond to the MR dimension).
     """
 
+    def __init__(
+        self, dimensions, counts, base_counts, counts_with_missings, overlaps=None
+    ):
+        super(_CatXMrMatrix, self).__init__(
+            dimensions, counts, base_counts, counts_with_missings
+        )
+        self._overlaps = overlaps
+
     @lazyproperty
     def columns(self):
         return tuple(
             _CatXMrVector(counts.T, base_counts.T, element, table_margin)
             for counts, base_counts, element, table_margin in self._column_generator
         )
+
+    @lazyproperty
+    def overlaps_tstats(self):
+        return self._overlaps if self._is_cat_x_mr_x_itself else None
 
     @lazyproperty
     def rows(self):
@@ -614,6 +651,10 @@ class _CatXMrMatrix(_MatrixWithMR):
         return dim_sum / np.sum(dim_sum, axis=0)
 
     @lazyproperty
+    def _is_cat_x_mr_x_itself(self):
+        return True if self._overlaps is not None else False
+
+    @lazyproperty
     def _column_generator(self):
         return zip(
             # self._counts.T[0],
@@ -626,6 +667,8 @@ class _CatXMrMatrix(_MatrixWithMR):
 
     @lazyproperty
     def _zscores(self):
+        # if the cube is a special one (5D with MRxItself as last dims)
+        # the zscores should be the same as a 2D MRxMR matrix
         return self._array_type_std_res(
             self._counts[:, :, 0],
             self.table_margin,
@@ -635,9 +678,11 @@ class _CatXMrMatrix(_MatrixWithMR):
 
 
 class _CatXMrMeansMatrix(_CatXMrMatrix):
-    def __init__(self, dimensions, means, base_counts):
+    def __init__(self, dimensions, means, base_counts, overlaps=None):
         counts = np.zeros(means.shape)
-        super(_CatXMrMeansMatrix, self).__init__(dimensions, counts, base_counts)
+        super(_CatXMrMeansMatrix, self).__init__(
+            dimensions, counts, base_counts, overlaps
+        )
         self._means = means
 
     @lazyproperty
@@ -666,6 +711,10 @@ class _MrXMrMatrix(_MatrixWithMR):
             _MultipleResponseVector(counts, base_counts, element, table_margin)
             for counts, base_counts, element, table_margin in self._column_generator
         )
+
+    @lazyproperty
+    def _mr_shadow_proportions(self):
+        return self._counts[:, 0, :, 0] / self._pairwise_overlap_total
 
     @lazyproperty
     def rows(self):
@@ -726,6 +775,10 @@ class _MrXMrMatrix(_MatrixWithMR):
         )
 
     @lazyproperty
+    def _pairwise_overlap_total(self):
+        return np.sum(np.sum(self._counts, axis=1), axis=2)
+
+    @lazyproperty
     def _row_generator(self):
         return zip(
             self._counts,
@@ -744,6 +797,53 @@ class _MrXMrMatrix(_MatrixWithMR):
             np.sum(self._counts, axis=1)[:, :, 0],
             np.sum(self._counts, axis=3)[:, 0, :],
         )
+
+    @lazyproperty
+    def tstats_overlap(self):
+        """
+        ndarray of correct tstats values considering the overlapped observations
+        t = (pi-pj)/s.e.(pi-pj)
+        where
+        s.e.(pi-pj) = sqrt(p_i*(1-p_i)/n_i+p_j*(1-p_j)/n_j-2*n_ij*(p_ij-p_i*p_j)/(n_i*n_j))
+        ni = base size for first subvar
+        nj = base size for second subvar
+        nij = number of overlapping observations
+        pij = proportion for which both subvar are True (selected)
+        In this case MRxMR the diff pi-pj is the pairwise subtraction of the diagonal of the
+        shadow_proportions the denominator is the matrix containing the unweighted counts
+        of the cube
+        """
+
+        # Subtraction of the proportions foreach observation
+        diff = np.subtract.outer(
+            self._mr_shadow_proportions.diagonal(),
+            self._mr_shadow_proportions.diagonal(),
+        )
+        # Sum of the s.e. for each observation
+        se_pi_pj = np.add.outer(
+            self._mr_shadow_proportions.diagonal()
+            * (1 - self._mr_shadow_proportions.diagonal())
+            / self.table_base.diagonal(),
+            self._mr_shadow_proportions.diagonal()
+            * (1 - self._mr_shadow_proportions.diagonal())
+            / self.table_base.diagonal(),
+        )
+        # Correction factor considering the overlap
+        correction_factor = (
+            2
+            * self.table_base
+            * (
+                self._mr_shadow_proportions
+                - np.multiply.outer(
+                    self._mr_shadow_proportions.diagonal(),
+                    self._mr_shadow_proportions.diagonal(),
+                )
+            )
+        ) / np.multiply.outer(self.table_base.diagonal(), self.table_base.diagonal())
+        se_diff = np.sqrt(se_pi_pj - correction_factor)
+        t_stats = diff / se_diff
+        np.fill_diagonal(t_stats, 0)
+        return t_stats
 
 
 # ===INSERTION (SUBTOTAL) VECTORS===

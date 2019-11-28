@@ -8,6 +8,8 @@ import pytest
 import numpy as np
 
 from cr.cube.cube import Cube, _Measures
+from cr.cube.enum import DIMENSION_TYPE as DT
+from cr.cube.dimension import _ApparentDimensions, Dimension
 
 from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
 from ..unitutil import instance_mock, property_mock
@@ -47,6 +49,34 @@ class DescribeCube(object):
 
         assert str(exception) == expected_value
 
+    def it_knows_if_it_is_mr_by_itself_to_help(
+        self,
+        request,
+        cube_dimensions_fixture,
+        dimension_types_prop_,
+        cube_dimensions_prop_,
+    ):
+        dimension_types, aliases, expected_value = cube_dimensions_fixture
+        cube = Cube(None, None, None, None)
+        all_dimensions_ = tuple(
+            instance_mock(
+                request,
+                Dimension,
+                name="dim-%d" % idx,
+                dimension_type=dt,
+                alias=aliases[idx],
+            )
+            for idx, dt in enumerate(dimension_types)
+        )
+        apparent_dimensions = _ApparentDimensions(all_dimensions_)
+        dimensions = apparent_dimensions._dimensions
+        dimension_types_prop_.return_value = dimension_types
+        cube_dimensions_prop_.return_value = dimensions
+
+        is_mr_by_itself = cube.is_mr_by_itself
+
+        assert is_mr_by_itself is expected_value
+
     # fixtures ---------------------------------------------
 
     @pytest.fixture(
@@ -75,6 +105,18 @@ class DescribeCube(object):
         cube_response, expected_value = request.param
         return cube_response, expected_value
 
+    @pytest.fixture(
+        params=[
+            ((DT.CAT, DT.MR, DT.MR), ("alias1", "alias2", "alias2"), True),
+            ((DT.CAT, DT.MR), ("alias1", "alias2"), False),
+            ((DT.CAT, DT.MR, DT.MR), ("alias1", "alias2", "alias3"), False),
+            ((DT.CAT, DT.TEXT, DT.TEXT), ("alias1", "alias2", "alias2"), False),
+        ]
+    )
+    def cube_dimensions_fixture(self, request):
+        dimension_types, aliases, expected_value = request.param
+        return dimension_types, aliases, expected_value
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -84,6 +126,10 @@ class DescribeCube(object):
     @pytest.fixture
     def dimension_types_prop_(self, request):
         return property_mock(request, Cube, "dimension_types")
+
+    @pytest.fixture
+    def cube_dimensions_prop_(self, request):
+        return property_mock(request, Cube, "dimensions")
 
 
 class DescribeMeasures(object):

@@ -187,6 +187,10 @@ class _Slice(CubePartition):
         return any(s == 0 for s in self.shape)
 
     @lazyproperty
+    def cube_is_mr_by_itself(self):
+        return self._cube.is_mr_by_itself
+
+    @lazyproperty
     def means(self):
         return np.array([row.means for row in self._matrix.rows])
 
@@ -201,6 +205,11 @@ class _Slice(CubePartition):
         A slice takes the name of its rows-dimension.
         """
         return self.rows_dimension_name
+
+    @lazyproperty
+    def overlaps_tstats(self):
+        return self._matrix.overlaps_tstats
+        # return self._matrix.overlaps_tstats[self._slice_idx]
 
     @lazyproperty
     def pairwise_indices(self):
@@ -458,6 +467,10 @@ class _Slice(CubePartition):
 
         title = self._cube.name
         table_name = self._cube.dimensions[0].valid_elements[self._slice_idx].label
+
+        if self._cube.is_mr_by_itself:
+            return title
+
         return "%s: %s" % (title, table_name)
 
     @lazyproperty
@@ -561,6 +574,10 @@ class _Strand(CubePartition):
     @lazyproperty
     def is_empty(self):
         return any(s == 0 for s in self._shape)
+
+    @lazyproperty
+    def cube_is_mr_by_itself(self):
+        return False
 
     @lazyproperty
     def inserted_row_idxs(self):
@@ -796,6 +813,10 @@ class _Nub(CubePartition):
     @lazyproperty
     def is_empty(self):
         return False if self.base_count else True
+
+    @lazyproperty
+    def cube_is_mr_by_itself(self):
+        return False
 
     @lazyproperty
     def means(self):

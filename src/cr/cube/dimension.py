@@ -259,6 +259,10 @@ class Dimension(object):
         self._dimension_transforms_arg = dimension_transforms
 
     @lazyproperty
+    def alias(self):
+        return self._dimension_dict["references"]["alias"]
+
+    @lazyproperty
     def all_elements(self):
         """_AllElements object providing cats or subvars of this dimension.
 

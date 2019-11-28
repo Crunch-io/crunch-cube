@@ -12,6 +12,18 @@ from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
 class Describe_Slice(object):
     """Integration-test suite for _Slice object."""
 
+    def it_knows_cube_is_mr_by_itself(self):
+        cube = Cube(CR.EDU_FAV5_FAV5)
+        slice_ = cube.partitions[0]
+        assert slice_.table_name == cube.name
+        assert slice_.cube_is_mr_by_itself is True
+
+    def it_knows_cube_is_not_mr_by_itself(self):
+        cube = Cube(CR.AGE_FAVMR)
+        slice_ = cube.partitions[0]
+        assert slice_.table_name is None
+        assert slice_.cube_is_mr_by_itself is False
+
     def it_is_not_empty(self):
         slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS).partitions[0]
         assert slice_.is_empty is False

@@ -78,8 +78,11 @@ class _ColumnPairwiseSignificance:
         return diff / se_diff
 
     @lazyproperty
-    def t_stats_scale_means(self):
+    def t_stats_correct(self):
+        return self._slice.overlaps_tstats[:, self._col_idx, :]
 
+    @lazyproperty
+    def t_stats_scale_means(self):
         """
         This property calculates the Two-tailed t-test using the formula:
         t = X1 - X2 / Sx1x2 * sqrt(1/n1 + 1/n2)
@@ -119,6 +122,10 @@ class _ColumnPairwiseSignificance:
 
     @lazyproperty
     def p_vals(self):
+        # if the cube to which the slice belongs is a CATxMRxITSELF
+        # returns the pvals using the t_stats_correct values
+        if self._slice.cube_is_mr_by_itself:
+            return 2 * (1 - t.cdf(abs(self.t_stats_correct), df=self._df))
         return 2 * (1 - t.cdf(abs(self.t_stats), df=self._df))
 
     @lazyproperty
@@ -167,11 +174,15 @@ class _ColumnPairwiseSignificance:
 
     @lazyproperty
     def _df(self):
+        # if the cube to which the slice belongs is a CATxMRxITSELF
+        # returns the n1 + n2 as degrees of freedom, n1 + n2 -2 otherwise
         selected_unweighted_n = (
             self._slice.column_base[self._col_idx]
             if self._slice.column_base.ndim < 2
             else self._slice.column_base[:, self._col_idx][:, None]
         )
+        if self._slice.cube_is_mr_by_itself:
+            return self._slice.column_base + selected_unweighted_n
         return self._slice.column_base + selected_unweighted_n - 2
 
     @lazyproperty

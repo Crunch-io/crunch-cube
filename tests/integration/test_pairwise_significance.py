@@ -353,6 +353,29 @@ class TestStandardizedResiduals(TestCase):
         ]
         np.testing.assert_array_equal(slice_.pairwise_indices, expected_indices)
 
+    def test_cat_mr_x_itself_pairwise_indices_only_larger(self):
+        slice_ = Cube(CR.EDU_FAV5_FAV5).partitions[0]
+        expected_indices = [
+            [(2, 4), (), (), (2,), (1, 2, 3)],
+            [(1, 4), (), (0, 1, 3), (), (1, 3)],
+            [(), (0, 2, 4), (0,), (0, 2, 4), (0,)],
+            [(), (0, 2, 4), (0,), (0, 2, 4), (0,)],
+        ]
+
+        np.testing.assert_array_equal(slice_.pairwise_indices, expected_indices)
+
+    def test_cat_mr_x_itself_pairwise_indices_and_smaller(self):
+        transforms = {"pairwise_indices": {"only_larger": False}}
+        slice_ = Cube(CR.EDU_FAV5_FAV5, transforms=transforms).partitions[0]
+        expected_indices = [
+            [(2, 4), (4,), (0, 3, 4), (2, 4), (0, 1, 2, 3)],
+            [(1, 2, 4), (0, 2, 4), (0, 1, 3), (2, 4), (0, 1, 3)],
+            [(1, 2, 3, 4), (0, 2, 4), (0, 1, 3), (0, 2, 4), (0, 1, 3)],
+            [(1, 2, 3, 4), (0, 2, 4), (0, 1, 3), (0, 2, 4), (0, 1, 3)],
+        ]
+
+        np.testing.assert_array_equal(slice_.pairwise_indices, expected_indices)
+
     def test_cat_x_mr_pairwise_indices_only_larger(self):
         # Without H&S
         transforms = {
