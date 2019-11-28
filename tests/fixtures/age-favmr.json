@@ -1,0 +1,1350 @@
+{
+  "element": "shoji:view",
+  "self": "https://app.crunch.io/api/datasets/9f1f51ac5b70492c9e573288e9e6bed6/cube/?query=%7B%22dimensions%22:%5B%7B%22variable%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2F9f1f51ac5b70492c9e573288e9e6bed6%2Fvariables%2F000003%2F%22%7D,%7B%22each%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2F9f1f51ac5b70492c9e573288e9e6bed6%2Fvariables%2F000125%2F%22%7D,%7B%22function%22:%22as_selected%22,%22args%22:%5B%7B%22variable%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2F9f1f51ac5b70492c9e573288e9e6bed6%2Fvariables%2F000125%2F%22%7D%5D%7D%5D,%22measures%22:%7B%22count%22:%7B%22function%22:%22cube_count%22,%22args%22:%5B%5D%7D%7D,%22weight%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2F9f1f51ac5b70492c9e573288e9e6bed6%2Fvariables%2F9c707cb06234410591aff3fb31c735fc%2F%22%7D",
+  "value": {
+    "query": {
+      "measures": {
+        "count": {
+          "function": "cube_count",
+          "args": []
+        }
+      },
+      "dimensions": [
+        {
+          "variable": "https://app.crunch.io/api/datasets/9f1f51ac5b70492c9e573288e9e6bed6/variables/000003/"
+        },
+        {
+          "each": "https://app.crunch.io/api/datasets/9f1f51ac5b70492c9e573288e9e6bed6/variables/000125/"
+        },
+        {
+          "function": "as_selected",
+          "args": [
+            {
+              "variable": "https://app.crunch.io/api/datasets/9f1f51ac5b70492c9e573288e9e6bed6/variables/000125/"
+            }
+          ]
+        }
+      ],
+      "weight": "https://app.crunch.io/api/datasets/9f1f51ac5b70492c9e573288e9e6bed6/variables/9c707cb06234410591aff3fb31c735fc/"
+    },
+    "query_environment": {
+      "filter": []
+    },
+    "result": {
+      "dimensions": [
+        {
+          "references": {
+            "alias": "age4",
+            "description": "Respondent age by category",
+            "name": "Age",
+            "view": {
+              "show_counts": false,
+              "show_numeric_values": false,
+              "transform": {
+                "insertions": []
+              },
+              "include_missing": false,
+              "column_width": null
+            }
+          },
+          "derived": false,
+          "type": {
+            "ordinal": false,
+            "class": "categorical",
+            "categories": [
+              {
+                "numeric_value": 1,
+                "id": 1,
+                "name": "Under 30",
+                "missing": false
+              },
+              {
+                "numeric_value": 2,
+                "id": 2,
+                "name": "30-44",
+                "missing": false
+              },
+              {
+                "numeric_value": 3,
+                "id": 3,
+                "name": "45-64",
+                "missing": false
+              },
+              {
+                "numeric_value": 4,
+                "id": 4,
+                "name": "65+",
+                "missing": false
+              },
+              {
+                "numeric_value": null,
+                "id": 32767,
+                "name": "not asked",
+                "missing": true
+              },
+              {
+                "numeric_value": null,
+                "id": 32766,
+                "name": "skipped",
+                "missing": true
+              },
+              {
+                "numeric_value": null,
+                "id": -1,
+                "name": "No Data",
+                "missing": true
+              }
+            ]
+          }
+        },
+        {
+          "references": {
+            "alias": "fav_pols",
+            "subreferences": [
+              {
+                "alias": "fav_joebiden",
+                "name": "Joe Biden"
+              },
+              {
+                "alias": "fav_corybooker",
+                "name": "Cory Booker"
+              },
+              {
+                "alias": "fav_petebuttigieg",
+                "name": "Pete Buttigieg"
+              },
+              {
+                "alias": "fav_juliancastro",
+                "name": "Julian Castro"
+              },
+              {
+                "alias": "fav_johndelaney",
+                "name": "John Delaney"
+              },
+              {
+                "alias": "fav_tulsigabbard",
+                "name": "Tulsi Gabbard"
+              },
+              {
+                "alias": "fav_kirstengillibrand",
+                "name": "Kirsten Gillibrand"
+              },
+              {
+                "alias": "fav_kamalaharris",
+                "name": "Kamala Harris"
+              },
+              {
+                "alias": "fav_johnhickenlooper",
+                "name": "John Hickenlooper"
+              },
+              {
+                "alias": "fav_jayinslee",
+                "name": "Jay Inslee"
+              },
+              {
+                "alias": "fav_amyklobuchar",
+                "name": "Amy Klobuchar"
+              },
+              {
+                "alias": "fav_betoorourke",
+                "name": "Beto O'Rourke"
+              },
+              {
+                "alias": "fav_timryan",
+                "name": "Tim Ryan"
+              },
+              {
+                "alias": "fav_berniesanders",
+                "name": "Bernie Sanders"
+              },
+              {
+                "alias": "fav_howardschultz",
+                "name": "Howard Schultz"
+              },
+              {
+                "alias": "fav_ericswalwell",
+                "name": "Eric Swalwell"
+              },
+              {
+                "alias": "fav_elizabethwarren",
+                "name": "Elizabeth Warren"
+              },
+              {
+                "alias": "fav_andrewyang",
+                "name": "Andrew Yang"
+              }
+            ],
+            "description": "Do you have a favorable or an unfavorable opinion of the following people?",
+            "name": "Favorability of politicians"
+          },
+          "derived": true,
+          "type": {
+            "subtype": {
+              "class": "variable"
+            },
+            "elements": [
+              {
+                "id": 1,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "fav_joebiden",
+                    "name": "Joe Biden"
+                  },
+                  "id": "0001"
+                },
+                "missing": false
+              },
+              {
+                "id": 2,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "fav_corybooker",
+                    "name": "Cory Booker"
+                  },
+                  "id": "0002"
+                },
+                "missing": false
+              },
+              {
+                "id": 3,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "fav_petebuttigieg",
+                    "name": "Pete Buttigieg"
+                  },
+                  "id": "0003"
+                },
+                "missing": false
+              },
+              {
+                "id": 4,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "fav_juliancastro",
+                    "name": "Julian Castro"
+                  },
+                  "id": "0004"
+                },
+                "missing": false
+              },
+              {
+                "id": 5,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "fav_johndelaney",
+                    "name": "John Delaney"
+                  },
+                  "id": "0005"
+                },
+                "missing": false
+              },
+              {
+                "id": 6,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "fav_tulsigabbard",
+                    "name": "Tulsi Gabbard"
+                  },
+                  "id": "0006"
+                },
+                "missing": false
+              },
+              {
+                "id": 7,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "fav_kirstengillibrand",
+                    "name": "Kirsten Gillibrand"
+                  },
+                  "id": "0007"
+                },
+                "missing": false
+              },
+              {
+                "id": 8,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "fav_kamalaharris",
+                    "name": "Kamala Harris"
+                  },
+                  "id": "0008"
+                },
+                "missing": false
+              },
+              {
+                "id": 9,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "fav_johnhickenlooper",
+                    "name": "John Hickenlooper"
+                  },
+                  "id": "0009"
+                },
+                "missing": false
+              },
+              {
+                "id": 10,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "fav_jayinslee",
+                    "name": "Jay Inslee"
+                  },
+                  "id": "0010"
+                },
+                "missing": false
+              },
+              {
+                "id": 11,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "fav_amyklobuchar",
+                    "name": "Amy Klobuchar"
+                  },
+                  "id": "0011"
+                },
+                "missing": false
+              },
+              {
+                "id": 12,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "fav_betoorourke",
+                    "name": "Beto O'Rourke"
+                  },
+                  "id": "0012"
+                },
+                "missing": false
+              },
+              {
+                "id": 13,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "fav_timryan",
+                    "name": "Tim Ryan"
+                  },
+                  "id": "0013"
+                },
+                "missing": false
+              },
+              {
+                "id": 14,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "fav_berniesanders",
+                    "name": "Bernie Sanders"
+                  },
+                  "id": "0014"
+                },
+                "missing": false
+              },
+              {
+                "id": 15,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "fav_howardschultz",
+                    "name": "Howard Schultz"
+                  },
+                  "id": "0015"
+                },
+                "missing": false
+              },
+              {
+                "id": 16,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "fav_ericswalwell",
+                    "name": "Eric Swalwell"
+                  },
+                  "id": "0016"
+                },
+                "missing": false
+              },
+              {
+                "id": 17,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "fav_elizabethwarren",
+                    "name": "Elizabeth Warren"
+                  },
+                  "id": "0017"
+                },
+                "missing": false
+              },
+              {
+                "id": 18,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "fav_andrewyang",
+                    "name": "Andrew Yang"
+                  },
+                  "id": "0018"
+                },
+                "missing": false
+              }
+            ],
+            "class": "enum"
+          }
+        },
+        {
+          "derived": true,
+          "references": {
+            "alias": "fav_pols",
+            "description": "Do you have a favorable or an unfavorable opinion of the following people?",
+            "name": "Favorability of politicians",
+            "subreferences": [
+              {
+                "alias": "fav_joebiden",
+                "name": "Joe Biden"
+              },
+              {
+                "alias": "fav_corybooker",
+                "name": "Cory Booker"
+              },
+              {
+                "alias": "fav_petebuttigieg",
+                "name": "Pete Buttigieg"
+              },
+              {
+                "alias": "fav_juliancastro",
+                "name": "Julian Castro"
+              },
+              {
+                "alias": "fav_johndelaney",
+                "name": "John Delaney"
+              },
+              {
+                "alias": "fav_tulsigabbard",
+                "name": "Tulsi Gabbard"
+              },
+              {
+                "alias": "fav_kirstengillibrand",
+                "name": "Kirsten Gillibrand"
+              },
+              {
+                "alias": "fav_kamalaharris",
+                "name": "Kamala Harris"
+              },
+              {
+                "alias": "fav_johnhickenlooper",
+                "name": "John Hickenlooper"
+              },
+              {
+                "alias": "fav_jayinslee",
+                "name": "Jay Inslee"
+              },
+              {
+                "alias": "fav_amyklobuchar",
+                "name": "Amy Klobuchar"
+              },
+              {
+                "alias": "fav_betoorourke",
+                "name": "Beto O'Rourke"
+              },
+              {
+                "alias": "fav_timryan",
+                "name": "Tim Ryan"
+              },
+              {
+                "alias": "fav_berniesanders",
+                "name": "Bernie Sanders"
+              },
+              {
+                "alias": "fav_howardschultz",
+                "name": "Howard Schultz"
+              },
+              {
+                "alias": "fav_ericswalwell",
+                "name": "Eric Swalwell"
+              },
+              {
+                "alias": "fav_elizabethwarren",
+                "name": "Elizabeth Warren"
+              },
+              {
+                "alias": "fav_andrewyang",
+                "name": "Andrew Yang"
+              }
+            ]
+          },
+          "type": {
+            "ordinal": false,
+            "subvariables": [
+              "0001",
+              "0002",
+              "0003",
+              "0004",
+              "0005",
+              "0006",
+              "0007",
+              "0008",
+              "0009",
+              "0010",
+              "0011",
+              "0012",
+              "0013",
+              "0014",
+              "0015",
+              "0016",
+              "0017",
+              "0018"
+            ],
+            "class": "categorical",
+            "categories": [
+              {
+                "numeric_value": 1,
+                "selected": true,
+                "id": 1,
+                "missing": false,
+                "name": "Selected"
+              },
+              {
+                "numeric_value": 0,
+                "id": 0,
+                "name": "Other",
+                "missing": false
+              },
+              {
+                "numeric_value": null,
+                "id": -1,
+                "name": "No Data",
+                "missing": true
+              }
+            ]
+          }
+        }
+      ],
+      "missing": 2,
+      "measures": {
+        "count": {
+          "data": [
+            121.00227075631206,
+            202.0548222948283,
+            0.0,
+            84.76555043938461,
+            238.2915426117557,
+            0.0,
+            83.52442572835847,
+            239.53266732278195,
+            0.0,
+            73.49037058864447,
+            249.56672246249593,
+            0.0,
+            50.547809902608364,
+            272.5092831485323,
+            0.0,
+            68.70066406140336,
+            254.35642898973703,
+            0.0,
+            62.57388828305242,
+            260.48320476808806,
+            0.0,
+            94.4527527356959,
+            228.60434031544446,
+            0.0,
+            52.46684141908653,
+            270.59025163205416,
+            0.0,
+            50.90414770110028,
+            272.1529453500404,
+            0.0,
+            60.749281068139055,
+            262.3078119830015,
+            0.0,
+            92.20589761269025,
+            230.85119543845008,
+            0.0,
+            49.61872130629918,
+            273.4383717448415,
+            0.0,
+            142.39842826140742,
+            180.6586647897329,
+            0.0,
+            58.78291398442182,
+            264.2741790667188,
+            0.0,
+            57.8494926004792,
+            265.20760045066135,
+            0.0,
+            109.5075712628806,
+            213.54952178825965,
+            0.0,
+            72.51902410556909,
+            250.53806894557127,
+            0.0,
+            149.77451640760665,
+            200.58145094143362,
+            2.81911352803626,
+            99.11941811972477,
+            251.23654922931556,
+            2.81911352803626,
+            81.73592307766691,
+            268.6200442713737,
+            2.81911352803626,
+            80.04498185540349,
+            270.310985493637,
+            2.81911352803626,
+            47.041493834451565,
+            303.31447351458945,
+            2.81911352803626,
+            55.650108516943725,
+            294.7058588320972,
+            2.81911352803626,
+            78.32692942716912,
+            272.02903792187146,
+            2.81911352803626,
+            105.24923939731657,
+            245.1067279517238,
+            2.81911352803626,
+            51.704676901158905,
+            298.651290447882,
+            2.81911352803626,
+            54.4255936137945,
+            295.93037373524646,
+            2.81911352803626,
+            74.26421264645784,
+            276.09175470258276,
+            2.81911352803626,
+            107.01705457694831,
+            243.338912772092,
+            2.81911352803626,
+            43.102574169558096,
+            307.2533931794829,
+            2.81911352803626,
+            155.01734541162855,
+            195.33862193741174,
+            2.81911352803626,
+            52.6214546925651,
+            297.73451265647583,
+            2.81911352803626,
+            53.46801788071406,
+            296.88794946832684,
+            2.81911352803626,
+            123.02075678502497,
+            227.3352105640153,
+            2.81911352803626,
+            59.96112622823041,
+            290.39484112081044,
+            2.81911352803626,
+            233.41916589630912,
+            278.8439528778547,
+            0.0,
+            139.63942421167835,
+            372.6236945624857,
+            0.0,
+            121.28086502276015,
+            390.9822537514039,
+            0.0,
+            108.82509045960394,
+            403.43802831455986,
+            0.0,
+            53.28910278269609,
+            458.9740159914684,
+            0.0,
+            78.24898525204465,
+            434.01413352211955,
+            0.0,
+            119.94424741719837,
+            392.3188713569656,
+            0.0,
+            152.61671745990634,
+            359.6464013142576,
+            0.0,
+            73.39927655346102,
+            438.86384222070325,
+            0.0,
+            63.86911632351993,
+            448.39400245064445,
+            0.0,
+            106.23547520725145,
+            406.0276435669125,
+            0.0,
+            138.82861364306675,
+            373.4345051310973,
+            0.0,
+            64.87333539807582,
+            447.3897833760884,
+            0.0,
+            182.41379770639733,
+            329.84932106776654,
+            0.0,
+            61.68506914073649,
+            450.5780496334278,
+            0.0,
+            64.13761825249478,
+            448.12550052166955,
+            0.0,
+            160.06650338140952,
+            352.1966153927545,
+            0.0,
+            74.66627947506346,
+            437.59683929910085,
+            0.0,
+            142.18122979740994,
+            169.32347750020094,
+            0.0,
+            89.97573881967791,
+            221.52896847793292,
+            0.0,
+            93.31463880795114,
+            218.19006848965975,
+            0.0,
+            80.62276304844579,
+            230.88194424916512,
+            0.0,
+            29.19457808358918,
+            282.3101292140215,
+            0.0,
+            39.348313900449654,
+            272.1563933971612,
+            0.0,
+            83.58632044411743,
+            227.9183868534935,
+            0.0,
+            103.99158561899934,
+            207.5131216786115,
+            0.0,
+            62.6361416965037,
+            248.8685656011073,
+            0.0,
+            53.951489113890645,
+            257.55321818372033,
+            0.0,
+            82.90354971110223,
+            228.60115758650863,
+            0.0,
+            100.67915588984226,
+            210.82555140776864,
+            0.0,
+            54.059987841742256,
+            257.4447194558687,
+            0.0,
+            105.08815432033475,
+            206.4165529772763,
+            0.0,
+            44.31679849597568,
+            267.1879088016352,
+            0.0,
+            62.32068240365625,
+            249.18402489395476,
+            0.0,
+            115.18303855784862,
+            196.32166873976226,
+            0.0,
+            28.224154882243663,
+            283.280552415367,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "n_missing": 2,
+          "metadata": {
+            "references": {},
+            "derived": true,
+            "type": {
+              "integer": false,
+              "missing_rules": {},
+              "missing_reasons": {
+                "No Data": -1
+              },
+              "class": "numeric"
+            }
+          }
+        }
+      },
+      "n": 1500,
+      "filter_stats": {
+        "filtered_complete": {
+          "unweighted": {
+            "selected": 1500,
+            "other": 0,
+            "missing": 366
+          },
+          "weighted": {
+            "selected": 1499.9999999999932,
+            "other": 0.0,
+            "missing": 0.0
+          }
+        },
+        "filtered": {
+          "unweighted": {
+            "selected": 1500,
+            "other": 366,
+            "missing": 0
+          },
+          "weighted": {
+            "selected": 1499.9999999999932,
+            "other": 0.0,
+            "missing": 0.0
+          }
+        }
+      },
+      "unfiltered": {
+        "unweighted_n": 1866,
+        "weighted_n": 1499.9999999999932
+      },
+      "filtered": {
+        "unweighted_n": 1500,
+        "weighted_n": 1499.9999999999932
+      },
+      "counts": [
+        128,
+        196,
+        0,
+        91,
+        233,
+        0,
+        89,
+        235,
+        0,
+        74,
+        250,
+        0,
+        51,
+        273,
+        0,
+        69,
+        255,
+        0,
+        70,
+        254,
+        0,
+        104,
+        220,
+        0,
+        53,
+        271,
+        0,
+        52,
+        272,
+        0,
+        65,
+        259,
+        0,
+        99,
+        225,
+        0,
+        47,
+        277,
+        0,
+        157,
+        167,
+        0,
+        55,
+        269,
+        0,
+        59,
+        265,
+        0,
+        121,
+        203,
+        0,
+        74,
+        250,
+        0,
+        170,
+        186,
+        2,
+        117,
+        239,
+        2,
+        100,
+        256,
+        2,
+        89,
+        267,
+        2,
+        52,
+        304,
+        2,
+        64,
+        292,
+        2,
+        94,
+        262,
+        2,
+        128,
+        228,
+        2,
+        56,
+        300,
+        2,
+        60,
+        296,
+        2,
+        85,
+        271,
+        2,
+        125,
+        231,
+        2,
+        48,
+        308,
+        2,
+        173,
+        183,
+        2,
+        58,
+        298,
+        2,
+        57,
+        299,
+        2,
+        146,
+        210,
+        2,
+        67,
+        289,
+        2,
+        248,
+        259,
+        0,
+        164,
+        343,
+        0,
+        144,
+        363,
+        0,
+        125,
+        382,
+        0,
+        54,
+        453,
+        0,
+        85,
+        422,
+        0,
+        137,
+        370,
+        0,
+        180,
+        327,
+        0,
+        88,
+        419,
+        0,
+        72,
+        435,
+        0,
+        124,
+        383,
+        0,
+        167,
+        340,
+        0,
+        67,
+        440,
+        0,
+        202,
+        305,
+        0,
+        61,
+        446,
+        0,
+        74,
+        433,
+        0,
+        186,
+        321,
+        0,
+        81,
+        426,
+        0,
+        155,
+        156,
+        0,
+        111,
+        200,
+        0,
+        114,
+        197,
+        0,
+        98,
+        213,
+        0,
+        33,
+        278,
+        0,
+        45,
+        266,
+        0,
+        98,
+        213,
+        0,
+        127,
+        184,
+        0,
+        75,
+        236,
+        0,
+        65,
+        246,
+        0,
+        103,
+        208,
+        0,
+        120,
+        191,
+        0,
+        61,
+        250,
+        0,
+        114,
+        197,
+        0,
+        43,
+        268,
+        0,
+        75,
+        236,
+        0,
+        133,
+        178,
+        0,
+        36,
+        275,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "element": "crunch:cube"
+    }
+  }
+}
