@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 import numpy as np
+import pytest
 
 from cr.cube.cubepart import CubePartition, _Slice
 from cr.cube.cube import Cube
@@ -12,17 +13,16 @@ from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
 class Describe_Slice(object):
     """Integration-test suite for _Slice object."""
 
-    def it_knows_cube_is_mr_by_itself(self):
-        cube = Cube(CR.EDU_FAV5_FAV5)
+    @pytest.mark.parametrize(
+        "fixture,table_name,expected",
+        [(CR.EDU_FAV5_FAV5, "Education", True), (CR.AGE_FAVMR, None, False)],
+    )
+    def it_knows_cube_is_mr_by_itself(self, fixture, table_name, expected):
+        cube = Cube(fixture)
         slice_ = cube.partitions[0]
-        assert slice_.table_name == cube.name
-        assert slice_.cube_is_mr_by_itself is True
 
-    def it_knows_cube_is_not_mr_by_itself(self):
-        cube = Cube(CR.AGE_FAVMR)
-        slice_ = cube.partitions[0]
-        assert slice_.table_name is None
-        assert slice_.cube_is_mr_by_itself is False
+        assert slice_.table_name == table_name
+        assert slice_.cube_is_mr_by_itself is expected
 
     def it_is_not_empty(self):
         slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS).partitions[0]
@@ -520,6 +520,16 @@ class Describe_Slice(object):
             ],
         )
 
+    def it_provides_residual_test_stats(self):
+        slice_ = Cube(CR.CAT_X_CAT).partitions[0]
+        np.testing.assert_array_almost_equal(
+            slice_.residual_test_stats,
+            [
+                [[0.71439304, 0.71439304], [0.71439304, 0.71439304]],
+                [[0.36596253, -0.36596253], [-0.36596253, 0.36596253]],
+            ],
+        )
+
     def it_reorders_cat_x_cat(self):
         slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS).partitions[0]
         transforms = {
@@ -635,6 +645,142 @@ class Describe_Slice(object):
         np.testing.assert_almost_equal(
             means, np.array([[38.3333333, np.nan, 65.0, 55.0, 34.0]])
         )
+
+    def it_knows_its_insertions(self, insertions_fixture):
+        fixture, expected_value = insertions_fixture
+        slice_ = Cube(fixture).partitions[0]
+
+        np.testing.assert_array_almost_equal(expected_value, slice_.insertions)
+
+    # fixtures ---------------------------------------------
+
+    @pytest.fixture(
+        params=[
+            (CR.CAT_X_CAT, []),
+            (
+                CR.CAT_X_CAT_HS_2ROWS_1COL,
+                np.array(
+                    [
+                        [
+                            [
+                                np.inf,
+                                np.inf,
+                                np.inf,
+                                np.inf,
+                                np.inf,
+                                2.98420609e-03,
+                                np.inf,
+                            ],
+                            [
+                                np.inf,
+                                np.inf,
+                                np.inf,
+                                np.inf,
+                                np.inf,
+                                1.20857620e-05,
+                                np.inf,
+                            ],
+                            [
+                                1.09954577e-02,
+                                1.64231069e-01,
+                                7.74991104e-04,
+                                4.78920155e-01,
+                                1.73194792e-12,
+                                2.68565170e-11,
+                                2.94880115e-03,
+                            ],
+                            [
+                                np.inf,
+                                np.inf,
+                                np.inf,
+                                np.inf,
+                                np.inf,
+                                1.19006985e-02,
+                                np.inf,
+                            ],
+                            [
+                                2.87540141e-05,
+                                2.72376900e-02,
+                                4.27168678e-09,
+                                7.46184742e-02,
+                                0.00000000e00,
+                                2.89875191e-09,
+                                3.51260516e-01,
+                            ],
+                            [
+                                np.inf,
+                                np.inf,
+                                np.inf,
+                                np.inf,
+                                np.inf,
+                                0.00000000e00,
+                                np.inf,
+                            ],
+                        ],
+                        [
+                            [
+                                np.inf,
+                                np.inf,
+                                np.inf,
+                                np.inf,
+                                np.inf,
+                                -2.96936015e00,
+                                np.inf,
+                            ],
+                            [
+                                np.inf,
+                                np.inf,
+                                np.inf,
+                                np.inf,
+                                np.inf,
+                                -4.37603499e00,
+                                np.inf,
+                            ],
+                            [
+                                2.54284314e00,
+                                1.39098139e00,
+                                3.36157570e00,
+                                -7.08040423e-01,
+                                -7.05452463e00,
+                                -6.66285184e00,
+                                2.97302533e00,
+                            ],
+                            [
+                                np.inf,
+                                np.inf,
+                                np.inf,
+                                np.inf,
+                                np.inf,
+                                -2.51507523e00,
+                                np.inf,
+                            ],
+                            [
+                                -4.18311635e00,
+                                2.20809445e00,
+                                5.87331384e00,
+                                1.78280240e00,
+                                -8.48620633e00,
+                                -5.93723152e00,
+                                9.32147088e-01,
+                            ],
+                            [
+                                np.inf,
+                                np.inf,
+                                np.inf,
+                                np.inf,
+                                np.inf,
+                                9.70800153e00,
+                                np.inf,
+                            ],
+                        ],
+                    ]
+                ),
+            ),
+        ]
+    )
+    def insertions_fixture(self, request):
+        fixture, expected_value = request.param
+        return fixture, expected_value
 
 
 class Describe_Strand(object):

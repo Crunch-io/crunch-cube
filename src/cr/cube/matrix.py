@@ -38,19 +38,19 @@ class TransformedMatrix(object):
         )
 
     @lazyproperty
-    def rows(self):
-        return tuple(
-            _VectorAfterHiding(row, self._assembled_columns)
-            for row in self._assembled_rows
-            if not row.hidden
-        )
-
-    @lazyproperty
     def overlaps_tstats(self):
         return (
             self._unordered_matrix.overlaps_tstats
             if self._unordered_matrix._is_cat_x_mr_x_itself
             else None
+        )
+
+    @lazyproperty
+    def rows(self):
+        return tuple(
+            _VectorAfterHiding(row, self._assembled_columns)
+            for row in self._assembled_rows
+            if not row.hidden
         )
 
     @lazyproperty
@@ -651,10 +651,6 @@ class _CatXMrMatrix(_MatrixWithMR):
         return dim_sum / np.sum(dim_sum, axis=0)
 
     @lazyproperty
-    def _is_cat_x_mr_x_itself(self):
-        return True if self._overlaps is not None else False
-
-    @lazyproperty
     def _column_generator(self):
         return zip(
             # self._counts.T[0],
@@ -664,6 +660,10 @@ class _CatXMrMatrix(_MatrixWithMR):
             self._column_elements,
             self.table_margin,
         )
+
+    @lazyproperty
+    def _is_cat_x_mr_x_itself(self):
+        return True if self._overlaps is not None else False
 
     @lazyproperty
     def _zscores(self):
@@ -746,6 +746,53 @@ class _MrXMrMatrix(_MatrixWithMR):
         return np.sum(self._counts, axis=(1, 3))
 
     @lazyproperty
+    def tstats_overlap(self):
+        """
+        ndarray of correct tstats values considering the overlapped observations
+        t = (pi-pj)/s.e.(pi-pj)
+        where
+        s.e.(pi-pj) = sqrt(p_i*(1-p_i)/n_i+p_j*(1-p_j)/n_j-2*n_ij*(p_ij-p_i*p_j)/(n_i*n_j))
+        ni = base size for first subvar
+        nj = base size for second subvar
+        nij = number of overlapping observations
+        pij = proportion for which both subvar are True (selected)
+        In this case MRxMR the diff pi-pj is the pairwise subtraction of the diagonal of the
+        shadow_proportions the denominator is the matrix containing the unweighted counts
+        of the cube
+        """
+
+        # Subtraction of the proportions foreach observation
+        diff = np.subtract.outer(
+            self._mr_shadow_proportions.diagonal(),
+            self._mr_shadow_proportions.diagonal(),
+        )
+        # Sum of the s.e. for each observation
+        se_pi_pj = np.add.outer(
+            self._mr_shadow_proportions.diagonal()
+            * (1 - self._mr_shadow_proportions.diagonal())
+            / self.table_base.diagonal(),
+            self._mr_shadow_proportions.diagonal()
+            * (1 - self._mr_shadow_proportions.diagonal())
+            / self.table_base.diagonal(),
+        )
+        # Correction factor considering the overlap
+        correction_factor = (
+            2
+            * self.table_base
+            * (
+                self._mr_shadow_proportions
+                - np.multiply.outer(
+                    self._mr_shadow_proportions.diagonal(),
+                    self._mr_shadow_proportions.diagonal(),
+                )
+            )
+        ) / np.multiply.outer(self.table_base.diagonal(), self.table_base.diagonal())
+        se_diff = np.sqrt(se_pi_pj - correction_factor)
+        t_stats = diff / se_diff
+        np.fill_diagonal(t_stats, 0)
+        return t_stats
+
+    @lazyproperty
     def _baseline(self):
         """ndarray of baseline values for column index.
 
@@ -797,53 +844,6 @@ class _MrXMrMatrix(_MatrixWithMR):
             np.sum(self._counts, axis=1)[:, :, 0],
             np.sum(self._counts, axis=3)[:, 0, :],
         )
-
-    @lazyproperty
-    def tstats_overlap(self):
-        """
-        ndarray of correct tstats values considering the overlapped observations
-        t = (pi-pj)/s.e.(pi-pj)
-        where
-        s.e.(pi-pj) = sqrt(p_i*(1-p_i)/n_i+p_j*(1-p_j)/n_j-2*n_ij*(p_ij-p_i*p_j)/(n_i*n_j))
-        ni = base size for first subvar
-        nj = base size for second subvar
-        nij = number of overlapping observations
-        pij = proportion for which both subvar are True (selected)
-        In this case MRxMR the diff pi-pj is the pairwise subtraction of the diagonal of the
-        shadow_proportions the denominator is the matrix containing the unweighted counts
-        of the cube
-        """
-
-        # Subtraction of the proportions foreach observation
-        diff = np.subtract.outer(
-            self._mr_shadow_proportions.diagonal(),
-            self._mr_shadow_proportions.diagonal(),
-        )
-        # Sum of the s.e. for each observation
-        se_pi_pj = np.add.outer(
-            self._mr_shadow_proportions.diagonal()
-            * (1 - self._mr_shadow_proportions.diagonal())
-            / self.table_base.diagonal(),
-            self._mr_shadow_proportions.diagonal()
-            * (1 - self._mr_shadow_proportions.diagonal())
-            / self.table_base.diagonal(),
-        )
-        # Correction factor considering the overlap
-        correction_factor = (
-            2
-            * self.table_base
-            * (
-                self._mr_shadow_proportions
-                - np.multiply.outer(
-                    self._mr_shadow_proportions.diagonal(),
-                    self._mr_shadow_proportions.diagonal(),
-                )
-            )
-        ) / np.multiply.outer(self.table_base.diagonal(), self.table_base.diagonal())
-        se_diff = np.sqrt(se_pi_pj - correction_factor)
-        t_stats = diff / se_diff
-        np.fill_diagonal(t_stats, 0)
-        return t_stats
 
 
 # ===INSERTION (SUBTOTAL) VECTORS===

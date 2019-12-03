@@ -5,13 +5,6 @@ from cr.cube.cube import Cube
 from ..fixtures import CR
 
 
-# def test_dummy():
-#     slice_ = Cube(CR.GGG).partitions[0]
-#     import ipdb
-#
-#     ipdb.set_trace()
-
-
 def test_labels_simple_mr_exclude_missing():
     slice_ = Cube(CR.SIMPLE_MR).partitions[0]
     assert slice_.row_labels == ("Response #1", "Response #2", "Response #3")

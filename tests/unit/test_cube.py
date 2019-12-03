@@ -49,7 +49,7 @@ class DescribeCube(object):
 
         assert str(exception) == expected_value
 
-    def it_knows_if_it_is_mr_by_itself_to_help(
+    def it_knows_if_it_is_mr_by_itself(
         self,
         request,
         cube_dimensions_fixture,
@@ -81,6 +81,28 @@ class DescribeCube(object):
 
     @pytest.fixture(
         params=[
+            ((DT.CAT, DT.MR), ("alias1", "alias2"), False),
+            ((DT.CAT, DT.MR, DT.MR), ("alias1", "alias2", "alias2"), True),
+            ((DT.CAT, DT.MR, DT.MR), ("alias1", "alias2", "alias3"), False),
+            ((DT.CAT, DT.TEXT, DT.TEXT), ("alias1", "alias2", "alias2"), False),
+        ]
+    )
+    def cube_dimensions_fixture(self, request):
+        dimension_types, aliases, expected_value = request.param
+        return dimension_types, aliases, expected_value
+
+    @pytest.fixture(
+        params=[
+            (CR.CAT_X_CAT, CR.CAT_X_CAT.get("value", CR.CAT_X_CAT)),
+            ({"value": "val"}, "val"),
+        ]
+    )
+    def cube_response_type_fixture(self, request):
+        cube_response, expected_value = request.param
+        return cube_response, expected_value
+
+    @pytest.fixture(
+        params=[
             (
                 None,
                 "Unsupported type <NoneType> provided. Cube response must be JSON (str) or dict.",
@@ -95,28 +117,6 @@ class DescribeCube(object):
         cube_response, expected_value = request.param
         return cube_response, expected_value
 
-    @pytest.fixture(
-        params=[
-            (CR.CAT_X_CAT, CR.CAT_X_CAT.get("value", CR.CAT_X_CAT)),
-            ({"value": "val"}, "val"),
-        ]
-    )
-    def cube_response_type_fixture(self, request):
-        cube_response, expected_value = request.param
-        return cube_response, expected_value
-
-    @pytest.fixture(
-        params=[
-            ((DT.CAT, DT.MR, DT.MR), ("alias1", "alias2", "alias2"), True),
-            ((DT.CAT, DT.MR), ("alias1", "alias2"), False),
-            ((DT.CAT, DT.MR, DT.MR), ("alias1", "alias2", "alias3"), False),
-            ((DT.CAT, DT.TEXT, DT.TEXT), ("alias1", "alias2", "alias2"), False),
-        ]
-    )
-    def cube_dimensions_fixture(self, request):
-        dimension_types, aliases, expected_value = request.param
-        return dimension_types, aliases, expected_value
-
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -124,12 +124,12 @@ class DescribeCube(object):
         return instance_mock(request, Cube)
 
     @pytest.fixture
-    def dimension_types_prop_(self, request):
-        return property_mock(request, Cube, "dimension_types")
-
-    @pytest.fixture
     def cube_dimensions_prop_(self, request):
         return property_mock(request, Cube, "dimensions")
+
+    @pytest.fixture
+    def dimension_types_prop_(self, request):
+        return property_mock(request, Cube, "dimension_types")
 
 
 class DescribeMeasures(object):

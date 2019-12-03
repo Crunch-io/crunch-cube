@@ -57,9 +57,8 @@ class CubePartition(object):
         return _Slice(cube, slice_idx, transforms, population, mask_size)
 
     @lazyproperty
-    def variable_name(self):
-        """str representing the name of the superheading variable."""
-        return self._dimensions[0 if self.ndim < 2 else 1].name
+    def cube_is_mr_by_itself(self):
+        return False
 
     @lazyproperty
     def dimension_types(self):
@@ -96,6 +95,11 @@ class CubePartition(object):
         raise NotImplementedError(
             "must be implemented by each subclass"
         )  # pragma: no cover
+
+    @lazyproperty
+    def variable_name(self):
+        """str representing the name of the superheading variable."""
+        return self._dimensions[0 if self.ndim < 2 else 1].name
 
 
 class _Slice(CubePartition):
@@ -168,6 +172,10 @@ class _Slice(CubePartition):
         return np.array([row.values for row in self._matrix.rows])
 
     @lazyproperty
+    def cube_is_mr_by_itself(self):
+        return self._cube.is_mr_by_itself
+
+    @lazyproperty
     def description(self):
         """str description of this slice, which it takes from its rows-dimension."""
         return self._rows_dimension.description
@@ -183,12 +191,26 @@ class _Slice(CubePartition):
         return tuple(i for i, row in enumerate(self._matrix.rows) if row.is_insertion)
 
     @lazyproperty
-    def is_empty(self):
-        return any(s == 0 for s in self.shape)
+    def insertions(self):
+        """Returns masked array with residuals for insertions"""
+        inserted_rows = self.inserted_row_idxs
+        inserted_cols = self.inserted_column_idxs
+        if not inserted_cols and not inserted_cols:
+            return []
+        mask = np.zeros(self.pvals.shape)
+        mask[inserted_rows, :] = 1
+        mask[:, inserted_cols] = 1
+        masked_pvals = np.ma.masked_array(self.pvals, np.logical_not(mask)).filled(
+            np.inf
+        )
+        masked_zscores = np.ma.masked_array(self.zscore, np.logical_not(mask)).filled(
+            np.inf
+        )
+        return np.stack([masked_pvals, masked_zscores])
 
     @lazyproperty
-    def cube_is_mr_by_itself(self):
-        return self._cube.is_mr_by_itself
+    def is_empty(self):
+        return any(s == 0 for s in self.shape)
 
     @lazyproperty
     def means(self):
@@ -209,7 +231,6 @@ class _Slice(CubePartition):
     @lazyproperty
     def overlaps_tstats(self):
         return self._matrix.overlaps_tstats
-        # return self._matrix.overlaps_tstats[self._slice_idx]
 
     @lazyproperty
     def pairwise_indices(self):
@@ -253,6 +274,14 @@ class _Slice(CubePartition):
     @lazyproperty
     def pvals(self):
         return np.array([row.pvals for row in self._matrix.rows])
+
+    @lazyproperty
+    def residual_test_stats(self):
+        """Exposes pvals and zscore (with HS) stacked together
+
+        Public method used as cube_method for the SOA API
+        """
+        return np.stack([self.pvals, self.zscore])
 
     @lazyproperty
     def row_base(self):
@@ -576,10 +605,6 @@ class _Strand(CubePartition):
         return any(s == 0 for s in self._shape)
 
     @lazyproperty
-    def cube_is_mr_by_itself(self):
-        return False
-
-    @lazyproperty
     def inserted_row_idxs(self):
         # TODO: add integration-test coverage for this.
         return tuple(i for i, row in enumerate(self._stripe.rows) if row.is_insertion)
@@ -813,10 +838,6 @@ class _Nub(CubePartition):
     @lazyproperty
     def is_empty(self):
         return False if self.base_count else True
-
-    @lazyproperty
-    def cube_is_mr_by_itself(self):
-        return False
 
     @lazyproperty
     def means(self):
