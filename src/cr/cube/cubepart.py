@@ -192,7 +192,18 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def insertions(self):
-        """Returns masked array with residuals for insertions"""
+        """Returns masked array with residuals for insertions
+
+                 0     1	 2	     3	    4	    5	    6
+           0   inf   inf   inf	   inf	  inf	 -2.9	  inf
+           1   inf	 inf   inf	   inf	  inf	 -4.3	  inf
+           2   2.5	 1.3   3.3	 -0.70	-7.25	 -6.52	 2.25
+           3   inf	 inf   inf	   inf	  inf	 -2.51	  inf
+           4  -1.16	 2.20  5.84	  1.78	-8.48	 -5.92	 0.93
+           5   inf   inf   inf	   inf	  inf	  9.70	  inf
+
+           Only the insertions residuals are showed in a inf masked array
+        """
         inserted_rows = self.inserted_row_idxs
         inserted_cols = self.inserted_column_idxs
         if not inserted_cols and not inserted_cols:
