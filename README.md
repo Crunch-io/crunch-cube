@@ -112,6 +112,12 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.11.13
+- Correct tstatistcs for multiple response
+- New tstats measure in MRxMR Matrix
+- New pairwise significance test for CATxMRxITSELF (5D) cubes
+- New cube partition methods for residuals values
+
 #### 1.11.12
 - Bug fix on residuals for subtotals
 

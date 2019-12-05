@@ -2,6 +2,6 @@
 
 """Initialization module for crunch-cube package."""
 
-__version__ = "1.11.12"
+__version__ = "1.11.13"
 
 # NOTE: We'll be switching to 2.0.0 once we throw out the old cube and slice
