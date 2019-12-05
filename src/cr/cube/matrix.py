@@ -232,7 +232,7 @@ class _BaseBaseMatrix(object):
                 _MrXMrMatrix, dimensions, counts, base_counts, counts_with_missings
             )
 
-            # These are apparent dimensions (user dimensions). Do we need to get all the dims?
+            # These are apparent dimensions which hide 'selections' dims behind 'MR'
             dimensions = cube.dimensions[:-1]
             counts = np.sum(counts[:, :, :, 0], axis=3)
             base_counts = np.sum(base_counts[:, :, :, 0], axis=3)
@@ -714,6 +714,11 @@ class _MrXMrMatrix(_MatrixWithMR):
 
     @lazyproperty
     def _mr_shadow_proportions(self):
+        """Cube containing item-wise selections, overlap, and nonoverlap
+           with all other items in a multiple response dimension, for each
+           element of any prepended dimensions:
+           A 1d interface to a 4d hypercube of underlying counts.
+        """
         return self._counts[:, 0, :, 0] / self._pairwise_overlap_total
 
     @lazyproperty
@@ -823,6 +828,12 @@ class _MrXMrMatrix(_MatrixWithMR):
 
     @lazyproperty
     def _pairwise_overlap_total(self):
+        """Return 2D ndarray symmetric-square matrix of valid observations.
+
+           Given a 4d hypercube of multiple response items, return the
+           symmetric square matrix of valid observations between all pairs.
+           n1 = 2; n2 = 2; n12 = 1; overlap total = 3
+        """
         return np.sum(np.sum(self._counts, axis=1), axis=2)
 
     @lazyproperty

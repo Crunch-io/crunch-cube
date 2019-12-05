@@ -348,15 +348,15 @@ def test_cat_x_mr_x_itself_zscores():
 
 
 def test_cat_x_mr_and_cat_x_mr_x_itself_zscores():
-    slice_ = Cube(CR.AGE_FAVMR).partitions[0]
-    slice2_ = Cube(CR.AGE_FAVMR_FAVMR).partitions[0]
+    slice_ = Cube(CR.EDU_FAV5).partitions[0]
+    slice2_ = Cube(CR.EDU_FAV5_FAV5).partitions[0]
 
     np.testing.assert_array_almost_equal(
         slice_.column_proportions, slice2_.column_proportions
     )
     np.testing.assert_array_almost_equal(slice_.zscore, slice2_.zscore)
-    assert slice_.shape == (4, 18)
-    assert slice2_.shape == (4, 18)
+    assert slice_.shape == (4, 5)
+    assert slice2_.shape == (4, 5)
 
 
 def test_cat_x_mr_x_mr_proportions_by_row():
