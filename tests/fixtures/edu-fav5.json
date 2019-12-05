@@ -1,0 +1,522 @@
+{
+  "element": "shoji:view",
+  "self": "https://app.crunch.io/api/datasets/9f1f51ac5b70492c9e573288e9e6bed6/cube/?query=%7B%22dimensions%22:%5B%7B%22variable%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2F9f1f51ac5b70492c9e573288e9e6bed6%2Fvariables%2F000084%2F%22%7D,%7B%22each%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2F9f1f51ac5b70492c9e573288e9e6bed6%2Fvariables%2F938eb32b7b934251adba525d95478b9e%2F%22%7D,%7B%22function%22:%22as_selected%22,%22args%22:%5B%7B%22variable%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2F9f1f51ac5b70492c9e573288e9e6bed6%2Fvariables%2F938eb32b7b934251adba525d95478b9e%2F%22%7D%5D%7D%5D,%22measures%22:%7B%22count%22:%7B%22function%22:%22cube_count%22,%22args%22:%5B%5D%7D%7D,%22weight%22:%22https:%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2F9f1f51ac5b70492c9e573288e9e6bed6%2Fvariables%2F9c707cb06234410591aff3fb31c735fc%2F%22%7D",
+  "value": {
+    "query": {
+      "measures": {
+        "count": {
+          "function": "cube_count",
+          "args": []
+        }
+      },
+      "dimensions": [
+        {
+          "variable": "https://app.crunch.io/api/datasets/9f1f51ac5b70492c9e573288e9e6bed6/variables/000084/"
+        },
+        {
+          "each": "https://app.crunch.io/api/datasets/9f1f51ac5b70492c9e573288e9e6bed6/variables/938eb32b7b934251adba525d95478b9e/"
+        },
+        {
+          "function": "as_selected",
+          "args": [
+            {
+              "variable": "https://app.crunch.io/api/datasets/9f1f51ac5b70492c9e573288e9e6bed6/variables/938eb32b7b934251adba525d95478b9e/"
+            }
+          ]
+        }
+      ],
+      "weight": "https://app.crunch.io/api/datasets/9f1f51ac5b70492c9e573288e9e6bed6/variables/9c707cb06234410591aff3fb31c735fc/"
+    },
+    "query_environment": {
+      "filter": []
+    },
+    "result": {
+      "dimensions": [
+        {
+          "derived": false,
+          "references": {
+            "alias": "educ4",
+            "name": "Education",
+            "description": "What is the highest level of education you have completed?"
+          },
+          "type": {
+            "ordinal": false,
+            "class": "categorical",
+            "categories": [
+              {
+                "numeric_value": 1,
+                "missing": false,
+                "id": 1,
+                "name": "HS or less"
+              },
+              {
+                "numeric_value": 2,
+                "missing": false,
+                "id": 2,
+                "name": "Some college"
+              },
+              {
+                "numeric_value": 3,
+                "missing": false,
+                "id": 3,
+                "name": "College grad"
+              },
+              {
+                "numeric_value": 4,
+                "missing": false,
+                "id": 4,
+                "name": "Postgrad"
+              },
+              {
+                "numeric_value": null,
+                "missing": true,
+                "id": 32767,
+                "name": "not asked"
+              },
+              {
+                "numeric_value": null,
+                "missing": true,
+                "id": 32766,
+                "name": "skipped"
+              },
+              {
+                "numeric_value": null,
+                "missing": true,
+                "id": -1,
+                "name": "No Data"
+              }
+            ]
+          }
+        },
+        {
+          "references": {
+            "alias": "Favorablility5",
+            "description": "Do you have a favorable or an unfavorable opinion of the following people?",
+            "name": "Favorablility5",
+            "subreferences": [
+              {
+                "alias": "fav_tulsigabbard#",
+                "name": "Tulsi Gabbard"
+              },
+              {
+                "alias": "fav_kirstengillibrand#",
+                "name": "Kirsten Gillibrand"
+              },
+              {
+                "alias": "fav_kamalaharris#",
+                "name": "Kamala Harris"
+              },
+              {
+                "alias": "fav_amyklobuchar#",
+                "name": "Amy Klobuchar"
+              },
+              {
+                "alias": "fav_elizabethwarren#",
+                "name": "Elizabeth Warren"
+              }
+            ]
+          },
+          "derived": true,
+          "type": {
+            "subtype": {
+              "class": "variable"
+            },
+            "elements": [
+              {
+                "id": 1,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "fav_tulsigabbard#",
+                    "name": "Tulsi Gabbard"
+                  },
+                  "id": "0006"
+                },
+                "missing": false
+              },
+              {
+                "id": 2,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "fav_kirstengillibrand#",
+                    "name": "Kirsten Gillibrand"
+                  },
+                  "id": "0007"
+                },
+                "missing": false
+              },
+              {
+                "id": 3,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "fav_kamalaharris#",
+                    "name": "Kamala Harris"
+                  },
+                  "id": "0008"
+                },
+                "missing": false
+              },
+              {
+                "id": 4,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "fav_amyklobuchar#",
+                    "name": "Amy Klobuchar"
+                  },
+                  "id": "0011"
+                },
+                "missing": false
+              },
+              {
+                "id": 5,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "fav_elizabethwarren#",
+                    "name": "Elizabeth Warren"
+                  },
+                  "id": "0017"
+                },
+                "missing": false
+              }
+            ],
+            "class": "enum"
+          }
+        },
+        {
+          "derived": true,
+          "references": {
+            "alias": "Favorablility5",
+            "subreferences": [
+              {
+                "alias": "fav_tulsigabbard#",
+                "name": "Tulsi Gabbard"
+              },
+              {
+                "alias": "fav_kirstengillibrand#",
+                "name": "Kirsten Gillibrand"
+              },
+              {
+                "alias": "fav_kamalaharris#",
+                "name": "Kamala Harris"
+              },
+              {
+                "alias": "fav_amyklobuchar#",
+                "name": "Amy Klobuchar"
+              },
+              {
+                "alias": "fav_elizabethwarren#",
+                "name": "Elizabeth Warren"
+              }
+            ],
+            "description": "Do you have a favorable or an unfavorable opinion of the following people?",
+            "name": "Favorablility5"
+          },
+          "type": {
+            "ordinal": false,
+            "subvariables": [
+              "0006",
+              "0007",
+              "0008",
+              "0011",
+              "0017"
+            ],
+            "class": "categorical",
+            "categories": [
+              {
+                "numeric_value": 1,
+                "selected": true,
+                "id": 1,
+                "missing": false,
+                "name": "Selected"
+              },
+              {
+                "numeric_value": 0,
+                "id": 0,
+                "name": "Other",
+                "missing": false
+              },
+              {
+                "numeric_value": null,
+                "id": -1,
+                "name": "No Data",
+                "missing": true
+              }
+            ]
+          }
+        }
+      ],
+      "missing": 2,
+      "measures": {
+        "count": {
+          "data": [
+            71.83810154867658,
+            499.68740351494034,
+            2.81911352803626,
+            83.39562193557171,
+            488.12988312804526,
+            2.81911352803626,
+            102.30979582528781,
+            469.2157092383291,
+            2.81911352803626,
+            76.09451166874392,
+            495.43099339487304,
+            2.81911352803626,
+            141.35334197742847,
+            430.1721630861883,
+            2.81911352803626,
+            73.24260480007527,
+            410.47378931607403,
+            0.0,
+            93.95957755088685,
+            389.75681656526257,
+            0.0,
+            146.19585086790124,
+            337.5205432482482,
+            0.0,
+            86.50745273203907,
+            397.20894138411023,
+            0.0,
+            150.28686481227885,
+            333.4295293038707,
+            0.0,
+            58.37370472416991,
+            207.90554535350535,
+            0.0,
+            97.14666583344481,
+            169.13258424423043,
+            0.0,
+            123.9294162446285,
+            142.34983383304672,
+            0.0,
+            89.84515177521234,
+            176.434098302463,
+            0.0,
+            130.51633226528136,
+            135.76291781239382,
+            0.0,
+            38.493660657919605,
+            137.1660765565955,
+            0.0,
+            69.92952025163403,
+            105.73021696288097,
+            0.0,
+            83.87523227410067,
+            91.78450494041434,
+            0.0,
+            71.70540245695537,
+            103.95433475755964,
+            0.0,
+            85.62133093217513,
+            90.03840628233992,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "n_missing": 2,
+          "metadata": {
+            "references": {},
+            "derived": true,
+            "type": {
+              "integer": false,
+              "missing_rules": {},
+              "missing_reasons": {
+                "No Data": -1
+              },
+              "class": "numeric"
+            }
+          }
+        }
+      },
+      "n": 1500,
+      "filter_stats": {
+        "filtered_complete": {
+          "unweighted": {
+            "selected": 1500,
+            "other": 0,
+            "missing": 366
+          },
+          "weighted": {
+            "selected": 1499.9999999999932,
+            "other": 0.0,
+            "missing": 0.0
+          }
+        },
+        "filtered": {
+          "unweighted": {
+            "selected": 1500,
+            "other": 366,
+            "missing": 0
+          },
+          "weighted": {
+            "selected": 1499.9999999999932,
+            "other": 0.0,
+            "missing": 0.0
+          }
+        }
+      },
+      "unfiltered": {
+        "unweighted_n": 1866,
+        "weighted_n": 1499.9999999999932
+      },
+      "filtered": {
+        "unweighted_n": 1500,
+        "weighted_n": 1499.9999999999932
+      },
+      "counts": [
+        54,
+        353,
+        2,
+        63,
+        344,
+        2,
+        82,
+        325,
+        2,
+        58,
+        349,
+        2,
+        108,
+        299,
+        2,
+        88,
+        467,
+        0,
+        117,
+        438,
+        0,
+        184,
+        371,
+        0,
+        107,
+        448,
+        0,
+        191,
+        364,
+        0,
+        72,
+        248,
+        0,
+        127,
+        193,
+        0,
+        162,
+        158,
+        0,
+        117,
+        203,
+        0,
+        171,
+        149,
+        0,
+        49,
+        167,
+        0,
+        92,
+        124,
+        0,
+        111,
+        105,
+        0,
+        95,
+        121,
+        0,
+        116,
+        100,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "element": "crunch:cube"
+    }
+  }
+}

@@ -13,6 +13,21 @@ except ImportError:  # pragma: no cover
     from itertools import filterfalse as ifilterfalse
 
 
+def calculate_overlap_tstats(
+    cls, mr_dimensions, mr_counts, mr_base_counts, mr_counts_with_missings
+):
+    overlaps = np.zeros(np.array(mr_counts.shape)[[0, 1, 3]])
+    for slice_index in range(mr_counts.shape[0]):
+        overlap_slice = cls(
+            mr_dimensions,
+            mr_counts[slice_index],
+            mr_base_counts[slice_index],
+            mr_counts_with_missings[slice_index],
+        )
+        overlaps[slice_index] = overlap_slice.tstats_overlap
+    return overlaps
+
+
 def compress_pruned(table):
     """Compress table based on pruning mask.
 

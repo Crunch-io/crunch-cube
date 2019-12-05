@@ -259,6 +259,15 @@ class Dimension(object):
         self._dimension_transforms_arg = dimension_transforms
 
     @lazyproperty
+    def alias(self):
+        """Return the alias for the dimension if it exists, None otherwise
+
+        This property is needed to identify one of the mandatory condition
+        for a MRxItself cube.
+        """
+        return self._dimension_dict["references"].get("alias", None)
+
+    @lazyproperty
     def all_elements(self):
         """_AllElements object providing cats or subvars of this dimension.
 

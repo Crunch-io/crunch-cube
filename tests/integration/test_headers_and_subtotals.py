@@ -2259,3 +2259,9 @@ class TestHeadersAndSubtotals(object):
                 [0.0, 7.11455911e-01, np.nan, 0.0, 0.0],
             ],
         )
+
+    def it_provide_residual_test_stats_including_hs(self):
+        slice_ = Cube(CR.CAT_X_CAT_HS_2ROWS_1COL).partitions[0]
+        np.testing.assert_array_equal(slice_.pvals, slice_.residual_test_stats[0])
+        np.testing.assert_array_equal(slice_.zscore, slice_.residual_test_stats[1])
+        assert slice_.residual_test_stats.shape == (2, 6, 7)

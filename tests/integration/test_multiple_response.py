@@ -332,6 +332,33 @@ def test_simple_mr_margin_by_col():
     np.testing.assert_array_equal(slice_.rows_margin, [3, 4, 0])
 
 
+def test_cat_x_mr_x_itself_zscores():
+    slice_ = Cube(CR.EDU_FAV5_FAV5).partitions[0]
+
+    assert slice_.cube_is_mr_by_itself is True
+    np.testing.assert_array_almost_equal(
+        slice_.zscore,
+        [
+            [-2.965933, -6.078075, -8.307031, -6.154084, -5.897443],
+            [-0.739747, -2.274391, -0.147797, -2.444906, -1.607212],
+            [2.81708, 5.763211, 6.28017, 5.28286, 5.739841],
+            [2.205063, 5.632647, 5.292887, 6.565961, 4.418183],
+        ],
+    )
+
+
+def test_cat_x_mr_and_cat_x_mr_x_itself_zscores():
+    slice_ = Cube(CR.EDU_FAV5).partitions[0]
+    slice2_ = Cube(CR.EDU_FAV5_FAV5).partitions[0]
+
+    np.testing.assert_array_almost_equal(
+        slice_.column_proportions, slice2_.column_proportions
+    )
+    np.testing.assert_array_almost_equal(slice_.zscore, slice2_.zscore)
+    assert slice_.shape == (4, 5)
+    assert slice2_.shape == (4, 5)
+
+
 def test_cat_x_mr_x_mr_proportions_by_row():
     slice_ = Cube(CR.CAT_X_MR_X_MR).partitions[0]
     np.testing.assert_almost_equal(

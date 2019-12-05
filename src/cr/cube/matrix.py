@@ -15,7 +15,7 @@ from scipy.stats import norm
 from scipy.stats.contingency import expected_freq
 
 from cr.cube.enum import DIMENSION_TYPE as DT
-from cr.cube.util import lazyproperty
+from cr.cube.util import lazyproperty, calculate_overlap_tstats
 
 
 class TransformedMatrix(object):
@@ -35,6 +35,14 @@ class TransformedMatrix(object):
             _VectorAfterHiding(column, self._assembled_rows)
             for column in self._assembled_columns
             if not column.hidden
+        )
+
+    @lazyproperty
+    def overlaps_tstats(self):
+        return (
+            self._unordered_matrix.overlaps_tstats
+            if self._unordered_matrix._is_cat_x_mr_x_itself
+            else None
         )
 
     @lazyproperty
@@ -218,7 +226,24 @@ class _BaseBaseMatrix(object):
         base_counts = cube.base_counts
         counts_with_missings = cube.counts_with_missings
         dimension_types = cube.dimension_types[-2:]
+        if cube.dimension_types == (DT.CAT, DT.MR, DT.MR) and cube.is_mr_by_itself:
 
+            overlap_tstats = calculate_overlap_tstats(
+                _MrXMrMatrix, dimensions, counts, base_counts, counts_with_missings
+            )
+
+            # These are apparent dimensions which hide 'selections' dims behind 'MR'
+            dimensions = cube.dimensions[:-1]
+            counts = np.sum(counts[:, :, :, 0], axis=3)
+            base_counts = np.sum(base_counts[:, :, :, 0], axis=3)
+            counts_with_missings = np.sum(counts_with_missings[:, :, :, 0], axis=3)
+            return _CatXMrMatrix(
+                dimensions,
+                counts,
+                base_counts,
+                counts_with_missings,
+                overlaps=overlap_tstats,
+            )
         # For cubes with means, create one of the means-matrix types
         if cube.has_means:
             if cube.ndim == 3:
@@ -562,12 +587,24 @@ class _CatXMrMatrix(_MatrixWithMR):
     (which correspond to the MR dimension).
     """
 
+    def __init__(
+        self, dimensions, counts, base_counts, counts_with_missings, overlaps=None
+    ):
+        super(_CatXMrMatrix, self).__init__(
+            dimensions, counts, base_counts, counts_with_missings
+        )
+        self._overlaps = overlaps
+
     @lazyproperty
     def columns(self):
         return tuple(
             _CatXMrVector(counts.T, base_counts.T, element, table_margin)
             for counts, base_counts, element, table_margin in self._column_generator
         )
+
+    @lazyproperty
+    def overlaps_tstats(self):
+        return self._overlaps if self._is_cat_x_mr_x_itself else None
 
     @lazyproperty
     def rows(self):
@@ -625,7 +662,13 @@ class _CatXMrMatrix(_MatrixWithMR):
         )
 
     @lazyproperty
+    def _is_cat_x_mr_x_itself(self):
+        return True if self._overlaps is not None else False
+
+    @lazyproperty
     def _zscores(self):
+        # if the cube is a special one (5D with MRxItself as last dims)
+        # the zscores should be the same as a 2D MRxMR matrix
         return self._array_type_std_res(
             self._counts[:, :, 0],
             self.table_margin,
@@ -635,9 +678,11 @@ class _CatXMrMatrix(_MatrixWithMR):
 
 
 class _CatXMrMeansMatrix(_CatXMrMatrix):
-    def __init__(self, dimensions, means, base_counts):
+    def __init__(self, dimensions, means, base_counts, overlaps=None):
         counts = np.zeros(means.shape)
-        super(_CatXMrMeansMatrix, self).__init__(dimensions, counts, base_counts)
+        super(_CatXMrMeansMatrix, self).__init__(
+            dimensions, counts, base_counts, overlaps
+        )
         self._means = means
 
     @lazyproperty
@@ -697,6 +742,53 @@ class _MrXMrMatrix(_MatrixWithMR):
         return np.sum(self._counts, axis=(1, 3))
 
     @lazyproperty
+    def tstats_overlap(self):
+        """
+        ndarray of correct tstats values considering the overlapped observations
+        t = (pi-pj)/s.e.(pi-pj)
+        where
+        s.e.(pi-pj) = sqrt(p_i*(1-p_i)/n_i+p_j*(1-p_j)/n_j-2*n_ij*(p_ij-p_i*p_j)/(n_i*n_j))
+        ni = base size for first subvar
+        nj = base size for second subvar
+        nij = number of overlapping observations
+        pij = proportion for which both subvar are True (selected)
+        In this case MRxMR the diff pi-pj is the pairwise subtraction of the diagonal of the
+        shadow_proportions the denominator is the matrix containing the unweighted counts
+        of the cube
+        """
+
+        # Subtraction of the proportions foreach observation
+        diff = np.subtract.outer(
+            self._mr_shadow_proportions.diagonal(),
+            self._mr_shadow_proportions.diagonal(),
+        )
+        # Sum of the s.e. for each observation
+        se_pi_pj = np.add.outer(
+            self._mr_shadow_proportions.diagonal()
+            * (1 - self._mr_shadow_proportions.diagonal())
+            / self.table_base.diagonal(),
+            self._mr_shadow_proportions.diagonal()
+            * (1 - self._mr_shadow_proportions.diagonal())
+            / self.table_base.diagonal(),
+        )
+        # Correction factor considering the overlap
+        correction_factor = (
+            2
+            * self.table_base
+            * (
+                self._mr_shadow_proportions
+                - np.multiply.outer(
+                    self._mr_shadow_proportions.diagonal(),
+                    self._mr_shadow_proportions.diagonal(),
+                )
+            )
+        ) / np.multiply.outer(self.table_base.diagonal(), self.table_base.diagonal())
+        se_diff = np.sqrt(se_pi_pj - correction_factor)
+        t_stats = diff / se_diff
+        np.fill_diagonal(t_stats, 0)
+        return t_stats
+
+    @lazyproperty
     def _baseline(self):
         """ndarray of baseline values for column index.
 
@@ -724,6 +816,25 @@ class _MrXMrMatrix(_MatrixWithMR):
             self._column_elements,
             self.table_margin.T,
         )
+
+    @lazyproperty
+    def _mr_shadow_proportions(self):
+        """Cube containing item-wise selections, overlap, and nonoverlap
+           with all other items in a multiple response dimension, for each
+           element of any prepended dimensions:
+           A 1d interface to a 4d hypercube of underlying counts.
+        """
+        return self._counts[:, 0, :, 0] / self._pairwise_overlap_total
+
+    @lazyproperty
+    def _pairwise_overlap_total(self):
+        """Return 2D ndarray symmetric-square matrix of valid observations.
+
+           Given a 4d hypercube of multiple response items, return the
+           symmetric square matrix of valid observations between all pairs.
+           n1 = 2; n2 = 2; n12 = 1; overlap total = 3
+        """
+        return np.sum(np.sum(self._counts, axis=1), axis=2)
 
     @lazyproperty
     def _row_generator(self):
@@ -925,12 +1036,12 @@ class _InsertionColumn(_BaseMatrixInsertionVector):
         )
 
     @lazyproperty
-    def _residuals(self):
-        return self.values - self._expected_counts
-
-    @lazyproperty
     def _expected_counts(self):
         return self.opposite_margins * self.margin / self.table_margin
+
+    @lazyproperty
+    def _residuals(self):
+        return self.values - self._expected_counts
 
 
 class _InsertionRow(_BaseMatrixInsertionVector):
@@ -961,12 +1072,12 @@ class _InsertionRow(_BaseMatrixInsertionVector):
         )
 
     @lazyproperty
-    def _residuals(self):
-        return self.values - self._expected_counts
-
-    @lazyproperty
     def _expected_counts(self):
         return self.opposite_margins * self.margin / self.table_margin
+
+    @lazyproperty
+    def _residuals(self):
+        return self.values - self._expected_counts
 
 
 # ===TRANSFORMATION VECTORS===
@@ -1370,12 +1481,12 @@ class _BaseVector(object):
         return self._residuals / np.sqrt(variance)
 
     @lazyproperty
-    def _residuals(self):
-        return self.values - self._expected_counts
-
-    @lazyproperty
     def _expected_counts(self):
         return self.opposite_margins * self.margin / self.table_margin
+
+    @lazyproperty
+    def _residuals(self):
+        return self.values - self._expected_counts
 
 
 class _CategoricalVector(_BaseVector):
@@ -1516,6 +1627,11 @@ class _MultipleResponseVector(_CategoricalVector):
         return self._selected
 
     @lazyproperty
+    def zscore(self):
+        # TODO: Implement the real zscore calc for MR
+        return self._zscore
+
+    @lazyproperty
     def _not_selected(self):
         return self._counts[1, :]
 
@@ -1530,8 +1646,3 @@ class _MultipleResponseVector(_CategoricalVector):
     @lazyproperty
     def _selected_unweighted(self):
         return self._base_counts[0, :]
-
-    @lazyproperty
-    def zscore(self):
-        # TODO: Implement the real zscore calc for MR
-        return self._zscore

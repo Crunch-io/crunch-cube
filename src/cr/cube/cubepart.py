@@ -57,9 +57,8 @@ class CubePartition(object):
         return _Slice(cube, slice_idx, transforms, population, mask_size)
 
     @lazyproperty
-    def variable_name(self):
-        """str representing the name of the superheading variable."""
-        return self._dimensions[0 if self.ndim < 2 else 1].name
+    def cube_is_mr_by_itself(self):
+        return False
 
     @lazyproperty
     def dimension_types(self):
@@ -96,6 +95,11 @@ class CubePartition(object):
         raise NotImplementedError(
             "must be implemented by each subclass"
         )  # pragma: no cover
+
+    @lazyproperty
+    def variable_name(self):
+        """str representing the name of the superheading variable."""
+        return self._dimensions[0 if self.ndim < 2 else 1].name
 
 
 class _Slice(CubePartition):
@@ -168,6 +172,10 @@ class _Slice(CubePartition):
         return np.array([row.values for row in self._matrix.rows])
 
     @lazyproperty
+    def cube_is_mr_by_itself(self):
+        return self._cube.is_mr_by_itself
+
+    @lazyproperty
     def description(self):
         """str description of this slice, which it takes from its rows-dimension."""
         return self._rows_dimension.description
@@ -181,6 +189,35 @@ class _Slice(CubePartition):
     @lazyproperty
     def inserted_row_idxs(self):
         return tuple(i for i, row in enumerate(self._matrix.rows) if row.is_insertion)
+
+    @lazyproperty
+    def insertions(self):
+        """Returns masked array with residuals for insertions
+
+                 0     1	 2	     3	    4	    5	    6
+           0   inf   inf   inf	   inf	  inf	 -2.9	  inf
+           1   inf	 inf   inf	   inf	  inf	 -4.3	  inf
+           2   2.5	 1.3   3.3	 -0.70	-7.25	 -6.52	 2.25
+           3   inf	 inf   inf	   inf	  inf	 -2.51	  inf
+           4  -1.16	 2.20  5.84	  1.78	-8.48	 -5.92	 0.93
+           5   inf   inf   inf	   inf	  inf	  9.70	  inf
+
+           Only the insertions residuals are showed in a inf masked array
+        """
+        inserted_rows = self.inserted_row_idxs
+        inserted_cols = self.inserted_column_idxs
+        if not inserted_cols and not inserted_cols:
+            return []
+        mask = np.zeros(self.pvals.shape)
+        mask[inserted_rows, :] = 1
+        mask[:, inserted_cols] = 1
+        masked_pvals = np.ma.masked_array(self.pvals, np.logical_not(mask)).filled(
+            np.inf
+        )
+        masked_zscores = np.ma.masked_array(self.zscore, np.logical_not(mask)).filled(
+            np.inf
+        )
+        return np.stack([masked_pvals, masked_zscores])
 
     @lazyproperty
     def is_empty(self):
@@ -201,6 +238,10 @@ class _Slice(CubePartition):
         A slice takes the name of its rows-dimension.
         """
         return self.rows_dimension_name
+
+    @lazyproperty
+    def overlaps_tstats(self):
+        return self._matrix.overlaps_tstats
 
     @lazyproperty
     def pairwise_indices(self):
@@ -244,6 +285,14 @@ class _Slice(CubePartition):
     @lazyproperty
     def pvals(self):
         return np.array([row.pvals for row in self._matrix.rows])
+
+    @lazyproperty
+    def residual_test_stats(self):
+        """Exposes pvals and zscore (with HS) stacked together
+
+        Public method used as cube_method for the SOA API
+        """
+        return np.stack([self.pvals, self.zscore])
 
     @lazyproperty
     def row_base(self):
@@ -458,6 +507,10 @@ class _Slice(CubePartition):
 
         title = self._cube.name
         table_name = self._cube.dimensions[0].valid_elements[self._slice_idx].label
+
+        if self._cube.is_mr_by_itself:
+            return title
+
         return "%s: %s" % (title, table_name)
 
     @lazyproperty
