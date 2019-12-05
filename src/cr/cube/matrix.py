@@ -713,15 +713,6 @@ class _MrXMrMatrix(_MatrixWithMR):
         )
 
     @lazyproperty
-    def _mr_shadow_proportions(self):
-        """Cube containing item-wise selections, overlap, and nonoverlap
-           with all other items in a multiple response dimension, for each
-           element of any prepended dimensions:
-           A 1d interface to a 4d hypercube of underlying counts.
-        """
-        return self._counts[:, 0, :, 0] / self._pairwise_overlap_total
-
-    @lazyproperty
     def rows(self):
         return tuple(
             _MultipleResponseVector(
@@ -825,6 +816,15 @@ class _MrXMrMatrix(_MatrixWithMR):
             self._column_elements,
             self.table_margin.T,
         )
+
+    @lazyproperty
+    def _mr_shadow_proportions(self):
+        """Cube containing item-wise selections, overlap, and nonoverlap
+           with all other items in a multiple response dimension, for each
+           element of any prepended dimensions:
+           A 1d interface to a 4d hypercube of underlying counts.
+        """
+        return self._counts[:, 0, :, 0] / self._pairwise_overlap_total
 
     @lazyproperty
     def _pairwise_overlap_total(self):
@@ -1036,12 +1036,12 @@ class _InsertionColumn(_BaseMatrixInsertionVector):
         )
 
     @lazyproperty
-    def _residuals(self):
-        return self.values - self._expected_counts
-
-    @lazyproperty
     def _expected_counts(self):
         return self.opposite_margins * self.margin / self.table_margin
+
+    @lazyproperty
+    def _residuals(self):
+        return self.values - self._expected_counts
 
 
 class _InsertionRow(_BaseMatrixInsertionVector):
@@ -1072,12 +1072,12 @@ class _InsertionRow(_BaseMatrixInsertionVector):
         )
 
     @lazyproperty
-    def _residuals(self):
-        return self.values - self._expected_counts
-
-    @lazyproperty
     def _expected_counts(self):
         return self.opposite_margins * self.margin / self.table_margin
+
+    @lazyproperty
+    def _residuals(self):
+        return self.values - self._expected_counts
 
 
 # ===TRANSFORMATION VECTORS===
@@ -1481,12 +1481,12 @@ class _BaseVector(object):
         return self._residuals / np.sqrt(variance)
 
     @lazyproperty
-    def _residuals(self):
-        return self.values - self._expected_counts
-
-    @lazyproperty
     def _expected_counts(self):
         return self.opposite_margins * self.margin / self.table_margin
+
+    @lazyproperty
+    def _residuals(self):
+        return self.values - self._expected_counts
 
 
 class _CategoricalVector(_BaseVector):
@@ -1627,6 +1627,11 @@ class _MultipleResponseVector(_CategoricalVector):
         return self._selected
 
     @lazyproperty
+    def zscore(self):
+        # TODO: Implement the real zscore calc for MR
+        return self._zscore
+
+    @lazyproperty
     def _not_selected(self):
         return self._counts[1, :]
 
@@ -1641,8 +1646,3 @@ class _MultipleResponseVector(_CategoricalVector):
     @lazyproperty
     def _selected_unweighted(self):
         return self._base_counts[0, :]
-
-    @lazyproperty
-    def zscore(self):
-        # TODO: Implement the real zscore calc for MR
-        return self._zscore
