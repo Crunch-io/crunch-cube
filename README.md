@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.11.14
+- Bug fix for margin property in MeanVector
+
 #### 1.11.13
 - Correct tstatistcs for multiple response
 - New tstats measure in MRxMR Matrix
