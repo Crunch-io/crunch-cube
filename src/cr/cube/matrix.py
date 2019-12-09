@@ -1573,6 +1573,7 @@ class _MeansVector(_BaseVector):
 
     def __init__(self, element, base_counts, means):
         super(_MeansVector, self).__init__(element, base_counts)
+        self._base_counts = base_counts
         self._means = means
 
     @lazyproperty
@@ -1582,6 +1583,10 @@ class _MeansVector(_BaseVector):
     @lazyproperty
     def values(self):
         return self._means
+
+    @lazyproperty
+    def margin(self):
+        return np.nan * len(self._base_counts)
 
 
 class _MeansWithMrVector(_MeansVector):
