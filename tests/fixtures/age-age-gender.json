@@ -1,0 +1,174 @@
+{
+  "result": {
+    "dimensions": [
+      {
+        "type": {
+          "class": "categorical",
+          "categories": [
+            {
+              "id": 1,
+              "name": "Mean",
+              "missing": false
+            }
+          ]
+        },
+        "references": {
+          "alias": "mean",
+          "name": "mean"
+        }
+      },
+      {
+        "references": {
+          "alias": "age4",
+          "view": {
+            "show_counts": false,
+            "show_numeric_values": false,
+            "transform": {
+              "insertions": [
+                {
+                  "function": "subtotal",
+                  "args": [
+                    2,
+                    1
+                  ],
+                  "name": "<44",
+                  "anchor": 2
+                }
+              ]
+            },
+            "include_missing": false,
+            "column_width": null
+          },
+          "description": "Respondent age by category",
+          "name": "age4"
+        },
+        "derived": false,
+        "type": {
+          "ordinal": false,
+          "class": "categorical",
+          "categories": [
+            {
+              "numeric_value": null,
+              "missing": false,
+              "id": 1,
+              "name": "Under 30"
+            },
+            {
+              "numeric_value": null,
+              "missing": false,
+              "id": 2,
+              "name": "30-44"
+            },
+            {
+              "numeric_value": null,
+              "missing": false,
+              "id": 3,
+              "name": "45-64"
+            },
+            {
+              "numeric_value": null,
+              "missing": false,
+              "id": 4,
+              "name": "65+"
+            },
+            {
+              "numeric_value": 32766,
+              "missing": true,
+              "id": 32766,
+              "name": "skipped"
+            },
+            {
+              "numeric_value": 32767,
+              "missing": true,
+              "id": 32767,
+              "name": "not asked"
+            },
+            {
+              "numeric_value": null,
+              "missing": true,
+              "id": -1,
+              "name": "No Data"
+            }
+          ]
+        }
+      }
+    ],
+    "measures": {
+      "mean": {
+        "data": [
+          24.4393575687,
+          37.3212274591,
+          55.4857195647,
+          73.0242765864,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          }
+        ],
+        "n_missing": 0,
+        "metadata": {
+          "derived": true,
+          "references": {},
+          "type": {
+            "integer": false,
+            "class": "numeric",
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1,
+              "NaN": -8
+            }
+          }
+        }
+      }
+    },
+    "n": 1500,
+    "filter_stats": {
+      "filtered_complete": {
+        "unweighted": {
+          "selected": 1500,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 1500.0,
+          "other": 0,
+          "missing": 0
+        }
+      },
+      "filtered": {
+        "unweighted": {
+          "selected": 1500,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 1500.0,
+          "other": 0,
+          "missing": 0
+        }
+      }
+    },
+    "unfiltered": {
+      "unweighted_n": 1500,
+      "weighted_n": 1500.0
+    },
+    "filtered": {
+      "unweighted_n": 1500,
+      "weighted_n": 1500.0
+    },
+    "counts": [
+      189,
+      395,
+      606,
+      310,
+      0,
+      0,
+      0
+    ]
+  }
+}

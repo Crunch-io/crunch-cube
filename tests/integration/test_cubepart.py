@@ -46,6 +46,24 @@ class Describe_Slice(object):
         cube = Cube(CR.CAT_X_CAT)
         assert cube.missing == 5
 
+    def it_provides_nan_margin_when_has_weighted_mean_without_weighted_counts(self):
+        slice_ = Cube(CR.AGE_AGE_GENDER).partitions[0]
+
+        np.testing.assert_array_almost_equal(
+            slice_.counts,
+            np.array(
+                [[24.43935757, 37.32122746, 61.76058503, 55.48571956, 73.02427659]]
+            ),
+        )
+        np.testing.assert_array_almost_equal(
+            slice_.means,
+            np.array([[24.43935757, 37.32122746, np.nan, 55.48571956, 73.02427659]]),
+        )
+        np.testing.assert_array_almost_equal(slice_.rows_margin, np.array([np.nan]))
+        np.testing.assert_array_almost_equal(
+            slice_.columns_margin, np.array([np.nan] * len(slice_.counts[0, :]))
+        )
+
     def it_calculates_various_measures(self):
         transforms = {
             "columns_dimension": {"insertions": {}},
