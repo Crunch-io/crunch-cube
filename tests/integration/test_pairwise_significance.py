@@ -353,13 +353,61 @@ class TestStandardizedResiduals(TestCase):
         ]
         np.testing.assert_array_equal(slice_.pairwise_indices, expected_indices)
 
+    def test_cat_mr_x_itself_pairwise_compare_columns(self):
+        slice_ = Cube(CR.EDU_FAV5_FAV5).partitions[0]
+
+        actual = slice_.pairwise_significance_tests[2]
+        expected_tstats = np.array(
+            [
+                [2.73301476, 1.76534884, 0.0, 2.42137351, -3.50646916],
+                [7.3711015, 6.40147803, 0.0, 7.24586022, -0.52041911],
+                [8.59141332, 3.97250854, 0.0, 5.03216768, -1.15533881],
+                [7.17475087, 2.62512969, 0.0, 2.31473877, -0.38987513],
+            ]
+        )
+        expected_pvals = np.array(
+            [
+                [
+                    6.41392358e-03,
+                    7.78304832e-02,
+                    1.00000000e00,
+                    1.56553423e-02,
+                    4.71990633e-04,
+                ],
+                [
+                    4.21662705e-13,
+                    2.42808884e-10,
+                    1.00000000e00,
+                    9.11937192e-13,
+                    6.02873892e-01,
+                ],
+                [
+                    0.00000000e00,
+                    7.65672880e-05,
+                    1.00000000e00,
+                    5.83681399e-07,
+                    2.48197031e-01,
+                ],
+                [
+                    1.65001346e-12,
+                    8.80253849e-03,
+                    1.00000000e00,
+                    2.08475477e-02,
+                    6.96702680e-01,
+                ],
+            ]
+        )
+        assert slice_.cube_is_mr_by_itself is True
+        np.testing.assert_array_almost_equal(actual.t_stats, expected_tstats)
+        np.testing.assert_array_almost_equal(actual.p_vals, expected_pvals)
+
     def test_cat_mr_x_itself_pairwise_indices_only_larger(self):
         slice_ = Cube(CR.EDU_FAV5_FAV5).partitions[0]
         expected_indices = [
-            [(2, 4), (), (), (2,), (1, 2, 3)],
-            [(1, 4), (), (0, 1, 3), (), (1, 3)],
-            [(), (0, 2, 4), (0,), (0, 2, 4), (0,)],
-            [(), (0, 2, 4), (0,), (0, 2, 4), (0,)],
+            [(2, 4), (4,), (4,), (2, 4), ()],
+            [(1, 2, 4), (2, 4), (), (2, 4), ()],
+            [(1, 2, 3, 4), (2, 4), (), (2, 4), ()],
+            [(1, 2, 3, 4), (2, 4), (), (2, 4), ()],
         ]
 
         np.testing.assert_array_equal(slice_.pairwise_indices, expected_indices)
