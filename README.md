@@ -2,7 +2,7 @@
 
 Open Source Python implementation of the API for working with CrunchCubes
 
-## Introduction
+## Package Introduction
 
 This package contains the implementation of the CrunchCube API. It is used to
 extract useful information from CrunchCube responses (we'll refer to them as
