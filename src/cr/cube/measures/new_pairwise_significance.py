@@ -71,6 +71,8 @@ class _ColumnPairwiseSignificance:
 
     @lazyproperty
     def t_stats(self):
+        if self._slice.cube_is_mr_by_itself:
+            return self.t_stats_correct
         props = self._slice.column_proportions
         diff = props - props[:, [self._col_idx]]
         var_props = props * (1.0 - props) / self._slice.column_base
