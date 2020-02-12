@@ -271,8 +271,14 @@ class _Slice(CubePartition):
         significance test contains `p_vals` and `t_stats` (ndarrays that represent
         probability values and statistical scores).
         """
+        alpha = self._transforms_dict.get("pairwise_indices", {}).get("alpha", 0.05)
+        only_larger = self._transforms_dict.get("pairwise_indices", {}).get(
+            "only_larger", True
+        )
         return tuple(
-            NewPairwiseSignificance(self).values[column_idx]
+            NewPairwiseSignificance(self, alpha=alpha, only_larger=only_larger).values[
+                column_idx
+            ]
             for column_idx in range(len(self._matrix.columns))
         )
 

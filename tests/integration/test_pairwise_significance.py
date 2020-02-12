@@ -5,13 +5,14 @@
 from unittest import TestCase
 
 import numpy as np
+import pytest
 
 from cr.cube.cube import Cube
 
 from ..fixtures import CR, SM
 
 
-class TestStandardizedResiduals(TestCase):
+class TestStandardizedResiduals(object):
     """Test cr.cube implementation of column family pairwise comparisons"""
 
     def test_pairwise_measures_scale_means_nps_type(self):
@@ -41,6 +42,17 @@ class TestStandardizedResiduals(TestCase):
         np.testing.assert_almost_equal(
             actual.t_stats_scale_means, [1.08966143, 0.0, 3.19741668, 6.10466696]
         )
+
+    def test_pairwise_indices_column_significance(self, alpha_fixture):
+
+        column_idx, transforms, expected_value = alpha_fixture
+        slice_ = Cube(SM.FACEBOOK_APPS_X_AGE, transforms=transforms).partitions[0]
+        # Testing col 0 with others
+        actual = slice_.pairwise_significance_tests[column_idx]
+
+        pairwise_indices = actual.pairwise_indices
+
+        assert pairwise_indices == expected_value
 
     def test_ttests_scale_means_cat_x_cat_pruning_and_hs(self):
         transforms = {
@@ -609,3 +621,17 @@ class TestStandardizedResiduals(TestCase):
                 ]
             ),
         )
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture(
+        params=[
+            (0, {"pairwise_indices": {"alpha": 0.05}}, [(3,), (), (3,), (2, 3)]),
+            (0, {"pairwise_indices": {"alpha": 0.02}}, [(3,), (), (3,), (3,)]),
+            (1, {"pairwise_indices": {"alpha": 0.05}}, [(2, 3), (), (2, 3), (2, 3)]),
+            (1, {"pairwise_indices": {"alpha": 0.02}}, [(2, 3), (), (3,), (2, 3)]),
+        ]
+    )
+    def alpha_fixture(self, request):
+        column_idx, transforms, expected_values = request.param
+        return column_idx, transforms, expected_values
