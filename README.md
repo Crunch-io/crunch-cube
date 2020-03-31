@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.11.16
+- New base for t_stats overlaps
+
 #### 1.11.15
 - Fix t_stats values for overlaps
 
