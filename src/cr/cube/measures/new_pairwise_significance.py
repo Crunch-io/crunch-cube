@@ -1,11 +1,12 @@
 # encoding: utf-8
 
-"""T-score based P-values of pairwise comparison or columns of a contingency table."""
+"""T-score based P-values of pairwise comparison or columns of a contingency
+table."""
 
 from __future__ import division
 
 import numpy as np
-from scipy.stats import t, norm
+from scipy.stats import t
 
 from cr.cube.util import lazyproperty
 
@@ -17,7 +18,8 @@ except NameError:  # pragma: no cover
 
 
 class NewPairwiseSignificance:
-    """Implementation of p-vals and t-tests for each column proportions comparison."""
+    """Implementation of p-vals and t-tests for each column proportions
+    comparison."""
 
     def __init__(self, slice_, alpha=0.05, only_larger=True):
         self._slice = slice_
@@ -50,7 +52,8 @@ class NewPairwiseSignificance:
 
     @lazyproperty
     def summary_pairwise_indices(self):
-        """ndarray containing tuples of pairwise indices for the column summary."""
+        """ndarray containing tuples of pairwise indices for the column
+        summary."""
         summary_pairwise_indices = np.empty(
             self.values[0].t_stats.shape[1], dtype=object
         )
@@ -61,7 +64,8 @@ class NewPairwiseSignificance:
 
 
 class _ColumnPairwiseSignificance:
-    """Value object providing matrix of T-score based pairwise-comparison P-values"""
+    """Value object providing matrix of T-score based pairwise-comparison
+    P-values"""
 
     def __init__(self, slice_, col_idx, alpha=0.05, only_larger=True):
         self._slice = slice_
@@ -81,7 +85,12 @@ class _ColumnPairwiseSignificance:
 
     @lazyproperty
     def t_stats_correct(self):
-        return self._slice.overlaps_tstats[:, self._col_idx, :]
+        """It returns the t_statistic for MR variables considering the overlaps
+        """
+        diff, se_diff = self._slice.overlaps_tstats
+        t_stats = diff[:, self._col_idx, :] / se_diff[:, self._col_idx, :]
+        t_stats[:, self._col_idx] = 0
+        return t_stats
 
     @lazyproperty
     def t_stats_scale_means(self):
@@ -106,7 +115,7 @@ class _ColumnPairwiseSignificance:
 
         standard_deviation = np.sqrt(
             np.divide(
-                (counts[self._col_idx] - 1) * variance[self._col_idx]
+                ((counts[self._col_idx] - 1) * variance[self._col_idx])
                 + ((counts - 1) * np.array(variance)),
                 (counts[self._col_idx] + counts - 2),
             )
@@ -124,10 +133,6 @@ class _ColumnPairwiseSignificance:
 
     @lazyproperty
     def p_vals(self):
-        # if the cube to which the slice belongs is a CATxMRxITSELF
-        # returns the pvals using the t_stats_correct values
-        if self._slice.cube_is_mr_by_itself:
-            return 2 * (1 - t.cdf(abs(self.t_stats_correct), df=self._df))
         return 2 * (1 - t.cdf(abs(self.t_stats), df=self._df))
 
     @lazyproperty
@@ -144,9 +149,10 @@ class _ColumnPairwiseSignificance:
 
         Considreing this output: [(3,), (2, 3), (3,), ()] and scale_means values
         [26, 30, 21, 11], each element contains a tuple of other element
-        indices that are significantly different from the present element's index
-        in a two-tailed test with alpha=.05 by default. The element at index 0 (26)
-        indicates that it differs significantly only from the element at index 3 (11)
+        indices that are significantly different from the present element's
+        index in a two-tailed test with alpha=.05 by default. The element at
+        index 0 (26) indicates that it differs significantly only from the
+        element at index 3 (11)
         """
         significance = self.p_vals_scale_means < self._alpha
         if self._only_larger:
