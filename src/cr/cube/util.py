@@ -16,7 +16,8 @@ except ImportError:  # pragma: no cover
 def calculate_overlap_tstats(
     cls, mr_dimensions, mr_counts, mr_base_counts, mr_counts_with_missings
 ):
-    overlaps = np.zeros(np.array(mr_counts.shape)[[0, 1, 3]])
+    numerator = np.zeros(np.array(mr_counts.shape)[[0, 1, 3]])
+    standard_error = np.zeros(np.array(mr_counts.shape)[[0, 1, 3]])
     for slice_index in range(mr_counts.shape[0]):
         overlap_slice = cls(
             mr_dimensions,
@@ -24,8 +25,10 @@ def calculate_overlap_tstats(
             mr_base_counts[slice_index],
             mr_counts_with_missings[slice_index],
         )
-        overlaps[slice_index] = overlap_slice.tstats_overlap
-    return overlaps
+        diff, se_diff = overlap_slice.tstats_overlap
+        numerator[slice_index] = diff
+        standard_error[slice_index] = se_diff
+    return numerator, standard_error
 
 
 def compress_pruned(table):

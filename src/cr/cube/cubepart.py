@@ -806,8 +806,8 @@ class _Strand(CubePartition):
     def _numeric_values_mask(self):
         """Array of boolean elements for each element in rows dimension."
 
-        This array contains True or False according to the nan in the numeric_values array
-        """
+        This array contains True or False according to the nan in the numeric_values
+        array"""
         is_a_number_mask = ~np.isnan(self._numeric_values)
         return is_a_number_mask
 
