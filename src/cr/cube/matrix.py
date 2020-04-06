@@ -291,7 +291,11 @@ class _BaseBaseMatrix(object):
     @lazyproperty
     def _column_generator(self):
         return zip(
-            self._counts.T, self._base_counts.T, self._column_elements, self._zscores.T
+            self._counts.T,
+            self._base_counts.T,
+            self._column_elements,
+            self._zscores.T,
+            self._standard_deviation.T,
         )
 
     @lazyproperty
@@ -333,9 +337,16 @@ class _CatXCatMatrix(_BaseBaseMatrix):
                 element,
                 self.table_margin,
                 zscore,
+                standard_deviation,
                 opposite_margins=self._row_margins,
             )
-            for counts, base_counts, element, zscore in self._column_generator
+            for (
+                counts,
+                base_counts,
+                element,
+                zscore,
+                standard_deviation,
+            ) in self._column_generator
         )
 
     @lazyproperty
@@ -347,6 +358,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
                 element,
                 self.table_margin,
                 zscore,
+                standard_deviation,
                 column_index,
                 opposite_margins=self._column_margins,
             )
@@ -355,6 +367,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
                 base_counts,
                 element,
                 zscore,
+                standard_deviation,
                 column_index,
             ) in self._row_generator
         )
@@ -402,6 +415,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
             self._base_counts,
             self._row_elements,
             self._zscores,
+            self._standard_deviation,
             self._column_index,
         )
 
@@ -414,7 +428,8 @@ class _CatXCatMatrix(_BaseBaseMatrix):
         if not np.all(counts.shape) or np.linalg.matrix_rank(counts) < 2:
             # If the matrix is "defective", in the sense that it doesn't have at least
             # two rows and two columns that are "full" of data, don't calculate zscores.
-            return np.zeros(counts.shape)
+            residuals = standard_deviation = np.zeros(counts.shape)
+            return residuals, standard_deviation
 
         expected_counts = expected_freq(counts)
         residuals = counts - expected_counts
@@ -423,16 +438,28 @@ class _CatXCatMatrix(_BaseBaseMatrix):
             * np.outer(total - rowsum, total - colsum)
             / total ** 3
         )
-        return residuals / np.sqrt(variance)
+        standard_deviation = np.sqrt(variance)
+        return residuals, standard_deviation
 
     @lazyproperty
-    def _zscores(self):
-        return self._scalar_type_std_res(
+    def _standard_deviation(self):
+        _, standard_deviation = self._zstats
+        return standard_deviation
+
+    @lazyproperty
+    def _zstats(self):
+        residuals, standard_deviation = self._scalar_type_std_res(
             self._counts,
             self.table_margin,
             np.sum(self._counts, axis=0),
             np.sum(self._counts, axis=1),
         )
+        return residuals, standard_deviation
+
+    @lazyproperty
+    def _zscores(self):
+        residuals, standard_deviation = self._zstats
+        return residuals / standard_deviation
 
 
 class _CatXCatMeansMatrix(_CatXCatMatrix):
@@ -471,12 +498,15 @@ class _MatrixWithMR(_CatXCatMatrix):
         if not np.all(counts.shape) or np.linalg.matrix_rank(counts) < 2:
             # If the matrix is "defective", in the sense that it doesn't have at least
             # two rows and two columns that are "full" of data, don't calculate zscores.
-            return np.zeros(counts.shape)
+            residuals, standard_deviation = 2 * [np.zeros(counts.shape)]
+            return residuals, standard_deviation
 
         expected_counts = rowsum * colsum / total
         # TODO: this line occasionally raises overflow warnings in the tests.
         variance = rowsum * colsum * (total - rowsum) * (total - colsum) / total ** 3
-        return (counts - expected_counts) / np.sqrt(variance)
+        residuals = counts - expected_counts
+        standard_deviation = np.sqrt(variance)
+        return residuals, standard_deviation
 
 
 class _MrXCatMatrix(_MatrixWithMR):
@@ -492,9 +522,20 @@ class _MrXCatMatrix(_MatrixWithMR):
         """Use bother selected and not-selected counts."""
         return tuple(
             _MultipleResponseVector(
-                counts, base_counts, element, self.table_margin, zscore
+                counts,
+                base_counts,
+                element,
+                self.table_margin,
+                zscore,
+                standard_deviation,
             )
-            for counts, base_counts, element, zscore in self._column_generator
+            for (
+                counts,
+                base_counts,
+                element,
+                zscore,
+                standard_deviation,
+            ) in self._column_generator
         )
 
     @lazyproperty
@@ -502,7 +543,13 @@ class _MrXCatMatrix(_MatrixWithMR):
         """Use only selected counts."""
         return tuple(
             _CatXMrVector(
-                counts, base_counts, element, table_margin, zscore, column_index
+                counts,
+                base_counts,
+                element,
+                table_margin,
+                zscore,
+                standard_deviation,
+                column_index,
             )
             for (
                 counts,
@@ -510,6 +557,7 @@ class _MrXCatMatrix(_MatrixWithMR):
                 element,
                 table_margin,
                 zscore,
+                standard_deviation,
                 column_index,
             ) in self._row_generator
         )
@@ -549,17 +597,29 @@ class _MrXCatMatrix(_MatrixWithMR):
             self._row_elements,
             self.table_margin,
             self._zscores,
+            self._standard_deviation,
             self._column_index,
         )
 
     @lazyproperty
-    def _zscores(self):
-        return self._array_type_std_res(
+    def _standard_deviation(self):
+        _, standard_deviation = self._zstats
+        return standard_deviation
+
+    @lazyproperty
+    def _zstats(self):
+        residuals, standard_deviation = self._array_type_std_res(
             self._counts[:, 0, :],
             self.table_margin[:, None],
             np.sum(self._counts, axis=1),
             np.sum(self._counts[:, 0, :], axis=1)[:, None],
         )
+        return residuals, standard_deviation
+
+    @lazyproperty
+    def _zscores(self):
+        residuals, standard_deviation = self._zstats
+        return residuals / standard_deviation
 
 
 class _MrXCatMeansMatrix(_MrXCatMatrix):
@@ -615,6 +675,7 @@ class _CatXMrMatrix(_MatrixWithMR):
                 element,
                 self.table_margin,
                 zscore,
+                standard_deviation,
                 column_index,
             )
             for (
@@ -622,6 +683,7 @@ class _CatXMrMatrix(_MatrixWithMR):
                 base_counts,
                 element,
                 zscore,
+                standard_deviation,
                 column_index,
             ) in self._row_generator
         )
@@ -666,15 +728,26 @@ class _CatXMrMatrix(_MatrixWithMR):
         return True if self._overlaps is not None else False
 
     @lazyproperty
-    def _zscores(self):
+    def _standard_deviation(self):
+        _, standard_deviation = self._zstats
+        return standard_deviation
+
+    @lazyproperty
+    def _zstats(self):
         # if the cube is a special one (5D with MRxItself as last dims)
         # the zscores should be the same as a 2D MRxMR matrix
-        return self._array_type_std_res(
+        residuals, standard_deviation = self._array_type_std_res(
             self._counts[:, :, 0],
             self.table_margin,
             np.sum(self._counts[:, :, 0], axis=0),
             np.sum(self._counts, axis=2),
         )
+        return residuals, standard_deviation
+
+    @lazyproperty
+    def _zscores(self):
+        residuals, standard_deviation = self._zstats
+        return residuals / standard_deviation
 
 
 class _CatXMrMeansMatrix(_CatXMrMatrix):
@@ -721,6 +794,7 @@ class _MrXMrMatrix(_MatrixWithMR):
                 element,
                 table_margin,
                 zscore,
+                standard_deviation,
                 column_index,
             )
             for (
@@ -729,6 +803,7 @@ class _MrXMrMatrix(_MatrixWithMR):
                 element,
                 table_margin,
                 zscore,
+                standard_deviation,
                 column_index,
             ) in self._row_generator
         )
@@ -848,17 +923,29 @@ class _MrXMrMatrix(_MatrixWithMR):
             self._row_elements,
             self.table_margin,
             self._zscores,
+            self._standard_deviation,
             self._column_index,
         )
 
     @lazyproperty
-    def _zscores(self):
-        return self._array_type_std_res(
+    def _standard_deviation(self):
+        _, standard_deviation = self._zstats
+        return standard_deviation
+
+    @lazyproperty
+    def _zstats(self):
+        residuals, standard_deviation = self._array_type_std_res(
             self._counts[:, 0, :, 0],
             self.table_margin,
             np.sum(self._counts, axis=1)[:, :, 0],
             np.sum(self._counts, axis=3)[:, 0, :],
         )
+        return residuals, standard_deviation
+
+    @lazyproperty
+    def _zscores(self):
+        residuals, standard_deviation = self._zstats
+        return residuals / standard_deviation
 
 
 # ===INSERTION (SUBTOTAL) VECTORS===
@@ -968,6 +1055,10 @@ class _BaseMatrixInsertionVector(object):
         return (self._anchor_n, self._neg_idx, self)
 
     @lazyproperty
+    def standard_deviation(self):
+        return self._standard_deviation
+
+    @lazyproperty
     def table_margin(self):
         return self._table_margin
 
@@ -996,10 +1087,16 @@ class _BaseMatrixInsertionVector(object):
         )
 
     @lazyproperty
-    def _zscore(self):
+    def _standard_deviation(self):
+        _, standard_deviation = self._zstats
+        return standard_deviation
+
+    @lazyproperty
+    def _zstats(self):
         # TODO: remove this if statement - temporary hack until MR zscore implementation
         if self.opposite_margins is None:
-            return tuple([np.nan] * len(self.values))
+            residuals = standard_deviation = np.array(len(self.values) * [np.nan])
+            return residuals, standard_deviation
         variance = (
             self.opposite_margins
             * self.margin
@@ -1009,7 +1106,13 @@ class _BaseMatrixInsertionVector(object):
             )
             / self.table_margin ** 3
         )
-        return self._residuals / np.sqrt(variance)
+        standard_deviation = np.sqrt(variance)
+        return self._residuals, standard_deviation
+
+    @lazyproperty
+    def _zscore(self):
+        residuals, standard_deviation = self._zstats
+        return residuals / standard_deviation
 
 
 class _InsertionColumn(_BaseMatrixInsertionVector):
@@ -1185,6 +1288,17 @@ class _AssembledVector(_BaseTransformationVector):
         return 2 * (1 - norm.cdf(np.abs(self.zscore)))
 
     @lazyproperty
+    def standard_deviation(self):
+        def fsubtot(subtotal):
+            if self.is_insertion:
+                _, standard_deviation = self._zstats(subtotal)
+            else:
+                standard_deviation = subtotal.standard_deviation[self._vector_idx]
+            return standard_deviation
+
+        return self._apply_interleaved(self._base_vector.standard_deviation, fsubtot)
+
+    @lazyproperty
     def table_proportions(self):
         return self.values / self._base_vector.table_margin
 
@@ -1201,27 +1315,30 @@ class _AssembledVector(_BaseTransformationVector):
     def zscore(self):
         def fsubtot(subtotal):
             if self.is_insertion:
-                opposite_margin = np.sum(self.opposite_margins[subtotal.addend_idxs])
-                variance = (
-                    opposite_margin
-                    * self.margin
-                    * (
-                        (self.table_margin - opposite_margin)
-                        * (self.table_margin - self.margin)
-                    )
-                    / self.table_margin ** 3
-                )
-                expected_count = opposite_margin * self.margin / self.table_margin
-                cell_value = np.sum(self._base_vector.values[subtotal.addend_idxs])
-                residuals = cell_value - expected_count
-                zscore = residuals / np.sqrt(variance)
-
+                residuals, standard_deviation = self._zstats(subtotal)
+                zscore = residuals / standard_deviation
             else:
                 zscore = subtotal.zscore[self._vector_idx]
-
             return zscore
 
         return self._apply_interleaved(self._base_vector.zscore, fsubtot)
+
+    def _zstats(self, subtotal):
+        opposite_margin = np.sum(self.opposite_margins[subtotal.addend_idxs])
+        variance = (
+            opposite_margin
+            * self.margin
+            * (
+                (self.table_margin - opposite_margin)
+                * (self.table_margin - self.margin)
+            )
+            / self.table_margin ** 3
+        )
+        expected_count = opposite_margin * self.margin / self.table_margin
+        cell_value = np.sum(self._base_vector.values[subtotal.addend_idxs])
+        residuals = cell_value - expected_count
+        standard_deviation = np.sqrt(variance)
+        return residuals, standard_deviation
 
     def _apply_interleaved(self, base_values, fsubtot):
         """ -> 1D array of result of applying fbase or fsubtot to each interleaved item.
@@ -1326,6 +1443,10 @@ class _VectorAfterHiding(_BaseTransformationVector):
         return self._base_vector.pvals[self._visible_element_idxs]
 
     @lazyproperty
+    def standard_deviation(self):
+        return self._base_vector.standard_deviation[self._visible_element_idxs]
+
+    @lazyproperty
     def table_proportions(self):
         return self._base_vector.table_proportions[self._visible_element_idxs]
 
@@ -1392,6 +1513,10 @@ class _OrderedVector(_BaseTransformationVector):
         collection.
         """
         return (self._index, self._index, self)
+
+    @lazyproperty
+    def standard_deviation(self):
+        return self._base_vector.standard_deviation
 
     @lazyproperty
     def values(self):
@@ -1471,7 +1596,7 @@ class _BaseVector(object):
         return self.base == 0 or np.isnan(self.base)
 
     @lazyproperty
-    def zscore(self):
+    def _zstats(self):
         variance = (
             self.opposite_margins
             * self.margin
@@ -1481,8 +1606,18 @@ class _BaseVector(object):
             )
             / self.table_margin ** 3
         )
+        standard_deviation = np.sqrt(variance)
+        return self._residuals, standard_deviation
 
-        return self._residuals / np.sqrt(variance)
+    @lazyproperty
+    def standard_deviation(self):
+        _, standard_deviation = self._zstats
+        return standard_deviation
+
+    @lazyproperty
+    def zscore(self):
+        residuals, standard_deviation = self._zstats
+        return residuals / standard_deviation
 
     @lazyproperty
     def _expected_counts(self):
@@ -1507,6 +1642,7 @@ class _CategoricalVector(_BaseVector):
         element,
         table_margin,
         zscore=None,
+        standard_deviation=None,
         column_index=None,
         opposite_margins=None,
     ):
@@ -1514,6 +1650,7 @@ class _CategoricalVector(_BaseVector):
         self._counts = counts
         self._table_margin = table_margin
         self._zscore = zscore
+        self._standard_deviation = standard_deviation
         self._column_index = column_index
         self.opposite_margins = opposite_margins
 
@@ -1546,10 +1683,23 @@ class _CatXMrVector(_CategoricalVector):
     """Used for categorical dimension when opposing dimension is multiple-response."""
 
     def __init__(
-        self, counts, base_counts, label, table_margin, zscore=None, column_index=None
+        self,
+        counts,
+        base_counts,
+        label,
+        table_margin,
+        zscore=None,
+        standard_deviation=None,
+        column_index=None,
     ):
         super(_CatXMrVector, self).__init__(
-            counts[0], base_counts[0], label, table_margin, zscore, column_index
+            counts[0],
+            base_counts[0],
+            label,
+            table_margin,
+            zscore,
+            standard_deviation,
+            column_index,
         )
         self._all_bases = base_counts
         self._all_counts = counts
@@ -1557,6 +1707,11 @@ class _CatXMrVector(_CategoricalVector):
     @lazyproperty
     def pruned(self):
         return self.table_base == 0
+
+    @lazyproperty
+    def standard_deviation(self):
+        # TODO: Implement the real zscore calc for MR
+        return self._standard_deviation
 
     @lazyproperty
     def table_base(self):
@@ -1630,6 +1785,11 @@ class _MultipleResponseVector(_CategoricalVector):
     @lazyproperty
     def pruned(self):
         return np.all(self.base == 0) or np.all(np.isnan(self.base))
+
+    @lazyproperty
+    def standard_deviation(self):
+        # TODO: Implement the real zscore calc for MR
+        return self._standard_deviation
 
     @lazyproperty
     def values(self):

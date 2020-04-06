@@ -292,6 +292,7 @@ class _Slice(CubePartition):
 
         Public method used as cube_method for the SOA API
         """
+        # TBD: wanna we expose also std_dev for SOA?
         return np.stack([self.pvals, self.zscore])
 
     @lazyproperty
@@ -524,6 +525,10 @@ class _Slice(CubePartition):
     @lazyproperty
     def zscore(self):
         return np.array([row.zscore for row in self._matrix.rows])
+
+    @lazyproperty
+    def standard_deviation(self):
+        return np.array([row.standard_deviation for row in self._matrix.rows])
 
     # ---implementation (helpers)-------------------------------------
 

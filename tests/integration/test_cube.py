@@ -791,10 +791,10 @@ class TestCrunchCubeAs_Slice(object):
         expected = np.array([500, 500])
         np.testing.assert_almost_equal(slice_.rows_margin, expected)
 
-    def test_calculate_standard_error_axis_0(self):
+    def test_calculate_zscore_and_std_dev_axis_0(self):
         """Calculate standard error across columns."""
         slice_ = Cube(CR.ECON_GENDER_X_IDEOLOGY_WEIGHTED).partitions[0]
-        expected = np.array(
+        expected_zscore = np.array(
             [
                 [
                     -0.715899626017458,
@@ -814,7 +814,14 @@ class TestCrunchCubeAs_Slice(object):
                 ],
             ]
         )
-        np.testing.assert_almost_equal(slice_.zscore, expected)
+
+        expected_std_dev = [
+            [4.0824583, 6.09817731, 7.65595104, 6.55448909, 4.96686325, 3.08408228],
+            [4.0824583, 6.09817731, 7.65595104, 6.55448909, 4.96686325, 3.08408228],
+        ]
+
+        np.testing.assert_almost_equal(slice_.zscore, expected_zscore)
+        np.testing.assert_almost_equal(slice_.standard_deviation, expected_std_dev)
 
     def test_pvals(self):
         expected = np.array(
@@ -907,13 +914,13 @@ class TestCrunchCubeAs_Slice(object):
         np.testing.assert_almost_equal(slice_.means, expected)
         assert slice_.ndim == 2
 
-    def test_z_scores_admit_by_dept_unweighted_rows(self):
+    def test_z_scores_and_std_dev_admit_by_dept_unweighted_rows(self):
         """see
         https://github.com/Crunch-io/whaam/blob/master/base/stats/tests/
         zvalues-spec.js#L42
         """
         slice_ = Cube(CR.ADMIT_X_DEPT_UNWEIGHTED).partitions[0]
-        expected = np.array(
+        expected_zscores = np.array(
             [
                 [
                     18.04029230689576,
@@ -933,21 +940,44 @@ class TestCrunchCubeAs_Slice(object):
                 ],
             ]
         )
-        np.testing.assert_almost_equal(slice_.zscore, expected)
+        expected_std_dev = [
+            [
+                13.26033297,
+                10.99679551,
+                13.18073425,
+                12.45474231,
+                10.98878642,
+                11.94842194,
+            ],
+            [
+                13.26033297,
+                10.99679551,
+                13.18073425,
+                12.45474231,
+                10.98878642,
+                11.94842194,
+            ],
+        ]
 
-    def test_z_scores_admit_by_gender_weighted_rows(self):
+        np.testing.assert_almost_equal(slice_.zscore, expected_zscores)
+        np.testing.assert_almost_equal(slice_.standard_deviation, expected_std_dev)
+
+    def test_z_scores_and_std_dev_admit_by_gender_weighted_rows(self):
         """ see
         https://github.com/Crunch-io/whaam/blob/master/base/stats/tests/
         zvalues-spec.js#L67
         """
         slice_ = Cube(CR.ADMIT_X_GENDER_WEIGHTED).partitions[0]
-        expected = np.array(
+        expected_zscores = np.array(
             [
                 [9.42561984520692, -9.425619845206922],
                 [-9.425619845206922, 9.42561984520692],
             ]
         )
-        np.testing.assert_almost_equal(slice_.zscore, expected)
+        expected_std_dev = [[15.9501454, 15.9501454], [15.9501454, 15.9501454]]
+
+        np.testing.assert_almost_equal(slice_.zscore, expected_zscores)
+        np.testing.assert_almost_equal(slice_.standard_deviation, expected_std_dev)
 
     def test_selected_crosstab_as_array(self):
         slice_ = Cube(CR.SELECTED_CROSSTAB_4).partitions[0]

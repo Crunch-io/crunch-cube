@@ -248,7 +248,7 @@ def test_table_base_unpruned_cat_x_mr():
 
 def test_z_scores_from_r_rows_margin():
     slice_ = Cube(CR.MR_X_CAT_PROFILES_STATS_WEIGHTED).partitions[0]
-    expected = [
+    expected_zscore = [
         [
             -1.465585354569577,
             3.704125875262655,
@@ -270,7 +270,31 @@ def test_z_scores_from_r_rows_margin():
             -0.794143540856781,
         ],
     ]
-    np.testing.assert_almost_equal(slice_.zscore, expected)
+    expected_std_dev = [
+        [
+            38.15566006,
+            37.26997317,
+            29.2301558,
+            20.80305728,
+            18.89149257,
+            37.6184329,
+            9.30718333,
+            11.70623318,
+        ],
+        [
+            38.15566006,
+            37.26997317,
+            29.2301558,
+            20.80305728,
+            18.89149257,
+            37.6184329,
+            9.30718333,
+            11.70623318,
+        ],
+    ]
+
+    np.testing.assert_almost_equal(slice_.zscore, expected_zscore)
+    np.testing.assert_almost_equal(slice_.standard_deviation, expected_std_dev)
 
 
 def test_mr_x_single_wave():
@@ -343,6 +367,15 @@ def test_cat_x_mr_x_itself_zscores():
             [-0.739747, -2.274391, -0.147797, -2.444906, -1.607212],
             [2.81708, 5.763211, 6.28017, 5.28286, 5.739841],
             [2.205063, 5.632647, 5.292887, 6.565961, 4.418183],
+        ],
+    )
+    np.testing.assert_array_almost_equal(
+        slice_.standard_deviation,
+        [
+            [6.91917455, 7.91133715, 8.65285776, 7.74212216, 8.89927366],
+            [6.66057136, 7.61565202, 8.3294584, 7.45276142, 8.56666454],
+            [5.446182, 6.22712748, 6.81078904, 6.09393593, 7.00474655],
+            [4.58337073, 5.24059494, 5.73178993, 5.12850425, 5.89501972],
         ],
     )
 

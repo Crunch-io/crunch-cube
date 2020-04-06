@@ -143,6 +143,20 @@ class Describe_Slice(object):
             ],
         )
 
+        # Test Standard Deviation
+        np.testing.assert_almost_equal(
+            slice_.standard_deviation,
+            [
+                [2.23030105, 1.94522662, 2.19148774, 1.84665363, 0.0, 0.80838175],
+                [2.17748767, 1.89916378, 2.13959345, 1.80292499, 0.0, 0.78923932],
+                [0.68476581, 0.59723986, 0.67284902, 0.56697515, 0.0, 0.24819617],
+                [1.52823322, 1.33289626, 1.5016378, 1.26535269, 0.0, 0.55391439],
+                [1.77330433, 1.54664267, 1.742444, 1.46826765, 0.0, 0.64274141],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                [0.82176975, 0.71673212, 0.80746872, 0.68041223, 0.0, 0.29785381],
+            ],
+        )
+
     def it_provides_base_counts(self):
         slice_ = _Slice(Cube(CR.CAT_X_CAT_PRUNING_HS), 0, None, None, 0)
         np.testing.assert_array_equal(
@@ -464,8 +478,20 @@ class Describe_Slice(object):
             ],
         ]
 
+        expected_std_dev = [
+            [1.67653494, 1.98274673, np.nan, 0.0, 2.40256729, 2.44047363, 0.0, np.nan],
+            [1.80083329, 2.70708943, np.nan, 0.0, 3.30123963, 3.30954425, 0.0, np.nan],
+            [1.70410478, 2.92379647, np.nan, 0.0, 3.80164566, 3.87595634, 0.0, np.nan],
+            [1.77929646, 2.93543739, np.nan, 0.0, 4.08965667, 4.23530434, 0.0, np.nan],
+            [2.15751815, 3.39844894, np.nan, 0.0, 4.16118848, 4.2630497, 0.0, np.nan],
+        ]
+
+        np.testing.assert_almost_equal(slice_.standard_deviation, expected_std_dev)
         np.testing.assert_almost_equal(slice_.zscore, expected_zscore)
         np.testing.assert_almost_equal(slice_.pvals, expected_pvals)
+        assert (
+            slice_.pvals.shape == slice_.zscore.shape == slice_.standard_deviation.shape
+        )
 
     def it_calculates_cat_x_mr_various_measures(self):
         slice_ = Cube(CR.CAT_X_MR_HS).partitions[0]
@@ -513,8 +539,23 @@ class Describe_Slice(object):
             [np.nan, np.nan, np.nan, np.nan, np.nan],
             [np.nan, np.nan, np.nan, np.nan, np.nan],
         ]
+        expected_std_dev = [
+            [1.67653494, 1.80083329, 1.70410478, 1.77929646, 2.15751815],
+            [1.98274673, 2.70708943, 2.92379647, 2.93543739, 3.39844894],
+            [np.nan, np.nan, np.nan, np.nan, np.nan],
+            [0.0, 0.0, 0.0, 0.0, 0.0],
+            [2.40256729, 3.30123963, 3.80164566, 4.08965667, 4.16118848],
+            [2.44047363, 3.30954425, 3.87595634, 4.23530434, 4.2630497],
+            [0.0, 0.0, 0.0, 0.0, 0.0],
+            [np.nan, np.nan, np.nan, np.nan, np.nan],
+        ]
+
         np.testing.assert_almost_equal(slice_.zscore, expected_zscore)
         np.testing.assert_almost_equal(slice_.pvals, expected_pvals)
+        np.testing.assert_almost_equal(slice_.standard_deviation, expected_std_dev)
+        assert (
+            slice_.zscore.shape == slice_.standard_deviation.shape == slice_.pvals.shape
+        )
 
     def it_calculates_mr_x_mr_row_proportions(self):
         slice_ = Cube(CR.MR_X_MR).partitions[0]
