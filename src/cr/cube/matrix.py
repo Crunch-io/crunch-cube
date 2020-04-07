@@ -291,7 +291,12 @@ class _BaseBaseMatrix(object):
     @lazyproperty
     def _column_generator(self):
         return zip(
-            self._counts.T, self._base_counts.T, self._column_elements, self._zscores.T
+            self._counts.T,
+            self._base_counts.T,
+            self._column_elements,
+            self._zscores.T,
+            self._standard_deviation.T,
+            self._standard_error.T,
         )
 
     @lazyproperty
@@ -333,9 +338,18 @@ class _CatXCatMatrix(_BaseBaseMatrix):
                 element,
                 self.table_margin,
                 zscore,
+                standard_deviation,
+                standard_error,
                 opposite_margins=self._row_margins,
             )
-            for counts, base_counts, element, zscore in self._column_generator
+            for (
+                counts,
+                base_counts,
+                element,
+                zscore,
+                standard_deviation,
+                standard_error,
+            ) in self._column_generator
         )
 
     @lazyproperty
@@ -347,6 +361,8 @@ class _CatXCatMatrix(_BaseBaseMatrix):
                 element,
                 self.table_margin,
                 zscore,
+                standard_deviation,
+                standard_error,
                 column_index,
                 opposite_margins=self._column_margins,
             )
@@ -355,6 +371,8 @@ class _CatXCatMatrix(_BaseBaseMatrix):
                 base_counts,
                 element,
                 zscore,
+                standard_deviation,
+                standard_error,
                 column_index,
             ) in self._row_generator
         )
@@ -402,6 +420,8 @@ class _CatXCatMatrix(_BaseBaseMatrix):
             self._base_counts,
             self._row_elements,
             self._zscores,
+            self._standard_deviation,
+            self._standard_error,
             self._column_index,
         )
 
@@ -424,6 +444,27 @@ class _CatXCatMatrix(_BaseBaseMatrix):
             / total ** 3
         )
         return residuals / np.sqrt(variance)
+
+    @lazyproperty
+    def _standard_deviation(self):
+        """Returns the standard deviation for cell percentages
+        `std_deviation = sqrt(variance)`
+        """
+        return np.sqrt(self._variance)
+
+    @lazyproperty
+    def _standard_error(self):
+        """Returns the standard error for cell percentages
+        `std_error = sqrt(variance/N)`
+        """
+        return np.sqrt(self._variance / self.table_margin)
+
+    @lazyproperty
+    def _variance(self):
+        """Returns the variance for cell percentages
+        `variance = p * (1-p)`
+        """
+        return self._counts * (1 - self._counts)
 
     @lazyproperty
     def _zscores(self):
@@ -492,9 +533,22 @@ class _MrXCatMatrix(_MatrixWithMR):
         """Use bother selected and not-selected counts."""
         return tuple(
             _MultipleResponseVector(
-                counts, base_counts, element, self.table_margin, zscore
+                counts,
+                base_counts,
+                element,
+                self.table_margin,
+                zscore,
+                standard_deviation,
+                standard_error,
             )
-            for counts, base_counts, element, zscore in self._column_generator
+            for (
+                counts,
+                base_counts,
+                element,
+                zscore,
+                standard_deviation,
+                standard_error,
+            ) in self._column_generator
         )
 
     @lazyproperty
@@ -502,7 +556,14 @@ class _MrXCatMatrix(_MatrixWithMR):
         """Use only selected counts."""
         return tuple(
             _CatXMrVector(
-                counts, base_counts, element, table_margin, zscore, column_index
+                counts,
+                base_counts,
+                element,
+                table_margin,
+                zscore,
+                standard_deviation,
+                standard_error,
+                column_index,
             )
             for (
                 counts,
@@ -510,6 +571,8 @@ class _MrXCatMatrix(_MatrixWithMR):
                 element,
                 table_margin,
                 zscore,
+                standard_deviation,
+                standard_error,
                 column_index,
             ) in self._row_generator
         )
@@ -549,8 +612,31 @@ class _MrXCatMatrix(_MatrixWithMR):
             self._row_elements,
             self.table_margin,
             self._zscores,
+            self._standard_deviation,
+            self._standard_error,
             self._column_index,
         )
+
+    @lazyproperty
+    def _standard_deviation(self):
+        """Returns the standard deviation for cell percentages
+        `std_deviation = sqrt(variance)`
+        """
+        return np.sqrt(self._variance)
+
+    @lazyproperty
+    def _standard_error(self):
+        """Returns the standard error for cell percentages
+        `std_error = sqrt(variance/N)`
+        """
+        return np.sqrt(self._variance / self.table_margin[:, None])
+
+    @lazyproperty
+    def _variance(self):
+        """Returns the variance for cell percentages
+        `variance = p * (1-p)`
+        """
+        return self._counts[:, 0, :] * (1 - self._counts[:, 0, :])
 
     @lazyproperty
     def _zscores(self):
@@ -615,6 +701,8 @@ class _CatXMrMatrix(_MatrixWithMR):
                 element,
                 self.table_margin,
                 zscore,
+                standard_deviation,
+                standard_error,
                 column_index,
             )
             for (
@@ -622,6 +710,8 @@ class _CatXMrMatrix(_MatrixWithMR):
                 base_counts,
                 element,
                 zscore,
+                standard_deviation,
+                standard_error,
                 column_index,
             ) in self._row_generator
         )
@@ -664,6 +754,27 @@ class _CatXMrMatrix(_MatrixWithMR):
     @lazyproperty
     def _is_cat_x_mr_x_itself(self):
         return True if self._overlaps is not None else False
+
+    @lazyproperty
+    def _standard_deviation(self):
+        """Returns the standard deviation for cell percentages
+        `std_deviation = sqrt(variance)`
+        """
+        return np.sqrt(self._variance)
+
+    @lazyproperty
+    def _standard_error(self):
+        """Returns the standard error for cell percentages
+        `std_error = sqrt(variance/N)`
+        """
+        return np.sqrt(self._variance / self.table_margin)
+
+    @lazyproperty
+    def _variance(self):
+        """Returns the variance for cell percentages
+        `variance = p * (1-p)`
+        """
+        return self._counts[:, :, 0] * (1 - self._counts[:, :, 0])
 
     @lazyproperty
     def _zscores(self):
@@ -721,6 +832,8 @@ class _MrXMrMatrix(_MatrixWithMR):
                 element,
                 table_margin,
                 zscore,
+                standard_deviation,
+                standard_error,
                 column_index,
             )
             for (
@@ -729,6 +842,8 @@ class _MrXMrMatrix(_MatrixWithMR):
                 element,
                 table_margin,
                 zscore,
+                standard_deviation,
+                standard_error,
                 column_index,
             ) in self._row_generator
         )
@@ -824,9 +939,9 @@ class _MrXMrMatrix(_MatrixWithMR):
     @lazyproperty
     def _mr_shadow_proportions(self):
         """Cube containing item-wise selections, overlap, and nonoverlap
-           with all other items in a multiple response dimension, for each
-           element of any prepended dimensions:
-           A 1d interface to a 4d hypercube of underlying counts.
+        with all other items in a multiple response dimension, for each
+        element of any prepended dimensions:
+        A 1d interface to a 4d hypercube of underlying counts.
         """
         return self._counts[:, 0, :, 0] / self._pairwise_overlap_total
 
@@ -834,9 +949,9 @@ class _MrXMrMatrix(_MatrixWithMR):
     def _pairwise_overlap_total(self):
         """Return 2D ndarray symmetric-square matrix of valid observations.
 
-           Given a 4d hypercube of multiple response items, return the
-           symmetric square matrix of valid observations between all pairs.
-           n1 = 2; n2 = 2; n12 = 1; overlap total = 3
+        Given a 4d hypercube of multiple response items, return the
+        symmetric square matrix of valid observations between all pairs.
+        n1 = 2; n2 = 2; n12 = 1; overlap total = 3
         """
         return np.sum(self._counts, axis=(1, 3))
 
@@ -848,8 +963,31 @@ class _MrXMrMatrix(_MatrixWithMR):
             self._row_elements,
             self.table_margin,
             self._zscores,
+            self._standard_deviation,
+            self._standard_error,
             self._column_index,
         )
+
+    @lazyproperty
+    def _standard_deviation(self):
+        """Returns the standard deviation for cell percentages
+        `std_deviation = sqrt(variance)`
+        """
+        return np.sqrt(self._variance)
+
+    @lazyproperty
+    def _standard_error(self):
+        """Returns the standard error for cell percentages
+        `std_error = sqrt(variance/N)`
+        """
+        return np.sqrt(self._variance / self.table_margin)
+
+    @lazyproperty
+    def _variance(self):
+        """Returns the variance for cell percentages
+        `variance = p * (1-p)`
+        """
+        return self._counts[:, 0, :, 0] * (1 - self._counts[:, 0, :, 0])
 
     @lazyproperty
     def _zscores(self):
@@ -968,6 +1106,14 @@ class _BaseMatrixInsertionVector(object):
         return (self._anchor_n, self._neg_idx, self)
 
     @lazyproperty
+    def standard_deviation(self):
+        return self._standard_deviation
+
+    @lazyproperty
+    def standard_error(self):
+        return self._standard_error
+
+    @lazyproperty
     def table_margin(self):
         return self._table_margin
 
@@ -994,6 +1140,27 @@ class _BaseMatrixInsertionVector(object):
             if anchor == "bottom"
             else int(self.anchor) + 1
         )
+
+    @lazyproperty
+    def _standard_deviation(self):
+        """Returns the standard deviation for cell percentages
+        `std_deviation = sqrt(variance)`
+        """
+        return np.sqrt(self._variance)
+
+    @lazyproperty
+    def _standard_error(self):
+        """Returns the standard error for cell percentages
+        `std_error = sqrt(variance/N)`
+        """
+        return np.sqrt(self._variance / self.table_margin)
+
+    @lazyproperty
+    def _variance(self):
+        """Returns the variance for cell percentages
+        `variance = p * (1-p)`
+        """
+        return self._values * (1 - self._values)
 
     @lazyproperty
     def _zscore(self):
@@ -1185,6 +1352,14 @@ class _AssembledVector(_BaseTransformationVector):
         return 2 * (1 - norm.cdf(np.abs(self.zscore)))
 
     @lazyproperty
+    def standard_deviation(self):
+        return np.sqrt(self._variance)
+
+    @lazyproperty
+    def standard_error(self):
+        return np.sqrt(self._variance / self.table_margin)
+
+    @lazyproperty
     def table_proportions(self):
         return self.values / self._base_vector.table_margin
 
@@ -1285,6 +1460,10 @@ class _AssembledVector(_BaseTransformationVector):
             )
         )
 
+    @lazyproperty
+    def _variance(self):
+        return self.table_proportions * (1 - self.table_proportions)
+
 
 class _VectorAfterHiding(_BaseTransformationVector):
     """Reflects a row or column with hidden elements removed."""
@@ -1324,6 +1503,14 @@ class _VectorAfterHiding(_BaseTransformationVector):
     @lazyproperty
     def pvals(self):
         return self._base_vector.pvals[self._visible_element_idxs]
+
+    @lazyproperty
+    def standard_deviation(self):
+        return self._base_vector.standard_deviation[self._visible_element_idxs]
+
+    @lazyproperty
+    def standard_error(self):
+        return self._base_vector.standard_error[self._visible_element_idxs]
 
     @lazyproperty
     def table_proportions(self):
@@ -1489,6 +1676,27 @@ class _BaseVector(object):
         return self.base == 0 or np.isnan(self.base)
 
     @lazyproperty
+    def standard_deviation(self):
+        """Returns the standard deviation for cell percentages
+        `std_deviation = sqrt(variance)`
+        """
+        return np.sqrt(self._variance)
+
+    @lazyproperty
+    def standard_error(self):
+        """Returns the standard error for cell percentages
+        `std_error = sqrt(variance/N)`
+        """
+        return np.sqrt(self._variance / self.table_margin)
+
+    @lazyproperty
+    def variance(self):
+        """Returns the variance for cell percentages
+        `variance = p * (1-p)`
+        """
+        return self.values * (1 - self.values)
+
+    @lazyproperty
     def zscore(self):
         variance = (
             self.opposite_margins
@@ -1525,6 +1733,8 @@ class _CategoricalVector(_BaseVector):
         element,
         table_margin,
         zscore=None,
+        standard_deviation=None,
+        standard_error=None,
         column_index=None,
         opposite_margins=None,
     ):
@@ -1532,6 +1742,8 @@ class _CategoricalVector(_BaseVector):
         self._counts = counts
         self._table_margin = table_margin
         self._zscore = zscore
+        self._standard_deviation = standard_deviation
+        self._standard_error = standard_error
         self._column_index = column_index
         self.opposite_margins = opposite_margins
 
@@ -1564,10 +1776,25 @@ class _CatXMrVector(_CategoricalVector):
     """Used for categorical dimension when opposing dimension is multiple-response."""
 
     def __init__(
-        self, counts, base_counts, label, table_margin, zscore=None, column_index=None
+        self,
+        counts,
+        base_counts,
+        label,
+        table_margin,
+        zscore=None,
+        standard_deviation=None,
+        standard_error=None,
+        column_index=None,
     ):
         super(_CatXMrVector, self).__init__(
-            counts[0], base_counts[0], label, table_margin, zscore, column_index
+            counts[0],
+            base_counts[0],
+            label,
+            table_margin,
+            zscore,
+            standard_deviation,
+            standard_error,
+            column_index,
         )
         self._all_bases = base_counts
         self._all_counts = counts
@@ -1575,6 +1802,14 @@ class _CatXMrVector(_CategoricalVector):
     @lazyproperty
     def pruned(self):
         return self.table_base == 0
+
+    @lazyproperty
+    def standard_deviation(self):
+        return self._standard_deviation
+
+    @lazyproperty
+    def standard_error(self):
+        return self._standard_error
 
     @lazyproperty
     def table_base(self):
@@ -1648,6 +1883,14 @@ class _MultipleResponseVector(_CategoricalVector):
     @lazyproperty
     def pruned(self):
         return np.all(self.base == 0) or np.all(np.isnan(self.base))
+
+    @lazyproperty
+    def standard_deviation(self):
+        return self._standard_deviation
+
+    @lazyproperty
+    def standard_error(self):
+        return self._standard_error
 
     @lazyproperty
     def values(self):

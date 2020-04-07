@@ -441,6 +441,14 @@ class _Slice(CubePartition):
         return self.counts.shape
 
     @lazyproperty
+    def standard_deviation(self):
+        return np.array([row.standard_deviation for row in self._matrix.rows])
+
+    @lazyproperty
+    def standard_error(self):
+        return np.array([row.standard_error for row in self._matrix.rows])
+
+    @lazyproperty
     def summary_pairwise_indices(self):
         alpha = self._transforms_dict.get("pairwise_indices", {}).get("alpha", 0.05)
         only_larger = self._transforms_dict.get("pairwise_indices", {}).get(

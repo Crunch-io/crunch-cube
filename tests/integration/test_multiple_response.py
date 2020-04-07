@@ -321,6 +321,19 @@ def test_array_x_mr_by_row():
     np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
 
+def test_std_deviation_std_error_array_x_mr_by_row():
+    slice_ = Cube(CR.CA_SUBVAR_X_CA_CAT_X_MR).partitions[0]
+
+    np.testing.assert_array_almost_equal(
+        slice_.standard_deviation,
+        [[0.42525266, 0.13871218, 0.47011351], [0.41662646, 0.49570823, 0.41823255]],
+    )
+    np.testing.assert_array_almost_equal(
+        slice_.standard_error,
+        [[0.02978762, 0.00971635, 0.03292998], [0.02918338, 0.03472281, 0.02929588]],
+    )
+
+
 def test_array_x_mr_by_cell():
     slice_ = Cube(CR.CA_SUBVAR_X_CA_CAT_X_MR).partitions[0]
     expected = [[0.23701678, 0.01962626, 0.32972586], [0.223554, 0.43462911, 0.2259899]]
@@ -343,6 +356,24 @@ def test_cat_x_mr_x_itself_zscores():
             [-0.739747, -2.274391, -0.147797, -2.444906, -1.607212],
             [2.81708, 5.763211, 6.28017, 5.28286, 5.739841],
             [2.205063, 5.632647, 5.292887, 6.565961, 4.418183],
+        ],
+    )
+    np.testing.assert_array_almost_equal(
+        slice_.standard_deviation,
+        [
+            [0.21372868, 0.22934489, 0.25231982, 0.2196406, 0.29240244],
+            [0.21570152, 0.24252658, 0.29683733, 0.23332739, 0.30050586],
+            [0.19356893, 0.24632529, 0.2755421, 0.23750454, 0.28209093],
+            [0.15827103, 0.21101155, 0.22996442, 0.21354113, 0.23220219],
+        ],
+    )
+    np.testing.assert_array_almost_equal(
+        slice_.standard_error,
+        [
+            [0.00552364, 0.00592723, 0.006521, 0.00567643, 0.0075569],
+            [0.00557463, 0.0062679, 0.00767152, 0.00603016, 0.00776633],
+            [0.00500263, 0.00636608, 0.00712116, 0.00613811, 0.00729041],
+            [0.00409039, 0.00545342, 0.00594324, 0.0055188, 0.00600108],
         ],
     )
 

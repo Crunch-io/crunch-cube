@@ -791,10 +791,10 @@ class TestCrunchCubeAs_Slice(object):
         expected = np.array([500, 500])
         np.testing.assert_almost_equal(slice_.rows_margin, expected)
 
-    def test_calculate_standard_error_axis_0(self):
+    def test_calculate_various_measures_axis_0(self):
         """Calculate standard error across columns."""
         slice_ = Cube(CR.ECON_GENDER_X_IDEOLOGY_WEIGHTED).partitions[0]
-        expected = np.array(
+        expected_zscore = np.array(
             [
                 [
                     -0.715899626017458,
@@ -814,7 +814,17 @@ class TestCrunchCubeAs_Slice(object):
                 ],
             ]
         )
-        np.testing.assert_almost_equal(slice_.zscore, expected)
+        expected_standard_dev = [
+            [0.17860955, 0.28275439, 0.38106557, 0.32204575, 0.25876083, 0.1149889],
+            [0.19320144, 0.29207169, 0.39927, 0.30384472, 0.19320144, 0.15976996],
+        ]
+        expected_standard_error = [
+            [0.00564813, 0.00894148, 0.01205035, 0.01018398, 0.00818274, 0.00363627],
+            [0.00610957, 0.00923612, 0.01262603, 0.00960841, 0.00610957, 0.00505237],
+        ]
+        np.testing.assert_almost_equal(slice_.standard_deviation, expected_standard_dev)
+        np.testing.assert_almost_equal(slice_.standard_error, expected_standard_error)
+        np.testing.assert_almost_equal(slice_.zscore, expected_zscore)
 
     def test_pvals(self):
         expected = np.array(
@@ -907,13 +917,13 @@ class TestCrunchCubeAs_Slice(object):
         np.testing.assert_almost_equal(slice_.means, expected)
         assert slice_.ndim == 2
 
-    def test_z_scores_admit_by_dept_unweighted_rows(self):
+    def test_various_measures_admit_by_dept_unweighted_rows(self):
         """see
         https://github.com/Crunch-io/whaam/blob/master/base/stats/tests/
         zvalues-spec.js#L42
         """
         slice_ = Cube(CR.ADMIT_X_DEPT_UNWEIGHTED).partitions[0]
-        expected = np.array(
+        expected_zscore = np.array(
             [
                 [
                     18.04029230689576,
@@ -933,21 +943,37 @@ class TestCrunchCubeAs_Slice(object):
                 ],
             ]
         )
-        np.testing.assert_almost_equal(slice_.zscore, expected)
+        expected_standard_error = [
+            [0.00504412, 0.00407255, 0.00382109, 0.00351444, 0.00263496, 0.00149089],
+            [0.00387535, 0.00316181, 0.00502629, 0.00475195, 0.00439013, 0.00527227],
+        ]
+        expected_standard_dev = [
+            [0.33934583, 0.27398329, 0.25706606, 0.2364359, 0.17726851, 0.10030056],
+            [0.26071661, 0.21271283, 0.33814647, 0.31969003, 0.29534847, 0.35469478],
+        ]
 
-    def test_z_scores_admit_by_gender_weighted_rows(self):
+        np.testing.assert_almost_equal(slice_.zscore, expected_zscore)
+        np.testing.assert_almost_equal(slice_.standard_deviation, expected_standard_dev)
+        np.testing.assert_almost_equal(slice_.standard_error, expected_standard_error)
+
+    def test_various_measures_admit_by_gender_weighted_rows(self):
         """ see
         https://github.com/Crunch-io/whaam/blob/master/base/stats/tests/
         zvalues-spec.js#L67
         """
         slice_ = Cube(CR.ADMIT_X_GENDER_WEIGHTED).partitions[0]
-        expected = np.array(
+        expected_zscore = np.array(
             [
                 [9.42561984520692, -9.425619845206922],
                 [-9.425619845206922, 9.42561984520692],
             ]
         )
-        np.testing.assert_almost_equal(slice_.zscore, expected)
+        expected_standard_dev = [[0.44013199, 0.32828883], [0.47059018, 0.45061221]]
+        expected_standard_error = [[0.00659641, 0.00492018], [0.0070529, 0.00675348]]
+
+        np.testing.assert_almost_equal(slice_.zscore, expected_zscore)
+        np.testing.assert_almost_equal(slice_.standard_deviation, expected_standard_dev)
+        np.testing.assert_almost_equal(slice_.standard_error, expected_standard_error)
 
     def test_selected_crosstab_as_array(self):
         slice_ = Cube(CR.SELECTED_CROSSTAB_4).partitions[0]
