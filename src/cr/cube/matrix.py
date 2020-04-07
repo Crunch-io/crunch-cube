@@ -464,7 +464,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
         """Returns the variance for cell percentages
         `variance = p * (1-p)`
         """
-        return self._counts * (1 - self._counts)
+        return self._counts / self.table_margin * (1 - self._counts / self.table_margin)
 
     @lazyproperty
     def _zscores(self):
@@ -636,7 +636,11 @@ class _MrXCatMatrix(_MatrixWithMR):
         """Returns the variance for cell percentages
         `variance = p * (1-p)`
         """
-        return self._counts[:, 0, :] * (1 - self._counts[:, 0, :])
+        return (
+            self._counts[:, 0, :]
+            / self.table_margin[:, None]
+            * (1 - self._counts[:, 0, :] / self.table_margin[:, None])
+        )
 
     @lazyproperty
     def _zscores(self):
@@ -774,7 +778,11 @@ class _CatXMrMatrix(_MatrixWithMR):
         """Returns the variance for cell percentages
         `variance = p * (1-p)`
         """
-        return self._counts[:, :, 0] * (1 - self._counts[:, :, 0])
+        return (
+            self._counts[:, :, 0]
+            / self.table_margin
+            * (1 - self._counts[:, :, 0] / self.table_margin)
+        )
 
     @lazyproperty
     def _zscores(self):
@@ -987,7 +995,11 @@ class _MrXMrMatrix(_MatrixWithMR):
         """Returns the variance for cell percentages
         `variance = p * (1-p)`
         """
-        return self._counts[:, 0, :, 0] * (1 - self._counts[:, 0, :, 0])
+        return (
+            self._counts[:, 0, :, 0]
+            / self.table_margin
+            * (1 - self._counts[:, 0, :, 0] / self.table_margin)
+        )
 
     @lazyproperty
     def _zscores(self):
@@ -1106,14 +1118,6 @@ class _BaseMatrixInsertionVector(object):
         return (self._anchor_n, self._neg_idx, self)
 
     @lazyproperty
-    def standard_deviation(self):
-        return self._standard_deviation
-
-    @lazyproperty
-    def standard_error(self):
-        return self._standard_error
-
-    @lazyproperty
     def table_margin(self):
         return self._table_margin
 
@@ -1140,27 +1144,6 @@ class _BaseMatrixInsertionVector(object):
             if anchor == "bottom"
             else int(self.anchor) + 1
         )
-
-    @lazyproperty
-    def _standard_deviation(self):
-        """Returns the standard deviation for cell percentages
-        `std_deviation = sqrt(variance)`
-        """
-        return np.sqrt(self._variance)
-
-    @lazyproperty
-    def _standard_error(self):
-        """Returns the standard error for cell percentages
-        `std_error = sqrt(variance/N)`
-        """
-        return np.sqrt(self._variance / self.table_margin)
-
-    @lazyproperty
-    def _variance(self):
-        """Returns the variance for cell percentages
-        `variance = p * (1-p)`
-        """
-        return self._values * (1 - self._values)
 
     @lazyproperty
     def _zscore(self):
@@ -1676,27 +1659,6 @@ class _BaseVector(object):
         return self.base == 0 or np.isnan(self.base)
 
     @lazyproperty
-    def standard_deviation(self):
-        """Returns the standard deviation for cell percentages
-        `std_deviation = sqrt(variance)`
-        """
-        return np.sqrt(self._variance)
-
-    @lazyproperty
-    def standard_error(self):
-        """Returns the standard error for cell percentages
-        `std_error = sqrt(variance/N)`
-        """
-        return np.sqrt(self._variance / self.table_margin)
-
-    @lazyproperty
-    def variance(self):
-        """Returns the variance for cell percentages
-        `variance = p * (1-p)`
-        """
-        return self.values * (1 - self.values)
-
-    @lazyproperty
     def zscore(self):
         variance = (
             self.opposite_margins
@@ -1804,14 +1766,6 @@ class _CatXMrVector(_CategoricalVector):
         return self.table_base == 0
 
     @lazyproperty
-    def standard_deviation(self):
-        return self._standard_deviation
-
-    @lazyproperty
-    def standard_error(self):
-        return self._standard_error
-
-    @lazyproperty
     def table_base(self):
         return np.sum(self._all_bases)
 
@@ -1883,14 +1837,6 @@ class _MultipleResponseVector(_CategoricalVector):
     @lazyproperty
     def pruned(self):
         return np.all(self.base == 0) or np.all(np.isnan(self.base))
-
-    @lazyproperty
-    def standard_deviation(self):
-        return self._standard_deviation
-
-    @lazyproperty
-    def standard_error(self):
-        return self._standard_error
 
     @lazyproperty
     def values(self):

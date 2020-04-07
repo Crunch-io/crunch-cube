@@ -246,9 +246,9 @@ def test_table_base_unpruned_cat_x_mr():
     np.testing.assert_array_equal(slice_.table_base_unpruned, expected)
 
 
-def test_z_scores_from_r_rows_margin():
+def test_various_measures_from_r_rows_margin():
     slice_ = Cube(CR.MR_X_CAT_PROFILES_STATS_WEIGHTED).partitions[0]
-    expected = [
+    expected_zscore = [
         [
             -1.465585354569577,
             3.704125875262655,
@@ -270,7 +270,54 @@ def test_z_scores_from_r_rows_margin():
             -0.794143540856781,
         ],
     ]
-    np.testing.assert_almost_equal(slice_.zscore, expected)
+    expected_standard_dev = [
+        [
+            0.32529036,
+            0.3230502,
+            0.24634286,
+            0.17015146,
+            0.15631497,
+            0.310228,
+            0.07333405,
+            0.09462074,
+        ],
+        [
+            0.34030642,
+            0.32321237,
+            0.24212202,
+            0.17077218,
+            0.15232289,
+            0.34229973,
+            0.07720184,
+            0.09510867,
+        ],
+    ]
+    expected_standard_error = [
+        [
+            0.00185406,
+            0.0018413,
+            0.00140409,
+            0.00096982,
+            0.00089095,
+            0.00176821,
+            0.00041798,
+            0.00053931,
+        ],
+        [
+            0.00193965,
+            0.00184222,
+            0.00138003,
+            0.00097335,
+            0.0008682,
+            0.00195101,
+            0.00044003,
+            0.00054209,
+        ],
+    ]
+
+    np.testing.assert_almost_equal(slice_.zscore, expected_zscore)
+    np.testing.assert_almost_equal(slice_.standard_error, expected_standard_error)
+    np.testing.assert_almost_equal(slice_.standard_deviation, expected_standard_dev)
 
 
 def test_mr_x_single_wave():
@@ -378,7 +425,7 @@ def test_cat_x_mr_x_itself_zscores():
     )
 
 
-def test_cat_x_mr_and_cat_x_mr_x_itself_zscores():
+def test_cat_x_mr_and_cat_x_mr_x_itself_various_measures():
     slice_ = Cube(CR.EDU_FAV5).partitions[0]
     slice2_ = Cube(CR.EDU_FAV5_FAV5).partitions[0]
 
@@ -386,6 +433,10 @@ def test_cat_x_mr_and_cat_x_mr_x_itself_zscores():
         slice_.column_proportions, slice2_.column_proportions
     )
     np.testing.assert_array_almost_equal(slice_.zscore, slice2_.zscore)
+    np.testing.assert_array_almost_equal(
+        slice_.standard_deviation, slice2_.standard_deviation
+    )
+    np.testing.assert_array_almost_equal(slice_.standard_error, slice2_.standard_error)
     assert slice_.shape == (4, 5)
     assert slice2_.shape == (4, 5)
 
