@@ -48,6 +48,21 @@ class TransformedStripe(object):
         )
 
     @lazyproperty
+    def rows_before_hiding(self):
+        """Sequence of pre-hiding row vectors.
+
+        All transforms are applied in this unit except for hidden row.
+        `._ordered_rows` applies ordering, _StripeInsertionHelper creates
+        and interleaves subtotal rows
+        """
+        return tuple(
+            row
+            for row in _StripeInsertionHelper.iter_interleaved_rows(
+                self._rows_dimension, self._ordered_rows, self._table_margin
+            )
+        )
+
+    @lazyproperty
     def table_base_unpruned(self):
         """Hmm, weird 1D ndarray with same int value repeated for each row."""
         return self._base_stripe.table_base
