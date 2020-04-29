@@ -341,27 +341,17 @@ class _Slice(CubePartition):
         return self._rows_dimension.name
 
     @lazyproperty
+    def rows_dimension_numeric(self):
+        return self._rows_dimension_numeric
+
+    @lazyproperty
     def rows_dimension_type(self):
         """Member of `cr.cube.enum.DIMENSION_TYPE` specifying type of rows dimension."""
         return self._rows_dimension.dimension_type
 
     @lazyproperty
-    def rows_dimension_numeric(self):
-        return self._rows_dimension_numeric
-
-    @lazyproperty
     def rows_margin(self):
         return np.array([row.margin for row in self._matrix.rows])
-
-    @lazyproperty
-    def scale_means_column(self):
-        if np.all(np.isnan(self._columns_dimension_numeric)):
-            return None
-
-        inner = np.nansum(self._columns_dimension_numeric * self.counts, axis=1)
-        not_a_nan_index = ~np.isnan(self._columns_dimension_numeric)
-        denominator = np.sum(self.counts[:, not_a_nan_index], axis=1)
-        return inner / denominator
 
     @lazyproperty
     def scale_mean_pairwise_indices(self):
@@ -372,6 +362,16 @@ class _Slice(CubePartition):
         return NewPairwiseSignificance(
             self, alpha=alpha, only_larger=only_larger
         ).scale_mean_pairwise_indices
+
+    @lazyproperty
+    def scale_means_column(self):
+        if np.all(np.isnan(self._columns_dimension_numeric)):
+            return None
+
+        inner = np.nansum(self._columns_dimension_numeric * self.counts, axis=1)
+        not_a_nan_index = ~np.isnan(self._columns_dimension_numeric)
+        denominator = np.sum(self.counts[:, not_a_nan_index], axis=1)
+        return inner / denominator
 
     @lazyproperty
     def scale_means_columns_margin(self):
