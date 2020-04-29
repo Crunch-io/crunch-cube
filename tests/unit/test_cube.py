@@ -17,10 +17,27 @@ from ..unitutil import instance_mock, property_mock, method_mock
 
 
 class DescribeCubeSet(object):
+    """Unit-test suite for `cr.cube.cube.CubeSet` object."""
+
+    @pytest.mark.parametrize(
+        ("cubes_dimtypes", "expected_value"),
+        (
+            ((), False),
+            (((DT.CAT, DT.CAT),), False),
+            (((DT.TEXT,), (DT.TEXT,)), False),
+            (((DT.CAT,), (DT.CAT, DT.CAT)), True),
+            (((DT.TEXT,), (DT.CAT, DT.CAT)), True),
+            (((DT.MR_CAT,), (DT.CAT, DT.CAT)), True),
+            (((DT.CAT,), (DT.CAT, DT.MR_CAT)), False),
+            (((DT.CAT, DT.CAT), (DT.CAT, DT.MR_CAT)), False),
+            (((DT.DATETIME,), (DT.DATETIME, DT.DATETIME)), True),
+            (((DT.DATETIME, DT.DATETIME), (DT.DATETIME, DT.DATETIME)), True),
+            (((DT.DATETIME, DT.DATETIME), (DT.DATETIME, DT.MR_CAT)), False),
+        ),
+    )
     def it_knows_whether_it_can_show_pairwise(
-        self, request, can_show_pairwise_fixture, _cubes_prop_
+        self, request, cubes_dimtypes, expected_value, _cubes_prop_
     ):
-        cubes_dimtypes, expected_value = can_show_pairwise_fixture
         _cubes_prop_.return_value = tuple(
             instance_mock(
                 request, Cube, dimension_types=cube_dimtypes, ndim=len(cube_dimtypes)
@@ -42,8 +59,12 @@ class DescribeCubeSet(object):
 
         assert description == "Are you male or female?"
 
-    def it_knows_whether_it_has_means(self, has_means_fixture, _cubes_prop_, cube_):
-        first_cube_has_means, expected_value = has_means_fixture
+    @pytest.mark.parametrize(
+        ("first_cube_has_means", "expected_value"), ((True, True), (False, False))
+    )
+    def it_knows_whether_it_has_means(
+        self, first_cube_has_means, expected_value, _cubes_prop_, cube_
+    ):
         cube_.has_means = first_cube_has_means
         _cubes_prop_.return_value = (cube_,)
         cube_set = CubeSet(None, None, None, None)
@@ -52,10 +73,12 @@ class DescribeCubeSet(object):
 
         assert has_means == expected_value
 
+    @pytest.mark.parametrize(
+        ("first_cube_has_w_counts", "expected_value"), ((True, True), (False, False))
+    )
     def it_knows_whether_it_has_weighted_counts(
-        self, has_weighted_counts_fixture, _cubes_prop_, cube_
+        self, first_cube_has_w_counts, expected_value, _cubes_prop_, cube_
     ):
-        first_cube_has_w_counts, expected_value = has_weighted_counts_fixture
         cube_.is_weighted = first_cube_has_w_counts
         _cubes_prop_.return_value = (cube_,)
         cube_set = CubeSet(None, None, None, None)
@@ -64,8 +87,10 @@ class DescribeCubeSet(object):
 
         assert has_weighted_counts == expected_value
 
-    def it_knows_when_it_is_ca_as_0th(self, is_ca_as_0th_fixture, _cubes_prop_, cube_):
-        ncubes, expected_value = is_ca_as_0th_fixture
+    @pytest.mark.parametrize(("ncubes", "expected_value"), ((2, True), (1, False)))
+    def it_knows_when_it_is_ca_as_0th(
+        self, ncubes, expected_value, _cubes_prop_, cube_
+    ):
         cubes_ = (cube_,) * ncubes
         cubes_[0].dimension_types = (DT.CA_SUBVAR,) * ncubes
         _cubes_prop_.return_value = cubes_
@@ -75,8 +100,12 @@ class DescribeCubeSet(object):
 
         assert is_ca_as_0th == expected_value
 
-    def it_knows_its_missing_count(self, missing_count_fixture, _cubes_prop_, cube_):
-        first_cube_missing_count, expected_value = missing_count_fixture
+    @pytest.mark.parametrize(
+        ("first_cube_missing_count", "expected_value"), ((34, 34), (0, 0))
+    )
+    def it_knows_its_missing_count(
+        self, first_cube_missing_count, expected_value, _cubes_prop_, cube_
+    ):
         cube_.missing = first_cube_missing_count
         _cubes_prop_.return_value = (cube_,)
         cube_set = CubeSet(None, None, None, None)
@@ -94,11 +123,20 @@ class DescribeCubeSet(object):
 
         assert name == "Beverage"
 
+    @pytest.mark.parametrize(
+        ("cube_partitions", "expected_value"),
+        (
+            # --- 3D, 2D, 1D, Nub ---
+            ((_Strand, _Slice, _Slice), ((_Strand,), (_Slice,), (_Slice,))),
+            ((_Slice, _Slice), ((_Slice,), (_Slice,))),
+            ((_Slice,), ((_Slice,),)),
+            ((_Nub,), ((_Nub,),)),
+        ),
+    )
     def it_provides_access_to_the_partition_sets(
-        self, partition_set_fixture, _cubes_prop_, cube_
+        self, cube_partitions, expected_value, _cubes_prop_, cube_
     ):
-        cube_partition, expected_value = partition_set_fixture
-        cube_.partitions = cube_partition
+        cube_.partitions = cube_partitions
         _cubes_prop_.return_value = (cube_,)
         cube_set = CubeSet(None, None, None, None)
 
@@ -106,10 +144,13 @@ class DescribeCubeSet(object):
 
         assert partition_sets == expected_value
 
+    @pytest.mark.parametrize(
+        ("population_fraction", "expected_value"),
+        ((1.0, 1.0), (0.54, 0.54), (np.nan, np.nan)),
+    )
     def it_has_proper_population_fraction(
-        self, population_fraction_fixture, cube_, _cubes_prop_
+        self, population_fraction, expected_value, cube_, _cubes_prop_
     ):
-        population_fraction, expected_value = population_fraction_fixture
         cube_.population_fraction = population_fraction
         _cubes_prop_.return_value = (cube_,)
         cube_set = CubeSet(None, None, None, None)
@@ -136,65 +177,6 @@ class DescribeCubeSet(object):
 
         assert len(cube_sequence) == 3
         assert all(isinstance(cube, Cube) for cube in cube_sequence)
-
-    # fixtures ---------------------------------------------
-
-    @pytest.fixture(
-        params=[
-            ((), False),
-            (((DT.CAT, DT.CAT),), False),
-            (((DT.TEXT,), (DT.TEXT,)), False),
-            (((DT.CAT,), (DT.CAT, DT.CAT)), True),
-            (((DT.TEXT,), (DT.CAT, DT.CAT)), True),
-            (((DT.MR_CAT,), (DT.CAT, DT.CAT)), True),
-            (((DT.CAT,), (DT.CAT, DT.MR_CAT)), False),
-            (((DT.CAT, DT.CAT), (DT.CAT, DT.MR_CAT)), False),
-            (((DT.DATETIME,), (DT.DATETIME, DT.DATETIME)), True),
-            (((DT.DATETIME, DT.DATETIME), (DT.DATETIME, DT.DATETIME)), True),
-            (((DT.DATETIME, DT.DATETIME), (DT.DATETIME, DT.MR_CAT)), False),
-        ]
-    )
-    def can_show_pairwise_fixture(self, request):
-        cubes_dimtypes, expected_value = request.param
-        return cubes_dimtypes, expected_value
-
-    @pytest.fixture(params=[(True, True), (False, False)])
-    def has_means_fixture(self, request):
-        first_cube_has_means, expected_value = request.param
-        return first_cube_has_means, expected_value
-
-    @pytest.fixture(params=[(True, True), (False, False)])
-    def has_weighted_counts_fixture(self, request):
-        first_cube_has_w_counts, expected_value = request.param
-        return first_cube_has_w_counts, expected_value
-
-    @pytest.fixture(params=[(2, True), (1, False)])
-    def is_ca_as_0th_fixture(self, request):
-        ncubes, expected_value = request.param
-        return ncubes, expected_value
-
-    @pytest.fixture(params=[(34, 34), (0, 0)])
-    def missing_count_fixture(self, request):
-        first_cube_missing_count, expected_value = request.param
-        return first_cube_missing_count, expected_value
-
-    @pytest.fixture(
-        # 3D, 2D, 1D, Nub
-        params=[
-            ((_Strand, _Slice, _Slice), ((_Strand,), (_Slice,), (_Slice,))),
-            ((_Slice, _Slice), ((_Slice,), (_Slice,))),
-            ((_Slice,), ((_Slice,),)),
-            ((_Nub,), ((_Nub,),)),
-        ]
-    )
-    def partition_set_fixture(self, request):
-        cube_partitions, expected_value = request.param
-        return cube_partitions, expected_value
-
-    @pytest.fixture(params=[(1.0, 1.0), (0.54, 0.54), (np.nan, np.nan)])
-    def population_fraction_fixture(self, request):
-        population_fraction, expected_value = request.param
-        return population_fraction, expected_value
 
     # fixture components ---------------------------------------------
 
