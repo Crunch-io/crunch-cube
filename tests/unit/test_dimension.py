@@ -922,9 +922,16 @@ class Describe_Element(object):
 
         assert label == expected_value
 
-    @pytest.mark.xfail(reason="implement me", strict=True)
-    def it_knows_whether_it_is_explicitly_hidden(self):
-        assert False
+    @pytest.mark.parametrize(
+        ("hide", "expected_value"), ((True, True), (False, False), (None, False))
+    )
+    def it_knows_whether_it_is_explicitly_hidden(self, request, hide, expected_value):
+        element_transforms_ = instance_mock(request, _ElementTransforms, hide=hide)
+        element = _Element(None, None, None, element_transforms_)
+
+        is_hidden = element.is_hidden
+
+        assert is_hidden is expected_value
 
     @pytest.mark.parametrize(
         ("element_dict", "expected_value"),
