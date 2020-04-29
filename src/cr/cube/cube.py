@@ -1,8 +1,8 @@
 # encoding: utf-8
 
-"""Provides the Cube class.
+"""Provides the CubeSet and Cube classes.
 
-Cube is the main API class for manipulating Crunch.io JSON cube responses.
+CubeSet is the main API class for manipulating Crunch.io JSON cube responses.
 """
 
 from __future__ import absolute_import, division, print_function, unicode_literals
