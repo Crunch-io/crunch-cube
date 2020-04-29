@@ -141,6 +141,30 @@ class CubeSet(object):
         """True if more than one cube-response was provided on construction."""
         return len(self._cube_responses) > 1
 
+    def _is_numeric_mean(self):
+        """True when CubeSet is special-case "numeric-mean" case requiring inflation.
+
+        When a numeric variable appears as the rows-dimension in a multitable analysis,
+        its cube-result has been "reduced" to the mean-value of those numerics. This is
+        in contrast to being "bucketized" into an arbitrary set of numeric-range
+        categories like 0-5, 5-10, etc. In the process, as an artifact of the ZZ9 query
+        response, that dimension is removed. As a result, the rows-dimension cube is 0D
+        and the column-dimension cubes are 1D. These need to be "inflated" to restore
+        the lost dimension such that they are uniform with other cube-results and can be
+        processed without special-case code.
+
+        "Inflation" is basically prefixing "1 x" to the dimensionality, for example a 1D
+        of size 5 becomes a 1 x 5 2D result. Note this requires no mapping in the actual
+        values because 5 = 1 x 5 = 5 (values).
+        """
+        # --- this case only arises in a multitable analysis ---
+        if not self._is_multi_cube:
+            return False
+
+        # --- We need the cube to tell us the dimensionality. This redundant
+        # --- construction is low-overhead because all Cube properties are lazy.
+        return Cube(self._cube_responses[0]).ndim == 0
+
     def _iter_cubes(self):
         """Generate a Cube object for each of cube_responses.
 
@@ -155,14 +179,9 @@ class CubeSet(object):
                 population=self._population,
                 mask_size=self._min_base,
             )
-            # ---a 0D rows-var cube gets inflated, as does a 1D cols-var cube---
-            if self._is_multi_cube and (
-                (idx == 0 and cube.ndim == 0) or (idx > 0 and cube.ndim == 1)
-            ):
-                yield cube.inflate()
-                continue
-            # ---others don't---
-            yield cube
+            # --- all numeric-mean cubes require inflation to restore their
+            # --- rows-dimension, others don't
+            yield cube.inflate() if self._is_numeric_mean else cube
 
 
 class Cube(object):

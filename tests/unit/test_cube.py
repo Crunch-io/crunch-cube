@@ -13,7 +13,7 @@ from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.dimension import _ApparentDimensions, Dimension
 
 from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
-from ..unitutil import instance_mock, property_mock, method_mock
+from ..unitutil import call, class_mock, instance_mock, property_mock, method_mock
 
 
 class DescribeCubeSet(object):
@@ -167,30 +167,105 @@ class DescribeCubeSet(object):
 
         assert cubes == (cube_, cube_, cube_)
 
-    def it_constructs_its_sequence_of_cube_objects_to_help(self, cube_, _cubedict_):
-        cubes_ = (cube_,) * 3
-        _cubedict_.return_value = cube_._cube_dict
-        transforms_ = [{}, {}, {}]
-        cube_set = CubeSet(cubes_, transforms_, None, None)
+    def it_constructs_its_sequence_of_cube_objects_to_help(
+        self, request, Cube_, _is_numeric_mean_prop_
+    ):
+        cubes_ = tuple(instance_mock(request, Cube) for _ in range(4))
+        Cube_.side_effect = iter(cubes_)
+        _is_numeric_mean_prop_.return_value = False
+        cube_set = CubeSet(
+            cube_responses=[{"cube": "resp-1"}, {"cube": "resp-2"}, {"cube": "resp-3"}],
+            transforms=[{"xfrms": 1}, {"xfrms": 2}, {"xfrms": 3}],
+            population=1000,
+            min_base=10,
+        )
 
-        cube_sequence = tuple(cube_set._iter_cubes())
+        cubes = tuple(cube_set._iter_cubes())
 
-        assert len(cube_sequence) == 3
-        assert all(isinstance(cube, Cube) for cube in cube_sequence)
+        assert Cube_.call_args_list == [
+            call(
+                {"cube": "resp-1"},
+                {"xfrms": 1},
+                first_cube_of_tab=True,
+                population=1000,
+                mask_size=10,
+            ),
+            call(
+                {"cube": "resp-2"},
+                {"xfrms": 2},
+                first_cube_of_tab=False,
+                population=1000,
+                mask_size=10,
+            ),
+            call(
+                {"cube": "resp-3"},
+                {"xfrms": 3},
+                first_cube_of_tab=False,
+                population=1000,
+                mask_size=10,
+            ),
+        ]
+        assert cubes == cubes_[:3]
+
+    def but_it_inflates_the_cubes_in_special_case_of_numeric_mean_payload(
+        self, request, Cube_, cube_, _is_numeric_mean_prop_
+    ):
+        cubes_ = tuple(instance_mock(request, Cube) for _ in range(4))
+        cube_.inflate.side_effect = iter(cubes_)
+        Cube_.return_value = cube_
+        _is_numeric_mean_prop_.return_value = True
+        cube_set = CubeSet(
+            cube_responses=[{"cube": "resp-1"}, {"cube": "resp-2"}, {"cube": "resp-3"}],
+            transforms=[{"xfrms": 1}, {"xfrms": 2}, {"xfrms": 3}],
+            population=1000,
+            min_base=10,
+        )
+
+        cubes = tuple(cube_set._iter_cubes())
+
+        assert Cube_.call_args_list == [
+            call(
+                {"cube": "resp-1"},
+                {"xfrms": 1},
+                first_cube_of_tab=True,
+                population=1000,
+                mask_size=10,
+            ),
+            call(
+                {"cube": "resp-2"},
+                {"xfrms": 2},
+                first_cube_of_tab=False,
+                population=1000,
+                mask_size=10,
+            ),
+            call(
+                {"cube": "resp-3"},
+                {"xfrms": 3},
+                first_cube_of_tab=False,
+                population=1000,
+                mask_size=10,
+            ),
+        ]
+        assert cube_.inflate.call_args_list == [call(), call(), call()]
+        assert cubes == cubes_[:3]
 
     # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def Cube_(self, request):
+        return class_mock(request, "cr.cube.cube.Cube")
 
     @pytest.fixture
     def cube_(self, request):
         return instance_mock(request, Cube)
 
     @pytest.fixture
-    def _cubedict_(self, request):
-        return property_mock(request, Cube, "_cube_dict")
-
-    @pytest.fixture
     def _cubes_prop_(self, request):
         return property_mock(request, CubeSet, "_cubes")
+
+    @pytest.fixture
+    def _is_numeric_mean_prop_(self, request):
+        return property_mock(request, CubeSet, "_is_numeric_mean")
 
     @pytest.fixture
     def _iter_cubes_(self, request):
