@@ -58,3 +58,4 @@ class LazyCubeResponseLoader(object):
 
 CR = LazyCubeResponseLoader(".")  # ---mnemonic: CR = 'cube-response'---
 SM = LazyCubeResponseLoader("./scale_means")
+TR = LazyCubeResponseLoader("./transforms")

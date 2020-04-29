@@ -1398,6 +1398,12 @@ class _OrderedVector(_BaseTransformationVector):
         return self._base_vector.values[self._opposing_order]
 
     @lazyproperty
+    def margin(self):
+        if not isinstance(self._base_vector.margin, np.ndarray):
+            return self._base_vector.margin
+        return self._base_vector.margin[self._opposing_order]
+
+    @lazyproperty
     def zscore(self):
         return self._base_vector.zscore
 
