@@ -1,0 +1,155 @@
+{
+  "element": "shoji:view",
+  "self": "https://alpha.crunch.io/api/datasets/5a782ff250164066b465d3e56897b269/cube/?query=%7B%22dimensions%22:%5B%7B%22variable%22:%22https:%2F%2Falpha.crunch.io%2Fapi%2Fdatasets%2F5a782ff250164066b465d3e56897b269%2Fvariables%2F5LKrMtLGwhNM34xJpJxCaP00002e%2Fsubvariables%2F0008%2F%22%7D%5D,%22measures%22:%7B%22count%22:%7B%22function%22:%22cube_count%22,%22args%22:%5B%5D%7D%7D%7D",
+  "value": {
+    "query": {
+      "measures": {
+        "count": {
+          "function": "cube_count",
+          "args": []
+        }
+      },
+      "dimensions": [
+        {
+          "variable": "https://alpha.crunch.io/api/datasets/5a782ff250164066b465d3e56897b269/variables/5LKrMtLGwhNM34xJpJxCaP00002e/subvariables/0008/"
+        }
+      ],
+      "weight": null
+    },
+    "query_environment": {
+      "filter": []
+    },
+    "result": {
+      "dimensions": [
+        {
+          "references": {
+            "alias": "stalin",
+            "name": "cabatt_1",
+            "description": "stalin"
+          },
+          "derived": false,
+          "type": {
+            "ordinal": false,
+            "class": "categorical",
+            "categories": [
+              {
+                "numeric_value": 0,
+                "missing": false,
+                "id": 0,
+                "name": "The right amount"
+              },
+              {
+                "numeric_value": 1,
+                "missing": false,
+                "id": 1,
+                "name": "Too much"
+              },
+              {
+                "numeric_value": 4,
+                "missing": false,
+                "id": 4,
+                "name": "Not sure"
+              },
+              {
+                "numeric_value": 5,
+                "missing": false,
+                "id": 5,
+                "name": "Too little"
+              },
+              {
+                "numeric_value": 32766,
+                "missing": true,
+                "id": 32766,
+                "name": "skipped"
+              },
+              {
+                "numeric_value": 32767,
+                "missing": true,
+                "id": 32767,
+                "name": "not asked"
+              },
+              {
+                "numeric_value": null,
+                "missing": true,
+                "id": -1,
+                "name": "No Data"
+              }
+            ]
+          }
+        }
+      ],
+      "missing": 13,
+      "measures": {
+        "count": {
+          "data": [
+            426,
+            841,
+            270,
+            112,
+            13,
+            0,
+            0
+          ],
+          "n_missing": 13,
+          "metadata": {
+            "references": {},
+            "derived": true,
+            "type": {
+              "integer": true,
+              "missing_rules": {},
+              "missing_reasons": {
+                "No Data": -1
+              },
+              "class": "numeric"
+            }
+          }
+        }
+      },
+      "n": 1662,
+      "filter_stats": {
+        "filtered_complete": {
+          "unweighted": {
+            "selected": 1662,
+            "other": 0,
+            "missing": 0
+          },
+          "weighted": {
+            "selected": 1662,
+            "other": 0,
+            "missing": 0
+          }
+        },
+        "filtered": {
+          "unweighted": {
+            "selected": 1662,
+            "other": 0,
+            "missing": 0
+          },
+          "weighted": {
+            "selected": 1662,
+            "other": 0,
+            "missing": 0
+          }
+        }
+      },
+      "unfiltered": {
+        "unweighted_n": 1662,
+        "weighted_n": 1662
+      },
+      "filtered": {
+        "unweighted_n": 1662,
+        "weighted_n": 1662
+      },
+      "counts": [
+        426,
+        841,
+        270,
+        112,
+        13,
+        0,
+        0
+      ],
+      "element": "crunch:cube"
+    }
+  }
+}

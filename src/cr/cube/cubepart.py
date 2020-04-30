@@ -576,6 +576,7 @@ class _Slice(CubePartition):
     def _transforms_dict(self):
         """dict containing all transforms for this slice, provided as `transforms` arg.
 
+
         This value is an empty dict (`{}`) when no transforms were specified on
         construction.
         """
@@ -786,7 +787,7 @@ class _Strand(CubePartition):
     @lazyproperty
     def _counts_as_array(self):
         """1D ndarray of count for each row."""
-        return np.array([row.count for row in self._stripe.rows])
+        return np.array([row.count for row in self._stripe.rows_before_hiding])
 
     @lazyproperty
     def _dimensions(self):
@@ -800,7 +801,7 @@ class _Strand(CubePartition):
         The items in the array can be numeric or np.nan, which appears for an inserted
         row (subtotal) or where the row-element has been assigned no numeric value.
         """
-        return np.array([row.numeric_value for row in self._stripe.rows])
+        return np.array([row.numeric_value for row in self._stripe.rows_before_hiding])
 
     @lazyproperty
     def _numeric_values_mask(self):

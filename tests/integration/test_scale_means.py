@@ -126,6 +126,18 @@ def test_univariate_cat():
     np.testing.assert_almost_equal(strand.scale_mean, [2.6865854])
 
 
+def test_univariate_cat_with_hiding():
+    strand_ = Cube(SM.BOLSHEVIK_HAIR).partitions[0]
+    np.testing.assert_almost_equal(strand_.scale_mean, [1.504548211])
+
+    # Appling hiding transforms
+    transforms = {
+        "rows_dimension": {"elements": {"5": {"hide": True}, "4": {"hide": True}}}
+    }
+    strand_with_hiding_ = Cube(SM.BOLSHEVIK_HAIR, transforms=transforms).partitions[0]
+    np.testing.assert_almost_equal(strand_.scale_mean, strand_with_hiding_.scale_mean)
+
+
 def test_cat_x_cat_with_hs():
     # Test without H&S
     transforms = {
