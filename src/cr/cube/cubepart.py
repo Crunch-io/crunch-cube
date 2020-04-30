@@ -101,6 +101,13 @@ class CubePartition(object):
         """str representing the name of the superheading variable."""
         return self._dimensions[0 if self.ndim < 2 else 1].name
 
+    @lazyproperty
+    def _dimensions(self):
+        """tuple of Dimension object for each dimension in cube-partition."""
+        raise NotImplementedError(
+            "must be implemented by each subclass"
+        )  # pragma: no cover
+
 
 class _Slice(CubePartition):
     """2D cube partition.
@@ -626,7 +633,6 @@ class _Strand(CubePartition):
         self._transforms_arg = transforms
         self._population = population
         self._ca_as_0th = ca_as_0th
-        # TODO: see if we really need this.
         self._slice_idx = slice_idx
         self._mask_size = mask_size
 

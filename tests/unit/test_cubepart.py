@@ -7,9 +7,56 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 import pytest
 
-from cr.cube.cubepart import _Slice, _Strand, _Nub
+from cr.cube.cube import Cube
+from cr.cube.cubepart import CubePartition, _Slice, _Strand, _Nub
 from cr.cube.matrix import TransformedMatrix, _VectorAfterHiding
-from ..unitutil import instance_mock, property_mock
+from ..unitutil import class_mock, instance_mock, property_mock
+
+
+class DescribeCubePartition(object):
+    """Unit test suite for `cr.cube.cubepart.CubePartition` object."""
+
+    def it_constructs_a_slice_with_its_factory_for_a_2D_cube(self, request, cube_):
+        cube_.ndim = 2
+        _Slice_ = class_mock(request, "cr.cube.cubepart._Slice")
+
+        slice_ = CubePartition.factory(cube_, 42, {"trans": "forms"}, 1000, False, 10)
+
+        _Slice_.assert_called_once_with(cube_, 42, {"trans": "forms"}, 1000, 10)
+        assert slice_ is _Slice_.return_value
+
+    def but_it_constructs_a_strand_for_a_2D_cube_when_ca_as_0th(self, request, cube_):
+        cube_.ndim = 2
+        _Strand_ = class_mock(request, "cr.cube.cubepart._Strand")
+
+        strand = CubePartition.factory(cube_, 0, ca_as_0th=True)
+
+        _Strand_.assert_called_once_with(cube_, None, None, True, 0, 0)
+        assert strand is _Strand_.return_value
+
+    def and_it_constructs_a_strand_for_a_1D_cube(self, request, cube_):
+        cube_.ndim = 1
+        _Strand_ = class_mock(request, "cr.cube.cubepart._Strand")
+
+        strand = CubePartition.factory(cube_, 42, {"trans": "forms"}, 1000, False, 10)
+
+        _Strand_.assert_called_once_with(cube_, {"trans": "forms"}, 1000, False, 42, 10)
+        assert strand is _Strand_.return_value
+
+    def and_it_constructs_a_nub_for_a_0D_cube(self, request, cube_):
+        cube_.ndim = 0
+        _Nub_ = class_mock(request, "cr.cube.cubepart._Nub")
+
+        nub = CubePartition.factory(cube_)
+
+        _Nub_.assert_called_once_with(cube_)
+        assert nub is _Nub_.return_value
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def cube_(self, request):
+        return instance_mock(request, Cube)
 
 
 class Describe_Slice(object):
@@ -50,6 +97,15 @@ class Describe_Slice(object):
 
         np.testing.assert_almost_equal(rows_margin, [[1, 2], [3, 4]])
 
+    # fixtures ---------------------------------------------
+
+    @pytest.fixture(
+        params=[((1,), False), ((0,), True), ((7, 6), False), ((0, 0), True)]
+    )
+    def slice_is_empty_fixture(self, request):
+        slice_shape, expected_value = request.param
+        return slice_shape, expected_value
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -63,15 +119,6 @@ class Describe_Slice(object):
     @pytest.fixture
     def _slice_prop_(self, request):
         return property_mock(request, _Slice, "shape")
-
-    # fixtures ---------------------------------------------
-
-    @pytest.fixture(
-        params=[((1,), False), ((0,), True), ((7, 6), False), ((0, 0), True)]
-    )
-    def slice_is_empty_fixture(self, request):
-        slice_shape, expected_value = request.param
-        return slice_shape, expected_value
 
 
 class Describe_Strand(object):
