@@ -1389,6 +1389,17 @@ class _OrderedVector(_BaseTransformationVector):
         return self._base_vector.label
 
     @lazyproperty
+    def margin(self):
+        """ -> np.array of base_vector margins
+
+        If the base_vector base is a numpy array it must return itself with the correct
+        order of the elements
+        """
+        if isinstance(self._base_vector.margin, np.ndarray):
+            return self._base_vector.margin[self._opposing_order]
+        return self._base_vector.margin
+
+    @lazyproperty
     def ordering(self):
         """ -> (position, index, self) tuple used for interleaving with insertions.
 
@@ -1403,17 +1414,6 @@ class _OrderedVector(_BaseTransformationVector):
     @lazyproperty
     def values(self):
         return self._base_vector.values[self._opposing_order]
-
-    @lazyproperty
-    def margin(self):
-        """ -> np.array of base_vector margins
-
-        If the base_vector base is a numpy array it must return itself with the correct
-        order of the elements
-        """
-        if isinstance(self._base_vector.margin, np.ndarray):
-            return self._base_vector.margin[self._opposing_order]
-        return self._base_vector.margin
 
     @lazyproperty
     def zscore(self):
