@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.11.17
+- Fix incorrect means values after hiding
+
 #### 1.11.16
 - New base for t_stats overlaps
 
