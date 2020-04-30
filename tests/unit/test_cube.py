@@ -285,6 +285,43 @@ class DescribeCube(object):
 
         assert cube_repr.startswith("<cr.cube.cube.Cube object at 0x")
 
+    def it_can_inflate_itself(self, request):
+        cube = Cube(
+            {"result": {"dimensions": [{"other": "dim"}]}},
+            transforms={"trans": "forms"},
+            first_cube_of_tab=False,
+            population=1000,
+            mask_size=10,
+        )
+        # --- mock Cube only *after* constructing cube-under-test; we only want the mock
+        # --- to intercept the *second* call
+        inflated_cube_ = instance_mock(request, Cube)
+        Cube_ = class_mock(request, "cr.cube.cube.Cube", return_value=inflated_cube_)
+
+        inflated_cube = cube.inflate()
+
+        Cube_.assert_called_once_with(
+            {
+                "result": {
+                    "dimensions": [
+                        {
+                            "references": {"alias": "mean", "name": "mean"},
+                            "type": {
+                                "class": "categorical",
+                                "categories": [{"id": 1, "name": "Mean"}],
+                            },
+                        },
+                        {"other": "dim"},
+                    ]
+                }
+            },
+            {"trans": "forms"},
+            False,
+            1000,
+            10,
+        )
+        assert inflated_cube is inflated_cube_
+
     @pytest.mark.parametrize(
         ("dim_types", "aliases", "expected_value"),
         (

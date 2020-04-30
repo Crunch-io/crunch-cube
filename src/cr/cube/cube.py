@@ -273,10 +273,7 @@ class Cube(object):
         dimensions = cube_dict["result"]["dimensions"]
         rows_dimension = {
             "references": {"alias": "mean", "name": "mean"},
-            "type": {
-                "categories": [{"id": 1, "missing": False, "name": "Mean"}],
-                "class": "categorical",
-            },
+            "type": {"categories": [{"id": 1, "name": "Mean"}], "class": "categorical"},
         }
         dimensions.insert(0, rows_dimension)
         return Cube(
