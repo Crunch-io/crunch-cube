@@ -198,7 +198,7 @@ class DescribeIntegrated_Measures(object):
         assert slice_.scale_mean is None
 
     def it_provides_access_to_table_name_when_it_is_ca_as_0th(self):
-        slice_ = Cube(CR.CA_AS_0TH, first_cube_of_tab=True).partitions[0]
+        slice_ = Cube(CR.CA_AS_0TH, cube_idx=0).partitions[0]
         assert slice_.table_name == "Level of interest: ATP Men's Tennis"
 
     def it_knows_unweighted_bases(self):
@@ -2063,10 +2063,7 @@ class TestCrunchCubeAs_Slice(object):
             "rows_dimension": {"insertions": {}},
         }
         slice_ = Cube(
-            CR.CA_AS_0TH,
-            transforms=transforms,
-            first_cube_of_tab=True,
-            population=100000000,
+            CR.CA_AS_0TH, cube_idx=0, transforms=transforms, population=100000000
         ).partitions[0]
 
         population_counts = slice_.population_counts

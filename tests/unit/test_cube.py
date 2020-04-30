@@ -185,22 +185,22 @@ class DescribeCubeSet(object):
         assert Cube_.call_args_list == [
             call(
                 {"cube": "resp-1"},
-                {"xfrms": 1},
-                first_cube_of_tab=True,
+                cube_idx=0,
+                transforms={"xfrms": 1},
                 population=1000,
                 mask_size=10,
             ),
             call(
                 {"cube": "resp-2"},
-                {"xfrms": 2},
-                first_cube_of_tab=False,
+                cube_idx=1,
+                transforms={"xfrms": 2},
                 population=1000,
                 mask_size=10,
             ),
             call(
                 {"cube": "resp-3"},
-                {"xfrms": 3},
-                first_cube_of_tab=False,
+                cube_idx=2,
+                transforms={"xfrms": 3},
                 population=1000,
                 mask_size=10,
             ),
@@ -226,22 +226,22 @@ class DescribeCubeSet(object):
         assert Cube_.call_args_list == [
             call(
                 {"cube": "resp-1"},
-                {"xfrms": 1},
-                first_cube_of_tab=True,
+                cube_idx=0,
+                transforms={"xfrms": 1},
                 population=1000,
                 mask_size=10,
             ),
             call(
                 {"cube": "resp-2"},
-                {"xfrms": 2},
-                first_cube_of_tab=False,
+                cube_idx=1,
+                transforms={"xfrms": 2},
                 population=1000,
                 mask_size=10,
             ),
             call(
                 {"cube": "resp-3"},
-                {"xfrms": 3},
-                first_cube_of_tab=False,
+                cube_idx=2,
+                transforms={"xfrms": 3},
                 population=1000,
                 mask_size=10,
             ),
@@ -279,7 +279,7 @@ class DescribeCube(object):
         self, dimension_types_prop_
     ):
         dimension_types_prop_.return_value = [1, 2, 3]
-        cube = Cube(None, None, None, None)
+        cube = Cube(None)
 
         cube_repr = cube.__repr__()
 
@@ -288,8 +288,8 @@ class DescribeCube(object):
     def it_can_inflate_itself(self, request):
         cube = Cube(
             {"result": {"dimensions": [{"other": "dim"}]}},
+            cube_idx=1,
             transforms={"trans": "forms"},
-            first_cube_of_tab=False,
             population=1000,
             mask_size=10,
         )
@@ -315,12 +315,18 @@ class DescribeCube(object):
                     ]
                 }
             },
+            1,
             {"trans": "forms"},
-            False,
             1000,
             10,
         )
         assert inflated_cube is inflated_cube_
+
+    @pytest.mark.parametrize(
+        ("cube_idx_arg", "expected_value"), ((None, 0), (0, 0), (1, 1), (42, 42))
+    )
+    def it_knows_its_index_within_its_cube_set(self, cube_idx_arg, expected_value):
+        assert Cube(None, cube_idx_arg).cube_index == expected_value
 
     @pytest.mark.parametrize(
         ("dim_types", "aliases", "expected_value"),

@@ -174,8 +174,8 @@ class CubeSet(object):
         for idx, cube_response in enumerate(self._cube_responses):
             cube = Cube(
                 cube_response,
-                self._transforms_dicts[idx],
-                first_cube_of_tab=(self._is_multi_cube and idx == 0),
+                cube_idx=idx if self._is_multi_cube else None,
+                transforms=self._transforms_dicts[idx],
                 population=self._population,
                 mask_size=self._min_base,
             )
@@ -188,19 +188,17 @@ class Cube(object):
     """Provides access to individual slices on a cube-result.
 
     It also provides some attributes of the overall cube-result.
+
+    `cube_idx` must be `None` (or omitted) for a single-cube CubeSet. This indicates the
+    CubeSet contains only a single cube and influences behaviors like CA-as-0th.
     """
 
     def __init__(
-        self,
-        response,
-        transforms=None,
-        first_cube_of_tab=False,
-        population=None,
-        mask_size=0,
+        self, response, cube_idx=None, transforms=None, population=None, mask_size=0
     ):
         self._cube_response_arg = response
         self._transforms_dict = {} if transforms is None else transforms
-        self._first_cube_of_tab = first_cube_of_tab
+        self._cube_idx_arg = cube_idx
         self._population = 0 if population is None else population
         self._mask_size = mask_size
 
@@ -232,6 +230,11 @@ class Cube(object):
     @lazyproperty
     def counts_with_missings(self):
         return self._measure(self.is_weighted).raw_cube_array
+
+    @lazyproperty
+    def cube_index(self):
+        """Offset of this cube within its CubeSet."""
+        return 0 if self._cube_idx_arg is None else self._cube_idx_arg
 
     @lazyproperty
     def description(self):
@@ -278,8 +281,8 @@ class Cube(object):
         dimensions.insert(0, rows_dimension)
         return Cube(
             cube_dict,
+            self._cube_idx_arg,
             self._transforms_dict,
-            self._first_cube_of_tab,
             self._population,
             self._mask_size,
         )
@@ -370,7 +373,7 @@ class Cube(object):
         a 2D cube-result becomes a single slice.
         """
         return (
-            self._first_cube_of_tab
+            self._cube_idx_arg == 0
             and len(self.dimension_types) > 0
             and self.dimension_types[0] == DT.CA
         )
