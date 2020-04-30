@@ -289,17 +289,13 @@ class Cube(object):
 
     @lazyproperty
     def is_mr_by_itself(self):
-        """It identify if the cube contains MRxItself as last 2 dimensions.
-
-        If the last 2 dimensions in cube (ndim>=3) are MR and they have
-        the same alias returns True
-        """
+        """True if the cube contains MRxItself as last 2 dimensions."""
         return (
-            # ---there are at least three dimensions---
+            # --- there are at least three dimensions ---
             self.ndim >= 3
-            # ---the last two are both MR---
+            # --- the last two are both MR ---
             and all(dim_type == DT.MR for dim_type in self.dimension_types[-2:])
-            # ---and they both have the same alias---
+            # --- and they both have the same alias ---
             and len(set([dimension.alias for dimension in self.dimensions[-2:]])) == 1
         )
 

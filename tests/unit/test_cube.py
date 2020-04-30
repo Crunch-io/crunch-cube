@@ -10,7 +10,7 @@ import numpy as np
 from cr.cube.cube import Cube, CubeSet, _Measures
 from cr.cube.cubepart import _Slice, _Strand, _Nub
 from cr.cube.enum import DIMENSION_TYPE as DT
-from cr.cube.dimension import _ApparentDimensions, Dimension
+from cr.cube.dimension import Dimension
 
 from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
 from ..unitutil import call, class_mock, instance_mock, property_mock, method_mock
@@ -280,111 +280,74 @@ class DescribeCube(object):
     ):
         dimension_types_prop_.return_value = [1, 2, 3]
         cube = Cube(None, None, None, None)
+
         cube_repr = cube.__repr__()
+
         assert cube_repr.startswith("<cr.cube.cube.Cube object at 0x")
 
-    def it_provides_access_to_the_cube_response_dict_to_help(self):
-        cube = Cube({"cube": "dict"})
-        cube_dict = cube._cube_dict
-        assert cube_dict == {"cube": "dict"}
-
-    def and_it_accepts_a_JSON_format_cube_response(self, cube_response_type_fixture):
-        cube_response, expected_value = cube_response_type_fixture
-        cube = Cube(cube_response)
-
-        cube_dict = cube._cube_dict
-
-        assert cube_dict == expected_value
-
-    def but_it_raises_on_other_cube_response_types(
-        self, wrong_cube_response_type_fixtures
-    ):
-        cube_response, expected_value = wrong_cube_response_type_fixtures
-        cube = Cube(cube_response)
-        with pytest.raises(TypeError) as e:
-            cube._cube_dict
-
-        exception = e.value
-
-        assert str(exception) == expected_value
-
+    @pytest.mark.parametrize(
+        ("dim_types", "aliases", "expected_value"),
+        (
+            ((), (), False),
+            ((DT.MR,), ("alias",), False),
+            ((DT.MR, DT.MR), ("alias", "alias"), False),
+            ((DT.MR, DT.CAT, DT.CAT), ("alias1", "alias2", "alias2"), False),
+            ((DT.CAT, DT.MR, DT.MR), ("alias1", "alias2", "alias3"), False),
+            ((DT.CAT, DT.MR, DT.MR), ("alias1", "alias2", "alias2"), True),
+        ),
+    )
     def it_knows_if_it_is_mr_by_itself(
-        self,
-        request,
-        cube_dimensions_fixture,
-        dimension_types_prop_,
-        cube_dimensions_prop_,
+        self, request, dim_types, aliases, expected_value, dimension_types_prop_
     ):
-        dimension_types, aliases, expected_value = cube_dimensions_fixture
-        cube = Cube(None, None, None, None)
-        all_dimensions_ = tuple(
-            instance_mock(
-                request,
-                Dimension,
-                name="dim-%d" % idx,
-                dimension_type=dt,
-                alias=aliases[idx],
-            )
-            for idx, dt in enumerate(dimension_types)
+        property_mock(request, Cube, "ndim", return_value=len(dim_types))
+        dimension_types_prop_.return_value = dim_types
+        property_mock(
+            request,
+            Cube,
+            "dimensions",
+            return_value=[
+                instance_mock(request, Dimension, alias=aliases[i])
+                for i, _ in enumerate(dim_types)
+            ],
         )
-        apparent_dimensions = _ApparentDimensions(all_dimensions_)
-        dimensions = apparent_dimensions._dimensions
-        dimension_types_prop_.return_value = dimension_types
-        cube_dimensions_prop_.return_value = dimensions
+        cube = Cube(None, None, None, None)
 
         is_mr_by_itself = cube.is_mr_by_itself
 
         assert is_mr_by_itself is expected_value
 
-    # fixtures ---------------------------------------------
+    def it_provides_access_to_the_cube_response_dict_to_help(self):
+        assert Cube({"cube": "dict"})._cube_dict == {"cube": "dict"}
 
-    @pytest.fixture(
-        params=[
-            ((DT.CAT, DT.MR), ("alias1", "alias2"), False),
-            ((DT.CAT, DT.MR, DT.MR), ("alias1", "alias2", "alias2"), True),
-            ((DT.CAT, DT.MR, DT.MR), ("alias1", "alias2", "alias3"), False),
-            ((DT.CAT, DT.TEXT, DT.TEXT), ("alias1", "alias2", "alias2"), False),
-        ]
+    @pytest.mark.parametrize(
+        ("cube_response", "expected_value"),
+        ((CR.CAT_X_CAT, CR.CAT_X_CAT), ({"value": "val"}, "val")),
     )
-    def cube_dimensions_fixture(self, request):
-        dimension_types, aliases, expected_value = request.param
-        return dimension_types, aliases, expected_value
+    def and_it_accepts_a_JSON_format_cube_response(self, cube_response, expected_value):
+        assert Cube(cube_response)._cube_dict == expected_value
 
-    @pytest.fixture(
-        params=[
-            (CR.CAT_X_CAT, CR.CAT_X_CAT.get("value", CR.CAT_X_CAT)),
-            ({"value": "val"}, "val"),
-        ]
-    )
-    def cube_response_type_fixture(self, request):
-        cube_response, expected_value = request.param
-        return cube_response, expected_value
-
-    @pytest.fixture(
-        params=[
+    @pytest.mark.parametrize(
+        ("cube_response", "expected_value"),
+        (
             (
                 None,
-                "Unsupported type <NoneType> provided. Cube response must be JSON (str) or dict.",
+                "Unsupported type <NoneType> provided. Cube response must be JSON "
+                "(str) or dict.",
             ),
             (
                 0,
-                "Unsupported type <int> provided. Cube response must be JSON (str) or dict.",
+                "Unsupported type <int> provided. Cube response must be JSON (str) or "
+                "dict.",
             ),
-        ]
+        ),
     )
-    def wrong_cube_response_type_fixtures(self, request):
-        cube_response, expected_value = request.param
-        return cube_response, expected_value
+    def but_it_raises_on_other_cube_response_types(self, cube_response, expected_value):
+        with pytest.raises(TypeError) as e:
+            Cube(cube_response)._cube_dict
+
+        assert str(e.value) == expected_value
 
     # fixture components ---------------------------------------------
-
-    @pytest.fixture
-    def cube_(self, request):
-        return instance_mock(request, Cube)
-
-    @pytest.fixture
-    def cube_dimensions_prop_(self, request):
-        return property_mock(request, Cube, "dimensions")
 
     @pytest.fixture
     def dimension_types_prop_(self, request):
