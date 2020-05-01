@@ -15,24 +15,35 @@ from cr.cube.cube import (
     _UnweightedCountMeasure,
     _WeightedCountMeasure,
 )
+from cr.cube.dimension import _ApparentDimensions
 from cr.cube.enum import DIMENSION_TYPE as DT
 
 from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
 
 
-class DescribeIntegratedCubeAs_Slice(object):
-    def it_provides_a_console_friendly_repr_for_a_cube(self):
-        cube = Cube(CR.CAT_X_CAT)
-        repr_ = repr(cube)
-        assert repr_ == "Cube(name='v4', dimension_types='CAT x CAT')"
+class DescribeIntegratedCube(object):
+    """Integration-test suite for `cr.cube.cube.Cube` object."""
 
-    def it_provides_description(self):
+    def it_provides_values_for_cat_x_cat(self):
         cube = Cube(CR.CAT_X_CAT)
+
+        assert cube.__repr__() == "Cube(name='v4', dimension_types='CAT x CAT')"
+        np.testing.assert_equal(cube.base_counts, [[5, 2], [5, 3]])
+        np.testing.assert_equal(cube.counts, [[5, 2], [5, 3]])
+        np.testing.assert_equal(
+            cube.counts_with_missings, [[5, 3, 2, 0], [5, 2, 3, 0], [0, 0, 0, 0]]
+        )
+        assert cube.cube_index == 0
         assert cube.description == ""
-
-    def it_knows_if_it_is_weighted(self):
-        cube = Cube(CR.CAT_X_CAT)
+        assert cube.dimension_types == (DT.CAT, DT.CAT)
+        assert isinstance(cube.dimensions, _ApparentDimensions)
+        assert cube.has_means is False
+        assert cube.is_mr_by_itself is False
         assert cube.is_weighted is False
+        assert cube.missing == 5
+        assert cube.name == "v4"
+        assert cube.ndim == 2
+        assert cube.population_fraction == 1.0
 
     def it_provides_access_to_its_dimensions(self, dimensions_fixture):
         cube_response, expected_dimension_types = dimensions_fixture
@@ -83,18 +94,6 @@ class DescribeIntegratedCubeAs_Slice(object):
                 ]
             ),
         )
-
-    def it_knows_its_columns_dimension_is_its_variable_name(self):
-        slice_ = Cube(CR.CAT_X_CAT).partitions[0]
-        assert slice_.variable_name == "v7"
-
-    def it_knows_its_only_dimension_is_its_variable_name(self):
-        slice_ = Cube(CR.UNIVARIATE_CATEGORICAL).partitions[0]
-        assert slice_.variable_name == "v7"
-
-    def it_knows_its_description(self):
-        slice_ = Cube(CR.CAT_X_CAT).partitions[0]
-        assert slice_.description == ""
 
     # fixtures -------------------------------------------------------
 
@@ -1416,11 +1415,10 @@ class TestCrunchCubeAs_Slice(object):
     def test_total_unweighted_margin_when_has_means(self):
         """Tests that total margin is Unweighted N, when cube has means."""
         strand = Cube(CR.CAT_MEAN_WGTD).partitions[0]
-        # TODO: Fix after base is implemented for means partitions
         assert len(strand.means) == 6367
         assert strand.table_margin == 17615
         assert strand.ndim == 1
-        assert strand._shape == (6367,)
+        assert strand.shape == (6367,)
 
     def test_1D_means_pruned(self):
         """Tests that total margin is Unweighted N, when cube has means."""

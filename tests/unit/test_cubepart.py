@@ -52,6 +52,10 @@ class DescribeCubePartition(object):
         _Nub_.assert_called_once_with(cube_)
         assert nub is _Nub_.return_value
 
+    def it_knows_if_cube_is_mr_by_itself(self):
+        # --- default of False is overridden by subclasses when appropriate ---
+        assert CubePartition(None).cube_is_mr_by_itself is False
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -62,9 +66,12 @@ class DescribeCubePartition(object):
 class Describe_Slice(object):
     """Unit test suite for `cr.cube.cubepart._Slice` object."""
 
-    def it_knows_its_data_status(self, _slice_prop_, slice_is_empty_fixture):
-        slice_shape, expected_value = slice_is_empty_fixture
-        _slice_prop_.return_value = slice_shape
+    @pytest.mark.parametrize(
+        ("shape", "expected_value"),
+        (((4, 2), False), ((4, 0), True), ((0, 2), True), ((0, 0), True)),
+    )
+    def it_knows_whether_it_is_empty(self, shape, expected_value, shape_prop_):
+        shape_prop_.return_value = shape
         slice_ = _Slice(None, None, None, None, None)
 
         is_empty = slice_.is_empty
@@ -97,61 +104,38 @@ class Describe_Slice(object):
 
         np.testing.assert_almost_equal(rows_margin, [[1, 2], [3, 4]])
 
-    # fixtures ---------------------------------------------
-
-    @pytest.fixture(
-        params=[((1,), False), ((0,), True), ((7, 6), False), ((0, 0), True)]
-    )
-    def slice_is_empty_fixture(self, request):
-        slice_shape, expected_value = request.param
-        return slice_shape, expected_value
-
     # fixture components ---------------------------------------------
-
-    @pytest.fixture
-    def _matrix_prop_(self, request):
-        return property_mock(request, _Slice, "_matrix")
 
     @pytest.fixture
     def matrix_(self, request):
         return instance_mock(request, TransformedMatrix)
 
     @pytest.fixture
-    def _slice_prop_(self, request):
+    def _matrix_prop_(self, request):
+        return property_mock(request, _Slice, "_matrix")
+
+    @pytest.fixture
+    def shape_prop_(self, request):
         return property_mock(request, _Slice, "shape")
 
 
 class Describe_Strand(object):
     """Unit test suite for `cr.cube.cubepart._Strand` object."""
 
-    def it_knows_its_data_status(self, _strand_prop_, strand_is_empty_fixture):
-        strand_shape, expected_value = strand_is_empty_fixture
-        _strand_prop_.return_value = strand_shape
-        strand_ = _Strand(None, None, None, None, None, None)
+    @pytest.mark.parametrize(("shape", "expected_value"), (((1,), False), ((0,), True)))
+    def it_knows_whether_it_is_empty(self, shape, expected_value, shape_prop_):
+        shape_prop_.return_value = shape
+        strand = _Strand(None, None, None, None, None, None)
 
-        is_empty = strand_.is_empty
+        is_empty = strand.is_empty
 
         assert is_empty is expected_value
-
-    def it_knows_if_cube_is_mr_by_itself(self):
-        strand_ = _Strand(None, None, None, None, None, None)
-
-        assert strand_.cube_is_mr_by_itself is False
 
     # fixture components ---------------------------------------------
 
     @pytest.fixture
-    def _strand_prop_(self, request):
-        return property_mock(request, _Strand, "_shape")
-
-    # fixtures ---------------------------------------------
-
-    @pytest.fixture(
-        params=[((1,), False), ((0,), True), ((7, 6), False), ((0, 0), True)]
-    )
-    def strand_is_empty_fixture(self, request):
-        slice_shape, expected_value = request.param
-        return slice_shape, expected_value
+    def shape_prop_(self, request):
+        return property_mock(request, _Strand, "shape")
 
 
 class Describe_Nub(object):
