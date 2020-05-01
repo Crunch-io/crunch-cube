@@ -801,11 +801,74 @@ class Describe_ValidElements(object):
 
         assert elements == (elements_[0], elements_[2])
 
+    def it_knows_its_display_order(self, request, all_elements_, display_order_fixture):
+        explicit_order, expected_value = display_order_fixture
+        _explicit_order_ = property_mock(request, _ValidElements, "_explicit_order")
+        elements_ = tuple(
+            instance_mock(request, _Element, missing=False) for _ in range(3)
+        )
+        all_elements_.__iter__.return_value = iter(elements_)
+        valid_elements = _ValidElements(all_elements_, None)
+        _explicit_order_.return_value = explicit_order
+
+        display_order = valid_elements.display_order
+
+        assert display_order == expected_value
+
+    def it_returns_the_correct_explicit_order(
+        self, all_elements_, explicit_order_fixture
+    ):
+        element_transform_dict, expected_value = explicit_order_fixture
+        elements_ = tuple(
+            _Element({"id": idx + 1}, None, None, None) for idx in range(3)
+        )
+        all_elements_.__iter__.return_value = iter(elements_)
+        valid_elements = _ValidElements(all_elements_, element_transform_dict)
+
+        _explicit_order_ = valid_elements._explicit_order
+
+        assert _explicit_order_ == expected_value
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture(
+        params=[
+            ([True, False, False], 2),
+            ([True, True, True], 0),
+            ([False, False, False], 3),
+            ([False, True, True], 1),
+        ]
+    )
+    def visible_elements_fixture(self, request):
+        element_transforms_hide, expected_value = request.param
+        return element_transforms_hide, expected_value
+
+    @pytest.fixture(
+        params=[
+            ({}, None),
+            ({"order": {"element_ids": [1, 3, 2], "type": "explicit"}}, (0, 2, 1)),
+            ({"order": {"element_ids": [-1, 3, 2], "type": "explicit"}}, (2, 1, 0)),
+            ({"order": {"element_ids": [1, 2, 3], "type": "explicit"}}, (0, 1, 2)),
+        ]
+    )
+    def explicit_order_fixture(self, request):
+        element_transform_dict, expected_value = request.param
+        return element_transform_dict, expected_value
+
+    @pytest.fixture(params=[(None, (0, 1, 2)), ((1, 0, 4, 3), (1, 0, 4, 3))])
+    def display_order_fixture(self, request):
+        explicit_order, expected_value = request.param
+        return explicit_order, expected_value
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
     def all_elements_(self, request):
         return instance_mock(request, _AllElements)
+
+    @pytest.fixture
+    def element_transforms_(self, request):
+        return instance_mock(request, _ElementTransforms)
 
 
 class Describe_Element(object):

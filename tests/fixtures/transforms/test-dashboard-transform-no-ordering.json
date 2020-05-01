@@ -1,0 +1,88 @@
+{
+  "columns_dimension": {
+    "elements": {
+      "1": {
+        "hide": true
+      },
+      "3": {
+        "hide": true
+      },
+      "2": {
+        "hide": true
+      },
+      "4": {
+        "hide": true
+      }
+    }
+  },
+  "rows_dimension": {
+    "elements": {
+      "20": {
+        "hide": true
+      },
+      "21": {
+        "hide": true
+      },
+      "22": {
+        "hide": true
+      },
+      "23": {
+        "hide": true
+      },
+      "1": {
+        "hide": true
+      },
+      "3": {
+        "hide": true
+      },
+      "5": {
+        "hide": true
+      },
+      "4": {
+        "hide": true
+      },
+      "7": {
+        "hide": true
+      },
+      "6": {
+        "hide": true
+      },
+      "9": {
+        "hide": true
+      },
+      "8": {
+        "hide": true
+      },
+      "11": {
+        "hide": true
+      },
+      "10": {
+        "hide": true
+      },
+      "13": {
+        "hide": true
+      },
+      "12": {
+        "hide": true
+      },
+      "15": {
+        "hide": true
+      },
+      "14": {
+        "hide": true
+      },
+      "17": {
+        "hide": true
+      },
+      "16": {
+        "hide": true
+      },
+      "19": {
+        "hide": true
+      },
+      "18": {
+        "hide": true
+      }
+    }
+  }
+}

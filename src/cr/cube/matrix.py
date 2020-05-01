@@ -1367,6 +1367,13 @@ class _OrderedVector(_BaseTransformationVector):
 
     @lazyproperty
     def base(self):
+        """ -> np.array of base_vector base N
+
+        If the base_vector base is a numpy array it must return itself with the correct
+        order of the elements
+        """
+        if isinstance(self._base_vector.base, np.ndarray):
+            return self._base_vector.base[self._opposing_order]
         return self._base_vector.base
 
     @lazyproperty
@@ -1380,6 +1387,17 @@ class _OrderedVector(_BaseTransformationVector):
     @lazyproperty
     def label(self):
         return self._base_vector.label
+
+    @lazyproperty
+    def margin(self):
+        """ -> np.array of base_vector margins
+
+        If the base_vector base is a numpy array it must return itself with the correct
+        order of the elements
+        """
+        if isinstance(self._base_vector.margin, np.ndarray):
+            return self._base_vector.margin[self._opposing_order]
+        return self._base_vector.margin
 
     @lazyproperty
     def ordering(self):

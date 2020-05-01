@@ -7,11 +7,308 @@ from cr.cube.cubepart import CubePartition, _Slice
 from cr.cube.cube import Cube
 from cr.cube.enum import DIMENSION_TYPE as DT
 
-from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
+# ---mnemonic: CR = 'cube-response'---
+# ---mnemonic: TR = 'transforms'---
+from ..fixtures import CR, TR
 
 
 class Describe_Slice(object):
     """Integration-test suite for _Slice object."""
+
+    def it_provides_same_proportions_without_explicit_order(self):
+        transforms = TR.TEST_DASHBOARD_TRANSFORM_SINGLE_EL_VISIBLE
+        slice_ = Cube(CR.TEST_DASHBOARD_FIXTURE, transforms=transforms).partitions[0]
+
+        np.testing.assert_almost_equal(slice_.column_proportions, [[0.48313902]])
+        np.testing.assert_almost_equal(slice_.row_proportions, [[0.61110996]])
+
+        # delete the explicit order
+        transforms = TR.TEST_DASHBOARD_TRANSFORM_NO_ORDERING
+        slice_wo_explicit_order_ = Cube(
+            CR.TEST_DASHBOARD_FIXTURE, transforms=transforms
+        ).partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_wo_explicit_order_.column_proportions, [[0.48313902]]
+        )
+        np.testing.assert_almost_equal(
+            slice_wo_explicit_order_.row_proportions, [[0.61110996]]
+        )
+        np.testing.assert_almost_equal(
+            slice_.column_base, slice_wo_explicit_order_.column_base
+        )
+        np.testing.assert_almost_equal(
+            slice_.row_base, slice_wo_explicit_order_.row_base
+        )
+
+    def it_respect_proportions_with_ordering_transform_cat_x_cat(self):
+        slice_ = Cube(CR.CAT_X_CAT).partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_.column_proportions, [[0.5, 0.4], [0.5, 0.6]]
+        )
+        np.testing.assert_almost_equal(
+            slice_.row_proportions, [[0.71428571, 0.28571429], [0.625, 0.375]]
+        )
+
+        transforms = {
+            "columns_dimension": {"order": {"element_ids": [3, 1], "type": "explicit"}},
+            "rows_dimension": {"order": {"element_ids": [1, 2], "type": "explicit"}},
+        }
+        slice_with_ordering_ = Cube(CR.CAT_X_CAT, transforms=transforms).partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_with_ordering_.column_proportions, [[0.4, 0.5], [0.6, 0.5]]
+        )
+        np.testing.assert_almost_equal(
+            slice_with_ordering_.row_proportions,
+            [[0.28571429, 0.71428571], [0.375, 0.625]],
+        )
+        np.testing.assert_almost_equal(slice_.row_base, slice_with_ordering_.row_base)
+        np.testing.assert_almost_equal(
+            np.flip(slice_.column_base), slice_with_ordering_.column_base
+        )
+
+    def it_respect_proportions_with_ordering_transform_cat_x_mr(self):
+        slice_ = Cube(CR.CAT_X_MR).partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_.column_proportions,
+            [[0.3, 0.35294118, 0.31578947], [0.7, 0.64705882, 0.6842105]],
+        )
+        np.testing.assert_almost_equal(
+            slice_.row_proportions,
+            [[0.4285714, 0.48, 0.5217391], [0.5384615, 0.4074074, 0.5531915]],
+        )
+
+        transforms = {
+            "columns_dimension": {
+                "order": {"element_ids": [3, 2, 1], "type": "explicit"}
+            },
+            "rows_dimension": {"order": {"element_ids": [2, 1], "type": "explicit"}},
+        }
+        slice_with_ordering_ = Cube(CR.CAT_X_MR, transforms=transforms).partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_with_ordering_.column_proportions,
+            [[0.6842105, 0.64705882, 0.7], [0.31578947, 0.35294118, 0.3]],
+        )
+        np.testing.assert_almost_equal(
+            slice_with_ordering_.row_proportions,
+            [[0.5531915, 0.4074074, 0.5384615], [0.5217391, 0.48, 0.4285714]],
+        )
+        np.testing.assert_almost_equal(
+            np.flip(np.flip(slice_.row_base, 0), 1), slice_with_ordering_.row_base
+        )
+        np.testing.assert_almost_equal(
+            np.flip(slice_.column_base), slice_with_ordering_.column_base
+        )
+
+    def it_respect_row_proportions_with_ordering_transform_mr_x_cat(self):
+        transforms = TR.GENERIC_TRANSFORMS_DICTS["both_order_mr_x_cat"]
+        slice_ = Cube(CR.MR_X_CAT_HS, transforms=transforms).partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_.row_proportions,
+            [
+                [0.06423004, 0.25883849, 0.39673409, 0.0, 0.74116151],
+                [0.44079255, 0.63354565, 0.2344488, 0.0, 0.36645435],
+            ],
+        )
+        # remove the rows order
+        transforms_wo_row_ordering = TR.GENERIC_TRANSFORMS_DICTS[
+            "no_row_order_mr_x_cat"
+        ]
+        slice_wo_row_ordering_ = Cube(
+            CR.MR_X_CAT_HS, transforms=transforms_wo_row_ordering
+        ).partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_wo_row_ordering_.row_proportions,
+            [
+                [0.44079255, 0.63354565, 0.2344488, 0.0, 0.36645435],
+                [0.06423004, 0.25883849, 0.39673409, 0.0, 0.74116151],
+            ],
+        )
+        # asserting that the 2 slices are flipped rows due to the ordering
+        np.testing.assert_almost_equal(
+            slice_wo_row_ordering_.row_proportions[0], slice_.row_proportions[1]
+        )
+        np.testing.assert_almost_equal(
+            slice_wo_row_ordering_.row_proportions[1], slice_.row_proportions[0]
+        )
+        np.testing.assert_almost_equal(
+            slice_wo_row_ordering_.column_base, np.flip(slice_.column_base, 0)
+        )
+        np.testing.assert_almost_equal(
+            slice_wo_row_ordering_.row_base, np.flip(slice_.row_base)
+        )
+
+    def it_respect_col_proportions_with_ordering_transform_mr_x_cat(self):
+        transforms = TR.GENERIC_TRANSFORMS_DICTS["both_order_mr_x_cat"]
+        slice_ = Cube(CR.MR_X_CAT_HS, transforms=transforms).partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_.column_proportions,
+            [
+                [0.78206694, 0.81825272, 0.79964474, np.nan, 0.79162243],
+                [0.63991606, 0.36700322, 0.11791067, np.nan, 0.09519879],
+            ],
+        )
+        # remove the columns order
+        transforms_wo_col_ordering = TR.GENERIC_TRANSFORMS_DICTS[
+            "no_col_order_mr_x_cat"
+        ]
+        slice_wo_col_ordering_ = Cube(
+            CR.MR_X_CAT_HS, transforms=transforms_wo_col_ordering
+        ).partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_wo_col_ordering_.column_proportions,
+            [
+                [0.63991606, 0.36700322, 0.11791067, np.nan, 0.09519879],
+                [0.78206694, 0.81825272, 0.79964474, np.nan, 0.79162243],
+            ],
+        )
+        # asserting that the 2 slices have flipped rows due to the ordering
+        np.testing.assert_almost_equal(
+            slice_wo_col_ordering_.column_proportions[0], slice_.column_proportions[1]
+        )
+        np.testing.assert_almost_equal(
+            slice_wo_col_ordering_.column_proportions[1], slice_.column_proportions[0]
+        )
+        np.testing.assert_almost_equal(
+            slice_wo_col_ordering_.column_base, np.flip(slice_.column_base, 0)
+        )
+        np.testing.assert_almost_equal(
+            slice_wo_col_ordering_.row_base, np.flip(slice_.row_base)
+        )
+
+    def it_respect_proportions_with_ordering_transform_ca_x_cat(self):
+        transforms = TR.GENERIC_TRANSFORMS_DICTS["both_order_ca_x_cat"]
+        slice_ = Cube(CR.CA_X_CAT_HS, transforms=transforms).partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_.row_proportions,
+            [[0.33333333, 0.0, 0.0, 0.33333333, 0.33333333, 0.33333333, 0.66666667]],
+        )
+        np.testing.assert_almost_equal(
+            slice_.column_proportions, [[1.0, 0.0, 0.0, 0.33333333, 1.0, 1.0, 1.0]]
+        )
+
+        # remove the order
+        transforms_wo_ordering = TR.GENERIC_TRANSFORMS_DICTS["no_order_ca_x_cat"]
+        slice_wo_ordering_ = Cube(
+            CR.CA_X_CAT_HS, transforms=transforms_wo_ordering
+        ).partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_wo_ordering_.row_proportions,
+            [[0.0, 0.0, 0.33333333, 0.33333333, 0.33333333, 0.33333333, 0.66666667]],
+        )
+        np.testing.assert_almost_equal(
+            slice_wo_ordering_.column_proportions,
+            [[0.0, 0.0, 1.0, 0.33333333, 1.0, 1.0, 1.0]],
+        )
+
+    def it_respect_proportions_with_ordering_transform_mr_x_mr(self):
+        slice_ = Cube(CR.MR_X_MR).partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_.row_proportions,
+            [
+                [1.0, 0.28566937, 0.43456698, 1.0],
+                [0.13302403, 1.0, 0.34959546, 1.0],
+                [0.12391245, 0.23498805, 1.0, 1.0],
+                [0.22804396, 0.47751837, 0.72838875, 1.0],
+            ],
+        )
+
+        transforms = {
+            "columns_dimension": {
+                "order": {"element_ids": [2, 1, 3, 0], "type": "explicit"}
+            },
+            "rows_dimension": {
+                "order": {"element_ids": [1, 2, 3, 0], "type": "explicit"}
+            },
+        }
+        slice_with_row_ordering_ = Cube(CR.MR_X_MR, transforms=transforms).partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_with_row_ordering_.row_proportions,
+            [
+                [0.28566937, 1.0, 0.43456698, 1.0],
+                [1.0, 0.13302403, 0.34959546, 1.0],
+                [0.23498805, 0.12391245, 1.0, 1.0],
+                [0.47751837, 0.22804396, 0.72838875, 1.0],
+            ],
+        )
+        # assert that the first column is flipped
+        np.testing.assert_almost_equal(
+            slice_.row_proportions[:, 0], slice_with_row_ordering_.row_proportions[:, 1]
+        )
+        np.testing.assert_almost_equal(
+            slice_.column_base,
+            [[12, 18, 26, 44], [7, 29, 20, 45], [10, 22, 34, 53], [12, 29, 34, 61]],
+        )
+        np.testing.assert_almost_equal(
+            slice_with_row_ordering_.column_base,
+            [[18, 12, 26, 44], [29, 7, 20, 45], [22, 10, 34, 53], [29, 12, 34, 61]],
+        )
+        np.testing.assert_almost_equal(
+            slice_.row_base,
+            [[12, 7, 10, 12], [18, 29, 22, 29], [26, 20, 34, 34], [44, 45, 53, 61]],
+        )
+        np.testing.assert_almost_equal(
+            slice_with_row_ordering_.row_base,
+            [[7, 12, 10, 12], [29, 18, 22, 29], [20, 26, 34, 34], [45, 44, 53, 61]],
+        )
+
+    def it_respect_proportions_with_ordering_transform_ca_x_mr(self):
+        slice_ = Cube(CR.CA_X_MR).partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_.row_proportions,
+            [
+                [0.56722442, 0.53361631, 0.98561362, np.nan],
+                [0.46968779, 0.52205975, 0.96608066, np.nan],
+                [0.41712503, 0.45425752, 0.96050869, np.nan],
+                [0.51077015, 0.50379377, 0.98869263, np.nan],
+                [0.1512758, 0.24490666, 0.9917377, np.nan],
+            ],
+        )
+
+        transforms = {
+            "rows_dimension": {
+                "order": {"element_ids": [0, 1, 2, 5, 4], "type": "explicit"}
+            }
+        }
+        slice_with_row_ordering_ = Cube(CR.CA_X_MR, transforms=transforms).partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_with_row_ordering_.row_proportions,
+            [
+                [0.56722442, 0.53361631, 0.98561362, np.nan],
+                [0.46968779, 0.52205975, 0.96608066, np.nan],
+                [0.1512758, 0.24490666, 0.9917377, np.nan],
+                [0.51077015, 0.50379377, 0.98869263, np.nan],
+                [0.41712503, 0.45425752, 0.96050869, np.nan],
+            ],
+        )
+        # assert that columns are flipped
+        np.testing.assert_almost_equal(
+            slice_.row_proportions[4, :], slice_with_row_ordering_.row_proportions[2, :]
+        )
+        np.testing.assert_almost_equal(
+            slice_.row_proportions[2, :],
+            slice_with_row_ordering_.row_proportions[-1, :],
+        )
+        np.testing.assert_almost_equal(
+            slice_with_row_ordering_.row_base[4, :], slice_.row_base[2, :]
+        )
+        np.testing.assert_almost_equal(
+            slice_with_row_ordering_.row_base[2, :], slice_.row_base[-1, :]
+        )
 
     @pytest.mark.parametrize(
         "fixture,table_name,expected",
