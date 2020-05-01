@@ -57,6 +57,14 @@ class CubePartition(object):
         return _Slice(cube, slice_idx, transforms, population, mask_size)
 
     @lazyproperty
+    def cube_index(self):
+        """Offset of this partition's cube in its CubeSet.
+
+        Used to differentiate certain partitions like a filtered rows-summary strand.
+        """
+        return self._cube.cube_index
+
+    @lazyproperty
     def cube_is_mr_by_itself(self):
         return False
 

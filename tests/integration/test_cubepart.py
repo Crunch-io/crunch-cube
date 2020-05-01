@@ -1327,6 +1327,7 @@ class Describe_Strand(object):
         assert strand.base_counts == (10, 5)
         assert strand.bases == (15, 15)
         assert strand.counts == (10, 5)
+        assert strand.cube_index == 0
         assert strand.cube_is_mr_by_itself is False
         assert strand.dimension_types == (DT.CAT,)
         assert strand.has_means is False

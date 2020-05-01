@@ -52,6 +52,14 @@ class DescribeCubePartition(object):
         _Nub_.assert_called_once_with(cube_)
         assert nub is _Nub_.return_value
 
+    def it_knows_the_index_of_its_cube_in_the_cube_set(self, cube_):
+        cube_.cube_index = 42
+        cube_partition = CubePartition(cube_)
+
+        cube_index = cube_partition.cube_index
+
+        assert cube_index == 42
+
     def it_knows_if_cube_is_mr_by_itself(self):
         # --- default of False is overridden by subclasses when appropriate ---
         assert CubePartition(None).cube_is_mr_by_itself is False
