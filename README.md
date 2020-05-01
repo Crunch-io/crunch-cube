@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.11.18
+- Fix wrong proportions and base values when explicit order is expressed
+
 #### 1.11.17
 - Fix incorrect means values after hiding
 
