@@ -43,6 +43,7 @@
                 "derived": false,
                 "references": {
                     "alias": "v4",
+                    "description": "Pet Owners",
                     "name": "v4"
                 },
                 "type": {
@@ -146,5 +147,6 @@
         },
         "missing": 5,
         "n": 20
-    }
+    },
+    "title": "Pony Owners"
 }

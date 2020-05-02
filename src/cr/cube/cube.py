@@ -250,7 +250,7 @@ class Cube(object):
 
     @lazyproperty
     def dimensions(self):
-        """_ApparentDimension object providing access to visible dimensions.
+        """_ApparentDimensions object providing access to visible dimensions.
 
         A cube involving a multiple-response (MR) variable has two dimensions
         for that variable (subvariables and categories dimensions), but is
@@ -360,7 +360,7 @@ class Cube(object):
         use-case it is a stand-in for the columns-dimension name since a strand has no
         columns dimension.
         """
-        raise NotImplementedError
+        return self._cube_dict.get("title", "Untitled")
 
     @lazyproperty
     def _all_dimensions(self):

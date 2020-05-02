@@ -22,7 +22,7 @@ class Describe_Slice(object):
         assert slice_.columns_dimension_name == "v7"
         assert slice_.columns_dimension_type == DT.CAT
         assert slice_.cube_is_mr_by_itself is False
-        assert slice_.description == ""
+        assert slice_.description == "Pet Owners"
         np.testing.assert_almost_equal(
             slice_.row_proportions, np.array([[0.71428571, 0.28571429], [0.625, 0.375]])
         )
@@ -39,7 +39,7 @@ class Describe_Slice(object):
             ],
         )
         assert slice_.row_labels == ("B", "C")
-        assert slice_.rows_dimension_description == ""
+        assert slice_.rows_dimension_description == "Pet Owners"
         assert slice_.rows_dimension_fills == (None, None)
         assert slice_.rows_dimension_name == "v4"
         assert slice_.rows_dimension_type == DT.CAT
@@ -1321,7 +1321,6 @@ class Describe_Slice(object):
 class Describe_Strand(object):
     """Integration-test suite for `cr.cube.cubepart._Strand` object."""
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     def it_provides_values_for_univariate_cat(self):
         strand = Cube(CR.UNIVARIATE_CATEGORICAL).partitions[0]
 
@@ -1359,7 +1358,6 @@ class Describe_Strand(object):
         assert pytest.approx(strand.var_scale_mean) == 0.8888888
         assert strand.variable_name == "v7"
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     def it_provides_values_for_cat_with_means_and_insertions(self):
         strand = Cube(CR.CAT_WITH_MEANS_AND_INSERTIONS).partitions[0]
 

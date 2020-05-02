@@ -24,7 +24,6 @@ from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
 class DescribeIntegratedCube(object):
     """Integration-test suite for `cr.cube.cube.Cube` object."""
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     def it_provides_values_for_cat_x_cat(self):
         cube = Cube(CR.CAT_X_CAT)
 
@@ -35,7 +34,7 @@ class DescribeIntegratedCube(object):
             cube.counts_with_missings, [[5, 3, 2, 0], [5, 2, 3, 0], [0, 0, 0, 0]]
         )
         assert cube.cube_index == 0
-        assert cube.description == ""
+        assert cube.description == "Pet Owners"
         assert cube.dimension_types == (DT.CAT, DT.CAT)
         assert isinstance(cube.dimensions, _ApparentDimensions)
         assert cube.has_means is False

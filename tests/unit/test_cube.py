@@ -359,6 +359,14 @@ class DescribeCube(object):
 
         assert is_mr_by_itself is expected_value
 
+    @pytest.mark.parametrize(
+        ("cube_dict", "expected_value"),
+        (({}, "Untitled"), ({"title": "Hipsters"}, "Hipsters")),
+    )
+    def it_knows_its_title(self, _cube_dict_prop_, cube_dict, expected_value):
+        _cube_dict_prop_.return_value = cube_dict
+        assert Cube(None).title == expected_value
+
     def it_provides_access_to_the_cube_response_dict_to_help(self):
         assert Cube({"cube": "dict"})._cube_dict == {"cube": "dict"}
 
@@ -391,6 +399,10 @@ class DescribeCube(object):
         assert str(e.value) == expected_value
 
     # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _cube_dict_prop_(self, request):
+        return property_mock(request, Cube, "_cube_dict")
 
     @pytest.fixture
     def dimension_types_prop_(self, request):
