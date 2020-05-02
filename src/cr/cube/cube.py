@@ -353,6 +353,16 @@ class Cube(object):
         return self._measures.population_fraction
 
     @lazyproperty
+    def title(self):
+        """str alternate-name given to cube-result.
+
+        This value is suitable for naming a Strand when displayed as a column. In this
+        use-case it is a stand-in for the columns-dimension name since a strand has no
+        columns dimension.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
     def _all_dimensions(self):
         """The AllDimensions object for this cube.
 

@@ -815,6 +815,16 @@ class _Strand(CubePartition):
         return tuple(row.table_proportions for row in self._stripe.rows)
 
     @lazyproperty
+    def title(self):
+        """The str display name of this strand, suitable for use as a column heading.
+
+        `Strand.name` is the rows-dimension name, which is suitable for use as a title
+        of the row-headings. However, a strand can also appear as a *column* and this
+        value is a suitable name for such a column.
+        """
+        return self._cube.title
+
+    @lazyproperty
     def unweighted_bases(self):
         """Sequence of base count for each row, before weighting.
 

@@ -131,7 +131,19 @@ class Describe_Strand(object):
 
         assert is_empty is expected_value
 
+    def it_knows_its_title(self, cube_):
+        cube_.title = "Unmarried"
+        strand_ = _Strand(cube_, None, None, None, None, None)
+
+        title = strand_.title
+
+        assert title == "Unmarried"
+
     # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def cube_(self, request):
+        return instance_mock(request, Cube)
 
     @pytest.fixture
     def shape_prop_(self, request):

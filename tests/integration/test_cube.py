@@ -24,6 +24,7 @@ from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
 class DescribeIntegratedCube(object):
     """Integration-test suite for `cr.cube.cube.Cube` object."""
 
+    @pytest.mark.xfail(reason="WIP", strict=True)
     def it_provides_values_for_cat_x_cat(self):
         cube = Cube(CR.CAT_X_CAT)
 
@@ -44,6 +45,7 @@ class DescribeIntegratedCube(object):
         assert cube.name == "v4"
         assert cube.ndim == 2
         assert cube.population_fraction == 1.0
+        assert cube.title == "Pony Owners"
 
     def it_provides_access_to_its_dimensions(self, dimensions_fixture):
         cube_response, expected_dimension_types = dimensions_fixture
