@@ -1321,6 +1321,7 @@ class Describe_Slice(object):
 class Describe_Strand(object):
     """Integration-test suite for `cr.cube.cubepart._Strand` object."""
 
+    @pytest.mark.xfail(reason="WIP", strict=True)
     def it_provides_values_for_univariate_cat(self):
         strand = Cube(CR.UNIVARIATE_CATEGORICAL).partitions[0]
 
@@ -1353,10 +1354,12 @@ class Describe_Strand(object):
         assert strand.table_name == "v7: C"
         assert pytest.approx(strand.table_percentages) == (66.66667, 33.33333)
         assert pytest.approx(strand.table_proportions) == (0.666667, 0.333333)
+        assert strand.title == "Registered Voters"
         assert strand.unweighted_bases == (15, 15)
         assert pytest.approx(strand.var_scale_mean) == 0.8888888
         assert strand.variable_name == "v7"
 
+    @pytest.mark.xfail(reason="WIP", strict=True)
     def it_provides_values_for_cat_with_means_and_insertions(self):
         strand = Cube(CR.CAT_WITH_MEANS_AND_INSERTIONS).partitions[0]
 
@@ -1364,6 +1367,7 @@ class Describe_Strand(object):
         np.testing.assert_almost_equal(
             strand.means, [19.85555556, 13.85416667, 52.78947368, np.nan, np.nan]
         )
+        assert strand.title == "Untitled"
 
     def it_knows_when_it_is_empty(self):
         strand = Cube(CR.OM_SGP8334215_VN_2019_SEP_19_STRAND).partitions[0]
