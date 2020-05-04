@@ -141,6 +141,7 @@ class CubeSet(object):
         """True if more than one cube-response was provided on construction."""
         return len(self._cube_responses) > 1
 
+    @lazyproperty
     def _is_numeric_mean(self):
         """True when CubeSet is special-case "numeric-mean" case requiring inflation.
 

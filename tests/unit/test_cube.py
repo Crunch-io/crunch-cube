@@ -167,6 +167,29 @@ class DescribeCubeSet(object):
 
         assert cubes == (cube_, cube_, cube_)
 
+    @pytest.mark.parametrize(
+        ("is_multi_cube", "cube_0_ndim", "expected_value"),
+        ((False, 1, False), (False, 0, False), (True, 1, False), (True, 0, True)),
+    )
+    def it_knows_whether_it_is_numeric_mean_to_help(
+        self,
+        _is_multi_cube_prop_,
+        is_multi_cube,
+        Cube_,
+        cube_,
+        cube_0_ndim,
+        expected_value,
+    ):
+        _is_multi_cube_prop_.return_value = is_multi_cube
+        cube_.ndim = cube_0_ndim
+        Cube_.return_value = cube_
+        cube_set = CubeSet(({"cube": 0}, {"cube": 1}), None, None, None)
+
+        is_numeric_mean = cube_set._is_numeric_mean
+
+        assert Cube_.call_args_list == ([call({"cube": 0})] if is_multi_cube else [])
+        assert is_numeric_mean == expected_value
+
     def it_constructs_its_sequence_of_cube_objects_to_help(
         self, request, Cube_, _is_numeric_mean_prop_
     ):
@@ -262,6 +285,10 @@ class DescribeCubeSet(object):
     @pytest.fixture
     def _cubes_prop_(self, request):
         return property_mock(request, CubeSet, "_cubes")
+
+    @pytest.fixture
+    def _is_multi_cube_prop_(self, request):
+        return property_mock(request, CubeSet, "_is_multi_cube")
 
     @pytest.fixture
     def _is_numeric_mean_prop_(self, request):
