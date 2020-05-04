@@ -1,0 +1,143 @@
+{
+    "query": {
+        "dimensions": [
+            {
+                "variable": "ff6a773b782a4b7fac1c772d4050ba5c"
+            }
+        ],
+        "measures": {
+            "count": {
+                "args": [],
+                "function": "cube_count"
+            }
+        },
+        "weight": null
+    },
+    "query_environment": {
+        "filter": []
+    },
+    "result": {
+        "counts": [
+            15231,
+            16275,
+            3480,
+            4262,
+            0
+        ],
+        "dimensions": [
+            {
+                "derived": true,
+                "references": {
+                    "alias": "Social Grade Combined",
+                    "description": "Social Grade",
+                    "header_order": 2487,
+                    "name": "Social Grade Combined",
+                    "view": {
+                        "column_width": null,
+                        "include_missing": false,
+                        "show_counts": false,
+                        "show_numeric_values": false,
+                        "transform": {}
+                    }
+                },
+                "type": {
+                    "categories": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "name": "AB",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 2,
+                            "missing": false,
+                            "name": "C1 & C2",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 4,
+                            "missing": false,
+                            "name": "D",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 5,
+                            "missing": false,
+                            "name": "E",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": -1,
+                            "missing": true,
+                            "name": "No Data",
+                            "numeric_value": null
+                        }
+                    ],
+                    "class": "categorical",
+                    "ordinal": false
+                }
+            }
+        ],
+        "element": "crunch:cube",
+        "filter_stats": {
+            "filtered": {
+                "unweighted": {
+                    "missing": 0,
+                    "other": 0,
+                    "selected": 39248
+                },
+                "weighted": {
+                    "missing": 0,
+                    "other": 0,
+                    "selected": 39248
+                }
+            },
+            "filtered_complete": {
+                "unweighted": {
+                    "missing": 0,
+                    "other": 0,
+                    "selected": 39248
+                },
+                "weighted": {
+                    "missing": 0,
+                    "other": 0,
+                    "selected": 39248
+                }
+            }
+        },
+        "filtered": {
+            "unweighted_n": 39248,
+            "weighted_n": 39248
+        },
+        "measures": {
+            "count": {
+                "data": [
+                    15231,
+                    16275,
+                    3480,
+                    4262,
+                    0
+                ],
+                "metadata": {
+                    "derived": true,
+                    "references": {},
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {}
+                    }
+                },
+                "n_missing": 0
+            }
+        },
+        "missing": 0,
+        "n": 39248,
+        "unfiltered": {
+            "unweighted_n": 39248,
+            "weighted_n": 39248
+        }
+    }
+}

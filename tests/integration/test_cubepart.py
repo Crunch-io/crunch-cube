@@ -1368,6 +1368,52 @@ class Describe_Strand(object):
         )
         assert strand.title == "Untitled"
 
+    @pytest.mark.xfail(reason="WIP", strict=True)
+    def it_places_insertions_on_a_reordered_dimension_in_the_right_position(self):
+        """Subtotal anchors follow re-ordered rows.
+
+        The key fixture characteristic is that an ordering transform is combined with
+        subtotal insertions such that their subtotal position is changed by the
+        ordering.
+        """
+        transforms = {
+            "rows_dimension": {
+                "insertions": [
+                    {
+                        "anchor": "top",
+                        "args": [1, 2],
+                        "function": "subtotal",
+                        "name": "Sum A-C",
+                    },
+                    {
+                        "anchor": 4,
+                        "args": [1, 2],
+                        "function": "subtotal",
+                        "name": "Total A-C",
+                    },
+                    {
+                        "anchor": "bottom",
+                        "args": [4, 5],
+                        "function": "subtotal",
+                        "name": "Total D-E",
+                    },
+                ],
+                "order": {"element_ids": [2, 4, 5, 1], "type": "explicit"},
+            }
+        }
+        strand = Cube(CR.CAT_SUBTOT_ORDER, transforms=transforms).partitions[0]
+
+        assert strand.row_labels == (
+            "Sum A-C",
+            "C1 & C2",
+            "D",
+            "Total A-C",
+            "E",
+            "AB",
+            "Total D-E",
+        )
+        assert strand.counts == (31506, 16275, 3480, 31506, 4262, 15231, 7742)
+
     def it_knows_when_it_is_empty(self):
         strand = Cube(CR.OM_SGP8334215_VN_2019_SEP_19_STRAND).partitions[0]
         assert strand.is_empty is True
