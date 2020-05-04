@@ -212,12 +212,12 @@ class _Slice(CubePartition):
     @lazyproperty
     def inserted_column_idxs(self):
         return tuple(
-            i for i, column in enumerate(self._matrix.columns) if column.is_insertion
+            i for i, column in enumerate(self._matrix.columns) if column.is_inserted
         )
 
     @lazyproperty
     def inserted_row_idxs(self):
-        return tuple(i for i, row in enumerate(self._matrix.rows) if row.is_insertion)
+        return tuple(i for i, row in enumerate(self._matrix.rows) if row.is_inserted)
 
     @lazyproperty
     def insertions(self):
@@ -665,7 +665,7 @@ class _Strand(CubePartition):
         Provided index values correspond to measure values as-delivered by this strand,
         after any re-ordering specified in a transform.
         """
-        return tuple(i for i, row in enumerate(self._stripe.rows) if row.is_insertion)
+        return tuple(i for i, row in enumerate(self._stripe.rows) if row.is_inserted)
 
     @lazyproperty
     def is_empty(self):

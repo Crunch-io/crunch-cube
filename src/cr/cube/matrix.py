@@ -79,10 +79,10 @@ class TransformedMatrix(object):
 
         Each column vector also includes any new elements introduced by inserted rows.
         """
-        opposing_insertions = self._inserted_rows
+        opposing_inserted_vectors = self._inserted_rows
 
         return tuple(
-            _AssembledVector(column, opposing_insertions, 0 if idx < 0 else idx)
+            _AssembledVector(column, opposing_inserted_vectors, 0 if idx < 0 else idx)
             for _, idx, column in sorted(
                 itertools.chain(
                     (column.ordering for column in self._inserted_columns),
@@ -97,10 +97,10 @@ class TransformedMatrix(object):
 
         Each row vector also reflects any new elements introduced by inserted columns.
         """
-        opposing_insertions = self._inserted_columns
+        opposing_inserted_vectors = self._inserted_columns
 
         return tuple(
-            _AssembledVector(row, opposing_insertions, 0 if idx < 0 else idx)
+            _AssembledVector(row, opposing_inserted_vectors, 0 if idx < 0 else idx)
             for _, idx, row in sorted(
                 itertools.chain(
                     (row.ordering for row in self._inserted_rows),
@@ -142,7 +142,7 @@ class TransformedMatrix(object):
 
     @lazyproperty
     def _inserted_columns(self):
-        """ -> tuple of _InsertionColumn objects representing subtotal columns.
+        """ -> tuple of _InsertedColumn objects representing subtotal columns.
 
         The returned vectors are in the order subtotals were specified in the cube
         result, which is no particular order. All subtotals defined on the column
@@ -153,23 +153,23 @@ class TransformedMatrix(object):
             return ()
 
         subtotals = self._columns_dimension.subtotals
-        # ---insertions are indexed using their *negative* idx, i.e. their "distance"
-        # ---from the end of the subtotals sequence. This insures their ordering tuple
-        # ---sorts before all base-columns with the same position while still providing
-        # ---an idx that works for indexed access (if required).
+        # --- inserted vectors are indexed using their *negative* idx, i.e. their
+        # --- "distance" from the end of the subtotals sequence. This insures their
+        # --- ordering tuple sorts before all base-columns with the same position while
+        # --- still providing an idx that works for indexed access (if required).
         neg_idxs = range(-len(subtotals), 0)  # ---like [-3, -2, -1]---
         table_margin = self._unordered_matrix.table_margin
         base_rows = self._base_rows
         base_cols = self._base_columns
 
         return tuple(
-            _InsertionColumn(subtotal, neg_idx, table_margin, base_rows, base_cols)
+            _InsertedColumn(subtotal, neg_idx, table_margin, base_rows, base_cols)
             for subtotal, neg_idx in zip(subtotals, neg_idxs)
         )
 
     @lazyproperty
     def _inserted_rows(self):
-        """ -> tuple of _InsertionRow objects representing inserted subtotal rows.
+        """ -> tuple of _InsertedRow objects representing inserted subtotal rows.
 
         The returned vectors are in the order subtotals were specified in the cube
         result, which is no particular order.
@@ -185,7 +185,7 @@ class TransformedMatrix(object):
         base_cols = self._base_columns
 
         return tuple(
-            _InsertionRow(subtotal, neg_idx, table_margin, base_rows, base_cols)
+            _InsertedRow(subtotal, neg_idx, table_margin, base_rows, base_cols)
             for subtotal, neg_idx in zip(subtotals, neg_idxs)
         )
 
@@ -1011,19 +1011,21 @@ class _MrXMrMatrix(_MatrixWithMR):
         )
 
 
-# ===INSERTION (SUBTOTAL) VECTORS===
+# ===INSERTED (SUBTOTAL) VECTORS===
 
 
-class _BaseMatrixInsertionVector(object):
-    """Base class for matrix insertion vectors.
+class _BaseMatrixInsertedVector(object):
+    """Base class for a (subtotal) vector inserted in a matrix.
 
-    There are some differences that arise when there are rows *and* columns, which
-    entails the complication of insertion *intersections*.
+    There are some differences that arise when there are both inserted rows *and*
+    inserted columns, which entails the complication of inserted vector *intersections*.
+
+    The `base_rows` and `base_colums` vector collections are already ordered.
     """
 
     def __init__(self, subtotal, neg_idx, table_margin, base_rows, base_columns):
         self._subtotal = subtotal
-        # ---the *negative* idx of this vector among its peer insertions---
+        # --- the *negative* idx of this vector among its peer inserted vectors ---
         self._neg_idx = neg_idx
         self._table_margin = table_margin
         self._base_rows = base_rows
@@ -1031,6 +1033,7 @@ class _BaseMatrixInsertionVector(object):
 
     @lazyproperty
     def addend_idxs(self):
+        """ndarray of int base-element offsets contributing to this subtotal."""
         return np.array(self._subtotal.addend_idxs)
 
     @lazyproperty
@@ -1049,18 +1052,18 @@ class _BaseMatrixInsertionVector(object):
 
     @lazyproperty
     def column_index(self):
-        # TODO: Calculate insertion column index for real. Check with Mike
+        """Computing the column-index of an inserted vector is hard. Punt for now."""
         return np.array([np.nan] * len(self.values))
 
     @lazyproperty
     def fill(self):
-        """Unconditionally `None` for an insertion vector.
+        """Unconditionally `None` for an inserted vector.
 
         A `fill` value is normally a str RGB value like "#da09fc", specifying the color
         to use for a chart category or series representing this element. The value
-        reflects the resolved element-fill transform cascade. Since an insertion cannot
-        (currently) have a fill-transform, the default value of `None` (indicating "use
-        default color") is unconditionally returned.
+        reflects the resolved element-fill transform cascade. Since an inserted vector
+        cannot (currently) have a fill-transform, the default value of `None`
+        (indicating "use default color") is unconditionally returned.
         """
         return None
 
@@ -1068,14 +1071,14 @@ class _BaseMatrixInsertionVector(object):
     def hidden(self):
         """True if vector is pruned.
 
-        Insertions can never be hidden explicitly (for now). They can also almost never
-        be pruned, except in the case when all of the opposite vectors are also pruned
-        (thus leaving no elements for this insertion vector).
+        An inserted vector can never be hidden explicitly (for now). They can also
+        almost never be pruned, except in the case when all of the opposite vectors are
+        also pruned (thus leaving no elements for this inserted vector).
         """
         return self.pruned
 
     @lazyproperty
-    def is_insertion(self):
+    def is_inserted(self):
         return True
 
     @lazyproperty
@@ -1089,7 +1092,7 @@ class _BaseMatrixInsertionVector(object):
     @lazyproperty
     def means(self):
         """ndarray of NaN values, of the same shape as values.
-        Insertions are not defined for means, this is just a placeholder.
+        Inserted vectors are not defined for means, this is just a placeholder.
         """
         return np.full(self.values.shape, np.nan)
 
@@ -1101,21 +1104,21 @@ class _BaseMatrixInsertionVector(object):
     def ordering(self):
         """ -> (position, index, self) tuple used for interleaving with base vectors.
 
-        This value allows the interleaving of insertions with base vectors to be reduced
-        to a sorting operation.
+        This value allows the interleaving of inserted vectors with base vectors to be
+        reduced to a sorting operation.
 
         The int position value is roughly equivalent to the notion of "anchor". It is
         0 for anchor=="top", sys.maxsize for anchor=="bottom", and int(anchor) + 1
-        otherwise. The +1 ensures insertions appear *after* the vector they are anchored
-        to.
+        otherwise. The +1 ensures inserted vectors appear *after* the vector they are
+        anchored to.
 
         The `index` value is the *negative* index of this subtotal in its collection
-        (i.e. the "distance from the end" of this insertion). This ensures that an
-        insertion will always sort *prior* to a base vector with the same position while
-        preserving the payload order of the insertion when two or more are anchored to
-        the same vector.
+        (i.e. the "distance from the end" of this inserted vector). This ensures that an
+        inserted vector will always sort *prior* to a base vector with the same position
+        while preserving the payload order of the inserted vector when two or more are
+        anchored to the same base vector.
         """
-        return (self._anchor_n, self._neg_idx, self)
+        return self._anchor_n, self._neg_idx, self
 
     @lazyproperty
     def table_margin(self):
@@ -1131,10 +1134,22 @@ class _BaseMatrixInsertionVector(object):
 
     @lazyproperty
     def _anchor_n(self):
-        """Anchor expressed as an int.
+        """Anchor expressed as an int "offset" relative to base-vector indices.
 
-        An anchor to a column is incremented by 1 to ensure it applies *after* the
-        anchor column rather than before. See `.ordering` for more.
+        `anchor_n` represents the base-vector idx *before which* the subtotal should
+        appear (even though subtotals appear *after* the row they are anchored to.
+
+        A subtotal with anchor_n `0` appears at the top, one with an anchor of `3`
+        appears *before* the base row at offset 3; `sys.maxsize` is used as anchor_n for
+        "bottom" anchored subtotals.
+
+        To make this work, the `anchor_n` for a subtotal is idx+1 of the base row it is
+        anchored to (for subtotals anchored to a row, not "top" or "bottom"). Combining
+        this +1 characteristic with placing subtotals before rows with idx=anchor_n
+        produces the right positioning and also allows top and bottom anchors to work
+        while representing the position as a single non-negative int.
+
+        See `.ordering` for more.
         """
         anchor = self.anchor
         return (
@@ -1162,7 +1177,7 @@ class _BaseMatrixInsertionVector(object):
         return self._residuals / np.sqrt(variance)
 
 
-class _InsertionColumn(_BaseMatrixInsertionVector):
+class _InsertedColumn(_BaseMatrixInsertedVector):
     """Represents an inserted (subtotal) column."""
 
     @lazyproperty
@@ -1173,9 +1188,9 @@ class _InsertionColumn(_BaseMatrixInsertionVector):
     def pruned(self):
         """True if vector is pruned.
 
-        Insertions can almost never be pruned, except in the case when all of the
-        opposite vectors are also pruned (thus leaving no elements for this
-        insertion vector).
+        An inserted vector can almost never be pruned, except in the case when all of
+        the opposite vectors are also pruned (thus leaving no elements for this
+        inserted vector).
         """
         return self._subtotal.prune and not np.any(
             np.array([row.base for row in self._base_rows])
@@ -1198,7 +1213,7 @@ class _InsertionColumn(_BaseMatrixInsertionVector):
         return self.values - self._expected_counts
 
 
-class _InsertionRow(_BaseMatrixInsertionVector):
+class _InsertedRow(_BaseMatrixInsertedVector):
     """Represents an inserted (subtotal) row."""
 
     @lazyproperty
@@ -1209,9 +1224,9 @@ class _InsertionRow(_BaseMatrixInsertionVector):
     def pruned(self):
         """True if vector is pruned.
 
-        Insertions can almost never be pruned, except in the case when all of the
-        opposite vectors are also pruned (thus leaving no elements for this
-        insertion vector).
+        An inserted vector can almost never be pruned, except in the case when all of
+        the opposite vectors are also pruned (thus leaving no elements for this
+        inserted vector).
         """
         return self._subtotal.prune and not np.any(
             np.array([column.base for column in self._base_columns])
@@ -1255,8 +1270,8 @@ class _BaseTransformationVector(object):
         return self._base_vector.hidden
 
     @lazyproperty
-    def is_insertion(self):
-        return self._base_vector.is_insertion
+    def is_inserted(self):
+        return self._base_vector.is_inserted
 
     @lazyproperty
     def label(self):
@@ -1303,8 +1318,8 @@ class _AssembledVector(_BaseTransformationVector):
     def base_values(self):
         base_values = self._base_vector.base_values
 
-        def fsubtot(subtotal):
-            return np.sum(base_values[subtotal.addend_idxs])
+        def fsubtot(inserted_vector):
+            return np.sum(base_values[inserted_vector.addend_idxs])
 
         return self._apply_interleaved(base_values, fsubtot)
 
@@ -1356,16 +1371,18 @@ class _AssembledVector(_BaseTransformationVector):
     def values(self):
         values = self._base_vector.values
 
-        def fsubtot(subtotal):
-            return np.sum(values[subtotal.addend_idxs])
+        def fsubtot(inserted_vector):
+            return np.sum(values[inserted_vector.addend_idxs])
 
         return self._apply_interleaved(values, fsubtot)
 
     @lazyproperty
     def zscore(self):
-        def fsubtot(subtotal):
-            if self.is_insertion:
-                opposite_margin = np.sum(self.opposite_margins[subtotal.addend_idxs])
+        def fsubtot(inserted_vector):
+            if self.is_inserted:
+                opposite_margin = np.sum(
+                    self.opposite_margins[inserted_vector.addend_idxs]
+                )
                 variance = (
                     opposite_margin
                     * self.margin
@@ -1376,12 +1393,14 @@ class _AssembledVector(_BaseTransformationVector):
                     / self.table_margin ** 3
                 )
                 expected_count = opposite_margin * self.margin / self.table_margin
-                cell_value = np.sum(self._base_vector.values[subtotal.addend_idxs])
+                cell_value = np.sum(
+                    self._base_vector.values[inserted_vector.addend_idxs]
+                )
                 residuals = cell_value - expected_count
                 zscore = residuals / np.sqrt(variance)
 
             else:
-                zscore = subtotal.zscore[self._vector_idx]
+                zscore = inserted_vector.zscore[self._vector_idx]
 
             return zscore
 
@@ -1392,7 +1411,7 @@ class _AssembledVector(_BaseTransformationVector):
 
         `base_values` is the "unassembled" vector measure values.
 
-        `fsubtot(subtot)` :: subtotal -> intersection_value
+        `fsubtot(inserted_vector)` :: inserted_vector -> intersection_value
 
         Takes care of the details of getting vector "cells" interleaved in the right
         order, you just provide the "unassembled" values and a function to apply to each
@@ -1577,10 +1596,10 @@ class _OrderedVector(_BaseTransformationVector):
 
     @lazyproperty
     def ordering(self):
-        """ -> (position, index, self) tuple used for interleaving with insertions.
+        """ -> (position, index, self) tuple used for interleaving inserted vectors.
 
-        This value allows the interleaving of base vectors with insertions to be reduced
-        to a sorting operation.
+        This value allows the interleaving of base and inserted vectors to be reduced to
+        a sorting operation.
 
         The position and index of a base vector are both its index within its ordered
         collection.
@@ -1649,7 +1668,7 @@ class _BaseVector(object):
         return self._element.is_hidden or (self._element.prune and self.pruned)
 
     @lazyproperty
-    def is_insertion(self):
+    def is_inserted(self):
         return False
 
     @lazyproperty

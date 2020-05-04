@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-"""Unit test suite for `cr.cube.cube` module."""
+"""Integration-test suite for `cr.cube.cube` module."""
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 

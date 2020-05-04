@@ -106,7 +106,7 @@ class _StripeInsertionHelper(object):
         return cls(rows_dimension, ordered_rows, table_margin)._iter_interleaved_rows()
 
     def _iter_interleaved_rows(self):
-        """Generate all row vectors with insertions interleaved at right spot."""
+        """Generate all row vectors with inserted rows interleaved at right spot."""
         # ---subtotals inserted at top---
         for row in self._all_inserted_rows:
             if row.anchor == "top":
@@ -125,7 +125,7 @@ class _StripeInsertionHelper(object):
 
     @lazyproperty
     def _all_inserted_rows(self):
-        """Sequence of _StripeInsertionRow objects representing inserted subtotal rows.
+        """Sequence of _StripeInsertedRow objects representing inserted subtotal rows.
 
         The returned vectors are in the order subtotals were specified in the cube
         result, which is no particular order.
@@ -135,7 +135,7 @@ class _StripeInsertionHelper(object):
             return tuple()
 
         return tuple(
-            _StripeInsertionRow(subtotal, self._ordered_rows, self._table_margin)
+            _StripeInsertedRow(subtotal, self._ordered_rows, self._table_margin)
             for subtotal in self._rows_dimension.subtotals
         )
 
@@ -279,7 +279,7 @@ class _MrStripe(_BaseBaseStripe):
 # ===STRIPE ROWS===
 
 
-class _StripeInsertionRow(object):
+class _StripeInsertedRow(object):
     """Represents an inserted (subtotal) row.
 
     This row item participates like any other row item, and a lot of its public
@@ -305,7 +305,7 @@ class _StripeInsertionRow(object):
 
     @lazyproperty
     def fill(self):
-        """An insertion row can have no element-fill-color transform."""
+        """An inserted row can have no element-fill-color transform."""
         return None
 
     @lazyproperty
@@ -314,7 +314,7 @@ class _StripeInsertionRow(object):
         return False
 
     @lazyproperty
-    def is_insertion(self):
+    def is_inserted(self):
         return True
 
     @lazyproperty
@@ -389,7 +389,7 @@ class _BaseStripeRow(object):
         return self._element.is_hidden or (self._element.prune and self.pruned)
 
     @lazyproperty
-    def is_insertion(self):
+    def is_inserted(self):
         return False
 
     @lazyproperty
