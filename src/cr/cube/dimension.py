@@ -908,17 +908,6 @@ class _Subtotal(object):
             return anchor.lower()
 
     @lazyproperty
-    def anchor_idx(self):
-        """int or str representing index of anchor element in dimension.
-
-        When the anchor is an operation, like 'top' or 'bottom'
-        """
-        anchor = self.anchor
-        if anchor in ["top", "bottom"]:
-            return anchor
-        return self._valid_elements.get_by_id(anchor).index_in_valids
-
-    @lazyproperty
     def addend_ids(self):
         """tuple of int ids of elements contributing to this subtotal.
 
@@ -929,19 +918,6 @@ class _Subtotal(object):
             arg
             for arg in self._subtotal_dict.get("args", [])
             if arg in self._valid_elements.element_ids
-        )
-
-    @lazyproperty
-    def addend_idxs(self):
-        """tuple of int index of each addend element for this subtotal.
-
-        The length of the tuple is the same as that for `.addend_ids`, but
-        each value repesents the offset of that element within the dimension,
-        rather than its element id.
-        """
-        return tuple(
-            self._valid_elements.get_by_id(addend_id).index_in_valids
-            for addend_id in self.addend_ids
         )
 
     @lazyproperty
