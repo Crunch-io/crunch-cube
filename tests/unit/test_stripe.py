@@ -43,6 +43,33 @@ class DescribeTransformedStripe(object):
 
         assert stripe.rows == (rows_[0], rows_[2])
 
+    def it_provides_access_to_its_rows_including_hidden_ones(self, request, dimension_):
+        rows_ = tuple(
+            instance_mock(
+                request, _BaseStripeRow, name="row[%d]" % i, hidden=bool(i % 2)
+            )
+            for i in range(4)
+        )
+        property_mock(
+            request,
+            TransformedStripe,
+            "_ordered_rows",
+            return_value=("ordered", "rows"),
+        )
+        property_mock(request, TransformedStripe, "_table_margin", return_value=42)
+        _StripeInsertionHelper_ = class_mock(
+            request, "cr.cube.stripe._StripeInsertionHelper"
+        )
+        _StripeInsertionHelper_.iter_interleaved_rows.return_value = iter(rows_)
+        stripe = TransformedStripe(dimension_, None)
+
+        rows = stripe.rows_including_hidden
+
+        _StripeInsertionHelper_.iter_interleaved_rows.assert_called_once_with(
+            dimension_, ("ordered", "rows"), 42
+        )
+        assert rows == (rows_[0], rows_[1], rows_[2], rows_[3])
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture

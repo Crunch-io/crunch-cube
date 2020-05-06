@@ -41,10 +41,9 @@ class TransformedStripe(object):
         """Sequence of row vectors including those hidden by the user."""
         # --- ordering and insertion transforms are applied here. `._ordered_rows`
         # --- applies any ordering transforms and _StripeInsertionHelper creates and
-        # --- interleaves subtotal rows
+        # --- interleaves subtotal rows.
         return tuple(
-            row
-            for row in _StripeInsertionHelper.iter_interleaved_rows(
+            _StripeInsertionHelper.iter_interleaved_rows(
                 self._rows_dimension, self._ordered_rows, self._table_margin
             )
         )
