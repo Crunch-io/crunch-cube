@@ -60,17 +60,15 @@ class TransformedStripe(object):
 
     @lazyproperty
     def _ordered_rows(self):
-        return tuple(np.array(self._base_stripe.rows)[self._row_order])
+        """Sequence of base-rows in order specified by user.
 
-    @lazyproperty
-    def _row_order(self):
-        """Indexer value identifying rows in order, suitable for slicing an ndarray.
-
-        This value is a 1D ndarray of int row indices, used for indexing the rows array
-        to produce an ordered version.
+        Default ordering is "payload order", the order dimension elements appear in the
+        cube result. This order may be overridden by an order transform.
         """
-        # ---Specifying int type prevents failure when there are zero rows---
-        return np.array(self._rows_dimension.display_order, dtype=int)
+        # --- display_order is like (2, 1, 0, 3); each int item is the offset of a row
+        # --- in the base-rows collection.
+        rows = self._base_stripe.rows
+        return tuple(rows[row_idx] for row_idx in self._rows_dimension.display_order)
 
     @lazyproperty
     def _table_margin(self):
@@ -159,6 +157,16 @@ class _BaseBaseStripe(object):
             return _MrStripe(rows_dimension, counts, base_counts)
 
         return _CatStripe(rows_dimension, counts, base_counts)
+
+    @lazyproperty
+    def rows(self):
+        """Sequence of rows in this stripe.
+
+        The sequence includes a row for each valid element in the rows-dimension, in the
+        order those elements are defined in the dimension (which is also the order in
+        which that dimension's values appear in the cube result).
+        """
+        raise NotImplementedError("must be implemented by each subclass")
 
     @lazyproperty
     def table_base(self):
