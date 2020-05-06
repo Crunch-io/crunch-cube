@@ -86,7 +86,7 @@ class _StripeInsertionHelper(object):
 
     @classmethod
     def iter_interleaved_rows(cls, rows_dimension, ordered_rows, table_margin):
-        """Generate rows with subtotals in correct position."""
+        """Generate rows with subtotals inserted in correct position."""
         return cls(rows_dimension, ordered_rows, table_margin)._iter_interleaved_rows()
 
     def _iter_interleaved_rows(self):

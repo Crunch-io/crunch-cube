@@ -8,9 +8,21 @@ import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension
-from cr.cube.stripe import _BaseBaseStripe, _BaseStripeRow, TransformedStripe
+from cr.cube.stripe import (
+    _BaseBaseStripe,
+    _BaseStripeRow,
+    _StripeInsertionHelper,
+    TransformedStripe,
+)
 
-from ..unitutil import ANY, class_mock, initializer_mock, instance_mock, property_mock
+from ..unitutil import (
+    ANY,
+    class_mock,
+    initializer_mock,
+    instance_mock,
+    method_mock,
+    property_mock,
+)
 
 
 class DescribeTransformedStripe(object):
@@ -105,3 +117,32 @@ class DescribeTransformedStripe(object):
     @pytest.fixture
     def stripe_(self, request):
         return instance_mock(request, TransformedStripe)
+
+
+class Describe_StripeInsertionHelper(object):
+    """Unit test suite for `cr.cube.stripe._StripeInsertionHelper` function-object."""
+
+    def it_provides_an_interface_classmethod(self, request, dimension_):
+        _init_ = initializer_mock(request, _StripeInsertionHelper)
+        _iter_interleaved_rows_ = method_mock(
+            request,
+            _StripeInsertionHelper,
+            "_iter_interleaved_rows",
+            return_value=iter(("interleaved", "rows")),
+        )
+
+        interleaved_rows = _StripeInsertionHelper.iter_interleaved_rows(
+            dimension_, ("ordered", "rows"), 42
+        )
+
+        _init_.assert_called_once_with(ANY, dimension_, ("ordered", "rows"), 42)
+        _iter_interleaved_rows_.assert_called_once_with(ANY)
+        assert next(interleaved_rows) == "interleaved"
+        assert next(interleaved_rows) == "rows"
+        assert next(interleaved_rows, None) is None
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def dimension_(self, request):
+        return instance_mock(request, Dimension)
