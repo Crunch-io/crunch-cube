@@ -33,28 +33,15 @@ class TransformedStripe(object):
 
     @lazyproperty
     def rows(self):
-        """Sequence of post-transformation row vectors.
-
-        All transforms are applied in this unit. `._ordered_rows` applies ordering,
-        _StripeInsertionHelper creates and interleaves subtotal rows, and hidden rows
-        are removed directly in this main row iterator.
-        """
-        return tuple(
-            row
-            for row in _StripeInsertionHelper.iter_interleaved_rows(
-                self._rows_dimension, self._ordered_rows, self._table_margin
-            )
-            if not row.hidden
-        )
+        """Sequence of post-transformation row vectors."""
+        return tuple(row for row in self.rows_including_hidden if not row.hidden)
 
     @lazyproperty
-    def rows_before_hiding(self):
-        """Sequence of pre-hiding row vectors.
-
-        All transforms are applied in this unit except for hidden row.
-        `._ordered_rows` applies ordering, _StripeInsertionHelper creates
-        and interleaves subtotal rows
-        """
+    def rows_including_hidden(self):
+        """Sequence of row vectors including those hidden by the user."""
+        # --- ordering and insertion transforms are applied here. `._ordered_rows`
+        # --- applies any ordering transforms and _StripeInsertionHelper creates and
+        # --- interleaves subtotal rows
         return tuple(
             row
             for row in _StripeInsertionHelper.iter_interleaved_rows(

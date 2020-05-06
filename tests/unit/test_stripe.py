@@ -8,9 +8,9 @@ import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension
-from cr.cube.stripe import _BaseBaseStripe, TransformedStripe
+from cr.cube.stripe import _BaseBaseStripe, _BaseStripeRow, TransformedStripe
 
-from ..unitutil import ANY, class_mock, initializer_mock, instance_mock
+from ..unitutil import ANY, class_mock, initializer_mock, instance_mock, property_mock
 
 
 class DescribeTransformedStripe(object):
@@ -28,6 +28,20 @@ class DescribeTransformedStripe(object):
         _BaseBaseStripe_.factory.assert_called_once_with(cube_, dimension_, True, 42)
         _init_.assert_called_once_with(ANY, dimension_, base_stripe_)
         assert isinstance(stripe, TransformedStripe)
+
+    def it_provides_access_to_its_rows(self, request):
+        rows_ = tuple(
+            instance_mock(
+                request, _BaseStripeRow, hidden=bool(i % 2), name="row[%d]" % i
+            )
+            for i in range(4)
+        )
+        property_mock(
+            request, TransformedStripe, "rows_including_hidden", return_value=rows_
+        )
+        stripe = TransformedStripe(None, None)
+
+        assert stripe.rows == (rows_[0], rows_[2])
 
     # fixture components ---------------------------------------------
 
