@@ -9,6 +9,7 @@ import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.cubepart import CubePartition, _Slice, _Strand, _Nub
+from cr.cube.dimension import Dimension
 from cr.cube.matrix import TransformedMatrix, _VectorAfterHiding
 from cr.cube.stripe import _BaseStripeRow, TransformedStripe
 from ..unitutil import class_mock, instance_mock, property_mock
@@ -160,11 +161,32 @@ class Describe_Strand(object):
 
         assert title == "Unmarried"
 
+    def it_constructs_its_underlying_stripe_to_help(
+        self, request, cube_, _rows_dimension_prop_, dimension_, stripe_
+    ):
+        TransformedStripe_ = class_mock(request, "cr.cube.cubepart.TransformedStripe")
+        TransformedStripe_.stripe.return_value = stripe_
+        _rows_dimension_prop_.return_value = dimension_
+        strand = _Strand(cube_, None, None, False, 42, None)
+
+        stripe = strand._stripe
+
+        TransformedStripe_.stripe.assert_called_once_with(cube_, dimension_, False, 42)
+        assert stripe is stripe_
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
     def cube_(self, request):
         return instance_mock(request, Cube)
+
+    @pytest.fixture
+    def dimension_(self, request):
+        return instance_mock(request, Dimension)
+
+    @pytest.fixture
+    def _rows_dimension_prop_(self, request):
+        return property_mock(request, _Strand, "_rows_dimension")
 
     @pytest.fixture
     def shape_prop_(self, request):
