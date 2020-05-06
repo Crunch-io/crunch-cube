@@ -364,51 +364,65 @@ class Describe_Slice(object):
             np.flip(slice_.column_base), slice_with_ordering_.column_base
         )
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     def it_respect_row_proportions_with_ordering_transform_mr_x_cat(self):
-        transforms = TR.GENERIC_TRANSFORMS_DICTS["both_order_mr_x_cat"]
-        slice_ = Cube(CR.MR_X_CAT_HS, transforms=transforms).partitions[0]
+        slice_ = Cube(
+            CR.MR_X_CAT_HS,
+            transforms=TR.GENERIC_TRANSFORMS_DICTS["both_order_mr_x_cat"],
+        ).partitions[0]
 
         np.testing.assert_almost_equal(
             slice_.row_proportions,
             [
-                [0.06423004, 0.25883849, 0.39673409, 0.0, 0.74116151],
-                [0.44079255, 0.63354565, 0.2344488, 0.0, 0.36645435],
+                [0.25883849, 0.06423004, 0.39673409, 0.0, 0.74116151],
+                [0.63354565, 0.44079255, 0.2344488, 0.0, 0.36645435],
             ],
         )
-        # remove the rows order
-        transforms_wo_row_ordering = TR.GENERIC_TRANSFORMS_DICTS[
-            "no_row_order_mr_x_cat"
-        ]
-        slice_wo_row_ordering_ = Cube(
-            CR.MR_X_CAT_HS, transforms=transforms_wo_row_ordering
+        np.testing.assert_equal(
+            slice_.column_base, [[101, 32, 208, 0, 375], [39, 15, 69, 0, 126]]
+        )
+        np.testing.assert_equal(slice_.row_base, [385, 26])
+
+        # --- rows flip after removing the rows order ---
+        slice_ = Cube(
+            CR.MR_X_CAT_HS,
+            transforms=TR.GENERIC_TRANSFORMS_DICTS["no_row_order_mr_x_cat"],
         ).partitions[0]
 
         np.testing.assert_almost_equal(
-            slice_wo_row_ordering_.row_proportions,
+            slice_.row_proportions,
             [
-                [0.44079255, 0.63354565, 0.2344488, 0.0, 0.36645435],
-                [0.06423004, 0.25883849, 0.39673409, 0.0, 0.74116151],
+                [0.63354565, 0.44079255, 0.2344488, 0.0, 0.36645435],
+                [0.25883849, 0.06423004, 0.39673409, 0.0, 0.74116151],
             ],
         )
-        # asserting that the 2 slices are flipped rows due to the ordering
-        np.testing.assert_almost_equal(
-            slice_wo_row_ordering_.row_proportions[0], slice_.row_proportions[1]
+        np.testing.assert_equal(
+            slice_.column_base, [[39, 15, 69, 0, 126], [101, 32, 208, 0, 375]]
         )
-        np.testing.assert_almost_equal(
-            slice_wo_row_ordering_.row_proportions[1], slice_.row_proportions[0]
-        )
-        np.testing.assert_almost_equal(
-            slice_wo_row_ordering_.column_base, np.flip(slice_.column_base, 0)
-        )
-        np.testing.assert_almost_equal(
-            slice_wo_row_ordering_.row_base, np.flip(slice_.row_base)
-        )
+        np.testing.assert_equal(slice_.row_base, [26, 385])
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     def it_respect_col_proportions_with_ordering_transform_mr_x_cat(self):
-        transforms = TR.GENERIC_TRANSFORMS_DICTS["both_order_mr_x_cat"]
-        slice_ = Cube(CR.MR_X_CAT_HS, transforms=transforms).partitions[0]
+        slice_ = Cube(
+            CR.MR_X_CAT_HS,
+            transforms=TR.GENERIC_TRANSFORMS_DICTS["both_order_mr_x_cat"],
+        ).partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_.column_proportions,
+            [
+                [0.81825272, 0.78206694, 0.79964474, np.nan, 0.79162243],
+                [0.36700322, 0.63991606, 0.11791067, np.nan, 0.09519879],
+            ],
+        )
+        np.testing.assert_equal(
+            slice_.column_base, [[101, 32, 208, 0, 375], [39, 15, 69, 0, 126]]
+        )
+        np.testing.assert_equal(slice_.row_base, [385, 26])
+
+        # --- remove the columns order ---
+        slice_ = Cube(
+            CR.MR_X_CAT_HS,
+            transforms=TR.GENERIC_TRANSFORMS_DICTS["no_col_order_mr_x_cat"],
+        ).partitions[0]
 
         np.testing.assert_almost_equal(
             slice_.column_proportions,
@@ -417,46 +431,21 @@ class Describe_Slice(object):
                 [0.63991606, 0.36700322, 0.11791067, np.nan, 0.09519879],
             ],
         )
-        # remove the columns order
-        transforms_wo_col_ordering = TR.GENERIC_TRANSFORMS_DICTS[
-            "no_col_order_mr_x_cat"
-        ]
-        slice_wo_col_ordering_ = Cube(
-            CR.MR_X_CAT_HS, transforms=transforms_wo_col_ordering
-        ).partitions[0]
+        np.testing.assert_equal(
+            slice_.column_base, [[32, 101, 208, 0, 375], [15, 39, 69, 0, 126]]
+        )
+        np.testing.assert_equal(slice_.row_base, [385, 26])
 
-        np.testing.assert_almost_equal(
-            slice_wo_col_ordering_.column_proportions,
-            [
-                [0.63991606, 0.36700322, 0.11791067, np.nan, 0.09519879],
-                [0.78206694, 0.81825272, 0.79964474, np.nan, 0.79162243],
-            ],
-        )
-        # asserting that the 2 slices have flipped rows due to the ordering
-        np.testing.assert_almost_equal(
-            slice_wo_col_ordering_.column_proportions[0], slice_.column_proportions[1]
-        )
-        np.testing.assert_almost_equal(
-            slice_wo_col_ordering_.column_proportions[1], slice_.column_proportions[0]
-        )
-        np.testing.assert_almost_equal(
-            slice_wo_col_ordering_.column_base, np.flip(slice_.column_base, 0)
-        )
-        np.testing.assert_almost_equal(
-            slice_wo_col_ordering_.row_base, np.flip(slice_.row_base)
-        )
-
-    @pytest.mark.xfail(reason="WIP", strict=True)
     def it_respect_proportions_with_ordering_transform_ca_x_cat(self):
         transforms = TR.GENERIC_TRANSFORMS_DICTS["both_order_ca_x_cat"]
         slice_ = Cube(CR.CA_X_CAT_HS, transforms=transforms).partitions[0]
 
         np.testing.assert_almost_equal(
             slice_.row_proportions,
-            [[0.33333333, 0.0, 0.0, 0.33333333, 0.33333333, 0.33333333, 0.66666667]],
+            [[0.33333333, 0.33333333, 0.0, 0.0, 0.33333333, 0.33333333, 0.66666667]],
         )
         np.testing.assert_almost_equal(
-            slice_.column_proportions, [[1.0, 0.0, 0.0, 0.33333333, 1.0, 1.0, 1.0]]
+            slice_.column_proportions, [[1.0, 0.33333333, 0.0, 0.0, 1.0, 1.0, 1.0]]
         )
 
         # remove the order
