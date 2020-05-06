@@ -10,6 +10,7 @@ import pytest
 from cr.cube.cube import Cube
 from cr.cube.cubepart import CubePartition, _Slice, _Strand, _Nub
 from cr.cube.matrix import TransformedMatrix, _VectorAfterHiding
+from cr.cube.stripe import _BaseStripeRow, TransformedStripe
 from ..unitutil import class_mock, instance_mock, property_mock
 
 
@@ -130,6 +131,18 @@ class Describe_Slice(object):
 class Describe_Strand(object):
     """Unit test suite for `cr.cube.cubepart._Strand` object."""
 
+    def it_knows_which_of_its_rows_are_inserted(self, request, _stripe_prop_, stripe_):
+        stripe_.rows = tuple(
+            instance_mock(request, _BaseStripeRow, is_inserted=bool(i % 2))
+            for i in range(7)
+        )
+        _stripe_prop_.return_value = stripe_
+        strand = _Strand(None, None, None, None, None, None)
+
+        inserted_row_idxs = strand.inserted_row_idxs
+
+        assert inserted_row_idxs == (1, 3, 5)
+
     @pytest.mark.parametrize(("shape", "expected_value"), (((1,), False), ((0,), True)))
     def it_knows_whether_it_is_empty(self, shape, expected_value, shape_prop_):
         shape_prop_.return_value = shape
@@ -156,6 +169,14 @@ class Describe_Strand(object):
     @pytest.fixture
     def shape_prop_(self, request):
         return property_mock(request, _Strand, "shape")
+
+    @pytest.fixture
+    def stripe_(self, request):
+        return instance_mock(request, TransformedStripe)
+
+    @pytest.fixture
+    def _stripe_prop_(self, request):
+        return property_mock(request, _Strand, "_stripe")
 
 
 class Describe_Nub(object):
