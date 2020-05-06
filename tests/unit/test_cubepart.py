@@ -12,6 +12,7 @@ from cr.cube.cubepart import CubePartition, _Slice, _Strand, _Nub
 from cr.cube.dimension import Dimension
 from cr.cube.matrix import TransformedMatrix, _VectorAfterHiding
 from cr.cube.stripe import _BaseStripeRow, TransformedStripe
+
 from ..unitutil import class_mock, instance_mock, property_mock
 
 
