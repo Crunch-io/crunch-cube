@@ -288,6 +288,7 @@ class _StripeInsertedRow(object):
 
     @lazyproperty
     def anchor(self):
+        """int idx-position of this inserted row relative to base rows."""
         return self._subtotal.anchor_idx
 
     @lazyproperty

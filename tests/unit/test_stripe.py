@@ -7,7 +7,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import pytest
 
 from cr.cube.cube import Cube
-from cr.cube.dimension import Dimension
+from cr.cube.dimension import Dimension, _Subtotal
 from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.stripe import (
     _BaseBaseStripe,
@@ -206,3 +206,21 @@ class Describe_StripeInsertionHelper(object):
     @pytest.fixture
     def dimension_(self, request):
         return instance_mock(request, Dimension)
+
+
+class Describe_StripeInsertedRow(object):
+    """Unit test suite for `cr.cube.stripe._StripeInsertedRow` object."""
+
+    def it_knows_its_anchor_location(self, subtotal_):
+        subtotal_.anchor_idx = 42
+        inserted_row = _StripeInsertedRow(subtotal_, None, None)
+
+        anchor = inserted_row.anchor
+
+        assert anchor == 42
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def subtotal_(self, request):
+        return instance_mock(request, _Subtotal)
