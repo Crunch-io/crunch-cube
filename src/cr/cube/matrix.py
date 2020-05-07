@@ -209,12 +209,15 @@ class TransformedMatrix(object):
 
         subtotals = self._rows_dimension.subtotals
         neg_idxs = range(-len(subtotals), 0)  # ---like [-3, -2, -1]---
-        table_margin = self._unordered_matrix.table_margin
-        base_rows = self._base_rows
-        base_cols = self._base_columns
 
         return tuple(
-            _InsertedRow(subtotal, neg_idx, table_margin, base_rows, base_cols)
+            _InsertedRow(
+                subtotal,
+                neg_idx,
+                self._unordered_matrix.table_margin,
+                self._base_rows,
+                self._base_columns,
+            )
             for subtotal, neg_idx in zip(subtotals, neg_idxs)
         )
 
