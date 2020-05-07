@@ -822,8 +822,8 @@ class TestCrunchCubeAs_Slice(object):
             [0.00564813, 0.00894148, 0.01205035, 0.01018398, 0.00818274, 0.00363627],
             [0.00610957, 0.00923612, 0.01262603, 0.00960841, 0.00610957, 0.00505237],
         ]
-        np.testing.assert_almost_equal(slice_.standard_deviation, expected_standard_dev)
-        np.testing.assert_almost_equal(slice_.standard_error, expected_standard_error)
+        np.testing.assert_almost_equal(slice_.table_std_dev, expected_standard_dev)
+        np.testing.assert_almost_equal(slice_.table_std_err, expected_standard_error)
         np.testing.assert_almost_equal(slice_.zscore, expected_zscore)
 
     def test_pvals(self):
@@ -953,8 +953,8 @@ class TestCrunchCubeAs_Slice(object):
         ]
 
         np.testing.assert_almost_equal(slice_.zscore, expected_zscore)
-        np.testing.assert_almost_equal(slice_.standard_deviation, expected_standard_dev)
-        np.testing.assert_almost_equal(slice_.standard_error, expected_standard_error)
+        np.testing.assert_almost_equal(slice_.table_std_dev, expected_standard_dev)
+        np.testing.assert_almost_equal(slice_.table_std_err, expected_standard_error)
 
     def test_various_measures_admit_by_gender_weighted_rows(self):
         """ see
@@ -972,8 +972,8 @@ class TestCrunchCubeAs_Slice(object):
         expected_standard_error = [[0.00659641, 0.00492018], [0.0070529, 0.00675348]]
 
         np.testing.assert_almost_equal(slice_.zscore, expected_zscore)
-        np.testing.assert_almost_equal(slice_.standard_deviation, expected_standard_dev)
-        np.testing.assert_almost_equal(slice_.standard_error, expected_standard_error)
+        np.testing.assert_almost_equal(slice_.table_std_dev, expected_standard_dev)
+        np.testing.assert_almost_equal(slice_.table_std_err, expected_standard_error)
 
     def test_selected_crosstab_as_array(self):
         slice_ = Cube(CR.SELECTED_CROSSTAB_4).partitions[0]

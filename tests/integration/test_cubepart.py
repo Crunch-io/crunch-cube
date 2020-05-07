@@ -442,7 +442,7 @@ class Describe_Slice(object):
 
         # Test standard deviation
         np.testing.assert_almost_equal(
-            slice_.standard_deviation,
+            slice_.table_std_dev,
             [
                 [0.46216723, 0.49904908, 0.41533263, 0.31225682, 0.0, 0.10250865],
                 [0.26758936, 0.40613936, 0.33710998, 0.28174342, 0.0, 0.14635252],
@@ -456,7 +456,7 @@ class Describe_Slice(object):
 
         # Test standard error
         np.testing.assert_almost_equal(
-            slice_.standard_error,
+            slice_.table_std_err,
             [
                 [0.04833892, 0.05219646, 0.0434404, 0.03265951, 0.0, 0.01072157],
                 [0.02798766, 0.04247886, 0.03525895, 0.02946806, 0.0, 0.01530728],
@@ -892,8 +892,8 @@ class Describe_Slice(object):
                 0.0226256,
             ],
         ]
-        np.testing.assert_almost_equal(slice_.standard_deviation, expected_standard_dev)
-        np.testing.assert_almost_equal(slice_.standard_error, expected_standard_error)
+        np.testing.assert_almost_equal(slice_.table_std_dev, expected_standard_dev)
+        np.testing.assert_almost_equal(slice_.table_std_err, expected_standard_error)
         np.testing.assert_almost_equal(slice_.zscore, expected_zscore)
         np.testing.assert_almost_equal(slice_.pvals, expected_pvals)
 
@@ -964,8 +964,8 @@ class Describe_Slice(object):
             [0.01865923, 0.02905764, 0.03132936, 0.02187038, 0.0226256],
         ]
 
-        np.testing.assert_almost_equal(slice_.standard_deviation, expected_standard_dev)
-        np.testing.assert_almost_equal(slice_.standard_error, expected_standard_error)
+        np.testing.assert_almost_equal(slice_.table_std_dev, expected_standard_dev)
+        np.testing.assert_almost_equal(slice_.table_std_err, expected_standard_error)
         np.testing.assert_almost_equal(slice_.zscore, expected_zscore)
         np.testing.assert_almost_equal(slice_.pvals, expected_pvals)
 

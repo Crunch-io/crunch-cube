@@ -1128,7 +1128,7 @@ class TestHeadersAndSubtotals(object):
             ],
         )
         np.testing.assert_almost_equal(
-            slice_.standard_deviation,
+            slice_.table_std_dev,
             [
                 [
                     0.13782324,
@@ -1187,7 +1187,7 @@ class TestHeadersAndSubtotals(object):
             ],
         )
         np.testing.assert_almost_equal(
-            slice_.standard_error,
+            slice_.table_std_err,
             [
                 [
                     0.00339092,
@@ -1389,7 +1389,7 @@ class TestHeadersAndSubtotals(object):
         )
         # Test std deviation for 1 col and 2 rows insertions
         np.testing.assert_almost_equal(
-            slice_.standard_deviation,
+            slice_.table_std_dev,
             [
                 [
                     0.12872965,
@@ -1455,7 +1455,7 @@ class TestHeadersAndSubtotals(object):
         )
         # Test std error for 1 col and 2 rows insertions
         np.testing.assert_almost_equal(
-            slice_.standard_error,
+            slice_.table_std_err,
             [
                 [
                     0.00316713,
@@ -1669,7 +1669,7 @@ class TestHeadersAndSubtotals(object):
         )
         # Test standard deviation for 2 rows and 2 cols insertions (1 col at bottom)
         np.testing.assert_almost_equal(
-            slice_.standard_deviation,
+            slice_.table_std_dev,
             [
                 [
                     0.12872965,
@@ -1741,7 +1741,7 @@ class TestHeadersAndSubtotals(object):
         )
         # Test std error for 2 rows and 2 cols insertions (1 col at bottom)
         np.testing.assert_almost_equal(
-            slice_.standard_error,
+            slice_.table_std_err,
             [
                 [
                     0.00316713,
@@ -1839,7 +1839,7 @@ class TestHeadersAndSubtotals(object):
 
         # Test std deviation for 1 column insertion
         np.testing.assert_almost_equal(
-            slice_.standard_deviation,
+            slice_.table_std_dev,
             [
                 [0.372678, 0.372678, 0.0, 0.0, 0.47140452],
                 [0.22906142, 0.372678, 0.31426968, 0.0, 0.41573971],
@@ -1849,7 +1849,7 @@ class TestHeadersAndSubtotals(object):
 
         # Test std error for 1 column insertion
         np.testing.assert_almost_equal(
-            slice_.standard_error,
+            slice_.table_std_err,
             [
                 [0.08784105, 0.08784105, 0.0, 0.0, 0.11111111],
                 [0.0539903, 0.08784105, 0.07407407, 0.0, 0.09799079],
@@ -1917,7 +1917,7 @@ class TestHeadersAndSubtotals(object):
 
         # Test standard_deviation for 2 columns insertion bottom and interleaved
         np.testing.assert_almost_equal(
-            slice_.standard_deviation,
+            slice_.table_std_dev,
             [
                 [0.4, 0.4, 0.0, 0.48989795, 0.0, 0.0, 0.0],
                 [0.0, 0.0, 0.4, 0.4, 0.4, 0.4, 0.48989795],
@@ -1928,7 +1928,7 @@ class TestHeadersAndSubtotals(object):
 
         # Test standard error for 2 columns insertion bottom and interleaved
         np.testing.assert_almost_equal(
-            slice_.standard_error,
+            slice_.table_std_err,
             [
                 [0.17888544, 0.17888544, 0.0, 0.21908902, 0.0, 0.0, 0.0],
                 [0.0, 0.0, 0.17888544, 0.17888544, 0.17888544, 0.17888544, 0.21908902],
@@ -1972,7 +1972,7 @@ class TestHeadersAndSubtotals(object):
 
         # Test std deviation for 1 row insertion
         np.testing.assert_almost_equal(
-            slice_.standard_deviation,
+            slice_.table_std_dev,
             [
                 [0.46216723, 0.41533263, 0.31225682, 0.0, 0.10250865],
                 [0.26758936, 0.33710998, 0.28174342, 0.0, 0.14635252],
@@ -1986,7 +1986,7 @@ class TestHeadersAndSubtotals(object):
 
         # Test std error for 1 row insertion
         np.testing.assert_almost_equal(
-            slice_.standard_error,
+            slice_.table_std_err,
             [
                 [0.04833892, 0.0434404, 0.03265951, 0.0, 0.01072157],
                 [0.02798766, 0.03525895, 0.02946806, 0.0, 0.01530728],
@@ -2126,7 +2126,7 @@ class TestHeadersAndSubtotals(object):
 
         # Test std deviation for 2 rows insertions (interleaved and bottom)
         np.testing.assert_almost_equal(
-            slice_.standard_deviation,
+            slice_.table_std_dev,
             [
                 [
                     0.12872965,
@@ -2187,7 +2187,7 @@ class TestHeadersAndSubtotals(object):
 
         # Test std error for 2 rows insertions (interleaved and bottom)
         np.testing.assert_almost_equal(
-            slice_.standard_error,
+            slice_.table_std_err,
             [
                 [
                     0.00316713,
@@ -2288,7 +2288,7 @@ class TestHeadersAndSubtotals(object):
 
         # Test std deviation for 1 column insertion at left
         np.testing.assert_almost_equal(
-            slice_.standard_deviation,
+            slice_.table_std_dev,
             [
                 [0.47966119, 0.0, 0.0, 0.35251189, 0.40973249, 0.20930808, 0.25894917],
                 [0.48723822, 0.36086396, 0.42327383, 0.0, 0.0, 0.24736422, 0.25468787],
@@ -2297,7 +2297,7 @@ class TestHeadersAndSubtotals(object):
 
         # Test std error for 1 column insertion at left
         np.testing.assert_almost_equal(
-            slice_.standard_error,
+            slice_.table_std_err,
             [
                 [0.0139872, 0.0, 0.0, 0.01027946, 0.01194804, 0.00610355, 0.00755111],
                 [0.01420816, 0.01052301, 0.01234292, 0.0, 0.0, 0.00721329, 0.00742685],
@@ -2571,7 +2571,7 @@ class TestHeadersAndSubtotals(object):
         )
         # Test std deviation
         np.testing.assert_almost_equal(
-            slice_.standard_deviation,
+            slice_.table_std_dev,
             [
                 [
                     0.03018845,
@@ -2681,7 +2681,7 @@ class TestHeadersAndSubtotals(object):
         )
         # Test standard error
         np.testing.assert_almost_equal(
-            slice_.standard_error,
+            slice_.table_std_err,
             [
                 [
                     0.00034447,
@@ -2803,12 +2803,12 @@ class TestHeadersAndSubtotals(object):
             slice_no_col_insertion_.pvals, slice_.pvals[:, : slice_.pvals.shape[1] - 1]
         )
         np.testing.assert_almost_equal(
-            slice_no_col_insertion_.standard_deviation,
-            slice_.standard_deviation[:, : slice_.standard_deviation.shape[1] - 1],
+            slice_no_col_insertion_.table_std_dev,
+            slice_.table_std_dev[:, : slice_.table_std_dev.shape[1] - 1],
         )
         np.testing.assert_almost_equal(
-            slice_no_col_insertion_.standard_error,
-            slice_.standard_error[:, : slice_.standard_error.shape[1] - 1],
+            slice_no_col_insertion_.table_std_err,
+            slice_.table_std_err[:, : slice_.table_std_err.shape[1] - 1],
         )
 
     def it_calculates_residuals_for_ca_as_0th_with_1_col_insertion(self):
@@ -3648,10 +3648,8 @@ class TestHeadersAndSubtotals(object):
             ],
         ]
 
-        np.testing.assert_almost_equal(
-            slice_.standard_deviation, expected_std_deviation
-        )
-        np.testing.assert_almost_equal(slice_.standard_error, expected_standard_error)
+        np.testing.assert_almost_equal(slice_.table_std_dev, expected_std_deviation)
+        np.testing.assert_almost_equal(slice_.table_std_err, expected_standard_error)
 
     def it_provide_residual_test_stats_including_hs(self):
         slice_ = Cube(CR.CAT_X_CAT_HS_2ROWS_1COL).partitions[0]
