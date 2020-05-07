@@ -219,6 +219,9 @@ class Describe_StripeInsertedRow(object):
 
         assert anchor == 42
 
+    def it_knows_it_is_inserted(self):
+        assert _StripeInsertedRow(None, None, None).is_inserted is True
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture

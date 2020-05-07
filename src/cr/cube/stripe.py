@@ -311,6 +311,10 @@ class _StripeInsertedRow(object):
 
     @lazyproperty
     def is_inserted(self):
+        """True when this row is an inserted row.
+
+        Unconditionally True for _StripeInsertedRow.
+        """
         return True
 
     @lazyproperty
