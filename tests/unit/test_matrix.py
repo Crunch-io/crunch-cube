@@ -291,21 +291,27 @@ class DescribeTransformedMatrix(object):
 class Describe_BaseMatrixInsertedVector(object):
     """Unit test suite for `cr.cube.matrix._BaseMatrixInsertedVector` object."""
 
-    def it_knows_the_indices_of_its_addends(self, subtotal_):
-        subtotal_.addend_idxs = (1, 2, 3)
+    def it_knows_the_indices_of_its_addends(
+        self, request, subtotal_, _base_vectors_prop_
+    ):
+        subtotal_.addend_ids = (2, 3)
+        _base_vectors_prop_.return_value = tuple(
+            instance_mock(request, _BaseVector, element_id=i + 1) for i in range(6)
+        )
         inserted_vector = _BaseMatrixInsertedVector(subtotal_, None, None, None, None)
 
         addend_idxs = inserted_vector.addend_idxs
 
-        np.testing.assert_equal(addend_idxs, (1, 2, 3))
+        np.testing.assert_equal(addend_idxs, (1, 2))
 
-    def it_knows_its_anchor(self, subtotal_):
-        subtotal_.anchor_idx = 42
+    @pytest.mark.parametrize("anchor_value", ("top", "bottom", 42))
+    def it_knows_its_anchor(self, subtotal_, anchor_value):
+        subtotal_.anchor = anchor_value
         inserted_vector = _BaseMatrixInsertedVector(subtotal_, None, None, None, None)
 
         anchor = inserted_vector.anchor
 
-        assert anchor == 42
+        assert anchor == anchor_value
 
     def it_knows_it_is_inserted(self):
         assert (
@@ -321,9 +327,15 @@ class Describe_BaseMatrixInsertedVector(object):
         assert ordering == (8, -4, inserted_vector)
 
     @pytest.mark.parametrize(
-        ("anchor", "expected_value"), (("top", 0), ("bottom", sys.maxsize), (8, 9))
+        ("anchor", "expected_value"), (("top", 0), ("bottom", sys.maxsize), (3, 3))
     )
-    def it_knows_its_anchor_location(self, request, anchor, expected_value):
+    def it_knows_its_anchor_location(
+        self, request, anchor, expected_value, _base_vectors_prop_
+    ):
+        _base_vectors_prop_.return_value = tuple(
+            instance_mock(request, _BaseVector, name="base[%d]" % i, element_id=i + 1)
+            for i in range(5)
+        )
         property_mock(request, _BaseMatrixInsertedVector, "anchor", return_value=anchor)
         inserted_vector = _BaseMatrixInsertedVector(None, None, None, None, None)
 

@@ -1074,12 +1074,24 @@ class _BaseMatrixInsertedVector(object):
         Suitable for directly indexing a numpy array object (such as base values or
         margin) to extract the addend values for this subtotal.
         """
-        return np.array(self._subtotal.addend_idxs)
+        addend_ids = self._subtotal.addend_ids
+        return np.fromiter(
+            (
+                idx
+                for idx, vector in enumerate(self._base_vectors)
+                if vector.element_id in addend_ids
+            ),
+            dtype=int,
+        )
 
     @lazyproperty
     def anchor(self):
-        """int offset of this inserted-vector relative to its base-vectors."""
-        return self._subtotal.anchor_idx
+        """str or int anchor value of this inserted-vector.
+
+        The value is either "top", "bottom", or an int element-id of the base-vector it
+        should appear after.
+        """
+        return self._subtotal.anchor
 
     @lazyproperty
     def base(self):
@@ -1220,13 +1232,19 @@ class _BaseMatrixInsertedVector(object):
         See `.ordering` for more.
         """
         anchor = self.anchor
-        return (
-            0
-            if anchor == "top"
-            else sys.maxsize
-            if anchor == "bottom"
-            else int(anchor) + 1
-        )
+
+        if anchor == "top":
+            return 0
+        if anchor == "bottom":
+            return sys.maxsize
+
+        anchor = int(anchor)
+        for i, vector in enumerate(self._base_vectors):
+            if vector.element_id == anchor:
+                return i + 1
+
+        # --- default to bottom if target anchor vector not found ---
+        return sys.maxsize
 
     @lazyproperty
     def _base_vectors(self):
