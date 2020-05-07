@@ -8,6 +8,7 @@ import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension
+from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.stripe import (
     _BaseBaseStripe,
     _BaseStripeRow,
@@ -18,6 +19,7 @@ from cr.cube.stripe import (
 
 from ..unitutil import (
     ANY,
+    call,
     class_mock,
     initializer_mock,
     instance_mock,
@@ -172,6 +174,32 @@ class Describe_StripeInsertionHelper(object):
         assert next(interleaved_rows) == subtotal_rows_[2]
         assert next(interleaved_rows) == subtotal_rows_[1]
         assert next(interleaved_rows, None) is None
+
+    @pytest.mark.parametrize(
+        ("dimension_type", "expected_len"), ((DT.MR, 0), (DT.CA, 0), (DT.CAT, 3))
+    )
+    def it_assembles_the_inserted_rows_to_help(
+        self, request, dimension_type, expected_len, dimension_
+    ):
+        subtotal_rows_ = (
+            instance_mock(request, _StripeInsertedRow, name="subtotal_0"),
+            instance_mock(request, _StripeInsertedRow, name="subtotal_1"),
+            instance_mock(request, _StripeInsertedRow, name="subtotal_2"),
+        )
+        _StripeInsertedRow_ = class_mock(
+            request, "cr.cube.stripe._StripeInsertedRow", side_effect=subtotal_rows_
+        )
+        dimension_.dimension_type = dimension_type
+        dimension_.subtotals = subtotal_rows_
+        insertion_helper = _StripeInsertionHelper(dimension_, ("ordered", "rows"), 42)
+
+        inserted_rows = insertion_helper._inserted_rows
+
+        print(_StripeInsertedRow_.call_args_list)
+        assert _StripeInsertedRow_.call_args_list == [
+            call(row, ("ordered", "rows"), 42) for row in subtotal_rows_[:expected_len]
+        ]
+        assert inserted_rows == subtotal_rows_[:expected_len]
 
     # fixture components ---------------------------------------------
 
