@@ -1,0 +1,167 @@
+{
+    "query": {
+        "dimensions": [
+            {
+                "variable": "/api/datasets/4bb830/variables/000001/"
+            },
+            {
+                "variable": "/api/datasets/4bb830/variables/066c45/"
+            }
+        ],
+        "measures": {
+            "count": {
+                "args": [],
+                "function": "cube_count"
+            }
+        },
+        "weight": null
+    },
+    "query_environment": {
+        "filter": []
+    },
+    "result": {
+        "counts": [
+            14,
+            14,
+            13,
+            16,
+            0,
+            0,
+            0,
+
+            22,
+            14,
+            19,
+            19,
+            0,
+            0,
+            0,
+
+            14,
+            16,
+            19,
+            18,
+            0,
+            0,
+            0,
+
+            17,
+            12,
+            28,
+            11,
+            0,
+            0,
+            0,
+
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ],
+        "dimensions": [
+            {
+                "derived": false,
+                "references": {"alias": "Fruit", "name": "Fruit"},
+                "type": {
+                    "categories": [
+                        {"id": 1, "name": "Apple"},
+                        {"id": 2, "name": "Banana"},
+                        {"id": 3, "name": "Cherry"},
+                        {"id": 4, "name": "Date"},
+                        {"id": -1, "missing": true, "name": "No Data"}
+                    ],
+                    "class": "categorical",
+                    "ordinal": false
+                }
+            },
+            {
+                "derived": false,
+                "references": {"alias": "Vegetable", "name": "Vegetable"},
+                "type": {
+                    "categories": [
+                        {"id": 1, "name": "Asparagus"},
+                        {"id": 2, "name": "Broccoli"},
+                        {"id": 3, "name": "Cauliflower"},
+                        {"id": 4, "name": "Daikon"},
+                        {"id": 5, "missing": true, "name": "Meat only"},
+                        {"id": 6, "missing": true, "name": "No Veg"},
+                        {"id": -1, "missing": true, "name": "No Data"}
+                    ],
+                    "class": "categorical",
+                    "ordinal": false
+                }
+            }
+        ],
+        "filtered": {
+            "unweighted_n": 243,
+            "weighted_n": 243
+        },
+        "measures": {
+            "count": {
+                "data": [
+                    14,
+                    14,
+                    13,
+                    16,
+                    0,
+                    0,
+                    0,
+
+                    22,
+                    14,
+                    19,
+                    19,
+                    0,
+                    0,
+                    0,
+
+                    14,
+                    16,
+                    19,
+                    18,
+                    0,
+                    0,
+                    0,
+
+                    17,
+                    12,
+                    28,
+                    11,
+                    0,
+                    0,
+                    0,
+
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "metadata": {
+                    "derived": true,
+                    "references": {},
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {}
+                    }
+                },
+                "n_missing": 0
+            }
+        },
+        "missing": 0,
+        "n": 243,
+        "unfiltered": {
+            "unweighted_n": 243,
+            "weighted_n": 243
+        }
+    }
+}

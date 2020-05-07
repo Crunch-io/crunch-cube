@@ -184,6 +184,98 @@ class Describe_Slice(object):
             ],
         )
 
+    @pytest.mark.xfail(reason="WIP", strict=True)
+    def it_places_insertions_on_a_reordered_dimension_in_the_right_position(self):
+        """Subtotal anchors follow re-ordered rows.
+
+        The key fixture characteristic is that an ordering transform is combined with
+        subtotal insertions such that their subtotal position is changed by the
+        ordering.
+        """
+        transforms = {
+            "rows_dimension": {
+                "insertions": [
+                    {
+                        "anchor": "top",
+                        "args": [1, 2],
+                        "function": "subtotal",
+                        "name": "Apple+Banana",
+                    },
+                    {
+                        "anchor": 4,
+                        "args": [1, 4],
+                        "function": "subtotal",
+                        "name": "Apple+Date",
+                    },
+                    {
+                        "anchor": "bottom",
+                        "args": [3, 4],
+                        "function": "subtotal",
+                        "name": "Cherry+Date",
+                    },
+                ],
+                "order": {"element_ids": [2, 4, 3, 1], "type": "explicit"},
+            },
+            "columns_dimension": {
+                "insertions": [
+                    {
+                        "anchor": "top",
+                        "args": [1, 2],
+                        "function": "subtotal",
+                        "name": "Asparagus+Broccoli",
+                    },
+                    {
+                        "anchor": 4,
+                        "args": [1, 4],
+                        "function": "subtotal",
+                        "name": "Asparagus+Daikon",
+                    },
+                    {
+                        "anchor": "bottom",
+                        "args": [3, 4],
+                        "function": "subtotal",
+                        "name": "Cauliflower+Daikon",
+                    },
+                ],
+                "order": {"element_ids": [2, 4, 3, 1], "type": "explicit"},
+            },
+        }
+        slice_ = Cube(CR.CAT_X_CAT_4X4, transforms=transforms).partitions[0]
+
+        print("slice_.row_labels == %s" % (slice_.row_labels,))
+        assert slice_.row_labels == (
+            "Apple+Banana",
+            "Banana",
+            "Date",
+            "Apple+Date",
+            "Cherry",
+            "Apple",
+            "Cherry+Date",
+        )
+        assert slice_.column_labels == (
+            "Asparagus+Broccoli",
+            "Broccoli",
+            "Daikon",
+            "Asparagus+Daikon",
+            "Cauliflower",
+            "Asparagus",
+            "Cauliflower+Daikon",
+        )
+        print("slice_.counts == \n%s" % (slice_.counts,))
+        np.testing.assert_equal(
+            slice_.counts,
+            [
+                #     2   4  1+4  3   1  3+4
+                [64, 28, 35, 71, 32, 36, 67],
+                [36, 14, 19, 41, 19, 22, 38],
+                [29, 12, 11, 28, 28, 17, 39],
+                [57, 26, 27, 58, 41, 31, 68],
+                [30, 16, 18, 32, 19, 14, 37],
+                [28, 14, 16, 30, 13, 14, 29],
+                [59, 28, 29, 60, 47, 31, 76],
+            ],
+        )
+
     def it_provides_same_proportions_without_explicit_order(self):
         transforms = TR.TEST_DASHBOARD_TRANSFORM_SINGLE_EL_VISIBLE
         slice_ = Cube(CR.TEST_DASHBOARD_FIXTURE, transforms=transforms).partitions[0]
