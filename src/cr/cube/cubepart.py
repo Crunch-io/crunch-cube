@@ -168,6 +168,20 @@ class _Slice(CubePartition):
         return np.array([column.margin for column in self._matrix.columns]).T
 
     @lazyproperty
+    def columns_std_dev(self):
+        """Returns the standard deviation for cell percentages
+        `std_deviation = sqrt(variance)`
+        """
+        return np.sqrt(self._columns_variance)
+
+    @lazyproperty
+    def columns_std_err(self):
+        """Returns the standard error for cell percentages
+        `std_error = sqrt(variance/N)`
+        """
+        return np.sqrt(self._columns_variance / self.columns_margin)
+
+    @lazyproperty
     def counts(self):
         return np.array([row.values for row in self._matrix.rows])
 
@@ -591,11 +605,13 @@ class _Slice(CubePartition):
         return self._transforms_arg if self._transforms_arg is not None else {}
 
     @lazyproperty
-    def _variance(self):
+    def _columns_variance(self):
         """Returns the variance for cell percentages
         `variance = p * (1-p)`
         """
-        return self.counts / self.table_margin * (1 - self.counts / self.table_margin)
+        return (
+            self.counts / self.columns_margin * (1 - self.counts / self.columns_margin)
+        )
 
 
 class _Strand(CubePartition):

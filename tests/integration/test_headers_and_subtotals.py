@@ -1005,6 +1005,129 @@ class TestHeadersAndSubtotals(object):
             "Latino and other voters",
         )
 
+    def it_calculate_col_residuals_for_subtotals(self):
+        slice_ = Cube(CR.CAT_X_CAT_HS_2ROWS_1COL).partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_.columns_std_dev,
+            [
+                [
+                    0.49326036,
+                    0.43967108,
+                    0.43739495,
+                    0.4093598,
+                    0.42242603,
+                    0.41688475,
+                    0.47060217,
+                ],
+                [
+                    0.35255854,
+                    0.47915742,
+                    0.47870319,
+                    0.46986171,
+                    0.3799671,
+                    0.42844691,
+                    0.4752359,
+                ],
+                [
+                    0.44536177,
+                    0.48562091,
+                    0.48697607,
+                    0.49823831,
+                    0.49136926,
+                    0.49885606,
+                    0.46812184,
+                ],
+                [
+                    0.22709084,
+                    0.4103259,
+                    0.41105414,
+                    0.39507899,
+                    0.32201514,
+                    0.35776034,
+                    0.37468029,
+                ],
+                [
+                    0.4,
+                    0.49487166,
+                    0.49493871,
+                    0.49948985,
+                    0.45491071,
+                    0.48840757,
+                    0.49981735,
+                ],
+                [
+                    0.41301152,
+                    0.372678,
+                    0.37676108,
+                    0.44107522,
+                    0.49937461,
+                    0.48614202,
+                    0.36229072,
+                ],
+            ],
+        )
+
+        np.testing.assert_almost_equal(
+            slice_.columns_std_err,
+            [
+                [
+                    0.06651121,
+                    0.03916901,
+                    0.01766622,
+                    0.02325007,
+                    0.0211213,
+                    0.01564541,
+                    0.03868326,
+                ],
+                [
+                    0.04753898,
+                    0.04268674,
+                    0.01933464,
+                    0.02668635,
+                    0.01899836,
+                    0.01607933,
+                    0.03906415,
+                ],
+                [
+                    0.06005257,
+                    0.04326255,
+                    0.01966878,
+                    0.02829803,
+                    0.02456846,
+                    0.01872173,
+                    0.03847938,
+                ],
+                [
+                    0.03062092,
+                    0.03655474,
+                    0.01660232,
+                    0.02243898,
+                    0.01610076,
+                    0.01342651,
+                    0.03079853,
+                ],
+                [
+                    0.05393599,
+                    0.04408667,
+                    0.01999039,
+                    0.02836912,
+                    0.02274554,
+                    0.01832961,
+                    0.04108473,
+                ],
+                [
+                    0.05569046,
+                    0.03320079,
+                    0.01521724,
+                    0.02505139,
+                    0.02496873,
+                    0.01824458,
+                    0.02978011,
+                ],
+            ],
+        )
+
     def it_calculate_residuals_for_subtotals_1col_2rows(self):
         slice_ = Cube(CR.CAT_X_CAT_HS_2ROWS_1COL).partitions[0]
 
@@ -1857,6 +1980,26 @@ class TestHeadersAndSubtotals(object):
             ],
         )
 
+        # Test col std dev
+        np.testing.assert_almost_equal(
+            slice_.columns_std_dev,
+            [
+                [0.4330127, 0.48412292, 0.0, 0.0, 0.5],
+                [0.4330127, 0.48412292, 0.47140452, 0.0, 0.47140452],
+                [0.0, 0.4330127, 0.47140452, 0.0, 0.372678],
+            ],
+        )
+
+        # Test col std err
+        np.testing.assert_almost_equal(
+            slice_.columns_std_err,
+            [
+                [0.21650635, 0.1711633, 0.0, 0.0, 0.14433757],
+                [0.21650635, 0.1711633, 0.27216553, 0.0, 0.13608276],
+                [0.0, 0.15309311, 0.27216553, 0.0, 0.10758287],
+            ],
+        )
+
         slice_ = Cube(CR.CA_X_CAT_HS).partitions[0]
 
         # Test zscores for 2 columns insertion bottom and interleaved
@@ -1937,6 +2080,28 @@ class TestHeadersAndSubtotals(object):
             ],
         )
 
+        # Test col standard dev for 2 columns insertion bottom and interleaved
+        np.testing.assert_almost_equal(
+            slice_.columns_std_dev,
+            [
+                [0.0, 0.0, 0.0, 0.47140452, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.47140452, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            ],
+        )
+
+        # Test col standard error for 2 columns insertion bottom and interleaved
+        np.testing.assert_almost_equal(
+            slice_.columns_std_err,
+            [
+                [0.0, 0.0, 0.0, 0.27216553, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.27216553, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            ],
+        )
+
     def it_calculates_residuals_for_rows_insertion(self):
         transforms = {"columns_dimension": {"insertions": {}}}
         slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[0]
@@ -1995,6 +2160,34 @@ class TestHeadersAndSubtotals(object):
                 [0.01873208, 0.02946806, 0.02359023, 0.0, 0.0],
                 [0.0, 0.0, 0.0, 0.0, 0.0],
                 [0.01072157, 0.01072157, 0.01072157, 0.0, 0.0],
+            ],
+        )
+
+        # Test col std deviation for 1 row insertion
+        np.testing.assert_almost_equal(
+            slice_.columns_std_dev,
+            [
+                [0.41561694, 0.48762374, 0.49916867, np.nan, 0.4689693],
+                [0.39644438, 0.48005275, 0.49353964, np.nan, 0.4689693],
+                [0.16604076, 0.0, 0.22060003, np.nan, 0.0],
+                [0.27659294, 0.32573599, 0.31156024, np.nan, 0.4689693],
+                [0.27659294, 0.42678893, 0.4384431, np.nan, 0.0],
+                [0.0, 0.0, 0.0, np.nan, 0.0],
+                [0.16126906, 0.16853704, 0.22060003, np.nan, 0.0],
+            ],
+        )
+
+        # Test col std error for 1 row insertion
+        np.testing.assert_almost_equal(
+            slice_.columns_std_err,
+            [
+                [0.06895161, 0.08465401, 0.11473767, np.nan, 0.27200111],
+                [0.06577085, 0.08333965, 0.1134438, np.nan, 0.27200111],
+                [0.02754647, 0.0, 0.05070657, np.nan, 0.0],
+                [0.04588727, 0.05654946, 0.07161446, np.nan, 0.27200111],
+                [0.04588727, 0.07409277, 0.10077944, np.nan, 0.0],
+                [0.0, 0.0, 0.0, np.nan, 0.0],
+                [0.02675483, 0.0292589, 0.05070657, np.nan, 0.0],
             ],
         )
 
@@ -2301,6 +2494,24 @@ class TestHeadersAndSubtotals(object):
             [
                 [0.0139872, 0.0, 0.0, 0.01027946, 0.01194804, 0.00610355, 0.00755111],
                 [0.01420816, 0.01052301, 0.01234292, 0.0, 0.0, 0.00721329, 0.00742685],
+            ],
+        )
+
+        # Test col std dev for 1 column insertion at left
+        np.testing.assert_almost_equal(
+            slice_.columns_std_dev,
+            [
+                [0.49962497, 0.0, 0.0, 0.0, 0.0, 0.49223325, 0.49991932],
+                [0.49962497, 0.0, 0.0, 0.0, 0.0, 0.49223325, 0.49991932],
+            ],
+        )
+
+        # Test col std err for 1 column insertion at left
+        np.testing.assert_almost_equal(
+            slice_.columns_std_err,
+            [
+                [0.01686153, 0.0, 0.0, 0.0, 0.0, 0.04300662, 0.03868492],
+                [0.01686153, 0.0, 0.0, 0.0, 0.0, 0.04300662, 0.03868492],
             ],
         )
 

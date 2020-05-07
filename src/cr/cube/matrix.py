@@ -1336,10 +1336,16 @@ class _AssembledVector(_BaseTransformationVector):
 
     @lazyproperty
     def table_std_dev(self):
+        """Returns the standard deviation for cell percentages
+        `std_deviation = sqrt(variance)`
+        """
         return np.sqrt(self._variance)
 
     @lazyproperty
     def table_std_err(self):
+        """Returns the standard error for cell percentages
+        `std_error = sqrt(variance/N)`
+        """
         return np.sqrt(self._variance / self.table_margin)
 
     @lazyproperty

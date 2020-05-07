@@ -270,7 +270,7 @@ def test_various_measures_from_r_rows_margin():
             -0.794143540856781,
         ],
     ]
-    expected_standard_dev = [
+    expected_table_std_dev = [
         [
             0.32529036,
             0.3230502,
@@ -292,7 +292,7 @@ def test_various_measures_from_r_rows_margin():
             0.09510867,
         ],
     ]
-    expected_standard_error = [
+    expected_table_std_err = [
         [
             0.00185406,
             0.0018413,
@@ -314,10 +314,57 @@ def test_various_measures_from_r_rows_margin():
             0.00054209,
         ],
     ]
+    expected_col_std_err = [
+        [
+            0.00564723,
+            0.00585537,
+            0.00798203,
+            0.01164323,
+            0.01289225,
+            0.00573883,
+            0.02665202,
+            0.02114537,
+        ],
+        [
+            0.00564723,
+            0.00585537,
+            0.00798203,
+            0.01164323,
+            0.01289225,
+            0.00573883,
+            0.02665202,
+            0.02114537,
+        ],
+    ]
+
+    expected_col_std_dev = [
+        [
+            0.49930382,
+            0.49999992,
+            0.49991404,
+            0.49999647,
+            0.49982403,
+            0.4967613,
+            0.49933267,
+            0.49999326,
+        ],
+        [
+            0.49930382,
+            0.49999992,
+            0.49991404,
+            0.49999647,
+            0.49982403,
+            0.4967613,
+            0.49933267,
+            0.49999326,
+        ],
+    ]
 
     np.testing.assert_almost_equal(slice_.zscore, expected_zscore)
-    np.testing.assert_almost_equal(slice_.table_std_err, expected_standard_error)
-    np.testing.assert_almost_equal(slice_.table_std_dev, expected_standard_dev)
+    np.testing.assert_almost_equal(slice_.table_std_err, expected_table_std_err)
+    np.testing.assert_almost_equal(slice_.table_std_dev, expected_table_std_dev)
+    np.testing.assert_almost_equal(slice_.columns_std_dev, expected_col_std_dev)
+    np.testing.assert_almost_equal(slice_.columns_std_err, expected_col_std_err)
 
 
 def test_mr_x_single_wave():
@@ -379,6 +426,14 @@ def test_std_deviation_std_error_array_x_mr_by_row():
         slice_.table_std_err,
         [[0.02978762, 0.00971635, 0.03292998], [0.02918338, 0.03472281, 0.02929588]],
     )
+    np.testing.assert_array_almost_equal(
+        slice_.columns_std_dev,
+        [[0.49978635, 0.20331906, 0.49121125], [0.49978635, 0.20331906, 0.49121125]],
+    )
+    np.testing.assert_array_almost_equal(
+        slice_.columns_std_err,
+        [[0.05158518, 0.02113084, 0.04615627], [0.05158518, 0.02113084, 0.04615627]],
+    )
 
 
 def test_array_x_mr_by_cell():
@@ -423,6 +478,24 @@ def test_cat_x_mr_x_itself_zscores():
             [0.00409039, 0.00545342, 0.00594324, 0.0055188, 0.00600108],
         ],
     )
+    np.testing.assert_almost_equal(
+        slice_.columns_std_dev,
+        [
+            [0.45689893, 0.42836987, 0.41706167, 0.4238419, 0.44819968],
+            [0.45943524, 0.44539695, 0.46662527, 0.44232528, 0.45647742],
+            [0.42785093, 0.44999726, 0.44477969, 0.44760084, 0.43699848],
+            [0.36576824, 0.40225385, 0.38733066, 0.41506083, 0.37441564],
+        ],
+    )
+    np.testing.assert_almost_equal(
+        slice_.columns_std_err,
+        [
+            [0.02937373, 0.02308169, 0.01952406, 0.02354123, 0.01988999],
+            [0.02953678, 0.02399915, 0.0218443, 0.02456784, 0.02025734],
+            [0.02750625, 0.02424703, 0.02082163, 0.02486086, 0.01939291],
+            [0.023515, 0.02167449, 0.01813225, 0.02305351, 0.01661564],
+        ],
+    )
 
 
 def test_cat_x_mr_and_cat_x_mr_x_itself_various_measures():
@@ -435,6 +508,12 @@ def test_cat_x_mr_and_cat_x_mr_x_itself_various_measures():
     np.testing.assert_array_almost_equal(slice_.zscore, slice2_.zscore)
     np.testing.assert_array_almost_equal(slice_.table_std_dev, slice2_.table_std_dev)
     np.testing.assert_array_almost_equal(slice_.table_std_err, slice2_.table_std_err)
+    np.testing.assert_array_almost_equal(
+        slice_.columns_std_dev, slice2_.columns_std_dev
+    )
+    np.testing.assert_array_almost_equal(
+        slice_.columns_std_err, slice2_.columns_std_err
+    )
     assert slice_.shape == (4, 5)
     assert slice2_.shape == (4, 5)
 

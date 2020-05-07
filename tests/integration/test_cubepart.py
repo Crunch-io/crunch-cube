@@ -440,7 +440,7 @@ class Describe_Slice(object):
             ],
         )
 
-        # Test standard deviation
+        # Test table standard deviation
         np.testing.assert_almost_equal(
             slice_.table_std_dev,
             [
@@ -454,7 +454,7 @@ class Describe_Slice(object):
             ],
         )
 
-        # Test standard error
+        # Test table standard error
         np.testing.assert_almost_equal(
             slice_.table_std_err,
             [
@@ -465,6 +465,34 @@ class Describe_Slice(object):
                 [0.01873208, 0.03400224, 0.02946806, 0.02359023, 0.0, 0.0],
                 [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
                 [0.01072157, 0.01508098, 0.01072157, 0.01072157, 0.0, 0.0],
+            ],
+        )
+
+        # Test cols standard dev
+        np.testing.assert_almost_equal(
+            slice_.columns_std_dev,
+            [
+                [0.41561694, 0.45910103, 0.48762374, 0.49916867, np.nan, 0.4689693],
+                [0.39644438, 0.44601408, 0.48005275, 0.49353964, np.nan, 0.4689693],
+                [0.16604076, 0.12087539, 0.0, 0.22060003, np.nan, 0.0],
+                [0.27659294, 0.30162497, 0.32573599, 0.31156024, np.nan, 0.4689693],
+                [0.27659294, 0.36469915, 0.42678893, 0.4384431, np.nan, 0.0],
+                [0.0, 0.0, 0.0, 0.0, np.nan, 0.0],
+                [0.16126906, 0.1647831, 0.16853704, 0.22060003, np.nan, 0.0],
+            ],
+        )
+
+        # Test cols standard err
+        np.testing.assert_almost_equal(
+            slice_.columns_std_err,
+            [
+                [0.06895161, 0.05506512, 0.08465401, 0.11473767, np.nan, 0.27200111],
+                [0.06577085, 0.05349546, 0.08333965, 0.1134438, np.nan, 0.27200111],
+                [0.02754647, 0.01449794, 0.0, 0.05070657, np.nan, 0.0],
+                [0.04588727, 0.03617726, 0.05654946, 0.07161446, np.nan, 0.27200111],
+                [0.04588727, 0.04374245, 0.07409277, 0.10077944, np.nan, 0.0],
+                [0.0, 0.0, 0.0, 0.0, np.nan, 0.0],
+                [0.02675483, 0.01976428, 0.0292589, 0.05070657, np.nan, 0.0],
             ],
         )
 
@@ -788,7 +816,7 @@ class Describe_Slice(object):
                 np.nan,
             ],
         ]
-        expected_standard_dev = [
+        expected_table_std_dev = [
             [
                 0.26982777,
                 0.18268971,
@@ -840,7 +868,7 @@ class Describe_Slice(object):
                 0.49151833,
             ],
         ]
-        expected_standard_error = [
+        expected_table_std_err = [
             [
                 0.02031794,
                 0.01375648,
@@ -892,8 +920,114 @@ class Describe_Slice(object):
                 0.0226256,
             ],
         ]
-        np.testing.assert_almost_equal(slice_.table_std_dev, expected_standard_dev)
-        np.testing.assert_almost_equal(slice_.table_std_err, expected_standard_error)
+        expected_col_std_dev = [
+            [
+                0.48002447,
+                0.38894286,
+                0.4819874,
+                np.nan,
+                0.25671222,
+                0.32250231,
+                np.nan,
+                0.29348932,
+            ],
+            [
+                0.4949243,
+                0.46165233,
+                0.48568705,
+                np.nan,
+                0.46761583,
+                0.46335822,
+                np.nan,
+                0.4655109,
+            ],
+            [
+                0.42148452,
+                0.49947006,
+                0.49363665,
+                np.nan,
+                0.49695538,
+                0.4998946,
+                np.nan,
+                0.49900958,
+            ],
+            [
+                0.46916094,
+                0.46423936,
+                0.46550355,
+                np.nan,
+                0.40251749,
+                0.35069396,
+                np.nan,
+                0.37577601,
+            ],
+            [
+                0.41284167,
+                0.37480303,
+                0.38563611,
+                np.nan,
+                0.41249133,
+                0.4002662,
+                np.nan,
+                0.40614819,
+            ],
+        ]
+        expected_col_std_err = [
+            [
+                0.1028366,
+                0.06789606,
+                0.06522613,
+                np.nan,
+                0.03345903,
+                0.04066543,
+                np.nan,
+                0.02659733,
+            ],
+            [
+                0.12475421,
+                0.07228711,
+                0.06460091,
+                np.nan,
+                0.0532943,
+                0.05249552,
+                np.nan,
+                0.03740326,
+            ],
+            [
+                0.12056446,
+                0.07802173,
+                0.06767673,
+                np.nan,
+                0.05182406,
+                0.04935598,
+                np.nan,
+                0.03577725,
+            ],
+            [
+                0.10249407,
+                0.05842565,
+                0.05076373,
+                np.nan,
+                0.03127232,
+                0.02435786,
+                np.nan,
+                0.01945794,
+            ],
+            [
+                0.07421655,
+                0.03989992,
+                0.03532412,
+                np.nan,
+                0.03203276,
+                0.02927602,
+                np.nan,
+                0.02162477,
+            ],
+        ]
+        np.testing.assert_almost_equal(slice_.table_std_dev, expected_table_std_dev)
+        np.testing.assert_almost_equal(slice_.table_std_err, expected_table_std_err)
+        np.testing.assert_almost_equal(slice_.columns_std_dev, expected_col_std_dev)
+        np.testing.assert_almost_equal(slice_.columns_std_err, expected_col_std_err)
         np.testing.assert_almost_equal(slice_.zscore, expected_zscore)
         np.testing.assert_almost_equal(slice_.pvals, expected_pvals)
 
@@ -943,7 +1077,7 @@ class Describe_Slice(object):
             [np.nan, np.nan, np.nan, np.nan, np.nan],
             [np.nan, np.nan, np.nan, np.nan, np.nan],
         ]
-        expected_standard_dev = [
+        expected_table_std_dev = [
             [0.26982777, 0.20175242, 0.10614473, 0.17290444, 0.22056401],
             [0.18268971, 0.2363915, 0.26958793, 0.29282782, 0.36225248],
             [0.31735855, 0.30254544, 0.28661105, 0.33136132, 0.40489719],
@@ -953,7 +1087,7 @@ class Describe_Slice(object):
             [0.0, 0.0, 0.0, 0.0, 0.0],
             [0.24779961, 0.42250711, 0.49311729, 0.46756128, 0.49151833],
         ]
-        expected_standard_error = [
+        expected_table_std_err = [
             [0.02031794, 0.01387539, 0.00674372, 0.00808768, 0.01015302],
             [0.01375648, 0.01625767, 0.01712781, 0.01369714, 0.01667523],
             [0.023897, 0.02080736, 0.01820934, 0.01549956, 0.01863825],
@@ -963,9 +1097,31 @@ class Describe_Slice(object):
             [0.0, 0.0, 0.0, 0.0, 0.0],
             [0.01865923, 0.02905764, 0.03132936, 0.02187038, 0.0226256],
         ]
+        expected_col_std_dev = [
+            [0.4964821, 0.33305134, 0.14814455, 0.19222783, 0.24516228],
+            [0.39446083, 0.38216178, 0.36232051, 0.32260503, 0.39589898],
+            [0.48183561, 0.46026052, 0.38241808, 0.36325841, 0.43799672],
+            [0.0, 0.0, 0.0, 0.0, 0.0],
+            [0.3384968, 0.47745422, 0.49106178, 0.47991786, 0.4751812],
+            [0.42365382, 0.47497424, 0.49293283, 0.49973929, 0.48921994],
+            [0.0, 0.0, 0.0, 0.0, 0.0],
+            [0.48183561, 0.46026052, 0.38241808, 0.36325841, 0.43799672],
+        ]
+        expected_col_std_err = [
+            [0.08827619, 0.03960109, 0.0132104, 0.01003574, 0.01263043],
+            [0.07013646, 0.04544051, 0.03230898, 0.01684241, 0.02039618],
+            [0.08567199, 0.05472675, 0.03410112, 0.01896482, 0.02256499],
+            [0.0, 0.0, 0.0, 0.0, 0.0],
+            [0.06018587, 0.05677115, 0.04378914, 0.02505532, 0.02448069],
+            [0.07532707, 0.05647627, 0.04395598, 0.02609015, 0.02520394],
+            [0.0, 0.0, 0.0, 0.0, 0.0],
+            [0.08567199, 0.05472675, 0.03410112, 0.01896482, 0.02256499],
+        ]
 
-        np.testing.assert_almost_equal(slice_.table_std_dev, expected_standard_dev)
-        np.testing.assert_almost_equal(slice_.table_std_err, expected_standard_error)
+        np.testing.assert_almost_equal(slice_.table_std_dev, expected_table_std_dev)
+        np.testing.assert_almost_equal(slice_.table_std_err, expected_table_std_err)
+        np.testing.assert_almost_equal(slice_.columns_std_dev, expected_col_std_dev)
+        np.testing.assert_almost_equal(slice_.columns_std_err, expected_col_std_err)
         np.testing.assert_almost_equal(slice_.zscore, expected_zscore)
         np.testing.assert_almost_equal(slice_.pvals, expected_pvals)
 
