@@ -65,6 +65,26 @@ class DescribeTransformedMatrix(object):
         )
         assert assembled_columns == ("assembled", "columns")
 
+    def it_assembles_inserted_rows_into_base_rows_to_help(
+        self,
+        _base_rows_prop_,
+        _inserted_rows_prop_,
+        _inserted_columns_prop_,
+        _assembled_vectors_,
+    ):
+        _base_rows_prop_.return_value = ("base", "rows")
+        _inserted_rows_prop_.return_value = ("inserted", "rows")
+        _inserted_columns_prop_.return_value = ("inserted", "columns")
+        _assembled_vectors_.return_value = ("assembled", "rows")
+        matrix = TransformedMatrix(None)
+
+        assembled_rows = matrix._assembled_rows
+
+        _assembled_vectors_.assert_called_once_with(
+            matrix, ("base", "rows"), ("inserted", "rows"), ("inserted", "columns")
+        )
+        assert assembled_rows == ("assembled", "rows")
+
     @pytest.mark.parametrize(
         ("InsertedVectorCls", "OpposingInsertedVectorCls"),
         ((_InsertedColumn, _InsertedRow), (_InsertedRow, _InsertedColumn)),
@@ -131,6 +151,10 @@ class DescribeTransformedMatrix(object):
     @pytest.fixture
     def base_matrix_(self, request):
         return instance_mock(request, _BaseBaseMatrix)
+
+    @pytest.fixture
+    def _base_rows_prop_(self, request):
+        return property_mock(request, TransformedMatrix, "_base_rows")
 
     @pytest.fixture
     def cube_(self, request):
