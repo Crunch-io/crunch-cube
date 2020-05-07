@@ -1331,7 +1331,7 @@ class _BaseTransformationVector(object):
 class _AssembledVector(_BaseTransformationVector):
     """Vector with base, as well as inserted, elements (of the opposite dimension)."""
 
-    def __init__(self, base_vector, opposite_inserted_vectors, vector_idx=0):
+    def __init__(self, base_vector, opposite_inserted_vectors, vector_idx):
         self._base_vector = base_vector
         self._opposite_inserted_vectors = opposite_inserted_vectors
         self._vector_idx = vector_idx
@@ -1405,30 +1405,21 @@ class _AssembledVector(_BaseTransformationVector):
     @lazyproperty
     def zscore(self):
         def fsubtot(inserted_vector):
-            if self.is_inserted:
-                opposite_margin = np.sum(
-                    self.opposite_margins[inserted_vector.addend_idxs]
-                )
-                variance = (
-                    opposite_margin
-                    * self.margin
-                    * (
-                        (self.table_margin - opposite_margin)
-                        * (self.table_margin - self.margin)
-                    )
-                    / self.table_margin ** 3
-                )
-                expected_count = opposite_margin * self.margin / self.table_margin
-                cell_value = np.sum(
-                    self._base_vector.values[inserted_vector.addend_idxs]
-                )
-                residuals = cell_value - expected_count
-                zscore = residuals / np.sqrt(variance)
+            if not self.is_inserted:
+                return inserted_vector.zscore[self._vector_idx]
 
-            else:
-                zscore = inserted_vector.zscore[self._vector_idx]
-
-            return zscore
+            margin, table_margin = self.margin, self.table_margin
+            opposite_margin = np.sum(self.opposite_margins[inserted_vector.addend_idxs])
+            variance = (
+                opposite_margin
+                * margin
+                * ((table_margin - opposite_margin) * (table_margin - margin))
+                / table_margin ** 3
+            )
+            expected_count = opposite_margin * margin / table_margin
+            cell_value = np.sum(self._base_vector.values[inserted_vector.addend_idxs])
+            residuals = cell_value - expected_count
+            return residuals / np.sqrt(variance)
 
         return self._apply_interleaved(self._base_vector.zscore, fsubtot)
 
