@@ -19,7 +19,15 @@ from cr.cube.matrix import (
     TransformedMatrix,
 )
 
-from ..unitutil import ANY, call, class_mock, initializer_mock, instance_mock
+from ..unitutil import (
+    ANY,
+    call,
+    class_mock,
+    initializer_mock,
+    instance_mock,
+    method_mock,
+    property_mock,
+)
 
 
 class DescribeTransformedMatrix(object):
@@ -36,6 +44,26 @@ class DescribeTransformedMatrix(object):
         _BaseBaseMatrix_.factory.assert_called_once_with(cube_, dimensions_, 7)
         _init_.assert_called_once_with(ANY, base_matrix_)
         assert isinstance(matrix, TransformedMatrix)
+
+    def it_assembles_inserted_columns_into_base_columns_to_help(
+        self,
+        _base_columns_prop_,
+        _inserted_columns_prop_,
+        _inserted_rows_prop_,
+        _assembled_vectors_,
+    ):
+        _base_columns_prop_.return_value = ("base", "columns")
+        _inserted_columns_prop_.return_value = ("inserted", "columns")
+        _inserted_rows_prop_.return_value = ("inserted", "rows")
+        _assembled_vectors_.return_value = ("assembled", "columns")
+        matrix = TransformedMatrix(None)
+
+        assembled_columns = matrix._assembled_columns
+
+        _assembled_vectors_.assert_called_once_with(
+            matrix, ("base", "columns"), ("inserted", "columns"), ("inserted", "rows")
+        )
+        assert assembled_columns == ("assembled", "columns")
 
     @pytest.mark.parametrize(
         ("InsertedVectorCls", "OpposingInsertedVectorCls"),
@@ -93,9 +121,25 @@ class DescribeTransformedMatrix(object):
         return class_mock(request, "cr.cube.matrix._AssembledVector")
 
     @pytest.fixture
+    def _assembled_vectors_(self, request):
+        return method_mock(request, TransformedMatrix, "_assembled_vectors")
+
+    @pytest.fixture
+    def _base_columns_prop_(self, request):
+        return property_mock(request, TransformedMatrix, "_base_columns")
+
+    @pytest.fixture
     def base_matrix_(self, request):
         return instance_mock(request, _BaseBaseMatrix)
 
     @pytest.fixture
     def cube_(self, request):
         return instance_mock(request, Cube)
+
+    @pytest.fixture
+    def _inserted_columns_prop_(self, request):
+        return property_mock(request, TransformedMatrix, "_inserted_columns")
+
+    @pytest.fixture
+    def _inserted_rows_prop_(self, request):
+        return property_mock(request, TransformedMatrix, "_inserted_rows")
