@@ -252,6 +252,9 @@ class Describe_BaseStripeRow(object):
 
         assert element_id == 42
 
+    def it_knows_it_is_not_inserted(self):
+        assert _BaseStripeRow(None).is_inserted is False
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
