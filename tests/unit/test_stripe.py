@@ -11,6 +11,7 @@ from cr.cube.dimension import Dimension
 from cr.cube.stripe import (
     _BaseBaseStripe,
     _BaseStripeRow,
+    _StripeInsertedRow,
     _StripeInsertionHelper,
     TransformedStripe,
 )
@@ -139,6 +140,37 @@ class Describe_StripeInsertionHelper(object):
         _iter_interleaved_rows_.assert_called_once_with(ANY)
         assert next(interleaved_rows) == "interleaved"
         assert next(interleaved_rows) == "rows"
+        assert next(interleaved_rows, None) is None
+
+    def it_generates_the_interleaved_rows_in_order_to_help(self, request):
+        subtotal_rows_ = (
+            instance_mock(request, _StripeInsertedRow, name="subt_0", anchor=0),
+            instance_mock(request, _StripeInsertedRow, name="subt_1", anchor="bottom"),
+            instance_mock(request, _StripeInsertedRow, name="subt_2", anchor=1),
+            instance_mock(request, _StripeInsertedRow, name="subt_3", anchor="top"),
+            instance_mock(request, _StripeInsertedRow, name="subt_4", anchor="top"),
+        )
+        property_mock(
+            request,
+            _StripeInsertionHelper,
+            "_inserted_rows",
+            return_value=subtotal_rows_,
+        )
+        ordered_rows_ = (
+            instance_mock(request, _BaseStripeRow, name="row_0"),
+            instance_mock(request, _BaseStripeRow, name="row_1"),
+        )
+        insertion_helper = _StripeInsertionHelper(None, ordered_rows_, None)
+
+        interleaved_rows = insertion_helper._iter_interleaved_rows()
+
+        assert next(interleaved_rows) == subtotal_rows_[3]
+        assert next(interleaved_rows) == subtotal_rows_[4]
+        assert next(interleaved_rows) == ordered_rows_[0]
+        assert next(interleaved_rows) == subtotal_rows_[0]
+        assert next(interleaved_rows) == ordered_rows_[1]
+        assert next(interleaved_rows) == subtotal_rows_[2]
+        assert next(interleaved_rows) == subtotal_rows_[1]
         assert next(interleaved_rows, None) is None
 
     # fixture components ---------------------------------------------

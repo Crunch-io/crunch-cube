@@ -10,6 +10,8 @@ proportions. It does *not* have pvals or zscores.
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import collections
+
 import numpy as np
 
 from cr.cube.enum import DIMENSION_TYPE as DT
@@ -91,24 +93,27 @@ class _StripeInsertionHelper(object):
 
     def _iter_interleaved_rows(self):
         """Generate all row vectors with inserted rows interleaved at right spot."""
-        # ---subtotals inserted at top---
-        for row in self._all_inserted_rows:
-            if row.anchor == "top":
-                yield row
+        # --- organize inserted-rows by anchor ---
+        inserted_rows_by_anchor = collections.defaultdict(list)
+        for inserted_row in self._inserted_rows:
+            inserted_rows_by_anchor[inserted_row.anchor].append(inserted_row)
 
-        # ---body rows with subtotals anchored to specific body positions---
+        # --- subtotals inserted at top ---
+        for inserted_row in inserted_rows_by_anchor["top"]:
+            yield inserted_row
+
+        # --- body rows with subtotals anchored to specific body positions ---
         for idx, row in enumerate(self._ordered_rows):
             yield row
-            for inserted_row in self._iter_inserted_rows_anchored_at(idx):
+            for inserted_row in inserted_rows_by_anchor[idx]:
                 yield inserted_row
 
-        # ---subtotals appended at bottom---
-        for row in self._all_inserted_rows:
-            if row.anchor == "bottom":
-                yield row
+        # --- subtotals appended at bottom ---
+        for inserted_row in inserted_rows_by_anchor["bottom"]:
+            yield inserted_row
 
     @lazyproperty
-    def _all_inserted_rows(self):
+    def _inserted_rows(self):
         """Sequence of _StripeInsertedRow objects representing inserted subtotal rows.
 
         The returned vectors are in the order subtotals were specified in the cube
@@ -122,10 +127,6 @@ class _StripeInsertionHelper(object):
             _StripeInsertedRow(subtotal, self._ordered_rows, self._table_margin)
             for subtotal in self._rows_dimension.subtotals
         )
-
-    def _iter_inserted_rows_anchored_at(self, anchor):
-        """Generate all inserted row vectors with matching `anchor`."""
-        return (row for row in self._all_inserted_rows if row.anchor == anchor)
 
 
 # ===BASE STRIPES===
