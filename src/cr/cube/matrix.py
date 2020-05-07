@@ -78,17 +78,13 @@ class TransformedMatrix(object):
         """Sequence of column vectors including inserted columns.
 
         Each column vector also includes any new elements introduced by inserted rows.
-        """
-        opposing_inserted_vectors = self._inserted_rows
 
-        return tuple(
-            _AssembledVector(column, opposing_inserted_vectors, 0 if idx < 0 else idx)
-            for _, idx, column in sorted(
-                itertools.chain(
-                    (column.ordering for column in self._inserted_columns),
-                    (column.ordering for column in self._base_columns),
-                )
-            )
+        Columns (_AssembledVector objects) appear in display-order with inserted columns
+        appearing in the proper position relative to the base columns. Note the final
+        appearance and position of columns is subject to later column hiding.
+        """
+        return self._assembled_vectors(
+            self._base_columns, self._inserted_columns, self._inserted_rows
         )
 
     @lazyproperty
@@ -97,14 +93,44 @@ class TransformedMatrix(object):
 
         Each row vector also reflects any new elements introduced by inserted columns.
         """
-        opposing_inserted_vectors = self._inserted_columns
+        return self._assembled_vectors(
+            self._base_rows, self._inserted_rows, self._inserted_columns
+        )
 
+    def _assembled_vectors(
+        self, base_vectors, inserted_vectors, opposing_inserted_vectors
+    ):
+        """Sequence of vectors (rows or columns) including inserted vectors.
+
+        Each opposing vector also includes any new elements introduced by insertions.
+
+        The returned _AssembledVector objects appear in display-order with inserted
+        vectors appearing in the proper position relative to the base vectors. Note the
+        final appearance and absolute position of vectors is subject to later vector
+        hiding.
+
+        Vector ordering is accomplished by *sorting* the vectors on their `.ordering`
+        value. The ordering value is a `(position, index, self)` triple.
+
+        The int position value is roughly equivalent to the notion of "anchor". It is
+        0 for anchor=="top", sys.maxsize for anchor=="bottom", and int(anchor_idx) + 1
+        otherwise. The +1 ensures inserted vectors appear *after* the vector they are
+        anchored to.
+
+        The `index` value is the *negative* index of this subtotal in its collection
+        (i.e. the "distance from the end" of this inserted vector). This ensures that an
+        inserted vector will always sort *prior* to a base vector with the same position
+        while preserving the payload order of the inserted vector when two or more are
+        anchored to the same base vector.
+
+        For a base-vector, `position` and `index` are the same.
+        """
         return tuple(
-            _AssembledVector(row, opposing_inserted_vectors, 0 if idx < 0 else idx)
-            for _, idx, row in sorted(
+            _AssembledVector(column, opposing_inserted_vectors, 0 if idx < 0 else idx)
+            for _, idx, column in sorted(
                 itertools.chain(
-                    (row.ordering for row in self._inserted_rows),
-                    (row.ordering for row in self._base_rows),
+                    (col.ordering for col in base_vectors),
+                    (col.ordering for col in inserted_vectors),
                 )
             )
         )
