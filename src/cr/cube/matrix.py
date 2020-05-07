@@ -178,18 +178,21 @@ class TransformedMatrix(object):
         if self._columns_dimension.dimension_type in (DT.MR, DT.CA):
             return ()
 
-        subtotals = self._columns_dimension.subtotals
         # --- inserted vectors are indexed using their *negative* idx, i.e. their
         # --- "distance" from the end of the subtotals sequence. This insures their
         # --- ordering tuple sorts before all base-columns with the same position while
         # --- still providing an idx that works for indexed access (if required).
+        subtotals = self._columns_dimension.subtotals
         neg_idxs = range(-len(subtotals), 0)  # ---like [-3, -2, -1]---
-        table_margin = self._unordered_matrix.table_margin
-        base_rows = self._base_rows
-        base_cols = self._base_columns
 
         return tuple(
-            _InsertedColumn(subtotal, neg_idx, table_margin, base_rows, base_cols)
+            _InsertedColumn(
+                subtotal,
+                neg_idx,
+                self._unordered_matrix.table_margin,
+                self._base_rows,
+                self._base_columns,
+            )
             for subtotal, neg_idx in zip(subtotals, neg_idxs)
         )
 
@@ -309,6 +312,10 @@ class _BaseBaseMatrix(object):
     @lazyproperty
     def rows_dimension(self):
         return self._dimensions[0]
+
+    @lazyproperty
+    def table_margin(self):
+        raise NotImplementedError("must be implemented by each subclass")
 
     @lazyproperty
     def _column_elements(self):

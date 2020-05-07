@@ -9,7 +9,8 @@ import sys
 import pytest
 
 from cr.cube.cube import Cube
-from cr.cube.dimension import Dimension
+from cr.cube.dimension import Dimension, _Subtotal
+from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.matrix import (
     _AssembledVector,
     _BaseBaseMatrix,
@@ -134,6 +135,52 @@ class DescribeTransformedMatrix(object):
         ]
         assert assembled_vectors == assembled_vectors_[:5]
 
+    def it_constructs_its_inserted_columns_to_help(
+        self,
+        request,
+        _columns_dimension_prop_,
+        dimension_,
+        _base_rows_prop_,
+        _base_columns_prop_,
+        unordered_matrix_,
+        _InsertedColumn_,
+    ):
+        subtotals_ = tuple(
+            instance_mock(request, _Subtotal, name="subtot[%i]" % i) for i in range(3)
+        )
+        inserted_columns_ = tuple(
+            instance_mock(request, _InsertedColumn) for _ in range(5)
+        )
+        dimension_.dimension_type = DT.CAT
+        dimension_.subtotals = subtotals_
+        _columns_dimension_prop_.return_value = dimension_
+        _base_rows_prop_.return_value = ("base", "rows")
+        _base_columns_prop_.return_value = ("base", "columns")
+        unordered_matrix_.table_margin = 73
+        _InsertedColumn_.side_effect = iter(inserted_columns_)
+        matrix = TransformedMatrix(unordered_matrix_)
+
+        inserted_columns = matrix._inserted_columns
+
+        assert _InsertedColumn_.call_args_list == [
+            call(subtotals_[0], -3, 73, ("base", "rows"), ("base", "columns")),
+            call(subtotals_[1], -2, 73, ("base", "rows"), ("base", "columns")),
+            call(subtotals_[2], -1, 73, ("base", "rows"), ("base", "columns")),
+        ]
+        assert inserted_columns == inserted_columns_[:3]
+
+    @pytest.mark.parametrize("dimension_type", (DT.CA, DT.MR))
+    def but_it_constructs_no_inserted_columns_for_an_array_dimension(
+        self, dimension_type, _columns_dimension_prop_, dimension_
+    ):
+        dimension_.dimension_type = dimension_type
+        _columns_dimension_prop_.return_value = dimension_
+        matrix = TransformedMatrix(None)
+
+        inserted_columns = matrix._inserted_columns
+
+        assert inserted_columns == ()
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -157,8 +204,20 @@ class DescribeTransformedMatrix(object):
         return property_mock(request, TransformedMatrix, "_base_rows")
 
     @pytest.fixture
+    def _columns_dimension_prop_(self, request):
+        return property_mock(request, TransformedMatrix, "_columns_dimension")
+
+    @pytest.fixture
     def cube_(self, request):
         return instance_mock(request, Cube)
+
+    @pytest.fixture
+    def dimension_(self, request):
+        return instance_mock(request, Dimension)
+
+    @pytest.fixture
+    def _InsertedColumn_(self, request):
+        return class_mock(request, "cr.cube.matrix._InsertedColumn")
 
     @pytest.fixture
     def _inserted_columns_prop_(self, request):
@@ -167,3 +226,7 @@ class DescribeTransformedMatrix(object):
     @pytest.fixture
     def _inserted_rows_prop_(self, request):
         return property_mock(request, TransformedMatrix, "_inserted_rows")
+
+    @pytest.fixture
+    def unordered_matrix_(self, request):
+        return instance_mock(request, _BaseBaseMatrix)
