@@ -347,6 +347,7 @@ class _StripeInsertedRow(object):
 
     @lazyproperty
     def _addend_rows(self):
+        """Sequence of _BaseStripeRow subclass that contribute to this subtotal."""
         return tuple(
             row
             for i, row in enumerate(self._base_rows)

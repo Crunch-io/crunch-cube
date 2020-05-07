@@ -222,6 +222,18 @@ class Describe_StripeInsertedRow(object):
     def it_knows_it_is_inserted(self):
         assert _StripeInsertedRow(None, None, None).is_inserted is True
 
+    def it_gathers_the_addend_rows_to_help(self, request, subtotal_):
+        base_rows_ = tuple(
+            instance_mock(request, _BaseStripeRow, name="base_rows_[%d]" % i)
+            for i in range(4)
+        )
+        subtotal_.addend_idxs = (1, 3)
+        inserted_row = _StripeInsertedRow(subtotal_, base_rows_, None)
+
+        addend_rows = inserted_row._addend_rows
+
+        assert addend_rows == (base_rows_[1], base_rows_[3])
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
