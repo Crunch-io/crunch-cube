@@ -1153,7 +1153,7 @@ class _BaseMatrixInsertedVector(object):
         reduced to a sorting operation.
 
         The int position value is roughly equivalent to the notion of "anchor". It is
-        0 for anchor=="top", sys.maxsize for anchor=="bottom", and int(anchor) + 1
+        0 for anchor=="top", `sys.maxsize` for anchor=="bottom", and int(anchor) + 1
         otherwise. The +1 ensures inserted vectors appear *after* the vector they are
         anchored to.
 

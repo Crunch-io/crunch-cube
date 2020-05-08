@@ -310,6 +310,14 @@ class Describe_BaseMatrixInsertedVector(object):
             _BaseMatrixInsertedVector(None, None, None, None, None).is_inserted is True
         )
 
+    def it_knows_its_ordering_value(self, request):
+        property_mock(request, _BaseMatrixInsertedVector, "_anchor_n", return_value=8)
+        inserted_vector = _BaseMatrixInsertedVector(None, -4, None, None, None)
+
+        ordering = inserted_vector.ordering
+
+        assert ordering == (8, -4, inserted_vector)
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
