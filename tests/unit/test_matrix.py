@@ -297,6 +297,14 @@ class Describe_BaseMatrixInsertedVector(object):
 
         np.testing.assert_equal(addend_idxs, (1, 2, 3))
 
+    def it_knows_its_anchor(self, subtotal_):
+        subtotal_.anchor_idx = 42
+        inserted_vector = _BaseMatrixInsertedVector(subtotal_, None, None, None, None)
+
+        anchor = inserted_vector.anchor
+
+        assert anchor == 42
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture

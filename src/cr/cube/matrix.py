@@ -1078,6 +1078,7 @@ class _BaseMatrixInsertedVector(object):
 
     @lazyproperty
     def anchor(self):
+        """int offset of this inserted-vector relative to its base-vectors."""
         return self._subtotal.anchor_idx
 
     @lazyproperty
