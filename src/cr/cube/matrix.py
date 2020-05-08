@@ -1301,6 +1301,14 @@ class _InsertedRow(_BaseMatrixInsertedVector):
 class _BaseTransformationVector(object):
     """Base class for most transformation vectors."""
 
+    def __init__(self, base_vector):
+        self._base_vector = base_vector
+
+    @lazyproperty
+    def element_id(self):
+        """int identifier of category or subvariable this vector represents."""
+        return self._base_vector.element_id
+
     @lazyproperty
     def fill(self):
         """str RGB color like "#def032" or None when not specified.
@@ -1352,7 +1360,7 @@ class _AssembledVector(_BaseTransformationVector):
     """Vector with base, as well as inserted, elements (of the opposite dimension)."""
 
     def __init__(self, base_vector, opposite_inserted_vectors, vector_idx):
-        self._base_vector = base_vector
+        super(_AssembledVector, self).__init__(base_vector)
         self._opposite_inserted_vectors = opposite_inserted_vectors
         self._vector_idx = vector_idx
 
@@ -1514,7 +1522,7 @@ class _VectorAfterHiding(_BaseTransformationVector):
     """Reflects a row or column with hidden elements removed."""
 
     def __init__(self, base_vector, opposite_vectors):
-        self._base_vector = base_vector
+        super(_VectorAfterHiding, self).__init__(base_vector)
         self._opposite_vectors = opposite_vectors
 
     @lazyproperty
@@ -1593,7 +1601,7 @@ class _OrderedVector(_BaseTransformationVector):
     """
 
     def __init__(self, base_vector, opposing_order, index):
-        self._base_vector = base_vector
+        super(_OrderedVector, self).__init__(base_vector)
         self._opposing_order_arg = opposing_order
         self._index = index
 

@@ -16,6 +16,7 @@ from cr.cube.matrix import (
     _AssembledVector,
     _BaseBaseMatrix,
     _BaseMatrixInsertedVector,
+    _BaseTransformationVector,
     _BaseVector,
     _InsertedColumn,
     _InsertedRow,
@@ -358,6 +359,24 @@ class Describe_BaseMatrixInsertedVector(object):
     @pytest.fixture
     def subtotal_(self, request):
         return instance_mock(request, _Subtotal)
+
+
+class Describe_BaseTransformationVector(object):
+    """Unit test suite for `cr.cube.matrix._BaseTransformationVector` object."""
+
+    def it_knows_its_element_id(self, base_vector_):
+        base_vector_.element_id = 42
+        transformation_vector = _BaseTransformationVector(base_vector_)
+
+        element_id = transformation_vector.element_id
+
+        assert element_id == 42
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def base_vector_(self, request):
+        return instance_mock(request, _BaseVector)
 
 
 class Describe_BaseVector(object):
