@@ -6,6 +6,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import sys
 
+import numpy as np
 import pytest
 
 from cr.cube.cube import Cube
@@ -14,6 +15,7 @@ from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.matrix import (
     _AssembledVector,
     _BaseBaseMatrix,
+    _BaseMatrixInsertedVector,
     _InsertedColumn,
     _InsertedRow,
     _OrderedVector,
@@ -282,3 +284,21 @@ class DescribeTransformedMatrix(object):
     @pytest.fixture
     def unordered_matrix_(self, request):
         return instance_mock(request, _BaseBaseMatrix)
+
+
+class Describe_BaseMatrixInsertedVector(object):
+    """Unit test suite for `cr.cube.matrix._BaseMatrixInsertedVector` object."""
+
+    def it_knows_the_indices_of_its_addends(self, subtotal_):
+        subtotal_.addend_idxs = (1, 2, 3)
+        inserted_vector = _BaseMatrixInsertedVector(subtotal_, None, None, None, None)
+
+        addend_idxs = inserted_vector.addend_idxs
+
+        np.testing.assert_equal(addend_idxs, (1, 2, 3))
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def subtotal_(self, request):
+        return instance_mock(request, _Subtotal)

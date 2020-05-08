@@ -1069,7 +1069,11 @@ class _BaseMatrixInsertedVector(object):
 
     @lazyproperty
     def addend_idxs(self):
-        """ndarray of int base-element offsets contributing to this subtotal."""
+        """ndarray of int base-element offsets contributing to this subtotal.
+
+        Suitable for directly indexing a numpy array object (such as base values or
+        margin) to extract the addend values for this subtotal.
+        """
         return np.array(self._subtotal.addend_idxs)
 
     @lazyproperty
