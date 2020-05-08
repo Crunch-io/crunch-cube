@@ -305,6 +305,11 @@ class Describe_BaseMatrixInsertedVector(object):
 
         assert anchor == 42
 
+    def it_knows_it_is_inserted(self):
+        assert (
+            _BaseMatrixInsertedVector(None, None, None, None, None).is_inserted is True
+        )
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture

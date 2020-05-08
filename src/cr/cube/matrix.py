@@ -1120,6 +1120,10 @@ class _BaseMatrixInsertedVector(object):
 
     @lazyproperty
     def is_inserted(self):
+        """True when this vector is an inserted vector.
+
+        Unconditionally True for _BaseMatrixInsertedVector.
+        """
         return True
 
     @lazyproperty
