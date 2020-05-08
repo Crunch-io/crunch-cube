@@ -318,6 +318,17 @@ class Describe_BaseMatrixInsertedVector(object):
 
         assert ordering == (8, -4, inserted_vector)
 
+    @pytest.mark.parametrize(
+        ("anchor", "expected_value"), (("top", 0), ("bottom", sys.maxsize), (8, 9))
+    )
+    def it_knows_its_anchor_location(self, request, anchor, expected_value):
+        property_mock(request, _BaseMatrixInsertedVector, "anchor", return_value=anchor)
+        inserted_vector = _BaseMatrixInsertedVector(None, None, None, None, None)
+
+        anchor_n = inserted_vector._anchor_n
+
+        assert anchor_n == expected_value
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture

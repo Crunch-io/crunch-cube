@@ -1220,7 +1220,7 @@ class _BaseMatrixInsertedVector(object):
             if anchor == "top"
             else sys.maxsize
             if anchor == "bottom"
-            else int(self.anchor) + 1
+            else int(anchor) + 1
         )
 
 
