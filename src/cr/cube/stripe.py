@@ -103,9 +103,9 @@ class _StripeInsertionHelper(object):
             yield inserted_row
 
         # --- body rows with subtotals anchored to specific body positions ---
-        for idx, row in enumerate(self._ordered_rows):
+        for row in self._ordered_rows:
             yield row
-            for inserted_row in inserted_rows_by_anchor[idx]:
+            for inserted_row in inserted_rows_by_anchor[row.element_id]:
                 yield inserted_row
 
         # --- subtotals appended at bottom ---
@@ -288,8 +288,12 @@ class _StripeInsertedRow(object):
 
     @lazyproperty
     def anchor(self):
-        """int idx-position of this inserted row relative to base rows."""
-        return self._subtotal.anchor_idx
+        """str or int anchor value for this inserted.
+
+        Value can be "top", "bottom" or an int element-id indicating the position of
+        this inserted-row with respect to the base-rows.
+        """
+        return self._subtotal.anchor
 
     @lazyproperty
     def base(self):
@@ -350,8 +354,8 @@ class _StripeInsertedRow(object):
         """Sequence of _BaseStripeRow subclass that contribute to this subtotal."""
         return tuple(
             row
-            for i, row in enumerate(self._base_rows)
-            if i in self._subtotal.addend_idxs
+            for row in self._base_rows
+            if row.element_id in self._subtotal.addend_ids
         )
 
 

@@ -1368,7 +1368,6 @@ class Describe_Strand(object):
         )
         assert strand.title == "Untitled"
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     def it_places_insertions_on_a_reordered_dimension_in_the_right_position(self):
         """Subtotal anchors follow re-ordered rows.
 

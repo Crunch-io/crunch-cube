@@ -146,9 +146,9 @@ class Describe_StripeInsertionHelper(object):
 
     def it_generates_the_interleaved_rows_in_order_to_help(self, request):
         subtotal_rows_ = (
-            instance_mock(request, _StripeInsertedRow, name="subt_0", anchor=0),
+            instance_mock(request, _StripeInsertedRow, name="subt_0", anchor=1),
             instance_mock(request, _StripeInsertedRow, name="subt_1", anchor="bottom"),
-            instance_mock(request, _StripeInsertedRow, name="subt_2", anchor=1),
+            instance_mock(request, _StripeInsertedRow, name="subt_2", anchor=2),
             instance_mock(request, _StripeInsertedRow, name="subt_3", anchor="top"),
             instance_mock(request, _StripeInsertedRow, name="subt_4", anchor="top"),
         )
@@ -159,8 +159,8 @@ class Describe_StripeInsertionHelper(object):
             return_value=subtotal_rows_,
         )
         ordered_rows_ = (
-            instance_mock(request, _BaseStripeRow, name="row_0"),
-            instance_mock(request, _BaseStripeRow, name="row_1"),
+            instance_mock(request, _BaseStripeRow, name="row_0", element_id=1),
+            instance_mock(request, _BaseStripeRow, name="row_1", element_id=2),
         )
         insertion_helper = _StripeInsertionHelper(None, ordered_rows_, None)
 
@@ -211,28 +211,31 @@ class Describe_StripeInsertionHelper(object):
 class Describe_StripeInsertedRow(object):
     """Unit test suite for `cr.cube.stripe._StripeInsertedRow` object."""
 
-    def it_knows_its_anchor_location(self, subtotal_):
-        subtotal_.anchor_idx = 42
+    @pytest.mark.parametrize("anchor_value", ("top", "bottom", 1, 36))
+    def it_knows_its_anchor_location(self, anchor_value, subtotal_):
+        subtotal_.anchor = anchor_value
         inserted_row = _StripeInsertedRow(subtotal_, None, None)
 
         anchor = inserted_row.anchor
 
-        assert anchor == 42
+        assert anchor == anchor_value
 
     def it_knows_it_is_inserted(self):
         assert _StripeInsertedRow(None, None, None).is_inserted is True
 
     def it_gathers_the_addend_rows_to_help(self, request, subtotal_):
         base_rows_ = tuple(
-            instance_mock(request, _BaseStripeRow, name="base_rows_[%d]" % i)
+            instance_mock(
+                request, _BaseStripeRow, name="base_rows_[%d]" % i, element_id=i + 1
+            )
             for i in range(4)
         )
-        subtotal_.addend_idxs = (1, 3)
+        subtotal_.addend_ids = (1, 3)
         inserted_row = _StripeInsertedRow(subtotal_, base_rows_, None)
 
         addend_rows = inserted_row._addend_rows
 
-        assert addend_rows == (base_rows_[1], base_rows_[3])
+        assert addend_rows == (base_rows_[0], base_rows_[2])
 
     # fixture components ---------------------------------------------
 
