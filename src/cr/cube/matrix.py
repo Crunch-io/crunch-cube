@@ -1664,7 +1664,7 @@ class _OrderedVector(_BaseTransformationVector):
 
 
 class _BaseVector(object):
-    """Base class for all vector objects.
+    """Base class for all base-vector objects.
 
     A vector represents a row or column of data in the overall data matrix. It composes
     the element that corresponds to the row or column and so knows the name, element_id,
@@ -1678,6 +1678,11 @@ class _BaseVector(object):
     @lazyproperty
     def base(self):
         return np.sum(self._base_counts)
+
+    @lazyproperty
+    def element_id(self):
+        """int identifier of category or subvariable this vector represents."""
+        return self._element.element_id
 
     @lazyproperty
     def fill(self):

@@ -10,7 +10,7 @@ import numpy as np
 import pytest
 
 from cr.cube.cube import Cube
-from cr.cube.dimension import Dimension, _Subtotal
+from cr.cube.dimension import Dimension, _Element, _Subtotal
 from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.matrix import (
     _AssembledVector,
@@ -358,3 +358,21 @@ class Describe_BaseMatrixInsertedVector(object):
     @pytest.fixture
     def subtotal_(self, request):
         return instance_mock(request, _Subtotal)
+
+
+class Describe_BaseVector(object):
+    """Unit test suite for `cr.cube.matrix._BaseVector` object."""
+
+    def it_knows_its_element_id(self, element_):
+        element_.element_id = 42
+        base_vector = _BaseVector(element_, None)
+
+        element_id = base_vector.element_id
+
+        assert element_id == 42
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def element_(self, request):
+        return instance_mock(request, _Element)
