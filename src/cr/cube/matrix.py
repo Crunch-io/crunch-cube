@@ -1196,6 +1196,11 @@ class _BaseMatrixInsertedVector(object):
         return self._residuals / np.sqrt(variance)
 
     @lazyproperty
+    def _addend_vectors(self):
+        """Sequence of base-vectors contributing to this inserted subtotal."""
+        return tuple(self._base_vectors[i] for i in self.addend_idxs)
+
+    @lazyproperty
     def _anchor_n(self):
         """Anchor expressed as an int "offset" relative to base-vector indices.
 
@@ -1223,6 +1228,14 @@ class _BaseMatrixInsertedVector(object):
             else int(anchor) + 1
         )
 
+    @lazyproperty
+    def _base_vectors(self):
+        """The base (non-inserted) vector "peers" for this inserted vectors.
+
+        This is base-rows for an inserted row or base-columns for an inserted column.
+        """
+        raise NotImplementedError("must be implemented by each subclass")
+
 
 class _InsertedColumn(_BaseMatrixInsertedVector):
     """Represents an inserted (subtotal) column."""
@@ -1240,12 +1253,9 @@ class _InsertedColumn(_BaseMatrixInsertedVector):
         )
 
     @lazyproperty
-    def _addend_vectors(self):
-        return tuple(
-            column
-            for i, column in enumerate(self._base_columns)
-            if i in self._subtotal.addend_idxs
-        )
+    def _base_vectors(self):
+        """The base vectors for an inserted column are the base columns."""
+        return self._base_columns
 
     @lazyproperty
     def _expected_counts(self):
@@ -1272,12 +1282,9 @@ class _InsertedRow(_BaseMatrixInsertedVector):
         )
 
     @lazyproperty
-    def _addend_vectors(self):
-        return tuple(
-            row
-            for i, row in enumerate(self._base_rows)
-            if i in self._subtotal.addend_idxs
-        )
+    def _base_vectors(self):
+        """The base vectors for an inserted row are the base rows."""
+        return self._base_rows
 
     @lazyproperty
     def _expected_counts(self):

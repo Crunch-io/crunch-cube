@@ -16,6 +16,7 @@ from cr.cube.matrix import (
     _AssembledVector,
     _BaseBaseMatrix,
     _BaseMatrixInsertedVector,
+    _BaseVector,
     _InsertedColumn,
     _InsertedRow,
     _OrderedVector,
@@ -329,7 +330,30 @@ class Describe_BaseMatrixInsertedVector(object):
 
         assert anchor_n == expected_value
 
+    @pytest.mark.parametrize("addend_idxs", ((), (1,), (2, 3)))
+    def it_gathers_its_addend_vectors_to_help(
+        self, request, addend_idxs, _base_vectors_prop_
+    ):
+        property_mock(
+            request, _BaseMatrixInsertedVector, "addend_idxs", return_value=addend_idxs
+        )
+        base_vectors_ = tuple(
+            instance_mock(request, _BaseVector, name="base[i]") for i in range(6)
+        )
+        _base_vectors_prop_.return_value = base_vectors_
+        inserted_vector = _BaseMatrixInsertedVector(None, -4, None, None, None)
+
+        addend_vectors = inserted_vector._addend_vectors
+
+        assert addend_vectors == tuple(
+            vector for i, vector in enumerate(base_vectors_) if i in addend_idxs
+        )
+
     # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _base_vectors_prop_(self, request):
+        return property_mock(request, _BaseMatrixInsertedVector, "_base_vectors")
 
     @pytest.fixture
     def subtotal_(self, request):
