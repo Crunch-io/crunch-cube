@@ -7,7 +7,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import pytest
 
 from cr.cube.cube import Cube
-from cr.cube.dimension import Dimension, _Subtotal
+from cr.cube.dimension import Dimension, _Element, _Subtotal
 from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.stripe import (
     _BaseBaseStripe,
@@ -239,3 +239,21 @@ class Describe_StripeInsertedRow(object):
     @pytest.fixture
     def subtotal_(self, request):
         return instance_mock(request, _Subtotal)
+
+
+class Describe_BaseStripeRow(object):
+    """Unit test suite for `cr.cube.stripe._BaseStripeRow` object."""
+
+    def it_knows_its_element_id(self, element_):
+        element_.element_id = 42
+        row = _BaseStripeRow(element_)
+
+        element_id = row.element_id
+
+        assert element_id == 42
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def element_(self, request):
+        return instance_mock(request, _Element)

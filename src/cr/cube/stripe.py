@@ -365,6 +365,11 @@ class _BaseStripeRow(object):
         self._element = element
 
     @lazyproperty
+    def element_id(self):
+        """int identifier of category or subvariable this row represents."""
+        return self._element.element_id
+
+    @lazyproperty
     def fill(self):
         """str RGB color like "#def032" or None when not specified.
 
