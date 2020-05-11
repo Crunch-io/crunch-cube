@@ -833,18 +833,6 @@ class Describe_ValidElements(object):
 
     @pytest.fixture(
         params=[
-            ([True, False, False], 2),
-            ([True, True, True], 0),
-            ([False, False, False], 3),
-            ([False, True, True], 1),
-        ]
-    )
-    def visible_elements_fixture(self, request):
-        element_transforms_hide, expected_value = request.param
-        return element_transforms_hide, expected_value
-
-    @pytest.fixture(
-        params=[
             ({}, None),
             ({"order": {"element_ids": [1, 3, 2], "type": "explicit"}}, (0, 2, 1)),
             ({"order": {"element_ids": [-1, 3, 2], "type": "explicit"}}, (2, 1, 0)),
@@ -865,10 +853,6 @@ class Describe_ValidElements(object):
     @pytest.fixture
     def all_elements_(self, request):
         return instance_mock(request, _AllElements)
-
-    @pytest.fixture
-    def element_transforms_(self, request):
-        return instance_mock(request, _ElementTransforms)
 
 
 class Describe_Element(object):
@@ -1245,10 +1229,6 @@ class Describe_Subtotal(object):
         return subtotal_dict, expected_value
 
     # fixture components ---------------------------------------------
-
-    @pytest.fixture
-    def addend_ids_prop_(self, request):
-        return property_mock(request, _Subtotal, "addend_ids")
 
     @pytest.fixture
     def valid_elements_(self, request):

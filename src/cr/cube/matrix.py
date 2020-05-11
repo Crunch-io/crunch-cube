@@ -318,7 +318,9 @@ class _BaseBaseMatrix(object):
 
     @lazyproperty
     def table_margin(self):
-        raise NotImplementedError("must be implemented by each subclass")
+        raise NotImplementedError(
+            "must be implemented by each subclass"
+        )  # pragma: no cover
 
     @lazyproperty
     def _column_elements(self):
@@ -1244,7 +1246,7 @@ class _BaseMatrixInsertedVector(object):
                 return i + 1
 
         # --- default to bottom if target anchor vector not found ---
-        return sys.maxsize
+        return sys.maxsize  # pragma: no cover
 
     @lazyproperty
     def _base_vectors(self):
@@ -1252,7 +1254,9 @@ class _BaseMatrixInsertedVector(object):
 
         This is base-rows for an inserted row or base-columns for an inserted column.
         """
-        raise NotImplementedError("must be implemented by each subclass")
+        raise NotImplementedError(
+            "must be implemented by each subclass"
+        )  # pragma: no cover
 
 
 class _InsertedColumn(_BaseMatrixInsertedVector):

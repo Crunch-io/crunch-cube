@@ -673,12 +673,6 @@ class _Element(object):
         """
         return self._index
 
-    # TODO: Find a more elegant solution and make this go away.
-    @lazyproperty
-    def index_in_valids(self):
-        valid_ids = [el["id"] for el in self._element_dicts if not el.get("missing")]
-        return valid_ids.index(self.element_id)
-
     @lazyproperty
     def is_hidden(self):
         """True if this element is explicitly hidden in this analysis."""

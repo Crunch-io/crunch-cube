@@ -167,7 +167,9 @@ class _BaseBaseStripe(object):
         order those elements are defined in the dimension (which is also the order in
         which that dimension's values appear in the cube result).
         """
-        raise NotImplementedError("must be implemented by each subclass")
+        raise NotImplementedError(
+            "must be implemented by each subclass"
+        )  # pragma: no cover
 
     @lazyproperty
     def table_base(self):
