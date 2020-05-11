@@ -168,6 +168,20 @@ class _Slice(CubePartition):
         return np.array([column.margin for column in self._matrix.columns]).T
 
     @lazyproperty
+    def columns_std_dev(self):
+        """Returns the standard deviation for cell percentages
+        `std_deviation = sqrt(variance)`
+        """
+        return np.sqrt(self._columns_variance)
+
+    @lazyproperty
+    def columns_std_err(self):
+        """Returns the standard error for cell percentages
+        `std_error = sqrt(variance/N)`
+        """
+        return np.sqrt(self._columns_variance / self.columns_margin)
+
+    @lazyproperty
     def counts(self):
         return np.array([row.values for row in self._matrix.rows])
 
@@ -252,16 +266,6 @@ class _Slice(CubePartition):
         return NewPairwiseSignificance(
             self, alpha=alpha, only_larger=only_larger
         ).pairwise_indices
-
-    @lazyproperty
-    def scale_mean_pairwise_indices(self):
-        alpha = self._transforms_dict.get("pairwise_indices", {}).get("alpha", 0.05)
-        only_larger = self._transforms_dict.get("pairwise_indices", {}).get(
-            "only_larger", True
-        )
-        return NewPairwiseSignificance(
-            self, alpha=alpha, only_larger=only_larger
-        ).scale_mean_pairwise_indices
 
     @lazyproperty
     def pairwise_significance_tests(self):
@@ -360,20 +364,14 @@ class _Slice(CubePartition):
         return inner / denominator
 
     @lazyproperty
-    def var_scale_means_column(self):
-        if np.all(np.isnan(self._columns_dimension_numeric)):
-            return None
-
-        not_a_nan_index = ~np.isnan(self._columns_dimension_numeric)
-        col_dim_numeric = self._columns_dimension_numeric[not_a_nan_index]
-
-        numerator = self.counts[:, not_a_nan_index] * pow(
-            np.broadcast_to(col_dim_numeric, self.counts[:, not_a_nan_index].shape)
-            - self.scale_means_column.reshape(-1, 1),
-            2,
+    def scale_mean_pairwise_indices(self):
+        alpha = self._transforms_dict.get("pairwise_indices", {}).get("alpha", 0.05)
+        only_larger = self._transforms_dict.get("pairwise_indices", {}).get(
+            "only_larger", True
         )
-        denominator = np.sum(self.counts[:, not_a_nan_index], axis=1)
-        return np.nansum(numerator, axis=1) / denominator
+        return NewPairwiseSignificance(
+            self, alpha=alpha, only_larger=only_larger
+        ).scale_mean_pairwise_indices
 
     @lazyproperty
     def scale_means_columns_margin(self):
@@ -399,26 +397,6 @@ class _Slice(CubePartition):
         not_a_nan_index = ~np.isnan(self._rows_dimension_numeric)
         denominator = np.sum(self.counts[not_a_nan_index, :], axis=0)
         return inner / denominator
-
-    @lazyproperty
-    def var_scale_means_row(self):
-        if np.all(np.isnan(self._rows_dimension_numeric)):
-            return None
-
-        not_a_nan_index = ~np.isnan(self._rows_dimension_numeric)
-        row_dim_numeric = self._rows_dimension_numeric[not_a_nan_index]
-        numerator = (
-            self.counts[not_a_nan_index, :]
-            * pow(
-                np.broadcast_to(
-                    row_dim_numeric, self.counts[not_a_nan_index, :].T.shape
-                )
-                - self.scale_means_row.reshape(-1, 1),
-                2,
-            ).T
-        )
-        denominator = np.sum(self.counts[not_a_nan_index, :], axis=0)
-        return np.nansum(numerator, axis=0) / denominator
 
     @lazyproperty
     def scale_means_rows_margin(self):
@@ -522,6 +500,50 @@ class _Slice(CubePartition):
         return np.array([row.table_proportions for row in self._matrix.rows])
 
     @lazyproperty
+    def table_std_dev(self):
+        return np.array([row.table_std_dev for row in self._matrix.rows])
+
+    @lazyproperty
+    def table_std_err(self):
+        return np.array([row.table_std_err for row in self._matrix.rows])
+
+    @lazyproperty
+    def var_scale_means_column(self):
+        if np.all(np.isnan(self._columns_dimension_numeric)):
+            return None
+
+        not_a_nan_index = ~np.isnan(self._columns_dimension_numeric)
+        col_dim_numeric = self._columns_dimension_numeric[not_a_nan_index]
+
+        numerator = self.counts[:, not_a_nan_index] * pow(
+            np.broadcast_to(col_dim_numeric, self.counts[:, not_a_nan_index].shape)
+            - self.scale_means_column.reshape(-1, 1),
+            2,
+        )
+        denominator = np.sum(self.counts[:, not_a_nan_index], axis=1)
+        return np.nansum(numerator, axis=1) / denominator
+
+    @lazyproperty
+    def var_scale_means_row(self):
+        if np.all(np.isnan(self._rows_dimension_numeric)):
+            return None
+
+        not_a_nan_index = ~np.isnan(self._rows_dimension_numeric)
+        row_dim_numeric = self._rows_dimension_numeric[not_a_nan_index]
+        numerator = (
+            self.counts[not_a_nan_index, :]
+            * pow(
+                np.broadcast_to(
+                    row_dim_numeric, self.counts[not_a_nan_index, :].T.shape
+                )
+                - self.scale_means_row.reshape(-1, 1),
+                2,
+            ).T
+        )
+        denominator = np.sum(self.counts[not_a_nan_index, :], axis=0)
+        return np.nansum(numerator, axis=0) / denominator
+
+    @lazyproperty
     def zscore(self):
         return np.array([row.zscore for row in self._matrix.rows])
 
@@ -581,6 +603,15 @@ class _Slice(CubePartition):
         construction.
         """
         return self._transforms_arg if self._transforms_arg is not None else {}
+
+    @lazyproperty
+    def _columns_variance(self):
+        """Returns the variance for cell percentages
+        `variance = p * (1-p)`
+        """
+        return (
+            self.counts / self.columns_margin * (1 - self.counts / self.columns_margin)
+        )
 
 
 class _Strand(CubePartition):
