@@ -1,8 +1,8 @@
 # encoding: utf-8
 
-"""Provides the Cube class.
+"""Provides the CubeSet and Cube classes.
 
-Cube is the main API class for manipulating Crunch.io JSON cube responses.
+CubeSet is the main API class for manipulating Crunch.io JSON cube responses.
 """
 
 from __future__ import absolute_import, division, print_function, unicode_literals
@@ -141,6 +141,31 @@ class CubeSet(object):
         """True if more than one cube-response was provided on construction."""
         return len(self._cube_responses) > 1
 
+    @lazyproperty
+    def _is_numeric_mean(self):
+        """True when CubeSet is special-case "numeric-mean" case requiring inflation.
+
+        When a numeric variable appears as the rows-dimension in a multitable analysis,
+        its cube-result has been "reduced" to the mean-value of those numerics. This is
+        in contrast to being "bucketized" into an arbitrary set of numeric-range
+        categories like 0-5, 5-10, etc. In the process, as an artifact of the ZZ9 query
+        response, that dimension is removed. As a result, the rows-dimension cube is 0D
+        and the column-dimension cubes are 1D. These need to be "inflated" to restore
+        the lost dimension such that they are uniform with other cube-results and can be
+        processed without special-case code.
+
+        "Inflation" is basically prefixing "1 x" to the dimensionality, for example a 1D
+        of size 5 becomes a 1 x 5 2D result. Note this requires no mapping in the actual
+        values because 5 = 1 x 5 = 5 (values).
+        """
+        # --- this case only arises in a multitable analysis ---
+        if not self._is_multi_cube:
+            return False
+
+        # --- We need the cube to tell us the dimensionality. This redundant
+        # --- construction is low-overhead because all Cube properties are lazy.
+        return Cube(self._cube_responses[0]).ndim == 0
+
     def _iter_cubes(self):
         """Generate a Cube object for each of cube_responses.
 
@@ -150,38 +175,31 @@ class CubeSet(object):
         for idx, cube_response in enumerate(self._cube_responses):
             cube = Cube(
                 cube_response,
-                self._transforms_dicts[idx],
-                first_cube_of_tab=(self._is_multi_cube and idx == 0),
+                cube_idx=idx if self._is_multi_cube else None,
+                transforms=self._transforms_dicts[idx],
                 population=self._population,
                 mask_size=self._min_base,
             )
-            # ---a 0D rows-var cube gets inflated, as does a 1D cols-var cube---
-            if self._is_multi_cube and (
-                (idx == 0 and cube.ndim == 0) or (idx > 0 and cube.ndim == 1)
-            ):
-                yield cube.inflate()
-                continue
-            # ---others don't---
-            yield cube
+            # --- all numeric-mean cubes require inflation to restore their
+            # --- rows-dimension, others don't
+            yield cube.inflate() if self._is_numeric_mean else cube
 
 
 class Cube(object):
     """Provides access to individual slices on a cube-result.
 
     It also provides some attributes of the overall cube-result.
+
+    `cube_idx` must be `None` (or omitted) for a single-cube CubeSet. This indicates the
+    CubeSet contains only a single cube and influences behaviors like CA-as-0th.
     """
 
     def __init__(
-        self,
-        response,
-        transforms=None,
-        first_cube_of_tab=False,
-        population=None,
-        mask_size=0,
+        self, response, cube_idx=None, transforms=None, population=None, mask_size=0
     ):
         self._cube_response_arg = response
         self._transforms_dict = {} if transforms is None else transforms
-        self._first_cube_of_tab = first_cube_of_tab
+        self._cube_idx_arg = cube_idx
         self._population = 0 if population is None else population
         self._mask_size = mask_size
 
@@ -215,6 +233,11 @@ class Cube(object):
         return self._measure(self.is_weighted).raw_cube_array
 
     @lazyproperty
+    def cube_index(self):
+        """Offset of this cube within its CubeSet."""
+        return 0 if self._cube_idx_arg is None else self._cube_idx_arg
+
+    @lazyproperty
     def description(self):
         """Return the description of the cube."""
         if not self.dimensions:
@@ -228,7 +251,7 @@ class Cube(object):
 
     @lazyproperty
     def dimensions(self):
-        """_ApparentDimension object providing access to visible dimensions.
+        """_ApparentDimensions object providing access to visible dimensions.
 
         A cube involving a multiple-response (MR) variable has two dimensions
         for that variable (subvariables and categories dimensions), but is
@@ -254,33 +277,26 @@ class Cube(object):
         dimensions = cube_dict["result"]["dimensions"]
         rows_dimension = {
             "references": {"alias": "mean", "name": "mean"},
-            "type": {
-                "categories": [{"id": 1, "missing": False, "name": "Mean"}],
-                "class": "categorical",
-            },
+            "type": {"categories": [{"id": 1, "name": "Mean"}], "class": "categorical"},
         }
         dimensions.insert(0, rows_dimension)
         return Cube(
             cube_dict,
+            self._cube_idx_arg,
             self._transforms_dict,
-            self._first_cube_of_tab,
             self._population,
             self._mask_size,
         )
 
     @lazyproperty
     def is_mr_by_itself(self):
-        """It identify if the cube contains MRxItself as last 2 dimensions.
-
-        If the last 2 dimensions in cube (ndim>=3) are MR and they have
-        the same alias returns True
-        """
+        """True if the cube contains MRxItself as last 2 dimensions."""
         return (
-            # ---there are at least three dimensions---
+            # --- there are at least three dimensions ---
             self.ndim >= 3
-            # ---the last two are both MR---
+            # --- the last two are both MR ---
             and all(dim_type == DT.MR for dim_type in self.dimension_types[-2:])
-            # ---and they both have the same alias---
+            # --- and they both have the same alias ---
             and len(set([dimension.alias for dimension in self.dimensions[-2:]])) == 1
         )
 
@@ -338,6 +354,16 @@ class Cube(object):
         return self._measures.population_fraction
 
     @lazyproperty
+    def title(self):
+        """str alternate-name given to cube-result.
+
+        This value is suitable for naming a Strand when displayed as a column. In this
+        use-case it is a stand-in for the columns-dimension name since a strand has no
+        columns dimension.
+        """
+        return self._cube_dict.get("title", "Untitled")
+
+    @lazyproperty
     def _all_dimensions(self):
         """The AllDimensions object for this cube.
 
@@ -358,7 +384,7 @@ class Cube(object):
         a 2D cube-result becomes a single slice.
         """
         return (
-            self._first_cube_of_tab
+            self._cube_idx_arg == 0
             and len(self.dimension_types) > 0
             and self.dimension_types[0] == DT.CA
         )

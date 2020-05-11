@@ -397,6 +397,16 @@ class _BaseStripeRow(object):
         return self._element.label
 
     @lazyproperty
+    def mean(self):
+        """Default mean value is `np.nan`, consistent with an inserted row.
+
+        It would be very unusual for this property to be accessed on a cube with no mean
+        values, but this prevents raising an AttributeError and provides a reasonable
+        value.
+        """
+        return np.nan
+
+    @lazyproperty
     def numeric_value(self):
         """Numeric value (or np.nan) assigned to the element of this row.
 
@@ -536,10 +546,6 @@ class _MrStripeRow(_BaseStripeRow):
 
     @lazyproperty
     def count(self):
-        return self._count
-
-    @lazyproperty
-    def margin(self):
         return self._count
 
     @lazyproperty

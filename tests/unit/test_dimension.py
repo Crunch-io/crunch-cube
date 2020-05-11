@@ -896,41 +896,9 @@ class Describe_Element(object):
         assert index == 17
 
     # TODO: add test cases that exercise element-name transform
-    def it_knows_its_label(self, label_fixture, element_transforms_):
-        element_dict, expected_value = label_fixture
-        element_transforms_.name = None
-        element = _Element(element_dict, None, None, element_transforms_)
-
-        label = element.label
-
-        assert label == expected_value
-
-    @pytest.mark.xfail(reason="implement me", strict=True)
-    def it_knows_whether_it_is_explicitly_hidden(self):
-        assert False
-
-    def it_knows_whether_its_missing_or_valid(self, missing_fixture):
-        element_dict, expected_value = missing_fixture
-        element = _Element(element_dict, None, None, None)
-
-        missing = element.missing
-
-        # ---only True or False, no Truthy or Falsy (so use `is` not `==`)---
-        assert missing is expected_value
-
-    def it_knows_its_numeric_value(self, numeric_value_fixture):
-        element_dict, expected_value = numeric_value_fixture
-        element = _Element(element_dict, None, None, None)
-
-        numeric_value = element.numeric_value
-
-        # ---np.nan != np.nan, but np.nan in [np.nan] works---
-        assert numeric_value in [expected_value]
-
-    # fixtures -------------------------------------------------------
-
-    @pytest.fixture(
-        params=[
+    @pytest.mark.parametrize(
+        ("element_dict", "expected_value"),
+        (
             ({}, ""),
             ({"name": ""}, ""),
             ({"name": None}, ""),
@@ -944,14 +912,30 @@ class Describe_Element(object):
             ({"value": "Fähig"}, "Fähig"),
             ({"value": {"references": {}}}, ""),
             ({"value": {"references": {"name": "Tom"}}}, "Tom"),
-        ]
+        ),
     )
-    def label_fixture(self, request):
-        element_dict, expected_value = request.param
-        return element_dict, expected_value
+    def it_knows_its_label(self, element_dict, expected_value, element_transforms_):
+        element_transforms_.name = None
+        element = _Element(element_dict, None, None, element_transforms_)
 
-    @pytest.fixture(
-        params=[
+        label = element.label
+
+        assert label == expected_value
+
+    @pytest.mark.parametrize(
+        ("hide", "expected_value"), ((True, True), (False, False), (None, False))
+    )
+    def it_knows_whether_it_is_explicitly_hidden(self, request, hide, expected_value):
+        element_transforms_ = instance_mock(request, _ElementTransforms, hide=hide)
+        element = _Element(None, None, None, element_transforms_)
+
+        is_hidden = element.is_hidden
+
+        assert is_hidden is expected_value
+
+    @pytest.mark.parametrize(
+        ("element_dict", "expected_value"),
+        (
             ({}, False),
             ({"missing": None}, False),
             ({"missing": False}, False),
@@ -959,14 +943,19 @@ class Describe_Element(object):
             # ---not expected values, but just in case---
             ({"missing": 0}, False),
             ({"missing": 1}, True),
-        ]
+        ),
     )
-    def missing_fixture(self, request):
-        element_dict, expected_value = request.param
-        return element_dict, expected_value
+    def it_knows_whether_its_missing_or_valid(self, element_dict, expected_value):
+        element = _Element(element_dict, None, None, None)
 
-    @pytest.fixture(
-        params=[
+        missing = element.missing
+
+        # ---only True or False, no Truthy or Falsy (so use `is` not `==`)---
+        assert missing is expected_value
+
+    @pytest.mark.parametrize(
+        ("element_dict", "expected_value"),
+        (
             ({}, np.nan),
             ({"numeric_value": None}, np.nan),
             ({"numeric_value": 0}, 0),
@@ -977,11 +966,15 @@ class Describe_Element(object):
             ({"numeric_value": "666"}, "666"),
             ({"numeric_value": {}}, {}),
             ({"numeric_value": {"?": 8}}, {"?": 8}),
-        ]
+        ),
     )
-    def numeric_value_fixture(self, request):
-        element_dict, expected_value = request.param
-        return element_dict, expected_value
+    def it_knows_its_numeric_value(self, element_dict, expected_value):
+        element = _Element(element_dict, None, None, None)
+
+        numeric_value = element.numeric_value
+
+        # ---np.nan != np.nan, but np.nan in [np.nan] works---
+        assert numeric_value in [expected_value]
 
     # fixture components ---------------------------------------------
 

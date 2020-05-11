@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from cr.cube.cubepart import CubePartition, _Slice
+from cr.cube.cubepart import _Slice
 from cr.cube.cube import Cube
 from cr.cube.enum import DIMENSION_TYPE as DT
 
@@ -14,6 +14,175 @@ from ..fixtures import CR, TR
 
 class Describe_Slice(object):
     """Integration-test suite for _Slice object."""
+
+    def it_provides_values_for_cat_x_cat(self):
+        slice_ = Cube(CR.CAT_X_CAT).partitions[0]
+
+        assert slice_.column_labels == ("C", "E")
+        assert slice_.columns_dimension_name == "v7"
+        assert slice_.columns_dimension_type == DT.CAT
+        assert slice_.cube_is_mr_by_itself is False
+        assert slice_.description == "Pet Owners"
+        np.testing.assert_almost_equal(
+            slice_.row_proportions, np.array([[0.71428571, 0.28571429], [0.625, 0.375]])
+        )
+        assert slice_.inserted_column_idxs == ()
+        assert slice_.inserted_row_idxs == ()
+        assert slice_.insertions == []
+        assert slice_.is_empty is False
+        assert slice_.name == "v4"
+        np.testing.assert_array_almost_equal(
+            slice_.residual_test_stats,
+            [
+                [[0.71439304, 0.71439304], [0.71439304, 0.71439304]],
+                [[0.36596253, -0.36596253], [-0.36596253, 0.36596253]],
+            ],
+        )
+        assert slice_.row_labels == ("B", "C")
+        assert slice_.rows_dimension_description == "Pet Owners"
+        assert slice_.rows_dimension_fills == (None, None)
+        assert slice_.rows_dimension_name == "v4"
+        assert slice_.rows_dimension_type == DT.CAT
+        assert slice_.shape == (2, 2)
+        assert slice_.table_name is None
+        assert slice_.variable_name == "v7"
+
+    def it_provides_values_for_cat_x_cat_pruning_hs(self):
+        slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS).partitions[0]
+
+        np.testing.assert_array_equal(
+            slice_.base_counts,
+            [
+                [28, 48, 20, 10, 0, 1],
+                [7, 19, 12, 8, 0, 2],
+                [1, 1, 0, 1, 0, 0],
+                [3, 7, 4, 2, 0, 2],
+                [3, 11, 8, 5, 0, 0],
+                [0, 0, 0, 0, 0, 0],
+                [1, 2, 1, 1, 0, 0],
+            ],
+        )
+        np.testing.assert_almost_equal(
+            slice_.column_index,
+            [
+                [119.51424328, np.nan, 93.79691922, 81.24002902, np.nan, 50.17378721],
+                [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
+                [129.57286502, np.nan, 0.0, 234.24140666, np.nan, 0.0],
+                [68.74132753, np.nan, 99.37070479, 89.71345927, np.nan, 554.5688323],
+                [48.0063805, np.nan, 137.75263952, 149.33201417, np.nan, 0.0],
+                [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
+                [83.86593205, np.nan, 91.83509301, 160.9906575, np.nan, 0.0],
+            ],
+        )
+        np.testing.assert_almost_equal(
+            slice_.column_proportions,
+            [
+                [0.77796143, 0.69805616, 0.61055807, 0.52882073, np.nan, 0.32659933],
+                [0.1953168, 0.27401008, 0.360181, 0.41988366, np.nan, 0.67340067],
+                [0.02837466, 0.01483081, 0.0, 0.05129561, np.nan, 0.0],
+                [0.08347107, 0.1012239, 0.12066365, 0.10893707, np.nan, 0.67340067],
+                [0.08347107, 0.15795536, 0.23951735, 0.25965098, np.nan, 0.0],
+                [0.0, 0.0, 0.0, 0.0, np.nan, 0.0],
+                [0.02672176, 0.02793377, 0.02926094, 0.05129561, np.nan, 0.0],
+            ],
+        )
+        assert slice_.columns_dimension_name == "ShutdownBlame"
+        assert slice_.columns_dimension_type == DT.CAT
+        np.testing.assert_almost_equal(
+            slice_.columns_std_dev,
+            [
+                [0.41561694, 0.45910103, 0.48762374, 0.49916867, np.nan, 0.4689693],
+                [0.39644438, 0.44601408, 0.48005275, 0.49353964, np.nan, 0.4689693],
+                [0.16604076, 0.12087539, 0.0, 0.22060003, np.nan, 0.0],
+                [0.27659294, 0.30162497, 0.32573599, 0.31156024, np.nan, 0.4689693],
+                [0.27659294, 0.36469915, 0.42678893, 0.4384431, np.nan, 0.0],
+                [0.0, 0.0, 0.0, 0.0, np.nan, 0.0],
+                [0.16126906, 0.1647831, 0.16853704, 0.22060003, np.nan, 0.0],
+            ],
+        )
+        np.testing.assert_almost_equal(
+            slice_.columns_std_err,
+            [
+                [0.06895161, 0.05506512, 0.08465401, 0.11473767, np.nan, 0.27200111],
+                [0.06577085, 0.05349546, 0.08333965, 0.1134438, np.nan, 0.27200111],
+                [0.02754647, 0.01449794, 0.0, 0.05070657, np.nan, 0.0],
+                [0.04588727, 0.03617726, 0.05654946, 0.07161446, np.nan, 0.27200111],
+                [0.04588727, 0.04374245, 0.07409277, 0.10077944, np.nan, 0.0],
+                [0.0, 0.0, 0.0, 0.0, np.nan, 0.0],
+                [0.02675483, 0.01976428, 0.0292589, 0.05070657, np.nan, 0.0],
+            ],
+        )
+        assert slice_.dimension_types == (DT.CAT, DT.CAT)
+        assert slice_.inserted_column_idxs == (1,)
+        assert slice_.inserted_row_idxs == (1,)
+        assert slice_.is_empty is False
+        assert slice_.name == "MaritalStatus"
+        assert slice_.ndim == 2
+        np.testing.assert_almost_equal(
+            slice_.pvals,
+            [
+                [0.03851757, 0.0922145, 0.54097586, 0.21071341, np.nan, 0.23299113],
+                [0.04198008, 0.11390712, 0.50508577, 0.28105398, np.nan, 0.1797169],
+                [0.73113976, 0.41072494, 0.28019785, 0.32642279, np.nan, 0.79310382],
+                [0.36684711, 0.29203707, 0.98652895, 0.85178994, np.nan, 0.00305394],
+                [0.06398878, 0.47430453, 0.21130996, 0.26884987, np.nan, 0.4212984],
+                [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
+                [0.82020207, 0.70318269, 0.91486794, 0.58880283, np.nan, 0.75048675],
+            ],
+        )
+        assert slice_.rows_dimension_description == "What is your marital status?"
+        assert slice_.rows_dimension_fills == (None, None, None, None, None, None, None)
+        assert slice_.rows_dimension_type == DT.CAT
+        np.testing.assert_almost_equal(
+            slice_.row_proportions,
+            [
+                [0.47502103, 0.81547519, 0.34045416, 0.16820858, 0.0, 0.01631623],
+                [0.24473593, 0.65688643, 0.4121505, 0.27407663, 0.0, 0.06903693],
+                [0.515, 0.515, 0.0, 0.485, 0.0, 0.0],
+                [0.27321912, 0.63390442, 0.3606853, 0.18575293, 0.0, 0.18034265],
+                [0.19080605, 0.69080605, 0.5, 0.30919395, 0.0, 0.0],
+                [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
+                [0.33333333, 0.66666667, 0.33333333, 0.33333333, 0.0, 0.0],
+            ],
+        )
+        assert slice_.table_base == 91
+        assert slice_.table_name is None
+        np.testing.assert_almost_equal(
+            slice_.table_std_dev,
+            [
+                [0.46216723, 0.49904908, 0.41533263, 0.31225682, 0.0, 0.10250865],
+                [0.26758936, 0.40613936, 0.33710998, 0.28174342, 0.0, 0.14635252],
+                [0.10559638, 0.10559638, 0.0, 0.10250865, 0.0, 0.0],
+                [0.17909696, 0.26654957, 0.20464365, 0.1484817, 0.0, 0.14635252],
+                [0.17909696, 0.32509465, 0.28174342, 0.22554563, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                [0.10250865, 0.14418892, 0.10250865, 0.10250865, 0.0, 0.0],
+            ],
+        )
+        np.testing.assert_almost_equal(
+            slice_.table_std_err,
+            [
+                [0.04833892, 0.05219646, 0.0434404, 0.03265951, 0.0, 0.01072157],
+                [0.02798766, 0.04247886, 0.03525895, 0.02946806, 0.0, 0.01530728],
+                [0.01104452, 0.01104452, 0.0, 0.01072157, 0.0, 0.0],
+                [0.01873208, 0.02787891, 0.02140405, 0.01552997, 0.0, 0.01530728],
+                [0.01873208, 0.03400224, 0.02946806, 0.02359023, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                [0.01072157, 0.01508098, 0.01072157, 0.01072157, 0.0, 0.0],
+            ],
+        )
+        np.testing.assert_almost_equal(
+            slice_.zscore,
+            [
+                [2.06930398, 1.68383013, -0.61133797, -1.25160615, np.nan, -1.19268916],
+                [-2.03371753, -1.58087282, 0.66650907, 1.07795469, np.nan, 1.34162721],
+                [0.3436098, -0.82261857, -1.079875, 0.98134469, np.nan, -0.26228228],
+                [-0.90239493, -1.05366336, -0.01688425, -0.18683508, np.nan, 2.962256],
+                [-1.85225802, -0.7154929, 1.24997148, 1.10571507, np.nan, -0.8041707],
+                [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
+                [-0.22728508, -0.3810277, -0.10690048, 0.5405717, np.nan, -0.31799761],
+            ],
+        )
 
     def it_provides_same_proportions_without_explicit_order(self):
         transforms = TR.TEST_DASHBOARD_TRANSFORM_SINGLE_EL_VISIBLE
@@ -311,37 +480,18 @@ class Describe_Slice(object):
         )
 
     @pytest.mark.parametrize(
-        "fixture,table_name,expected",
+        "fixture, table_name, expected",
         [(CR.EDU_FAV5_FAV5, "Education", True), (CR.AGE_FAVMR, None, False)],
     )
-    def it_knows_cube_is_mr_by_itself(self, fixture, table_name, expected):
+    def it_knows_when_cube_is_mr_by_itself(self, fixture, table_name, expected):
         cube = Cube(fixture)
         slice_ = cube.partitions[0]
 
         assert slice_.table_name == table_name
         assert slice_.cube_is_mr_by_itself is expected
 
-    def it_is_not_empty(self):
-        slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS).partitions[0]
-        assert slice_.is_empty is False
-
-    def it_is_empty(self):
-        slice_ = Cube(CR.OM_SGP8334215_VN_2019_SEP_19).partitions[0]
-        assert slice_.is_empty is True
-
-    def it_loads_from_cat_x_cat_cube(self):
-        cube = Cube(CR.CAT_X_CAT)
-        slice_ = _Slice(cube, 0, None, None, 0)
-        expected = np.array([[0.71428571, 0.28571429], [0.625, 0.375]])
-        np.testing.assert_almost_equal(slice_.row_proportions, expected)
-
-    def it_provides_fills(self):
-        slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS).partitions[0]
-        assert slice_.rows_dimension_fills == (None, None, None, None, None, None, None)
-
-    def it_provides_missing(self):
-        cube = Cube(CR.CAT_X_CAT)
-        assert cube.missing == 5
+    def it_knows_when_it_is_empty(self):
+        assert Cube(CR.OM_SGP8334215_VN_2019_SEP_19).partitions[0].is_empty is True
 
     def it_provides_nan_margin_when_has_weighted_mean_without_weighted_counts(self):
         slice_ = Cube(CR.AGE_AGE_GENDER).partitions[0]
@@ -378,159 +528,6 @@ class Describe_Slice(object):
             [0.33333333, 0.33333333, 0.33333333, 0.0, 0.0],
         ]
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
-
-        # With insertions (only row for now)
-        slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS).partitions[0]
-        expected = [
-            [0.47502103, 0.81547519, 0.34045416, 0.16820858, 0.0, 0.01631623],
-            [0.24473593, 0.65688643, 0.4121505, 0.27407663, 0.0, 0.06903693],
-            [0.515, 0.515, 0.0, 0.485, 0.0, 0.0],
-            [0.27321912, 0.63390442, 0.3606853, 0.18575293, 0.0, 0.18034265],
-            [0.19080605, 0.69080605, 0.5, 0.30919395, 0.0, 0.0],
-            [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
-            [0.33333333, 0.66666667, 0.33333333, 0.33333333, 0.0, 0.0],
-        ]
-        np.testing.assert_almost_equal(slice_.row_proportions, expected)
-        assert slice_.inserted_row_idxs == (1,)
-        assert slice_.inserted_column_idxs == (1,)
-        assert slice_.name == "MaritalStatus"
-        assert slice_.dimension_types == (DT.CAT, DT.CAT)
-        assert slice_.ndim == 2
-        assert slice_.table_name is None
-
-        # Test zscores
-        np.testing.assert_almost_equal(
-            slice_.zscore,
-            [
-                [2.06930398, 1.68383013, -0.61133797, -1.25160615, np.nan, -1.19268916],
-                [-2.03371753, -1.58087282, 0.66650907, 1.07795469, np.nan, 1.34162721],
-                [0.3436098, -0.82261857, -1.079875, 0.98134469, np.nan, -0.26228228],
-                [-0.90239493, -1.05366336, -0.01688425, -0.18683508, np.nan, 2.962256],
-                [-1.85225802, -0.7154929, 1.24997148, 1.10571507, np.nan, -0.8041707],
-                [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
-                [-0.22728508, -0.3810277, -0.10690048, 0.5405717, np.nan, -0.31799761],
-            ],
-        )
-
-        # Test pvals
-        np.testing.assert_almost_equal(
-            slice_.pvals,
-            [
-                [0.03851757, 0.0922145, 0.54097586, 0.21071341, np.nan, 0.23299113],
-                [0.04198008, 0.11390712, 0.50508577, 0.28105398, np.nan, 0.1797169],
-                [0.73113976, 0.41072494, 0.28019785, 0.32642279, np.nan, 0.79310382],
-                [0.36684711, 0.29203707, 0.98652895, 0.85178994, np.nan, 0.00305394],
-                [0.06398878, 0.47430453, 0.21130996, 0.26884987, np.nan, 0.4212984],
-                [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
-                [0.82020207, 0.70318269, 0.91486794, 0.58880283, np.nan, 0.75048675],
-            ],
-        )
-
-        # Test column index
-        np.testing.assert_almost_equal(
-            slice_.column_index,
-            [
-                [119.51424328, np.nan, 93.79691922, 81.24002902, np.nan, 50.17378721],
-                [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
-                [129.57286502, np.nan, 0.0, 234.24140666, np.nan, 0.0],
-                [68.74132753, np.nan, 99.37070479, 89.71345927, np.nan, 554.5688323],
-                [48.0063805, np.nan, 137.75263952, 149.33201417, np.nan, 0.0],
-                [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
-                [83.86593205, np.nan, 91.83509301, 160.9906575, np.nan, 0.0],
-            ],
-        )
-
-        # Test table standard deviation
-        np.testing.assert_almost_equal(
-            slice_.table_std_dev,
-            [
-                [0.46216723, 0.49904908, 0.41533263, 0.31225682, 0.0, 0.10250865],
-                [0.26758936, 0.40613936, 0.33710998, 0.28174342, 0.0, 0.14635252],
-                [0.10559638, 0.10559638, 0.0, 0.10250865, 0.0, 0.0],
-                [0.17909696, 0.26654957, 0.20464365, 0.1484817, 0.0, 0.14635252],
-                [0.17909696, 0.32509465, 0.28174342, 0.22554563, 0.0, 0.0],
-                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                [0.10250865, 0.14418892, 0.10250865, 0.10250865, 0.0, 0.0],
-            ],
-        )
-
-        # Test table standard error
-        np.testing.assert_almost_equal(
-            slice_.table_std_err,
-            [
-                [0.04833892, 0.05219646, 0.0434404, 0.03265951, 0.0, 0.01072157],
-                [0.02798766, 0.04247886, 0.03525895, 0.02946806, 0.0, 0.01530728],
-                [0.01104452, 0.01104452, 0.0, 0.01072157, 0.0, 0.0],
-                [0.01873208, 0.02787891, 0.02140405, 0.01552997, 0.0, 0.01530728],
-                [0.01873208, 0.03400224, 0.02946806, 0.02359023, 0.0, 0.0],
-                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                [0.01072157, 0.01508098, 0.01072157, 0.01072157, 0.0, 0.0],
-            ],
-        )
-
-        # Test cols standard dev
-        np.testing.assert_almost_equal(
-            slice_.columns_std_dev,
-            [
-                [0.41561694, 0.45910103, 0.48762374, 0.49916867, np.nan, 0.4689693],
-                [0.39644438, 0.44601408, 0.48005275, 0.49353964, np.nan, 0.4689693],
-                [0.16604076, 0.12087539, 0.0, 0.22060003, np.nan, 0.0],
-                [0.27659294, 0.30162497, 0.32573599, 0.31156024, np.nan, 0.4689693],
-                [0.27659294, 0.36469915, 0.42678893, 0.4384431, np.nan, 0.0],
-                [0.0, 0.0, 0.0, 0.0, np.nan, 0.0],
-                [0.16126906, 0.1647831, 0.16853704, 0.22060003, np.nan, 0.0],
-            ],
-        )
-
-        # Test cols standard err
-        np.testing.assert_almost_equal(
-            slice_.columns_std_err,
-            [
-                [0.06895161, 0.05506512, 0.08465401, 0.11473767, np.nan, 0.27200111],
-                [0.06577085, 0.05349546, 0.08333965, 0.1134438, np.nan, 0.27200111],
-                [0.02754647, 0.01449794, 0.0, 0.05070657, np.nan, 0.0],
-                [0.04588727, 0.03617726, 0.05654946, 0.07161446, np.nan, 0.27200111],
-                [0.04588727, 0.04374245, 0.07409277, 0.10077944, np.nan, 0.0],
-                [0.0, 0.0, 0.0, 0.0, np.nan, 0.0],
-                [0.02675483, 0.01976428, 0.0292589, 0.05070657, np.nan, 0.0],
-            ],
-        )
-
-    def it_provides_base_counts(self):
-        slice_ = _Slice(Cube(CR.CAT_X_CAT_PRUNING_HS), 0, None, None, 0)
-        np.testing.assert_array_equal(
-            slice_.base_counts,
-            [
-                [28, 48, 20, 10, 0, 1],
-                [7, 19, 12, 8, 0, 2],
-                [1, 1, 0, 1, 0, 0],
-                [3, 7, 4, 2, 0, 2],
-                [3, 11, 8, 5, 0, 0],
-                [0, 0, 0, 0, 0, 0],
-                [1, 2, 1, 1, 0, 0],
-            ],
-        )
-        assert slice_.table_base == 91
-
-    def it_provides_various_names_and_labels(self):
-        slice_ = _Slice(Cube(CR.CAT_X_CAT_PRUNING_HS), 0, None, None, 0)
-        assert slice_.columns_dimension_name == "ShutdownBlame"
-        assert slice_.rows_dimension_description == "What is your marital status?"
-        assert slice_.rows_dimension_type == DT.CAT
-        assert slice_.columns_dimension_type == DT.CAT
-
-    def it_calculates_cat_x_cat_column_proportions(self):
-        slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS).partitions[0]
-        expected = [
-            [0.77796143, 0.69805616, 0.61055807, 0.52882073, np.nan, 0.32659933],
-            [0.1953168, 0.27401008, 0.360181, 0.41988366, np.nan, 0.67340067],
-            [0.02837466, 0.01483081, 0.0, 0.05129561, np.nan, 0.0],
-            [0.08347107, 0.1012239, 0.12066365, 0.10893707, np.nan, 0.67340067],
-            [0.08347107, 0.15795536, 0.23951735, 0.25965098, np.nan, 0.0],
-            [0.0, 0.0, 0.0, 0.0, np.nan, 0.0],
-            [0.02672176, 0.02793377, 0.02926094, 0.05129561, np.nan, 0.0],
-        ]
-        np.testing.assert_almost_equal(slice_.column_proportions, expected)
 
     def it_provides_unpruned_table_margin(self):
         slice_ = _Slice(Cube(CR.MR_X_CAT_HS), 0, None, None, 0)
@@ -1147,18 +1144,7 @@ class Describe_Slice(object):
             ],
         )
 
-    def it_provides_residual_test_stats(self):
-        slice_ = Cube(CR.CAT_X_CAT).partitions[0]
-        np.testing.assert_array_almost_equal(
-            slice_.residual_test_stats,
-            [
-                [[0.71439304, 0.71439304], [0.71439304, 0.71439304]],
-                [[0.36596253, -0.36596253], [-0.36596253, 0.36596253]],
-            ],
-        )
-
     def it_reorders_cat_x_cat(self):
-        slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS).partitions[0]
         transforms = {
             "rows_dimension": {
                 "insertions": {},
@@ -1183,7 +1169,6 @@ class Describe_Slice(object):
         np.testing.assert_equal(slice_.base_counts, expected)
 
     def it_prunes_cat_x_cat_with_hs(self):
-        slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS).partitions[0]
         # Pruned - without insertions
         transforms = {
             "rows_dimension": {"insertions": {}, "prune": True},
@@ -1273,164 +1258,118 @@ class Describe_Slice(object):
             means, np.array([[38.3333333, np.nan, 65.0, 55.0, 34.0]])
         )
 
-    def it_knows_its_insertions(self, insertions_fixture):
-        fixture, expected_value = insertions_fixture
-        slice_ = Cube(fixture).partitions[0]
+    def it_knows_its_insertions(self):
+        slice_ = Cube(CR.CAT_X_CAT_HS_2ROWS_1COL).partitions[0]
 
-        np.testing.assert_array_almost_equal(expected_value, slice_.insertions)
-
-    # fixtures ---------------------------------------------
-
-    @pytest.fixture(
-        params=[
-            (CR.CAT_X_CAT, []),
-            (
-                CR.CAT_X_CAT_HS_2ROWS_1COL,
-                np.array(
+        np.testing.assert_array_almost_equal(
+            slice_.insertions,
+            np.array(
+                [
                     [
+                        [np.inf, np.inf, np.inf, np.inf, np.inf, 2.9842060e-03, np.inf],
+                        [np.inf, np.inf, np.inf, np.inf, np.inf, 1.2085762e-05, np.inf],
                         [
-                            [
-                                np.inf,
-                                np.inf,
-                                np.inf,
-                                np.inf,
-                                np.inf,
-                                2.98420609e-03,
-                                np.inf,
-                            ],
-                            [
-                                np.inf,
-                                np.inf,
-                                np.inf,
-                                np.inf,
-                                np.inf,
-                                1.20857620e-05,
-                                np.inf,
-                            ],
-                            [
-                                1.09954577e-02,
-                                1.64231069e-01,
-                                7.74991104e-04,
-                                4.78920155e-01,
-                                1.73194792e-12,
-                                2.68565170e-11,
-                                2.94880115e-03,
-                            ],
-                            [
-                                np.inf,
-                                np.inf,
-                                np.inf,
-                                np.inf,
-                                np.inf,
-                                1.19006985e-02,
-                                np.inf,
-                            ],
-                            [
-                                2.87540141e-05,
-                                2.72376900e-02,
-                                4.27168678e-09,
-                                7.46184742e-02,
-                                0.00000000e00,
-                                2.89875191e-09,
-                                3.51260516e-01,
-                            ],
-                            [
-                                np.inf,
-                                np.inf,
-                                np.inf,
-                                np.inf,
-                                np.inf,
-                                0.00000000e00,
-                                np.inf,
-                            ],
+                            1.09954577e-02,
+                            1.64231069e-01,
+                            7.74991104e-04,
+                            4.78920155e-01,
+                            1.73194792e-12,
+                            2.68565170e-11,
+                            2.94880115e-03,
                         ],
+                        [np.inf, np.inf, np.inf, np.inf, np.inf, 1.1900698e-02, np.inf],
                         [
-                            [
-                                np.inf,
-                                np.inf,
-                                np.inf,
-                                np.inf,
-                                np.inf,
-                                -2.96936015e00,
-                                np.inf,
-                            ],
-                            [
-                                np.inf,
-                                np.inf,
-                                np.inf,
-                                np.inf,
-                                np.inf,
-                                -4.37603499e00,
-                                np.inf,
-                            ],
-                            [
-                                2.54284314e00,
-                                1.39098139e00,
-                                3.36157570e00,
-                                -7.08040423e-01,
-                                -7.05452463e00,
-                                -6.66285184e00,
-                                2.97302533e00,
-                            ],
-                            [
-                                np.inf,
-                                np.inf,
-                                np.inf,
-                                np.inf,
-                                np.inf,
-                                -2.51507523e00,
-                                np.inf,
-                            ],
-                            [
-                                -4.18311635e00,
-                                2.20809445e00,
-                                5.87331384e00,
-                                1.78280240e00,
-                                -8.48620633e00,
-                                -5.93723152e00,
-                                9.32147088e-01,
-                            ],
-                            [
-                                np.inf,
-                                np.inf,
-                                np.inf,
-                                np.inf,
-                                np.inf,
-                                9.70800153e00,
-                                np.inf,
-                            ],
+                            2.87540141e-05,
+                            2.72376900e-02,
+                            4.27168678e-09,
+                            7.46184742e-02,
+                            0.0,
+                            2.89875191e-09,
+                            3.51260516e-01,
                         ],
-                    ]
-                ),
+                        [np.inf, np.inf, np.inf, np.inf, np.inf, 0.0, np.inf],
+                    ],
+                    [
+                        [np.inf, np.inf, np.inf, np.inf, np.inf, -2.96936015, np.inf],
+                        [np.inf, np.inf, np.inf, np.inf, np.inf, -4.37603499, np.inf],
+                        [
+                            2.54284314e00,
+                            1.39098139e00,
+                            3.36157570e00,
+                            -7.08040423e-01,
+                            -7.05452463e00,
+                            -6.66285184e00,
+                            2.97302533e00,
+                        ],
+                        [np.inf, np.inf, np.inf, np.inf, np.inf, -2.51507523, np.inf],
+                        [
+                            -4.18311635e00,
+                            2.20809445e00,
+                            5.87331384e00,
+                            1.78280240e00,
+                            -8.48620633e00,
+                            -5.93723152e00,
+                            9.32147088e-01,
+                        ],
+                        [np.inf, np.inf, np.inf, np.inf, np.inf, 9.70800153, np.inf],
+                    ],
+                ]
             ),
-        ]
-    )
-    def insertions_fixture(self, request):
-        fixture, expected_value = request.param
-        return fixture, expected_value
+        )
 
 
 class Describe_Strand(object):
     """Integration-test suite for `cr.cube.cubepart._Strand` object."""
 
-    def it_provides_nans_for_means_insertions(self):
-        strand = CubePartition.factory(
-            Cube(CR.CAT_WITH_MEANS_AND_INSERTIONS), 0, None, None, None, 0
-        )
+    def it_provides_values_for_univariate_cat(self):
+        strand = Cube(CR.UNIVARIATE_CATEGORICAL).partitions[0]
+
+        assert strand.base_counts == (10, 5)
+        assert strand.bases == (15, 15)
+        assert strand.counts == (10, 5)
+        assert strand.cube_index == 0
+        assert strand.cube_is_mr_by_itself is False
+        assert strand.dimension_types == (DT.CAT,)
+        assert strand.has_means is False
+        assert strand.inserted_row_idxs == ()
+        assert strand.is_empty is False
+        assert strand.means == (np.nan, np.nan)
+        np.testing.assert_equal(strand.min_base_size_mask, [False, False])
+        assert strand.name == "v7"
+        assert strand.ndim == 1
+        assert strand.population_counts == (0.0, 0.0)
+        np.testing.assert_equal(strand.row_base, [10, 5])
+        assert strand.row_count == 2
+        assert strand.row_labels == ("C", "E")
+        assert strand.rows_dimension_fills == (None, None)
+        assert strand.rows_dimension_name == "v7"
+        assert strand.rows_dimension_type == DT.CAT
+        np.testing.assert_equal(strand.rows_margin, [10, 5])
+        assert strand.scale_mean - 1.66667 < 0.0001
+        assert strand.shape == (2,)
+        assert strand.table_base == 15
+        assert strand.table_base_unpruned == 15
+        assert strand.table_margin == 15
+        assert strand.table_margin_unpruned == 15
+        assert strand.table_name == "v7: C"
+        assert pytest.approx(strand.table_percentages) == (66.66667, 33.33333)
+        assert pytest.approx(strand.table_proportions) == (0.666667, 0.333333)
+        assert strand.title == "Registered Voters"
+        assert strand.unweighted_bases == (15, 15)
+        assert pytest.approx(strand.var_scale_mean) == 0.8888888
+        assert strand.variable_name == "v7"
+
+    def it_provides_values_for_cat_with_means_and_insertions(self):
+        strand = Cube(CR.CAT_WITH_MEANS_AND_INSERTIONS).partitions[0]
+
+        assert strand.is_empty is False
         np.testing.assert_almost_equal(
             strand.means, [19.85555556, 13.85416667, 52.78947368, np.nan, np.nan]
         )
+        assert strand.title == "Untitled"
 
-    def it_is_not_empty(self):
-        strand = CubePartition.factory(
-            Cube(CR.CAT_WITH_MEANS_AND_INSERTIONS), 0, None, None, None, 0
-        )
-        assert strand.is_empty is False
-
-    def it_is_empty(self):
-        strand = CubePartition.factory(
-            Cube(CR.OM_SGP8334215_VN_2019_SEP_19_STRAND), 0, None, None, None, 0
-        )
+    def it_knows_when_it_is_empty(self):
+        strand = Cube(CR.OM_SGP8334215_VN_2019_SEP_19_STRAND).partitions[0]
         assert strand.is_empty is True
 
 

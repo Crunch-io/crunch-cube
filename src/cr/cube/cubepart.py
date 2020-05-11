@@ -57,6 +57,14 @@ class CubePartition(object):
         return _Slice(cube, slice_idx, transforms, population, mask_size)
 
     @lazyproperty
+    def cube_index(self):
+        """Offset of this partition's cube in its CubeSet.
+
+        Used to differentiate certain partitions like a filtered rows-summary strand.
+        """
+        return self._cube.cube_index
+
+    @lazyproperty
     def cube_is_mr_by_itself(self):
         return False
 
@@ -100,6 +108,13 @@ class CubePartition(object):
     def variable_name(self):
         """str representing the name of the superheading variable."""
         return self._dimensions[0 if self.ndim < 2 else 1].name
+
+    @lazyproperty
+    def _dimensions(self):
+        """tuple of Dimension object for each dimension in cube-partition."""
+        raise NotImplementedError(
+            "must be implemented by each subclass"
+        )  # pragma: no cover
 
 
 class _Slice(CubePartition):
@@ -341,27 +356,17 @@ class _Slice(CubePartition):
         return self._rows_dimension.name
 
     @lazyproperty
+    def rows_dimension_numeric(self):
+        return self._rows_dimension_numeric
+
+    @lazyproperty
     def rows_dimension_type(self):
         """Member of `cr.cube.enum.DIMENSION_TYPE` specifying type of rows dimension."""
         return self._rows_dimension.dimension_type
 
     @lazyproperty
-    def rows_dimension_numeric(self):
-        return self._rows_dimension_numeric
-
-    @lazyproperty
     def rows_margin(self):
         return np.array([row.margin for row in self._matrix.rows])
-
-    @lazyproperty
-    def scale_means_column(self):
-        if np.all(np.isnan(self._columns_dimension_numeric)):
-            return None
-
-        inner = np.nansum(self._columns_dimension_numeric * self.counts, axis=1)
-        not_a_nan_index = ~np.isnan(self._columns_dimension_numeric)
-        denominator = np.sum(self.counts[:, not_a_nan_index], axis=1)
-        return inner / denominator
 
     @lazyproperty
     def scale_mean_pairwise_indices(self):
@@ -372,6 +377,16 @@ class _Slice(CubePartition):
         return NewPairwiseSignificance(
             self, alpha=alpha, only_larger=only_larger
         ).scale_mean_pairwise_indices
+
+    @lazyproperty
+    def scale_means_column(self):
+        if np.all(np.isnan(self._columns_dimension_numeric)):
+            return None
+
+        inner = np.nansum(self._columns_dimension_numeric * self.counts, axis=1)
+        not_a_nan_index = ~np.isnan(self._columns_dimension_numeric)
+        denominator = np.sum(self.counts[:, not_a_nan_index], axis=1)
+        return inner / denominator
 
     @lazyproperty
     def scale_means_columns_margin(self):
@@ -626,7 +641,6 @@ class _Strand(CubePartition):
         self._transforms_arg = transforms
         self._population = population
         self._ca_as_0th = ca_as_0th
-        # TODO: see if we really need this.
         self._slice_idx = slice_idx
         self._mask_size = mask_size
 
@@ -637,20 +651,25 @@ class _Strand(CubePartition):
     @lazyproperty
     def bases(self):
         """Sequence of weighted base for each row."""
-        return tuple(np.broadcast_to(self.table_margin, self._shape))
+        return tuple(np.broadcast_to(self.table_margin, self.shape))
 
     @lazyproperty
     def counts(self):
         return tuple(row.count for row in self._stripe.rows)
 
     @lazyproperty
-    def is_empty(self):
-        return any(s == 0 for s in self._shape)
+    def inserted_row_idxs(self):
+        """tuple of int index of each inserted row in this strand.
+
+        Suitable for use in applying different formatting (e.g. Bold) to inserted rows.
+        Provided index values correspond to measure values as-delivered by this strand,
+        after any re-ordering specified in a transform.
+        """
+        return tuple(i for i, row in enumerate(self._stripe.rows) if row.is_insertion)
 
     @lazyproperty
-    def inserted_row_idxs(self):
-        # TODO: add integration-test coverage for this.
-        return tuple(i for i, row in enumerate(self._stripe.rows) if row.is_insertion)
+    def is_empty(self):
+        return any(s == 0 for s in self.shape)
 
     @lazyproperty
     def means(self):
@@ -659,12 +678,12 @@ class _Strand(CubePartition):
     @lazyproperty
     def min_base_size_mask(self):
         mask = self.table_base < self._mask_size
-        strand_shape = (self.row_count,)
-
-        if self.table_base.shape == strand_shape:
-            return mask
-
-        return np.logical_or(np.zeros(strand_shape, dtype=bool), mask)
+        shape = self.shape
+        return (
+            mask
+            if self.table_base.shape == shape
+            else np.logical_or(np.zeros(shape, dtype=bool), mask)
+        )
 
     @lazyproperty
     def name(self):
@@ -715,7 +734,7 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def rows_margin(self):
-        return np.array([row.margin for row in self._stripe.rows])
+        return np.array([row.count for row in self._stripe.rows])
 
     @lazyproperty
     def scale_mean(self):
@@ -739,6 +758,18 @@ class _Strand(CubePartition):
 
         # ---overall scale-mean is the quotient---
         return total_numeric_value / total_count
+
+    @lazyproperty
+    def shape(self):
+        """Tuple of int vector counts for this partition.
+
+        A _Strand has a shape like (5,) which represents its row-count.
+
+        Not to be confused with `numpy.ndarray.shape`, this represent the count of rows
+        in this strand. It does not necessarily represent the shape of any underlying
+        `numpy.ndarray` object In particular, the value of its row-count can be zero.
+        """
+        return (self.row_count,)
 
     @lazyproperty
     def table_base(self):
@@ -792,6 +823,16 @@ class _Strand(CubePartition):
         return tuple(row.table_proportions for row in self._stripe.rows)
 
     @lazyproperty
+    def title(self):
+        """The str display name of this strand, suitable for use as a column heading.
+
+        `Strand.name` is the rows-dimension name, which is suitable for use as a title
+        of the row-headings. However, a strand can also appear as a *column* and this
+        value is a suitable name for such a column.
+        """
+        return self._cube.title
+
+    @lazyproperty
     def unweighted_bases(self):
         """Sequence of base count for each row, before weighting.
 
@@ -799,7 +840,7 @@ class _Strand(CubePartition):
         reflecting the base for that individual subvariable. In all other cases, the
         table base is repeated for each row.
         """
-        return tuple(np.broadcast_to(self.table_base, self._shape))
+        return tuple(np.broadcast_to(self.table_base, self.shape))
 
     @lazyproperty
     def var_scale_mean(self):
@@ -853,11 +894,6 @@ class _Strand(CubePartition):
         """Transforms dict for the single (rows) dimension of this strand."""
         transforms_dict = {} if self._transforms_arg is None else self._transforms_arg
         return transforms_dict.get("rows_dimension", {})
-
-    @lazyproperty
-    def _shape(self):
-        """The shape this strand would have it it were an array (which it isn't)."""
-        return (self.row_count,)
 
     @lazyproperty
     def _stripe(self):
