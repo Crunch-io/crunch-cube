@@ -112,6 +112,11 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.11.19
+- Fix problem where pre-ordering anchor-idx was used for locating inserted subtotal vectors
+- Enable handling of filter-only multitable-template placeholders.
+- New measures: table and columns standard deviation and standard error
+
 #### 1.11.18
 - Fix wrong proportions and base values when explicit order is expressed
 
