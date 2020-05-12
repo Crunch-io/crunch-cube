@@ -833,18 +833,6 @@ class Describe_ValidElements(object):
 
     @pytest.fixture(
         params=[
-            ([True, False, False], 2),
-            ([True, True, True], 0),
-            ([False, False, False], 3),
-            ([False, True, True], 1),
-        ]
-    )
-    def visible_elements_fixture(self, request):
-        element_transforms_hide, expected_value = request.param
-        return element_transforms_hide, expected_value
-
-    @pytest.fixture(
-        params=[
             ({}, None),
             ({"order": {"element_ids": [1, 3, 2], "type": "explicit"}}, (0, 2, 1)),
             ({"order": {"element_ids": [-1, 3, 2], "type": "explicit"}}, (2, 1, 0)),
@@ -865,10 +853,6 @@ class Describe_ValidElements(object):
     @pytest.fixture
     def all_elements_(self, request):
         return instance_mock(request, _AllElements)
-
-    @pytest.fixture
-    def element_transforms_(self, request):
-        return instance_mock(request, _ElementTransforms)
 
 
 class Describe_Element(object):
@@ -1183,20 +1167,6 @@ class Describe_Subtotal(object):
 
         assert anchor == expected_value
 
-    def it_knows_the_index_of_the_anchor_element(
-        self, anchor_idx_fixture, anchor_prop_, valid_elements_, element_
-    ):
-        anchor, index, calls, expected_value = anchor_idx_fixture
-        anchor_prop_.return_value = anchor
-        valid_elements_.get_by_id.return_value = element_
-        element_.index_in_valids = index
-        subtotal = _Subtotal(None, valid_elements_, None)
-
-        anchor_idx = subtotal.anchor_idx
-
-        assert valid_elements_.get_by_id.call_args_list == calls
-        assert anchor_idx == expected_value
-
     def it_provides_access_to_the_addend_element_ids(
         self, addend_ids_fixture, valid_elements_
     ):
@@ -1207,21 +1177,6 @@ class Describe_Subtotal(object):
         addend_ids = subtotal.addend_ids
 
         assert addend_ids == expected_value
-
-    def it_provides_access_to_the_addend_element_indices(
-        self, request, addend_ids_prop_, valid_elements_
-    ):
-        addend_ids_prop_.return_value = (3, 6, 9)
-        valid_elements_.get_by_id.side_effect = iter(
-            instance_mock(request, _Element, index_in_valids=index)
-            for index in (2, 4, 6)
-        )
-        subtotal = _Subtotal(None, valid_elements_, None)
-
-        addend_idxs = subtotal.addend_idxs
-
-        assert valid_elements_.get_by_id.call_args_list == [call(3), call(6), call(9)]
-        assert addend_idxs == (2, 4, 6)
 
     def it_knows_the_subtotal_label(self, label_fixture):
         subtotal_dict, expected_value = label_fixture
@@ -1262,14 +1217,6 @@ class Describe_Subtotal(object):
         return subtotal_dict, element_ids, expected_value
 
     @pytest.fixture(
-        params=[("top", None, 0, "top"), ("bottom", None, 0, "bottom"), (42, 7, 1, 7)]
-    )
-    def anchor_idx_fixture(self, request):
-        anchor, index, call_count, expected_value = request.param
-        calls = [call(anchor)] * call_count
-        return anchor, index, calls, expected_value
-
-    @pytest.fixture(
         params=[
             ({}, ""),
             ({"name": None}, ""),
@@ -1282,18 +1229,6 @@ class Describe_Subtotal(object):
         return subtotal_dict, expected_value
 
     # fixture components ---------------------------------------------
-
-    @pytest.fixture
-    def addend_ids_prop_(self, request):
-        return property_mock(request, _Subtotal, "addend_ids")
-
-    @pytest.fixture
-    def anchor_prop_(self, request):
-        return property_mock(request, _Subtotal, "anchor")
-
-    @pytest.fixture
-    def element_(self, request):
-        return instance_mock(request, _Element)
 
     @pytest.fixture
     def valid_elements_(self, request):

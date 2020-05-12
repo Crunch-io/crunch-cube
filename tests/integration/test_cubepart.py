@@ -184,6 +184,97 @@ class Describe_Slice(object):
             ],
         )
 
+    def it_places_insertions_on_a_reordered_dimension_in_the_right_position(self):
+        """Subtotal anchors follow re-ordered rows.
+
+        The key fixture characteristic is that an ordering transform is combined with
+        subtotal insertions such that their subtotal position is changed by the
+        ordering.
+        """
+        transforms = {
+            "rows_dimension": {
+                "insertions": [
+                    {
+                        "anchor": "top",
+                        "args": [1, 2],
+                        "function": "subtotal",
+                        "name": "Apple+Banana",
+                    },
+                    {
+                        "anchor": 4,
+                        "args": [1, 4],
+                        "function": "subtotal",
+                        "name": "Apple+Date",
+                    },
+                    {
+                        "anchor": "bottom",
+                        "args": [3, 4],
+                        "function": "subtotal",
+                        "name": "Cherry+Date",
+                    },
+                ],
+                "order": {"element_ids": [2, 4, 3, 1], "type": "explicit"},
+            },
+            "columns_dimension": {
+                "insertions": [
+                    {
+                        "anchor": "top",
+                        "args": [1, 2],
+                        "function": "subtotal",
+                        "name": "Asparagus+Broccoli",
+                    },
+                    {
+                        "anchor": 4,
+                        "args": [1, 4],
+                        "function": "subtotal",
+                        "name": "Asparagus+Daikon",
+                    },
+                    {
+                        "anchor": "bottom",
+                        "args": [3, 4],
+                        "function": "subtotal",
+                        "name": "Cauliflower+Daikon",
+                    },
+                ],
+                "order": {"element_ids": [2, 4, 3, 1], "type": "explicit"},
+            },
+        }
+        slice_ = Cube(CR.CAT_X_CAT_4X4, transforms=transforms).partitions[0]
+
+        print("slice_.row_labels == %s" % (slice_.row_labels,))
+        assert slice_.row_labels == (
+            "Apple+Banana",
+            "Banana",
+            "Date",
+            "Apple+Date",
+            "Cherry",
+            "Apple",
+            "Cherry+Date",
+        )
+        assert slice_.column_labels == (
+            "Asparagus+Broccoli",
+            "Broccoli",
+            "Daikon",
+            "Asparagus+Daikon",
+            "Cauliflower",
+            "Asparagus",
+            "Cauliflower+Daikon",
+        )
+        print("slice_.counts == \n%s" % (slice_.counts,))
+        np.testing.assert_equal(
+            slice_.counts,
+            [
+                #     2   4  1+4  3   1  3+4
+                [64, 28, 35, 71, 32, 36, 67],
+                [36, 14, 19, 41, 19, 22, 38],
+                [29, 12, 11, 28, 28, 17, 39],
+                [57, 26, 27, 58, 41, 31, 68],
+                [30, 16, 18, 32, 19, 14, 37],
+                [28, 14, 16, 30, 13, 14, 29],
+                [59, 28, 29, 60, 47, 31, 76],
+            ],
+        )
+
     def it_provides_same_proportions_without_explicit_order(self):
         transforms = TR.TEST_DASHBOARD_TRANSFORM_SINGLE_EL_VISIBLE
         slice_ = Cube(CR.TEST_DASHBOARD_FIXTURE, transforms=transforms).partitions[0]
@@ -274,48 +365,64 @@ class Describe_Slice(object):
         )
 
     def it_respect_row_proportions_with_ordering_transform_mr_x_cat(self):
-        transforms = TR.GENERIC_TRANSFORMS_DICTS["both_order_mr_x_cat"]
-        slice_ = Cube(CR.MR_X_CAT_HS, transforms=transforms).partitions[0]
+        slice_ = Cube(
+            CR.MR_X_CAT_HS,
+            transforms=TR.GENERIC_TRANSFORMS_DICTS["both_order_mr_x_cat"],
+        ).partitions[0]
 
         np.testing.assert_almost_equal(
             slice_.row_proportions,
             [
-                [0.06423004, 0.25883849, 0.39673409, 0.0, 0.74116151],
-                [0.44079255, 0.63354565, 0.2344488, 0.0, 0.36645435],
+                [0.25883849, 0.06423004, 0.39673409, 0.0, 0.74116151],
+                [0.63354565, 0.44079255, 0.2344488, 0.0, 0.36645435],
             ],
         )
-        # remove the rows order
-        transforms_wo_row_ordering = TR.GENERIC_TRANSFORMS_DICTS[
-            "no_row_order_mr_x_cat"
-        ]
-        slice_wo_row_ordering_ = Cube(
-            CR.MR_X_CAT_HS, transforms=transforms_wo_row_ordering
+        np.testing.assert_equal(
+            slice_.column_base, [[101, 32, 208, 0, 375], [39, 15, 69, 0, 126]]
+        )
+        np.testing.assert_equal(slice_.row_base, [385, 26])
+
+        # --- rows flip after removing the rows order ---
+        slice_ = Cube(
+            CR.MR_X_CAT_HS,
+            transforms=TR.GENERIC_TRANSFORMS_DICTS["no_row_order_mr_x_cat"],
         ).partitions[0]
 
         np.testing.assert_almost_equal(
-            slice_wo_row_ordering_.row_proportions,
+            slice_.row_proportions,
             [
-                [0.44079255, 0.63354565, 0.2344488, 0.0, 0.36645435],
-                [0.06423004, 0.25883849, 0.39673409, 0.0, 0.74116151],
+                [0.63354565, 0.44079255, 0.2344488, 0.0, 0.36645435],
+                [0.25883849, 0.06423004, 0.39673409, 0.0, 0.74116151],
             ],
         )
-        # asserting that the 2 slices are flipped rows due to the ordering
-        np.testing.assert_almost_equal(
-            slice_wo_row_ordering_.row_proportions[0], slice_.row_proportions[1]
+        np.testing.assert_equal(
+            slice_.column_base, [[39, 15, 69, 0, 126], [101, 32, 208, 0, 375]]
         )
-        np.testing.assert_almost_equal(
-            slice_wo_row_ordering_.row_proportions[1], slice_.row_proportions[0]
-        )
-        np.testing.assert_almost_equal(
-            slice_wo_row_ordering_.column_base, np.flip(slice_.column_base, 0)
-        )
-        np.testing.assert_almost_equal(
-            slice_wo_row_ordering_.row_base, np.flip(slice_.row_base)
-        )
+        np.testing.assert_equal(slice_.row_base, [26, 385])
 
     def it_respect_col_proportions_with_ordering_transform_mr_x_cat(self):
-        transforms = TR.GENERIC_TRANSFORMS_DICTS["both_order_mr_x_cat"]
-        slice_ = Cube(CR.MR_X_CAT_HS, transforms=transforms).partitions[0]
+        slice_ = Cube(
+            CR.MR_X_CAT_HS,
+            transforms=TR.GENERIC_TRANSFORMS_DICTS["both_order_mr_x_cat"],
+        ).partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_.column_proportions,
+            [
+                [0.81825272, 0.78206694, 0.79964474, np.nan, 0.79162243],
+                [0.36700322, 0.63991606, 0.11791067, np.nan, 0.09519879],
+            ],
+        )
+        np.testing.assert_equal(
+            slice_.column_base, [[101, 32, 208, 0, 375], [39, 15, 69, 0, 126]]
+        )
+        np.testing.assert_equal(slice_.row_base, [385, 26])
+
+        # --- remove the columns order ---
+        slice_ = Cube(
+            CR.MR_X_CAT_HS,
+            transforms=TR.GENERIC_TRANSFORMS_DICTS["no_col_order_mr_x_cat"],
+        ).partitions[0]
 
         np.testing.assert_almost_equal(
             slice_.column_proportions,
@@ -324,34 +431,10 @@ class Describe_Slice(object):
                 [0.63991606, 0.36700322, 0.11791067, np.nan, 0.09519879],
             ],
         )
-        # remove the columns order
-        transforms_wo_col_ordering = TR.GENERIC_TRANSFORMS_DICTS[
-            "no_col_order_mr_x_cat"
-        ]
-        slice_wo_col_ordering_ = Cube(
-            CR.MR_X_CAT_HS, transforms=transforms_wo_col_ordering
-        ).partitions[0]
-
-        np.testing.assert_almost_equal(
-            slice_wo_col_ordering_.column_proportions,
-            [
-                [0.63991606, 0.36700322, 0.11791067, np.nan, 0.09519879],
-                [0.78206694, 0.81825272, 0.79964474, np.nan, 0.79162243],
-            ],
+        np.testing.assert_equal(
+            slice_.column_base, [[32, 101, 208, 0, 375], [15, 39, 69, 0, 126]]
         )
-        # asserting that the 2 slices have flipped rows due to the ordering
-        np.testing.assert_almost_equal(
-            slice_wo_col_ordering_.column_proportions[0], slice_.column_proportions[1]
-        )
-        np.testing.assert_almost_equal(
-            slice_wo_col_ordering_.column_proportions[1], slice_.column_proportions[0]
-        )
-        np.testing.assert_almost_equal(
-            slice_wo_col_ordering_.column_base, np.flip(slice_.column_base, 0)
-        )
-        np.testing.assert_almost_equal(
-            slice_wo_col_ordering_.row_base, np.flip(slice_.row_base)
-        )
+        np.testing.assert_equal(slice_.row_base, [385, 26])
 
     def it_respect_proportions_with_ordering_transform_ca_x_cat(self):
         transforms = TR.GENERIC_TRANSFORMS_DICTS["both_order_ca_x_cat"]
@@ -359,10 +442,10 @@ class Describe_Slice(object):
 
         np.testing.assert_almost_equal(
             slice_.row_proportions,
-            [[0.33333333, 0.0, 0.0, 0.33333333, 0.33333333, 0.33333333, 0.66666667]],
+            [[0.33333333, 0.33333333, 0.0, 0.0, 0.33333333, 0.33333333, 0.66666667]],
         )
         np.testing.assert_almost_equal(
-            slice_.column_proportions, [[1.0, 0.0, 0.0, 0.33333333, 1.0, 1.0, 1.0]]
+            slice_.column_proportions, [[1.0, 0.33333333, 0.0, 0.0, 1.0, 1.0, 1.0]]
         )
 
         # remove the order
@@ -1367,6 +1450,51 @@ class Describe_Strand(object):
             strand.means, [19.85555556, 13.85416667, 52.78947368, np.nan, np.nan]
         )
         assert strand.title == "Untitled"
+
+    def it_places_insertions_on_a_reordered_dimension_in_the_right_position(self):
+        """Subtotal anchors follow re-ordered rows.
+
+        The key fixture characteristic is that an ordering transform is combined with
+        subtotal insertions such that their subtotal position is changed by the
+        ordering.
+        """
+        transforms = {
+            "rows_dimension": {
+                "insertions": [
+                    {
+                        "anchor": "top",
+                        "args": [1, 2],
+                        "function": "subtotal",
+                        "name": "Sum A-C",
+                    },
+                    {
+                        "anchor": 4,
+                        "args": [1, 2],
+                        "function": "subtotal",
+                        "name": "Total A-C",
+                    },
+                    {
+                        "anchor": "bottom",
+                        "args": [4, 5],
+                        "function": "subtotal",
+                        "name": "Total D-E",
+                    },
+                ],
+                "order": {"element_ids": [2, 4, 5, 1], "type": "explicit"},
+            }
+        }
+        strand = Cube(CR.CAT_SUBTOT_ORDER, transforms=transforms).partitions[0]
+
+        assert strand.row_labels == (
+            "Sum A-C",
+            "C1 & C2",
+            "D",
+            "Total A-C",
+            "E",
+            "AB",
+            "Total D-E",
+        )
+        assert strand.counts == (31506, 16275, 3480, 31506, 4262, 15231, 7742)
 
     def it_knows_when_it_is_empty(self):
         strand = Cube(CR.OM_SGP8334215_VN_2019_SEP_19_STRAND).partitions[0]

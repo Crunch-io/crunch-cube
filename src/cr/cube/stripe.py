@@ -10,6 +10,8 @@ proportions. It does *not* have pvals or zscores.
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import collections
+
 import numpy as np
 
 from cr.cube.enum import DIMENSION_TYPE as DT
@@ -33,31 +35,17 @@ class TransformedStripe(object):
 
     @lazyproperty
     def rows(self):
-        """Sequence of post-transformation row vectors.
-
-        All transforms are applied in this unit. `._ordered_rows` applies ordering,
-        _StripeInsertionHelper creates and interleaves subtotal rows, and hidden rows
-        are removed directly in this main row iterator.
-        """
-        return tuple(
-            row
-            for row in _StripeInsertionHelper.iter_interleaved_rows(
-                self._rows_dimension, self._ordered_rows, self._table_margin
-            )
-            if not row.hidden
-        )
+        """Sequence of post-transformation row vectors."""
+        return tuple(row for row in self.rows_including_hidden if not row.hidden)
 
     @lazyproperty
-    def rows_before_hiding(self):
-        """Sequence of pre-hiding row vectors.
-
-        All transforms are applied in this unit except for hidden row.
-        `._ordered_rows` applies ordering, _StripeInsertionHelper creates
-        and interleaves subtotal rows
-        """
+    def rows_including_hidden(self):
+        """Sequence of row vectors including those hidden by the user."""
+        # --- ordering and insertion transforms are applied here. `._ordered_rows`
+        # --- applies any ordering transforms and _StripeInsertionHelper creates and
+        # --- interleaves subtotal rows.
         return tuple(
-            row
-            for row in _StripeInsertionHelper.iter_interleaved_rows(
+            _StripeInsertionHelper.iter_interleaved_rows(
                 self._rows_dimension, self._ordered_rows, self._table_margin
             )
         )
@@ -74,17 +62,15 @@ class TransformedStripe(object):
 
     @lazyproperty
     def _ordered_rows(self):
-        return tuple(np.array(self._base_stripe.rows)[self._row_order])
+        """Sequence of base-rows in order specified by user.
 
-    @lazyproperty
-    def _row_order(self):
-        """Indexer value identifying rows in order, suitable for slicing an ndarray.
-
-        This value is a 1D ndarray of int row indices, used for indexing the rows array
-        to produce an ordered version.
+        Default ordering is "payload order", the order dimension elements appear in the
+        cube result. This order may be overridden by an order transform.
         """
-        # ---Specifying int type prevents failure when there are zero rows---
-        return np.array(self._rows_dimension.display_order, dtype=int)
+        # --- display_order is like (2, 1, 0, 3); each int item is the offset of a row
+        # --- in the base-rows collection.
+        rows = self._base_stripe.rows
+        return tuple(rows[row_idx] for row_idx in self._rows_dimension.display_order)
 
     @lazyproperty
     def _table_margin(self):
@@ -102,30 +88,33 @@ class _StripeInsertionHelper(object):
 
     @classmethod
     def iter_interleaved_rows(cls, rows_dimension, ordered_rows, table_margin):
-        """Generate rows with subtotals in correct position."""
+        """Generate rows with subtotals inserted in correct position."""
         return cls(rows_dimension, ordered_rows, table_margin)._iter_interleaved_rows()
 
     def _iter_interleaved_rows(self):
-        """Generate all row vectors with insertions interleaved at right spot."""
-        # ---subtotals inserted at top---
-        for row in self._all_inserted_rows:
-            if row.anchor == "top":
-                yield row
+        """Generate all row vectors with inserted rows interleaved at right spot."""
+        # --- organize inserted-rows by anchor ---
+        inserted_rows_by_anchor = collections.defaultdict(list)
+        for inserted_row in self._inserted_rows:
+            inserted_rows_by_anchor[inserted_row.anchor].append(inserted_row)
 
-        # ---body rows with subtotals anchored to specific body positions---
-        for idx, row in enumerate(self._ordered_rows):
+        # --- subtotals inserted at top ---
+        for inserted_row in inserted_rows_by_anchor["top"]:
+            yield inserted_row
+
+        # --- body rows with subtotals anchored to specific body positions ---
+        for row in self._ordered_rows:
             yield row
-            for inserted_row in self._iter_inserted_rows_anchored_at(idx):
+            for inserted_row in inserted_rows_by_anchor[row.element_id]:
                 yield inserted_row
 
-        # ---subtotals appended at bottom---
-        for row in self._all_inserted_rows:
-            if row.anchor == "bottom":
-                yield row
+        # --- subtotals appended at bottom ---
+        for inserted_row in inserted_rows_by_anchor["bottom"]:
+            yield inserted_row
 
     @lazyproperty
-    def _all_inserted_rows(self):
-        """Sequence of _StripeInsertionRow objects representing inserted subtotal rows.
+    def _inserted_rows(self):
+        """Sequence of _StripeInsertedRow objects representing inserted subtotal rows.
 
         The returned vectors are in the order subtotals were specified in the cube
         result, which is no particular order.
@@ -135,13 +124,9 @@ class _StripeInsertionHelper(object):
             return tuple()
 
         return tuple(
-            _StripeInsertionRow(subtotal, self._ordered_rows, self._table_margin)
+            _StripeInsertedRow(subtotal, self._ordered_rows, self._table_margin)
             for subtotal in self._rows_dimension.subtotals
         )
-
-    def _iter_inserted_rows_anchored_at(self, anchor):
-        """Generate all inserted row vectors with matching `anchor`."""
-        return (row for row in self._all_inserted_rows if row.anchor == anchor)
 
 
 # ===BASE STRIPES===
@@ -173,6 +158,18 @@ class _BaseBaseStripe(object):
             return _MrStripe(rows_dimension, counts, base_counts)
 
         return _CatStripe(rows_dimension, counts, base_counts)
+
+    @lazyproperty
+    def rows(self):
+        """Sequence of rows in this stripe.
+
+        The sequence includes a row for each valid element in the rows-dimension, in the
+        order those elements are defined in the dimension (which is also the order in
+        which that dimension's values appear in the cube result).
+        """
+        raise NotImplementedError(
+            "must be implemented by each subclass"
+        )  # pragma: no cover
 
     @lazyproperty
     def table_base(self):
@@ -279,7 +276,7 @@ class _MrStripe(_BaseBaseStripe):
 # ===STRIPE ROWS===
 
 
-class _StripeInsertionRow(object):
+class _StripeInsertedRow(object):
     """Represents an inserted (subtotal) row.
 
     This row item participates like any other row item, and a lot of its public
@@ -293,7 +290,12 @@ class _StripeInsertionRow(object):
 
     @lazyproperty
     def anchor(self):
-        return self._subtotal.anchor_idx
+        """str or int anchor value for this inserted.
+
+        Value can be "top", "bottom" or an int element-id indicating the position of
+        this inserted-row with respect to the base-rows.
+        """
+        return self._subtotal.anchor
 
     @lazyproperty
     def base(self):
@@ -305,7 +307,7 @@ class _StripeInsertionRow(object):
 
     @lazyproperty
     def fill(self):
-        """An insertion row can have no element-fill-color transform."""
+        """An inserted row can have no element-fill-color transform."""
         return None
 
     @lazyproperty
@@ -314,7 +316,11 @@ class _StripeInsertionRow(object):
         return False
 
     @lazyproperty
-    def is_insertion(self):
+    def is_inserted(self):
+        """True when this row is an inserted row.
+
+        Unconditionally True for _StripeInsertedRow.
+        """
         return True
 
     @lazyproperty
@@ -347,10 +353,11 @@ class _StripeInsertionRow(object):
 
     @lazyproperty
     def _addend_rows(self):
+        """Sequence of _BaseStripeRow subclass that contribute to this subtotal."""
         return tuple(
             row
-            for i, row in enumerate(self._base_rows)
-            if i in self._subtotal.addend_idxs
+            for row in self._base_rows
+            if row.element_id in self._subtotal.addend_ids
         )
 
 
@@ -362,6 +369,11 @@ class _BaseStripeRow(object):
 
     def __init__(self, element):
         self._element = element
+
+    @lazyproperty
+    def element_id(self):
+        """int identifier of category or subvariable this row represents."""
+        return self._element.element_id
 
     @lazyproperty
     def fill(self):
@@ -389,7 +401,7 @@ class _BaseStripeRow(object):
         return self._element.is_hidden or (self._element.prune and self.pruned)
 
     @lazyproperty
-    def is_insertion(self):
+    def is_inserted(self):
         return False
 
     @lazyproperty

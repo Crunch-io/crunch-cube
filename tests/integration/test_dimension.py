@@ -20,7 +20,7 @@ from cr.cube.dimension import (
 from cr.cube.enum import DIMENSION_TYPE as DT
 
 from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
-from ..unitutil import instance_mock, property_mock
+from ..unitutil import instance_mock
 
 
 class DescribeIntegratedAllDimensions(object):
@@ -302,14 +302,12 @@ class TestDimension(object):
         assert isinstance(subtotal, _Subtotal)
         assert subtotal.anchor == "bottom"
         assert subtotal.addend_ids == (1,)
-        assert subtotal.addend_idxs == (0,)
         assert subtotal.label == "Liberal net"
 
         subtotal = subtotals[1]
         assert isinstance(subtotal, _Subtotal)
         assert subtotal.anchor == 5
         assert subtotal.addend_ids == (5,)
-        assert subtotal.addend_idxs == (1,)
         assert subtotal.label == "Conservative net"
 
     def test_numeric_values(self):
