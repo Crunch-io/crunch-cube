@@ -126,11 +126,11 @@ class TransformedMatrix(object):
         For a base-vector, `position` and `index` are the same.
         """
         return tuple(
-            _AssembledVector(column, opposing_inserted_vectors, 0 if idx < 0 else idx)
-            for _, idx, column in sorted(
+            _AssembledVector(vector, opposing_inserted_vectors, 0 if idx < 0 else idx)
+            for _, idx, vector in sorted(
                 itertools.chain(
-                    (col.ordering for col in base_vectors),
-                    (col.ordering for col in inserted_vectors),
+                    (bv.ordering for bv in base_vectors),
+                    (iv.ordering for iv in inserted_vectors),
                 )
             )
         )
