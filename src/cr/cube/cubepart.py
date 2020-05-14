@@ -430,6 +430,34 @@ class _Slice(CubePartition):
         )
 
     @lazyproperty
+    def scale_std_dev_column(self):
+        """ -> 1D np.ndarray of the standard deviation column of scales"""
+        if np.all(np.isnan(self._columns_dimension_numeric)):
+            return None
+        return np.sqrt(self.var_scale_means_column)
+
+    @lazyproperty
+    def scale_std_dev_row(self):
+        """ -> 1D np.ndarray of the standard deviation row of scales"""
+        if np.all(np.isnan(self._rows_dimension_numeric)):
+            return None
+        return np.sqrt(self.var_scale_means_row)
+
+    @lazyproperty
+    def scale_std_err_column(self):
+        """ -> 1D np.ndarray of the standard error column of scales"""
+        if np.all(np.isnan(self._columns_dimension_numeric)):
+            return None
+        return np.sqrt(self.var_scale_means_column / self.scale_means_columns_margin)
+
+    @lazyproperty
+    def scale_std_err_row(self):
+        """ -> 1D np.ndarray of the standard error row of scales"""
+        if np.all(np.isnan(self._rows_dimension_numeric)):
+            return None
+        return np.sqrt(self.var_scale_means_row / self.scale_means_rows_margin)
+
+    @lazyproperty
     def shape(self):
         return self.counts.shape
 
@@ -486,7 +514,6 @@ class _Slice(CubePartition):
 
         # No pruning or reordering since single value
         return self._matrix.table_margin_unpruned
-        # return self._matrix.table_margin
 
     @lazyproperty
     def table_margin_unpruned(self):
@@ -524,6 +551,11 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def var_scale_means_column(self):
+        """ -> 1D np.ndarray of the column variance values for scales
+
+        Note: the variance for scale is defined as sum((Yi−Y~)2/(N)), where Y~ is the
+              mean of the data.
+        """
         if np.all(np.isnan(self._columns_dimension_numeric)):
             return None
 
@@ -540,6 +572,11 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def var_scale_means_row(self):
+        """ -> 1D np.ndarray of the row variance values for scales
+
+        Note: the variance for scale is defined as sum((Yi−Y~)2/(N)), where Y~ is the
+              mean of the data.
+        """
         if np.all(np.isnan(self._rows_dimension_numeric)):
             return None
 
@@ -758,6 +795,21 @@ class _Strand(CubePartition):
 
         # ---overall scale-mean is the quotient---
         return total_numeric_value / total_count
+
+    @lazyproperty
+    def scale_std_dev(self):
+        """ -> 1D np.ndarray of the standard deviation of scales"""
+        if np.all(np.isnan(self._numeric_values)):
+            return None
+        return np.sqrt(self.var_scale_mean)
+
+    @lazyproperty
+    def scale_std_err(self):
+        """ -> 1D np.ndarray of the standard error of scales"""
+        if np.all(np.isnan(self._numeric_values)):
+            return None
+        counts = self._counts_as_array[self._numeric_values_mask]
+        return np.sqrt(self.var_scale_mean / np.sum(counts))
 
     @lazyproperty
     def shape(self):

@@ -156,7 +156,6 @@ def test_cat_x_cat_with_hs():
 
     # Test with H&S
     slice_ = Cube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS).partitions[0]
-    slice_.scale_means_row
     np.testing.assert_almost_equal(
         slice_.scale_means_row,
         [2.19444444, 2.19230769, 2.26666667, 1.88990826, 1.76363636, 3.85],
