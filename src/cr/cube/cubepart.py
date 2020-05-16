@@ -449,7 +449,7 @@ class _Slice(CubePartition):
         counts = self.counts[:, not_a_nan_index]
         total_counts = np.sum(counts, axis=1)
         # --- sorting counts by numeric values ---
-        sorted_counts = np.array(zip(*sorted(zip(numeric_values, counts.T)))[1]).T
+        sorted_counts = np.array(list(zip(*sorted(zip(numeric_values, counts.T))))[1]).T
         # --- calc of the middle points considering even and odd case ---
         middle_points = (
             total_counts // 2
@@ -486,7 +486,7 @@ class _Slice(CubePartition):
         counts = self.counts[not_a_nan_index, :]
         total_counts = np.sum(counts, axis=0)
         # --- sorting counts by numeric values ---
-        sorted_counts = np.array(zip(*sorted(zip(numeric_values, counts)))[1])
+        sorted_counts = np.array(list(zip(*sorted(zip(numeric_values, counts))))[1])
         # --- calc of the middle points considering even and odd case ---
         middle_points = (
             total_counts // 2
@@ -917,7 +917,7 @@ class _Strand(CubePartition):
             if len(counts) % 2 == 1
             else ((np.sum(counts) // 2) + ((np.sum(counts) // 2) + 1)) / 2
         )
-        sorted_counts = np.array(zip(*sorted(zip(numeric_values, counts)))[1])
+        sorted_counts = np.array(list(zip(*sorted(zip(numeric_values, counts))))[1])
         # --- the median index express where the middle point falls ---
         median_index = np.where(np.cumsum(sorted_counts) > middle_point)[0]
         # --- returns the corresponding numeric value given the median index ---
