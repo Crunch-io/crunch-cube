@@ -221,6 +221,13 @@ def test_univariate_cat():
     np.testing.assert_almost_equal(strand_.scale_median, [4.0])
 
 
+def test_cat_x_cat_without_scales():
+    strand_ = Cube(SM.UNIVARIATE_CAT_WITH_ALL_NULL_NUMERIC_VALUE).partitions[0]
+    assert strand_.scale_median is None
+    assert strand_.scale_std_dev is None
+    assert strand_.scale_std_err is None
+
+
 def test_univariate_with_hs():
     # Test without H&S
     transforms = {
@@ -233,9 +240,9 @@ def test_univariate_with_hs():
     np.testing.assert_almost_equal(strand_.scale_median, [2.0])
 
     # Test with H&S
-    strand = Cube(CR.ECON_BLAME_WITH_HS).partitions[0]
-    np.testing.assert_almost_equal(strand.scale_std_dev, [1.066016])
-    np.testing.assert_almost_equal(strand.scale_std_err, [0.0337611])
+    strand_ = Cube(CR.ECON_BLAME_WITH_HS).partitions[0]
+    np.testing.assert_almost_equal(strand_.scale_std_dev, [1.066016])
+    np.testing.assert_almost_equal(strand_.scale_std_err, [0.0337611])
     np.testing.assert_almost_equal(strand_.scale_median, [2.0])
 
 
