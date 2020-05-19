@@ -388,7 +388,7 @@ class DescribeCube(object):
 
     @pytest.mark.parametrize(
         ("cube_dict", "expected_value"),
-        (({}, "Untitled"), ({"title": "Hipsters"}, "Hipsters")),
+        (({"result": {}}, "Untitled"), ({"result": {"title": "Hipsters"}}, "Hipsters")),
     )
     def it_knows_its_title(self, _cube_dict_prop_, cube_dict, expected_value):
         _cube_dict_prop_.return_value = cube_dict
