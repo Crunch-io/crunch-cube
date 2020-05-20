@@ -361,7 +361,7 @@ class Cube(object):
         use-case it is a stand-in for the columns-dimension name since a strand has no
         columns dimension.
         """
-        return self._cube_dict.get("title", "Untitled")
+        return self._cube_dict["result"].get("title", "Untitled")
 
     @lazyproperty
     def _all_dimensions(self):
