@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.11.20
+- Fix cube title payload discrepancy
+
 #### 1.11.19
 - Fix problem where pre-ordering anchor-idx was used for locating inserted subtotal vectors
 - Enable handling of filter-only multitable-template placeholders.
