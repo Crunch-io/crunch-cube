@@ -437,7 +437,7 @@ class _Slice(CubePartition):
         a continuous random variable rather than n discrete categories.
         Steps:
         1. The middle point is calculated by dividing the sum of the counts by 2 if the
-           total counts is odd, for even number of entries, so you would actually take
+           total counts is odd, for even number of entries, so we would actually take
            the mean of the values at positions middle and middle + 1
         2. Identify in which category (our numeric values) this middle point falls
         """
@@ -474,7 +474,7 @@ class _Slice(CubePartition):
         a continuous random variable rather than n discrete categories.
         Steps:
         1. The middle point is calculated by dividing the sum of the counts by 2 if the
-           total counts is odd, for even number of entries, so you would actually take
+           total counts is odd, for even number of entries, so we would actually take
            the mean of the values at positions middle and middle + 1
         2. Identify in which category (our numeric values) this middle point falls
         """
@@ -918,9 +918,10 @@ class _Strand(CubePartition):
             else ((np.sum(counts) // 2) + ((np.sum(counts) // 2) + 1)) / 2
         )
         sorted_counts = np.array(list(zip(*sorted(zip(numeric_values, counts))))[1])
-        # --- the median index express where the middle point falls ---
+        # ---the median index contains all the indices where the middle point is lower
+        # ---than the cumsum elements
         median_index = np.where(np.cumsum(sorted_counts) > middle_point)[0]
-        # --- returns the corresponding numeric value given the median index ---
+        # ---returns the corresponding numeric value given the first median index---
         return (
             np.sort(numeric_values)[median_index[0]]
             if median_index.size != 0
