@@ -504,6 +504,28 @@ class _Slice(CubePartition):
         ]
 
     @lazyproperty
+    def scale_median_row_margin(self):
+        """ -> np.int64, represents the rows scale median margin"""
+        if np.all(np.isnan(self._rows_dimension_numeric)):
+            return None
+        rows_margin = self.rows_margin
+        if len(rows_margin.shape) > 1:
+            rows_margin = rows_margin[:, 0]
+        not_a_nan_index = ~np.isnan(self._rows_dimension_numeric)
+        numeric_values = self._rows_dimension_numeric[not_a_nan_index]
+        counts = rows_margin[not_a_nan_index]
+        middle_point = (
+            np.sum(counts) // 2
+            if len(counts) % 2 == 1
+            else ((np.sum(counts) // 2) + ((np.sum(counts) // 2) + 1)) / 2
+        )
+        sorted_counts = np.array(list(zip(*sorted(zip(numeric_values, counts))))[1])
+        median_index = np.where(np.cumsum(sorted_counts) > middle_point)[0]
+        return (
+            np.sort(numeric_values)[median_index[0]] if median_index.size != 0 else None
+        )
+
+    @lazyproperty
     def scale_std_dev_column(self):
         """ -> 1D np.ndarray of the standard deviation column of scales"""
         if np.all(np.isnan(self._columns_dimension_numeric)):
@@ -522,14 +544,14 @@ class _Slice(CubePartition):
         """ -> 1D np.ndarray of the standard error column of scales"""
         if np.all(np.isnan(self._columns_dimension_numeric)):
             return None
-        return np.sqrt(self.var_scale_means_column / self.scale_means_columns_margin)
+        return self.scale_std_dev_column / np.sqrt(self.rows_margin)
 
     @lazyproperty
     def scale_std_err_row(self):
         """ -> 1D np.ndarray of the standard error row of scales"""
         if np.all(np.isnan(self._rows_dimension_numeric)):
             return None
-        return np.sqrt(self.var_scale_means_row / self.scale_means_rows_margin)
+        return self.scale_std_dev_row / np.sqrt(self.columns_margin)
 
     @lazyproperty
     def shape(self):
@@ -1063,10 +1085,11 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def _numeric_values_mask(self):
-        """Array of boolean elements for each element in rows dimension."
+        """ -> np.ndarray, boolean elements for each element in rows dimension."
 
         This array contains True or False according to the nan in the numeric_values
-        array"""
+        array
+        """
         is_a_number_mask = ~np.isnan(self._numeric_values)
         return is_a_number_mask
 
