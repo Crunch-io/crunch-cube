@@ -504,6 +504,28 @@ class _Slice(CubePartition):
         ]
 
     @lazyproperty
+    def scale_median_column_margin(self):
+        """ -> np.int64, represents the rows scale median margin"""
+        if np.all(np.isnan(self._columns_dimension_numeric)):
+            return None
+        columns_margin = self.columns_margin
+        if len(columns_margin.shape) > 1:
+            columns_margin = columns_margin[0]
+        not_a_nan_index = ~np.isnan(self._columns_dimension_numeric)
+        numeric_values = self._columns_dimension_numeric[not_a_nan_index]
+        counts = columns_margin[not_a_nan_index]
+        middle_point = (
+            np.sum(counts) // 2
+            if len(counts) % 2 == 1
+            else ((np.sum(counts) // 2) + ((np.sum(counts) // 2) + 1)) / 2
+        )
+        sorted_counts = np.array(list(zip(*sorted(zip(numeric_values, counts))))[1])
+        median_index = np.where(np.cumsum(sorted_counts) > middle_point)[0]
+        return (
+            np.sort(numeric_values)[median_index[0]] if median_index.size != 0 else None
+        )
+
+    @lazyproperty
     def scale_median_row_margin(self):
         """ -> np.int64, represents the rows scale median margin"""
         if np.all(np.isnan(self._rows_dimension_numeric)):

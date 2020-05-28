@@ -15,6 +15,7 @@ def test_ca_cat_x_items():
     )
     np.testing.assert_almost_equal(slice_.scale_median_row, [1, 5, 5, 5])
     assert slice_.scale_median_row_margin == 4
+    assert slice_.scale_median_column_margin is None
     assert slice_.scale_std_dev_column is None
     assert slice_.scale_std_err_column is None
     assert slice_.scale_median_column is None
@@ -29,6 +30,7 @@ def test_ca_items_x_cat():
         slice_.scale_std_err_column, [0.0394328, 0.0579909, 0.0537937, 0.0544237]
     )
     np.testing.assert_almost_equal(slice_.scale_median_column, [1, 5, 5, 5])
+    assert slice_.scale_median_column_margin == 4
     assert slice_.scale_median_row_margin is None
     assert slice_.scale_std_dev_row is None
     assert slice_.scale_std_err_row is None
@@ -45,6 +47,7 @@ def test_ca_x_mr():
     )
     np.testing.assert_almost_equal(slice_.scale_median_row, [1, 1, 1, np.nan])
     assert slice_.scale_median_row_margin == 1
+    assert slice_.scale_median_column_margin is None
     assert slice_.scale_std_dev_column is None
     assert slice_.scale_std_err_column is None
     assert slice_.scale_median_column is None
@@ -58,6 +61,7 @@ def test_ca_x_mr():
     )
     np.testing.assert_almost_equal(slice_.scale_median_row, [5.0, 5.0, 4.0, np.nan])
     assert slice_.scale_median_row_margin == 5
+    assert slice_.scale_median_column_margin is None
     assert slice_.scale_std_dev_column is None
     assert slice_.scale_std_err_column is None
     assert slice_.scale_median_column is None
@@ -71,6 +75,7 @@ def test_ca_x_mr():
     )
     np.testing.assert_almost_equal(slice_.scale_median_row, [5.0, 5.0, 5.0, np.nan])
     assert slice_.scale_median_row_margin == 5
+    assert slice_.scale_median_column_margin is None
     assert slice_.scale_std_dev_column is None
     assert slice_.scale_std_err_column is None
     assert slice_.scale_median_column is None
@@ -84,6 +89,7 @@ def test_ca_x_mr():
     )
     np.testing.assert_almost_equal(slice_.scale_median_row, [5.0, 5.0, 5.0, np.nan])
     assert slice_.scale_median_row_margin == 5
+    assert slice_.scale_median_column_margin is None
     assert slice_.scale_std_dev_column is None
     assert slice_.scale_std_err_column is None
     assert slice_.scale_median_column is None
@@ -99,6 +105,7 @@ def test_cat_x_ca_cat_x_items():
     )
     np.testing.assert_almost_equal(slice_.scale_median_row, [1, 1, 4, 1])
     assert slice_.scale_median_row_margin == 1
+    assert slice_.scale_median_column_margin is None
     assert slice_.scale_std_dev_column is None
     assert slice_.scale_std_err_column is None
     assert slice_.scale_median_column is None
@@ -112,6 +119,7 @@ def test_cat_x_ca_cat_x_items():
     )
     np.testing.assert_almost_equal(slice_.scale_median_row, [1, 5, 5, 5])
     assert slice_.scale_median_row_margin == 4
+    assert slice_.scale_median_column_margin is None
     assert slice_.scale_std_dev_column is None
     assert slice_.scale_std_err_column is None
     assert slice_.scale_median_column is None
@@ -125,6 +133,7 @@ def test_cat_x_ca_cat_x_items():
     )
     np.testing.assert_almost_equal(slice_.scale_median_row, [1, 5, 5, 5])
     assert slice_.scale_median_row_margin == 4
+    assert slice_.scale_median_column_margin is None
     assert slice_.scale_std_dev_column is None
     assert slice_.scale_std_err_column is None
     assert slice_.scale_median_column is None
@@ -138,6 +147,7 @@ def test_cat_x_ca_cat_x_items():
     )
     np.testing.assert_almost_equal(slice_.scale_median_row, [1, 5, 5, 5])
     assert slice_.scale_median_row_margin == 4
+    assert slice_.scale_median_column_margin is None
     assert slice_.scale_std_dev_column is None
     assert slice_.scale_std_err_column is None
     assert slice_.scale_median_column is None
@@ -151,6 +161,7 @@ def test_cat_x_ca_cat_x_items():
     )
     np.testing.assert_almost_equal(slice_.scale_median_row, [1, 4, 4, 4])
     assert slice_.scale_median_row_margin == 1
+    assert slice_.scale_median_column_margin is None
     assert slice_.scale_std_dev_column is None
     assert slice_.scale_std_err_column is None
     assert slice_.scale_median_column is None
@@ -163,6 +174,7 @@ def test_cat_x_ca_cat_x_items():
         slice_.scale_std_err_row, [0.136498, 0.1435946, 0.1107691, 0.1104202]
     )
     assert slice_.scale_median_row_margin == 4
+    assert slice_.scale_median_column_margin is None
     assert slice_.scale_std_dev_column is None
     assert slice_.scale_std_err_column is None
     assert slice_.scale_median_column is None
@@ -195,6 +207,7 @@ def test_cat_x_cat():
         [3.37322314, 3.43820862, 3.43035216, 3.1839334, 3.18609375, 3.44206538],
     )
     assert slice_.scale_median_row_margin == 4
+    assert slice_.scale_median_column_margin == 2
 
 
 def test_cat_x_mr():
@@ -208,6 +221,7 @@ def test_cat_x_mr():
     )
     np.testing.assert_almost_equal(slice_.scale_median_row, [2.0, 2.0, 2.0, np.nan])
     assert slice_.scale_median_row_margin == 2
+    assert slice_.scale_median_column_margin is None
     assert slice_.scale_std_dev_column is None
     assert slice_.scale_std_err_column is None
     assert slice_.scale_median_column is None
@@ -223,6 +237,7 @@ def test_mr_x_cat():
         slice_.scale_std_err_column, [0.1547943, 0.173707, 0.0493952, np.nan]
     )
     np.testing.assert_almost_equal(slice_.scale_median_column, [2.0, 2.0, 2.0, np.nan])
+    assert slice_.scale_median_column_margin == 2
     assert slice_.scale_median_row_margin is None
     assert slice_.scale_std_dev_row is None
     assert slice_.scale_std_err_row is None
@@ -308,6 +323,7 @@ def test_cat_x_cat_with_hs():
     np.testing.assert_almost_equal(slice_.scale_median_row, [2, 2, 2, 1, 1, 5])
     np.testing.assert_almost_equal(slice_.scale_median_column, [4, 3, 3, 4, 4])
     assert slice_.scale_median_row_margin == 2
+    assert slice_.scale_median_column_margin == 3
 
     # Test with H&S
     slice_ = Cube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS).partitions[0]
@@ -330,6 +346,7 @@ def test_cat_x_cat_with_hs():
     np.testing.assert_almost_equal(slice_.scale_median_row, [2, 2, 2, 1, 1, 5])
     np.testing.assert_almost_equal(slice_.scale_median_column, [4, 3, 3, 3, 4, 4])
     assert slice_.scale_median_row_margin == 2
+    assert slice_.scale_median_column_margin == 3
 
 
 def test_cat_x_cat_with_hs_on_both_dims():
@@ -360,6 +377,7 @@ def test_cat_x_cat_with_hs_on_both_dims():
     np.testing.assert_almost_equal(slice_.scale_median_row, [2, 2, 2, 1, 1, 5])
     np.testing.assert_almost_equal(slice_.scale_median_column, [4, 3, 3, 4, 4])
     assert slice_.scale_median_row_margin == 2
+    assert slice_.scale_median_column_margin == 3
 
     # Test with H&S
     slice_ = Cube(CR.ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS).partitions[0]
@@ -382,6 +400,7 @@ def test_cat_x_cat_with_hs_on_both_dims():
     np.testing.assert_almost_equal(slice_.scale_median_row, [2, 2, 2, 2, 1, 1, 5])
     np.testing.assert_almost_equal(slice_.scale_median_column, [4, 3, 3, 3, 4, 4])
     assert slice_.scale_median_row_margin == 2
+    assert slice_.scale_median_column_margin == 3
 
 
 def test_ca_x_mr_with_hs_and_pruning():
@@ -398,6 +417,7 @@ def test_ca_x_mr_with_hs_and_pruning():
     )
     np.testing.assert_almost_equal(slice_.scale_median_row, [3.0, 3.0, 3.0, np.nan])
     assert slice_.scale_median_row_margin == 3
+    assert slice_.scale_median_column_margin is None
     assert slice_.scale_std_dev_column is None
     assert slice_.scale_std_err_column is None
     assert slice_.scale_median_column is None
@@ -411,6 +431,7 @@ def test_ca_x_mr_with_hs_and_pruning():
     )
     np.testing.assert_almost_equal(slice_.scale_median_row, [3.0, 3.0, 4.0, np.nan])
     assert slice_.scale_median_row_margin == 3
+    assert slice_.scale_median_column_margin is None
     assert slice_.scale_std_dev_column is None
     assert slice_.scale_std_err_column is None
     assert slice_.scale_median_column is None
@@ -426,6 +447,7 @@ def test_ca_x_mr_with_hs_and_pruning():
         slice_.scale_median_row, [np.nan, np.nan, np.nan, np.nan]
     )
     assert slice_.scale_median_row_margin is None
+    assert slice_.scale_median_column_margin is None
     assert slice_.scale_std_dev_column is None
     assert slice_.scale_std_err_column is None
     assert slice_.scale_median_column is None
@@ -443,6 +465,7 @@ def test_ca_x_mr_with_hs_and_pruning():
     )
     np.testing.assert_almost_equal(slice_.scale_median_row, [3, 3, 3])
     assert slice_.scale_median_row_margin == 3
+    assert slice_.scale_median_column_margin is None
     assert slice_.scale_std_dev_column is None
     assert slice_.scale_std_err_column is None
     assert slice_.scale_median_column is None
@@ -456,6 +479,7 @@ def test_ca_x_mr_with_hs_and_pruning():
     )
     np.testing.assert_almost_equal(slice_.scale_median_row, [3, 3, 4])
     assert slice_.scale_median_row_margin == 3
+    assert slice_.scale_median_column_margin is None
     assert slice_.scale_std_dev_column is None
     assert slice_.scale_std_err_column is None
     assert slice_.scale_median_column is None
@@ -465,6 +489,7 @@ def test_ca_x_mr_with_hs_and_pruning():
     np.testing.assert_almost_equal(slice_.scale_std_err_row, [])
     np.testing.assert_almost_equal(slice_.scale_median_row, [])
     assert slice_.scale_median_row_margin is None
+    assert slice_.scale_median_column_margin is None
     assert slice_.scale_std_dev_column is None
     assert slice_.scale_std_err_column is None
     assert slice_.scale_median_column is None
@@ -493,6 +518,7 @@ def test_cat_x_cat_pruning_and_hs():
     np.testing.assert_almost_equal(slice_.scale_median_row, [1, 1, 1, np.nan, 3])
     np.testing.assert_almost_equal(slice_.scale_median_column, [2, 1, 2, 2, np.nan, 2])
     assert slice_.scale_median_row_margin == 1
+    assert slice_.scale_median_column_margin == 2
 
     # Just H&S
     slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS).partitions[0]
@@ -517,6 +543,7 @@ def test_cat_x_cat_pruning_and_hs():
         slice_.scale_median_column, [2, 2, 1, 2, 2, np.nan, 2]
     )
     assert slice_.scale_median_row_margin == 1
+    assert slice_.scale_median_column_margin == 2
 
     # Just pruning
     transforms = {
@@ -541,6 +568,7 @@ def test_cat_x_cat_pruning_and_hs():
     np.testing.assert_almost_equal(slice_.scale_median_row, [1, 1, 1, 1, 3])
     np.testing.assert_almost_equal(slice_.scale_median_column, [2, 2, 3, 2, 2, 2])
     assert slice_.scale_median_row_margin == 1
+    assert slice_.scale_median_column_margin == 2
 
     # Pruning and H&S
     transforms = {
@@ -565,6 +593,7 @@ def test_cat_x_cat_pruning_and_hs():
     np.testing.assert_almost_equal(slice_.scale_median_row, [1, 1, 1, 3])
     np.testing.assert_almost_equal(slice_.scale_median_column, [2, 3, 2, 2, 2])
     assert slice_.scale_median_row_margin == 1
+    assert slice_.scale_median_column_margin == 2
 
 
 def test_cat_single_element_x_cat():
@@ -578,6 +607,7 @@ def test_cat_single_element_x_cat():
     )
     np.testing.assert_almost_equal(slice_.scale_median_column, [np.nan])
     assert slice_.scale_median_row_margin is None
+    assert slice_.scale_median_column_margin is None
 
 
 def test_bivariate_cat():
@@ -601,6 +631,7 @@ def test_bivariate_cat():
     np.testing.assert_almost_equal(slice_.scale_median_row, [2, 2, 2, 1, 1, 5])
     np.testing.assert_almost_equal(slice_.scale_median_column, [4, 3, 3, 3, 4, 4])
     assert slice_.scale_median_row_margin == 2
+    assert slice_.scale_median_column_margin == 3
 
 
 def test_cat_array_cat_dim_first():
@@ -611,6 +642,7 @@ def test_cat_array_cat_dim_first():
     np.testing.assert_almost_equal(
         slice_.scale_std_err_column, [0.0351443, 0.0347574, 0.0366944]
     )
+    assert slice_.scale_median_column_margin == 1
     assert slice_.scale_std_dev_row is None
     assert slice_.scale_std_err_row is None
     assert slice_.scale_median_row_margin is None
@@ -626,6 +658,7 @@ def test_cat_array_subvar_dim_first():
     )
     np.testing.assert_almost_equal(slice_.scale_median_row, [1, 1, 2])
     assert slice_.scale_median_row_margin == 1
+    assert slice_.scale_median_column_margin is None
     assert slice_.scale_std_dev_column is None
     assert slice_.scale_std_err_column is None
     assert slice_.scale_median_column is None
@@ -644,12 +677,14 @@ def test_cat_x_cat_arr_fruit_first():
         slice_.scale_std_err_column, [0.09992, 0.093522, 0.1041586]
     )
     np.testing.assert_almost_equal(slice_.scale_median_column, [1, 1, 2])
+    assert slice_.scale_median_column_margin == 1
 
     slice_ = Cube(CR.FRUIT_X_PETS_ARRAY).partitions[1]
     assert slice_.scale_std_dev_row is None
     assert slice_.scale_std_err_row is None
     assert slice_.scale_median_row is None
     assert slice_.scale_median_row_margin is None
+    assert slice_.scale_median_column_margin == 1
     np.testing.assert_almost_equal(
         slice_.scale_std_dev_column, [0.4913518, 0.4985185, 0.4971626]
     )
@@ -669,6 +704,7 @@ def test_cat_x_cat_arr_subvars_first():
     )
     np.testing.assert_almost_equal(slice_.scale_median_row, [2, 2, 2])
     assert slice_.scale_median_row_margin == 2
+    assert slice_.scale_median_column_margin is None
     assert slice_.scale_std_dev_column is None
     assert slice_.scale_std_err_column is None
     assert slice_.scale_median_column is None
@@ -681,6 +717,7 @@ def test_cat_x_cat_arr_subvars_first():
         slice_.scale_std_err_row, [0.0819565, 0.0724569, 0.0754053]
     )
     np.testing.assert_almost_equal(slice_.scale_median_row, [2, 2, 2])
+    assert slice_.scale_median_column_margin is None
     assert slice_.scale_std_dev_column is None
     assert slice_.scale_std_err_column is None
     assert slice_.scale_median_column is None
@@ -695,6 +732,7 @@ def test_cat_x_cat_arr_pets_first():
     np.testing.assert_almost_equal(slice_.scale_median_row, [1, 1])
     np.testing.assert_almost_equal(slice_.scale_median_column, [2, 2])
     assert slice_.scale_median_row_margin == 1
+    assert slice_.scale_median_column_margin == 2
 
     slice_ = Cube(CR.FRUIT_X_PETS_ARRAY_PETS_FIRST).partitions[1]
     np.testing.assert_almost_equal(slice_.scale_std_dev_row, [0.4948717, 0.4985185])
@@ -704,6 +742,7 @@ def test_cat_x_cat_arr_pets_first():
     np.testing.assert_almost_equal(slice_.scale_median_row, [1, 2])
     np.testing.assert_almost_equal(slice_.scale_median_column, [2, 2])
     assert slice_.scale_median_row_margin == 2
+    assert slice_.scale_median_column_margin == 2
 
     slice_ = Cube(CR.FRUIT_X_PETS_ARRAY_PETS_FIRST).partitions[2]
     np.testing.assert_almost_equal(slice_.scale_std_dev_row, [0.4995272, 0.4971626])
@@ -713,6 +752,7 @@ def test_cat_x_cat_arr_pets_first():
     np.testing.assert_almost_equal(slice_.scale_median_row, [2, 2])
     np.testing.assert_almost_equal(slice_.scale_median_column, [2, 2])
     assert slice_.scale_median_row_margin == 2
+    assert slice_.scale_median_column_margin == 2
 
 
 def test_with_null_values():
@@ -725,6 +765,7 @@ def test_with_null_values():
     )
     np.testing.assert_almost_equal(slice_.scale_median_row, [1, 1, 1])
     assert slice_.scale_median_row_margin == 1
+    assert slice_.scale_median_column_margin is None
     assert slice_.scale_std_dev_column is None
     assert slice_.scale_std_err_column is None
     assert slice_.scale_median_column is None
