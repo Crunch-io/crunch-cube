@@ -505,7 +505,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def scale_median_column_margin(self):
-        """ -> np.int64, represents the rows scale median margin"""
+        """ -> np.int64, represents the column scale median margin"""
         if np.all(np.isnan(self._columns_dimension_numeric)):
             return None
         columns_margin = self.columns_margin
