@@ -384,7 +384,7 @@ class Cube(object):
         a 2D cube-result becomes a single slice.
         """
         return (
-            self._cube_idx_arg == 0
+            (self._cube_idx_arg == 0 or self._is_single_filter_col_cube)
             and len(self.dimension_types) > 0
             and self.dimension_types[0] == DT.CA
         )
@@ -407,6 +407,11 @@ class Cube(object):
                 "Unsupported type <%s> provided. Cube response must be JSON "
                 "(str) or dict." % type(self._cube_response_arg).__name__
             )
+
+    @lazyproperty
+    def _is_single_filter_col_cube(self):
+        """ -> bool, determines if it is a single column filter cube."""
+        return self._cube_dict["result"].get("is_single_col_cube", False)
 
     def _measure(self, weighted):
         """_BaseMeasure subclass representing primary measure for this cube.

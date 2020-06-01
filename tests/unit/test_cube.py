@@ -387,12 +387,63 @@ class DescribeCube(object):
         assert is_mr_by_itself is expected_value
 
     @pytest.mark.parametrize(
+        ("dim_types", "cube_idx", "_is_single_filter_col_cube", "expected_value"),
+        (
+            ((), 0, False, False),
+            ((), 0, True, False),
+            ((), 1, True, False),
+            ((DT.CA, DT.CAT), 0, False, True),
+            ((DT.CA, DT.CAT), 1, True, True),
+            ((DT.CAT, DT.CAT), 0, True, False),
+            ((DT.CA, DT.CAT, DT.CAT), 0, True, True),
+            ((DT.CA, DT.CAT, DT.CAT), 1, False, False),
+        ),
+    )
+    def it_knows_ca_as_0th(
+        self,
+        request,
+        dim_types,
+        cube_idx,
+        _is_single_filter_col_cube,
+        expected_value,
+        dimension_types_prop_,
+    ):
+        property_mock(
+            request,
+            Cube,
+            "_is_single_filter_col_cube",
+            return_value=_is_single_filter_col_cube,
+        )
+        dimension_types_prop_.return_value = dim_types
+        cube = Cube(
+            response=None,
+            cube_idx=cube_idx,
+            transforms=None,
+            population=None,
+            mask_size=0,
+        )
+
+        _ca_as_0th = cube._ca_as_0th
+
+        assert _ca_as_0th is expected_value
+
+    @pytest.mark.parametrize(
         ("cube_dict", "expected_value"),
         (({"result": {}}, "Untitled"), ({"result": {"title": "Hipsters"}}, "Hipsters")),
     )
     def it_knows_its_title(self, _cube_dict_prop_, cube_dict, expected_value):
         _cube_dict_prop_.return_value = cube_dict
         assert Cube(None).title == expected_value
+
+    @pytest.mark.parametrize(
+        ("cube_dict", "expected_value"),
+        (({"result": {}}, False), ({"result": {"is_single_col_cube": True}}, True)),
+    )
+    def it_knows_if_it_is_a_single_col_filter_cube(
+        self, _cube_dict_prop_, cube_dict, expected_value
+    ):
+        _cube_dict_prop_.return_value = cube_dict
+        assert Cube(None)._is_single_filter_col_cube == expected_value
 
     def it_provides_access_to_the_cube_response_dict_to_help(self):
         assert Cube({"cube": "dict"})._cube_dict == {"cube": "dict"}
