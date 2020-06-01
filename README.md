@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.11.21
+- Fix slicing for CA + single col filter
+
 #### 1.11.20
 - Fix cube title payload discrepancy
 
