@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.11.22
+- Additional summary measures for scale (`std_dev`, `std_error`, `median`)
+
 #### 1.11.21
 - Fix slicing for CA + single col filter
 
