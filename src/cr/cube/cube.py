@@ -46,34 +46,29 @@ class CubeSet(object):
     @lazyproperty
     def can_show_pairwise(self):
         """True if all 2D cubes in a multi-cube set can provide pairwise comparison."""
-        if len(self.cubes) < 2:
+        if len(self._cubes) < 2:
             return False
 
         return all(
             all(dt in DT.ALLOWED_PAIRWISE_TYPES for dt in cube.dimension_types[-2:])
             and cube.ndim >= 2
-            for cube in self.cubes[1:]
+            for cube in self._cubes[1:]
         )
-
-    @lazyproperty
-    def cubes(self):
-        """Sequence of Cube objects containing data for this analysis."""
-        return tuple(self._iter_cubes())
 
     @lazyproperty
     def description(self):
         """str description of first cube in this set."""
-        return self.cubes[0].description
+        return self._cubes[0].description
 
     @lazyproperty
     def has_means(self):
         """True if cubes in this set include a means measure."""
-        return self.cubes[0].has_means
+        return self._cubes[0].has_means
 
     @lazyproperty
     def has_weighted_counts(self):
         """True if cube-responses include a weighted-count measure."""
-        return self.cubes[0].is_weighted
+        return self._cubes[0].is_weighted
 
     @lazyproperty
     def is_ca_as_0th(self):
@@ -86,19 +81,19 @@ class CubeSet(object):
         if not self._is_multi_cube:
             return False
         # ---the rest depends on the row-var cube---
-        cube = self.cubes[0]
+        cube = self._cubes[0]
         # ---True if row-var cube is CA---
         return cube.dimension_types[0] == DT.CA_SUBVAR
 
     @lazyproperty
     def missing_count(self):
         """The number of missing values from first cube in this set."""
-        return self.cubes[0].missing
+        return self._cubes[0].missing
 
     @lazyproperty
     def name(self):
         """str name of first cube in this set."""
-        return self.cubes[0].name
+        return self._cubes[0].name
 
     @lazyproperty
     def partition_sets(self):
@@ -123,7 +118,7 @@ class CubeSet(object):
         a _Strand and the rest being _Slice objects. Multiple partition sets only arise
         for a tabbook in the CA-as-0th case.
         """
-        return tuple(zip(*(cube.partitions for cube in self.cubes)))
+        return tuple(zip(*(cube.partitions for cube in self._cubes)))
 
     @lazyproperty
     def population_fraction(self):
@@ -134,7 +129,12 @@ class CubeSet(object):
         if the unfiltered count is zero, which would otherwise result in
         a divide-by-zero error.
         """
-        return self.cubes[0].population_fraction
+        return self._cubes[0].population_fraction
+
+    @lazyproperty
+    def _cubes(self):
+        """Sequence of Cube objects containing data for this analysis."""
+        return tuple(self._iter_cubes())
 
     @lazyproperty
     def _is_multi_cube(self):

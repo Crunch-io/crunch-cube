@@ -163,7 +163,7 @@ class DescribeCubeSet(object):
         _iter_cubes_.return_value = (c for c in (cube_, cube_, cube_))
         cube_set = CubeSet(None, None, None, None)
 
-        cubes = cube_set.cubes
+        cubes = cube_set._cubes
 
         assert cubes == (cube_, cube_, cube_)
 
@@ -284,7 +284,7 @@ class DescribeCubeSet(object):
 
     @pytest.fixture
     def _cubes_prop_(self, request):
-        return property_mock(request, CubeSet, "cubes")
+        return property_mock(request, CubeSet, "_cubes")
 
     @pytest.fixture
     def _is_multi_cube_prop_(self, request):
