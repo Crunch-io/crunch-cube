@@ -189,9 +189,9 @@ class Describe_Strand(object):
 
     def it_knows_the_population_fraction(self, cube_):
         cube_.population_fraction = 0.5
-        slice_ = _Strand(cube_, None, None, None, None, None)
+        strand_ = _Strand(cube_, None, None, None, None, None)
 
-        population_fraction = slice_.population_fraction
+        population_fraction = strand_.population_fraction
 
         assert population_fraction == 0.5
 
