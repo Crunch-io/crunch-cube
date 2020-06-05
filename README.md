@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.11.23
+- Expose population fraction in cube partitions
+
 #### 1.11.22
 - Additional summary measures for scale (`std_dev`, `std_error`, `median`)
 
@@ -131,44 +134,5 @@ The detailed description can be found
 
 #### 1.11.17
 - Fix incorrect means values after hiding
-
-#### 1.11.16
-- New base for t_stats overlaps
-
-#### 1.11.15
-- Fix t_stats values for overlaps
-
-#### 1.11.14
-- Bug fix for margin property in MeanVector
-
-#### 1.11.13
-- Correct tstatistcs for multiple response
-- New tstats measure in MRxMR Matrix
-- New pairwise significance test for CATxMRxITSELF (5D) cubes
-- New cube partition methods for residuals values
-
-#### 1.11.12
-- Bug fix on residuals for subtotals
-
-#### 1.11.11
-- Two-tailed t-tests for scale means
-- Pairwise significance measure for scale means
-
-#### 1.11.10
-- zscore and pval measures for headers and subtotals
-
-#### 1.11.9
-- 100% test coverage
-- New `is_empty` property in each of cube partition
-
-#### 1.11.8
-- Increase test coverage
-- Fix 2D cubes that have means with insertions
-
-#### 1.11.7
-- Fix a bug when MR x MR table is pruned on both dimensions
-
-#### 1.11.6
-- Calculate population size fraction using complete cases
 
 For a complete list of changes see [history](https://github.com/Crunch-io/crunch-cube/blob/master/HISTORY.md).
