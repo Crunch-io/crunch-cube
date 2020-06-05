@@ -302,6 +302,11 @@ class _Slice(CubePartition):
         )
 
     @lazyproperty
+    def population_fraction(self):
+        """Returns the population fraction of the cube"""
+        return self._cube.population_fraction
+
+    @lazyproperty
     def pvals(self):
         return np.array([row.pvals for row in self._matrix.rows])
 
@@ -877,6 +882,11 @@ class _Strand(CubePartition):
             * self._population
             * self._cube.population_fraction
         )
+
+    @lazyproperty
+    def population_fraction(self):
+        """Returns the population fraction of the cube"""
+        return self._cube.population_fraction
 
     @lazyproperty
     def row_base(self):

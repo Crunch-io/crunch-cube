@@ -115,7 +115,19 @@ class Describe_Slice(object):
 
         np.testing.assert_almost_equal(rows_margin, [[1, 2], [3, 4]])
 
+    def it_knows_the_population_fraction(self, cube_):
+        cube_.population_fraction = 0.5
+        slice_ = _Slice(cube_, None, None, None, None)
+
+        population_fraction = slice_.population_fraction
+
+        assert population_fraction == 0.5
+
     # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def cube_(self, request):
+        return instance_mock(request, Cube)
 
     @pytest.fixture
     def matrix_(self, request):
@@ -174,6 +186,14 @@ class Describe_Strand(object):
 
         TransformedStripe_.stripe.assert_called_once_with(cube_, dimension_, False, 42)
         assert stripe is stripe_
+
+    def it_knows_the_population_fraction(self, cube_):
+        cube_.population_fraction = 0.5
+        strand_ = _Strand(cube_, None, None, None, None, None)
+
+        population_fraction = strand_.population_fraction
+
+        assert population_fraction == 0.5
 
     # fixture components ---------------------------------------------
 
