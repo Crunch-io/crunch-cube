@@ -108,6 +108,21 @@ class DescribeCubePartition(object):
         assert str(e.value) == expected_message
 
     @pytest.mark.parametrize(
+        "pw_indices_dict, expected_value",
+        (
+            # --- default value is True ---
+            ({}, True),
+            ({"only_larger": "foobar"}, True),
+            ({"only_larger": False}, False),
+        ),
+    )
+    def it_knows_the_only_larger_flag_state_to_help(
+        self, _transforms_dict_prop_, pw_indices_dict, expected_value
+    ):
+        _transforms_dict_prop_.return_value = {"pairwise_indices": pw_indices_dict}
+        assert CubePartition(None)._only_larger == expected_value
+
+    @pytest.mark.parametrize(
         "transforms, expected_value",
         ((None, {}), ({"trans": "forms"}, {"trans": "forms"})),
     )
@@ -169,6 +184,10 @@ class DescribeCubePartition(object):
     @pytest.fixture
     def cube_(self, request):
         return instance_mock(request, Cube)
+
+    @pytest.fixture
+    def _transforms_dict_prop_(self, request):
+        return property_mock(request, CubePartition, "_transforms_dict")
 
 
 class Describe_Slice(object):

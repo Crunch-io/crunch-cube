@@ -170,6 +170,25 @@ class CubePartition(object):
         )  # pragma: no cover
 
     @lazyproperty
+    def _only_larger(self):
+        """True if only the larger of reciprocal pairwise-t values should appear.
+
+        In general, pairwise-t tests are reciprocal. That is, if A is significant with
+        respect to B, then B is significant with respect to A. Having a letter in both
+        columns can produce a cluttered appearance. When this flag is set by the user,
+        only the cell in the reciprocal pair having the largest value gets a letter.
+        Defaults to True unless explicitly set False.
+        """
+        return (
+            False
+            if self._transforms_dict.get("pairwise_indices", {}).get(
+                "only_larger", True
+            )
+            is False
+            else True
+        )
+
+    @lazyproperty
     def _transforms_dict(self):
         """dict holding transforms for this partition, provided as `transforms` arg.
 
@@ -335,11 +354,8 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def pairwise_indices(self):
-        only_larger = self._transforms_dict.get("pairwise_indices", {}).get(
-            "only_larger", True
-        )
         return NewPairwiseSignificance(
-            self, self._alpha, only_larger=only_larger
+            self, self._alpha, self._only_larger
         ).pairwise_indices
 
     @lazyproperty
@@ -430,11 +446,8 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def scale_mean_pairwise_indices(self):
-        only_larger = self._transforms_dict.get("pairwise_indices", {}).get(
-            "only_larger", True
-        )
         return NewPairwiseSignificance(
-            self, self._alpha, only_larger=only_larger
+            self, self._alpha, self._only_larger
         ).scale_mean_pairwise_indices
 
     @lazyproperty
@@ -594,11 +607,8 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def summary_pairwise_indices(self):
-        only_larger = self._transforms_dict.get("pairwise_indices", {}).get(
-            "only_larger", True
-        )
         return NewPairwiseSignificance(
-            self, self._alpha, only_larger=only_larger
+            self, self._alpha, self._only_larger
         ).summary_pairwise_indices
 
     @lazyproperty
