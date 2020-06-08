@@ -122,6 +122,15 @@ class CubePartition(object):
             "must be implemented by each subclass"
         )  # pragma: no cover
 
+    @lazyproperty
+    def _transforms_dict(self):
+        """dict holding transforms for this partition, provided as `transforms` arg.
+
+        This value is an empty dict (`{}`) when no transforms were specified on
+        construction.
+        """
+        return {} if self._transforms_arg is None else self._transforms_arg
+
 
 class _Slice(CubePartition):
     """2D cube partition.
@@ -735,16 +744,6 @@ class _Slice(CubePartition):
             self._transforms_dict.get("columns_dimension", {}),
         )
 
-    @lazyproperty
-    def _transforms_dict(self):
-        """dict containing all transforms for this slice, provided as `transforms` arg.
-
-
-        This value is an empty dict (`{}`) when no transforms were specified on
-        construction.
-        """
-        return self._transforms_arg if self._transforms_arg is not None else {}
-
 
 class _Strand(CubePartition):
     """1D cube-partition.
@@ -1040,8 +1039,7 @@ class _Strand(CubePartition):
     @lazyproperty
     def _row_transforms_dict(self):
         """Transforms dict for the single (rows) dimension of this strand."""
-        transforms_dict = {} if self._transforms_arg is None else self._transforms_arg
-        return transforms_dict.get("rows_dimension", {})
+        return self._transforms_dict.get("rows_dimension", {})
 
     @lazyproperty
     def _stripe(self):

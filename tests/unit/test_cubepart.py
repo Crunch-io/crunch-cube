@@ -67,6 +67,14 @@ class DescribeCubePartition(object):
         # --- default of False is overridden by subclasses when appropriate ---
         assert CubePartition(None).cube_is_mr_by_itself is False
 
+    @pytest.mark.parametrize(
+        "transforms, expected_value",
+        ((None, {}), ({"trans": "forms"}, {"trans": "forms"})),
+    )
+    def it_provides_the_transforms_dict_to_help(self, transforms, expected_value):
+        """Handles defaulting of transforms arg."""
+        assert CubePartition(None, transforms)._transforms_dict == expected_value
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
