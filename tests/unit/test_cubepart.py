@@ -68,12 +68,92 @@ class DescribeCubePartition(object):
         assert CubePartition(None).cube_is_mr_by_itself is False
 
     @pytest.mark.parametrize(
+        "pw_indices_dict, expected_value",
+        (
+            # --- default value is .05 ---
+            ({}, (0.05, None)),
+            ({"alpha": {}}, (0.05, None)),
+            ({"alpha": []}, (0.05, None)),
+            # --- scalar (float) value sets alpha and sets alpha_alt to None ---
+            ({"alpha": 0.025}, (0.025, None)),
+            # --- single (float) value sets alpha and sets alpha_alt to None ---
+            ({"alpha": [0.03]}, (0.03, None)),
+            # --- two values sets alpha to lesser and alpha_alt to greater ---
+            ({"alpha": [0.07, 0.03]}, (0.03, 0.07)),
+            # --- third and later values are ignored ---
+            ({"alpha": (0.07, 0.03, "foobar")}, (0.03, 0.07)),
+        ),
+    )
+    def it_interprets_the_provided_alpha_values_to_help(
+        self, pw_indices_dict, expected_value
+    ):
+        cube_partition = CubePartition(None, {"pairwise_indices": pw_indices_dict})
+
+        alpha_values = cube_partition._alpha_values
+
+        assert alpha_values == expected_value
+
+    def but_it_raises_on_invalid_alpha_values(self, alpha_values_raises_fixture):
+        pw_indices_dict, exception_type, expected_message = alpha_values_raises_fixture
+        cube_partition = CubePartition(None, {"pairwise_indices": pw_indices_dict})
+
+        with pytest.raises(exception_type) as e:
+            cube_partition._alpha_values
+
+        assert str(e.value) == expected_message
+
+    @pytest.mark.parametrize(
         "transforms, expected_value",
         ((None, {}), ({"trans": "forms"}, {"trans": "forms"})),
     )
     def it_provides_the_transforms_dict_to_help(self, transforms, expected_value):
         """Handles defaulting of transforms arg."""
         assert CubePartition(None, transforms)._transforms_dict == expected_value
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture(
+        params=(
+            # --- type errors ---
+            (
+                {"alpha": {"al": "pha"}},
+                TypeError,
+                "transforms.pairwise_indices.alpha, when defined, must be a list of 1 "
+                "or 2 float values between 0.0 and 1.0 exclusive. Got %s"
+                % repr({"al": "pha"}),
+            ),
+            (
+                {"alpha": "0.05"},
+                TypeError,
+                "transforms.pairwise_indices.alpha, when defined, must be a list of 1 "
+                "or 2 float values between 0.0 and 1.0 exclusive. Got %s"
+                % repr("0.05"),
+            ),
+            # --- scalar out-of-range errors ---
+            (
+                {"alpha": -0.1},
+                ValueError,
+                "alpha value, when provided, must be between 0.0 and 1.0 exclusive. "
+                "Got %s" % repr(-0.1),
+            ),
+            (
+                {"alpha": 1.0},
+                ValueError,
+                "alpha value, when provided, must be between 0.0 and 1.0 exclusive. "
+                "Got %s" % repr(1.0),
+            ),
+            # --- sequence value errors ---
+            (
+                {"alpha": [0.01, ".05"]},
+                ValueError,
+                "transforms.pairwise_indices.alpha must be a list of 1 or 2 float "
+                "values between 0.0 and 1.0 exclusive. Got %s" % repr([0.01, ".05"]),
+            ),
+        )
+    )
+    def alpha_values_raises_fixture(self, request):
+        pw_indices_dict, exception_type, expected_message = request.param
+        return pw_indices_dict, exception_type, expected_message
 
     # fixture components ---------------------------------------------
 

@@ -116,6 +116,48 @@ class CubePartition(object):
         return self._dimensions[0 if self.ndim < 2 else 1].name
 
     @lazyproperty
+    def _alpha_values(self):
+        """Pair (tuple) of confidence-interval thresholds to be used for t-tests.
+
+        The second value is optional and is None when no secondary alpha value was
+        defined for the cube-set.
+        """
+        value = self._transforms_dict.get("pairwise_indices", {}).get("alpha")
+
+        # --- handle omitted, None, [], (), {}, "", 0, and 0.0 cases ---
+        if not value:
+            return (0.05, None)
+
+        # --- reject invalid types ---
+        if not isinstance(value, (float, list, tuple)):
+            raise TypeError(
+                "transforms.pairwise_indices.alpha, when defined, must be a list of 1 "
+                "or 2 float values between 0.0 and 1.0 exclusive. Got %r" % value
+            )
+
+        # --- legacy float "by-itself" case ---
+        if isinstance(value, float):
+            if not 0.0 < value < 1.0:
+                raise ValueError(
+                    "alpha value, when provided, must be between 0.0 and 1.0 "
+                    "exclusive. Got %r" % value
+                )
+            return (value, None)
+
+        # --- sequence case ---
+        for x in value[:2]:
+            if not isinstance(x, float) or not 0.0 < x < 1.0:
+                raise ValueError(
+                    "transforms.pairwise_indices.alpha must be a list of 1 or 2 float "
+                    "values between 0.0 and 1.0 exclusive. Got %r" % value
+                )
+
+        if len(value) == 1:
+            return (value[0], None)
+
+        return tuple(sorted(value[:2]))
+
+    @lazyproperty
     def _dimensions(self):
         """tuple of Dimension object for each dimension in cube-partition."""
         raise NotImplementedError(
