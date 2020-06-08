@@ -34,8 +34,9 @@ class CubePartition(object):
     These represent 2, 1, or 0 dimensions of a cube, respectively.
     """
 
-    def __init__(self, cube):
+    def __init__(self, cube, transforms=None):
         self._cube = cube
+        self._transforms_arg = transforms
 
     @classmethod
     def factory(
@@ -131,9 +132,8 @@ class _Slice(CubePartition):
     """
 
     def __init__(self, cube, slice_idx, transforms, population, mask_size):
-        super(_Slice, self).__init__(cube)
+        super(_Slice, self).__init__(cube, transforms)
         self._slice_idx = slice_idx
-        self._transforms_arg = transforms
         self._population = population
         self._mask_size = mask_size
 
@@ -754,8 +754,7 @@ class _Strand(CubePartition):
     """
 
     def __init__(self, cube, transforms, population, ca_as_0th, slice_idx, mask_size):
-        super(_Strand, self).__init__(cube)
-        self._transforms_arg = transforms
+        super(_Strand, self).__init__(cube, transforms)
         self._population = population
         self._ca_as_0th = ca_as_0th
         self._slice_idx = slice_idx
