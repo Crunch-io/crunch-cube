@@ -116,6 +116,11 @@ class CubePartition(object):
         return self._dimensions[0 if self.ndim < 2 else 1].name
 
     @lazyproperty
+    def _alpha(self):
+        """float confidence-interval threshold for pairwise-t (sig) tests."""
+        return self._alpha_values[0]
+
+    @lazyproperty
     def _alpha_values(self):
         """Pair (tuple) of confidence-interval thresholds to be used for t-tests.
 
@@ -330,12 +335,11 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def pairwise_indices(self):
-        alpha = self._transforms_dict.get("pairwise_indices", {}).get("alpha", 0.05)
         only_larger = self._transforms_dict.get("pairwise_indices", {}).get(
             "only_larger", True
         )
         return NewPairwiseSignificance(
-            self, alpha=alpha, only_larger=only_larger
+            self, self._alpha, only_larger=only_larger
         ).pairwise_indices
 
     @lazyproperty
@@ -426,12 +430,11 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def scale_mean_pairwise_indices(self):
-        alpha = self._transforms_dict.get("pairwise_indices", {}).get("alpha", 0.05)
         only_larger = self._transforms_dict.get("pairwise_indices", {}).get(
             "only_larger", True
         )
         return NewPairwiseSignificance(
-            self, alpha=alpha, only_larger=only_larger
+            self, self._alpha, only_larger=only_larger
         ).scale_mean_pairwise_indices
 
     @lazyproperty
@@ -591,12 +594,11 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def summary_pairwise_indices(self):
-        alpha = self._transforms_dict.get("pairwise_indices", {}).get("alpha", 0.05)
         only_larger = self._transforms_dict.get("pairwise_indices", {}).get(
             "only_larger", True
         )
         return NewPairwiseSignificance(
-            self, alpha=alpha, only_larger=only_larger
+            self, self._alpha, only_larger=only_larger
         ).summary_pairwise_indices
 
     @lazyproperty

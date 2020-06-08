@@ -67,6 +67,11 @@ class DescribeCubePartition(object):
         # --- default of False is overridden by subclasses when appropriate ---
         assert CubePartition(None).cube_is_mr_by_itself is False
 
+    def it_knows_the_primary_alpha_value_to_help(self, _alpha_values_prop_):
+        """alpha is the primary confidence-interval threshold specified by the user."""
+        _alpha_values_prop_.return_value = (0.042, 0.084)
+        assert CubePartition(None)._alpha == 0.042
+
     @pytest.mark.parametrize(
         "pw_indices_dict, expected_value",
         (
@@ -156,6 +161,10 @@ class DescribeCubePartition(object):
         return pw_indices_dict, exception_type, expected_message
 
     # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _alpha_values_prop_(self, request):
+        return property_mock(request, CubePartition, "_alpha_values")
 
     @pytest.fixture
     def cube_(self, request):
