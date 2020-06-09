@@ -354,9 +354,23 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def pairwise_indices(self):
-        return PairwiseSignificance(
+        """2D ndarray of tuple of int column-idxs meeting pairwise-t threshold.
+
+        Like::
+
+            [
+               [(1, 3, 4), (), (0,), (), ()],
+               [(2,), (1, 2), (), (), (0, 3)],
+               [(), (), (), (), ()],
+            ]
+
+        Has the same shape as `.counts`. Each int represents the offset of another
+        column in the same row with a confidence interval meeting the threshold defined
+        for this analysis.
+        """
+        return PairwiseSignificance.pairwise_indices(
             self, self._alpha, self._only_larger
-        ).pairwise_indices
+        )
 
     @lazyproperty
     def pairwise_significance_tests(self):
