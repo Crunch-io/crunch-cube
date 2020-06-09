@@ -441,6 +441,7 @@ class _Slice(CubePartition):
         The median is calculated using the standard algebra applied to the numeric
         values repeated for each related counts value
         """
+
         if np.all(np.isnan(self._columns_dimension_numeric)):
             return None
         not_a_nan_index = ~np.isnan(self._columns_dimension_numeric)
@@ -448,7 +449,7 @@ class _Slice(CubePartition):
         counts = self.counts[:, not_a_nan_index].astype("int64")
         scale_median = np.array(
             [
-                np.median(np.repeat(numeric_values, counts[i, :]))
+                self._median(np.repeat(numeric_values, counts[i, :]))
                 for i in range(counts.shape[0])
             ]
         )
@@ -461,6 +462,10 @@ class _Slice(CubePartition):
         The median is calculated using the standard algebra applied to the numeric
         values repeated for each related counts value
         """
+
+        def _median(values):
+            return np.median(values) if values.size != 0 else np.nan
+
         if np.all(np.isnan(self._rows_dimension_numeric)):
             return None
         not_a_nan_index = ~np.isnan(self._rows_dimension_numeric)
@@ -468,7 +473,7 @@ class _Slice(CubePartition):
         counts = self.counts[not_a_nan_index, :].astype("int64")
         scale_median = np.array(
             [
-                np.median(np.repeat(numeric_values, counts[:, i]))
+                self._median(np.repeat(numeric_values, counts[:, i]))
                 for i in range(counts.shape[1])
             ]
         )
@@ -709,6 +714,9 @@ class _Slice(CubePartition):
     def _matrix(self):
         """The TransformedMatrix object for this slice."""
         return TransformedMatrix.matrix(self._cube, self._dimensions, self._slice_idx)
+
+    def _median(self, values):
+        return np.median(values) if values.size != 0 else np.nan
 
     @lazyproperty
     def _rows_dimension(self):
