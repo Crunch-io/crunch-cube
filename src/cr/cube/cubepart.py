@@ -483,9 +483,9 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def scale_mean_pairwise_indices(self):
-        return PairwiseSignificance(
+        return PairwiseSignificance.scale_mean_pairwise_indices(
             self, self._alpha, self._only_larger
-        ).scale_mean_pairwise_indices
+        )
 
     @lazyproperty
     def scale_means_column(self):

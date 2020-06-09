@@ -28,10 +28,15 @@ class PairwiseSignificance(object):
         """ -> 2D ndarray of tuples of pairwise indices."""
         return cls(slice_, alpha, only_larger)._pairwise_indices
 
-    @lazyproperty
-    def scale_mean_pairwise_indices(self):
-        """ndarray containing tuples of pairwise indices."""
-        return np.array([sig.scale_mean_pairwise_indices for sig in self.values]).T
+    @classmethod
+    def scale_mean_pairwise_indices(cls, slice_, alpha, only_larger):
+        """ -> 1D ndarray of tuples of column-indices meeting pairwise-t threshold.
+
+        Indicates "whole columns" that are significantly different, based on the mean of
+        the scale (category numeric-values) for each column. The length of the array is
+        that of the columns-dimension.
+        """
+        return cls(slice_, alpha, only_larger)._scale_mean_pairwise_indices
 
     @lazyproperty
     def summary_pairwise_indices(self):
@@ -62,6 +67,11 @@ class PairwiseSignificance(object):
     def _pairwise_indices(self):
         """2D ndarray containing tuples of pairwise indices."""
         return np.array([sig.pairwise_indices for sig in self.values]).T
+
+    @lazyproperty
+    def _scale_mean_pairwise_indices(self):
+        """ndarray containing tuples of pairwise indices."""
+        return np.array([sig.scale_mean_pairwise_indices for sig in self.values]).T
 
 
 class _ColumnPairwiseSignificance(object):
