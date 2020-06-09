@@ -5,10 +5,55 @@
 from unittest import TestCase
 
 import numpy as np
+import pytest
 
 from cr.cube.cube import Cube
+from cr.cube.cubepart import _Slice
 
 from ..fixtures import CR, SM
+from ..util import load_python_expression
+
+
+class Describe_Slice(object):
+    """Integration-test suite for pairwise-t aspects of _Slice object."""
+
+    @pytest.mark.parametrize(
+        "fixture, pw_indices_dict, expectation",
+        (
+            (
+                CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION_WITH_HS,
+                {},
+                "cat-x-cat-hs-pw-idxs",
+            ),
+            (CR.PAIRWISE_HIROTSU_OCCUPATION_X_ILLNESS, {}, "cat-x-cat-pw-idxs"),
+            (
+                CR.PAIRWISE_HIROTSU_OCCUPATION_X_ILLNESS,
+                {"only_larger": False},
+                "cat-x-cat-pw-idxs-recip",
+            ),
+            (CR.MR_X_CAT, {}, "mr-x-cat-pw-idxs"),
+            (CR.MR_X_CAT_HS, {}, "mr-x-cat-hs-pw-idxs"),
+            (CR.EDU_FAV5_FAV5, {}, "cat-x-mr-aug-pw-idxs"),
+            (CR.EDU_FAV5_FAV5, {"only_larger": False}, "cat-x-mr-aug-pw-idxs-recip"),
+            (CR.CAT_HS_X_MR, {}, "cat-hs-x-mr-pw-idxs"),
+            (CR.CAT_X_MR_2, {}, "cat-x-mr-pw-idxs"),
+            (CR.MR_X_MR, {}, "mr-x-mr-pw-idxs"),
+        ),
+    )
+    def it_provides_pairwise_indices(self, fixture, pw_indices_dict, expectation):
+        slice_ = _Slice(
+            Cube(fixture),
+            slice_idx=0,
+            transforms={"pairwise_indices": pw_indices_dict},
+            population=None,
+            mask_size=0,
+        )
+
+        pairwise_indices = slice_.pairwise_indices
+
+        actual = pairwise_indices.tolist()
+        expected = load_python_expression(expectation)
+        assert expected == actual, "\n%s\n\n%s" % (expected, actual)
 
 
 class TestStandardizedResiduals(TestCase):
@@ -245,39 +290,6 @@ class TestStandardizedResiduals(TestCase):
         p_vals = slice_.pairwise_significance_tests[0].p_vals
         np.testing.assert_almost_equal(p_vals, expected)
 
-    def test_pairwise_indices_with_hs(self):
-        slice_ = Cube(CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION_WITH_HS).partitions[0]
-        expected = [
-            [
-                (3, 4, 5, 8, 10),
-                (3, 4, 5, 8, 10),
-                (3, 4, 5, 8, 10),
-                (),
-                (),
-                (10,),
-                (3, 4, 5, 8, 10),
-                (3, 4, 10),
-                (),
-                (4, 10),
-                (),
-            ],
-            [
-                (),
-                (),
-                (),
-                (0, 2, 6, 7),
-                (0, 2, 6, 7),
-                (0, 2),
-                (),
-                (),
-                (0, 2),
-                (),
-                (0, 2, 6, 7),
-            ],
-            [(), (), (), (), (), (1,), (), (), (), (), (1,)],
-        ]
-        assert slice_.pairwise_indices.tolist() == expected
-
     def test_compare_to_column(self):
         slice_ = Cube(CR.PAIRWISE_HIROTSU_OCCUPATION_X_ILLNESS).partitions[0]
         actual = slice_.pairwise_significance_tests[2]
@@ -307,51 +319,6 @@ class TestStandardizedResiduals(TestCase):
         ]
         np.testing.assert_almost_equal(actual.t_stats, expected_tstats)
         np.testing.assert_almost_equal(actual.p_vals, expected_pvals)
-
-    def test_cat_x_cat_pairwise_indices_only_larger(self):
-        slice_ = Cube(CR.PAIRWISE_HIROTSU_OCCUPATION_X_ILLNESS).partitions[0]
-        expected_indices = np.array(
-            [
-                [(1,), (), ()],
-                [(2,), (), ()],
-                [(1, 2), (), ()],
-                [(), (0,), ()],
-                [(), (0,), (0,)],
-                [(), (), ()],
-                [(), (), ()],
-                [(), (), ()],
-                [(), (), ()],
-                [(), (0,), (0,)],
-            ]
-        )
-        np.testing.assert_array_equal(slice_.pairwise_indices, expected_indices)
-
-    def test_mr_x_cat_pairwise_indices_only_larger(self):
-        # Without H&S
-        transforms = {
-            "columns_dimension": {"insertions": {}},
-            "rows_dimension": {"insertions": {}},
-        }
-        slice_ = Cube(CR.MR_X_CAT_HS, transforms=transforms).partitions[0]
-        expected_indices = [
-            [(1, 3, 4), (), (), (), (), ()],
-            [(), (), (), (), (), ()],
-            [(), (), (), (0,), (0,), ()],
-            [(), (), (), (), (1,), ()],
-            [(), (), (), (), (), ()],
-        ]
-        np.testing.assert_array_equal(slice_.pairwise_indices, expected_indices)
-
-        # With H&S
-        slice_ = Cube(CR.MR_X_CAT_HS).partitions[0]
-        expected_indices = [
-            [(1, 4, 5, 7), (), (4, 5, 7), (), (), (), (), ()],
-            [(), (), (), (), (), (), (), ()],
-            [(), (), (), (), (0,), (0,), (), (0,)],
-            [(), (), (), (), (), (1, 2), (), (1, 2)],
-            [(), (), (), (), (), (), (), ()],
-        ]
-        np.testing.assert_array_equal(slice_.pairwise_indices, expected_indices)
 
     def test_cat_mr_x_itself_pairwise_compare_columns(self):
         slice_ = Cube(CR.EDU_FAV5_FAV5).partitions[0]
@@ -397,93 +364,6 @@ class TestStandardizedResiduals(TestCase):
         assert slice_.cube_is_mr_by_itself is True
         np.testing.assert_array_almost_equal(actual.t_stats, expected_tstats)
         np.testing.assert_array_almost_equal(actual.p_vals, expected_pvals)
-
-    def test_cat_mr_x_itself_pairwise_indices_only_larger(self):
-        slice_ = Cube(CR.EDU_FAV5_FAV5).partitions[0]
-        expected_indices = [
-            [(2, 4), (2, 4), (4,), (2, 4), ()],
-            [(1, 2, 4), (2, 4), (), (2, 4), ()],
-            [(1, 2, 3, 4), (2, 4), (), (2, 4), ()],
-            [(1, 2, 3, 4), (2, 4), (), (2, 4), ()],
-        ]
-
-        np.testing.assert_array_equal(slice_.pairwise_indices, expected_indices)
-
-    def test_cat_mr_x_itself_pairwise_indices_and_smaller(self):
-        transforms = {"pairwise_indices": {"only_larger": False}}
-        slice_ = Cube(CR.EDU_FAV5_FAV5, transforms=transforms).partitions[0]
-        expected_indices = [
-            [(2, 4), (2, 4), (0, 1, 3, 4), (2, 4), (0, 1, 2, 3)],
-            [(1, 2, 4), (0, 2, 4), (0, 1, 3), (2, 4), (0, 1, 3)],
-            [(1, 2, 3, 4), (0, 2, 4), (0, 1, 3), (0, 2, 4), (0, 1, 3)],
-            [(1, 2, 3, 4), (0, 2, 4), (0, 1, 3), (0, 2, 4), (0, 1, 3)],
-        ]
-
-        np.testing.assert_array_equal(slice_.pairwise_indices, expected_indices)
-
-    def test_cat_x_mr_pairwise_indices_only_larger(self):
-        # Without H&S
-        transforms = {
-            "columns_dimension": {"insertions": {}},
-            "rows_dimension": {"insertions": {}},
-        }
-        slice_ = Cube(CR.CAT_X_MR_HS, transforms=transforms).partitions[0]
-        expected_indices = [
-            [(1, 2, 3, 4), (2, 3), (), (), (2,)],
-            [(), (), (), (), (3,)],
-            [(), (), (), (), ()],
-            [(), (0,), (0,), (0,), (0,)],
-            [(), (), (), (0, 1, 4), ()],
-            [(), (), (), (), ()],
-        ]
-        np.testing.assert_array_equal(slice_.pairwise_indices, expected_indices)
-
-        # With H&S
-        slice_ = Cube(CR.CAT_X_MR_HS).partitions[0]
-        expected_indices = [
-            [(1, 2, 3, 4), (2, 3), (), (), (2,)],
-            [(), (), (), (), (3,)],
-            [(1, 2, 3, 4), (2, 3), (), (), (3,)],
-            [(), (), (), (), ()],
-            [(), (0,), (0,), (0,), (0,)],
-            [(), (), (), (0, 1, 4), ()],
-            [(), (), (), (), ()],
-            [(), (0,), (0, 1), (0, 1, 4), (0,)],
-        ]
-        np.testing.assert_array_equal(slice_.pairwise_indices, expected_indices)
-
-    def test_mr_x_mr_pairwise_indices_only_larger(self):
-        slice_ = Cube(CR.MR_X_MR).partitions[0]
-        expected_indices = np.array(
-            [
-                [(1, 2, 3), (), (), ()],
-                [(), (0, 2, 3), (), (2,)],
-                [(), (), (0, 1, 3), (1,)],
-                [(), (), (), ()],
-            ]
-        )
-        np.testing.assert_array_equal(slice_.pairwise_indices, expected_indices)
-
-    def test_pairwise_indices_larger_and_smaller(self):
-        transforms = {"pairwise_indices": {"only_larger": False}}
-        slice_ = Cube(
-            CR.PAIRWISE_HIROTSU_OCCUPATION_X_ILLNESS, transforms=transforms
-        ).partitions[0]
-        expected_indices = np.array(
-            [
-                [(1,), (0,), ()],
-                [(2,), (), (0,)],
-                [(1, 2), (0,), (0,)],
-                [(1,), (0,), ()],
-                [(1, 2), (0,), (0,)],
-                [(), (), ()],
-                [(), (), ()],
-                [(), (), ()],
-                [(), (), ()],
-                [(1, 2), (0,), (0,)],
-            ]
-        )
-        np.testing.assert_array_equal(slice_.pairwise_indices, expected_indices)
 
     def test_cat_x_cat_summary_pairwise_indices(self):
         # Only larger

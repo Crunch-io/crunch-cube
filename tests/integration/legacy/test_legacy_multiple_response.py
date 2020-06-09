@@ -1492,7 +1492,7 @@ def test_cat_x_mr_x_cat_missing_proportions_by_col():
 
 
 def test_cat_by_mr_hs_col_percentage():
-    cube = CrunchCube(CR.CAT_X_MR_HS)
+    cube = CrunchCube(CR.CAT_HS_X_MR)
     expected = np.array(
         [
             [
@@ -1546,7 +1546,7 @@ def test_cat_by_mr_hs_col_percentage():
 
 
 def test_cat_by_mr_hs_row_percentage():
-    cube = CrunchCube(CR.CAT_X_MR_HS)
+    cube = CrunchCube(CR.CAT_HS_X_MR)
     expected = np.array(
         [
             [
@@ -1600,7 +1600,7 @@ def test_cat_by_mr_hs_row_percentage():
 
 
 def test_cat_by_mr_hs_cell_percentage():
-    cube = CrunchCube(CR.CAT_X_MR_HS)
+    cube = CrunchCube(CR.CAT_HS_X_MR)
     expected = np.array(
         [
             [

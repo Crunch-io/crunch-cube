@@ -21,3 +21,17 @@ def load_expectation(expectation_file_name, strip=True):  # pragma: no cover
     if strip:
         return expectation_bytes.decode("utf-8").strip()
     return expectation_bytes.decode("utf-8")
+
+
+def load_python_expression(expression_file_name):
+    """Return a Python object (list, dict) formed by parsing `expression_file_name`.
+
+    Expectation file path is rooted at tests/expectations.
+    """
+    thisdir = os.path.dirname(__file__)
+    expression_file_path = os.path.abspath(
+        os.path.join(thisdir, "expectations", "%s.py" % expression_file_name)
+    )
+    with open(expression_file_path) as f:
+        expression_bytes = f.read()
+    return eval(expression_bytes)
