@@ -87,6 +87,11 @@ class CubePartition(object):
         return len(self._dimensions)
 
     @lazyproperty
+    def population_fraction(self):
+        """Returns the population fraction of the cube"""
+        return self._cube.population_fraction
+
+    @lazyproperty
     def shape(self):
         """Tuple of int vector counts for this partition.
 
@@ -300,11 +305,6 @@ class _Slice(CubePartition):
         return (
             self.table_proportions * self._population * self._cube.population_fraction
         )
-
-    @lazyproperty
-    def population_fraction(self):
-        """Returns the population fraction of the cube"""
-        return self._cube.population_fraction
 
     @lazyproperty
     def pvals(self):
@@ -806,11 +806,6 @@ class _Strand(CubePartition):
             * self._population
             * self._cube.population_fraction
         )
-
-    @lazyproperty
-    def population_fraction(self):
-        """Returns the population fraction of the cube"""
-        return self._cube.population_fraction
 
     @lazyproperty
     def row_base(self):
