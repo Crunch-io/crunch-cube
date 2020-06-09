@@ -73,6 +73,15 @@ class DescribeCubePartition(object):
         assert CubePartition(None)._alpha == 0.042
 
     @pytest.mark.parametrize(
+        "alpha_values, expected_value", (((0.042, 0.084), 0.084), ((0.042, None), None))
+    )
+    def it_knows_the_secondary_alpha_value_to_help(
+        self, _alpha_values_prop_, alpha_values, expected_value
+    ):
+        _alpha_values_prop_.return_value = alpha_values
+        assert CubePartition(None)._alpha_alt == expected_value
+
+    @pytest.mark.parametrize(
         "pw_indices_dict, expected_value",
         (
             # --- default value is .05 ---

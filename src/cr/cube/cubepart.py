@@ -121,6 +121,15 @@ class CubePartition(object):
         return self._alpha_values[0]
 
     @lazyproperty
+    def _alpha_alt(self):
+        """Alternate float confidence-interval threshold or None.
+
+        This is an optional secondary confidence interval allowing two-level
+        significance testing. Value is None if no alternate alpha was specified by user.
+        """
+        return self._alpha_values[1]
+
+    @lazyproperty
     def _alpha_values(self):
         """Pair (tuple) of confidence-interval thresholds to be used for t-tests.
 
