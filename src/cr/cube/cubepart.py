@@ -21,7 +21,7 @@ import numpy as np
 
 from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.min_base_size_mask import MinBaseSizeMask
-from cr.cube.measures.pairwise_significance import NewPairwiseSignificance
+from cr.cube.measures.pairwise_significance import PairwiseSignificance
 from cr.cube.matrix import TransformedMatrix
 from cr.cube.scalar import MeansScalar
 from cr.cube.stripe import TransformedStripe
@@ -354,7 +354,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def pairwise_indices(self):
-        return NewPairwiseSignificance(
+        return PairwiseSignificance(
             self, self._alpha, self._only_larger
         ).pairwise_indices
 
@@ -367,7 +367,7 @@ class _Slice(CubePartition):
         probability values and statistical scores).
         """
         return tuple(
-            NewPairwiseSignificance(self).values[column_idx]
+            PairwiseSignificance(self).values[column_idx]
             for column_idx in range(len(self._matrix.columns))
         )
 
@@ -446,7 +446,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def scale_mean_pairwise_indices(self):
-        return NewPairwiseSignificance(
+        return PairwiseSignificance(
             self, self._alpha, self._only_larger
         ).scale_mean_pairwise_indices
 
@@ -607,7 +607,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def summary_pairwise_indices(self):
-        return NewPairwiseSignificance(
+        return PairwiseSignificance(
             self, self._alpha, self._only_larger
         ).summary_pairwise_indices
 
