@@ -101,9 +101,8 @@ class Describe_Slice(object):
             Cube(fixture), slice_idx=0, transforms={}, population=None, mask_size=0
         )
 
-        scale_mean_pairwise_indices = slice_.scale_mean_pairwise_indices
+        actual = slice_.scale_mean_pairwise_indices
 
-        actual = scale_mean_pairwise_indices.tolist()
         expected = load_python_expression(expectation)
         assert expected == actual, "\n%s\n\n%s" % (expected, actual)
 

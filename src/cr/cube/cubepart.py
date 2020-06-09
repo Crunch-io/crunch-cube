@@ -483,8 +483,15 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def scale_mean_pairwise_indices(self):
-        return PairwiseSignificance.scale_mean_pairwise_indices(
-            self, self._alpha, self._only_larger
+        """Sequence of column-idx tuples indicating pairwise-t result of scale-means.
+
+        The calculation is based on the mean of the scale (category numeric-values) for
+        each column. The length of the array is that of the columns-dimension.
+        """
+        return tuple(
+            PairwiseSignificance.scale_mean_pairwise_indices(
+                self, self._alpha, self._only_larger
+            ).tolist()
         )
 
     @lazyproperty
