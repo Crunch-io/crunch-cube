@@ -495,6 +495,23 @@ class _Slice(CubePartition):
         )
 
     @lazyproperty
+    def scale_mean_pairwise_indices_alt(self):
+        """Sequence of column-idx tuples indicating pairwise-t result of scale-means.
+
+        Same calculation as `.scale_mean_pairwise_indices` using the `._alpha_alt`
+        value. None when no secondary alpha value was specified. The length of the
+        sequence is that of the columns-dimension.
+        """
+        if self._alpha_alt is None:
+            return None
+
+        return tuple(
+            PairwiseSignificance.scale_mean_pairwise_indices(
+                self, self._alpha_alt, self._only_larger
+            ).tolist()
+        )
+
+    @lazyproperty
     def scale_means_column(self):
         if np.all(np.isnan(self._columns_dimension_numeric)):
             return None

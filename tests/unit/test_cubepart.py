@@ -267,6 +267,31 @@ class Describe_Slice(object):
 
         np.testing.assert_almost_equal(rows_margin, [[1, 2], [3, 4]])
 
+    def it_provides_the_secondary_scale_mean_pairwise_indices(
+        self, _alpha_alt_prop_, _only_larger_prop_, PairwiseSignificance_
+    ):
+        PairwiseSignificance_.scale_mean_pairwise_indices.return_value = np.array(
+            [(2,), (0,), ()]
+        )
+        _alpha_alt_prop_.return_value = 0.42
+        _only_larger_prop_.return_value = True
+        slice_ = _Slice(None, None, None, None, None)
+
+        scale_mean_pairwise_indices_alt = slice_.scale_mean_pairwise_indices_alt
+
+        PairwiseSignificance_.scale_mean_pairwise_indices.assert_called_once_with(
+            slice_, 0.42, True
+        )
+        assert scale_mean_pairwise_indices_alt == ((2,), (0,), ())
+
+    def but_scale_mean_pairwise_indices_alt_is_None_when_no_secondary_alpha_specified(
+        self, _alpha_alt_prop_
+    ):
+        _alpha_alt_prop_.return_value = None
+        slice_ = _Slice(None, None, None, None, None)
+
+        assert slice_.scale_mean_pairwise_indices_alt is None
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
