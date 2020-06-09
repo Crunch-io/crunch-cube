@@ -382,6 +382,20 @@ class _Slice(CubePartition):
         )
 
     @lazyproperty
+    def pairwise_indices_alt(self):
+        """2D ndarray of tuple of int column-idxs meeting alternate threshold.
+
+        This value is None if no alternate threshold has been defined.
+        """
+        return (
+            None
+            if self._alpha_alt is None
+            else PairwiseSignificance.pairwise_indices(
+                self, self._alpha_alt, self._only_larger
+            )
+        )
+
+    @lazyproperty
     def pairwise_significance_tests(self):
         """tuple of _ColumnPairwiseSignificance tests.
 

@@ -55,7 +55,6 @@ class Describe_Slice(object):
         expected = load_python_expression(expectation)
         assert expected == actual, "\n%s\n\n%s" % (expected, actual)
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     @pytest.mark.parametrize(
         "fixture, pw_indices_dict, expectation",
         (
