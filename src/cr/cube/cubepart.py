@@ -441,7 +441,6 @@ class _Slice(CubePartition):
         The median is calculated using the standard algebra applied to the numeric
         values repeated for each related counts value
         """
-
         if np.all(np.isnan(self._columns_dimension_numeric)):
             return None
         not_a_nan_index = ~np.isnan(self._columns_dimension_numeric)
@@ -462,10 +461,6 @@ class _Slice(CubePartition):
         The median is calculated using the standard algebra applied to the numeric
         values repeated for each related counts value
         """
-
-        def _median(values):
-            return np.median(values) if values.size != 0 else np.nan
-
         if np.all(np.isnan(self._rows_dimension_numeric)):
             return None
         not_a_nan_index = ~np.isnan(self._rows_dimension_numeric)
