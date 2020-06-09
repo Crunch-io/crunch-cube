@@ -55,6 +55,35 @@ class Describe_Slice(object):
         expected = load_python_expression(expectation)
         assert expected == actual, "\n%s\n\n%s" % (expected, actual)
 
+    @pytest.mark.xfail(reason="WIP", strict=True)
+    @pytest.mark.parametrize(
+        "fixture, pw_indices_dict, expectation",
+        (
+            (
+                CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION_WITH_HS,
+                {"alpha": [0.175, 0.025], "only_larger": False},
+                "cat-x-cat-hs-pw-idxs-alt",
+            ),
+            (CR.MR_X_CAT, {"alpha": [0.175, 0.01]}, "mr-x-cat-pw-idxs-alt"),
+            (CR.EDU_FAV5_FAV5, {"alpha": [0.175, 0.01]}, "cat-x-mr-aug-pw-idxs-alt"),
+        ),
+    )
+    def it_provides_pairwise_indices_alt(self, fixture, pw_indices_dict, expectation):
+        """Provides indicies meeting secondary sig-test threshold, when specified."""
+        slice_ = _Slice(
+            Cube(fixture),
+            slice_idx=0,
+            transforms={"pairwise_indices": pw_indices_dict},
+            population=None,
+            mask_size=0,
+        )
+
+        pairwise_indices_alt = slice_.pairwise_indices_alt
+
+        actual = pairwise_indices_alt.tolist()
+        expected = load_python_expression(expectation)
+        assert expected == actual, "\n%s\n\n%s" % (expected, actual)
+
 
 class TestStandardizedResiduals(TestCase):
     """Test cr.cube implementation of column family pairwise comparisons"""
