@@ -103,7 +103,7 @@ def test_cat_x_ca_cat_x_items():
     np.testing.assert_almost_equal(
         slice_.scale_std_err_row, [0.216994, 0.3202223, 0.302742, 0.3055608]
     )
-    np.testing.assert_almost_equal(slice_.scale_median_row, [1, 1, 4, 1])
+    np.testing.assert_almost_equal(slice_.scale_median_row, [1, 1, 2.5, 1])
     assert slice_.scale_median_row_margin == 1
     assert slice_.scale_median_column_margin is None
     assert slice_.scale_std_dev_column is None
@@ -321,7 +321,7 @@ def test_cat_x_cat_with_hs():
         [0.0847993, 0.0533474, 0.0515249, 0.0718528, 0.104389, 0.2488725],
     )
     np.testing.assert_almost_equal(slice_.scale_median_row, [2, 2, 2, 1, 1, 5])
-    np.testing.assert_almost_equal(slice_.scale_median_column, [4, 3, 3, 4, 4])
+    np.testing.assert_almost_equal(slice_.scale_median_column, [4, 3, 3, 3.5, 4])
     assert slice_.scale_median_row_margin == 2
     assert slice_.scale_median_column_margin == 3
 
@@ -344,7 +344,7 @@ def test_cat_x_cat_with_hs():
         [0.0847993, 0.0533474, 0.0515249, 0.0718528, 0.104389, 0.2488725],
     )
     np.testing.assert_almost_equal(slice_.scale_median_row, [2, 2, 2, 1, 1, 5])
-    np.testing.assert_almost_equal(slice_.scale_median_column, [4, 3, 3, 3, 4, 4])
+    np.testing.assert_almost_equal(slice_.scale_median_column, [4, 3, 3, 3, 3.5, 4])
     assert slice_.scale_median_row_margin == 2
     assert slice_.scale_median_column_margin == 3
 
@@ -375,7 +375,7 @@ def test_cat_x_cat_with_hs_on_both_dims():
         [0.0847993, 0.0533474, 0.0515249, 0.0718528, 0.104389, 0.2488725],
     )
     np.testing.assert_almost_equal(slice_.scale_median_row, [2, 2, 2, 1, 1, 5])
-    np.testing.assert_almost_equal(slice_.scale_median_column, [4, 3, 3, 4, 4])
+    np.testing.assert_almost_equal(slice_.scale_median_column, [4, 3, 3, 3.5, 4])
     assert slice_.scale_median_row_margin == 2
     assert slice_.scale_median_column_margin == 3
 
@@ -398,7 +398,7 @@ def test_cat_x_cat_with_hs_on_both_dims():
         [0.0847993, 0.0533474, 0.0515249, 0.0388506, 0.0718528, 0.104389, 0.2488725],
     )
     np.testing.assert_almost_equal(slice_.scale_median_row, [2, 2, 2, 2, 1, 1, 5])
-    np.testing.assert_almost_equal(slice_.scale_median_column, [4, 3, 3, 3, 4, 4])
+    np.testing.assert_almost_equal(slice_.scale_median_column, [4, 3, 3, 3, 3.5, 4])
     assert slice_.scale_median_row_margin == 2
     assert slice_.scale_median_column_margin == 3
 
@@ -516,7 +516,9 @@ def test_cat_x_cat_pruning_and_hs():
         [0.1102738, 0.7064704, 0.4111442, 0.17486, np.nan, 0.4784233],
     )
     np.testing.assert_almost_equal(slice_.scale_median_row, [1, 1, 1, np.nan, 3])
-    np.testing.assert_almost_equal(slice_.scale_median_column, [2, 1, 2, 2, np.nan, 2])
+    np.testing.assert_almost_equal(
+        slice_.scale_median_column, [2, 1, 2, 2, np.nan, np.nan]
+    )
     assert slice_.scale_median_row_margin == 1
     assert slice_.scale_median_column_margin == 2
 
@@ -540,7 +542,7 @@ def test_cat_x_cat_pruning_and_hs():
     )
     np.testing.assert_almost_equal(slice_.scale_median_row, [1, 1, 1, 1, np.nan, 3])
     np.testing.assert_almost_equal(
-        slice_.scale_median_column, [2, 2, 1, 2, 2, np.nan, 2]
+        slice_.scale_median_column, [2, 2, 1, 2, 2, np.nan, np.nan]
     )
     assert slice_.scale_median_row_margin == 1
     assert slice_.scale_median_column_margin == 2
@@ -566,7 +568,7 @@ def test_cat_x_cat_pruning_and_hs():
         [0.1102738, 0.1933713, 0.7064704, 0.4111442, 0.17486, 0.4784233],
     )
     np.testing.assert_almost_equal(slice_.scale_median_row, [1, 1, 1, 1, 3])
-    np.testing.assert_almost_equal(slice_.scale_median_column, [2, 2, 3, 2, 2, 2])
+    np.testing.assert_almost_equal(slice_.scale_median_column, [2, 2, 1, 2, 2, np.nan])
     assert slice_.scale_median_row_margin == 1
     assert slice_.scale_median_column_margin == 2
 
@@ -591,7 +593,7 @@ def test_cat_x_cat_pruning_and_hs():
         [0.1102738, 0.7064704, 0.4111442, 0.17486, 0.4784233],
     )
     np.testing.assert_almost_equal(slice_.scale_median_row, [1, 1, 1, 3])
-    np.testing.assert_almost_equal(slice_.scale_median_column, [2, 3, 2, 2, 2])
+    np.testing.assert_almost_equal(slice_.scale_median_column, [2, 1, 2, 2, np.nan])
     assert slice_.scale_median_row_margin == 1
     assert slice_.scale_median_column_margin == 2
 
@@ -628,8 +630,8 @@ def test_bivariate_cat():
         slice_.scale_std_err_column,
         [0.0558603, 0.0486317, 0.0447584, 0.063111, 0.7698004, 0.1938773],
     )
-    # np.testing.assert_almost_equal(slice_.scale_median_row, [2, 2, 2, 1, 1, 5])
-    # np.testing.assert_almost_equal(slice_.scale_median_column, [4, 3, 3, 3, 4, 4])
+    np.testing.assert_almost_equal(slice_.scale_median_row, [2, 2, 2, 1, 1, 5])
+    np.testing.assert_almost_equal(slice_.scale_median_column, [4, 3, 3, 3, 3.5, 4])
     assert slice_.scale_median_row_margin == 2
     assert slice_.scale_median_column_margin == 3
 
@@ -741,7 +743,7 @@ def test_cat_x_cat_arr_pets_first():
     np.testing.assert_almost_equal(slice_.scale_std_err_column, [0.0774597, 0.0724569])
     np.testing.assert_almost_equal(slice_.scale_median_row, [1, 2])
     np.testing.assert_almost_equal(slice_.scale_median_column, [2, 2])
-    assert slice_.scale_median_row_margin == 2
+    assert slice_.scale_median_row_margin == 1.5
     assert slice_.scale_median_column_margin == 2
 
     slice_ = Cube(CR.FRUIT_X_PETS_ARRAY_PETS_FIRST).partitions[2]

@@ -445,10 +445,10 @@ class _Slice(CubePartition):
             return None
         not_a_nan_index = ~np.isnan(self._columns_dimension_numeric)
         numeric_values = self._columns_dimension_numeric[not_a_nan_index]
-        counts = self.counts[:, not_a_nan_index]
+        counts = self.counts[:, not_a_nan_index].astype("int64")
         scale_median = np.array(
             [
-                np.median(np.repeat(numeric_values, counts[i, 0].astype("int64")))
+                np.median(np.repeat(numeric_values, counts[i, :]))
                 for i in range(counts.shape[0])
             ]
         )
@@ -465,10 +465,10 @@ class _Slice(CubePartition):
             return None
         not_a_nan_index = ~np.isnan(self._rows_dimension_numeric)
         numeric_values = self._rows_dimension_numeric[not_a_nan_index]
-        counts = self.counts[not_a_nan_index, :]
+        counts = self.counts[not_a_nan_index, :].astype("int64")
         scale_median = np.array(
             [
-                np.median(np.repeat(numeric_values, counts[:, i].astype("int64")))
+                np.median(np.repeat(numeric_values, counts[:, i]))
                 for i in range(counts.shape[1])
             ]
         )
@@ -484,9 +484,11 @@ class _Slice(CubePartition):
             columns_margin = columns_margin[0]
         not_a_nan_index = ~np.isnan(self._columns_dimension_numeric)
         numeric_values = self._columns_dimension_numeric[not_a_nan_index]
-        counts = columns_margin[not_a_nan_index]
+        counts = columns_margin[not_a_nan_index].astype("int64")
         unwrapped_num_values = np.repeat(numeric_values, counts)
-        return np.median(unwrapped_num_values)
+        return (
+            np.median(unwrapped_num_values) if unwrapped_num_values.size != 0 else None
+        )
 
     @lazyproperty
     def scale_median_row_margin(self):
@@ -498,9 +500,11 @@ class _Slice(CubePartition):
             rows_margin = rows_margin[:, 0]
         not_a_nan_index = ~np.isnan(self._rows_dimension_numeric)
         numeric_values = self._rows_dimension_numeric[not_a_nan_index]
-        counts = rows_margin[not_a_nan_index]
+        counts = rows_margin[not_a_nan_index].astype("int64")
         unwrapped_num_values = np.repeat(numeric_values, counts)
-        return np.median(unwrapped_num_values)
+        return (
+            np.median(unwrapped_num_values) if unwrapped_num_values.size != 0 else None
+        )
 
     @lazyproperty
     def scale_std_dev_column(self):
