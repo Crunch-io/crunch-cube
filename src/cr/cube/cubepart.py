@@ -436,9 +436,6 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def scale_median_column(self):
-        import ipdb
-
-        ipdb.set_trace()
         """ -> np.int64 ndarray of the columns scale median
 
         The median is calculated using the standard algebra applied to the numeric
@@ -459,9 +456,6 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def scale_median_row(self):
-        import ipdb
-
-        ipdb.set_trace()
         """ -> np.int64 ndarray of the rows scale median
 
         The median is calculated using the standard algebra applied to the numeric
