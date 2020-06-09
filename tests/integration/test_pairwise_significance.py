@@ -96,12 +96,43 @@ class Describe_Slice(object):
         ),
     )
     def it_provides_scale_mean_pairwise_indices(self, fixture, expectation):
-        """Provides indicies meeting secondary sig-test threshold, when specified."""
+        """Provides column-indicies meeting sig-test threshold on column scale means."""
         slice_ = _Slice(
             Cube(fixture), slice_idx=0, transforms={}, population=None, mask_size=0
         )
 
         actual = slice_.scale_mean_pairwise_indices
+
+        expected = load_python_expression(expectation)
+        assert expected == actual, "\n%s\n\n%s" % (expected, actual)
+
+    @pytest.mark.xfail(reason="WIP", strict=True)
+    @pytest.mark.parametrize(
+        "fixture, expectation",
+        (
+            (
+                CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION_WITH_HS,
+                "cat-x-cat-hs-scale-mean-pw-idxs-alt",
+            ),
+            (
+                CR.PAIRWISE_HIROTSU_OCCUPATION_X_ILLNESS,
+                "cat-x-cat-scale-mean-pw-idxs-alt",
+            ),
+            (CR.CAT_X_MR_2, "cat-x-mr-scale-mean-pw-idxs-alt"),
+            (CR.EDU_FAV5_FAV5, "cat-x-mr-aug-scale-mean-pw-idxs-alt"),
+        ),
+    )
+    def it_provides_scale_mean_pairwise_indices_alt(self, fixture, expectation):
+        """Provides col idxs meeting secondary sig-test threshold on scale mean."""
+        slice_ = _Slice(
+            Cube(fixture),
+            slice_idx=0,
+            transforms={"pairwise_indices": {"alpha": [0.01, 0.08]}},
+            population=None,
+            mask_size=0,
+        )
+
+        actual = slice_.scale_mean_pairwise_indices_alt
 
         expected = load_python_expression(expectation)
         assert expected == actual, "\n%s\n\n%s" % (expected, actual)
