@@ -83,6 +83,30 @@ class Describe_Slice(object):
         expected = load_python_expression(expectation)
         assert expected == actual, "\n%s\n\n%s" % (expected, actual)
 
+    @pytest.mark.parametrize(
+        "fixture, expectation",
+        (
+            (
+                CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION_WITH_HS,
+                "cat-x-cat-hs-scale-mean-pw-idxs",
+            ),
+            (CR.PAIRWISE_HIROTSU_OCCUPATION_X_ILLNESS, "cat-x-cat-scale-mean-pw-idxs"),
+            (CR.CAT_X_MR_2, "cat-x-mr-scale-mean-pw-idxs"),
+            (CR.EDU_FAV5_FAV5, "cat-x-mr-aug-scale-mean-pw-idxs"),
+        ),
+    )
+    def it_provides_scale_mean_pairwise_indices(self, fixture, expectation):
+        """Provides indicies meeting secondary sig-test threshold, when specified."""
+        slice_ = _Slice(
+            Cube(fixture), slice_idx=0, transforms={}, population=None, mask_size=0
+        )
+
+        scale_mean_pairwise_indices = slice_.scale_mean_pairwise_indices
+
+        actual = scale_mean_pairwise_indices.tolist()
+        expected = load_python_expression(expectation)
+        assert expected == actual, "\n%s\n\n%s" % (expected, actual)
+
 
 class TestStandardizedResiduals(TestCase):
     """Test cr.cube implementation of column family pairwise comparisons"""
@@ -447,72 +471,3 @@ class TestStandardizedResiduals(TestCase):
             ]
         )
         np.testing.assert_array_equal(pairwise_indices, expected_indices)
-
-    def test_pairwise_significance_scale_means_nps_type(self):
-        slice_ = Cube(SM.FACEBOOK_APPS_X_AGE).partitions[0]
-        scale_mean_pairwise_indices = slice_.scale_mean_pairwise_indices
-
-        np.testing.assert_array_equal(
-            scale_mean_pairwise_indices, np.array([(3,), (2, 3), (3,), ()])
-        )
-
-        transforms = {"pairwise_indices": {"only_larger": False}}
-        slice_ = Cube(SM.FACEBOOK_APPS_X_AGE, transforms=transforms).partitions[0]
-        scale_mean_pairwise_indices = slice_.scale_mean_pairwise_indices
-
-        np.testing.assert_array_equal(
-            scale_mean_pairwise_indices, np.array([(3,), (2, 3), (1, 3), (0, 1, 2)])
-        )
-
-    def test_pairwise_indices_scale_means_with_hs(self):
-        slice_ = Cube(CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION_WITH_HS).partitions[0]
-        scale_mean_pairwise_indices = slice_.scale_mean_pairwise_indices
-
-        assert scale_mean_pairwise_indices.shape == (slice_.counts.shape[1],)
-        np.testing.assert_array_equal(
-            scale_mean_pairwise_indices,
-            np.array(
-                [
-                    (3, 4, 5, 8, 10),
-                    (3, 4, 10),
-                    (3, 4, 5, 8, 10),
-                    (),
-                    (),
-                    (),
-                    (3, 4, 5, 8, 10),
-                    (3, 4, 10),
-                    (),
-                    (10,),
-                    (),
-                ]
-            ),
-        )
-
-        transforms = {
-            "columns_dimension": {"insertions": {}},
-            "rows_dimension": {"insertions": {}},
-        }
-
-        slice_without_hs_ = Cube(
-            CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION_WITH_HS, transforms=transforms
-        ).partitions[0]
-        scale_mean_pairwise_indices = slice_without_hs_.scale_mean_pairwise_indices
-
-        assert scale_mean_pairwise_indices.shape == (slice_.counts.shape[1] - 1,)
-        np.testing.assert_array_equal(
-            scale_mean_pairwise_indices,
-            np.array(
-                [
-                    (3, 4, 7, 9),
-                    (3, 4, 9),
-                    (3, 4, 7, 9),
-                    (),
-                    (),
-                    (3, 4, 7, 9),
-                    (3, 4, 9),
-                    (),
-                    (9,),
-                    (),
-                ]
-            ),
-        )
