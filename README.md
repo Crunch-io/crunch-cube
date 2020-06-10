@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.11.25
+- Expose two-level pairwise-t-test
+
 #### 1.11.24
 - Bug fix for scale_median calculation
 
