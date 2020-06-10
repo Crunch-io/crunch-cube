@@ -87,6 +87,11 @@ class CubePartition(object):
         return len(self._dimensions)
 
     @lazyproperty
+    def population_fraction(self):
+        """Returns the population fraction of the cube"""
+        return self._cube.population_fraction
+
+    @lazyproperty
     def shape(self):
         """Tuple of int vector counts for this partition.
 
@@ -302,11 +307,6 @@ class _Slice(CubePartition):
         )
 
     @lazyproperty
-    def population_fraction(self):
-        """Returns the population fraction of the cube"""
-        return self._cube.population_fraction
-
-    @lazyproperty
     def pvals(self):
         return np.array([row.pvals for row in self._matrix.rows])
 
@@ -436,77 +436,43 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def scale_median_column(self):
-        """ -> np.int64 array of the columns scale median
+        """ -> np.int64 ndarray of the columns scale median
 
-        The median is calculated in a way that assumes that the n point scale represents
-        a continuous random variable rather than n discrete categories.
-        Steps:
-        1. The middle point is calculated by dividing the sum of the counts by 2 if the
-           total counts is odd, for even number of entries, so we would actually take
-           the mean of the values at positions middle and middle + 1
-        2. Identify in which category (our numeric values) this middle point falls
+        The median is calculated using the standard algebra applied to the numeric
+        values repeated for each related counts value
         """
         if np.all(np.isnan(self._columns_dimension_numeric)):
             return None
-
         not_a_nan_index = ~np.isnan(self._columns_dimension_numeric)
         numeric_values = self._columns_dimension_numeric[not_a_nan_index]
-        counts = self.counts[:, not_a_nan_index]
-        total_counts = np.sum(counts, axis=1)
-        # --- sorting counts by numeric values ---
-        sorted_counts = np.array(list(zip(*sorted(zip(numeric_values, counts.T))))[1]).T
-        # --- calc of the middle points considering even and odd case ---
-        middle_points = (
-            total_counts // 2
-            if counts.shape[1] % 2 == 1
-            else ((total_counts // 2) + ((total_counts // 2) + 1)) / 2
+        counts = self.counts[:, not_a_nan_index].astype("int64")
+        scale_median = np.array(
+            [
+                self._median(np.repeat(numeric_values, counts[i, :]))
+                for i in range(counts.shape[0])
+            ]
         )
-        # --- the median indices represent a list of idxs that express where the ---
-        # --- middle point falls ---
-        median_indices = self._compose_median_col_idxs(sorted_counts, middle_points)
-        # --- returns for each column the numeric value corrispondent to the idx ---
-        # --- of the median_indices ---
-        return [
-            np.sort(numeric_values)[i] if not np.isnan(i) else np.nan
-            for i in median_indices
-        ]
+        return scale_median
 
     @lazyproperty
     def scale_median_row(self):
-        """ -> np.int64 array of the rows scale median
+        """ -> np.int64 ndarray of the rows scale median
 
-        The median is calculated in a way that assumes that the n point scale represents
-        a continuous random variable rather than n discrete categories.
-        Steps:
-        1. The middle point is calculated by dividing the sum of the counts by 2 if the
-           total counts is odd, for even number of entries, so we would actually take
-           the mean of the values at positions middle and middle + 1
-        2. Identify in which category (our numeric values) this middle point falls
+        The median is calculated using the standard algebra applied to the numeric
+        values repeated for each related counts value
         """
         if np.all(np.isnan(self._rows_dimension_numeric)):
             return None
-
         not_a_nan_index = ~np.isnan(self._rows_dimension_numeric)
         numeric_values = self._rows_dimension_numeric[not_a_nan_index]
-        counts = self.counts[not_a_nan_index, :]
-        total_counts = np.sum(counts, axis=0)
-        # --- sorting counts by numeric values ---
-        sorted_counts = np.array(list(zip(*sorted(zip(numeric_values, counts))))[1])
-        # --- calc of the middle points considering even and odd case ---
-        middle_points = (
-            total_counts // 2
-            if counts.shape[0] % 2 == 1
-            else ((total_counts // 2) + ((total_counts // 2) + 1)) / 2
+        counts = self.counts[not_a_nan_index, :].astype("int64")
+        scale_median = np.array(
+            [
+                self._median(np.repeat(numeric_values, counts[:, i]))
+                for i in range(counts.shape[1])
+            ]
         )
-        # --- the median indices represent a list of idx that express where the ---
-        # --- middle point falls ---
-        median_indices = self._compose_median_row_idxs(sorted_counts, middle_points)
-        # --- returns for each row the numeric value corrispondent to the idx ---
-        # --- of the median_indices ---
-        return [
-            np.sort(numeric_values)[i] if not np.isnan(i) else np.nan
-            for i in median_indices
-        ]
+        return scale_median
 
     @lazyproperty
     def scale_median_column_margin(self):
@@ -518,16 +484,10 @@ class _Slice(CubePartition):
             columns_margin = columns_margin[0]
         not_a_nan_index = ~np.isnan(self._columns_dimension_numeric)
         numeric_values = self._columns_dimension_numeric[not_a_nan_index]
-        counts = columns_margin[not_a_nan_index]
-        middle_point = (
-            np.sum(counts) // 2
-            if len(counts) % 2 == 1
-            else ((np.sum(counts) // 2) + ((np.sum(counts) // 2) + 1)) / 2
-        )
-        sorted_counts = np.array(list(zip(*sorted(zip(numeric_values, counts))))[1])
-        median_index = np.where(np.cumsum(sorted_counts) > middle_point)[0]
+        counts = columns_margin[not_a_nan_index].astype("int64")
+        unwrapped_num_values = np.repeat(numeric_values, counts)
         return (
-            np.sort(numeric_values)[median_index[0]] if median_index.size != 0 else None
+            np.median(unwrapped_num_values) if unwrapped_num_values.size != 0 else None
         )
 
     @lazyproperty
@@ -540,16 +500,10 @@ class _Slice(CubePartition):
             rows_margin = rows_margin[:, 0]
         not_a_nan_index = ~np.isnan(self._rows_dimension_numeric)
         numeric_values = self._rows_dimension_numeric[not_a_nan_index]
-        counts = rows_margin[not_a_nan_index]
-        middle_point = (
-            np.sum(counts) // 2
-            if len(counts) % 2 == 1
-            else ((np.sum(counts) // 2) + ((np.sum(counts) // 2) + 1)) / 2
-        )
-        sorted_counts = np.array(list(zip(*sorted(zip(numeric_values, counts))))[1])
-        median_index = np.where(np.cumsum(sorted_counts) > middle_point)[0]
+        counts = rows_margin[not_a_nan_index].astype("int64")
+        unwrapped_num_values = np.repeat(numeric_values, counts)
         return (
-            np.sort(numeric_values)[median_index[0]] if median_index.size != 0 else None
+            np.median(unwrapped_num_values) if unwrapped_num_values.size != 0 else None
         )
 
     @lazyproperty
@@ -741,32 +695,6 @@ class _Slice(CubePartition):
             self.counts / self.columns_margin * (1 - self.counts / self.columns_margin)
         )
 
-    def _compose_median_row_idxs(self, sorted_counts, middle_points):
-        """ -> list of idx corresponding to the median values of rows scale"""
-        median_indices = []
-        for idx in range(sorted_counts.shape[1]):
-            idx_array = np.where(
-                np.cumsum(sorted_counts, axis=0)[:, idx] > middle_points[idx]
-            )[0]
-            if idx_array.size != 0:
-                median_indices.append(idx_array[0])
-            else:
-                median_indices.append(np.nan)
-        return median_indices
-
-    def _compose_median_col_idxs(self, sorted_counts, middle_points):
-        """ -> list of idx corresponding to the median values of cols scale"""
-        median_indices = []
-        for idx in range(sorted_counts.shape[0]):
-            idx_array = np.where(
-                np.cumsum(sorted_counts, axis=1)[idx, :] > middle_points[idx]
-            )[0]
-            if idx_array.size != 0:
-                median_indices.append(idx_array[0])
-            else:
-                median_indices.append(np.nan)
-        return median_indices
-
     @lazyproperty
     def _dimensions(self):
         """tuple of (rows_dimension, columns_dimension) Dimension objects."""
@@ -781,6 +709,9 @@ class _Slice(CubePartition):
     def _matrix(self):
         """The TransformedMatrix object for this slice."""
         return TransformedMatrix.matrix(self._cube, self._dimensions, self._slice_idx)
+
+    def _median(self, values):
+        return np.median(values) if values.size != 0 else np.nan
 
     @lazyproperty
     def _rows_dimension(self):
@@ -884,11 +815,6 @@ class _Strand(CubePartition):
         )
 
     @lazyproperty
-    def population_fraction(self):
-        """Returns the population fraction of the cube"""
-        return self._cube.population_fraction
-
-    @lazyproperty
     def row_base(self):
         return np.array([row.base for row in self._stripe.rows])
 
@@ -954,33 +880,15 @@ class _Strand(CubePartition):
     def scale_median(self):
         """ -> np.int64, the median of scales
 
-        The median is calculated in a way that assumes that the n point scale represents
-        a continuous random variable rather than n discrete categories.
-        Steps:
-        1. The middle point is calculated by dividing the sum of the counts by 2 if the
-           total counts is odd, for even number of entries, so you would actually take
-           the mean of the values at positions middle and middle + 1
-        2. Identify in which category (our numeric values) this middle point falls
+        The median is calculated using the standard algebra applied to the numeric
+        values repeated for each related counts value
         """
         if np.all(np.isnan(self._numeric_values)):
             return None
         numeric_values = self._numeric_values[self._numeric_values_mask]
-        counts = self._counts_as_array[self._numeric_values_mask]
-        middle_point = (
-            np.sum(counts) // 2
-            if len(counts) % 2 == 1
-            else ((np.sum(counts) // 2) + ((np.sum(counts) // 2) + 1)) / 2
-        )
-        sorted_counts = np.array(list(zip(*sorted(zip(numeric_values, counts))))[1])
-        # ---the median index contains all the indices where the middle point is lower
-        # ---than the cumsum elements
-        median_index = np.where(np.cumsum(sorted_counts) > middle_point)[0]
-        # ---returns the corresponding numeric value given the first median index---
-        return (
-            np.sort(numeric_values)[median_index[0]]
-            if median_index.size != 0
-            else np.nan
-        )
+        counts = self._counts_as_array[self._numeric_values_mask].astype("int64")
+        unwrapped_numeric_values = np.repeat(numeric_values, counts)
+        return np.median(unwrapped_numeric_values)
 
     @lazyproperty
     def scale_std_dev(self):
