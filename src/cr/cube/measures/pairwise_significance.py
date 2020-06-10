@@ -75,8 +75,7 @@ class PairwiseSignificance(object):
 
 
 class _ColumnPairwiseSignificance(object):
-    """Value object providing matrix of T-score based pairwise-comparison
-    P-values"""
+    """Value object providing matrix of T-score based pairwise-comparison P-values"""
 
     def __init__(self, slice_, col_idx, alpha=0.05, only_larger=True):
         self._slice = slice_
@@ -149,8 +148,7 @@ class _ColumnPairwiseSignificance(object):
 
     @lazyproperty
     def t_stats_correct(self):
-        """It returns the t_statistic for MR variables considering the overlaps
-        """
+        """It returns the t_statistic for MR variables considering the overlaps"""
         diff, se_diff = self._slice.overlaps_tstats
         t_stats = diff[:, self._col_idx, :] / se_diff[:, self._col_idx, :]
         t_stats[:, self._col_idx] = 0
