@@ -347,7 +347,7 @@ class TestStandardizedResiduals(TestCase):
         np.testing.assert_array_equal(pairwise_indices, expected_indices)
 
     def test_cat_x_mr_pairwise_indices_only_larger(self):
-        cube = CrunchCube(CR.CAT_X_MR_HS)
+        cube = CrunchCube(CR.CAT_HS_X_MR)
         expected_indices = np.array(
             [
                 [(1, 2, 3, 4), (2, 3), (), (), (2,)],

@@ -1364,7 +1364,7 @@ def test_cat_x_mr_x_cat_missing_proportions_by_col():
 
 
 def test_cat_by_mr_hs_col_percentage():
-    slice_ = Cube(CR.CAT_X_MR_HS).partitions[0]
+    slice_ = Cube(CR.CAT_HS_X_MR).partitions[0]
     expected = [
         [
             0.44079255048452126,
@@ -1415,7 +1415,7 @@ def test_cat_by_mr_hs_col_percentage():
 
 
 def test_cat_by_mr_hs_row_percentage():
-    slice_ = Cube(CR.CAT_X_MR_HS).partitions[0]
+    slice_ = Cube(CR.CAT_HS_X_MR).partitions[0]
     expected = [
         [
             0.6399160598631669,
@@ -1466,7 +1466,7 @@ def test_cat_by_mr_hs_row_percentage():
 
 
 def test_cat_by_mr_hs_cell_percentage():
-    slice_ = Cube(CR.CAT_X_MR_HS).partitions[0]
+    slice_ = Cube(CR.CAT_HS_X_MR).partitions[0]
     expected = [
         [
             0.07905704201278009,

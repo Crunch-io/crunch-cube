@@ -21,7 +21,7 @@ import numpy as np
 
 from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.min_base_size_mask import MinBaseSizeMask
-from cr.cube.measures.new_pairwise_significance import NewPairwiseSignificance
+from cr.cube.measures.pairwise_significance import PairwiseSignificance
 from cr.cube.matrix import TransformedMatrix
 from cr.cube.scalar import MeansScalar
 from cr.cube.stripe import TransformedStripe
@@ -34,8 +34,9 @@ class CubePartition(object):
     These represent 2, 1, or 0 dimensions of a cube, respectively.
     """
 
-    def __init__(self, cube):
+    def __init__(self, cube, transforms=None):
         self._cube = cube
+        self._transforms_arg = transforms
 
     @classmethod
     def factory(
@@ -115,11 +116,95 @@ class CubePartition(object):
         return self._dimensions[0 if self.ndim < 2 else 1].name
 
     @lazyproperty
+    def _alpha(self):
+        """float confidence-interval threshold for pairwise-t (sig) tests."""
+        return self._alpha_values[0]
+
+    @lazyproperty
+    def _alpha_alt(self):
+        """Alternate float confidence-interval threshold or None.
+
+        This is an optional secondary confidence interval allowing two-level
+        significance testing. Value is None if no alternate alpha was specified by user.
+        """
+        return self._alpha_values[1]
+
+    @lazyproperty
+    def _alpha_values(self):
+        """Pair (tuple) of confidence-interval thresholds to be used for t-tests.
+
+        The second value is optional and is None when no secondary alpha value was
+        defined for the cube-set.
+        """
+        value = self._transforms_dict.get("pairwise_indices", {}).get("alpha")
+
+        # --- handle omitted, None, [], (), {}, "", 0, and 0.0 cases ---
+        if not value:
+            return (0.05, None)
+
+        # --- reject invalid types ---
+        if not isinstance(value, (float, list, tuple)):
+            raise TypeError(
+                "transforms.pairwise_indices.alpha, when defined, must be a list of 1 "
+                "or 2 float values between 0.0 and 1.0 exclusive. Got %r" % value
+            )
+
+        # --- legacy float "by-itself" case ---
+        if isinstance(value, float):
+            if not 0.0 < value < 1.0:
+                raise ValueError(
+                    "alpha value, when provided, must be between 0.0 and 1.0 "
+                    "exclusive. Got %r" % value
+                )
+            return (value, None)
+
+        # --- sequence case ---
+        for x in value[:2]:
+            if not isinstance(x, float) or not 0.0 < x < 1.0:
+                raise ValueError(
+                    "transforms.pairwise_indices.alpha must be a list of 1 or 2 float "
+                    "values between 0.0 and 1.0 exclusive. Got %r" % value
+                )
+
+        if len(value) == 1:
+            return (value[0], None)
+
+        return tuple(sorted(value[:2]))
+
+    @lazyproperty
     def _dimensions(self):
         """tuple of Dimension object for each dimension in cube-partition."""
         raise NotImplementedError(
             "must be implemented by each subclass"
         )  # pragma: no cover
+
+    @lazyproperty
+    def _only_larger(self):
+        """True if only the larger of reciprocal pairwise-t values should appear.
+
+        In general, pairwise-t tests are reciprocal. That is, if A is significant with
+        respect to B, then B is significant with respect to A. Having a letter in both
+        columns can produce a cluttered appearance. When this flag is set by the user,
+        only the cell in the reciprocal pair having the largest value gets a letter.
+        Defaults to True unless explicitly set False.
+        """
+        return (
+            False
+            if self._transforms_dict.get("pairwise_indices", {}).get(
+                "only_larger", True
+            )
+            is False
+            else True
+        )
+
+    @lazyproperty
+    def _transforms_dict(self):
+        """dict holding transforms for this partition, provided as `transforms` arg.
+
+        This value is an empty dict (`{}`) when no transforms were specified on
+        construction.
+        """
+        return {} if self._transforms_arg is None else self._transforms_arg
 
 
 class _Slice(CubePartition):
@@ -131,9 +216,8 @@ class _Slice(CubePartition):
     """
 
     def __init__(self, cube, slice_idx, transforms, population, mask_size):
-        super(_Slice, self).__init__(cube)
+        super(_Slice, self).__init__(cube, transforms)
         self._slice_idx = slice_idx
-        self._transforms_arg = transforms
         self._population = population
         self._mask_size = mask_size
 
@@ -279,13 +363,37 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def pairwise_indices(self):
-        alpha = self._transforms_dict.get("pairwise_indices", {}).get("alpha", 0.05)
-        only_larger = self._transforms_dict.get("pairwise_indices", {}).get(
-            "only_larger", True
+        """2D ndarray of tuple of int column-idxs meeting pairwise-t threshold.
+
+        Like::
+
+            [
+               [(1, 3, 4), (), (0,), (), ()],
+               [(2,), (1, 2), (), (), (0, 3)],
+               [(), (), (), (), ()],
+            ]
+
+        Has the same shape as `.counts`. Each int represents the offset of another
+        column in the same row with a confidence interval meeting the threshold defined
+        for this analysis.
+        """
+        return PairwiseSignificance.pairwise_indices(
+            self, self._alpha, self._only_larger
         )
-        return NewPairwiseSignificance(
-            self, alpha=alpha, only_larger=only_larger
-        ).pairwise_indices
+
+    @lazyproperty
+    def pairwise_indices_alt(self):
+        """2D ndarray of tuple of int column-idxs meeting alternate threshold.
+
+        This value is None if no alternate threshold has been defined.
+        """
+        return (
+            None
+            if self._alpha_alt is None
+            else PairwiseSignificance.pairwise_indices(
+                self, self._alpha_alt, self._only_larger
+            )
+        )
 
     @lazyproperty
     def pairwise_significance_tests(self):
@@ -296,7 +404,7 @@ class _Slice(CubePartition):
         probability values and statistical scores).
         """
         return tuple(
-            NewPairwiseSignificance(self).values[column_idx]
+            PairwiseSignificance(self).values[column_idx]
             for column_idx in range(len(self._matrix.columns))
         )
 
@@ -375,13 +483,33 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def scale_mean_pairwise_indices(self):
-        alpha = self._transforms_dict.get("pairwise_indices", {}).get("alpha", 0.05)
-        only_larger = self._transforms_dict.get("pairwise_indices", {}).get(
-            "only_larger", True
+        """Sequence of column-idx tuples indicating pairwise-t result of scale-means.
+
+        The calculation is based on the mean of the scale (category numeric-values) for
+        each column. The length of the array is that of the columns-dimension.
+        """
+        return tuple(
+            PairwiseSignificance.scale_mean_pairwise_indices(
+                self, self._alpha, self._only_larger
+            ).tolist()
         )
-        return NewPairwiseSignificance(
-            self, alpha=alpha, only_larger=only_larger
-        ).scale_mean_pairwise_indices
+
+    @lazyproperty
+    def scale_mean_pairwise_indices_alt(self):
+        """Sequence of column-idx tuples indicating pairwise-t result of scale-means.
+
+        Same calculation as `.scale_mean_pairwise_indices` using the `._alpha_alt`
+        value. None when no secondary alpha value was specified. The length of the
+        sequence is that of the columns-dimension.
+        """
+        if self._alpha_alt is None:
+            return None
+
+        return tuple(
+            PairwiseSignificance.scale_mean_pairwise_indices(
+                self, self._alpha_alt, self._only_larger
+            ).tolist()
+        )
 
     @lazyproperty
     def scale_means_column(self):
@@ -540,12 +668,8 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def summary_pairwise_indices(self):
-        alpha = self._transforms_dict.get("pairwise_indices", {}).get("alpha", 0.05)
-        only_larger = self._transforms_dict.get("pairwise_indices", {}).get(
-            "only_larger", True
-        )
-        return NewPairwiseSignificance(
-            self, alpha=alpha, only_larger=only_larger
+        return PairwiseSignificance(
+            self, self._alpha, self._only_larger
         ).summary_pairwise_indices
 
     @lazyproperty
@@ -735,16 +859,6 @@ class _Slice(CubePartition):
             self._transforms_dict.get("columns_dimension", {}),
         )
 
-    @lazyproperty
-    def _transforms_dict(self):
-        """dict containing all transforms for this slice, provided as `transforms` arg.
-
-
-        This value is an empty dict (`{}`) when no transforms were specified on
-        construction.
-        """
-        return self._transforms_arg if self._transforms_arg is not None else {}
-
 
 class _Strand(CubePartition):
     """1D cube-partition.
@@ -754,8 +868,7 @@ class _Strand(CubePartition):
     """
 
     def __init__(self, cube, transforms, population, ca_as_0th, slice_idx, mask_size):
-        super(_Strand, self).__init__(cube)
-        self._transforms_arg = transforms
+        super(_Strand, self).__init__(cube, transforms)
         self._population = population
         self._ca_as_0th = ca_as_0th
         self._slice_idx = slice_idx
@@ -1041,8 +1154,7 @@ class _Strand(CubePartition):
     @lazyproperty
     def _row_transforms_dict(self):
         """Transforms dict for the single (rows) dimension of this strand."""
-        transforms_dict = {} if self._transforms_arg is None else self._transforms_arg
-        return transforms_dict.get("rows_dimension", {})
+        return self._transforms_dict.get("rows_dimension", {})
 
     @lazyproperty
     def _stripe(self):

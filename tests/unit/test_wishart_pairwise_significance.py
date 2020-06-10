@@ -5,7 +5,7 @@
 import pytest
 import numpy as np
 
-from cr.cube.measures.pairwise_significance import (
+from cr.cube.measures.old_pairwise_significance import (
     _ColumnPairwiseSignificance,
     PairwiseSignificance,
 )

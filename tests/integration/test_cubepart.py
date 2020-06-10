@@ -763,7 +763,7 @@ class Describe_Slice(object):
         np.testing.assert_almost_equal(slice_.column_proportions, expected)
 
     def it_calculates_cat_x_mr_row_proportions(self):
-        slice_ = Cube(CR.CAT_X_MR_HS).partitions[0]
+        slice_ = Cube(CR.CAT_HS_X_MR).partitions[0]
         expected = [
             [0.63991606, 0.57106291, 0.23101896, 0.6728815, 0.78206694],
             [0.18579712, 0.30796582, 0.47698573, 0.6856928, 0.83094212],
@@ -777,7 +777,7 @@ class Describe_Slice(object):
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
     def it_calculates_cat_x_mr_column_proportions(self):
-        slice_ = Cube(CR.CAT_X_MR_HS).partitions[0]
+        slice_ = Cube(CR.CAT_HS_X_MR).partitions[0]
         expected = [
             [0.44079255, 0.12706997, 0.02245085, 0.03842827, 0.06423004],
             [0.1927531, 0.17758354, 0.15543673, 0.11799739, 0.19460845],
@@ -1112,7 +1112,7 @@ class Describe_Slice(object):
         np.testing.assert_almost_equal(slice_.pvals, expected_pvals)
 
     def it_calculates_cat_x_mr_various_measures(self):
-        slice_ = Cube(CR.CAT_X_MR_HS).partitions[0]
+        slice_ = Cube(CR.CAT_HS_X_MR).partitions[0]
         expected_zscore = [
             [5.98561407, 2.06703905, -1.98375582, -1.52909314, -0.23349936],
             [0.10667037, -0.40052278, -0.4294405, -2.51725298, 0.84630085],
