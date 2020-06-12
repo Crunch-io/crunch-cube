@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.11.26
+- Fix `pairwise_indices()` array collapse when all values empty
+
 #### 1.11.25
 - Expose two-level pairwise-t-test
 
