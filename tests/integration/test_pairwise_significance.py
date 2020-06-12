@@ -49,9 +49,8 @@ class Describe_Slice(object):
             mask_size=0,
         )
 
-        pairwise_indices = slice_.pairwise_indices
+        actual = slice_.pairwise_indices
 
-        actual = pairwise_indices.tolist()
         expected = load_python_expression(expectation)
         assert expected == actual, "\n%s\n\n%s" % (expected, actual)
 
@@ -77,9 +76,8 @@ class Describe_Slice(object):
             mask_size=0,
         )
 
-        pairwise_indices_alt = slice_.pairwise_indices_alt
+        actual = slice_.pairwise_indices_alt
 
-        actual = pairwise_indices_alt.tolist()
         expected = load_python_expression(expectation)
         assert expected == actual, "\n%s\n\n%s" % (expected, actual)
 
