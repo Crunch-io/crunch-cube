@@ -66,7 +66,8 @@ class PairwiseSignificance(object):
     @lazyproperty
     def _pairwise_indices(self):
         """2D ndarray containing tuples of pairwise indices."""
-        return np.array([sig.pairwise_indices for sig in self.values]).T
+        A = np.array([sig.pairwise_indices for sig in self.values]).T
+        return tuple(tuple(cell for cell in row) for row in A)
 
     @lazyproperty
     def _scale_mean_pairwise_indices(self):
@@ -96,7 +97,11 @@ class _ColumnPairwiseSignificance(object):
         significance = self.p_vals < self._alpha
         if self._only_larger:
             significance = np.logical_and(self.t_stats < 0, significance)
-        return [tuple(np.where(sig_row)[0]) for sig_row in significance]
+        # --- the overall array is collapsed into an empty list in a later step if we
+        # --- don't explicitly specify its shape and type here.
+        A = np.empty((len(significance),), dtype=object)
+        A[:] = [tuple(np.where(sig_row)[0]) for sig_row in significance]
+        return A
 
     @lazyproperty
     def scale_mean_pairwise_indices(self):
