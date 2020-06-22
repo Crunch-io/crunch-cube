@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.11.27
+- Standard deviation and standard error for `Strand`
+
 #### 1.11.26
 - Fix `pairwise_indices()` array collapse when all values empty
 
