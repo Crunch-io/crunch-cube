@@ -1031,6 +1031,16 @@ class _Strand(CubePartition):
         return (self.row_count,)
 
     @lazyproperty
+    def standard_deviation(self):
+        """ -> np.ndarray, percentages standard deviation"""
+        return np.sqrt(self._variance)
+
+    @lazyproperty
+    def standard_error(self):
+        """ -> np.ndarray, percentages standard error"""
+        return np.sqrt(self._variance / self.rows_margin)
+
+    @lazyproperty
     def table_base(self):
         """1D, single-element ndarray (like [3770])."""
         # For MR strands, table base is also a strand, since subvars never collapse.
@@ -1060,7 +1070,6 @@ class _Strand(CubePartition):
             return np.array([row.table_margin for row in self._stripe.rows])
 
         return self._stripe.table_margin_unpruned
-        # return self._stripe.table_margin
 
     @lazyproperty
     def table_margin_unpruned(self):
@@ -1166,6 +1175,14 @@ class _Strand(CubePartition):
     @lazyproperty
     def _table_proportions_as_array(self):
         return np.array([row.table_proportions for row in self._stripe.rows])
+
+    @lazyproperty
+    def _variance(self):
+        """Returns the variance for cell percentages
+        `variance = p * (1-p)`
+        """
+        p = self._table_proportions_as_array
+        return p * (1 - p)
 
 
 class _Nub(CubePartition):

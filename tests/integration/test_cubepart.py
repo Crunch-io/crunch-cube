@@ -1451,6 +1451,38 @@ class Describe_Strand(object):
         )
         assert strand.title == "Untitled"
 
+    def it_provides_std_dev_err_univ_mr_with_hs(self):
+        strand = Cube(CR.UNIV_MR_WITH_HS["slides"][0]["cube"]).partitions[0]
+
+        np.testing.assert_almost_equal(
+            strand.standard_deviation,
+            [
+                0.46426724,
+                0.3584419,
+                0.2351762,
+                0.32431855,
+                0.2891897,
+                0.24800318,
+                0.15104855,
+                0.49700725,
+                0.14466968,
+            ],
+        )
+        np.testing.assert_almost_equal(
+            strand.standard_error,
+            [
+                0.00453318,
+                0.00504326,
+                0.00531142,
+                0.00513733,
+                0.00521646,
+                0.0052914,
+                0.00541038,
+                0.00407718,
+                0.00541584,
+            ],
+        )
+
     def it_places_insertions_on_a_reordered_dimension_in_the_right_position(self):
         """Subtotal anchors follow re-ordered rows.
 
