@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.11.28
+- Fix collapsed `scale-mean-pairwise-indices`
+
 #### 1.11.27
 - Standard deviation and standard error for `Strand`
 
