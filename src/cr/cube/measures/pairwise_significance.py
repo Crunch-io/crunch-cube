@@ -71,8 +71,8 @@ class PairwiseSignificance(object):
 
     @lazyproperty
     def _scale_mean_pairwise_indices(self):
-        """ndarray containing tuples of pairwise indices."""
-        return np.array([sig.scale_mean_pairwise_indices for sig in self.values]).T
+        """Sequence of pairwise indices tuples like `((), (0, 3), (0,), (2,))`."""
+        return tuple(sig.scale_mean_pairwise_indices for sig in self.values)
 
 
 class _ColumnPairwiseSignificance(object):
