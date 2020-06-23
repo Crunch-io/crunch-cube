@@ -499,7 +499,7 @@ class TestCrunchCubeAs_Slice(object):
         np.testing.assert_almost_equal(
             strand.standard_deviation, [0.47140452, 0.47140452]
         )
-        np.testing.assert_almost_equal(strand.standard_error, [0.1490712, 0.21081851])
+        np.testing.assert_almost_equal(strand.standard_error, [0.1217161, 0.1217161])
 
     def test_std_dev_err_numeric(self):
         strand = Cube(CR.VOTER_REGISTRATION).partitions[0]
@@ -507,7 +507,7 @@ class TestCrunchCubeAs_Slice(object):
             strand.standard_deviation, [0.31902194, 0.30655342, 0.09949874]
         )
         np.testing.assert_almost_equal(
-            strand.standard_error, [0.01072381, 0.02991655, 0.03146427]
+            strand.standard_error, [0.0100884, 0.0096941, 0.0031464]
         )
 
     def test_std_dev_err_datetime(self):
@@ -516,7 +516,7 @@ class TestCrunchCubeAs_Slice(object):
             strand.standard_deviation, [0.4330127, 0.4330127, 0.4330127, 0.4330127]
         )
         np.testing.assert_almost_equal(
-            strand.standard_error, [0.4330127, 0.4330127, 0.4330127, 0.4330127]
+            strand.standard_error, [0.2165064, 0.2165064, 0.2165064, 0.2165064]
         )
 
     def test_std_dev_err_text(self):
@@ -527,7 +527,7 @@ class TestCrunchCubeAs_Slice(object):
         )
         np.testing.assert_almost_equal(
             strand.standard_error,
-            [0.372678, 0.372678, 0.372678, 0.372678, 0.372678, 0.372678],
+            [0.1521452, 0.1521452, 0.1521452, 0.1521452, 0.1521452, 0.1521452],
         )
 
     def test_proportions_cat_x_cat_axis_none(self):

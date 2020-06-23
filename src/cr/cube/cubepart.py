@@ -1034,7 +1034,7 @@ class _Strand(CubePartition):
     @lazyproperty
     def standard_error(self):
         """ -> np.ndarray, percentages standard error"""
-        return np.sqrt(self._variance / self.rows_margin)
+        return np.sqrt(self._variance / np.sum(self.rows_margin))
 
     @lazyproperty
     def table_base(self):
