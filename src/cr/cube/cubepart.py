@@ -488,10 +488,8 @@ class _Slice(CubePartition):
         The calculation is based on the mean of the scale (category numeric-values) for
         each column. The length of the array is that of the columns-dimension.
         """
-        return tuple(
-            PairwiseSignificance.scale_mean_pairwise_indices(
-                self, self._alpha, self._only_larger
-            ).tolist()
+        return PairwiseSignificance.scale_mean_pairwise_indices(
+            self, self._alpha, self._only_larger
         )
 
     @lazyproperty
@@ -505,10 +503,8 @@ class _Slice(CubePartition):
         if self._alpha_alt is None:
             return None
 
-        return tuple(
-            PairwiseSignificance.scale_mean_pairwise_indices(
-                self, self._alpha_alt, self._only_larger
-            ).tolist()
+        return PairwiseSignificance.scale_mean_pairwise_indices(
+            self, self._alpha_alt, self._only_larger
         )
 
     @lazyproperty

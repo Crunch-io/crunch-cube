@@ -270,8 +270,10 @@ class Describe_Slice(object):
     def it_provides_the_secondary_scale_mean_pairwise_indices(
         self, _alpha_alt_prop_, _only_larger_prop_, PairwiseSignificance_
     ):
-        PairwiseSignificance_.scale_mean_pairwise_indices.return_value = np.array(
-            [(2,), (0,), ()]
+        PairwiseSignificance_.scale_mean_pairwise_indices.return_value = (
+            (2,),
+            (0,),
+            (),
         )
         _alpha_alt_prop_.return_value = 0.42
         _only_larger_prop_.return_value = True
