@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.11.30
+- Fix `standard_error` calculation for MR types 
+
 #### 1.11.29
 - Fix `standard_error` denominator for `Strand` 
 
