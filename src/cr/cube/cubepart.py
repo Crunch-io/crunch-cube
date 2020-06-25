@@ -1035,7 +1035,7 @@ class _Strand(CubePartition):
     def standard_error(self):
         """ -> np.ndarray, percentages standard error"""
         if self.dimension_types[0] == DT.MR:
-            return np.sqrt(self._variance / self.rows_margin)
+            return np.sqrt(self._variance / self.bases)
         return np.sqrt(self._variance / np.sum(self.rows_margin))
 
     @lazyproperty
