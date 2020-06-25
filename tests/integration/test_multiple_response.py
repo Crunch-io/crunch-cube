@@ -33,9 +33,7 @@ def test_std_dev_err_simple_mr():
     np.testing.assert_almost_equal(
         strand.standard_deviation, [0.4898979, 0.4714045, 0.0]
     )
-    np.testing.assert_almost_equal(
-        strand.standard_error, [0.2828427, 0.2357023, np.nan]
-    )
+    np.testing.assert_almost_equal(strand.standard_error, [0.219089, 0.1924501, 0.0])
 
 
 def test_1D_mr_with_means():
