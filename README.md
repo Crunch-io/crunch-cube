@@ -112,6 +112,10 @@ The detailed description can be found
 
 ## Changes
 
+
+#### 1.11.31
+- Use bases instead of margin for MR `standard_error` calculation
+
 #### 1.11.30
 - Fix `standard_error` calculation for MR types 
 
