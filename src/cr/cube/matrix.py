@@ -41,7 +41,7 @@ class TransformedMatrix(object):
     def overlaps_tstats(self):
         return (
             self._unordered_matrix.overlaps_tstats
-            if self._unordered_matrix._is_cat_x_mr_x_itself
+            if self._unordered_matrix.is_augmented
             else None
         )
 
@@ -258,7 +258,7 @@ class _BaseBaseMatrix(object):
         base_counts = cube.base_counts
         counts_with_missings = cube.counts_with_missings
         dimension_types = cube.dimension_types[-2:]
-        if cube.dimension_types == (DT.CAT, DT.MR, DT.MR) and cube.is_mr_by_itself:
+        if cube.is_mr_by_itself:
 
             overlap_tstats = calculate_overlap_tstats(
                 _MrXMrMatrix, dimensions, counts, base_counts, counts_with_missings
@@ -269,13 +269,18 @@ class _BaseBaseMatrix(object):
             counts = np.sum(counts[:, :, :, 0], axis=3)
             base_counts = np.sum(base_counts[:, :, :, 0], axis=3)
             counts_with_missings = np.sum(counts_with_missings[:, :, :, 0], axis=3)
+            if cube.dimension_types[0] == DT.MR:
+                return _MrXMrMatrix(
+                    dimensions,
+                    counts,
+                    base_counts,
+                    counts_with_missings,
+                    overlap_tstats,
+                )
             return _CatXMrMatrix(
-                dimensions,
-                counts,
-                base_counts,
-                counts_with_missings,
-                overlaps=overlap_tstats,
+                dimensions, counts, base_counts, counts_with_missings, overlap_tstats
             )
+
         # For cubes with means, create one of the means-matrix types
         if cube.has_means:
             if cube.ndim == 3:
@@ -731,8 +736,12 @@ class _CatXMrMatrix(_MatrixWithMR):
         )
 
     @lazyproperty
+    def is_augmented(self):
+        return True if self._overlaps is not None else False
+
+    @lazyproperty
     def overlaps_tstats(self):
-        return self._overlaps if self._is_cat_x_mr_x_itself else None
+        return self._overlaps if self.is_augmented else None
 
     @lazyproperty
     def rows(self):
@@ -792,10 +801,6 @@ class _CatXMrMatrix(_MatrixWithMR):
             self._column_elements,
             self.table_margin,
         )
-
-    @lazyproperty
-    def _is_cat_x_mr_x_itself(self):
-        return True if self._overlaps is not None else False
 
     @lazyproperty
     def _table_std_dev(self):
@@ -862,12 +867,28 @@ class _MrXMrMatrix(_MatrixWithMR):
     Needs to properly index both rows and columns (selected/not-selected).
     """
 
+    def __init__(
+        self, dimensions, counts, base_counts, counts_with_missings, overlaps=None
+    ):
+        super(_MrXMrMatrix, self).__init__(
+            dimensions, counts, base_counts, counts_with_missings
+        )
+        self._overlaps = overlaps
+
     @lazyproperty
     def columns(self):
         return tuple(
             _MultipleResponseVector(counts, base_counts, element, table_margin)
             for counts, base_counts, element, table_margin in self._column_generator
         )
+
+    @lazyproperty
+    def is_augmented(self):
+        return True if self._overlaps is not None else False
+
+    @lazyproperty
+    def overlaps_tstats(self):
+        return self._overlaps if self.is_augmented else None
 
     @lazyproperty
     def rows(self):
