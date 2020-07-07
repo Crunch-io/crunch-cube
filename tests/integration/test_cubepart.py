@@ -1,5 +1,9 @@
 # encoding: utf-8
 
+"""Integration-test suite for `cr.cube.cubepart` module."""
+
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import numpy as np
 import pytest
 
@@ -184,6 +188,52 @@ class Describe_Slice(object):
             ],
         )
 
+    def it_ignores_hidden_subtotals(self):
+        """A subtotal with `"hide": True` does not appear.
+
+        This behavior is added in the "interim", insertion-has-no-id state to allow
+        display of a global (lives-on-variable) insertion to be suppressed without
+        actually deleting it, which would require unnatural acts to restore it later if
+        wanted again.
+        """
+        transforms = {
+            "rows_dimension": {
+                "insertions": [
+                    {
+                        "anchor": "top",
+                        "args": [1, 2],
+                        "function": "subtotal",
+                        "hide": True,
+                        "name": "Apple+Banana",
+                    }
+                ]
+            },
+            "columns_dimension": {
+                "insertions": [
+                    {
+                        "anchor": 4,
+                        "args": [1, 4],
+                        "function": "subtotal",
+                        "hide": True,
+                        "name": "Asparagus+Daikon",
+                    }
+                ]
+            },
+        }
+        slice_ = _Slice(Cube(CR.CAT_X_CAT_4X4), 0, transforms, None, 0)
+
+        assert slice_.row_labels == ("Apple", "Banana", "Cherry", "Date")
+        assert slice_.column_labels == (
+            "Asparagus",
+            "Broccoli",
+            "Cauliflower",
+            "Daikon",
+        )
+        np.testing.assert_equal(
+            slice_.counts,
+            [[14, 14, 13, 16], [22, 14, 19, 19], [14, 16, 19, 18], [17, 12, 28, 11]],
+        )
+
     def it_places_insertions_on_a_reordered_dimension_in_the_right_position(self):
         """Subtotal anchors follow re-ordered rows.
 
@@ -241,7 +291,6 @@ class Describe_Slice(object):
         }
         slice_ = Cube(CR.CAT_X_CAT_4X4, transforms=transforms).partitions[0]
 
-        print("slice_.row_labels == %s" % (slice_.row_labels,))
         assert slice_.row_labels == (
             "Apple+Banana",
             "Banana",
@@ -260,7 +309,6 @@ class Describe_Slice(object):
             "Asparagus",
             "Cauliflower+Daikon",
         )
-        print("slice_.counts == \n%s" % (slice_.counts,))
         np.testing.assert_equal(
             slice_.counts,
             [

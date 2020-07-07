@@ -845,6 +845,10 @@ class _Subtotals(Sequence):
             if insertion_dict.get("function") != "subtotal":
                 continue
 
+            # ---skip any hidden insertions---
+            if insertion_dict.get("hide") is True:
+                continue
+
             # ---skip any malformed subtotal-dicts---
             if not {"anchor", "args", "name"}.issubset(insertion_dict.keys()):
                 continue
