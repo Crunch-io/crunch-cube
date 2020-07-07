@@ -112,6 +112,8 @@ The detailed description can be found
 
 ## Changes
 
+#### 1.11.32
+- Handle hidden option for insertions
 
 #### 1.11.31
 - Use bases instead of margin for MR `standard_error` calculation
