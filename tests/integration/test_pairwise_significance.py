@@ -549,6 +549,32 @@ class TestStandardizedResiduals(TestCase):
             actual.p_vals, [[1.0, 0.30036831, 0.04105959], [1.0, 0.25537821, 0.0]]
         )
 
+    def test_mr_x_mr_pairwise_compare_columns(self):
+        slice_ = Cube(CR.MR_X_MR_2).partitions[0]
+        actual = slice_.pairwise_significance_tests[1]
+
+        assert slice_.cube_is_mr_by_itself is False
+        np.testing.assert_array_almost_equal(
+            actual.t_stats,
+            [
+                [-0.80066287, 0.0, -2.22179624],
+                [-0.60726974, 0.0, -2.1554303],
+                [1.203117, 0.0, 0.14490412],
+                [1.59774062, 0.0, 0.43050695],
+                [-1.71054946, 0.0, 1.53817055],
+            ],
+        )
+        np.testing.assert_array_almost_equal(
+            actual.p_vals,
+            [
+                [0.42416402, 1.0, 0.02645888],
+                [0.54427888, 1.0, 0.03130077],
+                [0.23018433, 1.0, 0.88480775],
+                [0.11149176, 1.0, 0.66689419],
+                [0.08853052, 1.0, 0.12423633],
+            ],
+        )
+
     def test_mr_x_mr_itself_pairwise_compare_columns(self):
         slice_ = Cube(CR.MR_X_MR_ITSELF).partitions[0]
         actual = slice_.pairwise_significance_tests[1]
