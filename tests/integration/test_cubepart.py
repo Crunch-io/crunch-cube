@@ -612,7 +612,12 @@ class Describe_Slice(object):
 
     @pytest.mark.parametrize(
         "fixture, table_name, expected",
-        [(CR.EDU_FAV5_FAV5, "Education", True), (CR.AGE_FAVMR, None, False)],
+        [
+            (CR.EDU_FAV5_FAV5, "Education", True),
+            (CR.CAT_HS_X_MR_ITSELF, "Age (4 category)", True),
+            (CR.MR_X_MR_ITSELF, "Military Status", True),
+            (CR.AGE_FAVMR, None, False),
+        ],
     )
     def it_knows_when_cube_is_mr_by_itself(self, fixture, table_name, expected):
         cube = Cube(fixture)

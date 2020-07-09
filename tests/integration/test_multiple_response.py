@@ -893,6 +893,19 @@ def test_mr_x_num_with_means_pruned():
     np.testing.assert_almost_equal(slice_.counts, expected)
 
 
+def test_mr_x_mr_itself_zscore():
+    slice_ = Cube(CR.MR_X_MR_ITSELF).partitions[0]
+    expected = [
+        [-2.09809816e-01, -2.47663660e-01, 0.00000000e00],
+        [2.79428953e-01, 1.54988917e-01, 0.00000000e00],
+        [-2.15682422e-01, -6.37644486e-02, -3.01876861e-15],
+        [3.68523425e-01, 5.62052405e-01, 7.96003449e-15],
+        [-1.87152853e-01, -3.78529911e-01, 0.00000000e00],
+    ]
+
+    np.testing.assert_almost_equal(slice_.zscore, expected)
+
+
 def test_mr_x_num_with_means_not_pruned():
     slice_ = Cube(CR.BBC_NEWS).partitions[0]
     expected = [

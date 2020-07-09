@@ -1,0 +1,678 @@
+{
+  "element": "shoji:view",
+  "self": "https://alpha.crunch.io/api/datasets/387a3d0d0c0d40068431b157ec3d21fe/cube/?query=%7B%22dimensions%22:%5B%7B%22function%22:%22dimension%22,%22args%22:%5B%7B%22function%22:%22as_selected%22,%22args%22:%5B%7B%22variable%22:%22https:%2F%2Falpha.crunch.io%2Fapi%2Fdatasets%2F387a3d0d0c0d40068431b157ec3d21fe%2Fvariables%2F000865%2F%22%7D%5D%7D,%7B%22value%22:%22subvariables%22%7D%5D%7D,%7B%22function%22:%22as_selected%22,%22args%22:%5B%7B%22variable%22:%22https:%2F%2Falpha.crunch.io%2Fapi%2Fdatasets%2F387a3d0d0c0d40068431b157ec3d21fe%2Fvariables%2F000865%2F%22%7D%5D%7D,%7B%22function%22:%22dimension%22,%22args%22:%5B%7B%22function%22:%22as_selected%22,%22args%22:%5B%7B%22variable%22:%22https:%2F%2Falpha.crunch.io%2Fapi%2Fdatasets%2F387a3d0d0c0d40068431b157ec3d21fe%2Fvariables%2F000221%2F%22%7D%5D%7D,%7B%22value%22:%22subvariables%22%7D%5D%7D,%7B%22function%22:%22as_selected%22,%22args%22:%5B%7B%22variable%22:%22https:%2F%2Falpha.crunch.io%2Fapi%2Fdatasets%2F387a3d0d0c0d40068431b157ec3d21fe%2Fvariables%2F000221%2F%22%7D%5D%7D%5D,%22measures%22:%7B%22count%22:%7B%22function%22:%22cube_count%22,%22args%22:%5B%5D%7D%7D,%22weight%22:%22https:%2F%2Falpha.crunch.io%2Fapi%2Fdatasets%2F387a3d0d0c0d40068431b157ec3d21fe%2Fvariables%2F98d1d04f0be3416db8016d654b11973b%2F%22%7D",
+  "value": {
+    "query": {
+      "measures": {
+        "count": {
+          "function": "cube_count",
+          "args": []
+        }
+      },
+      "dimensions": [
+        {
+          "function": "dimension",
+          "args": [
+            {
+              "function": "as_selected",
+              "args": [
+                {
+                  "variable": "https://alpha.crunch.io/api/datasets/387a3d0d0c0d40068431b157ec3d21fe/variables/000865/"
+                }
+              ]
+            },
+            {
+              "value": "subvariables"
+            }
+          ]
+        },
+        {
+          "function": "as_selected",
+          "args": [
+            {
+              "variable": "https://alpha.crunch.io/api/datasets/387a3d0d0c0d40068431b157ec3d21fe/variables/000865/"
+            }
+          ]
+        },
+        {
+          "function": "dimension",
+          "args": [
+            {
+              "function": "as_selected",
+              "args": [
+                {
+                  "variable": "https://alpha.crunch.io/api/datasets/387a3d0d0c0d40068431b157ec3d21fe/variables/000221/"
+                }
+              ]
+            },
+            {
+              "value": "subvariables"
+            }
+          ]
+        },
+        {
+          "function": "as_selected",
+          "args": [
+            {
+              "variable": "https://alpha.crunch.io/api/datasets/387a3d0d0c0d40068431b157ec3d21fe/variables/000221/"
+            }
+          ]
+        }
+      ],
+      "weight": "https://alpha.crunch.io/api/datasets/387a3d0d0c0d40068431b157ec3d21fe/variables/98d1d04f0be3416db8016d654b11973b/"
+    },
+    "query_environment": {
+      "filter": []
+    },
+    "result": {
+      "dimensions": [
+        {
+          "references": {
+            "alias": "milstat",
+            "subreferences": [
+              {
+                "alias": "milstat_1",
+                "name": "Military Household - I am"
+              },
+              {
+                "alias": "milstat_2",
+                "name": "Military Household - Family"
+              },
+              {
+                "alias": "milstat_3",
+                "name": "Military Household - I served previously"
+              },
+              {
+                "alias": "milstat_4",
+                "name": "Military Household - Family served previously"
+              },
+              {
+                "alias": "milstat_5",
+                "name": "Military Household - None"
+              }
+            ],
+            "description": "We'd like to know whether you or someone in your immediate family is currently serving or has ever served in the U.S. military.  Immediate family is defined as your parents, siblings, spouse, and children.  Please check all boxes that apply.",
+            "name": "Military Status"
+          },
+          "derived": true,
+          "type": {
+            "subtype": {
+              "class": "variable"
+            },
+            "elements": [
+              {
+                "id": 1,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "milstat_1",
+                    "name": "Military Household - I am"
+                  },
+                  "id": "0001"
+                },
+                "missing": false
+              },
+              {
+                "id": 2,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "milstat_2",
+                    "name": "Military Household - Family"
+                  },
+                  "id": "0002"
+                },
+                "missing": false
+              },
+              {
+                "id": 3,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "milstat_3",
+                    "name": "Military Household - I served previously"
+                  },
+                  "id": "0003"
+                },
+                "missing": false
+              },
+              {
+                "id": 4,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "milstat_4",
+                    "name": "Military Household - Family served previously"
+                  },
+                  "id": "0004"
+                },
+                "missing": false
+              },
+              {
+                "id": 5,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "milstat_5",
+                    "name": "Military Household - None"
+                  },
+                  "id": "0005"
+                },
+                "missing": false
+              }
+            ],
+            "class": "enum"
+          }
+        },
+        {
+          "derived": true,
+          "references": {
+            "alias": "milstat",
+            "description": "We'd like to know whether you or someone in your immediate family is currently serving or has ever served in the U.S. military.  Immediate family is defined as your parents, siblings, spouse, and children.  Please check all boxes that apply.",
+            "name": "Military Status",
+            "subreferences": [
+              {
+                "alias": "milstat_1",
+                "name": "Military Household - I am"
+              },
+              {
+                "alias": "milstat_2",
+                "name": "Military Household - Family"
+              },
+              {
+                "alias": "milstat_3",
+                "name": "Military Household - I served previously"
+              },
+              {
+                "alias": "milstat_4",
+                "name": "Military Household - Family served previously"
+              },
+              {
+                "alias": "milstat_5",
+                "name": "Military Household - None"
+              }
+            ]
+          },
+          "type": {
+            "ordinal": false,
+            "subvariables": [
+              "0001",
+              "0002",
+              "0003",
+              "0004",
+              "0005"
+            ],
+            "class": "categorical",
+            "categories": [
+              {
+                "numeric_value": 1,
+                "selected": true,
+                "id": 1,
+                "missing": false,
+                "name": "Selected"
+              },
+              {
+                "numeric_value": 0,
+                "missing": false,
+                "id": 0,
+                "name": "Other"
+              },
+              {
+                "numeric_value": null,
+                "missing": true,
+                "id": -1,
+                "name": "No Data"
+              }
+            ]
+          }
+        },
+        {
+          "references": {
+            "alias": "union_hhold",
+            "subreferences": [
+              {
+                "alias": "union_hhold_1",
+                "name": "Yes, I am"
+              },
+              {
+                "alias": "union_hhold_2",
+                "name": "Yes, household member is"
+              },
+              {
+                "alias": "union_hhold_3",
+                "name": "No"
+              }
+            ],
+            "description": "Are you or is someone in your household a member of a labor union?",
+            "name": "Union Household"
+          },
+          "derived": true,
+          "type": {
+            "subtype": {
+              "class": "variable"
+            },
+            "elements": [
+              {
+                "id": 1,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "union_hhold_1",
+                    "name": "Yes, I am"
+                  },
+                  "id": "0001"
+                },
+                "missing": false
+              },
+              {
+                "id": 2,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "union_hhold_2",
+                    "name": "Yes, household member is"
+                  },
+                  "id": "0002"
+                },
+                "missing": false
+              },
+              {
+                "id": 3,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "union_hhold_3",
+                    "name": "No"
+                  },
+                  "id": "0003"
+                },
+                "missing": false
+              }
+            ],
+            "class": "enum"
+          }
+        },
+        {
+          "derived": true,
+          "references": {
+            "alias": "union_hhold",
+            "description": "Are you or is someone in your household a member of a labor union?",
+            "name": "Union Household",
+            "subreferences": [
+              {
+                "alias": "union_hhold_1",
+                "name": "Yes, I am"
+              },
+              {
+                "alias": "union_hhold_2",
+                "name": "Yes, household member is"
+              },
+              {
+                "alias": "union_hhold_3",
+                "name": "No"
+              }
+            ]
+          },
+          "type": {
+            "ordinal": false,
+            "subvariables": [
+              "0001",
+              "0002",
+              "0003"
+            ],
+            "class": "categorical",
+            "categories": [
+              {
+                "numeric_value": 1,
+                "selected": true,
+                "id": 1,
+                "missing": false,
+                "name": "Selected"
+              },
+              {
+                "numeric_value": 0,
+                "missing": false,
+                "id": 0,
+                "name": "Other"
+              },
+              {
+                "numeric_value": null,
+                "missing": true,
+                "id": -1,
+                "name": "No Data"
+              }
+            ]
+          }
+        }
+      ],
+      "missing": 0,
+      "measures": {
+        "count": {
+          "data": [
+            3.352871617403984,
+            16.73431762470768,
+            0,
+            6.53222712627504,
+            13.554962115836622,
+            0,
+            10.202090498432637,
+            9.885098743679023,
+            0,
+            86.98306046162037,
+            1392.9297502962697,
+            0,
+            101.92961603505412,
+            1377.9831947228358,
+            0,
+            1288.4994336794884,
+            191.41337707840108,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            8.453006469710013,
+            74.60957088418289,
+            0,
+            12.854762980003045,
+            70.20781437388986,
+            0,
+            63.19193913032873,
+            19.87063822356415,
+            0,
+            81.88292560931434,
+            1335.054497036794,
+            0,
+            95.60708018132615,
+            1321.3303424647816,
+            0,
+            1235.509585047592,
+            181.42783759851594,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            14.965991488452854,
+            163.83363018213828,
+            0,
+            12.052056804623824,
+            166.7475648659673,
+            0,
+            150.37512388350788,
+            28.424497787083208,
+            0,
+            75.3699405905715,
+            1245.830437738838,
+            0,
+            96.4097863567054,
+            1224.7905919727036,
+            0,
+            1148.3264002944134,
+            172.87397803499687,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            41.77593341768506,
+            527.6988222149192,
+            0,
+            38.91870264032824,
+            530.5560529922762,
+            0,
+            493.49805742319717,
+            75.97669820940708,
+            0,
+            48.55999866133929,
+            881.9652457060573,
+            0,
+            69.54314052100098,
+            860.9821038463954,
+            0,
+            805.2034667547233,
+            125.32177761267309,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            29.216494351217612,
+            714.1537771391872,
+            0,
+            46.988204000368725,
+            696.3820674900359,
+            0,
+            664.0829612064523,
+            79.2873102839522,
+            0,
+            61.11943772780674,
+            695.5102907817896,
+            0,
+            61.47363916096049,
+            695.156089348636,
+            0,
+            634.6185629714682,
+            122.01116553812793,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "n_missing": 0,
+          "metadata": {
+            "references": {},
+            "derived": true,
+            "type": {
+              "integer": false,
+              "missing_rules": {},
+              "missing_reasons": {
+                "No Data": -1
+              },
+              "class": "numeric"
+            }
+          }
+        }
+      },
+      "n": 1500,
+      "filter_stats": {
+        "filtered_complete": {
+          "unweighted": {
+            "selected": 1500,
+            "other": 0,
+            "missing": 431
+          },
+          "weighted": {
+            "selected": 1500.0000000000014,
+            "other": 0,
+            "missing": 0
+          }
+        },
+        "filtered": {
+          "unweighted": {
+            "selected": 1500,
+            "other": 431,
+            "missing": 0
+          },
+          "weighted": {
+            "selected": 1500.0000000000014,
+            "other": 0,
+            "missing": 0
+          }
+        }
+      },
+      "unfiltered": {
+        "unweighted_n": 1931,
+        "weighted_n": 1500.0000000000014
+      },
+      "filtered": {
+        "unweighted_n": 1500,
+        "weighted_n": 1500.0000000000014
+      },
+      "counts": [
+        5,
+        9,
+        0,
+        1,
+        13,
+        0,
+        8,
+        6,
+        0,
+        121,
+        1365,
+        0,
+        102,
+        1384,
+        0,
+        1270,
+        216,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        9,
+        84,
+        0,
+        9,
+        84,
+        0,
+        77,
+        16,
+        0,
+        117,
+        1290,
+        0,
+        94,
+        1313,
+        0,
+        1201,
+        206,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        24,
+        189,
+        0,
+        9,
+        204,
+        0,
+        179,
+        34,
+        0,
+        102,
+        1185,
+        0,
+        94,
+        1193,
+        0,
+        1099,
+        188,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        62,
+        580,
+        0,
+        47,
+        595,
+        0,
+        540,
+        102,
+        0,
+        64,
+        794,
+        0,
+        56,
+        802,
+        0,
+        738,
+        120,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        40,
+        612,
+        0,
+        42,
+        610,
+        0,
+        571,
+        81,
+        0,
+        86,
+        762,
+        0,
+        61,
+        787,
+        0,
+        707,
+        141,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "element": "crunch:cube"
+    }
+  }
+}
