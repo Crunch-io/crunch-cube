@@ -399,7 +399,7 @@ class TestStandardizedResiduals(TestCase):
         np.testing.assert_almost_equal(actual.t_stats, expected_tstats)
         np.testing.assert_almost_equal(actual.p_vals, expected_pvals)
 
-    def test_cat_mr_x_itself_pairwise_compare_columns(self):
+    def test_cat_x_mr_itself_pairwise_compare_columns(self):
         slice_ = Cube(CR.EDU_FAV5_FAV5).partitions[0]
 
         actual = slice_.pairwise_significance_tests[2]
@@ -498,3 +498,79 @@ class TestStandardizedResiduals(TestCase):
             ]
         )
         np.testing.assert_array_equal(pairwise_indices, expected_indices)
+
+    def test_cat2_x_mr_itself_pairwise_compare_columns(self):
+        slice_ = Cube(CR.CAT2_X_MR_ITSELF).partitions[0]
+        actual = slice_.pairwise_significance_tests[1]
+
+        assert slice_.cube_is_mr_by_itself is True
+        np.testing.assert_array_almost_equal(
+            actual.t_stats,
+            [[-1.11043969, 0.0, -38.08479951], [1.95585649, 0.0, -43.33389473]],
+        )
+        np.testing.assert_array_almost_equal(
+            actual.p_vals, [[0.26797932, 1.0, 0.0], [0.05170342, 1.0, 0.0]]
+        )
+
+    def test_cat_hs_x_mr_itself_pairwise_compare_columns(self):
+        slice_ = Cube(CR.CAT_HS_X_MR_ITSELF).partitions[0]
+        actual = slice_.pairwise_significance_tests[0]
+
+        assert slice_.cube_is_mr_by_itself is True
+        np.testing.assert_array_almost_equal(
+            actual.t_stats,
+            [
+                [0.0, -5.48459384, -26.49263374],
+                [0.0, -0.82075664, -31.36275346],
+                [0.0, 1.19221703, -33.43708574],
+                [0.0, 3.12076094, -27.21302499],
+            ],
+        )
+        np.testing.assert_array_almost_equal(
+            actual.p_vals,
+            [
+                [1.00000000e00, 1.09309460e-07, 0.00000000e00],
+                [1.00000000e00, 4.12638459e-01, 0.00000000e00],
+                [1.00000000e00, 2.34410124e-01, 0.00000000e00],
+                [1.00000000e00, 2.03575836e-03, 0.00000000e00],
+            ],
+        )
+
+    def test_cat_subvar_x_mr_itself_pairwise_compare_columns(self):
+        slice_ = Cube(CR.CAT_SUBVAR_X_MR_ITSELF).partitions[0]
+        actual = slice_.pairwise_significance_tests[0]
+
+        assert slice_.cube_is_mr_by_itself is True
+        np.testing.assert_array_almost_equal(
+            actual.t_stats,
+            [[0.0, -1.0379925, -2.04481142], [0.0, -1.14023824, -60.07645576]],
+        )
+        np.testing.assert_array_almost_equal(
+            actual.p_vals, [[1.0, 0.30036831, 0.04105959], [1.0, 0.25537821, 0.0]]
+        )
+
+    def test_mr_x_mr_itself_pairwise_compare_columns(self):
+        slice_ = Cube(CR.MR_X_MR_ITSELF).partitions[0]
+        actual = slice_.pairwise_significance_tests[1]
+
+        assert slice_.cube_is_mr_by_itself is True
+        np.testing.assert_array_almost_equal(
+            actual.t_stats,
+            [
+                [1.0379925, 0.0, -0.9156408],
+                [1.03178074, 0.0, -7.45906932],
+                [-0.57777416, 0.0, -18.5810699],
+                [-0.34165816, 0.0, -34.91068779],
+                [2.09893803, 0.0, -43.76650632],
+            ],
+        )
+        np.testing.assert_array_almost_equal(
+            actual.p_vals,
+            [
+                [3.00272449e-01, 1, 3.60013917e-01],
+                [3.03167992e-01, 1, 1.52766688e-13],
+                [5.63934548e-01, 1, 0.00000000e00],
+                [7.32894024e-01, 1, 0.00000000e00],
+                [3.68215623e-02, 1, 0.00000000e00],
+            ],
+        )

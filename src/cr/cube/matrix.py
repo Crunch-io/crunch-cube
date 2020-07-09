@@ -259,9 +259,14 @@ class _BaseBaseMatrix(object):
         counts_with_missings = cube.counts_with_missings
         dimension_types = cube.dimension_types[-2:]
         if cube.is_mr_by_itself:
-
+            offset = 1 if cube.dimension_types[0] == DT.MR else 0
             overlap_tstats = calculate_overlap_tstats(
-                _MrXMrMatrix, dimensions, counts, base_counts, counts_with_missings
+                _MrXMrMatrix,
+                offset,
+                dimensions,
+                counts,
+                base_counts,
+                counts_with_missings,
             )
 
             # These are apparent dimensions which hide 'selections' dims behind 'MR'

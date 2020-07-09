@@ -14,17 +14,23 @@ except ImportError:  # pragma: no cover
 
 
 def calculate_overlap_tstats(
-    cls, mr_dimensions, mr_counts, mr_base_counts, mr_counts_with_missings
+    cls, offset, mr_dimensions, mr_counts, mr_base_counts, mr_counts_with_missings
 ):
-    numerator = np.zeros(np.array(mr_counts.shape)[[0, 1, 3]])
-    standard_error = np.zeros(np.array(mr_counts.shape)[[0, 1, 3]])
+    numerator = np.zeros(np.array(mr_counts.shape)[[0, 1 + offset, 3 + offset]])
+    standard_error = np.zeros(np.array(mr_counts.shape)[[0, 1 + offset, 3 + offset]])
     for slice_index in range(mr_counts.shape[0]):
-        overlap_slice = cls(
-            mr_dimensions,
-            mr_counts[slice_index],
-            mr_base_counts[slice_index],
-            mr_counts_with_missings[slice_index],
+        counts = mr_counts[slice_index][0] if offset != 0 else mr_counts[slice_index]
+        base_counts = (
+            mr_base_counts[slice_index][0]
+            if offset != 0
+            else mr_base_counts[slice_index]
         )
+        counts_with_missings = (
+            mr_counts_with_missings[slice_index][0]
+            if offset != 0
+            else mr_counts_with_missings[slice_index]
+        )
+        overlap_slice = cls(mr_dimensions, counts, base_counts, counts_with_missings)
         diff, se_diff = overlap_slice.tstats_overlap
         numerator[slice_index] = diff
         standard_error[slice_index] = se_diff
