@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+### 1.11.34
+- Bug fix for augmented MRxMR matrices
+
 #### 1.11.33
 - Manage augmentation for MRxMR matrices
 
