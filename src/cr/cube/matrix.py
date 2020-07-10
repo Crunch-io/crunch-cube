@@ -268,13 +268,13 @@ class _BaseBaseMatrix(object):
                 base_counts,
                 counts_with_missings,
             )
-
-            # These are apparent dimensions which hide 'selections' dims behind 'MR'
             dimensions = cube.dimensions[:-1]
-            counts = np.sum(counts[:, :, :, 0], axis=3)
-            base_counts = np.sum(base_counts[:, :, :, 0], axis=3)
-            counts_with_missings = np.sum(counts_with_missings[:, :, :, 0], axis=3)
             if cube.dimension_types[0] == DT.MR:
+                counts = np.sum(counts[:, :, :, :, 0], axis=4)
+                base_counts = np.sum(base_counts[:, :, :, :, 0], axis=4)
+                counts_with_missings = np.sum(
+                    counts_with_missings[:, :, :, :, 0], axis=4
+                )
                 return _MrXMrMatrix(
                     dimensions,
                     counts,
@@ -282,6 +282,9 @@ class _BaseBaseMatrix(object):
                     counts_with_missings,
                     overlap_tstats,
                 )
+            counts = np.sum(counts[:, :, :, 0], axis=3)
+            base_counts = np.sum(base_counts[:, :, :, 0], axis=3)
+            counts_with_missings = np.sum(counts_with_missings[:, :, :, 0], axis=3)
             return _CatXMrMatrix(
                 dimensions, counts, base_counts, counts_with_missings, overlap_tstats
             )
