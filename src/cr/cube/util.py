@@ -30,7 +30,19 @@ def calculate_overlap_tstats(
             if offset != 0
             else mr_counts_with_missings[slice_index]
         )
-        overlap_slice = cls(mr_dimensions, counts, base_counts, counts_with_missings)
+        overlap_margins = (
+            np.sum(mr_counts[slice_index], axis=0)[:, 0, :, 0]
+            if offset != 0
+            else np.sum(mr_counts, axis=0)[:, 0, :, 0]
+        )
+        overlap_slice = cls(
+            mr_dimensions,
+            counts,
+            base_counts,
+            counts_with_missings,
+            None,
+            overlap_margins,
+        )
         diff, se_diff = overlap_slice.tstats_overlap
         numerator[slice_index] = diff
         standard_error[slice_index] = se_diff

@@ -1,0 +1,953 @@
+{
+  "element": "shoji:view",
+  "self": "https://alpha.crunch.io/api/datasets/f6d04137cce547e8acbd46b8d0d66f13/cube/?query=%7B%22dimensions%22:%5B%7B%22variable%22:%22https:%2F%2Falpha.crunch.io%2Fapi%2Fdatasets%2Ff6d04137cce547e8acbd46b8d0d66f13%2Fvariables%2Fcbb9bb2421024e09a89b8739cb58e4fb%2Fsubvariables%2F00000%2F%22%7D,%7B%22function%22:%22dimension%22,%22args%22:%5B%7B%22function%22:%22as_selected%22,%22args%22:%5B%7B%22variable%22:%22https:%2F%2Falpha.crunch.io%2Fapi%2Fdatasets%2Ff6d04137cce547e8acbd46b8d0d66f13%2Fvariables%2F13aa1c88f30d4d3d9fbe27349b050f17%2F%22%7D%5D%7D,%7B%22value%22:%22subvariables%22%7D%5D%7D,%7B%22function%22:%22as_selected%22,%22args%22:%5B%7B%22variable%22:%22https:%2F%2Falpha.crunch.io%2Fapi%2Fdatasets%2Ff6d04137cce547e8acbd46b8d0d66f13%2Fvariables%2F13aa1c88f30d4d3d9fbe27349b050f17%2F%22%7D%5D%7D,%7B%22function%22:%22dimension%22,%22args%22:%5B%7B%22function%22:%22as_selected%22,%22args%22:%5B%7B%22variable%22:%22https:%2F%2Falpha.crunch.io%2Fapi%2Fdatasets%2Ff6d04137cce547e8acbd46b8d0d66f13%2Fvariables%2F13aa1c88f30d4d3d9fbe27349b050f17%2F%22%7D%5D%7D,%7B%22value%22:%22subvariables%22%7D%5D%7D,%7B%22function%22:%22as_selected%22,%22args%22:%5B%7B%22variable%22:%22https:%2F%2Falpha.crunch.io%2Fapi%2Fdatasets%2Ff6d04137cce547e8acbd46b8d0d66f13%2Fvariables%2F13aa1c88f30d4d3d9fbe27349b050f17%2F%22%7D%5D%7D%5D,%22measures%22:%7B%22count%22:%7B%22function%22:%22cube_count%22,%22args%22:%5B%5D%7D%7D,%22weight%22:%22https:%2F%2Falpha.crunch.io%2Fapi%2Fdatasets%2Ff6d04137cce547e8acbd46b8d0d66f13%2Fvariables%2F0yADwLRARYg8QMoiERXLx300011d%2F%22%7D",
+  "value": {
+    "query": {
+      "measures": {
+        "count": {
+          "function": "cube_count",
+          "args": []
+        }
+      },
+      "dimensions": [
+        {
+          "variable": "https://alpha.crunch.io/api/datasets/f6d04137cce547e8acbd46b8d0d66f13/variables/cbb9bb2421024e09a89b8739cb58e4fb/subvariables/00000/"
+        },
+        {
+          "function": "dimension",
+          "args": [
+            {
+              "function": "as_selected",
+              "args": [
+                {
+                  "variable": "https://alpha.crunch.io/api/datasets/f6d04137cce547e8acbd46b8d0d66f13/variables/13aa1c88f30d4d3d9fbe27349b050f17/"
+                }
+              ]
+            },
+            {
+              "value": "subvariables"
+            }
+          ]
+        },
+        {
+          "function": "as_selected",
+          "args": [
+            {
+              "variable": "https://alpha.crunch.io/api/datasets/f6d04137cce547e8acbd46b8d0d66f13/variables/13aa1c88f30d4d3d9fbe27349b050f17/"
+            }
+          ]
+        },
+        {
+          "function": "dimension",
+          "args": [
+            {
+              "function": "as_selected",
+              "args": [
+                {
+                  "variable": "https://alpha.crunch.io/api/datasets/f6d04137cce547e8acbd46b8d0d66f13/variables/13aa1c88f30d4d3d9fbe27349b050f17/"
+                }
+              ]
+            },
+            {
+              "value": "subvariables"
+            }
+          ]
+        },
+        {
+          "function": "as_selected",
+          "args": [
+            {
+              "variable": "https://alpha.crunch.io/api/datasets/f6d04137cce547e8acbd46b8d0d66f13/variables/13aa1c88f30d4d3d9fbe27349b050f17/"
+            }
+          ]
+        }
+      ],
+      "weight": "https://alpha.crunch.io/api/datasets/f6d04137cce547e8acbd46b8d0d66f13/variables/0yADwLRARYg8QMoiERXLx300011d/"
+    },
+    "query_environment": {
+      "filter": []
+    },
+    "result": {
+      "dimensions": [
+        {
+          "references": {
+            "alias": "SENCONTR_W57__1",
+            "name": "Senate",
+            "view": {
+              "show_counts": false,
+              "include_noneoftheabove": false,
+              "include_missing": false,
+              "column_width": null
+            }
+          },
+          "derived": false,
+          "type": {
+            "ordinal": false,
+            "class": "categorical",
+            "categories": [
+              {
+                "numeric_value": 1,
+                "selected": true,
+                "id": 1,
+                "missing": false,
+                "name": "Selected"
+              },
+              {
+                "numeric_value": 0,
+                "id": 0,
+                "name": "Other",
+                "missing": false
+              },
+              {
+                "numeric_value": null,
+                "id": -1,
+                "name": "No Data",
+                "missing": true
+              }
+            ]
+          }
+        },
+        {
+          "references": {
+            "uniform_basis": false,
+            "description": null,
+            "format": {
+              "summary": {
+                "digits": 0
+              }
+            },
+            "subreferences": [
+              {
+                "alias": "CR_SOURCESUM_NYTimes__1",
+                "name": "NYTimes"
+              },
+              {
+                "alias": "CR_SOURCESUM_WashingtonPost__1",
+                "name": "WaPo"
+              },
+              {
+                "alias": "CR_SOURCESUM_FoxNews__1",
+                "name": "FoxNews"
+              }
+            ],
+            "notes": null,
+            "api_derivation": null,
+            "dichotomous": true,
+            "alias": "Trust",
+            "view": {
+              "show_counts": false,
+              "include_noneoftheabove": false,
+              "include_missing": false,
+              "column_width": null
+            },
+            "name": "Trust"
+          },
+          "derived": true,
+          "type": {
+            "subtype": {
+              "class": "variable"
+            },
+            "elements": [
+              {
+                "id": 1,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "CR_SOURCESUM_NYTimes__1",
+                    "name": "NYTimes"
+                  },
+                  "id": "00000"
+                },
+                "missing": false
+              },
+              {
+                "id": 2,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "CR_SOURCESUM_WashingtonPost__1",
+                    "name": "WaPo"
+                  },
+                  "id": "00002"
+                },
+                "missing": false
+              },
+              {
+                "id": 3,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "CR_SOURCESUM_FoxNews__1",
+                    "name": "FoxNews"
+                  },
+                  "id": "00001"
+                },
+                "missing": false
+              }
+            ],
+            "class": "enum"
+          }
+        },
+        {
+          "derived": true,
+          "references": {
+            "uniform_basis": false,
+            "description": null,
+            "name": "Trust",
+            "format": {
+              "summary": {
+                "digits": 0
+              }
+            },
+            "subreferences": [
+              {
+                "alias": "CR_SOURCESUM_NYTimes__1",
+                "name": "NYTimes"
+              },
+              {
+                "alias": "CR_SOURCESUM_WashingtonPost__1",
+                "name": "WaPo"
+              },
+              {
+                "alias": "CR_SOURCESUM_FoxNews__1",
+                "name": "FoxNews"
+              }
+            ],
+            "notes": null,
+            "api_derivation": null,
+            "dichotomous": true,
+            "alias": "Trust",
+            "view": {
+              "show_counts": false,
+              "include_noneoftheabove": false,
+              "include_missing": false,
+              "column_width": null
+            }
+          },
+          "type": {
+            "ordinal": false,
+            "subvariables": [
+              "00000",
+              "00002",
+              "00001"
+            ],
+            "class": "categorical",
+            "categories": [
+              {
+                "numeric_value": 1,
+                "selected": true,
+                "id": 1,
+                "missing": false,
+                "name": "Selected"
+              },
+              {
+                "numeric_value": 0,
+                "missing": false,
+                "id": 0,
+                "name": "Other"
+              },
+              {
+                "numeric_value": null,
+                "missing": true,
+                "id": -1,
+                "name": "No Data"
+              }
+            ]
+          }
+        },
+        {
+          "references": {
+            "uniform_basis": false,
+            "description": null,
+            "format": {
+              "summary": {
+                "digits": 0
+              }
+            },
+            "subreferences": [
+              {
+                "alias": "CR_SOURCESUM_NYTimes__1",
+                "name": "NYTimes"
+              },
+              {
+                "alias": "CR_SOURCESUM_WashingtonPost__1",
+                "name": "WaPo"
+              },
+              {
+                "alias": "CR_SOURCESUM_FoxNews__1",
+                "name": "FoxNews"
+              }
+            ],
+            "notes": null,
+            "api_derivation": null,
+            "dichotomous": true,
+            "alias": "Trust",
+            "view": {
+              "show_counts": false,
+              "include_noneoftheabove": false,
+              "include_missing": false,
+              "column_width": null
+            },
+            "name": "Trust"
+          },
+          "derived": true,
+          "type": {
+            "subtype": {
+              "class": "variable"
+            },
+            "elements": [
+              {
+                "id": 1,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "CR_SOURCESUM_NYTimes__1",
+                    "name": "NYTimes"
+                  },
+                  "id": "00000"
+                },
+                "missing": false
+              },
+              {
+                "id": 2,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "CR_SOURCESUM_WashingtonPost__1",
+                    "name": "WaPo"
+                  },
+                  "id": "00002"
+                },
+                "missing": false
+              },
+              {
+                "id": 3,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "CR_SOURCESUM_FoxNews__1",
+                    "name": "FoxNews"
+                  },
+                  "id": "00001"
+                },
+                "missing": false
+              }
+            ],
+            "class": "enum"
+          }
+        },
+        {
+          "derived": true,
+          "references": {
+            "uniform_basis": false,
+            "description": null,
+            "name": "Trust",
+            "format": {
+              "summary": {
+                "digits": 0
+              }
+            },
+            "subreferences": [
+              {
+                "alias": "CR_SOURCESUM_NYTimes__1",
+                "name": "NYTimes"
+              },
+              {
+                "alias": "CR_SOURCESUM_WashingtonPost__1",
+                "name": "WaPo"
+              },
+              {
+                "alias": "CR_SOURCESUM_FoxNews__1",
+                "name": "FoxNews"
+              }
+            ],
+            "notes": null,
+            "api_derivation": null,
+            "dichotomous": true,
+            "alias": "Trust",
+            "view": {
+              "show_counts": false,
+              "include_noneoftheabove": false,
+              "include_missing": false,
+              "column_width": null
+            }
+          },
+          "type": {
+            "ordinal": false,
+            "subvariables": [
+              "00000",
+              "00002",
+              "00001"
+            ],
+            "class": "categorical",
+            "categories": [
+              {
+                "numeric_value": 1,
+                "selected": true,
+                "id": 1,
+                "missing": false,
+                "name": "Selected"
+              },
+              {
+                "numeric_value": 0,
+                "missing": false,
+                "id": 0,
+                "name": "Other"
+              },
+              {
+                "numeric_value": null,
+                "missing": true,
+                "id": -1,
+                "name": "No Data"
+              }
+            ]
+          }
+        }
+      ],
+      "missing": 0,
+      "measures": {
+        "count": {
+          "data": [
+            2990.034858481553,
+            0,
+            0,
+            2309.003533193423,
+            681.0313252881257,
+            0,
+            460.7612656136308,
+            2529.273592867921,
+            0,
+            0,
+            4417.96127005564,
+            0,
+            404.9396547795978,
+            4013.0216152760568,
+            0,
+            2387.2073365798865,
+            2030.7539334757605,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            2309.003533193423,
+            404.9396547795978,
+            0,
+            2713.9431879730273,
+            0,
+            0,
+            427.73688024091933,
+            2286.2063077321036,
+            0,
+            681.0313252881257,
+            4013.0216152760568,
+            0,
+            0,
+            4694.052940564154,
+            0,
+            2420.2317219526017,
+            2273.8212186115857,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            460.7612656136308,
+            2387.2073365798865,
+            0,
+            427.73688024091933,
+            2420.2317219526017,
+            0,
+            2847.9686021935213,
+            0,
+            0,
+            2529.273592867921,
+            2030.7539334757605,
+            0,
+            2286.2063077321036,
+            2273.8212186115857,
+            0,
+            0,
+            4560.02752634365,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1198.1018157815818,
+            0,
+            0,
+            737.3838155466077,
+            460.71800023497684,
+            0,
+            586.9990139683207,
+            611.1028018132641,
+            0,
+            0,
+            3436.9025399306934,
+            0,
+            177.09464897266272,
+            3259.8078909580317,
+            0,
+            1698.7971954464244,
+            1738.1053444842785,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            737.3838155466077,
+            177.09464897266272,
+            0,
+            914.4784645192702,
+            0,
+            0,
+            431.97294848793115,
+            482.50551603133994,
+            0,
+            460.71800023497684,
+            3259.8078909580317,
+            0,
+            0,
+            3720.525891193006,
+            0,
+            1853.8232609268125,
+            1866.7026302662023,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            586.9990139683207,
+            1698.7971954464244,
+            0,
+            431.97294848793115,
+            1853.8232609268125,
+            0,
+            2285.796209414744,
+            0,
+            0,
+            611.1028018132641,
+            1738.1053444842785,
+            0,
+            482.50551603133994,
+            1866.7026302662023,
+            0,
+            0,
+            2349.2081462975384,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "n_missing": 0,
+          "metadata": {
+            "references": {},
+            "derived": true,
+            "type": {
+              "integer": false,
+              "missing_rules": {},
+              "missing_reasons": {
+                "No Data": -1
+              },
+              "class": "numeric"
+            }
+          }
+        }
+      },
+      "n": 12043,
+      "filter_stats": {
+        "filtered_complete": {
+          "unweighted": {
+            "selected": 12043,
+            "other": 0,
+            "missing": 0
+          },
+          "weighted": {
+            "selected": 12043.000484249482,
+            "other": 0,
+            "missing": 0
+          }
+        },
+        "filtered": {
+          "unweighted": {
+            "selected": 12043,
+            "other": 0,
+            "missing": 0
+          },
+          "weighted": {
+            "selected": 12043.000484249482,
+            "other": 0,
+            "missing": 0
+          }
+        }
+      },
+      "unfiltered": {
+        "unweighted_n": 12043,
+        "weighted_n": 12043.000484249482
+      },
+      "filtered": {
+        "unweighted_n": 12043,
+        "weighted_n": 12043.000484249482
+      },
+      "counts": [
+        4046,
+        0,
+        0,
+        3232,
+        814,
+        0,
+        470,
+        3576,
+        0,
+        0,
+        4573,
+        0,
+        462,
+        4111,
+        0,
+        2465,
+        2108,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        3232,
+        462,
+        0,
+        3694,
+        0,
+        0,
+        434,
+        3260,
+        0,
+        814,
+        4111,
+        0,
+        0,
+        4925,
+        0,
+        2501,
+        2424,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        470,
+        2465,
+        0,
+        434,
+        2501,
+        0,
+        2935,
+        0,
+        0,
+        3576,
+        2108,
+        0,
+        3260,
+        2424,
+        0,
+        0,
+        5684,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1028,
+        0,
+        0,
+        659,
+        369,
+        0,
+        419,
+        609,
+        0,
+        0,
+        2396,
+        0,
+        148,
+        2248,
+        0,
+        1111,
+        1285,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        659,
+        148,
+        0,
+        807,
+        0,
+        0,
+        327,
+        480,
+        0,
+        369,
+        2248,
+        0,
+        0,
+        2617,
+        0,
+        1203,
+        1414,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        419,
+        1111,
+        0,
+        327,
+        1203,
+        0,
+        1530,
+        0,
+        0,
+        609,
+        1285,
+        0,
+        480,
+        1414,
+        0,
+        0,
+        1894,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "element": "crunch:cube"
+    }
+  }
+}

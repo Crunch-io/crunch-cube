@@ -404,40 +404,16 @@ class TestStandardizedResiduals(TestCase):
 
         actual = slice_.pairwise_significance_tests[2]
         expected_tstats = [
-            [3.2386393, 2.09194923, 0.0, 2.8693425, -4.15518752],
-            [6.88147131, 5.97625571, 0.0, 6.76454926, -0.48584994],
-            [7.83715229, 3.62375238, 0.0, 4.59038147, -1.05390881],
-            [6.47017555, 2.36733655, 0.0, 2.08742665, -0.35158859],
+            [2.77424925, 0.85007482, 0.0, 0.47831155, 3.04402516],
+            [-0.6340733, -2.54684651, 0.0, -2.73767248, -1.6604073],
+            [-1.33079086, 0.66919214, 0.0, 0.33872442, -1.43285793],
+            [-1.21370228, 1.44532295, 0.0, 2.7434399, -1.71341099],
         ]
         expected_pvals = [
-            [
-                1.25043153e-03,
-                3.67114360e-02,
-                1.00000000e00,
-                4.20783661e-03,
-                3.49648630e-05,
-            ],
-            [
-                1.19420029e-11,
-                3.24026250e-09,
-                1.00000000e00,
-                2.38187248e-11,
-                6.27168180e-01,
-            ],
-            [
-                1.46549439e-14,
-                3.05956626e-04,
-                1.00000000e00,
-                5.04126756e-06,
-                2.92150962e-01,
-            ],
-            [
-                1.70207404e-10,
-                1.81187549e-02,
-                1.00000000e00,
-                3.71254466e-02,
-                7.25212661e-01,
-            ],
+            [0.00566154, 0.39550041, 1.0, 0.63254261, 0.00238858],
+            [0.52621379, 0.01102887, 1.0, 0.0063075, 0.09711121],
+            [0.18363606, 0.50353759, 1.0, 0.73489497, 0.15217626],
+            [0.22521874, 0.14870119, 1.0, 0.00619867, 0.08691245],
         ]
 
         assert slice_.cube_is_mr_by_itself is True
@@ -505,11 +481,10 @@ class TestStandardizedResiduals(TestCase):
 
         assert slice_.cube_is_mr_by_itself is True
         np.testing.assert_array_almost_equal(
-            actual.t_stats,
-            [[-1.11043969, 0.0, -38.08479951], [1.95585649, 0.0, -43.33389473]],
+            actual.t_stats, [[2.03737702, 0.0, np.nan], [-1.77241544, 0.0, np.nan]]
         )
         np.testing.assert_array_almost_equal(
-            actual.p_vals, [[0.26797932, 1.0, 0.0], [0.05170342, 1.0, 0.0]]
+            actual.p_vals, [[0.04276734, 1.0, np.nan], [0.07766098, 1.0, np.nan]]
         )
 
     def test_cat_hs_x_mr_itself_pairwise_compare_columns(self):
@@ -520,19 +495,59 @@ class TestStandardizedResiduals(TestCase):
         np.testing.assert_array_almost_equal(
             actual.t_stats,
             [
-                [0.0, -5.48459384, -26.49263374],
-                [0.0, -0.82075664, -31.36275346],
-                [0.0, 1.19221703, -33.43708574],
-                [0.0, 3.12076094, -27.21302499],
+                [0.0, 6.22407684, np.nan],
+                [0.0, 0.21986422, np.nan],
+                [0.0, -2.39283195, np.nan],
+                [0.0, -3.83382639, np.nan],
             ],
         )
         np.testing.assert_array_almost_equal(
             actual.p_vals,
             [
-                [1.00000000e00, 1.09309460e-07, 0.00000000e00],
-                [1.00000000e00, 4.12638459e-01, 0.00000000e00],
-                [1.00000000e00, 2.34410124e-01, 0.00000000e00],
-                [1.00000000e00, 2.03575836e-03, 0.00000000e00],
+                [1.00000000e00, 2.28560104e-09, np.nan],
+                [1.00000000e00, 8.26172768e-01, np.nan],
+                [1.00000000e00, 1.75259091e-02, np.nan],
+                [1.00000000e00, 1.63076135e-04, np.nan],
+            ],
+        )
+
+    def test_cat_x_mr_weighted_augmented(self):
+        slice_ = Cube(CR.CAT_X_MR_WEIGHTED_AUGMENTED).partitions[0]
+        actual = slice_.pairwise_significance_tests[1]
+
+        assert slice_.cube_is_mr_by_itself is True
+        np.testing.assert_array_almost_equal(
+            actual.t_stats,
+            [[-10.2964264, 0.0, -20.09577285], [5.96350953, 0.0, 24.14335882]],
+        )
+        np.testing.assert_array_almost_equal(
+            actual.p_vals,
+            [[0.0, 1.00000000e00, 0.0], [2.55612775e-09, 1.00000000e00, 0.0]],
+        )
+
+    def test_mr_x_mr_weighted_augmented(self):
+        slice_ = Cube(CR.MR_X_MR_WEIGHTED_AUGMENTED).partitions[0]
+        actual = slice_.pairwise_significance_tests[1]
+
+        assert slice_.cube_is_mr_by_itself is True
+        np.testing.assert_array_almost_equal(
+            actual.t_stats,
+            [
+                [-10.2964264, 0.0, -20.09577285],
+                [-16.38251357, 0.0, -28.57841019],
+                [-7.42875194, 0.0, 2.33766663],
+                [-10.88338158, 0.0, -22.45002834],
+                [-2.12632668, 0.0, -11.07466431],
+            ],
+        )
+        np.testing.assert_array_almost_equal(
+            actual.p_vals,
+            [
+                [0.0, 1.0, 0.0],
+                [0.0, 1.0, 0.0],
+                [1.19015908e-13, 1.0, 1.94264286e-02],
+                [0.0, 1.0, 0.0],
+                [3.35015757e-02, 1.0, 0.0],
             ],
         )
 
@@ -542,11 +557,10 @@ class TestStandardizedResiduals(TestCase):
 
         assert slice_.cube_is_mr_by_itself is True
         np.testing.assert_array_almost_equal(
-            actual.t_stats,
-            [[0.0, -1.0379925, -2.04481142], [0.0, -1.14023824, -60.07645576]],
+            actual.t_stats, [[0.0, 0.76138776, np.nan], [0.0, -0.84215637, np.nan]]
         )
         np.testing.assert_array_almost_equal(
-            actual.p_vals, [[1.0, 0.30036831, 0.04105959], [1.0, 0.25537821, 0.0]]
+            actual.p_vals, [[1.0, 0.44720885, np.nan], [1.0, 0.40057908, np.nan]]
         )
 
     def test_mr_x_mr_pairwise_compare_columns(self):
@@ -583,20 +597,20 @@ class TestStandardizedResiduals(TestCase):
         np.testing.assert_array_almost_equal(
             actual.t_stats,
             [
-                [1.0379925, 0.0, -0.9156408],
-                [1.03178074, 0.0, -7.45906932],
-                [-0.57777416, 0.0, -18.5810699],
-                [-0.34165816, 0.0, -34.91068779],
-                [2.09893803, 0.0, -43.76650632],
+                [-0.76138776, 0.0, np.nan],
+                [-0.61826861, 0.0, np.nan],
+                [1.13358041, 0.0, np.nan],
+                [1.62565984, 0.0, np.nan],
+                [-1.63486497, 0.0, np.nan],
             ],
         )
         np.testing.assert_array_almost_equal(
             actual.p_vals,
             [
-                [3.00368306e-01, 1.00000000e00, 3.60015180e-01],
-                [3.03263297e-01, 1.00000000e00, 1.53432822e-13],
-                [5.63984270e-01, 1.00000000e00, 0.00000000e00],
-                [7.32921470e-01, 1.00000000e00, 0.00000000e00],
-                [3.69178553e-02, 1.00000000e00, 0.00000000e00],
+                [0.44720885, 1.0, np.nan],
+                [0.53701272, 1.0, np.nan],
+                [0.25815593, 1.0, np.nan],
+                [0.10539741, 1.0, np.nan],
+                [0.10345119, 1.0, np.nan],
             ],
         )
