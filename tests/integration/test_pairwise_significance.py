@@ -399,27 +399,6 @@ class TestStandardizedResiduals(TestCase):
         np.testing.assert_almost_equal(actual.t_stats, expected_tstats)
         np.testing.assert_almost_equal(actual.p_vals, expected_pvals)
 
-    def test_cat_x_mr_itself_pairwise_compare_columns(self):
-        slice_ = Cube(CR.EDU_FAV5_FAV5).partitions[0]
-
-        actual = slice_.pairwise_significance_tests[2]
-        expected_tstats = [
-            [2.77424925, 0.85007482, 0.0, 0.47831155, 3.04402516],
-            [-0.6340733, -2.54684651, 0.0, -2.73767248, -1.6604073],
-            [-1.33079086, 0.66919214, 0.0, 0.33872442, -1.43285793],
-            [-1.21370228, 1.44532295, 0.0, 2.7434399, -1.71341099],
-        ]
-        expected_pvals = [
-            [0.00566154, 0.39550041, 1.0, 0.63254261, 0.00238858],
-            [0.52621379, 0.01102887, 1.0, 0.0063075, 0.09711121],
-            [0.18363606, 0.50353759, 1.0, 0.73489497, 0.15217626],
-            [0.22521874, 0.14870119, 1.0, 0.00619867, 0.08691245],
-        ]
-
-        assert slice_.cube_is_mr_by_itself is True
-        np.testing.assert_array_almost_equal(actual.t_stats, expected_tstats)
-        np.testing.assert_array_almost_equal(actual.p_vals, expected_pvals)
-
     def test_cat_x_cat_summary_pairwise_indices(self):
         # Only larger
         slice_ = Cube(CR.PAIRWISE_HIROTSU_OCCUPATION_X_ILLNESS).partitions[0]
@@ -475,20 +454,8 @@ class TestStandardizedResiduals(TestCase):
         )
         np.testing.assert_array_equal(pairwise_indices, expected_indices)
 
-    def test_cat2_x_mr_itself_pairwise_compare_columns(self):
-        slice_ = Cube(CR.CAT2_X_MR_ITSELF).partitions[0]
-        actual = slice_.pairwise_significance_tests[1]
-
-        assert slice_.cube_is_mr_by_itself is True
-        np.testing.assert_array_almost_equal(
-            actual.t_stats, [[2.03737702, 0.0, np.nan], [-1.77241544, 0.0, np.nan]]
-        )
-        np.testing.assert_array_almost_equal(
-            actual.p_vals, [[0.04276734, 1.0, np.nan], [0.07766098, 1.0, np.nan]]
-        )
-
-    def test_cat_hs_x_mr_itself_pairwise_compare_columns(self):
-        slice_ = Cube(CR.CAT_HS_X_MR_ITSELF).partitions[0]
+    def test_cat_hs_x_mr_augmented_pairwise_t_test(self):
+        slice_ = Cube(CR.CAT_HS_X_MR_AUGMENTED).partitions[0]
         actual = slice_.pairwise_significance_tests[0]
 
         assert slice_.cube_is_mr_by_itself is True
@@ -551,8 +518,8 @@ class TestStandardizedResiduals(TestCase):
             ],
         )
 
-    def test_cat_subvar_x_mr_itself_pairwise_compare_columns(self):
-        slice_ = Cube(CR.CAT_SUBVAR_X_MR_ITSELF).partitions[0]
+    def test_cat_subvar_x_mr_augmented_pairwise_t_test(self):
+        slice_ = Cube(CR.CAT_SUBVAR_X_MR_AUGMENTED).partitions[0]
         actual = slice_.pairwise_significance_tests[0]
 
         assert slice_.cube_is_mr_by_itself is True
@@ -563,7 +530,7 @@ class TestStandardizedResiduals(TestCase):
             actual.p_vals, [[1.0, 0.44720885, np.nan], [1.0, 0.40057908, np.nan]]
         )
 
-    def test_mr_x_mr_pairwise_compare_columns(self):
+    def test_mr_x_mr_pairwise_t_test(self):
         slice_ = Cube(CR.MR_X_MR_2).partitions[0]
         actual = slice_.pairwise_significance_tests[1]
 
@@ -589,8 +556,8 @@ class TestStandardizedResiduals(TestCase):
             ],
         )
 
-    def test_mr_x_mr_itself_pairwise_compare_columns(self):
-        slice_ = Cube(CR.MR_X_MR_ITSELF).partitions[0]
+    def test_mr_x_mr_augmented_pairwise_t_test(self):
+        slice_ = Cube(CR.MR_X_MR_AUGMENTED).partitions[0]
         actual = slice_.pairwise_significance_tests[1]
 
         assert slice_.cube_is_mr_by_itself is True
