@@ -614,12 +614,12 @@ class Describe_Slice(object):
         "fixture, table_name, expected",
         [
             (CR.EDU_FAV5_FAV5, "Education", True),
-            (CR.CAT_HS_X_MR_ITSELF, "Age (4 category)", True),
-            (CR.MR_X_MR_ITSELF, "Military Status", True),
+            (CR.CAT_HS_X_MR_AUGMENTED, "Age (4 category)", True),
+            (CR.MR_X_MR_AUGMENTED, "Military Status", True),
             (CR.AGE_FAVMR, None, False),
         ],
     )
-    def it_knows_when_cube_is_mr_by_itself(self, fixture, table_name, expected):
+    def it_knows_when_cube_is_augmented(self, fixture, table_name, expected):
         cube = Cube(fixture)
         slice_ = cube.partitions[0]
 
