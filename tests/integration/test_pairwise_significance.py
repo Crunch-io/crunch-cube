@@ -479,6 +479,7 @@ class TestStandardizedResiduals(TestCase):
         )
 
     def test_cat_x_mr_weighted_augmented(self):
+        """Same behaviour of test_mr_subvar_x_mr_augmented_pairwise_t_test"""
         slice_ = Cube(CR.CAT_X_MR_WEIGHTED_AUGMENTED).partitions[0]
         actual = slice_.pairwise_significance_tests[1]
         overlap_margins = np.sum(slice_._cube.counts, axis=0)[:, 0, :, 0]
@@ -520,7 +521,63 @@ class TestStandardizedResiduals(TestCase):
         assert slice_._cube.counts.shape == (2, 3, 2, 3, 2)
         assert actual.t_stats.shape == (2, 3)
 
-    def test_mr_x_mr_weighted_augmented(self):
+    def test_mr_x_mr_weighted_augmented_pairwise_t_test(self):
+        """This test proofs the hypotesis testing for MR1_X_MR2 considering the
+        overlaps. To calculate the overlap of this kind of cube we need to calculate
+        the shadow proportion behind the MR1_X_MR2 table:
+                            +-----------------------------------+
+                            |               Trust               |
+        +-------------------+-----------------------------------+
+        | Pol.Know          |                                   |
+        +-------------------+----------- +---------+------------+
+        |                   |    NYTimes |  WaPo   |  FoxNews   |
+        +===================+============+=========+============+
+        | Senate            |    71.39   |  74.80  |    55.48   |
+        | Deficit           |    67.75   |  72.58  |    44.91   |
+        | Unemp.            |    62.70   |  66.04  |    68.24   |
+        | Tariffs           |    80.47   |  83.61  |    64.52   |
+        | Elec.vot          |    43.52   |  44.56  |    33.81   |
+        +-------------------+------------+---------+------------+
+
+         ==================SENATE - SELECTED (COUNTS)==============
+                            +-----------------------------------+
+                            |               Trust               |
+        +-------------------+-----------------------------------+
+        | Trust             |                                   |
+        +-------------------+----------- +---------+------------+
+        |                   |    NYTimes |  WaPo   |  FoxNews   |
+        +===================+============+=========+============+
+        | NYTimes           |    2990    |  2309   |    461     |
+        | WaPo              |    2309    |  2714   |    428     |
+        | FoxNews           |    461     |  428    |    2848    |
+        +-------------------+------------+---------+------------+
+
+        ==================SENATE - OTHER (COUNTS)================
+                            +-----------------------------------+
+                            |               Trust               |
+        +-------------------+-----------------------------------+
+        | Trust             |                                   |
+        +-------------------+----------- +---------+------------+
+        |                   |    NYTimes |  WaPo   |  FoxNews   |
+        +===================+============+=========+============+
+        | NYTimes           |   1998     |  737    |    586     |
+        | WaPo              |    737     |  914    |    431     |
+        | FoxNews           |    586     |  431    |    2285    |
+        +-------------------+------------+---------+------------+
+
+        So to get the 71.39 we have to divide counts / margin. For example
+        the first shadow proportion will be 2990 / (2990+1198) where 2990 is the count
+        of the NYTimesXNYTimes in the Senate Selected tab and the denominator is the
+        sum of the counts of the Selected and Other Senate tab in the position (0,0).
+
+        This procedure, is repeated for each couple of (selected and other) tabs for
+        each of the 5 Pol.Know variables.
+
+        Given the shadow proportions and the overlap margins for all the tabs we use
+        these figures to calculate the t-statistic considering the overlaps.
+
+        In this test we are comparing the first column `NYTimes` with the other 2
+        using the correct t_stats arrays."""
         slice_ = Cube(CR.MR_X_MR_WEIGHTED_AUGMENTED).partitions[0]
         actual = slice_.pairwise_significance_tests[1]
         overlap_margins = np.sum(slice_._cube.counts[0], axis=0)[:, 0, :, 0]
@@ -581,7 +638,58 @@ class TestStandardizedResiduals(TestCase):
         assert slice_._cube.counts.shape == (5, 2, 3, 2, 3, 2)
         assert actual.t_stats.shape == (5, 3)
 
-    def test_cat_subvar_x_mr_augmented_pairwise_t_test(self):
+    def test_mr_subvar_x_mr_augmented_pairwise_t_test(self):
+        """This test proofs the hypotesis testing for MR_SUBVAR_X_MR considering the
+        overlaps. To calculate the overlap of this kind of cube we need to calculate
+        the shadow proportion behind the SUBVAR_X_MR table:
+                            +-----------------------------------+
+                            |               Trust               |
+        +-------------------+-----------------------------------+
+        | Increasing Taxes  |                                   |
+        +-------------------+----------- +---------+------------+
+        |                   |    NYTimes |  WaPo   |  FoxNews   |
+        +===================+============+=========+============+
+        | Selected          |    82.71   |  85.96  |    63.21   |
+        | Other             |    17.29   |  14.4   |    36.79   |
+        +-------------------+------------+---------+------------+
+
+         ==================TAB 1 - SELECTED (COUNTS)=============
+                            +-----------------------------------+
+                            |               Trust               |
+        +-------------------+-----------------------------------+
+        | Trust             |                                   |
+        +-------------------+----------- +---------+------------+
+        |                   |    NYTimes |  WaPo   |  FoxNews   |
+        +===================+============+=========+============+
+        | NYTimes           |    3464    |  2647   |    590     |
+        | WaPo              |    2647    |  3119   |    529     |
+        | FoxNews           |    590     |  529    |    3245    |
+        +-------------------+------------+---------+------------+
+
+        ==================TAB 2 - OTHER (COUNTS)=================
+                            +-----------------------------------+
+                            |               Trust               |
+        +-------------------+-----------------------------------+
+        | Trust             |                                   |
+        +-------------------+----------- +---------+------------+
+        |                   |    NYTimes |  WaPo   |  FoxNews   |
+        +===================+============+=========+============+
+        | NYTimes           |    724     |  400    |    458     |
+        | WaPo              |    400     |  509    |    331     |
+        | FoxNews           |    458     |  331    |    1889    |
+        +-------------------+------------+---------+------------+
+
+        So to get the 82.71 we have to divide counts / margin. For example
+        the first shadow proportion will be 3464 / (3464+724) where 3464 is the count
+        of the NYTimesXNYTimes in the first tab and the denominator is the sum of the
+        counts of the first tab and second tab in the position (0,0).
+
+        Given the shadow proportions and the overlap margins for all the tabs we use
+        these figures to calculate the t-statistic considering the overlaps.
+
+        In this test we are comparing the first column `NYTimes` with the other 2
+        using the correct t_stats arrays.
+        """
         slice_ = Cube(CR.CAT_SUBVAR_X_MR_AUGMENTED).partitions[0]
         actual = slice_.pairwise_significance_tests[0]
         overlap_margins = np.sum(slice_._cube.counts, axis=0)[:, 0, :, 0]
@@ -590,16 +698,37 @@ class TestStandardizedResiduals(TestCase):
 
         assert slice_.cube_is_mr_by_itself is True
         np.testing.assert_array_almost_equal(
-            actual.t_stats, [[0.0, 0.76138776, np.nan], [0.0, -0.84215637, np.nan]]
+            actual.t_stats,
+            [[0.0, 16.02651373, -22.43766743], [0.0, -6.56624439, 29.71952066]],
         )
         np.testing.assert_array_almost_equal(
-            actual.p_vals, [[1.0, 0.44720885, np.nan], [1.0, 0.40057908, np.nan]]
+            actual.p_vals,
+            [
+                [1.00000000e00, 0.00000000e00, 0.00000000e00],
+                [1.00000000e00, 5.42792478e-11, 0.00000000e00],
+            ],
         )
         np.testing.assert_array_almost_equal(
             slice_.column_proportions,
             [
-                [0.03711559, 0.06022604, 0.00785561],
-                [0.96288441, 0.93977396, 0.99214439],
+                [0.82707248, 0.85960427, 0.63206628],
+                [0.17292752, 0.14039573, 0.36793372],
+            ],
+        )
+        np.testing.assert_array_almost_equal(
+            shadow_proportions_tab1,
+            [
+                [0.82707248, 0.86881078, 0.56294105],
+                [0.86881078, 0.85960427, 0.61504991],
+                [0.56294105, 0.61504991, 0.63206628],
+            ],
+        )
+        np.testing.assert_array_almost_equal(
+            shadow_proportions_tab2,
+            [
+                [0.17292752, 0.13118922, 0.43705895],
+                [0.13118922, 0.14039573, 0.38495009],
+                [0.43705895, 0.38495009, 0.36793372],
             ],
         )
         np.testing.assert_array_almost_equal(
@@ -632,31 +761,5 @@ class TestStandardizedResiduals(TestCase):
                 [0.23018433, 1.0, 0.88480775],
                 [0.11149176, 1.0, 0.66689419],
                 [0.08853052, 1.0, 0.12423633],
-            ],
-        )
-
-    def test_mr_x_mr_augmented_pairwise_t_test(self):
-        slice_ = Cube(CR.MR_X_MR_AUGMENTED).partitions[0]
-        actual = slice_.pairwise_significance_tests[1]
-
-        assert slice_.cube_is_mr_by_itself is True
-        np.testing.assert_array_almost_equal(
-            actual.t_stats,
-            [
-                [-0.76138776, 0.0, np.nan],
-                [-0.61826861, 0.0, np.nan],
-                [1.13358041, 0.0, np.nan],
-                [1.62565984, 0.0, np.nan],
-                [-1.63486497, 0.0, np.nan],
-            ],
-        )
-        np.testing.assert_array_almost_equal(
-            actual.p_vals,
-            [
-                [0.44720885, 1.0, np.nan],
-                [0.53701272, 1.0, np.nan],
-                [0.25815593, 1.0, np.nan],
-                [0.10539741, 1.0, np.nan],
-                [0.10345119, 1.0, np.nan],
             ],
         )
