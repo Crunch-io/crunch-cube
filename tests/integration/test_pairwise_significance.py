@@ -481,17 +481,11 @@ class TestStandardizedResiduals(TestCase):
     def test_cat_x_mr_weighted_augmented(self):
         slice_ = Cube(CR.CAT_X_MR_WEIGHTED_AUGMENTED).partitions[0]
         actual = slice_.pairwise_significance_tests[1]
+        overlap_margins = np.sum(slice_._cube.counts, axis=0)[:, 0, :, 0]
+        shadow_proportions_tab1 = slice_._cube.counts[0][:, 0, :, 0] / overlap_margins
+        shadow_proportions_tab2 = slice_._cube.counts[1][:, 0, :, 0] / overlap_margins
 
         assert slice_.cube_is_mr_by_itself is True
-        overlap_margins = np.sum(slice_._cube.counts, axis=0)[:, 0, :, 0]
-        shadow_proportions_tab1 = (
-            slice_._cube.counts[0][:, 0, :, 0]
-            / np.sum(slice_._cube.counts, axis=0)[:, 0, :, 0]
-        )
-        shadow_proportions_tab2 = (
-            slice_._cube.counts[1][:, 0, :, 0]
-            / np.sum(slice_._cube.counts, axis=0)[:, 0, :, 0]
-        )
         np.testing.assert_array_almost_equal(
             overlap_margins,
             [
@@ -529,8 +523,6 @@ class TestStandardizedResiduals(TestCase):
     def test_mr_x_mr_weighted_augmented(self):
         slice_ = Cube(CR.MR_X_MR_WEIGHTED_AUGMENTED).partitions[0]
         actual = slice_.pairwise_significance_tests[1]
-
-        assert slice_.cube_is_mr_by_itself is True
         overlap_margins = np.sum(slice_._cube.counts[0], axis=0)[:, 0, :, 0]
         # MRxMRxMR has (5, 2, 3, 2, 3, 2) shape, so 5 tabs of shadow proportions
         shadow_proportions_tab = [
@@ -538,6 +530,7 @@ class TestStandardizedResiduals(TestCase):
             for i in range(slice_._cube.counts.shape[0])
         ]
 
+        assert slice_.cube_is_mr_by_itself is True
         np.testing.assert_array_almost_equal(
             actual.t_stats,
             [
@@ -591,6 +584,9 @@ class TestStandardizedResiduals(TestCase):
     def test_cat_subvar_x_mr_augmented_pairwise_t_test(self):
         slice_ = Cube(CR.CAT_SUBVAR_X_MR_AUGMENTED).partitions[0]
         actual = slice_.pairwise_significance_tests[0]
+        overlap_margins = np.sum(slice_._cube.counts, axis=0)[:, 0, :, 0]
+        shadow_proportions_tab1 = slice_._cube.counts[0][:, 0, :, 0] / overlap_margins
+        shadow_proportions_tab2 = slice_._cube.counts[1][:, 0, :, 0] / overlap_margins
 
         assert slice_.cube_is_mr_by_itself is True
         np.testing.assert_array_almost_equal(
@@ -598,6 +594,19 @@ class TestStandardizedResiduals(TestCase):
         )
         np.testing.assert_array_almost_equal(
             actual.p_vals, [[1.0, 0.44720885, np.nan], [1.0, 0.40057908, np.nan]]
+        )
+        np.testing.assert_array_almost_equal(
+            slice_.column_proportions,
+            [
+                [0.03711559, 0.06022604, 0.00785561],
+                [0.96288441, 0.93977396, 0.99214439],
+            ],
+        )
+        np.testing.assert_array_almost_equal(
+            shadow_proportions_tab1.diagonal(), slice_.column_proportions[0, :]
+        )
+        np.testing.assert_array_almost_equal(
+            shadow_proportions_tab2.diagonal(), slice_.column_proportions[1, :]
         )
 
     def test_mr_x_mr_pairwise_t_test(self):
