@@ -456,7 +456,7 @@ def test_simple_mr_margin_by_col():
     np.testing.assert_array_equal(slice_.rows_margin, [3, 4, 0])
 
 
-def test_cat_x_mr_x_itself_zscores():
+def test_cat_x_mr_x_augmented_zscores():
     slice_ = Cube(CR.EDU_FAV5_FAV5).partitions[0]
 
     assert slice_.cube_is_mr_by_itself is True
@@ -507,7 +507,7 @@ def test_cat_x_mr_x_itself_zscores():
     )
 
 
-def test_cat_x_mr_and_cat_x_mr_x_itself_various_measures():
+def test_cat_x_mr_and_cat_x_mr_augmented_various_measures():
     slice_ = Cube(CR.EDU_FAV5).partitions[0]
     slice2_ = Cube(CR.EDU_FAV5_FAV5).partitions[0]
 
@@ -893,8 +893,8 @@ def test_mr_x_num_with_means_pruned():
     np.testing.assert_almost_equal(slice_.counts, expected)
 
 
-def test_mr_x_mr_itself_zscore():
-    slice_ = Cube(CR.MR_X_MR_ITSELF).partitions[0]
+def test_mr_x_mr_augmented_zscore():
+    slice_ = Cube(CR.MR_X_MR_AUGMENTED).partitions[0]
     expected = [
         [2.02358771, 4.40571894, -4.73781476],
         [1.6374635, 2.98524415, -2.88925509],

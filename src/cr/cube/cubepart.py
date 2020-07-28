@@ -70,6 +70,11 @@ class CubePartition(object):
         return False
 
     @lazyproperty
+    def cube_row_dimension_type(self):
+        """Member of `cr.cube.enum.DIMENSION_TYPE` for cube row dimension"""
+        return self._cube.dimensions[0].dimension_type
+
+    @lazyproperty
     def dimension_types(self):
         """Sequence of member of `cr.cube.enum.DIMENSION_TYPE` for each dimension.
 

@@ -876,12 +876,19 @@ class _MrXMrMatrix(_MatrixWithMR):
     """
 
     def __init__(
-        self, dimensions, counts, base_counts, counts_with_missings, overlaps=None
+        self,
+        dimensions,
+        counts,
+        base_counts,
+        counts_with_missings,
+        overlaps=None,
+        overlaps_margin=None,
     ):
         super(_MrXMrMatrix, self).__init__(
             dimensions, counts, base_counts, counts_with_missings
         )
         self._overlaps = overlaps
+        self._overlaps_margin = overlaps_margin
 
     @lazyproperty
     def columns(self):
@@ -948,24 +955,27 @@ class _MrXMrMatrix(_MatrixWithMR):
         """
 
         # Subtraction of the proportions foreach observation
-        diff = np.subtract.outer(
-            self._mr_shadow_proportions.diagonal(),
-            self._mr_shadow_proportions.diagonal(),
+        diff = (
+            np.subtract.outer(
+                self._mr_shadow_proportions.diagonal(),
+                self._mr_shadow_proportions.diagonal(),
+            )
+            * -1
         )
 
         se_pi_pj = np.add.outer(
             self._mr_shadow_proportions.diagonal()
             * (1 - self._mr_shadow_proportions.diagonal())
-            / self._pairwise_overlap_total.diagonal(),
+            / self._overlaps_margin.diagonal(),
             self._mr_shadow_proportions.diagonal()
             * (1 - self._mr_shadow_proportions.diagonal())
-            / self._pairwise_overlap_total.diagonal(),
+            / self._overlaps_margin.diagonal(),
         )
 
         # Correction factor considering the overlap
         correction_factor = (
             2
-            * self._pairwise_overlap_total
+            * self._overlaps_margin
             * (
                 self._mr_shadow_proportions
                 - np.multiply.outer(
@@ -974,8 +984,7 @@ class _MrXMrMatrix(_MatrixWithMR):
                 )
             )
         ) / np.multiply.outer(
-            self._pairwise_overlap_total.diagonal(),
-            self._pairwise_overlap_total.diagonal(),
+            self._overlaps_margin.diagonal(), self._overlaps_margin.diagonal()
         )
         se_diff = np.sqrt(se_pi_pj - correction_factor)
         np.fill_diagonal(diff, 0)
@@ -1018,17 +1027,7 @@ class _MrXMrMatrix(_MatrixWithMR):
         element of any prepended dimensions:
         A 1d interface to a 4d hypercube of underlying counts.
         """
-        return self._counts[:, 0, :, 0] / self._pairwise_overlap_total
-
-    @lazyproperty
-    def _pairwise_overlap_total(self):
-        """Return 2D ndarray symmetric-square matrix of valid observations.
-
-        Given a 4d hypercube of multiple response items, return the
-        symmetric square matrix of valid observations between all pairs.
-        n1 = 2; n2 = 2; n12 = 1; overlap total = 3
-        """
-        return np.sum(self._counts, axis=(1, 3))
+        return self._counts[:, 0, :, 0] / self._overlaps_margin
 
     @lazyproperty
     def _row_generator(self):

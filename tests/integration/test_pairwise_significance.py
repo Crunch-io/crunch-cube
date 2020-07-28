@@ -399,51 +399,6 @@ class TestStandardizedResiduals(TestCase):
         np.testing.assert_almost_equal(actual.t_stats, expected_tstats)
         np.testing.assert_almost_equal(actual.p_vals, expected_pvals)
 
-    def test_cat_x_mr_itself_pairwise_compare_columns(self):
-        slice_ = Cube(CR.EDU_FAV5_FAV5).partitions[0]
-
-        actual = slice_.pairwise_significance_tests[2]
-        expected_tstats = [
-            [3.2386393, 2.09194923, 0.0, 2.8693425, -4.15518752],
-            [6.88147131, 5.97625571, 0.0, 6.76454926, -0.48584994],
-            [7.83715229, 3.62375238, 0.0, 4.59038147, -1.05390881],
-            [6.47017555, 2.36733655, 0.0, 2.08742665, -0.35158859],
-        ]
-        expected_pvals = [
-            [
-                1.25043153e-03,
-                3.67114360e-02,
-                1.00000000e00,
-                4.20783661e-03,
-                3.49648630e-05,
-            ],
-            [
-                1.19420029e-11,
-                3.24026250e-09,
-                1.00000000e00,
-                2.38187248e-11,
-                6.27168180e-01,
-            ],
-            [
-                1.46549439e-14,
-                3.05956626e-04,
-                1.00000000e00,
-                5.04126756e-06,
-                2.92150962e-01,
-            ],
-            [
-                1.70207404e-10,
-                1.81187549e-02,
-                1.00000000e00,
-                3.71254466e-02,
-                7.25212661e-01,
-            ],
-        ]
-
-        assert slice_.cube_is_mr_by_itself is True
-        np.testing.assert_array_almost_equal(actual.t_stats, expected_tstats)
-        np.testing.assert_array_almost_equal(actual.p_vals, expected_pvals)
-
     def test_cat_x_cat_summary_pairwise_indices(self):
         # Only larger
         slice_ = Cube(CR.PAIRWISE_HIROTSU_OCCUPATION_X_ILLNESS).partitions[0]
@@ -499,57 +454,291 @@ class TestStandardizedResiduals(TestCase):
         )
         np.testing.assert_array_equal(pairwise_indices, expected_indices)
 
-    def test_cat2_x_mr_itself_pairwise_compare_columns(self):
-        slice_ = Cube(CR.CAT2_X_MR_ITSELF).partitions[0]
-        actual = slice_.pairwise_significance_tests[1]
-
-        assert slice_.cube_is_mr_by_itself is True
-        np.testing.assert_array_almost_equal(
-            actual.t_stats,
-            [[-1.11043969, 0.0, -38.08479951], [1.95585649, 0.0, -43.33389473]],
-        )
-        np.testing.assert_array_almost_equal(
-            actual.p_vals, [[0.26797932, 1.0, 0.0], [0.05170342, 1.0, 0.0]]
-        )
-
-    def test_cat_hs_x_mr_itself_pairwise_compare_columns(self):
-        slice_ = Cube(CR.CAT_HS_X_MR_ITSELF).partitions[0]
+    def test_cat_hs_x_mr_augmented_pairwise_t_test(self):
+        slice_ = Cube(CR.CAT_HS_X_MR_AUGMENTED).partitions[0]
         actual = slice_.pairwise_significance_tests[0]
 
         assert slice_.cube_is_mr_by_itself is True
         np.testing.assert_array_almost_equal(
             actual.t_stats,
             [
-                [0.0, -5.48459384, -26.49263374],
-                [0.0, -0.82075664, -31.36275346],
-                [0.0, 1.19221703, -33.43708574],
-                [0.0, 3.12076094, -27.21302499],
+                [0.0, 6.22407684, np.nan],
+                [0.0, 0.21986422, np.nan],
+                [0.0, -2.39283195, np.nan],
+                [0.0, -3.83382639, np.nan],
             ],
         )
         np.testing.assert_array_almost_equal(
             actual.p_vals,
             [
-                [1.00000000e00, 1.09309460e-07, 0.00000000e00],
-                [1.00000000e00, 4.12638459e-01, 0.00000000e00],
-                [1.00000000e00, 2.34410124e-01, 0.00000000e00],
-                [1.00000000e00, 2.03575836e-03, 0.00000000e00],
+                [1.00000000e00, 2.28560104e-09, np.nan],
+                [1.00000000e00, 8.26172768e-01, np.nan],
+                [1.00000000e00, 1.75259091e-02, np.nan],
+                [1.00000000e00, 1.63076135e-04, np.nan],
             ],
         )
 
-    def test_cat_subvar_x_mr_itself_pairwise_compare_columns(self):
-        slice_ = Cube(CR.CAT_SUBVAR_X_MR_ITSELF).partitions[0]
-        actual = slice_.pairwise_significance_tests[0]
+    def test_cat_x_mr_weighted_augmented(self):
+        """Same behaviour of test_mr_subvar_x_mr_augmented_pairwise_t_test"""
+        slice_ = Cube(CR.CAT_X_MR_WEIGHTED_AUGMENTED).partitions[0]
+        actual = slice_.pairwise_significance_tests[1]
+        overlap_margins = np.sum(slice_._cube.counts, axis=0)[:, 0, :, 0]
+        shadow_proportions_tab1 = slice_._cube.counts[0][:, 0, :, 0] / overlap_margins
+        shadow_proportions_tab2 = slice_._cube.counts[1][:, 0, :, 0] / overlap_margins
+
+        assert slice_.cube_is_mr_by_itself is True
+        np.testing.assert_array_almost_equal(
+            overlap_margins,
+            [
+                [4188.13667426, 3046.38734874, 1047.76027958],
+                [3046.38734874, 3628.42165249, 859.70982873],
+                [1047.76027958, 859.70982873, 5133.76481161],
+            ],
+        )
+        np.testing.assert_array_almost_equal(
+            slice_.column_proportions,
+            [
+                [0.71392963, 0.74796797, 0.55475245],
+                [0.28607037, 0.25203203, 0.44524755],
+            ],
+        )
+        np.testing.assert_array_almost_equal(
+            shadow_proportions_tab1.diagonal(), slice_.column_proportions[0, :]
+        )
+        np.testing.assert_array_almost_equal(
+            shadow_proportions_tab2.diagonal(), slice_.column_proportions[1, :]
+        )
+        # each diagonal of the shadow proportions tab is equal to the correspondent row
+        # for the actual proportions
+        np.testing.assert_array_almost_equal(
+            actual.t_stats,
+            [[-10.2964264, 0.0, -20.09577285], [5.96350953, 0.0, 24.14335882]],
+        )
+        np.testing.assert_array_almost_equal(
+            actual.p_vals,
+            [[0.0, 1.00000000e00, 0.0], [2.55612775e-09, 1.00000000e00, 0.0]],
+        )
+        assert slice_._cube.counts.shape == (2, 3, 2, 3, 2)
+        assert actual.t_stats.shape == (2, 3)
+
+    def test_mr_x_mr_weighted_augmented_pairwise_t_test(self):
+        """This test proofs the hypotesis testing for MR1_X_MR2 considering the
+        overlaps. To calculate the overlap of this kind of cube we need to calculate
+        the shadow proportion behind the MR1_X_MR2 table:
+                            +-----------------------------------+
+                            |               Trust               |
+        +-------------------+-----------------------------------+
+        | Pol.Know          |                                   |
+        +-------------------+----------- +---------+------------+
+        |                   |    NYTimes |  WaPo   |  FoxNews   |
+        +===================+============+=========+============+
+        | Senate            |    71.39   |  74.80  |    55.48   |
+        | Deficit           |    67.75   |  72.58  |    44.91   |
+        | Unemp.            |    62.70   |  66.04  |    68.24   |
+        | Tariffs           |    80.47   |  83.61  |    64.52   |
+        | Elec.vot          |    43.52   |  44.56  |    33.81   |
+        +-------------------+------------+---------+------------+
+
+         ==================SENATE - SELECTED (COUNTS)==============
+                            +-----------------------------------+
+                            |               Trust               |
+        +-------------------+-----------------------------------+
+        | Trust             |                                   |
+        +-------------------+----------- +---------+------------+
+        |                   |    NYTimes |  WaPo   |  FoxNews   |
+        +===================+============+=========+============+
+        | NYTimes           |    2990    |  2309   |    461     |
+        | WaPo              |    2309    |  2714   |    428     |
+        | FoxNews           |    461     |  428    |    2848    |
+        +-------------------+------------+---------+------------+
+
+        ==================SENATE - OTHER (COUNTS)================
+                            +-----------------------------------+
+                            |               Trust               |
+        +-------------------+-----------------------------------+
+        | Trust             |                                   |
+        +-------------------+----------- +---------+------------+
+        |                   |    NYTimes |  WaPo   |  FoxNews   |
+        +===================+============+=========+============+
+        | NYTimes           |   1998     |  737    |    586     |
+        | WaPo              |    737     |  914    |    431     |
+        | FoxNews           |    586     |  431    |    2285    |
+        +-------------------+------------+---------+------------+
+
+        So to get the 71.39 we have to divide counts / margin. For example
+        the first shadow proportion will be 2990 / (2990+1198) where 2990 is the count
+        of the NYTimesXNYTimes in the Senate Selected tab and the denominator is the
+        sum of the counts of the Selected and Other Senate tab in the position (0,0).
+
+        This procedure, is repeated for each couple of (selected and other) tabs for
+        each of the 5 Pol.Know variables.
+
+        Given the shadow proportions and the overlap margins for all the tabs we use
+        these figures to calculate the t-statistic considering the overlaps.
+
+        In this test we are comparing the first column `NYTimes` with the other 2
+        using the correct t_stats arrays."""
+        slice_ = Cube(CR.MR_X_MR_WEIGHTED_AUGMENTED).partitions[0]
+        actual = slice_.pairwise_significance_tests[1]
+        overlap_margins = np.sum(slice_._cube.counts[0], axis=0)[:, 0, :, 0]
+        # MRxMRxMR has (5, 2, 3, 2, 3, 2) shape, so 5 tabs of shadow proportions
+        shadow_proportions_tab = [
+            (slice_._cube.counts[i][0][:, 0, :, 0] / overlap_margins)
+            for i in range(slice_._cube.counts.shape[0])
+        ]
 
         assert slice_.cube_is_mr_by_itself is True
         np.testing.assert_array_almost_equal(
             actual.t_stats,
-            [[0.0, -1.0379925, -2.04481142], [0.0, -1.14023824, -60.07645576]],
+            [
+                [-10.2964264, 0.0, -20.09577285],
+                [-16.38251357, 0.0, -28.57841019],
+                [-7.42875194, 0.0, 2.33766663],
+                [-10.88338158, 0.0, -22.45002834],
+                [-2.12632668, 0.0, -11.07466431],
+            ],
         )
         np.testing.assert_array_almost_equal(
-            actual.p_vals, [[1.0, 0.30036831, 0.04105959], [1.0, 0.25537821, 0.0]]
+            actual.p_vals,
+            [
+                [0.0, 1.00000000e00, 0.0],
+                [0.0, 1.00000000e00, 0.0],
+                [1.19015908e-13, 1.00000000e00, 1.94264286e-02],
+                [0.0, 1.00000000e00, 0.0],
+                [3.35015757e-02, 1.00000000e00, 0.0],
+            ],
+        )
+        np.testing.assert_array_almost_equal(
+            slice_.column_proportions,
+            [
+                [0.71392963, 0.74796797, 0.55475245],
+                [0.67749583, 0.72581913, 0.44912163],
+                [0.62702902, 0.6603541, 0.68236206],
+                [0.80466553, 0.8360987, 0.64524993],
+                [0.43519965, 0.44556699, 0.33807508],
+            ],
+        )
+        # each diagonal of the shadow proportions tab is equal to the correspondent row
+        # for the actual proportions
+        np.testing.assert_array_almost_equal(
+            shadow_proportions_tab[0].diagonal(), slice_.column_proportions[0, :]
+        )
+        np.testing.assert_array_almost_equal(
+            shadow_proportions_tab[1].diagonal(), slice_.column_proportions[1, :]
+        )
+        np.testing.assert_array_almost_equal(
+            shadow_proportions_tab[2].diagonal(), slice_.column_proportions[2, :]
+        )
+        np.testing.assert_array_almost_equal(
+            shadow_proportions_tab[3].diagonal(), slice_.column_proportions[3, :]
+        )
+        np.testing.assert_array_almost_equal(
+            shadow_proportions_tab[4].diagonal(), slice_.column_proportions[4, :]
+        )
+        assert slice_._cube.counts.shape == (5, 2, 3, 2, 3, 2)
+        assert actual.t_stats.shape == (5, 3)
+
+    def test_mr_subvar_x_mr_augmented_pairwise_t_test(self):
+        """This test proofs the hypotesis testing for MR_SUBVAR_X_MR considering the
+        overlaps. To calculate the overlap of this kind of cube we need to calculate
+        the shadow proportion behind the SUBVAR_X_MR table:
+                            +-----------------------------------+
+                            |               Trust               |
+        +-------------------+-----------------------------------+
+        | Increasing Taxes  |                                   |
+        +-------------------+----------- +---------+------------+
+        |                   |    NYTimes |  WaPo   |  FoxNews   |
+        +===================+============+=========+============+
+        | Selected          |    82.71   |  85.96  |    63.21   |
+        | Other             |    17.29   |  14.4   |    36.79   |
+        +-------------------+------------+---------+------------+
+
+         ==================TAB 1 - SELECTED (COUNTS)=============
+                            +-----------------------------------+
+                            |               Trust               |
+        +-------------------+-----------------------------------+
+        | Trust             |                                   |
+        +-------------------+----------- +---------+------------+
+        |                   |    NYTimes |  WaPo   |  FoxNews   |
+        +===================+============+=========+============+
+        | NYTimes           |    3464    |  2647   |    590     |
+        | WaPo              |    2647    |  3119   |    529     |
+        | FoxNews           |    590     |  529    |    3245    |
+        +-------------------+------------+---------+------------+
+
+        ==================TAB 2 - OTHER (COUNTS)=================
+                            +-----------------------------------+
+                            |               Trust               |
+        +-------------------+-----------------------------------+
+        | Trust             |                                   |
+        +-------------------+----------- +---------+------------+
+        |                   |    NYTimes |  WaPo   |  FoxNews   |
+        +===================+============+=========+============+
+        | NYTimes           |    724     |  400    |    458     |
+        | WaPo              |    400     |  509    |    331     |
+        | FoxNews           |    458     |  331    |    1889    |
+        +-------------------+------------+---------+------------+
+
+        So to get the 82.71 we have to divide counts / margin. For example
+        the first shadow proportion will be 3464 / (3464+724) where 3464 is the count
+        of the NYTimesXNYTimes in the first tab and the denominator is the sum of the
+        counts of the first tab and second tab in the position (0,0).
+
+        Given the shadow proportions and the overlap margins for all the tabs we use
+        these figures to calculate the t-statistic considering the overlaps.
+
+        In this test we are comparing the first column `NYTimes` with the other 2
+        using the correct t_stats arrays.
+        """
+        slice_ = Cube(CR.CAT_SUBVAR_X_MR_AUGMENTED).partitions[0]
+        actual = slice_.pairwise_significance_tests[0]
+        overlap_margins = np.sum(slice_._cube.counts, axis=0)[:, 0, :, 0]
+        shadow_proportions_tab1 = slice_._cube.counts[0][:, 0, :, 0] / overlap_margins
+        shadow_proportions_tab2 = slice_._cube.counts[1][:, 0, :, 0] / overlap_margins
+
+        assert slice_.cube_is_mr_by_itself is True
+        np.testing.assert_array_almost_equal(
+            actual.t_stats,
+            [[0.0, 16.02651373, -22.43766743], [0.0, -6.56624439, 29.71952066]],
+        )
+        np.testing.assert_array_almost_equal(
+            actual.p_vals,
+            [
+                [1.00000000e00, 0.00000000e00, 0.00000000e00],
+                [1.00000000e00, 5.42792478e-11, 0.00000000e00],
+            ],
+        )
+        np.testing.assert_array_almost_equal(
+            slice_.column_proportions,
+            [
+                [0.82707248, 0.85960427, 0.63206628],
+                [0.17292752, 0.14039573, 0.36793372],
+            ],
+        )
+        np.testing.assert_array_almost_equal(
+            shadow_proportions_tab1,
+            [
+                [0.82707248, 0.86881078, 0.56294105],
+                [0.86881078, 0.85960427, 0.61504991],
+                [0.56294105, 0.61504991, 0.63206628],
+            ],
+        )
+        np.testing.assert_array_almost_equal(
+            shadow_proportions_tab2,
+            [
+                [0.17292752, 0.13118922, 0.43705895],
+                [0.13118922, 0.14039573, 0.38495009],
+                [0.43705895, 0.38495009, 0.36793372],
+            ],
+        )
+        np.testing.assert_array_almost_equal(
+            shadow_proportions_tab1.diagonal(), slice_.column_proportions[0, :]
+        )
+        np.testing.assert_array_almost_equal(
+            shadow_proportions_tab2.diagonal(), slice_.column_proportions[1, :]
         )
 
-    def test_mr_x_mr_pairwise_compare_columns(self):
+    def test_mr_x_mr_pairwise_t_test(self):
         slice_ = Cube(CR.MR_X_MR_2).partitions[0]
         actual = slice_.pairwise_significance_tests[1]
 
@@ -572,31 +761,5 @@ class TestStandardizedResiduals(TestCase):
                 [0.23018433, 1.0, 0.88480775],
                 [0.11149176, 1.0, 0.66689419],
                 [0.08853052, 1.0, 0.12423633],
-            ],
-        )
-
-    def test_mr_x_mr_itself_pairwise_compare_columns(self):
-        slice_ = Cube(CR.MR_X_MR_ITSELF).partitions[0]
-        actual = slice_.pairwise_significance_tests[1]
-
-        assert slice_.cube_is_mr_by_itself is True
-        np.testing.assert_array_almost_equal(
-            actual.t_stats,
-            [
-                [1.0379925, 0.0, -0.9156408],
-                [1.03178074, 0.0, -7.45906932],
-                [-0.57777416, 0.0, -18.5810699],
-                [-0.34165816, 0.0, -34.91068779],
-                [2.09893803, 0.0, -43.76650632],
-            ],
-        )
-        np.testing.assert_array_almost_equal(
-            actual.p_vals,
-            [
-                [3.00368306e-01, 1.00000000e00, 3.60015180e-01],
-                [3.03263297e-01, 1.00000000e00, 1.53432822e-13],
-                [5.63984270e-01, 1.00000000e00, 0.00000000e00],
-                [7.32921470e-01, 1.00000000e00, 0.00000000e00],
-                [3.69178553e-02, 1.00000000e00, 0.00000000e00],
             ],
         )
