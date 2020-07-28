@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+### 1.11.35
+- Bug fix for hypothesis testing with overlaps
+
 ### 1.11.34
 - Bug fix for augmented MRxMR matrices
 
