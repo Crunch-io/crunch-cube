@@ -14,6 +14,7 @@ from cr.cube.enum import DIMENSION_TYPE as DT
 # ---mnemonic: CR = 'cube-response'---
 # ---mnemonic: TR = 'transforms'---
 from ..fixtures import CR, TR
+from ..util import load_python_expression
 
 
 class Describe_Slice(object):
@@ -186,6 +187,44 @@ class Describe_Slice(object):
                 [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
                 [-0.22728508, -0.3810277, -0.10690048, 0.5405717, np.nan, -0.31799761],
             ],
+        )
+
+    @pytest.mark.parametrize(
+        "fixture, expectation",
+        (
+            (CR.CAT_HS_X_MR, "cat-hs-x-mr-row-proportions"),
+            (CR.MR_X_CAT_HS, "mr-x-cat-hs-row-proportions"),
+            (CR.MR_X_MR, "mr-x-mr-row-proportions"),
+        ),
+    )
+    def it_knows_the_row_proportions(self, fixture, expectation):
+        slice_ = _Slice(
+            Cube(fixture), slice_idx=0, transforms={}, population=None, mask_size=0
+        )
+
+        row_proportions = slice_.row_proportions
+
+        np.testing.assert_almost_equal(
+            row_proportions, load_python_expression(expectation)
+        )
+
+    @pytest.mark.parametrize(
+        "fixture, expectation",
+        (
+            (CR.CAT_HS_X_MR, "cat-hs-x-mr-column-proportions"),
+            (CR.MR_X_CAT_HS, "mr-x-cat-hs-column-proportions"),
+            (CR.MR_X_MR, "mr-x-mr-column-proportions"),
+        ),
+    )
+    def it_knows_the_column_proportions(self, fixture, expectation):
+        slice_ = _Slice(
+            Cube(fixture), slice_idx=0, transforms={}, population=None, mask_size=0
+        )
+
+        column_proportions = slice_.column_proportions
+
+        np.testing.assert_almost_equal(
+            column_proportions, load_python_expression(expectation)
         )
 
     def it_ignores_hidden_subtotals(self):
@@ -702,146 +741,6 @@ class Describe_Slice(object):
             [471.93176847, 176.36555176, 457.05095566, 211.42058767, 247.74073787],
         )
 
-    def it_calculates_mr_x_cat_row_proportions(self):
-        slice_ = Cube(CR.MR_X_CAT_HS).partitions[0]
-        expected = [
-            [
-                0.44079255,
-                0.1927531,
-                0.63354565,
-                0.0,
-                0.13200555,
-                0.2344488,
-                0.0,
-                0.36645435,
-            ],
-            [
-                0.12706997,
-                0.17758354,
-                0.30465351,
-                0.0,
-                0.35154979,
-                0.3437967,
-                0.0,
-                0.69534649,
-            ],
-            [
-                0.02245085,
-                0.15543673,
-                0.17788758,
-                0.0,
-                0.40588131,
-                0.41623111,
-                0.0,
-                0.82211242,
-            ],
-            [
-                0.03842827,
-                0.11799739,
-                0.15642566,
-                0.0,
-                0.35971868,
-                0.48385566,
-                0.0,
-                0.84357434,
-            ],
-            [
-                0.06423004,
-                0.19460845,
-                0.25883849,
-                0.0,
-                0.34442742,
-                0.39673409,
-                0.0,
-                0.74116151,
-            ],
-        ]
-        np.testing.assert_almost_equal(slice_.row_proportions, expected)
-
-    def it_calculates_mr_x_cat_column_proportions(self):
-        slice_ = Cube(CR.MR_X_CAT_HS).partitions[0]
-        expected = [
-            [
-                0.63991606,
-                0.18579712,
-                0.36700322,
-                np.nan,
-                0.0709326,
-                0.11791067,
-                np.nan,
-                0.09519879,
-            ],
-            [
-                0.57106291,
-                0.30796582,
-                0.38122252,
-                np.nan,
-                0.32298183,
-                0.31211929,
-                np.nan,
-                0.31751821,
-            ],
-            [
-                0.23101896,
-                0.47698573,
-                0.42048358,
-                np.nan,
-                0.55509399,
-                0.51026605,
-                np.nan,
-                0.53145537,
-            ],
-            [
-                0.6728815,
-                0.6856928,
-                0.68250053,
-                np.nan,
-                0.79661367,
-                0.85638988,
-                np.nan,
-                0.82983691,
-            ],
-            [
-                0.78206694,
-                0.83094212,
-                0.81825272,
-                np.nan,
-                0.78257903,
-                0.79964474,
-                np.nan,
-                0.79162243,
-            ],
-        ]
-        np.testing.assert_almost_equal(slice_.column_proportions, expected)
-
-    def it_calculates_cat_x_mr_row_proportions(self):
-        slice_ = Cube(CR.CAT_HS_X_MR).partitions[0]
-        expected = [
-            [0.63991606, 0.57106291, 0.23101896, 0.6728815, 0.78206694],
-            [0.18579712, 0.30796582, 0.47698573, 0.6856928, 0.83094212],
-            [0.36700322, 0.38122252, 0.42048358, 0.68250053, 0.81825272],
-            [np.nan, np.nan, np.nan, np.nan, np.nan],
-            [0.0709326, 0.32298183, 0.55509399, 0.79661367, 0.78257903],
-            [0.11791067, 0.31211929, 0.51026605, 0.85638988, 0.79964474],
-            [np.nan, np.nan, np.nan, np.nan, np.nan],
-            [0.09519879, 0.31751821, 0.53145537, 0.82983691, 0.79162243],
-        ]
-        np.testing.assert_almost_equal(slice_.row_proportions, expected)
-
-    def it_calculates_cat_x_mr_column_proportions(self):
-        slice_ = Cube(CR.CAT_HS_X_MR).partitions[0]
-        expected = [
-            [0.44079255, 0.12706997, 0.02245085, 0.03842827, 0.06423004],
-            [0.1927531, 0.17758354, 0.15543673, 0.11799739, 0.19460845],
-            [0.63354565, 0.30465351, 0.17788758, 0.15642566, 0.25883849],
-            [0.0, 0.0, 0.0, 0.0, 0.0],
-            [0.13200555, 0.35154979, 0.40588131, 0.35971868, 0.34442742],
-            [0.2344488, 0.3437967, 0.41623111, 0.48385566, 0.39673409],
-            [0.0, 0.0, 0.0, 0.0, 0.0],
-            [0.36645435, 0.69534649, 0.82211242, 0.84357434, 0.74116151],
-        ]
-        np.testing.assert_almost_equal(slice_.column_proportions, expected)
-
     def it_calculates_mr_x_cat_various_measures(self):
         slice_ = Cube(CR.MR_X_CAT_HS).partitions[0]
         expected_zscore = [
@@ -1256,28 +1155,6 @@ class Describe_Slice(object):
         np.testing.assert_almost_equal(slice_.columns_std_err, expected_col_std_err)
         np.testing.assert_almost_equal(slice_.zscore, expected_zscore)
         np.testing.assert_almost_equal(slice_.pvals, expected_pvals)
-
-    def it_calculates_mr_x_mr_row_proportions(self):
-        slice_ = Cube(CR.MR_X_MR).partitions[0]
-        expected = [
-            [1.0, 0.28566937, 0.43456698, 1.0],
-            [0.13302403, 1.0, 0.34959546, 1.0],
-            [0.12391245, 0.23498805, 1.0, 1.0],
-            [0.22804396, 0.47751837, 0.72838875, 1.0],
-        ]
-        np.testing.assert_almost_equal(slice_.row_proportions, expected)
-
-    def it_knows_mr_x_mr_column_proportions(self):
-        slice_ = Cube(CR.MR_X_MR).partitions[0]
-        np.testing.assert_almost_equal(
-            slice_.column_proportions,
-            [
-                [1.0, 0.13302403, 0.12391245, 0.22804396],
-                [0.28566937, 1.0, 0.23498805, 0.47751837],
-                [0.43456698, 0.34959546, 1.0, 0.72838875],
-                [1.0, 1.0, 1.0, 1.0],
-            ],
-        )
 
     def it_reorders_cat_x_cat(self):
         transforms = {
