@@ -396,6 +396,30 @@ class Describe_Slice(object):
         expected = load_python_expression(expectation)
         np.testing.assert_almost_equal(actual, expected)
 
+    @pytest.mark.xfail(reason="WIP", strict=True)
+    def it_can_sort_by_value(self):
+        """Responds to order:opposing_element sort-by-value."""
+        transforms = {
+            "rows_dimension": {"order": {"type": "opposing_element", "element_id": 1}}
+        }
+        slice_ = _Slice(
+            Cube(CR.CAT_4_X_CAT_5),
+            slice_idx=0,
+            transforms=transforms,
+            population=None,
+            mask_size=0,
+        )
+
+        counts = [list(row) for row in slice_.counts]
+
+        expected = [
+            [253, 17, 41, 1, 47],  # --- Not Enough ---
+            [127, 55, 13, 1, 29],  # --- Enough ---
+            [46, 21, 3, 0, 7],  # --- Plenty ---
+            [247, 80, 19, 4, 26],  # --- N/A ---
+        ]
+        assert expected == counts, "\n%s\n\n%s" % (expected, counts)
+
     def it_ignores_hidden_subtotals(self):
         """A subtotal with `"hide": True` does not appear.
 
