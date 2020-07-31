@@ -63,22 +63,14 @@ def calculate_overlap_tstats(
     numerator = np.zeros(np.array(mr_counts.shape)[[0, 1 + offset, 3 + offset]])
     standard_error = np.zeros(np.array(mr_counts.shape)[[0, 1 + offset, 3 + offset]])
     for slice_index in range(mr_counts.shape[0]):
-        counts = mr_counts[slice_index][0] if offset != 0 else mr_counts[slice_index]
-        base_counts = (
-            mr_base_counts[slice_index][0]
-            if offset != 0
-            else mr_base_counts[slice_index]
-        )
-        counts_with_missings = (
-            mr_counts_with_missings[slice_index][0]
-            if offset != 0
-            else mr_counts_with_missings[slice_index]
-        )
+        counts = mr_counts[slice_index]
+        base_counts = mr_base_counts[slice_index]
+        counts_with_missings = mr_counts_with_missings[slice_index]
         overlap_slice = cls(
             mr_dimensions,
-            counts,
-            base_counts,
-            counts_with_missings,
+            counts if offset == 0 else counts[0],
+            base_counts if offset == 0 else base_counts[0],
+            counts_with_missings if offset == 0 else counts_with_missings[0],
             None,
             overlap_margins,
         )
