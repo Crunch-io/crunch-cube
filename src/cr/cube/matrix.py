@@ -1357,10 +1357,6 @@ class _BaseTransformationVector(object):
         self._base_vector = base_vector
 
     @lazyproperty
-    def addend_idxs(self):
-        return self._base_vector.addend_idxs
-
-    @lazyproperty
     def element_id(self):
         """int identifier of category or subvariable this vector represents."""
         return self._base_vector.element_id
