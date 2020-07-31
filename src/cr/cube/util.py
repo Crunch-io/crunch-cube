@@ -23,6 +23,7 @@ def counts_with_subtotals(addend_idxs, inserted_rows_idxs, counts):
     subtotals_counts = np.array(
         [sum(counts[i] for i in addend_idxs[j]) for j, _ in enumerate(addend_idxs)]
     )
+
     for id, elem in enumerate(inserted_rows_idxs):
         counts_with_hs[elem] = subtotals_counts[id]
     nan_idx = [
