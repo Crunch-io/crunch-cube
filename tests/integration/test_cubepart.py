@@ -396,11 +396,17 @@ class Describe_Slice(object):
         expected = load_python_expression(expectation)
         np.testing.assert_almost_equal(actual, expected)
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     def it_can_sort_by_value(self):
         """Responds to order:opposing_element sort-by-value."""
         transforms = {
-            "rows_dimension": {"order": {"type": "opposing_element", "element_id": 1}}
+            "rows_dimension": {
+                "order": {
+                    "type": "opposing_element",
+                    "element_id": 1,
+                    "exclude": {"bottom": [999]},
+                    "measure": "count",
+                }
+            }
         }
         slice_ = _Slice(
             Cube(CR.CAT_4_X_CAT_5),
@@ -420,7 +426,6 @@ class Describe_Slice(object):
         ]
         assert expected == counts, "\n%s\n\n%s" % (expected, counts)
 
-    @pytest.mark.xfail(reason="WIP", raises=AssertionError, strict=True)
     def and_it_can_sort_by_marginal(self):
         """Responds to order:marginal sort-by-value."""
         transforms = {
@@ -449,9 +454,56 @@ class Describe_Slice(object):
             rows_base,
         )
 
-    @pytest.mark.xfail(reason="WIP", raises=AssertionError, strict=True)
     def and_it_can_sort_by_an_opposing_subtotal(self):
         """Responds to order:opposing_insertion sort-by-value."""
+        tmpl = "\nexpected: %s\ngot:      %s\n"
+
+        # --- baseline ---
+        slice_ = _Slice(
+            Cube(CR.CAT_4_X_CAT_5_HS_2),
+            slice_idx=0,
+            transforms={},
+            population=None,
+            mask_size=0,
+        )
+
+        expected_col_lbls = (
+            "Married",
+            "As married",
+            "Together",
+            "Divorced",
+            "Widowed",
+            "Apart",
+            "Never",
+        )
+        col_lbls = slice_.column_labels
+        assert expected_col_lbls == col_lbls, tmpl % (expected_col_lbls, col_lbls)
+
+        expected_row_lbls = (
+            "Plenty",
+            "Enough",
+            "OK",
+            "Not Enough",
+            "Not Plenty",
+            "N/A",
+        )
+        row_lbls = slice_.row_labels
+        assert expected_row_lbls == row_lbls, tmpl % (expected_row_lbls, row_lbls)
+
+        expected_ucounts = (
+            # Ma  As   To  Dv  W  Ap  Nev
+            (46, 21, 67, 3, 0, 3, 7),  # --- Plenty --
+            (127, 55, 182, 13, 1, 14, 29),  # --- Enough ---
+            (173, 76, 249, 16, 1, 17, 36),  # --- OK ---
+            (253, 17, 270, 41, 1, 42, 47),  # --- Not Enough ---
+            (380, 72, 452, 54, 2, 56, 76),  # --- Not Plenty ---
+            (247, 80, 327, 19, 4, 23, 26),  # --- N/A ---
+        )
+        ucounts = slice_.unweighted_counts
+        assert expected_ucounts == ucounts, tmpl % (expected_ucounts, ucounts)
+
+        # --- sort-by-subtotal ---
+
         transforms = {
             "rows_dimension": {
                 "order": {
@@ -459,22 +511,61 @@ class Describe_Slice(object):
                     "insertion_id": 1,
                     "measure": "unweighted_count",
                     "direction": "descending",
-                    "exclude": {"bottom": [999]},
+                    "exclude": {"top": [999]},
                 }
-            }
+            },
+            "columns_dimension": {
+                "order": {
+                    "type": "opposing_subtotal",
+                    "insertion_id": 1,
+                    "measure": "unweighted_count",
+                    "direction": "descending",
+                }
+            },
         }
+
         slice_ = _Slice(
-            Cube(CR.CAT_4_X_CAT_5),
+            Cube(CR.CAT_4_X_CAT_5_HS_2),
             slice_idx=0,
             transforms=transforms,
             population=None,
             mask_size=0,
         )
 
-        ucounts = slice_.unweighted_counts
+        expected_col_lbls = (
+            "Together",
+            "Apart",
+            "Married",
+            "As married",
+            "Never",
+            "Divorced",
+            "Widowed",
+        )
+        col_lbls = slice_.column_labels
+        assert expected_col_lbls == col_lbls, tmpl % (expected_col_lbls, col_lbls)
 
-        expected = (376, 77, 225, 359)
-        assert expected == ucounts, "\nexpected: %s\ngot:      %s" % (expected, ucounts)
+        expected_row_lbls = (
+            "Not Plenty",
+            "OK",
+            "N/A",
+            "Not Enough",
+            "Enough",
+            "Plenty",
+        )
+        row_lbls = slice_.row_labels
+        assert expected_row_lbls == row_lbls, tmpl % (expected_row_lbls, row_lbls)
+
+        expected_ucounts = (
+            # Tg  Ap   Ma  As  Nv  Di  W
+            (452, 56, 380, 72, 76, 54, 2),  # --- Not Plenty ---
+            (249, 17, 173, 76, 36, 16, 1),  # --- OK ---
+            (327, 23, 247, 80, 26, 19, 4),  # --- N/A ---
+            (270, 42, 253, 17, 47, 41, 1),  # --- Not Enough ---
+            (182, 14, 127, 55, 29, 13, 1),  # --- Enough ---
+            (67, 3, 46, 21, 7, 3, 0),  # --- Plenty --
+        )
+        ucounts = slice_.unweighted_counts
+        assert expected_ucounts == ucounts, tmpl % (expected_ucounts, ucounts)
 
     def it_ignores_hidden_subtotals(self):
         """A subtotal with `"hide": True` does not appear.

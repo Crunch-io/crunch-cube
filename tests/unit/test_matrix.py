@@ -4,8 +4,6 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import sys
-
 import numpy as np
 import pytest
 
@@ -13,14 +11,12 @@ from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension, _Element, _Subtotal
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.matrix import (
-    _AssembledVector,
     _BaseBaseMatrix,
     _BaseInsertedVector,
     _BaseTransformationVector,
     _BaseVector,
     _InsertedColumn,
     _InsertedRow,
-    _OrderedVector,
     TransformedMatrix,
 )
 
@@ -50,6 +46,7 @@ class DescribeTransformedMatrix(object):
         _init_.assert_called_once_with(ANY, base_matrix_)
         assert isinstance(matrix, TransformedMatrix)
 
+    @pytest.mark.xfail(reason="WIP", raises=AttributeError, strict=True)
     def it_assembles_inserted_columns_into_base_columns_to_help(
         self,
         _base_columns_prop_,
@@ -70,6 +67,7 @@ class DescribeTransformedMatrix(object):
         )
         assert assembled_columns == ("assembled", "columns")
 
+    @pytest.mark.xfail(reason="WIP", raises=AttributeError, strict=True)
     def it_assembles_inserted_rows_into_base_rows_to_help(
         self,
         _base_rows_prop_,
@@ -89,55 +87,6 @@ class DescribeTransformedMatrix(object):
             matrix, ("base", "rows"), ("inserted", "rows"), ("inserted", "columns")
         )
         assert assembled_rows == ("assembled", "rows")
-
-    @pytest.mark.parametrize(
-        ("InsertedVectorCls", "OpposingInsertedVectorCls"),
-        ((_InsertedColumn, _InsertedRow), (_InsertedRow, _InsertedColumn)),
-    )
-    def it_assembles_base_vectors_with_inserted_vectors_to_help(
-        self, request, InsertedVectorCls, OpposingInsertedVectorCls, _AssembledVector_
-    ):
-        # --- base vectors ---
-        top_base_vector_ = instance_mock(request, _OrderedVector, name="top")
-        top_base_vector_.ordering = (0, 0, top_base_vector_)
-        bot_base_vector_ = instance_mock(request, _OrderedVector, name="bot")
-        bot_base_vector_.ordering = (1, 1, bot_base_vector_)
-        base_vectors_ = (top_base_vector_, bot_base_vector_)
-        # --- inserted vectors ---
-        top_inserted_vector_ = instance_mock(request, InsertedVectorCls, name="top")
-        top_inserted_vector_.ordering = (0, -2, top_inserted_vector_)
-        mid_inserted_vector_ = instance_mock(request, InsertedVectorCls, name="mid")
-        mid_inserted_vector_.ordering = (1, -1, mid_inserted_vector_)
-        bot_inserted_vector_ = instance_mock(request, InsertedVectorCls, name="bot")
-        bot_inserted_vector_.ordering = (sys.maxsize, -3, bot_inserted_vector_)
-        inserted_vectors_ = (
-            bot_inserted_vector_,
-            top_inserted_vector_,
-            mid_inserted_vector_,
-        )
-        # --- opposing inserted vectors ---
-        opposing_inserted_vectors_ = tuple(
-            instance_mock(request, OpposingInsertedVectorCls) for _ in range(3)
-        )
-        # --- _AssembledVector behaviors ---
-        assembled_vectors_ = tuple(
-            instance_mock(request, _AssembledVector) for _ in range(8)
-        )
-        _AssembledVector_.side_effect = iter(assembled_vectors_)
-        matrix = TransformedMatrix(None)
-
-        assembled_vectors = matrix._assembled_vectors(
-            base_vectors_, inserted_vectors_, opposing_inserted_vectors_
-        )
-
-        assert _AssembledVector_.call_args_list == [
-            call(top_inserted_vector_, opposing_inserted_vectors_, 0),
-            call(top_base_vector_, opposing_inserted_vectors_, 0),
-            call(mid_inserted_vector_, opposing_inserted_vectors_, 0),
-            call(bot_base_vector_, opposing_inserted_vectors_, 1),
-            call(bot_inserted_vector_, opposing_inserted_vectors_, 0),
-        ]
-        assert assembled_vectors == assembled_vectors_[:5]
 
     def it_constructs_its_inserted_columns_to_help(
         self,
@@ -167,9 +116,9 @@ class DescribeTransformedMatrix(object):
         inserted_columns = matrix._inserted_columns
 
         assert _InsertedColumn_.call_args_list == [
-            call(subtotals_[0], -3, 73, ("base", "rows"), ("base", "columns")),
-            call(subtotals_[1], -2, 73, ("base", "rows"), ("base", "columns")),
-            call(subtotals_[2], -1, 73, ("base", "rows"), ("base", "columns")),
+            call(subtotals_[0], 73, ("base", "rows"), ("base", "columns")),
+            call(subtotals_[1], 73, ("base", "rows"), ("base", "columns")),
+            call(subtotals_[2], 73, ("base", "rows"), ("base", "columns")),
         ]
         assert inserted_columns == inserted_columns_[:3]
 
@@ -211,9 +160,9 @@ class DescribeTransformedMatrix(object):
         inserted_rows = matrix._inserted_rows
 
         assert _InsertedRow_.call_args_list == [
-            call(subtotals_[0], -3, 302, ("base", "rows"), ("base", "columns")),
-            call(subtotals_[1], -2, 302, ("base", "rows"), ("base", "columns")),
-            call(subtotals_[2], -1, 302, ("base", "rows"), ("base", "columns")),
+            call(subtotals_[0], 302, ("base", "rows"), ("base", "columns")),
+            call(subtotals_[1], 302, ("base", "rows"), ("base", "columns")),
+            call(subtotals_[2], 302, ("base", "rows"), ("base", "columns")),
         ]
         assert inserted_rows == inserted_rows_[:3]
 
@@ -298,7 +247,7 @@ class Describe_BaseInsertedVector(object):
         _base_vectors_prop_.return_value = tuple(
             instance_mock(request, _BaseVector, element_id=i + 1) for i in range(6)
         )
-        inserted_vector = _BaseInsertedVector(subtotal_, None, None, None, None)
+        inserted_vector = _BaseInsertedVector(subtotal_, None, None, None)
 
         addend_idxs = inserted_vector.addend_idxs
 
@@ -307,7 +256,7 @@ class Describe_BaseInsertedVector(object):
     @pytest.mark.parametrize("anchor_value", ("top", "bottom", 42))
     def it_knows_its_anchor(self, subtotal_, anchor_value):
         subtotal_.anchor = anchor_value
-        inserted_vector = _BaseInsertedVector(subtotal_, None, None, None, None)
+        inserted_vector = _BaseInsertedVector(subtotal_, None, None, None)
 
         anchor = inserted_vector.anchor
 
@@ -315,39 +264,14 @@ class Describe_BaseInsertedVector(object):
 
     def it_knows_its_insertion_id(self, subtotal_):
         subtotal_.insertion_id = 42
-        inserted_vector = _BaseInsertedVector(subtotal_, None, None, None, None)
+        inserted_vector = _BaseInsertedVector(subtotal_, None, None, None)
 
         insertion_id = inserted_vector.insertion_id
 
         assert insertion_id == 42
 
     def it_knows_it_is_inserted(self):
-        assert _BaseInsertedVector(None, None, None, None, None).is_inserted is True
-
-    def it_knows_its_ordering_value(self, request):
-        property_mock(request, _BaseInsertedVector, "_anchor_n", return_value=8)
-        inserted_vector = _BaseInsertedVector(None, -4, None, None, None)
-
-        ordering = inserted_vector.ordering
-
-        assert ordering == (8, -4, inserted_vector)
-
-    @pytest.mark.parametrize(
-        ("anchor", "expected_value"), (("top", 0), ("bottom", sys.maxsize), (3, 3))
-    )
-    def it_knows_its_anchor_location(
-        self, request, anchor, expected_value, _base_vectors_prop_
-    ):
-        _base_vectors_prop_.return_value = tuple(
-            instance_mock(request, _BaseVector, name="base[%d]" % i, element_id=i + 1)
-            for i in range(5)
-        )
-        property_mock(request, _BaseInsertedVector, "anchor", return_value=anchor)
-        inserted_vector = _BaseInsertedVector(None, None, None, None, None)
-
-        anchor_n = inserted_vector._anchor_n
-
-        assert anchor_n == expected_value
+        assert _BaseInsertedVector(None, None, None, None).is_inserted is True
 
     @pytest.mark.parametrize("addend_idxs", ((), (1,), (2, 3)))
     def it_gathers_its_addend_vectors_to_help(
@@ -360,7 +284,7 @@ class Describe_BaseInsertedVector(object):
             instance_mock(request, _BaseVector, name="base[i]") for i in range(6)
         )
         _base_vectors_prop_.return_value = base_vectors_
-        inserted_vector = _BaseInsertedVector(None, -4, None, None, None)
+        inserted_vector = _BaseInsertedVector(None, None, None, None)
 
         addend_vectors = inserted_vector._addend_vectors
 

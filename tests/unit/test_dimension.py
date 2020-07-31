@@ -656,14 +656,13 @@ class Describe_AllElements(object):
         elements_ = tuple(
             instance_mock(request, _Element, name="el%s" % idx) for idx in range(3)
         )
-        dimension_transforms_dict = {"dimension": "transforms"}
         _elements_prop_.return_value = elements_
         _ValidElements_.return_value = valid_elements_
-        all_elements = _AllElements(None, dimension_transforms_dict)
+        all_elements = _AllElements(None, None)
 
         valid_elements = all_elements.valid_elements
 
-        _ValidElements_.assert_called_once_with(elements_, dimension_transforms_dict)
+        _ValidElements_.assert_called_once_with(elements_)
         assert valid_elements is valid_elements_
 
     def it_creates_its_Element_objects_in_a_local_factory_to_help(
@@ -773,50 +772,11 @@ class Describe_ValidElements(object):
             for idx, missing in enumerate([False, True, False])
         )
         all_elements_.__iter__.return_value = iter(elements_)
-        valid_elements = _ValidElements(all_elements_, None)
+        valid_elements = _ValidElements(all_elements_)
 
         elements = valid_elements._elements
 
         assert elements == (elements_[0], elements_[2])
-
-    @pytest.mark.parametrize(
-        "explicit_order, expected_value ",
-        ((None, (0, 1, 2)), ((1, 0, 4, 3), (1, 0, 4, 3))),
-    )
-    def it_knows_its_display_order(
-        self, request, all_elements_, explicit_order, expected_value
-    ):
-        _explicit_order_ = property_mock(request, _ValidElements, "_explicit_order")
-        elements_ = tuple(
-            instance_mock(request, _Element, missing=False) for _ in range(3)
-        )
-        all_elements_.__iter__.return_value = iter(elements_)
-        valid_elements = _ValidElements(all_elements_, None)
-        _explicit_order_.return_value = explicit_order
-
-        display_order = valid_elements.display_order
-
-        assert display_order == expected_value
-
-    @pytest.mark.parametrize(
-        "element_transform_dict, expected_value",
-        (
-            ({}, None),
-            ({"order": {"element_ids": [1, 3, 2], "type": "explicit"}}, (0, 2, 1)),
-            ({"order": {"element_ids": [-1, 3, 2], "type": "explicit"}}, (2, 1, 0)),
-            ({"order": {"element_ids": [1, 2, 3], "type": "explicit"}}, (0, 1, 2)),
-        ),
-    )
-    def it_returns_the_correct_explicit_order(
-        self, all_elements_, element_transform_dict, expected_value
-    ):
-        elements_ = tuple(_Element({"id": idx + 1}, None, None) for idx in range(3))
-        all_elements_.__iter__.return_value = iter(elements_)
-        valid_elements = _ValidElements(all_elements_, element_transform_dict)
-
-        _explicit_order_ = valid_elements._explicit_order
-
-        assert _explicit_order_ == expected_value
 
     # fixture components ---------------------------------------------
 
@@ -1139,7 +1099,7 @@ class Describe_Subtotal(object):
             _Element({"id": 99}, None, None),
         )
         all_elements_.__iter__.return_value = iter(elements_)
-        valid_elements = _ValidElements(all_elements_, None)
+        valid_elements = _ValidElements(all_elements_)
         subtotal = _Subtotal(subtotal_dict, valid_elements, None, None)
 
         addend_idxs = subtotal.addend_idxs

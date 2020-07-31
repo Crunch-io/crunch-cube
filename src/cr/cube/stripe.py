@@ -14,7 +14,8 @@ import collections
 
 import numpy as np
 
-from cr.cube.enums import DIMENSION_TYPE as DT
+from cr.cube.collator import ExplicitOrderCollator
+from cr.cube.enums import COLLATION_METHOD as CM, DIMENSION_TYPE as DT
 from cr.cube.util import lazyproperty
 
 
@@ -108,7 +109,32 @@ class TransformedStripe(object):
         # --- display_order is like (2, 1, 0, 3); each int item is the offset of a row
         # --- in the base-rows collection.
         rows = self._base_stripe.rows
-        return tuple(rows[row_idx] for row_idx in self._rows_dimension.display_order)
+
+        # TODO: make right this hacky workaround inserted during spiking. I think
+        # the implication is that the dimension cannot dispatch the collator and the
+        # matrix or stripe needs to do it for itself. The dimension doesn't know and
+        # doesn't want to know whether it belongs to a matrix or a stripe.
+        rows_dimension = self._rows_dimension
+        collation_method = rows_dimension.collation_method
+
+        # XXX: Just order the base rows, let _StripeInsertionHelper take care of
+        # insertions during spike.
+        if collation_method == CM.PAYLOAD_ORDER:
+            return rows
+        elif collation_method == CM.EXPLICIT_ORDER:
+            # TODO: filthy hack to get past this in spike
+            display_order = tuple(
+                idx
+                for _, idx in sorted(
+                    ExplicitOrderCollator(rows_dimension)._base_element_orderings
+                )
+            )
+        else:
+            raise NotImplementedError(
+                "unrecognized collation-method %r" % collation_method
+            )
+
+        return tuple(rows[row_idx] for row_idx in display_order)
 
     @lazyproperty
     def _table_margin(self):

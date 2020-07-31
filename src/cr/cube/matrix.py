@@ -7,14 +7,18 @@ A matrix object has rows and columns.
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import itertools
-import sys
-
 import numpy as np
 from scipy.stats import norm
 from scipy.stats.contingency import expected_freq
 
-from cr.cube.enums import DIMENSION_TYPE as DT
+from cr.cube.collator import (
+    ExplicitOrderCollator,
+    MarginalCollator,
+    OpposingElementCollator,
+    OpposingSubtotalCollator,
+    PayloadOrderCollator,
+)
+from cr.cube.enums import COLLATION_METHOD as CM, DIMENSION_TYPE as DT
 from cr.cube.util import lazyproperty, calculate_overlap_tstats
 
 
@@ -176,7 +180,11 @@ class TransformedMatrix(object):
         appearance and absolute position of columns is subject to later column hiding.
         """
         return self._assembled_vectors(
-            self._base_columns, self._inserted_columns, self._inserted_rows
+            base_vectors=self._unordered_matrix.columns,
+            inserted_vectors=self._inserted_columns,
+            opposing_inserted_vectors=self._inserted_rows,
+            ordered_vector_idxs=self._column_order,
+            opposing_order=self._row_order,
         )
 
     @lazyproperty
@@ -186,73 +194,84 @@ class TransformedMatrix(object):
         Each row vector also reflects any new elements introduced by inserted columns.
         """
         return self._assembled_vectors(
-            self._base_rows, self._inserted_rows, self._inserted_columns
+            base_vectors=self._unordered_matrix.rows,
+            inserted_vectors=self._inserted_rows,
+            opposing_inserted_vectors=self._inserted_columns,
+            ordered_vector_idxs=self._row_order,
+            opposing_order=self._column_order,
         )
 
     def _assembled_vectors(
-        self, base_vectors, inserted_vectors, opposing_inserted_vectors
+        self,
+        base_vectors,
+        inserted_vectors,
+        opposing_inserted_vectors,
+        ordered_vector_idxs,
+        opposing_order,
     ):
-        """Sequence of vectors (rows or columns) including inserted vectors.
+        """Sequence of _AssembledVector for each row/column in dimension.
 
-        Each opposing vector also includes any new elements introduced by insertions.
-
-        The returned _AssembledVector objects appear in display-order with inserted
-        vectors appearing in the proper position relative to the base vectors. Note the
-        final appearance and absolute position of vectors is subject to later vector
-        hiding.
-
-        Vector ordering is accomplished by *sorting* the vectors on their `.ordering`
-        value. The ordering value is a `(position, index, self)` triple.
-
-        The int position value is roughly equivalent to the notion of "anchor". It is
-        0 for anchor=="top", sys.maxsize for anchor=="bottom", and int(anchor_idx) + 1
-        otherwise. The +1 ensures inserted vectors appear *after* the vector they are
-        anchored to.
-
-        The `index` value is the *negative* index of this subtotal in its collection
-        (i.e. the "distance from the end" of this inserted vector). This ensures that an
-        inserted vector will always sort *prior* to a base vector with the same position
-        while preserving the payload order of the inserted vector when two or more are
-        anchored to the same base vector.
-
-        For a base-vector, `position` and `index` are the same.
+        The returned _AssembledVector objects include inserted-subtotal vectors and all
+        vectors appear in their final display-order. Note the final appearance and
+        absolute position of vectors is subject to later vector hiding.
         """
+
+        def iter_unassembled_vectors():
+            """Generate base and inserted vectors in order ..."""
+            for idx in ordered_vector_idxs:
+                yield idx, inserted_vectors[idx] if idx < 0 else base_vectors[idx]
+
         return tuple(
-            _AssembledVector(vector, opposing_inserted_vectors, 0 if idx < 0 else idx)
-            for _, idx, vector in sorted(
-                itertools.chain(
-                    (bv.ordering for bv in base_vectors),
-                    (iv.ordering for iv in inserted_vectors),
-                )
+            _AssembledVector(
+                unassembled_vector,
+                opposing_inserted_vectors,
+                opposing_order,
+                vector_idx=0 if idx < 0 else idx,
             )
+            for idx, unassembled_vector in iter_unassembled_vectors()
         )
 
     @lazyproperty
     def _base_columns(self):
-        """Sequence of column vectors after ordering but prior to insertions."""
-        return tuple(
-            _OrderedVector(column, self._row_order, idx)
-            for idx, column in enumerate(
-                tuple(np.array(self._unordered_matrix.columns)[self._column_order])
-            )
-        )
+        """Sequence of base column vectors, in payload order and without insertions."""
+        return self._unordered_matrix.columns
 
     @lazyproperty
     def _base_rows(self):
-        """Sequence of row vectors, after ordering but prior to insertions."""
-        return tuple(
-            _OrderedVector(row, self._column_order, idx)
-            for idx, row in enumerate(
-                tuple(np.array(self._unordered_matrix.rows)[self._row_order])
-            )
-        )
+        """Sequence of base row vectors, in payload order and without insertions."""
+        return self._unordered_matrix.rows
 
     @lazyproperty
     def _column_order(self):
         """ -> 1D ndarray of int col idx specifying order of unordered-array columns."""
-        # --- Specifying int type prevents failure when there are zero columns. The
-        # --- default type for ndarray is float, which is not valid for indexing.
-        return np.array(self._columns_dimension.display_order, dtype=int)
+        dimension = self._columns_dimension
+        collation_method = dimension.collation_method
+
+        if collation_method == CM.PAYLOAD_ORDER:
+            display_order = PayloadOrderCollator.display_order(dimension)
+        elif collation_method == CM.EXPLICIT_ORDER:
+            display_order = ExplicitOrderCollator.display_order(dimension)
+        elif collation_method == CM.MARGINAL:
+            display_order = MarginalCollator.display_order(
+                dimension=dimension, vectors=self._unordered_matrix.columns
+            )
+        elif collation_method == CM.OPPOSING_ELEMENT:
+            display_order = OpposingElementCollator.display_order(
+                dimension=dimension, opposing_vectors=self._unordered_matrix.rows
+            )
+        elif collation_method == CM.OPPOSING_SUBTOTAL:
+            display_order = OpposingSubtotalCollator.display_order(
+                dimension=dimension,
+                opposing_inserted_vectors=self._inserted_rows,
+            )
+        else:
+            raise NotImplementedError(
+                "unrecognized collation method %r" % collation_method
+            )
+
+        # ---Specifying int type prevents failure when there are zero columns. The
+        # ---default type for ndarray is float, which is not valid for indexing.
+        return np.array(display_order, dtype=int)
 
     @lazyproperty
     def _columns_dimension(self):
@@ -276,17 +295,15 @@ class TransformedMatrix(object):
         # --- ordering tuple sorts before all base-columns with the same position while
         # --- still providing an idx that works for indexed access (if required).
         subtotals = self._columns_dimension.subtotals
-        neg_idxs = range(-len(subtotals), 0)  # ---like [-3, -2, -1]---
 
         return tuple(
             _InsertedColumn(
                 subtotal,
-                neg_idx,
                 self._unordered_matrix.table_margin,
                 self._base_rows,
                 self._base_columns,
             )
-            for subtotal, neg_idx in zip(subtotals, neg_idxs)
+            for subtotal in subtotals
         )
 
     @lazyproperty
@@ -301,24 +318,49 @@ class TransformedMatrix(object):
             return tuple()
 
         subtotals = self._rows_dimension.subtotals
-        neg_idxs = range(-len(subtotals), 0)  # ---like [-3, -2, -1]---
 
         return tuple(
             _InsertedRow(
                 subtotal,
-                neg_idx,
                 self._unordered_matrix.table_margin,
                 self._base_rows,
                 self._base_columns,
             )
-            for subtotal, neg_idx in zip(subtotals, neg_idxs)
+            for subtotal in subtotals
         )
 
     @lazyproperty
     def _row_order(self):
         """1D ndarray of int row idx specifying order of unordered-array rows."""
-        # --- specifying int type prevents failure when there are zero rows ---
-        return np.array(self._rows_dimension.display_order, dtype=int)
+        dimension = self._rows_dimension
+        collation_method = dimension.collation_method
+
+        if collation_method == CM.PAYLOAD_ORDER:
+            display_order = PayloadOrderCollator.display_order(dimension)
+        elif collation_method == CM.EXPLICIT_ORDER:
+            display_order = ExplicitOrderCollator.display_order(dimension)
+        elif collation_method == CM.MARGINAL:
+            display_order = MarginalCollator.display_order(
+                dimension=dimension,
+                vectors=self._unordered_matrix.rows,
+                inserted_vectors=self._inserted_rows,
+            )
+        elif collation_method == CM.OPPOSING_ELEMENT:
+            display_order = OpposingElementCollator.display_order(
+                dimension=dimension, opposing_vectors=self._unordered_matrix.columns
+            )
+        elif collation_method == CM.OPPOSING_SUBTOTAL:
+            display_order = OpposingSubtotalCollator.display_order(
+                dimension=dimension,
+                opposing_inserted_vectors=self._inserted_columns,
+            )
+        else:
+            raise NotImplementedError(
+                "unrecognized collation_method %r" % collation_method
+            )
+
+        # ---Specifying int type prevents failure when there are zero rows---
+        return np.array(display_order, dtype=int)
 
     @lazyproperty
     def _rows_dimension(self):
@@ -1525,10 +1567,8 @@ class _BaseInsertedVector(object):
     The `base_rows` and `base_colums` vector collections are already ordered.
     """
 
-    def __init__(self, subtotal, neg_idx, table_margin, base_rows, base_columns):
+    def __init__(self, subtotal, table_margin, base_rows, base_columns):
         self._subtotal = subtotal
-        # --- the *negative* idx of this vector among its peer inserted vectors ---
-        self._neg_idx = neg_idx
         self._table_margin = table_margin
         self._base_rows = base_rows
         self._base_columns = base_columns
@@ -1669,26 +1709,6 @@ class _BaseInsertedVector(object):
         return self._addend_vectors[0].opposing_margin
 
     @lazyproperty
-    def ordering(self):
-        """(position, index, self) tuple used for interleaving with base vectors.
-
-        This value allows the interleaving of inserted vectors with base vectors to be
-        reduced to a sorting operation.
-
-        The int position value is roughly equivalent to the notion of "anchor". It is
-        0 for anchor=="top", `sys.maxsize` for anchor=="bottom", and int(anchor) + 1
-        otherwise. The +1 ensures inserted vectors appear *after* the vector they are
-        anchored to.
-
-        The `index` value is the *negative* index of this subtotal in its collection
-        (i.e. the "distance from the end" of this inserted vector). This ensures that an
-        inserted vector will always sort *prior* to a base vector with the same position
-        while preserving the payload order of the inserted vector when two or more are
-        anchored to the same base vector.
-        """
-        return self._anchor_n, self._neg_idx, self
-
-    @lazyproperty
     def table_margin(self):
         """Scalar np.float/int64 or 1D np.float/int64 ndarray of table weighted N.
 
@@ -1727,40 +1747,6 @@ class _BaseInsertedVector(object):
     def _addend_vectors(self):
         """Sequence of base-vectors contributing to this inserted subtotal."""
         return tuple(self._base_vectors[i] for i in self.addend_idxs)
-
-    @lazyproperty
-    def _anchor_n(self):
-        """Anchor expressed as an int "offset" relative to base-vector indices.
-
-        `anchor_n` represents the base-vector idx *before which* the subtotal should
-        appear (even though subtotals appear *after* the row they are anchored to.
-
-        A subtotal with anchor_n `0` appears at the top, one with an anchor of `3`
-        appears *before* the base row at offset 3; `sys.maxsize` is used as anchor_n for
-        "bottom" anchored subtotals.
-
-        To make this work, the `anchor_n` for a subtotal is idx+1 of the base row it is
-        anchored to (for subtotals anchored to a row, not "top" or "bottom"). Combining
-        this +1 characteristic with placing subtotals before rows with idx=anchor_n
-        produces the right positioning and also allows top and bottom anchors to work
-        while representing the position as a single non-negative int.
-
-        See `.ordering` for more.
-        """
-        anchor = self.anchor
-
-        if anchor == "top":
-            return 0
-        if anchor == "bottom":
-            return sys.maxsize
-
-        anchor = int(anchor)
-        for i, vector in enumerate(self._base_vectors):
-            if vector.element_id == anchor:
-                return i + 1
-
-        # --- default to bottom if target anchor vector not found ---
-        return sys.maxsize  # pragma: no cover
 
     @lazyproperty
     def _base_vectors(self):
@@ -1939,12 +1925,35 @@ class _BaseTransformationVector(object):
         return self._base_vector.table_margin
 
 
-class _AssembledVector(_BaseTransformationVector):
-    """Vector with base, as well as inserted, elements (of the opposite dimension)."""
+class _AssembledVector(object):
+    """Vector with both base and inserted elements.
 
-    def __init__(self, base_vector, opposite_inserted_vectors, vector_idx):
-        super(_AssembledVector, self).__init__(base_vector)
-        self._opposite_inserted_vectors = opposite_inserted_vectors
+    Assembly both orders the unassembled cells and inserts the subtotal cells in
+    a single process. Normally, an assembled vector is *longer* than its unassembled
+    vector when the opposing dimension has inserted subtotals. However, an MR dimension
+    cannot contain subtotals (MR-subvar values cannot meaningfully be simply added
+    together), so the assembled and unassembled vector are the same length in the
+    opposing-MR case. This fact is depended upon in several properties below that could
+    otherwise trigger a NumPy broadcast error when opposing an MR dimension.
+
+    An assembled-vector is used both for base vectors and inserted vectors. When its
+    assembly is an insertion vector, the inserted subtotal cells are *intersection*
+    cells, which require computation here; neither insertion vector contains its
+    intersection cells as provided.
+
+    `unassembled_vector` can be either a base vector or an inserted vector.
+
+    `opposing_order` is a sequence of signed int indices. A positive index references
+    a base vector and a negative index references an inserted vector. Both can be used
+    directly to reference the indicated vector from their respective sequence.
+    """
+
+    def __init__(
+        self, unassembled_vector, opposing_inserted_vectors, opposing_order, vector_idx
+    ):
+        self._unassembled_vector = unassembled_vector
+        self._opposing_inserted_vectors = opposing_inserted_vectors
+        self._opposing_order = opposing_order
         self._vector_idx = vector_idx
 
     @lazyproperty
@@ -1955,7 +1964,17 @@ class _AssembledVector(_BaseTransformationVector):
         because each MR_SUBVAR element has a distinct unweighted N. A vector opposing
         a CAT dimension produces a scalar value.
         """
-        return self._base_vector.base
+        unassembled_base = self._unassembled_vector.base
+
+        # --- `base` is an ndarray when opposing dimension is MR or CA_SUBVAR.
+        # --- Neither of these can have subtotals (subvars don't add), so no
+        # --- interleaving is necessary.
+        if isinstance(unassembled_base, np.ndarray):
+            return unassembled_base[self._opposing_order]
+
+        # --- otherwise it's a scalar value and neither interleaving nor ordering
+        # --- is required
+        return unassembled_base
 
     @lazyproperty
     def column_index(self):
@@ -1976,26 +1995,72 @@ class _AssembledVector(_BaseTransformationVector):
             # ask @mike to confirm
             return np.nan
 
-        return self._apply_interleaved(self._base_vector.column_index, fsubtot)
+        return self._apply_interleaved(self._unassembled_vector.column_index, fsubtot)
 
     @lazyproperty
     def counts(self):
         """1D np.float/int64 ndarray of weighted count for each vector cell."""
-        base_vector_counts = self._base_vector.counts
+        unassembled_counts = self._unassembled_vector.counts
 
         def fsubtot(inserted_vector):
-            """Return np.float/int64 count for `inserted_vector`.
+            """Return np.float/int64 intersection-cell count for `inserted_vector`."""
+            return np.sum(unassembled_counts[inserted_vector.addend_idxs])
 
-            Passed to and called by ._apply_interleaved() to compute inserted value
-            which it places in the right vector position.
-            """
-            return np.sum(base_vector_counts[inserted_vector.addend_idxs])
+        return self._apply_interleaved(unassembled_counts, fsubtot)
 
-        return self._apply_interleaved(base_vector_counts, fsubtot)
+    @lazyproperty
+    def fill(self):
+        """str RGB color like "#def032" or None when not specified.
+
+        The value reflects the resolved element-fill transform cascade. A value of
+        `None` indicates no element-fill transform was specified and the default
+        (theme-specified) color should be used for this element.
+        """
+        return self._unassembled_vector.fill
+
+    @lazyproperty
+    def hidden(self):
+        """True if this vector should not appear in the transformed matrix.
+
+        A vector can be hidden by a "hide" transform on its dimension element or because
+        the vector is "pruned".
+        """
+        return self._unassembled_vector.hidden
+
+    @lazyproperty
+    def is_inserted(self):
+        """True if this vector represents an inserted subtotal."""
+        return self._unassembled_vector.is_inserted
+
+    @lazyproperty
+    def label(self):
+        """str display-name used for this vector's row or column heading."""
+        return self._unassembled_vector.label
+
+    @lazyproperty
+    def margin(self):
+        """Scalar np.float/int64 or 1D np.float/ing64 ndarray of weighted N for vector.
+
+        A vector that opposes an MR dimension has an array of weighted N values because
+        each MR_SUBVAR element has a distinct weighted N count. A vector opposing a CAT
+        dimension produces a scalar value. Values are np.int64 if the cube-result is
+        unweighted.
+        """
+        unassembled_margin = self._unassembled_vector.margin
+
+        # --- `margin` is an ndarray when opposing dimension is MR or CA_SUBVAR.
+        # --- Neither of these can have subtotals (subvars don't add), so no
+        # --- interleaving is necessary.
+        if isinstance(unassembled_margin, np.ndarray):
+            return unassembled_margin[self._opposing_order]
+
+        # --- otherwise it's a scalar value and neither interleaving nor ordering
+        # --- is required
+        return unassembled_margin
 
     @lazyproperty
     def means(self):
-        """1D ndarray of np.float64 or np.nan mean value for each vector cell.
+        """1D ndarray of np.float64/np.nan mean value for each vector cell.
 
         A cell corresponding to an inserted subtotal gets a mean of np.nan.
         """
@@ -2008,7 +2073,29 @@ class _AssembledVector(_BaseTransformationVector):
             """
             return np.nan
 
-        return self._apply_interleaved(self._base_vector.means, fsubtot)
+        return self._apply_interleaved(self._unassembled_vector.means, fsubtot)
+
+    @lazyproperty
+    def numeric_value(self):
+        """int, float, or np.nan representing numeric value for this vector's element.
+
+        This mapping of a category to a numeric value is optional, but when present
+        allows additional quantitative computations to be applied to categorical data,
+        in particular, so-called "scale-means".
+
+        Its value may be int or float if present and is np.nan if not specified by user
+        or the vector is an inserted subtotal.
+        """
+        return self._unassembled_vector.numeric_value
+
+    @lazyproperty
+    def opposing_margin(self):
+        """1D np.float/int64 ndarray (or None) of weighted N for each opposing vector.
+
+        Value can be `None` when cube-result measure is means or involves an MR
+        dimension.
+        """
+        return self._unassembled_vector.opposing_margin
 
     @lazyproperty
     def proportions(self):
@@ -2025,6 +2112,42 @@ class _AssembledVector(_BaseTransformationVector):
         return 2 * (1 - norm.cdf(np.abs(self.zscores)))
 
     @lazyproperty
+    def table_base(self):
+        """np.int64 unweighted N for overall table.
+
+        Cannot be computed at vector level and must be passed in on vector construction.
+        """
+        return self._unassembled_vector.table_base
+
+    @lazyproperty
+    def table_margin(self):
+        """Scalar np.float/int64 or 1D np.float/int64 ndarray of weighted N for table.
+
+        A vector that opposes an MR dimension has an array of weighted N values because
+        each MR_SUBVAR element has a distinct table margin. A vector opposing a CAT
+        dimension produces a scalar value. Values are np.int64 if the cube-result is
+        unweighted.
+        """
+        return self._unassembled_vector.table_margin
+
+    @lazyproperty
+    def table_proportions(self):
+        """1D np.float64 ndarray of table-proportion for each vector cell.
+
+        Also known as "cell-proportion", the proportion of overall weighted N for the
+        table that appears in that particular cell.
+        """
+        # TODO: THIS WILL GET TABLE_PROPORTIONS WRONG IN X_MR CASE except when
+        # unassembled-table-margin is all the same value or ordering is PAYLOAD_ORDER.
+        # To fix, we need to order these values before performing the calculation.
+
+        # --- the unassembled table-margin is always either a scalar (opposing CAT
+        # --- (X_CAT) case) or the unassembled table-margin is the same length as the
+        # --- assembled vector (X_MR case, because MR dimension cannot accept inserted
+        # --- subtotals).
+        return self.counts / self._unassembled_vector.table_margin
+
+    @lazyproperty
     def table_std_dev(self):
         """1D np.float64 ndarray of std-dev of table-percent for each vector cell."""
         return np.sqrt(self._table_proportion_variance)
@@ -2035,31 +2158,18 @@ class _AssembledVector(_BaseTransformationVector):
         return np.sqrt(self._table_proportion_variance / self.table_margin)
 
     @lazyproperty
-    def table_proportions(self):
-        """1D np.float64 ndarray of table-proportion for each vector cell.
-
-        Also known as "cell-proportion", the proportion of overall weighted N for the
-        table that appears in that particular cell.
-        """
-        return self.counts / self._base_vector.table_margin
-
-    @lazyproperty
     def unweighted_counts(self):
         """1D np.int64 ndarray of unweighted count for each base element and insertion.
 
         Subtotal values are interleaved with base values in their specified location.
         """
-        unweighted_counts = self._base_vector.unweighted_counts
+        unassembled_ucounts = self._unassembled_vector.unweighted_counts
 
         def fsubtot(inserted_vector):
-            """Return np.int64 count for `inserted_vector`.
+            """Return np.int64 unweighted-count intersection-cell value."""
+            return np.sum(unassembled_ucounts[inserted_vector.addend_idxs])
 
-            Passed to and called by ._apply_interleaved() to compute inserted value
-            which it places in the right vector position.
-            """
-            return np.sum(unweighted_counts[inserted_vector.addend_idxs])
-
-        return self._apply_interleaved(unweighted_counts, fsubtot)
+        return self._apply_interleaved(unassembled_ucounts, fsubtot)
 
     @lazyproperty
     def zscores(self):
@@ -2082,80 +2192,42 @@ class _AssembledVector(_BaseTransformationVector):
             # --- but when this vector IS itself a subtotal, this cell is an
             # --- *intersection* cell and requires a more sophisticated computation
             margin, table_margin = self.margin, self.table_margin
-            opposite_margin = np.sum(self.opposing_margin[inserted_vector.addend_idxs])
+            opposing_margin = np.sum(self.opposing_margin[inserted_vector.addend_idxs])
             variance = (
-                opposite_margin
+                opposing_margin
                 * margin
-                * ((table_margin - opposite_margin) * (table_margin - margin))
+                * ((table_margin - opposing_margin) * (table_margin - margin))
                 / table_margin ** 3
             )
-            expected_count = opposite_margin * margin / table_margin
-            cell_value = np.sum(self._base_vector.counts[inserted_vector.addend_idxs])
+            expected_count = opposing_margin * margin / table_margin
+            cell_value = np.sum(
+                self._unassembled_vector.counts[inserted_vector.addend_idxs]
+            )
             residuals = cell_value - expected_count
             with np.errstate(divide="ignore", invalid="ignore"):
                 return residuals / np.sqrt(variance)
 
-        return self._apply_interleaved(self._base_vector.zscores, fsubtot)
+        return self._apply_interleaved(self._unassembled_vector.zscores, fsubtot)
 
-    def _apply_interleaved(self, base_values, fsubtot):
+    def _apply_interleaved(self, unassembled_values, fsubtot):
         """Return 1D array result of applying fbase or fsubtot to each interleaved item.
 
-        `base_values` is the "unassembled" vector measure values.
+        `unassembled_values` is the "unassembled" vector measure values. This vector can
+        be a base vector or an inserted vector.
 
-        `fsubtot(inserted_vector)` :: inserted_vector -> intersection_value
+        `fsubtot()` computes the intersection cell value given an inserted_vector in the
+        opposing dimension.
 
         Takes care of the details of getting vector "cells" interleaved in the right
         order, you just provide the "unassembled" values and a function to apply to each
         subtotal-vector to get its value.
         """
-        subtotals = self._opposite_inserted_vectors
+        subtotals = self._opposing_inserted_vectors
 
         return np.array(
             tuple(
-                fsubtot(subtotals[idx]) if idx < 0 else base_values[idx]
-                for idx in self._interleaved_idxs
-            )
-        )
-
-    @lazyproperty
-    def _interleaved_idxs(self):
-        """tuple of int: idx for base and inserted values, in display order.
-
-        Inserted value indicies are negative, to distinguish them from base vector
-        indices. The indexes are interleaved simply by sorting their orderings. An
-        ordering is a (position, idx) pair.
-        """
-
-        def iter_insertion_orderings():
-            """Generate (int: position, int: idx) for each opposing insertion.
-
-            The position for an insertion is an int representation of its anchor and its
-            idx is the *negative* offset of its position in the opposing insertions
-            sequence (like -3, -2, -1 for a sequence of length 3). The negative idx
-            works just as well as the normal one for accessing the subtotal but insures
-            that an insertion at the same position as a base row always sorts *before*
-            the base row.
-
-            The `position` int for a subtotal is 0 for anchor "top", sys.maxsize for
-            anchor "bottom", and int(anchor) + 1 for all others. The +1 ensures
-            a subtotal appears *after* the vector it is anchored to.
-            """
-            for v in self._opposite_inserted_vectors:
-                pos, idx, _ = v.ordering
-                yield pos, idx
-
-        def iter_base_value_orderings():
-            """Generate (int: position, int: idx) for each base-vector value.
-
-            The position of a base value is simply it's index in the vector.
-            """
-            for idx in range(len(self._base_vector.counts)):
-                yield idx, idx
-
-        return tuple(
-            idx
-            for pos, idx in sorted(
-                itertools.chain(iter_insertion_orderings(), iter_base_value_orderings())
+                fsubtot(subtotals[idx]) if idx < 0 else unassembled_values[idx]
+                for idx in self._opposing_order
             )
         )
 
@@ -2283,97 +2355,6 @@ class _VectorAfterHiding(_BaseTransformationVector):
             ],
             dtype=int,
         )
-
-
-class _OrderedVector(_BaseTransformationVector):
-    """Rearranges its "cells" to the order of its opposing-vectors.
-
-    For example, the cells in a row appear in the order of the column vectors. Ordering
-    is performed before insertions, so this vector includes only base-vector values.
-
-    `opposing_order` is a 1D int ndarray of indices of opposing dimension elements, in
-    the order those elements (and their vectors) appear in the opposing dimension.
-    """
-
-    def __init__(self, base_vector, opposing_order, index):
-        super(_OrderedVector, self).__init__(base_vector)
-        self._opposing_order = opposing_order
-        self._index = index
-
-    @lazyproperty
-    def base(self):
-        """np.int64 or 1D np.int64 ndarray of unweighted-N for this vector.
-
-        Values appear in the order of their corresponding opposing vector. Unweighted
-        N values are a scalar when this vector opposes a CAT dimension but are an array
-        when it opposes an MR dimension.
-        """
-        if isinstance(self._base_vector.base, np.ndarray):
-            return self._base_vector.base[self._opposing_order]
-        return self._base_vector.base
-
-    @lazyproperty
-    def column_index(self):
-        """1D np.float64 ndarray of col-index values in opposing-dimension order."""
-        return self._base_vector.column_index[self._opposing_order]
-
-    @lazyproperty
-    def counts(self):
-        """1D np.float/int64 ndarray of weighted-counts in opposing-dimension order.
-
-        Values are np.int64 when the cube-result is unweighted.
-        """
-        return self._base_vector.counts[self._opposing_order]
-
-    @lazyproperty
-    def label(self):
-        """str display-name for this vector, for use as its row or column heading."""
-        return self._base_vector.label
-
-    @lazyproperty
-    def margin(self):
-        """np.float/int64 or 1D np.float/int64 ndarray of margin for each vector cell.
-
-        Values appear in the order of the opposing dimension. `margin` is the weighted
-        N for the vector. A vector opposing an MR dimension has a distinct margin for
-        each cell and produces a 1D np.float64 ndarray (or np.int64 if cube-result is
-        unweighted). A vector opposing a CAT dimension produces a scalar np.float/int64
-        value.
-        """
-        if isinstance(self._base_vector.margin, np.ndarray):
-            return self._base_vector.margin[self._opposing_order]
-        return self._base_vector.margin
-
-    @lazyproperty
-    def ordering(self):
-        """3-tuple (position, index, self) used for interleaving inserted vectors.
-
-        This value allows the interleaving of base and inserted vectors to be reduced to
-        a sorting operation.
-
-        The position and index of a base vector are both its index within its ordered
-        collection. The `position` value of the ordering is operative for inserted
-        vectors.
-        """
-        return (self._index, self._index, self)
-
-    @lazyproperty
-    def unweighted_counts(self):
-        """1D np.int64 ndarray of unweighted-count for each vector cell.
-
-        Values are rearranged (from base-vector position) to appear in the order of the
-        opposing dimension.
-        """
-        return self._base_vector.unweighted_counts[self._opposing_order]
-
-    @lazyproperty
-    def zscores(self):
-        """1D np.float64/np.nan ndarray of zscore for each vector cell.
-
-        Values are rearranged (from base-vector position) to appear in the order of the
-        opposing dimension. A zscore can be `np.nan` in certain situations.
-        """
-        return self._base_vector.zscores[self._opposing_order]
 
 
 # ===OPERAND VECTORS===

@@ -11,7 +11,7 @@ else:
 
 import numpy as np
 
-from cr.cube.enums import DIMENSION_TYPE as DT
+from cr.cube.enums import COLLATION_METHOD as CM, DIMENSION_TYPE as DT
 from cr.cube.util import lazyproperty
 
 
@@ -294,6 +294,14 @@ class Dimension(object):
         )
 
     @lazyproperty
+    def collation_method(self):
+        """Member of COLLATION_METHOD specifying ordering of dimension elements."""
+        method_keyword = self.order_dict.get("type")
+        if method_keyword is None:
+            return CM.PAYLOAD_ORDER
+        return CM(method_keyword)
+
+    @lazyproperty
     def description(self):
         """str description of this dimension."""
         # ---First authority in cascade is analysis-specific dimension transform. None
@@ -314,37 +322,12 @@ class Dimension(object):
         return self._dimension_type
 
     @lazyproperty
-    def display_order(self):
-        """Sequence of int element indices specifying display order of elements.
-
-        The sequence includes only valid elements; missing elements do not appear.
-        Further, each index represents the document-order position of the element in the
-        sequence of valid elements; missing elements are skipped in the assignment of
-        indexes. The returned sequence is exhaustive; all valid elements are
-        represented.
-
-        The sequence reflects the resolved cascade of any *explicit* ordering
-        transforms, but does *not* reflect any *sort* transforms, which cannot be
-        resolved by the dimension. Use the `.sort` property to access any sort transform
-        that may apply.
-
-        Example with explicit-order transform:
-
-            (3, 0, 2, 1, 4)
-
-        Example with no explicit-order transform:
-
-            (0, 1, 2, 3, 4)
-        """
-        return self.valid_elements.display_order
-
-    @lazyproperty
     def element_ids(self):
         """tuple of int element-id for each valid element in this dimension.
 
         Element-ids appear in the order defined in the cube-result.
         """
-        raise NotImplementedError
+        return tuple(e.element_id for e in self.valid_elements)
 
     @lazyproperty
     def name(self):
@@ -501,7 +484,7 @@ class _AllElements(_BaseElements):
     @lazyproperty
     def valid_elements(self):
         """_ValidElements object containing only non-missing elements."""
-        return _ValidElements(self._elements, self._dimension_transforms_dict)
+        return _ValidElements(self._elements)
 
     @lazyproperty
     def _element_dicts(self):
@@ -562,71 +545,13 @@ class _ValidElements(_BaseElements):
     directly.
     """
 
-    def __init__(self, all_elements, dimension_transforms_dict):
+    def __init__(self, all_elements):
         self._all_elements = all_elements
-        self._dimension_transforms_dict = dimension_transforms_dict
-
-    @lazyproperty
-    def display_order(self):
-        """Sequence of int element-idx reflecting order in which to display elements.
-
-        This order reflects the application of any explicit element-order transforms,
-        including resolution of any cascade. It does *not* reflect the results of
-        a *sort* transform, which can only be resolved at a higher level, where vector
-        values are known.
-        """
-        return (
-            self._explicit_order
-            if self._explicit_order
-            else tuple(range(len(self._elements)))
-        )
 
     @lazyproperty
     def _elements(self):
-        """tuple containing actual sequence of element objects."""
+        """tuple containing valid (non-missing) element objects in payload order."""
         return tuple(element for element in self._all_elements if not element.missing)
-
-    @lazyproperty
-    def _explicit_order(self):
-        """Sequence of int element-idx or None, reflecting explicit-order transform.
-
-        This value is None if no explicit-order transform is specified. Otherwise, it is
-        an exhaustive collection of (valid) element offsets, in the order specified (and
-        in some cases implied) by the order transform.
-        """
-        # ---get order transform if any, aborting if no explicit order transform---
-        order_dict = self._dimension_transforms_dict.get("order", {})
-        order_type = order_dict.get("type")
-        ordered_element_ids = order_dict.get("element_ids")
-        if order_type != "explicit" or not isinstance(ordered_element_ids, list):
-            return None
-
-        # ---list like [0, 1, 2, -1], perhaps ["0001", "0002", etc.], reflecting element
-        # ---ids in the order they appear in the cube result. We'll use this to map
-        # ---element-id to its index in the valid-elements sequence.
-        cube_result_order = tuple(element.element_id for element in self)
-        # ---this is a copy of the same, but we're going to mutate this one. This is
-        # ---required to implement the "no-duplicates" behavior.
-        remaining_element_ids = list(cube_result_order)
-
-        # ---we'll collect the results in this---
-        ordered_idxs = []
-        # ---append idx of each element mentioned by id in transform, in order. Remove
-        # ---each element-id from remaining as we go to keep track of dups and leftovers
-        for element_id in ordered_element_ids:
-            # ---An element-id appearing in transform but not in dimension is ignored.
-            # ---Also, a duplicated element-id is only used on first encounter.
-            if element_id not in remaining_element_ids:
-                continue
-            ordered_idxs.append(cube_result_order.index(element_id))
-            remaining_element_ids.remove(element_id)
-
-        # ---any remaining elements are tacked onto the end of the list in the order
-        # ---they originally appeared in the cube-result.
-        for element_id in remaining_element_ids:
-            ordered_idxs.append(cube_result_order.index(element_id))
-
-        return tuple(ordered_idxs)
 
 
 class _Element(object):
@@ -891,7 +816,12 @@ class _Subtotals(Sequence):
 
 
 class _Subtotal(object):
-    """A subtotal insertion on a cube dimension."""
+    """A subtotal insertion on a cube dimension.
+
+    `fallback_insertion_id` is a fallback unique identifier for this insertion, until
+    real insertion-ids can be added. Its value is just the index+1 of this subtotal
+    within the insertions transform collection.
+    """
 
     def __init__(self, subtotal_dict, valid_elements, prune, fallback_insertion_id):
         self._subtotal_dict = subtotal_dict

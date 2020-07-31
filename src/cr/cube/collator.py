@@ -63,7 +63,7 @@ class _BaseAnchoredCollator(_BaseCollator):
 
     @classmethod
     def display_order(cls, dimension):
-        """ -> sequence of int element-idx specifying ordering of dimension elements.
+        """Return sequence of int element-idx specifying ordering of dimension elements.
 
         The returned indices are "signed", with positive indices applying to base
         vectors and negative indices applying to inserted vectors. Both work for
@@ -289,8 +289,7 @@ class _BaseSortByValueCollator(_BaseCollator):
     In general, the anchors used to position inserted subtotals lose their meaning when
     the dimension is sorted by-value. In sort-by-value cases, subtotals are grouped at
     the top (when sort direction is descending (default)) or the bottom (when direction
-    is ascending), while also being sorted within the group of subtotal by the specified
-    value.
+    is ascending), while also being sorted by the specified value.
     """
 
     @property
@@ -468,7 +467,7 @@ class MarginalCollator(_BaseSortByValueCollator):
 
     @classmethod
     def display_order(cls, dimension, vectors, inserted_vectors):
-        """ -> sequence of int element-idx, reflecting sort-by-marginal transform.
+        """Return sequence of int element-idx, reflecting sort-by-marginal transform.
 
         This value is an exhaustive collection of (valid) element offsets, sorted by the
         value of their margin value.
@@ -530,8 +529,22 @@ class OpposingElementCollator(_BaseSortByValueCollator):
 
     @classmethod
     def display_order(cls, dimension, opposing_vectors):
-        """ -> sequence of int element-idx specifying ordering of dimension elements."""
+        """Return sequence of int element-idx in opposing element order."""
         return cls(dimension, opposing_vectors)._display_order
+
+    @property
+    def _display_order(self):
+        """tuple of int element-idx specifying ordering of dimension elements."""
+        # --- The opposing vector that provides the basis for the sort is specified by
+        # --- its id. Because the ordering-transform is part of a saved analysis, it's
+        # --- possible for the specified sort-key category or subvar to be deleted
+        # --- between authoring time and export time (which could be weeks or more
+        # --- later). If the sort-key element is not found in the opposing dimension,
+        # --- fall back to payload order.
+        try:
+            return super(OpposingElementCollator, self)._display_order
+        except ValueError:
+            return PayloadOrderCollator.display_order(self._dimension)
 
     @lazyproperty
     def _element_values(self):
@@ -579,7 +592,7 @@ class OpposingSubtotalCollator(_BaseSortByValueCollator):
 
     @classmethod
     def display_order(cls, dimension, opposing_inserted_vectors):
-        """ -> sequence of int element-idx specifying ordering of dimension elements.
+        """Return sequence of int element-idx specifying ordering of dimension elements.
 
         The returned indices are "signed", with positive indices applying to base
         vectors and negative indices applying to inserted vectors. Both work for
@@ -587,11 +600,25 @@ class OpposingSubtotalCollator(_BaseSortByValueCollator):
         """
         return cls(dimension, opposing_inserted_vectors)._display_order
 
+    @property
+    def _display_order(self):
+        """tuple of int element-idx specifying ordering of dimension elements."""
+        # --- The opposing subtotal that provides the basis for the sort is specified by
+        # --- its id. Because the ordering-transform is part of a saved analysis, it's
+        # --- possible for the specified sort-key subtotal to be deleted between
+        # --- authoring time and export time (which could be weeks or more later). If
+        # --- the sort-key element is not found in the opposing dimension, fall back to
+        # --- payload order.
+        try:
+            return super(OpposingSubtotalCollator, self)._display_order
+        except ValueError:
+            return PayloadOrderCollator.display_order(self._dimension)
+
     @lazyproperty
     def _element_values(self):
         """tuple of measure values in the specified opposing subtotal vector.
 
-        Values appear in payload-order without interleaved subtotals. The payload-order
+        Values appear in payload order without interleaved subtotals. The payload-order
         index of each value can be inferred from its position in this sequence. Can
         possibly include NaN values.
         """

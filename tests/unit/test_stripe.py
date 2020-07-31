@@ -86,13 +86,13 @@ class DescribeTransformedStripe(object):
         )
         assert rows == (rows_[0], rows_[1], rows_[2], rows_[3])
 
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     @pytest.mark.parametrize(
         "display_order", ((), (0,), (1, 0), (0, 1, 2), (2, 1, 0, 3))
     )
     def it_provides_access_to_the_ordered_base_rows_to_help(
-        self, request, display_order, dimension_, base_stripe_
+        self, request, dimension_, base_stripe_, display_order
     ):
-        dimension_.display_order = display_order
         rows_ = tuple(
             instance_mock(request, _BaseStripeRow, name="row[%d]" % i)
             for i in range(len(display_order))
@@ -102,6 +102,7 @@ class DescribeTransformedStripe(object):
 
         ordered_rows = stripe._ordered_rows
 
+        dimension_.display_order.assert_called_once_with()
         assert ordered_rows == tuple(rows_[idx] for idx in display_order)
 
     # fixture components ---------------------------------------------

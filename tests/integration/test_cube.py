@@ -266,10 +266,12 @@ class DescribeIntegrated_MeanMeasure(object):
             "Sweden",
         )
 
-    def it_handles_cat_x_cat_means_with_insertions(self):
-        slice_ = Cube(CR.CAT_X_CAT_MEANS_WITH_HS).partitions[0]
-        np.testing.assert_array_almost_equal(
-            slice_.means,
+    def it_handles_means_cat_hs_x_cat_hs(self):
+        slice_ = Cube(CR.MEANS_CAT_HS_X_CAT_HS).partitions[0]
+
+        means = slice_.means
+
+        expected = np.array(
             [
                 [41.96875, 30.875, 25.66666667, np.nan, 42.0],
                 [51.51515152, 47.95555556, 45.44444444, np.nan, 45.0952381],
@@ -278,11 +280,12 @@ class DescribeIntegrated_MeanMeasure(object):
                 [44.03030303, 45.21568627, 54.53333333, np.nan, 56.19512195],
                 [45.64516129, 47.41428571, 46.89361702, np.nan, 55.27894737],
                 [34.20408163, 43.2745098, 41.2, np.nan, 35.26086957],
-            ],
+            ]
         )
+        np.testing.assert_array_almost_equal(means, expected)
 
     def it_knows_if_it_has_means(self):
-        slice_ = Cube(CR.CAT_X_CAT_MEANS_WITH_HS).partitions[0]
+        slice_ = Cube(CR.MEANS_CAT_HS_X_CAT_HS).partitions[0]
         assert slice_.has_means
 
 
@@ -1636,7 +1639,7 @@ class TestCrunchCubeAs_Slice(object):
 
     def test_ca_subvar_x_cat_hs_counts_prune(self):
         transforms = {"rows_dimension": {"prune": True}}
-        slice_ = Cube(CR.CA_SUBVAR_X_CAT_HS, transforms=transforms).partitions[0]
+        slice_ = Cube(CR.CA_SUBVAR_HS_X_CAT_HS, transforms=transforms).partitions[0]
         expected = np.array([[3, 3, 0, 0, 6], [1, 3, 2, 0, 4], [0, 2, 1, 3, 2]])
         np.testing.assert_array_equal(slice_.counts, expected)
 

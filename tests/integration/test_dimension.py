@@ -82,16 +82,6 @@ class DescribeIntegratedDimension(object):
             "s?"
         )
 
-    def it_knows_the_display_order_of_its_elements(self, dimension_dict):
-        dimension_transforms = {
-            "order": {"type": "explicit", "element_ids": [3, 5, 42, 8, 2]}
-        }
-        dimension = Dimension(dimension_dict, None, dimension_transforms)
-
-        display_order = dimension.display_order
-
-        assert display_order == (2, 4, 1, 0, 3)
-
     def it_knows_its_transformed_name(self, dimension_dict):
         dimension_transforms = {"name": "barfoo"}
         dimension = Dimension(dimension_dict, None, dimension_transforms)
@@ -169,24 +159,8 @@ class DescribeIntegrated_AllElements(object):
 class DescribeIntegrated_ValidElements(object):
     """Integration-test suite for `cr.cube.dimension._ValidElements` object."""
 
-    def it_knows_the_transformed_element_display_order(self, all_elements):
-        dimension_transforms = {
-            "order": {"type": "explicit", "element_ids": [2, 1, 666, 4, 3, 4, 8]}
-        }
-        valid_elements = _ValidElements(all_elements, dimension_transforms)
-
-        display_order = valid_elements.display_order
-
-        assert display_order == (1, 0, 3, 2, 4)
-        assert len(display_order) == len(valid_elements)
-
-    def but_it_returns_the_cube_result_order_when_not_transformed(self, all_elements):
-        dimension_transforms = {}
-        valid_elements = _ValidElements(all_elements, dimension_transforms)
-
-        order = valid_elements.display_order
-
-        assert order == (0, 1, 2, 3, 4)
+    def it_knows_the_valid_element_ids(self, all_elements):
+        assert _ValidElements(all_elements).element_ids == (1, 2, 3, 4, 5)
 
     # fixture components ---------------------------------------------
 
