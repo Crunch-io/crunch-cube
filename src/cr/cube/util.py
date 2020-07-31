@@ -13,9 +13,52 @@ except ImportError:  # pragma: no cover
     from itertools import filterfalse as ifilterfalse
 
 
+def counts_with_subtotals(addend_idxs, inserted_rows_idxs, counts):
+    """np.array of orignal counts + subtotals
+
+    Reshapes the original counts considering subtotal positions and values
+    """
+    final_shape = [len(inserted_rows_idxs) + counts.shape[0]] + list(counts.shape[1:])
+    counts_with_hs = np.full(final_shape, np.nan)
+    subtotals_counts = np.array(
+        [sum(counts[i] for i in addend_idxs[j]) for j, _ in enumerate(addend_idxs)]
+    )
+    for id, elem in enumerate(inserted_rows_idxs):
+        counts_with_hs[elem] = subtotals_counts[id]
+    nan_idx = [
+        id
+        for id, _ in enumerate(counts_with_hs)
+        if np.any(np.isnan(counts_with_hs[id]))
+    ]
+    for id, elem in enumerate(nan_idx):
+        counts_with_hs[elem] = counts[id]
+    return counts_with_hs
+
+
 def calculate_overlap_tstats(
-    cls, offset, mr_dimensions, mr_counts, mr_base_counts, mr_counts_with_missings
+    cls,
+    offset,
+    mr_dimensions,
+    mr_counts,
+    mr_base_counts,
+    mr_counts_with_missings,
+    subtotals,
 ):
+    overlap_margins = (
+        np.sum(mr_counts[0], axis=0)[:, 0, :, 0]
+        if offset != 0
+        else np.sum(mr_counts, axis=0)[:, 0, :, 0]
+    )
+    if subtotals:
+        addend_idxs = [s.addend_idxs for s in subtotals]
+        inserted_rows_idxs = subtotals.anchor_idxs
+        mr_counts = counts_with_subtotals(addend_idxs, inserted_rows_idxs, mr_counts)
+        mr_base_counts = counts_with_subtotals(
+            addend_idxs, inserted_rows_idxs, mr_base_counts
+        )
+        mr_counts_with_missings = counts_with_subtotals(
+            addend_idxs, inserted_rows_idxs, mr_counts_with_missings
+        )
     numerator = np.zeros(np.array(mr_counts.shape)[[0, 1 + offset, 3 + offset]])
     standard_error = np.zeros(np.array(mr_counts.shape)[[0, 1 + offset, 3 + offset]])
     for slice_index in range(mr_counts.shape[0]):
@@ -29,11 +72,6 @@ def calculate_overlap_tstats(
             mr_counts_with_missings[slice_index][0]
             if offset != 0
             else mr_counts_with_missings[slice_index]
-        )
-        overlap_margins = (
-            np.sum(mr_counts[slice_index], axis=0)[:, 0, :, 0]
-            if offset != 0
-            else np.sum(mr_counts, axis=0)[:, 0, :, 0]
         )
         overlap_slice = cls(
             mr_dimensions,

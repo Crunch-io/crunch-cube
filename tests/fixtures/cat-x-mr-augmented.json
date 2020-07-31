@@ -77,46 +77,6 @@
             "view": {
               "show_counts": false,
               "show_numeric_values": false,
-              "transform": {
-                "insertions": [
-                  {
-                    "function": "subtotal",
-                    "args": [
-                      1,
-                      2
-                    ],
-                    "name": "18–49",
-                    "anchor": "top"
-                  },
-                  {
-                    "function": "subtotal",
-                    "args": [
-                      3,
-                      4
-                    ],
-                    "name": "≥50",
-                    "anchor": "top"
-                  },
-                  {
-                    "function": "subtotal",
-                    "args": [
-                      3,
-                      2
-                    ],
-                    "name": "test12",
-                    "anchor": 2
-                  },
-                  {
-                    "function": "subtotal",
-                    "args": [
-                      4,
-                      99
-                    ],
-                    "name": "test",
-                    "anchor": "bottom"
-                  }
-                ]
-              },
               "include_missing": false,
               "column_width": null
             }
