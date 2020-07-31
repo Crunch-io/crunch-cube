@@ -1158,6 +1158,26 @@ class Describe_Subtotals(object):
 class Describe_Subtotal(object):
     """Unit-test suite for `cr.cube.dimension._Subtotal` object."""
 
+    def it_knows_the_addend_idxs(
+        self, addend_ids_, all_elements_, valid_elements_, addend_idxs_fixture
+    ):
+        subtotal_dict, addend_ids, expected_value = addend_idxs_fixture
+        addend_ids_.return_value = addend_ids
+        elements_ = (
+            _Element({"id": 1}, None, None, None),
+            _Element({"id": 2}, None, None, None),
+            _Element({"id": 3}, None, None, None),
+            _Element({"id": 4}, None, None, None),
+            _Element({"id": 99}, None, None, None),
+        )
+        all_elements_.__iter__.return_value = iter(elements_)
+        valid_elements = _ValidElements(all_elements_, None)
+        subtotal = _Subtotal(subtotal_dict, valid_elements, None)
+
+        addend_idxs = subtotal.addend_idxs
+
+        np.testing.assert_array_almost_equal(addend_idxs, expected_value)
+
     def it_knows_the_insertion_anchor(self, anchor_fixture, valid_elements_):
         subtotal_dict, element_ids, expected_value = anchor_fixture
         valid_elements_.element_ids = element_ids
@@ -1205,6 +1225,19 @@ class Describe_Subtotal(object):
 
     @pytest.fixture(
         params=[
+            ({"args": []}, (), []),
+            ({"args": [1, 2]}, (1, 2), [0, 1]),
+            ({"args": [0, 2]}, (1, 2), [0, 1]),
+            ({"args": [3, 4]}, (3, 4), [2, 3]),
+            ({"args": [4, 99]}, (4, 99), [3, 4]),
+        ]
+    )
+    def addend_idxs_fixture(self, request):
+        subtotal_dict, addend_ids, expected_value = request.param
+        return subtotal_dict, addend_ids, expected_value
+
+    @pytest.fixture(
+        params=[
             ({"anchor": 1}, {1, 2, 3}, 1),
             ({"anchor": 4}, {1, 2, 3}, "bottom"),
             ({"anchor": "Top"}, {1, 2, 3}, "top"),
@@ -1229,6 +1262,14 @@ class Describe_Subtotal(object):
         return subtotal_dict, expected_value
 
     # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def addend_ids_(self, request):
+        return property_mock(request, _Subtotal, "addend_ids")
+
+    @pytest.fixture
+    def all_elements_(self, request):
+        return instance_mock(request, _AllElements)
 
     @pytest.fixture
     def valid_elements_(self, request):
