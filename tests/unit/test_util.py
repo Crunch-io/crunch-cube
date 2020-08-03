@@ -7,7 +7,38 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 import pytest
 
-from cr.cube.util import compress_pruned, lazyproperty
+from cr.cube.util import compress_pruned, lazyproperty, counts_with_subtotals
+
+
+class Describe_counts_with_subtotals(object):
+    def it_returns_a_reshaped_array_with_interleaved_vectors(self):
+        addend_idxs = [np.array([0, 1])]
+        inserted_rows_idxs = [2]
+        counts = np.array(
+            [
+                [
+                    [[[1, 2, 3], [1, 2, 3]], [[1, 2, 3], [1, 2, 3]]],
+                    [[[1, 2, 3], [1, 2, 3]], [[1, 2, 3], [1, 2, 3]]],
+                ],
+                [
+                    [[[1, 2, 3], [1, 2, 3]], [[1, 2, 3], [1, 2, 3]]],
+                    [[[1, 2, 3], [1, 2, 3]], [[1, 2, 3], [1, 2, 3]]],
+                ],
+            ]
+        )
+
+        counts_with_hs = counts_with_subtotals(addend_idxs, inserted_rows_idxs, counts)
+
+        assert counts_with_hs.shape == (3, 2, 2, 2, 3)
+        np.testing.assert_array_almost_equal(
+            counts_with_hs[2],
+            np.array(
+                [
+                    [[[2, 4, 6], [2, 4, 6]], [[2, 4, 6], [2, 4, 6]]],
+                    [[[2, 4, 6], [2, 4, 6]], [[2, 4, 6], [2, 4, 6]]],
+                ]
+            ),
+        )
 
 
 class Describe_compress_pruned(object):

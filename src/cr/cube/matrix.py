@@ -259,6 +259,7 @@ class _BaseBaseMatrix(object):
         counts_with_missings = cube.counts_with_missings
         dimension_types = cube.dimension_types[-2:]
         if cube.is_mr_by_itself:
+            subtotals = cube.dimensions[0].subtotals
             offset = 1 if cube.dimension_types[0] == DT.MR else 0
             overlap_tstats = calculate_overlap_tstats(
                 _MrXMrMatrix,
@@ -267,6 +268,7 @@ class _BaseBaseMatrix(object):
                 counts,
                 base_counts,
                 counts_with_missings,
+                subtotals,
             )
             dimensions = cube.dimensions[:-1]
             if cube.dimension_types[0] == DT.MR:

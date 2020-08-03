@@ -9,6 +9,7 @@ import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.cubepart import _Slice
+from cr.cube.util import counts_with_subtotals
 
 from ..fixtures import CR, SM
 from ..util import load_python_expression
@@ -454,30 +455,6 @@ class TestStandardizedResiduals(TestCase):
         )
         np.testing.assert_array_equal(pairwise_indices, expected_indices)
 
-    def test_cat_hs_x_mr_augmented_pairwise_t_test(self):
-        slice_ = Cube(CR.CAT_HS_X_MR_AUGMENTED).partitions[0]
-        actual = slice_.pairwise_significance_tests[0]
-
-        assert slice_.cube_is_mr_by_itself is True
-        np.testing.assert_array_almost_equal(
-            actual.t_stats,
-            [
-                [0.0, 6.22407684, np.nan],
-                [0.0, 0.21986422, np.nan],
-                [0.0, -2.39283195, np.nan],
-                [0.0, -3.83382639, np.nan],
-            ],
-        )
-        np.testing.assert_array_almost_equal(
-            actual.p_vals,
-            [
-                [1.00000000e00, 2.28560104e-09, np.nan],
-                [1.00000000e00, 8.26172768e-01, np.nan],
-                [1.00000000e00, 1.75259091e-02, np.nan],
-                [1.00000000e00, 1.63076135e-04, np.nan],
-            ],
-        )
-
     def test_cat_x_mr_weighted_augmented(self):
         """Same behaviour of test_mr_subvar_x_mr_augmented_pairwise_t_test"""
         slice_ = Cube(CR.CAT_X_MR_WEIGHTED_AUGMENTED).partitions[0]
@@ -520,6 +497,120 @@ class TestStandardizedResiduals(TestCase):
         )
         assert slice_._cube.counts.shape == (2, 3, 2, 3, 2)
         assert actual.t_stats.shape == (2, 3)
+
+    def test_ca_subvar_hs_x_mr_augmented(self):
+        slice_ = Cube(CR.CA_SUBVAR_HS_X_MR_AUGMENTED).partitions[0]
+        actual = slice_.pairwise_significance_tests[1]
+        overlap_margins = np.sum(slice_._cube.counts, axis=0)[:, 0, :, 0]
+        addend_idxs = [s.addend_idxs for s in slice_._cube.dimensions[0].subtotals]
+        counts_with_hs = counts_with_subtotals(
+            addend_idxs, slice_.inserted_row_idxs, slice_._cube.counts
+        )
+        assert slice_.inserted_row_idxs == (0,)
+        assert slice_.cube_is_mr_by_itself is True
+        assert actual.t_stats.shape == (3, 4)
+        assert slice_.counts.shape == (3, 4)
+        assert counts_with_hs.shape == (3, 4, 2, 4, 2)
+        np.testing.assert_array_almost_equal(
+            overlap_margins,
+            [[44, 3, 0, 0], [3, 34, 0, 0], [0, 0, 348, 0], [0, 0, 0, 0]],
+        )
+
+        slice_no_aug_ = Cube(CR.CA_SUBVAR_HS_X_MR).partitions[0]
+
+        for i in range(slice_no_aug_.shape[0]):
+            np.testing.assert_array_almost_equal(
+                slice_no_aug_.counts[i], counts_with_hs[i][:, 0, :, 0].diagonal()
+            )
+
+    def test_cat_hs_x_mr_augmented_wgtd(self):
+        slice_ = Cube(CR.CAT_HS_X_MR_AUGMENTED_WGTD).partitions[0]
+        actual = slice_.pairwise_significance_tests[1]
+        overlap_margins = np.sum(slice_._cube.counts, axis=0)[:, 0, :, 0]
+        addend_idxs = [s.addend_idxs for s in slice_._cube.dimensions[0].subtotals]
+        counts_with_hs = counts_with_subtotals(
+            addend_idxs, slice_.inserted_row_idxs, slice_._cube.counts
+        )
+
+        # CATxMR (9, 3, 2, 3, 2) shape, 9 = (5 + 4subtot) tabs of shadow proportions
+        assert slice_.inserted_row_idxs == (0, 1, 4, 8)
+        assert slice_.cube_is_mr_by_itself is True
+        assert actual.t_stats.shape == (9, 3)
+        assert slice_.counts.shape == (9, 3)
+        np.testing.assert_array_almost_equal(
+            overlap_margins,
+            np.array(
+                [
+                    [4188.13667426, 3046.38734874, 1047.76027958],
+                    [3046.38734874, 3628.42165249, 859.70982873],
+                    [1047.76027958, 859.70982873, 5133.76481161],
+                ]
+            ),
+        )
+        np.testing.assert_array_almost_equal(
+            actual.t_stats,
+            np.array(
+                [
+                    [6.11927895, 0.0, -14.1303337],
+                    [-7.69445366, 0.0, 12.49573404],
+                    [5.69285527, 0.0, -11.74466913],
+                    [1.38057613, 0.0, -5.07435061],
+                    [-1.53449069, 0.0, 3.79025526],
+                    [-3.55908594, 0.0, 9.3099453],
+                    [-5.57805647, 0.0, 5.41192963],
+                    [0.22264108, 0.0, 1.98230386],
+                    [-5.55112327, 0.0, 5.63360373],
+                ]
+            ),
+        )
+        np.testing.assert_array_almost_equal(
+            actual.p_vals,
+            np.array(
+                [
+                    [9.76839276e-10, 1.00000000e00, 0.00000000e00],
+                    [1.55431223e-14, 1.00000000e00, 0.00000000e00],
+                    [1.28612265e-08, 1.00000000e00, 0.00000000e00],
+                    [1.67441552e-01, 1.00000000e00, 3.96622408e-07],
+                    [1.24942021e-01, 1.00000000e00, 1.51478682e-04],
+                    [3.73949987e-04, 1.00000000e00, 0.00000000e00],
+                    [2.49833210e-08, 1.00000000e00, 6.39580235e-08],
+                    [8.23819611e-01, 1.00000000e00, 4.74757203e-02],
+                    [2.91411313e-08, 1.00000000e00, 1.81814095e-08],
+                ]
+            ),
+        )
+        actual = slice_.pairwise_significance_tests[1]
+
+        slice_no_hs_ = Cube(CR.CAT_X_MR_AUGMENTED).partitions[0]
+        actual_no_hs = slice_no_hs_.pairwise_significance_tests[1]
+
+        # Same fixture without insertion has 5,3 shape with same values for t_stats
+        # not considering the insertions in the fixture above
+        np.testing.assert_array_almost_equal(
+            actual_no_hs.t_stats,
+            np.array(
+                [
+                    [5.69285527, 0.0, -11.74466913],
+                    [1.38057613, 0.0, -5.07435061],
+                    [-3.55908594, 0.0, 9.3099453],
+                    [-5.57805647, 0.0, 5.41192963],
+                    [0.22264108, 0.0, 1.98230386],
+                ]
+            ),
+        )
+        np.testing.assert_array_almost_equal(actual_no_hs.t_stats[0], actual.t_stats[2])
+        np.testing.assert_array_almost_equal(actual_no_hs.t_stats[1], actual.t_stats[3])
+        np.testing.assert_array_almost_equal(actual_no_hs.t_stats[2], actual.t_stats[5])
+        np.testing.assert_array_almost_equal(actual_no_hs.t_stats[3], actual.t_stats[6])
+        np.testing.assert_array_almost_equal(actual_no_hs.t_stats[4], actual.t_stats[7])
+
+        slice_no_aug_ = Cube(CR.CAT_HS_X_MR_WGTD).partitions[0]
+
+        np.testing.assert_array_almost_equal(slice_.counts, slice_no_aug_.counts)
+        for i in range(slice_no_aug_.shape[0]):
+            np.testing.assert_array_almost_equal(
+                slice_no_aug_.counts[i], counts_with_hs[i][:, 0, :, 0].diagonal()
+            )
 
     def test_mr_x_mr_weighted_augmented_pairwise_t_test(self):
         """This test proofs the hypotesis testing for MR1_X_MR2 considering the

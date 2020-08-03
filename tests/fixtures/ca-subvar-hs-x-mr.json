@@ -1,0 +1,450 @@
+{
+  "element": "shoji:view",
+  "self": "https://alpha.crunch.io/api/datasets/5a782ff250164066b465d3e56897b269/cube/?query=%7B%22dimensions%22:%5B%7B%22variable%22:%22https:%2F%2Falpha.crunch.io%2Fapi%2Fdatasets%2F5a782ff250164066b465d3e56897b269%2Fvariables%2F5LKrMtLGwhNM34xJpJxCaP000031%2Fsubvariables%2F0019%2F%22%7D,%7B%22function%22:%22dimension%22,%22args%22:%5B%7B%22function%22:%22as_selected%22,%22args%22:%5B%7B%22variable%22:%22https:%2F%2Falpha.crunch.io%2Fapi%2Fdatasets%2F5a782ff250164066b465d3e56897b269%2Fvariables%2F5LKrMtLGwhNM34xJpJxCaP000033%2F%22%7D%5D%7D,%7B%22value%22:%22subvariables%22%7D%5D%7D,%7B%22function%22:%22as_selected%22,%22args%22:%5B%7B%22variable%22:%22https:%2F%2Falpha.crunch.io%2Fapi%2Fdatasets%2F5a782ff250164066b465d3e56897b269%2Fvariables%2F5LKrMtLGwhNM34xJpJxCaP000033%2F%22%7D%5D%7D%5D,%22measures%22:%7B%22count%22:%7B%22function%22:%22cube_count%22,%22args%22:%5B%5D%7D%7D,%22weight%22:null%7D",
+  "value": {
+    "query": {
+      "measures": {
+        "count": {
+          "function": "cube_count",
+          "args": []
+        }
+      },
+      "dimensions": [
+        {
+          "variable": "https://alpha.crunch.io/api/datasets/5a782ff250164066b465d3e56897b269/variables/5LKrMtLGwhNM34xJpJxCaP000031/subvariables/0019/"
+        },
+        {
+          "function": "dimension",
+          "args": [
+            {
+              "function": "as_selected",
+              "args": [
+                {
+                  "variable": "https://alpha.crunch.io/api/datasets/5a782ff250164066b465d3e56897b269/variables/5LKrMtLGwhNM34xJpJxCaP000033/"
+                }
+              ]
+            },
+            {
+              "value": "subvariables"
+            }
+          ]
+        },
+        {
+          "function": "as_selected",
+          "args": [
+            {
+              "variable": "https://alpha.crunch.io/api/datasets/5a782ff250164066b465d3e56897b269/variables/5LKrMtLGwhNM34xJpJxCaP000033/"
+            }
+          ]
+        }
+      ],
+      "weight": null
+    },
+    "query_environment": {
+      "filter": []
+    },
+    "result": {
+      "dimensions": [
+        {
+          "references": {
+            "alias": "france",
+            "view": {
+              "show_counts": false,
+              "show_numeric_values": false,
+              "transform": {
+                "insertions": [
+                  {
+                    "function": "subtotal",
+                    "args": [
+                      1,
+                      2
+                    ],
+                    "name": "t1",
+                    "anchor": "top"
+                  }
+                ]
+              },
+              "include_missing": false,
+              "column_width": null
+            },
+            "description": "france",
+            "name": "multrace_1"
+          },
+          "derived": false,
+          "type": {
+            "ordinal": false,
+            "class": "categorical",
+            "categories": [
+              {
+                "numeric_value": 1,
+                "_id": 0,
+                "id": 1,
+                "name": "selected",
+                "missing": false
+              },
+              {
+                "numeric_value": 2,
+                "_id": 1,
+                "id": 2,
+                "name": "not selected",
+                "missing": false
+              },
+              {
+                "numeric_value": 32766,
+                "_id": 2,
+                "id": 32766,
+                "name": "skipped",
+                "missing": true
+              },
+              {
+                "numeric_value": 32767,
+                "_id": 3,
+                "id": 32767,
+                "name": "not asked",
+                "missing": true
+              },
+              {
+                "numeric_value": null,
+                "_id": -1,
+                "id": -1,
+                "name": "No Data",
+                "missing": true
+              }
+            ]
+          }
+        },
+        {
+          "references": {
+            "subreferences": [
+              {
+                "alias": "eurasia",
+                "name": "union_hhold_1",
+                "description": "eurasia"
+              },
+              {
+                "alias": "oceania",
+                "name": "union_hhold_2",
+                "description": "oceania"
+              },
+              {
+                "alias": "eastasia",
+                "name": "union_hhold_3",
+                "description": "eastasia"
+              },
+              {
+                "alias": "disputed",
+                "name": "Disputed",
+                "description": "disputed"
+              }
+            ],
+            "uniform_basis": false,
+            "alias": "countries",
+            "description": "Which of the following countries from 1984 would you live in? (select all that apply)",
+            "name": "countries"
+          },
+          "derived": true,
+          "type": {
+            "subtype": {
+              "class": "variable"
+            },
+            "elements": [
+              {
+                "id": 1,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "eurasia",
+                    "name": "union_hhold_1",
+                    "description": "eurasia"
+                  },
+                  "id": "0027"
+                },
+                "missing": false
+              },
+              {
+                "id": 2,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "oceania",
+                    "name": "union_hhold_2",
+                    "description": "oceania"
+                  },
+                  "id": "0028"
+                },
+                "missing": false
+              },
+              {
+                "id": 3,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "eastasia",
+                    "name": "union_hhold_3",
+                    "description": "eastasia"
+                  },
+                  "id": "0029"
+                },
+                "missing": false
+              },
+              {
+                "id": 4,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "disputed",
+                    "name": "Disputed",
+                    "description": "disputed"
+                  },
+                  "id": "002a"
+                },
+                "missing": false
+              }
+            ],
+            "class": "enum"
+          }
+        },
+        {
+          "derived": true,
+          "references": {
+            "subreferences": [
+              {
+                "alias": "eurasia",
+                "name": "union_hhold_1",
+                "description": "eurasia"
+              },
+              {
+                "alias": "oceania",
+                "name": "union_hhold_2",
+                "description": "oceania"
+              },
+              {
+                "alias": "eastasia",
+                "name": "union_hhold_3",
+                "description": "eastasia"
+              },
+              {
+                "alias": "disputed",
+                "name": "Disputed",
+                "description": "disputed"
+              }
+            ],
+            "uniform_basis": false,
+            "description": "Which of the following countries from 1984 would you live in? (select all that apply)",
+            "name": "countries",
+            "alias": "countries"
+          },
+          "type": {
+            "ordinal": false,
+            "subvariables": [
+              "0027",
+              "0028",
+              "0029",
+              "002a"
+            ],
+            "class": "categorical",
+            "categories": [
+              {
+                "numeric_value": 1,
+                "selected": true,
+                "id": 1,
+                "name": "Selected",
+                "missing": false
+              },
+              {
+                "numeric_value": 0,
+                "id": 0,
+                "name": "Other",
+                "missing": false
+              },
+              {
+                "numeric_value": null,
+                "id": -1,
+                "name": "No Data",
+                "missing": true
+              }
+            ]
+          }
+        }
+      ],
+      "missing": 1089,
+      "measures": {
+        "count": {
+          "data": [
+            44,
+            8,
+            369,
+            34,
+            9,
+            378,
+            346,
+            1,
+            74,
+            0,
+            0,
+            421,
+            0,
+            2,
+            0,
+            0,
+            2,
+            0,
+            2,
+            0,
+            0,
+            0,
+            0,
+            2,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            94,
+            109,
+            886,
+            101,
+            105,
+            883,
+            902,
+            31,
+            156,
+            0,
+            0,
+            1089,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "n_missing": 1089,
+          "metadata": {
+            "references": {},
+            "derived": true,
+            "type": {
+              "integer": true,
+              "missing_rules": {},
+              "missing_reasons": {
+                "No Data": -1
+              },
+              "class": "numeric"
+            }
+          }
+        }
+      },
+      "n": 1512,
+      "filter_stats": {
+        "filtered_complete": {
+          "unweighted": {
+            "selected": 1452,
+            "other": 150,
+            "missing": 60
+          },
+          "weighted": {
+            "selected": 1452,
+            "other": 150,
+            "missing": 60
+          }
+        },
+        "filtered": {
+          "unweighted": {
+            "selected": 1512,
+            "other": 150,
+            "missing": 0
+          },
+          "weighted": {
+            "selected": 1512,
+            "other": 150,
+            "missing": 0
+          }
+        }
+      },
+      "unfiltered": {
+        "unweighted_n": 1662,
+        "weighted_n": 1662
+      },
+      "filtered": {
+        "unweighted_n": 1512,
+        "weighted_n": 1512
+      },
+      "counts": [
+        44,
+        8,
+        369,
+        34,
+        9,
+        378,
+        346,
+        1,
+        74,
+        0,
+        0,
+        421,
+        0,
+        2,
+        0,
+        0,
+        2,
+        0,
+        2,
+        0,
+        0,
+        0,
+        0,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        94,
+        109,
+        886,
+        101,
+        105,
+        883,
+        902,
+        31,
+        156,
+        0,
+        0,
+        1089,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "element": "crunch:cube"
+    }
+  }
+}

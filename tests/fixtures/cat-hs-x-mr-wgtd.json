@@ -1,0 +1,467 @@
+{
+  "element": "shoji:view",
+  "self": "https://alpha.crunch.io/api/datasets/f6d04137cce547e8acbd46b8d0d66f13/cube/?query=%7B%22dimensions%22:%5B%7B%22variable%22:%22https:%2F%2Falpha.crunch.io%2Fapi%2Fdatasets%2Ff6d04137cce547e8acbd46b8d0d66f13%2Fvariables%2F0yADwLRARYg8QMoiERXLx3000107%2F%22%7D,%7B%22function%22:%22dimension%22,%22args%22:%5B%7B%22function%22:%22as_selected%22,%22args%22:%5B%7B%22variable%22:%22https:%2F%2Falpha.crunch.io%2Fapi%2Fdatasets%2Ff6d04137cce547e8acbd46b8d0d66f13%2Fvariables%2F13aa1c88f30d4d3d9fbe27349b050f17%2F%22%7D%5D%7D,%7B%22value%22:%22subvariables%22%7D%5D%7D,%7B%22function%22:%22as_selected%22,%22args%22:%5B%7B%22variable%22:%22https:%2F%2Falpha.crunch.io%2Fapi%2Fdatasets%2Ff6d04137cce547e8acbd46b8d0d66f13%2Fvariables%2F13aa1c88f30d4d3d9fbe27349b050f17%2F%22%7D%5D%7D%5D,%22measures%22:%7B%22count%22:%7B%22function%22:%22cube_count%22,%22args%22:%5B%5D%7D%7D,%22weight%22:%22https:%2F%2Falpha.crunch.io%2Fapi%2Fdatasets%2Ff6d04137cce547e8acbd46b8d0d66f13%2Fvariables%2F0yADwLRARYg8QMoiERXLx300011d%2F%22%7D",
+  "value": {
+    "query": {
+      "measures": {
+        "count": {
+          "function": "cube_count",
+          "args": []
+        }
+      },
+      "dimensions": [
+        {
+          "variable": "https://alpha.crunch.io/api/datasets/f6d04137cce547e8acbd46b8d0d66f13/variables/0yADwLRARYg8QMoiERXLx3000107/"
+        },
+        {
+          "function": "dimension",
+          "args": [
+            {
+              "function": "as_selected",
+              "args": [
+                {
+                  "variable": "https://alpha.crunch.io/api/datasets/f6d04137cce547e8acbd46b8d0d66f13/variables/13aa1c88f30d4d3d9fbe27349b050f17/"
+                }
+              ]
+            },
+            {
+              "value": "subvariables"
+            }
+          ]
+        },
+        {
+          "function": "as_selected",
+          "args": [
+            {
+              "variable": "https://alpha.crunch.io/api/datasets/f6d04137cce547e8acbd46b8d0d66f13/variables/13aa1c88f30d4d3d9fbe27349b050f17/"
+            }
+          ]
+        }
+      ],
+      "weight": "https://alpha.crunch.io/api/datasets/f6d04137cce547e8acbd46b8d0d66f13/variables/0yADwLRARYg8QMoiERXLx300011d/"
+    },
+    "query_environment": {
+      "filter": []
+    },
+    "result": {
+      "dimensions": [
+        {
+          "derived": false,
+          "references": {
+            "alias": "F_AGECAT",
+            "view": {
+              "show_counts": false,
+              "column_width": null,
+              "transform": {
+                "insertions": [
+                  {
+                    "function": "subtotal",
+                    "args": [
+                      1,
+                      2
+                    ],
+                    "name": "18–49",
+                    "anchor": "top"
+                  },
+                  {
+                    "function": "subtotal",
+                    "args": [
+                      3,
+                      4
+                    ],
+                    "name": "≥50",
+                    "anchor": "top"
+                  },
+                  {
+                    "function": "subtotal",
+                    "args": [
+                      3,
+                      2
+                    ],
+                    "name": "test12",
+                    "anchor": 2
+                  },
+                  {
+                    "function": "subtotal",
+                    "args": [
+                      4,
+                      99
+                    ],
+                    "name": "test",
+                    "anchor": "bottom"
+                  }
+                ]
+              },
+              "include_missing": false,
+              "show_numeric_values": false
+            },
+            "description": "Age category",
+            "name": "F_AGECAT"
+          },
+          "type": {
+            "ordinal": false,
+            "class": "categorical",
+            "categories": [
+              {
+                "numeric_value": 1,
+                "_id": 0,
+                "id": 1,
+                "name": "18-29",
+                "missing": false
+              },
+              {
+                "numeric_value": 2,
+                "_id": 1,
+                "id": 2,
+                "name": "30-49",
+                "missing": false
+              },
+              {
+                "numeric_value": 3,
+                "_id": 2,
+                "id": 3,
+                "name": "50-64",
+                "missing": false
+              },
+              {
+                "numeric_value": 4,
+                "_id": 3,
+                "id": 4,
+                "name": "65+",
+                "missing": false
+              },
+              {
+                "numeric_value": 99,
+                "_id": 4,
+                "id": 99,
+                "name": "Refused",
+                "missing": false
+              },
+              {
+                "numeric_value": null,
+                "_id": -1,
+                "id": -1,
+                "name": "No Data",
+                "missing": true
+              }
+            ]
+          }
+        },
+        {
+          "references": {
+            "uniform_basis": false,
+            "description": null,
+            "format": {
+              "summary": {
+                "digits": 0
+              }
+            },
+            "subreferences": [
+              {
+                "alias": "CR_SOURCESUM_NYTimes__1",
+                "name": "NYTimes"
+              },
+              {
+                "alias": "CR_SOURCESUM_WashingtonPost__1",
+                "name": "WaPo"
+              },
+              {
+                "alias": "CR_SOURCESUM_FoxNews__1",
+                "name": "FoxNews"
+              }
+            ],
+            "notes": null,
+            "api_derivation": null,
+            "dichotomous": true,
+            "alias": "Trust",
+            "view": {
+              "show_counts": false,
+              "include_noneoftheabove": false,
+              "include_missing": false,
+              "column_width": null
+            },
+            "name": "Trust"
+          },
+          "derived": true,
+          "type": {
+            "subtype": {
+              "class": "variable"
+            },
+            "elements": [
+              {
+                "id": 1,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "CR_SOURCESUM_NYTimes__1",
+                    "name": "NYTimes"
+                  },
+                  "id": "00000"
+                },
+                "missing": false
+              },
+              {
+                "id": 2,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "CR_SOURCESUM_WashingtonPost__1",
+                    "name": "WaPo"
+                  },
+                  "id": "00002"
+                },
+                "missing": false
+              },
+              {
+                "id": 3,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "CR_SOURCESUM_FoxNews__1",
+                    "name": "FoxNews"
+                  },
+                  "id": "00001"
+                },
+                "missing": false
+              }
+            ],
+            "class": "enum"
+          }
+        },
+        {
+          "derived": true,
+          "references": {
+            "uniform_basis": false,
+            "description": null,
+            "name": "Trust",
+            "format": {
+              "summary": {
+                "digits": 0
+              }
+            },
+            "subreferences": [
+              {
+                "alias": "CR_SOURCESUM_NYTimes__1",
+                "name": "NYTimes"
+              },
+              {
+                "alias": "CR_SOURCESUM_WashingtonPost__1",
+                "name": "WaPo"
+              },
+              {
+                "alias": "CR_SOURCESUM_FoxNews__1",
+                "name": "FoxNews"
+              }
+            ],
+            "notes": null,
+            "api_derivation": null,
+            "dichotomous": true,
+            "alias": "Trust",
+            "view": {
+              "show_counts": false,
+              "include_noneoftheabove": false,
+              "include_missing": false,
+              "column_width": null
+            }
+          },
+          "type": {
+            "ordinal": false,
+            "subvariables": [
+              "00000",
+              "00002",
+              "00001"
+            ],
+            "class": "categorical",
+            "categories": [
+              {
+                "numeric_value": 1,
+                "selected": true,
+                "id": 1,
+                "name": "Selected",
+                "missing": false
+              },
+              {
+                "numeric_value": 0,
+                "id": 0,
+                "name": "Other",
+                "missing": false
+              },
+              {
+                "numeric_value": null,
+                "id": -1,
+                "name": "No Data",
+                "missing": true
+              }
+            ]
+          }
+        }
+      ],
+      "missing": 0,
+      "measures": {
+        "count": {
+          "data": [
+            1002.5234324131684,
+            1247.7916049952876,
+            0,
+            765.9507980406985,
+            1484.3642393677555,
+            0,
+            656.4393749723399,
+            1593.8756624361115,
+            0,
+            1520.2348209127326,
+            2573.2276224677926,
+            0,
+            1291.0925791970749,
+            2802.3698641834494,
+            0,
+            1595.4441236462358,
+            2498.0183197342967,
+            0,
+            908.6566750086301,
+            2254.626234708468,
+            0,
+            841.7643918636179,
+            2321.5185178534775,
+            0,
+            1603.7959675490333,
+            1559.4869421680564,
+            0,
+            746.8900823558639,
+            1753.2632224112933,
+            0,
+            721.3824808649454,
+            1778.770823902211,
+            0,
+            1255.8703894419277,
+            1244.2829153252233,
+            0,
+            9.83166357273626,
+            25.955125403512575,
+            0,
+            8.23140252595565,
+            27.555386450293184,
+            0,
+            22.2149559987165,
+            13.571832977532326,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "n_missing": 0,
+          "metadata": {
+            "references": {},
+            "derived": true,
+            "type": {
+              "integer": false,
+              "missing_rules": {},
+              "missing_reasons": {
+                "No Data": -1
+              },
+              "class": "numeric"
+            }
+          }
+        }
+      },
+      "n": 12043,
+      "filter_stats": {
+        "filtered_complete": {
+          "unweighted": {
+            "selected": 12043,
+            "other": 0,
+            "missing": 0
+          },
+          "weighted": {
+            "selected": 12043.000484249482,
+            "other": 0,
+            "missing": 0
+          }
+        },
+        "filtered": {
+          "unweighted": {
+            "selected": 12043,
+            "other": 0,
+            "missing": 0
+          },
+          "weighted": {
+            "selected": 12043.000484249482,
+            "other": 0,
+            "missing": 0
+          }
+        }
+      },
+      "unfiltered": {
+        "unweighted_n": 12043,
+        "weighted_n": 12043.000484249482
+      },
+      "filtered": {
+        "unweighted_n": 12043,
+        "weighted_n": 12043.000484249482
+      },
+      "counts": [
+        711,
+        694,
+        0,
+        564,
+        841,
+        0,
+        362,
+        1043,
+        0,
+        1744,
+        2169,
+        0,
+        1485,
+        2428,
+        0,
+        1286,
+        2627,
+        0,
+        1375,
+        2212,
+        0,
+        1291,
+        2296,
+        0,
+        1487,
+        2100,
+        0,
+        1220,
+        1864,
+        0,
+        1145,
+        1939,
+        0,
+        1308,
+        1776,
+        0,
+        24,
+        30,
+        0,
+        16,
+        38,
+        0,
+        22,
+        32,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "element": "crunch:cube"
+    }
+  }
+}

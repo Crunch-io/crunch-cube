@@ -329,7 +329,7 @@ class _Slice(CubePartition):
         """
         inserted_rows = self.inserted_row_idxs
         inserted_cols = self.inserted_column_idxs
-        if not inserted_cols and not inserted_cols:
+        if not inserted_cols and not inserted_rows:
             return []
         mask = np.zeros(self.pvals.shape)
         mask[inserted_rows, :] = 1
