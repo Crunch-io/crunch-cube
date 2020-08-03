@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+### 1.11.36
+- Hypotesis testing for subtotals (heading and insertions)
+
 ### 1.11.35
 - Bug fix for hypothesis testing with overlaps
 
