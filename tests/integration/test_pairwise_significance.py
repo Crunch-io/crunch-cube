@@ -9,6 +9,7 @@ import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.cubepart import _Slice
+from cr.cube.util import counts_with_subtotals
 
 from ..fixtures import CR, SM
 from ..util import load_python_expression
@@ -498,9 +499,13 @@ class TestStandardizedResiduals(TestCase):
         assert actual.t_stats.shape == (2, 3)
 
     def test_cat_hs_x_mr_augmented(self):
-        slice_ = Cube(CR.CAT_HS_X_MR_AUGMENTED).partitions[0]
+        slice_ = Cube(CR.CAT_HS_X_MR_AUGMENTED_WGTD).partitions[0]
         actual = slice_.pairwise_significance_tests[1]
         overlap_margins = np.sum(slice_._cube.counts, axis=0)[:, 0, :, 0]
+        addend_idxs = [s.addend_idxs for s in slice_._cube.dimensions[0].subtotals]
+        counts_with_hs = counts_with_subtotals(
+            addend_idxs, slice_.inserted_row_idxs, slice_._cube.counts
+        )
 
         # CATxMR (9, 3, 2, 3, 2) shape, 9 = (5 + 4subtot) tabs of shadow proportions
         assert slice_.inserted_row_idxs == (0, 1, 4, 8)
@@ -549,6 +554,8 @@ class TestStandardizedResiduals(TestCase):
                 ]
             ),
         )
+        actual = slice_.pairwise_significance_tests[1]
+
         slice_no_hs_ = Cube(CR.CAT_X_MR_AUGMENTED).partitions[0]
         actual_no_hs = slice_no_hs_.pairwise_significance_tests[1]
 
@@ -571,6 +578,14 @@ class TestStandardizedResiduals(TestCase):
         np.testing.assert_array_almost_equal(actual_no_hs.t_stats[2], actual.t_stats[5])
         np.testing.assert_array_almost_equal(actual_no_hs.t_stats[3], actual.t_stats[6])
         np.testing.assert_array_almost_equal(actual_no_hs.t_stats[4], actual.t_stats[7])
+
+        slice_no_aug_ = Cube(CR.CAT_HS_X_MR_WGTD).partitions[0]
+
+        np.testing.assert_array_almost_equal(slice_.counts, slice_no_aug_.counts)
+        for i in range(slice_no_aug_.shape[0]):
+            np.testing.assert_array_almost_equal(
+                slice_no_aug_.counts[i], counts_with_hs[i][:, 0, :, 0].diagonal()
+            )
 
     def test_mr_x_mr_weighted_augmented_pairwise_t_test(self):
         """This test proofs the hypotesis testing for MR1_X_MR2 considering the
