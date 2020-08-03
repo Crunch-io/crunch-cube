@@ -498,7 +498,32 @@ class TestStandardizedResiduals(TestCase):
         assert slice_._cube.counts.shape == (2, 3, 2, 3, 2)
         assert actual.t_stats.shape == (2, 3)
 
-    def test_cat_hs_x_mr_augmented(self):
+    def test_ca_subvar_hs_x_mr_augmented(self):
+        slice_ = Cube(CR.CA_SUBVAR_HS_X_MR_AUGMENTED).partitions[0]
+        actual = slice_.pairwise_significance_tests[1]
+        overlap_margins = np.sum(slice_._cube.counts, axis=0)[:, 0, :, 0]
+        addend_idxs = [s.addend_idxs for s in slice_._cube.dimensions[0].subtotals]
+        counts_with_hs = counts_with_subtotals(
+            addend_idxs, slice_.inserted_row_idxs, slice_._cube.counts
+        )
+        assert slice_.inserted_row_idxs == (0,)
+        assert slice_.cube_is_mr_by_itself is True
+        assert actual.t_stats.shape == (3, 4)
+        assert slice_.counts.shape == (3, 4)
+        assert counts_with_hs.shape == (3, 4, 2, 4, 2)
+        np.testing.assert_array_almost_equal(
+            overlap_margins,
+            [[44, 3, 0, 0], [3, 34, 0, 0], [0, 0, 348, 0], [0, 0, 0, 0]],
+        )
+
+        slice_no_aug_ = Cube(CR.CA_SUBVAR_HS_X_MR).partitions[0]
+
+        for i in range(slice_no_aug_.shape[0]):
+            np.testing.assert_array_almost_equal(
+                slice_no_aug_.counts[i], counts_with_hs[i][:, 0, :, 0].diagonal()
+            )
+
+    def test_cat_hs_x_mr_augmented_wgtd(self):
         slice_ = Cube(CR.CAT_HS_X_MR_AUGMENTED_WGTD).partitions[0]
         actual = slice_.pairwise_significance_tests[1]
         overlap_margins = np.sum(slice_._cube.counts, axis=0)[:, 0, :, 0]

@@ -614,7 +614,7 @@ class Describe_Slice(object):
         "fixture, table_name, expected",
         [
             (CR.EDU_FAV5_FAV5, "Education", True),
-            (CR.CAT_HS_X_MR_AUGMENTED, "F_AGECAT", True),
+            (CR.CAT_HS_X_MR_AUGMENTED_WGTD, "F_AGECAT", True),
             (CR.MR_X_MR_AUGMENTED, "Military Status", True),
             (CR.AGE_FAVMR, None, False),
         ],
