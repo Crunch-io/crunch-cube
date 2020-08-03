@@ -828,8 +828,16 @@ class _Subtotals(Sequence):
     @lazyproperty
     def anchor_idxs(self):
         """List of int indicating the actual position of the subtotals."""
+        # TODO: this appears wrong, using an anchor (element_id) as an index (offset of
+        # anchor element within elements). This may appear to work if category-ids are
+        # assigned consecutively starting at 1, but will not work in the general case.
+        # I'll bet it also doesn't work when more than one subtotal is anchored to the
+        # same element-id.
+
+        def occurrences(s, lst):
+            return (i for i, e in enumerate(lst) if e == s)
+
         anchors = self._anchors
-        occurrences = lambda s, lst: (i for i, e in enumerate(lst) if e == s)
         top_anchors = list(occurrences("top", anchors))
         int_anchors = [a + len(top_anchors) for a in anchors if isinstance(a, int)]
         bottom_anchors = [

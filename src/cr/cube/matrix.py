@@ -251,7 +251,7 @@ class _BaseBaseMatrix(object):
         self._counts = counts
         self._base_counts = base_counts
 
-    @classmethod
+    @classmethod  # noqa: C901
     def factory(cls, cube, dimensions, slice_idx):
         """Return a base-matrix object of appropriate type for `cube`."""
         counts = cube.counts
