@@ -138,7 +138,7 @@ class _ColumnPairwiseSignificance(object):
 
     @lazyproperty
     def t_stats(self):
-        if self._slice.cube_is_mr_by_itself:
+        if self._slice.cube_is_mr_aug:
             return self.t_stats_correct
         props = self._slice.column_proportions
         diff = props - props[:, [self._col_idx]]
@@ -198,7 +198,7 @@ class _ColumnPairwiseSignificance(object):
             if self._slice.column_base.ndim < 2
             else self._slice.column_base[:, self._col_idx][:, None]
         )
-        if self._slice.cube_is_mr_by_itself:
+        if self._slice.cube_is_mr_aug:
             return self._slice.column_base + selected_unweighted_n
         return self._slice.column_base + selected_unweighted_n - 2
 

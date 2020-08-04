@@ -456,10 +456,10 @@ def test_simple_mr_margin_by_col():
     np.testing.assert_array_equal(slice_.rows_margin, [3, 4, 0])
 
 
-def test_cat_x_mr_x_augmented_zscores():
+def test_cat_x_mr_aug_zscores():
     slice_ = Cube(CR.EDU_FAV5_FAV5).partitions[0]
 
-    assert slice_.cube_is_mr_by_itself is True
+    assert slice_.cube_is_mr_aug is True
     np.testing.assert_array_almost_equal(
         slice_.zscore,
         [

@@ -366,7 +366,7 @@ class DescribeCube(object):
             ((DT.CAT, DT.MR, DT.MR), ("alias1", "alias2", "alias2"), True),
         ),
     )
-    def it_knows_if_it_is_mr_by_itself(
+    def it_knows_if_it_is_mr_aug(
         self, request, dim_types, aliases, expected_value, dimension_types_prop_
     ):
         property_mock(request, Cube, "ndim", return_value=len(dim_types))
@@ -382,9 +382,9 @@ class DescribeCube(object):
         )
         cube = Cube(None, None, None, None)
 
-        is_mr_by_itself = cube.is_mr_by_itself
+        is_mr_aug = cube.is_mr_aug
 
-        assert is_mr_by_itself is expected_value
+        assert is_mr_aug is expected_value
 
     @pytest.mark.parametrize(
         ("dim_types", "cube_idx", "_is_single_filter_col_cube", "expected_value"),

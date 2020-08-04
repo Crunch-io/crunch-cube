@@ -25,7 +25,7 @@ class Describe_Slice(object):
         assert slice_.column_labels == ("C", "E")
         assert slice_.columns_dimension_name == "v7"
         assert slice_.columns_dimension_type == DT.CAT
-        assert slice_.cube_is_mr_by_itself is False
+        assert slice_.cube_is_mr_aug is False
         assert slice_.description == "Pet Owners"
         np.testing.assert_almost_equal(
             slice_.row_proportions, np.array([[0.71428571, 0.28571429], [0.625, 0.375]])
@@ -619,12 +619,11 @@ class Describe_Slice(object):
             (CR.AGE_FAVMR, None, False),
         ],
     )
-    def it_knows_when_cube_is_augmented(self, fixture, table_name, expected):
-        cube = Cube(fixture)
-        slice_ = cube.partitions[0]
+    def it_knows_when_its_cube_is_augmented(self, fixture, table_name, expected):
+        slice_ = Cube(fixture).partitions[0]
 
         assert slice_.table_name == table_name
-        assert slice_.cube_is_mr_by_itself is expected
+        assert slice_.cube_is_mr_aug is expected
 
     def it_knows_when_it_is_empty(self):
         assert Cube(CR.OM_SGP8334215_VN_2019_SEP_19).partitions[0].is_empty is True
@@ -1464,7 +1463,7 @@ class Describe_Strand(object):
         assert strand.bases == (15, 15)
         assert strand.counts == (10, 5)
         assert strand.cube_index == 0
-        assert strand.cube_is_mr_by_itself is False
+        assert strand.cube_is_mr_aug is False
         assert strand.dimension_types == (DT.CAT,)
         assert strand.has_means is False
         assert strand.inserted_row_idxs == ()

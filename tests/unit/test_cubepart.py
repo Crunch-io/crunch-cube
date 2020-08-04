@@ -64,9 +64,9 @@ class DescribeCubePartition(object):
 
         assert cube_index == 42
 
-    def it_knows_if_cube_is_mr_by_itself(self):
+    def it_knows_if_cube_is_mr_aug(self):
         # --- default of False is overridden by subclasses when appropriate ---
-        assert CubePartition(None).cube_is_mr_by_itself is False
+        assert CubePartition(None).cube_is_mr_aug is False
 
     @pytest.mark.parametrize(
         "dims, expected_value",
@@ -438,10 +438,10 @@ class Describe_Nub(object):
 
         assert is_empty == expected_value
 
-    def it_knows_if_cube_is_mr_by_itself(self):
+    def it_knows_if_cube_is_mr_aug(self):
         nub_ = _Nub(None)
 
-        assert nub_.cube_is_mr_by_itself is False
+        assert nub_.cube_is_mr_aug is False
 
     # fixture components ---------------------------------------------
 
