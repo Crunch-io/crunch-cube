@@ -251,77 +251,18 @@ class _BaseBaseMatrix(object):
         self._counts = counts
         self._base_counts = base_counts
 
-    @classmethod  # noqa: C901
+    @classmethod
     def factory(cls, cube, dimensions, slice_idx):
         """Return a base-matrix object of appropriate type for `cube`."""
-        counts = cube.counts
-        base_counts = cube.base_counts
-        counts_with_missings = cube.counts_with_missings
-        dimension_types = cube.dimension_types[-2:]
         if cube.is_mr_aug:
-            subtotals = cube.dimensions[0].subtotals
-            offset = 1 if cube.dimension_types[0] == DT.MR else 0
-            overlap_tstats = calculate_overlap_tstats(
-                _MrXMrMatrix,
-                offset,
-                dimensions,
-                counts,
-                base_counts,
-                counts_with_missings,
-                subtotals,
-            )
-            dimensions = cube.dimensions[:-1]
-            if cube.dimension_types[0] == DT.MR:
-                counts = np.sum(counts[:, :, :, :, 0], axis=4)
-                base_counts = np.sum(base_counts[:, :, :, :, 0], axis=4)
-                counts_with_missings = np.sum(
-                    counts_with_missings[:, :, :, :, 0], axis=4
-                )
-                return _MrXMrMatrix(
-                    dimensions,
-                    counts,
-                    base_counts,
-                    counts_with_missings,
-                    overlap_tstats,
-                )
-            counts = np.sum(counts[:, :, :, 0], axis=3)
-            base_counts = np.sum(base_counts[:, :, :, 0], axis=3)
-            counts_with_missings = np.sum(counts_with_missings[:, :, :, 0], axis=3)
-            return _CatXMrMatrix(
-                dimensions, counts, base_counts, counts_with_missings, overlap_tstats
-            )
+            return cls._mr_aug_matrix_factory(cube, dimensions, slice_idx)
 
-        # For cubes with means, create one of the means-matrix types
+        # --- means cube gets one of the means-matrix types ---
         if cube.has_means:
-            if cube.ndim == 3:
-                base_counts = base_counts[slice_idx]
-                counts = counts[slice_idx]
-            if dimension_types == (DT.MR, DT.MR):
-                # TODO: Potentially address this case, which didn't arise yet
-                raise NotImplementedError(
-                    "MR x MR with means is not implemented."
-                )  # pragma: no cover
-            if dimension_types[1] == DT.MR:
-                return _CatXMrMeansMatrix(dimensions, counts, base_counts)
-            if dimensions[0].dimension_type == DT.MR:
-                return _MrXCatMeansMatrix(dimensions, counts, base_counts)
-            return _CatXCatMeansMatrix(dimensions, counts, base_counts)
+            return cls._means_matrix_factory(cube, dimensions, slice_idx)
 
-        if cube.ndim > 2:
-            base_counts = base_counts[slice_idx]
-            counts = counts[slice_idx]
-            counts_with_missings = counts_with_missings[slice_idx]
-            if cube.dimension_types[0] == DT.MR:
-                base_counts = base_counts[0]
-                counts = counts[0]
-                counts_with_missings = counts_with_missings[0]
-        if dimension_types == (DT.MR, DT.MR):
-            return _MrXMrMatrix(dimensions, counts, base_counts, counts_with_missings)
-        if dimension_types[0] == DT.MR:
-            return _MrXCatMatrix(dimensions, counts, base_counts, counts_with_missings)
-        if dimension_types[1] == DT.MR:
-            return _CatXMrMatrix(dimensions, counts, base_counts, counts_with_missings)
-        return _CatXCatMatrix(dimensions, counts, base_counts, counts_with_missings)
+        # --- everything else gets a more conventional matrix ---
+        return cls._regular_matrix_factory(cube, dimensions, slice_idx)
 
     @lazyproperty
     def columns_dimension(self):
@@ -355,6 +296,103 @@ class _BaseBaseMatrix(object):
     @lazyproperty
     def _column_proportions(self):
         return np.array([col.proportions for col in self.columns]).T
+
+    @classmethod
+    def _means_matrix_factory(cls, cube, dimensions, slice_idx):
+        """ -> matrix object appropriate to means `cube`."""
+        dimension_types = cube.dimension_types[-2:]
+
+        if dimension_types == (DT.MR, DT.MR):
+            # TODO: Potentially address this case, which didn't arise yet
+            raise NotImplementedError(
+                "MR x MR with means is not implemented."
+            )  # pragma: no cover
+
+        MatrixCls = (
+            _CatXMrMeansMatrix
+            if dimension_types[1] == DT.MR
+            else _MrXCatMeansMatrix
+            if dimensions[0].dimension_type == DT.MR
+            else _CatXCatMeansMatrix
+        )
+        counts, unweighted_counts = (
+            (cube.counts[slice_idx], cube.base_counts[slice_idx])
+            if cube.ndim == 3
+            else (cube.counts, cube.base_counts)
+        )
+        return MatrixCls(dimensions, counts, unweighted_counts)
+
+    @classmethod
+    def _mr_aug_matrix_factory(cls, cube, dimensions, slice_idx):
+        """ -> matrix for MR_AUG slice."""
+        overlap_tstats = calculate_overlap_tstats(
+            _MrXMrMatrix,
+            offset=1 if cube.dimension_types[0] == DT.MR else 0,
+            mr_dimensions=dimensions,
+            mr_counts=cube.counts,
+            mr_base_counts=cube.base_counts,
+            mr_counts_with_missings=cube.counts_with_missings,
+            subtotals=cube.dimensions[0].subtotals,
+        )
+
+        # --- drop repeated MR dimension for matrix purposes ---
+        dimensions = cube.dimensions[:-1]
+
+        if cube.dimension_types[0] == DT.MR:
+            return _MrXMrMatrix(
+                dimensions,
+                counts=np.sum(cube.counts[:, :, :, :, 0], axis=4),
+                base_counts=np.sum(cube.base_counts[:, :, :, :, 0], axis=4),
+                counts_with_missings=np.sum(
+                    cube.counts_with_missings[:, :, :, :, 0], axis=4
+                ),
+                overlaps=overlap_tstats,
+            )
+
+        # --- otherwise rows-dimension is CAT ---
+        return _CatXMrMatrix(
+            dimensions,
+            counts=np.sum(cube.counts[:, :, :, 0], axis=3),
+            base_counts=np.sum(cube.base_counts[:, :, :, 0], axis=3),
+            counts_with_missings=np.sum(cube.counts_with_missings[:, :, :, 0], axis=3),
+            overlaps=overlap_tstats,
+        )
+
+    @classmethod
+    def _regular_matrix_factory(cls, cube, dimensions, slice_idx):
+        """ -> matrix object for non-mr-aug and non-means slice."""
+        counts, unweighted_counts, counts_with_missings = (
+            (
+                cube.counts[slice_idx][0],
+                cube.base_counts[slice_idx][0],
+                cube.counts_with_missings[slice_idx][0],
+            )
+            if cube.ndim > 2 and cube.dimension_types[0] == DT.MR
+            else (
+                cube.counts[slice_idx],
+                cube.base_counts[slice_idx],
+                cube.counts_with_missings[slice_idx],
+            )
+            if cube.ndim > 2
+            else (cube.counts, cube.base_counts, cube.counts_with_missings)
+        )
+
+        dimension_types = cube.dimension_types[-2:]
+        if dimension_types == (DT.MR, DT.MR):
+            return _MrXMrMatrix(
+                dimensions, counts, unweighted_counts, counts_with_missings
+            )
+        if dimension_types[0] == DT.MR:
+            return _MrXCatMatrix(
+                dimensions, counts, unweighted_counts, counts_with_missings
+            )
+        if dimension_types[1] == DT.MR:
+            return _CatXMrMatrix(
+                dimensions, counts, unweighted_counts, counts_with_missings
+            )
+        return _CatXCatMatrix(
+            dimensions, counts, unweighted_counts, counts_with_missings
+        )
 
     @lazyproperty
     def _row_elements(self):
