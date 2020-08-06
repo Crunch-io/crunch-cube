@@ -135,7 +135,26 @@ class CubeSet(object):
     @lazyproperty
     def _cubes(self):
         """Sequence of Cube objects containing data for this analysis."""
-        return tuple(self._iter_cubes())
+
+        def iter_cubes():
+            """Generate a Cube object for each of cube_responses.
+
+            0D cube-responses and 1D second-and-later cubes are "inflated" to add their
+            missing row dimension.
+            """
+            for idx, cube_response in enumerate(self._cube_responses):
+                cube = Cube(
+                    cube_response,
+                    cube_idx=idx if self._is_multi_cube else None,
+                    transforms=self._transforms_dicts[idx],
+                    population=self._population,
+                    mask_size=self._min_base,
+                )
+                # --- numeric-mean cubes require inflation to restore their
+                # --- rows-dimension, others don't
+                yield cube.inflate() if self._is_numeric_mean else cube
+
+        return tuple(iter_cubes())
 
     @lazyproperty
     def _is_multi_cube(self):
@@ -166,24 +185,6 @@ class CubeSet(object):
         # --- We need the cube to tell us the dimensionality. This redundant
         # --- construction is low-overhead because all Cube properties are lazy.
         return Cube(self._cube_responses[0]).ndim == 0
-
-    def _iter_cubes(self):
-        """Generate a Cube object for each of cube_responses.
-
-        0D cube-responses and 1D second-and-later cubes are "inflated" to add their
-        missing row dimension.
-        """
-        for idx, cube_response in enumerate(self._cube_responses):
-            cube = Cube(
-                cube_response,
-                cube_idx=idx if self._is_multi_cube else None,
-                transforms=self._transforms_dicts[idx],
-                population=self._population,
-                mask_size=self._min_base,
-            )
-            # --- all numeric-mean cubes require inflation to restore their
-            # --- rows-dimension, others don't
-            yield cube.inflate() if self._is_numeric_mean else cube
 
 
 class Cube(object):
