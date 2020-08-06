@@ -1,3 +1,9 @@
+# encoding: utf-8
+
+"""Integration-test suite for multiple-response cube behaviors"""
+
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import numpy as np
 
 from cr.cube.cube import Cube
@@ -534,7 +540,7 @@ def test_cat_x_mr_x_mr_proportions_by_row():
         [[0.19169699, 0.5949388], [0.19543651, 0.59920635], [0.19712526, 0.59753593]],
     )
     np.testing.assert_array_equal(
-        slice_.base_counts, [[1159, 3597], [197, 604], [192, 582]]
+        slice_.unweighted_counts, [[1159, 3597], [197, 604], [192, 582]]
     )
     slice_ = Cube(CR.CAT_X_MR_X_MR).partitions[1]
     np.testing.assert_almost_equal(
@@ -542,7 +548,7 @@ def test_cat_x_mr_x_mr_proportions_by_row():
         [[0.17207792, 0.1017316], [0.1963129, 0.10380335], [0.19141804, 0.10442508]],
     )
     np.testing.assert_array_equal(
-        slice_.base_counts, [[159, 94], [1182, 625], [1142, 623]]
+        slice_.unweighted_counts, [[159, 94], [1182, 625], [1142, 623]]
     )
 
 
@@ -763,11 +769,11 @@ def test_mr_counts_not_pruned():
     ]
     # Not pruned
     slice_ = Cube(CR.PROMPTED_AWARENESS).partitions[0]
-    np.testing.assert_array_equal(slice_.base_counts, expected)
+    np.testing.assert_array_equal(slice_.unweighted_counts, expected)
     # Pruned (actuall nothing is pruned because not-selected != 0)
     transforms = {"columns_dimension": {"prune": True}}
     slice_ = Cube(CR.PROMPTED_AWARENESS, transforms=transforms).partitions[0]
-    np.testing.assert_array_equal(slice_.base_counts, expected)
+    np.testing.assert_array_equal(slice_.unweighted_counts, expected)
 
 
 def test_mr_x_cat_x_mr_pruned_rows():

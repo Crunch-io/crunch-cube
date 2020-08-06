@@ -221,10 +221,6 @@ class Cube(object):
             return super(Cube, self).__repr__()
 
     @lazyproperty
-    def base_counts(self):
-        return self._measures.unweighted_counts.raw_cube_array[self._valid_idxs]
-
-    @lazyproperty
     def counts(self):
         return self.counts_with_missings[self._valid_idxs]
 
@@ -365,6 +361,17 @@ class Cube(object):
         columns dimension.
         """
         return self._cube_dict["result"].get("title", "Untitled")
+
+    @lazyproperty
+    def unweighted_counts(self):
+        """ndarray of unweighted counts, valid elements only.
+
+        Unweighted counts are drawn from the `result.counts` field of the cube result.
+        These counts are always present, even when the measure is `mean` and there are
+        no count measures. These counts are always unweighted, regardless of whether the
+        cube is "weighted".
+        """
+        return self._measures.unweighted_counts.raw_cube_array[self._valid_idxs]
 
     @lazyproperty
     def _all_dimensions(self):

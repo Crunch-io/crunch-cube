@@ -246,10 +246,10 @@ class TransformedMatrix(object):
 class _BaseBaseMatrix(object):
     """Base class for all matrix (2D secondary-analyzer) objects."""
 
-    def __init__(self, dimensions, counts, base_counts):
+    def __init__(self, dimensions, counts, unweighted_counts):
         self._dimensions = dimensions
         self._counts = counts
-        self._base_counts = base_counts
+        self._unweighted_counts = unweighted_counts
 
     @classmethod
     def factory(cls, cube, dimensions, slice_idx):
@@ -286,7 +286,7 @@ class _BaseBaseMatrix(object):
     def _column_generator(self):
         return zip(
             self._counts.T,
-            self._base_counts.T,
+            self._unweighted_counts.T,
             self._column_elements,
             self._zscores.T,
             self._table_std_dev.T,
@@ -316,9 +316,9 @@ class _BaseBaseMatrix(object):
             else _CatXCatMeansMatrix
         )
         counts, unweighted_counts = (
-            (cube.counts[slice_idx], cube.base_counts[slice_idx])
+            (cube.counts[slice_idx], cube.unweighted_counts[slice_idx])
             if cube.ndim == 3
-            else (cube.counts, cube.base_counts)
+            else (cube.counts, cube.unweighted_counts)
         )
         return MatrixCls(dimensions, counts, unweighted_counts)
 
@@ -330,7 +330,7 @@ class _BaseBaseMatrix(object):
             offset=1 if cube.dimension_types[0] == DT.MR else 0,
             mr_dimensions=dimensions,
             mr_counts=cube.counts,
-            mr_base_counts=cube.base_counts,
+            mr_unweighted_counts=cube.unweighted_counts,
             mr_counts_with_missings=cube.counts_with_missings,
             subtotals=cube.dimensions[0].subtotals,
         )
@@ -342,7 +342,7 @@ class _BaseBaseMatrix(object):
             return _MrXMrMatrix(
                 dimensions,
                 counts=np.sum(cube.counts[:, :, :, :, 0], axis=4),
-                base_counts=np.sum(cube.base_counts[:, :, :, :, 0], axis=4),
+                unweighted_counts=np.sum(cube.unweighted_counts[:, :, :, :, 0], axis=4),
                 counts_with_missings=np.sum(
                     cube.counts_with_missings[:, :, :, :, 0], axis=4
                 ),
@@ -353,7 +353,7 @@ class _BaseBaseMatrix(object):
         return _CatXMrMatrix(
             dimensions,
             counts=np.sum(cube.counts[:, :, :, 0], axis=3),
-            base_counts=np.sum(cube.base_counts[:, :, :, 0], axis=3),
+            unweighted_counts=np.sum(cube.unweighted_counts[:, :, :, 0], axis=3),
             counts_with_missings=np.sum(cube.counts_with_missings[:, :, :, 0], axis=3),
             overlaps=overlap_tstats,
         )
@@ -364,17 +364,17 @@ class _BaseBaseMatrix(object):
         counts, unweighted_counts, counts_with_missings = (
             (
                 cube.counts[slice_idx][0],
-                cube.base_counts[slice_idx][0],
+                cube.unweighted_counts[slice_idx][0],
                 cube.counts_with_missings[slice_idx][0],
             )
             if cube.ndim > 2 and cube.dimension_types[0] == DT.MR
             else (
                 cube.counts[slice_idx],
-                cube.base_counts[slice_idx],
+                cube.unweighted_counts[slice_idx],
                 cube.counts_with_missings[slice_idx],
             )
             if cube.ndim > 2
-            else (cube.counts, cube.base_counts, cube.counts_with_missings)
+            else (cube.counts, cube.unweighted_counts, cube.counts_with_missings)
         )
 
         dimension_types = cube.dimension_types[-2:]
@@ -416,8 +416,10 @@ class _CatXCatMatrix(_BaseBaseMatrix):
     rows or columns).
     """
 
-    def __init__(self, dimensions, counts, base_counts, counts_with_missings=None):
-        super(_CatXCatMatrix, self).__init__(dimensions, counts, base_counts)
+    def __init__(
+        self, dimensions, counts, unweighted_counts, counts_with_missings=None
+    ):
+        super(_CatXCatMatrix, self).__init__(dimensions, counts, unweighted_counts)
         self._all_counts = counts_with_missings
 
     @lazyproperty
@@ -425,7 +427,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
         return tuple(
             _CategoricalVector(
                 counts,
-                base_counts,
+                unweighted_counts,
                 element,
                 self.table_margin,
                 zscore,
@@ -435,7 +437,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
             )
             for (
                 counts,
-                base_counts,
+                unweighted_counts,
                 element,
                 zscore,
                 table_std_dev,
@@ -448,7 +450,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
         return tuple(
             _CategoricalVector(
                 counts,
-                base_counts,
+                unweighted_counts,
                 element,
                 self.table_margin,
                 zscore,
@@ -459,7 +461,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
             )
             for (
                 counts,
-                base_counts,
+                unweighted_counts,
                 element,
                 zscore,
                 table_std_dev,
@@ -470,7 +472,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
 
     @lazyproperty
     def table_base(self):
-        return np.sum(self._base_counts)
+        return np.sum(self._unweighted_counts)
 
     @lazyproperty
     def table_margin(self):
@@ -504,7 +506,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
     def _row_generator(self):
         return zip(
             self._counts,
-            self._base_counts,
+            self._unweighted_counts,
             self._row_elements,
             self._zscores,
             self._table_std_dev,
@@ -570,17 +572,17 @@ class _CatXCatMatrix(_BaseBaseMatrix):
 class _CatXCatMeansMatrix(_CatXCatMatrix):
     """Cat-x-cat matrix for means measure."""
 
-    def __init__(self, dimensions, means, base_counts):
-        super(_CatXCatMeansMatrix, self).__init__(dimensions, None, base_counts)
+    def __init__(self, dimensions, means, unweighted_counts):
+        super(_CatXCatMeansMatrix, self).__init__(dimensions, None, unweighted_counts)
         self._means = means
 
     @lazyproperty
     def columns(self):
         return tuple(
-            _MeansVector(element, base_counts, means)
-            for element, base_counts, means in zip(
+            _MeansVector(element, unweighted_counts, means)
+            for element, unweighted_counts, means in zip(
                 self.columns_dimension.valid_elements,
-                self._base_counts.T,
+                self._unweighted_counts.T,
                 self._means.T,
             )
         )
@@ -588,9 +590,9 @@ class _CatXCatMeansMatrix(_CatXCatMatrix):
     @lazyproperty
     def rows(self):
         return tuple(
-            _MeansVector(element, base_counts, means)
-            for element, base_counts, means in zip(
-                self.rows_dimension.valid_elements, self._base_counts, self._means
+            _MeansVector(element, unweighted_counts, means)
+            for element, unweighted_counts, means in zip(
+                self.rows_dimension.valid_elements, self._unweighted_counts, self._means
             )
         )
 
@@ -625,7 +627,7 @@ class _MrXCatMatrix(_MatrixWithMR):
         return tuple(
             _MultipleResponseVector(
                 counts,
-                base_counts,
+                unweighted_counts,
                 element,
                 self.table_margin,
                 zscore,
@@ -634,7 +636,7 @@ class _MrXCatMatrix(_MatrixWithMR):
             )
             for (
                 counts,
-                base_counts,
+                unweighted_counts,
                 element,
                 zscore,
                 table_std_dev,
@@ -648,7 +650,7 @@ class _MrXCatMatrix(_MatrixWithMR):
         return tuple(
             _CatXMrVector(
                 counts,
-                base_counts,
+                unweighted_counts,
                 element,
                 table_margin,
                 zscore,
@@ -658,7 +660,7 @@ class _MrXCatMatrix(_MatrixWithMR):
             )
             for (
                 counts,
-                base_counts,
+                unweighted_counts,
                 element,
                 table_margin,
                 zscore,
@@ -670,7 +672,7 @@ class _MrXCatMatrix(_MatrixWithMR):
 
     @lazyproperty
     def table_base(self):
-        return np.sum(self._base_counts, axis=(1, 2))
+        return np.sum(self._unweighted_counts, axis=(1, 2))
 
     @lazyproperty
     def table_margin(self):
@@ -699,7 +701,7 @@ class _MrXCatMatrix(_MatrixWithMR):
     def _row_generator(self):
         return zip(
             self._counts,
-            self._base_counts,
+            self._unweighted_counts,
             self._row_elements,
             self.table_margin,
             self._zscores,
@@ -746,17 +748,17 @@ class _MrXCatMatrix(_MatrixWithMR):
 class _MrXCatMeansMatrix(_MrXCatMatrix):
     """ ... """
 
-    def __init__(self, dimensions, means, base_counts):
+    def __init__(self, dimensions, means, unweighted_counts):
         counts = np.zeros(means.shape)
-        super(_MrXCatMeansMatrix, self).__init__(dimensions, counts, base_counts)
+        super(_MrXCatMeansMatrix, self).__init__(dimensions, counts, unweighted_counts)
         self._means = means
 
     @lazyproperty
     def rows(self):
         return tuple(
-            _MeansWithMrVector(element, base_counts, means[0])
-            for element, base_counts, means in zip(
-                self.rows_dimension.valid_elements, self._base_counts, self._means
+            _MeansWithMrVector(element, unweighted_counts, means[0])
+            for element, unweighted_counts, means in zip(
+                self.rows_dimension.valid_elements, self._unweighted_counts, self._means
             )
         )
 
@@ -769,18 +771,18 @@ class _CatXMrMatrix(_MatrixWithMR):
     """
 
     def __init__(
-        self, dimensions, counts, base_counts, counts_with_missings, overlaps=None
+        self, dimensions, counts, unweighted_counts, counts_with_missings, overlaps=None
     ):
         super(_CatXMrMatrix, self).__init__(
-            dimensions, counts, base_counts, counts_with_missings
+            dimensions, counts, unweighted_counts, counts_with_missings
         )
         self._overlaps = overlaps
 
     @lazyproperty
     def columns(self):
         return tuple(
-            _CatXMrVector(counts.T, base_counts.T, element, table_margin)
-            for counts, base_counts, element, table_margin in self._column_generator
+            _CatXMrVector(counts.T, unweighted_counts.T, element, table_margin)
+            for counts, unweighted_counts, element, table_margin in self._column_generator
         )
 
     @lazyproperty
@@ -796,7 +798,7 @@ class _CatXMrMatrix(_MatrixWithMR):
         return tuple(
             _MultipleResponseVector(
                 counts.T,
-                base_counts.T,
+                unweighted_counts.T,
                 element,
                 self.table_margin,
                 zscore,
@@ -806,7 +808,7 @@ class _CatXMrMatrix(_MatrixWithMR):
             )
             for (
                 counts,
-                base_counts,
+                unweighted_counts,
                 element,
                 zscore,
                 table_std_dev,
@@ -817,7 +819,7 @@ class _CatXMrMatrix(_MatrixWithMR):
 
     @lazyproperty
     def table_base(self):
-        return np.sum(self._base_counts, axis=(0, 2))
+        return np.sum(self._unweighted_counts, axis=(0, 2))
 
     @lazyproperty
     def table_margin(self):
@@ -842,10 +844,10 @@ class _CatXMrMatrix(_MatrixWithMR):
     @lazyproperty
     def _column_generator(self):
         return zip(
-            # self._counts.T[0],
             np.array([self._counts.T[0].T, self._counts.T[1].T]).T,
-            # self._base_counts.T[0],
-            np.array([self._base_counts.T[0].T, self._base_counts.T[1].T]).T,
+            np.array(
+                [self._unweighted_counts.T[0].T, self._unweighted_counts.T[1].T]
+            ).T,
             self._column_elements,
             self.table_margin,
         )
@@ -888,10 +890,10 @@ class _CatXMrMatrix(_MatrixWithMR):
 
 
 class _CatXMrMeansMatrix(_CatXMrMatrix):
-    def __init__(self, dimensions, means, base_counts, overlaps=None):
+    def __init__(self, dimensions, means, unweighted_counts, overlaps=None):
         counts = np.zeros(means.shape)
         super(_CatXMrMeansMatrix, self).__init__(
-            dimensions, counts, base_counts, overlaps
+            dimensions, counts, unweighted_counts, overlaps
         )
         self._means = means
 
@@ -902,9 +904,9 @@ class _CatXMrMeansMatrix(_CatXMrMatrix):
         return tuple(
             # We must inflate the means with [:, 0], because the values are oriented
             # like columns (0th is selected while 1st is other)
-            _MeansWithMrVector(element, base_counts, means[:, 0])
-            for element, base_counts, means in zip(
-                self.rows_dimension.valid_elements, self._base_counts, self._means
+            _MeansWithMrVector(element, unweighted_counts, means[:, 0])
+            for element, unweighted_counts, means in zip(
+                self.rows_dimension.valid_elements, self._unweighted_counts, self._means
             )
         )
 
@@ -919,13 +921,13 @@ class _MrXMrMatrix(_MatrixWithMR):
         self,
         dimensions,
         counts,
-        base_counts,
+        unweighted_counts,
         counts_with_missings,
         overlaps=None,
         overlaps_margin=None,
     ):
         super(_MrXMrMatrix, self).__init__(
-            dimensions, counts, base_counts, counts_with_missings
+            dimensions, counts, unweighted_counts, counts_with_missings
         )
         self._overlaps = overlaps
         self._overlaps_margin = overlaps_margin
@@ -933,8 +935,8 @@ class _MrXMrMatrix(_MatrixWithMR):
     @lazyproperty
     def columns(self):
         return tuple(
-            _MultipleResponseVector(counts, base_counts, element, table_margin)
-            for counts, base_counts, element, table_margin in self._column_generator
+            _MultipleResponseVector(counts, unweighted_counts, element, table_margin)
+            for counts, unweighted_counts, element, table_margin in self._column_generator
         )
 
     @lazyproperty
@@ -950,7 +952,7 @@ class _MrXMrMatrix(_MatrixWithMR):
         return tuple(
             _MultipleResponseVector(
                 counts[0].T,
-                base_counts[0].T,
+                unweighted_counts[0].T,
                 element,
                 table_margin,
                 zscore,
@@ -960,7 +962,7 @@ class _MrXMrMatrix(_MatrixWithMR):
             )
             for (
                 counts,
-                base_counts,
+                unweighted_counts,
                 element,
                 table_margin,
                 zscore,
@@ -972,7 +974,7 @@ class _MrXMrMatrix(_MatrixWithMR):
 
     @lazyproperty
     def table_base(self):
-        return np.sum(self._base_counts, axis=(1, 3))
+        return np.sum(self._unweighted_counts, axis=(1, 3))
 
     @lazyproperty
     def table_margin(self):
@@ -1055,7 +1057,7 @@ class _MrXMrMatrix(_MatrixWithMR):
     def _column_generator(self):
         return zip(
             self._counts.T[0],
-            self._base_counts.T[0],
+            self._unweighted_counts.T[0],
             self._column_elements,
             self.table_margin.T,
         )
@@ -1073,7 +1075,7 @@ class _MrXMrMatrix(_MatrixWithMR):
     def _row_generator(self):
         return zip(
             self._counts,
-            self._base_counts,
+            self._unweighted_counts,
             self._row_elements,
             self.table_margin,
             self._zscores,
@@ -1168,12 +1170,6 @@ class _BaseMatrixInsertedVector(object):
         return np.sum(np.array([vec.base for vec in self._addend_vectors]), axis=0)
 
     @lazyproperty
-    def base_values(self):
-        return np.sum(
-            np.array([row.base_values for row in self._addend_vectors]), axis=0
-        )
-
-    @lazyproperty
     def column_index(self):
         """Computing the column-index of an inserted vector is hard. Punt for now."""
         return np.array([np.nan] * len(self.values))
@@ -1254,6 +1250,13 @@ class _BaseMatrixInsertedVector(object):
     @lazyproperty
     def table_margin(self):
         return self._table_margin
+
+    @lazyproperty
+    def unweighted_counts(self):
+        """1D ndarray of addend cell unweighted-count sum for each vector position."""
+        return np.sum(
+            np.array([row.unweighted_counts for row in self._addend_vectors]), axis=0
+        )
 
     @lazyproperty
     def values(self):
@@ -1459,15 +1462,6 @@ class _AssembledVector(_BaseTransformationVector):
         return self._base_vector.base
 
     @lazyproperty
-    def base_values(self):
-        base_values = self._base_vector.base_values
-
-        def fsubtot(inserted_vector):
-            return np.sum(base_values[inserted_vector.addend_idxs])
-
-        return self._apply_interleaved(base_values, fsubtot)
-
-    @lazyproperty
     def column_index(self):
         def fsubtot(subtotal):
             # TODO: Replace with real column index values from insertions vectors. This
@@ -1510,6 +1504,19 @@ class _AssembledVector(_BaseTransformationVector):
     @lazyproperty
     def table_proportions(self):
         return self.values / self._base_vector.table_margin
+
+    @lazyproperty
+    def unweighted_counts(self):
+        """1D ndarray of unweighted count for each base element and insertion.
+
+        Subtotal values are interleaved with base values in their specified location.
+        """
+        unweighted_counts = self._base_vector.unweighted_counts
+
+        def fsubtot(inserted_vector):
+            return np.sum(unweighted_counts[inserted_vector.addend_idxs])
+
+        return self._apply_interleaved(unweighted_counts, fsubtot)
 
     @lazyproperty
     def values(self):
@@ -1622,10 +1629,6 @@ class _VectorAfterHiding(_BaseTransformationVector):
         return self._base_vector.base[self._visible_element_idxs]
 
     @lazyproperty
-    def base_values(self):
-        return self._base_vector.base_values[self._visible_element_idxs]
-
-    @lazyproperty
     def column_index(self):
         return self._base_vector.column_index[self._visible_element_idxs]
 
@@ -1658,6 +1661,11 @@ class _VectorAfterHiding(_BaseTransformationVector):
     @lazyproperty
     def table_proportions(self):
         return self._base_vector.table_proportions[self._visible_element_idxs]
+
+    @lazyproperty
+    def unweighted_counts(self):
+        """1D ndarray of unweighted count for each visible element in vector."""
+        return self._base_vector.unweighted_counts[self._visible_element_idxs]
 
     @lazyproperty
     def values(self):
@@ -1707,10 +1715,6 @@ class _OrderedVector(_BaseTransformationVector):
         return self._base_vector.base
 
     @lazyproperty
-    def base_values(self):
-        return self._base_vector.base_values[self._opposing_order]
-
-    @lazyproperty
     def column_index(self):
         return self._base_vector.column_index
 
@@ -1742,6 +1746,11 @@ class _OrderedVector(_BaseTransformationVector):
         return (self._index, self._index, self)
 
     @lazyproperty
+    def unweighted_counts(self):
+        """1D ndarray of unweighted count reordered to opposing-vector ordering."""
+        return self._base_vector.unweighted_counts[self._opposing_order]
+
+    @lazyproperty
     def values(self):
         return self._base_vector.values[self._opposing_order]
 
@@ -1769,13 +1778,13 @@ class _BaseVector(object):
     numeric value, etc. for the row or column.
     """
 
-    def __init__(self, element, base_counts):
+    def __init__(self, element, unweighted_counts):
         self._element = element
-        self._base_counts = base_counts
+        self._unweighted_counts = unweighted_counts
 
     @lazyproperty
     def base(self):
-        return np.sum(self._base_counts)
+        return np.sum(self._unweighted_counts)
 
     @lazyproperty
     def element_id(self):
@@ -1861,7 +1870,7 @@ class _CategoricalVector(_BaseVector):
     def __init__(
         self,
         counts,
-        base_counts,
+        unweighted_counts,
         element,
         table_margin,
         zscore=None,
@@ -1870,7 +1879,7 @@ class _CategoricalVector(_BaseVector):
         column_index=None,
         opposing_margin=None,
     ):
-        super(_CategoricalVector, self).__init__(element, base_counts)
+        super(_CategoricalVector, self).__init__(element, unweighted_counts)
         self._counts = counts
         self._table_margin = table_margin
         self._zscore = zscore
@@ -1878,10 +1887,6 @@ class _CategoricalVector(_BaseVector):
         self._table_std_err = table_std_err
         self._column_index = column_index
         self._opposing_margin = opposing_margin
-
-    @lazyproperty
-    def base_values(self):
-        return self._base_counts
 
     @lazyproperty
     def column_index(self):
@@ -1900,6 +1905,11 @@ class _CategoricalVector(_BaseVector):
         return self._table_margin
 
     @lazyproperty
+    def unweighted_counts(self):
+        """1D ndarray of unweighted count for each valid element in vector."""
+        return self._unweighted_counts
+
+    @lazyproperty
     def values(self):
         return self._counts
 
@@ -1910,7 +1920,7 @@ class _CatXMrVector(_CategoricalVector):
     def __init__(
         self,
         counts,
-        base_counts,
+        unweighted_counts,
         label,
         table_margin,
         zscore=None,
@@ -1920,7 +1930,7 @@ class _CatXMrVector(_CategoricalVector):
     ):
         super(_CatXMrVector, self).__init__(
             counts[0],
-            base_counts[0],
+            unweighted_counts[0],
             label,
             table_margin,
             zscore,
@@ -1928,7 +1938,7 @@ class _CatXMrVector(_CategoricalVector):
             table_std_err,
             column_index,
         )
-        self._all_bases = base_counts
+        self._all_unweighted_counts = unweighted_counts
         self._all_counts = counts
 
     @lazyproperty
@@ -1937,7 +1947,7 @@ class _CatXMrVector(_CategoricalVector):
 
     @lazyproperty
     def table_base(self):
-        return np.sum(self._all_bases)
+        return np.sum(self._all_unweighted_counts)
 
     @lazyproperty
     def table_margin(self):
@@ -1952,9 +1962,9 @@ class _CatXMrVector(_CategoricalVector):
 class _MeansVector(_BaseVector):
     """Used on a non-MR dimension when cube-result contains means."""
 
-    def __init__(self, element, base_counts, means):
-        super(_MeansVector, self).__init__(element, base_counts)
-        self._base_counts = base_counts
+    def __init__(self, element, unweighted_counts, means):
+        super(_MeansVector, self).__init__(element, unweighted_counts)
+        self._unweighted_counts = unweighted_counts
         self._means = means
         self._opposing_margin = None
 
@@ -1968,7 +1978,7 @@ class _MeansVector(_BaseVector):
 
     @lazyproperty
     def margin(self):
-        return np.nan * len(self._base_counts)
+        return np.nan * len(self._unweighted_counts)
 
 
 class _MeansWithMrVector(_MeansVector):
@@ -1976,7 +1986,7 @@ class _MeansWithMrVector(_MeansVector):
 
     @lazyproperty
     def base(self):
-        return np.sum(self._base_counts[0])
+        return np.sum(self._unweighted_counts[0])
 
 
 class _MultipleResponseVector(_CategoricalVector):
@@ -1995,10 +2005,6 @@ class _MultipleResponseVector(_CategoricalVector):
         )
 
     @lazyproperty
-    def base_values(self):
-        return self._base_counts[0, :]
-
-    @lazyproperty
     def margin(self):
         counts = zip(self._selected, self._not_selected)
         return np.array(
@@ -2008,6 +2014,11 @@ class _MultipleResponseVector(_CategoricalVector):
     @lazyproperty
     def pruned(self):
         return np.all(self.base == 0) or np.all(np.isnan(self.base))
+
+    @lazyproperty
+    def unweighted_counts(self):
+        """1D ndarray of unweighted-count of selected responses in MR dimension."""
+        return self._unweighted_counts[0, :]
 
     @lazyproperty
     def values(self):
@@ -2024,7 +2035,7 @@ class _MultipleResponseVector(_CategoricalVector):
 
     @lazyproperty
     def _not_selected_unweighted(self):
-        return self._base_counts[1, :]
+        return self._unweighted_counts[1, :]
 
     @lazyproperty
     def _selected(self):
@@ -2032,4 +2043,4 @@ class _MultipleResponseVector(_CategoricalVector):
 
     @lazyproperty
     def _selected_unweighted(self):
-        return self._base_counts[0, :]
+        return self._unweighted_counts[0, :]

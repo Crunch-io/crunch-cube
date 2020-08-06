@@ -56,7 +56,7 @@ class Describe_Slice(object):
         slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS).partitions[0]
 
         np.testing.assert_array_equal(
-            slice_.base_counts,
+            slice_.unweighted_counts,
             [
                 [28, 48, 20, 10, 0, 1],
                 [7, 19, 12, 8, 0, 2],
@@ -527,7 +527,7 @@ class Describe_Slice(object):
         expected = np.array(
             [[28, 20, 10, 1], [1, 0, 1, 0], [3, 4, 2, 2], [3, 8, 5, 0], [1, 1, 1, 0]]
         )
-        np.testing.assert_equal(slice_.base_counts, expected)
+        np.testing.assert_equal(slice_.unweighted_counts, expected)
 
         # Pruned (just rows) - with insertions
         transforms = {"rows_dimension": {"prune": True}}
@@ -542,7 +542,7 @@ class Describe_Slice(object):
                 [1, 2, 1, 1, 0, 0],
             ]
         )
-        np.testing.assert_equal(slice_.base_counts, expected)
+        np.testing.assert_equal(slice_.unweighted_counts, expected)
 
         # Pruned (just columns) - with insertions
         transforms = {"columns_dimension": {"prune": True}}
@@ -558,7 +558,7 @@ class Describe_Slice(object):
                 [1, 2, 1, 1, 0],
             ]
         )
-        np.testing.assert_equal(slice_.base_counts, expected)
+        np.testing.assert_equal(slice_.unweighted_counts, expected)
 
         # Pruned (rows and columns) - with insertions
         transforms = {
@@ -576,7 +576,7 @@ class Describe_Slice(object):
                 [1, 2, 1, 1, 0],
             ]
         )
-        np.testing.assert_equal(slice_.base_counts, expected)
+        np.testing.assert_equal(slice_.unweighted_counts, expected)
 
         # Not pruned - with insertions
         slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS).partitions[0]
@@ -591,7 +591,7 @@ class Describe_Slice(object):
                 [1, 2, 1, 1, 0, 0],
             ]
         )
-        np.testing.assert_equal(slice_.base_counts, expected)
+        np.testing.assert_equal(slice_.unweighted_counts, expected)
 
     def it_accommodates_an_all_missing_element_rows_dimension(self):
         slice_ = _Slice(Cube(CR.CAT_X_CAT_ALL_MISSING_ROW_ELEMENTS), 0, None, None, 0)
@@ -673,7 +673,6 @@ class Describe_Strand(object):
     def it_provides_values_for_univariate_cat(self):
         strand = Cube(CR.UNIVARIATE_CATEGORICAL).partitions[0]
 
-        assert strand.base_counts == (10, 5)
         assert strand.bases == (15, 15)
         assert strand.counts == (10, 5)
         assert strand.cube_index == 0
@@ -705,6 +704,7 @@ class Describe_Strand(object):
         assert pytest.approx(strand.table_proportions) == (0.666667, 0.333333)
         assert strand.title == "Registered Voters"
         assert strand.unweighted_bases == (15, 15)
+        assert strand.unweighted_counts == (10, 5)
         assert pytest.approx(strand.var_scale_mean) == 0.8888888
         assert strand.variable_name == "v7"
 

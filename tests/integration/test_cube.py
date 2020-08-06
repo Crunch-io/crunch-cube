@@ -28,7 +28,6 @@ class DescribeIntegratedCube(object):
         cube = Cube(CR.CAT_X_CAT)
 
         assert cube.__repr__() == "Cube(name='v4', dimension_types='CAT x CAT')"
-        np.testing.assert_equal(cube.base_counts, [[5, 2], [5, 3]])
         np.testing.assert_equal(cube.counts, [[5, 2], [5, 3]])
         np.testing.assert_equal(
             cube.counts_with_missings, [[5, 3, 2, 0], [5, 2, 3, 0], [0, 0, 0, 0]]
@@ -45,6 +44,7 @@ class DescribeIntegratedCube(object):
         assert cube.ndim == 2
         assert cube.population_fraction == 1.0
         assert cube.title == "Pony Owners"
+        np.testing.assert_equal(cube.unweighted_counts, [[5, 2], [5, 3]])
 
     def it_provides_access_to_its_dimensions(self, dimensions_fixture):
         cube_response, expected_dimension_types = dimensions_fixture
@@ -55,20 +55,21 @@ class DescribeIntegratedCube(object):
         assert dimension_types == expected_dimension_types
 
     def it_provides_array_for_single_valid_cat_CAT_X_MR(self):
-        """No pruning needs to happen, because the base counts are:
-        >>> slice_._slice._base_counts
+        """No pruning needs to happen, because pruning is based on unweighted counts:
+        >>> cube.unweighted_counts
         array([[[0, 108],
                 [14, 94],
                 [94, 14]]])
 
-        whild the weighted counts are:
+        so even though the weighted counts are all zeroes:
 
-        >>> slice_._slice._base_counts
+        >>> cube.counts
         array([[[0, 0],
                 [0, 0],
                 [0, 0]]])
 
-        therefore we need 3 zeros in the result (no zero gets pruned).
+        we expect [[0, 0, 0]] as the result; no zero gets pruned because no unweighted
+        count is zero.
         """
         transforms = {
             "rows_dimension": {"prune": True},
@@ -346,12 +347,13 @@ class TestCrunchCubeAsNub(TestCase):
         assert cube.description is None
         assert cube.name is None
         assert cube.missing == 0
+
         nub = cube.partitions[0]
-        expected = np.array([49.095])
-        np.testing.assert_almost_equal(nub.means, expected)
-        np.testing.assert_almost_equal(nub.table_base, expected)
+
+        np.testing.assert_almost_equal(nub.means, np.array([49.095]))
         assert nub.ndim == 0
-        np.testing.assert_array_equal(nub.base_count, 1000)
+        np.testing.assert_almost_equal(nub.table_base, np.array([49.095]))
+        np.testing.assert_array_equal(nub.unweighted_count, 1000)
 
 
 class TestCrunchCubeAs_Slice(object):
@@ -365,7 +367,7 @@ class TestCrunchCubeAs_Slice(object):
     def test_as_array_univariate_cat_exclude_missing(self):
         strand = Cube(CR.UNIVARIATE_CATEGORICAL).partitions[0]
         assert strand.counts == (10, 5)
-        assert strand.base_counts == (10, 5)
+        assert strand.unweighted_counts == (10, 5)
 
     def test_as_array_numeric(self):
         strand = Cube(CR.VOTER_REGISTRATION).partitions[0]
@@ -772,7 +774,7 @@ class TestCrunchCubeAs_Slice(object):
     def test_as_array_unweighted_gender_x_ideology(self):
         slice_ = Cube(CR.ECON_GENDER_X_IDEOLOGY_WEIGHTED).partitions[0]
         expected = np.array([[32, 85, 171, 114, 70, 13], [40, 97, 205, 106, 40, 27]])
-        np.testing.assert_array_equal(slice_.base_counts, expected)
+        np.testing.assert_array_equal(slice_.unweighted_counts, expected)
 
     def test_as_array_weighted_gender_x_ideology(self):
         slice_ = Cube(CR.ECON_GENDER_X_IDEOLOGY_WEIGHTED).partitions[0]
@@ -1553,7 +1555,7 @@ class TestCrunchCubeAs_Slice(object):
     def test_ca_with_single_cat_pruning(self):
         transforms = {"rows_dimension": {"prune": True}}
         slice_ = Cube(CR.CA_SINGLE_CAT, transforms=transforms).partitions[0]
-        np.testing.assert_array_equal(slice_.base_counts, [[79], [80], [70]])
+        np.testing.assert_array_equal(slice_.unweighted_counts, [[79], [80], [70]])
 
     def test_ca_x_single_cat_counts(self):
         slice_ = Cube(CR.CA_X_SINGLE_CAT).partitions[0]

@@ -229,10 +229,6 @@ class _Slice(CubePartition):
     # ---interface ---------------------------------------------------
 
     @lazyproperty
-    def base_counts(self):
-        return np.array([row.base_values for row in self._matrix.rows])
-
-    @lazyproperty
     def column_base(self):
         return np.array([column.base for column in self._matrix.columns]).T
 
@@ -757,6 +753,11 @@ class _Slice(CubePartition):
         return np.array([row.table_std_err for row in self._matrix.rows])
 
     @lazyproperty
+    def unweighted_counts(self):
+        """2D tuple of unweighted counts."""
+        return tuple(tuple(row.unweighted_counts) for row in self._matrix.rows)
+
+    @lazyproperty
     def var_scale_means_column(self):
         """ -> 1D np.ndarray of the column variance values for scales
 
@@ -879,10 +880,6 @@ class _Strand(CubePartition):
         self._ca_as_0th = ca_as_0th
         self._slice_idx = slice_idx
         self._mask_size = mask_size
-
-    @lazyproperty
-    def base_counts(self):
-        return tuple(row.base for row in self._stripe.rows)
 
     @lazyproperty
     def bases(self):
@@ -1119,6 +1116,11 @@ class _Strand(CubePartition):
         return tuple(np.broadcast_to(self.table_base, self.shape))
 
     @lazyproperty
+    def unweighted_counts(self):
+        """tuple of int unweighted count for each row of stripe."""
+        return tuple(row.unweighted_count for row in self._stripe.rows)
+
+    @lazyproperty
     def var_scale_mean(self):
         if np.all(np.isnan(self._numeric_values)):
             return None
@@ -1197,12 +1199,8 @@ class _Nub(CubePartition):
     """0D slice."""
 
     @lazyproperty
-    def base_count(self):
-        return self._cube.base_counts
-
-    @lazyproperty
     def is_empty(self):
-        return False if self.base_count else True
+        return False if self.unweighted_count else True
 
     @lazyproperty
     def means(self):
@@ -1211,6 +1209,10 @@ class _Nub(CubePartition):
     @lazyproperty
     def table_base(self):
         return self._scalar.table_base
+
+    @lazyproperty
+    def unweighted_count(self):
+        return self._cube.unweighted_counts
 
     # ---implementation (helpers)-------------------------------------
 
@@ -1221,4 +1223,4 @@ class _Nub(CubePartition):
     @lazyproperty
     def _scalar(self):
         """The pre-transforms data-array for this slice."""
-        return MeansScalar(self._cube.counts, self._cube.base_counts)
+        return MeansScalar(self._cube.counts, self._cube.unweighted_counts)
