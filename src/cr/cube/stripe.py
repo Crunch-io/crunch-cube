@@ -19,7 +19,20 @@ from cr.cube.util import lazyproperty
 
 
 class TransformedStripe(object):
-    """Stripe reflecting application of all transforms."""
+    """Stripe reflecting application of all transforms.
+
+    `rows_dimension` is a `cr.cube.dimension.Dimension` object representing the single
+    dimension of this stripe. This is referred to as the "rows" dimension because when
+    viewed as a "card" in the Crunch UI, the elements of this dimension each appear as
+    a distinct row of the card.
+
+    `base_stripe` is one of the low-level, pre-transformation stripe objects defined
+    later in the module. The `.stripe()` classmethod uses a factory method to construct
+    an instance of the right class depending on the dimension type.
+
+    This object is not meant to be constructed directly, except perhaps in unit tests.
+    Use the `.stripe()` classmethod to create a new `TransformedStripe` instance.
+    """
 
     def __init__(self, rows_dimension, base_stripe):
         self._rows_dimension = rows_dimension
@@ -27,7 +40,7 @@ class TransformedStripe(object):
 
     @classmethod
     def stripe(cls, cube, rows_dimension, ca_as_0th, slice_idx):
-        """Return a TransformedStripe object constructed from this cube result."""
+        """Return a TransformedStripe object constructed from the data in `cube`."""
         base_stripe = _BaseBaseStripe.factory(
             cube, rows_dimension, ca_as_0th, slice_idx
         )
@@ -52,12 +65,25 @@ class TransformedStripe(object):
 
     @lazyproperty
     def table_base_unpruned(self):
-        """Hmm, weird 1D ndarray with same int value repeated for each row."""
+        """np.int64 scalar or 1D np.int64 ndarray of table base including "empty" items.
+
+        Value is an np.int64 scalar except when this stripe is multiple-response (MR).
+        This value is a 1D ndarray of np.int64 for an MR stripe.
+        """
         return self._base_stripe.table_base
 
     @lazyproperty
     def table_margin_unpruned(self):
-        """Hmm, weird 1D ndarray with same float value repeated for each row."""
+        """np.float/int64 scalar or 1D np.float/int64 ndarray of table margin.
+
+        This value includes rows that may not appear in `.rows` because they are hidden.
+
+        This value is an np.int64 scalar when this stripe is CAT. The value is an array
+        when this stripe is multiple-response (MR) because each subvar of an MR
+        dimension has a distinct table margin.
+
+        Values are np.int64 when the cube-result is unweighted.
+        """
         return self._base_stripe.table_margin
 
     @lazyproperty
@@ -175,10 +201,12 @@ class _BaseBaseStripe(object):
 
     @lazyproperty
     def table_base(self):
+        """np.int64 count of actual respondents asked this question."""
         return np.sum(self._unweighted_counts)
 
     @lazyproperty
     def _row_elements(self):
+        """cr.cube.dimension._ValidElements instance for rows-dimension."""
         return self._rows_dimension.valid_elements
 
 
@@ -194,6 +222,7 @@ class _CatStripe(_BaseBaseStripe):
 
     @lazyproperty
     def rows(self):
+        """Sequence of _CatStripeRow for each valid element in rows-dimension."""
         table_margin = self.table_margin
         return tuple(
             _CatStripeRow(element, count, unweighted_count, table_margin)
@@ -204,7 +233,10 @@ class _CatStripe(_BaseBaseStripe):
 
     @lazyproperty
     def table_margin(self):
-        """Needed by inserted rows in later transformation step."""
+        """np.int64 total weighted count of responses to this question.
+
+        Needed by inserted rows in later transformation step.
+        """
         return np.sum(self._counts)
 
 
@@ -217,6 +249,7 @@ class _MeansStripe(_BaseBaseStripe):
 
     @lazyproperty
     def rows(self):
+        """Sequence of _MeansStripeRow for each valid element in rows-dimension."""
         return tuple(
             _MeansStripeRow(element, unweighted_count, mean)
             for element, unweighted_count, mean in zip(
@@ -239,6 +272,7 @@ class _MeansWithMrStripe(_BaseBaseStripe):
 
     @lazyproperty
     def rows(self):
+        """Sequence of _MeansMrStripeRow for each valid element in rows-dimension."""
         return tuple(
             _MeansMrStripeRow(element, unweighted_counts, means)
             for element, unweighted_counts, means in zip(
@@ -248,11 +282,12 @@ class _MeansWithMrStripe(_BaseBaseStripe):
 
     @lazyproperty
     def table_margin(self):
+        # TODO: explain in docstring why this is unweighted for means instead of _counts
         return np.sum(self._unweighted_counts)
 
 
 class _MrStripe(_BaseBaseStripe):
-    """Special case of 1-D MR slice (stripe)."""
+    """Special case of 1D MR slice (stripe)."""
 
     def __init__(self, rows_dimension, counts, unweighted_counts):
         super(_MrStripe, self).__init__(rows_dimension, unweighted_counts)
@@ -260,6 +295,7 @@ class _MrStripe(_BaseBaseStripe):
 
     @lazyproperty
     def rows(self):
+        """Sequence of _MrStripeRow for each valid element in rows-dimension."""
         return tuple(
             _MrStripeRow(element, counts, unweighted_counts, table_margin)
             for (element, counts, unweighted_counts, table_margin) in zip(
@@ -272,10 +308,20 @@ class _MrStripe(_BaseBaseStripe):
 
     @lazyproperty
     def table_base(self):
+        """1D ndarray of unweighted selected + unselected count for each row of stripe.
+
+        Note the base (how many respondents were asked the question) can vary from row
+        to row because not all choices are necessarily shown to all respondents.
+        """
         return np.sum(self._unweighted_counts, axis=1)
 
     @lazyproperty
     def table_margin(self):
+        """1D ndarray of weighted selected + unselected count for each row of stripe.
+
+        Note this can vary from row to row because not all choices are necessarily shown
+        to all respondents.
+        """
         return np.sum(self._counts, axis=1)
 
 
@@ -305,11 +351,12 @@ class _StripeInsertedRow(object):
 
     @lazyproperty
     def base(self):
-        """int64 sum of (unweighted) sample population of each addend row."""
+        """np.int64 sum of (unweighted) sample population of each addend row."""
         return sum(row.base for row in self._addend_rows)
 
     @lazyproperty
     def count(self):
+        """np.float64 subtotal of weighted count of this answer across addend rows."""
         return sum(row.count for row in self._addend_rows)
 
     @lazyproperty
@@ -332,10 +379,12 @@ class _StripeInsertedRow(object):
 
     @lazyproperty
     def label(self):
+        """str heading for this row."""
         return self._subtotal.label
 
     @lazyproperty
     def mean(self):
+        """Means cannot be subtotaled (so far at least)."""
         return np.nan
 
     @lazyproperty
@@ -352,6 +401,7 @@ class _StripeInsertedRow(object):
 
     @lazyproperty
     def table_proportions(self):
+        """float 0.0->1.0 portion of weighted respondents who chose this response."""
         return self.count / self.table_margin
 
     @lazyproperty
@@ -455,7 +505,10 @@ class _CatStripeRow(_BaseStripeRow):
 
     @lazyproperty
     def base(self):
-        """np.int64 (unweighted) sample population for this row."""
+        """np.int64 count of actual respondents who were offered this response."""
+        # TODO: this doesn't seem right. The unweighted-count is the number of actual
+        # respondents who *selected* this response, not all those who were asked the
+        # question (as it should be).
         return self._unweighted_count
 
     @lazyproperty
@@ -465,12 +518,16 @@ class _CatStripeRow(_BaseStripeRow):
 
     @lazyproperty
     def pruned(self):
-        """True if this row is "empty"."""
+        """True if this question was answered by exactly zero respondents."""
         return self._unweighted_count == 0 or np.isnan(self._unweighted_count)
 
     @lazyproperty
     def table_proportions(self):
-        """float between 0.0 and 1.0 quantifying this row's share of stripe total."""
+        """float between 0.0 and 1.0 quantifying this row's share of stripe total.
+
+        This is the proportion of *weighted* respondents who selected this response to
+        the *weighted total* of respondents asked this question.
+        """
         return self.count / self._table_margin
 
     @lazyproperty
@@ -519,9 +576,9 @@ class _MeansMrStripeRow(_BaseStripeRow):
 
     def __init__(self, element, unweighted_counts, means):
         super(_MeansMrStripeRow, self).__init__(element)
-        # ---unweighted_counts is an int array like [336 5501]---
+        # ---unweighted_counts is a two-value int array like [336 5501]---
         self._unweighted_counts = unweighted_counts
-        # ---means is a float array like [2.578 1.639]---
+        # ---means is a two-value float array like [2.578 1.639]---
         self._means = means
 
     @lazyproperty
@@ -557,22 +614,27 @@ class _MrStripeRow(_BaseStripeRow):
 
     @lazyproperty
     def count(self):
+        """Number of weighted respondents who seleted this response."""
         return self._counts[0]
 
     @lazyproperty
     def pruned(self):
+        """True if this question was asked of exactly zero actual respondents."""
         return self.table_base == 0
 
     @lazyproperty
     def table_base(self):
+        """Sample size for MR question, how many actual folks were asked."""
         return np.sum(self._both_unweighted_counts)
 
     @lazyproperty
     def table_margin(self):
+        """Weighted sample size, how many "weighted" folks were asked."""
         return np.sum(self._both_counts)
 
     @lazyproperty
     def table_proportions(self):
+        """Proportion of all weighted respondents that selected this row's answer."""
         return self.count / self._table_margin
 
     @lazyproperty
@@ -582,8 +644,10 @@ class _MrStripeRow(_BaseStripeRow):
 
     @lazyproperty
     def _both_counts(self):
+        """Count of weighted respondents who offered this possible response."""
         return self._counts
 
     @lazyproperty
     def _both_unweighted_counts(self):
+        """Count of actual respondents who were offered this possible response."""
         return self._unweighted_counts
