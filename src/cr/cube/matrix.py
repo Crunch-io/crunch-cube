@@ -26,11 +26,33 @@ class TransformedMatrix(object):
 
     @classmethod
     def matrix(cls, cube, dimensions, slice_idx):
-        """Return a TransformedMatrix object constructed from this cube result."""
+        """ -> TransformedMatrix object constructed from values of `cube`.
+
+        `cube` is the `cr.cube.Cube` object containing the data for this matrix. Note
+        that not all the data in `cube` will necessarily be used by this matrix. When
+        `cube` is more than 2-dimensional, it is "sliced" and each slice gets its own
+        matrix (and `_Slice` object).
+
+        `dimensions` is a pair (2-tuple) of (rows_dimension, columns_dimension)
+        Dimension objects. These are based on two of the dimensions of `cube` but may
+        not be the first two and may and often do have transformations applied that are
+        not present on the `cube` dimensions from which they derive.
+
+        `slice_idx` is an int offset indicating which portion of `cube` data to use for
+        this matrix.
+        """
         return cls(_BaseBaseMatrix.factory(cube, dimensions, slice_idx))
 
     @lazyproperty
     def columns(self):
+        """A sequence of `_VectorAfterHiding` objects each representing a matrix column.
+
+        Each column has all transformations applied, in particular, renaming, ordering,
+        insertions (subtotals) and hiding (including pruning) of elements. The value in
+        any given "cell" of each column also appears in a "cell" of its opposing row
+        vector. Accessing values row-wise or column-wise produces the same overall
+        matrix of values, although most commonly values are accessed row-wise.
+        """
         return tuple(
             _VectorAfterHiding(column, self._assembled_rows)
             for column in self._assembled_columns
@@ -47,6 +69,14 @@ class TransformedMatrix(object):
 
     @lazyproperty
     def rows(self):
+        """A sequence of `_VectorAfterHiding` objects each representing a matrix row.
+
+        Each row has all transformations applied, in particular, renaming, ordering,
+        insertions (subtotals) and hiding (including pruning) of elements. The value in
+        any given "cell" of each row also appears in a "cell" of its opposing column
+        vector. Accessing values row-wise or column-wise produces the same overall
+        matrix of values, although most commonly values are accessed row-wise.
+        """
         return tuple(
             _VectorAfterHiding(row, self._assembled_columns)
             for row in self._assembled_rows
@@ -55,22 +85,70 @@ class TransformedMatrix(object):
 
     @lazyproperty
     def table_base(self):
+        """np.int64 scalar or a 1D or 2D ndarray of np.int64 representing table base.
+
+        A multiple-response (MR) dimension produces an array of table-base values
+        because each element (subvariable) of the dimension represents a logically
+        distinct question which may not have been asked of all respondents. When both
+        dimensions are MR, the return value is a 2D ndarray and there is a distinct
+        table-base value for each "cell" of the matrix. A CAT_X_CAT matrix produces
+        a scalar value for this property.
+        """
         return self.table_base_unpruned[
             np.ix_(self._visible_rows_mask, self._visible_cols_mask)
         ]
 
     @lazyproperty
     def table_base_unpruned(self):
+        """np.int64 scalar or a 1D or 2D ndarray of np.int64 representing table base.
+
+        This version includes hidden vectors, those with either a hide transform on
+        their element or that have been pruned (because their base (N) is zero). This
+        does not affect a scalar value but when the return value is an ndarray, the
+        shape may be different than the array returned by `.table_base`.
+
+        A multiple-response (MR) dimension produces an array of table-base values
+        because each element (subvariable) of the dimension represents a logically
+        distinct question which may not have been asked of all respondents. When both
+        dimensions are MR, the return value is a 2D ndarray. A CAT_X_CAT matrix produces
+        a scalar value for this property.
+        """
         return self._unordered_matrix.table_base
 
     @lazyproperty
     def table_margin(self):
+        """np.float/int64 scalar or a 1D or 2D np.float/int64 ndarray table margin.
+
+        The table margin is the overall sample size of the matrix. This is the weighted
+        count of respondents who were asked both questions and provided a valid response
+        for both (including not-selecting an MR option/subvar).
+
+        A multiple-response (MR) dimension produces an array of table-base values
+        because each element (subvariable) of the dimension represents a logically
+        distinct question which may not have been asked of all respondents. When both
+        dimensions are MR, the return value is a 2D ndarray and there is a distinct
+        table-base value for each "cell" of the matrix. A CAT_X_CAT matrix produces
+        a scalar value for this property.
+        """
         return self.table_margin_unpruned[
             np.ix_(self._visible_rows_mask, self._visible_cols_mask)
         ]
 
     @lazyproperty
     def table_margin_unpruned(self):
+        """np.float/int64 scalar or a 1D or 2D ndarray of np.float/int64 table margin.
+
+        This version includes hidden vectors, those with either a hide transform on
+        their element or that have been pruned (because their base (N) is zero). This
+        does not affect a scalar value but when the return value is an ndarray, the
+        shape may be different than the array returned by `.table_margin`.
+
+        A matrix with a multiple-response (MR) dimension produces an array of
+        table-margin values because each element (subvariable) of the dimension
+        represents a logically distinct question which may not have been asked of all
+        respondents. When both dimensions are MR, the return value is a 2D ndarray.
+        A CAT_X_CAT matrix produces a scalar value for this property.
+        """
         return self._unordered_matrix.table_margin
 
     @lazyproperty
@@ -81,7 +159,7 @@ class TransformedMatrix(object):
 
         Columns (_AssembledVector objects) appear in display-order with inserted columns
         appearing in the proper position relative to the base columns. Note the final
-        appearance and position of columns is subject to later column hiding.
+        appearance and absolute position of columns is subject to later column hiding.
         """
         return self._assembled_vectors(
             self._base_columns, self._inserted_columns, self._inserted_rows
@@ -137,7 +215,7 @@ class TransformedMatrix(object):
 
     @lazyproperty
     def _base_columns(self):
-        """columns after ordering but prior to insertions"""
+        """Sequence of column vectors after ordering but prior to insertions."""
         return tuple(
             _OrderedVector(column, self._row_order, idx)
             for idx, column in enumerate(
@@ -147,7 +225,7 @@ class TransformedMatrix(object):
 
     @lazyproperty
     def _base_rows(self):
-        """rows after ordering but prior to insertions"""
+        """Sequence of row vectors, after ordering but prior to insertions."""
         return tuple(
             _OrderedVector(row, self._column_order, idx)
             for idx, row in enumerate(
@@ -158,12 +236,13 @@ class TransformedMatrix(object):
     @lazyproperty
     def _column_order(self):
         """ -> 1D ndarray of int col idx specifying order of unordered-array columns."""
-        # ---Specifying int type prevents failure when there are zero columns. The
-        # ---default type for ndarray is float, which is not valid for indexing.
+        # --- Specifying int type prevents failure when there are zero columns. The
+        # --- default type for ndarray is float, which is not valid for indexing.
         return np.array(self._columns_dimension.display_order, dtype=int)
 
     @lazyproperty
     def _columns_dimension(self):
+        """The `Dimension` object representing column elements in this matrix."""
         return self._unordered_matrix.columns_dimension
 
     @lazyproperty
@@ -174,7 +253,7 @@ class TransformedMatrix(object):
         result, which is no particular order. All subtotals defined on the column
         dimension appear in the sequence.
         """
-        # ---an aggregate columns-dimension is not summable---
+        # --- an aggregate columns-dimension is not summable ---
         if self._columns_dimension.dimension_type in (DT.MR, DT.CA):
             return ()
 
@@ -203,7 +282,7 @@ class TransformedMatrix(object):
         The returned vectors are in the order subtotals were specified in the cube
         result, which is no particular order.
         """
-        # ---an aggregate rows-dimension is not summable---
+        # --- an aggregate rows-dimension is not summable ---
         if self._rows_dimension.dimension_type in (DT.MR, DT.CA):
             return tuple()
 
@@ -224,20 +303,29 @@ class TransformedMatrix(object):
     @lazyproperty
     def _row_order(self):
         """ -> 1D ndarray of int row idx specifying order of unordered-array rows."""
-        # ---Specifying int type prevents failure when there are zero rows---
+        # --- specifying int type prevents failure when there are zero rows ---
         return np.array(self._rows_dimension.display_order, dtype=int)
 
     @lazyproperty
     def _rows_dimension(self):
+        """The `Dimension` object representing row elements in this matrix."""
         return self._unordered_matrix.rows_dimension
 
     @lazyproperty
     def _visible_cols_mask(self):
-        return [not col.hidden for col in self._assembled_columns]
+        """Sequence of bool indicating which columns are visible (not hidden).
+
+        Suitable for use as a numpy mask on the columns dimension.
+        """
+        return tuple(not col.hidden for col in self._assembled_columns)
 
     @lazyproperty
     def _visible_rows_mask(self):
-        return [not row.hidden for row in self._assembled_rows]
+        """Sequence of bool indicating which rows are visible (not hidden).
+
+        Suitable for use as a numpy mask on the rows dimension.
+        """
+        return tuple(not row.hidden for row in self._assembled_rows)
 
 
 # === BASE-MATRIX OBJECTS ===
@@ -266,24 +354,44 @@ class _BaseBaseMatrix(object):
 
     @lazyproperty
     def columns_dimension(self):
+        """The `Dimension` object representing column elements of this matrix."""
         return self._dimensions[1]
 
     @lazyproperty
     def rows_dimension(self):
+        """The `Dimension` object representing row elements of this matrix."""
         return self._dimensions[0]
 
     @lazyproperty
     def table_margin(self):
+        """np.float/int64 scalar or a 1D or 2D np.float/int64 ndarray table margin.
+
+        The table margin is the overall sample size of the matrix. This is the weighted
+        count of respondents who were asked both questions and provided a valid response
+        for both (including not-selecting an MR option/subvar).
+
+        A matrix with a multiple-response (MR) dimension produces a 1D ndarray value.
+        When both dimensions are MR, the return value is a 2D ndarray and there is
+        a distinct table-base value for each "cell" of the matrix. A CAT_X_CAT matrix
+        produces a scalar value for this property.
+        """
         raise NotImplementedError(
             "must be implemented by each subclass"
         )  # pragma: no cover
 
     @lazyproperty
     def _column_elements(self):
+        """Sequence of `cr.cube.dimension._Element` object for each matrix column."""
         return self.columns_dimension.valid_elements
 
-    @lazyproperty
+    @property
     def _column_generator(self):
+        """Iterable providing construction parameters for each column vector in turn.
+
+        Used by `.columns` property in each subclass. Cannot be a lazyproperty because
+        an iterator is exhausted on each use.
+        """
+        # --- note zip() returns an iterator in Python 3 ---
         return zip(
             self._counts.T,
             self._unweighted_counts.T,
@@ -295,6 +403,11 @@ class _BaseBaseMatrix(object):
 
     @lazyproperty
     def _column_proportions(self):
+        """2D ndarray of np.float64 between 0.0 and 1.0.
+
+        The value represents the ratio of each cell count to the total count (margin)
+        for its column.
+        """
         return np.array([col.proportions for col in self.columns]).T
 
     @classmethod
@@ -303,7 +416,7 @@ class _BaseBaseMatrix(object):
         dimension_types = cube.dimension_types[-2:]
 
         if dimension_types == (DT.MR, DT.MR):
-            # TODO: Potentially address this case, which didn't arise yet
+            # --- this MEANS_MR_X_MR case hasn't arisen yet ---
             raise NotImplementedError(
                 "MR x MR with means is not implemented."
             )  # pragma: no cover
@@ -396,24 +509,26 @@ class _BaseBaseMatrix(object):
 
     @lazyproperty
     def _row_elements(self):
+        """Sequence of `cr.cube.dimension._Element` object for each matrix row."""
         return self.rows_dimension.valid_elements
 
     @lazyproperty
     def _valid_rows_idxs(self):
-        """ndarray-style index for only valid rows (out of missing and not-missing)."""
+        """ndarray-style index for only valid (non-missing) rows.
+
+        Suitable for indexing a raw measure array to include only valid rows.
+        """
         return np.ix_(self._dimensions[-2].valid_elements.element_idxs)
 
 
 class _CatXCatMatrix(_BaseBaseMatrix):
-    """Deals with CAT x CAT data.
+    """Matrix for CAT_X_CAT cubes and base class for most other matrix classes.
 
     Delegates most functionality to vectors (rows or columns), but calculates some
     values by itself (like table_margin).
 
-    This class (or its inheritants) must be instantiated as a starting point when
-    dealing with slices. Other classes that represents various stages of
-    transformations, need to repro a portion of this class' API (like iterating over
-    rows or columns).
+    `counts_with_missings` is the raw weighted counts array, needed to compute the
+    column-index.
     """
 
     def __init__(
@@ -424,6 +539,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
 
     @lazyproperty
     def columns(self):
+        """Sequence of `_CategoricalVector` object for each valid column element."""
         return tuple(
             _CategoricalVector(
                 counts,
@@ -447,6 +563,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
 
     @lazyproperty
     def rows(self):
+        """Sequence of `_CategoricalVector` object for each valid row element."""
         return tuple(
             _CategoricalVector(
                 counts,
@@ -472,38 +589,87 @@ class _CatXCatMatrix(_BaseBaseMatrix):
 
     @lazyproperty
     def table_base(self):
+        """np.int64 count of actual respondents who answered both questions.
+
+        Each dimension of a CAT_X_CAT matrix represents a categorical question. Only
+        responses that answered both those questions appear as entries in the valid
+        elements of those dimensions. The sum total of all valid answers is the sample
+        size, aka "N" or "base".
+        """
         return np.sum(self._unweighted_counts)
 
     @lazyproperty
     def table_margin(self):
+        """Scalar np.float/int64 weighted-N for overall table.
+
+        This is the weighted count of respondents who provided a valid response to
+        both questions. Because both dimensions are CAT, the table-margin value is the
+        same for all cells of the matrix. Value is np.int64 when source cube-result is
+        unweighted.
+        """
         return np.sum(self._counts)
 
     @lazyproperty
     def _baseline(self):
-        """ndarray of baseline values for column index.
+        """2D np.float64 ndarray of baseline value for each row in matrix.
 
-        Baseline is obtained by calculating the unconditional row margin (which needs
-        to include missings from the column dimension) and dividint it by the total.
-        Total also needs to include the missings from the column dimension.
+        The shape of the return value is (nrows, 1). The baseline value for a row is the
+        proportion of all values that appear in that row. A baseline for a 4 x 3 matrix
+        looks like this:
 
-        `dim_sum` is the unconditional row margin. For CAT x CAT slice it needs to
-        sum across axis 1, because that's the columns CAT dimension, that gets
-        collapsed. The total is calculated by totaling the unconditional row margin.
-        Please note that the total _doesn't_ include missings for the row dimension.
+            [[0.2006734 ]
+             [0.72592593]
+             [0.05521886]
+             [0.01818182]]
+
+        Note that the baseline values sum to 1.0. This is because each represents the
+        portion of all responses that fall in that row. This baseline value is the
+        denominator of the `._column_index` computation.
+
+        Baseline is a straightforward function of the *unconditional row margin*.
+        Unconditional here means that both valid and invalid responses (to the
+        columns-var question) are included. This ensures that the baseline is not
+        distorted by a large number of missing responses to the columns-question.
         """
         dim_sum = np.sum(self._all_counts, axis=1)[self._valid_rows_idxs]
         return dim_sum[:, None] / np.sum(dim_sum)
 
     @lazyproperty
     def _column_index(self):
+        """2D np.float64/np.nan ndarray of column-index value for each matrix cell.
+
+        Column-index answers the question "are respondents in this row-category more or
+        less likely than the overall table population to choose the answer represented
+        by this column?". For example, if the row is "Hispanic" and the column is
+        home-ownership, a value of 100 indicates hispanics are no less and no more
+        likely to own their home than the overall population. If that value was 150, it
+        would indicate hispanics are 50% more likely to own their home than the general
+        population (or the population surveyed anyway).
+
+        These values must be known by vectors but cannot be calculated there (the
+        calculation is "cross-vector") so must these values must be passed down from the
+        matrix level.
+        """
         return self._column_proportions / self._baseline * 100
 
     @lazyproperty
     def _columns_margin(self):
+        """1D ndarray of np.float64 (or np.int64) weighted N for each matrix column.
+
+        These values are required for zscore calculations at vector level but must be
+        calculated at matrix level. The values are `np.int64` when the source
+        cube-result is not weighted.
+        """
         return np.sum(self._counts, axis=0)
 
-    @lazyproperty
+    @property
     def _row_generator(self):
+        """Iterable of arguments to row-vector constructor call for each row element.
+
+        Used by `.rows` propert. Cannot be a lazyproperty because an iterator is
+        exhausted on each use and must be created newly on each call.
+        """
+        # --- Note `zip()` returns an iterator in Python 3 ---
         return zip(
             self._counts,
             self._unweighted_counts,
@@ -516,6 +682,12 @@ class _CatXCatMatrix(_BaseBaseMatrix):
 
     @lazyproperty
     def _rows_margin(self):
+        """1D np.float/int64 ndarray of weighted-N for each matrix row.
+
+        These "opposing-margin" values are required for vector-level calculations but
+        must be calculated at matrix level. The values are `np.int64` when the source
+        cube-result is not weighted.
+        """
         return np.sum(self._counts, axis=1)
 
     @staticmethod
@@ -540,15 +712,17 @@ class _CatXCatMatrix(_BaseBaseMatrix):
 
     @lazyproperty
     def _table_std_dev(self):
-        """Returns the standard deviation for cell percentages
-        `std_deviation = sqrt(variance)`
+        """2D np.float64 ndarray of table-percent std-deviation for each matrix cell.
+
+        Standard deviation is the square-root of the variance.
         """
         return np.sqrt(self._variance)
 
     @lazyproperty
     def _table_std_err(self):
-        """Returns the standard error for cell percentages
-        `std_error = sqrt(variance/N)`
+        """2D np.float64 ndarray of table-percent std-error for each matrix cell.
+
+        Standard error is sqrt(variance/N).
         """
         return np.sqrt(self._variance / self.table_margin)
 
@@ -561,6 +735,12 @@ class _CatXCatMatrix(_BaseBaseMatrix):
 
     @lazyproperty
     def _zscores(self):
+        """2D ndarray of np.float64 std-res value for each cell of matrix.
+
+        A z-score is also known as a *standard score* and is the number of standard
+        deviations above (positive) or below (negative) the population mean a cell's
+        value is.
+        """
         return self._scalar_type_std_res(
             self._counts,
             self.table_margin,
@@ -570,7 +750,10 @@ class _CatXCatMatrix(_BaseBaseMatrix):
 
 
 class _CatXCatMeansMatrix(_CatXCatMatrix):
-    """Cat-x-cat matrix for means measure."""
+    """Cat-x-cat matrix for means measure.
+
+    A means matrix has an array of mean values instead of a `counts` array.
+    """
 
     def __init__(self, dimensions, means, unweighted_counts):
         super(_CatXCatMeansMatrix, self).__init__(dimensions, None, unweighted_counts)
@@ -578,10 +761,13 @@ class _CatXCatMeansMatrix(_CatXCatMatrix):
 
     @lazyproperty
     def columns(self):
+        """Sequence of `_MeansVector` object for each valid column element."""
         return tuple(
             _MeansVector(element, unweighted_counts, means)
             for element, unweighted_counts, means in zip(
                 self.columns_dimension.valid_elements,
+                # --- transpose (.T) arrays to make columns first dimension so columns
+                # --- are iterated over by zip.
                 self._unweighted_counts.T,
                 self._means.T,
             )
@@ -589,6 +775,7 @@ class _CatXCatMeansMatrix(_CatXCatMatrix):
 
     @lazyproperty
     def rows(self):
+        """Sequence of `_MeansVector` object for each valid row element."""
         return tuple(
             _MeansVector(element, unweighted_counts, means)
             for element, unweighted_counts, means in zip(
@@ -614,16 +801,34 @@ class _MatrixWithMR(_CatXCatMatrix):
 
 
 class _MrXCatMatrix(_MatrixWithMR):
-    """Represents MR x CAT slices.
+    """Represents MR_X_CAT slices.
 
-    It's similar to CAT x CAT, other than the way it handles columns. For
-    columns - which correspond to the MR dimension - it needs to handle the indexing
-    of selected/not-selected correctly.
+    It's `._counts` is a 3D ndarray with axes (rows, selected/not, cols), like:
+
+        [[[ 39  44  24  35]
+          [389 447 266 394]]
+
+         [[ 34  36  29  24]
+          [394 455 261 405]]
+
+         [[357 415 241 371]
+          [ 71  76  49  58]]
+
+         [[  0   0   0   0]
+          [428 491 290 429]]]
+
+    Each value is np.float64, or np.int64 if the cube-result is unweighted (as in this
+    example).
+
+    It's rows are `_MrOpposingCatVector` objects. Its columns are `_OpposingMrVector`
+    objects.
     """
 
     @lazyproperty
     def columns(self):
-        """Use bother selected and not-selected counts."""
+        """Sequence of _OpposingMrVector for each columns-dimension element."""
+        # --- each `counts` is a 2D ndarray with shape (2, nrows), a selected and
+        # --- not-selected array, each of size nrows.
         return tuple(
             _MultipleResponseVector(
                 counts,
@@ -646,7 +851,9 @@ class _MrXCatMatrix(_MatrixWithMR):
 
     @lazyproperty
     def rows(self):
-        """Use only selected counts."""
+        """Sequence of _MrOpposingCatVector for each rows-dimension element."""
+        # --- each `counts` is a 2D ndarray with shape (2, ncols), a selected and
+        # --- not-selected array, each of size ncols.
         return tuple(
             _CatXMrVector(
                 counts,
@@ -672,33 +879,62 @@ class _MrXCatMatrix(_MatrixWithMR):
 
     @lazyproperty
     def table_base(self):
+        """1D np.int64 ndarray of unweighted N for each row of matrix.
+
+        Since the rows-dimension is MR, each row has a distinct base, since not all of
+        the multiple responses were necessarily offered to all respondents. The base for
+        each row indicates the number of respondents who were offered that option.
+        """
         return np.sum(self._unweighted_counts, axis=(1, 2))
 
     @lazyproperty
     def table_margin(self):
+        """1D np.float/int64 ndarray of weighted-N for each row of matrix.
+
+        Since the rows-dimension is MR, each row has a distinct table margin, since not
+        all of the multiple responses were necessarily offered to all respondents. The
+        table-margin for each row indicates the weighted number of respondents who were
+        offered that option.
+
+        The values are np.int64 when the source cube-result is unweighted.
+        """
         return np.sum(self._counts, axis=(1, 2))
 
     @lazyproperty
     def _baseline(self):
-        """ndarray of baseline values for column index.
+        """2D np.float64 ndarray of baseline value for each row in matrix.
 
-        Baseline is obtained by calculating the unconditional row margin (which needs
-        to include missings from the column dimension) and dividint it by the total.
-        Total also needs to include the missings from the column dimension.
+        `._baseline` is the denominator of the column-index and represents the
+        proportion of the overall row-count present in each row. A cell with
+        a column-proportion exactly equal to this basline will have a column-index of
+        100.
 
-        `dim_sum` is the unconditional row margin. For MR x CAT slice it needs to
-        sum across axis 2, because that's the CAT dimension, that gets collapsed.
-        Then it needs to select only the selected counts of
-        the MR (hence the `[:, 0]` index). The total needs include missings of the
-        2nd dimension, but not of the first (hence the [:, 0:2] index, which only
-        includes the selected and not-selected of the MR dimension).
+        The shape of the return value is (nrows, 1). A baseline for a 4 x 3 matrix looks
+        something like this:
+
+            [[0.17935204]
+             [0.33454989]
+             [0.50762388]
+             [0.80331259]
+             [0.7996507 ]]
+
+        Baseline is a function of the *unconditional row margin*. Unconditional here
+        means that both valid and invalid responses (to the columns-var question) are
+        included. This ensures that the baseline is not distorted by a large number of
+        missing responses to the columns-question.
         """
         dim_sum = np.sum(self._all_counts, axis=2)[:, 0][self._valid_rows_idxs]
         total = np.sum(self._all_counts[self._valid_rows_idxs][:, 0:2], axis=(1, 2))
         return (dim_sum / total)[:, None]
 
-    @lazyproperty
+    @property
     def _row_generator(self):
+        """Iterable of arguments to row-vector constructor call for each row element.
+
+        Used by `.rows` property. Cannot be a lazyproperty because an iterator is
+        exhausted on each use and must be created newly on each call.
+        """
+        # --- Note `zip()` returns an iterator in Python 3 ---
         return zip(
             self._counts,
             self._unweighted_counts,
@@ -719,8 +955,9 @@ class _MrXCatMatrix(_MatrixWithMR):
 
     @lazyproperty
     def _table_std_err(self):
-        """Returns the standard error for cell percentages
-        `std_error = sqrt(variance/N)`
+        """2D np.float64 ndarray of table-percent std-error for each matrix cell.
+
+        Standard error is sqrt(variance/N).
         """
         return np.sqrt(self._variance / self.table_margin[:, None])
 
@@ -737,6 +974,7 @@ class _MrXCatMatrix(_MatrixWithMR):
 
     @lazyproperty
     def _zscores(self):
+        """2D np.float64 ndarray of z-score for each matrix cell."""
         return self._array_type_std_res(
             self._counts[:, 0, :],
             self.table_margin[:, None],
@@ -746,7 +984,11 @@ class _MrXCatMatrix(_MatrixWithMR):
 
 
 class _MrXCatMeansMatrix(_MrXCatMatrix):
-    """ ... """
+    """MR_X_CAT slice with means measure instead of counts.
+
+    Note that its (weighted) counts are all set to zero. A means slice still has
+    meaningful unweighted counts.
+    """
 
     def __init__(self, dimensions, means, unweighted_counts):
         counts = np.zeros(means.shape)
@@ -755,6 +997,7 @@ class _MrXCatMeansMatrix(_MrXCatMatrix):
 
     @lazyproperty
     def rows(self):
+        """Sequence of _MeansWithMrVector object for each row of matrix."""
         return tuple(
             _MeansWithMrVector(element, unweighted_counts, means[0])
             for element, unweighted_counts, means in zip(
@@ -766,8 +1009,33 @@ class _MrXCatMeansMatrix(_MrXCatMatrix):
 class _CatXMrMatrix(_MatrixWithMR):
     """Handles CAT x MR slices.
 
-    Needs to handle correctly the indexing for the selected/not-selected for rows
-    (which correspond to the MR dimension).
+    It's `._counts` is a 3D ndarray with axes (rows, cols, selected/not), like:
+
+        [[[1002.52343241 1247.791605  ]
+          [ 765.95079804 1484.36423937]
+          [ 656.43937497 1593.87566244]]
+
+         [[1520.23482091 2573.22762247]
+          [1291.0925792  2802.36986418]
+          [1595.44412365 2498.01831973]]
+
+         [[ 908.65667501 2254.62623471]
+          [ 841.76439186 2321.51851785]
+          [1603.79596755 1559.48694217]]
+
+         [[ 746.89008236 1753.26322241]
+          [ 721.38248086 1778.7708239 ]
+          [1255.87038944 1244.28291533]]
+
+         [[   9.83166357   25.9551254 ]
+          [   8.23140253   27.55538645]
+          [  22.214956     13.57183298]]]
+
+    Each value is np.float64 if the cube-result is weighted (as in this example), or
+    np.int64 if unweighted.
+
+    It's rows are `_OpposingMrVector` objects. Its columns are `_MrOpposingCatVector`
+    objects.
     """
 
     def __init__(
@@ -780,6 +1048,7 @@ class _CatXMrMatrix(_MatrixWithMR):
 
     @lazyproperty
     def columns(self):
+        """Sequence of _MrOpposingCatVector object for each column of matrix."""
         return tuple(
             _CatXMrVector(counts.T, unweighted_counts.T, element, table_margin)
             for counts, unweighted_counts, element, table_margin in self._column_generator
@@ -787,14 +1056,21 @@ class _CatXMrMatrix(_MatrixWithMR):
 
     @lazyproperty
     def is_augmented(self):
+        """True if this matrix comes from an augmented (MR_X_ITSELF aka MR_AUG) cube."""
         return True if self._overlaps is not None else False
 
     @lazyproperty
     def overlaps_tstats(self):
+        """Pair of 3D np.float64 ndarray or None when cube is not augmented.
+
+        The array shape is (nrows, ncols, ncols) (ask Ernesto, this is probably changing
+        anyway and he will be sure to carefully document the next version :).
+        """
         return self._overlaps if self.is_augmented else None
 
     @lazyproperty
     def rows(self):
+        """Sequence of _OpposingMrVector object for each row of matrix."""
         return tuple(
             _MultipleResponseVector(
                 counts.T,
@@ -819,30 +1095,49 @@ class _CatXMrMatrix(_MatrixWithMR):
 
     @lazyproperty
     def table_base(self):
+        """1D np.int64 unweighted N for each column of matrix.
+
+        Because the matrix is X_MR, each column has a distinct table base.
+        """
+        # --- unweighted-counts is (nrows, ncols, selected/not) so axis 1 is preserved
+        # --- to provide a distinct value for each MR subvar.
         return np.sum(self._unweighted_counts, axis=(0, 2))
 
     @lazyproperty
     def table_margin(self):
+        """1D np.float/int64 ndarray of weighted-N for each column of matrix.
+
+        Because the matrix is X_MR, each column has a distinct table margin.
+        """
+        # --- unweighted-counts is (nrows, ncols, selected/not) so axis 1 is preserved
+        # --- to provide a distinct value for each MR subvar.
         return np.sum(self._counts, axis=(0, 2))
 
     @lazyproperty
     def _baseline(self):
-        """ndarray of baseline values for column index.
+        """2D np.float64 (or NaN) ndarray of baseline value for each matrix cell.
 
-        Baseline is obtained by calculating the unconditional row margin (which needs
-        to include missings from the column dimension) and dividint it by the total.
-        Total also needs to include the missings from the column dimension.
+        Its shape is (nrows, ncols) which corresponds to CAT_X_MR_SUBVAR.
 
-        `dim_sum` is the unconditional row margin. For CAT x MR slice it needs to sum
-        across axis 2, because that's the MR_CAT dimension, that gets collapsed
-        (but the MR subvars don't get collapsed). Then it needs to calculate the total,
-        which is easily obtained by summing across the CAT dimension (hence `axis=0`).
+        The baseline value is compared with the column-proportion value for each cell to
+        form the column-index value. The baseline is a function of the unconditional row
+        margin, which is the sum of counts across both valid and missing columns.
+
+        For CAT_X_MR, `uncond_row_margin` sums across the MR_CAT (selected, not,
+        missing) dimension to include missing values (an MR_SUBVAR element is never
+        "missing": true).
         """
         dim_sum = np.sum(self._all_counts, axis=2)[self._valid_rows_idxs]
         return dim_sum / np.sum(dim_sum, axis=0)
 
-    @lazyproperty
+    @property
     def _column_generator(self):
+        """Iterable providing construction parameters for each column vector in turn.
+
+        Used by `.columns` property. Cannot be a lazyproperty because an iterator is
+        exhausted on each use.
+        """
+        # --- note zip() returns an iterator in Python 3 ---
         return zip(
             np.array([self._counts.T[0].T, self._counts.T[1].T]).T,
             np.array(
@@ -879,6 +1174,12 @@ class _CatXMrMatrix(_MatrixWithMR):
 
     @lazyproperty
     def _zscores(self):
+        """2D ndarray of np.float64 std-res value for each cell of matrix.
+
+        A z-score is also known as a *standard score* and is the number of standard
+        deviations above (positive) or below (negative) the population mean each cell's
+        value is.
+        """
         # if the cube is a special one (5D with MRxItself as last dims)
         # the zscores should be the same as a 2D MRxMR matrix
         return self._array_type_std_res(
@@ -890,6 +1191,8 @@ class _CatXMrMatrix(_MatrixWithMR):
 
 
 class _CatXMrMeansMatrix(_CatXMrMatrix):
+    """Basis for CAT_X_MR slice having mean measure instead of counts."""
+
     def __init__(self, dimensions, means, unweighted_counts, overlaps=None):
         counts = np.zeros(means.shape)
         super(_CatXMrMeansMatrix, self).__init__(
@@ -899,8 +1202,7 @@ class _CatXMrMeansMatrix(_CatXMrMatrix):
 
     @lazyproperty
     def rows(self):
-        """rows of CAT x MR matrix."""
-
+        """Sequence of _MeansWithMrVector object for each row of matrix."""
         return tuple(
             # We must inflate the means with [:, 0], because the values are oriented
             # like columns (0th is selected while 1st is other)
@@ -914,7 +1216,45 @@ class _CatXMrMeansMatrix(_CatXMrMatrix):
 class _MrXMrMatrix(_MatrixWithMR):
     """Represents MR x MR slices.
 
-    Needs to properly index both rows and columns (selected/not-selected).
+    It's `._counts` is a 4D ndarray with axes (rows, selected-and-not, cols,
+    selected-and-not), like:
+
+        [[[[2990.03485848 4417.96127006]
+           [2713.94318797 4694.05294056]
+           [2847.96860219 4560.02752634]]
+
+          [[1198.10181578 3436.90253993]
+           [ 914.47846452 3720.52589119]
+           [2285.79620941 2349.2081463 ]]]
+
+
+         [[[2626.08325048 5180.55485426]
+           [2396.04310657 5410.59499817]
+           [3503.08635211 4303.55175262]]
+
+          [[1562.05342378 2674.30895573]
+           [1232.37854592 3003.98383359]
+           [1630.67845949 2605.68392002]]]
+
+
+         [[[3370.04923406 5278.54391705]
+           [3033.71862569 5614.87452542]
+           [3312.56140096 5336.03175016]]
+
+          [[ 818.0874402  2576.31989293]
+           [ 594.7030268  2799.70430633]
+           [1821.20341065 1573.20392249]]]
+
+
+         [[[1822.67560537 2883.99243344]
+           [1616.70492531 3089.96311351]
+           [1735.59793395 2971.07010487]]
+
+          [[2365.46106889 4970.87137654]
+           [2011.71672718 5324.61571825]
+           [3398.16687766 3938.16556777]]]]
+
+    It's rows and columns are both `_OpposingMrVector` objects.
     """
 
     def __init__(
@@ -934,6 +1274,10 @@ class _MrXMrMatrix(_MatrixWithMR):
 
     @lazyproperty
     def columns(self):
+        """Sequence of _OpposingMrVector object for each column in matrix.
+
+        Each column corresponds to a subvar of the second MR dimension.
+        """
         return tuple(
             _MultipleResponseVector(counts, unweighted_counts, element, table_margin)
             for counts, unweighted_counts, element, table_margin in self._column_generator
@@ -949,6 +1293,10 @@ class _MrXMrMatrix(_MatrixWithMR):
 
     @lazyproperty
     def rows(self):
+        """Sequence of _OpposingMrVector object for each row of matrix.
+
+        Each row corresponds to a subvar of the first MR dimension.
+        """
         return tuple(
             _MultipleResponseVector(
                 counts[0].T,
@@ -974,10 +1322,29 @@ class _MrXMrMatrix(_MatrixWithMR):
 
     @lazyproperty
     def table_base(self):
+        """2D np.int64 ndarray of distinct unweighted N for each cell of matrix.
+
+        Because the matrix is MR_X_MR, each cell corresponds to a 2x2 sub-table
+        (selected/not on each axis), each of which has its own distinct table-base.
+        """
+        # --- unweighted_counts is 4D of shape (nrows, 2, ncols, 2):
+        # --- (MR_SUBVAR (nrows), MR_CAT (sel/not), MR_SUBVAR (ncols), MR_CAT (sel/not))
+        # --- Reduce the second and fourth axes with sum() producing 2D (nrows, ncols).
+        # --- This sums (selected, selected), (selected, not), (not, selected) and
+        # --- (not, not) cells of the subtable for each matrix cell.
         return np.sum(self._unweighted_counts, axis=(1, 3))
 
     @lazyproperty
     def table_margin(self):
+        """2D np.float/int64 ndarray of weighted N for each cell of matrix.
+
+        Because the matrix is MR_X_MR, each cell corresponds to a 2x2 sub-table
+        (selected/not on each axis), each of which has its own distinct table-margin.
+        """
+        # --- Reduce second and fourth axes (the two MR_CAT dimensions) with sum()
+        # --- producing 2D (nrows, ncols). This sums (selected, selected),
+        # --- (selected, not), (not, selected) and (not, not) cells of the subtable for
+        # --- each matrix cell.
         return np.sum(self._counts, axis=(1, 3))
 
     @lazyproperty
@@ -1035,26 +1402,24 @@ class _MrXMrMatrix(_MatrixWithMR):
 
     @lazyproperty
     def _baseline(self):
-        """ndarray of baseline values for column index.
+        """2D np.float64 ndarray of baseline value for each matrix cell.
 
-        Baseline is obtained by calculating the unconditional row margin (which needs
-        to include missings from the column dimension) and dividint it by the total.
-        Total also needs to include the missings from the column dimension.
-
-        `dim_sum` is the unconditional row margin. For MR x MR slice it needs to sum
-        across axis 3, because that's the MR_CAT dimension, that gets collapsed
-        (but the MR subvars don't get collapsed). Then it needs to calculate the total,
-        which is obtained by summing across both MR_CAT dimensions. However, please
-        note, that in calculating the unconditional total, missing elements need to be
-        included for the column dimension, while they need to be _excluded_ for the row
-        dimension. Hence the `[:, 0:2]` indexing for the first MR_CAT, but not the 2nd.
+        The shape is (nrows, ncols) and all values in a given row are the same. So
+        really there are only nrows distinct baseline values, but the returned shape
+        makes calculating zscores in a general way more convenient.
         """
         dim_sum = np.sum(self._all_counts[:, 0:2], axis=3)[self._valid_rows_idxs][:, 0]
         total = np.sum(self._all_counts[:, 0:2], axis=(1, 3))[self._valid_rows_idxs]
         return dim_sum / total
 
-    @lazyproperty
+    @property
     def _column_generator(self):
+        """Iterable providing construction parameters for each column vector in turn.
+
+        Used by `.columns` property. Cannot be a lazyproperty because an iterator is
+        exhausted on each use.
+        """
+        # --- note zip() returns an iterator in Python 3 ---
         return zip(
             self._counts.T[0],
             self._unweighted_counts.T[0],
@@ -1071,8 +1436,14 @@ class _MrXMrMatrix(_MatrixWithMR):
         """
         return self._counts[:, 0, :, 0] / self._overlaps_margin
 
-    @lazyproperty
+    @property
     def _row_generator(self):
+        """Iterable providing construction parameters for each column vector in turn.
+
+        Used by `.rows` property. Cannot be a lazyproperty because an iterator is
+        exhausted on each use.
+        """
+        # --- note zip() returns an iterator in Python 3 ---
         return zip(
             self._counts,
             self._unweighted_counts,
@@ -1111,6 +1482,12 @@ class _MrXMrMatrix(_MatrixWithMR):
 
     @lazyproperty
     def _zscores(self):
+        """2D ndarray of np.float64 std-res value for each cell of matrix.
+
+        A z-score is also known as a *standard score* and is the number of standard
+        deviations above (positive) or below (negative) the population mean each cell's
+        value is.
+        """
         return self._array_type_std_res(
             self._counts[:, 0, :, 0],
             self.table_margin,
@@ -1167,11 +1544,20 @@ class _BaseMatrixInsertedVector(object):
 
     @lazyproperty
     def base(self):
-        return np.sum(np.array([vec.base for vec in self._addend_vectors]), axis=0)
+        """np.int64 or 1D np.int64 ndarray of unweighted-N for this vector.
+
+        `base` is the unweighted N for the vector. A subtotal vector opposing an MR
+        dimension has a distinct base for each cell and produces a 1D np.int64 ndarray.
+        A subtotal vector opposing a CAT dimension produces a scalar np.int64 value.
+        """
+        return np.sum(np.array([v.base for v in self._addend_vectors]), axis=0)
 
     @lazyproperty
     def column_index(self):
-        """Computing the column-index of an inserted vector is hard. Punt for now."""
+        """1D ndarray of np.nan for each cell of vector.
+
+        Computing the column-index of an inserted vector is hard. Punt for now.
+        """
         return np.array([np.nan] * len(self.values))
 
     @lazyproperty
@@ -1188,11 +1574,12 @@ class _BaseMatrixInsertedVector(object):
 
     @lazyproperty
     def hidden(self):
-        """True if vector is pruned.
+        """True if vector is hidden, either by a hide-transform or pruning.
 
         An inserted vector can never be hidden explicitly (for now). They can also
         almost never be pruned, except in the case when all of the opposite vectors are
-        also pruned (thus leaving no elements for this inserted vector).
+        also pruned (thus leaving no elements for this inserted vector, but also
+        a completely empty table).
         """
         return self.pruned
 
@@ -1206,25 +1593,43 @@ class _BaseMatrixInsertedVector(object):
 
     @lazyproperty
     def label(self):
+        """str display-name for this vector, for use as its row or column heading."""
         return self._subtotal.label
 
     @lazyproperty
     def margin(self):
-        return np.sum(np.array([vec.margin for vec in self._addend_vectors]), axis=0)
+        """np.float/int64 or 1D np.float/int64 ndarray of margin for each vector cell.
+
+        `margin` is the weighted N for the vector. A subtotal vector opposing an MR
+        dimension has a distinct margin for each cell and produces a 1D np.float64
+        ndarray (or np.int64 if cube-result is unweighted). A subtotal vector opposing
+        a CAT dimension produces a scalar np.float/int64 value.
+        """
+        return np.sum(np.array([v.margin for v in self._addend_vectors]), axis=0)
 
     @lazyproperty
     def means(self):
-        """ndarray of NaN values, of the same shape as values.
-        Inserted vectors are not defined for means, this is just a placeholder.
+        """1D ndarray of NaN value for each cell of vector.
+
+        Means is currently undefined for inserted vectors. np.nan is some sort of
+        reasonable value to indicate this.
         """
         return np.full(self.values.shape, np.nan)
 
     @lazyproperty
     def numeric(self):
+        """Unconditionally np.nan; an inserted vector can have no numeric-value."""
         return np.nan
 
     @lazyproperty
     def opposing_margin(self):
+        """Optional 1D np.float/int64 ndarray of weighted N for each opposing vector.
+
+        This value is used in the zscore calculation for a non-MR matrix and
+        expected_counts computations. Its value is `None` for an insertion in a means
+        matrix (margin is sum of counts and means cube has no counts) or an insertion in
+        a matrix with an MR dimension.
+        """
         return self._addend_vectors[0].opposing_margin
 
     @lazyproperty
@@ -1249,11 +1654,16 @@ class _BaseMatrixInsertedVector(object):
 
     @lazyproperty
     def table_margin(self):
+        """Scalar np.float/int64 or 1D np.float/int64 ndarray of table weighted N.
+
+        Value is ndarray for an MR vector or one opposing MR. Otherwise (e.g.
+        CAT-opposing-CAT) it is a scalar.
+        """
         return self._table_margin
 
     @lazyproperty
     def unweighted_counts(self):
-        """1D ndarray of addend cell unweighted-count sum for each vector position."""
+        """1D np.int64 ndarray of unweighted-count subtotal for each vector cell."""
         return np.sum(
             np.array([row.unweighted_counts for row in self._addend_vectors]), axis=0
         )
@@ -1264,6 +1674,7 @@ class _BaseMatrixInsertedVector(object):
 
     @lazyproperty
     def zscore(self):
+        """1D np.float64 (or np.nan) ndarray of standard-score for each matrix cell."""
         opposing_margin = self.opposing_margin
 
         # TODO: remove this if statement - temporary hack until MR zscore implementation
@@ -1321,12 +1732,13 @@ class _BaseMatrixInsertedVector(object):
 
     @lazyproperty
     def _base_vectors(self):
-        """The base (non-inserted) vector "peers" for this inserted vectors.
+        """The base (non-inserted) vector "peers" for this inserted vector.
 
-        This is base-rows for an inserted row or base-columns for an inserted column.
+        This is `._base_rows` for an inserted row or `._base_columns` for an inserted
+        column.
         """
         raise NotImplementedError(
-            "must be implemented by each subclass"
+            "`._base_vectors` must be implemented by each subclass"
         )  # pragma: no cover
 
 
@@ -1339,7 +1751,7 @@ class _InsertedColumn(_BaseMatrixInsertedVector):
 
         An inserted vector can almost never be pruned, except in the case when all of
         the opposite vectors are also pruned (thus leaving no elements for this
-        inserted vector).
+        inserted vector and a completely empty table).
         """
         return self._subtotal.prune and not np.any(
             np.array([row.base for row in self._base_rows])
@@ -1347,7 +1759,11 @@ class _InsertedColumn(_BaseMatrixInsertedVector):
 
     @lazyproperty
     def _base_vectors(self):
-        """The base vectors for an inserted column are the base columns."""
+        """The base vectors of an inserted column are the base-columns.
+
+        The base columns are the non-inserted columns from which the addend columns are
+        drawn.
+        """
         return self._base_columns
 
     @lazyproperty
@@ -1368,7 +1784,7 @@ class _InsertedRow(_BaseMatrixInsertedVector):
 
         An inserted vector can almost never be pruned, except in the case when all of
         the opposite vectors are also pruned (thus leaving no elements for this
-        inserted vector).
+        inserted vector and a completely empty table).
         """
         return self._subtotal.prune and not np.any(
             np.array([column.base for column in self._base_columns])
@@ -1376,7 +1792,10 @@ class _InsertedRow(_BaseMatrixInsertedVector):
 
     @lazyproperty
     def _base_vectors(self):
-        """The base vectors for an inserted row are the base rows."""
+        """The base vectors of an inserted row are the base-rows.
+
+        The base rows are the non-inserted rows from which the addend rows are drawn.
+        """
         return self._base_rows
 
     @lazyproperty
@@ -1414,38 +1833,83 @@ class _BaseTransformationVector(object):
 
     @lazyproperty
     def hidden(self):
+        """True if this vector should not appear in the transformed matrix.
+
+        A vector can be hidden by a "hide" transform on its dimension element or because
+        the vector is "pruned".
+        """
         return self._base_vector.hidden
 
     @lazyproperty
     def is_inserted(self):
+        """True if this vector is an inserted subtotal."""
         return self._base_vector.is_inserted
 
     @lazyproperty
     def label(self):
+        """str display-name used for this vector's row or column heading."""
         return self._base_vector.label
 
     @lazyproperty
     def margin(self):
+        """Scalar np.float/int64 or 1D np.float/ing64 ndarray of weighted N for vector.
+
+        A vector that opposes an MR dimension has an array of weighted N values because
+        each MR_SUBVAR element has a distinct weighted N count. A vector opposing a CAT
+        dimension produces a scalar value. Values are np.int64 if the cube-result is
+        unweighted.
+        """
         return self._base_vector.margin
 
     @lazyproperty
     def means(self):
+        """1D np.float64 (or np.nan) ndarray of mean value for each vector cell.
+
+        Intended only for use when the cube-result measure is means. Raises
+        `AttributeError` when called on a cube-result with count measure (and no means
+        measure).
+        """
         return self._base_vector.means
 
     @lazyproperty
     def numeric(self):
+        """int, float, or np.nan representing numeric value for this vector's element.
+
+        This mapping of a category to a numeric value is optional, but when present
+        allows additional quantitative computations to be applied to categorical data,
+        in particular, so-called "scale-means".
+
+        Its value may be int or float if present and is np.nan if not specified by user
+        or the vector is an inserte subtotal.
+        """
         return self._base_vector.numeric
 
     @lazyproperty
     def opposing_margin(self):
+        """1D np.float/int64 ndarray (or None) of weighted N for each opposing vector.
+
+        Value can be `None` when cube-result measure is means or involves an MR
+        dimension.
+        """
         return self._base_vector.opposing_margin
 
     @lazyproperty
     def table_base(self):
+        """np.int64 unweighted N for overall table.
+
+        Cannot be computed at vector level and must be passed in on vector construction.
+        """
         return self._base_vector.table_base
 
     @lazyproperty
     def table_margin(self):
+        """Scalar np.float/int64 or 1D np.float/int64 ndarray of weighted N for table.
+
+        A vector that opposes an MR dimension has an array of weighted N values because
+        each MR_SUBVAR element has a distinct table margin. A vector opposing a CAT
+        dimension produces a scalar value. Values are np.int64 if the cube-result is
+        unweighted.
+        """
         return self._base_vector.table_margin
 
 
@@ -1459,11 +1923,27 @@ class _AssembledVector(_BaseTransformationVector):
 
     @lazyproperty
     def base(self):
+        """Scalar np.int64 or 1D np.int64 ndarray of unweighted N for this vector.
+
+        A vector that opposes an MR dimension has an array of unweighted N values
+        because each MR_SUBVAR element has a distinct unweighted N. A vector opposing
+        a CAT dimension produces a scalar value.
+        """
         return self._base_vector.base
 
     @lazyproperty
     def column_index(self):
-        def fsubtot(subtotal):
+        """1D np.float64/np.nan ndarray of column-index for each vector cell.
+
+        A cell corresponding to an inserted subtotal gets np.nan.
+        """
+
+        def fsubtot(inserted_vector):
+            """ -> np.nan as unconditional col-index value for `inserted_vector`.
+
+            Called by ._apply_interleaved() to compute inserted value which it places
+            in the right vector position.
+            """
             # TODO: Replace with real column index values from insertions vectors. This
             # should be something like:
             #   col_ind = (ins1.prop + ins2.prop) / (ins1.baseline + ins2.baseline)
@@ -1474,46 +1954,67 @@ class _AssembledVector(_BaseTransformationVector):
 
     @lazyproperty
     def means(self):
-        # ---just np.nan for insertions for now---
-        return self._apply_interleaved(
-            self._base_vector.means, fsubtot=lambda _: np.nan
-        )
+        """1D ndarray of np.float64 or np.nan mean value for each vector cell.
+
+        A cell corresponding to an inserted subtotal gets a mean of np.nan.
+        """
+
+        def fsubtot(inserted_vector):
+            """ -> np.nan as unconditional mean value for `inserted_vector`.
+
+            Passed to and called by ._apply_interleaved() to compute inserted value
+            which it places in the right vector position.
+            """
+            return np.nan
+
+        return self._apply_interleaved(self._base_vector.means, fsubtot)
 
     @lazyproperty
     def proportions(self):
+        """1D np.float64/np.nan ndarray of count proportion for each vector cell.
+
+        A cell value is np.nan if its corresponding margin value is zero.
+        """
         return self.values / self.margin
 
     @lazyproperty
     def pvals(self):
+        """1D np.float64/np.nan ndarray of p-value for each vector cell."""
         return 2 * (1 - norm.cdf(np.abs(self.zscore)))
 
     @lazyproperty
     def table_std_dev(self):
-        """Returns the standard deviation for cell percentages
-        `std_deviation = sqrt(variance)`
-        """
+        """1D np.float64 ndarray of std-dev of table-percent for each vector cell."""
         return np.sqrt(self._variance)
 
     @lazyproperty
     def table_std_err(self):
-        """Returns the standard error for cell percentages
-        `std_error = sqrt(variance/N)`
-        """
+        """1D np.float64 ndarray of std-err of table-percent for each vector cell."""
         return np.sqrt(self._variance / self.table_margin)
 
     @lazyproperty
     def table_proportions(self):
+        """1D np.float64 ndarray of table-proportion for each vector cell.
+
+        Also known as "cell-proportion", the proportion of overall weighted N for the
+        table that appears in that particular cell.
+        """
         return self.values / self._base_vector.table_margin
 
     @lazyproperty
     def unweighted_counts(self):
-        """1D ndarray of unweighted count for each base element and insertion.
+        """1D np.int64 ndarray of unweighted count for each base element and insertion.
 
         Subtotal values are interleaved with base values in their specified location.
         """
         unweighted_counts = self._base_vector.unweighted_counts
 
         def fsubtot(inserted_vector):
+            """ -> np.int64 count for `inserted_vector`.
+
+            Passed to and called by ._apply_interleaved() to compute inserted value
+            which it places in the right vector position.
+            """
             return np.sum(unweighted_counts[inserted_vector.addend_idxs])
 
         return self._apply_interleaved(unweighted_counts, fsubtot)
@@ -1529,10 +2030,24 @@ class _AssembledVector(_BaseTransformationVector):
 
     @lazyproperty
     def zscore(self):
+        """1D np.float64/np.nan ndarray of z-score for each base element and insertion.
+
+        Subtotal values are interleaved with base values in their specified location.
+        """
+
         def fsubtot(inserted_vector):
+            """ -> np.float64 zscore for `inserted_vector`.
+
+            Passed to and called by ._apply_interleaved() to compute inserted value
+            which it places in the right vector position.
+            """
+            # --- when this vector is not itself a subtotal, `inserted_vector` can
+            # --- provide the value directly
             if not self.is_inserted:
                 return inserted_vector.zscore[self._vector_idx]
 
+            # --- but when this vector IS itself a subtotal, this cell is an
+            # --- *intersection* cell and is requires a more sophisticated computation
             margin, table_margin = self.margin, self.table_margin
             opposite_margin = np.sum(self.opposing_margin[inserted_vector.addend_idxs])
             variance = (
@@ -1557,7 +2072,7 @@ class _AssembledVector(_BaseTransformationVector):
 
         Takes care of the details of getting vector "cells" interleaved in the right
         order, you just provide the "unassembled" values and a function to apply to each
-        subtotal to get its value.
+        subtotal-vector to get its value.
         """
         subtotals = self._opposite_inserted_vectors
 
@@ -1596,7 +2111,7 @@ class _AssembledVector(_BaseTransformationVector):
                 yield pos, idx
 
         def iter_base_value_orderings():
-            """Generate (int: position, int: idx) for each base value.
+            """Generate (int: position, int: idx) for each base-vector value.
 
             The position of a base value is simply it's index in the vector.
             """
@@ -1624,47 +2139,83 @@ class _VectorAfterHiding(_BaseTransformationVector):
 
     @lazyproperty
     def base(self):
+        """np.int64 or 1D np.int64 ndarray of unweighted-N for this vector.
+
+        Unweighted N values are a scalar when this vector opposes a CAT dimension but
+        are an array when it opposes an MR dimension.
+        """
         if not isinstance(self._base_vector.base, np.ndarray):
             return self._base_vector.base
         return self._base_vector.base[self._visible_element_idxs]
 
     @lazyproperty
     def column_index(self):
+        """1D np.float64/np.nan ndarray of column-index for each visible vector cell."""
         return self._base_vector.column_index[self._visible_element_idxs]
 
     @lazyproperty
     def margin(self):
+        """np.float/int64 or 1D np.float/int64 ndarray of weighted-N for this vector.
+
+        Weighted-N values are a scalar when this vector opposes a CAT dimension but
+        are an array when it opposes an MR dimension.
+        """
         if not isinstance(self._base_vector.margin, np.ndarray):
             return self._base_vector.margin
         return self._base_vector.margin[self._visible_element_idxs]
 
     @lazyproperty
     def means(self):
+        """1D np.float64/np.nan ndarray of mean value for each visible vector cell.
+
+        Cell value is `np.nan` for each cell corresponding to an inserted subtotal
+        (mean of addend cells cannot simply be added to get the mean of the subtotal).
+        """
         return self._base_vector.means[self._visible_element_idxs]
 
     @lazyproperty
     def proportions(self):
+        """1D np.float64/np.nan ndarray of vector-proportion for each vector cell.
+
+        vector-proportions is column-proportions when the vector is a column and
+        row-proportions when it represents a row. The cell values are `np.nan` when the
+        vector-margin is zero (producing a division by zero).
+        """
         return self._base_vector.proportions[self._visible_element_idxs]
 
     @lazyproperty
     def pvals(self):
+        """1D np.float64/np.nan ndarray of p-value for each visible vector cell.
+
+        A cell value representing an inserted subtotal can be `np.nan` in certain
+        situations involving MR dimensions.
+        """
         return self._base_vector.pvals[self._visible_element_idxs]
 
     @lazyproperty
     def table_std_dev(self):
+        """1D np.float64 ndarray of std-dev of table-proportion for each vector cell."""
         return self._base_vector.table_std_dev[self._visible_element_idxs]
 
     @lazyproperty
     def table_std_err(self):
+        """1D np.float64 ndarray of std-err of table-proportion for each vector cell."""
         return self._base_vector.table_std_err[self._visible_element_idxs]
 
     @lazyproperty
     def table_proportions(self):
+        """1D np.float64 ndarray of table-proportion for each visible vector cell.
+
+        Table-proportion is the proportion of the weighted-N for the overall table
+        represented in the cell. The table-margin (table weighted-N) for an MR dimension
+        is distinct for each MR subvar, so each table-proportion is not necessarily
+        computed with the same denominator value.
+        """
         return self._base_vector.table_proportions[self._visible_element_idxs]
 
     @lazyproperty
     def unweighted_counts(self):
-        """1D ndarray of unweighted count for each visible element in vector."""
+        """1D np.int64 ndarray of unweighted-count for each visible vector cell."""
         return self._base_vector.unweighted_counts[self._visible_element_idxs]
 
     @lazyproperty
@@ -1673,6 +2224,11 @@ class _VectorAfterHiding(_BaseTransformationVector):
 
     @lazyproperty
     def zscore(self):
+        """1D np.float64/np.nan ndarray of z-score for each visible vector cell.
+
+        A cell value representing an inserted subtotal can be `np.nan` in certain
+        situations involving MR dimensions.
+        """
         return self._base_vector.zscore[self._visible_element_idxs]
 
     @lazyproperty
@@ -1695,7 +2251,11 @@ class _VectorAfterHiding(_BaseTransformationVector):
 class _OrderedVector(_BaseTransformationVector):
     """Rearranges its "cells" to the order of its opposing-vectors.
 
-    For example, the cells in a row appear in the order of the column vectors.
+    For example, the cells in a row appear in the order of the column vectors. Ordering
+    is performed before insertions, so this vector includes only base-vector values.
+
+    `opposing_order` is a 1D int ndarray of indices of opposing dimension elements, in
+    the order those elements (and their vectors) appear in the opposing dimension.
     """
 
     def __init__(self, base_vector, opposing_order, index):
@@ -1705,10 +2265,11 @@ class _OrderedVector(_BaseTransformationVector):
 
     @lazyproperty
     def base(self):
-        """ -> np.array of base_vector base N
+        """np.int64 or 1D np.int64 ndarray of unweighted-N for this vector.
 
-        If the base_vector base is a numpy array it must return itself with the correct
-        order of the elements
+        Values appear in the order of their corresponding opposing vector. Unweighted
+        N values are a scalar when this vector opposes a CAT dimension but are an array
+        when it opposes an MR dimension.
         """
         if isinstance(self._base_vector.base, np.ndarray):
             return self._base_vector.base[self._opposing_order]
@@ -1720,14 +2281,18 @@ class _OrderedVector(_BaseTransformationVector):
 
     @lazyproperty
     def label(self):
+        """str display-name for this vector, for use as its row or column heading."""
         return self._base_vector.label
 
     @lazyproperty
     def margin(self):
-        """ -> np.array of base_vector margins
+        """np.float/int64 or 1D np.float/int64 ndarray of margin for each vector cell.
 
-        If the base_vector base is a numpy array it must return itself with the correct
-        order of the elements
+        Values appear in the order of the opposing dimension. `margin` is the weighted
+        N for the vector. A vector opposing an MR dimension has a distinct margin for
+        each cell and produces a 1D np.float64 ndarray (or np.int64 if cube-result is
+        unweighted). A vector opposing a CAT dimension produces a scalar np.float/int64
+        value.
         """
         if isinstance(self._base_vector.margin, np.ndarray):
             return self._base_vector.margin[self._opposing_order]
@@ -1735,19 +2300,24 @@ class _OrderedVector(_BaseTransformationVector):
 
     @lazyproperty
     def ordering(self):
-        """ -> (position, index, self) tuple used for interleaving inserted vectors.
+        """3-tuple (position, index, self) used for interleaving inserted vectors.
 
         This value allows the interleaving of base and inserted vectors to be reduced to
         a sorting operation.
 
         The position and index of a base vector are both its index within its ordered
-        collection.
+        collection. The `position` value of the ordering is operative for inserted
+        vectors.
         """
         return (self._index, self._index, self)
 
     @lazyproperty
     def unweighted_counts(self):
-        """1D ndarray of unweighted count reordered to opposing-vector ordering."""
+        """1D np.int64 ndarray of unweighted-count for each vector cell.
+
+        Values are rearranged (from base-vector position) to appear in the order of the
+        opposing dimension.
+        """
         return self._base_vector.unweighted_counts[self._opposing_order]
 
     @lazyproperty
@@ -1756,6 +2326,11 @@ class _OrderedVector(_BaseTransformationVector):
 
     @lazyproperty
     def zscore(self):
+        """1D np.float64/np.nan ndarray of zscore for each vector cell.
+
+        Values are rearranged (from base-vector position) to appear in the order of the
+        opposing dimension. A zscore can be `np.nan` in certain situations.
+        """
         return self._base_vector.zscore
 
     @lazyproperty
@@ -1773,9 +2348,14 @@ class _OrderedVector(_BaseTransformationVector):
 class _BaseVector(object):
     """Base class for all base-vector objects.
 
+    A "base" vector is one containing all the valid data items for that vector in the
+    cube-result, in the order they appear in the cube result. This vector serves as the
+    "base" on which other transforms such as reordering, insertions, and hiding are
+    performed.
+
     A vector represents a row or column of data in the overall data matrix. It composes
-    the element that corresponds to the row or column and so knows the name, element_id,
-    numeric value, etc. for the row or column.
+    the element that corresponds to that row or column and so knows the name,
+    element_id, numeric value, etc. of that row or column.
     """
 
     def __init__(self, element, unweighted_counts):
@@ -1784,6 +2364,12 @@ class _BaseVector(object):
 
     @lazyproperty
     def base(self):
+        """np.int64 or 1D np.int64 ndarray of unweighted-N for this vector.
+
+        A vector opposing an MR dimension has a distinct base for each cell and produces
+        a 1D np.int64 ndarray. A vector opposing a CAT dimension has a single base and
+        produces a scalar np.int64 value.
+        """
         return np.sum(self._unweighted_counts)
 
     @lazyproperty
@@ -1807,25 +2393,37 @@ class _BaseVector(object):
 
         Vectors are hidden in two ways:
 
-            1. Explicitly via transforms
-            2. Implicitly when the base is 0 (also called pruning)
+            1. Explicitly via a "hide" transform on its element
+            2. Implicitly when its base (unweighted-N) is 0 (also called pruning)
 
         This property checks whether a vector needs to be hidden, either implicitly or
-        explicitly. It is used when iterating through rows or columns, to form the
-        correct result.
+        explicitly.
         """
         return self._element.is_hidden or (self._element.prune and self.pruned)
 
     @lazyproperty
     def is_inserted(self):
+        """Unconditionally False for a base-vector.
+
+        Only insertion vectors are inserted.
+        """
         return False
 
     @lazyproperty
     def label(self):
+        """str display-name for this vector, for use as its row or column heading."""
         return self._element.label
 
     @lazyproperty
     def numeric(self):
+        """int, float, or np.nan representing numeric value of this vector's element.
+
+        This mapping of a category to a numeric value is optional, but when present
+        allows additional quantitative computations to be applied to categorical data,
+        in particular, so-called "scale-means".
+
+        Its value may be int or float if present and is np.nan if not specified by user.
+        """
         return self._element.numeric_value
 
     @lazyproperty
@@ -1834,6 +2432,7 @@ class _BaseVector(object):
 
     @lazyproperty
     def pruned(self):
+        """True if this vector contains no samples."""
         return self.base == 0 or np.isnan(self.base)
 
     @lazyproperty
@@ -1861,10 +2460,10 @@ class _BaseVector(object):
 
 
 class _CategoricalVector(_BaseVector):
-    """Main staple of all measures.
+    """Vector for CAT vector that does not oppose an MR dimension.
 
-    Some of the measures it can calculate by itself, others it needs to receive at
-    construction time (like table margin and zscores).
+    Also serves as the base-class for several other vector types that share many of its
+    properties.
     """
 
     def __init__(
@@ -1890,23 +2489,47 @@ class _CategoricalVector(_BaseVector):
 
     @lazyproperty
     def column_index(self):
+        """1D np.float64/np.nan ndarray of column-index for each vector cell.
+
+        Column-index must be computed at the matrix level, which passes those values to
+        the vector on construction.
+        """
         return self._column_index
 
     @lazyproperty
     def margin(self):
+        """Scalar np.float/int64 of unweighted-N for this vector.
+
+        This property must be overridden for vectors that oppose an MR dimension and
+        produce a distinct margin value for each vector cell.
+        """
         return np.sum(self._counts)
 
     @lazyproperty
     def proportions(self):
+        """1D np.float64/np.nan ndarray of (weighted) count proportions for vector.
+
+        Each value is between 0.0 and 1.0 and indicates the fraction of overall vector
+        counts that appear in that cell. A cell value is np.nan if its corresponding
+        margin value is zero. Note that when this vector opposes an MR dimension the
+        vector margin is distinct for each cell and the proportions may not sum to 1.0.
+        """
         return self.values / self.margin
 
     @lazyproperty
     def table_margin(self):
+        """Scalar np.float/int64 or 1D np.float/int64 ndarray of table weighted N.
+
+        Table margin must be computed at the matrix level, which passes this value to
+        the vector on construction. When this vector opposes an MR dimension, it's table
+        dimension is an array (each vector cell has a distinct table-margin value).
+        A scalar value is returned when the opposing dimension is CAT.
+        """
         return self._table_margin
 
     @lazyproperty
     def unweighted_counts(self):
-        """1D ndarray of unweighted count for each valid element in vector."""
+        """1D np.int64 ndarray of unweighted count for each vector cell."""
         return self._unweighted_counts
 
     @lazyproperty
@@ -1915,7 +2538,18 @@ class _CategoricalVector(_BaseVector):
 
 
 class _CatXMrVector(_CategoricalVector):
-    """Used for categorical dimension when opposing dimension is multiple-response."""
+    """Used for multiple-response dimension when opposing dimension is categorical.
+
+    It is constructed from a 2D np.float/int64 `counts` array with axes
+    (selected/not, cells) like:
+
+        [[  6.53222713  12.85476298  12.0520568   38.91870264  46.988204  ]
+         [101.92961604  95.60708018  96.40978636  69.54314052  61.47363916]]
+
+    This vector is suitable for use by either a CAT-opposing-MR vector or an
+    MR-opposing-MR vector since both have the same number of values and the axis layout
+    can be made uniform by the caller.
+    """
 
     def __init__(
         self,
@@ -1943,14 +2577,28 @@ class _CatXMrVector(_CategoricalVector):
 
     @lazyproperty
     def pruned(self):
+        """True if this vector contains no samples."""
         return self.table_base == 0
 
     @lazyproperty
     def table_base(self):
+        """np.int64 "table" unweighted-N for this vector.
+
+        Because this MR vector opposes a CAT dimension, all its cells share a single
+        table-base value. Note however that its sibling MR vectors each have their own
+        distinct table-base which is often different. This is because each MR response
+        may be presented to a different number of respondents.
+        """
         return np.sum(self._all_unweighted_counts)
 
     @lazyproperty
     def table_margin(self):
+        """np.float/int64 "table" weighted-N for this vector.
+
+        Because this MR vector opposes a CAT dimension, a single table-margin value is
+        shared by all cells in this vector. Note however that its sibling MR vectors
+        each have their own distinct table-margin which is often different.
+        """
         return np.sum(self._all_counts)
 
     @lazyproperty
@@ -1960,7 +2608,7 @@ class _CatXMrVector(_CategoricalVector):
 
 
 class _MeansVector(_BaseVector):
-    """Used on a non-MR dimension when cube-result contains means."""
+    """Used on a CAT dimension of a CAT_X_CAT matrix with means cube-result measure."""
 
     def __init__(self, element, unweighted_counts, means):
         super(_MeansVector, self).__init__(element, unweighted_counts)
@@ -1970,6 +2618,10 @@ class _MeansVector(_BaseVector):
 
     @lazyproperty
     def means(self):
+        """1D np.float64/np.nan ndarray of mean for each vector cell.
+
+        Mean is np.nan for a cell with an unweighted-count of zero.
+        """
         return self._means
 
     @lazyproperty
@@ -1978,23 +2630,39 @@ class _MeansVector(_BaseVector):
 
     @lazyproperty
     def margin(self):
+        """Unconditionally np.nan for a means vector.
+
+        A means vector has no (weighted) counts, so it can have no margin.
+        """
         return np.nan * len(self._unweighted_counts)
 
 
 class _MeansWithMrVector(_MeansVector):
-    """MR vector with means for use in a matrix."""
+    """Used for row vectors in a means matrix with an MR dimension."""
+
+    # TODO: Work out why non-means vectors are used for the columns of these matrices.
+    # I expect it is because _Slice gets most of its values from rows and columns are
+    # only used for column-oriented things like column-proportions and column-labels.
+    # Still, could be bugs lurking here as to how columns handle means.
 
     @lazyproperty
     def base(self):
+        """np.int64 unweighted-N for this vector."""
         return np.sum(self._unweighted_counts[0])
 
 
 class _MultipleResponseVector(_CategoricalVector):
-    """Handles MR vectors (either rows or columns)
+    """CAT or MR vector that opposes an MR dimension.
 
-    Needs to handle selected and not-selected properly. Consequently, it calculates the
-    right margin (for itself), but receives table margin on construction time (from the
-    slice).
+    It is constructed from `counts` that are a 2D np.float/int64 vector with axes
+    (selected/not, cells) like:
+
+        [[  6.53222713  12.85476298  12.0520568   38.91870264  46.988204  ]
+         [101.92961604  95.60708018  96.40978636  69.54314052  61.47363916]]
+
+    This vector is suitable for use by either a CAT-opposing-MR vector or an
+    MR-opposing-MR vector since both have the same number of values and the axis layout
+    can be made uniform by the caller.
     """
 
     @lazyproperty
@@ -2006,6 +2674,10 @@ class _MultipleResponseVector(_CategoricalVector):
 
     @lazyproperty
     def margin(self):
+        """1D np.float/int64 ndarray of weighted-N for each vector cell.
+
+        Because the opposing dimension is MR, each vector cell has a distinct margin.
+        """
         counts = zip(self._selected, self._not_selected)
         return np.array(
             [selected + not_selected for (selected, not_selected) in counts]
@@ -2013,6 +2685,7 @@ class _MultipleResponseVector(_CategoricalVector):
 
     @lazyproperty
     def pruned(self):
+        """True if this vector contains no samples."""
         return np.all(self.base == 0) or np.all(np.isnan(self.base))
 
     @lazyproperty
