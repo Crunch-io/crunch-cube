@@ -379,6 +379,21 @@ class _BaseBaseMatrix(object):
             "must be implemented by each subclass"
         )  # pragma: no cover
 
+    def _array_type_std_res(self, counts, total, colsum, rowsum):
+        """ -> 2D ndarray of np.float64 std-res value for each cell of MR matrix.
+
+        This is a utility method used by a matrix with one or more MR dimensions. The
+        caller forms the input arrays based on which of its dimensions are MR.
+        """
+        # --- if the matrix is "defective", in the sense that it doesn't have at least
+        # --- two rows and two columns that are "full" of data, don't calculate zscores.
+        if not np.all(counts.shape) or np.linalg.matrix_rank(counts) < 2:
+            return np.zeros(counts.shape)
+
+        expected_counts = rowsum * colsum / total
+        variance = rowsum * colsum * (total - rowsum) * (total - colsum) / total ** 3
+        return (counts - expected_counts) / np.sqrt(variance)
+
     @lazyproperty
     def _column_elements(self):
         """Sequence of `cr.cube.dimension._Element` object for each matrix column."""
@@ -777,23 +792,7 @@ class _CatXCatMeansMatrix(_CatXCatMatrix):
         )
 
 
-class _MatrixWithMR(_CatXCatMatrix):
-    """ ... """
-
-    @staticmethod
-    def _array_type_std_res(counts, total, colsum, rowsum):
-        if not np.all(counts.shape) or np.linalg.matrix_rank(counts) < 2:
-            # If the matrix is "defective", in the sense that it doesn't have at least
-            # two rows and two columns that are "full" of data, don't calculate zscores.
-            return np.zeros(counts.shape)
-
-        expected_counts = rowsum * colsum / total
-        # TODO: this line occasionally raises overflow warnings in the tests.
-        variance = rowsum * colsum * (total - rowsum) * (total - colsum) / total ** 3
-        return (counts - expected_counts) / np.sqrt(variance)
-
-
-class _MrXCatMatrix(_MatrixWithMR):
+class _MrXCatMatrix(_CatXCatMatrix):
     """Represents MR_X_CAT slices.
 
     It's `._counts` is a 3D ndarray with axes (rows, selected/not, cols), like:
@@ -987,7 +986,7 @@ class _MrXCatMeansMatrix(_MrXCatMatrix):
         )
 
 
-class _CatXMrMatrix(_MatrixWithMR):
+class _CatXMrMatrix(_CatXCatMatrix):
     """Handles CAT x MR slices.
 
     It's `._counts` is a 3D ndarray with axes (rows, cols, selected/not), like:
@@ -1175,7 +1174,7 @@ class _CatXMrMeansMatrix(_CatXMrMatrix):
         )
 
 
-class _MrXMrMatrix(_MatrixWithMR):
+class _MrXMrMatrix(_CatXCatMatrix):
     """Represents MR x MR slices.
 
     It's `._counts` is a 4D ndarray with axes (rows, selected-and-not, cols,
