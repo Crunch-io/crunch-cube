@@ -825,31 +825,9 @@ class _Subtotals(Sequence):
         """Implements len(subtotals)."""
         return len(self._subtotals)
 
-    @lazyproperty
-    def anchor_idxs(self):
-        """List of int indicating the actual position of the subtotals."""
-        anchors = self._anchors
-        occurrences = lambda s, lst: (i for i, e in enumerate(lst) if e == s)
-        top_anchors = list(occurrences("top", anchors))
-        int_anchors = [a + len(top_anchors) for a in anchors if isinstance(a, int)]
-        bottom_anchors = [
-            a + len(self._valid_elements) + len(top_anchors + int_anchors)
-            for a, _ in enumerate(list(occurrences("bottom", anchors)))
-        ]
-        final_anchors = top_anchors + int_anchors + bottom_anchors
-        return final_anchors
-
     def iter_for_anchor(self, anchor):
         """Generate each subtotal having matching *anchor*."""
         return (subtotal for subtotal in self._subtotals if subtotal.anchor == anchor)
-
-    @lazyproperty
-    def _anchors(self):
-        """List of int or str indicating element under which to insert this subtotal."""
-        return list(
-            _Subtotal(subtotal_dict, self._valid_elements, self._prune).anchor
-            for subtotal_dict in self._iter_valid_subtotal_dicts()
-        )
 
     @lazyproperty
     def _element_ids(self):
@@ -938,23 +916,6 @@ class _Subtotal(object):
             arg
             for arg in self._subtotal_dict.get("args", [])
             if arg in self._valid_elements.element_ids
-        )
-
-    @lazyproperty
-    def addend_idxs(self):
-        """ndarray of int base-element offsets contributing to this subtotal.
-
-        Suitable for directly indexing a numpy array object (such as base values or
-        margin) to extract the addend values for this subtotal.
-        """
-        addend_ids = self.addend_ids
-        return np.fromiter(
-            (
-                idx
-                for idx, vector in enumerate(self._valid_elements)
-                if vector.element_id in addend_ids
-            ),
-            dtype=int,
         )
 
     @lazyproperty

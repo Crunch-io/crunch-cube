@@ -57,7 +57,7 @@
                   {
                     "function": "subtotal",
                     "args": [
-                      1,
+                      5,
                       2
                     ],
                     "name": "18–49",
@@ -78,7 +78,16 @@
                       3,
                       2
                     ],
-                    "name": "test12",
+                    "name": "sub1",
+                    "anchor": 2
+                  },
+                  {
+                    "function": "subtotal",
+                    "args": [
+                      4,
+                      2
+                    ],
+                    "name": "sub2",
                     "anchor": 2
                   },
                   {
@@ -87,7 +96,7 @@
                       4,
                       99
                     ],
-                    "name": "test",
+                    "name": "sub3",
                     "anchor": "bottom"
                   }
                 ]
@@ -105,7 +114,7 @@
               {
                 "numeric_value": 1,
                 "_id": 0,
-                "id": 1,
+                "id": 5,
                 "name": "18-29",
                 "missing": false
               },

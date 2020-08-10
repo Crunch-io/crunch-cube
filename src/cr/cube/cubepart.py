@@ -291,6 +291,11 @@ class _Slice(CubePartition):
         return np.sqrt(self._columns_variance / self.columns_margin)
 
     @lazyproperty
+    def correction_factor(self):
+        """ -> np.ndarray, correction factor for the denom considering the overlaps"""
+        return self._matrix.correction_factor
+
+    @lazyproperty
     def counts(self):
         return np.array([row.values for row in self._matrix.rows])
 
@@ -361,10 +366,6 @@ class _Slice(CubePartition):
         A slice takes the name of its rows-dimension.
         """
         return self.rows_dimension_name
-
-    @lazyproperty
-    def overlaps_tstats(self):
-        return self._matrix.overlaps_tstats
 
     @lazyproperty
     def pairwise_indices(self):

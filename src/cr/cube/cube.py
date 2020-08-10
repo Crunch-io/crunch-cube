@@ -343,6 +343,15 @@ class Cube(object):
         )
 
     @lazyproperty
+    def overlap_margins(self):
+        """np.ndarray, margin values considering the overlaps for augmented cubes"""
+        if self.is_mr_by_itself:
+            if self.dimension_types[0] == DT.MR:
+                return np.sum(self.counts[0], axis=0)[:, 0, :, 0]
+            return np.sum(self.counts, axis=0)[:, 0, :, 0]
+        return None
+
+    @lazyproperty
     def population_fraction(self):
         """The filtered/unfiltered ratio for cube response.
 
@@ -352,6 +361,24 @@ class Cube(object):
         otherwise result in a divide-by-zero error.
         """
         return self._measures.population_fraction
+
+    @lazyproperty
+    def shadow_counts(self):
+        """-> np.ndarray, shadow counts for augmented cubes.
+
+        Cube containing item-wise selections, overlap, and nonoverlap
+        with all other items in a multiple response dimension, for each
+        element of any prepended dimensions:
+        A 1d interface to a 4d hypercube of underlying counts.
+        """
+        if self.is_mr_by_itself:
+            counts = self.counts
+            if self.dimension_types[0] == DT.MR:
+                return np.array(
+                    [counts[i][0][:, 0, :, 0] for i in range(counts.shape[0])]
+                )
+            return np.array([counts[i][:, 0, :, 0] for i in range(counts.shape[0])])
+        return None
 
     @lazyproperty
     def title(self):

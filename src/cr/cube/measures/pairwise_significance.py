@@ -143,21 +143,12 @@ class _ColumnPairwiseSignificance(object):
 
     @lazyproperty
     def t_stats(self):
-        if self._slice.cube_is_mr_by_itself:
-            return self.t_stats_correct
         props = self._slice.column_proportions
         diff = props - props[:, [self._col_idx]]
         var_props = props * (1.0 - props) / self._slice.column_base
-        se_diff = np.sqrt(var_props + var_props[:, [self._col_idx]])
+        correction = self._correction_factor
+        se_diff = np.sqrt(var_props + var_props[:, [self._col_idx]]) - correction
         return diff / se_diff
-
-    @lazyproperty
-    def t_stats_correct(self):
-        """It returns the t_statistic for MR variables considering the overlaps"""
-        diff, se_diff = self._slice.overlaps_tstats
-        t_stats = diff[:, self._col_idx, :] / se_diff[:, self._col_idx, :]
-        t_stats[:, self._col_idx] = 0
-        return t_stats
 
     @lazyproperty
     def t_stats_scale_means(self):
@@ -193,6 +184,12 @@ class _ColumnPairwiseSignificance(object):
         ) / (standard_deviation * np.sqrt((1 / counts[self._col_idx]) + (1 / counts)))
 
         return tstats_scale_means
+
+    @lazyproperty
+    def _correction_factor(self):
+        """ -> np.ndarray, correction factor for the denom considering the overlaps"""
+        correction_factor = self._slice.correction_factor[:, self._col_idx, :]
+        return correction_factor
 
     @lazyproperty
     def _df(self):

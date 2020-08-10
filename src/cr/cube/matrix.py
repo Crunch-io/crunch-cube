@@ -15,7 +15,7 @@ from scipy.stats import norm
 from scipy.stats.contingency import expected_freq
 
 from cr.cube.enum import DIMENSION_TYPE as DT
-from cr.cube.util import lazyproperty, calculate_overlap_tstats
+from cr.cube.util import lazyproperty
 
 
 class TransformedMatrix(object):
@@ -38,12 +38,39 @@ class TransformedMatrix(object):
         )
 
     @lazyproperty
-    def overlaps_tstats(self):
-        return (
-            self._unordered_matrix.overlaps_tstats
-            if self._unordered_matrix.is_augmented
-            else None
-        )
+    def correction_factor(self):
+        """-> np.ndarray, correction factor for the denom considering the overlaps
+
+        s.e. = sqrt(p_i*(1-p_i)/n_i+p_j*(1-p_j)/n_j-correction_factor)
+        correction_factor = 2*n_ij*(p_ij-p_i*p_j)/(n_i*n_j)
+        where:
+        pi = proportion values for first var
+        pj = proportion values for second var
+        ni = base size for first var
+        nj = base size for second var
+        nij = number of overlapping observations
+        pij = proportion for which both subvar are True (selected)"""
+        if self._unordered_matrix.is_augmented:
+            prop = self._shadow_proportions
+            margins = self._unordered_matrix.overlap_margins
+            correction_factor = np.array(
+                [
+                    (
+                        2
+                        * margins
+                        * (
+                            prop[i]
+                            - np.multiply.outer(prop[i].diagonal(), prop[i].diagonal())
+                        )
+                    )
+                    / np.multiply.outer(margins.diagonal(), margins.diagonal())
+                    for i, _ in enumerate(prop)
+                ]
+            )
+        else:
+            # for not augmented matrix returns array of zeros
+            correction_factor = np.zeros(shape=self._shape)
+        return correction_factor
 
     @lazyproperty
     def rows(self):
@@ -232,6 +259,45 @@ class TransformedMatrix(object):
         return self._unordered_matrix.rows_dimension
 
     @lazyproperty
+    def _shadow_counts(self):
+        """-> np.ndarray, shadow counts for augmented cubes including subtotals.
+
+        Construct the final counts array filling a nan array with the actual counts and
+        subtotal counts in the proper position.
+        """
+        inserted_rows_idxs = [id for id, row in enumerate(self.rows) if row.is_inserted]
+        addend_idxs = [row.addend_idxs for row in self._inserted_rows]
+        counts = self._unordered_matrix.shadow_counts
+        subtotals_counts = np.array(
+            [sum(counts[i] for i in addend_idxs[j]) for j, _ in enumerate(addend_idxs)]
+        )
+        counts_with_hs = np.full(self._shape, np.nan)
+        for id, elem in enumerate(inserted_rows_idxs):
+            counts_with_hs[elem] = subtotals_counts[id]
+        nan_idx = [
+            id
+            for id, _ in enumerate(counts_with_hs)
+            if np.any(np.isnan(counts_with_hs[id]))
+        ]
+        for id, elem in enumerate(nan_idx):
+            counts_with_hs[elem] = counts[id]
+        return counts_with_hs
+
+    @lazyproperty
+    def _shadow_proportions(self):
+        """Cube containing item-wise selections, overlap, and nonoverlap
+        with all other items in a multiple response dimension, for each
+        element of any prepended dimensions:
+        A 1d interface to a 4d hypercube of underlying counts.
+        """
+        return self._shadow_counts / self._unordered_matrix.overlap_margins
+
+    @lazyproperty
+    def _shape(self):
+        """ -> tuple, shape of the counts under augmentation"""
+        return (len(self.rows), len(self.columns), len(self.columns))
+
+    @lazyproperty
     def _visible_cols_mask(self):
         return [not col.hidden for col in self._assembled_columns]
 
@@ -258,18 +324,9 @@ class _BaseBaseMatrix(object):
         base_counts = cube.base_counts
         counts_with_missings = cube.counts_with_missings
         dimension_types = cube.dimension_types[-2:]
+        shadow_counts = cube.shadow_counts
+        overlap_margins = cube.overlap_margins
         if cube.is_mr_by_itself:
-            subtotals = cube.dimensions[0].subtotals
-            offset = 1 if cube.dimension_types[0] == DT.MR else 0
-            overlap_tstats = calculate_overlap_tstats(
-                _MrXMrMatrix,
-                offset,
-                dimensions,
-                counts,
-                base_counts,
-                counts_with_missings,
-                subtotals,
-            )
             dimensions = cube.dimensions[:-1]
             if cube.dimension_types[0] == DT.MR:
                 counts = np.sum(counts[:, :, :, :, 0], axis=4)
@@ -282,13 +339,19 @@ class _BaseBaseMatrix(object):
                     counts,
                     base_counts,
                     counts_with_missings,
-                    overlap_tstats,
+                    shadow_counts,
+                    overlap_margins,
                 )
             counts = np.sum(counts[:, :, :, 0], axis=3)
             base_counts = np.sum(base_counts[:, :, :, 0], axis=3)
             counts_with_missings = np.sum(counts_with_missings[:, :, :, 0], axis=3)
             return _CatXMrMatrix(
-                dimensions, counts, base_counts, counts_with_missings, overlap_tstats
+                dimensions,
+                counts,
+                base_counts,
+                counts_with_missings,
+                shadow_counts,
+                overlap_margins,
             )
 
         # For cubes with means, create one of the means-matrix types
@@ -306,7 +369,6 @@ class _BaseBaseMatrix(object):
             if dimensions[0].dimension_type == DT.MR:
                 return _MrXCatMeansMatrix(dimensions, counts, base_counts)
             return _CatXCatMeansMatrix(dimensions, counts, base_counts)
-
         if cube.ndim > 2:
             base_counts = base_counts[slice_idx]
             counts = counts[slice_idx]
@@ -326,6 +388,10 @@ class _BaseBaseMatrix(object):
     @lazyproperty
     def columns_dimension(self):
         return self._dimensions[1]
+
+    @lazyproperty
+    def is_augmented(self):
+        return False
 
     @lazyproperty
     def rows_dimension(self):
@@ -731,12 +797,19 @@ class _CatXMrMatrix(_MatrixWithMR):
     """
 
     def __init__(
-        self, dimensions, counts, base_counts, counts_with_missings, overlaps=None
+        self,
+        dimensions,
+        counts,
+        base_counts,
+        counts_with_missings,
+        shadow_counts=None,
+        overlap_margins=None,
     ):
         super(_CatXMrMatrix, self).__init__(
             dimensions, counts, base_counts, counts_with_missings
         )
-        self._overlaps = overlaps
+        self._shadow_counts = shadow_counts
+        self._overlap_margins = overlap_margins
 
     @lazyproperty
     def columns(self):
@@ -747,11 +820,11 @@ class _CatXMrMatrix(_MatrixWithMR):
 
     @lazyproperty
     def is_augmented(self):
-        return True if self._overlaps is not None else False
+        return True if self._shadow_counts is not None else False
 
     @lazyproperty
-    def overlaps_tstats(self):
-        return self._overlaps if self.is_augmented else None
+    def overlap_margins(self):
+        return self._overlap_margins
 
     @lazyproperty
     def rows(self):
@@ -776,6 +849,10 @@ class _CatXMrMatrix(_MatrixWithMR):
                 column_index,
             ) in self._row_generator
         )
+
+    @lazyproperty
+    def shadow_counts(self):
+        return self._shadow_counts
 
     @lazyproperty
     def table_base(self):
@@ -883,14 +960,14 @@ class _MrXMrMatrix(_MatrixWithMR):
         counts,
         base_counts,
         counts_with_missings,
-        overlaps=None,
-        overlaps_margin=None,
+        shadow_counts=None,
+        overlap_margins=None,
     ):
         super(_MrXMrMatrix, self).__init__(
             dimensions, counts, base_counts, counts_with_missings
         )
-        self._overlaps = overlaps
-        self._overlaps_margin = overlaps_margin
+        self._shadow_counts = shadow_counts
+        self._overlap_margins = overlap_margins
 
     @lazyproperty
     def columns(self):
@@ -901,11 +978,15 @@ class _MrXMrMatrix(_MatrixWithMR):
 
     @lazyproperty
     def is_augmented(self):
-        return True if self._overlaps is not None else False
+        return True if self._shadow_counts is not None else False
 
     @lazyproperty
-    def overlaps_tstats(self):
-        return self._overlaps if self.is_augmented else None
+    def overlap_margins(self):
+        return self._overlap_margins
+
+    @lazyproperty
+    def shadow_counts(self):
+        return self._shadow_counts
 
     @lazyproperty
     def rows(self):
@@ -941,59 +1022,6 @@ class _MrXMrMatrix(_MatrixWithMR):
         return np.sum(self._counts, axis=(1, 3))
 
     @lazyproperty
-    def tstats_overlap(self):
-        """
-        ndarray of correct tstats values considering the overlapped observations
-        t = (pi-pj)/sqrt(s.e.ˆ2(pi-pj))
-        where
-        s.e.ˆ2(pi-pj) = p_i*(1-p_i)/n_i+p_j*(1-p_j)/n_j-2*n_ij*(p_ij-p_i*p_j)/(n_i*n_j)
-        ni = base size for first subvar
-        nj = base size for second subvar
-        nij = number of overlapping observations
-        pij = proportion for which both subvar are True (selected)
-        In this case MRxMR the diff pi-pj is the pairwise subtraction of the diagonal
-        of the shadow_proportions the denominator is the matrix containing the
-        unweighted counts of the cube
-        """
-
-        # Subtraction of the proportions foreach observation
-        diff = (
-            np.subtract.outer(
-                self._mr_shadow_proportions.diagonal(),
-                self._mr_shadow_proportions.diagonal(),
-            )
-            * -1
-        )
-
-        se_pi_pj = np.add.outer(
-            self._mr_shadow_proportions.diagonal()
-            * (1 - self._mr_shadow_proportions.diagonal())
-            / self._overlaps_margin.diagonal(),
-            self._mr_shadow_proportions.diagonal()
-            * (1 - self._mr_shadow_proportions.diagonal())
-            / self._overlaps_margin.diagonal(),
-        )
-
-        # Correction factor considering the overlap
-        correction_factor = (
-            2
-            * self._overlaps_margin
-            * (
-                self._mr_shadow_proportions
-                - np.multiply.outer(
-                    self._mr_shadow_proportions.diagonal(),
-                    self._mr_shadow_proportions.diagonal(),
-                )
-            )
-        ) / np.multiply.outer(
-            self._overlaps_margin.diagonal(), self._overlaps_margin.diagonal()
-        )
-        se_diff = np.sqrt(se_pi_pj - correction_factor)
-        np.fill_diagonal(diff, 0)
-        np.fill_diagonal(se_diff, 0)
-        return diff, se_diff
-
-    @lazyproperty
     def _baseline(self):
         """ndarray of baseline values for column index.
 
@@ -1021,15 +1049,6 @@ class _MrXMrMatrix(_MatrixWithMR):
             self._column_elements,
             self.table_margin.T,
         )
-
-    @lazyproperty
-    def _mr_shadow_proportions(self):
-        """Cube containing item-wise selections, overlap, and nonoverlap
-        with all other items in a multiple response dimension, for each
-        element of any prepended dimensions:
-        A 1d interface to a 4d hypercube of underlying counts.
-        """
-        return self._counts[:, 0, :, 0] / self._overlaps_margin
 
     @lazyproperty
     def _row_generator(self):

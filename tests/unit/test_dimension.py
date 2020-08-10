@@ -1158,26 +1158,6 @@ class Describe_Subtotals(object):
 class Describe_Subtotal(object):
     """Unit-test suite for `cr.cube.dimension._Subtotal` object."""
 
-    def it_knows_the_addend_idxs(
-        self, addend_ids_, all_elements_, valid_elements_, addend_idxs_fixture
-    ):
-        subtotal_dict, addend_ids, expected_value = addend_idxs_fixture
-        addend_ids_.return_value = addend_ids
-        elements_ = (
-            _Element({"id": 1}, None, None, None),
-            _Element({"id": 2}, None, None, None),
-            _Element({"id": 3}, None, None, None),
-            _Element({"id": 4}, None, None, None),
-            _Element({"id": 99}, None, None, None),
-        )
-        all_elements_.__iter__.return_value = iter(elements_)
-        valid_elements = _ValidElements(all_elements_, None)
-        subtotal = _Subtotal(subtotal_dict, valid_elements, None)
-
-        addend_idxs = subtotal.addend_idxs
-
-        np.testing.assert_array_almost_equal(addend_idxs, expected_value)
-
     def it_knows_the_insertion_anchor(self, anchor_fixture, valid_elements_):
         subtotal_dict, element_ids, expected_value = anchor_fixture
         valid_elements_.element_ids = element_ids
