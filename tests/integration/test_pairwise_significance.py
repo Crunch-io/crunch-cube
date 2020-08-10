@@ -651,6 +651,25 @@ class TestStandardizedResiduals(TestCase):
                 slice_no_aug_.counts[i], slice_.counts[i]
             )
 
+        np.testing.assert_array_almost_equal(
+            slice_no_hs_.column_proportions,
+            [
+                [0.23937219, 0.21109752, 0.12786705],
+                [0.36298596, 0.3558276, 0.31077468],
+                [0.21695965, 0.23199189, 0.31240153],
+                [0.1783347, 0.1988144, 0.24462951],
+                [0.0023475, 0.00226859, 0.00432723],
+            ],
+        )
+
+        # the shadow proportions are corresponding to the slice no augmented column
+        # proportions
+        shadow_proportions = slice_._cube.shadow_counts / slice_._cube.overlap_margins
+        for i, _ in enumerate(slice_no_hs_.column_proportions):
+            np.testing.assert_array_almost_equal(
+                slice_no_hs_.column_proportions[0], shadow_proportions[0].diagonal()
+            )
+
     def test_mr_x_mr_weighted_augmented_pairwise_t_test(self):
         """This test proofs the hypotesis testing for MR1_X_MR2 considering the
         overlaps. To calculate the overlap of this kind of cube we need to calculate

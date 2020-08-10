@@ -50,6 +50,9 @@ class TransformedMatrix(object):
         nj = base size for second var
         nij = number of overlapping observations
         pij = proportion for which both subvar are True (selected)"""
+        import ipdb
+
+        ipdb.set_trace()
         if self._unordered_matrix.is_augmented:
             prop = self._shadow_proportions
             margins = self._unordered_matrix.overlap_margins
