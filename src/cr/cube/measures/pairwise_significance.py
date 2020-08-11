@@ -147,7 +147,7 @@ class _ColumnPairwiseSignificance(object):
         diff = props - props[:, [self._col_idx]]
         var_props = (props * (1.0 - props)) / self._slice.column_base
         correction = self._correction_factor
-        se_diff = np.sqrt((var_props + var_props[:, [self._col_idx]]) - correction)
+        se_diff = np.sqrt(var_props + var_props[:, [self._col_idx]] - correction)
         return diff / se_diff
 
     @lazyproperty

@@ -52,16 +52,13 @@ class TransformedMatrix(object):
         pij = proportion for which both subvar are True (selected)"""
         if self._unordered_matrix.is_augmented:
             prop = self._shadow_proportions
-            margins = self._unordered_matrix.overlap_margins
-            import ipdb
-
-            ipdb.set_trace()
+            margins = self._shadow_margins
             correction_factor = np.array(
                 [
                     (
                         2
                         * (
-                            margins
+                            margins[i]
                             * (
                                 prop[i]
                                 - np.multiply.outer(
@@ -70,7 +67,7 @@ class TransformedMatrix(object):
                             )
                         )
                     )
-                    / (np.multiply.outer(margins.diagonal(), margins.diagonal()))
+                    / (np.multiply.outer(margins[i].diagonal(), margins[i].diagonal()))
                     for i, _ in enumerate(prop)
                 ]
             )
@@ -278,9 +275,6 @@ class TransformedMatrix(object):
         subtotals_counts = np.array(
             [sum(counts[i] for i in addend_idxs[j]) for j, _ in enumerate(addend_idxs)]
         )
-        import ipdb
-
-        ipdb.set_trace()
         counts_with_hs = np.full(self._shape, np.nan)
         for id, elem in enumerate(inserted_rows_idxs):
             counts_with_hs[elem] = subtotals_counts[id]
@@ -300,7 +294,23 @@ class TransformedMatrix(object):
         element of any prepended dimensions:
         A 1d interface to a 4d hypercube of underlying counts.
         """
-        return self._shadow_counts / self._unordered_matrix.overlap_margins
+        return self._shadow_counts / self._shadow_margins
+
+    @lazyproperty
+    def _shadow_margins(self):
+        overlap_margins = self._unordered_matrix.overlap_margins
+        shadow_margins = np.diagonal(self._shadow_counts, axis1=1, axis2=2)[
+            :, np.newaxis
+        ]
+        margins = np.array(
+            [
+                np.repeat(shadow_margins[i], overlap_margins.shape[0], axis=0)
+                for i, _ in enumerate(shadow_margins)
+            ]
+        )
+        for i, _ in enumerate(margins):
+            np.fill_diagonal(margins[i], overlap_margins.diagonal())
+        return margins
 
     @lazyproperty
     def _shape(self):
@@ -337,9 +347,6 @@ class _BaseBaseMatrix(object):
         shadow_counts = cube.shadow_counts
         overlap_margins = cube.overlap_margins
         if cube.is_mr_by_itself:
-            import ipdb
-
-            ipdb.set_trace()
             dimensions = cube.dimensions[:-1]
             if cube.dimension_types[0] == DT.MR:
                 counts = np.sum(counts[:, :, :, :, 0], axis=4)
