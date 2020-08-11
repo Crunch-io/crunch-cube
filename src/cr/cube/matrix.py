@@ -53,17 +53,24 @@ class TransformedMatrix(object):
         if self._unordered_matrix.is_augmented:
             prop = self._shadow_proportions
             margins = self._unordered_matrix.overlap_margins
+            import ipdb
+
+            ipdb.set_trace()
             correction_factor = np.array(
                 [
                     (
                         2
-                        * margins
                         * (
-                            prop[i]
-                            - np.multiply.outer(prop[i].diagonal(), prop[i].diagonal())
+                            margins
+                            * (
+                                prop[i]
+                                - np.multiply.outer(
+                                    prop[i].diagonal(), prop[i].diagonal()
+                                )
+                            )
                         )
                     )
-                    / np.multiply.outer(margins.diagonal(), margins.diagonal())
+                    / (np.multiply.outer(margins.diagonal(), margins.diagonal()))
                     for i, _ in enumerate(prop)
                 ]
             )
@@ -271,6 +278,9 @@ class TransformedMatrix(object):
         subtotals_counts = np.array(
             [sum(counts[i] for i in addend_idxs[j]) for j, _ in enumerate(addend_idxs)]
         )
+        import ipdb
+
+        ipdb.set_trace()
         counts_with_hs = np.full(self._shape, np.nan)
         for id, elem in enumerate(inserted_rows_idxs):
             counts_with_hs[elem] = subtotals_counts[id]
@@ -327,6 +337,9 @@ class _BaseBaseMatrix(object):
         shadow_counts = cube.shadow_counts
         overlap_margins = cube.overlap_margins
         if cube.is_mr_by_itself:
+            import ipdb
+
+            ipdb.set_trace()
             dimensions = cube.dimensions[:-1]
             if cube.dimension_types[0] == DT.MR:
                 counts = np.sum(counts[:, :, :, :, 0], axis=4)

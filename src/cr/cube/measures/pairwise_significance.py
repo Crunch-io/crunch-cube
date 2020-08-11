@@ -145,9 +145,9 @@ class _ColumnPairwiseSignificance(object):
     def t_stats(self):
         props = self._slice.column_proportions
         diff = props - props[:, [self._col_idx]]
-        var_props = props * (1.0 - props) / self._slice.column_base
+        var_props = (props * (1.0 - props)) / self._slice.column_base
         correction = self._correction_factor
-        se_diff = np.sqrt(var_props + var_props[:, [self._col_idx]]) - correction
+        se_diff = np.sqrt((var_props + var_props[:, [self._col_idx]]) - correction)
         return diff / se_diff
 
     @lazyproperty
@@ -189,6 +189,7 @@ class _ColumnPairwiseSignificance(object):
     def _correction_factor(self):
         """ -> np.ndarray, correction factor for the denom considering the overlaps"""
         correction_factor = self._slice.correction_factor[:, self._col_idx, :]
+        correction_factor[:, self._col_idx] = 0
         return correction_factor
 
     @lazyproperty
