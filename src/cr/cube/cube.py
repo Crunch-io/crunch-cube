@@ -328,6 +328,15 @@ class Cube(object):
         return len(self.dimensions)
 
     @lazyproperty
+    def overlap_margins(self):
+        """np.ndarray, margin values considering the overlaps for augmented cubes"""
+        if self.is_mr_by_itself:
+            if self.dimension_types[0] == DT.MR:
+                return np.sum(self.counts[0], axis=0)[:, 0, :, 0]
+            return np.sum(self.counts, axis=0)[:, 0, :, 0]
+        return None
+
+    @lazyproperty
     def partitions(self):
         """Sequence of _Slice, _Strand, or _Nub objects from this cube-result."""
         return tuple(
@@ -341,15 +350,6 @@ class Cube(object):
             )
             for slice_idx in self._slice_idxs
         )
-
-    @lazyproperty
-    def overlap_margins(self):
-        """np.ndarray, margin values considering the overlaps for augmented cubes"""
-        if self.is_mr_by_itself:
-            if self.dimension_types[0] == DT.MR:
-                return np.sum(self.counts[0], axis=0)[:, 0, :, 0]
-            return np.sum(self.counts, axis=0)[:, 0, :, 0]
-        return None
 
     @lazyproperty
     def population_fraction(self):
