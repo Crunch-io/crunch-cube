@@ -55,17 +55,11 @@ class TransformedMatrix(object):
             margins = self._shadow_margins
             correction_factor = np.array(
                 [
-                    (
-                        2
-                        * (
-                            margins[i]
-                            * (
-                                prop[i]
-                                - np.multiply.outer(
-                                    prop[i].diagonal(), prop[i].diagonal()
-                                )
-                            )
-                        )
+                    2.0
+                    * margins[i]
+                    * (
+                        prop[i]
+                        - np.multiply.outer(prop[i].diagonal(), prop[i].diagonal())
                     )
                     / (np.multiply.outer(margins[i].diagonal(), margins[i].diagonal()))
                     for i, _ in enumerate(prop)
@@ -298,10 +292,10 @@ class TransformedMatrix(object):
 
     @lazyproperty
     def _shadow_margins(self):
+        """-> np.ndarray, shadow margins for augmented cubes."""
+        counts = self._shadow_counts
         overlap_margins = self._unordered_matrix.overlap_margins
-        shadow_margins = np.diagonal(self._shadow_counts, axis1=1, axis2=2)[
-            :, np.newaxis
-        ]
+        shadow_margins = np.diagonal(counts, axis1=1, axis2=2)[:, np.newaxis]
         margins = np.array(
             [
                 np.repeat(shadow_margins[i], overlap_margins.shape[0], axis=0)

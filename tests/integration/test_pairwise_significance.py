@@ -458,19 +458,9 @@ class TestStandardizedResiduals(TestCase):
         """Same behaviour of test_mr_subvar_x_mr_augmented_pairwise_t_test"""
         slice_ = Cube(CR.CAT_X_MR_WEIGHTED_AUGMENTED).partitions[0]
         actual = slice_.pairwise_significance_tests[1]
-        overlap_margins = np.sum(slice_._cube.counts, axis=0)[:, 0, :, 0]
-        shadow_proportions_tab1 = slice_._cube.counts[0][:, 0, :, 0] / overlap_margins
-        shadow_proportions_tab2 = slice_._cube.counts[1][:, 0, :, 0] / overlap_margins
 
         assert slice_.cube_is_mr_by_itself is True
-        np.testing.assert_array_almost_equal(
-            overlap_margins,
-            [
-                [4188.13667426, 3046.38734874, 1047.76027958],
-                [3046.38734874, 3628.42165249, 859.70982873],
-                [1047.76027958, 859.70982873, 5133.76481161],
-            ],
-        )
+
         np.testing.assert_array_almost_equal(
             slice_.column_proportions,
             [
@@ -478,21 +468,14 @@ class TestStandardizedResiduals(TestCase):
                 [0.28607037, 0.25203203, 0.44524755],
             ],
         )
-        np.testing.assert_array_almost_equal(
-            shadow_proportions_tab1.diagonal(), slice_.column_proportions[0, :]
-        )
-        np.testing.assert_array_almost_equal(
-            shadow_proportions_tab2.diagonal(), slice_.column_proportions[1, :]
-        )
+
         # each diagonal of the shadow proportions tab is equal to the correspondent row
         # for the actual proportions
         np.testing.assert_array_almost_equal(
-            actual.t_stats,
-            [[-10.2964264, 0.0, -20.09577285], [5.96350953, 0.0, 24.14335882]],
+            actual.t_stats, [[np.nan, 0.0, -14.475749], [np.nan, 0.0, 21.826747]]
         )
         np.testing.assert_array_almost_equal(
-            actual.p_vals,
-            [[0.0, 1.00000000e00, 0.0], [2.55612775e-09, 1.00000000e00, 0.0]],
+            actual.p_vals, [[np.nan, 1.00000000e00, 0.0], [np.nan, 1.00000000e00, 0.0]]
         )
         assert slice_._cube.counts.shape == (2, 3, 2, 3, 2)
         assert actual.t_stats.shape == (2, 3)
@@ -501,32 +484,54 @@ class TestStandardizedResiduals(TestCase):
         slice_ = Cube(CR.CA_SUBVAR_HS_X_MR_AUGMENTED).partitions[0]
         actual = slice_.pairwise_significance_tests[1]
         overlap_margins = np.sum(slice_._cube.counts, axis=0)[:, 0, :, 0]
-        addend_idxs = [s.addend_idxs for s in slice_._cube.dimensions[0].subtotals]
-        counts_with_hs = counts_with_subtotals(
-            addend_idxs, slice_.inserted_row_idxs, slice_._cube.counts
-        )
+
         assert slice_.inserted_row_idxs == (0,)
         assert slice_.cube_is_mr_by_itself is True
         assert actual.t_stats.shape == (3, 4)
         assert slice_.counts.shape == (3, 4)
-        assert counts_with_hs.shape == (3, 4, 2, 4, 2)
         np.testing.assert_array_almost_equal(
             overlap_margins,
             [[44, 3, 0, 0], [3, 34, 0, 0], [0, 0, 348, 0], [0, 0, 0, 0]],
         )
-
-        slice_no_aug_ = Cube(CR.CA_SUBVAR_HS_X_MR).partitions[0]
-
-        for i in range(slice_no_aug_.shape[0]):
-            np.testing.assert_array_almost_equal(
-                slice_no_aug_.counts[i], counts_with_hs[i][:, 0, :, 0].diagonal()
-            )
+        np.testing.assert_array_almost_equal(
+            actual.t_stats,
+            [
+                [0.0, np.nan, 0.0, np.nan],
+                [0.0, np.nan, -0.73447387, np.nan],
+                [np.nan, np.nan, 1.58113883, np.nan],
+            ],
+        )
+        var_props = (
+            slice_.column_proportions
+            * (1.0 - slice_.column_proportions)
+            / slice_.column_base
+        )
+        se_diff = np.sqrt(var_props + var_props[:, [1]])
+        correction_factor = slice_.correction_factor[:, 1, :]
+        se_diff_with_correction = np.sqrt(
+            var_props + var_props[:, [1]] - correction_factor
+        )
+        np.testing.assert_array_almost_equal(
+            se_diff,
+            [
+                [0.0, 0.0, 0.0, np.nan],
+                [0.0, 0.0, 0.12649111, np.nan],
+                [0.0, 0.0, 0.12649111, np.nan],
+            ],
+        )
+        np.testing.assert_array_almost_equal(
+            se_diff_with_correction,
+            [
+                [0.23412141, 0.0, 0.24253563, np.nan],
+                [0.23412141, 0.0, 0.27230376, np.nan],
+                [np.nan, 0.0, 0.12649111, np.nan],
+            ],
+        )
 
     def test_cat_hs_x_mr_augmented_wgtd(self):
         slice_ = Cube(CR.CAT_HS_X_MR_AUGMENTED_WGTD).partitions[0]
         actual = slice_.pairwise_significance_tests[1]
         overlap_margins = np.sum(slice_._cube.counts, axis=0)[:, 0, :, 0]
-
         # CATxMR (10, 3, 2, 3, 2) shape, 9 = (5 + 5subtot) tabs of shadow proportions
         assert slice_.inserted_row_idxs == (0, 1, 4, 5, 9)
         assert slice_.cube_is_mr_by_itself is True
@@ -753,21 +758,21 @@ class TestStandardizedResiduals(TestCase):
         np.testing.assert_array_almost_equal(
             actual.t_stats,
             [
-                [-10.2964264, 0.0, -20.09577285],
-                [-16.38251357, 0.0, -28.57841019],
-                [-7.42875194, 0.0, 2.33766663],
-                [-10.88338158, 0.0, -22.45002834],
-                [-2.12632668, 0.0, -11.07466431],
+                [np.nan, 0.0, -14.47574904],
+                [np.nan, 0.0, -23.30735393],
+                [np.nan, 0.0, 1.51559307],
+                [-6.53635865, 0.0, -13.05517391],
+                [np.nan, 0.0, -10.65873041],
             ],
         )
         np.testing.assert_array_almost_equal(
             actual.p_vals,
             [
-                [0.0, 1.00000000e00, 0.0],
-                [0.0, 1.00000000e00, 0.0],
-                [1.19015908e-13, 1.00000000e00, 1.94264286e-02],
-                [0.0, 1.00000000e00, 0.0],
-                [3.35015757e-02, 1.00000000e00, 0.0],
+                [np.nan, 1.00000000e00, 0.00000000e00],
+                [np.nan, 1.00000000e00, 0.00000000e00],
+                [np.nan, 1.00000000e00, 1.29657533e-01],
+                [6.62481181e-11, 1.00000000e00, 0.00000000e00],
+                [np.nan, 1.00000000e00, 0.00000000e00],
             ],
         )
         np.testing.assert_array_almost_equal(
@@ -854,20 +859,16 @@ class TestStandardizedResiduals(TestCase):
         """
         slice_ = Cube(CR.CAT_SUBVAR_X_MR_AUGMENTED).partitions[0]
         actual = slice_.pairwise_significance_tests[0]
-        overlap_margins = np.sum(slice_._cube.counts, axis=0)[:, 0, :, 0]
-        shadow_proportions_tab1 = slice_._cube.counts[0][:, 0, :, 0] / overlap_margins
-        shadow_proportions_tab2 = slice_._cube.counts[1][:, 0, :, 0] / overlap_margins
 
         assert slice_.cube_is_mr_by_itself is True
         np.testing.assert_array_almost_equal(
-            actual.t_stats,
-            [[0.0, 16.02651373, -22.43766743], [0.0, -6.56624439, 29.71952066]],
+            actual.t_stats, [[0.0, np.nan, -14.407543], [0.0, -16.206268, 27.899357]]
         )
         np.testing.assert_array_almost_equal(
             actual.p_vals,
             [
-                [1.00000000e00, 0.00000000e00, 0.00000000e00],
-                [1.00000000e00, 5.42792478e-11, 0.00000000e00],
+                [1.00000000e00, np.nan, 0.00000000e00],
+                [1.00000000e00, 0.0, 0.00000000e00],
             ],
         )
         np.testing.assert_array_almost_equal(
@@ -876,28 +877,6 @@ class TestStandardizedResiduals(TestCase):
                 [0.82707248, 0.85960427, 0.63206628],
                 [0.17292752, 0.14039573, 0.36793372],
             ],
-        )
-        np.testing.assert_array_almost_equal(
-            shadow_proportions_tab1,
-            [
-                [0.82707248, 0.86881078, 0.56294105],
-                [0.86881078, 0.85960427, 0.61504991],
-                [0.56294105, 0.61504991, 0.63206628],
-            ],
-        )
-        np.testing.assert_array_almost_equal(
-            shadow_proportions_tab2,
-            [
-                [0.17292752, 0.13118922, 0.43705895],
-                [0.13118922, 0.14039573, 0.38495009],
-                [0.43705895, 0.38495009, 0.36793372],
-            ],
-        )
-        np.testing.assert_array_almost_equal(
-            shadow_proportions_tab1.diagonal(), slice_.column_proportions[0, :]
-        )
-        np.testing.assert_array_almost_equal(
-            shadow_proportions_tab2.diagonal(), slice_.column_proportions[1, :]
         )
 
     def test_mr_x_mr_pairwise_t_test(self):
