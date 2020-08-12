@@ -1061,7 +1061,7 @@ class _CatXMrMatrix(_CatXCatMatrix):
     @lazyproperty
     def is_augmented(self):
         """True if this matrix comes from an augmented (MR_X_ITSELF aka MR_AUG) cube."""
-        return True if self._overlaps is not None else False
+        return self._overlaps is not None
 
     @lazyproperty
     def overlaps_tstats(self):
@@ -1200,12 +1200,16 @@ class _CatXMrMeansMatrix(_CatXMrMatrix):
     @lazyproperty
     def rows(self):
         """Sequence of _MeansWithMrVector object for each row of matrix."""
+        # --- `._means` is 3D (CAT (nrows), MR_SUBVAR (ncols), MR_CAT (selected/not)).
+        # --- Index to take only the selected values for sending to vector, producing
+        # --- a 2D array (nrows, ncols) of selected-mean for each matrix cell.
+        means_of_selected = self._means[:, :, 0]
         return tuple(
-            # We must inflate the means with [:, 0], because the values are oriented
-            # like columns (0th is selected while 1st is other)
-            _MeansWithMrVector(element, unweighted_counts, means[:, 0])
+            _MeansWithMrVector(element, unweighted_counts, means)
             for element, unweighted_counts, means in zip(
-                self.rows_dimension.valid_elements, self._unweighted_counts, self._means
+                self.rows_dimension.valid_elements,
+                self._unweighted_counts,
+                means_of_selected,
             )
         )
 
@@ -2433,7 +2437,7 @@ class _BaseVector(object):
     @lazyproperty
     def pruned(self):
         """True if this vector contains no samples."""
-        return self.base == 0 or np.isnan(self.base)
+        return self.base == 0
 
     @lazyproperty
     def zscore(self):
@@ -2564,7 +2568,7 @@ class _MeansVector(_BaseVector):
 
         A means vector has no (weighted) counts, so it can have no margin.
         """
-        return np.nan * len(self._unweighted_counts)
+        return np.nan
 
 
 class _MeansWithMrVector(_MeansVector):
@@ -2616,13 +2620,14 @@ class _MrOpposingCatVector(_CategoricalVector):
             table_std_err,
             column_index,
         )
-        self._all_unweighted_counts = unweighted_counts
-        self._all_counts = counts
+        self._both_counts = counts
+        self._both_unweighted_counts = unweighted_counts
 
     @lazyproperty
     def pruned(self):
         """True if this vector contains no samples."""
-        return self.table_base == 0
+        vector_base = np.sum(self._both_unweighted_counts)
+        return vector_base == 0
 
     @lazyproperty
     def table_base(self):
@@ -2633,7 +2638,7 @@ class _MrOpposingCatVector(_CategoricalVector):
         distinct table-base which is often different. This is because each MR response
         may be presented to a different number of respondents.
         """
-        return np.sum(self._all_unweighted_counts)
+        return np.sum(self._both_unweighted_counts)
 
     @lazyproperty
     def table_margin(self):
@@ -2643,7 +2648,7 @@ class _MrOpposingCatVector(_CategoricalVector):
         shared by all cells in this vector. Note however that its sibling MR vectors
         each have their own distinct table-margin which is often different.
         """
-        return np.sum(self._all_counts)
+        return np.sum(self._both_counts)
 
     @lazyproperty
     def zscore(self):
@@ -2686,7 +2691,8 @@ class _OpposingMrVector(_CategoricalVector):
     @lazyproperty
     def pruned(self):
         """True if this vector contains no samples."""
-        return np.all(self.base == 0) or np.all(np.isnan(self.base))
+        vector_base = np.sum(self._unweighted_counts, axis=0)
+        return (vector_base == 0).all()
 
     @lazyproperty
     def unweighted_counts(self):
