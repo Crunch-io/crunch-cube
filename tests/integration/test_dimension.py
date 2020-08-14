@@ -208,7 +208,7 @@ class DescribeIntegrated_Element(object):
 
     def it_knows_its_transformed_label(self, element_dict, element_transforms_):
         element_transforms_.name = "Xfinity Lounge"
-        element = _Element(element_dict, None, None, element_transforms_)
+        element = _Element(element_dict, None, element_transforms_)
 
         label = element.label
 
@@ -218,7 +218,7 @@ class DescribeIntegrated_Element(object):
         self, element_dict, element_transforms_
     ):
         element_transforms_.name = None
-        element = _Element(element_dict, None, None, element_transforms_)
+        element = _Element(element_dict, None, element_transforms_)
 
         label = element.label
 
@@ -226,7 +226,7 @@ class DescribeIntegrated_Element(object):
 
     def it_knows_when_it_is_explicitly_hidden(self, element_dict, element_transforms_):
         element_transforms_.hide = True
-        element = _Element(element_dict, None, None, element_transforms_)
+        element = _Element(element_dict, None, element_transforms_)
 
         is_hidden = element.is_hidden
 
@@ -234,7 +234,7 @@ class DescribeIntegrated_Element(object):
 
     def but_it_is_not_hidden_by_default(self, element_transforms_):
         element_transforms_.hide = None
-        element = _Element(None, None, None, element_transforms_)
+        element = _Element(None, None, element_transforms_)
 
         is_hidden = element.is_hidden
 

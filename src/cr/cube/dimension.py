@@ -315,7 +315,7 @@ class Dimension(object):
 
     @lazyproperty
     def display_order(self):
-        """Sequence of int element offsets specifying display order of elements.
+        """Sequence of int element indices specifying display order of elements.
 
         The sequence includes only valid elements; missing elements do not appear.
         Further, each index represents the document-order position of the element in the
@@ -523,12 +523,10 @@ class _AllElements(_BaseElements):
     @lazyproperty
     def _elements(self):
         """tuple storing actual sequence of element objects."""
-        element_dicts = self._element_dicts
         return tuple(
             _Element(
                 element_dict,
                 idx,
-                element_dicts,
                 _ElementTransforms(element_transforms_dict, self._prune),
             )
             for (
@@ -645,11 +643,9 @@ class _Element(object):
     This object resolves the transform cascade for element-level transforms.
     """
 
-    def __init__(self, element_dict, index, element_dicts, element_transforms):
+    def __init__(self, element_dict, index, element_transforms):
         self._element_dict = element_dict
         self._index = index
-        # TODO: Remove this hack. An element should not need to know of its peers.
-        self._element_dicts = element_dicts
         self._element_transforms = element_transforms
 
     @lazyproperty
