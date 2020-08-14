@@ -1749,6 +1749,16 @@ class _BaseMatrixInsertedVector(object):
             "`._base_vectors` must be implemented by each subclass"
         )  # pragma: no cover
 
+    @lazyproperty
+    def _expected_counts(self):
+        """1D np.float64 ndarray of expected value of count for each vector cell."""
+        return self.opposing_margin * self.margin / self.table_margin
+
+    @lazyproperty
+    def _residuals(self):
+        """1D np.float64 ndarray of count/expected difference for each vector cell."""
+        return self.counts - self._expected_counts
+
 
 class _InsertedColumn(_BaseMatrixInsertedVector):
     """Represents an inserted (subtotal) column."""
@@ -1774,14 +1784,6 @@ class _InsertedColumn(_BaseMatrixInsertedVector):
         """
         return self._base_columns
 
-    @lazyproperty
-    def _expected_counts(self):
-        return self.opposing_margin * self.margin / self.table_margin
-
-    @lazyproperty
-    def _residuals(self):
-        return self.counts - self._expected_counts
-
 
 class _InsertedRow(_BaseMatrixInsertedVector):
     """Represents an inserted (subtotal) row."""
@@ -1805,14 +1807,6 @@ class _InsertedRow(_BaseMatrixInsertedVector):
         The base rows are the non-inserted rows from which the addend rows are drawn.
         """
         return self._base_rows
-
-    @lazyproperty
-    def _expected_counts(self):
-        return self.opposing_margin * self.margin / self.table_margin
-
-    @lazyproperty
-    def _residuals(self):
-        return self.counts - self._expected_counts
 
 
 # ===TRANSFORMATION VECTORS===
