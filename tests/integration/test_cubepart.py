@@ -303,7 +303,7 @@ class Describe_Slice(object):
             (CR.MR_X_MR, [1, 2, 3, 0], [2, 1, 3, 0], "mr-x-mr-explicit-order"),
         ),
     )
-    def it_respects_explicit_order_transform(
+    def it_respects_explicit_order_transform_for_dim_types(
         self, fixture, row_order, col_order, expectation
     ):
         transforms = {
@@ -324,6 +324,38 @@ class Describe_Slice(object):
 
         expected = load_python_expression(expectation)
         assert expected == actual, "\n%s\n\n%s" % (expected, actual)
+
+    @pytest.mark.parametrize(
+        "measure_propname, expectation",
+        (
+            ("column_index", "cat-x-cat-col-idx-explicit-order"),
+            ("unweighted_counts", "cat-x-cat-ucounts-explicit-order"),
+            ("zscores", "cat-x-cat-zscores-explicit-order"),
+        ),
+    )
+    def and_it_respects_explicit_order_transform_for_measures(
+        self, measure_propname, expectation
+    ):
+        transforms = {
+            "rows_dimension": {
+                "order": {"type": "explicit", "element_ids": [2, 4, 3, 1]}
+            },
+            "columns_dimension": {
+                "order": {"type": "explicit", "element_ids": [3, 2, 4, 1]}
+            },
+        }
+        slice_ = _Slice(
+            Cube(CR.CAT_4_X_CAT_4),
+            slice_idx=0,
+            transforms=transforms,
+            population=None,
+            mask_size=0,
+        )
+
+        actual = getattr(slice_, measure_propname)
+
+        expected = load_python_expression(expectation)
+        np.testing.assert_almost_equal(actual, expected)
 
     def it_ignores_hidden_subtotals(self):
         """A subtotal with `"hide": True` does not appear.
@@ -357,7 +389,7 @@ class Describe_Slice(object):
                 ]
             },
         }
-        slice_ = _Slice(Cube(CR.CAT_X_CAT_4X4), 0, transforms, None, 0)
+        slice_ = _Slice(Cube(CR.CAT_4_X_CAT_4), 0, transforms, None, 0)
 
         assert slice_.row_labels == ("Apple", "Banana", "Cherry", "Date")
         assert slice_.column_labels == (
@@ -426,7 +458,7 @@ class Describe_Slice(object):
                 "order": {"element_ids": [2, 4, 3, 1], "type": "explicit"},
             },
         }
-        slice_ = Cube(CR.CAT_X_CAT_4X4, transforms=transforms).partitions[0]
+        slice_ = Cube(CR.CAT_4_X_CAT_4, transforms=transforms).partitions[0]
 
         assert slice_.row_labels == (
             "Apple+Banana",

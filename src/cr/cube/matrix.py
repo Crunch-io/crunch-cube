@@ -2288,7 +2288,8 @@ class _OrderedVector(_BaseTransformationVector):
 
     @lazyproperty
     def column_index(self):
-        return self._base_vector.column_index
+        """1D np.float64 ndarray of col-index values in opposing-dimension order."""
+        return self._base_vector.column_index[self._opposing_order]
 
     @lazyproperty
     def counts(self):
@@ -2346,7 +2347,7 @@ class _OrderedVector(_BaseTransformationVector):
         Values are rearranged (from base-vector position) to appear in the order of the
         opposing dimension. A zscore can be `np.nan` in certain situations.
         """
-        return self._base_vector.zscores
+        return self._base_vector.zscores[self._opposing_order]
 
 
 # ===OPERAND VECTORS===
