@@ -437,10 +437,10 @@ class _BaseBaseMatrix(object):
             )  # pragma: no cover
 
         MatrixCls = (
-            _CatXMrMeansMatrix
+            _MrXCatMeansMatrix
+            if dimension_types[0] == DT.MR
+            else _CatXMrMeansMatrix
             if dimension_types[1] == DT.MR
-            else _MrXCatMeansMatrix
-            if dimensions[0].dimension_type == DT.MR
             else _CatXCatMeansMatrix
         )
         counts, unweighted_counts = (
