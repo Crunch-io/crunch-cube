@@ -2271,7 +2271,7 @@ class _OrderedVector(_BaseTransformationVector):
 
     def __init__(self, base_vector, opposing_order, index):
         super(_OrderedVector, self).__init__(base_vector)
-        self._opposing_order_arg = opposing_order
+        self._opposing_order = opposing_order
         self._index = index
 
     @lazyproperty
@@ -2347,14 +2347,6 @@ class _OrderedVector(_BaseTransformationVector):
         opposing dimension. A zscore can be `np.nan` in certain situations.
         """
         return self._base_vector.zscores
-
-    @lazyproperty
-    def _opposing_order(self):
-        return (
-            slice(None)
-            if self._opposing_order_arg is None
-            else self._opposing_order_arg
-        )
 
 
 # ===OPERAND VECTORS===
