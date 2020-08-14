@@ -211,6 +211,21 @@ class Describe_Slice(object):
             slice_.pvals, load_python_expression("cat-hs-x-mr-pvals")
         )
 
+    def it_provides_values_for_mean_cat_x_cat_hs(self):
+        slice_ = Cube(CR.MEANS_CAT_X_CAT_HS).partitions[0]
+
+        np.testing.assert_array_almost_equal(
+            slice_.counts, np.array([[np.nan, np.nan, np.nan, np.nan, np.nan]])
+        )
+        np.testing.assert_array_almost_equal(
+            slice_.means,
+            np.array([[24.43935757, 37.32122746, np.nan, 55.48571956, 73.02427659]]),
+        )
+        np.testing.assert_array_almost_equal(slice_.rows_margin, np.array([np.nan]))
+        np.testing.assert_array_almost_equal(
+            slice_.columns_margin, np.array([np.nan] * len(slice_.counts[0, :]))
+        )
+
     def it_provides_values_for_mr_x_cat_hs(self):
         slice_ = Cube(CR.MR_X_CAT_HS).partitions[0]
 
@@ -488,24 +503,6 @@ class Describe_Slice(object):
 
     def it_knows_when_it_is_empty(self):
         assert Cube(CR.OM_SGP8334215_VN_2019_SEP_19).partitions[0].is_empty is True
-
-    def it_provides_nan_margin_when_has_weighted_mean_without_weighted_counts(self):
-        slice_ = Cube(CR.AGE_AGE_GENDER).partitions[0]
-
-        np.testing.assert_array_almost_equal(
-            slice_.counts,
-            np.array(
-                [[24.43935757, 37.32122746, 61.76058503, 55.48571956, 73.02427659]]
-            ),
-        )
-        np.testing.assert_array_almost_equal(
-            slice_.means,
-            np.array([[24.43935757, 37.32122746, np.nan, 55.48571956, 73.02427659]]),
-        )
-        np.testing.assert_array_almost_equal(slice_.rows_margin, np.array([np.nan]))
-        np.testing.assert_array_almost_equal(
-            slice_.columns_margin, np.array([np.nan] * len(slice_.counts[0, :]))
-        )
 
     def it_provides_unpruned_table_margin(self):
         slice_ = _Slice(Cube(CR.MR_X_CAT_HS), 0, None, None, 0)

@@ -1560,7 +1560,17 @@ class _BaseMatrixInsertedVector(object):
 
         Computing the column-index of an inserted vector is hard. Punt for now.
         """
-        return np.array([np.nan] * len(self.values))
+        return np.array([np.nan] * len(self.counts))
+
+    @lazyproperty
+    def counts(self):
+        """1D np.float/int64 ndarray of count subtotal for each vector cell.
+
+        Note that all counts are zero (0.0) for a MEANS matrix.
+        """
+        # --- addend_vectors are _OrderedVector objects because ordering happens before
+        # --- insertion of subtotals.
+        return np.sum(np.array([v.counts for v in self._addend_vectors]), axis=0)
 
     @lazyproperty
     def fill(self):
@@ -1616,7 +1626,7 @@ class _BaseMatrixInsertedVector(object):
         Means is currently undefined for inserted vectors. np.nan is some sort of
         reasonable value to indicate this.
         """
-        return np.full(self.values.shape, np.nan)
+        return np.full(self.counts.shape, np.nan)
 
     @lazyproperty
     def numeric_value(self):
@@ -1671,17 +1681,13 @@ class _BaseMatrixInsertedVector(object):
         )
 
     @lazyproperty
-    def values(self):
-        return np.sum(np.array([row.values for row in self._addend_vectors]), axis=0)
-
-    @lazyproperty
     def zscore(self):
         """1D np.float64 (or np.nan) ndarray of standard-score for each matrix cell."""
         opposing_margin = self.opposing_margin
 
         # TODO: remove this if statement - temporary hack until MR zscore implementation
         if opposing_margin is None:
-            return tuple([np.nan] * len(self.values))
+            return tuple([np.nan] * len(self.counts))
 
         margin = self.margin
         table_margin = self.table_margin
@@ -1774,7 +1780,7 @@ class _InsertedColumn(_BaseMatrixInsertedVector):
 
     @lazyproperty
     def _residuals(self):
-        return self.values - self._expected_counts
+        return self.counts - self._expected_counts
 
 
 class _InsertedRow(_BaseMatrixInsertedVector):
@@ -1806,7 +1812,7 @@ class _InsertedRow(_BaseMatrixInsertedVector):
 
     @lazyproperty
     def _residuals(self):
-        return self.values - self._expected_counts
+        return self.counts - self._expected_counts
 
 
 # ===TRANSFORMATION VECTORS===
@@ -1955,6 +1961,21 @@ class _AssembledVector(_BaseTransformationVector):
         return self._apply_interleaved(self._base_vector.column_index, fsubtot)
 
     @lazyproperty
+    def counts(self):
+        """1D np.float/int64 ndarray of weighted count for each vector cell."""
+        base_vector_counts = self._base_vector.counts
+
+        def fsubtot(inserted_vector):
+            """ -> np.float/int64 count for `inserted_vector`.
+
+            Passed to and called by ._apply_interleaved() to compute inserted value
+            which it places in the right vector position.
+            """
+            return np.sum(base_vector_counts[inserted_vector.addend_idxs])
+
+        return self._apply_interleaved(base_vector_counts, fsubtot)
+
+    @lazyproperty
     def means(self):
         """1D ndarray of np.float64 or np.nan mean value for each vector cell.
 
@@ -1977,7 +1998,7 @@ class _AssembledVector(_BaseTransformationVector):
 
         A cell value is np.nan if its corresponding margin value is zero.
         """
-        return self.values / self.margin
+        return self.counts / self.margin
 
     @lazyproperty
     def pvals(self):
@@ -2001,7 +2022,7 @@ class _AssembledVector(_BaseTransformationVector):
         Also known as "cell-proportion", the proportion of overall weighted N for the
         table that appears in that particular cell.
         """
-        return self.values / self._base_vector.table_margin
+        return self.counts / self._base_vector.table_margin
 
     @lazyproperty
     def unweighted_counts(self):
@@ -2020,15 +2041,6 @@ class _AssembledVector(_BaseTransformationVector):
             return np.sum(unweighted_counts[inserted_vector.addend_idxs])
 
         return self._apply_interleaved(unweighted_counts, fsubtot)
-
-    @lazyproperty
-    def values(self):
-        values = self._base_vector.values
-
-        def fsubtot(inserted_vector):
-            return np.sum(values[inserted_vector.addend_idxs])
-
-        return self._apply_interleaved(values, fsubtot)
 
     @lazyproperty
     def zscore(self):
@@ -2059,7 +2071,7 @@ class _AssembledVector(_BaseTransformationVector):
                 / table_margin ** 3
             )
             expected_count = opposite_margin * margin / table_margin
-            cell_value = np.sum(self._base_vector.values[inserted_vector.addend_idxs])
+            cell_value = np.sum(self._base_vector.counts[inserted_vector.addend_idxs])
             residuals = cell_value - expected_count
             return residuals / np.sqrt(variance)
 
@@ -2117,7 +2129,7 @@ class _AssembledVector(_BaseTransformationVector):
 
             The position of a base value is simply it's index in the vector.
             """
-            for idx in range(len(self._base_vector.values)):
+            for idx in range(len(self._base_vector.counts)):
                 yield idx, idx
 
         return tuple(
@@ -2156,6 +2168,11 @@ class _VectorAfterHiding(_BaseTransformationVector):
     def column_index(self):
         """1D np.float64/np.nan ndarray of column-index for each visible vector cell."""
         return self._base_vector.column_index[self._visible_element_idxs]
+
+    @lazyproperty
+    def counts(self):
+        """1D np.float/int64 ndarray of weighted-count for each visible vector cell."""
+        return self._base_vector.counts[self._visible_element_idxs]
 
     @lazyproperty
     def margin(self):
@@ -2223,10 +2240,6 @@ class _VectorAfterHiding(_BaseTransformationVector):
         return self._base_vector.unweighted_counts[self._visible_element_idxs]
 
     @lazyproperty
-    def values(self):
-        return self._base_vector.values[self._visible_element_idxs]
-
-    @lazyproperty
     def zscore(self):
         """1D np.float64/np.nan ndarray of z-score for each visible vector cell.
 
@@ -2284,6 +2297,14 @@ class _OrderedVector(_BaseTransformationVector):
         return self._base_vector.column_index
 
     @lazyproperty
+    def counts(self):
+        """1D np.float/int64 ndarray of weighted-counts in opposing-dimension order.
+
+        Values are np.int64 when the cube-result is unweighted.
+        """
+        return self._base_vector.counts[self._opposing_order]
+
+    @lazyproperty
     def label(self):
         """str display-name for this vector, for use as its row or column heading."""
         return self._base_vector.label
@@ -2323,10 +2344,6 @@ class _OrderedVector(_BaseTransformationVector):
         opposing dimension.
         """
         return self._base_vector.unweighted_counts[self._opposing_order]
-
-    @lazyproperty
-    def values(self):
-        return self._base_vector.values[self._opposing_order]
 
     @lazyproperty
     def zscore(self):
@@ -2460,7 +2477,7 @@ class _BaseVector(object):
 
     @lazyproperty
     def _residuals(self):
-        return self.values - self._expected_counts
+        return self.counts - self._expected_counts
 
 
 class _CategoricalVector(_BaseVector):
@@ -2501,6 +2518,11 @@ class _CategoricalVector(_BaseVector):
         return self._column_index
 
     @lazyproperty
+    def counts(self):
+        """1D np.float/int64 ndarray of weighted count for each vector cell."""
+        return self._counts
+
+    @lazyproperty
     def margin(self):
         """Scalar np.float/int64 of unweighted-N for this vector.
 
@@ -2518,7 +2540,7 @@ class _CategoricalVector(_BaseVector):
         margin value is zero. Note that when this vector opposes an MR dimension the
         vector margin is distinct for each cell and the proportions may not sum to 1.0.
         """
-        return self.values / self.margin
+        return self.counts / self.margin
 
     @lazyproperty
     def table_margin(self):
@@ -2536,10 +2558,6 @@ class _CategoricalVector(_BaseVector):
         """1D np.int64 ndarray of unweighted count for each vector cell."""
         return self._unweighted_counts
 
-    @lazyproperty
-    def values(self):
-        return self._counts
-
 
 class _MeansVector(_BaseVector):
     """Used on a CAT dimension of a CAT_X_CAT matrix with means cube-result measure."""
@@ -2551,15 +2569,20 @@ class _MeansVector(_BaseVector):
         self._opposing_margin = None
 
     @lazyproperty
+    def counts(self):
+        """1D ndarray of np.nan for each vector cell.
+
+        A cube-result with means measure has no weighted counts (or they are ignored if
+        they happen to be present, which is very unusual).
+        """
+        return np.full(self._means.shape, np.nan)
+
+    @lazyproperty
     def means(self):
         """1D np.float64/np.nan ndarray of mean for each vector cell.
 
         Mean is np.nan for a cell with an unweighted-count of zero.
         """
-        return self._means
-
-    @lazyproperty
-    def values(self):
         return self._means
 
     @lazyproperty
@@ -2678,6 +2701,11 @@ class _OpposingMrVector(_CategoricalVector):
         )
 
     @lazyproperty
+    def counts(self):
+        """1D np.float/int64 ndarray of weighted count for each vector cell."""
+        return self._counts[0, :]
+
+    @lazyproperty
     def margin(self):
         """1D np.float/int64 ndarray of weighted-N for each vector cell.
 
@@ -2698,10 +2726,6 @@ class _OpposingMrVector(_CategoricalVector):
     def unweighted_counts(self):
         """1D ndarray of unweighted-count of selected responses in MR dimension."""
         return self._unweighted_counts[0, :]
-
-    @lazyproperty
-    def values(self):
-        return self._selected
 
     @lazyproperty
     def zscore(self):

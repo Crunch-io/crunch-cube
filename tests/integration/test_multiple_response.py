@@ -896,7 +896,7 @@ def test_mr_x_num_with_means_pruned():
             np.nan,
         ],
     ]
-    np.testing.assert_almost_equal(slice_.counts, expected)
+    np.testing.assert_almost_equal(slice_.means, expected)
 
 
 def test_mr_x_mr_augmented_zscore():
@@ -1042,7 +1042,7 @@ def test_mr_x_num_with_means_not_pruned():
             np.nan,
         ],
     ]
-    np.testing.assert_almost_equal(slice_.counts, expected)
+    np.testing.assert_almost_equal(slice_.means, expected)
 
 
 def test_mr_x_num_rows_margin():

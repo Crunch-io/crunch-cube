@@ -288,7 +288,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def counts(self):
-        return np.array([row.values for row in self._matrix.rows])
+        return np.array([row.counts for row in self._matrix.rows])
 
     @lazyproperty
     def cube_is_mr_aug(self):
