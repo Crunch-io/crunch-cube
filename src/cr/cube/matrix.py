@@ -2378,7 +2378,7 @@ class _BaseVector(object):
         a 1D np.int64 ndarray. A vector opposing a CAT dimension has a single base and
         produces a scalar np.int64 value.
         """
-        return np.sum(self._unweighted_counts)
+        return np.sum(self._unweighted_counts, axis=0)
 
     @lazyproperty
     def element_id(self):
@@ -2662,13 +2662,6 @@ class _OpposingMrVector(_CategoricalVector):
     """
 
     @lazyproperty
-    def base(self):
-        counts = zip(self._selected_unweighted, self._not_selected_unweighted)
-        return np.array(
-            [selected + not_selected for (selected, not_selected) in counts]
-        )
-
-    @lazyproperty
     def counts(self):
         """1D np.float/int64 ndarray of weighted count for each vector cell."""
         return self._counts[0, :]
@@ -2679,10 +2672,7 @@ class _OpposingMrVector(_CategoricalVector):
 
         Because the opposing dimension is MR, each vector cell has a distinct margin.
         """
-        counts = zip(self._selected, self._not_selected)
-        return np.array(
-            [selected + not_selected for (selected, not_selected) in counts]
-        )
+        return np.sum(self._counts, axis=0)
 
     @lazyproperty
     def pruned(self):
@@ -2692,21 +2682,5 @@ class _OpposingMrVector(_CategoricalVector):
 
     @lazyproperty
     def unweighted_counts(self):
-        """1D ndarray of unweighted-count of selected responses in MR dimension."""
-        return self._unweighted_counts[0, :]
-
-    @lazyproperty
-    def _not_selected(self):
-        return self._counts[1, :]
-
-    @lazyproperty
-    def _not_selected_unweighted(self):
-        return self._unweighted_counts[1, :]
-
-    @lazyproperty
-    def _selected(self):
-        return self._counts[0, :]
-
-    @lazyproperty
-    def _selected_unweighted(self):
+        """1D np.int64 ndarray of unweighted selected-count for each vector cell."""
         return self._unweighted_counts[0, :]

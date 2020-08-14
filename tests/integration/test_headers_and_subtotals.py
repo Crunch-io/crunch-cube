@@ -1128,7 +1128,7 @@ class TestHeadersAndSubtotals(object):
             ],
         )
 
-    def it_calculate_residuals_for_subtotals_1col_2rows(self):
+    def it_computes_residuals_for_subtotals_1col_2rows(self):
         slice_ = Cube(CR.CAT_X_CAT_HS_2ROWS_1COL).partitions[0]
 
         np.testing.assert_almost_equal(
