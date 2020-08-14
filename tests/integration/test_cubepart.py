@@ -177,7 +177,7 @@ class Describe_Slice(object):
             ],
         )
         np.testing.assert_almost_equal(
-            slice_.zscore,
+            slice_.zscores,
             [
                 [2.06930398, 1.68383013, -0.61133797, -1.25160615, np.nan, -1.19268916],
                 [-2.03371753, -1.58087282, 0.66650907, 1.07795469, np.nan, 1.34162721],
@@ -205,7 +205,7 @@ class Describe_Slice(object):
             slice_.columns_std_err, load_python_expression("cat-hs-x-mr-col-stderr")
         )
         np.testing.assert_almost_equal(
-            slice_.zscore, load_python_expression("cat-hs-x-mr-zscores")
+            slice_.zscores, load_python_expression("cat-hs-x-mr-zscores")
         )
         np.testing.assert_almost_equal(
             slice_.pvals, load_python_expression("cat-hs-x-mr-pvals")
@@ -245,7 +245,7 @@ class Describe_Slice(object):
             slice_.pvals, load_python_expression("mr-x-cat-hs-pvals")
         )
         np.testing.assert_almost_equal(
-            slice_.zscore, load_python_expression("mr-x-cat-hs-zscores")
+            slice_.zscores, load_python_expression("mr-x-cat-hs-zscores")
         )
 
     @pytest.mark.parametrize(

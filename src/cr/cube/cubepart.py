@@ -338,7 +338,7 @@ class _Slice(CubePartition):
         masked_pvals = np.ma.masked_array(self.pvals, np.logical_not(mask)).filled(
             np.inf
         )
-        masked_zscores = np.ma.masked_array(self.zscore, np.logical_not(mask)).filled(
+        masked_zscores = np.ma.masked_array(self.zscores, np.logical_not(mask)).filled(
             np.inf
         )
         return np.stack([masked_pvals, masked_zscores])
@@ -426,11 +426,11 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def residual_test_stats(self):
-        """Exposes pvals and zscore (with HS) stacked together
+        """Exposes pvals and zscores (with HS) stacked together
 
         Public method used as cube_method for the SOA API
         """
-        return np.stack([self.pvals, self.zscore])
+        return np.stack([self.pvals, self.zscores])
 
     @lazyproperty
     def row_base(self):
@@ -806,8 +806,8 @@ class _Slice(CubePartition):
         return np.nansum(numerator, axis=0) / denominator
 
     @lazyproperty
-    def zscore(self):
-        return np.array([row.zscore for row in self._matrix.rows])
+    def zscores(self):
+        return np.array([row.zscores for row in self._matrix.rows])
 
     # ---implementation (helpers)-------------------------------------
 

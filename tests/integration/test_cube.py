@@ -872,7 +872,7 @@ class TestCrunchCubeAs_Slice(object):
         np.testing.assert_almost_equal(slice_.table_std_err, expected_table_std_err)
         np.testing.assert_almost_equal(slice_.columns_std_dev, expected_col_std_dev)
         np.testing.assert_almost_equal(slice_.columns_std_err, expected_col_std_err)
-        np.testing.assert_almost_equal(slice_.zscore, expected_zscore)
+        np.testing.assert_almost_equal(slice_.zscores, expected_zscore)
 
     def test_pvals(self):
         expected = np.array(
@@ -971,7 +971,7 @@ class TestCrunchCubeAs_Slice(object):
         zvalues-spec.js#L42
         """
         slice_ = Cube(CR.ADMIT_X_DEPT_UNWEIGHTED).partitions[0]
-        expected_zscore = np.array(
+        expected_zscores = np.array(
             [
                 [
                     18.04029230689576,
@@ -1008,7 +1008,7 @@ class TestCrunchCubeAs_Slice(object):
             [0.01567414, 0.01993363, 0.01575024, 0.01682826, 0.01795892, 0.00918798],
         ]
 
-        np.testing.assert_almost_equal(slice_.zscore, expected_zscore)
+        np.testing.assert_almost_equal(slice_.zscores, expected_zscores)
         np.testing.assert_almost_equal(slice_.table_std_dev, expected_table_std_dev)
         np.testing.assert_almost_equal(slice_.table_std_err, expected_table_std_err)
         np.testing.assert_almost_equal(slice_.columns_std_dev, expected_col_std_dev)
@@ -1020,7 +1020,7 @@ class TestCrunchCubeAs_Slice(object):
         zvalues-spec.js#L67
         """
         slice_ = Cube(CR.ADMIT_X_GENDER_WEIGHTED).partitions[0]
-        expected_zscore = np.array(
+        expected_zscores = np.array(
             [
                 [9.42561984520692, -9.425619845206922],
                 [-9.425619845206922, 9.42561984520692],
@@ -1031,7 +1031,7 @@ class TestCrunchCubeAs_Slice(object):
         expected_col_std_dev = [[0.49668253, 0.45933735], [0.49668253, 0.45933735]]
         expected_col_std_err = [[0.00966009, 0.01080163], [0.00966009, 0.01080163]]
 
-        np.testing.assert_almost_equal(slice_.zscore, expected_zscore)
+        np.testing.assert_almost_equal(slice_.zscores, expected_zscores)
         np.testing.assert_almost_equal(slice_.table_std_dev, expected_table_std_dev)
         np.testing.assert_almost_equal(slice_.table_std_err, expected_table_std_err)
         np.testing.assert_almost_equal(slice_.columns_std_dev, expected_col_std_dev)

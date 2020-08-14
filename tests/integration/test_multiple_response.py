@@ -263,7 +263,7 @@ def test_table_base_unpruned_cat_x_mr():
 
 def test_various_measures_from_r_rows_margin():
     slice_ = Cube(CR.MR_X_CAT_PROFILES_STATS_WEIGHTED).partitions[0]
-    expected_zscore = [
+    expected_zscores = [
         [
             -1.465585354569577,
             3.704125875262655,
@@ -375,7 +375,7 @@ def test_various_measures_from_r_rows_margin():
         ],
     ]
 
-    np.testing.assert_almost_equal(slice_.zscore, expected_zscore)
+    np.testing.assert_almost_equal(slice_.zscores, expected_zscores)
     np.testing.assert_almost_equal(slice_.table_std_err, expected_table_std_err)
     np.testing.assert_almost_equal(slice_.table_std_dev, expected_table_std_dev)
     np.testing.assert_almost_equal(slice_.columns_std_dev, expected_col_std_dev)
@@ -467,7 +467,7 @@ def test_cat_x_mr_aug_zscores():
 
     assert slice_.cube_is_mr_aug is True
     np.testing.assert_array_almost_equal(
-        slice_.zscore,
+        slice_.zscores,
         [
             [-2.965933, -6.078075, -8.307031, -6.154084, -5.897443],
             [-0.739747, -2.274391, -0.147797, -2.444906, -1.607212],
@@ -520,7 +520,7 @@ def test_cat_x_mr_and_cat_x_mr_augmented_various_measures():
     np.testing.assert_array_almost_equal(
         slice_.column_proportions, slice2_.column_proportions
     )
-    np.testing.assert_array_almost_equal(slice_.zscore, slice2_.zscore)
+    np.testing.assert_array_almost_equal(slice_.zscores, slice2_.zscores)
     np.testing.assert_array_almost_equal(slice_.table_std_dev, slice2_.table_std_dev)
     np.testing.assert_array_almost_equal(slice_.table_std_err, slice2_.table_std_err)
     np.testing.assert_array_almost_equal(
@@ -899,7 +899,7 @@ def test_mr_x_num_with_means_pruned():
     np.testing.assert_almost_equal(slice_.means, expected)
 
 
-def test_mr_x_mr_augmented_zscore():
+def test_mr_x_mr_augmented_zscores():
     slice_ = Cube(CR.MR_X_MR_AUGMENTED).partitions[0]
     expected = [
         [2.02358771, 4.40571894, -4.73781476],
@@ -909,7 +909,7 @@ def test_mr_x_mr_augmented_zscore():
         [-3.37595335, -1.34855138, 3.10157807],
     ]
 
-    np.testing.assert_almost_equal(slice_.zscore, expected)
+    np.testing.assert_almost_equal(slice_.zscores, expected)
 
 
 def test_mr_x_num_with_means_not_pruned():

@@ -561,7 +561,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
                 unweighted_counts,
                 element,
                 self.table_margin,
-                zscore,
+                zscores,
                 table_std_dev,
                 table_std_err,
                 opposing_margin=self._rows_margin,
@@ -570,7 +570,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
                 counts,
                 unweighted_counts,
                 element,
-                zscore,
+                zscores,
                 table_std_dev,
                 table_std_err,
             ) in self._column_generator
@@ -585,7 +585,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
                 unweighted_counts,
                 element,
                 self.table_margin,
-                zscore,
+                zscores,
                 table_std_dev,
                 table_std_err,
                 column_index,
@@ -595,7 +595,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
                 counts,
                 unweighted_counts,
                 element,
-                zscore,
+                zscores,
                 table_std_dev,
                 table_std_err,
                 column_index,
@@ -745,7 +745,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
         # --- If the matrix is "defective", in the sense that it doesn't have at least
         # --- two rows and two columns that are "full" of data, don't calculate zscores.
         if not np.all(counts.shape) or np.linalg.matrix_rank(counts) < 2:
-            return np.zeros(counts.shape)
+            return np.full(counts.shape, np.nan)
 
         residuals = counts - expected_freq(counts)
 
@@ -832,7 +832,7 @@ class _MrXCatMatrix(_CatXCatMatrix):
                 unweighted_counts,
                 element,
                 self.table_margin,
-                zscore,
+                zscores,
                 table_std_dev,
                 table_std_err,
             )
@@ -840,7 +840,7 @@ class _MrXCatMatrix(_CatXCatMatrix):
                 counts,
                 unweighted_counts,
                 element,
-                zscore,
+                zscores,
                 table_std_dev,
                 table_std_err,
             ) in self._column_generator
@@ -857,7 +857,7 @@ class _MrXCatMatrix(_CatXCatMatrix):
                 unweighted_counts,
                 element,
                 table_margin,
-                zscore,
+                zscores,
                 table_std_dev,
                 table_std_err,
                 column_index,
@@ -867,7 +867,7 @@ class _MrXCatMatrix(_CatXCatMatrix):
                 unweighted_counts,
                 element,
                 table_margin,
-                zscore,
+                zscores,
                 table_std_dev,
                 table_std_err,
                 column_index,
@@ -1081,7 +1081,7 @@ class _CatXMrMatrix(_CatXCatMatrix):
                 unweighted_counts.T,
                 element,
                 self.table_margin,
-                zscore,
+                zscores,
                 table_std_dev,
                 table_std_err,
                 column_index,
@@ -1090,7 +1090,7 @@ class _CatXMrMatrix(_CatXCatMatrix):
                 counts,
                 unweighted_counts,
                 element,
-                zscore,
+                zscores,
                 table_std_dev,
                 table_std_err,
                 column_index,
@@ -1309,7 +1309,7 @@ class _MrXMrMatrix(_CatXCatMatrix):
                 unweighted_counts[0].T,
                 element,
                 table_margin,
-                zscore,
+                zscores,
                 table_std_dev,
                 table_std_err,
                 column_index,
@@ -1319,7 +1319,7 @@ class _MrXMrMatrix(_CatXCatMatrix):
                 unweighted_counts,
                 element,
                 table_margin,
-                zscore,
+                zscores,
                 table_std_dev,
                 table_std_err,
                 column_index,
@@ -1681,7 +1681,7 @@ class _BaseMatrixInsertedVector(object):
         )
 
     @lazyproperty
-    def zscore(self):
+    def zscores(self):
         """1D np.float64 (or np.nan) ndarray of standard-score for each matrix cell."""
         opposing_margin = self.opposing_margin
 
@@ -2003,7 +2003,7 @@ class _AssembledVector(_BaseTransformationVector):
     @lazyproperty
     def pvals(self):
         """1D np.float64/np.nan ndarray of p-value for each vector cell."""
-        return 2 * (1 - norm.cdf(np.abs(self.zscore)))
+        return 2 * (1 - norm.cdf(np.abs(self.zscores)))
 
     @lazyproperty
     def table_std_dev(self):
@@ -2043,7 +2043,7 @@ class _AssembledVector(_BaseTransformationVector):
         return self._apply_interleaved(unweighted_counts, fsubtot)
 
     @lazyproperty
-    def zscore(self):
+    def zscores(self):
         """1D np.float64/np.nan ndarray of z-score for each base element and insertion.
 
         Subtotal values are interleaved with base values in their specified location.
@@ -2058,7 +2058,7 @@ class _AssembledVector(_BaseTransformationVector):
             # --- when this vector is not itself a subtotal, `inserted_vector` can
             # --- provide the value directly
             if not self.is_inserted:
-                return inserted_vector.zscore[self._vector_idx]
+                return inserted_vector.zscores[self._vector_idx]
 
             # --- but when this vector IS itself a subtotal, this cell is an
             # --- *intersection* cell and is requires a more sophisticated computation
@@ -2075,7 +2075,7 @@ class _AssembledVector(_BaseTransformationVector):
             residuals = cell_value - expected_count
             return residuals / np.sqrt(variance)
 
-        return self._apply_interleaved(self._base_vector.zscore, fsubtot)
+        return self._apply_interleaved(self._base_vector.zscores, fsubtot)
 
     def _apply_interleaved(self, base_values, fsubtot):
         """ -> 1D array of result of applying fbase or fsubtot to each interleaved item.
@@ -2240,13 +2240,13 @@ class _VectorAfterHiding(_BaseTransformationVector):
         return self._base_vector.unweighted_counts[self._visible_element_idxs]
 
     @lazyproperty
-    def zscore(self):
+    def zscores(self):
         """1D np.float64/np.nan ndarray of z-score for each visible vector cell.
 
         A cell value representing an inserted subtotal can be `np.nan` in certain
         situations involving MR dimensions.
         """
-        return self._base_vector.zscore[self._visible_element_idxs]
+        return self._base_vector.zscores[self._visible_element_idxs]
 
     @lazyproperty
     def _visible_element_idxs(self):
@@ -2346,13 +2346,13 @@ class _OrderedVector(_BaseTransformationVector):
         return self._base_vector.unweighted_counts[self._opposing_order]
 
     @lazyproperty
-    def zscore(self):
+    def zscores(self):
         """1D np.float64/np.nan ndarray of zscore for each vector cell.
 
         Values are rearranged (from base-vector position) to appear in the order of the
         opposing dimension. A zscore can be `np.nan` in certain situations.
         """
-        return self._base_vector.zscore
+        return self._base_vector.zscores
 
     @lazyproperty
     def _opposing_order(self):
@@ -2457,21 +2457,6 @@ class _BaseVector(object):
         return self.base == 0
 
     @lazyproperty
-    def zscore(self):
-        margin = self.margin
-        table_margin = self._table_margin
-        opposing_margin = self._opposing_margin
-
-        variance = (
-            opposing_margin
-            * margin
-            * ((table_margin - opposing_margin) * (table_margin - margin))
-            / table_margin ** 3
-        )
-
-        return self._residuals / np.sqrt(variance)
-
-    @lazyproperty
     def _expected_counts(self):
         return self._opposing_margin * self.margin / self.table_margin
 
@@ -2493,7 +2478,7 @@ class _CategoricalVector(_BaseVector):
         unweighted_counts,
         element,
         table_margin,
-        zscore=None,
+        zscores=None,
         table_std_dev=None,
         table_std_err=None,
         column_index=None,
@@ -2502,7 +2487,7 @@ class _CategoricalVector(_BaseVector):
         super(_CategoricalVector, self).__init__(element, unweighted_counts)
         self._counts = counts
         self._table_margin = table_margin
-        self._zscore = zscore
+        self._zscores = zscores
         self._table_std_dev = table_std_dev
         self._table_std_err = table_std_err
         self._column_index = column_index
@@ -2557,6 +2542,11 @@ class _CategoricalVector(_BaseVector):
     def unweighted_counts(self):
         """1D np.int64 ndarray of unweighted count for each vector cell."""
         return self._unweighted_counts
+
+    @lazyproperty
+    def zscores(self):
+        """1D np.float64/np.nan ndarray of z-score for each vector cell."""
+        return self._zscores
 
 
 class _MeansVector(_BaseVector):
@@ -2628,7 +2618,7 @@ class _MrOpposingCatVector(_CategoricalVector):
         unweighted_counts,
         label,
         table_margin,
-        zscore=None,
+        zscores=None,
         table_std_dev=None,
         table_std_err=None,
         column_index=None,
@@ -2638,7 +2628,7 @@ class _MrOpposingCatVector(_CategoricalVector):
             unweighted_counts[0],
             label,
             table_margin,
-            zscore,
+            zscores,
             table_std_dev,
             table_std_err,
             column_index,
@@ -2672,11 +2662,6 @@ class _MrOpposingCatVector(_CategoricalVector):
         each have their own distinct table-margin which is often different.
         """
         return np.sum(self._both_counts)
-
-    @lazyproperty
-    def zscore(self):
-        # TODO: Implement the real zscore calc for MR
-        return self._zscore
 
 
 class _OpposingMrVector(_CategoricalVector):
@@ -2726,11 +2711,6 @@ class _OpposingMrVector(_CategoricalVector):
     def unweighted_counts(self):
         """1D ndarray of unweighted-count of selected responses in MR dimension."""
         return self._unweighted_counts[0, :]
-
-    @lazyproperty
-    def zscore(self):
-        # TODO: Implement the real zscore calc for MR
-        return self._zscore
 
     @lazyproperty
     def _not_selected(self):
