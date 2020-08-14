@@ -2435,10 +2435,6 @@ class _BaseVector(object):
         return self._element.numeric_value
 
     @lazyproperty
-    def opposing_margin(self):
-        return self._opposing_margin
-
-    @lazyproperty
     def pruned(self):
         """True if this vector contains no samples."""
         return self.base == 0
@@ -2504,6 +2500,15 @@ class _CategoricalVector(_BaseVector):
         return np.sum(self._counts)
 
     @lazyproperty
+    def opposing_margin(self):
+        """1D np.float/int64 ndarray of weighted-N for each opposing dimension vector.
+
+        This value is computed at the matrix level and passed in on construction. It can
+        be `None` in certain circumstances.
+        """
+        return self._opposing_margin
+
+    @lazyproperty
     def proportions(self):
         """1D np.float64/np.nan ndarray of (weighted) count proportions for vector.
 
@@ -2543,7 +2548,6 @@ class _MeansVector(_BaseVector):
         super(_MeansVector, self).__init__(element, unweighted_counts)
         self._unweighted_counts = unweighted_counts
         self._means = means
-        self._opposing_margin = None
 
     @lazyproperty
     def counts(self):
