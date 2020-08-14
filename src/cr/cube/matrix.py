@@ -2439,14 +2439,6 @@ class _BaseVector(object):
         """True if this vector contains no samples."""
         return self.base == 0
 
-    @lazyproperty
-    def _expected_counts(self):
-        return self._opposing_margin * self.margin / self.table_margin
-
-    @lazyproperty
-    def _residuals(self):
-        return self.counts - self._expected_counts
-
 
 class _CategoricalVector(_BaseVector):
     """Vector for CAT vector that does not oppose an MR dimension.
