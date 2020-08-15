@@ -827,7 +827,7 @@ class _MrXCatMatrix(_CatXCatMatrix):
         # --- each `counts` is a 2D ndarray with shape (2, nrows), a selected and
         # --- not-selected array, each of size nrows.
         return tuple(
-            _MultipleResponseVector(
+            _OpposingMrVector(
                 counts,
                 unweighted_counts,
                 element,
@@ -1076,7 +1076,7 @@ class _CatXMrMatrix(_CatXCatMatrix):
     def rows(self):
         """Sequence of _OpposingMrVector object for each row of matrix."""
         return tuple(
-            _MultipleResponseVector(
+            _OpposingMrVector(
                 counts.T,
                 unweighted_counts.T,
                 element,
@@ -1276,8 +1276,13 @@ class _MrXMrMatrix(_CatXCatMatrix):
         Each column corresponds to a subvar of the second MR dimension.
         """
         return tuple(
-            _MultipleResponseVector(counts, unweighted_counts, element, table_margin)
-            for counts, unweighted_counts, element, table_margin in self._column_generator
+            _OpposingMrVector(counts, unweighted_counts, element, table_margin)
+            for (
+                counts,
+                unweighted_counts,
+                element,
+                table_margin,
+            ) in self._column_generator
         )
 
     @lazyproperty
@@ -1295,7 +1300,7 @@ class _MrXMrMatrix(_CatXCatMatrix):
         Each row corresponds to a subvar of the first MR dimension.
         """
         return tuple(
-            _MultipleResponseVector(
+            _OpposingMrVector(
                 counts[0].T,
                 unweighted_counts[0].T,
                 element,
@@ -2646,7 +2651,7 @@ class _MrOpposingCatVector(_CategoricalVector):
         return self._zscore
 
 
-class _MultipleResponseVector(_CategoricalVector):
+class _OpposingMrVector(_CategoricalVector):
     """CAT or MR vector that opposes an MR dimension.
 
     It is constructed from `counts` that are a 2D np.float/int64 vector with axes
