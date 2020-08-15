@@ -745,6 +745,7 @@ class Describe_Strand(object):
             strand.means, [19.85555556, 13.85416667, 52.78947368, np.nan, np.nan]
         )
         assert strand.title == "Untitled"
+        assert strand.unweighted_counts == (409, 113, 139, 409, 252)
 
     def it_provides_std_dev_err_univ_mr_with_hs(self):
         strand = Cube(CR.UNIV_MR_WITH_HS["slides"][0]["cube"]).partitions[0]

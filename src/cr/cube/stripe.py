@@ -490,6 +490,13 @@ class _BaseStripeRow(object):
         """
         return self._element.numeric_value
 
+    @lazyproperty
+    def unweighted_count(self):
+        """np.int64 unweighted-count for this row."""
+        raise NotImplementedError(
+            "`.unweighted_count` must be implemented by each subclass"
+        )  # pragma: no cover
+
 
 class _CatStripeRow(_BaseStripeRow):
     """Stripe-row for a categorical rows-dimension."""
@@ -568,6 +575,7 @@ class _MeansStripeRow(_BaseStripeRow):
 
     @lazyproperty
     def unweighted_count(self):
+        """np.int64 unweighted-count for this row."""
         return self._unweighted_count
 
 
