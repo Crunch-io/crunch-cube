@@ -711,12 +711,18 @@ class _CatXCatMatrix(_BaseBaseMatrix):
         return residuals / np.sqrt(variance)
 
     @lazyproperty
+    def _table_proportion_variance(self):
+        """2D ndarray of np.float64 cell proportion variance for each cell of matrix."""
+        p = self._counts / self.table_margin
+        return p * (1 - p)
+
+    @lazyproperty
     def _table_std_dev(self):
         """2D np.float64 ndarray of table-percent std-deviation for each matrix cell.
 
         Standard deviation is the square-root of the variance.
         """
-        return np.sqrt(self._variance)
+        return np.sqrt(self._table_proportion_variance)
 
     @lazyproperty
     def _table_std_err(self):
@@ -724,14 +730,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
 
         Standard error is sqrt(variance/N).
         """
-        return np.sqrt(self._variance / self.table_margin)
-
-    @lazyproperty
-    def _variance(self):
-        """Returns the variance for cell percentages
-        `variance = p * (1-p)`
-        """
-        return self._counts / self.table_margin * (1 - self._counts / self.table_margin)
+        return np.sqrt(self._table_proportion_variance / self.table_margin)
 
     @lazyproperty
     def _zscores(self):
@@ -947,11 +946,10 @@ class _MrXCatMatrix(_MatrixWithMR):
         )
 
     @lazyproperty
-    def _table_std_dev(self):
-        """Returns the standard deviation for cell percentages
-        `std_deviation = sqrt(variance)`
-        """
-        return np.sqrt(self._variance)
+    def _table_proportion_variance(self):
+        """2D ndarray of np.float64 table proportion variance for each matrix cell."""
+        p = self._counts[:, 0, :] / self.table_margin[:, None]
+        return p * (1 - p)
 
     @lazyproperty
     def _table_std_err(self):
@@ -959,18 +957,7 @@ class _MrXCatMatrix(_MatrixWithMR):
 
         Standard error is sqrt(variance/N).
         """
-        return np.sqrt(self._variance / self.table_margin[:, None])
-
-    @lazyproperty
-    def _variance(self):
-        """Returns the variance for cell percentages
-        `variance = p * (1-p)`
-        """
-        return (
-            self._counts[:, 0, :]
-            / self.table_margin[:, None]
-            * (1 - self._counts[:, 0, :] / self.table_margin[:, None])
-        )
+        return np.sqrt(self._table_proportion_variance / self.table_margin[:, None])
 
     @lazyproperty
     def _zscores(self):
@@ -1148,29 +1135,10 @@ class _CatXMrMatrix(_MatrixWithMR):
         )
 
     @lazyproperty
-    def _table_std_dev(self):
-        """Returns the standard deviation for cell percentages
-        `std_deviation = sqrt(variance)`
-        """
-        return np.sqrt(self._variance)
-
-    @lazyproperty
-    def _table_std_err(self):
-        """Returns the standard error for cell percentages
-        `std_error = sqrt(variance/N)`
-        """
-        return np.sqrt(self._variance / self.table_margin)
-
-    @lazyproperty
-    def _variance(self):
-        """Returns the variance for cell percentages
-        `variance = p * (1-p)`
-        """
-        return (
-            self._counts[:, :, 0]
-            / self.table_margin
-            * (1 - self._counts[:, :, 0] / self.table_margin)
-        )
+    def _table_proportion_variance(self):
+        """2D ndarray of np.float64 table proportion variance for each matrix cell."""
+        p = self._counts[:, :, 0] / self.table_margin
+        return p * (1 - p)
 
     @lazyproperty
     def _zscores(self):
@@ -1456,29 +1424,10 @@ class _MrXMrMatrix(_MatrixWithMR):
         )
 
     @lazyproperty
-    def _table_std_dev(self):
-        """Returns the standard deviation for cell percentages
-        `std_deviation = sqrt(variance)`
-        """
-        return np.sqrt(self._variance)
-
-    @lazyproperty
-    def _table_std_err(self):
-        """Returns the standard error for cell percentages
-        `std_error = sqrt(variance/N)`
-        """
-        return np.sqrt(self._variance / self.table_margin)
-
-    @lazyproperty
-    def _variance(self):
-        """Returns the variance for cell percentages
-        `variance = p * (1-p)`
-        """
-        return (
-            self._counts[:, 0, :, 0]
-            / self.table_margin
-            * (1 - self._counts[:, 0, :, 0] / self.table_margin)
-        )
+    def _table_proportion_variance(self):
+        """2D ndarray of np.float64 table proportion variance for each matrix cell."""
+        p = self._counts[:, 0, :, 0] / self.table_margin
+        return p * (1 - p)
 
     @lazyproperty
     def _zscores(self):
@@ -1985,12 +1934,12 @@ class _AssembledVector(_BaseTransformationVector):
     @lazyproperty
     def table_std_dev(self):
         """1D np.float64 ndarray of std-dev of table-percent for each vector cell."""
-        return np.sqrt(self._variance)
+        return np.sqrt(self._table_proportion_variance)
 
     @lazyproperty
     def table_std_err(self):
         """1D np.float64 ndarray of std-err of table-percent for each vector cell."""
-        return np.sqrt(self._variance / self.table_margin)
+        return np.sqrt(self._table_proportion_variance / self.table_margin)
 
     @lazyproperty
     def table_proportions(self):
@@ -2126,8 +2075,10 @@ class _AssembledVector(_BaseTransformationVector):
         )
 
     @lazyproperty
-    def _variance(self):
-        return self.table_proportions * (1 - self.table_proportions)
+    def _table_proportion_variance(self):
+        """1D ndarray of np.float64 table proportion variance for each vector cell."""
+        p = self.table_proportions
+        return p * (1 - p)
 
 
 class _VectorAfterHiding(_BaseTransformationVector):
