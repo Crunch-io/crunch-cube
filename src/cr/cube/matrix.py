@@ -690,26 +690,6 @@ class _CatXCatMatrix(_BaseBaseMatrix):
         """
         return np.sum(self._counts, axis=1)
 
-    @staticmethod
-    def _scalar_type_std_res(counts, total, colsum, rowsum):
-        """Return ndarray containing standard residuals for category values.
-
-        The shape of the return value is the same as that of *counts*.
-        """
-        if not np.all(counts.shape) or np.linalg.matrix_rank(counts) < 2:
-            # If the matrix is "defective", in the sense that it doesn't have at least
-            # two rows and two columns that are "full" of data, don't calculate zscores.
-            return np.zeros(counts.shape)
-
-        expected_counts = expected_freq(counts)
-        residuals = counts - expected_counts
-        variance = (
-            np.outer(rowsum, colsum)
-            * np.outer(total - rowsum, total - colsum)
-            / total ** 3
-        )
-        return residuals / np.sqrt(variance)
-
     @lazyproperty
     def _table_proportion_variance(self):
         """2D ndarray of np.float64 cell proportion variance for each cell of matrix."""
@@ -740,12 +720,26 @@ class _CatXCatMatrix(_BaseBaseMatrix):
         deviations above (positive) or below (negative) the population mean a cell's
         value is.
         """
-        return self._scalar_type_std_res(
-            self._counts,
-            self.table_margin,
-            np.sum(self._counts, axis=0),
-            np.sum(self._counts, axis=1),
+        counts = self._counts
+
+        # --- If the matrix is "defective", in the sense that it doesn't have at least
+        # --- two rows and two columns that are "full" of data, don't calculate zscores.
+        if not np.all(counts.shape) or np.linalg.matrix_rank(counts) < 2:
+            return np.zeros(counts.shape)
+
+        residuals = counts - expected_freq(counts)
+
+        # --- variance ---
+        rows_margin = self._rows_margin
+        columns_margin = self._columns_margin
+        table_margin = self.table_margin
+        variance = (
+            np.outer(rows_margin, columns_margin)
+            * np.outer(table_margin - rows_margin, table_margin - columns_margin)
+            / table_margin ** 3
         )
+
+        return residuals / np.sqrt(variance)
 
 
 class _CatXCatMeansMatrix(_CatXCatMatrix):
