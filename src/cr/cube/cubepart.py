@@ -475,8 +475,8 @@ class _Slice(CubePartition):
         return self._rows_dimension.name
 
     @lazyproperty
-    def rows_dimension_numeric(self):
-        return self._rows_dimension_numeric
+    def rows_dimension_numeric_values(self):
+        return self._rows_dimension_numeric_values
 
     @lazyproperty
     def rows_dimension_type(self):
@@ -515,17 +515,17 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def scale_means_column(self):
-        if np.all(np.isnan(self._columns_dimension_numeric)):
+        if np.all(np.isnan(self._columns_dimension_numeric_values)):
             return None
 
-        inner = np.nansum(self._columns_dimension_numeric * self.counts, axis=1)
-        not_a_nan_index = ~np.isnan(self._columns_dimension_numeric)
+        inner = np.nansum(self._columns_dimension_numeric_values * self.counts, axis=1)
+        not_a_nan_index = ~np.isnan(self._columns_dimension_numeric_values)
         denominator = np.sum(self.counts[:, not_a_nan_index], axis=1)
         return inner / denominator
 
     @lazyproperty
     def scale_means_columns_margin(self):
-        if np.all(np.isnan(self._columns_dimension_numeric)):
+        if np.all(np.isnan(self._columns_dimension_numeric_values)):
             return None
 
         columns_margin = self.columns_margin
@@ -534,23 +534,25 @@ class _Slice(CubePartition):
             # fix with subclassing
             columns_margin = columns_margin[0]
 
-        not_a_nan_index = ~np.isnan(self._columns_dimension_numeric)
-        return np.nansum(self._columns_dimension_numeric * columns_margin) / np.sum(
-            columns_margin[not_a_nan_index]
-        )
+        not_a_nan_index = ~np.isnan(self._columns_dimension_numeric_values)
+        return np.nansum(
+            self._columns_dimension_numeric_values * columns_margin
+        ) / np.sum(columns_margin[not_a_nan_index])
 
     @lazyproperty
     def scale_means_row(self):
-        if np.all(np.isnan(self._rows_dimension_numeric)):
+        if np.all(np.isnan(self._rows_dimension_numeric_values)):
             return None
-        inner = np.nansum(self._rows_dimension_numeric[:, None] * self.counts, axis=0)
-        not_a_nan_index = ~np.isnan(self._rows_dimension_numeric)
+        inner = np.nansum(
+            self._rows_dimension_numeric_values[:, None] * self.counts, axis=0
+        )
+        not_a_nan_index = ~np.isnan(self._rows_dimension_numeric_values)
         denominator = np.sum(self.counts[not_a_nan_index, :], axis=0)
         return inner / denominator
 
     @lazyproperty
     def scale_means_rows_margin(self):
-        if np.all(np.isnan(self._rows_dimension_numeric)):
+        if np.all(np.isnan(self._rows_dimension_numeric_values)):
             return None
 
         rows_margin = self.rows_margin
@@ -559,8 +561,8 @@ class _Slice(CubePartition):
             # fix with subclassing
             rows_margin = rows_margin[:, 0]
 
-        not_a_nan_index = ~np.isnan(self._rows_dimension_numeric)
-        return np.nansum(self._rows_dimension_numeric * rows_margin) / np.sum(
+        not_a_nan_index = ~np.isnan(self._rows_dimension_numeric_values)
+        return np.nansum(self._rows_dimension_numeric_values * rows_margin) / np.sum(
             rows_margin[not_a_nan_index]
         )
 
@@ -571,10 +573,10 @@ class _Slice(CubePartition):
         The median is calculated using the standard algebra applied to the numeric
         values repeated for each related counts value
         """
-        if np.all(np.isnan(self._columns_dimension_numeric)):
+        if np.all(np.isnan(self._columns_dimension_numeric_values)):
             return None
-        not_a_nan_index = ~np.isnan(self._columns_dimension_numeric)
-        numeric_values = self._columns_dimension_numeric[not_a_nan_index]
+        not_a_nan_index = ~np.isnan(self._columns_dimension_numeric_values)
+        numeric_values = self._columns_dimension_numeric_values[not_a_nan_index]
         counts = self.counts[:, not_a_nan_index].astype("int64")
         scale_median = np.array(
             [
@@ -591,10 +593,10 @@ class _Slice(CubePartition):
         The median is calculated using the standard algebra applied to the numeric
         values repeated for each related counts value
         """
-        if np.all(np.isnan(self._rows_dimension_numeric)):
+        if np.all(np.isnan(self._rows_dimension_numeric_values)):
             return None
-        not_a_nan_index = ~np.isnan(self._rows_dimension_numeric)
-        numeric_values = self._rows_dimension_numeric[not_a_nan_index]
+        not_a_nan_index = ~np.isnan(self._rows_dimension_numeric_values)
+        numeric_values = self._rows_dimension_numeric_values[not_a_nan_index]
         counts = self.counts[not_a_nan_index, :].astype("int64")
         scale_median = np.array(
             [
@@ -607,13 +609,13 @@ class _Slice(CubePartition):
     @lazyproperty
     def scale_median_column_margin(self):
         """ -> np.int64, represents the column scale median margin"""
-        if np.all(np.isnan(self._columns_dimension_numeric)):
+        if np.all(np.isnan(self._columns_dimension_numeric_values)):
             return None
         columns_margin = self.columns_margin
         if len(columns_margin.shape) > 1:
             columns_margin = columns_margin[0]
-        not_a_nan_index = ~np.isnan(self._columns_dimension_numeric)
-        numeric_values = self._columns_dimension_numeric[not_a_nan_index]
+        not_a_nan_index = ~np.isnan(self._columns_dimension_numeric_values)
+        numeric_values = self._columns_dimension_numeric_values[not_a_nan_index]
         counts = columns_margin[not_a_nan_index].astype("int64")
         unwrapped_num_values = np.repeat(numeric_values, counts)
         return (
@@ -623,13 +625,13 @@ class _Slice(CubePartition):
     @lazyproperty
     def scale_median_row_margin(self):
         """ -> np.int64, represents the rows scale median margin"""
-        if np.all(np.isnan(self._rows_dimension_numeric)):
+        if np.all(np.isnan(self._rows_dimension_numeric_values)):
             return None
         rows_margin = self.rows_margin
         if len(rows_margin.shape) > 1:
             rows_margin = rows_margin[:, 0]
-        not_a_nan_index = ~np.isnan(self._rows_dimension_numeric)
-        numeric_values = self._rows_dimension_numeric[not_a_nan_index]
+        not_a_nan_index = ~np.isnan(self._rows_dimension_numeric_values)
+        numeric_values = self._rows_dimension_numeric_values[not_a_nan_index]
         counts = rows_margin[not_a_nan_index].astype("int64")
         unwrapped_num_values = np.repeat(numeric_values, counts)
         return (
@@ -639,28 +641,28 @@ class _Slice(CubePartition):
     @lazyproperty
     def scale_std_dev_column(self):
         """ -> 1D np.ndarray of the standard deviation column of scales"""
-        if np.all(np.isnan(self._columns_dimension_numeric)):
+        if np.all(np.isnan(self._columns_dimension_numeric_values)):
             return None
         return np.sqrt(self.var_scale_means_column)
 
     @lazyproperty
     def scale_std_dev_row(self):
         """ -> 1D np.ndarray of the standard deviation row of scales"""
-        if np.all(np.isnan(self._rows_dimension_numeric)):
+        if np.all(np.isnan(self._rows_dimension_numeric_values)):
             return None
         return np.sqrt(self.var_scale_means_row)
 
     @lazyproperty
     def scale_std_err_column(self):
         """ -> 1D np.ndarray of the standard error column of scales"""
-        if np.all(np.isnan(self._columns_dimension_numeric)):
+        if np.all(np.isnan(self._columns_dimension_numeric_values)):
             return None
         return self.scale_std_dev_column / np.sqrt(self.rows_margin)
 
     @lazyproperty
     def scale_std_err_row(self):
         """ -> 1D np.ndarray of the standard error row of scales"""
-        if np.all(np.isnan(self._rows_dimension_numeric)):
+        if np.all(np.isnan(self._rows_dimension_numeric_values)):
             return None
         return self.scale_std_dev_row / np.sqrt(self.columns_margin)
 
@@ -764,11 +766,11 @@ class _Slice(CubePartition):
         Note: the variance for scale is defined as sum((Yi−Y~)2/(N)), where Y~ is the
               mean of the data.
         """
-        if np.all(np.isnan(self._columns_dimension_numeric)):
+        if np.all(np.isnan(self._columns_dimension_numeric_values)):
             return None
 
-        not_a_nan_index = ~np.isnan(self._columns_dimension_numeric)
-        col_dim_numeric = self._columns_dimension_numeric[not_a_nan_index]
+        not_a_nan_index = ~np.isnan(self._columns_dimension_numeric_values)
+        col_dim_numeric = self._columns_dimension_numeric_values[not_a_nan_index]
 
         numerator = self.counts[:, not_a_nan_index] * pow(
             np.broadcast_to(col_dim_numeric, self.counts[:, not_a_nan_index].shape)
@@ -785,16 +787,16 @@ class _Slice(CubePartition):
         Note: the variance for scale is defined as sum((Yi−Y~)2/(N)), where Y~ is the
               mean of the data.
         """
-        if np.all(np.isnan(self._rows_dimension_numeric)):
+        if np.all(np.isnan(self._rows_dimension_numeric_values)):
             return None
 
-        not_a_nan_index = ~np.isnan(self._rows_dimension_numeric)
-        row_dim_numeric = self._rows_dimension_numeric[not_a_nan_index]
+        not_a_nan_index = ~np.isnan(self._rows_dimension_numeric_values)
+        row_dim_numeric_values = self._rows_dimension_numeric_values[not_a_nan_index]
         numerator = (
             self.counts[not_a_nan_index, :]
             * pow(
                 np.broadcast_to(
-                    row_dim_numeric, self.counts[not_a_nan_index, :].T.shape
+                    row_dim_numeric_values, self.counts[not_a_nan_index, :].T.shape
                 )
                 - self.scale_means_row.reshape(-1, 1),
                 2,
@@ -814,8 +816,9 @@ class _Slice(CubePartition):
         return self._dimensions[1]
 
     @lazyproperty
-    def _columns_dimension_numeric(self):
-        return np.array([column.numeric for column in self._matrix.columns])
+    def _columns_dimension_numeric_values(self):
+        """1D ndarray of numeric-value for each columns-dimension element."""
+        return np.array([column.numeric_value for column in self._matrix.columns])
 
     @lazyproperty
     def _columns_variance(self):
@@ -849,8 +852,9 @@ class _Slice(CubePartition):
         return self._dimensions[0]
 
     @lazyproperty
-    def _rows_dimension_numeric(self):
-        return np.array([row.numeric for row in self._matrix.rows])
+    def _rows_dimension_numeric_values(self):
+        """1D ndarray of numeric-value for each rows-dimension element."""
+        return np.array([row.numeric_value for row in self._matrix.rows])
 
     @lazyproperty
     def _transform_dicts(self):

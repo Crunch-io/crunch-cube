@@ -172,7 +172,7 @@ class _ColumnPairwiseSignificance(object):
         variance = self._slice.var_scale_means_row
         # Sum for each column of the counts that have not a nan index in the
         # related numeric counts
-        not_a_nan_index = ~np.isnan(self._slice.rows_dimension_numeric)
+        not_a_nan_index = ~np.isnan(self._slice.rows_dimension_numeric_values)
         counts = np.sum(self._slice.counts[not_a_nan_index, :], axis=0)
 
         standard_deviation = np.sqrt(
@@ -204,6 +204,6 @@ class _ColumnPairwiseSignificance(object):
 
     @lazyproperty
     def _two_sample_df(self):
-        not_a_nan_index = ~np.isnan(self._slice.rows_dimension_numeric)
+        not_a_nan_index = ~np.isnan(self._slice.rows_dimension_numeric_values)
         counts = np.sum(self._slice.counts[not_a_nan_index, :], axis=0)
         return counts[self._col_idx] + counts - 2

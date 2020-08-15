@@ -1559,7 +1559,7 @@ class _BaseMatrixInsertedVector(object):
         return np.full(self.values.shape, np.nan)
 
     @lazyproperty
-    def numeric(self):
+    def numeric_value(self):
         """Unconditionally np.nan; an inserted vector can have no numeric-value."""
         return np.nan
 
@@ -1814,7 +1814,7 @@ class _BaseTransformationVector(object):
         return self._base_vector.means
 
     @lazyproperty
-    def numeric(self):
+    def numeric_value(self):
         """int, float, or np.nan representing numeric value for this vector's element.
 
         This mapping of a category to a numeric value is optional, but when present
@@ -1824,7 +1824,7 @@ class _BaseTransformationVector(object):
         Its value may be int or float if present and is np.nan if not specified by user
         or the vector is an inserte subtotal.
         """
-        return self._base_vector.numeric
+        return self._base_vector.numeric_value
 
     @lazyproperty
     def opposing_margin(self):
@@ -2359,7 +2359,7 @@ class _BaseVector(object):
         return self._element.label
 
     @lazyproperty
-    def numeric(self):
+    def numeric_value(self):
         """int, float, or np.nan representing numeric value of this vector's element.
 
         This mapping of a category to a numeric value is optional, but when present
