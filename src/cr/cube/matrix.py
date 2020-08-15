@@ -852,7 +852,7 @@ class _MrXCatMatrix(_CatXCatMatrix):
         # --- each `counts` is a 2D ndarray with shape (2, ncols), a selected and
         # --- not-selected array, each of size ncols.
         return tuple(
-            _CatXMrVector(
+            _MrOpposingCatVector(
                 counts,
                 unweighted_counts,
                 element,
@@ -1049,8 +1049,13 @@ class _CatXMrMatrix(_CatXCatMatrix):
     def columns(self):
         """Sequence of _MrOpposingCatVector object for each column of matrix."""
         return tuple(
-            _CatXMrVector(counts.T, unweighted_counts.T, element, table_margin)
-            for counts, unweighted_counts, element, table_margin in self._column_generator
+            _MrOpposingCatVector(counts.T, unweighted_counts.T, element, table_margin)
+            for (
+                counts,
+                unweighted_counts,
+                element,
+                table_margin,
+            ) in self._column_generator
         )
 
     @lazyproperty
@@ -2527,76 +2532,6 @@ class _CategoricalVector(_BaseVector):
         return self._counts
 
 
-class _CatXMrVector(_CategoricalVector):
-    """Used for multiple-response dimension when opposing dimension is categorical.
-
-    It is constructed from a 2D np.float/int64 `counts` array with axes
-    (selected/not, cells) like:
-
-        [[  6.53222713  12.85476298  12.0520568   38.91870264  46.988204  ]
-         [101.92961604  95.60708018  96.40978636  69.54314052  61.47363916]]
-
-    This vector is suitable for use by either a CAT-opposing-MR vector or an
-    MR-opposing-MR vector since both have the same number of values and the axis layout
-    can be made uniform by the caller.
-    """
-
-    def __init__(
-        self,
-        counts,
-        unweighted_counts,
-        label,
-        table_margin,
-        zscore=None,
-        table_std_dev=None,
-        table_std_err=None,
-        column_index=None,
-    ):
-        super(_CatXMrVector, self).__init__(
-            counts[0],
-            unweighted_counts[0],
-            label,
-            table_margin,
-            zscore,
-            table_std_dev,
-            table_std_err,
-            column_index,
-        )
-        self._all_unweighted_counts = unweighted_counts
-        self._all_counts = counts
-
-    @lazyproperty
-    def pruned(self):
-        """True if this vector contains no samples."""
-        return self.table_base == 0
-
-    @lazyproperty
-    def table_base(self):
-        """np.int64 "table" unweighted-N for this vector.
-
-        Because this MR vector opposes a CAT dimension, all its cells share a single
-        table-base value. Note however that its sibling MR vectors each have their own
-        distinct table-base which is often different. This is because each MR response
-        may be presented to a different number of respondents.
-        """
-        return np.sum(self._all_unweighted_counts)
-
-    @lazyproperty
-    def table_margin(self):
-        """np.float/int64 "table" weighted-N for this vector.
-
-        Because this MR vector opposes a CAT dimension, a single table-margin value is
-        shared by all cells in this vector. Note however that its sibling MR vectors
-        each have their own distinct table-margin which is often different.
-        """
-        return np.sum(self._all_counts)
-
-    @lazyproperty
-    def zscore(self):
-        # TODO: Implement the real zscore calc for MR
-        return self._zscore
-
-
 class _MeansVector(_BaseVector):
     """Used on a CAT dimension of a CAT_X_CAT matrix with means cube-result measure."""
 
@@ -2639,6 +2574,76 @@ class _MeansWithMrVector(_MeansVector):
     def base(self):
         """np.int64 unweighted-N for this vector."""
         return np.sum(self._unweighted_counts[0])
+
+
+class _MrOpposingCatVector(_CategoricalVector):
+    """Used for multiple-response dimension when opposing dimension is categorical.
+
+    It is constructed from a 2D np.float/int64 `counts` array with axes
+    (selected/not, cells) like:
+
+        [[  6.53222713  12.85476298  12.0520568   38.91870264  46.988204  ]
+         [101.92961604  95.60708018  96.40978636  69.54314052  61.47363916]]
+
+    This vector is suitable for use by either a CAT-opposing-MR vector or an
+    MR-opposing-MR vector since both have the same number of values and the axis layout
+    can be made uniform by the caller.
+    """
+
+    def __init__(
+        self,
+        counts,
+        unweighted_counts,
+        label,
+        table_margin,
+        zscore=None,
+        table_std_dev=None,
+        table_std_err=None,
+        column_index=None,
+    ):
+        super(_MrOpposingCatVector, self).__init__(
+            counts[0],
+            unweighted_counts[0],
+            label,
+            table_margin,
+            zscore,
+            table_std_dev,
+            table_std_err,
+            column_index,
+        )
+        self._all_unweighted_counts = unweighted_counts
+        self._all_counts = counts
+
+    @lazyproperty
+    def pruned(self):
+        """True if this vector contains no samples."""
+        return self.table_base == 0
+
+    @lazyproperty
+    def table_base(self):
+        """np.int64 "table" unweighted-N for this vector.
+
+        Because this MR vector opposes a CAT dimension, all its cells share a single
+        table-base value. Note however that its sibling MR vectors each have their own
+        distinct table-base which is often different. This is because each MR response
+        may be presented to a different number of respondents.
+        """
+        return np.sum(self._all_unweighted_counts)
+
+    @lazyproperty
+    def table_margin(self):
+        """np.float/int64 "table" weighted-N for this vector.
+
+        Because this MR vector opposes a CAT dimension, a single table-margin value is
+        shared by all cells in this vector. Note however that its sibling MR vectors
+        each have their own distinct table-margin which is often different.
+        """
+        return np.sum(self._all_counts)
+
+    @lazyproperty
+    def zscore(self):
+        # TODO: Implement the real zscore calc for MR
+        return self._zscore
 
 
 class _MultipleResponseVector(_CategoricalVector):
