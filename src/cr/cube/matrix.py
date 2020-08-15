@@ -528,7 +528,7 @@ class _BaseBaseMatrix(object):
         return self.rows_dimension.valid_elements
 
     @lazyproperty
-    def _valid_rows_idxs(self):
+    def _valid_row_idxs(self):
         """ndarray-style index for only valid (non-missing) rows.
 
         Suitable for indexing a raw measure array to include only valid rows.
@@ -550,7 +550,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
         self, dimensions, counts, unweighted_counts, counts_with_missings=None
     ):
         super(_CatXCatMatrix, self).__init__(dimensions, counts, unweighted_counts)
-        self._all_counts = counts_with_missings
+        self._counts_with_missings = counts_with_missings
 
     @lazyproperty
     def columns(self):
@@ -646,8 +646,13 @@ class _CatXCatMatrix(_BaseBaseMatrix):
         columns-var question) are included. This ensures that the baseline is not
         distorted by a large number of missing responses to the columns-question.
         """
-        dim_sum = np.sum(self._all_counts, axis=1)[self._valid_rows_idxs]
-        return dim_sum[:, None] / np.sum(dim_sum)
+        # --- uncond_row_margin is a 1D ndarray of weighted total observation count
+        # --- involving each valid row. Counts consider both valid and invalid columns,
+        # --- but are only produced for valid rows.
+        uncond_row_margin = np.sum(self._counts_with_missings, axis=1)[
+            self._valid_row_idxs
+        ]
+        return uncond_row_margin[:, None] / np.sum(uncond_row_margin)
 
     @lazyproperty
     def _column_index(self):
@@ -915,9 +920,23 @@ class _MrXCatMatrix(_CatXCatMatrix):
         included. This ensures that the baseline is not distorted by a large number of
         missing responses to the columns-question.
         """
-        dim_sum = np.sum(self._all_counts, axis=2)[:, 0][self._valid_rows_idxs]
-        total = np.sum(self._all_counts[self._valid_rows_idxs][:, 0:2], axis=(1, 2))
-        return (dim_sum / total)[:, None]
+        # --- unconditional row-margin is a 1D ndarray of size nrows computed by:
+        # --- 1. summing across all columns: np.sum(self._counts_with_missings, axis=2)
+        # --- 2. taking only selected counts: [:, 0]
+        # --- 3. taking only valid rows: [self._valid_row_idxs]
+        uncond_row_margin = np.sum(self._counts_with_missings, axis=2)[:, 0][
+            self._valid_row_idxs
+        ]
+        # --- The "total" (uncond_row_table_margin) is a 1D ndarray of size nrows. Each
+        # --- sum includes only valid rows (MR_SUBVAR, axis 0), selected and unselected
+        # --- but not missing counts ([0:2]) of the MR_CAT axis (axis 1), and all column
+        # --- counts, both valid and missing (axis 2). The rows axis (0) is preserved
+        # --- because each MR subvar has a distinct table margin.
+        uncond_row_table_margin = np.sum(
+            self._counts_with_missings[self._valid_row_idxs][:, 0:2], axis=(1, 2)
+        )
+        # --- inflate shape to (nrows, 1) for later calculation convenience ---
+        return (uncond_row_margin / uncond_row_table_margin)[:, None]
 
     @property
     def _row_generator(self):
@@ -1107,8 +1126,20 @@ class _CatXMrMatrix(_CatXCatMatrix):
         missing) dimension to include missing values (an MR_SUBVAR element is never
         "missing": true).
         """
-        dim_sum = np.sum(self._all_counts, axis=2)[self._valid_rows_idxs]
-        return dim_sum / np.sum(dim_sum, axis=0)
+        # --- counts_with_missings.shape is (nall_rows, ncols, selected/not/missing).
+        # --- axes[1] corresponds to the MR_SUBVAR dimension, in which there are never
+        # --- "missing" subvars (so nall_cols always equals ncols for that dimension
+        # --- type). uncond_row_margin selects only valid rows, retains all columns and
+        # --- reduces the selected/not/missing axis by summing those three counts. Its
+        # --- shape is (nrows, ncols).
+        uncond_row_margin = np.sum(self._counts_with_missings, axis=2)[
+            self._valid_row_idxs
+        ]
+        # --- uncond_table_margin sums across rows, producing 1D array of size ncols,
+        # --- (although all its values are always the same).
+        uncond_table_margin = np.sum(uncond_row_margin, axis=0)
+        # --- division produces a 2D matrix of shape (nrows, ncols) ---
+        return uncond_row_margin / uncond_table_margin
 
     @property
     def _column_generator(self):
@@ -1369,9 +1400,24 @@ class _MrXMrMatrix(_CatXCatMatrix):
         really there are only nrows distinct baseline values, but the returned shape
         makes calculating zscores in a general way more convenient.
         """
-        dim_sum = np.sum(self._all_counts[:, 0:2], axis=3)[self._valid_rows_idxs][:, 0]
-        total = np.sum(self._all_counts[:, 0:2], axis=(1, 3))[self._valid_rows_idxs]
-        return dim_sum / total
+        # --- `counts_with_missings` for MR_X_MR is 4D of size (nrows, 3, ncols, 3)
+        # --- (MR_SUBVAR, MR_CAT, MR_SUBVAR, MR_CAT). Unconditional row margin:
+        # --- * Takes all rows and all cols (axes 0 & 2), because MR_SUBVAR dimension
+        # ---   can contain only valid elements (no such thing as "missing": true
+        # ---   subvar).
+        # --- * Sums selected + unselected + missing categories in second MR_CAT
+        # ---   dimension (columns MR, axes[3]). Including missings here fulfills
+        # ---   "unconditional" characteristic of margin.
+        # --- * Takes only those totals associated with selected categories of first
+        # ---   MR_CAT dimension (rows MR). ("counts" for MR are "selected" counts).
+        # --- Produces a 2D (nrows, ncols) array.
+        uncond_row_margin = np.sum(self._counts_with_missings[:, 0:2], axis=3)[:, 0]
+        # --- Unconditional table margin is also 2D (nrows, ncols) but the values for
+        # --- all columns in a row have the same value; basically each row has
+        # --- a distinct table margin.
+        uncond_table_margin = np.sum(self._counts_with_missings[:, 0:2], axis=(1, 3))
+        # --- baseline is produced by dividing uncond_row_margin by uncond_table_margin.
+        return uncond_row_margin / uncond_table_margin
 
     @property
     def _column_generator(self):
