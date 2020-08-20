@@ -4,14 +4,12 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-# pylint: disable=missing-docstring, invalid-name, redefined-outer-name
-
 import pytest
 import numpy as np
 
 from cr.cube.crunch_cube import CrunchCube
 from cr.cube.cube_slice import CubeSlice
-from cr.cube.enum import DIMENSION_TYPE as DT
+from cr.cube.enums import DIMENSION_TYPE as DT
 
 from ..unitutil import instance_mock
 

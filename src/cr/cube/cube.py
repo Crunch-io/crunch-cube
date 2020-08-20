@@ -13,7 +13,7 @@ import numpy as np
 
 from cr.cube.cubepart import CubePartition
 from cr.cube.dimension import AllDimensions
-from cr.cube.enum import DIMENSION_TYPE as DT
+from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.util import lazyproperty
 
 np.seterr(divide="ignore", invalid="ignore")

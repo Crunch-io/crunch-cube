@@ -14,7 +14,7 @@ from unittest import TestCase
 
 from cr.cube.crunch_cube import CrunchCube
 from cr.cube.legacy_dimension import AllDimensions, Dimension, _Subtotal
-from cr.cube.enum import DIMENSION_TYPE as DT
+from cr.cube.enums import DIMENSION_TYPE as DT
 
 from ...fixtures import CR  # ---mnemonic: CR = 'cube-response'---
 

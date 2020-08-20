@@ -4,7 +4,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from cr.cube.enum import _DimensionType
+from cr.cube.enums import _DimensionType
 
 
 class Describe_DimensionType(object):

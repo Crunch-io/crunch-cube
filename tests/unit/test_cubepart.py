@@ -15,7 +15,7 @@ from cr.cube.cubepart import (
     _Nub,
 )
 from cr.cube.dimension import Dimension
-from cr.cube.enum import DIMENSION_TYPE as DT
+from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.matrix import TransformedMatrix, _VectorAfterHiding
 from cr.cube.noa.smoothing import SingleSidedMovingAvgSmoother
 from cr.cube.stripe import _BaseStripeRow, TransformedStripe

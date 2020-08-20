@@ -9,7 +9,7 @@ from cr.cube.crunch_cube import (
     _UnweightedCountMeasure,
     _WeightedCountMeasure,
 )
-from cr.cube.enum import DIMENSION_TYPE as DT
+from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.measures.index import Index
 from cr.cube.util import compress_pruned
 

@@ -3,10 +3,11 @@
 """MinBaseSize class."""
 
 from __future__ import division
+
 import numpy as np
 
 from cr.cube.util import lazyproperty
-from cr.cube.enum import DIMENSION_TYPE as DT
+from cr.cube.enums import DIMENSION_TYPE as DT
 
 
 class MinBaseSizeMask(object):

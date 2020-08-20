@@ -3,6 +3,7 @@
 
 import os
 import re
+import sys
 
 from setuptools import find_packages, setup
 
@@ -31,6 +32,9 @@ readme = ascii_bytes_from(thisdir, "README.md")
 version = re.search('__version__ = "([^"]+)"', init_py).group(1)
 
 install_requires = ["scipy", "tabulate"]
+
+if sys.version_info < (3, 4):
+    install_requires.append("enum34")
 
 test_requires = ["pytest", "pytest-cov", "mock", "coverage"]
 

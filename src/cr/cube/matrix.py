@@ -14,7 +14,7 @@ import numpy as np
 from scipy.stats import norm
 from scipy.stats.contingency import expected_freq
 
-from cr.cube.enum import DIMENSION_TYPE as DT
+from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.util import lazyproperty, calculate_overlap_tstats
 
 
