@@ -1516,7 +1516,7 @@ class _MrXMrMatrix(_CatXCatMatrix):
 # ===INSERTED (SUBTOTAL) VECTORS===
 
 
-class _BaseMatrixInsertedVector(object):
+class _BaseInsertedVector(object):
     """Base class for a (subtotal) vector inserted in a matrix.
 
     There are some differences that arise when there are both inserted rows *and*
@@ -1614,7 +1614,7 @@ class _BaseMatrixInsertedVector(object):
     def is_inserted(self):
         """True when this vector is an inserted vector.
 
-        Unconditionally True for _BaseMatrixInsertedVector.
+        Unconditionally True for _BaseInsertedVector.
         """
         return True
 
@@ -1775,7 +1775,7 @@ class _BaseMatrixInsertedVector(object):
         return self.counts - self._expected_counts
 
 
-class _InsertedColumn(_BaseMatrixInsertedVector):
+class _InsertedColumn(_BaseInsertedVector):
     """Represents an inserted (subtotal) column."""
 
     @lazyproperty
@@ -1800,7 +1800,7 @@ class _InsertedColumn(_BaseMatrixInsertedVector):
         return self._base_columns
 
 
-class _InsertedRow(_BaseMatrixInsertedVector):
+class _InsertedRow(_BaseInsertedVector):
     """Represents an inserted (subtotal) row."""
 
     @lazyproperty
