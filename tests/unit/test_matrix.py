@@ -15,7 +15,7 @@ from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.matrix import (
     _AssembledVector,
     _BaseBaseMatrix,
-    _BaseMatrixInsertedVector,
+    _BaseInsertedVector,
     _BaseTransformationVector,
     _BaseVector,
     _InsertedColumn,
@@ -288,8 +288,8 @@ class DescribeTransformedMatrix(object):
         return instance_mock(request, _BaseBaseMatrix)
 
 
-class Describe_BaseMatrixInsertedVector(object):
-    """Unit test suite for `cr.cube.matrix._BaseMatrixInsertedVector` object."""
+class Describe_BaseInsertedVector(object):
+    """Unit test suite for `cr.cube.matrix._BaseInsertedVector` object."""
 
     def it_knows_the_indices_of_its_addends(
         self, request, subtotal_, _base_vectors_prop_
@@ -298,7 +298,7 @@ class Describe_BaseMatrixInsertedVector(object):
         _base_vectors_prop_.return_value = tuple(
             instance_mock(request, _BaseVector, element_id=i + 1) for i in range(6)
         )
-        inserted_vector = _BaseMatrixInsertedVector(subtotal_, None, None, None, None)
+        inserted_vector = _BaseInsertedVector(subtotal_, None, None, None, None)
 
         addend_idxs = inserted_vector.addend_idxs
 
@@ -307,20 +307,18 @@ class Describe_BaseMatrixInsertedVector(object):
     @pytest.mark.parametrize("anchor_value", ("top", "bottom", 42))
     def it_knows_its_anchor(self, subtotal_, anchor_value):
         subtotal_.anchor = anchor_value
-        inserted_vector = _BaseMatrixInsertedVector(subtotal_, None, None, None, None)
+        inserted_vector = _BaseInsertedVector(subtotal_, None, None, None, None)
 
         anchor = inserted_vector.anchor
 
         assert anchor == anchor_value
 
     def it_knows_it_is_inserted(self):
-        assert (
-            _BaseMatrixInsertedVector(None, None, None, None, None).is_inserted is True
-        )
+        assert _BaseInsertedVector(None, None, None, None, None).is_inserted is True
 
     def it_knows_its_ordering_value(self, request):
-        property_mock(request, _BaseMatrixInsertedVector, "_anchor_n", return_value=8)
-        inserted_vector = _BaseMatrixInsertedVector(None, -4, None, None, None)
+        property_mock(request, _BaseInsertedVector, "_anchor_n", return_value=8)
+        inserted_vector = _BaseInsertedVector(None, -4, None, None, None)
 
         ordering = inserted_vector.ordering
 
@@ -336,8 +334,8 @@ class Describe_BaseMatrixInsertedVector(object):
             instance_mock(request, _BaseVector, name="base[%d]" % i, element_id=i + 1)
             for i in range(5)
         )
-        property_mock(request, _BaseMatrixInsertedVector, "anchor", return_value=anchor)
-        inserted_vector = _BaseMatrixInsertedVector(None, None, None, None, None)
+        property_mock(request, _BaseInsertedVector, "anchor", return_value=anchor)
+        inserted_vector = _BaseInsertedVector(None, None, None, None, None)
 
         anchor_n = inserted_vector._anchor_n
 
@@ -348,13 +346,13 @@ class Describe_BaseMatrixInsertedVector(object):
         self, request, addend_idxs, _base_vectors_prop_
     ):
         property_mock(
-            request, _BaseMatrixInsertedVector, "addend_idxs", return_value=addend_idxs
+            request, _BaseInsertedVector, "addend_idxs", return_value=addend_idxs
         )
         base_vectors_ = tuple(
             instance_mock(request, _BaseVector, name="base[i]") for i in range(6)
         )
         _base_vectors_prop_.return_value = base_vectors_
-        inserted_vector = _BaseMatrixInsertedVector(None, -4, None, None, None)
+        inserted_vector = _BaseInsertedVector(None, -4, None, None, None)
 
         addend_vectors = inserted_vector._addend_vectors
 
@@ -366,7 +364,7 @@ class Describe_BaseMatrixInsertedVector(object):
 
     @pytest.fixture
     def _base_vectors_prop_(self, request):
-        return property_mock(request, _BaseMatrixInsertedVector, "_base_vectors")
+        return property_mock(request, _BaseInsertedVector, "_base_vectors")
 
     @pytest.fixture
     def subtotal_(self, request):
