@@ -34,12 +34,13 @@ class TransformedMatrix(object):
         matrix (and `_Slice` object).
 
         `dimensions` is a pair (2-tuple) of (rows_dimension, columns_dimension)
-        Dimension objects. These are based on two of the dimensions of `cube` but may
-        not be the first two and may and often do have transformations applied that are
-        not present on the `cube` dimensions from which they derive.
+        Dimension objects. These are always the last two dimensions of `cube` but may
+        and often do have transformations applied that are not present on the `cube`
+        dimensions from which they derive.
 
         `slice_idx` is an int offset indicating which portion of `cube` data to use for
-        this matrix.
+        this matrix. There is one slice for each element of the first cube dimension
+        (the "table" dimension) when the cube has more than two dimensions.
         """
         return cls(_BaseBaseMatrix.factory(cube, dimensions, slice_idx))
 
@@ -113,6 +114,17 @@ class TransformedMatrix(object):
         dimensions are MR, the return value is a 2D ndarray. A CAT_X_CAT matrix produces
         a scalar value for this property.
         """
+        # TODO: This the name is misleading. It's not only "unpruned" it's
+        # "before_hiding" (of either kind, prune or hide-transform). But the real
+        # problem is having this interface property at all. The need for this is related
+        # to expressing ranges for base and margin in cubes that have an MR dimension.
+        # The real solution is to compute ranges in `cr.cube` rather than leaking this
+        # sort of internal detail through the interface and making the client compute
+        # those for themselves. So this will require reconstructing that "show-ranges"
+        # requirement and either adding some sort of a `.range` property that returns
+        # a sequence of (min, max) tuples, or maybe just returning margin or base as
+        # tuples when appropriate and having something like a `.margin_is_ranges`
+        # predicate the client can switch on to control their rendering.
         return self._unordered_matrix.table_base
 
     @lazyproperty
@@ -120,8 +132,9 @@ class TransformedMatrix(object):
         """np.float/int64 scalar or a 1D or 2D np.float/int64 ndarray table margin.
 
         The table margin is the overall sample size of the matrix. This is the weighted
-        count of respondents who were asked both questions and provided a valid response
-        for both (including not-selecting an MR option/subvar).
+        count of respondents who were asked both the rows-question *and* the
+        columns-questions and provided a valid response for both (note that
+        not-selecting an MR option/subvar is a valid response).
 
         A multiple-response (MR) dimension produces an array of table-base values
         because each element (subvariable) of the dimension represents a logically
@@ -149,6 +162,7 @@ class TransformedMatrix(object):
         respondents. When both dimensions are MR, the return value is a 2D ndarray.
         A CAT_X_CAT matrix produces a scalar value for this property.
         """
+        # TODO: see TODO in `.table_base_unpruned`
         return self._unordered_matrix.table_margin
 
     @lazyproperty
@@ -607,9 +621,9 @@ class _CatXCatMatrix(_BaseBaseMatrix):
         """np.int64 count of actual respondents who answered both questions.
 
         Each dimension of a CAT_X_CAT matrix represents a categorical question. Only
-        responses that answered both those questions appear as entries in the valid
-        elements of those dimensions. The sum total of all valid answers is the sample
-        size, aka "N" or "base".
+        responses that include answers to both those questions appear as entries in the
+        valid elements of those dimensions. The sum total of all valid answers is the
+        sample size, aka "N" or "base".
         """
         return np.sum(self._unweighted_counts)
 
@@ -667,7 +681,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
         population (or the population surveyed anyway).
 
         These values must be known by vectors but cannot be calculated there (the
-        calculation is "cross-vector") so must these values must be passed down from the
+        calculation is "cross-vector") so these values must be passed down from the
         matrix level.
         """
         return self._column_proportions / self._baseline * 100
@@ -686,7 +700,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
     def _row_generator(self):
         """Iterable of arguments to row-vector constructor call for each row element.
 
-        Used by `.rows` propert. Cannot be a lazyproperty because an iterator is
+        Used by `.rows` property. Cannot be a lazyproperty because an iterator is
         exhausted on each use and must be created newly on each call.
         """
         # --- Note `zip()` returns an iterator in Python 3 ---
@@ -705,8 +719,9 @@ class _CatXCatMatrix(_BaseBaseMatrix):
         """1D np.float/int64 ndarray of weighted-N for each matrix row.
 
         These "opposing-margin" values are required for vector-level calculations but
-        must be calculated at matrix level. The values are `np.int64` when the source
-        cube-result is not weighted.
+        cannot be calculated there (the calculation is "cross-vector") so these values
+        must be passed down from the matrix level. The values are `np.int64` when the
+        source cube-result is not weighted.
         """
         return np.sum(self._counts, axis=1)
 
@@ -800,7 +815,7 @@ class _CatXCatMeansMatrix(_CatXCatMatrix):
 class _MrXCatMatrix(_CatXCatMatrix):
     """Represents MR_X_CAT slices.
 
-    It's `._counts` is a 3D ndarray with axes (rows, selected/not, cols), like:
+    Its `._counts` is a 3D ndarray with axes (rows, selected/not, cols), like:
 
         [[[ 39  44  24  35]
           [389 447 266 394]]
@@ -817,7 +832,7 @@ class _MrXCatMatrix(_CatXCatMatrix):
     Each value is np.float64, or np.int64 if the cube-result is unweighted (as in this
     example).
 
-    It's rows are `_MrOpposingCatVector` objects. Its columns are `_OpposingMrVector`
+    Its rows are `_MrOpposingCatVector` objects. Its columns are `_OpposingMrVector`
     objects.
     """
 
@@ -1008,7 +1023,7 @@ class _MrXCatMeansMatrix(_MrXCatMatrix):
 class _CatXMrMatrix(_CatXCatMatrix):
     """Handles CAT x MR slices.
 
-    It's `._counts` is a 3D ndarray with axes (rows, cols, selected/not), like:
+    Its `._counts` is a 3D ndarray with axes (rows, cols, selected/not), like:
 
         [[[1002.52343241 1247.791605  ]
           [ 765.95079804 1484.36423937]
@@ -1033,7 +1048,7 @@ class _CatXMrMatrix(_CatXCatMatrix):
     Each value is np.float64 if the cube-result is weighted (as in this example), or
     np.int64 if unweighted.
 
-    It's rows are `_OpposingMrVector` objects. Its columns are `_MrOpposingCatVector`
+    Its rows are `_OpposingMrVector` objects. Its columns are `_MrOpposingCatVector`
     objects.
     """
 
@@ -1217,7 +1232,7 @@ class _CatXMrMeansMatrix(_CatXMrMatrix):
 class _MrXMrMatrix(_CatXCatMatrix):
     """Represents MR x MR slices.
 
-    It's `._counts` is a 4D ndarray with axes (rows, selected-and-not, cols,
+    Its `._counts` is a 4D ndarray with axes (rows, selected-and-not, cols,
     selected-and-not), like:
 
         [[[[2990.03485848 4417.96127006]
@@ -1255,7 +1270,7 @@ class _MrXMrMatrix(_CatXCatMatrix):
            [2011.71672718 5324.61571825]
            [3398.16687766 3938.16556777]]]]
 
-    It's rows and columns are both `_OpposingMrVector` objects.
+    Its rows and columns are both `_OpposingMrVector` objects.
     """
 
     def __init__(
