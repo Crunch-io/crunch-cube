@@ -394,17 +394,6 @@ class Dimension(object):
         return len(self.all_elements)
 
     @lazyproperty
-    def sort(self):
-        """A _BaseSort-subclass object or None, describing the applied sort method.
-
-        This value is None if no sort transform was specified for this dimension.
-        Currently that is its only possible value. The returned sort object describes
-        the sort method which can include sorting on the value of an opposing element or
-        on the margin and specify ascending or descending order.
-        """
-        return None  # pragma: no cover
-
-    @lazyproperty
     def subtotals(self):
         """_Subtotals sequence object for this dimension.
 
