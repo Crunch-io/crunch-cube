@@ -1079,8 +1079,9 @@ class Describe_Subtotals(object):
         subtotal_objs = subtotals._subtotals
 
         assert _Subtotal_.call_args_list == [
-            call(subtot_dict_, valid_elements_, True)
-            for subtot_dict_ in subtotal_dicts_
+            call(subtotal_dicts_[0], valid_elements_, True, 1),
+            call(subtotal_dicts_[1], valid_elements_, True, 2),
+            call(subtotal_dicts_[2], valid_elements_, True, 3),
         ]
         assert subtotal_objs == subtotal_objs_
 
@@ -1139,7 +1140,7 @@ class Describe_Subtotal(object):
         )
         all_elements_.__iter__.return_value = iter(elements_)
         valid_elements = _ValidElements(all_elements_, None)
-        subtotal = _Subtotal(subtotal_dict, valid_elements, None)
+        subtotal = _Subtotal(subtotal_dict, valid_elements, None, None)
 
         addend_idxs = subtotal.addend_idxs
 
@@ -1159,11 +1160,9 @@ class Describe_Subtotal(object):
         self, subtotal_dict, element_ids, expected_value, valid_elements_
     ):
         valid_elements_.element_ids = element_ids
-        subtotal = _Subtotal(subtotal_dict, valid_elements_, None)
+        subtotal = _Subtotal(subtotal_dict, valid_elements_, None, None)
 
-        anchor = subtotal.anchor
-
-        assert anchor == expected_value
+        assert subtotal.anchor == expected_value
 
     @pytest.mark.parametrize(
         "subtotal_dict, element_ids, expected_value",
@@ -1181,21 +1180,22 @@ class Describe_Subtotal(object):
         self, subtotal_dict, element_ids, expected_value, valid_elements_
     ):
         valid_elements_.element_ids = element_ids
-        subtotal = _Subtotal(subtotal_dict, valid_elements_, None)
+        subtotal = _Subtotal(subtotal_dict, valid_elements_, None, None)
 
-        addend_ids = subtotal.addend_ids
+        assert subtotal.addend_ids == expected_value
 
-        assert addend_ids == expected_value
+    def it_knows_its_insertion_id_when_it_has_been_assigned_one(self):
+        assert _Subtotal({"insertion_id": 42}, None, None, None).insertion_id == 42
 
-    def it_knows_its_insertion_id(self):
-        assert _Subtotal({"insertion_id": 42}, None, None).insertion_id == 42
+    def and_it_uses_its_fallback_insertion_id_when_not_assigned_one(self):
+        assert _Subtotal({}, None, None, 24).insertion_id == 24
 
     @pytest.mark.parametrize(
         "subtotal_dict, expected_value",
         (({}, ""), ({"name": None}, ""), ({"name": ""}, ""), ({"name": "Joe"}, "Joe")),
     )
     def it_knows_the_subtotal_label(self, subtotal_dict, expected_value):
-        assert _Subtotal(subtotal_dict, None, None).label == expected_value
+        assert _Subtotal(subtotal_dict, None, None, None).label == expected_value
 
     # fixture components ---------------------------------------------
 
