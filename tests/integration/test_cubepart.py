@@ -420,6 +420,62 @@ class Describe_Slice(object):
         ]
         assert expected == counts, "\n%s\n\n%s" % (expected, counts)
 
+    @pytest.mark.xfail(reason="WIP", raises=AssertionError, strict=True)
+    def and_it_can_sort_by_marginal(self):
+        """Responds to order:marginal sort-by-value."""
+        transforms = {
+            "rows_dimension": {
+                "order": {
+                    "type": "marginal",
+                    "marginal": "unweighted_N",
+                    "exclude": {"top": [999]},
+                    "direction": "ascending",
+                }
+            }
+        }
+        slice_ = _Slice(
+            Cube(CR.CAT_4_X_CAT_5),
+            slice_idx=0,
+            transforms=transforms,
+            population=None,
+            mask_size=0,
+        )
+
+        rows_base = slice_.row_base
+
+        expected = np.array([376, 77, 225, 359])
+        assert (expected == rows_base).all(), "\nexpected: %s\ngot:      %s" % (
+            expected,
+            rows_base,
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=AssertionError, strict=True)
+    def and_it_can_sort_by_an_opposing_subtotal(self):
+        """Responds to order:opposing_insertion sort-by-value."""
+        transforms = {
+            "rows_dimension": {
+                "order": {
+                    "type": "opposing_subtotal",
+                    "insertion_id": 1,
+                    "measure": "unweighted_count",
+                    "direction": "descending",
+                    "exclude": {"bottom": [999]},
+                }
+            }
+        }
+        slice_ = _Slice(
+            Cube(CR.CAT_4_X_CAT_5),
+            slice_idx=0,
+            transforms=transforms,
+            population=None,
+            mask_size=0,
+        )
+
+        ucounts = slice_.unweighted_counts
+
+        expected = (376, 77, 225, 359)
+        assert expected == ucounts, "\nexpected: %s\ngot:      %s" % (expected, ucounts)
+
     def it_ignores_hidden_subtotals(self):
         """A subtotal with `"hide": True` does not appear.
 
