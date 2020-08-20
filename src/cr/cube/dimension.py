@@ -838,11 +838,8 @@ class _Subtotals(Sequence):
 
     @lazyproperty
     def _anchors(self):
-        """List of int or str indicating element under which to insert this subtotal."""
-        return list(
-            _Subtotal(subtotal_dict, self._valid_elements, self._prune).anchor
-            for subtotal_dict in self._iter_valid_subtotal_dicts()
-        )
+        """Sequence of int or str anchor for each subtotal."""
+        return tuple(s.anchor for s in self._subtotals)
 
     @lazyproperty
     def _element_ids(self):
@@ -880,18 +877,24 @@ class _Subtotals(Sequence):
     def _subtotals(self):
         """Composed tuple storing actual sequence of _Subtotal objects."""
         return tuple(
-            _Subtotal(subtotal_dict, self._valid_elements, self._prune)
-            for subtotal_dict in self._iter_valid_subtotal_dicts()
+            _Subtotal(subtotal_dict, self._valid_elements, self._prune, idx + 1)
+            for idx, subtotal_dict in enumerate(self._iter_valid_subtotal_dicts())
         )
 
 
 class _Subtotal(object):
-    """A subtotal insertion on a cube dimension."""
+    """A subtotal insertion on a cube dimension.
 
-    def __init__(self, subtotal_dict, valid_elements, prune):
+    `fallback_insertion_id` is a fallback unique identifier for this insertion, until
+    real insertion-ids can be added. Its value is just the index+1 of this subtotal
+    within the insertions transform collection.
+    """
+
+    def __init__(self, subtotal_dict, valid_elements, prune, fallback_insertion_id):
         self._subtotal_dict = subtotal_dict
         self._valid_elements = valid_elements
         self._prune = prune
+        self._fallback_insertion_id = fallback_insertion_id
 
     @lazyproperty
     def anchor(self):
@@ -953,7 +956,7 @@ class _Subtotal(object):
     @lazyproperty
     def insertion_id(self):
         """int unique identifier of this subtotal within this dimension's insertions."""
-        return self._subtotal_dict.get("insertion_id")
+        return self._subtotal_dict.get("insertion_id", self._fallback_insertion_id)
 
     @lazyproperty
     def label(self):
