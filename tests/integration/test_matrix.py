@@ -13,7 +13,6 @@ from cr.cube.matrix import _BaseInsertedVector
 class Describe_BaseInsertedVector(object):
     """Unit test suite for `cr.cube.matrix._BaseInsertedVector` object."""
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_knows_its_insertion_id_when_it_has_been_assigned_one(self):
         subtotal_dict = {"insertion_id": 42}
         subtotal = _Subtotal(subtotal_dict, None, None)
