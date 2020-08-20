@@ -313,6 +313,14 @@ class Describe_BaseInsertedVector(object):
 
         assert anchor == anchor_value
 
+    def it_knows_its_insertion_id(self, subtotal_):
+        subtotal_.insertion_id = 42
+        inserted_vector = _BaseInsertedVector(subtotal_, None, None, None, None)
+
+        insertion_id = inserted_vector.insertion_id
+
+        assert insertion_id == 42
+
     def it_knows_it_is_inserted(self):
         assert _BaseInsertedVector(None, None, None, None, None).is_inserted is True
 
