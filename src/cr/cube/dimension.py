@@ -955,7 +955,7 @@ class _Subtotal(object):
     @lazyproperty
     def insertion_id(self):
         """int unique identifier of this subtotal within this dimension's insertions."""
-        raise NotImplementedError
+        return self._subtotal_dict.get("insertion_id")
 
     @lazyproperty
     def label(self):

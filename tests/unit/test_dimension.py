@@ -1207,16 +1207,15 @@ class Describe_Subtotal(object):
 
         assert addend_ids == expected_value
 
+    def it_knows_its_insertion_id(self):
+        assert _Subtotal({"insertion_id": 42}, None, None).insertion_id == 42
+
     @pytest.mark.parametrize(
         "subtotal_dict, expected_value",
         (({}, ""), ({"name": None}, ""), ({"name": ""}, ""), ({"name": "Joe"}, "Joe")),
     )
     def it_knows_the_subtotal_label(self, subtotal_dict, expected_value):
-        subtotal = _Subtotal(subtotal_dict, None, None)
-
-        label = subtotal.label
-
-        assert label == expected_value
+        assert _Subtotal(subtotal_dict, None, None).label == expected_value
 
     # fixture components ---------------------------------------------
 
