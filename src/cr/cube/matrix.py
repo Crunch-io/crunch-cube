@@ -1617,7 +1617,7 @@ class _BaseInsertedVector(object):
         This value is unique within the insertions of a dimension but may be the same
         value as one of the dimension's categories/subvars.
         """
-        raise NotImplementedError
+        return self._subtotal.insertion_id
 
     @lazyproperty
     def is_inserted(self):
