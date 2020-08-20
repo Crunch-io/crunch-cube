@@ -951,6 +951,11 @@ class _Subtotal(object):
         )
 
     @lazyproperty
+    def insertion_id(self):
+        """int unique identifier of this subtotal within this dimension's insertions."""
+        raise NotImplementedError
+
+    @lazyproperty
     def label(self):
         """str display name for this subtotal, suitable for use as label."""
         name = self._subtotal_dict.get("name")
