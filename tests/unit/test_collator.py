@@ -97,6 +97,38 @@ class Describe_BaseAnchoredCollator(object):
 
         assert _BaseAnchoredCollator(None, None)._display_order == expected_value
 
+    @pytest.mark.parametrize(
+        "element_order_descriptors, expected_value",
+        (
+            # --- no elements in dimension (not an expected case) ---
+            ((), ()),
+            # --- 1 element ---
+            (((0, 0, 6),), ((0, 0),)),
+            # --- 3 elements in dimension ---
+            (((0, 2, 18), (1, 0, 12), (2, 1, 5)), ((0, 2), (1, 0), (2, 1))),
+        ),
+    )
+    def it_computes_the_base_element_orderings_to_help(
+        self, request, element_order_descriptors, expected_value
+    ):
+        property_mock(
+            request,
+            _BaseAnchoredCollator,
+            "_element_order_descriptors",
+            return_value=element_order_descriptors,
+        )
+        collator = _BaseAnchoredCollator(None, None)
+
+        assert collator._base_element_orderings == expected_value
+
+    def it_raises_on_element_order_descriptors_access(self):
+        """Error message identifies the non-implementing subclass."""
+        with pytest.raises(NotImplementedError) as e:
+            _BaseAnchoredCollator(None, None)._element_order_descriptors
+        assert str(e.value) == (
+            "`_BaseAnchoredCollator` must implement `._element_order_descriptors`"
+        )
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
