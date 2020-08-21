@@ -37,6 +37,11 @@ class _BaseCollator(object):
         return frozenset(empty_idxs + self._dimension.hidden_idxs)
 
     @lazyproperty
+    def _order_dict(self):
+        """dict transforms-payload section specifying ordering."""
+        raise NotImplementedError
+
+    @lazyproperty
     def _subtotals(self):
         """Sequence of _Subtotal object for each inserted subtotal in dimension."""
         return self._dimension.subtotals
@@ -168,6 +173,10 @@ class _BaseAnchoredCollator(_BaseCollator):
             if element_id in self._element_positions_by_id
             else sys.maxsize
         )
+
+
+class ExplicitOrderCollator(_BaseAnchoredCollator):
+    """Orders elements in the sequence specified in order transform."""
 
 
 class PayloadOrderCollator(_BaseAnchoredCollator):
