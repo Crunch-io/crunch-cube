@@ -387,7 +387,7 @@ class Dimension(object):
 
         Value is `{}` if no "order": field is present.
         """
-        raise NotImplementedError
+        return self._dimension_transforms_dict.get("order", {})
 
     @lazyproperty
     def prune(self):
