@@ -12,6 +12,8 @@ base vectors and inserted vectors, respectively.
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from cr.cube.util import lazyproperty
+
 
 class _BaseCollator(object):
     """Base class for all collator objects, providing shared properties."""
@@ -45,6 +47,41 @@ class _BaseAnchoredCollator(_BaseCollator):
         An assembled vector contains both base and inserted cells. The returned
         element-indices are signed; positive indices are base-elements and negative
         indices refer to inserted subtotals.
+        """
+        return tuple(
+            idx
+            for _, idx in sorted(
+                self._base_element_orderings + self._insertion_orderings
+            )
+        )
+
+    @lazyproperty
+    def _base_element_orderings(self):
+        """tuple of (int: position, int: idx) for each base-vector value.
+
+        The position of a base value is it's index in the ordered base vector.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
+    def _insertion_orderings(self):
+        """tuple of (int: position, int: idx) for each inserted-vector value.
+
+        The position for an insertion is an int representation of its anchor and its
+        idx is the *negative* offset of its position in the opposing insertions
+        sequence (like -3, -2, -1 for a sequence of length 3). The negative idx
+        works just as well as the normal one for accessing the subtotal but insures
+        that an insertion at the same position as a base row always sorts *before*
+        the base row.
+
+        The `position` int for a subtotal is 0 for anchor "top", sys.maxsize for
+        anchor "bottom", and int(anchor) + 1 for all others. The +1 ensures
+        a subtotal appears *after* the vector it is anchored to and can be interpreted
+        as the index of the base-element it should appear *before*.
+
+        Multiple insertions having the same anchor appear in payload order within that
+        group. The strictly increasing insertion index values (-3 < -2 < -1) ensure
+        insertions with the same anchor appear in payload order after that anchor.
         """
         raise NotImplementedError
 
