@@ -15,6 +15,10 @@ from ..unitutil import ANY, initializer_mock, instance_mock, property_mock
 class Describe_BaseCollator(object):
     """Unit-test suite for `cr.cube.collator._BaseCollator` object."""
 
+    def it_provides_access_to_the_dimension_element_ids_to_help(self, dimension_):
+        dimension_.element_ids = (42, 24, 1, 6)
+        assert _BaseCollator(dimension_, None)._element_ids == (42, 24, 1, 6)
+
     @pytest.mark.parametrize(
         "empty_idxs, prune, hidden_idxs, expected_value",
         (
