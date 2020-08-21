@@ -10,6 +10,7 @@ indices work for accessing the specified vector from the payload-order collectio
 base vectors and inserted vectors, respectively.
 """
 
+import collections
 import sys
 
 from cr.cube.util import lazyproperty
@@ -177,6 +178,79 @@ class _BaseAnchoredCollator(_BaseCollator):
 
 class ExplicitOrderCollator(_BaseAnchoredCollator):
     """Orders elements in the sequence specified in order transform."""
+
+    @lazyproperty
+    def _element_order_descriptors(self):
+        """tuple of (position, idx, element_id) triple for each element in dimension.
+
+        The `position` of an element is it's index in the ordered collection. The
+        returned triples appear in position order, but the position can be accessed
+        directly as the first item of each triple. The `idx` value in each tuple is the
+        index of that element as it appears in the cube-result (unordered).
+
+        An explicit-order transform on a dimension looks like::
+
+            "transforms": {
+                "(rows|columns)_dimension": {
+                    "order": {
+                        "type": "explicit",
+                        "element_ids": [3, 1, 5]
+                    }
+                }
+            }
+
+        This descriptor collection represents all valid elements of the dimension, even
+        if they are not mentioned in the `"element_ids":` list of the explicit-order
+        transform.
+
+        The algorithm is tolerant of mismatches between element-ids specified in the
+        transform and those present on the dimension:
+
+        * When a element-id appears in the ordering array but not in the dimension, that
+          element-id is ignored. This is important because an element (e.g. category)
+          can be removed from a variable by the user after the transform is saved to an
+          analysis.
+
+        * When the ordering array does not include all element-ids present on the
+          dimension, those present appear first, in the specified order, and the
+          remaining elements appear after, in payload order.
+        """
+
+        def iter_element_order_descriptors():
+            """Generate (idx, element_id) triple for each base-vector value.
+
+            The (idx, id) pairs are generated in position order. The position of an
+            element is it's index in the ordered element sequence.
+            """
+            # --- OrderedDict mapping element-id to payload-order, like {15:0, 12:1,..}.
+            # --- This gives us payload-idx lookup along with duplicate and leftover
+            # --- tracking.
+            remaining_element_idxs_by_id = collections.OrderedDict(
+                (id_, idx) for idx, id_ in enumerate(self._element_ids)
+            )
+
+            # --- yield (idx, id) pair for each element mentioned by id in transform,
+            # --- in the order mentioned. Remove each from remaining as we go to track
+            # --- dups and leftovers.
+            for element_id in self._order_dict.get("element_ids", []):
+                # --- An element-id appearing in transform but not in dimension is
+                # --- ignored. Also, an element-id that appears more than oncce in
+                # --- order-array is only used on first encounter.
+                if element_id not in remaining_element_idxs_by_id:
+                    continue
+                yield remaining_element_idxs_by_id.pop(element_id), element_id
+
+            # --- any remaining elements are generated in the order they originally
+            # --- appeared in the cube-result.
+            for element_id, idx in remaining_element_idxs_by_id.items():
+                yield idx, element_id
+
+        return tuple(
+            (position, idx, element_id)
+            for position, (idx, element_id) in enumerate(
+                iter_element_order_descriptors()
+            )
+        )
 
 
 class PayloadOrderCollator(_BaseAnchoredCollator):
