@@ -10,6 +10,8 @@ indices work for accessing the specified vector from the payload-order collectio
 base vectors and inserted vectors, respectively.
 """
 
+import sys
+
 from cr.cube.util import lazyproperty
 
 
@@ -93,6 +95,15 @@ class _BaseAnchoredCollator(_BaseCollator):
         )
 
     @lazyproperty
+    def _element_positions_by_id(self):
+        """dict of int base-element position keyed by that element's id.
+
+        Allows O(1) lookup of base-element position by element-idx for purposes of
+        positioning an inserted subtotal after its anchor element.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
     def _insertion_orderings(self):
         """tuple of (int: position, int: idx) for each inserted-vector value.
 
@@ -138,7 +149,22 @@ class _BaseAnchoredCollator(_BaseCollator):
         bottom anchors to work while representing the position as a single non-negative
         int.
         """
-        raise NotImplementedError
+        anchor = subtotal.anchor
+
+        # --- "top" and "bottom" have fixed position mappings ---
+        if anchor == "top":
+            return 0
+        if anchor == "bottom":
+            return sys.maxsize
+
+        # --- otherwise look up anchor-element position by id and add 1, defaulting to
+        # --- bottom if target anchor element not found ---
+        element_id = int(anchor)
+        return (
+            self._element_positions_by_id[element_id] + 1
+            if element_id in self._element_positions_by_id
+            else sys.maxsize
+        )
 
 
 class PayloadOrderCollator(_BaseAnchoredCollator):
