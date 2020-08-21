@@ -144,6 +144,30 @@ class Describe_BaseAnchoredCollator(object):
         )
 
     @pytest.mark.parametrize(
+        "element_order_descriptors, expected_value",
+        (
+            # --- no elements in dimension (not an expected case) ---
+            ((), {}),
+            # --- 1 element ---
+            (((0, 0, 6),), {6: 0}),
+            # --- 3 elements in dimension ---
+            (((0, 2, 18), (1, 0, 12), (2, 1, 5)), {18: 0, 12: 1, 5: 2}),
+        ),
+    )
+    def it_maps_the_element_ids_to_their_position_to_help(
+        self, request, element_order_descriptors, expected_value
+    ):
+        property_mock(
+            request,
+            _BaseAnchoredCollator,
+            "_element_order_descriptors",
+            return_value=element_order_descriptors,
+        )
+        collator = _BaseAnchoredCollator(None, None)
+
+        assert collator._element_positions_by_id == expected_value
+
+    @pytest.mark.parametrize(
         "insertion_positions, expected_value",
         (
             # --- no inserted-subtotals in dimension ---
