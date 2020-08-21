@@ -391,6 +391,14 @@ class Dimension(object):
         return tuple(element.numeric_value for element in self.valid_elements)
 
     @lazyproperty
+    def order_dict(self):
+        """dict "order": field in dimensions.transforms parsed from JSON payload.
+
+        Value is `{}` if no "order": field is present.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
     def prune(self):
         """True if empty elements should be automatically hidden on this dimension."""
         prune = self._dimension_transforms_dict.get("prune")
