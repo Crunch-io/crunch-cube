@@ -2,6 +2,8 @@
 
 """Unit test suite for `cr.cube.collator` module."""
 
+import sys
+
 import pytest
 
 from cr.cube.collator import _BaseAnchoredCollator
@@ -24,6 +26,46 @@ class Describe_BaseAnchoredCollator(object):
 
         _init_.assert_called_once_with(ANY, dimension_, (2,))
         assert display_order == (-3, 0, 1, -2, 2, 3, -1)
+
+    @pytest.mark.parametrize(
+        "base_orderings, insertion_orderings, hidden_idxs, expected_value",
+        (
+            # --- base-values but no insertions ---
+            (((0, 0), (1, 1), (2, 2)), (), (), (0, 1, 2)),
+            # --- insertions but no base-values (not expected) ---
+            ((), ((sys.maxsize, -3), (0, -2), (sys.maxsize, -1)), (1,), (-2, -3, -1)),
+            # --- both base-values and insertions ---
+            (
+                ((0, 0), (1, 1), (2, 2), (3, 3)),
+                ((0, -3), (2, -2), (sys.maxsize, -1)),
+                (1, 3),
+                (-3, 0, -2, 2, -1),
+            ),
+        ),
+    )
+    def it_computes_the_display_order_to_help(
+        self, request, base_orderings, insertion_orderings, hidden_idxs, expected_value
+    ):
+        property_mock(
+            request,
+            _BaseAnchoredCollator,
+            "_hidden_idxs",
+            return_value=hidden_idxs,
+        )
+        property_mock(
+            request,
+            _BaseAnchoredCollator,
+            "_insertion_orderings",
+            return_value=insertion_orderings,
+        )
+        property_mock(
+            request,
+            _BaseAnchoredCollator,
+            "_base_element_orderings",
+            return_value=base_orderings,
+        )
+
+        assert _BaseAnchoredCollator(None, None)._display_order == expected_value
 
     # fixture components ---------------------------------------------
 
