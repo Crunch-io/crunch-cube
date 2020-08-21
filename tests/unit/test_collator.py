@@ -9,9 +9,16 @@ import sys
 import pytest
 
 from cr.cube.collator import _BaseCollator, _BaseAnchoredCollator, PayloadOrderCollator
-from cr.cube.dimension import Dimension
+from cr.cube.dimension import Dimension, _Subtotal
 
-from ..unitutil import ANY, initializer_mock, instance_mock, property_mock
+from ..unitutil import (
+    ANY,
+    call,
+    initializer_mock,
+    instance_mock,
+    method_mock,
+    property_mock,
+)
 
 
 class Describe_BaseCollator(object):
@@ -108,6 +115,41 @@ class Describe_BaseAnchoredCollator(object):
         base_element_orderings = collator._base_element_orderings
 
         assert base_element_orderings == expected_value
+
+    @pytest.mark.parametrize(
+        "insertion_positions, expected_value",
+        (
+            # --- no inserted-subtotals in dimension ---
+            ((), ()),
+            # --- 1 insertion ---
+            ((6,), ((6, -1),)),
+            # --- 3 insertions ---
+            ((7, sys.maxsize, 0), ((7, -3), (sys.maxsize, -2), (0, -1))),
+        ),
+    )
+    def it_computes_the_insertion_orderings_to_help(
+        self, request, insertion_positions, expected_value
+    ):
+        subtotals_ = tuple(
+            instance_mock(request, _Subtotal) for _ in insertion_positions
+        )
+        property_mock(
+            request, _BaseAnchoredCollator, "_subtotals", return_value=subtotals_
+        )
+        _insertion_position_ = method_mock(
+            request,
+            _BaseAnchoredCollator,
+            "_insertion_position",
+            side_effect=iter(insertion_positions),
+        )
+        collator = _BaseAnchoredCollator(None)
+
+        insertion_orderings = collator._insertion_orderings
+
+        assert _insertion_position_.call_args_list == [
+            call(collator, s) for s in subtotals_
+        ]
+        assert insertion_orderings == expected_value
 
     # fixture components ---------------------------------------------
 
