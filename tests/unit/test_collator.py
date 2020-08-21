@@ -65,6 +65,32 @@ class Describe_BaseAnchoredCollator(object):
 
         assert display_order == expected_value
 
+    @pytest.mark.parametrize(
+        "element_order_descriptors, expected_value",
+        (
+            # --- no elements in dimension (not an expected case) ---
+            ((), ()),
+            # --- 1 element ---
+            (((0, 0, 6),), ((0, 0),)),
+            # --- 3 elements in dimension ---
+            (((0, 2, 18), (1, 0, 12), (2, 1, 5)), ((0, 2), (1, 0), (2, 1))),
+        ),
+    )
+    def it_computes_the_base_element_orderings_to_help(
+        self, request, element_order_descriptors, expected_value
+    ):
+        property_mock(
+            request,
+            _BaseAnchoredCollator,
+            "_element_order_descriptors",
+            return_value=element_order_descriptors,
+        )
+        collator = _BaseAnchoredCollator(None)
+
+        base_element_orderings = collator._base_element_orderings
+
+        assert base_element_orderings == expected_value
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture

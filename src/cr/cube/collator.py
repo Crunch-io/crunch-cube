@@ -61,7 +61,16 @@ class _BaseAnchoredCollator(_BaseCollator):
 
         The position of a base value is it's index in the ordered base vector.
         """
-        raise NotImplementedError
+        return tuple(
+            (position, idx) for position, idx, _ in self._element_order_descriptors
+        )
+
+    @lazyproperty
+    def _element_order_descriptors(self):
+        """tuple of (position, idx, element_id) triple for each element in dimension."""
+        raise NotImplementedError(
+            "`._element_order_descriptors` must be implemented by each subclass"
+        )
 
     @lazyproperty
     def _insertion_orderings(self):
