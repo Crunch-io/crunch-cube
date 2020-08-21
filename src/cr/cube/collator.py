@@ -99,9 +99,10 @@ class _BaseAnchoredCollator(_BaseCollator):
         Allows O(1) lookup of base-element position by element-idx for purposes of
         positioning an inserted subtotal after its anchor element.
         """
-        raise NotImplementedError(
-            "`._element_positions_by_id` must be implemented by each subclass"
-        )
+        return {
+            element_id: position
+            for position, _, element_id in self._element_order_descriptors
+        }
 
     @lazyproperty
     def _insertion_orderings(self):
