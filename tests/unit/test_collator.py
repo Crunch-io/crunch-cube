@@ -51,6 +51,10 @@ class Describe_BaseCollator(object):
 
         assert collator._hidden_idxs == frozenset(expected_value)
 
+    def it_provides_access_to_the_order_transform_dict_to_help(self, dimension_):
+        dimension_.order_dict = {"order": "dict"}
+        assert _BaseCollator(dimension_, None)._order_dict == {"order": "dict"}
+
     def it_provides_access_to_the_dimension_subtotals_to_help(self, dimension_):
         assert _BaseCollator(dimension_, None)._subtotals is dimension_.subtotals
 

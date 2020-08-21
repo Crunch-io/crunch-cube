@@ -40,7 +40,7 @@ class _BaseCollator(object):
     @lazyproperty
     def _order_dict(self):
         """dict transforms-payload section specifying ordering."""
-        raise NotImplementedError
+        return self._dimension.order_dict
 
     @lazyproperty
     def _subtotals(self):
