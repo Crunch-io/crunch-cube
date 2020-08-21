@@ -173,6 +173,33 @@ class Describe_BaseAnchoredCollator(object):
         ]
         assert insertion_orderings == expected_value
 
+    @pytest.mark.parametrize(
+        "anchor, expected_value",
+        (
+            ("top", 0),
+            ("bottom", sys.maxsize),
+            (666, sys.maxsize),
+            (1, 1),
+            (2, 2),
+            (3, 3),
+        ),
+    )
+    def it_can_compute_the_insertion_position_for_a_subtotal_to_help(
+        self, request, anchor, expected_value
+    ):
+        property_mock(
+            request,
+            _BaseAnchoredCollator,
+            "_element_positions_by_id",
+            return_value={1: 0, 2: 1, 3: 2},
+        )
+        subtotal_ = instance_mock(request, _Subtotal, anchor=anchor)
+        collator = _BaseAnchoredCollator(None)
+
+        insertion_position = collator._insertion_position(subtotal_)
+
+        assert insertion_position == expected_value
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
