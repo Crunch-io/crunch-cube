@@ -33,6 +33,11 @@ class _BaseCollator(object):
         return self._dimension.element_ids
 
     @lazyproperty
+    def _order_dict(self):
+        """dict transforms-payload section specifying ordering."""
+        raise NotImplementedError
+
+    @lazyproperty
     def _subtotals(self):
         """Sequence of _Subtotal object for each inserted subtotal in dimension."""
         # --- elements of an aggregate/array dimension cannot meaningfully be summed, so
@@ -167,6 +172,10 @@ class _BaseAnchoredCollator(_BaseCollator):
             return sys.maxsize
 
         return element_positions_by_id[element_id] + 1
+
+
+class ExplicitOrderCollator(_BaseAnchoredCollator):
+    """Orders elements in the sequence specified in order transform."""
 
 
 class PayloadOrderCollator(_BaseAnchoredCollator):
