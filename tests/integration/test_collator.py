@@ -13,13 +13,26 @@ from ..unitutil import instance_mock
 class DescribePayloadOrderCollator(object):
     """Partial-integration test suite for `PayloadOrderCollator` object."""
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     @pytest.mark.parametrize(
         "element_ids, anchors, expected_value",
         (
-            ((9, 3, 7), ("bottom", 3, 3, "top"), (-1, 0, 1, -3, -2, 2, -4)),
+            pytest.param(
+                (9, 3, 7),
+                ("bottom", 3, 3, "top"),
+                (-1, 0, 1, -3, -2, 2, -4),
+                marks=pytest.mark.xfail(
+                    reason="WIP", raises=NotImplementedError, strict=True
+                ),
+            ),
             ((9, 3, 7), (), (0, 1, 2)),
-            ((), ("bottom", 3, 3, "top"), (-1, -4, -3, -2)),
+            pytest.param(
+                (),
+                ("bottom", 3, 3, "top"),
+                (-1, -4, -3, -2),
+                marks=pytest.mark.xfail(
+                    reason="WIP", raises=NotImplementedError, strict=True
+                ),
+            ),
         ),
     )
     def it_knows_the_display_order_for_a_dimension(

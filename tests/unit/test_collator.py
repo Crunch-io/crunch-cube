@@ -46,6 +46,9 @@ class Describe_BaseCollator(object):
 
         assert collator._hidden_idxs == frozenset(expected_value)
 
+    def it_provides_access_to_the_dimension_subtotals_to_help(self, dimension_):
+        assert _BaseCollator(dimension_, None)._subtotals is dimension_.subtotals
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture

@@ -37,7 +37,7 @@ class _BaseCollator(object):
     @lazyproperty
     def _subtotals(self):
         """Sequence of _Subtotal object for each inserted subtotal in dimension."""
-        raise NotImplementedError
+        return self._dimension.subtotals
 
 
 class _BaseAnchoredCollator(_BaseCollator):
