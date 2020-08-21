@@ -38,6 +38,14 @@ class Describe_BaseCollator(object):
 
         assert element_ids == (42, 24, 1, 6)
 
+    def it_provides_access_to_the_order_transform_dict_to_help(self, dimension_):
+        dimension_.order_dict = {"order": "dict"}
+        collator = _BaseCollator(dimension_)
+
+        order_dict = collator._order_dict
+
+        assert order_dict == {"order": "dict"}
+
     @pytest.mark.parametrize(
         "subtotals, dimension_type, expected_value",
         (

@@ -15,7 +15,6 @@ from ..unitutil import instance_mock
 class DescribeExplicitOrderCollator(object):
     """Partial-integration test suite for `ExplicitOrderCollator` object."""
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     @pytest.mark.parametrize(
         "element_ids, order, anchors, expected_value",
         (
