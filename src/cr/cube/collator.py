@@ -27,7 +27,7 @@ class _BaseCollator(object):
 
         Element-ids appear in the order there were defined in the cube-result.
         """
-        raise NotImplementedError
+        return self._dimension.element_ids
 
 
 class _BaseAnchoredCollator(_BaseCollator):

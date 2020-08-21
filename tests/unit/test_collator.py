@@ -8,10 +8,28 @@ import sys
 
 import pytest
 
-from cr.cube.collator import _BaseAnchoredCollator, PayloadOrderCollator
+from cr.cube.collator import _BaseCollator, _BaseAnchoredCollator, PayloadOrderCollator
 from cr.cube.dimension import Dimension
 
 from ..unitutil import ANY, initializer_mock, instance_mock, property_mock
+
+
+class Describe_BaseCollator(object):
+    """Unit-test suite for `cr.cube.collator._BaseCollator` object."""
+
+    def it_provides_access_to_the_dimension_element_ids_to_help(self, dimension_):
+        dimension_.element_ids = (42, 24, 1, 6)
+        collator = _BaseCollator(dimension_)
+
+        element_ids = collator._element_ids
+
+        assert element_ids == (42, 24, 1, 6)
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def dimension_(self, request):
+        return instance_mock(request, Dimension)
 
 
 class Describe_BaseAnchoredCollator(object):
