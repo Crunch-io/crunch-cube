@@ -341,6 +341,14 @@ class Dimension(object):
         return self.valid_elements.display_order
 
     @lazyproperty
+    def element_ids(self):
+        """tuple of int element-id for each valid element in this dimension.
+
+        Element-ids appear in the order defined in the cube-result.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
     def name(self):
         """str name of this dimension, the empty string ("") if not specified."""
         references = self._dimension_dict["references"]
