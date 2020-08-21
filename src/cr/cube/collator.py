@@ -12,6 +12,7 @@ base vectors and inserted vectors, respectively.
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.util import lazyproperty
 
 
@@ -32,7 +33,11 @@ class _BaseCollator(object):
     @lazyproperty
     def _subtotals(self):
         """Sequence of _Subtotal object for each inserted subtotal in dimension."""
-        raise NotImplementedError
+        # --- elements of an aggregate/array dimension cannot meaningfully be summed, so
+        # --- an array dimension cannot have subtotals
+        if self._dimension.dimension_type in (DT.MR, DT.CA_SUBVAR):
+            return tuple()
+        return self._dimension.subtotals
 
 
 class _BaseAnchoredCollator(_BaseCollator):

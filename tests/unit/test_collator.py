@@ -10,6 +10,7 @@ import pytest
 
 from cr.cube.collator import _BaseCollator, _BaseAnchoredCollator, PayloadOrderCollator
 from cr.cube.dimension import Dimension, _Subtotal
+from cr.cube.enums import DIMENSION_TYPE as DT
 
 from ..unitutil import (
     ANY,
@@ -31,6 +32,27 @@ class Describe_BaseCollator(object):
         element_ids = collator._element_ids
 
         assert element_ids == (42, 24, 1, 6)
+
+    @pytest.mark.parametrize(
+        "subtotals, dimension_type, expected_value",
+        (
+            ((), DT.CAT, ()),
+            ((), DT.MR, ()),
+            (("sub", "tot", "als"), DT.CAT, ("sub", "tot", "als")),
+            (("sub", "tot", "als"), DT.CA_SUBVAR, ()),
+            (("sub", "tot", "als"), DT.MR, ()),
+        ),
+    )
+    def it_provides_access_to_the_dimension_subtotals_to_help(
+        self, dimension_, subtotals, dimension_type, expected_value
+    ):
+        dimension_.dimension_type = dimension_type
+        dimension_.subtotals = subtotals
+        collator = _BaseCollator(dimension_)
+
+        subtotals = collator._subtotals
+
+        assert subtotals == expected_value
 
     # fixture components ---------------------------------------------
 
