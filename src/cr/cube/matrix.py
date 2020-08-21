@@ -1611,6 +1611,15 @@ class _BaseInsertedVector(object):
         return self.pruned
 
     @lazyproperty
+    def insertion_id(self):
+        """int identifier for this inserted subtotal.
+
+        This value is unique within the insertions of a dimension but may be the same
+        value as one of the dimension's categories/subvars.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
     def is_inserted(self):
         """True when this vector is an inserted vector.
 
