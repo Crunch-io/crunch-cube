@@ -34,6 +34,11 @@ class _BaseCollator(object):
         empty_idxs = self._empty_idxs if self._dimension.prune else ()
         return frozenset(empty_idxs + self._dimension.hidden_idxs)
 
+    @lazyproperty
+    def _subtotals(self):
+        """Sequence of _Subtotal object for each inserted subtotal in dimension."""
+        raise NotImplementedError
+
 
 class _BaseAnchoredCollator(_BaseCollator):
     """Base class for collators that respect insertion anchors.
@@ -106,6 +111,32 @@ class _BaseAnchoredCollator(_BaseCollator):
         Multiple insertions having the same anchor appear in payload order within that
         group. The strictly increasing insertion index values (-3 < -2 < -1) ensure
         insertions with the same anchor appear in payload order after that anchor.
+        """
+        subtotals = self._subtotals
+        n_subtotals = len(subtotals)
+        neg_idxs = tuple(i - n_subtotals for i in range(n_subtotals))
+        return tuple(
+            (self._insertion_position(subtotal), neg_idx)
+            for subtotal, neg_idx in zip(subtotals, neg_idxs)
+        )
+
+    def _insertion_position(self, subtotal):
+        """Subtotal position expressed as int index among base-vector indices.
+
+        The return value represents the payload-order base-vector idx *before which* the
+        subtotal should appear (even though subtotals appear *after* the row they are
+        anchored to.
+
+        A subtotal with position `0` appears at the top, one with an anchor of `3`
+        appears *before* the base row at offset 3; `sys.maxsize` is used as the position
+        for a "bottom" anchored subtotal.
+
+        To make this work, the position of a subtotal is idx+1 of the base row it
+        is anchored to (for subtotals anchored to a row, not "top" or "bottom").
+        Combining this +1 characteristic with placing subtotals before rows with
+        idx=insertion_position produces the right positioning and also allows top and
+        bottom anchors to work while representing the position as a single non-negative
+        int.
         """
         raise NotImplementedError
 
