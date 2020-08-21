@@ -8,7 +8,7 @@ import sys
 
 import pytest
 
-from cr.cube.collator import _BaseAnchoredCollator
+from cr.cube.collator import _BaseAnchoredCollator, PayloadOrderCollator
 from cr.cube.dimension import Dimension
 
 from ..unitutil import ANY, initializer_mock, instance_mock, property_mock
@@ -96,3 +96,30 @@ class Describe_BaseAnchoredCollator(object):
     @pytest.fixture
     def dimension_(self, request):
         return instance_mock(request, Dimension)
+
+
+class DescribePayloadOrderCollator(object):
+    """Unit-test suite for `cr.cube.collator.PayloadOrderCollator` object."""
+
+    @pytest.mark.parametrize(
+        "element_ids, expected_value",
+        (
+            # --- no (valid) elements in dimension (not an expected case) ---
+            ((), ()),
+            # --- 1 element ---
+            ((302,), ((0, 0, 302),)),
+            # --- 3 elements in dimension ---
+            ((47, 103, 18), ((0, 0, 47), (1, 1, 103), (2, 2, 18))),
+        ),
+    )
+    def it_computes_the_element_order_descriptors_to_help(
+        self, request, element_ids, expected_value
+    ):
+        property_mock(
+            request, PayloadOrderCollator, "_element_ids", return_value=element_ids
+        )
+        collator = PayloadOrderCollator(None)
+
+        element_order_descriptors = collator._element_order_descriptors
+
+        assert element_order_descriptors == expected_value

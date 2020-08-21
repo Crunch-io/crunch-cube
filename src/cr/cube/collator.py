@@ -21,6 +21,14 @@ class _BaseCollator(object):
     def __init__(self, dimension):
         self._dimension = dimension
 
+    @lazyproperty
+    def _element_ids(self):
+        """Sequence of int element-id for each category or subvar in dimension.
+
+        Element-ids appear in the order there were defined in the cube-result.
+        """
+        raise NotImplementedError
+
 
 class _BaseAnchoredCollator(_BaseCollator):
     """Base class for collators that respect insertion anchors.
@@ -101,3 +109,18 @@ class PayloadOrderCollator(_BaseAnchoredCollator):
     Insertion anchors are respected and each insertion-index is interleaved according to
     the anchor specified in its insertion transform.
     """
+
+    @lazyproperty
+    def _element_order_descriptors(self):
+        """tuple of (position, idx, element_id) triple for each element in dimension.
+
+        In payload-order, the position of an element is simply it's index in the
+        sequence of element-ids; the result looks like:
+
+            ((0, 0, {id}), (1, 1, {id}), ..., (n, n, {id}))
+
+        where `n` is `len(element_ids) - 1`.
+        """
+        return tuple(
+            (idx, idx, element_id) for idx, element_id in enumerate(self._element_ids)
+        )
