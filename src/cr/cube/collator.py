@@ -14,6 +14,10 @@ base vectors and inserted vectors, respectively.
 class _BaseCollator(object):
     """Base class for all collator objects, providing shared properties."""
 
+    def __init__(self, dimension, empty_idxs):
+        self._dimension = dimension
+        self._empty_idxs = tuple(empty_idxs) if empty_idxs else ()
+
 
 class _BaseAnchoredCollator(_BaseCollator):
     """Base class for collators that respect insertion anchors.
@@ -30,6 +34,16 @@ class _BaseAnchoredCollator(_BaseCollator):
         The returned indices are "signed", with positive indices applying to base
         vectors and negative indices applying to inserted vectors. Both work for
         indexing in their respective unordered collections.
+        """
+        return cls(dimension, empty_idxs)._display_order
+
+    @property
+    def _display_order(self):
+        """tuple of int element-idx for each element in assembly order.
+
+        An assembled vector contains both base and inserted cells. The returned
+        element-indices are signed; positive indices are base-elements and negative
+        indices refer to inserted subtotals.
         """
         raise NotImplementedError
 
