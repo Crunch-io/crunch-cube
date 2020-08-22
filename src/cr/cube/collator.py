@@ -291,6 +291,26 @@ class _BaseSortByValueCollator(_BaseCollator):
     value.
     """
 
+    @property
+    def _display_order(self):
+        """tuple of int element-idx specifying ordering of dimension elements.
+
+        The element-indices are signed; positive indices are base-elements and negative
+        indices refer to inserted subtotals.
+
+        Subtotal elements all appear at the top when the sort direction is descending
+        and all appear at the bottom when sort-direction is ascending. Top-anchored
+        "excluded-from-sort" elements appear after any top subtotals, followed by
+        non-excluded base-elements, bottom-anchored base-elements, and finally
+        bottom-subtotals (only when sort-direction is ascending).
+
+        Subtotal elements appear in value-sorted order, respecting the sort-direction
+        specified in the request. Excluded base elements appear in the order mentioned
+        in the `"exclude": [...]` array of the order transform. Base elements appear in
+        value-sorted order within their grouping.
+        """
+        raise NotImplementedError
+
 
 class MarginalCollator(_BaseSortByValueCollator):
     """Orders elements in the sequence of specified marginal values.
@@ -299,6 +319,11 @@ class MarginalCollator(_BaseSortByValueCollator):
     value. A typical example is `cr.cube.matrix._CategoricalVector` with properties like
     `.base` and `.margin` (unweighted and weighted-N respectively).
     """
+
+    def __init__(self, dimension, vectors, inserted_vectors):
+        super(MarginalCollator, self).__init__(dimension)
+        self._vectors = vectors
+        self._inserted_vectors = inserted_vectors
 
     @classmethod
     def display_order(cls, dimension, vectors, inserted_vectors):
@@ -320,4 +345,4 @@ class MarginalCollator(_BaseSortByValueCollator):
             }
 
         """
-        raise NotImplementedError
+        return cls(dimension, vectors, inserted_vectors)._display_order

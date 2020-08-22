@@ -12,6 +12,7 @@ from cr.cube.collator import (
     _BaseCollator,
     _BaseAnchoredCollator,
     ExplicitOrderCollator,
+    MarginalCollator,
     PayloadOrderCollator,
 )
 from cr.cube.dimension import Dimension, _Subtotal
@@ -282,6 +283,35 @@ class DescribeExplicitOrderCollator(object):
         element_order_descriptors = collator._element_order_descriptors
 
         assert element_order_descriptors == expected_value
+
+
+class DescribeMarginalCollator(object):
+    """Unit-test suite for `cr.cube.collator.MarginalCollator` object.
+
+    MarginalCollator computes element ordering for sort-by-marginal order transforms.
+    Margins it can sort by include weighted-N (margin), unweighted-N (base), and "All"
+    (percent).
+    """
+
+    def it_provides_an_interface_classmethod(self, request, dimension_):
+        _init_ = initializer_mock(request, MarginalCollator)
+        _display_order_ = property_mock(request, MarginalCollator, "_display_order")
+        _display_order_.return_value = (-3, -1, -2, 1, 0, 2, 3)
+
+        display_order = MarginalCollator.display_order(
+            dimension_, ("vec", "tors"), ("inserted", "vectors")
+        )
+
+        _init_.assert_called_once_with(
+            ANY, dimension_, ("vec", "tors"), ("inserted", "vectors")
+        )
+        assert display_order == (-3, -1, -2, 1, 0, 2, 3)
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def dimension_(self, request):
+        return instance_mock(request, Dimension)
 
 
 class DescribePayloadOrderCollator(object):
