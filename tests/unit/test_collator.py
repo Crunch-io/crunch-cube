@@ -275,6 +275,29 @@ class Describe_BaseSortByValueCollator(object):
         assert display_order == (1, 2, 3, 4, 5, 6, 7, 8, 9)
 
     @pytest.mark.parametrize(
+        "order_dict, expected_value",
+        (
+            ({"direction": "ascending"}, False),
+            ({"direction": "descending"}, True),
+            ({}, True),
+            ({"direction": None}, True),
+            ({"direction": 42}, True),
+            ({"direction": False}, True),
+            ({"direction": "foobar"}, True),
+        ),
+    )
+    def it_knows_whether_the_sort_direction_is_descending(
+        self, _order_dict_prop_, order_dict, expected_value
+    ):
+        """Otherwise, sort direction is ascending."""
+        _order_dict_prop_.return_value = order_dict
+        collator = _BaseSortByValueCollator(None)
+
+        descending = collator._descending
+
+        assert descending == expected_value
+
+    @pytest.mark.parametrize(
         "descending, subtotal_idxs, expected_value",
         (
             # --- ascending sort, no subtotals at top ---
@@ -310,6 +333,10 @@ class Describe_BaseSortByValueCollator(object):
     @pytest.fixture
     def _descending_prop_(self, request):
         return property_mock(request, _BaseSortByValueCollator, "_descending")
+
+    @pytest.fixture
+    def _order_dict_prop_(self, request):
+        return property_mock(request, _BaseSortByValueCollator, "_order_dict")
 
     @pytest.fixture
     def _subtotal_idxs_prop_(self, request):
