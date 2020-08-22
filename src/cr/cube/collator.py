@@ -48,6 +48,9 @@ class _BaseCollator(object):
         return self._dimension.subtotals
 
 
+# === CONVENTIONAL (ANCHOR-PRESERVING) COLLATORS ===
+
+
 class _BaseAnchoredCollator(_BaseCollator):
     """Base class for collators that respect insertion anchors.
 
@@ -273,3 +276,48 @@ class PayloadOrderCollator(_BaseAnchoredCollator):
         return tuple(
             (idx, idx, element_id) for idx, element_id in enumerate(self._element_ids)
         )
+
+
+# === SORT-BY-VALUE COLLATORS ===
+
+
+class _BaseSortByValueCollator(_BaseCollator):
+    """Base class for Collators that perform sorting of values.
+
+    In general, the anchors used to position inserted subtotals lose their meaning when
+    the dimension is sorted by-value. In sort-by-value cases, subtotals are grouped at
+    the top (when sort direction is descending (default)) or the bottom (when direction
+    is ascending), while also being sorted within the group of subtotal by the specified
+    value.
+    """
+
+
+class MarginalCollator(_BaseSortByValueCollator):
+    """Orders elements in the sequence of specified marginal values.
+
+    `vectors` is a sequence of vector objects to be interrogated for their marginal
+    value. A typical example is `cr.cube.matrix._CategoricalVector` with properties like
+    `.base` and `.margin` (unweighted and weighted-N respectively).
+    """
+
+    @classmethod
+    def display_order(cls, dimension, vectors, inserted_vectors):
+        """ -> sequence of int element-idx, reflecting sort-by-marginal transform.
+
+        This value is an exhaustive collection of (valid) element offsets, sorted by the
+        value of their margin value.
+
+        An sort-by-marginal transform on a dimension looks like::
+
+            "transforms": {
+                "(rows|columns)_dimension": {
+                    "order": {
+                        "type": "marginal",
+                        "marginal": "base",  # --- unweighted-N ---
+                        "exclude": {"bottom": [999]},
+                    }
+                }
+            }
+
+        """
+        raise NotImplementedError
