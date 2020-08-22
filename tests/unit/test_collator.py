@@ -6,6 +6,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import sys
 
+import numpy as np
 import pytest
 
 from cr.cube.collator import (
@@ -296,6 +297,34 @@ class Describe_BaseSortByValueCollator(object):
         descending = collator._descending
 
         assert descending == expected_value
+
+    @pytest.mark.parametrize(
+        "descending, subtotal_values, expected_value",
+        (
+            # --- ascending sort ---
+            (False, (8.0, 2.0, 4.0), (-2, -1, -3)),
+            (False, (8.0, np.nan, 4.0, np.nan), (-2, -4, -3, -1)),
+            # --- descending sort ---
+            (True, (4.0, 2.0, 8.0), (-1, -3, -2)),
+            (True, (8.0, np.nan, 4.0, np.nan), (-4, -2, -3, -1)),
+        ),
+    )
+    def it_computes_subtotal_idxs_from_subclass_values_to_help(
+        self, request, _descending_prop_, descending, subtotal_values, expected_value
+    ):
+        """Sorting, neg-idx generation and NaN-handling are common across subclasses."""
+        _descending_prop_.return_value = descending
+        property_mock(
+            request,
+            _BaseSortByValueCollator,
+            "_subtotal_values",
+            return_value=subtotal_values,
+        )
+        collator = _BaseSortByValueCollator(None)
+
+        subtotal_idxs = collator._subtotal_idxs
+
+        assert subtotal_idxs == expected_value
 
     @pytest.mark.parametrize(
         "descending, subtotal_idxs, expected_value",

@@ -15,6 +15,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import collections
 import sys
 
+import numpy as np
+
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.util import lazyproperty
 
@@ -365,7 +367,24 @@ class _BaseSortByValueCollator(_BaseCollator):
         `._subtotal_values` property defined in the subclass and sort direction
         specified in the `"order": {}` dict.
         """
-        raise NotImplementedError
+        subtotal_values = self._subtotal_values
+        n_values = len(subtotal_values)
+        # --- `keys` looks like [(75.36, -3), (18.17, -2), (23.46, -1)], providing a
+        # --- sequence that can be sorted and then harvested for ordered idxs.
+        keys, nans = [], []
+        for i, val in enumerate(subtotal_values):
+            neg_idx = i - n_values
+            group = nans if np.isnan(val) else keys
+            group.append((val, neg_idx))
+
+        return tuple(idx for _, idx in (sorted(keys, reverse=self._descending) + nans))
+
+    @lazyproperty
+    def _subtotal_values(self):
+        """tuple of the measure value for each inserted subtotal, in payload order."""
+        raise NotImplementedError(
+            "`._subtotal_values must be implemented by each subclass"
+        )
 
     @lazyproperty
     def _top_exclusion_idxs(self):
