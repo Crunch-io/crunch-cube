@@ -11,6 +11,7 @@ import pytest
 from cr.cube.collator import (
     _BaseCollator,
     _BaseAnchoredCollator,
+    _BaseSortByValueCollator,
     ExplicitOrderCollator,
     MarginalCollator,
     PayloadOrderCollator,
@@ -245,6 +246,45 @@ class Describe_BaseAnchoredCollator(object):
     @pytest.fixture
     def dimension_(self, request):
         return instance_mock(request, Dimension)
+
+
+class Describe_BaseSortByValueCollator(object):
+    """Unit-test suite for `cr.cube.collator._BaseSortByValueCollator` object."""
+
+    def it_computes_the_display_order_to_help(
+        self, request, _top_exclusion_idxs_prop_, _bottom_exclusion_idxs_prop_
+    ):
+        _top_exclusion_idxs_prop_.return_value = (3,)
+        _bottom_exclusion_idxs_prop_.return_value = (7, 8)
+        property_mock(
+            request, _BaseSortByValueCollator, "_top_subtotal_idxs", return_value=(1, 2)
+        )
+        property_mock(
+            request, _BaseSortByValueCollator, "_body_idxs", return_value=(4, 5, 6)
+        )
+        property_mock(
+            request,
+            _BaseSortByValueCollator,
+            "_bottom_subtotal_idxs",
+            return_value=(9,),
+        )
+        collator = _BaseSortByValueCollator(None)
+
+        display_order = collator._display_order
+
+        assert display_order == (1, 2, 3, 4, 5, 6, 7, 8, 9)
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _bottom_exclusion_idxs_prop_(self, request):
+        return property_mock(
+            request, _BaseSortByValueCollator, "_bottom_exclusion_idxs"
+        )
+
+    @pytest.fixture
+    def _top_exclusion_idxs_prop_(self, request):
+        return property_mock(request, _BaseSortByValueCollator, "_top_exclusion_idxs")
 
 
 class DescribeExplicitOrderCollator(object):
