@@ -349,6 +349,25 @@ class _BaseSortByValueCollator(_BaseCollator):
         raise NotImplementedError
 
     @lazyproperty
+    def _descending(self):
+        """True if collation direction is larger-to-smaller, False otherwise.
+
+        Descending is the default direction because it is so much more common than
+        ascending in survey analysis.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
+    def _subtotal_idxs(self):
+        """tuple of int (negative) element-idx for each subtotal of this dimension.
+
+        These values appear in sorted order. The sequence is determined by the
+        `._subtotal_values` property defined in the subclass and sort direction
+        specified in the `"order": {}` dict.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
     def _top_exclusion_idxs(self):
         """Tuple of (positive) payload-order idx for each top-anchored element.
 
@@ -365,7 +384,7 @@ class _BaseSortByValueCollator(_BaseCollator):
         sort-direction is descending. When sort-direction is ascending, all subtotal
         vectors appear at the bottom.
         """
-        raise NotImplementedError
+        return self._subtotal_idxs if self._descending else ()
 
 
 class MarginalCollator(_BaseSortByValueCollator):
