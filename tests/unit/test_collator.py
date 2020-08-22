@@ -19,6 +19,7 @@ from cr.cube.collator import (
 )
 from cr.cube.dimension import Dimension, _Subtotal
 from cr.cube.enums import DIMENSION_TYPE as DT
+from cr.cube.matrix import _BaseInsertedVector
 
 from ..unitutil import (
     ANY,
@@ -436,11 +437,29 @@ class DescribeMarginalCollator(object):
         )
         assert display_order == (-3, -1, -2, 1, 0, 2, 3)
 
+    def it_gathers_the_subtotal_marginal_values_to_help(
+        self, request, _marginal_propname_prop_
+    ):
+        _marginal_propname_prop_.return_value = "base"
+        subtotal_vectors_ = tuple(
+            instance_mock(request, _BaseInsertedVector, base=1.0 * n)
+            for n in range(1, 4)
+        )
+        collator = MarginalCollator(None, None, subtotal_vectors_)
+
+        subtotal_values = collator._subtotal_values
+
+        assert subtotal_values == (1.0, 2.0, 3.0)
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
     def dimension_(self, request):
         return instance_mock(request, Dimension)
+
+    @pytest.fixture
+    def _marginal_propname_prop_(self, request):
+        return property_mock(request, MarginalCollator, "_marginal_propname")
 
 
 class DescribePayloadOrderCollator(object):

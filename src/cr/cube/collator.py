@@ -440,3 +440,16 @@ class MarginalCollator(_BaseSortByValueCollator):
 
         """
         return cls(dimension, vectors, inserted_vectors)._display_order
+
+    @lazyproperty
+    def _marginal_propname(self):
+        """ -> str property name corresponding to the specified marginal."""
+        # --- the `"marginal":` field is required. If this statement raises KeyError, it
+        # --- indicates a validation gap. There is no default marginal.
+        raise NotImplementedError
+
+    @lazyproperty
+    def _subtotal_values(self):
+        """tuple of the measure value for each inserted subtotal, in payload order."""
+        marginal_propname = self._marginal_propname
+        return tuple(getattr(v, marginal_propname) for v in self._inserted_vectors)
