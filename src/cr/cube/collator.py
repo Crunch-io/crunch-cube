@@ -504,3 +504,17 @@ class MarginalCollator(_BaseSortByValueCollator):
         """tuple of the measure value for each inserted subtotal, in payload order."""
         marginal_propname = self._marginal_propname
         return tuple(getattr(v, marginal_propname) for v in self._inserted_vectors)
+
+
+class OpposingElementCollator(_BaseSortByValueCollator):
+    """Orders elements by the values of an opposing base vector.
+
+    This would be like "order rows in descending order by value of 'Strongly Agree'
+    column. An opposing-element ordering is only available on a matrix, because only
+    a matrix dimension has an opposing dimension.
+    """
+
+    @classmethod
+    def display_order(cls, dimension, opposing_vectors):
+        """ -> sequence of int element-idx specifying ordering of dimension elements."""
+        raise NotImplementedError
