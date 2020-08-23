@@ -347,7 +347,7 @@ class _BaseSortByValueCollator(_BaseCollator):
         The items appear in the order specified in the "bottom" exclude-grouping of the
         transform; they are not subject to sorting-by-value.
         """
-        raise NotImplementedError
+        return tuple(self._iter_exclusion_idxs("bottom"))
 
     @lazyproperty
     def _bottom_subtotal_idxs(self):
