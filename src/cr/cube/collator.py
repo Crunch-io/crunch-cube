@@ -397,6 +397,11 @@ class _BaseSortByValueCollator(_BaseCollator):
             yield element_idxs_by_id[element_id]
 
     @lazyproperty
+    def _measure_propname(self):
+        """ -> str base-vector property name corresponding to `measure`."""
+        raise NotImplementedError
+
+    @lazyproperty
     def _subtotal_idxs(self):
         """tuple of int (negative) element-idx for each subtotal of this dimension.
 
@@ -522,3 +527,19 @@ class OpposingElementCollator(_BaseSortByValueCollator):
     def display_order(cls, dimension, opposing_vectors):
         """ -> sequence of int element-idx specifying ordering of dimension elements."""
         return cls(dimension, opposing_vectors)._display_order
+
+    @lazyproperty
+    def _opposing_vector(self):
+        """Base-vector object providing key-values for the sort."""
+        raise NotImplementedError
+
+    @lazyproperty
+    def _subtotal_values(self):
+        """tuple of the measure value of each inserted subtotal, in payload order."""
+        measure_propname = self._measure_propname
+
+        def subtotal_value(subtotal):
+            values = getattr(self._opposing_vector, measure_propname)
+            return sum(values[idx] for idx in subtotal.addend_idxs)
+
+        return tuple(subtotal_value(s) for s in self._subtotals)

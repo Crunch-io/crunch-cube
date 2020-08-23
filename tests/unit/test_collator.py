@@ -553,7 +553,8 @@ class DescribeMarginalCollator(object):
     (percent).
     """
 
-    def it_provides_an_interface_classmethod(self, request, dimension_):
+    def it_provides_an_interface_classmethod(self, request):
+        dimension_ = instance_mock(request, Dimension)
         _init_ = initializer_mock(request, MarginalCollator)
         _display_order_ = property_mock(request, MarginalCollator, "_display_order")
         _display_order_.return_value = (-3, -1, -2, 1, 0, 2, 3)
@@ -617,10 +618,6 @@ class DescribeMarginalCollator(object):
     # fixture components ---------------------------------------------
 
     @pytest.fixture
-    def dimension_(self, request):
-        return instance_mock(request, Dimension)
-
-    @pytest.fixture
     def _marginal_propname_prop_(self, request):
         return property_mock(request, MarginalCollator, "_marginal_propname")
 
@@ -647,6 +644,41 @@ class DescribeOpposingElementCollator(object):
 
         _init_.assert_called_once_with(ANY, dimension_, ("opposing", "vectors"))
         assert display_order == (-2, -1, -3, 1, 0, 3, 2)
+
+    def it_gathers_the_subtotal_marginal_values_to_help(
+        self, request, _measure_propname_prop_
+    ):
+        property_mock(
+            request,
+            OpposingElementCollator,
+            "_subtotals",
+            return_value=tuple(
+                instance_mock(request, _Subtotal, addend_idxs=addend_idxs)
+                for addend_idxs in ((0, 1), (4, 2, 3))
+            ),
+        )
+        property_mock(
+            request, OpposingElementCollator, "_measure_propname", return_value="counts"
+        )
+        property_mock(
+            request,
+            OpposingElementCollator,
+            "_opposing_vector",
+            return_value=instance_mock(
+                request, _CategoricalVector, counts=np.array([1.0, 3.25, 2.5, 1.5, 8.0])
+            ),
+        )
+        collator = OpposingElementCollator(None, None)
+
+        subtotal_values = collator._subtotal_values
+
+        assert subtotal_values == (4.25, 12.0)
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _measure_propname_prop_(self, request):
+        return property_mock(request, OpposingElementCollator, "_measure_propname")
 
 
 class DescribePayloadOrderCollator(object):
