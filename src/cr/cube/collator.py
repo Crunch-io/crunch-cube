@@ -479,6 +479,18 @@ class MarginalCollator(_BaseSortByValueCollator):
         return cls(dimension, vectors, inserted_vectors)._display_order
 
     @lazyproperty
+    def _element_values(self):
+        """Sequence of marginal values for the provided vectors.
+
+        These would be array-values like rows-margin, columns-base, and
+        table_proportions.
+
+        Can possibly include NaN values.
+        """
+        propname = self._marginal_propname
+        return tuple(getattr(v, propname) for v in self._vectors)
+
+    @lazyproperty
     def _marginal_propname(self):
         """ -> str property name corresponding to the specified marginal."""
         # --- the `"marginal":` field is required. If this statement raises KeyError, it

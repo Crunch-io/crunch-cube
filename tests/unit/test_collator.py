@@ -19,7 +19,7 @@ from cr.cube.collator import (
 )
 from cr.cube.dimension import Dimension, _Subtotal
 from cr.cube.enums import DIMENSION_TYPE as DT
-from cr.cube.matrix import _BaseInsertedVector
+from cr.cube.matrix import _BaseInsertedVector, _CategoricalVector
 
 from ..unitutil import (
     ANY,
@@ -540,6 +540,20 @@ class DescribeMarginalCollator(object):
             ANY, dimension_, ("vec", "tors"), ("inserted", "vectors")
         )
         assert display_order == (-3, -1, -2, 1, 0, 2, 3)
+
+    def it_gathers_the_base_vector_marginal_values_to_help(
+        self, request, _marginal_propname_prop_
+    ):
+        _marginal_propname_prop_.return_value = "margin"
+        vectors_ = tuple(
+            instance_mock(request, _CategoricalVector, margin=margin)
+            for margin in (1.2, 3.1, 2.5, 1.7, 8.2)
+        )
+        collator = MarginalCollator(None, vectors_, None)
+
+        element_values = collator._element_values
+
+        assert element_values == (1.2, 3.1, 2.5, 1.7, 8.2)
 
     @pytest.mark.parametrize(
         "marginal_keyword, expected_value",
