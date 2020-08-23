@@ -47,7 +47,6 @@ class DescribeExplicitOrderCollator(object):
 class DescribeMarginalCollator(object):
     """Partial-integration test suite for `MarginalCollator` object."""
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     @pytest.mark.parametrize(
         "direction, vectors, inserted_vectors, expected_value",
         (

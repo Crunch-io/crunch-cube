@@ -329,6 +329,31 @@ class Describe_BaseSortByValueCollator(object):
         assert bottom_exclusion_idxs == (4, 0, 5, 2)
 
     @pytest.mark.parametrize(
+        "descending, subtotal_idxs, expected_value",
+        (
+            # --- ascending sort, all subtotals at bottom ---
+            (False, (-3, -1, -2), (-3, -1, -2)),
+            # --- descending sort, no subtotals at bottom ---
+            (True, (-3, -1, -2), ()),
+        ),
+    )
+    def it_knows_the_bottom_subtotal_idxs_to_help(
+        self,
+        _descending_prop_,
+        _subtotal_idxs_prop_,
+        descending,
+        subtotal_idxs,
+        expected_value,
+    ):
+        _descending_prop_.return_value = descending
+        _subtotal_idxs_prop_.return_value = subtotal_idxs
+        collator = _BaseSortByValueCollator(None)
+
+        bottom_subtotal_idxs = collator._bottom_subtotal_idxs
+
+        assert bottom_subtotal_idxs == expected_value
+
+    @pytest.mark.parametrize(
         "order_dict, expected_value",
         (
             ({"direction": "ascending"}, False),
