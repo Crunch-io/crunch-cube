@@ -299,6 +299,16 @@ class Describe_BaseSortByValueCollator(object):
 
         assert descending == expected_value
 
+    def it_provides_a_mapping_of_element_id_to_element_idx_to_help(self, request):
+        property_mock(
+            request, _BaseSortByValueCollator, "_element_ids", return_value=(1, 2, 3)
+        )
+        collator = _BaseSortByValueCollator(None)
+
+        element_idxs_by_id = collator._element_idxs_by_id
+
+        assert element_idxs_by_id == {1: 0, 2: 1, 3: 2}
+
     @pytest.mark.parametrize(
         "top_or_bottom, order_dict, expected_value",
         (

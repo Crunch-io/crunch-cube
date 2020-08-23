@@ -362,7 +362,7 @@ class _BaseSortByValueCollator(_BaseCollator):
     @lazyproperty
     def _element_idxs_by_id(self):
         """dict mapping element-id to payload-order element-idx."""
-        raise NotImplementedError
+        return {id_: idx for idx, id_ in enumerate(self._element_ids)}
 
     def _iter_exclusion_idxs(self, top_or_bottom):
         """Generate the element-idx of each exclusion in the `top_or_bottom` group.
