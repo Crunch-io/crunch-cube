@@ -399,7 +399,12 @@ class _BaseSortByValueCollator(_BaseCollator):
     @lazyproperty
     def _measure_propname(self):
         """ -> str base-vector property name corresponding to `measure`."""
-        raise NotImplementedError
+        # --- the `"measure":` field is required. If this statement raises KeyError
+        # --- (in either of the two lookups), it indicates a validation gap. There is no
+        # --- default measure.
+        return {"unweighted_count": "unweighted_counts", "count": "counts"}[
+            self._order_dict["measure"]
+        ]
 
     @lazyproperty
     def _subtotal_idxs(self):

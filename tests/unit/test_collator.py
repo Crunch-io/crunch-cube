@@ -417,6 +417,20 @@ class Describe_BaseSortByValueCollator(object):
         assert tuple(exclusion_idx_iterator) == expected_value
 
     @pytest.mark.parametrize(
+        "measure_keyword, expected_value",
+        (("unweighted_count", "unweighted_counts"), ("count", "counts")),
+    )
+    def it_maps_the_measure_keyword_to_its_vector_property_name_to_help(
+        self, request, _order_dict_prop_, measure_keyword, expected_value
+    ):
+        _order_dict_prop_.return_value = {"measure": measure_keyword}
+        collator = _BaseSortByValueCollator(None)
+
+        measure_propname = collator._measure_propname
+
+        assert measure_propname == expected_value
+
+    @pytest.mark.parametrize(
         "descending, subtotal_values, expected_value",
         (
             # --- ascending sort ---
