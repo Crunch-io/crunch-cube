@@ -446,7 +446,9 @@ class MarginalCollator(_BaseSortByValueCollator):
         """ -> str property name corresponding to the specified marginal."""
         # --- the `"marginal":` field is required. If this statement raises KeyError, it
         # --- indicates a validation gap. There is no default marginal.
-        raise NotImplementedError
+        return {"unweighted_N": "base", "weighted_N": "margin"}[
+            self._order_dict["marginal"]
+        ]
 
     @lazyproperty
     def _subtotal_values(self):

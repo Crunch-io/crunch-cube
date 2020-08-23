@@ -437,6 +437,25 @@ class DescribeMarginalCollator(object):
         )
         assert display_order == (-3, -1, -2, 1, 0, 2, 3)
 
+    @pytest.mark.parametrize(
+        "marginal_keyword, expected_value",
+        (("unweighted_N", "base"), ("weighted_N", "margin")),
+    )
+    def it_maps_the_marginal_keyword_to_its_vector_property_name_to_help(
+        self, request, marginal_keyword, expected_value
+    ):
+        property_mock(
+            request,
+            MarginalCollator,
+            "_order_dict",
+            return_value={"marginal": marginal_keyword},
+        )
+        collator = MarginalCollator(None, None, None)
+
+        marginal_propname = collator._marginal_propname
+
+        assert marginal_propname == expected_value
+
     def it_gathers_the_subtotal_marginal_values_to_help(
         self, request, _marginal_propname_prop_
     ):
