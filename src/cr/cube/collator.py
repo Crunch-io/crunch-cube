@@ -536,7 +536,14 @@ class OpposingElementCollator(_BaseSortByValueCollator):
     @lazyproperty
     def _opposing_vector(self):
         """Base-vector object providing key-values for the sort."""
-        raise NotImplementedError
+        key_element_id = self._order_dict["element_id"]
+        for vector in self._opposing_vectors:
+            if vector.element_id == key_element_id:
+                return vector
+        raise ValueError(
+            "sort-by-value key element-id %r not found in opposing dimension"
+            % key_element_id
+        )
 
     @lazyproperty
     def _subtotal_values(self):

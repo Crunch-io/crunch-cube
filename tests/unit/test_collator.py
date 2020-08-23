@@ -659,6 +659,31 @@ class DescribeOpposingElementCollator(object):
         _init_.assert_called_once_with(ANY, dimension_, ("opposing", "vectors"))
         assert display_order == (-2, -1, -3, 1, 0, 3, 2)
 
+    def it_finds_the_sort_key_opposing_vector_to_help(self, request, _order_dict_prop_):
+        _order_dict_prop_.return_value = {"element_id": 2}
+        opposing_vectors_ = tuple(
+            instance_mock(request, _CategoricalVector, element_id=element_id)
+            for element_id in (1, 2, 3)
+        )
+        collator = OpposingElementCollator(None, opposing_vectors_)
+
+        opposing_vector = collator._opposing_vector
+
+        assert opposing_vector is opposing_vectors_[1]
+
+    def but_it_raises_ValueError_when_key_opposing_vector_is_not_present(
+        self, request, _order_dict_prop_
+    ):
+        _order_dict_prop_.return_value = {"element_id": 666}
+        opposing_vectors_ = tuple(
+            instance_mock(request, _CategoricalVector, element_id=element_id)
+            for element_id in (1, 2, 3)
+        )
+        collator = OpposingElementCollator(None, opposing_vectors_)
+
+        with pytest.raises(ValueError):
+            collator._opposing_vector
+
     def it_gathers_the_subtotal_marginal_values_to_help(
         self, request, _measure_propname_prop_
     ):
@@ -693,6 +718,10 @@ class DescribeOpposingElementCollator(object):
     @pytest.fixture
     def _measure_propname_prop_(self, request):
         return property_mock(request, OpposingElementCollator, "_measure_propname")
+
+    @pytest.fixture
+    def _order_dict_prop_(self, request):
+        return property_mock(request, OpposingElementCollator, "_order_dict")
 
 
 class DescribePayloadOrderCollator(object):
