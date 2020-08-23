@@ -514,7 +514,11 @@ class OpposingElementCollator(_BaseSortByValueCollator):
     a matrix dimension has an opposing dimension.
     """
 
+    def __init__(self, dimension, opposing_vectors):
+        super(OpposingElementCollator, self).__init__(dimension)
+        self._opposing_vectors = opposing_vectors
+
     @classmethod
     def display_order(cls, dimension, opposing_vectors):
         """ -> sequence of int element-idx specifying ordering of dimension elements."""
-        raise NotImplementedError
+        return cls(dimension, opposing_vectors)._display_order
