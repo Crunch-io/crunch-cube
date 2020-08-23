@@ -277,6 +277,49 @@ class Describe_BaseSortByValueCollator(object):
         assert display_order == (1, 2, 3, 4, 5, 6, 7, 8, 9)
 
     @pytest.mark.parametrize(
+        "top_excl_idxs, bottom_excl_idxs, descending, element_values, expected_value",
+        (
+            # --- ascending sort ---
+            ((), (), False, (8.0, 2.0, 4.0, 1.0), (3, 1, 2, 0)),
+            # --- ascending with top exclusions (which therefore do not appear ---
+            ((2, 1), (), False, (8.0, 2.0, 4.0, 1.0), (3, 0)),
+            # --- descending sort ---
+            ((), (), True, (8.0, 2.0, 4.0, 1.0), (0, 2, 1, 3)),
+            # --- descending with bottom exclusions ---
+            ((), (1, 0), True, (8.0, 2.0, 4.0, 1.0), (2, 3)),
+            # --- descending with both kinds of exclusion ---
+            ((0,), (3,), True, (8.0, 2.0, 4.0, 1.0), (2, 1)),
+        ),
+    )
+    def it_computes_the_sorted_body_idxs_to_help(
+        self,
+        request,
+        _top_exclusion_idxs_prop_,
+        _bottom_exclusion_idxs_prop_,
+        _descending_prop_,
+        top_excl_idxs,
+        bottom_excl_idxs,
+        descending,
+        element_values,
+        expected_value,
+    ):
+        """Body-idxs are for elements that are not subtotals and not excluded."""
+        _top_exclusion_idxs_prop_.return_value = top_excl_idxs
+        _bottom_exclusion_idxs_prop_.return_value = bottom_excl_idxs
+        _descending_prop_.return_value = descending
+        property_mock(
+            request,
+            _BaseSortByValueCollator,
+            "_element_values",
+            return_value=element_values,
+        )
+        collator = _BaseSortByValueCollator(None)
+
+        body_idxs = collator._body_idxs
+
+        assert body_idxs == expected_value
+
+    @pytest.mark.parametrize(
         "order_dict, expected_value",
         (
             ({"direction": "ascending"}, False),

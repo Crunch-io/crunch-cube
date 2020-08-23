@@ -327,7 +327,18 @@ class _BaseSortByValueCollator(_BaseCollator):
         `._target_values` property defined in the subclass and the "top" and "bottom"
         anchored elements specified in the `"order": {}` dict.
         """
-        raise NotImplementedError
+        excluded_idxs = frozenset(
+            self._top_exclusion_idxs + self._bottom_exclusion_idxs
+        )
+        sorted_value_idx_pairs = sorted(
+            (
+                (value, idx)
+                for idx, value in enumerate(self._element_values)
+                if idx not in excluded_idxs
+            ),
+            reverse=self._descending,
+        )
+        return tuple(idx for _, idx in sorted_value_idx_pairs)
 
     @lazyproperty
     def _bottom_exclusion_idxs(self):
@@ -363,6 +374,13 @@ class _BaseSortByValueCollator(_BaseCollator):
     def _element_idxs_by_id(self):
         """dict mapping element-id to payload-order element-idx."""
         return {id_: idx for idx, id_ in enumerate(self._element_ids)}
+
+    @lazyproperty
+    def _element_values(self):
+        """tuple of the measure value for each dimension element, in payload order."""
+        raise NotImplementedError(
+            "`._element_values must be implemented by each subclass"
+        )
 
     def _iter_exclusion_idxs(self, top_or_bottom):
         """Generate the element-idx of each exclusion in the `top_or_bottom` group.
