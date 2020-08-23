@@ -359,6 +359,16 @@ class _BaseSortByValueCollator(_BaseCollator):
         """
         return self._order_dict.get("direction", "descending") != "ascending"
 
+    def _iter_exclusion_idxs(self, top_or_bottom):
+        """Generate the element-idx of each exclusion in the `top_or_bottom` group.
+
+        `top_or_bottom` must be one of "top" or "bottom". Any element-id specified in
+        the exclusion-group that is not present in the dimension is ignored. This is
+        important because an element (e.g. category) can be removed after the analysis
+        is saved and may no longer be present at export time.
+        """
+        raise NotImplementedError
+
     @lazyproperty
     def _subtotal_idxs(self):
         """tuple of int (negative) element-idx for each subtotal of this dimension.
@@ -393,7 +403,7 @@ class _BaseSortByValueCollator(_BaseCollator):
         The items appear in the order specified in the "top" exclude-grouping of the
         transform; they are not subject to sorting-by-value.
         """
-        raise NotImplementedError
+        return tuple(self._iter_exclusion_idxs("top"))
 
     @lazyproperty
     def _top_subtotal_idxs(self):

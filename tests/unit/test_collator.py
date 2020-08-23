@@ -327,6 +327,15 @@ class Describe_BaseSortByValueCollator(object):
 
         assert subtotal_idxs == expected_value
 
+    def it_knows_the_top_exclusion_idxs_to_help(self, _iter_exclusion_idxs_):
+        _iter_exclusion_idxs_.return_value = (n for n in (3, 1, 4, 2))
+        collator = _BaseSortByValueCollator(None)
+
+        top_exclusion_idxs = collator._top_exclusion_idxs
+
+        _iter_exclusion_idxs_.assert_called_once_with(collator, "top")
+        assert top_exclusion_idxs == (3, 1, 4, 2)
+
     @pytest.mark.parametrize(
         "descending, subtotal_idxs, expected_value",
         (
@@ -363,6 +372,10 @@ class Describe_BaseSortByValueCollator(object):
     @pytest.fixture
     def _descending_prop_(self, request):
         return property_mock(request, _BaseSortByValueCollator, "_descending")
+
+    @pytest.fixture
+    def _iter_exclusion_idxs_(self, request):
+        return method_mock(request, _BaseSortByValueCollator, "_iter_exclusion_idxs")
 
     @pytest.fixture
     def _order_dict_prop_(self, request):
