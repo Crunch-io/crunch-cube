@@ -659,6 +659,24 @@ class DescribeOpposingElementCollator(object):
         _init_.assert_called_once_with(ANY, dimension_, ("opposing", "vectors"))
         assert display_order == (-2, -1, -3, 1, 0, 3, 2)
 
+    def it_gathers_the_base_vector_measure_values_to_help(
+        self, request, _measure_propname_prop_
+    ):
+        _measure_propname_prop_.return_value = "counts"
+        property_mock(
+            request,
+            OpposingElementCollator,
+            "_opposing_vector",
+            return_value=instance_mock(
+                request, _CategoricalVector, counts=np.array([2.5, 1.5, 1.0, 3.25])
+            ),
+        )
+        collator = OpposingElementCollator(None, None)
+
+        element_values = collator._element_values
+
+        assert element_values == (2.5, 1.5, 1.0, 3.25)
+
     def it_finds_the_sort_key_opposing_vector_to_help(self, request, _order_dict_prop_):
         _order_dict_prop_.return_value = {"element_id": 2}
         opposing_vectors_ = tuple(

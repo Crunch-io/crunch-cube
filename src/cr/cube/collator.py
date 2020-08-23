@@ -534,6 +534,14 @@ class OpposingElementCollator(_BaseSortByValueCollator):
         return cls(dimension, opposing_vectors)._display_order
 
     @lazyproperty
+    def _element_values(self):
+        """tuple of meaure values in the specified opposing vector, in payload order.
+
+        Can possibly include NaN values.
+        """
+        return tuple(getattr(self._opposing_vector, self._measure_propname))
+
+    @lazyproperty
     def _opposing_vector(self):
         """Base-vector object providing key-values for the sort."""
         key_element_id = self._order_dict["element_id"]
