@@ -359,6 +359,11 @@ class _BaseSortByValueCollator(_BaseCollator):
         """
         return self._order_dict.get("direction", "descending") != "ascending"
 
+    @lazyproperty
+    def _element_idxs_by_id(self):
+        """dict mapping element-id to payload-order element-idx."""
+        raise NotImplementedError
+
     def _iter_exclusion_idxs(self, top_or_bottom):
         """Generate the element-idx of each exclusion in the `top_or_bottom` group.
 
@@ -367,7 +372,11 @@ class _BaseSortByValueCollator(_BaseCollator):
         important because an element (e.g. category) can be removed after the analysis
         is saved and may no longer be present at export time.
         """
-        raise NotImplementedError
+        element_idxs_by_id = self._element_idxs_by_id
+        for element_id in self._order_dict.get("exclude", {}).get(top_or_bottom, []):
+            if element_id not in element_idxs_by_id:
+                continue
+            yield element_idxs_by_id[element_id]
 
     @lazyproperty
     def _subtotal_idxs(self):

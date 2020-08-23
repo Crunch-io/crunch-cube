@@ -300,6 +300,35 @@ class Describe_BaseSortByValueCollator(object):
         assert descending == expected_value
 
     @pytest.mark.parametrize(
+        "top_or_bottom, order_dict, expected_value",
+        (
+            ("top", {}, ()),
+            ("bottom", {"exclude": {}}, ()),
+            ("bottom", {"exclude": {"foobar": [3, 4]}}, ()),
+            ("top", {"exclude": {"top": [2, 3]}}, (1, 2)),
+            ("bottom", {"exclude": {"top": [2, 3]}}, ()),
+            ("top", {"exclude": {"bottom": [2, 3]}}, ()),
+            ("bottom", {"exclude": {"bottom": [2]}}, (1,)),
+            ("top", {"exclude": {"top": [2, 5, 3]}}, (1, 2)),
+        ),
+    )
+    def it_can_generate_the_exclusion_idxs_for_top_or_bottom_to_help(
+        self, request, _order_dict_prop_, top_or_bottom, order_dict, expected_value
+    ):
+        property_mock(
+            request,
+            _BaseSortByValueCollator,
+            "_element_idxs_by_id",
+            return_value={1: 0, 2: 1, 3: 2, 4: 3},
+        )
+        _order_dict_prop_.return_value = order_dict
+        collator = _BaseSortByValueCollator(None)
+
+        exclusion_idx_iterator = collator._iter_exclusion_idxs(top_or_bottom)
+
+        assert tuple(exclusion_idx_iterator) == expected_value
+
+    @pytest.mark.parametrize(
         "descending, subtotal_values, expected_value",
         (
             # --- ascending sort ---
