@@ -586,3 +586,23 @@ class OpposingSubtotalCollator(_BaseSortByValueCollator):
         indexing in their respective unordered collections.
         """
         return cls(dimension, opposing_inserted_vectors)._display_order
+
+    @lazyproperty
+    def _opposing_subtotal(self):
+        """Insertion-vector object providing values by which to sort."""
+        raise NotImplementedError
+
+    @lazyproperty
+    def _subtotal_values(self):
+        """tuple of the measure value for each inserted subtotal, in payload order."""
+        measure_propname = self._measure_propname
+
+        # TODO: this calculation needs to be more sophisticated than just `sum()` for
+        # certain measures. Probably just np.nan in most of those cases, but in general
+        # the function should be looked up from a source shared with the
+        # vector-assembler, as long as all subtotaling functions can share a signature.
+        def subtotal_value(subtotal):
+            values = getattr(self._opposing_subtotal, measure_propname)
+            return sum(values[idx] for idx in subtotal.addend_idxs)
+
+        return tuple(subtotal_value(s) for s in self._subtotals)

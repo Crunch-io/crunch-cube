@@ -703,9 +703,7 @@ class DescribeOpposingElementCollator(object):
         with pytest.raises(ValueError):
             collator._opposing_vector
 
-    def it_gathers_the_subtotal_marginal_values_to_help(
-        self, request, _measure_propname_prop_
-    ):
+    def it_gathers_the_subtotal_values_to_help(self, request, _measure_propname_prop_):
         property_mock(
             request,
             OpposingElementCollator,
@@ -767,6 +765,42 @@ class DescribeOpposingSubtotalCollator(object):
             ANY, dimension_, ("opposing", "inserted", "vectors")
         )
         assert display_order == (-3, -1, -2, 3, 0, 2, 1)
+
+    def it_gathers_the_subtotal_values_to_help(self, request, _measure_propname_prop_):
+        property_mock(
+            request,
+            OpposingSubtotalCollator,
+            "_subtotals",
+            return_value=tuple(
+                instance_mock(request, _Subtotal, addend_idxs=addend_idxs)
+                for addend_idxs in ((0, 1), (4, 2, 3))
+            ),
+        )
+        property_mock(
+            request,
+            OpposingSubtotalCollator,
+            "_measure_propname",
+            return_value="counts",
+        )
+        property_mock(
+            request,
+            OpposingSubtotalCollator,
+            "_opposing_subtotal",
+            return_value=instance_mock(
+                request, _BaseInsertedVector, counts=np.array([1.0, 3.5, 2.5, 1.5, 8.0])
+            ),
+        )
+        collator = OpposingSubtotalCollator(None, None)
+
+        subtotal_values = collator._subtotal_values
+
+        assert subtotal_values == (4.5, 12.0)
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _measure_propname_prop_(self, request):
+        return property_mock(request, OpposingSubtotalCollator, "_measure_propname")
 
 
 class DescribePayloadOrderCollator(object):
