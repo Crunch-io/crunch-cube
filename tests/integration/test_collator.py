@@ -170,7 +170,6 @@ class DescribeOpposingElementCollator(object):
 class DescribeOpposingSubtotalCollator(object):
     """Partial-integration test suite for `OpposingSubtotalCollator` object."""
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     @pytest.mark.parametrize(
         "direction, elements, subtots, expected_value",
         (

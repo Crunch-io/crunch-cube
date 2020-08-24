@@ -766,6 +766,24 @@ class DescribeOpposingSubtotalCollator(object):
         )
         assert display_order == (-3, -1, -2, 3, 0, 2, 1)
 
+    def it_gathers_the_non_intersecting_subtotal_values_to_help(
+        self, request, _measure_propname_prop_
+    ):
+        _measure_propname_prop_.return_value = "counts"
+        property_mock(
+            request,
+            OpposingSubtotalCollator,
+            "_opposing_subtotal",
+            return_value=instance_mock(
+                request, _BaseInsertedVector, counts=np.array([2.5, 1.5, 1.0, 3.25])
+            ),
+        )
+        collator = OpposingSubtotalCollator(None, None)
+
+        element_values = collator._element_values
+
+        assert element_values == (2.5, 1.5, 1.0, 3.25)
+
     def it_gathers_the_subtotal_values_to_help(self, request, _measure_propname_prop_):
         property_mock(
             request,

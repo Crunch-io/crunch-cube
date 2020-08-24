@@ -588,6 +588,16 @@ class OpposingSubtotalCollator(_BaseSortByValueCollator):
         return cls(dimension, opposing_inserted_vectors)._display_order
 
     @lazyproperty
+    def _element_values(self):
+        """tuple of measure values in the specified opposing subtotal vector.
+
+        Values appear in payload-order without interleaved subtotals. The payload-order
+        index of each value can be inferred from its position in this sequence. Can
+        possibly include NaN values.
+        """
+        return tuple(getattr(self._opposing_subtotal, self._measure_propname))
+
+    @lazyproperty
     def _opposing_subtotal(self):
         """Insertion-vector object providing values by which to sort."""
         key_insertion_id = self._order_dict["insertion_id"]
