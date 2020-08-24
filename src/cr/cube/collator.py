@@ -563,3 +563,22 @@ class OpposingElementCollator(_BaseSortByValueCollator):
             return sum(values[idx] for idx in subtotal.addend_idxs)
 
         return tuple(subtotal_value(s) for s in self._subtotals)
+
+
+class OpposingSubtotalCollator(_BaseSortByValueCollator):
+    """Orders elements by value of an opposing subtotal vector.
+
+    This would be like "order rows in descending order by value of 'Top 3' subtotal
+    column". An opposing-subtotal ordering is only available on a matrix, because only
+    a matrix dimension can have an opposing dimension.
+    """
+
+    @classmethod
+    def display_order(cls, dimension, opposing_inserted_vectors):
+        """ -> sequence of int element-idx specifying ordering of dimension elements.
+
+        The returned indices are "signed", with positive indices applying to base
+        vectors and negative indices applying to inserted vectors. Both work for
+        indexing in their respective unordered collections.
+        """
+        raise NotImplementedError
