@@ -796,11 +796,42 @@ class DescribeOpposingSubtotalCollator(object):
 
         assert subtotal_values == (4.5, 12.0)
 
+    def it_finds_the_sort_key_opposing_subtotal_to_help(
+        self, request, _order_dict_prop_
+    ):
+        _order_dict_prop_.return_value = {"insertion_id": 2}
+        opposing_subtotals_ = tuple(
+            instance_mock(request, _BaseInsertedVector, insertion_id=insertion_id)
+            for insertion_id in (1, 2, 3)
+        )
+        collator = OpposingSubtotalCollator(None, opposing_subtotals_)
+
+        opposing_subtotal = collator._opposing_subtotal
+
+        assert opposing_subtotal is opposing_subtotals_[1]
+
+    def but_it_raises_ValueError_when_key_opposing_subtotal_is_not_present(
+        self, request, _order_dict_prop_
+    ):
+        _order_dict_prop_.return_value = {"insertion_id": 666}
+        opposing_subtotals_ = tuple(
+            instance_mock(request, _BaseInsertedVector, insertion_id=insertion_id)
+            for insertion_id in (1, 2, 3)
+        )
+        collator = OpposingSubtotalCollator(None, opposing_subtotals_)
+
+        with pytest.raises(ValueError):
+            collator._opposing_subtotal
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
     def _measure_propname_prop_(self, request):
         return property_mock(request, OpposingSubtotalCollator, "_measure_propname")
+
+    @pytest.fixture
+    def _order_dict_prop_(self, request):
+        return property_mock(request, OpposingSubtotalCollator, "_order_dict")
 
 
 class DescribePayloadOrderCollator(object):

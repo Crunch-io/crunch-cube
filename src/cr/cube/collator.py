@@ -590,7 +590,14 @@ class OpposingSubtotalCollator(_BaseSortByValueCollator):
     @lazyproperty
     def _opposing_subtotal(self):
         """Insertion-vector object providing values by which to sort."""
-        raise NotImplementedError
+        key_insertion_id = self._order_dict["insertion_id"]
+        for v in self._opposing_inserted_vectors:
+            if v.insertion_id == key_insertion_id:
+                return v
+        raise ValueError(
+            "sort-by-subtotal key insertion-id %r not found in opposing insertions"
+            % key_insertion_id
+        )
 
     @lazyproperty
     def _subtotal_values(self):
