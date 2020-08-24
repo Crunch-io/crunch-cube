@@ -16,6 +16,7 @@ from cr.cube.collator import (
     ExplicitOrderCollator,
     MarginalCollator,
     OpposingElementCollator,
+    OpposingSubtotalCollator,
     PayloadOrderCollator,
 )
 from cr.cube.dimension import Dimension, _Subtotal
@@ -740,6 +741,32 @@ class DescribeOpposingElementCollator(object):
     @pytest.fixture
     def _order_dict_prop_(self, request):
         return property_mock(request, OpposingElementCollator, "_order_dict")
+
+
+class DescribeOpposingSubtotalCollator(object):
+    """Unit-test suite for `cr.cube.collator.OpposingSubtotalCollator` object.
+
+    OpposingSubtotalCollator computes element ordering for order transforms of type
+    "opposing_subtotal". This would be like "order rows in descending order of the
+    count in their 'Top 3' column cell.
+    """
+
+    def it_provides_an_interface_classmethod(self, request):
+        _init_ = initializer_mock(request, OpposingSubtotalCollator)
+        dimension_ = instance_mock(request, Dimension)
+        _display_order_ = property_mock(
+            request, OpposingSubtotalCollator, "_display_order"
+        )
+        _display_order_.return_value = (-3, -1, -2, 3, 0, 2, 1)
+
+        display_order = OpposingSubtotalCollator.display_order(
+            dimension_, ("opposing", "inserted", "vectors")
+        )
+
+        _init_.assert_called_once_with(
+            ANY, dimension_, ("opposing", "inserted", "vectors")
+        )
+        assert display_order == (-3, -1, -2, 3, 0, 2, 1)
 
 
 class DescribePayloadOrderCollator(object):

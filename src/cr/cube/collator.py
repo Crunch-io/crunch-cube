@@ -573,6 +573,10 @@ class OpposingSubtotalCollator(_BaseSortByValueCollator):
     a matrix dimension can have an opposing dimension.
     """
 
+    def __init__(self, dimension, opposing_inserted_vectors):
+        super(OpposingSubtotalCollator, self).__init__(dimension)
+        self._opposing_inserted_vectors = opposing_inserted_vectors
+
     @classmethod
     def display_order(cls, dimension, opposing_inserted_vectors):
         """ -> sequence of int element-idx specifying ordering of dimension elements.
@@ -581,4 +585,4 @@ class OpposingSubtotalCollator(_BaseSortByValueCollator):
         vectors and negative indices applying to inserted vectors. Both work for
         indexing in their respective unordered collections.
         """
-        raise NotImplementedError
+        return cls(dimension, opposing_inserted_vectors)._display_order
