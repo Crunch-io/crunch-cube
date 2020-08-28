@@ -26,7 +26,7 @@ class TransformedMatrix(object):
 
     @classmethod
     def matrix(cls, cube, dimensions, slice_idx):
-        """ -> TransformedMatrix object constructed from values of `cube`.
+        """-> TransformedMatrix object constructed from values of `cube`.
 
         `cube` is the `cr.cube.Cube` object containing the data for this matrix. Note
         that not all the data in `cube` will necessarily be used by this matrix. When
@@ -136,11 +136,11 @@ class TransformedMatrix(object):
         columns-questions and provided a valid response for both (note that
         not-selecting an MR option/subvar is a valid response).
 
-        A multiple-response (MR) dimension produces an array of table-base values
+        A multiple-response (MR) dimension produces an array of table-margin values
         because each element (subvariable) of the dimension represents a logically
         distinct question which may not have been asked of all respondents. When both
         dimensions are MR, the return value is a 2D ndarray and there is a distinct
-        table-base value for each "cell" of the matrix. A CAT_X_CAT matrix produces
+        table-margin value for each "cell" of the matrix. A CAT_X_CAT matrix produces
         a scalar value for this property.
         """
         return self.table_margin_unpruned[
@@ -261,7 +261,7 @@ class TransformedMatrix(object):
 
     @lazyproperty
     def _inserted_columns(self):
-        """ -> tuple of _InsertedColumn objects representing subtotal columns.
+        """-> tuple of _InsertedColumn objects representing subtotal columns.
 
         The returned vectors are in the order subtotals were specified in the cube
         result, which is no particular order. All subtotals defined on the column
@@ -291,7 +291,7 @@ class TransformedMatrix(object):
 
     @lazyproperty
     def _inserted_rows(self):
-        """ -> tuple of _InsertedRow objects representing inserted subtotal rows.
+        """-> tuple of _InsertedRow objects representing inserted subtotal rows.
 
         The returned vectors are in the order subtotals were specified in the cube
         result, which is no particular order.
@@ -394,7 +394,7 @@ class _BaseBaseMatrix(object):
         )  # pragma: no cover
 
     def _array_type_std_res(self, counts, total, colsum, rowsum):
-        """ -> 2D ndarray of np.float64 std-res value for each cell of MR matrix.
+        """-> 2D ndarray of np.float64 std-res value for each cell of MR matrix.
 
         This is a utility method used by a matrix with one or more MR dimensions. The
         caller forms the input arrays based on which of its dimensions are MR.
@@ -660,7 +660,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
         columns-var question) are included. This ensures that the baseline is not
         distorted by a large number of missing responses to the columns-question.
         """
-        # --- uncond_row_margin is a 1D ndarray of weighted total observation count
+        # --- uncond_row_margin is a 1D ndarray of the weighted total observation count
         # --- involving each valid row. Counts consider both valid and invalid columns,
         # --- but are only produced for valid rows.
         uncond_row_margin = np.sum(self._counts_with_missings, axis=1)[
@@ -1661,7 +1661,7 @@ class _BaseMatrixInsertedVector(object):
 
     @lazyproperty
     def ordering(self):
-        """ -> (position, index, self) tuple used for interleaving with base vectors.
+        """-> (position, index, self) tuple used for interleaving with base vectors.
 
         This value allows the interleaving of inserted vectors with base vectors to be
         reduced to a sorting operation.
@@ -1956,7 +1956,7 @@ class _AssembledVector(_BaseTransformationVector):
         """
 
         def fsubtot(inserted_vector):
-            """ -> np.nan as unconditional col-index value for `inserted_vector`.
+            """-> np.nan as unconditional col-index value for `inserted_vector`.
 
             Called by ._apply_interleaved() to compute inserted value which it places
             in the right vector position.
@@ -1975,7 +1975,7 @@ class _AssembledVector(_BaseTransformationVector):
         base_vector_counts = self._base_vector.counts
 
         def fsubtot(inserted_vector):
-            """ -> np.float/int64 count for `inserted_vector`.
+            """-> np.float/int64 count for `inserted_vector`.
 
             Passed to and called by ._apply_interleaved() to compute inserted value
             which it places in the right vector position.
@@ -1992,7 +1992,7 @@ class _AssembledVector(_BaseTransformationVector):
         """
 
         def fsubtot(inserted_vector):
-            """ -> np.nan as unconditional mean value for `inserted_vector`.
+            """-> np.nan as unconditional mean value for `inserted_vector`.
 
             Passed to and called by ._apply_interleaved() to compute inserted value
             which it places in the right vector position.
@@ -2042,7 +2042,7 @@ class _AssembledVector(_BaseTransformationVector):
         unweighted_counts = self._base_vector.unweighted_counts
 
         def fsubtot(inserted_vector):
-            """ -> np.int64 count for `inserted_vector`.
+            """-> np.int64 count for `inserted_vector`.
 
             Passed to and called by ._apply_interleaved() to compute inserted value
             which it places in the right vector position.
@@ -2059,7 +2059,7 @@ class _AssembledVector(_BaseTransformationVector):
         """
 
         def fsubtot(inserted_vector):
-            """ -> np.float64 zscore for `inserted_vector`.
+            """-> np.float64 zscore for `inserted_vector`.
 
             Passed to and called by ._apply_interleaved() to compute inserted value
             which it places in the right vector position.
@@ -2087,7 +2087,7 @@ class _AssembledVector(_BaseTransformationVector):
         return self._apply_interleaved(self._base_vector.zscores, fsubtot)
 
     def _apply_interleaved(self, base_values, fsubtot):
-        """ -> 1D array of result of applying fbase or fsubtot to each interleaved item.
+        """-> 1D array of result of applying fbase or fsubtot to each interleaved item.
 
         `base_values` is the "unassembled" vector measure values.
 
@@ -2108,7 +2108,7 @@ class _AssembledVector(_BaseTransformationVector):
 
     @lazyproperty
     def _interleaved_idxs(self):
-        """ -> tuple of int: idx for base and inserted values, in display order.
+        """-> tuple of int: idx for base and inserted values, in display order.
 
         Inserted value indicies are negative, to distinguish them from base vector
         indices. The indexes are interleaved simply by sorting their orderings. An
@@ -2393,6 +2393,23 @@ class _BaseVector(object):
         a 1D np.int64 ndarray. A vector opposing a CAT dimension has a single base and
         produces a scalar np.int64 value.
         """
+        # --- The `axis=0` parameter makes this work for both the X_MR and X_CAT cases.
+        # --- A vector opposing an MR dimension (X_MR) has a 2D unweighted_counts like:
+        #
+        #      [[653  128  120  389  469]
+        #       [101   95   96   69   61]]
+        #
+        # --- where the first axis is selected/unselected and the second dimension is
+        # --- a distinct value for each MR-subvar. The sum must include both selected
+        # --- and unselected values, but cannot sum across subvars. So the result is
+        # --- a 1D array for the X_MR case.
+        # ---
+        # --- In the X_CAT case, unweighted_counts is a 1D array like:
+        #
+        #      [246  61  102  318  469]
+        #
+        # --- Summing across axis-0 gives the right (scalar) result here too, even
+        # --- though specifying the axis is superfluous for this case.
         return np.sum(self._unweighted_counts, axis=0)
 
     @lazyproperty
@@ -2631,13 +2648,13 @@ class _MrOpposingCatVector(_CategoricalVector):
             table_std_err,
             column_index,
         )
-        self._both_counts = counts
-        self._both_unweighted_counts = unweighted_counts
+        self._both_selected_and_unselected_counts = counts
+        self._both_selected_and_unselected_unweighted_counts = unweighted_counts
 
     @lazyproperty
     def pruned(self):
         """True if this vector contains no samples."""
-        vector_base = np.sum(self._both_unweighted_counts)
+        vector_base = np.sum(self._both_selected_and_unselected_unweighted_counts)
         return vector_base == 0
 
     @lazyproperty
@@ -2649,7 +2666,7 @@ class _MrOpposingCatVector(_CategoricalVector):
         distinct table-base which is often different. This is because each MR response
         may be presented to a different number of respondents.
         """
-        return np.sum(self._both_unweighted_counts)
+        return np.sum(self._both_selected_and_unselected_unweighted_counts)
 
     @lazyproperty
     def table_margin(self):
@@ -2659,7 +2676,7 @@ class _MrOpposingCatVector(_CategoricalVector):
         shared by all cells in this vector. Note however that its sibling MR vectors
         each have their own distinct table-margin which is often different.
         """
-        return np.sum(self._both_counts)
+        return np.sum(self._both_selected_and_unselected_counts)
 
 
 class _OpposingMrVector(_CategoricalVector):
