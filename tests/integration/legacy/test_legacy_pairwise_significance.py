@@ -44,7 +44,9 @@ class TestStandardizedResiduals(TestCase):
                 [(), (), (), (), (), ()],
                 [(), (), (), (), (), ()],
                 [(), (), (), (), (), ()],
-            ]
+            ],
+            # --- ragged array must be data-type "object" ---
+            dtype=object,
         )
         actual_pairwise_indices = slice_.wishart_pairwise_indices(axis=0)
         np.testing.assert_array_equal(actual_pairwise_indices, expected)
@@ -91,7 +93,9 @@ class TestStandardizedResiduals(TestCase):
     def test_hirotsu_pairwise_indices(self):
         slice_ = CrunchCube(CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION).slices[0]
         actual_pairwise_indices = slice_.wishart_pairwise_indices(axis=0)
-        expected = np.array([(), (), (3, 4, 7, 9), (2,), (2,), (), (), (2,), (), (2,)])
+        expected = np.array(
+            [(), (), (3, 4, 7, 9), (2,), (2,), (), (), (2,), (), (2,)], dtype=object
+        )
         np.testing.assert_array_equal(actual_pairwise_indices, expected)
 
     def test_pairwise_t_stats_with_hs(self):
@@ -327,7 +331,8 @@ class TestStandardizedResiduals(TestCase):
                 [(), (), ()],
                 [(), (), ()],
                 [(), (0,), (0,)],
-            ]
+            ],
+            dtype=object,
         )
         pairwise_indices = cube.slices[0].pairwise_indices()
         np.testing.assert_array_equal(pairwise_indices, expected_indices)
@@ -341,7 +346,9 @@ class TestStandardizedResiduals(TestCase):
                 [(), (), (), (0,), (0,), ()],
                 [(), (), (), (), (1,), ()],
                 [(), (), (), (), (), ()],
-            ]
+            ],
+            # --- each cell is a tuple object, not an additional array level ---
+            dtype=object,
         )
         pairwise_indices = cube.slices[0].pairwise_indices()
         np.testing.assert_array_equal(pairwise_indices, expected_indices)
@@ -356,7 +363,8 @@ class TestStandardizedResiduals(TestCase):
                 [(), (0,), (0,), (0,), (0,)],
                 [(), (), (), (0, 1, 4), ()],
                 [(), (), (), (), ()],
-            ]
+            ],
+            dtype=object,
         )
         pairwise_indices = cube.slices[0].pairwise_indices()
         np.testing.assert_array_equal(pairwise_indices, expected_indices)
@@ -369,7 +377,8 @@ class TestStandardizedResiduals(TestCase):
                 [(), (0, 2, 3), (), (2,)],
                 [(), (), (0, 1, 3), (1,)],
                 [(), (), (), ()],
-            ]
+            ],
+            dtype=object,
         )
         pairwise_indices = cube.slices[0].pairwise_indices()
         np.testing.assert_array_equal(pairwise_indices, expected_indices)
@@ -388,7 +397,8 @@ class TestStandardizedResiduals(TestCase):
                 [(), (), ()],
                 [(), (), ()],
                 [(1, 2), (0,), (0,)],
-            ]
+            ],
+            dtype=object,
         )
         pairwise_indices = cube.slices[0].pairwise_indices(only_larger=False)
         np.testing.assert_array_equal(pairwise_indices, expected_indices)
@@ -398,7 +408,7 @@ class TestStandardizedResiduals(TestCase):
 
         # Only larger
         pairwise_indices = slice_.summary_pairwise_indices()
-        expected_indices = np.array([(2,), (0, 2), ()])
+        expected_indices = np.array([(2,), (0, 2), ()], dtype=object)
         np.testing.assert_array_equal(pairwise_indices, expected_indices)
 
         # Larger and smaller
@@ -443,6 +453,7 @@ class TestStandardizedResiduals(TestCase):
                 [(), (), (), ()],
                 [(), (), (), ()],
                 [(2, 3), (), (), ()],
-            ]
+            ],
+            dtype=object,
         )
         np.testing.assert_array_equal(pairwise_indices, expected_indices)

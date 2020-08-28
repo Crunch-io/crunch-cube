@@ -158,7 +158,9 @@ class _CatXCatPairwiseSignificance(WishartPairwiseSignificance):
             [
                 self._pairwise_sig_indices(pvals_row < self._alpha)
                 for pvals_row in self.pvals
-            ]
+            ],
+            # --- this is a ragged array so tuples must be objects ---
+            dtype=object,
         )
 
     @lazyproperty
@@ -196,7 +198,8 @@ class _MrXCatPairwiseSignificance(WishartPairwiseSignificance):
                     for pvals_row in pvals_matrix
                 ]
                 for pvals_matrix in self.pvals
-            ]
+            ],
+            dtype=object,
         )
 
     @lazyproperty

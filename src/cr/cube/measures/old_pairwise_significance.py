@@ -54,7 +54,7 @@ class PairwiseSignificance:
     @lazyproperty
     def pairwise_indices(self):
         """ndarray containing tuples of pairwise indices."""
-        return np.array([sig.pairwise_indices for sig in self.values]).T
+        return np.array([sig.pairwise_indices for sig in self.values], dtype=object).T
 
     @lazyproperty
     def summary_pairwise_indices(self):

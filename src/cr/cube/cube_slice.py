@@ -727,7 +727,7 @@ class CubeSlice(object):
             return result
         result = result[self._index]
         if isinstance(result, tuple):
-            return np.array(result)
+            return np.array(result, dtype=object)
         elif not isinstance(result, np.ndarray):
             result = np.array([result])
         return result

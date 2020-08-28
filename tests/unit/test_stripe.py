@@ -195,7 +195,6 @@ class Describe_StripeInsertionHelper(object):
 
         inserted_rows = insertion_helper._inserted_rows
 
-        print(_StripeInsertedRow_.call_args_list)
         assert _StripeInsertedRow_.call_args_list == [
             call(row, ("ordered", "rows"), 42) for row in subtotal_rows_[:expected_len]
         ]

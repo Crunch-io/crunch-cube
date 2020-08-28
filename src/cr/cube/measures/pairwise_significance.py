@@ -9,11 +9,6 @@ from scipy.stats import t
 
 from cr.cube.util import lazyproperty
 
-try:
-    xrange
-except NameError:  # pragma: no cover
-    xrange = range
-
 
 class PairwiseSignificance(object):
     """Implementation of p-vals and t-tests for each column proportions comparison."""
@@ -30,7 +25,7 @@ class PairwiseSignificance(object):
 
     @classmethod
     def scale_mean_pairwise_indices(cls, slice_, alpha, only_larger):
-        """ -> 1D ndarray of tuples of column-indices meeting pairwise-t threshold.
+        """-> 1D ndarray of tuples of column-indices meeting pairwise-t threshold.
 
         Indicates "whole columns" that are significantly different, based on the mean of
         the scale (category numeric-values) for each column. The length of the array is
@@ -60,14 +55,14 @@ class PairwiseSignificance(object):
             _ColumnPairwiseSignificance(
                 self._slice, col_idx, self._alpha, self._only_larger
             )
-            for col_idx in xrange(self._slice.shape[1])
+            for col_idx in range(self._slice.shape[1])
         ]
 
     @lazyproperty
     def _pairwise_indices(self):
-        """2D ndarray containing tuples of pairwise indices."""
-        A = np.array([sig.pairwise_indices for sig in self.values]).T
-        return tuple(tuple(cell for cell in row) for row in A)
+        """2D ndarray containing tuples of int pairwise indices."""
+        A = np.array([col_pw_sig.pairwise_indices for col_pw_sig in self.values]).T
+        return np.array([[tuple(cell) for cell in row] for row in A], dtype=tuple)
 
     @lazyproperty
     def _scale_mean_pairwise_indices(self):

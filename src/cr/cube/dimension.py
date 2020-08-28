@@ -2,7 +2,12 @@
 
 """Provides the Dimension class."""
 
-from collections import Sequence
+import sys
+
+if sys.version_info >= (3, 3):
+    from collections.abc import Sequence
+else:
+    from collections import Sequence
 
 import numpy as np
 

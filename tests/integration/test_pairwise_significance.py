@@ -52,8 +52,8 @@ class Describe_Slice(object):
 
         actual = slice_.pairwise_indices
 
-        expected = load_python_expression(expectation)
-        assert expected == actual, "\n%s\n\n%s" % (expected, actual)
+        expected = np.array(load_python_expression(expectation), dtype=tuple)
+        assert (expected == actual).all(), "\n%s\n\n%s" % (expected, actual)
 
     @pytest.mark.parametrize(
         "fixture, pw_indices_dict, expectation",
@@ -79,8 +79,8 @@ class Describe_Slice(object):
 
         actual = slice_.pairwise_indices_alt
 
-        expected = load_python_expression(expectation)
-        assert expected == actual, "\n%s\n\n%s" % (expected, actual)
+        expected = np.array(load_python_expression(expectation), dtype=tuple)
+        assert (expected == actual).all(), "\n%s\n\n%s" % (expected, actual)
 
     @pytest.mark.parametrize(
         "fixture, expectation",
@@ -404,7 +404,7 @@ class TestStandardizedResiduals(TestCase):
         # Only larger
         slice_ = Cube(CR.PAIRWISE_HIROTSU_OCCUPATION_X_ILLNESS).partitions[0]
         pairwise_indices = slice_.summary_pairwise_indices
-        expected_indices = np.array([(2,), (0, 2), ()])
+        expected_indices = np.array([(2,), (0, 2), ()], dtype=tuple)
         np.testing.assert_array_equal(pairwise_indices, expected_indices)
 
         # Larger and smaller
@@ -451,7 +451,8 @@ class TestStandardizedResiduals(TestCase):
                 [(), (), (), ()],
                 [(), (), (), ()],
                 [(2, 3), (), (), ()],
-            ]
+            ],
+            dtype=tuple,
         )
         np.testing.assert_array_equal(pairwise_indices, expected_indices)
 
