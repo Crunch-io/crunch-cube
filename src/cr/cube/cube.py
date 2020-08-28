@@ -221,10 +221,6 @@ class Cube(object):
             return super(Cube, self).__repr__()
 
     @lazyproperty
-    def base_counts(self):
-        return self._measures.unweighted_counts.raw_cube_array[self._valid_idxs]
-
-    @lazyproperty
     def counts(self):
         return self.counts_with_missings[self._valid_idxs]
 
@@ -289,15 +285,26 @@ class Cube(object):
         )
 
     @lazyproperty
-    def is_mr_by_itself(self):
-        """True if the cube contains MRxItself as last 2 dimensions."""
+    def is_mr_aug(self):
+        """True if cube is MR_AUG (augmented).
+
+        An augmented-MR cube is required to compute pairwise-t-tests when an MR
+        dimension is involved because that introduces *overlap* which otherwise inflates
+        the case count.
+
+        An MR_AUG cube is used to calculate statistical significance of complete-cases,
+        and is created by artificially *augmenting* the original cube's dimensions, such
+        as MR, or CAT_X_MR, by repeating the MR dimension to make the cube MR_X_MR or
+        CAT_X_MR_X_MR for these respective examples. The repeating of the MR dimension
+        allows the overlaps to be computed.
+        """
         return (
             # --- there are at least three dimensions ---
             self.ndim >= 3
             # --- the last two are both MR ---
             and all(dim_type == DT.MR for dim_type in self.dimension_types[-2:])
             # --- and they both have the same alias ---
-            and len(set([dimension.alias for dimension in self.dimensions[-2:]])) == 1
+            and len(set(dim.alias for dim in self.dimensions[-2:])) == 1
         )
 
     @lazyproperty
@@ -362,6 +369,17 @@ class Cube(object):
         columns dimension.
         """
         return self._cube_dict["result"].get("title", "Untitled")
+
+    @lazyproperty
+    def unweighted_counts(self):
+        """ndarray of unweighted counts, valid elements only.
+
+        Unweighted counts are drawn from the `result.counts` field of the cube result.
+        These counts are always present, even when the measure is `mean` and there are
+        no count measures. These counts are always unweighted, regardless of whether the
+        cube is "weighted".
+        """
+        return self._measures.unweighted_counts.raw_cube_array[self._valid_idxs]
 
     @lazyproperty
     def _all_dimensions(self):

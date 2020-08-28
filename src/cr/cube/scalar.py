@@ -10,9 +10,9 @@ from cr.cube.util import lazyproperty
 class MeansScalar(object):
     """Represents slices with means (and no counts)."""
 
-    def __init__(self, means, base_counts):
+    def __init__(self, means, unweighted_counts):
         self._means = means
-        self._base_counts = base_counts
+        self._unweighted_counts = unweighted_counts
 
     @lazyproperty
     def means(self):

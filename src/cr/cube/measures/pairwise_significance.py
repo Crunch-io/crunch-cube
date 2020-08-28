@@ -9,11 +9,6 @@ from scipy.stats import t
 
 from cr.cube.util import lazyproperty
 
-try:
-    xrange
-except NameError:  # pragma: no cover
-    xrange = range
-
 
 class PairwiseSignificance(object):
     """Implementation of p-vals and t-tests for each column proportions comparison."""
@@ -30,7 +25,7 @@ class PairwiseSignificance(object):
 
     @classmethod
     def scale_mean_pairwise_indices(cls, slice_, alpha, only_larger):
-        """ -> 1D ndarray of tuples of column-indices meeting pairwise-t threshold.
+        """-> 1D ndarray of tuples of column-indices meeting pairwise-t threshold.
 
         Indicates "whole columns" that are significantly different, based on the mean of
         the scale (category numeric-values) for each column. The length of the array is
@@ -60,14 +55,14 @@ class PairwiseSignificance(object):
             _ColumnPairwiseSignificance(
                 self._slice, col_idx, self._alpha, self._only_larger
             )
-            for col_idx in xrange(self._slice.shape[1])
+            for col_idx in range(self._slice.shape[1])
         ]
 
     @lazyproperty
     def _pairwise_indices(self):
-        """2D ndarray containing tuples of pairwise indices."""
-        A = np.array([sig.pairwise_indices for sig in self.values]).T
-        return tuple(tuple(cell for cell in row) for row in A)
+        """2D ndarray containing tuples of int pairwise indices."""
+        A = np.array([col_pw_sig.pairwise_indices for col_pw_sig in self.values]).T
+        return np.array([[tuple(cell) for cell in row] for row in A], dtype=tuple)
 
     @lazyproperty
     def _scale_mean_pairwise_indices(self):
@@ -143,7 +138,7 @@ class _ColumnPairwiseSignificance(object):
 
     @lazyproperty
     def t_stats(self):
-        if self._slice.cube_is_mr_by_itself:
+        if self._slice.cube_is_mr_aug:
             return self.t_stats_correct
         props = self._slice.column_proportions
         diff = props - props[:, [self._col_idx]]
@@ -177,7 +172,7 @@ class _ColumnPairwiseSignificance(object):
         variance = self._slice.var_scale_means_row
         # Sum for each column of the counts that have not a nan index in the
         # related numeric counts
-        not_a_nan_index = ~np.isnan(self._slice.rows_dimension_numeric)
+        not_a_nan_index = ~np.isnan(self._slice.rows_dimension_numeric_values)
         counts = np.sum(self._slice.counts[not_a_nan_index, :], axis=0)
 
         standard_deviation = np.sqrt(
@@ -203,12 +198,12 @@ class _ColumnPairwiseSignificance(object):
             if self._slice.column_base.ndim < 2
             else self._slice.column_base[:, self._col_idx][:, None]
         )
-        if self._slice.cube_is_mr_by_itself:
+        if self._slice.cube_is_mr_aug:
             return self._slice.column_base + selected_unweighted_n
         return self._slice.column_base + selected_unweighted_n - 2
 
     @lazyproperty
     def _two_sample_df(self):
-        not_a_nan_index = ~np.isnan(self._slice.rows_dimension_numeric)
+        not_a_nan_index = ~np.isnan(self._slice.rows_dimension_numeric_values)
         counts = np.sum(self._slice.counts[not_a_nan_index, :], axis=0)
         return counts[self._col_idx] + counts - 2

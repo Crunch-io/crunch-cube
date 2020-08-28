@@ -52,8 +52,8 @@ class Describe_Slice(object):
 
         actual = slice_.pairwise_indices
 
-        expected = load_python_expression(expectation)
-        assert expected == actual, "\n%s\n\n%s" % (expected, actual)
+        expected = np.array(load_python_expression(expectation), dtype=tuple)
+        assert (expected == actual).all(), "\n%s\n\n%s" % (expected, actual)
 
     @pytest.mark.parametrize(
         "fixture, pw_indices_dict, expectation",
@@ -79,8 +79,8 @@ class Describe_Slice(object):
 
         actual = slice_.pairwise_indices_alt
 
-        expected = load_python_expression(expectation)
-        assert expected == actual, "\n%s\n\n%s" % (expected, actual)
+        expected = np.array(load_python_expression(expectation), dtype=tuple)
+        assert (expected == actual).all(), "\n%s\n\n%s" % (expected, actual)
 
     @pytest.mark.parametrize(
         "fixture, expectation",
@@ -404,7 +404,7 @@ class TestStandardizedResiduals(TestCase):
         # Only larger
         slice_ = Cube(CR.PAIRWISE_HIROTSU_OCCUPATION_X_ILLNESS).partitions[0]
         pairwise_indices = slice_.summary_pairwise_indices
-        expected_indices = np.array([(2,), (0, 2), ()])
+        expected_indices = np.array([(2,), (0, 2), ()], dtype=tuple)
         np.testing.assert_array_equal(pairwise_indices, expected_indices)
 
         # Larger and smaller
@@ -451,7 +451,8 @@ class TestStandardizedResiduals(TestCase):
                 [(), (), (), ()],
                 [(), (), (), ()],
                 [(2, 3), (), (), ()],
-            ]
+            ],
+            dtype=tuple,
         )
         np.testing.assert_array_equal(pairwise_indices, expected_indices)
 
@@ -463,7 +464,7 @@ class TestStandardizedResiduals(TestCase):
         shadow_proportions_tab1 = slice_._cube.counts[0][:, 0, :, 0] / overlap_margins
         shadow_proportions_tab2 = slice_._cube.counts[1][:, 0, :, 0] / overlap_margins
 
-        assert slice_.cube_is_mr_by_itself is True
+        assert slice_.cube_is_mr_aug is True
         np.testing.assert_array_almost_equal(
             overlap_margins,
             [
@@ -507,7 +508,7 @@ class TestStandardizedResiduals(TestCase):
             addend_idxs, slice_.inserted_row_idxs, slice_._cube.counts
         )
         assert slice_.inserted_row_idxs == (0,)
-        assert slice_.cube_is_mr_by_itself is True
+        assert slice_.cube_is_mr_aug is True
         assert actual.t_stats.shape == (3, 4)
         assert slice_.counts.shape == (3, 4)
         assert counts_with_hs.shape == (3, 4, 2, 4, 2)
@@ -534,7 +535,7 @@ class TestStandardizedResiduals(TestCase):
 
         # CATxMR (9, 3, 2, 3, 2) shape, 9 = (5 + 4subtot) tabs of shadow proportions
         assert slice_.inserted_row_idxs == (0, 1, 4, 8)
-        assert slice_.cube_is_mr_by_itself is True
+        assert slice_.cube_is_mr_aug is True
         assert actual.t_stats.shape == (9, 3)
         assert slice_.counts.shape == (9, 3)
         np.testing.assert_array_almost_equal(
@@ -678,7 +679,7 @@ class TestStandardizedResiduals(TestCase):
             for i in range(slice_._cube.counts.shape[0])
         ]
 
-        assert slice_.cube_is_mr_by_itself is True
+        assert slice_.cube_is_mr_aug is True
         np.testing.assert_array_almost_equal(
             actual.t_stats,
             [
@@ -787,7 +788,7 @@ class TestStandardizedResiduals(TestCase):
         shadow_proportions_tab1 = slice_._cube.counts[0][:, 0, :, 0] / overlap_margins
         shadow_proportions_tab2 = slice_._cube.counts[1][:, 0, :, 0] / overlap_margins
 
-        assert slice_.cube_is_mr_by_itself is True
+        assert slice_.cube_is_mr_aug is True
         np.testing.assert_array_almost_equal(
             actual.t_stats,
             [[0.0, 16.02651373, -22.43766743], [0.0, -6.56624439, 29.71952066]],
@@ -833,7 +834,7 @@ class TestStandardizedResiduals(TestCase):
         slice_ = Cube(CR.MR_X_MR_2).partitions[0]
         actual = slice_.pairwise_significance_tests[1]
 
-        assert slice_.cube_is_mr_by_itself is False
+        assert slice_.cube_is_mr_aug is False
         np.testing.assert_array_almost_equal(
             actual.t_stats,
             [

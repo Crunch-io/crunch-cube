@@ -688,14 +688,11 @@ class Describe_AllElements(object):
     def it_creates_its_Element_objects_in_a_local_factory_to_help(
         self,
         request,
-        _element_dicts_prop_,
         _prune_prop_,
         _ElementTransforms_,
         _Element_,
         _iter_element_makings_,
     ):
-        element_dicts_ = "element-dicts-that-shouldn't-be-needed"
-        _element_dicts_prop_.return_value = element_dicts_
         _prune_prop_.return_value = True
         element_transforms_ = tuple(
             instance_mock(request, _ElementTransforms, name="element-xfrms-%s" % idx)
@@ -724,9 +721,9 @@ class Describe_AllElements(object):
             call({"xfrms": 2}, True),
         ]
         assert _Element_.call_args_list == [
-            call({"element": "dict-A"}, 0, element_dicts_, element_transforms_[0]),
-            call({"element": "dict-B"}, 1, element_dicts_, element_transforms_[1]),
-            call({"element": "dict-C"}, 2, element_dicts_, element_transforms_[2]),
+            call({"element": "dict-A"}, 0, element_transforms_[0]),
+            call({"element": "dict-B"}, 1, element_transforms_[1]),
+            call({"element": "dict-C"}, 2, element_transforms_[2]),
         ]
         assert elements == (elements_[0], elements_[1], elements_[2])
 
@@ -819,9 +816,7 @@ class Describe_ValidElements(object):
         self, all_elements_, explicit_order_fixture
     ):
         element_transform_dict, expected_value = explicit_order_fixture
-        elements_ = tuple(
-            _Element({"id": idx + 1}, None, None, None) for idx in range(3)
-        )
+        elements_ = tuple(_Element({"id": idx + 1}, None, None) for idx in range(3))
         all_elements_.__iter__.return_value = iter(elements_)
         valid_elements = _ValidElements(all_elements_, element_transform_dict)
 
@@ -860,7 +855,7 @@ class Describe_Element(object):
 
     def it_knows_its_element_id(self):
         element_dict = {"id": 42}
-        element = _Element(element_dict, None, None, None)
+        element = _Element(element_dict, None, None)
 
         element_id = element.element_id
 
@@ -868,14 +863,14 @@ class Describe_Element(object):
 
     def it_knows_its_fill_RGB_color_str(self, element_transforms_):
         element_transforms_.fill = [255, 255, 248]
-        element = _Element(None, None, None, element_transforms_)
+        element = _Element(None, None, element_transforms_)
 
         rgb_color_fill = element.fill
 
         assert rgb_color_fill == [255, 255, 248]
 
     def it_knows_its_position_among_all_the_dimension_elements(self):
-        element = _Element(None, 17, None, None)
+        element = _Element(None, 17, None)
         index = element.index
         assert index == 17
 
@@ -900,7 +895,7 @@ class Describe_Element(object):
     )
     def it_knows_its_label(self, element_dict, expected_value, element_transforms_):
         element_transforms_.name = None
-        element = _Element(element_dict, None, None, element_transforms_)
+        element = _Element(element_dict, None, element_transforms_)
 
         label = element.label
 
@@ -911,7 +906,7 @@ class Describe_Element(object):
     )
     def it_knows_whether_it_is_explicitly_hidden(self, request, hide, expected_value):
         element_transforms_ = instance_mock(request, _ElementTransforms, hide=hide)
-        element = _Element(None, None, None, element_transforms_)
+        element = _Element(None, None, element_transforms_)
 
         is_hidden = element.is_hidden
 
@@ -930,7 +925,7 @@ class Describe_Element(object):
         ),
     )
     def it_knows_whether_its_missing_or_valid(self, element_dict, expected_value):
-        element = _Element(element_dict, None, None, None)
+        element = _Element(element_dict, None, None)
 
         missing = element.missing
 
@@ -953,7 +948,7 @@ class Describe_Element(object):
         ),
     )
     def it_knows_its_numeric_value(self, element_dict, expected_value):
-        element = _Element(element_dict, None, None, None)
+        element = _Element(element_dict, None, None)
 
         numeric_value = element.numeric_value
 
@@ -1164,11 +1159,11 @@ class Describe_Subtotal(object):
         subtotal_dict, addend_ids, expected_value = addend_idxs_fixture
         addend_ids_.return_value = addend_ids
         elements_ = (
-            _Element({"id": 1}, None, None, None),
-            _Element({"id": 2}, None, None, None),
-            _Element({"id": 3}, None, None, None),
-            _Element({"id": 4}, None, None, None),
-            _Element({"id": 99}, None, None, None),
+            _Element({"id": 1}, None, None),
+            _Element({"id": 2}, None, None),
+            _Element({"id": 3}, None, None),
+            _Element({"id": 4}, None, None),
+            _Element({"id": 99}, None, None),
         )
         all_elements_.__iter__.return_value = iter(elements_)
         valid_elements = _ValidElements(all_elements_, None)

@@ -41,7 +41,7 @@ def calculate_overlap_tstats(
     offset,
     mr_dimensions,
     mr_counts,
-    mr_base_counts,
+    mr_unweighted_counts,
     mr_counts_with_missings,
     subtotals,
 ):
@@ -54,8 +54,8 @@ def calculate_overlap_tstats(
         addend_idxs = [s.addend_idxs for s in subtotals]
         inserted_rows_idxs = subtotals.anchor_idxs
         mr_counts = counts_with_subtotals(addend_idxs, inserted_rows_idxs, mr_counts)
-        mr_base_counts = counts_with_subtotals(
-            addend_idxs, inserted_rows_idxs, mr_base_counts
+        mr_unweighted_counts = counts_with_subtotals(
+            addend_idxs, inserted_rows_idxs, mr_unweighted_counts
         )
         mr_counts_with_missings = counts_with_subtotals(
             addend_idxs, inserted_rows_idxs, mr_counts_with_missings
@@ -64,12 +64,12 @@ def calculate_overlap_tstats(
     standard_error = np.zeros(np.array(mr_counts.shape)[[0, 1 + offset, 3 + offset]])
     for slice_index in range(mr_counts.shape[0]):
         counts = mr_counts[slice_index]
-        base_counts = mr_base_counts[slice_index]
+        unweighted_counts = mr_unweighted_counts[slice_index]
         counts_with_missings = mr_counts_with_missings[slice_index]
         overlap_slice = cls(
             mr_dimensions,
             counts if offset == 0 else counts[0],
-            base_counts if offset == 0 else base_counts[0],
+            unweighted_counts if offset == 0 else unweighted_counts[0],
             counts_with_missings if offset == 0 else counts_with_missings[0],
             None,
             overlap_margins,

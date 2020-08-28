@@ -19,7 +19,20 @@ from cr.cube.util import lazyproperty
 
 
 class TransformedStripe(object):
-    """Stripe reflecting application of all transforms."""
+    """Stripe that reflects application of all transforms.
+
+    `rows_dimension` is a `cr.cube.dimension.Dimension` object representing the single
+    dimension of this stripe. This is referred to as the "rows" dimension because when
+    viewed as a "card" in the Crunch UI, the elements of this dimension each appear as
+    a distinct row of the card.
+
+    `base_stripe` is one of the low-level, pre-transformation stripe objects defined
+    later in the module. The `.stripe()` classmethod uses a factory method to construct
+    an instance of the right class depending on the dimension type.
+
+    This object is not meant to be constructed directly, except perhaps in unit tests.
+    Use the `.stripe()` classmethod to create a new `TransformedStripe` instance.
+    """
 
     def __init__(self, rows_dimension, base_stripe):
         self._rows_dimension = rows_dimension
@@ -27,7 +40,7 @@ class TransformedStripe(object):
 
     @classmethod
     def stripe(cls, cube, rows_dimension, ca_as_0th, slice_idx):
-        """Return a TransformedStripe object constructed from this cube result."""
+        """Return a TransformedStripe object constructed from the data in `cube`."""
         base_stripe = _BaseBaseStripe.factory(
             cube, rows_dimension, ca_as_0th, slice_idx
         )
@@ -52,12 +65,37 @@ class TransformedStripe(object):
 
     @lazyproperty
     def table_base_unpruned(self):
-        """Hmm, weird 1D ndarray with same int value repeated for each row."""
+        """np.int64 scalar or 1D np.int64 ndarray of table base including "empty" items.
+
+        Value is an np.int64 scalar except when this stripe is multiple-response (MR).
+        This value is a 1D ndarray of np.int64 for an MR stripe.
+        """
+        # TODO: This the name is misleading. It's not only "unpruned" it's
+        # "before_hiding" (of either kind, prune or hide-transform). But the real
+        # problem is having this interface property at all. The need for this is related
+        # to expressing ranges for base and margin in cubes that have an MR dimension.
+        # The real solution is to compute ranges in `cr.cube` rather than leaking this
+        # sort of internal detail through the interface and making the client compute
+        # those for themselves. So this will require reconstructing that "show-ranges"
+        # requirement and either adding some sort of a `.range` property that returns
+        # a sequence of (min, max) tuples, or maybe just returning margin or base as
+        # tuples when appropriate and having something like a `.margin_is_ranges`
+        # predicate the client can switch on to control their rendering.
         return self._base_stripe.table_base
 
     @lazyproperty
     def table_margin_unpruned(self):
-        """Hmm, weird 1D ndarray with same float value repeated for each row."""
+        """np.float/int64 scalar or 1D np.float/int64 ndarray of table margin.
+
+        This value includes rows that may not appear in `.rows` because they are hidden.
+
+        This value is an np.int64 scalar when this stripe is CAT. The value is an array
+        when this stripe is multiple-response (MR) because each subvar of an MR
+        dimension has a distinct table margin.
+
+        Values are np.int64 when the cube-result is unweighted.
+        """
+        # TODO: see TODO in `.table_base_unpruned`
         return self._base_stripe.table_margin
 
     @lazyproperty
@@ -135,29 +173,31 @@ class _StripeInsertionHelper(object):
 class _BaseBaseStripe(object):
     """Base class for all stripe objects."""
 
-    def __init__(self, rows_dimension, base_counts):
+    def __init__(self, rows_dimension, unweighted_counts):
         self._rows_dimension = rows_dimension
-        self._base_counts = base_counts
+        self._unweighted_counts = unweighted_counts
 
     @classmethod
     def factory(cls, cube, rows_dimension, ca_as_0th, slice_idx):
         """Return a base-slice object of appropriate type based on parameters."""
         counts = cube.counts
-        base_counts = cube.base_counts
+        unweighted_counts = cube.unweighted_counts
 
         # ---for cubes with means, create one of the means-stripe types---
         if cube.has_means:
             if rows_dimension.dimension_type == DT.MR:
-                return _MeansWithMrStripe(rows_dimension, counts, base_counts)
-            return _MeansStripe(rows_dimension, counts, base_counts)
+                return _MeansWithMrStripe(rows_dimension, counts, unweighted_counts)
+            return _MeansStripe(rows_dimension, counts, unweighted_counts)
 
         if ca_as_0th:
-            return _CatStripe(rows_dimension, counts[slice_idx], base_counts[slice_idx])
+            return _CatStripe(
+                rows_dimension, counts[slice_idx], unweighted_counts[slice_idx]
+            )
 
         if rows_dimension.dimension_type == DT.MR:
-            return _MrStripe(rows_dimension, counts, base_counts)
+            return _MrStripe(rows_dimension, counts, unweighted_counts)
 
-        return _CatStripe(rows_dimension, counts, base_counts)
+        return _CatStripe(rows_dimension, counts, unweighted_counts)
 
     @lazyproperty
     def rows(self):
@@ -173,10 +213,12 @@ class _BaseBaseStripe(object):
 
     @lazyproperty
     def table_base(self):
-        return np.sum(self._base_counts)
+        """np.int64 count of actual respondents asked this question."""
+        return np.sum(self._unweighted_counts)
 
     @lazyproperty
     def _row_elements(self):
+        """cr.cube.dimension._ValidElements instance for rows-dimension."""
         return self._rows_dimension.valid_elements
 
 
@@ -186,90 +228,112 @@ class _CatStripe(_BaseBaseStripe):
     Values are treated as rows, while there's only a single column (vector).
     """
 
-    def __init__(self, rows_dimension, counts, base_counts):
-        super(_CatStripe, self).__init__(rows_dimension, base_counts)
+    def __init__(self, rows_dimension, counts, unweighted_counts):
+        super(_CatStripe, self).__init__(rows_dimension, unweighted_counts)
         self._counts = counts
 
     @lazyproperty
     def rows(self):
+        """tuple of _CatStripeRow for each valid element in rows-dimension."""
         table_margin = self.table_margin
         return tuple(
-            _CatStripeRow(element, count, base_count, table_margin)
-            for (element, count, base_count) in zip(
-                self._row_elements, self._counts, self._base_counts
+            _CatStripeRow(element, count, unweighted_count, table_margin)
+            for (element, count, unweighted_count) in zip(
+                self._row_elements, self._counts, self._unweighted_counts
             )
         )
 
     @lazyproperty
     def table_margin(self):
-        """Needed by inserted rows in later transformation step."""
+        """np.int64 total weighted count of responses to this question.
+
+        Needed by inserted rows in later transformation step.
+        """
         return np.sum(self._counts)
 
 
 class _MeansStripe(_BaseBaseStripe):
     """A 1D calculator for a strand containing mean first-order measure."""
 
-    def __init__(self, rows_dimension, means, base_counts):
-        super(_MeansStripe, self).__init__(rows_dimension, base_counts)
+    def __init__(self, rows_dimension, means, unweighted_counts):
+        super(_MeansStripe, self).__init__(rows_dimension, unweighted_counts)
         self._means = means
 
     @lazyproperty
     def rows(self):
+        """Sequence of _MeansStripeRow for each valid element in rows-dimension."""
         return tuple(
-            _MeansStripeRow(element, base_count, mean)
-            for element, base_count, mean in zip(
-                self._rows_dimension.valid_elements, self._base_counts, self._means
+            _MeansStripeRow(element, unweighted_count, mean)
+            for element, unweighted_count, mean in zip(
+                self._row_elements, self._unweighted_counts, self._means
             )
         )
 
     @lazyproperty
     def table_margin(self):
-        return np.sum(self._base_counts)
+        # TODO: explain in docstring why this is unweighted for means instead of _counts
+        return np.sum(self._unweighted_counts)
 
 
 class _MeansWithMrStripe(_BaseBaseStripe):
     """Means behavior differs when dimension is MR."""
 
-    def __init__(self, rows_dimension, means, base_counts):
-        super(_MeansWithMrStripe, self).__init__(rows_dimension, base_counts)
+    def __init__(self, rows_dimension, means, unweighted_counts):
+        super(_MeansWithMrStripe, self).__init__(rows_dimension, unweighted_counts)
         self._means = means
 
     @lazyproperty
     def rows(self):
+        """Sequence of _MeansMrStripeRow for each valid element in rows-dimension."""
         return tuple(
-            _MeansMrStripeRow(element, base_counts, means)
-            for element, base_counts, means in zip(
-                self._rows_dimension.valid_elements, self._base_counts, self._means
+            _MeansMrStripeRow(element, unweighted_counts, means)
+            for element, unweighted_counts, means in zip(
+                self._row_elements, self._unweighted_counts, self._means
             )
         )
 
     @lazyproperty
     def table_margin(self):
-        return np.sum(self._base_counts)
+        # TODO: explain in docstring why this is unweighted for means instead of _counts
+        return np.sum(self._unweighted_counts)
 
 
 class _MrStripe(_BaseBaseStripe):
-    """Special case of 1-D MR slice (stripe)."""
+    """Special case of 1D MR slice (stripe)."""
 
-    def __init__(self, rows_dimension, counts, base_counts):
-        super(_MrStripe, self).__init__(rows_dimension, base_counts)
+    def __init__(self, rows_dimension, counts, unweighted_counts):
+        super(_MrStripe, self).__init__(rows_dimension, unweighted_counts)
         self._counts = counts
 
     @lazyproperty
     def rows(self):
+        """Sequence of _MrStripeRow for each valid element in rows-dimension."""
         return tuple(
-            _MrStripeRow(element, counts, base_counts, table_margin)
-            for (element, counts, base_counts, table_margin) in zip(
-                self._row_elements, self._counts, self._base_counts, self.table_margin
+            _MrStripeRow(element, counts, unweighted_counts, table_margin)
+            for (element, counts, unweighted_counts, table_margin) in zip(
+                self._row_elements,
+                self._counts,
+                self._unweighted_counts,
+                self.table_margin,
             )
         )
 
     @lazyproperty
     def table_base(self):
-        return np.sum(self._base_counts, axis=1)
+        """1D ndarray of unweighted selected + unselected count for each row of stripe.
+
+        Note the base (how many respondents were asked the question) can vary from row
+        to row because not all choices are necessarily shown to all respondents.
+        """
+        return np.sum(self._unweighted_counts, axis=1)
 
     @lazyproperty
     def table_margin(self):
+        """1D ndarray of weighted selected + unselected count for each row of stripe.
+
+        Note this can vary from row to row because not all choices are necessarily shown
+        to all respondents.
+        """
         return np.sum(self._counts, axis=1)
 
 
@@ -299,10 +363,12 @@ class _StripeInsertedRow(object):
 
     @lazyproperty
     def base(self):
+        """np.int64 sum of (unweighted) sample population of each addend row."""
         return sum(row.base for row in self._addend_rows)
 
     @lazyproperty
     def count(self):
+        """np.float64 subtotal of weighted count of this answer across addend rows."""
         return sum(row.count for row in self._addend_rows)
 
     @lazyproperty
@@ -325,10 +391,12 @@ class _StripeInsertedRow(object):
 
     @lazyproperty
     def label(self):
+        """str heading for this row."""
         return self._subtotal.label
 
     @lazyproperty
     def mean(self):
+        """Means cannot be subtotaled (so far at least)."""
         return np.nan
 
     @lazyproperty
@@ -345,11 +413,13 @@ class _StripeInsertedRow(object):
 
     @lazyproperty
     def table_proportions(self):
-        return self.value / self.table_margin
+        """float 0.0->1.0 portion of weighted respondents who chose this response."""
+        return self.count / self.table_margin
 
     @lazyproperty
-    def value(self):
-        return sum(row.value for row in self._addend_rows)
+    def unweighted_count(self):
+        """int64 sum of unweighted-count of each addend row."""
+        return sum(row.unweighted_count for row in self._addend_rows)
 
     @lazyproperty
     def _addend_rows(self):
@@ -432,23 +502,33 @@ class _BaseStripeRow(object):
         """
         return self._element.numeric_value
 
+    @lazyproperty
+    def unweighted_count(self):
+        """np.int64 unweighted-count for this row."""
+        raise NotImplementedError(
+            "`.unweighted_count` must be implemented by each subclass"
+        )  # pragma: no cover
+
 
 class _CatStripeRow(_BaseStripeRow):
     """Stripe-row for a categorical rows-dimension."""
 
-    def __init__(self, element, count, base_count, table_margin):
+    def __init__(self, element, count, unweighted_count, table_margin):
         super(_CatStripeRow, self).__init__(element)
         # ---count is a numpy numeric (np.int64 or np.float64)---
         self._count = count
-        # ---base_count is np.int64---
-        self._base_count = base_count
+        # ---unweighted_count is np.int64---
+        self._unweighted_count = unweighted_count
         # ---table_margin is np.int64 or np.float64---
         self._table_margin = table_margin
 
     @lazyproperty
     def base(self):
-        """np.int64 unweighted count for this row."""
-        return self._base_count
+        """np.int64 count of actual respondents who were offered this response."""
+        # TODO: this doesn't seem right. The unweighted-count is the number of actual
+        # respondents who *selected* this response, not all those who were asked the
+        # question (as it should be).
+        return self._unweighted_count
 
     @lazyproperty
     def count(self):
@@ -457,33 +537,38 @@ class _CatStripeRow(_BaseStripeRow):
 
     @lazyproperty
     def pruned(self):
-        """True if this row is "empty"."""
-        return self.base == 0 or np.isnan(self.base)
+        """True if this question was answered by exactly zero respondents."""
+        return self._unweighted_count == 0 or np.isnan(self._unweighted_count)
 
     @lazyproperty
     def table_proportions(self):
-        """float between 0.0 and 1.0 quantifying this row's share of stripe total."""
-        return self.value / self._table_margin
+        """float between 0.0 and 1.0 quantifying this row's share of stripe total.
+
+        This is the proportion of *weighted* respondents who selected this response to
+        the *weighted total* of respondents asked this question.
+        """
+        return self.count / self._table_margin
 
     @lazyproperty
-    def value(self):
-        """Weighted count for this row."""
-        return self._count
+    def unweighted_count(self):
+        """np.int64 unweighted count for this row."""
+        return self._unweighted_count
 
 
 class _MeansStripeRow(_BaseStripeRow):
     """Stripe-row for a non-MR 1D cube-result with means."""
 
-    def __init__(self, element, base_count, mean):
+    def __init__(self, element, unweighted_count, mean):
         super(_MeansStripeRow, self).__init__(element)
-        # ---base_count is np.int64---
-        self._base_count = base_count
+        # ---unweighted_count is np.int64---
+        self._unweighted_count = unweighted_count
         # ---mean is np.float64 or np.nan---
         self._mean = mean
 
     @lazyproperty
     def base(self):
-        return self._base_count
+        """np.int64 base, just unweighted count for a non-MR row."""
+        return self._unweighted_count
 
     @lazyproperty
     def count(self):
@@ -498,28 +583,33 @@ class _MeansStripeRow(_BaseStripeRow):
 
     @lazyproperty
     def pruned(self):
-        return self.base == 0 or np.isnan(self.base)
+        return self._unweighted_count == 0 or np.isnan(self._unweighted_count)
+
+    @lazyproperty
+    def unweighted_count(self):
+        """np.int64 unweighted-count for this row."""
+        return self._unweighted_count
 
 
 class _MeansMrStripeRow(_BaseStripeRow):
     """Stripe-row for a univariate MR cube-response with means."""
 
-    def __init__(self, element, base_counts, means):
+    def __init__(self, element, unweighted_counts, means):
         super(_MeansMrStripeRow, self).__init__(element)
-        # ---base_counts is an int array like [336 5501]---
-        self._base_counts = base_counts
-        # ---means is a float array like [2.578 1.639]---
+        # ---unweighted_counts is a [selected, not] int array like [336 5501]---
+        self._unweighted_counts = unweighted_counts
+        # ---means is a [selected, not] float array like [2.578 1.639]---
         self._means = means
 
     @lazyproperty
     def base(self):
         """np.int64 unweighted count of selected."""
-        return self._base_count
+        return self._unweighted_counts[0]
 
     @lazyproperty
     def mean(self):
         """float mean of selected."""
-        return self._mean
+        return self._means[0]
 
     @lazyproperty
     def pruned(self):
@@ -529,70 +619,55 @@ class _MeansMrStripeRow(_BaseStripeRow):
     def table_base(self):
         return self.base
 
-    @lazyproperty
-    def _base_count(self):
-        """np.int64 unweighted count of selected."""
-        return self._base_counts[0]
-
-    @lazyproperty
-    def _mean(self):
-        return self._means[0]
-
 
 class _MrStripeRow(_BaseStripeRow):
     """Stripe-row for use in MR stripe."""
 
-    def __init__(self, element, counts, base_counts, table_margin):
+    def __init__(self, element, counts, unweighted_counts, table_margin):
         super(_MrStripeRow, self).__init__(element)
-        # ---counts is a float array like [42.0 63.5]---
+        # --- counts is a float [selected, not-selected] array like [42.0 63.5] ---
         self._counts = counts
-        # ---base_counts is an int array like [6076 1431]---
-        self._base_counts = base_counts
-        # ---table_margin is a numpy numeric scalar---
+        # --- unweighted_counts is [selected, not-selected] int array like [607 143]---
+        self._unweighted_counts = unweighted_counts
+        # --- table_margin is a numpy numeric scalar ---
         self._table_margin = table_margin
 
     @lazyproperty
-    def base(self):
-        """np.int64 unweighted count of selected."""
-        return self._base_count
-
-    @lazyproperty
     def count(self):
-        return self._count
+        """np.float/int64 number of weighted respondents who selected this response."""
+        return self._counts[0]
 
     @lazyproperty
     def pruned(self):
+        """True if this question was asked of exactly zero actual respondents."""
         return self.table_base == 0
 
     @lazyproperty
     def table_base(self):
-        return np.sum(self._both_bases)
+        """np.int64 sample size for MR question, how many actual folks were asked."""
+        return np.sum(self._both_unweighted_counts)
 
     @lazyproperty
     def table_margin(self):
+        """np.float64 weighted sample size, how many "weighted" folks were asked."""
         return np.sum(self._both_counts)
 
     @lazyproperty
     def table_proportions(self):
-        return self.value / self._table_margin
+        """np.float64 proportion of all weighted respondents selecteing this answer."""
+        return self.count / self._table_margin
 
     @lazyproperty
-    def value(self):
-        return self._count
-
-    @lazyproperty
-    def _base_count(self):
-        """np.int64 unweighted count of selected."""
-        return self._base_counts[0]
-
-    @lazyproperty
-    def _both_bases(self):
-        return self._base_counts
+    def unweighted_count(self):
+        """np.int64 unweighted count of selected responses."""
+        return self._unweighted_counts[0]
 
     @lazyproperty
     def _both_counts(self):
+        """np.float64 count of weighted respondents offered this possible response."""
         return self._counts
 
     @lazyproperty
-    def _count(self):
-        return self._counts[0]
+    def _both_unweighted_counts(self):
+        """np.int64 count of actual respondents offered this possible response."""
+        return self._unweighted_counts

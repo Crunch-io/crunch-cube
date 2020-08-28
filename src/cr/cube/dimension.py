@@ -2,7 +2,12 @@
 
 """Provides the Dimension class."""
 
-from collections import Sequence
+import sys
+
+if sys.version_info >= (3, 3):
+    from collections.abc import Sequence
+else:
+    from collections import Sequence
 
 import numpy as np
 
@@ -310,7 +315,7 @@ class Dimension(object):
 
     @lazyproperty
     def display_order(self):
-        """Sequence of int element offsets specifying display order of elements.
+        """Sequence of int element indices specifying display order of elements.
 
         The sequence includes only valid elements; missing elements do not appear.
         Further, each index represents the document-order position of the element in the
@@ -518,12 +523,10 @@ class _AllElements(_BaseElements):
     @lazyproperty
     def _elements(self):
         """tuple storing actual sequence of element objects."""
-        element_dicts = self._element_dicts
         return tuple(
             _Element(
                 element_dict,
                 idx,
-                element_dicts,
                 _ElementTransforms(element_transforms_dict, self._prune),
             )
             for (
@@ -640,11 +643,9 @@ class _Element(object):
     This object resolves the transform cascade for element-level transforms.
     """
 
-    def __init__(self, element_dict, index, element_dicts, element_transforms):
+    def __init__(self, element_dict, index, element_transforms):
         self._element_dict = element_dict
         self._index = index
-        # TODO: Remove this hack. An element should not need to know of its peers.
-        self._element_dicts = element_dicts
         self._element_transforms = element_transforms
 
     @lazyproperty
@@ -828,8 +829,16 @@ class _Subtotals(Sequence):
     @lazyproperty
     def anchor_idxs(self):
         """List of int indicating the actual position of the subtotals."""
+        # TODO: this appears wrong, using an anchor (element_id) as an index (offset of
+        # anchor element within elements). This may appear to work if category-ids are
+        # assigned consecutively starting at 1, but will not work in the general case.
+        # I'll bet it also doesn't work when more than one subtotal is anchored to the
+        # same element-id.
+
+        def occurrences(s, lst):
+            return (i for i, e in enumerate(lst) if e == s)
+
         anchors = self._anchors
-        occurrences = lambda s, lst: (i for i, e in enumerate(lst) if e == s)
         top_anchors = list(occurrences("top", anchors))
         int_anchors = [a + len(top_anchors) for a in anchors if isinstance(a, int)]
         bottom_anchors = [

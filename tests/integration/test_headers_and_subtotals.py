@@ -1128,11 +1128,11 @@ class TestHeadersAndSubtotals(object):
             ],
         )
 
-    def it_calculate_residuals_for_subtotals_1col_2rows(self):
+    def it_computes_residuals_for_subtotals_1col_2rows(self):
         slice_ = Cube(CR.CAT_X_CAT_HS_2ROWS_1COL).partitions[0]
 
         np.testing.assert_almost_equal(
-            slice_.zscore,
+            slice_.zscores,
             [
                 [
                     5.51248445,
@@ -1376,10 +1376,10 @@ class TestHeadersAndSubtotals(object):
         assert len(slice_.inserted_column_idxs) == 1
         assert slice_.inserted_row_idxs == (2, 5)
         assert len(slice_.inserted_row_idxs) == 2
-        assert slice_.row_proportions.shape == slice_.zscore.shape
-        # Test zscore for 1 col and 2 rows insertions
+        assert slice_.row_proportions.shape == slice_.zscores.shape
+        # Test zscores for 1 col and 2 rows insertions
         np.testing.assert_almost_equal(
-            slice_.zscore,
+            slice_.zscores,
             [
                 [
                     4.52186866,
@@ -1645,9 +1645,9 @@ class TestHeadersAndSubtotals(object):
 
         slice_ = Cube(CR.CAT_X_CAT_HS_TOTAL_BOTTOM).partitions[0]
 
-        # Test zscore for 2 rows and 2 cols insertions (1 col at bottom)
+        # Test zscores for 2 rows and 2 cols insertions (1 col at bottom)
         np.testing.assert_almost_equal(
-            slice_.zscore,
+            slice_.zscores,
             [
                 [
                     4.52186866,
@@ -1942,7 +1942,7 @@ class TestHeadersAndSubtotals(object):
         assert slice_.inserted_column_idxs == (4,)
         assert len(slice_.inserted_column_idxs) == 1
         np.testing.assert_almost_equal(
-            slice_.zscore,
+            slice_.zscores,
             [
                 [2.00445931, 0.3354102, -1.34164079, -1.34164079, 2.12132034],
                 [-0.40089186, 0.3354102, 1.34164079, -1.34164079, 0.0],
@@ -2006,7 +2006,7 @@ class TestHeadersAndSubtotals(object):
         assert slice_.inserted_column_idxs == (3, 6)
         assert len(slice_.inserted_column_idxs) == 2
         np.testing.assert_almost_equal(
-            slice_.zscore,
+            slice_.zscores,
             [
                 [
                     1.36930639,
@@ -2109,7 +2109,7 @@ class TestHeadersAndSubtotals(object):
         # Test zscores for 1 row insertion
         assert slice_.inserted_row_idxs == (1,)
         np.testing.assert_almost_equal(
-            slice_.zscore,
+            slice_.zscores,
             [
                 [2.06930398, -0.61133797, -1.25160615, np.nan, -1.19268916],
                 [-2.03371753, 0.66650907, 1.07795469, np.nan, 1.34162721],
@@ -2197,7 +2197,7 @@ class TestHeadersAndSubtotals(object):
         assert slice_.inserted_row_idxs == (2, 5)
         assert len(slice_.inserted_row_idxs) == 2
         np.testing.assert_almost_equal(
-            slice_.zscore,
+            slice_.zscores,
             [
                 [
                     4.52186866,
@@ -2447,7 +2447,7 @@ class TestHeadersAndSubtotals(object):
 
         # Test szcores for 1 column insertion at left
         np.testing.assert_almost_equal(
-            slice_.zscore,
+            slice_.zscores,
             [
                 [
                     0.42390758,
@@ -2522,10 +2522,10 @@ class TestHeadersAndSubtotals(object):
         }
         slice_ = Cube(CR.CAT_X_NUM_HS_PRUNE, transforms=transforms).partitions[0]
 
-        # Test zscore for 3 rows insertions
+        # Test zscores for 3 rows insertions
         assert slice_.inserted_row_idxs == (0, 1, 3)
         np.testing.assert_almost_equal(
-            slice_.zscore, np.tile(np.nan, slice_.row_proportions.shape)
+            slice_.zscores, np.full(slice_.row_proportions.shape, np.nan)
         )
 
         # Test pvals for 3 rows insertions
@@ -2535,10 +2535,10 @@ class TestHeadersAndSubtotals(object):
 
         slice_ = Cube(CR.CAT_X_NUM_HS_PRUNE).partitions[0]
 
-        # Test zscore for 3 rows insertions (1 at left)
+        # Test zscores for 3 rows insertions (1 at left)
         assert slice_.inserted_row_idxs == (0, 3, 7)
         np.testing.assert_almost_equal(
-            slice_.zscore, np.tile(np.nan, slice_.row_proportions.shape)
+            slice_.zscores, np.tile(np.nan, slice_.row_proportions.shape)
         )
 
         # Test pvals for 3 rows insertions (1 at left)
@@ -2561,7 +2561,7 @@ class TestHeadersAndSubtotals(object):
 
         # Test zscores
         np.testing.assert_almost_equal(
-            slice_.zscore,
+            slice_.zscores,
             [
                 [
                     -1.41314157,
@@ -3007,8 +3007,8 @@ class TestHeadersAndSubtotals(object):
         ).partitions[2]
 
         np.testing.assert_almost_equal(
-            slice_no_col_insertion_.zscore,
-            slice_.zscore[:, : slice_.zscore.shape[1] - 1],
+            slice_no_col_insertion_.zscores,
+            slice_.zscores[:, : slice_.zscores.shape[1] - 1],
         )
         np.testing.assert_almost_equal(
             slice_no_col_insertion_.pvals, slice_.pvals[:, : slice_.pvals.shape[1] - 1]
@@ -3026,10 +3026,10 @@ class TestHeadersAndSubtotals(object):
         # Test for multi-cube when first cube represents a categorical-array
         slice_ = Cube(CR.CA_AS_0TH).partitions[0]
 
-        # Test zscore for subtotal as 5 col (idx=4)
+        # Test zscores for subtotal as 5 col (idx=4)
         assert slice_.inserted_column_idxs == (4,)
         np.testing.assert_almost_equal(
-            slice_.zscore,
+            slice_.zscores,
             [
                 [1.4384278496e02, np.nan, -8.4743683791e01, np.nan, -1.4384278496e02],
                 [-3.3776223679e02, np.nan, 1.7103706996e02, np.nan, 3.3776223679e02],
@@ -3307,7 +3307,7 @@ class TestHeadersAndSubtotals(object):
         # Test for multi-cube when first cube represents a categorical-array
         slice_ = Cube(CR.CA_AS_0TH).partitions[0]
 
-        # Test zscore for subtotal as 5 col (idx=4)
+        # Test zscores for subtotal as 5 col (idx=4)
         assert slice_.inserted_column_idxs == (4,)
 
         expected_std_deviation = [
@@ -3865,6 +3865,6 @@ class TestHeadersAndSubtotals(object):
     def it_provide_residual_test_stats_including_hs(self):
         slice_ = Cube(CR.CAT_X_CAT_HS_2ROWS_1COL).partitions[0]
         np.testing.assert_array_equal(slice_.pvals, slice_.residual_test_stats[0])
-        np.testing.assert_array_equal(slice_.zscore, slice_.residual_test_stats[1])
+        np.testing.assert_array_equal(slice_.zscores, slice_.residual_test_stats[1])
 
         assert slice_.residual_test_stats.shape == (2, 6, 7)

@@ -64,9 +64,9 @@ class DescribeCubePartition(object):
 
         assert cube_index == 42
 
-    def it_knows_if_cube_is_mr_by_itself(self):
+    def it_knows_if_cube_is_mr_aug(self):
         # --- default of False is overridden by subclasses when appropriate ---
-        assert CubePartition(None).cube_is_mr_by_itself is False
+        assert CubePartition(None).cube_is_mr_aug is False
 
     @pytest.mark.parametrize(
         "dims, expected_value",
@@ -429,29 +429,16 @@ class Describe_Strand(object):
 class Describe_Nub(object):
     """Unit test suite for `cr.cube.cubepart._Nub` object."""
 
-    def it_knows_its_data_status(self, _nub_prop_, nub_is_empty_fixture):
-        base_count, expected_value = nub_is_empty_fixture
-        _nub_prop_.return_value = base_count
+    @pytest.mark.parametrize(
+        "unweighted_count, expected_value", ((None, True), (45.4, False))
+    )
+    def it_knows_when_it_is_empty(self, request, unweighted_count, expected_value):
+        property_mock(request, _Nub, "unweighted_count", return_value=unweighted_count)
         nub_ = _Nub(None)
 
         is_empty = nub_.is_empty
 
         assert is_empty == expected_value
 
-    def it_knows_if_cube_is_mr_by_itself(self):
-        nub_ = _Nub(None)
-
-        assert nub_.cube_is_mr_by_itself is False
-
-    # fixture components ---------------------------------------------
-
-    @pytest.fixture
-    def _nub_prop_(self, request):
-        return property_mock(request, _Nub, "base_count")
-
-    # fixtures ---------------------------------------------
-
-    @pytest.fixture(params=[(None, True), (45.4, False)])
-    def nub_is_empty_fixture(self, request):
-        base_count, expected_value = request.param
-        return base_count, expected_value
+    def it_knows_its_cube_is_never_mr_aug(self):
+        assert _Nub(None).cube_is_mr_aug is False

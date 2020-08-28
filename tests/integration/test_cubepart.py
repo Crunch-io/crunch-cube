@@ -14,6 +14,7 @@ from cr.cube.enum import DIMENSION_TYPE as DT
 # ---mnemonic: CR = 'cube-response'---
 # ---mnemonic: TR = 'transforms'---
 from ..fixtures import CR, TR
+from ..util import load_python_expression
 
 
 class Describe_Slice(object):
@@ -25,7 +26,7 @@ class Describe_Slice(object):
         assert slice_.column_labels == ("C", "E")
         assert slice_.columns_dimension_name == "v7"
         assert slice_.columns_dimension_type == DT.CAT
-        assert slice_.cube_is_mr_by_itself is False
+        assert slice_.cube_is_mr_aug is False
         assert slice_.description == "Pet Owners"
         np.testing.assert_almost_equal(
             slice_.row_proportions, np.array([[0.71428571, 0.28571429], [0.625, 0.375]])
@@ -55,7 +56,7 @@ class Describe_Slice(object):
         slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS).partitions[0]
 
         np.testing.assert_array_equal(
-            slice_.base_counts,
+            slice_.unweighted_counts,
             [
                 [28, 48, 20, 10, 0, 1],
                 [7, 19, 12, 8, 0, 2],
@@ -176,7 +177,7 @@ class Describe_Slice(object):
             ],
         )
         np.testing.assert_almost_equal(
-            slice_.zscore,
+            slice_.zscores,
             [
                 [2.06930398, 1.68383013, -0.61133797, -1.25160615, np.nan, -1.19268916],
                 [-2.03371753, -1.58087282, 0.66650907, 1.07795469, np.nan, 1.34162721],
@@ -187,6 +188,174 @@ class Describe_Slice(object):
                 [-0.22728508, -0.3810277, -0.10690048, 0.5405717, np.nan, -0.31799761],
             ],
         )
+
+    def it_provides_values_for_cat_hs_x_mr(self):
+        slice_ = Cube(CR.CAT_HS_X_MR).partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_.table_std_dev, load_python_expression("cat-hs-x-mr-tbl-stddev")
+        )
+        np.testing.assert_almost_equal(
+            slice_.table_std_err, load_python_expression("cat-hs-x-mr-tbl-stderr")
+        )
+        np.testing.assert_almost_equal(
+            slice_.columns_std_dev, load_python_expression("cat-hs-x-mr-col-stddev")
+        )
+        np.testing.assert_almost_equal(
+            slice_.columns_std_err, load_python_expression("cat-hs-x-mr-col-stderr")
+        )
+        np.testing.assert_almost_equal(
+            slice_.zscores, load_python_expression("cat-hs-x-mr-zscores")
+        )
+        np.testing.assert_almost_equal(
+            slice_.pvals, load_python_expression("cat-hs-x-mr-pvals")
+        )
+
+    def it_provides_values_for_mean_cat_x_cat_hs(self):
+        slice_ = Cube(CR.MEANS_CAT_X_CAT_HS).partitions[0]
+
+        np.testing.assert_array_almost_equal(
+            slice_.counts, np.array([[np.nan, np.nan, np.nan, np.nan, np.nan]])
+        )
+        np.testing.assert_array_almost_equal(
+            slice_.means,
+            np.array([[24.43935757, 37.32122746, np.nan, 55.48571956, 73.02427659]]),
+        )
+        np.testing.assert_array_almost_equal(slice_.rows_margin, np.array([np.nan]))
+        np.testing.assert_array_almost_equal(
+            slice_.columns_margin, np.array([np.nan] * len(slice_.counts[0, :]))
+        )
+
+    def it_provides_values_for_mr_x_cat_hs(self):
+        slice_ = Cube(CR.MR_X_CAT_HS).partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_.table_std_dev, load_python_expression("mr-x-cat-hs-tbl-stddev")
+        )
+        np.testing.assert_almost_equal(
+            slice_.table_std_err, load_python_expression("mr-x-cat-hs-tbl-stderr")
+        )
+        np.testing.assert_almost_equal(
+            slice_.columns_std_dev, load_python_expression("mr-x-cat-hs-col-stddev")
+        )
+        np.testing.assert_almost_equal(
+            slice_.columns_std_err, load_python_expression("mr-x-cat-hs-col-stderr")
+        )
+        np.testing.assert_almost_equal(
+            slice_.pvals, load_python_expression("mr-x-cat-hs-pvals")
+        )
+        np.testing.assert_almost_equal(
+            slice_.zscores, load_python_expression("mr-x-cat-hs-zscores")
+        )
+
+    @pytest.mark.parametrize(
+        "fixture, expectation",
+        (
+            (CR.CAT_HS_X_MR, "cat-hs-x-mr-row-proportions"),
+            (CR.MR_X_CAT_HS, "mr-x-cat-hs-row-proportions"),
+            (CR.MR_X_MR, "mr-x-mr-row-proportions"),
+        ),
+    )
+    def it_knows_the_row_proportions(self, fixture, expectation):
+        slice_ = _Slice(
+            Cube(fixture), slice_idx=0, transforms={}, population=None, mask_size=0
+        )
+
+        row_proportions = slice_.row_proportions
+
+        np.testing.assert_almost_equal(
+            row_proportions, load_python_expression(expectation)
+        )
+
+    @pytest.mark.parametrize(
+        "fixture, expectation",
+        (
+            (CR.CAT_HS_X_MR, "cat-hs-x-mr-column-proportions"),
+            (CR.MR_X_CAT_HS, "mr-x-cat-hs-column-proportions"),
+            (CR.MR_X_MR, "mr-x-mr-column-proportions"),
+        ),
+    )
+    def it_knows_the_column_proportions(self, fixture, expectation):
+        slice_ = _Slice(
+            Cube(fixture), slice_idx=0, transforms={}, population=None, mask_size=0
+        )
+
+        column_proportions = slice_.column_proportions
+
+        np.testing.assert_almost_equal(
+            column_proportions, load_python_expression(expectation)
+        )
+
+    @pytest.mark.parametrize(
+        "fixture, row_order, col_order, expectation",
+        (
+            (CR.CA_X_CAT_HS, [3, 1, 2], [3, 1, 2], "ca-x-cat-hs-explicit-order"),
+            (CR.CA_X_MR, [0, 1, 2, 5, 4], [3, 1, 2], "ca-x-mr-explicit-order"),
+            (CR.CAT_X_CAT, [1, 2], [3, 1], "cat-x-cat-explicit-order"),
+            (CR.CAT_X_MR, [2, 1], [3, 2, 1], "cat-x-mr-explicit-order"),
+            (CR.MR_X_CAT, [2, 1, 3, 4, 5], [5, 1, 4, 3, 2], "mr-x-cat-explicit-order"),
+            (
+                CR.MR_X_CAT_HS,
+                [5, 1, 4, 2, 3],
+                [5, 1, 4, 3, 2],
+                "mr-x-cat-hs-explicit-order",
+            ),
+            (CR.MR_X_MR, [1, 2, 3, 0], [2, 1, 3, 0], "mr-x-mr-explicit-order"),
+        ),
+    )
+    def it_respects_explicit_order_transform_for_dim_types(
+        self, fixture, row_order, col_order, expectation
+    ):
+        transforms = {
+            "rows_dimension": {"order": {"type": "explicit", "element_ids": row_order}},
+            "columns_dimension": {
+                "order": {"type": "explicit", "element_ids": col_order}
+            },
+        }
+        slice_ = _Slice(
+            Cube(fixture),
+            slice_idx=0,
+            transforms=transforms,
+            population=None,
+            mask_size=0,
+        )
+
+        actual = [[int(n) for n in row_counts] for row_counts in slice_.counts]
+
+        expected = load_python_expression(expectation)
+        assert expected == actual, "\n%s\n\n%s" % (expected, actual)
+
+    @pytest.mark.parametrize(
+        "measure_propname, expectation",
+        (
+            ("column_index", "cat-x-cat-col-idx-explicit-order"),
+            ("unweighted_counts", "cat-x-cat-ucounts-explicit-order"),
+            ("zscores", "cat-x-cat-zscores-explicit-order"),
+        ),
+    )
+    def and_it_respects_explicit_order_transform_for_measures(
+        self, measure_propname, expectation
+    ):
+        transforms = {
+            "rows_dimension": {
+                "order": {"type": "explicit", "element_ids": [2, 4, 3, 1]}
+            },
+            "columns_dimension": {
+                "order": {"type": "explicit", "element_ids": [3, 2, 4, 1]}
+            },
+        }
+        slice_ = _Slice(
+            Cube(CR.CAT_4_X_CAT_4),
+            slice_idx=0,
+            transforms=transforms,
+            population=None,
+            mask_size=0,
+        )
+
+        actual = getattr(slice_, measure_propname)
+
+        expected = load_python_expression(expectation)
+        np.testing.assert_almost_equal(actual, expected)
 
     def it_ignores_hidden_subtotals(self):
         """A subtotal with `"hide": True` does not appear.
@@ -220,7 +389,7 @@ class Describe_Slice(object):
                 ]
             },
         }
-        slice_ = _Slice(Cube(CR.CAT_X_CAT_4X4), 0, transforms, None, 0)
+        slice_ = _Slice(Cube(CR.CAT_4_X_CAT_4), 0, transforms, None, 0)
 
         assert slice_.row_labels == ("Apple", "Banana", "Cherry", "Date")
         assert slice_.column_labels == (
@@ -289,7 +458,7 @@ class Describe_Slice(object):
                 "order": {"element_ids": [2, 4, 3, 1], "type": "explicit"},
             },
         }
-        slice_ = Cube(CR.CAT_X_CAT_4X4, transforms=transforms).partitions[0]
+        slice_ = Cube(CR.CAT_4_X_CAT_4, transforms=transforms).partitions[0]
 
         assert slice_.row_labels == (
             "Apple+Banana",
@@ -349,267 +518,6 @@ class Describe_Slice(object):
             slice_.row_base, slice_wo_explicit_order_.row_base
         )
 
-    def it_respect_proportions_with_ordering_transform_cat_x_cat(self):
-        slice_ = Cube(CR.CAT_X_CAT).partitions[0]
-
-        np.testing.assert_almost_equal(
-            slice_.column_proportions, [[0.5, 0.4], [0.5, 0.6]]
-        )
-        np.testing.assert_almost_equal(
-            slice_.row_proportions, [[0.71428571, 0.28571429], [0.625, 0.375]]
-        )
-
-        transforms = {
-            "columns_dimension": {"order": {"element_ids": [3, 1], "type": "explicit"}},
-            "rows_dimension": {"order": {"element_ids": [1, 2], "type": "explicit"}},
-        }
-        slice_with_ordering_ = Cube(CR.CAT_X_CAT, transforms=transforms).partitions[0]
-
-        np.testing.assert_almost_equal(
-            slice_with_ordering_.column_proportions, [[0.4, 0.5], [0.6, 0.5]]
-        )
-        np.testing.assert_almost_equal(
-            slice_with_ordering_.row_proportions,
-            [[0.28571429, 0.71428571], [0.375, 0.625]],
-        )
-        np.testing.assert_almost_equal(slice_.row_base, slice_with_ordering_.row_base)
-        np.testing.assert_almost_equal(
-            np.flip(slice_.column_base), slice_with_ordering_.column_base
-        )
-
-    def it_respect_proportions_with_ordering_transform_cat_x_mr(self):
-        slice_ = Cube(CR.CAT_X_MR).partitions[0]
-
-        np.testing.assert_almost_equal(
-            slice_.column_proportions,
-            [[0.3, 0.35294118, 0.31578947], [0.7, 0.64705882, 0.6842105]],
-        )
-        np.testing.assert_almost_equal(
-            slice_.row_proportions,
-            [[0.4285714, 0.48, 0.5217391], [0.5384615, 0.4074074, 0.5531915]],
-        )
-
-        transforms = {
-            "columns_dimension": {
-                "order": {"element_ids": [3, 2, 1], "type": "explicit"}
-            },
-            "rows_dimension": {"order": {"element_ids": [2, 1], "type": "explicit"}},
-        }
-        slice_with_ordering_ = Cube(CR.CAT_X_MR, transforms=transforms).partitions[0]
-
-        np.testing.assert_almost_equal(
-            slice_with_ordering_.column_proportions,
-            [[0.6842105, 0.64705882, 0.7], [0.31578947, 0.35294118, 0.3]],
-        )
-        np.testing.assert_almost_equal(
-            slice_with_ordering_.row_proportions,
-            [[0.5531915, 0.4074074, 0.5384615], [0.5217391, 0.48, 0.4285714]],
-        )
-        np.testing.assert_almost_equal(
-            np.flip(np.flip(slice_.row_base, 0), 1), slice_with_ordering_.row_base
-        )
-        np.testing.assert_almost_equal(
-            np.flip(slice_.column_base), slice_with_ordering_.column_base
-        )
-
-    def it_respect_row_proportions_with_ordering_transform_mr_x_cat(self):
-        slice_ = Cube(
-            CR.MR_X_CAT_HS,
-            transforms=TR.GENERIC_TRANSFORMS_DICTS["both_order_mr_x_cat"],
-        ).partitions[0]
-
-        np.testing.assert_almost_equal(
-            slice_.row_proportions,
-            [
-                [0.25883849, 0.06423004, 0.39673409, 0.0, 0.74116151],
-                [0.63354565, 0.44079255, 0.2344488, 0.0, 0.36645435],
-            ],
-        )
-        np.testing.assert_equal(
-            slice_.column_base, [[101, 32, 208, 0, 375], [39, 15, 69, 0, 126]]
-        )
-        np.testing.assert_equal(slice_.row_base, [385, 26])
-
-        # --- rows flip after removing the rows order ---
-        slice_ = Cube(
-            CR.MR_X_CAT_HS,
-            transforms=TR.GENERIC_TRANSFORMS_DICTS["no_row_order_mr_x_cat"],
-        ).partitions[0]
-
-        np.testing.assert_almost_equal(
-            slice_.row_proportions,
-            [
-                [0.63354565, 0.44079255, 0.2344488, 0.0, 0.36645435],
-                [0.25883849, 0.06423004, 0.39673409, 0.0, 0.74116151],
-            ],
-        )
-        np.testing.assert_equal(
-            slice_.column_base, [[39, 15, 69, 0, 126], [101, 32, 208, 0, 375]]
-        )
-        np.testing.assert_equal(slice_.row_base, [26, 385])
-
-    def it_respect_col_proportions_with_ordering_transform_mr_x_cat(self):
-        slice_ = Cube(
-            CR.MR_X_CAT_HS,
-            transforms=TR.GENERIC_TRANSFORMS_DICTS["both_order_mr_x_cat"],
-        ).partitions[0]
-
-        np.testing.assert_almost_equal(
-            slice_.column_proportions,
-            [
-                [0.81825272, 0.78206694, 0.79964474, np.nan, 0.79162243],
-                [0.36700322, 0.63991606, 0.11791067, np.nan, 0.09519879],
-            ],
-        )
-        np.testing.assert_equal(
-            slice_.column_base, [[101, 32, 208, 0, 375], [39, 15, 69, 0, 126]]
-        )
-        np.testing.assert_equal(slice_.row_base, [385, 26])
-
-        # --- remove the columns order ---
-        slice_ = Cube(
-            CR.MR_X_CAT_HS,
-            transforms=TR.GENERIC_TRANSFORMS_DICTS["no_col_order_mr_x_cat"],
-        ).partitions[0]
-
-        np.testing.assert_almost_equal(
-            slice_.column_proportions,
-            [
-                [0.78206694, 0.81825272, 0.79964474, np.nan, 0.79162243],
-                [0.63991606, 0.36700322, 0.11791067, np.nan, 0.09519879],
-            ],
-        )
-        np.testing.assert_equal(
-            slice_.column_base, [[32, 101, 208, 0, 375], [15, 39, 69, 0, 126]]
-        )
-        np.testing.assert_equal(slice_.row_base, [385, 26])
-
-    def it_respect_proportions_with_ordering_transform_ca_x_cat(self):
-        transforms = TR.GENERIC_TRANSFORMS_DICTS["both_order_ca_x_cat"]
-        slice_ = Cube(CR.CA_X_CAT_HS, transforms=transforms).partitions[0]
-
-        np.testing.assert_almost_equal(
-            slice_.row_proportions,
-            [[0.33333333, 0.33333333, 0.0, 0.0, 0.33333333, 0.33333333, 0.66666667]],
-        )
-        np.testing.assert_almost_equal(
-            slice_.column_proportions, [[1.0, 0.33333333, 0.0, 0.0, 1.0, 1.0, 1.0]]
-        )
-
-        # remove the order
-        transforms_wo_ordering = TR.GENERIC_TRANSFORMS_DICTS["no_order_ca_x_cat"]
-        slice_wo_ordering_ = Cube(
-            CR.CA_X_CAT_HS, transforms=transforms_wo_ordering
-        ).partitions[0]
-
-        np.testing.assert_almost_equal(
-            slice_wo_ordering_.row_proportions,
-            [[0.0, 0.0, 0.33333333, 0.33333333, 0.33333333, 0.33333333, 0.66666667]],
-        )
-        np.testing.assert_almost_equal(
-            slice_wo_ordering_.column_proportions,
-            [[0.0, 0.0, 1.0, 0.33333333, 1.0, 1.0, 1.0]],
-        )
-
-    def it_respect_proportions_with_ordering_transform_mr_x_mr(self):
-        slice_ = Cube(CR.MR_X_MR).partitions[0]
-
-        np.testing.assert_almost_equal(
-            slice_.row_proportions,
-            [
-                [1.0, 0.28566937, 0.43456698, 1.0],
-                [0.13302403, 1.0, 0.34959546, 1.0],
-                [0.12391245, 0.23498805, 1.0, 1.0],
-                [0.22804396, 0.47751837, 0.72838875, 1.0],
-            ],
-        )
-
-        transforms = {
-            "columns_dimension": {
-                "order": {"element_ids": [2, 1, 3, 0], "type": "explicit"}
-            },
-            "rows_dimension": {
-                "order": {"element_ids": [1, 2, 3, 0], "type": "explicit"}
-            },
-        }
-        slice_with_row_ordering_ = Cube(CR.MR_X_MR, transforms=transforms).partitions[0]
-
-        np.testing.assert_almost_equal(
-            slice_with_row_ordering_.row_proportions,
-            [
-                [0.28566937, 1.0, 0.43456698, 1.0],
-                [1.0, 0.13302403, 0.34959546, 1.0],
-                [0.23498805, 0.12391245, 1.0, 1.0],
-                [0.47751837, 0.22804396, 0.72838875, 1.0],
-            ],
-        )
-        # assert that the first column is flipped
-        np.testing.assert_almost_equal(
-            slice_.row_proportions[:, 0], slice_with_row_ordering_.row_proportions[:, 1]
-        )
-        np.testing.assert_almost_equal(
-            slice_.column_base,
-            [[12, 18, 26, 44], [7, 29, 20, 45], [10, 22, 34, 53], [12, 29, 34, 61]],
-        )
-        np.testing.assert_almost_equal(
-            slice_with_row_ordering_.column_base,
-            [[18, 12, 26, 44], [29, 7, 20, 45], [22, 10, 34, 53], [29, 12, 34, 61]],
-        )
-        np.testing.assert_almost_equal(
-            slice_.row_base,
-            [[12, 7, 10, 12], [18, 29, 22, 29], [26, 20, 34, 34], [44, 45, 53, 61]],
-        )
-        np.testing.assert_almost_equal(
-            slice_with_row_ordering_.row_base,
-            [[7, 12, 10, 12], [29, 18, 22, 29], [20, 26, 34, 34], [45, 44, 53, 61]],
-        )
-
-    def it_respect_proportions_with_ordering_transform_ca_x_mr(self):
-        slice_ = Cube(CR.CA_X_MR).partitions[0]
-
-        np.testing.assert_almost_equal(
-            slice_.row_proportions,
-            [
-                [0.56722442, 0.53361631, 0.98561362, np.nan],
-                [0.46968779, 0.52205975, 0.96608066, np.nan],
-                [0.41712503, 0.45425752, 0.96050869, np.nan],
-                [0.51077015, 0.50379377, 0.98869263, np.nan],
-                [0.1512758, 0.24490666, 0.9917377, np.nan],
-            ],
-        )
-
-        transforms = {
-            "rows_dimension": {
-                "order": {"element_ids": [0, 1, 2, 5, 4], "type": "explicit"}
-            }
-        }
-        slice_with_row_ordering_ = Cube(CR.CA_X_MR, transforms=transforms).partitions[0]
-
-        np.testing.assert_almost_equal(
-            slice_with_row_ordering_.row_proportions,
-            [
-                [0.56722442, 0.53361631, 0.98561362, np.nan],
-                [0.46968779, 0.52205975, 0.96608066, np.nan],
-                [0.1512758, 0.24490666, 0.9917377, np.nan],
-                [0.51077015, 0.50379377, 0.98869263, np.nan],
-                [0.41712503, 0.45425752, 0.96050869, np.nan],
-            ],
-        )
-        # assert that columns are flipped
-        np.testing.assert_almost_equal(
-            slice_.row_proportions[4, :], slice_with_row_ordering_.row_proportions[2, :]
-        )
-        np.testing.assert_almost_equal(
-            slice_.row_proportions[2, :],
-            slice_with_row_ordering_.row_proportions[-1, :],
-        )
-        np.testing.assert_almost_equal(
-            slice_with_row_ordering_.row_base[4, :], slice_.row_base[2, :]
-        )
-        np.testing.assert_almost_equal(
-            slice_with_row_ordering_.row_base[2, :], slice_.row_base[-1, :]
-        )
-
     @pytest.mark.parametrize(
         "fixture, table_name, expected",
         [
@@ -619,51 +527,14 @@ class Describe_Slice(object):
             (CR.AGE_FAVMR, None, False),
         ],
     )
-    def it_knows_when_cube_is_augmented(self, fixture, table_name, expected):
-        cube = Cube(fixture)
-        slice_ = cube.partitions[0]
+    def it_knows_when_its_cube_is_augmented(self, fixture, table_name, expected):
+        slice_ = Cube(fixture).partitions[0]
 
         assert slice_.table_name == table_name
-        assert slice_.cube_is_mr_by_itself is expected
+        assert slice_.cube_is_mr_aug is expected
 
     def it_knows_when_it_is_empty(self):
         assert Cube(CR.OM_SGP8334215_VN_2019_SEP_19).partitions[0].is_empty is True
-
-    def it_provides_nan_margin_when_has_weighted_mean_without_weighted_counts(self):
-        slice_ = Cube(CR.AGE_AGE_GENDER).partitions[0]
-
-        np.testing.assert_array_almost_equal(
-            slice_.counts,
-            np.array(
-                [[24.43935757, 37.32122746, 61.76058503, 55.48571956, 73.02427659]]
-            ),
-        )
-        np.testing.assert_array_almost_equal(
-            slice_.means,
-            np.array([[24.43935757, 37.32122746, np.nan, 55.48571956, 73.02427659]]),
-        )
-        np.testing.assert_array_almost_equal(slice_.rows_margin, np.array([np.nan]))
-        np.testing.assert_array_almost_equal(
-            slice_.columns_margin, np.array([np.nan] * len(slice_.counts[0, :]))
-        )
-
-    def it_calculates_various_measures(self):
-        transforms = {
-            "columns_dimension": {"insertions": {}},
-            "rows_dimension": {"insertions": {}},
-        }
-
-        # Without insertions
-        slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[0]
-        expected = [
-            [0.47502103, 0.34045416, 0.16820858, 0.0, 0.01631623],
-            [0.515, 0.0, 0.485, 0.0, 0.0],
-            [0.27321912, 0.3606853, 0.18575293, 0.0, 0.18034265],
-            [0.19080605, 0.5, 0.30919395, 0.0, 0.0],
-            [np.nan, np.nan, np.nan, np.nan, np.nan],
-            [0.33333333, 0.33333333, 0.33333333, 0.0, 0.0],
-        ]
-        np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
     def it_provides_unpruned_table_margin(self):
         slice_ = _Slice(Cube(CR.MR_X_CAT_HS), 0, None, None, 0)
@@ -675,635 +546,6 @@ class Describe_Slice(object):
             [176.3655518, 211.4205877, 247.7407379, 457.0509557, 471.9317685],
         )
 
-    def it_reorders_various_measures_on_mr_x_cat(self):
-        transforms = {
-            "rows_dimension": {
-                "order": {"type": "explicit", "element_ids": [5, 1, 4, 2, 3]}
-            }
-        }
-        slice_ = Cube(CR.MR_X_CAT_HS, transforms=transforms).partitions[0]
-        np.testing.assert_almost_equal(
-            slice_.base_counts,
-            [
-                [27, 58, 85, 0, 134, 166, 0, 300],
-                [8, 7, 15, 0, 6, 5, 0, 11],
-                [13, 36, 49, 0, 130, 190, 0, 320],
-                [7, 16, 23, 0, 26, 27, 0, 53],
-                [4, 21, 25, 0, 39, 54, 0, 93],
-            ],
-        )
-        np.testing.assert_almost_equal(slice_.row_base, [385, 26, 369, 76, 118])
-        np.testing.assert_almost_equal(
-            slice_.rows_margin,
-            [376.76564059, 31.63152104, 366.88839144, 70.73073413, 125.75911351],
-        )
-        np.testing.assert_almost_equal(slice_.table_base, [476, 165, 450, 210, 242])
-        np.testing.assert_almost_equal(
-            slice_.table_margin,
-            [471.93176847, 176.36555176, 457.05095566, 211.42058767, 247.74073787],
-        )
-
-    def it_calculates_mr_x_cat_row_proportions(self):
-        slice_ = Cube(CR.MR_X_CAT_HS).partitions[0]
-        expected = [
-            [
-                0.44079255,
-                0.1927531,
-                0.63354565,
-                0.0,
-                0.13200555,
-                0.2344488,
-                0.0,
-                0.36645435,
-            ],
-            [
-                0.12706997,
-                0.17758354,
-                0.30465351,
-                0.0,
-                0.35154979,
-                0.3437967,
-                0.0,
-                0.69534649,
-            ],
-            [
-                0.02245085,
-                0.15543673,
-                0.17788758,
-                0.0,
-                0.40588131,
-                0.41623111,
-                0.0,
-                0.82211242,
-            ],
-            [
-                0.03842827,
-                0.11799739,
-                0.15642566,
-                0.0,
-                0.35971868,
-                0.48385566,
-                0.0,
-                0.84357434,
-            ],
-            [
-                0.06423004,
-                0.19460845,
-                0.25883849,
-                0.0,
-                0.34442742,
-                0.39673409,
-                0.0,
-                0.74116151,
-            ],
-        ]
-        np.testing.assert_almost_equal(slice_.row_proportions, expected)
-
-    def it_calculates_mr_x_cat_column_proportions(self):
-        slice_ = Cube(CR.MR_X_CAT_HS).partitions[0]
-        expected = [
-            [
-                0.63991606,
-                0.18579712,
-                0.36700322,
-                np.nan,
-                0.0709326,
-                0.11791067,
-                np.nan,
-                0.09519879,
-            ],
-            [
-                0.57106291,
-                0.30796582,
-                0.38122252,
-                np.nan,
-                0.32298183,
-                0.31211929,
-                np.nan,
-                0.31751821,
-            ],
-            [
-                0.23101896,
-                0.47698573,
-                0.42048358,
-                np.nan,
-                0.55509399,
-                0.51026605,
-                np.nan,
-                0.53145537,
-            ],
-            [
-                0.6728815,
-                0.6856928,
-                0.68250053,
-                np.nan,
-                0.79661367,
-                0.85638988,
-                np.nan,
-                0.82983691,
-            ],
-            [
-                0.78206694,
-                0.83094212,
-                0.81825272,
-                np.nan,
-                0.78257903,
-                0.79964474,
-                np.nan,
-                0.79162243,
-            ],
-        ]
-        np.testing.assert_almost_equal(slice_.column_proportions, expected)
-
-    def it_calculates_cat_x_mr_row_proportions(self):
-        slice_ = Cube(CR.CAT_HS_X_MR).partitions[0]
-        expected = [
-            [0.63991606, 0.57106291, 0.23101896, 0.6728815, 0.78206694],
-            [0.18579712, 0.30796582, 0.47698573, 0.6856928, 0.83094212],
-            [0.36700322, 0.38122252, 0.42048358, 0.68250053, 0.81825272],
-            [np.nan, np.nan, np.nan, np.nan, np.nan],
-            [0.0709326, 0.32298183, 0.55509399, 0.79661367, 0.78257903],
-            [0.11791067, 0.31211929, 0.51026605, 0.85638988, 0.79964474],
-            [np.nan, np.nan, np.nan, np.nan, np.nan],
-            [0.09519879, 0.31751821, 0.53145537, 0.82983691, 0.79162243],
-        ]
-        np.testing.assert_almost_equal(slice_.row_proportions, expected)
-
-    def it_calculates_cat_x_mr_column_proportions(self):
-        slice_ = Cube(CR.CAT_HS_X_MR).partitions[0]
-        expected = [
-            [0.44079255, 0.12706997, 0.02245085, 0.03842827, 0.06423004],
-            [0.1927531, 0.17758354, 0.15543673, 0.11799739, 0.19460845],
-            [0.63354565, 0.30465351, 0.17788758, 0.15642566, 0.25883849],
-            [0.0, 0.0, 0.0, 0.0, 0.0],
-            [0.13200555, 0.35154979, 0.40588131, 0.35971868, 0.34442742],
-            [0.2344488, 0.3437967, 0.41623111, 0.48385566, 0.39673409],
-            [0.0, 0.0, 0.0, 0.0, 0.0],
-            [0.36645435, 0.69534649, 0.82211242, 0.84357434, 0.74116151],
-        ]
-        np.testing.assert_almost_equal(slice_.column_proportions, expected)
-
-    def it_calculates_mr_x_cat_various_measures(self):
-        slice_ = Cube(CR.MR_X_CAT_HS).partitions[0]
-        expected_zscore = [
-            [
-                5.98561407,
-                0.10667037,
-                np.nan,
-                np.nan,
-                -2.65642772,
-                -1.58344064,
-                np.nan,
-                np.nan,
-            ],
-            [
-                2.06703905,
-                -0.40052278,
-                np.nan,
-                np.nan,
-                -0.26977425,
-                -0.52803412,
-                np.nan,
-                np.nan,
-            ],
-            [
-                -1.98375582,
-                -0.4294405,
-                np.nan,
-                np.nan,
-                1.14820815,
-                0.06992955,
-                np.nan,
-                np.nan,
-            ],
-            [
-                -1.52909314,
-                -2.51725298,
-                np.nan,
-                np.nan,
-                -0.24776194,
-                2.62630708,
-                np.nan,
-                np.nan,
-            ],
-            [
-                -0.23349936,
-                0.84630085,
-                np.nan,
-                np.nan,
-                -0.62837448,
-                0.05687326,
-                np.nan,
-                np.nan,
-            ],
-        ]
-        expected_pvals = [
-            [
-                2.15574980e-09,
-                9.15050488e-01,
-                np.nan,
-                np.nan,
-                7.89733774e-03,
-                1.13321065e-01,
-                np.nan,
-                np.nan,
-            ],
-            [
-                3.87304749e-02,
-                6.88771512e-01,
-                np.nan,
-                np.nan,
-                7.87333931e-01,
-                5.97475651e-01,
-                np.nan,
-                np.nan,
-            ],
-            [
-                4.72830679e-02,
-                6.67602683e-01,
-                np.nan,
-                np.nan,
-                2.50882647e-01,
-                9.44249733e-01,
-                np.nan,
-                np.nan,
-            ],
-            [
-                1.26241357e-01,
-                1.18273874e-02,
-                np.nan,
-                np.nan,
-                8.04318606e-01,
-                8.63169073e-03,
-                np.nan,
-                np.nan,
-            ],
-            [
-                8.15373669e-01,
-                3.97384931e-01,
-                np.nan,
-                np.nan,
-                5.29758649e-01,
-                9.54646158e-01,
-                np.nan,
-                np.nan,
-            ],
-        ]
-        expected_table_std_dev = [
-            [
-                0.26982777,
-                0.18268971,
-                0.31735855,
-                0.0,
-                0.15203597,
-                0.20070068,
-                0.0,
-                0.24779961,
-            ],
-            [
-                0.20175242,
-                0.2363915,
-                0.30254544,
-                0.0,
-                0.32214688,
-                0.31904263,
-                0.0,
-                0.42250711,
-            ],
-            [
-                0.10614473,
-                0.26958793,
-                0.28661105,
-                0.0,
-                0.40445594,
-                0.40822282,
-                0.0,
-                0.49311729,
-            ],
-            [
-                0.17290444,
-                0.29282782,
-                0.33136132,
-                0.0,
-                0.45318467,
-                0.48738756,
-                0.0,
-                0.46756128,
-            ],
-            [
-                0.22056401,
-                0.36225248,
-                0.40489719,
-                0.0,
-                0.44650059,
-                0.46520183,
-                0.0,
-                0.49151833,
-            ],
-        ]
-        expected_table_std_err = [
-            [
-                0.02031794,
-                0.01375648,
-                0.023897,
-                0.0,
-                0.01144826,
-                0.0151127,
-                0.0,
-                0.01865923,
-            ],
-            [
-                0.01387539,
-                0.01625767,
-                0.02080736,
-                0.0,
-                0.02215544,
-                0.02194194,
-                0.0,
-                0.02905764,
-            ],
-            [
-                0.00674372,
-                0.01712781,
-                0.01820934,
-                0.0,
-                0.02569641,
-                0.02593574,
-                0.0,
-                0.03132936,
-            ],
-            [
-                0.00808768,
-                0.01369714,
-                0.01549956,
-                0.0,
-                0.0211979,
-                0.02279776,
-                0.0,
-                0.02187038,
-            ],
-            [
-                0.01015302,
-                0.01667523,
-                0.01863825,
-                0.0,
-                0.02055334,
-                0.0214142,
-                0.0,
-                0.0226256,
-            ],
-        ]
-        expected_col_std_dev = [
-            [
-                0.48002447,
-                0.38894286,
-                0.4819874,
-                np.nan,
-                0.25671222,
-                0.32250231,
-                np.nan,
-                0.29348932,
-            ],
-            [
-                0.4949243,
-                0.46165233,
-                0.48568705,
-                np.nan,
-                0.46761583,
-                0.46335822,
-                np.nan,
-                0.4655109,
-            ],
-            [
-                0.42148452,
-                0.49947006,
-                0.49363665,
-                np.nan,
-                0.49695538,
-                0.4998946,
-                np.nan,
-                0.49900958,
-            ],
-            [
-                0.46916094,
-                0.46423936,
-                0.46550355,
-                np.nan,
-                0.40251749,
-                0.35069396,
-                np.nan,
-                0.37577601,
-            ],
-            [
-                0.41284167,
-                0.37480303,
-                0.38563611,
-                np.nan,
-                0.41249133,
-                0.4002662,
-                np.nan,
-                0.40614819,
-            ],
-        ]
-        expected_col_std_err = [
-            [
-                0.1028366,
-                0.06789606,
-                0.06522613,
-                np.nan,
-                0.03345903,
-                0.04066543,
-                np.nan,
-                0.02659733,
-            ],
-            [
-                0.12475421,
-                0.07228711,
-                0.06460091,
-                np.nan,
-                0.0532943,
-                0.05249552,
-                np.nan,
-                0.03740326,
-            ],
-            [
-                0.12056446,
-                0.07802173,
-                0.06767673,
-                np.nan,
-                0.05182406,
-                0.04935598,
-                np.nan,
-                0.03577725,
-            ],
-            [
-                0.10249407,
-                0.05842565,
-                0.05076373,
-                np.nan,
-                0.03127232,
-                0.02435786,
-                np.nan,
-                0.01945794,
-            ],
-            [
-                0.07421655,
-                0.03989992,
-                0.03532412,
-                np.nan,
-                0.03203276,
-                0.02927602,
-                np.nan,
-                0.02162477,
-            ],
-        ]
-        np.testing.assert_almost_equal(slice_.table_std_dev, expected_table_std_dev)
-        np.testing.assert_almost_equal(slice_.table_std_err, expected_table_std_err)
-        np.testing.assert_almost_equal(slice_.columns_std_dev, expected_col_std_dev)
-        np.testing.assert_almost_equal(slice_.columns_std_err, expected_col_std_err)
-        np.testing.assert_almost_equal(slice_.zscore, expected_zscore)
-        np.testing.assert_almost_equal(slice_.pvals, expected_pvals)
-
-    def it_calculates_cat_x_mr_various_measures(self):
-        slice_ = Cube(CR.CAT_HS_X_MR).partitions[0]
-        expected_zscore = [
-            [5.98561407, 2.06703905, -1.98375582, -1.52909314, -0.23349936],
-            [0.10667037, -0.40052278, -0.4294405, -2.51725298, 0.84630085],
-            [np.nan, np.nan, np.nan, np.nan, np.nan],
-            [np.nan, np.nan, np.nan, np.nan, np.nan],
-            [-2.65642772, -0.26977425, 1.14820815, -0.24776194, -0.62837448],
-            [-1.58344064, -0.52803412, 0.06992955, 2.62630708, 0.05687326],
-            [np.nan, np.nan, np.nan, np.nan, np.nan],
-            [np.nan, np.nan, np.nan, np.nan, np.nan],
-        ]
-        expected_pvals = [
-            [
-                2.15574980e-09,
-                3.87304749e-02,
-                4.72830679e-02,
-                1.26241357e-01,
-                8.15373669e-01,
-            ],
-            [
-                9.15050488e-01,
-                6.88771512e-01,
-                6.67602683e-01,
-                1.18273874e-02,
-                3.97384931e-01,
-            ],
-            [np.nan, np.nan, np.nan, np.nan, np.nan],
-            [np.nan, np.nan, np.nan, np.nan, np.nan],
-            [
-                7.89733774e-03,
-                7.87333931e-01,
-                2.50882647e-01,
-                8.04318606e-01,
-                5.29758649e-01,
-            ],
-            [
-                1.13321065e-01,
-                5.97475651e-01,
-                9.44249733e-01,
-                8.63169073e-03,
-                9.54646158e-01,
-            ],
-            [np.nan, np.nan, np.nan, np.nan, np.nan],
-            [np.nan, np.nan, np.nan, np.nan, np.nan],
-        ]
-        expected_table_std_dev = [
-            [0.26982777, 0.20175242, 0.10614473, 0.17290444, 0.22056401],
-            [0.18268971, 0.2363915, 0.26958793, 0.29282782, 0.36225248],
-            [0.31735855, 0.30254544, 0.28661105, 0.33136132, 0.40489719],
-            [0.0, 0.0, 0.0, 0.0, 0.0],
-            [0.15203597, 0.32214688, 0.40445594, 0.45318467, 0.44650059],
-            [0.20070068, 0.31904263, 0.40822282, 0.48738756, 0.46520183],
-            [0.0, 0.0, 0.0, 0.0, 0.0],
-            [0.24779961, 0.42250711, 0.49311729, 0.46756128, 0.49151833],
-        ]
-        expected_table_std_err = [
-            [0.02031794, 0.01387539, 0.00674372, 0.00808768, 0.01015302],
-            [0.01375648, 0.01625767, 0.01712781, 0.01369714, 0.01667523],
-            [0.023897, 0.02080736, 0.01820934, 0.01549956, 0.01863825],
-            [0.0, 0.0, 0.0, 0.0, 0.0],
-            [0.01144826, 0.02215544, 0.02569641, 0.0211979, 0.02055334],
-            [0.0151127, 0.02194194, 0.02593574, 0.02279776, 0.0214142],
-            [0.0, 0.0, 0.0, 0.0, 0.0],
-            [0.01865923, 0.02905764, 0.03132936, 0.02187038, 0.0226256],
-        ]
-        expected_col_std_dev = [
-            [0.4964821, 0.33305134, 0.14814455, 0.19222783, 0.24516228],
-            [0.39446083, 0.38216178, 0.36232051, 0.32260503, 0.39589898],
-            [0.48183561, 0.46026052, 0.38241808, 0.36325841, 0.43799672],
-            [0.0, 0.0, 0.0, 0.0, 0.0],
-            [0.3384968, 0.47745422, 0.49106178, 0.47991786, 0.4751812],
-            [0.42365382, 0.47497424, 0.49293283, 0.49973929, 0.48921994],
-            [0.0, 0.0, 0.0, 0.0, 0.0],
-            [0.48183561, 0.46026052, 0.38241808, 0.36325841, 0.43799672],
-        ]
-        expected_col_std_err = [
-            [0.08827619, 0.03960109, 0.0132104, 0.01003574, 0.01263043],
-            [0.07013646, 0.04544051, 0.03230898, 0.01684241, 0.02039618],
-            [0.08567199, 0.05472675, 0.03410112, 0.01896482, 0.02256499],
-            [0.0, 0.0, 0.0, 0.0, 0.0],
-            [0.06018587, 0.05677115, 0.04378914, 0.02505532, 0.02448069],
-            [0.07532707, 0.05647627, 0.04395598, 0.02609015, 0.02520394],
-            [0.0, 0.0, 0.0, 0.0, 0.0],
-            [0.08567199, 0.05472675, 0.03410112, 0.01896482, 0.02256499],
-        ]
-
-        np.testing.assert_almost_equal(slice_.table_std_dev, expected_table_std_dev)
-        np.testing.assert_almost_equal(slice_.table_std_err, expected_table_std_err)
-        np.testing.assert_almost_equal(slice_.columns_std_dev, expected_col_std_dev)
-        np.testing.assert_almost_equal(slice_.columns_std_err, expected_col_std_err)
-        np.testing.assert_almost_equal(slice_.zscore, expected_zscore)
-        np.testing.assert_almost_equal(slice_.pvals, expected_pvals)
-
-    def it_calculates_mr_x_mr_row_proportions(self):
-        slice_ = Cube(CR.MR_X_MR).partitions[0]
-        expected = [
-            [1.0, 0.28566937, 0.43456698, 1.0],
-            [0.13302403, 1.0, 0.34959546, 1.0],
-            [0.12391245, 0.23498805, 1.0, 1.0],
-            [0.22804396, 0.47751837, 0.72838875, 1.0],
-        ]
-        np.testing.assert_almost_equal(slice_.row_proportions, expected)
-
-    def it_knows_mr_x_mr_column_proportions(self):
-        slice_ = Cube(CR.MR_X_MR).partitions[0]
-        np.testing.assert_almost_equal(
-            slice_.column_proportions,
-            [
-                [1.0, 0.13302403, 0.12391245, 0.22804396],
-                [0.28566937, 1.0, 0.23498805, 0.47751837],
-                [0.43456698, 0.34959546, 1.0, 0.72838875],
-                [1.0, 1.0, 1.0, 1.0],
-            ],
-        )
-
-    def it_reorders_cat_x_cat(self):
-        transforms = {
-            "rows_dimension": {
-                "insertions": {},
-                "order": {"type": "explicit", "element_ids": [6, 1, 2, 5, 4, 3]},
-            },
-            "columns_dimension": {
-                "insertions": {},
-                "order": {"type": "explicit", "element_ids": [5, 1, 2, 4, 3]},
-            },
-        }
-        slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[0]
-        expected = np.array(
-            [
-                [0, 1, 1, 0, 1],
-                [1, 28, 20, 0, 10],
-                [0, 1, 0, 0, 1],
-                [0, 0, 0, 0, 0],
-                [0, 3, 8, 0, 5],
-                [2, 3, 4, 0, 2],
-            ]
-        )
-        np.testing.assert_equal(slice_.base_counts, expected)
-
     def it_prunes_cat_x_cat_with_hs(self):
         # Pruned - without insertions
         transforms = {
@@ -1314,7 +556,7 @@ class Describe_Slice(object):
         expected = np.array(
             [[28, 20, 10, 1], [1, 0, 1, 0], [3, 4, 2, 2], [3, 8, 5, 0], [1, 1, 1, 0]]
         )
-        np.testing.assert_equal(slice_.base_counts, expected)
+        np.testing.assert_equal(slice_.unweighted_counts, expected)
 
         # Pruned (just rows) - with insertions
         transforms = {"rows_dimension": {"prune": True}}
@@ -1329,7 +571,7 @@ class Describe_Slice(object):
                 [1, 2, 1, 1, 0, 0],
             ]
         )
-        np.testing.assert_equal(slice_.base_counts, expected)
+        np.testing.assert_equal(slice_.unweighted_counts, expected)
 
         # Pruned (just columns) - with insertions
         transforms = {"columns_dimension": {"prune": True}}
@@ -1345,7 +587,7 @@ class Describe_Slice(object):
                 [1, 2, 1, 1, 0],
             ]
         )
-        np.testing.assert_equal(slice_.base_counts, expected)
+        np.testing.assert_equal(slice_.unweighted_counts, expected)
 
         # Pruned (rows and columns) - with insertions
         transforms = {
@@ -1363,7 +605,7 @@ class Describe_Slice(object):
                 [1, 2, 1, 1, 0],
             ]
         )
-        np.testing.assert_equal(slice_.base_counts, expected)
+        np.testing.assert_equal(slice_.unweighted_counts, expected)
 
         # Not pruned - with insertions
         slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS).partitions[0]
@@ -1378,7 +620,7 @@ class Describe_Slice(object):
                 [1, 2, 1, 1, 0, 0],
             ]
         )
-        np.testing.assert_equal(slice_.base_counts, expected)
+        np.testing.assert_equal(slice_.unweighted_counts, expected)
 
     def it_accommodates_an_all_missing_element_rows_dimension(self):
         slice_ = _Slice(Cube(CR.CAT_X_CAT_ALL_MISSING_ROW_ELEMENTS), 0, None, None, 0)
@@ -1460,11 +702,10 @@ class Describe_Strand(object):
     def it_provides_values_for_univariate_cat(self):
         strand = Cube(CR.UNIVARIATE_CATEGORICAL).partitions[0]
 
-        assert strand.base_counts == (10, 5)
         assert strand.bases == (15, 15)
         assert strand.counts == (10, 5)
         assert strand.cube_index == 0
-        assert strand.cube_is_mr_by_itself is False
+        assert strand.cube_is_mr_aug is False
         assert strand.dimension_types == (DT.CAT,)
         assert strand.has_means is False
         assert strand.inserted_row_idxs == ()
@@ -1492,6 +733,7 @@ class Describe_Strand(object):
         assert pytest.approx(strand.table_proportions) == (0.666667, 0.333333)
         assert strand.title == "Registered Voters"
         assert strand.unweighted_bases == (15, 15)
+        assert strand.unweighted_counts == (10, 5)
         assert pytest.approx(strand.var_scale_mean) == 0.8888888
         assert strand.variable_name == "v7"
 
@@ -1503,6 +745,7 @@ class Describe_Strand(object):
             strand.means, [19.85555556, 13.85416667, 52.78947368, np.nan, np.nan]
         )
         assert strand.title == "Untitled"
+        assert strand.unweighted_counts == (409, 113, 139, 409, 252)
 
     def it_provides_std_dev_err_univ_mr_with_hs(self):
         strand = Cube(CR.UNIV_MR_WITH_HS["slides"][0]["cube"]).partitions[0]

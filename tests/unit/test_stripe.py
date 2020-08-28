@@ -12,6 +12,7 @@ from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.stripe import (
     _BaseBaseStripe,
     _BaseStripeRow,
+    _MeansStripeRow,
     _StripeInsertedRow,
     _StripeInsertionHelper,
     TransformedStripe,
@@ -195,7 +196,6 @@ class Describe_StripeInsertionHelper(object):
 
         inserted_rows = insertion_helper._inserted_rows
 
-        print(_StripeInsertedRow_.call_args_list)
         assert _StripeInsertedRow_.call_args_list == [
             call(row, ("ordered", "rows"), 42) for row in subtotal_rows_[:expected_len]
         ]
@@ -222,6 +222,20 @@ class Describe_StripeInsertedRow(object):
 
     def it_knows_it_is_inserted(self):
         assert _StripeInsertedRow(None, None, None).is_inserted is True
+
+    def it_knows_its_unweighted_count(self, request):
+        addend_rows_ = tuple(
+            instance_mock(request, _BaseStripeRow, unweighted_count=i + 1)
+            for i in range(3)
+        )
+        property_mock(
+            request, _StripeInsertedRow, "_addend_rows", return_value=addend_rows_
+        )
+        inserted_row = _StripeInsertedRow(None, None, None)
+
+        unweighted_count = inserted_row.unweighted_count
+
+        assert unweighted_count == 6  # --- 1+2+3 ---
 
     def it_gathers_the_addend_rows_to_help(self, request, subtotal_):
         base_rows_ = tuple(
@@ -263,3 +277,10 @@ class Describe_BaseStripeRow(object):
     @pytest.fixture
     def element_(self, request):
         return instance_mock(request, _Element)
+
+
+class Describe_MeansStripeRow(object):
+    """Unit test suite for `cr.cube.stripe.Describe_MeansStripeRow` object."""
+
+    def it_knows_its_unweighted_count(self):
+        assert _MeansStripeRow(None, 42, None).unweighted_count == 42
