@@ -500,7 +500,7 @@ class Cube(object):
 
 
 class SmoothedMeasure(object):
-    """Base class for smoothing measure objects"""
+    """Base class for smoothing objects"""
 
     def __init__(self, transforms_dict):
         self._transforms_dict = transforms_dict
@@ -518,7 +518,7 @@ class SmoothedMeasure(object):
 
 
 class _SingleSideMovingAvg(SmoothedMeasure):
-    """Smoothing measure using one side moving average algorithm"""
+    """Apply smoothing using one side moving average algorithm"""
 
     def smoothed_values(self, values):
         """ -> np.ndarray, provide rolling window calculations on given values.
@@ -568,6 +568,7 @@ class _SingleSideMovingAvg(SmoothedMeasure):
         )
 
     def _valid_window(self, total_period):
+        """ -> bool, the validity of the window parameter."""
         if self._window > total_period or self._window == 0:
             return False
         return True
