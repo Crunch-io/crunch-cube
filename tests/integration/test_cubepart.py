@@ -695,6 +695,128 @@ class Describe_Slice(object):
             ),
         )
 
+    def it_provides_smoothed_counts_array_cat_x_cat_date(self):
+        transforms = {
+            "smoothing": {"method": "one_side_moving_avg", "window": 3, "show": True}
+        }
+        cube = Cube(CR.CAT_X_CAT_DATE, transforms=transforms)
+        slice_ = cube.partitions[0]
+        np.testing.assert_almost_equal(
+            slice_.counts,
+            [
+                [np.nan, np.nan, 127.66666667, 105.66666667],
+                [np.nan, np.nan, 189.0, 157.0],
+                [np.nan, np.nan, 62.0, 38.0],
+                [np.nan, np.nan, 19.66666667, 11.0],
+                [np.nan, np.nan, 38.0, 16.0],
+            ],
+        )
+
+        transforms = {
+            "smoothing": {"method": "one_side_moving_avg", "window": 3, "show": False}
+        }
+        cube2 = Cube(CR.CAT_X_CAT_DATE, transforms=transforms)
+        slice2_ = cube2.partitions[0]
+        np.testing.assert_array_almost_equal(
+            slice2_.counts,
+            [
+                [138, 144, 101, 72],
+                [185, 236, 146, 89],
+                [85, 53, 48, 13],
+                [27, 24, 8, 1],
+                [74, 28, 12, 8],
+            ],
+        )
+        assert slice_.shape == slice2_.shape
+
+    def it_provides_smoothed_counts_array_cat_x_cat_date_wgtd(self):
+        transforms = {
+            "smoothing": {"method": "one_side_moving_avg", "window": 3, "show": True}
+        }
+        cube = Cube(CR.CAT_X_CAT_DATE_WGTD, transforms=transforms)
+        slice_ = cube.partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_.counts,
+            [
+                [np.nan, np.nan, 131.35327524, 100.25662157],
+                [np.nan, np.nan, 196.09532984, 152.55817888],
+                [np.nan, np.nan, 63.00400068, 36.14178289],
+                [np.nan, np.nan, 21.21684549, 11.91461353],
+                [np.nan, np.nan, 40.41337078, 16.21162515],
+            ],
+        )
+
+        cube2 = Cube(CR.CAT_X_CAT_DATE_WGTD)
+        slice2_ = cube2.partitions[0]
+
+        np.testing.assert_array_almost_equal(
+            slice2_.counts,
+            [
+                [146.40471513, 175.96741344, 71.68769716, 53.1147541],
+                [196.26719057, 288.3910387, 103.62776025, 65.6557377],
+                [90.17681729, 64.76578411, 34.06940063, 9.59016393],
+                [28.64440079, 29.32790224, 5.67823344, 0.73770492],
+                [78.50687623, 34.21588595, 8.51735016, 5.90163934],
+            ],
+        )
+        assert slice_.shape == slice2_.shape
+
+    def it_provides_smoothed_counts_array_cat_x_mr_x_cat_date(self):
+        transforms = {
+            "smoothing": {"method": "one_side_moving_avg", "window": 3, "show": True}
+        }
+        cube = Cube(CR.CAT_X_MR_X_CAT_DATE, transforms=transforms)
+        slice_ = cube.partitions[0]
+        np.testing.assert_array_almost_equal(
+            slice_.counts,
+            [
+                [np.nan, np.nan, 26.66666667, 19.66666667],
+                [np.nan, np.nan, 74.0, 62.66666667],
+                [np.nan, np.nan, 34.66666667, 26.33333333],
+                [np.nan, np.nan, 42.33333333, 34.33333333],
+                [np.nan, np.nan, 7.0, 6.0],
+                [np.nan, np.nan, 10.33333333, 8.0],
+                [np.nan, np.nan, 2.33333333, 1.33333333],
+                [np.nan, np.nan, 65.0, 51.33333333],
+                [np.nan, np.nan, 10.0, 11.33333333],
+                [np.nan, np.nan, 22.33333333, 20.33333333],
+                [np.nan, np.nan, 34.33333333, 26.33333333],
+                [np.nan, np.nan, 17.33333333, 13.0],
+                [np.nan, np.nan, 12.33333333, 11.66666667],
+                [np.nan, np.nan, 6.33333333, 6.33333333],
+                [np.nan, np.nan, 24.0, 19.33333333],
+                [np.nan, np.nan, 1.66666667, 0.33333333],
+            ],
+        )
+
+        transforms = {"smoothing": {"method": "one_side_moving_avg", "window": 3}}
+        cube2 = Cube(CR.CAT_X_MR_X_CAT_DATE, transforms=transforms)
+        slice2_ = cube2.partitions[0]
+        np.testing.assert_array_almost_equal(
+            slice2_.counts,
+            [
+                [35, 27, 18, 14],
+                [77, 86, 59, 43],
+                [43, 38, 23, 18],
+                [47, 49, 31, 23],
+                [5, 12, 4, 2],
+                [10, 17, 4, 3],
+                [3, 3, 1, 0],
+                [74, 75, 46, 33],
+                [5, 14, 11, 9],
+                [24, 23, 20, 18],
+                [41, 39, 23, 17],
+                [19, 23, 10, 6],
+                [12, 12, 13, 10],
+                [5, 8, 6, 5],
+                [23, 25, 24, 9],
+                [4, 0, 1, 0],
+            ],
+        )
+        for i, p in enumerate(cube2.partitions):
+            assert cube.partitions[i].counts.shape == cube2.partitions[i].counts.shape
+
 
 class Describe_Strand(object):
     """Integration-test suite for `cr.cube.cubepart._Strand` object."""
@@ -827,6 +949,129 @@ class Describe_Strand(object):
     def it_knows_when_it_is_empty(self):
         strand = Cube(CR.OM_SGP8334215_VN_2019_SEP_19_STRAND).partitions[0]
         assert strand.is_empty is True
+
+    def it_provides_smoothed_counts_univariate_date(self):
+        transforms = {
+            "smoothing": {"method": "one_side_moving_avg", "window": 3, "show": True}
+        }
+        cube = Cube(CR.CAT_DATE, transforms=transforms)
+        strand_ = cube.partitions[0]
+        np.testing.assert_array_almost_equal(
+            strand_.counts,
+            (
+                np.nan,
+                np.nan,
+                24.666666666666668,
+                22.0,
+                76.33333333333333,
+                71.66666666666667,
+                69.0,
+                18.0,
+                12.333333333333334,
+                51.0,
+                58.333333333333336,
+                56.333333333333336,
+                16.0,
+                21.666666666666668,
+                30.333333333333332,
+                31.666666666666668,
+                19.333333333333332,
+                17.0,
+                17.0,
+                14.333333333333334,
+                12.666666666666666,
+                18.0,
+                30.333333333333332,
+                32.0,
+                25.333333333333332,
+                20.0,
+                13.0,
+                11.333333333333334,
+                8.333333333333334,
+                9.0,
+                18.666666666666668,
+                16.666666666666668,
+                48.333333333333336,
+                52.0,
+                48.666666666666664,
+                39.0,
+                29.333333333333332,
+                38.0,
+                43.333333333333336,
+                40.666666666666664,
+                36.666666666666664,
+                7.666666666666667,
+                16.333333333333332,
+                38.333333333333336,
+                42.333333333333336,
+                31.666666666666668,
+                17.0,
+                25.0,
+                27.666666666666668,
+                26.666666666666668,
+                15.333333333333334,
+            ),
+        )
+
+        cube2 = Cube(CR.CAT_DATE)
+        strand2_ = cube2.partitions[0]
+        np.testing.assert_array_almost_equal(
+            strand2_.counts,
+            (
+                30,
+                2,
+                42,
+                22,
+                165,
+                28,
+                14,
+                12,
+                11,
+                130,
+                34,
+                5,
+                9,
+                51,
+                31,
+                13,
+                14,
+                24,
+                13,
+                6,
+                19,
+                29,
+                43,
+                24,
+                9,
+                27,
+                3,
+                4,
+                18,
+                5,
+                33,
+                12,
+                100,
+                44,
+                2,
+                71,
+                15,
+                28,
+                87,
+                7,
+                16,
+                0,
+                33,
+                82,
+                12,
+                1,
+                38,
+                36,
+                9,
+                35,
+                2,
+            ),
+        )
+        assert len(strand_.counts) == len(strand2_.counts)
 
 
 class Describe_Nub(object):

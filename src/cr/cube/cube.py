@@ -361,6 +361,20 @@ class Cube(object):
         return self._measures.population_fraction
 
     @lazyproperty
+    def show_smoothing(self):
+        if self._has_smoothing:
+            return self._transforms_dict.get("smoothing").get("show", False)
+        return False
+
+    @lazyproperty
+    def smoother(self):
+        if self._has_smoothing:
+            return SmoothedMeasure.factory(
+                self._transforms_dict, self._all_dimensions.shape[-1]
+            )
+        return None
+
+    @lazyproperty
     def title(self):
         """str alternate-name given to cube-result.
 
@@ -427,6 +441,17 @@ class Cube(object):
             )
 
     @lazyproperty
+    def _has_smoothing(self):
+        """ -> bool, True if smoothing method is present in the transform dict.
+        If smoothing is avaliable the cube counts will be smoothed according to the
+        selected method.
+        """
+        transforms_dict = self._transforms_dict if self._transforms_dict else {}
+        if transforms_dict.get("smoothing") is not None:
+            return True
+        return False
+
+    @lazyproperty
     def _is_single_filter_col_cube(self):
         """ -> bool, determines if it is a single column filter cube."""
         return self._cube_dict["result"].get("is_single_col_cube", False)
@@ -475,6 +500,83 @@ class Cube(object):
         return np.ix_(
             *tuple(d.valid_elements.element_idxs for d in self._all_dimensions)
         )
+
+
+class SmoothedMeasure(object):
+    """Base class for smoothing measure objects"""
+
+    def __init__(self, transforms_dict, last_dim_size):
+        self._transforms_dict = transforms_dict
+        self._last_dim_size = last_dim_size
+
+    @classmethod
+    def factory(cls, transforms_dict, last_dim_size):
+        """Returns appropriate Smoothing Method according to transforms_dict"""
+        method = transforms_dict.get("smoothing").get("method", None)
+        # ATM it returns always _OneSideMovingAvg, but in this way it's ready when
+        # furhter smoothing methods will be implemented
+        SmoothingMethodCls = {"one_side_moving_avg": _SingleSideMovingAvg}.get(
+            method, _SingleSideMovingAvg
+        )
+        return SmoothingMethodCls(transforms_dict, last_dim_size)
+
+
+class _SingleSideMovingAvg(SmoothedMeasure):
+    """Smoothing measure using one side moving average algorithm"""
+
+    def smoothed_values(self, values):
+        """ -> np.ndarray, provide rolling window calculations on given values.
+
+        Given a series of numbers and a fixed subset size, the first element of the
+        moving average is obtained by taking the average of the initial fixed subset of
+        the number series. Then the subset is modified by `shifting forward; that is,
+        excluding the first number of the series and including the next value in the `
+        subset. A moving average is commonly used with time series data to smooth out
+        short-term fluctuations and highlight longer-term trends or cycles.
+        Assuming that we want calculate a rolling average for a one year period, for
+        xample, it means taking January through December for the first period and
+        averaging that data, then taking February through January for the next period
+        and averaging that, then moving on to March through February and so on.
+        """
+        window = self._window
+        values = np.array(values)
+        smoothed_values = np.squeeze(
+            np.array(
+                [
+                    tuple(np.convolve(v, np.ones(window), mode="valid") / window)
+                    for v in values
+                ]
+            )
+        )
+        nans = (
+            np.ones(list(np.squeeze(values).shape[:-1]) + [self._difference]) * np.nan
+        )
+        return np.concatenate([nans, smoothed_values], axis=np.squeeze(values).ndim - 1)
+
+    @lazyproperty
+    def _difference(self):
+        """ -> int, how many dropped elements after smoothing
+
+        np.convolve with `valid` mode selected returns output of length
+        max(M, N) - min(M, N) + 1.
+        """
+        return self._last_dim_size - (
+            max(self._last_dim_size, self._window)
+            - min(self._last_dim_size, self._window)
+            + 1
+        )
+
+    @lazyproperty
+    def _window(self):
+        """ -> int, size of the moving window.
+
+        This is the number of observations used for calculating the statistic. Each
+        window will be a fixed size. Return last dimension size, if window is greater
+        than the the last dimension size because we canno have a moving window grater
+        than the number of elements of each column.
+        """
+        window = self._transforms_dict.get("smoothing").get("window", 3)
+        return window if window < self._last_dim_size else self._last_dim_size
 
 
 class _Measures(object):

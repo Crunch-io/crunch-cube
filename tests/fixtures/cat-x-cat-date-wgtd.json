@@ -1,0 +1,315 @@
+{
+  "element": "shoji:view",
+  "self": "https://alpha.crunch.io/api/datasets/120aa3c58ec94ca29bb948d16e737212/cube/?query=%7B%22dimensions%22:%5B%7B%22variable%22:%22https:%2F%2Falpha.crunch.io%2Fapi%2Fdatasets%2F120aa3c58ec94ca29bb948d16e737212%2Fvariables%2F00000b%2F%22%7D,%7B%22variable%22:%22https:%2F%2Falpha.crunch.io%2Fapi%2Fdatasets%2F120aa3c58ec94ca29bb948d16e737212%2Fvariables%2F000038%2F%22%7D%5D,%22measures%22:%7B%22count%22:%7B%22function%22:%22cube_count%22,%22args%22:%5B%5D%7D%7D,%22weight%22:%22https:%2F%2Falpha.crunch.io%2Fapi%2Fdatasets%2F120aa3c58ec94ca29bb948d16e737212%2Fvariables%2F5dca0befa53443c99c5b55df6661d2bf%2F%22%7D",
+  "value": {
+    "query": {
+      "measures": {
+        "count": {
+          "function": "cube_count",
+          "args": []
+        }
+      },
+      "dimensions": [
+        {
+          "variable": "https://alpha.crunch.io/api/datasets/120aa3c58ec94ca29bb948d16e737212/variables/00000b/"
+        },
+        {
+          "variable": "https://alpha.crunch.io/api/datasets/120aa3c58ec94ca29bb948d16e737212/variables/000038/"
+        }
+      ],
+      "weight": "https://alpha.crunch.io/api/datasets/120aa3c58ec94ca29bb948d16e737212/variables/5dca0befa53443c99c5b55df6661d2bf/"
+    },
+    "query_environment": {
+      "filter": []
+    },
+    "result": {
+      "dimensions": [
+        {
+          "derived": false,
+          "references": {
+            "alias": "fake_news",
+            "name": "fake_news",
+            "description": "How confident are you that you can tell real news from fake news?"
+          },
+          "type": {
+            "ordinal": false,
+            "class": "categorical",
+            "categories": [
+              {
+                "numeric_value": 1,
+                "id": 1,
+                "name": "Very confident",
+                "missing": false
+              },
+              {
+                "numeric_value": 2,
+                "id": 2,
+                "name": "Somewhat confident",
+                "missing": false
+              },
+              {
+                "numeric_value": 3,
+                "id": 3,
+                "name": "Not very confident",
+                "missing": false
+              },
+              {
+                "numeric_value": 4,
+                "id": 4,
+                "name": "Not at all confident",
+                "missing": false
+              },
+              {
+                "numeric_value": 5,
+                "id": 5,
+                "name": "Not sure",
+                "missing": false
+              },
+              {
+                "numeric_value": 32766,
+                "id": 32766,
+                "name": "skipped",
+                "missing": true
+              },
+              {
+                "numeric_value": 32767,
+                "id": 32767,
+                "name": "not asked",
+                "missing": true
+              },
+              {
+                "numeric_value": null,
+                "id": -1,
+                "name": "No Data",
+                "missing": true
+              }
+            ]
+          }
+        },
+        {
+          "derived": false,
+          "references": {
+            "alias": "educ4",
+            "name": "CAT DATE VARIABLE WITH 4 DATES",
+            "description": "test description"
+          },
+          "type": {
+            "ordinal": false,
+            "class": "categorical",
+            "categories": [
+              {
+                "date": "2019-01",
+                "missing": false,
+                "id": 1,
+                "name": "Jan 2019"
+              },
+              {
+                "date": "2019-04",
+                "missing": false,
+                "id": 2,
+                "name": "Apr 2019"
+              },
+              {
+                "date": "2019-07",
+                "missing": false,
+                "id": 3,
+                "name": "Jul 2019"
+              },
+              {
+                "date": "2019-10",
+                "missing": false,
+                "id": 4,
+                "name": "Oct 2019"
+              },
+              {
+                "missing": true,
+                "id": 32766,
+                "name": "skipped"
+              },
+              {
+                "missing": true,
+                "id": 32767,
+                "name": "not asked"
+              },
+              {
+                "missing": true,
+                "id": -1,
+                "name": "No Data"
+              }
+            ]
+          }
+        }
+      ],
+      "missing": 8,
+      "measures": {
+        "count": {
+          "data": [
+            146.40471512770176,
+            175.9674134419557,
+            71.68769716088315,
+            53.11475409836074,
+            0,
+            0,
+            0,
+            196.26719056974525,
+            288.391038696538,
+            103.62776025236572,
+            65.65573770491817,
+            0,
+            0,
+            0,
+            90.17681728880166,
+            64.76578411405292,
+            34.069400630914785,
+            9.590163934426227,
+            0,
+            0,
+            0,
+            28.644400785854604,
+            29.32790224032586,
+            5.678233438485804,
+            0.7377049180327869,
+            0,
+            0,
+            0,
+            78.50687622789786,
+            34.215885947046836,
+            8.517350157728705,
+            5.9016393442622945,
+            0,
+            0,
+            0,
+            0,
+            7.3319755600814664,
+            1.419558359621451,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "n_missing": 8,
+          "metadata": {
+            "references": {},
+            "derived": true,
+            "type": {
+              "integer": false,
+              "missing_rules": {},
+              "missing_reasons": {
+                "No Data": -1
+              },
+              "class": "numeric"
+            }
+          }
+        }
+      },
+      "n": 1500,
+      "filter_stats": {
+        "filtered_complete": {
+          "unweighted": {
+            "selected": 1500,
+            "other": 0,
+            "missing": 0
+          },
+          "weighted": {
+            "selected": 1500,
+            "other": 0,
+            "missing": 0
+          }
+        },
+        "filtered": {
+          "unweighted": {
+            "selected": 1500,
+            "other": 0,
+            "missing": 0
+          },
+          "weighted": {
+            "selected": 1500,
+            "other": 0,
+            "missing": 0
+          }
+        }
+      },
+      "unfiltered": {
+        "unweighted_n": 1500,
+        "weighted_n": 1500
+      },
+      "filtered": {
+        "unweighted_n": 1500,
+        "weighted_n": 1500
+      },
+      "counts": [
+        138,
+        144,
+        101,
+        72,
+        0,
+        0,
+        0,
+        185,
+        236,
+        146,
+        89,
+        0,
+        0,
+        0,
+        85,
+        53,
+        48,
+        13,
+        0,
+        0,
+        0,
+        27,
+        24,
+        8,
+        1,
+        0,
+        0,
+        0,
+        74,
+        28,
+        12,
+        8,
+        0,
+        0,
+        0,
+        0,
+        6,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "element": "crunch:cube"
+    }
+  }
+}

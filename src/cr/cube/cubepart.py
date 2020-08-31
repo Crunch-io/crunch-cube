@@ -88,6 +88,11 @@ class CubePartition(object):
         return self._cube.has_means
 
     @lazyproperty
+    def show_smoothing(self):
+        """True if cube transforms includes smoothing option"""
+        return self._cube.show_smoothing
+
+    @lazyproperty
     def ndim(self):
         """int count of dimensions for this partition."""
         return len(self._dimensions)
@@ -288,7 +293,10 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def counts(self):
-        return np.array([row.counts for row in self._matrix.rows])
+        counts = np.array([row.counts for row in self._matrix.rows])
+        if self.show_smoothing:
+            return self._cube.smoother.smoothed_values(counts)
+        return counts
 
     @lazyproperty
     def cube_is_mr_aug(self):
@@ -892,7 +900,10 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def counts(self):
-        return tuple(row.count for row in self._stripe.rows)
+        counts = tuple(row.count for row in self._stripe.rows)
+        if self.show_smoothing:
+            return self._cube.smoother.smoothed_values([counts])
+        return counts
 
     @lazyproperty
     def inserted_row_idxs(self):
