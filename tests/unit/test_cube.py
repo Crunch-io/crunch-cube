@@ -538,7 +538,7 @@ class DescribeMeasures(object):
         np.testing.assert_equal(population_fraction, expected_value)
 
 
-class DescribeSmoothedCountMeasure(object):
+class DescribeSmoothedMeasure(object):
     def it_has_an_integrated_object_factory(self, factory_fixture):
         transforms_dict, SmoothingMethodCls_, smoothing_method_ = factory_fixture
         SmoothingMethodCls_.return_value = smoothing_method_
@@ -563,3 +563,27 @@ class DescribeSmoothedCountMeasure(object):
         )
         smoothing_method_ = instance_mock(request, SmoothingMethodCls)
         return transforms_dict, SmoothingMethodCls_, smoothing_method_
+
+
+class DescribeSingleSideMovingAvg(object):
+    def it_knows_if_window_param_is_valid(self, _window, valid_window_fixture):
+        window, total_period, expected_value = valid_window_fixture
+        _window.return_value = window
+        smoothed_measure = _SingleSideMovingAvg(None)
+
+        valid_window = smoothed_measure._valid_window(total_period)
+
+        assert valid_window == expected_value
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _window(self, request):
+        return property_mock(request, _SingleSideMovingAvg, "_window")
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture(params=[(30, 4, False), (0, 4, False), (3, 12, True), (3, 3, True)])
+    def valid_window_fixture(self, request):
+        window, total_period, expected_value = request.param
+        return window, total_period, expected_value
