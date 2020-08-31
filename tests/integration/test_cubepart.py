@@ -695,7 +695,7 @@ class Describe_Slice(object):
             ),
         )
 
-    def it_provides_smoothed_counts_array_cat_x_cat_date(self, cat_x_cat_date_fixture):
+    def it_provides_smoothed_counts_for_cat_x_cat_date(self, cat_x_cat_date_fixture):
         window, expected_value = cat_x_cat_date_fixture
         transforms = {
             "smoothing": {
@@ -725,7 +725,7 @@ class Describe_Slice(object):
         )
         assert slice_.shape == slice2_.shape
 
-    def it_provides_smoothed_counts_array_cat_x_cat_date_wgtd(self):
+    def it_provides_smoothed_counts_for_cat_x_cat_date_wgtd(self):
         transforms = {
             "smoothing": {"method": "one_side_moving_avg", "window": 3, "show": True}
         }
@@ -758,7 +758,7 @@ class Describe_Slice(object):
         )
         assert slice_.shape == slice2_.shape
 
-    def it_provides_smoothed_counts_array_cat_x_mr_x_cat_date(self):
+    def it_provides_smoothed_counts_for_cat_x_mr_x_cat_date(self):
         transforms = {
             "smoothing": {"method": "one_side_moving_avg", "window": 3, "show": True}
         }
@@ -813,7 +813,7 @@ class Describe_Slice(object):
         for i, p in enumerate(cube2.partitions):
             assert cube.partitions[i].counts.shape == cube2.partitions[i].counts.shape
 
-    def it_provides_smoothed_counts_array_ca_x_ca_subvar_x_cat_date(self):
+    def it_provides_smoothed_counts_for_ca_x_ca_subvar_x_cat_date(self):
         transforms = {
             "smoothing": {"method": "one_side_moving_avg", "window": 3, "show": True}
         }
@@ -846,7 +846,7 @@ class Describe_Slice(object):
             ],
         )
 
-    def it_provides_smoothed_counts_array_mr_x_cat_date(self):
+    def it_provides_smoothed_counts_for_mr_x_cat_date(self):
         transforms = {
             "smoothing": {"method": "one_side_moving_avg", "window": 3, "show": True}
         }
