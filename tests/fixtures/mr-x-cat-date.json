@@ -1,0 +1,1275 @@
+{
+  "element": "shoji:view",
+  "self": "https://alpha.crunch.io/api/datasets/120aa3c58ec94ca29bb948d16e737212/cube/?query=%7B%22dimensions%22:%5B%7B%22function%22:%22dimension%22,%22args%22:%5B%7B%22function%22:%22as_selected%22,%22args%22:%5B%7B%22variable%22:%22https:%2F%2Falpha.crunch.io%2Fapi%2Fdatasets%2F120aa3c58ec94ca29bb948d16e737212%2Fvariables%2F000058%2F%22%7D%5D%7D,%7B%22value%22:%22subvariables%22%7D%5D%7D,%7B%22function%22:%22as_selected%22,%22args%22:%5B%7B%22variable%22:%22https:%2F%2Falpha.crunch.io%2Fapi%2Fdatasets%2F120aa3c58ec94ca29bb948d16e737212%2Fvariables%2F000058%2F%22%7D%5D%7D,%7B%22variable%22:%22https:%2F%2Falpha.crunch.io%2Fapi%2Fdatasets%2F120aa3c58ec94ca29bb948d16e737212%2Fvariables%2F000038%2F%22%7D%5D,%22measures%22:%7B%22count%22:%7B%22function%22:%22cube_count%22,%22args%22:%5B%5D%7D%7D,%22weight%22:null%7D",
+  "value": {
+    "query": {
+      "measures": {
+        "count": {
+          "function": "cube_count",
+          "args": []
+        }
+      },
+      "dimensions": [
+        {
+          "function": "dimension",
+          "args": [
+            {
+              "function": "as_selected",
+              "args": [
+                {
+                  "variable": "https://alpha.crunch.io/api/datasets/120aa3c58ec94ca29bb948d16e737212/variables/000058/"
+                }
+              ]
+            },
+            {
+              "value": "subvariables"
+            }
+          ]
+        },
+        {
+          "function": "as_selected",
+          "args": [
+            {
+              "variable": "https://alpha.crunch.io/api/datasets/120aa3c58ec94ca29bb948d16e737212/variables/000058/"
+            }
+          ]
+        },
+        {
+          "variable": "https://alpha.crunch.io/api/datasets/120aa3c58ec94ca29bb948d16e737212/variables/000038/"
+        }
+      ],
+      "weight": null
+    },
+    "query_environment": {
+      "filter": []
+    },
+    "result": {
+      "dimensions": [
+        {
+          "references": {
+            "alias": "facebook_uses",
+            "is_dichotomous": true,
+            "description": null,
+            "name": "facebook_uses",
+            "subreferences": [
+              {
+                "alias": "facebook_uses_1",
+                "name": "Keep up-to-date with the news",
+                "description": "facebook_uses_1"
+              },
+              {
+                "alias": "facebook_uses_2",
+                "name": "To keep in contact with friends",
+                "description": "facebook_uses_2"
+              },
+              {
+                "alias": "facebook_uses_3",
+                "name": "Share my own opinions",
+                "description": "facebook_uses_3"
+              },
+              {
+                "alias": "facebook_uses_4",
+                "name": "Share things I find interesting or entertaining, e.g., articles, videos, etc.",
+                "description": "facebook_uses_4"
+              },
+              {
+                "alias": "facebook_uses_5",
+                "name": "Keep up-to-date with celebrities I like",
+                "description": "facebook_uses_5"
+              },
+              {
+                "alias": "facebook_uses_6",
+                "name": "Keep up-to-date with brands I like",
+                "description": "facebook_uses_6"
+              },
+              {
+                "alias": "facebook_uses_7",
+                "name": "To look/apply for jobs",
+                "description": "facebook_uses_7"
+              },
+              {
+                "alias": "facebook_uses_8",
+                "name": "To keep in contact with family",
+                "description": "facebook_uses_8"
+              },
+              {
+                "alias": "facebook_uses_9",
+                "name": "To organise my social life",
+                "description": "facebook_uses_9"
+              },
+              {
+                "alias": "facebook_uses_10",
+                "name": "Share the things that I am doing",
+                "description": "facebook_uses_10"
+              },
+              {
+                "alias": "facebook_uses_11",
+                "name": "Looking at or watching fun/entertaining content",
+                "description": "facebook_uses_11"
+              },
+              {
+                "alias": "facebook_uses_12",
+                "name": "Follow interesting people/industry experts",
+                "description": "facebook_uses_12"
+              },
+              {
+                "alias": "facebook_uses_13",
+                "name": "Networking with people/building my network",
+                "description": "facebook_uses_13"
+              },
+              {
+                "alias": "facebook_uses_97",
+                "name": "Other",
+                "description": "facebook_uses_97"
+              },
+              {
+                "alias": "facebook_uses_99",
+                "name": "None of these",
+                "description": "facebook_uses_99"
+              },
+              {
+                "alias": "facebook_uses_98",
+                "name": "Don't know",
+                "description": "facebook_uses_98"
+              }
+            ]
+          },
+          "derived": true,
+          "type": {
+            "subtype": {
+              "class": "variable"
+            },
+            "elements": [
+              {
+                "id": 1,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "facebook_uses_1",
+                    "name": "Keep up-to-date with the news",
+                    "description": "facebook_uses_1"
+                  },
+                  "id": "000f"
+                },
+                "missing": false
+              },
+              {
+                "id": 2,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "facebook_uses_2",
+                    "name": "To keep in contact with friends",
+                    "description": "facebook_uses_2"
+                  },
+                  "id": "0010"
+                },
+                "missing": false
+              },
+              {
+                "id": 3,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "facebook_uses_3",
+                    "name": "Share my own opinions",
+                    "description": "facebook_uses_3"
+                  },
+                  "id": "0011"
+                },
+                "missing": false
+              },
+              {
+                "id": 4,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "facebook_uses_4",
+                    "name": "Share things I find interesting or entertaining, e.g., articles, videos, etc.",
+                    "description": "facebook_uses_4"
+                  },
+                  "id": "0012"
+                },
+                "missing": false
+              },
+              {
+                "id": 5,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "facebook_uses_5",
+                    "name": "Keep up-to-date with celebrities I like",
+                    "description": "facebook_uses_5"
+                  },
+                  "id": "0013"
+                },
+                "missing": false
+              },
+              {
+                "id": 6,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "facebook_uses_6",
+                    "name": "Keep up-to-date with brands I like",
+                    "description": "facebook_uses_6"
+                  },
+                  "id": "0014"
+                },
+                "missing": false
+              },
+              {
+                "id": 7,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "facebook_uses_7",
+                    "name": "To look/apply for jobs",
+                    "description": "facebook_uses_7"
+                  },
+                  "id": "0015"
+                },
+                "missing": false
+              },
+              {
+                "id": 8,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "facebook_uses_8",
+                    "name": "To keep in contact with family",
+                    "description": "facebook_uses_8"
+                  },
+                  "id": "0016"
+                },
+                "missing": false
+              },
+              {
+                "id": 9,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "facebook_uses_9",
+                    "name": "To organise my social life",
+                    "description": "facebook_uses_9"
+                  },
+                  "id": "0017"
+                },
+                "missing": false
+              },
+              {
+                "id": 10,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "facebook_uses_10",
+                    "name": "Share the things that I am doing",
+                    "description": "facebook_uses_10"
+                  },
+                  "id": "0018"
+                },
+                "missing": false
+              },
+              {
+                "id": 11,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "facebook_uses_11",
+                    "name": "Looking at or watching fun/entertaining content",
+                    "description": "facebook_uses_11"
+                  },
+                  "id": "0019"
+                },
+                "missing": false
+              },
+              {
+                "id": 12,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "facebook_uses_12",
+                    "name": "Follow interesting people/industry experts",
+                    "description": "facebook_uses_12"
+                  },
+                  "id": "001a"
+                },
+                "missing": false
+              },
+              {
+                "id": 13,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "facebook_uses_13",
+                    "name": "Networking with people/building my network",
+                    "description": "facebook_uses_13"
+                  },
+                  "id": "001b"
+                },
+                "missing": false
+              },
+              {
+                "id": 14,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "facebook_uses_97",
+                    "name": "Other",
+                    "description": "facebook_uses_97"
+                  },
+                  "id": "001c"
+                },
+                "missing": false
+              },
+              {
+                "id": 15,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "facebook_uses_99",
+                    "name": "None of these",
+                    "description": "facebook_uses_99"
+                  },
+                  "id": "001d"
+                },
+                "missing": false
+              },
+              {
+                "id": 16,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "facebook_uses_98",
+                    "name": "Don't know",
+                    "description": "facebook_uses_98"
+                  },
+                  "id": "001e"
+                },
+                "missing": false
+              }
+            ],
+            "class": "enum"
+          }
+        },
+        {
+          "derived": true,
+          "references": {
+            "alias": "facebook_uses",
+            "subreferences": [
+              {
+                "alias": "facebook_uses_1",
+                "name": "Keep up-to-date with the news",
+                "description": "facebook_uses_1"
+              },
+              {
+                "alias": "facebook_uses_2",
+                "name": "To keep in contact with friends",
+                "description": "facebook_uses_2"
+              },
+              {
+                "alias": "facebook_uses_3",
+                "name": "Share my own opinions",
+                "description": "facebook_uses_3"
+              },
+              {
+                "alias": "facebook_uses_4",
+                "name": "Share things I find interesting or entertaining, e.g., articles, videos, etc.",
+                "description": "facebook_uses_4"
+              },
+              {
+                "alias": "facebook_uses_5",
+                "name": "Keep up-to-date with celebrities I like",
+                "description": "facebook_uses_5"
+              },
+              {
+                "alias": "facebook_uses_6",
+                "name": "Keep up-to-date with brands I like",
+                "description": "facebook_uses_6"
+              },
+              {
+                "alias": "facebook_uses_7",
+                "name": "To look/apply for jobs",
+                "description": "facebook_uses_7"
+              },
+              {
+                "alias": "facebook_uses_8",
+                "name": "To keep in contact with family",
+                "description": "facebook_uses_8"
+              },
+              {
+                "alias": "facebook_uses_9",
+                "name": "To organise my social life",
+                "description": "facebook_uses_9"
+              },
+              {
+                "alias": "facebook_uses_10",
+                "name": "Share the things that I am doing",
+                "description": "facebook_uses_10"
+              },
+              {
+                "alias": "facebook_uses_11",
+                "name": "Looking at or watching fun/entertaining content",
+                "description": "facebook_uses_11"
+              },
+              {
+                "alias": "facebook_uses_12",
+                "name": "Follow interesting people/industry experts",
+                "description": "facebook_uses_12"
+              },
+              {
+                "alias": "facebook_uses_13",
+                "name": "Networking with people/building my network",
+                "description": "facebook_uses_13"
+              },
+              {
+                "alias": "facebook_uses_97",
+                "name": "Other",
+                "description": "facebook_uses_97"
+              },
+              {
+                "alias": "facebook_uses_99",
+                "name": "None of these",
+                "description": "facebook_uses_99"
+              },
+              {
+                "alias": "facebook_uses_98",
+                "name": "Don't know",
+                "description": "facebook_uses_98"
+              }
+            ],
+            "is_dichotomous": true,
+            "description": null,
+            "name": "facebook_uses"
+          },
+          "type": {
+            "ordinal": false,
+            "subvariables": [
+              "000f",
+              "0010",
+              "0011",
+              "0012",
+              "0013",
+              "0014",
+              "0015",
+              "0016",
+              "0017",
+              "0018",
+              "0019",
+              "001a",
+              "001b",
+              "001c",
+              "001d",
+              "001e"
+            ],
+            "class": "categorical",
+            "categories": [
+              {
+                "numeric_value": 1,
+                "selected": true,
+                "id": 1,
+                "missing": false,
+                "name": "Selected"
+              },
+              {
+                "numeric_value": 0,
+                "missing": false,
+                "id": 0,
+                "name": "Other"
+              },
+              {
+                "numeric_value": null,
+                "missing": true,
+                "id": -1,
+                "name": "No Data"
+              }
+            ]
+          }
+        },
+        {
+          "derived": false,
+          "references": {
+            "alias": "educ4",
+            "name": "CAT DATE VARIABLE WITH 4 DATES",
+            "description": "test description"
+          },
+          "type": {
+            "ordinal": false,
+            "class": "categorical",
+            "categories": [
+              {
+                "date": "2019-01",
+                "missing": false,
+                "id": 1,
+                "name": "Jan 2019"
+              },
+              {
+                "date": "2019-04",
+                "missing": false,
+                "id": 2,
+                "name": "Apr 2019"
+              },
+              {
+                "date": "2019-07",
+                "missing": false,
+                "id": 3,
+                "name": "Jul 2019"
+              },
+              {
+                "date": "2019-10",
+                "missing": false,
+                "id": 4,
+                "name": "Oct 2019"
+              },
+              {
+                "missing": true,
+                "id": 32766,
+                "name": "skipped"
+              },
+              {
+                "missing": true,
+                "id": 32767,
+                "name": "not asked"
+              },
+              {
+                "missing": true,
+                "id": -1,
+                "name": "No Data"
+              }
+            ]
+          }
+        }
+      ],
+      "missing": 0,
+      "measures": {
+        "count": {
+          "data": [
+            87,
+            94,
+            53,
+            33,
+            0,
+            0,
+            0,
+            422,
+            397,
+            264,
+            150,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            272,
+            265,
+            184,
+            117,
+            0,
+            0,
+            0,
+            237,
+            226,
+            133,
+            66,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            118,
+            106,
+            69,
+            38,
+            0,
+            0,
+            0,
+            391,
+            385,
+            248,
+            145,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            134,
+            147,
+            91,
+            56,
+            0,
+            0,
+            0,
+            375,
+            344,
+            226,
+            127,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            22,
+            38,
+            14,
+            3,
+            0,
+            0,
+            0,
+            487,
+            453,
+            303,
+            180,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            40,
+            39,
+            25,
+            10,
+            0,
+            0,
+            0,
+            469,
+            452,
+            292,
+            173,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            17,
+            19,
+            9,
+            2,
+            0,
+            0,
+            0,
+            492,
+            472,
+            308,
+            181,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            264,
+            241,
+            167,
+            98,
+            0,
+            0,
+            0,
+            245,
+            250,
+            150,
+            85,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            24,
+            33,
+            29,
+            19,
+            0,
+            0,
+            0,
+            485,
+            458,
+            288,
+            164,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            70,
+            77,
+            61,
+            39,
+            0,
+            0,
+            0,
+            439,
+            414,
+            256,
+            144,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            115,
+            133,
+            82,
+            43,
+            0,
+            0,
+            0,
+            394,
+            358,
+            235,
+            140,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            49,
+            58,
+            38,
+            20,
+            0,
+            0,
+            0,
+            460,
+            433,
+            279,
+            163,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            34,
+            49,
+            46,
+            18,
+            0,
+            0,
+            0,
+            475,
+            442,
+            271,
+            165,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            28,
+            27,
+            20,
+            6,
+            0,
+            0,
+            0,
+            481,
+            464,
+            297,
+            177,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            101,
+            94,
+            57,
+            31,
+            0,
+            0,
+            0,
+            408,
+            397,
+            260,
+            152,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            17,
+            5,
+            5,
+            2,
+            0,
+            0,
+            0,
+            492,
+            486,
+            312,
+            181,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "n_missing": 0,
+          "metadata": {
+            "references": {},
+            "derived": true,
+            "type": {
+              "integer": true,
+              "missing_rules": {},
+              "missing_reasons": {
+                "No Data": -1
+              },
+              "class": "numeric"
+            }
+          }
+        }
+      },
+      "n": 1500,
+      "filter_stats": {
+        "filtered_complete": {
+          "unweighted": {
+            "selected": 1500,
+            "other": 0,
+            "missing": 0
+          },
+          "weighted": {
+            "selected": 1500,
+            "other": 0,
+            "missing": 0
+          }
+        },
+        "filtered": {
+          "unweighted": {
+            "selected": 1500,
+            "other": 0,
+            "missing": 0
+          },
+          "weighted": {
+            "selected": 1500,
+            "other": 0,
+            "missing": 0
+          }
+        }
+      },
+      "unfiltered": {
+        "unweighted_n": 1500,
+        "weighted_n": 1500
+      },
+      "filtered": {
+        "unweighted_n": 1500,
+        "weighted_n": 1500
+      },
+      "counts": [
+        87,
+        94,
+        53,
+        33,
+        0,
+        0,
+        0,
+        422,
+        397,
+        264,
+        150,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        272,
+        265,
+        184,
+        117,
+        0,
+        0,
+        0,
+        237,
+        226,
+        133,
+        66,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        118,
+        106,
+        69,
+        38,
+        0,
+        0,
+        0,
+        391,
+        385,
+        248,
+        145,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        134,
+        147,
+        91,
+        56,
+        0,
+        0,
+        0,
+        375,
+        344,
+        226,
+        127,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        22,
+        38,
+        14,
+        3,
+        0,
+        0,
+        0,
+        487,
+        453,
+        303,
+        180,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        40,
+        39,
+        25,
+        10,
+        0,
+        0,
+        0,
+        469,
+        452,
+        292,
+        173,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        17,
+        19,
+        9,
+        2,
+        0,
+        0,
+        0,
+        492,
+        472,
+        308,
+        181,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        264,
+        241,
+        167,
+        98,
+        0,
+        0,
+        0,
+        245,
+        250,
+        150,
+        85,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        24,
+        33,
+        29,
+        19,
+        0,
+        0,
+        0,
+        485,
+        458,
+        288,
+        164,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        70,
+        77,
+        61,
+        39,
+        0,
+        0,
+        0,
+        439,
+        414,
+        256,
+        144,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        115,
+        133,
+        82,
+        43,
+        0,
+        0,
+        0,
+        394,
+        358,
+        235,
+        140,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        49,
+        58,
+        38,
+        20,
+        0,
+        0,
+        0,
+        460,
+        433,
+        279,
+        163,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        34,
+        49,
+        46,
+        18,
+        0,
+        0,
+        0,
+        475,
+        442,
+        271,
+        165,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        28,
+        27,
+        20,
+        6,
+        0,
+        0,
+        0,
+        481,
+        464,
+        297,
+        177,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        101,
+        94,
+        57,
+        31,
+        0,
+        0,
+        0,
+        408,
+        397,
+        260,
+        152,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        17,
+        5,
+        5,
+        2,
+        0,
+        0,
+        0,
+        492,
+        486,
+        312,
+        181,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "element": "crunch:cube"
+    }
+  }
+}

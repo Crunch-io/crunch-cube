@@ -8,6 +8,7 @@ CubeSet is the main API class for manipulating Crunch.io JSON cube responses.
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import json
+import warnings
 
 import numpy as np
 
@@ -368,11 +369,7 @@ class Cube(object):
 
     @lazyproperty
     def smoother(self):
-        if self._has_smoothing:
-            return SmoothedMeasure.factory(
-                self._transforms_dict, self._all_dimensions.shape[-1]
-            )
-        return None
+        return SmoothedMeasure.factory(self._transforms_dict)
 
     @lazyproperty
     def title(self):
@@ -505,12 +502,11 @@ class Cube(object):
 class SmoothedMeasure(object):
     """Base class for smoothing measure objects"""
 
-    def __init__(self, transforms_dict, last_dim_size):
+    def __init__(self, transforms_dict):
         self._transforms_dict = transforms_dict
-        self._last_dim_size = last_dim_size
 
     @classmethod
-    def factory(cls, transforms_dict, last_dim_size):
+    def factory(cls, transforms_dict):
         """Returns appropriate Smoothing Method according to transforms_dict"""
         method = transforms_dict.get("smoothing").get("method", None)
         # ATM it returns always _OneSideMovingAvg, but in this way it's ready when
@@ -518,7 +514,7 @@ class SmoothedMeasure(object):
         SmoothingMethodCls = {"one_side_moving_avg": _SingleSideMovingAvg}.get(
             method, _SingleSideMovingAvg
         )
-        return SmoothingMethodCls(transforms_dict, last_dim_size)
+        return SmoothingMethodCls(transforms_dict)
 
 
 class _SingleSideMovingAvg(SmoothedMeasure):
@@ -538,33 +534,31 @@ class _SingleSideMovingAvg(SmoothedMeasure):
         averaging that data, then taking February through January for the next period
         and averaging that, then moving on to March through February and so on.
         """
-        window = self._window
         values = np.array(values)
+        values_shape = np.squeeze(values).shape
+        if not self._valid_window(values_shape[-1]):
+            warnings.warn(
+                "Window (value: {}) parameter is not valid: window must be less equal "
+                "than the total period and <> 0".format(self._window),
+                UserWarning,
+            )
+            return np.squeeze(values)
+        w = self._window
         smoothed_values = np.squeeze(
             np.array(
-                [
-                    tuple(np.convolve(v, np.ones(window), mode="valid") / window)
-                    for v in values
-                ]
+                [tuple(np.convolve(v, np.ones(w), mode="valid") / w) for v in values]
             )
         )
-        nans = (
-            np.ones(list(np.squeeze(values).shape[:-1]) + [self._difference]) * np.nan
+        difference = values_shape[-1] - np.atleast_1d(smoothed_values).shape[-1]
+        nans = np.full(list(values_shape[:-1]) + [difference], np.nan)
+        return np.concatenate(
+            [nans, np.atleast_1d(smoothed_values)], axis=len(values_shape) - 1
         )
-        return np.concatenate([nans, smoothed_values], axis=np.squeeze(values).ndim - 1)
 
-    @lazyproperty
-    def _difference(self):
-        """ -> int, how many dropped elements after smoothing
-
-        np.convolve with `valid` mode selected returns output of length
-        max(M, N) - min(M, N) + 1.
-        """
-        return self._last_dim_size - (
-            max(self._last_dim_size, self._window)
-            - min(self._last_dim_size, self._window)
-            + 1
-        )
+    def _valid_window(self, total_period):
+        if self._window > total_period or self._window == 0:
+            return False
+        return True
 
     @lazyproperty
     def _window(self):
@@ -572,11 +566,10 @@ class _SingleSideMovingAvg(SmoothedMeasure):
 
         This is the number of observations used for calculating the statistic. Each
         window will be a fixed size. Return last dimension size, if window is greater
-        than the the last dimension size because we canno have a moving window grater
+        than the the last dimension size because we cannot have a moving window grater
         than the number of elements of each column.
         """
-        window = self._transforms_dict.get("smoothing").get("window", 3)
-        return window if window < self._last_dim_size else self._last_dim_size
+        return self._transforms_dict.get("smoothing").get("window", 3)
 
 
 class _Measures(object):

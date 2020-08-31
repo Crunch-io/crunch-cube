@@ -7,7 +7,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import pytest
 import numpy as np
 
-from cr.cube.cube import Cube, CubeSet, _Measures
+from cr.cube.cube import Cube, CubeSet, _Measures, SmoothedMeasure, _SingleSideMovingAvg
 from cr.cube.cubepart import _Slice, _Strand, _Nub
 from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.dimension import Dimension
@@ -436,6 +436,23 @@ class DescribeCube(object):
         assert Cube(None).title == expected_value
 
     @pytest.mark.parametrize(
+        ("transforms_dict", "expected_value"),
+        (({"smoothing": {"method": "one_side_moving_avg"}}, True), ({}, False)),
+    )
+    def it_knows_if_it_has_smoothing(self, transforms_dict, expected_value):
+        cube = Cube(
+            response=None,
+            cube_idx=None,
+            transforms=transforms_dict,
+            population=None,
+            mask_size=0,
+        )
+
+        has_smoothing = cube._has_smoothing
+
+        assert has_smoothing is expected_value
+
+    @pytest.mark.parametrize(
         ("cube_dict", "expected_value"),
         (({"result": {}}, False), ({"result": {"is_single_col_cube": True}}, True)),
     )
@@ -519,3 +536,30 @@ class DescribeMeasures(object):
         population_fraction = measures.population_fraction
 
         np.testing.assert_equal(population_fraction, expected_value)
+
+
+class DescribeSmoothedCountMeasure(object):
+    def it_has_an_integrated_object_factory(self, factory_fixture):
+        transforms_dict, SmoothingMethodCls_, smoothing_method_ = factory_fixture
+        SmoothingMethodCls_.return_value = smoothing_method_
+
+        smoothing_method = SmoothedMeasure.factory(transforms_dict)
+
+        SmoothingMethodCls_.assert_called_once_with(transforms_dict)
+        assert smoothing_method is smoothing_method_
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture(
+        params=[
+            ({"smoothing": {"method": "one_side_moving_avg"}}, _SingleSideMovingAvg),
+            ({"smoothing": {"method": "another_method"}}, _SingleSideMovingAvg),
+        ]
+    )
+    def factory_fixture(self, request):
+        transforms_dict, SmoothingMethodCls = request.param
+        SmoothingMethodCls_ = class_mock(
+            request, "cr.cube.cube.%s" % SmoothingMethodCls.__name__
+        )
+        smoothing_method_ = instance_mock(request, SmoothingMethodCls)
+        return transforms_dict, SmoothingMethodCls_, smoothing_method_
