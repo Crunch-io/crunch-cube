@@ -902,7 +902,7 @@ class _Strand(CubePartition):
     def counts(self):
         counts = tuple(row.count for row in self._stripe.rows)
         if self.show_smoothing:
-            return self._cube.smoother.smoothed_values([counts])
+            return self._cube.smoother.smoothed_values(np.array(counts))
         return counts
 
     @lazyproperty

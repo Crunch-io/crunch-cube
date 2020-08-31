@@ -534,25 +534,27 @@ class _SingleSideMovingAvg(SmoothedMeasure):
         averaging that data, then taking February through January for the next period
         and averaging that, then moving on to March through February and so on.
         """
-        values = np.array(values)
-        values_shape = np.squeeze(values).shape
-        if not self._valid_window(values_shape[-1]):
+        if not self._valid_window(values.shape[-1]):
             warnings.warn(
                 "Window (value: {}) parameter is not valid: window must be less equal "
                 "than the total period and <> 0".format(self._window),
                 UserWarning,
             )
-            return np.squeeze(values)
+            return values
+
+        smoothed_values = self._smoother(values)
+        difference = values.shape[-1] - smoothed_values.shape[-1]
+        nans = np.full(list(values.shape[:-1]) + [difference], np.nan)
+        return np.concatenate([nans, smoothed_values], axis=values.ndim - 1)
+
+    def _smoother(self, values):
         w = self._window
-        smoothed_values = np.squeeze(
-            np.array(
+        return (
+            np.array(tuple(np.convolve(values, np.ones(w), mode="valid") / w))
+            if values.ndim == 1
+            else np.array(
                 [tuple(np.convolve(v, np.ones(w), mode="valid") / w) for v in values]
             )
-        )
-        difference = values_shape[-1] - np.atleast_1d(smoothed_values).shape[-1]
-        nans = np.full(list(values_shape[:-1]) + [difference], np.nan)
-        return np.concatenate(
-            [nans, np.atleast_1d(smoothed_values)], axis=len(values_shape) - 1
         )
 
     def _valid_window(self, total_period):

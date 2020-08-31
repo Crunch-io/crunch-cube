@@ -695,22 +695,18 @@ class Describe_Slice(object):
             ),
         )
 
-    def it_provides_smoothed_counts_array_cat_x_cat_date(self):
+    def it_provides_smoothed_counts_array_cat_x_cat_date(self, cat_x_cat_date_fixture):
+        window, expected_value = cat_x_cat_date_fixture
         transforms = {
-            "smoothing": {"method": "one_side_moving_avg", "window": 3, "show": True}
+            "smoothing": {
+                "method": "one_side_moving_avg",
+                "window": window,
+                "show": True,
+            }
         }
         cube = Cube(CR.CAT_X_CAT_DATE, transforms=transforms)
         slice_ = cube.partitions[0]
-        np.testing.assert_almost_equal(
-            slice_.counts,
-            [
-                [np.nan, np.nan, 127.66666667, 105.66666667],
-                [np.nan, np.nan, 189.0, 157.0],
-                [np.nan, np.nan, 62.0, 38.0],
-                [np.nan, np.nan, 19.66666667, 11.0],
-                [np.nan, np.nan, 38.0, 16.0],
-            ],
-        )
+        np.testing.assert_almost_equal(slice_.counts, expected_value)
 
         transforms = {
             "smoothing": {"method": "one_side_moving_avg", "window": 3, "show": False}
@@ -916,6 +912,56 @@ class Describe_Slice(object):
         slice2_ = cube2.partitions[0]
 
         np.testing.assert_array_almost_equal_nulp(slice_.counts, slice2_.counts)
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture(
+        params=[
+            (
+                1,
+                [
+                    [138.0, 144.0, 101.0, 72.0],
+                    [185.0, 236.0, 146.0, 89.0],
+                    [85.0, 53.0, 48.0, 13.0],
+                    [27.0, 24.0, 8.0, 1.0],
+                    [74.0, 28.0, 12.0, 8.0],
+                ],
+            ),
+            (
+                2,
+                [
+                    [np.nan, 141.0, 122.5, 86.5],
+                    [np.nan, 210.5, 191.0, 117.5],
+                    [np.nan, 69.0, 50.5, 30.5],
+                    [np.nan, 25.5, 16.0, 4.5],
+                    [np.nan, 51.0, 20.0, 10.0],
+                ],
+            ),
+            (
+                3,
+                [
+                    [np.nan, np.nan, 127.66666667, 105.66666667],
+                    [np.nan, np.nan, 189.0, 157.0],
+                    [np.nan, np.nan, 62.0, 38.0],
+                    [np.nan, np.nan, 19.66666667, 11.0],
+                    [np.nan, np.nan, 38.0, 16.0],
+                ],
+            ),
+            (
+                4,
+                [
+                    [np.nan, np.nan, np.nan, 113.75],
+                    [np.nan, np.nan, np.nan, 164.0],
+                    [np.nan, np.nan, np.nan, 49.75],
+                    [np.nan, np.nan, np.nan, 15.0],
+                    [np.nan, np.nan, np.nan, 30.5],
+                ],
+            ),
+        ]
+    )
+    def cat_x_cat_date_fixture(self, request):
+        window, expected_value = request.param
+        return window, expected_value
 
 
 class Describe_Strand(object):
