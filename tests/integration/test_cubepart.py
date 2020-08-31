@@ -911,7 +911,7 @@ class Describe_Slice(object):
         cube2 = Cube(CR.CAT_X_CAT_DATE)
         slice2_ = cube2.partitions[0]
 
-        np.testing.assert_array_almost_equal_nulp(slice_.counts, slice2_.counts)
+        np.testing.assert_array_almost_equal(slice_.counts, slice2_.counts)
 
     # fixtures -------------------------------------------------------
 
@@ -1229,7 +1229,7 @@ class Describe_Strand(object):
         cube2 = Cube(CR.CAT_DATE)
         strand2_ = cube2.partitions[0]
 
-        np.testing.assert_array_almost_equal_nulp(strand_.counts, strand2_.counts)
+        np.testing.assert_array_almost_equal(strand_.counts, strand2_.counts)
 
 
 class Describe_Nub(object):
