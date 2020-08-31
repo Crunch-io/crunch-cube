@@ -525,12 +525,11 @@ class _SingleSideMovingAvg(SmoothedMeasure):
 
         Given a series of numbers and a fixed subset size, the first element of the
         moving average is obtained by taking the average of the initial fixed subset of
-        the number series. Then the subset is modified by `shifting forward; that is,
-        excluding the first number of the series and including the next value in the `
-        subset. A moving average is commonly used with time series data to smooth out
+        the number series. Then the subset is modified by `shifting forward` the values.
+        A moving average is commonly used with time series data to smooth `out
         short-term fluctuations and highlight longer-term trends or cycles.
         Assuming that we want calculate a rolling average for a one year period, for
-        xample, it means taking January through December for the first period and
+        example, it means taking January through December for the first period and
         averaging that data, then taking February through January for the next period
         and averaging that, then moving on to March through February and so on.
         """
@@ -548,6 +547,17 @@ class _SingleSideMovingAvg(SmoothedMeasure):
         return np.concatenate([nans, smoothed_values], axis=values.ndim - 1)
 
     def _smoother(self, values):
+        """ -> np.ndarray, provide smoothing algorithm on the given values.
+
+        In this case the moving average smoother is performed using the np.convolve
+        operator that returns the discrete, linear convolution of two one-dimensional
+        sequences.
+        A moving average is a form of a convolution often used in time series analysis
+        to smooth out noise in data by replacing a data point with the average of
+        neighboring values in a moving window. A moving average is essentially a
+        low-pass filter because it removes short-term fluctuations to highlight a deeper
+        underlying trend.
+        """
         w = self._window
         return (
             np.array(tuple(np.convolve(values, np.ones(w), mode="valid") / w))
