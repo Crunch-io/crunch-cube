@@ -542,9 +542,9 @@ class _SingleSideMovingAvg(SmoothedMeasure):
             return values
 
         smoothed_values = self._smoother(values)
-        difference = values.shape[-1] - smoothed_values.shape[-1]
-        nans = np.full(list(values.shape[:-1]) + [difference], np.nan)
-        return np.concatenate([nans, smoothed_values], axis=values.ndim - 1)
+        offset = values.shape[-1] - smoothed_values.shape[-1]
+        additional_nans = np.full(list(values.shape[:-1]) + [offset], np.nan)
+        return np.concatenate([additional_nans, smoothed_values], axis=values.ndim - 1)
 
     def _smoother(self, values):
         """ -> np.ndarray, provide smoothing algorithm on the given values.
