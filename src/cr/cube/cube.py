@@ -544,14 +544,16 @@ class _SingleSideMovingAvg(SmoothedMeasure):
             return values
 
         smoothed_values = self._smoother(values)
-        offset = values.shape[-1] - smoothed_values.shape[-1]
-        additional_nans = np.full(list(values.shape[:-1]) + [offset], np.nan)
+        # offset between original values and smoothed values
+        offset = [values.shape[-1] - smoothed_values.shape[-1]]
+        additional_nans = np.full(list(values.shape[:-1]) + offset, np.nan)
         return np.concatenate([additional_nans, smoothed_values], axis=values.ndim - 1)
 
     def _smoother(self, values):
         """ -> np.ndarray, provide smoothing algorithm on the given values.
 
         In this case the moving average smoother is performed using the np.convolve
+        (https://numpy.org/doc/stable/reference/generated/numpy.convolve.html)
         operator that returns the discrete, linear convolution of two one-dimensional
         sequences.
         A moving average is a form of a convolution often used in time series analysis
