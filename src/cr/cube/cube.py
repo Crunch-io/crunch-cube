@@ -535,8 +535,10 @@ class _SingleSideMovingAvg(SmoothedMeasure):
         """
         if not self._valid_window(values.shape[-1]):
             warnings.warn(
-                "Window (value: {}) parameter is not valid: window must be less equal "
-                "than the total period and <> 0".format(self._window),
+                "Window (value: {}) parameter is not valid: window must be less than "
+                "equal to the total period (value: {}) and positive".format(
+                    self._window, values.shape[-1]
+                ),
                 UserWarning,
             )
             return values
