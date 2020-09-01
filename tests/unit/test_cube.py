@@ -575,6 +575,15 @@ class DescribeSingleSideMovingAvg(object):
 
         assert valid_window == expected_value
 
+    def it_applies_the_smoother(self, _window, smoother_fixture):
+        values, window, expected_value = smoother_fixture
+        _window.return_value = window
+        smoothing_alg = _SingleSideMovingAvg(None)
+
+        smoothed_values = smoothing_alg._smoother(values)
+
+        np.testing.assert_array_almost_equal(smoothed_values, expected_value)
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -583,7 +592,22 @@ class DescribeSingleSideMovingAvg(object):
 
     # fixtures -------------------------------------------------------
 
-    @pytest.fixture(params=[(30, 4, False), (0, 4, False), (3, 12, True), (3, 3, True)])
-    def valid_window_fixture(self, request):
-        window, total_period, expected_value = request.param
-        return window, total_period, expected_value
+    @pytest.fixture(
+        params=[
+            (np.array([3, 4, 5, 6]), 1, [3, 4, 5, 6]),
+            (np.array([3, 4, 5, 6]), 2, [3.5, 4.5, 5.5]),
+            (np.array([3, 4, 5, 6]), 3, [4.0, 5.0]),
+            (np.array([3, 4, 5, 6]), 4, [4.5]),
+            (np.array([[3, 4, 5, 6], [7, 8, 9, 1]]), 1, [[3, 4, 5, 6], [7, 8, 9, 1]]),
+            (
+                np.array([[3, 4, 5, 6], [7, 8, 9, 1]]),
+                2,
+                [[3.5, 4.5, 5.5], [7.5, 8.5, 5.0]],
+            ),
+            (np.array([[3, 4, 5, 6], [7, 8, 9, 1]]), 3, [[4.0, 5.0], [8.0, 6.0]]),
+            (np.array([[3, 4, 5, 6], [7, 8, 9, 1]]), 4, np.array([[4.5], [6.25]])),
+        ]
+    )
+    def smoother_fixture(self, request):
+        values, window, expected_value = request.param
+        return values, window, expected_value
