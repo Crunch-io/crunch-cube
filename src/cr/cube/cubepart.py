@@ -298,6 +298,11 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def counts(self):
+        """ -> np.ndarray, counts with smoothing if applicable.
+
+        It returns original counts or smoothed counts according to the transforms dict
+        specified in the cube.
+        """
         return self._counts
 
     @lazyproperty
@@ -910,6 +915,11 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def counts(self):
+        """ -> tuple, counts with smoothing if applicable.
+
+        It returns original counts or smoothed counts according to the transforms dict
+        specified in the cube.
+        """
         return self._counts
 
     @lazyproperty
