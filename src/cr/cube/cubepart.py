@@ -88,11 +88,6 @@ class CubePartition(object):
         return self._cube.has_means
 
     @lazyproperty
-    def show_smoothing(self):
-        """True if cube transforms includes smoothing option"""
-        return self._cube.show_smoothing
-
-    @lazyproperty
     def ndim(self):
         """int count of dimensions for this partition."""
         return len(self._dimensions)
@@ -208,6 +203,16 @@ class CubePartition(object):
         )
 
     @lazyproperty
+    def _show_smoothing(self):
+        """True if cube transforms includes smoothing option"""
+        return self._cube.show_smoothing
+
+    @lazyproperty
+    def _smoother(self):
+        """Returns the appropriate smoother according to the opt in transforms dict"""
+        return self._cube.smoother
+
+    @lazyproperty
     def _transforms_dict(self):
         """dict holding transforms for this partition, provided as `transforms` arg.
 
@@ -293,10 +298,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def counts(self):
-        counts = np.array([row.counts for row in self._matrix.rows])
-        if self.show_smoothing:
-            return self._cube.smoother.smoothed_values(counts)
-        return counts
+        return self._counts
 
     @lazyproperty
     def cube_is_mr_aug(self):
@@ -838,6 +840,14 @@ class _Slice(CubePartition):
         )
 
     @lazyproperty
+    def _counts(self):
+        """ -> np.ndarray, counts with or without smoothing"""
+        counts = np.array([row.counts for row in self._matrix.rows])
+        if self._show_smoothing:
+            return self._smoother.smoothed_values(counts)
+        return counts
+
+    @lazyproperty
     def _dimensions(self):
         """tuple of (rows_dimension, columns_dimension) Dimension objects."""
         return tuple(
@@ -900,10 +910,7 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def counts(self):
-        counts = tuple(row.count for row in self._stripe.rows)
-        if self.show_smoothing:
-            return tuple(self._cube.smoother.smoothed_values(np.array(counts)))
-        return counts
+        return self._counts
 
     @lazyproperty
     def inserted_row_idxs(self):
@@ -1148,6 +1155,14 @@ class _Strand(CubePartition):
         )
 
     # ---implementation (helpers)-------------------------------------
+
+    @lazyproperty
+    def _counts(self):
+        """ -> tuple, counts with or without smoothing"""
+        counts = tuple(row.count for row in self._stripe.rows)
+        if self._show_smoothing:
+            return tuple(self._smoother.smoothed_values(np.array(counts)))
+        return counts
 
     @lazyproperty
     def _counts_as_array(self):

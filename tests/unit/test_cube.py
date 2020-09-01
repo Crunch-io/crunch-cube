@@ -611,3 +611,8 @@ class DescribeSingleSideMovingAvg(object):
     def smoother_fixture(self, request):
         values, window, expected_value = request.param
         return values, window, expected_value
+
+    @pytest.fixture(params=[(30, 4, False), (0, 4, False), (3, 12, True), (3, 3, True)])
+    def valid_window_fixture(self, request):
+        window, total_period, expected_value = request.param
+        return window, total_period, expected_value
