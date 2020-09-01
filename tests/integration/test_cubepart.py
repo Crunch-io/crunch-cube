@@ -813,24 +813,20 @@ class Describe_Slice(object):
         for i, p in enumerate(cube2.partitions):
             assert cube.partitions[i].counts.shape == cube2.partitions[i].counts.shape
 
-    def it_provides_smoothed_counts_for_ca_x_ca_subvar_x_cat_date(self):
+    def it_provides_smoothed_counts_for_ca_x_ca_subvar_x_cat_date(
+        self, ca_x_ca_subvar_x_cat_date_fixture
+    ):
+        window, expected_value = ca_x_ca_subvar_x_cat_date_fixture
         transforms = {
-            "smoothing": {"method": "one_side_moving_avg", "window": 3, "show": True}
+            "smoothing": {
+                "method": "one_side_moving_avg",
+                "window": window,
+                "show": True,
+            }
         }
         cube = Cube(CR.CA_X_CA_SUBVAR_X_CAT_DATE, transforms=transforms)
         slice_ = cube.partitions[0]
-
-        np.testing.assert_array_almost_equal(
-            slice_.counts,
-            [
-                [np.nan, np.nan, 217.66666667, 147.0],
-                [np.nan, np.nan, 84.66666667, 51.33333333],
-                [np.nan, np.nan, 133.0, 95.66666667],
-                [np.nan, np.nan, 82.0, 76.33333333],
-                [np.nan, np.nan, 96.33333333, 83.33333333],
-                [np.nan, np.nan, 37.0, 19.66666667],
-            ],
-        )
+        np.testing.assert_array_almost_equal(slice_.counts, expected_value)
 
         cube2 = Cube(CR.CA_X_CA_SUBVAR_X_CAT_DATE)
         slice2_ = cube2.partitions[0]
@@ -846,34 +842,18 @@ class Describe_Slice(object):
             ],
         )
 
-    def it_provides_smoothed_counts_for_mr_x_cat_date(self):
+    def it_provides_smoothed_counts_for_mr_x_cat_date(self, mr_x_cat_date_fixture):
+        window, expected_value = mr_x_cat_date_fixture
         transforms = {
-            "smoothing": {"method": "one_side_moving_avg", "window": 3, "show": True}
+            "smoothing": {
+                "method": "one_side_moving_avg",
+                "window": window,
+                "show": True,
+            }
         }
         cube = Cube(CR.MR_X_CAT_DATE, transforms=transforms)
         slice_ = cube.partitions[0]
-
-        np.testing.assert_array_almost_equal(
-            slice_.counts,
-            [
-                [np.nan, np.nan, 78.0, 60.0],
-                [np.nan, np.nan, 240.33333333, 188.66666667],
-                [np.nan, np.nan, 97.66666667, 71.0],
-                [np.nan, np.nan, 124.0, 98.0],
-                [np.nan, np.nan, 24.66666667, 18.33333333],
-                [np.nan, np.nan, 34.66666667, 24.66666667],
-                [np.nan, np.nan, 15.0, 10.0],
-                [np.nan, np.nan, 224.0, 168.66666667],
-                [np.nan, np.nan, 28.66666667, 27.0],
-                [np.nan, np.nan, 69.33333333, 59.0],
-                [np.nan, np.nan, 110.0, 86.0],
-                [np.nan, np.nan, 48.33333333, 38.66666667],
-                [np.nan, np.nan, 43.0, 37.66666667],
-                [np.nan, np.nan, 25.0, 17.66666667],
-                [np.nan, np.nan, 84.0, 60.66666667],
-                [np.nan, np.nan, 9.0, 4.0],
-            ],
-        )
+        np.testing.assert_array_almost_equal(slice_.counts, expected_value)
 
         transforms = {"smoothing": {"method": "one_side_moving_avg", "window": 0}}
         cube2 = Cube(CR.MR_X_CAT_DATE, transforms=transforms)
@@ -960,6 +940,150 @@ class Describe_Slice(object):
         ]
     )
     def cat_x_cat_date_fixture(self, request):
+        window, expected_value = request.param
+        return window, expected_value
+
+    @pytest.fixture(
+        params=[
+            (
+                1,
+                [
+                    [87, 94, 53, 33],
+                    [272, 265, 184, 117],
+                    [118, 106, 69, 38],
+                    [134, 147, 91, 56],
+                    [22, 38, 14, 3],
+                    [40, 39, 25, 10],
+                    [17, 19, 9, 2],
+                    [264, 241, 167, 98],
+                    [24, 33, 29, 19],
+                    [70, 77, 61, 39],
+                    [115, 133, 82, 43],
+                    [49, 58, 38, 20],
+                    [34, 49, 46, 18],
+                    [28, 27, 20, 6],
+                    [101, 94, 57, 31],
+                    [17, 5, 5, 2],
+                ],
+            ),
+            (
+                2,
+                [
+                    [np.nan, 90.5, 73.5, 43.0],
+                    [np.nan, 268.5, 224.5, 150.5],
+                    [np.nan, 112.0, 87.5, 53.5],
+                    [np.nan, 140.5, 119.0, 73.5],
+                    [np.nan, 30.0, 26.0, 8.5],
+                    [np.nan, 39.5, 32.0, 17.5],
+                    [np.nan, 18.0, 14.0, 5.5],
+                    [np.nan, 252.5, 204.0, 132.5],
+                    [np.nan, 28.5, 31.0, 24.0],
+                    [np.nan, 73.5, 69.0, 50.0],
+                    [np.nan, 124.0, 107.5, 62.5],
+                    [np.nan, 53.5, 48.0, 29.0],
+                    [np.nan, 41.5, 47.5, 32.0],
+                    [np.nan, 27.5, 23.5, 13.0],
+                    [np.nan, 97.5, 75.5, 44.0],
+                    [np.nan, 11.0, 5.0, 3.5],
+                ],
+            ),
+            (
+                3,
+                [
+                    [np.nan, np.nan, 78.0, 60.0],
+                    [np.nan, np.nan, 240.33333333, 188.66666667],
+                    [np.nan, np.nan, 97.66666667, 71.0],
+                    [np.nan, np.nan, 124.0, 98.0],
+                    [np.nan, np.nan, 24.66666667, 18.33333333],
+                    [np.nan, np.nan, 34.66666667, 24.66666667],
+                    [np.nan, np.nan, 15.0, 10.0],
+                    [np.nan, np.nan, 224.0, 168.66666667],
+                    [np.nan, np.nan, 28.66666667, 27.0],
+                    [np.nan, np.nan, 69.33333333, 59.0],
+                    [np.nan, np.nan, 110.0, 86.0],
+                    [np.nan, np.nan, 48.33333333, 38.66666667],
+                    [np.nan, np.nan, 43.0, 37.66666667],
+                    [np.nan, np.nan, 25.0, 17.66666667],
+                    [np.nan, np.nan, 84.0, 60.66666667],
+                    [np.nan, np.nan, 9.0, 4.0],
+                ],
+            ),
+            (
+                4,
+                [
+                    [np.nan, np.nan, np.nan, 66.75],
+                    [np.nan, np.nan, np.nan, 209.5],
+                    [np.nan, np.nan, np.nan, 82.75],
+                    [np.nan, np.nan, np.nan, 107.0],
+                    [np.nan, np.nan, np.nan, 19.25],
+                    [np.nan, np.nan, np.nan, 28.5],
+                    [np.nan, np.nan, np.nan, 11.75],
+                    [np.nan, np.nan, np.nan, 192.5],
+                    [np.nan, np.nan, np.nan, 26.25],
+                    [np.nan, np.nan, np.nan, 61.75],
+                    [np.nan, np.nan, np.nan, 93.25],
+                    [np.nan, np.nan, np.nan, 41.25],
+                    [np.nan, np.nan, np.nan, 36.75],
+                    [np.nan, np.nan, np.nan, 20.25],
+                    [np.nan, np.nan, np.nan, 70.75],
+                    [np.nan, np.nan, np.nan, 7.25],
+                ],
+            ),
+        ]
+    )
+    def mr_x_cat_date_fixture(self, request):
+        window, expected_value = request.param
+        return window, expected_value
+
+    @pytest.fixture(
+        params=[
+            (
+                1,
+                [
+                    [296, 220, 137, 84],
+                    [127, 87, 40, 27],
+                    [169, 133, 97, 57],
+                    [70, 107, 69, 53],
+                    [75, 120, 94, 36],
+                    [61, 36, 14, 9],
+                ],
+            ),
+            (
+                2,
+                [
+                    [np.nan, 258.0, 178.5, 110.5],
+                    [np.nan, 107.0, 63.5, 33.5],
+                    [np.nan, 151.0, 115.0, 77.0],
+                    [np.nan, 88.5, 88.0, 61.0],
+                    [np.nan, 97.5, 107.0, 65.0],
+                    [np.nan, 48.5, 25.0, 11.5],
+                ],
+            ),
+            (
+                3,
+                [
+                    [np.nan, np.nan, 217.66666667, 147.0],
+                    [np.nan, np.nan, 84.66666667, 51.33333333],
+                    [np.nan, np.nan, 133.0, 95.66666667],
+                    [np.nan, np.nan, 82.0, 76.33333333],
+                    [np.nan, np.nan, 96.33333333, 83.33333333],
+                    [np.nan, np.nan, 37.0, 19.66666667],
+                ],
+            ),
+            (
+                4,
+                [
+                    [np.nan, np.nan, np.nan, 184.25],
+                    [np.nan, np.nan, np.nan, 70.25],
+                    [np.nan, np.nan, np.nan, 114.0],
+                    [np.nan, np.nan, np.nan, 74.75],
+                    [np.nan, np.nan, np.nan, 81.25],
+                    [np.nan, np.nan, np.nan, 30.0],
+                ],
+            ),
+        ]
+    )
+    def ca_x_ca_subvar_x_cat_date_fixture(self, request):
         window, expected_value = request.param
         return window, expected_value
 
