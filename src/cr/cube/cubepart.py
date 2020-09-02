@@ -263,7 +263,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def column_proportions(self):
-        return np.array([col.proportions for col in self._matrix.columns]).T
+        return self._column_proportions
 
     @lazyproperty
     def columns_dimension_name(self):
@@ -303,6 +303,8 @@ class _Slice(CubePartition):
         It returns original counts or smoothed counts according to the transforms dict
         specified in the cube.
         """
+        if self._show_smoothing:
+            return self._smoothed_counts
         return self._counts
 
     @lazyproperty
@@ -533,9 +535,9 @@ class _Slice(CubePartition):
         if np.all(np.isnan(self._columns_dimension_numeric_values)):
             return None
 
-        inner = np.nansum(self._columns_dimension_numeric_values * self.counts, axis=1)
+        inner = np.nansum(self._columns_dimension_numeric_values * self._counts, axis=1)
         not_a_nan_index = ~np.isnan(self._columns_dimension_numeric_values)
-        denominator = np.sum(self.counts[:, not_a_nan_index], axis=1)
+        denominator = np.sum(self._counts[:, not_a_nan_index], axis=1)
         return inner / denominator
 
     @lazyproperty
@@ -559,10 +561,10 @@ class _Slice(CubePartition):
         if np.all(np.isnan(self._rows_dimension_numeric_values)):
             return None
         inner = np.nansum(
-            self._rows_dimension_numeric_values[:, None] * self.counts, axis=0
+            self._rows_dimension_numeric_values[:, None] * self._counts, axis=0
         )
         not_a_nan_index = ~np.isnan(self._rows_dimension_numeric_values)
-        denominator = np.sum(self.counts[not_a_nan_index, :], axis=0)
+        denominator = np.sum(self._counts[not_a_nan_index, :], axis=0)
         return inner / denominator
 
     @lazyproperty
@@ -592,7 +594,7 @@ class _Slice(CubePartition):
             return None
         not_a_nan_index = ~np.isnan(self._columns_dimension_numeric_values)
         numeric_values = self._columns_dimension_numeric_values[not_a_nan_index]
-        counts = self.counts[:, not_a_nan_index].astype("int64")
+        counts = self._counts[:, not_a_nan_index].astype("int64")
         scale_median = np.array(
             [
                 self._median(np.repeat(numeric_values, counts[i, :]))
@@ -612,7 +614,7 @@ class _Slice(CubePartition):
             return None
         not_a_nan_index = ~np.isnan(self._rows_dimension_numeric_values)
         numeric_values = self._rows_dimension_numeric_values[not_a_nan_index]
-        counts = self.counts[not_a_nan_index, :].astype("int64")
+        counts = self._counts[not_a_nan_index, :].astype("int64")
         scale_median = np.array(
             [
                 self._median(np.repeat(numeric_values, counts[:, i]))
@@ -787,12 +789,12 @@ class _Slice(CubePartition):
         not_a_nan_index = ~np.isnan(self._columns_dimension_numeric_values)
         col_dim_numeric = self._columns_dimension_numeric_values[not_a_nan_index]
 
-        numerator = self.counts[:, not_a_nan_index] * pow(
-            np.broadcast_to(col_dim_numeric, self.counts[:, not_a_nan_index].shape)
+        numerator = self._counts[:, not_a_nan_index] * pow(
+            np.broadcast_to(col_dim_numeric, self._counts[:, not_a_nan_index].shape)
             - self.scale_means_column.reshape(-1, 1),
             2,
         )
-        denominator = np.sum(self.counts[:, not_a_nan_index], axis=1)
+        denominator = np.sum(self._counts[:, not_a_nan_index], axis=1)
         return np.nansum(numerator, axis=1) / denominator
 
     @lazyproperty
@@ -808,16 +810,16 @@ class _Slice(CubePartition):
         not_a_nan_index = ~np.isnan(self._rows_dimension_numeric_values)
         row_dim_numeric_values = self._rows_dimension_numeric_values[not_a_nan_index]
         numerator = (
-            self.counts[not_a_nan_index, :]
+            self._counts[not_a_nan_index, :]
             * pow(
                 np.broadcast_to(
-                    row_dim_numeric_values, self.counts[not_a_nan_index, :].T.shape
+                    row_dim_numeric_values, self._counts[not_a_nan_index, :].T.shape
                 )
                 - self.scale_means_row.reshape(-1, 1),
                 2,
             ).T
         )
-        denominator = np.sum(self.counts[not_a_nan_index, :], axis=0)
+        denominator = np.sum(self._counts[not_a_nan_index, :], axis=0)
         return np.nansum(numerator, axis=0) / denominator
 
     @lazyproperty
@@ -841,16 +843,22 @@ class _Slice(CubePartition):
         `variance = p * (1-p)`
         """
         return (
-            self.counts / self.columns_margin * (1 - self.counts / self.columns_margin)
+            self._counts
+            / self.columns_margin
+            * (1 - self._counts / self.columns_margin)
         )
 
     @lazyproperty
     def _counts(self):
-        """ -> np.ndarray, counts with or without smoothing"""
-        counts = np.array([row.counts for row in self._matrix.rows])
+        """ -> np.ndarray, counts array"""
+        return np.array([row.counts for row in self._matrix.rows])
+
+    @lazyproperty
+    def _column_proportions(self):
+        col_prop = np.array([col.proportions for col in self._matrix.columns]).T
         if self._show_smoothing:
-            return self._smoother.smoothed_values(counts)
-        return counts
+            return self._smoother.smoothed_values(col_prop)
+        return col_prop
 
     @lazyproperty
     def _dimensions(self):
@@ -878,6 +886,11 @@ class _Slice(CubePartition):
     def _rows_dimension_numeric_values(self):
         """1D ndarray of numeric-value for each rows-dimension element."""
         return np.array([row.numeric_value for row in self._matrix.rows])
+
+    @lazyproperty
+    def _smoothed_counts(self):
+        """ -> np.ndarray, counts with smoothing"""
+        return self._smoother.smoothed_values(self._counts)
 
     @lazyproperty
     def _transform_dicts(self):
