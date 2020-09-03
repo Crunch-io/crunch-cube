@@ -362,12 +362,6 @@ class Cube(object):
         return self._measures.population_fraction
 
     @lazyproperty
-    def show_smoothing(self):
-        if self._has_smoothing:
-            return self._transforms_dict.get("smoothing").get("show", False)
-        return False
-
-    @lazyproperty
     def smoother(self):
         return SmoothedMeasure.factory(self._transforms_dict)
 
@@ -438,17 +432,6 @@ class Cube(object):
             )
 
     @lazyproperty
-    def _has_smoothing(self):
-        """ -> bool, True if smoothing method is present in the transform dict.
-        If smoothing is avaliable the cube counts will be smoothed according to the
-        selected method.
-        """
-        transforms_dict = self._transforms_dict if self._transforms_dict else {}
-        if transforms_dict.get("smoothing") is not None:
-            return True
-        return False
-
-    @lazyproperty
     def _is_single_filter_col_cube(self):
         """ -> bool, determines if it is a single column filter cube."""
         return self._cube_dict["result"].get("is_single_col_cube", False)
@@ -508,13 +491,38 @@ class SmoothedMeasure(object):
     @classmethod
     def factory(cls, transforms_dict):
         """Returns appropriate Smoothing Method according to transforms_dict"""
+        if not cls._show_smoothing(transforms_dict):
+            return _NullSmoother(transforms_dict)
         method = transforms_dict.get("smoothing").get("method", None)
-        # ATM it returns always _OneSideMovingAvg, but in this way it's ready when
-        # furhter smoothing methods will be implemented
         SmoothingMethodCls = {"one_side_moving_avg": _SingleSideMovingAvg}.get(
-            method, _SingleSideMovingAvg
+            method, _NullSmoother
         )
         return SmoothingMethodCls(transforms_dict)
+
+    @classmethod
+    def _has_smoothing(cls, transforms_dict):
+        """ -> bool, True if smoothing method is present in the transform dict.
+        If smoothing is avaliable the cube counts will be smoothed according to the
+        selected method.
+        """
+        transforms_dict = transforms_dict if transforms_dict else {}
+        if transforms_dict.get("smoothing"):
+            return True
+        return False
+
+    @classmethod
+    def _show_smoothing(cls, transforms_dict):
+        if cls._has_smoothing(transforms_dict):
+            return transforms_dict.get("smoothing").get("show", False)
+        return False
+
+
+class _NullSmoother(SmoothedMeasure):
+    """Avoid appling smoothing"""
+
+    def smoothed_values(self, values):
+        """ -> np.ndarray, original values"""
+        return values
 
 
 class _SingleSideMovingAvg(SmoothedMeasure):

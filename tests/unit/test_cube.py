@@ -7,7 +7,14 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import pytest
 import numpy as np
 
-from cr.cube.cube import Cube, CubeSet, _Measures, SmoothedMeasure, _SingleSideMovingAvg
+from cr.cube.cube import (
+    Cube,
+    CubeSet,
+    _Measures,
+    SmoothedMeasure,
+    _SingleSideMovingAvg,
+    _NullSmoother,
+)
 from cr.cube.cubepart import _Slice, _Strand, _Nub
 from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.dimension import Dimension
@@ -436,23 +443,6 @@ class DescribeCube(object):
         assert Cube(None).title == expected_value
 
     @pytest.mark.parametrize(
-        ("transforms_dict", "expected_value"),
-        (({"smoothing": {"method": "one_side_moving_avg"}}, True), ({}, False)),
-    )
-    def it_knows_if_it_has_smoothing(self, transforms_dict, expected_value):
-        cube = Cube(
-            response=None,
-            cube_idx=None,
-            transforms=transforms_dict,
-            population=None,
-            mask_size=0,
-        )
-
-        has_smoothing = cube._has_smoothing
-
-        assert has_smoothing is expected_value
-
-    @pytest.mark.parametrize(
         ("cube_dict", "expected_value"),
         (({"result": {}}, False), ({"result": {"is_single_col_cube": True}}, True)),
     )
@@ -552,8 +542,16 @@ class DescribeSmoothedMeasure(object):
 
     @pytest.fixture(
         params=[
-            ({"smoothing": {"method": "one_side_moving_avg"}}, _SingleSideMovingAvg),
-            ({"smoothing": {"method": "another_method"}}, _SingleSideMovingAvg),
+            (
+                {"smoothing": {"method": "one_side_moving_avg", "show": True}},
+                _SingleSideMovingAvg,
+            ),
+            ({"smoothing": {"method": "another_method", "show": True}}, _NullSmoother),
+            (
+                {"smoothing": {"method": "one_side_moving_avg", "show": False}},
+                _NullSmoother,
+            ),
+            ({"smoothing": {"method": "another_method", "show": False}}, _NullSmoother),
         ]
     )
     def factory_fixture(self, request):
