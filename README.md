@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+### 1.12.0a
+- Smoothing POC
+
 ### 1.11.37
 - PR 216: Document matrix.py classes and properties
 
