@@ -869,11 +869,6 @@ class _Slice(CubePartition):
         return np.array([row.numeric_value for row in self._matrix.rows])
 
     @lazyproperty
-    def _smoothed_counts(self):
-        """ -> np.ndarray, counts with smoothing"""
-        return self._smoother.smoothed_values(self._counts)
-
-    @lazyproperty
     def _transform_dicts(self):
         """Pair of dict (rows_dimension_transforms, columns_dimension_transforms).
 
