@@ -203,11 +203,6 @@ class CubePartition(object):
         )
 
     @lazyproperty
-    def _smoother(self):
-        """Returns the appropriate smoother according to the opt in transforms dict"""
-        return self._cube.smoother
-
-    @lazyproperty
     def _transforms_dict(self):
         """dict holding transforms for this partition, provided as `transforms` arg.
 
@@ -293,13 +288,8 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def counts(self):
-        """ -> np.ndarray, counts with smoothing if applicable.
-
-        It returns original counts or smoothed counts according to the transforms dict
-        specified in the cube.
-        """
+        """ -> np.ndarray, 2D cube counts."""
         return np.array([row.counts for row in self._matrix.rows])
-        # return self._smoother.smoothed_values(counts)
 
     @lazyproperty
     def cube_is_mr_aug(self):
@@ -903,13 +893,8 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def counts(self):
-        """ -> tuple, counts with smoothing if applicable.
-
-        It returns original counts or smoothed counts according to the transforms dict
-        specified in the cube.
-        """
-        counts = tuple(row.count for row in self._stripe.rows)
-        return tuple(self._smoother.smoothed_values(np.array(counts)))
+        """ -> tuple, 1D cube counts."""
+        return tuple(row.count for row in self._stripe.rows)
 
     @lazyproperty
     def inserted_row_idxs(self):

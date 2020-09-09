@@ -377,6 +377,10 @@ class _BaseBaseMatrix(object):
         return self._dimensions[0]
 
     @lazyproperty
+    def smoother(self):
+        return self._dimensions[-1].smoother
+
+    @lazyproperty
     def table_margin(self):
         """np.float/int64 scalar or a 1D or 2D np.float/int64 ndarray table margin.
 
@@ -412,24 +416,6 @@ class _BaseBaseMatrix(object):
     def _column_elements(self):
         """Sequence of `cr.cube.dimension._Element` object for each matrix column."""
         return self.columns_dimension.valid_elements
-
-    # @property
-    # def _column_generator(self):
-    #     """Iterable providing construction parameters for each column vector in turn.
-    #
-    #     Used by `.columns` property in each subclass. Cannot be a lazyproperty because
-    #     an iterator is exhausted on each use.
-    #     """
-    #     # --- note zip() returns an iterator in Python 3 ---
-    #     return zip(
-    #         self._counts.T,
-    #         self._counts.T / self._columns_margin,
-    #         self._unweighted_counts.T,
-    #         self._column_elements,
-    #         self._zscores.T,
-    #         self._table_std_dev.T,
-    #         self._table_std_err.T,
-    #     )
 
     @lazyproperty
     def _column_proportions(self):
@@ -684,7 +670,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
 
         return zip(
             self._counts.T,
-            (self._counts / self._columns_margin).T,
+            self._col_proportions,
             self._unweighted_counts.T,
             self._column_elements,
             self._zscores.T,
@@ -720,6 +706,10 @@ class _CatXCatMatrix(_BaseBaseMatrix):
         """
         return np.sum(self._counts, axis=0)
 
+    @lazyproperty
+    def _col_proportions(self):
+        return self.smoother.smoothed_values(self._counts / self._columns_margin.T).T
+
     @property
     def _row_generator(self):
         """Iterable of arguments to row-vector constructor call for each row element.
@@ -730,7 +720,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
         # --- Note `zip()` returns an iterator in Python 3 ---
         return zip(
             self._counts,
-            (self._counts.T / self._rows_margin.T).T,
+            self._row_proportions,
             self._unweighted_counts,
             self._row_elements,
             self._zscores,
@@ -738,6 +728,10 @@ class _CatXCatMatrix(_BaseBaseMatrix):
             self._table_std_err,
             self._column_index,
         )
+
+    @lazyproperty
+    def _row_proportions(self):
+        return (self._counts.T / self._rows_margin.T).T
 
     @lazyproperty
     def _rows_margin(self):
@@ -871,7 +865,7 @@ class _MrXCatMatrix(_CatXCatMatrix):
         # --- note zip() returns an iterator in Python 3 ---
         return zip(
             self._counts.T,
-            (self._counts[:, 0, :] / self._rows_margin).T,
+            self._col_proportions,
             self._unweighted_counts.T,
             self._column_elements,
             self._zscores.T,
@@ -1000,6 +994,12 @@ class _MrXCatMatrix(_CatXCatMatrix):
         # --- inflate shape to (nrows, 1) for later calculation convenience ---
         return (uncond_row_margin / uncond_row_table_margin)[:, None]
 
+    @lazyproperty
+    def _col_proportions(self):
+        return self.smoother.smoothed_values(
+            (self._counts[:, 0, :] / self._rows_margin)
+        ).T
+
     @property
     def _row_generator(self):
         """Iterable of arguments to row-vector constructor call for each row element.
@@ -1010,7 +1010,7 @@ class _MrXCatMatrix(_CatXCatMatrix):
         # --- Note `zip()` returns an iterator in Python 3 ---
         return zip(
             self._counts,
-            (self._counts[:, 0, :].T / np.sum(self._counts[:, 0, :], axis=1)).T,
+            self._row_proportions,
             self._unweighted_counts,
             self._row_elements,
             self.table_margin,
@@ -1019,6 +1019,10 @@ class _MrXCatMatrix(_CatXCatMatrix):
             self._table_std_err,
             self._column_index,
         )
+
+    @lazyproperty
+    def _row_proportions(self):
+        return (self._counts[:, 0, :].T / np.sum(self._counts[:, 0, :], axis=1)).T
 
     @lazyproperty
     def _table_proportion_variance(self):
@@ -1225,13 +1229,17 @@ class _CatXMrMatrix(_CatXCatMatrix):
 
         return zip(
             np.array([self._counts.T[0].T, self._counts.T[1].T]).T,
-            (self._counts / self._columns_margin)[:, :, 0].T,
+            self._col_proportions,
             np.array(
                 [self._unweighted_counts.T[0].T, self._unweighted_counts.T[1].T]
             ).T,
             self._column_elements,
             self.table_margin,
         )
+
+    @lazyproperty
+    def _col_proportions(self):
+        return (self._counts / self._columns_margin)[:, :, 0].T
 
     @property
     def _row_generator(self):
@@ -1243,7 +1251,7 @@ class _CatXMrMatrix(_CatXCatMatrix):
         # --- Note `zip()` returns an iterator in Python 3 ---
         return zip(
             self._counts,
-            self._counts[:, :, 0] / np.sum(self._counts, axis=2),
+            self._row_proportions,
             self._unweighted_counts,
             self._row_elements,
             self._zscores,
@@ -1251,6 +1259,10 @@ class _CatXMrMatrix(_CatXCatMatrix):
             self._table_std_err,
             self._column_index,
         )
+
+    @lazyproperty
+    def _row_proportions(self):
+        return self._counts[:, :, 0] / np.sum(self._counts, axis=2)
 
     @lazyproperty
     def _table_proportion_variance(self):
@@ -1538,11 +1550,15 @@ class _MrXMrMatrix(_CatXCatMatrix):
 
         return zip(
             self._counts.T[0],
-            (self._counts[:, 0, :, 0] / self._rows_margin[:, :, 0]).T,
+            self._col_proportions,
             self._unweighted_counts.T[0],
             self._column_elements,
             self.table_margin.T,
         )
+
+    @lazyproperty
+    def _col_proportions(self):
+        return (self._counts[:, 0, :, 0] / self._rows_margin[:, :, 0]).T
 
     @lazyproperty
     def _mr_shadow_proportions(self):
@@ -1563,7 +1579,7 @@ class _MrXMrMatrix(_CatXCatMatrix):
         # --- note zip() returns an iterator in Python 3 ---
         return zip(
             self._counts,
-            self._counts[:, 0, :, 0] / np.sum(self._counts, axis=3)[:, 0, :],
+            self._row_proportions,
             self._unweighted_counts,
             self._row_elements,
             self.table_margin,
@@ -1572,6 +1588,10 @@ class _MrXMrMatrix(_CatXCatMatrix):
             self._table_std_err,
             self._column_index,
         )
+
+    @lazyproperty
+    def _row_proportions(self):
+        return self._counts[:, 0, :, 0] / np.sum(self._counts, axis=3)[:, 0, :]
 
     @lazyproperty
     def _table_proportion_variance(self):
@@ -1765,7 +1785,7 @@ class _BaseMatrixInsertedVector(object):
     def proportions(self):
         counts = np.sum(
             np.nan_to_num(
-                np.array([v.proportions * v.margin for v in self._addend_vectors]), 0
+                np.array([v.proportions * v.margin for v in self._addend_vectors])
             ),
             axis=0,
         )
