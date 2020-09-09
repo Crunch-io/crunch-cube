@@ -7,14 +7,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import pytest
 import numpy as np
 
-from cr.cube.cube import (
-    Cube,
-    CubeSet,
-    _Measures,
-    SmoothedMeasure,
-    _SingleSideMovingAvg,
-    _NullSmoother,
-)
+from cr.cube.cube import Cube, CubeSet, _Measures
 from cr.cube.cubepart import _Slice, _Strand, _Nub
 from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.dimension import Dimension
@@ -526,91 +519,3 @@ class DescribeMeasures(object):
         population_fraction = measures.population_fraction
 
         np.testing.assert_equal(population_fraction, expected_value)
-
-
-class DescribeSmoothedMeasure(object):
-    def it_has_an_integrated_object_factory(self, factory_fixture):
-        transforms_dict, SmoothingMethodCls_, smoothing_method_ = factory_fixture
-        SmoothingMethodCls_.return_value = smoothing_method_
-
-        smoothing_method = SmoothedMeasure.factory(transforms_dict)
-
-        SmoothingMethodCls_.assert_called_once_with(transforms_dict)
-        assert smoothing_method is smoothing_method_
-
-    # fixtures -------------------------------------------------------
-
-    @pytest.fixture(
-        params=[
-            (
-                {"smoothing": {"method": "one_side_moving_avg", "show": True}},
-                _SingleSideMovingAvg,
-            ),
-            ({"smoothing": {"method": "another_method", "show": True}}, _NullSmoother),
-            (
-                {"smoothing": {"method": "one_side_moving_avg", "show": False}},
-                _NullSmoother,
-            ),
-            ({"smoothing": {"method": "another_method", "show": False}}, _NullSmoother),
-        ]
-    )
-    def factory_fixture(self, request):
-        transforms_dict, SmoothingMethodCls = request.param
-        SmoothingMethodCls_ = class_mock(
-            request, "cr.cube.cube.%s" % SmoothingMethodCls.__name__
-        )
-        smoothing_method_ = instance_mock(request, SmoothingMethodCls)
-        return transforms_dict, SmoothingMethodCls_, smoothing_method_
-
-
-class DescribeSingleSideMovingAvg(object):
-    def it_knows_if_window_param_is_valid(self, _window, valid_window_fixture):
-        window, total_period, expected_value = valid_window_fixture
-        _window.return_value = window
-        smoothed_measure = _SingleSideMovingAvg(None)
-
-        valid_window = smoothed_measure._valid_window(total_period)
-
-        assert valid_window == expected_value
-
-    def it_applies_the_smoother(self, _window, smoother_fixture):
-        values, window, expected_value = smoother_fixture
-        _window.return_value = window
-        smoothing_alg = _SingleSideMovingAvg(None)
-
-        smoothed_values = smoothing_alg._smoother(values)
-
-        np.testing.assert_array_almost_equal(smoothed_values, expected_value)
-
-    # fixture components ---------------------------------------------
-
-    @pytest.fixture
-    def _window(self, request):
-        return property_mock(request, _SingleSideMovingAvg, "_window")
-
-    # fixtures -------------------------------------------------------
-
-    @pytest.fixture(
-        params=[
-            (np.array([3, 4, 5, 6]), 1, [3, 4, 5, 6]),
-            (np.array([3, 4, 5, 6]), 2, [3.5, 4.5, 5.5]),
-            (np.array([3, 4, 5, 6]), 3, [4.0, 5.0]),
-            (np.array([3, 4, 5, 6]), 4, [4.5]),
-            (np.array([[3, 4, 5, 6], [7, 8, 9, 1]]), 1, [[3, 4, 5, 6], [7, 8, 9, 1]]),
-            (
-                np.array([[3, 4, 5, 6], [7, 8, 9, 1]]),
-                2,
-                [[3.5, 4.5, 5.5], [7.5, 8.5, 5.0]],
-            ),
-            (np.array([[3, 4, 5, 6], [7, 8, 9, 1]]), 3, [[4.0, 5.0], [8.0, 6.0]]),
-            (np.array([[3, 4, 5, 6], [7, 8, 9, 1]]), 4, np.array([[4.5], [6.25]])),
-        ]
-    )
-    def smoother_fixture(self, request):
-        values, window, expected_value = request.param
-        return values, window, expected_value
-
-    @pytest.fixture(params=[(30, 4, False), (0, 4, False), (3, 12, True), (3, 3, True)])
-    def valid_window_fixture(self, request):
-        window, total_period, expected_value = request.param
-        return window, total_period, expected_value
