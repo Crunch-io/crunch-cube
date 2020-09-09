@@ -139,19 +139,6 @@
             "view": {
               "show_counts": false,
               "show_numeric_values": false,
-              "transform": {
-                "insertions": [
-                  {
-                    "function": "subtotal",
-                    "args": [
-                      2,
-                      1
-                    ],
-                    "name": "jan+apr",
-                    "anchor": 2
-                  }
-                ]
-              },
               "include_missing": false,
               "column_width": null
             },
