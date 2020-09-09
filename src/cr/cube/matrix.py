@@ -413,22 +413,23 @@ class _BaseBaseMatrix(object):
         """Sequence of `cr.cube.dimension._Element` object for each matrix column."""
         return self.columns_dimension.valid_elements
 
-    @property
-    def _column_generator(self):
-        """Iterable providing construction parameters for each column vector in turn.
-
-        Used by `.columns` property in each subclass. Cannot be a lazyproperty because
-        an iterator is exhausted on each use.
-        """
-        # --- note zip() returns an iterator in Python 3 ---
-        return zip(
-            self._counts.T,
-            self._unweighted_counts.T,
-            self._column_elements,
-            self._zscores.T,
-            self._table_std_dev.T,
-            self._table_std_err.T,
-        )
+    # @property
+    # def _column_generator(self):
+    #     """Iterable providing construction parameters for each column vector in turn.
+    #
+    #     Used by `.columns` property in each subclass. Cannot be a lazyproperty because
+    #     an iterator is exhausted on each use.
+    #     """
+    #     # --- note zip() returns an iterator in Python 3 ---
+    #     return zip(
+    #         self._counts.T,
+    #         self._counts.T / self._columns_margin,
+    #         self._unweighted_counts.T,
+    #         self._column_elements,
+    #         self._zscores.T,
+    #         self._table_std_dev.T,
+    #         self._table_std_err.T,
+    #     )
 
     @lazyproperty
     def _column_proportions(self):
@@ -572,6 +573,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
         return tuple(
             _CategoricalVector(
                 counts,
+                proportions,
                 unweighted_counts,
                 element,
                 self.table_margin,
@@ -582,6 +584,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
             )
             for (
                 counts,
+                proportions,
                 unweighted_counts,
                 element,
                 zscores,
@@ -596,6 +599,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
         return tuple(
             _CategoricalVector(
                 counts,
+                proportions,
                 unweighted_counts,
                 element,
                 self.table_margin,
@@ -607,6 +611,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
             )
             for (
                 counts,
+                proportions,
                 unweighted_counts,
                 element,
                 zscores,
@@ -668,6 +673,25 @@ class _CatXCatMatrix(_BaseBaseMatrix):
         ]
         return uncond_row_margin[:, None] / np.sum(uncond_row_margin)
 
+    @property
+    def _column_generator(self):
+        """Iterable providing construction parameters for each column vector in turn.
+
+        Used by `.columns` property in each subclass. Cannot be a lazyproperty because
+        an iterator is exhausted on each use.
+        """
+        # --- note zip() returns an iterator in Python 3 ---
+
+        return zip(
+            self._counts.T,
+            (self._counts / self._columns_margin).T,
+            self._unweighted_counts.T,
+            self._column_elements,
+            self._zscores.T,
+            self._table_std_dev.T,
+            self._table_std_err.T,
+        )
+
     @lazyproperty
     def _column_index(self):
         """2D np.float64/np.nan ndarray of column-index value for each matrix cell.
@@ -706,6 +730,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
         # --- Note `zip()` returns an iterator in Python 3 ---
         return zip(
             self._counts,
+            (self._counts.T / self._rows_margin.T).T,
             self._unweighted_counts,
             self._row_elements,
             self._zscores,
@@ -836,6 +861,25 @@ class _MrXCatMatrix(_CatXCatMatrix):
     objects.
     """
 
+    @property
+    def _column_generator(self):
+        """Iterable providing construction parameters for each column vector in turn.
+
+        Used by `.columns` property in each subclass. Cannot be a lazyproperty because
+        an iterator is exhausted on each use.
+        """
+        # --- note zip() returns an iterator in Python 3 ---
+
+        return zip(
+            self._counts.T,
+            (self._counts[:, 0, :] / self._rows_margin).T,
+            self._unweighted_counts.T,
+            self._column_elements,
+            self._zscores.T,
+            self._table_std_dev.T,
+            self._table_std_err.T,
+        )
+
     @lazyproperty
     def columns(self):
         """Sequence of _OpposingMrVector for each columns-dimension element."""
@@ -844,6 +888,7 @@ class _MrXCatMatrix(_CatXCatMatrix):
         return tuple(
             _OpposingMrVector(
                 counts,
+                proportions,
                 unweighted_counts,
                 element,
                 self.table_margin,
@@ -853,6 +898,7 @@ class _MrXCatMatrix(_CatXCatMatrix):
             )
             for (
                 counts,
+                proportions,
                 unweighted_counts,
                 element,
                 zscores,
@@ -869,6 +915,7 @@ class _MrXCatMatrix(_CatXCatMatrix):
         return tuple(
             _MrOpposingCatVector(
                 counts,
+                proportions,
                 unweighted_counts,
                 element,
                 table_margin,
@@ -879,6 +926,7 @@ class _MrXCatMatrix(_CatXCatMatrix):
             )
             for (
                 counts,
+                proportions,
                 unweighted_counts,
                 element,
                 table_margin,
@@ -963,6 +1011,7 @@ class _MrXCatMatrix(_CatXCatMatrix):
         # --- Note `zip()` returns an iterator in Python 3 ---
         return zip(
             self._counts,
+            self._counts / self._columns_margin,
             self._unweighted_counts,
             self._row_elements,
             self.table_margin,
@@ -1064,9 +1113,12 @@ class _CatXMrMatrix(_CatXCatMatrix):
     def columns(self):
         """Sequence of _MrOpposingCatVector object for each column of matrix."""
         return tuple(
-            _MrOpposingCatVector(counts.T, unweighted_counts.T, element, table_margin)
+            _MrOpposingCatVector(
+                counts.T, proportions, unweighted_counts.T, element, table_margin
+            )
             for (
                 counts,
+                proportions,
                 unweighted_counts,
                 element,
                 table_margin,
@@ -1093,6 +1145,7 @@ class _CatXMrMatrix(_CatXCatMatrix):
         return tuple(
             _OpposingMrVector(
                 counts.T,
+                proportions,
                 unweighted_counts.T,
                 element,
                 self.table_margin,
@@ -1103,6 +1156,7 @@ class _CatXMrMatrix(_CatXCatMatrix):
             )
             for (
                 counts,
+                proportions,
                 unweighted_counts,
                 element,
                 zscores,
@@ -1169,13 +1223,34 @@ class _CatXMrMatrix(_CatXCatMatrix):
         exhausted on each use.
         """
         # --- note zip() returns an iterator in Python 3 ---
+
         return zip(
             np.array([self._counts.T[0].T, self._counts.T[1].T]).T,
+            (self._counts / self._columns_margin)[:, :, 0].T,
             np.array(
                 [self._unweighted_counts.T[0].T, self._unweighted_counts.T[1].T]
             ).T,
             self._column_elements,
             self.table_margin,
+        )
+
+    @property
+    def _row_generator(self):
+        """Iterable of arguments to row-vector constructor call for each row element.
+
+        Used by `.rows` property. Cannot be a lazyproperty because an iterator is
+        exhausted on each use and must be created newly on each call.
+        """
+        # --- Note `zip()` returns an iterator in Python 3 ---
+        return zip(
+            self._counts,
+            (self._counts / self._columns_margin)[:, :, 0],
+            self._unweighted_counts,
+            self._row_elements,
+            self._zscores,
+            self._table_std_dev,
+            self._table_std_err,
+            self._column_index,
         )
 
     @lazyproperty
@@ -1295,9 +1370,12 @@ class _MrXMrMatrix(_CatXCatMatrix):
         Each column corresponds to a subvar of the second MR dimension.
         """
         return tuple(
-            _OpposingMrVector(counts, unweighted_counts, element, table_margin)
+            _OpposingMrVector(
+                counts, proportions, unweighted_counts, element, table_margin
+            )
             for (
                 counts,
+                proportions,
                 unweighted_counts,
                 element,
                 table_margin,
@@ -1321,6 +1399,7 @@ class _MrXMrMatrix(_CatXCatMatrix):
         return tuple(
             _OpposingMrVector(
                 counts[0].T,
+                proportions,
                 unweighted_counts[0].T,
                 element,
                 table_margin,
@@ -1331,6 +1410,7 @@ class _MrXMrMatrix(_CatXCatMatrix):
             )
             for (
                 counts,
+                proportions,
                 unweighted_counts,
                 element,
                 table_margin,
@@ -1456,8 +1536,10 @@ class _MrXMrMatrix(_CatXCatMatrix):
         exhausted on each use.
         """
         # --- note zip() returns an iterator in Python 3 ---
+
         return zip(
             self._counts.T[0],
+            (self._counts[:, 0, :, 0] / self._rows_margin[:, :, 0]).T,
             self._unweighted_counts.T[0],
             self._column_elements,
             self.table_margin.T,
@@ -1482,6 +1564,7 @@ class _MrXMrMatrix(_CatXCatMatrix):
         # --- note zip() returns an iterator in Python 3 ---
         return zip(
             self._counts,
+            self._counts[:, 0, :, 0] / np.sum(self._counts, axis=3)[:, 0, :],
             self._unweighted_counts,
             self._row_elements,
             self.table_margin,
@@ -1911,6 +1994,10 @@ class _BaseTransformationVector(object):
         return self._base_vector.opposing_margin
 
     @lazyproperty
+    def proportions(self):
+        return self._base_vector.proportions
+
+    @lazyproperty
     def table_base(self):
         """np.int64 unweighted N for overall table.
 
@@ -2000,14 +2087,6 @@ class _AssembledVector(_BaseTransformationVector):
             return np.nan
 
         return self._apply_interleaved(self._base_vector.means, fsubtot)
-
-    @lazyproperty
-    def proportions(self):
-        """1D np.float64/np.nan ndarray of count proportion for each vector cell.
-
-        A cell value is np.nan if its corresponding margin value is zero.
-        """
-        return self.counts / self.margin
 
     @lazyproperty
     def pvals(self):
@@ -2347,6 +2426,11 @@ class _OrderedVector(_BaseTransformationVector):
         return (self._index, self._index, self)
 
     @lazyproperty
+    def proportions(self):
+
+        return self._base_vector.proportions[self._opposing_order]
+
+    @lazyproperty
     def unweighted_counts(self):
         """1D np.int64 ndarray of unweighted-count for each vector cell.
 
@@ -2482,6 +2566,7 @@ class _CategoricalVector(_BaseVector):
     def __init__(
         self,
         counts,
+        proportions,
         unweighted_counts,
         element,
         table_margin,
@@ -2493,6 +2578,7 @@ class _CategoricalVector(_BaseVector):
     ):
         super(_CategoricalVector, self).__init__(element, unweighted_counts)
         self._counts = counts
+        self._proportions = proportions
         self._table_margin = table_margin
         self._zscores = zscores
         self._table_std_dev = table_std_dev
@@ -2541,7 +2627,7 @@ class _CategoricalVector(_BaseVector):
         margin value is zero. Note that when this vector opposes an MR dimension the
         vector margin is distinct for each cell and the proportions may not sum to 1.0.
         """
-        return self.counts / self.margin
+        return self._proportions
 
     @lazyproperty
     def table_margin(self):
@@ -2630,6 +2716,7 @@ class _MrOpposingCatVector(_CategoricalVector):
     def __init__(
         self,
         counts,
+        proportions,
         unweighted_counts,
         label,
         table_margin,
@@ -2640,6 +2727,7 @@ class _MrOpposingCatVector(_CategoricalVector):
     ):
         super(_MrOpposingCatVector, self).__init__(
             counts[0],
+            proportions,
             unweighted_counts[0],
             label,
             table_margin,

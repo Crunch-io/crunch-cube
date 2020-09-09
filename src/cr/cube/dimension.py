@@ -3,6 +3,7 @@
 """Provides the Dimension class."""
 
 import sys
+import warnings
 
 if sys.version_info >= (3, 3):
     from collections.abc import Sequence
@@ -384,6 +385,10 @@ class Dimension(object):
     @lazyproperty
     def shape(self):
         return len(self.all_elements)
+
+    @lazyproperty
+    def smoother(self):
+        return Smoother.factory(self._dimension_transforms_dict)
 
     @lazyproperty
     def sort(self):
@@ -976,3 +981,118 @@ class _Subtotal(object):
     def prune(self):
         """True if this subtotal should not appear when empty."""
         return self._prune
+
+
+class Smoother(object):
+    """Base class for smoothing objects"""
+
+    def __init__(self, dimension_transforms_dict):
+        self._dimension_transforms_dict = dimension_transforms_dict
+
+    @classmethod
+    def factory(cls, dimension_transforms_dict):
+        """Returns appropriate Smoothing Method according to transforms_dict"""
+        if not cls._show_smoothing(dimension_transforms_dict):
+            return _NullSmoother(dimension_transforms_dict)
+        method = dimension_transforms_dict.get("smoothing").get("method", None)
+        SmoothingMethodCls = {"one_side_moving_avg": _SingleSideMovingAvg}.get(
+            method, _NullSmoother
+        )
+        return SmoothingMethodCls(dimension_transforms_dict)
+
+    @classmethod
+    def _has_smoothing(cls, dimension_transforms_dict):
+        """ -> bool, True if smoothing method is present in the transform dict.
+        If smoothing is avaliable the cube counts will be smoothed according to the
+        selected method.
+        """
+        if dimension_transforms_dict.get("smoothing"):
+            return True
+        return False
+
+    @classmethod
+    def _show_smoothing(cls, dimension_transforms_dict):
+        if cls._has_smoothing(dimension_transforms_dict):
+            return dimension_transforms_dict.get("smoothing").get("show", False)
+        return False
+
+
+class _NullSmoother(Smoother):
+    """Avoid appling smoothing"""
+
+    def smoothed_values(self, values):
+        """ -> np.ndarray, original values"""
+        return values
+
+
+class _SingleSideMovingAvg(Smoother):
+    """Apply smoothing using one side moving average algorithm"""
+
+    def smoothed_values(self, values):
+        """ -> np.ndarray, provide rolling window calculations on given values.
+
+        Given a series of numbers and a fixed subset size, the first element of the
+        moving average is obtained by taking the average of the initial fixed subset of
+        the number series. Then the subset is modified by `shifting forward` the values.
+        A moving average is commonly used with time series data to smooth `out
+        short-term fluctuations and highlight longer-term trends or cycles.
+        Assuming that we want calculate a rolling average for a one year period, for
+        example, it means taking January through December for the first period and
+        averaging that data, then taking February through January for the next period
+        and averaging that, then moving on to March through February and so on.
+        """
+        if not self._valid_window(values.shape[-1]):
+            warnings.warn(
+                "Window (value: {}) parameter is not valid: window must be less than "
+                "equal to the total period (value: {}) and positive".format(
+                    self._window, values.shape[-1]
+                ),
+                UserWarning,
+            )
+            return values
+
+        smoothed_values = self._smoother(values)
+        # offset between original values and smoothed values
+        offset = [values.shape[-1] - smoothed_values.shape[-1]]
+        additional_nans = np.full(list(values.shape[:-1]) + offset, np.nan)
+        return np.concatenate([additional_nans, smoothed_values], axis=values.ndim - 1)
+
+    def _smoother(self, values):
+        """ -> np.ndarray, provide smoothing algorithm on the given values.
+
+        In this case the moving average smoother is performed using the np.convolve
+        (https://numpy.org/doc/stable/reference/generated/numpy.convolve.html)
+        operator that returns the discrete, linear convolution of two one-dimensional
+        sequences.
+        A moving average is a form of a convolution often used in time series analysis
+        to smooth out noise in data by replacing a data point with the average of
+        neighboring values in a moving window. A moving average is essentially a
+        low-pass filter because it removes short-term fluctuations to highlight a deeper
+        underlying trend.
+        """
+        w = self._window
+        return (
+            np.array(tuple(np.convolve(values, np.ones(w), mode="valid") / w))
+            if values.ndim == 1
+            else np.array(
+                [tuple(np.convolve(v, np.ones(w), mode="valid") / w) for v in values]
+            )
+        )
+
+    def _valid_window(self, total_period):
+        """ -> bool, the validity of the window parameter."""
+        if self._window > total_period or self._window == 0:
+            return False
+        return True
+
+    @lazyproperty
+    def _window(self):
+        """ -> int, size of the moving window.
+
+        This is the number of observations used for calculating the statistic. Each
+        window will be a fixed size. Return last dimension size, if window is greater
+        than the the last dimension size because we cannot have a moving window grater
+        than the number of elements of each column.
+        """
+
+        return self._dimension_transforms_dict.get("smoothing").get("window", 3)

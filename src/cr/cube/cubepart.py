@@ -258,8 +258,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def column_proportions(self):
-        col_prop = np.array([col.proportions for col in self._matrix.columns]).T
-        return self._smoother.smoothed_values(col_prop)
+        return np.array([col.proportions for col in self._matrix.columns]).T
 
     @lazyproperty
     def columns_dimension_name(self):
@@ -299,8 +298,8 @@ class _Slice(CubePartition):
         It returns original counts or smoothed counts according to the transforms dict
         specified in the cube.
         """
-        counts = np.array([row.counts for row in self._matrix.rows])
-        return self._smoother.smoothed_values(counts)
+        return np.array([row.counts for row in self._matrix.rows])
+        # return self._smoother.smoothed_values(counts)
 
     @lazyproperty
     def cube_is_mr_aug(self):
