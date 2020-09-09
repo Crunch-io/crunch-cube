@@ -869,7 +869,6 @@ class _MrXCatMatrix(_CatXCatMatrix):
         an iterator is exhausted on each use.
         """
         # --- note zip() returns an iterator in Python 3 ---
-
         return zip(
             self._counts.T,
             (self._counts[:, 0, :] / self._rows_margin).T,
@@ -1011,7 +1010,7 @@ class _MrXCatMatrix(_CatXCatMatrix):
         # --- Note `zip()` returns an iterator in Python 3 ---
         return zip(
             self._counts,
-            self._counts / self._columns_margin,
+            (self._counts[:, 0, :].T / np.sum(self._counts[:, 0, :], axis=1)).T,
             self._unweighted_counts,
             self._row_elements,
             self.table_margin,
@@ -1244,7 +1243,7 @@ class _CatXMrMatrix(_CatXCatMatrix):
         # --- Note `zip()` returns an iterator in Python 3 ---
         return zip(
             self._counts,
-            (self._counts / self._columns_margin)[:, :, 0],
+            self._counts[:, :, 0] / np.sum(self._counts, axis=2),
             self._unweighted_counts,
             self._row_elements,
             self._zscores,
@@ -1763,6 +1762,18 @@ class _BaseMatrixInsertedVector(object):
         return self._anchor_n, self._neg_idx, self
 
     @lazyproperty
+    def proportions(self):
+        counts = np.sum(
+            np.nan_to_num(
+                np.array([v.proportions * v.margin for v in self._addend_vectors]), 0
+            ),
+            axis=0,
+        )
+        # --- addend_vectors are _OrderedVector objects because ordering happens before
+        # --- insertion of subtotals.
+        return counts / self.margin
+
+    @lazyproperty
     def table_margin(self):
         """Scalar np.float/int64 or 1D np.float/int64 ndarray of table weighted N.
 
@@ -2087,6 +2098,21 @@ class _AssembledVector(_BaseTransformationVector):
             return np.nan
 
         return self._apply_interleaved(self._base_vector.means, fsubtot)
+
+    @lazyproperty
+    def proportions(self):
+        """1D np.float/int64 ndarray of weighted count for each vector cell."""
+        base_vector_proportions = self._base_vector.proportions
+
+        def fsubtot(inserted_vector):
+            """-> np.float/int64 count for `inserted_vector`.
+
+            Passed to and called by ._apply_interleaved() to compute inserted value
+            which it places in the right vector position.
+            """
+            return np.sum(base_vector_proportions[inserted_vector.addend_idxs])
+
+        return self._apply_interleaved(base_vector_proportions, fsubtot)
 
     @lazyproperty
     def pvals(self):
@@ -2427,7 +2453,6 @@ class _OrderedVector(_BaseTransformationVector):
 
     @lazyproperty
     def proportions(self):
-
         return self._base_vector.proportions[self._opposing_order]
 
     @lazyproperty
