@@ -340,10 +340,17 @@ class Describe_RawDimension(object):
         assert dimension_type == expected_value
 
     def it_resolves_a_categorical_type_to_help(
-        self, resolve_cat_fixture, _is_array_cat_prop_, _has_selected_category_prop_
+        self,
+        resolve_cat_fixture,
+        _is_array_cat_prop_,
+        _is_cat_date_prop_,
+        _has_selected_category_prop_,
     ):
-        is_array_cat, has_selected_cat, expected_value = resolve_cat_fixture
+        is_cat_date, is_array_cat, has_selected_cat, expected_value = (
+            resolve_cat_fixture
+        )
         _is_array_cat_prop_.return_value = is_array_cat
+        _is_cat_date_prop_.return_value = is_cat_date
         _has_selected_category_prop_.return_value = has_selected_cat
         raw_dimension = _RawDimension(None, None)
 
@@ -413,15 +420,19 @@ class Describe_RawDimension(object):
 
     @pytest.fixture(
         params=[
-            (False, False, DT.CAT),
-            (False, True, DT.LOGICAL),
-            (True, False, DT.CA_CAT),
-            (True, True, DT.MR_CAT),
+            (False, False, False, DT.CAT),
+            (False, False, True, DT.LOGICAL),
+            (False, True, False, DT.CA_CAT),
+            (False, True, True, DT.MR_CAT),
+            (True, True, True, DT.CAT_DATE),
+            (True, False, True, DT.CAT_DATE),
+            (True, True, False, DT.CAT_DATE),
+            (True, False, False, DT.CAT_DATE),
         ]
     )
     def resolve_cat_fixture(self, request):
-        is_array_cat, has_selected_cat, expected_value = request.param
-        return is_array_cat, has_selected_cat, expected_value
+        is_cat_date, is_array_cat, has_selected_cat, expected_value = request.param
+        return is_cat_date, is_array_cat, has_selected_cat, expected_value
 
     # fixture components ---------------------------------------------
 
@@ -440,6 +451,10 @@ class Describe_RawDimension(object):
     @pytest.fixture
     def _is_array_cat_prop_(self, request):
         return property_mock(request, _RawDimension, "_is_array_cat")
+
+    @pytest.fixture
+    def _is_cat_date_prop_(self, request):
+        return property_mock(request, _RawDimension, "_is_cat_date")
 
     @pytest.fixture
     def _next_raw_dimension_prop_(self, request):
@@ -1274,14 +1289,16 @@ class Describe_Subtotal(object):
         return instance_mock(request, _ValidElements)
 
 
-class DescribeSmoothedMeasure(object):
+class DescribeSmoother(object):
     def it_has_an_integrated_object_factory(self, factory_fixture):
-        transforms_dict, SmoothingMethodCls_, smoothing_method_ = factory_fixture
+        dimension_type, transforms_dict, SmoothingMethodCls_, smoothing_method_ = (
+            factory_fixture
+        )
         SmoothingMethodCls_.return_value = smoothing_method_
 
-        smoothing_method = Smoother.factory(transforms_dict)
+        smoothing_method = Smoother.factory(transforms_dict, dimension_type)
 
-        SmoothingMethodCls_.assert_called_once_with(transforms_dict)
+        SmoothingMethodCls_.assert_called_once_with(transforms_dict, dimension_type)
         assert smoothing_method is smoothing_method_
 
     # fixtures -------------------------------------------------------
@@ -1289,24 +1306,44 @@ class DescribeSmoothedMeasure(object):
     @pytest.fixture(
         params=[
             (
+                DT.CAT_DATE,
                 {"smoothing": {"method": "one_side_moving_avg", "show": True}},
                 _SingleSideMovingAvg,
             ),
-            ({"smoothing": {"method": "another_method", "show": True}}, _NullSmoother),
             (
+                DT.CAT_DATE,
+                {"smoothing": {"method": "another_method", "show": True}},
+                _NullSmoother,
+            ),
+            (
+                DT.CAT_DATE,
                 {"smoothing": {"method": "one_side_moving_avg", "show": False}},
                 _NullSmoother,
             ),
-            ({"smoothing": {"method": "another_method", "show": False}}, _NullSmoother),
+            (
+                DT.CAT_DATE,
+                {"smoothing": {"method": "another_method", "show": False}},
+                _NullSmoother,
+            ),
+            (
+                DT.CAT,
+                {"smoothing": {"method": "one_side_moving_avg", "show": True}},
+                _NullSmoother,
+            ),
+            (
+                DT.CA_CAT,
+                {"smoothing": {"method": "one_side_moving_avg", "show": True}},
+                _NullSmoother,
+            ),
         ]
     )
     def factory_fixture(self, request):
-        transforms_dict, SmoothingMethodCls = request.param
+        dimension_type, transforms_dict, SmoothingMethodCls = request.param
         SmoothingMethodCls_ = class_mock(
             request, "cr.cube.dimension.%s" % SmoothingMethodCls.__name__
         )
         smoothing_method_ = instance_mock(request, SmoothingMethodCls)
-        return transforms_dict, SmoothingMethodCls_, smoothing_method_
+        return dimension_type, transforms_dict, SmoothingMethodCls_, smoothing_method_
 
 
 class DescribeSingleSideMovingAvg(object):

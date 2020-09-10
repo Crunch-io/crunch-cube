@@ -203,6 +203,18 @@ class _RawDimension(object):
         return "subreferences" in self._dimension_dict["references"]
 
     @lazyproperty
+    def _is_cat_date(self):
+        """True if a categorical dimension_dict contains date key in all the categories.
+
+        Returns True if date is present in all the categories of the dimension_dict
+        for all of non-missing data.
+        """
+        return True in {
+            category.get("date") and category.get("missing") is False
+            for category in self._dimension_dict.get("type").get("categories", [])
+        }
+
+    @lazyproperty
     def _next_raw_dimension(self):
         """_RawDimension for next *dimension_dict* in sequence or None for last.
 
@@ -240,6 +252,9 @@ class _RawDimension(object):
         return value is only meaningful if the dimension is known to be one
         of the categorical types (has base-type 'categorical').
         """
+        # ---categorical dimensions with date is CAT_DATE
+        if self._is_cat_date:
+            return DT.CAT_DATE
         # ---an array categorical is either CA_CAT or MR_CAT---
         if self._is_array_cat:
             return DT.MR_CAT if self._has_selected_category else DT.CA_CAT
@@ -388,7 +403,7 @@ class Dimension(object):
 
     @lazyproperty
     def smoother(self):
-        return Smoother.factory(self._dimension_transforms_dict)
+        return Smoother.factory(self._dimension_transforms_dict, self._dimension_type)
 
     @lazyproperty
     def sort(self):
@@ -986,19 +1001,23 @@ class _Subtotal(object):
 class Smoother(object):
     """Base class for smoothing objects"""
 
-    def __init__(self, dimension_transforms_dict):
+    def __init__(self, dimension_transforms_dict, dimension_type):
         self._dimension_transforms_dict = dimension_transforms_dict
+        self._dimension_type = dimension_type
 
     @classmethod
-    def factory(cls, dimension_transforms_dict):
+    def factory(cls, dimension_transforms_dict, dimension_type):
         """Returns appropriate Smoothing Method according to transforms_dict"""
-        if not cls._show_smoothing(dimension_transforms_dict):
-            return _NullSmoother(dimension_transforms_dict)
+        if (
+            not cls._show_smoothing(dimension_transforms_dict)
+            or dimension_type != DT.CAT_DATE
+        ):
+            return _NullSmoother(dimension_transforms_dict, dimension_type)
         method = dimension_transforms_dict.get("smoothing").get("method", None)
         SmoothingMethodCls = {"one_side_moving_avg": _SingleSideMovingAvg}.get(
             method, _NullSmoother
         )
-        return SmoothingMethodCls(dimension_transforms_dict)
+        return SmoothingMethodCls(dimension_transforms_dict, dimension_type)
 
     @classmethod
     def _has_smoothing(cls, dimension_transforms_dict):
