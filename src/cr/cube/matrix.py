@@ -1799,22 +1799,8 @@ class _BaseMatrixInsertedVector(object):
 
     @lazyproperty
     def proportions(self):
-        """1D np.float/int64 ndarray of proportions subtotal for each vector cell.
-
-        Considering that the proportions could be smoothed, the counts must be computed
-        multiplying the proportions with the margins for each addend vector.
-
-        NB. We can't use the ``self.counts`` because they are not smoothed
-        """
-        counts = np.sum(
-            np.nan_to_num(
-                np.array([v.proportions * v.margin for v in self._addend_vectors])
-            ),
-            axis=0,
-        )
-        # --- addend_vectors are _OrderedVector objects because ordering happens before
-        # --- insertion of subtotals.
-        return counts / self.margin
+        """1D np.float/int64 ndarray of proportions for each vector cell."""
+        return self.counts / self.margin
 
     @lazyproperty
     def table_margin(self):
