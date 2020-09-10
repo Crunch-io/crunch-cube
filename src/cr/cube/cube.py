@@ -362,10 +362,6 @@ class Cube(object):
         return self._measures.population_fraction
 
     @lazyproperty
-    def smoother(self):
-        return SmoothedMeasure.factory(self._transforms_dict)
-
-    @lazyproperty
     def title(self):
         """str alternate-name given to cube-result.
 

@@ -1575,6 +1575,15 @@ class _MrXMrMatrix(_CatXCatMatrix):
         """2D np.float64 ndarray of column proportions for each matrix cell."""
         return (self._counts[:, 0, :, 0] / self._rows_margin[:, :, 0]).T
 
+    @lazyproperty
+    def _mr_shadow_proportions(self):
+        """Cube containing item-wise selections, overlap, and nonoverlap
+        with all other items in a multiple response dimension, for each
+        element of any prepended dimensions:
+        A 1d interface to a 4d hypercube of underlying counts.
+        """
+        return self._counts[:, 0, :, 0] / self._overlaps_margin
+
     @property
     def _row_generator(self):
         """Iterable providing construction parameters for each column vector in turn.
