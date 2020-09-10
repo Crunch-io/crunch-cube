@@ -1350,7 +1350,7 @@ class DescribeSingleSideMovingAvg(object):
     def it_knows_if_window_param_is_valid(self, _window, valid_window_fixture):
         window, total_period, expected_value = valid_window_fixture
         _window.return_value = window
-        smoothed_measure = _SingleSideMovingAvg(None)
+        smoothed_measure = _SingleSideMovingAvg(None, None)
 
         valid_window = smoothed_measure._valid_window(total_period)
 
@@ -1359,7 +1359,7 @@ class DescribeSingleSideMovingAvg(object):
     def it_applies_the_smoother(self, _window, smoother_fixture):
         values, window, expected_value = smoother_fixture
         _window.return_value = window
-        smoothing_alg = _SingleSideMovingAvg(None)
+        smoothing_alg = _SingleSideMovingAvg(None, None)
 
         smoothed_values = smoothing_alg._smoother(values)
 
