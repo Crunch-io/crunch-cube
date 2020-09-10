@@ -708,6 +708,11 @@ class _CatXCatMatrix(_BaseBaseMatrix):
 
     @lazyproperty
     def _col_proportions(self):
+        """2D np.float64 ndarray of column proportions for each matrix cell.
+
+        Returns smoothed or unsmoothed values according to the smoother expressed in the
+        dimension transforms.
+        """
         return self.smoother.smoothed_values(self._counts / self._columns_margin.T).T
 
     @property
@@ -731,6 +736,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
 
     @lazyproperty
     def _row_proportions(self):
+        """2D np.float64 ndarray of row proportions for each matrix cell."""
         return (self._counts.T / self._rows_margin.T).T
 
     @lazyproperty
@@ -996,6 +1002,11 @@ class _MrXCatMatrix(_CatXCatMatrix):
 
     @lazyproperty
     def _col_proportions(self):
+        """2D np.float64 ndarray of column proportions for each matrix cell.
+
+        Returns smoothed or unsmoothed values according to the smoother expressed in the
+        dimension transforms.
+        """
         return self.smoother.smoothed_values(
             (self._counts[:, 0, :] / self._rows_margin)
         ).T
@@ -1022,6 +1033,7 @@ class _MrXCatMatrix(_CatXCatMatrix):
 
     @lazyproperty
     def _row_proportions(self):
+        """2D np.float64 ndarray of row proportions for each matrix cell."""
         return (self._counts[:, 0, :].T / np.sum(self._counts[:, 0, :], axis=1)).T
 
     @lazyproperty
@@ -1239,6 +1251,7 @@ class _CatXMrMatrix(_CatXCatMatrix):
 
     @lazyproperty
     def _col_proportions(self):
+        """2D np.float64 ndarray of column proportions for each matrix cell."""
         return (self._counts / self._columns_margin)[:, :, 0].T
 
     @property
@@ -1262,6 +1275,7 @@ class _CatXMrMatrix(_CatXCatMatrix):
 
     @lazyproperty
     def _row_proportions(self):
+        """2D np.float64 ndarray of row proportions for each matrix cell."""
         return self._counts[:, :, 0] / np.sum(self._counts, axis=2)
 
     @lazyproperty
@@ -1558,16 +1572,8 @@ class _MrXMrMatrix(_CatXCatMatrix):
 
     @lazyproperty
     def _col_proportions(self):
+        """2D np.float64 ndarray of column proportions for each matrix cell."""
         return (self._counts[:, 0, :, 0] / self._rows_margin[:, :, 0]).T
-
-    @lazyproperty
-    def _mr_shadow_proportions(self):
-        """Cube containing item-wise selections, overlap, and nonoverlap
-        with all other items in a multiple response dimension, for each
-        element of any prepended dimensions:
-        A 1d interface to a 4d hypercube of underlying counts.
-        """
-        return self._counts[:, 0, :, 0] / self._overlaps_margin
 
     @property
     def _row_generator(self):
@@ -1591,6 +1597,7 @@ class _MrXMrMatrix(_CatXCatMatrix):
 
     @lazyproperty
     def _row_proportions(self):
+        """2D np.float64 ndarray of row proportions for each matrix cell."""
         return self._counts[:, 0, :, 0] / np.sum(self._counts, axis=3)[:, 0, :]
 
     @lazyproperty
@@ -1783,6 +1790,13 @@ class _BaseMatrixInsertedVector(object):
 
     @lazyproperty
     def proportions(self):
+        """1D np.float/int64 ndarray of proportions subtotal for each vector cell.
+
+        Considering that the proportions could be smoothed, the counts must be computed
+        multiplying the proportions with the margins for each addend vector.
+
+        NB. We can't use the ``self.counts`` because they are not smoothed
+        """
         counts = np.sum(
             np.nan_to_num(
                 np.array([v.proportions * v.margin for v in self._addend_vectors])
@@ -2025,10 +2039,6 @@ class _BaseTransformationVector(object):
         return self._base_vector.opposing_margin
 
     @lazyproperty
-    def proportions(self):
-        return self._base_vector.proportions
-
-    @lazyproperty
     def table_base(self):
         """np.int64 unweighted N for overall table.
 
@@ -2121,11 +2131,11 @@ class _AssembledVector(_BaseTransformationVector):
 
     @lazyproperty
     def proportions(self):
-        """1D np.float/int64 ndarray of weighted count for each vector cell."""
+        """1D np.float/int64 ndarray of proportions for each vector cell."""
         base_vector_proportions = self._base_vector.proportions
 
         def fsubtot(inserted_vector):
-            """-> np.float/int64 count for `inserted_vector`.
+            """-> np.float/int64 proportions for `inserted_vector`.
 
             Passed to and called by ._apply_interleaved() to compute inserted value
             which it places in the right vector position.

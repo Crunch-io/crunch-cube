@@ -16,9 +16,9 @@ from ..fixtures import CR
 
 class DescribeSliceSmoothing(object):
     def it_provides_smoothed_col_percent_for_cat_x_cat_date(
-        self, cat_x_cat_date_counts_fixture
+        self, cat_x_cat_date_col_percent_fixture
     ):
-        window, expected_value = cat_x_cat_date_counts_fixture
+        window, expected_value = cat_x_cat_date_col_percent_fixture
         transforms = {
             "columns_dimension": {
                 "smoothing": {
@@ -162,9 +162,9 @@ class DescribeSliceSmoothing(object):
             assert cube.partitions[i].counts.shape == cube2.partitions[i].counts.shape
 
     def it_provides_smoothed_col_percent_for_ca_x_ca_subvar_x_cat_date(
-        self, ca_x_ca_subvar_x_cat_date_counts_fixture
+        self, ca_x_ca_subvar_x_cat_date_col_percent_fixture
     ):
-        window, expected_value = ca_x_ca_subvar_x_cat_date_counts_fixture
+        window, expected_value = ca_x_ca_subvar_x_cat_date_col_percent_fixture
         transforms = {
             "columns_dimension": {
                 "smoothing": {
@@ -193,9 +193,9 @@ class DescribeSliceSmoothing(object):
         )
 
     def it_provides_smoothed_col_percent_for_mr_x_cat_date(
-        self, mr_x_cat_date_counts_fixture
+        self, mr_x_cat_date_col_percent_fixture
     ):
-        window, expected_value = mr_x_cat_date_counts_fixture
+        window, expected_value = mr_x_cat_date_col_percent_fixture
         transforms = {
             "columns_dimension": {
                 "smoothing": {
@@ -258,9 +258,9 @@ class DescribeSliceSmoothing(object):
         np.testing.assert_array_almost_equal(slice_.counts, slice2_.counts)
 
     def it_provides_smoothed_col_percent_for_cat_hs_x_cat_date(
-        self, cat_x_cat_date_hs_fixture
+        self, cat_hs_x_cat_date_col_percent_fixture
     ):
-        window, expected_value = cat_x_cat_date_hs_fixture
+        window, expected_value = cat_hs_x_cat_date_col_percent_fixture
         transforms = {
             "columns_dimension": {
                 "smoothing": {
@@ -272,7 +272,6 @@ class DescribeSliceSmoothing(object):
         }
         cube = Cube(CR.CAT_HS_X_CAT_DATE, transforms=transforms)
         slice_ = cube.partitions[0]
-
         np.testing.assert_almost_equal(slice_.column_percentages, expected_value)
 
         transforms = {
@@ -289,16 +288,17 @@ class DescribeSliceSmoothing(object):
         np.testing.assert_array_almost_equal(
             slice2_.column_percentages,
             [
-                [42.17821782, 43.98340249, 40.63492063, 43.09392265],
-                [14.45544554, 14.3153527, 18.73015873, 17.12707182],
-                [56.63366337, 58.29875519, 59.36507937, 60.22099448],
-                [6.13861386, 4.14937759, 5.3968254, 4.97237569],
-                [6.53465347, 7.05394191, 6.34920635, 6.07734807],
-                [4.95049505, 3.31950207, 2.22222222, 1.65745856],
-                [4.55445545, 6.01659751, 6.98412698, 7.18232044],
-                [9.5049505, 9.33609959, 9.20634921, 8.83977901],
-                [17.82178218, 19.29460581, 18.41269841, 17.12707182],
-                [3.36633663, 1.86721992, 1.26984127, 2.76243094],
+                [73.28094303, 68.83910387, 78.5488959, 81.96721311],
+                [72.69155206, 66.19144603, 74.44794953, 80.32786885],
+                [12.77013752, 13.64562118, 7.57097792, 8.19672131],
+                [12.37721022, 11.20162933, 7.2555205, 6.01092896],
+                [25.14734774, 24.84725051, 14.82649842, 14.20765027],
+                [0.58939096, 2.64765784, 4.10094637, 1.63934426],
+                [0.58939096, 0.61099796, 0.63091483, 0.0],
+                [0.78585462, 2.44399185, 4.7318612, 1.63934426],
+                [0.19646365, 2.64765784, 1.26182965, 1.63934426],
+                [0.0, 0.61099796, 0.0, 0.54644809],
+                [0.19646365, 3.2586558, 1.26182965, 2.18579235],
             ],
         )
         assert slice_.shape == slice2_.shape
@@ -310,66 +310,70 @@ class DescribeSliceSmoothing(object):
             (
                 1,
                 [
-                    [42.17821782, 43.98340249, 40.63492063, 43.09392265],
-                    [14.45544554, 14.3153527, 18.73015873, 17.12707182],
-                    [56.63366337, 58.29875519, 59.36507937, 60.22099448],
-                    [6.13861386, 4.14937759, 5.3968254, 4.97237569],
-                    [6.53465347, 7.05394191, 6.34920635, 6.07734807],
-                    [4.95049505, 3.31950207, 2.22222222, 1.65745856],
-                    [4.55445545, 6.01659751, 6.98412698, 7.18232044],
-                    [9.5049505, 9.33609959, 9.20634921, 8.83977901],
-                    [17.82178218, 19.29460581, 18.41269841, 17.12707182],
-                    [3.36633663, 1.86721992, 1.26984127, 2.76243094],
+                    [73.28094303, 68.83910387, 78.5488959, 81.96721311],
+                    [72.69155206, 66.19144603, 74.44794953, 80.32786885],
+                    [12.77013752, 13.64562118, 7.57097792, 8.19672131],
+                    [12.37721022, 11.20162933, 7.2555205, 6.01092896],
+                    [25.14734774, 24.84725051, 14.82649842, 14.20765027],
+                    [0.58939096, 2.64765784, 4.10094637, 1.63934426],
+                    [0.58939096, 0.61099796, 0.63091483, 0.0],
+                    [0.78585462, 2.44399185, 4.7318612, 1.63934426],
+                    [0.19646365, 2.64765784, 1.26182965, 1.63934426],
+                    [0.0, 0.61099796, 0.0, 0.54644809],
+                    [0.19646365, 3.2586558, 1.26182965, 2.18579235],
                 ],
             ),
             (
                 2,
                 [
-                    [np.nan, 43.08081016, 42.30916156, 41.86442164],
-                    [np.nan, 14.38539912, 16.52275571, 17.92861528],
-                    [np.nan, 57.46620928, 58.83191728, 59.79303692],
-                    [np.nan, 5.14399573, 4.7731015, 5.18460054],
-                    [np.nan, 6.79429769, 6.70157413, 6.21327721],
-                    [np.nan, 4.13499856, 2.77086215, 1.93984039],
-                    [np.nan, 5.28552648, 6.50036225, 7.08322371],
-                    [np.nan, 9.42052504, 9.2712244, 9.02306411],
-                    [np.nan, 18.55819399, 18.85365211, 17.76988512],
-                    [np.nan, 2.61677828, 1.56853059, 2.0161361],
+                    [np.nan, 71.06002345, 73.69399988, 80.25805451],
+                    [np.nan, 69.44149905, 70.31969778, 77.38790919],
+                    [np.nan, 13.20787935, 10.60829955, 7.88384961],
+                    [np.nan, 11.78941977, 9.22857492, 6.63322473],
+                    [np.nan, 24.99729912, 19.83687447, 14.51707435],
+                    [np.nan, 1.6185244, 3.37430211, 2.87014532],
+                    [np.nan, 0.60019446, 0.62095639, 0.31545741],
+                    [np.nan, 1.61492324, 3.58792653, 3.18560273],
+                    [np.nan, 1.42206075, 1.95474375, 1.45058696],
+                    [np.nan, 0.30549898, 0.30549898, 0.27322404],
+                    [np.nan, 1.72755973, 2.26024273, 1.723811],
                 ],
             ),
             (
                 3,
                 [
-                    [np.nan, np.nan, 42.26551365, 42.57074859],
-                    [np.nan, np.nan, 15.83365232, 16.72419442],
-                    [np.nan, np.nan, 58.09916597, 59.29494301],
-                    [np.nan, np.nan, 5.22827228, 4.83952623],
-                    [np.nan, np.nan, 6.64593391, 6.49349877],
-                    [np.nan, np.nan, 3.49740645, 2.39972762],
-                    [np.nan, np.nan, 5.85172665, 6.72768165],
-                    [np.nan, np.nan, 9.3491331, 9.12740927],
-                    [np.nan, np.nan, 18.50969547, 18.27812535],
-                    [np.nan, np.nan, 2.16779927, 1.96649738],
+                    [np.nan, np.nan, 73.55631426, 76.45173763],
+                    [np.nan, np.nan, 71.11031587, 73.6557548],
+                    [np.nan, np.nan, 11.32891221, 9.80444014],
+                    [np.nan, np.nan, 10.27812002, 8.15602626],
+                    [np.nan, np.nan, 21.60703222, 17.9604664],
+                    [np.nan, np.nan, 2.44599839, 2.79598283],
+                    [np.nan, np.nan, 0.61043458, 0.41397093],
+                    [np.nan, np.nan, 2.65390256, 2.9383991],
+                    [np.nan, np.nan, 1.36865038, 1.84961059],
+                    [np.nan, np.nan, 0.20366599, 0.38581535],
+                    [np.nan, np.nan, 1.57231637, 2.23542594],
                 ],
             ),
             (
                 4,
                 [
-                    [np.nan, np.nan, np.nan, 42.4726159],
-                    [np.nan, np.nan, np.nan, 16.1570072],
-                    [np.nan, np.nan, np.nan, 58.6296231],
-                    [np.nan, np.nan, np.nan, 5.16429814],
-                    [np.nan, np.nan, np.nan, 6.50378745],
-                    [np.nan, np.nan, np.nan, 3.03741948],
-                    [np.nan, np.nan, np.nan, 6.1843751],
-                    [np.nan, np.nan, np.nan, 9.22179457],
-                    [np.nan, np.nan, np.nan, 18.16403956],
-                    [np.nan, np.nan, np.nan, 2.31645719],
+                    [np.nan, np.nan, np.nan, 75.65903898],
+                    [np.nan, np.nan, np.nan, 73.41470412],
+                    [np.nan, np.nan, np.nan, 10.54586448],
+                    [np.nan, np.nan, np.nan, 9.21132225],
+                    [np.nan, np.nan, np.nan, 19.75718674],
+                    [np.nan, np.nan, np.nan, 2.24433486],
+                    [np.nan, np.nan, np.nan, 0.45782594],
+                    [np.nan, np.nan, np.nan, 2.40026298],
+                    [np.nan, np.nan, np.nan, 1.43632385],
+                    [np.nan, np.nan, np.nan, 0.28936151],
+                    [np.nan, np.nan, np.nan, 1.72568537],
                 ],
             ),
         ]
     )
-    def cat_x_cat_date_hs_fixture(self, request):
+    def cat_hs_x_cat_date_col_percent_fixture(self, request):
         window, expected_value = request.param
         return window, expected_value
 
@@ -417,7 +421,7 @@ class DescribeSliceSmoothing(object):
             ),
         ]
     )
-    def cat_x_cat_date_counts_fixture(self, request):
+    def cat_x_cat_date_col_percent_fixture(self, request):
         window, expected_value = request.param
         return window, expected_value
 
@@ -509,7 +513,7 @@ class DescribeSliceSmoothing(object):
             ),
         ]
     )
-    def mr_x_cat_date_counts_fixture(self, request):
+    def mr_x_cat_date_col_percent_fixture(self, request):
         window, expected_value = request.param
         return window, expected_value
 
@@ -561,6 +565,6 @@ class DescribeSliceSmoothing(object):
             ),
         ]
     )
-    def ca_x_ca_subvar_x_cat_date_counts_fixture(self, request):
+    def ca_x_ca_subvar_x_cat_date_col_percent_fixture(self, request):
         window, expected_value = request.param
         return window, expected_value
