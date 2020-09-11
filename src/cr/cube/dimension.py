@@ -1090,12 +1090,8 @@ class _SingleSideMovingAvg(Smoother):
         underlying trend.
         """
         w = self._window
-        return (
-            np.array(tuple(np.convolve(values, np.ones(w), mode="valid") / w))
-            if values.ndim == 1
-            else np.array(
-                [tuple(np.convolve(v, np.ones(w), mode="valid") / w) for v in values]
-            )
+        return np.array(
+            [tuple(np.convolve(v, np.ones(w), mode="valid") / w) for v in values]
         )
 
     def _valid_window(self, total_period):

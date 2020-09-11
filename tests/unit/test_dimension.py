@@ -1375,10 +1375,6 @@ class DescribeSingleSideMovingAvg(object):
 
     @pytest.fixture(
         params=[
-            (np.array([3, 4, 5, 6]), 1, [3, 4, 5, 6]),
-            (np.array([3, 4, 5, 6]), 2, [3.5, 4.5, 5.5]),
-            (np.array([3, 4, 5, 6]), 3, [4.0, 5.0]),
-            (np.array([3, 4, 5, 6]), 4, [4.5]),
             (np.array([[3, 4, 5, 6], [7, 8, 9, 1]]), 1, [[3, 4, 5, 6], [7, 8, 9, 1]]),
             (
                 np.array([[3, 4, 5, 6], [7, 8, 9, 1]]),
