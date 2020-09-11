@@ -112,7 +112,7 @@ The detailed description can be found
 
 ## Changes
 
-### 1.12.0a
+### 1.12.1a
 - Smoothing POC
 
 ### 1.11.37
