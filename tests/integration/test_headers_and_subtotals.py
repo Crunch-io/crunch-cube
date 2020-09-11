@@ -1,7 +1,6 @@
 # encoding: utf-8
 
 """Integrations tests for headings and subtotals behaviors."""
-import pytest
 
 import numpy as np
 
