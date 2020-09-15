@@ -288,7 +288,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def counts(self):
-        """ -> np.ndarray, 2D cube counts."""
+        """2D np.float64 ndarray of weighted cube counts."""
         return np.array([row.counts for row in self._matrix.rows])
 
     @lazyproperty
@@ -893,7 +893,7 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def counts(self):
-        """ -> tuple, 1D cube counts."""
+        """ tuple, 1D cube counts."""
         return tuple(row.count for row in self._stripe.rows)
 
     @lazyproperty

@@ -203,18 +203,6 @@ class _RawDimension(object):
         return "subreferences" in self._dimension_dict["references"]
 
     @lazyproperty
-    def _is_cat_date(self):
-        """True if a categorical dimension_dict contains date key in all the categories.
-
-        Returns True if date is present in all the categories of the dimension_dict
-        for all of non-missing data.
-        """
-        return True in {
-            category.get("date") and category.get("missing") is False
-            for category in self._dimension_dict.get("type").get("categories", [])
-        }
-
-    @lazyproperty
     def _next_raw_dimension(self):
         """_RawDimension for next *dimension_dict* in sequence or None for last.
 
@@ -252,9 +240,6 @@ class _RawDimension(object):
         return value is only meaningful if the dimension is known to be one
         of the categorical types (has base-type 'categorical').
         """
-        # ---categorical dimensions with date is CAT_DATE
-        if self._is_cat_date:
-            return DT.CAT_DATE
         # ---an array categorical is either CA_CAT or MR_CAT---
         if self._is_array_cat:
             return DT.MR_CAT if self._has_selected_category else DT.CA_CAT
@@ -403,7 +388,7 @@ class Dimension(object):
 
     @lazyproperty
     def smoother(self):
-        return Smoother.factory(self._dimension_transforms_dict, self._dimension_type)
+        return _BaseSmoother.factory(self._dimension_transforms_dict, self._is_cat_date)
 
     @lazyproperty
     def sort(self):
@@ -457,6 +442,19 @@ class Dimension(object):
             self._dimension_transforms_arg
             if self._dimension_transforms_arg is not None
             else {}
+        )
+
+    @lazyproperty
+    def _is_cat_date(self):
+        """True for a categorical dimension having date defined on all valid categories.
+
+        Only meaningful when the dimension is known to be categorical
+        (has base-type `categorical`).
+        """
+        return any(
+            category.get("date")
+            for category in self._dimension_dict["type"].get("categories", [])
+            if not category.get("missing", False)
         )
 
 
@@ -998,45 +996,41 @@ class _Subtotal(object):
         return self._prune
 
 
-class Smoother(object):
+class _BaseSmoother(object):
     """Base class for smoothing objects"""
 
-    def __init__(self, dimension_transforms_dict, dimension_type):
+    def __init__(self, dimension_transforms_dict, is_cat_date):
         self._dimension_transforms_dict = dimension_transforms_dict
-        self._dimension_type = dimension_type
+        self._is_cat_date = is_cat_date
 
     @classmethod
-    def factory(cls, dimension_transforms_dict, dimension_type):
-        """Returns appropriate Smoothing Method according to transforms_dict"""
-        if (
-            not cls._show_smoothing(dimension_transforms_dict)
-            or dimension_type != DT.CAT_DATE
-        ):
-            return _NullSmoother(dimension_transforms_dict, dimension_type)
-        method = dimension_transforms_dict.get("smoothing").get("method", None)
-        SmoothingMethodCls = {"one_side_moving_avg": _SingleSideMovingAvg}.get(
-            method, _NullSmoother
-        )
-        return SmoothingMethodCls(dimension_transforms_dict, dimension_type)
+    def factory(cls, dimension_transforms_dict, is_cat_date):
+        """Returns appropriate Smoother object according to transforms_dict"""
+        # --- smoothing is only applied to CAT_DATE dimensions ---
+        if not is_cat_date:
+            return _NullSmoother()
 
-    @classmethod
-    def _has_smoothing(cls, dimension_transforms_dict):
-        """ -> bool, True if smoothing method is present in the transform dict.
-        If smoothing is avaliable the cube counts will be smoothed according to the
-        selected method.
-        """
-        if dimension_transforms_dict.get("smoothing"):
-            return True
-        return False
+        # --- smoothing is only applied when requested ---
+        if not cls._show_smoothing(dimension_transforms_dict):
+            return _NullSmoother()
+
+        # --- otherwise smoothing is single-side moving-average ---
+        return _SingleSideMovingAvgSmoother(dimension_transforms_dict)
 
     @classmethod
     def _show_smoothing(cls, dimension_transforms_dict):
-        if cls._has_smoothing(dimension_transforms_dict):
-            return dimension_transforms_dict.get("smoothing").get("show", False)
-        return False
+        """Return True if a smoothing transform is active for this dimension."""
+        smoothing = dimension_transforms_dict.get("smoothing")
+        # --- default is no smoothing when smoothing transform is not present ---
+        if not smoothing:
+            return False
+        # --- no smoothing when the smoothing transform is inactive ---
+        if not smoothing.get("show", True):
+            return False
+        return True
 
 
-class _NullSmoother(Smoother):
+class _NullSmoother:
     """Avoid appling smoothing"""
 
     def smoothed_values(self, values):
@@ -1044,8 +1038,11 @@ class _NullSmoother(Smoother):
         return values
 
 
-class _SingleSideMovingAvg(Smoother):
+class _SingleSideMovingAvgSmoother(object):
     """Apply smoothing using one side moving average algorithm"""
+
+    def __init__(self, dimension_transforms):
+        self._dimension_transforms = dimension_transforms
 
     def smoothed_values(self, values):
         """ -> np.ndarray, provide rolling window calculations on given values.
@@ -1110,4 +1107,4 @@ class _SingleSideMovingAvg(Smoother):
         than the number of elements of each column.
         """
 
-        return self._dimension_transforms_dict.get("smoothing").get("window", 3)
+        return self._dimension_transforms.get("smoothing").get("window", 3)
