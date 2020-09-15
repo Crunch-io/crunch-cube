@@ -418,6 +418,23 @@ class _BaseBaseMatrix(object):
         """Sequence of `cr.cube.dimension._Element` object for each matrix column."""
         return self.columns_dimension.valid_elements
 
+    @property
+    def _column_generator(self):
+        """Iterable providing construction parameters for each column vector in turn.
+        Used by `.columns` property in each subclass. Cannot be a lazyproperty because
+        an iterator is exhausted on each use.
+        """
+        # --- note zip() returns an iterator in Python 3 ---
+        return zip(
+            self._counts.T,
+            self._col_proportions,
+            self._unweighted_counts.T,
+            self._column_elements,
+            self._zscores.T,
+            self._table_std_dev.T,
+            self._table_std_err.T,
+        )
+
     @lazyproperty
     def _column_proportions(self):
         """2D ndarray of np.float64 between 0.0 and 1.0.
@@ -660,25 +677,6 @@ class _CatXCatMatrix(_BaseBaseMatrix):
         ]
         return uncond_row_margin[:, None] / np.sum(uncond_row_margin)
 
-    @property
-    def _column_generator(self):
-        """Iterable providing construction parameters for each column vector in turn.
-
-        Used by `.columns` property in each subclass. Cannot be a lazyproperty because
-        an iterator is exhausted on each use.
-        """
-        # --- note zip() returns an iterator in Python 3 ---
-
-        return zip(
-            self._counts.T,
-            self._col_proportions,
-            self._unweighted_counts.T,
-            self._column_elements,
-            self._zscores.T,
-            self._table_std_dev.T,
-            self._table_std_err.T,
-        )
-
     @lazyproperty
     def _column_index(self):
         """2D np.float64/np.nan ndarray of column-index value for each matrix cell.
@@ -861,24 +859,6 @@ class _MrXCatMatrix(_CatXCatMatrix):
     Its rows are `_MrOpposingCatVector` objects. Its columns are `_OpposingMrVector`
     objects.
     """
-
-    @property
-    def _column_generator(self):
-        """Iterable providing construction parameters for each column vector in turn.
-
-        Used by `.columns` property in each subclass. Cannot be a lazyproperty because
-        an iterator is exhausted on each use.
-        """
-        # --- note zip() returns an iterator in Python 3 ---
-        return zip(
-            self._counts.T,
-            self._col_proportions,
-            self._unweighted_counts.T,
-            self._column_elements,
-            self._zscores.T,
-            self._table_std_dev.T,
-            self._table_std_err.T,
-        )
 
     @lazyproperty
     def columns(self):
