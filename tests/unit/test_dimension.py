@@ -487,6 +487,14 @@ class DescribeDimension(object):
 
         assert numeric_values == (1, 2.2, np.nan)
 
+    def it_knows_its_is_cat_date_prop(self, is_cat_date_fixture):
+        dimension_dict, expected_value = is_cat_date_fixture
+        dimension = Dimension(dimension_dict, None)
+
+        is_cat_date = dimension._is_cat_date
+
+        assert is_cat_date is expected_value
+
     def it_provides_access_to_its_subtotals_to_help(
         self,
         subtotals_fixture,
@@ -539,6 +547,62 @@ class DescribeDimension(object):
         ]
     )
     def description_fixture(self, request):
+        dimension_dict, expected_value = request.param
+        return dimension_dict, expected_value
+
+    @pytest.fixture(
+        params=[
+            ({"type": {"categories": []}}, False),
+            ({"type": {"categories": [{"id": 1}, {"id": 2}]}}, False),
+            (
+                {
+                    "type": {
+                        "categories": [
+                            {"id": 1, "date": "2019-10-10", "missing": False},
+                            {"id": 2, "missing": False},
+                        ]
+                    }
+                },
+                False,
+            ),
+            (
+                {
+                    "type": {
+                        "categories": [
+                            {"id": 1, "date": "2019-10-10", "missing": False},
+                            {"id": 2, "date": "2019-11-10", "missing": False},
+                        ]
+                    }
+                },
+                True,
+            ),
+            (
+                {
+                    "type": {
+                        "categories": [
+                            {"id": 1, "date": "2019-10-10", "missing": False},
+                            {"id": 2, "date": "2019-11-10", "missing": False},
+                            {"id": 3, "missing": True},
+                        ]
+                    }
+                },
+                True,
+            ),
+            (
+                {
+                    "type": {
+                        "categories": [
+                            {"id": 1, "date": "2019-10-10", "missing": False},
+                            {"id": 2, "date": "2019-11-10", "missing": False},
+                            {"id": 3},
+                        ]
+                    }
+                },
+                False,
+            ),
+        ]
+    )
+    def is_cat_date_fixture(self, request):
         dimension_dict, expected_value = request.param
         return dimension_dict, expected_value
 

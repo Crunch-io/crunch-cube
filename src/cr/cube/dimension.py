@@ -388,6 +388,7 @@ class Dimension(object):
 
     @lazyproperty
     def smoother(self):
+        """Smoother object according to the tranforms dict and `is_cat_date`"""
         return _BaseSmoother.factory(self._dimension_transforms_dict, self._is_cat_date)
 
     @lazyproperty
@@ -451,9 +452,12 @@ class Dimension(object):
         Only meaningful when the dimension is known to be categorical
         (has base-type `categorical`).
         """
-        return any(
+        dimension_type_categories = self._dimension_dict["type"].get("categories", [])
+        if not dimension_type_categories:
+            return False
+        return all(
             category.get("date")
-            for category in self._dimension_dict["type"].get("categories", [])
+            for category in dimension_type_categories
             if not category.get("missing", False)
         )
 
