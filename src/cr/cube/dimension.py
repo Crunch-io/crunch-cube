@@ -1043,7 +1043,7 @@ class _NullSmoother:
 
 
 class _SingleSideMovingAvgSmoother(object):
-    """Apply smoothing using one side moving average algorithm"""
+    """Apply smoothing using single side moving average algorithm"""
 
     def __init__(self, dimension_transforms):
         self._dimension_transforms = dimension_transforms
