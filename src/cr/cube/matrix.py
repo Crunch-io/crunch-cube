@@ -378,6 +378,7 @@ class _BaseBaseMatrix(object):
 
     @lazyproperty
     def smoother(self):
+        """Smoother object according to the dimension transforms dict"""
         return self._dimensions[-1].smoother
 
     @lazyproperty

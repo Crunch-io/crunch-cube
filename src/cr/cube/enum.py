@@ -29,7 +29,6 @@ class DIMENSION_TYPE(object):
     # ---member definitions---
     BINNED_NUMERIC = _DimensionType("BINNED_NUMERIC")
     CAT = _DimensionType("CAT")
-    CAT_DATE = _DimensionType("CAT_DATE")
     CA_CAT = _DimensionType("CA_CAT")
     CA_SUBVAR = _DimensionType("CA_SUBVAR")
     DATETIME = _DimensionType("DATETIME")

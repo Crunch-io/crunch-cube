@@ -1045,7 +1045,7 @@ class _SingleSideMovingAvgSmoother(object):
         self._dimension_transforms = dimension_transforms
 
     def smoothed_values(self, values):
-        """ -> np.ndarray, provide rolling window calculations on given values.
+        """ -> np.float64 ndarray, provide rolling window calculations on given values.
 
         Given a series of numbers and a fixed subset size, the first element of the
         moving average is obtained by taking the average of the initial fixed subset of
@@ -1106,5 +1106,4 @@ class _SingleSideMovingAvgSmoother(object):
         than the the last dimension size because we cannot have a moving window grater
         than the number of elements of each column.
         """
-
         return self._dimension_transforms.get("smoothing").get("window", 3)
