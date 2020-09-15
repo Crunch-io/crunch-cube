@@ -762,3 +762,53 @@ class DescribeSliceSmoothing(object):
     def ca_x_ca_subvar_x_cat_date_col_percent_fixture(self, request):
         window, expected_value = request.param
         return window, expected_value
+
+
+class DescribeStrandMeansSmoothing(object):
+    def it_provides_smoothed_means_cat_date(self):
+        transforms = {
+            "rows_dimension": {
+                "smoothing": {
+                    "method": "one_side_moving_avg",
+                    "window": 3,
+                    "show": True,
+                }
+            }
+        }
+        cube = Cube(CR.CAT_DATE_MEAN, transforms=transforms)
+        strand_ = cube.partitions[0]
+
+        np.testing.assert_array_almost_equal(
+            strand_.means, [np.nan, np.nan, 2.65670765025029, 2.5774816240050358]
+        )
+
+        cube = Cube(CR.CAT_DATE_MEAN)
+        strand_ = cube.partitions[0]
+
+        np.testing.assert_array_almost_equal(
+            strand_.means, [2.937132, 2.600815, 2.432177, 2.699454]
+        )
+
+    def it_doesnt_smoot_means_mr_mean_filt_wgtd(self):
+        transforms = {
+            "rows_dimension": {
+                "smoothing": {
+                    "method": "one_side_moving_avg",
+                    "window": 3,
+                    "show": True,
+                }
+            }
+        }
+        cube = Cube(CR.MR_MEAN_FILT_WGTD, transforms=transforms)
+        strand_ = cube.partitions[0]
+
+        np.testing.assert_array_almost_equal(
+            strand_.means, [3.724051, 2.578429, 2.218593, 1.865335]
+        )
+
+        cube = Cube(CR.MR_MEAN_FILT_WGTD)
+        strand_ = cube.partitions[0]
+
+        np.testing.assert_array_almost_equal(
+            strand_.means, [3.724051, 2.578429, 2.218593, 1.865335]
+        )

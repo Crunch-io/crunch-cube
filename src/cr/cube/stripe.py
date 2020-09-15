@@ -212,6 +212,11 @@ class _BaseBaseStripe(object):
         )  # pragma: no cover
 
     @lazyproperty
+    def smoother(self):
+        """Smoother object according to the row transforms"""
+        return self._rows_dimension.smoother
+
+    @lazyproperty
     def table_base(self):
         """np.int64 count of actual respondents asked this question."""
         return np.sum(self._unweighted_counts)
@@ -265,7 +270,9 @@ class _MeansStripe(_BaseBaseStripe):
         return tuple(
             _MeansStripeRow(element, unweighted_count, mean)
             for element, unweighted_count, mean in zip(
-                self._row_elements, self._unweighted_counts, self._means
+                self._row_elements,
+                self._unweighted_counts,
+                self.smoother.smoothed_values(self._means),
             )
         )
 
