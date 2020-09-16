@@ -418,31 +418,41 @@ class _BaseBaseMatrix(object):
         """Sequence of `cr.cube.dimension._Element` object for each matrix column."""
         return self.columns_dimension.valid_elements
 
+    @lazyproperty
+    def _column_index(self):
+        """2D np.float64/np.nan ndarray of column-index value for each matrix cell.
+
+        Column-index answers the question "are respondents in this row-category more or
+        less likely than the overall table population to choose the answer represented
+        by this column?". For example, if the row is "Hispanic" and the column is
+        home-ownership, a value of 100 indicates hispanics are no less and no more
+        likely to own their home than the overall population. If that value was 150, it
+        would indicate hispanics are 50% more likely to own their home than the general
+        population (or the population surveyed anyway).
+
+        These values must be known by vectors but cannot be calculated there (the
+        calculation is "cross-vector") so these values must be passed down from the
+        matrix level.
+        """
+        return self._column_proportions.T / self._baseline * 100
+
     @property
     def _column_generator(self):
         """Iterable providing construction parameters for each column vector in turn.
+
         Used by `.columns` property in each subclass. Cannot be a lazyproperty because
         an iterator is exhausted on each use.
         """
         # --- note zip() returns an iterator in Python 3 ---
         return zip(
             self._counts.T,
-            self._col_proportions,
+            self._column_proportions,
             self._unweighted_counts.T,
             self._column_elements,
             self._zscores.T,
             self._table_std_dev.T,
             self._table_std_err.T,
         )
-
-    @lazyproperty
-    def _column_proportions(self):
-        """2D ndarray of np.float64 between 0.0 and 1.0.
-
-        The value represents the ratio of each cell count to the total count (margin)
-        for its column.
-        """
-        return np.array([col.proportions for col in self.columns]).T
 
     @classmethod
     def _means_matrix_factory(cls, cube, dimensions, slice_idx):
@@ -678,24 +688,6 @@ class _CatXCatMatrix(_BaseBaseMatrix):
         return uncond_row_margin[:, None] / np.sum(uncond_row_margin)
 
     @lazyproperty
-    def _column_index(self):
-        """2D np.float64/np.nan ndarray of column-index value for each matrix cell.
-
-        Column-index answers the question "are respondents in this row-category more or
-        less likely than the overall table population to choose the answer represented
-        by this column?". For example, if the row is "Hispanic" and the column is
-        home-ownership, a value of 100 indicates hispanics are no less and no more
-        likely to own their home than the overall population. If that value was 150, it
-        would indicate hispanics are 50% more likely to own their home than the general
-        population (or the population surveyed anyway).
-
-        These values must be known by vectors but cannot be calculated there (the
-        calculation is "cross-vector") so these values must be passed down from the
-        matrix level.
-        """
-        return self._column_proportions / self._baseline * 100
-
-    @lazyproperty
     def _columns_margin(self):
         """1D ndarray of np.float64 (or np.int64) weighted N for each matrix column.
 
@@ -706,7 +698,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
         return np.sum(self._counts, axis=0)
 
     @lazyproperty
-    def _col_proportions(self):
+    def _column_proportions(self):
         """2D np.float64 ndarray of column proportions for each matrix cell.
 
         Returns smoothed or unsmoothed values according to the smoother expressed in the
@@ -982,7 +974,7 @@ class _MrXCatMatrix(_CatXCatMatrix):
         return (uncond_row_margin / uncond_row_table_margin)[:, None]
 
     @lazyproperty
-    def _col_proportions(self):
+    def _column_proportions(self):
         """2D np.float64 ndarray of column proportions for each matrix cell.
 
         Returns smoothed or unsmoothed values according to the smoother expressed in the
@@ -1219,10 +1211,9 @@ class _CatXMrMatrix(_CatXCatMatrix):
         exhausted on each use.
         """
         # --- note zip() returns an iterator in Python 3 ---
-
         return zip(
             np.array([self._counts.T[0].T, self._counts.T[1].T]).T,
-            self._col_proportions,
+            self._column_proportions,
             np.array(
                 [self._unweighted_counts.T[0].T, self._unweighted_counts.T[1].T]
             ).T,
@@ -1231,7 +1222,7 @@ class _CatXMrMatrix(_CatXCatMatrix):
         )
 
     @lazyproperty
-    def _col_proportions(self):
+    def _column_proportions(self):
         """2D np.float64 ndarray of column proportions for each matrix cell."""
         return (self._counts / self._columns_margin)[:, :, 0].T
 
@@ -1545,14 +1536,14 @@ class _MrXMrMatrix(_CatXCatMatrix):
 
         return zip(
             self._counts.T[0],
-            self._col_proportions,
+            self._column_proportions,
             self._unweighted_counts.T[0],
             self._column_elements,
             self.table_margin.T,
         )
 
     @lazyproperty
-    def _col_proportions(self):
+    def _column_proportions(self):
         """2D np.float64 ndarray of column proportions for each matrix cell."""
         return (self._counts[:, 0, :, 0] / self._rows_margin[:, :, 0]).T
 
