@@ -571,7 +571,6 @@ class DescribeDimension(object):
 
         smooth = dimension.smooth
 
-        assert str(type(smooth)) == "<type 'function'>"
         assert smooth.__name__ == expected_value
 
     def it_knows_its_smoothing_window(self, smoothing_window_fixture):
