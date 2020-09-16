@@ -46,8 +46,9 @@ class _BaseDimensions(Sequence):
 class AllDimensions(_BaseDimensions):
     """Collection containing every dimension defined in cube response."""
 
-    def __init__(self, dimension_dicts):
+    def __init__(self, dimension_dicts, smoothing_transform=None):
         self._dimension_dicts = dimension_dicts
+        self._smoothing_transform = smoothing_transform
 
     @lazyproperty
     def apparent_dimensions(self):
@@ -75,7 +76,11 @@ class AllDimensions(_BaseDimensions):
         This composed tuple is the internal source for the dimension objects
         in this collection.
         """
-        return tuple(_DimensionFactory.iter_dimensions(self._dimension_dicts))
+        return tuple(
+            _DimensionFactory.iter_dimensions(
+                self._dimension_dicts, self._smoothing_transform
+            )
+        )
 
 
 class _ApparentDimensions(_BaseDimensions):
@@ -102,18 +107,23 @@ class _DimensionFactory(object):
     make dimension class choices as well.
     """
 
-    def __init__(self, dimension_dicts):
+    def __init__(self, dimension_dicts, smoothing_transform):
         self._dimension_dicts = dimension_dicts
+        self._smoothing_transform = smoothing_transform
 
     @classmethod
-    def iter_dimensions(cls, dimension_dicts):
+    def iter_dimensions(cls, dimension_dicts, smoothing_transform):
         """Generate Dimension object for each of *dimension_dicts*."""
-        return cls(dimension_dicts)._iter_dimensions()
+        return cls(dimension_dicts, smoothing_transform)._iter_dimensions()
 
     def _iter_dimensions(self):
         """Generate Dimension object for each dimension dict."""
         return (
-            Dimension(raw_dimension.dimension_dict, raw_dimension.dimension_type)
+            Dimension(
+                dimension_dict=raw_dimension.dimension_dict,
+                dimension_type=raw_dimension.dimension_type,
+                smoothing_transform=self._smoothing_transform,
+            )
             for raw_dimension in self._raw_dimensions
         )
 
@@ -259,10 +269,17 @@ class Dimension(object):
     :attr:`.CrunchCube.dimensions`.
     """
 
-    def __init__(self, dimension_dict, dimension_type, dimension_transforms=None):
+    def __init__(
+        self,
+        dimension_dict,
+        dimension_type,
+        dimension_transforms=None,
+        smoothing_transform=None,
+    ):
         self._dimension_dict = dimension_dict
         self._dimension_type = dimension_type
         self._dimension_transforms_arg = dimension_transforms
+        self._smoothing_transform = smoothing_transform
 
     @lazyproperty
     def alias(self):
@@ -291,7 +308,10 @@ class Dimension(object):
         The new dimension object is the same as this one in all other respects.
         """
         return Dimension(
-            self._dimension_dict, self._dimension_type, dimension_transforms
+            self._dimension_dict,
+            self._dimension_type,
+            dimension_transforms,
+            self._smoothing_transform,
         )
 
     @lazyproperty
@@ -471,7 +491,7 @@ class Dimension(object):
     @lazyproperty
     def _show_smoothing(self):
         """Return True if a smoothing transform is active for this dimension."""
-        smoothing = self._dimension_transforms_dict.get("smoothing")
+        smoothing = self._smoothing_transform
         # --- default is no smoothing when smoothing transform is not present ---
         if not smoothing:
             return False
@@ -488,10 +508,9 @@ class Dimension(object):
         than the the last dimension size because we cannot have a moving window grater
         than the number of elements of each column.
         """
-        smoothing = self._dimension_transforms_dict.get("smoothing")
-        if not smoothing:
+        if not self._smoothing_transform:
             return None
-        return self._dimension_transforms_dict.get("smoothing").get("window", 3)
+        return self._smoothing_transform.get("window", 3)
 
 
 class _BaseElements(Sequence):

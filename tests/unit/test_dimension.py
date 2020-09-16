@@ -98,7 +98,9 @@ class DescribeAllDimensions(object):
 
         dimensions = all_dimensions._dimensions
 
-        _DimensionFactory_.iter_dimensions.assert_called_once_with(dimension_dicts_)
+        _DimensionFactory_.iter_dimensions.assert_called_once_with(
+            dimension_dicts_, None
+        )
         assert dimensions == dimensions_
 
     # fixture components ---------------------------------------------
@@ -146,10 +148,10 @@ class Describe_DimensionFactory(object):
         )
         _iter_dimensions_.return_value = iter(dimensions_)
 
-        dimension_iter = _DimensionFactory.iter_dimensions(dimension_dicts_)
+        dimension_iter = _DimensionFactory.iter_dimensions(dimension_dicts_, None)
 
         # ---ANY is for dimension_factory object (self), which we can't see---
-        _init_.assert_called_once_with(ANY, dimension_dicts_)
+        _init_.assert_called_once_with(ANY, dimension_dicts_, None)
         _iter_dimensions_.assert_called_once_with(ANY)
         assert tuple(dimension_iter) == dimensions_
 
@@ -171,16 +173,28 @@ class Describe_DimensionFactory(object):
             instance_mock(request, Dimension, name="dim-%d" % idx) for idx in range(3)
         )
         Dimension_.side_effect = iter(dimensions_)
-        dimension_factory = _DimensionFactory(None)
+        dimension_factory = _DimensionFactory(None, None)
 
         dimension_iter = dimension_factory._iter_dimensions()
 
         # ---exercising the iterator needs to come first---
         assert tuple(dimension_iter) == dimensions_
         assert Dimension_.call_args_list == [
-            call(dimension_dicts_[0], dimension_types_[0]),
-            call(dimension_dicts_[1], dimension_types_[1]),
-            call(dimension_dicts_[2], dimension_types_[2]),
+            call(
+                dimension_dict=dimension_dicts_[0],
+                dimension_type=dimension_types_[0],
+                smoothing_transform=None,
+            ),
+            call(
+                dimension_dict=dimension_dicts_[1],
+                dimension_type=dimension_types_[1],
+                smoothing_transform=None,
+            ),
+            call(
+                dimension_dict=dimension_dicts_[2],
+                dimension_type=dimension_types_[2],
+                smoothing_transform=None,
+            ),
         ]
 
     def it_constructs_RawDimension_objects_to_help(
@@ -191,7 +205,7 @@ class Describe_DimensionFactory(object):
             for idx in range(3)
         )
         _RawDimension_.side_effect = iter(raw_dimensions_)
-        dimension_factory = _DimensionFactory(dimension_dicts_)
+        dimension_factory = _DimensionFactory(dimension_dicts_, None)
 
         raw_dimensions = dimension_factory._raw_dimensions
 
@@ -479,7 +493,7 @@ class DescribeDimension(object):
             instance_mock(request, _Element, numeric_value=numeric_value)
             for numeric_value in (1, 2.2, np.nan)
         )
-        dimension = Dimension(None, None)
+        dimension = Dimension(None, None, None)
 
         numeric_values = dimension.numeric_values
 
@@ -535,8 +549,8 @@ class DescribeDimension(object):
         assert subtotals is subtotals_
 
     def it_knows_its_show_smoothing_property(self, show_smoothing_fixture):
-        dimension_transforms, expected_value = show_smoothing_fixture
-        dimension = Dimension(None, None, dimension_transforms)
+        smoothing_transform, expected_value = show_smoothing_fixture
+        dimension = Dimension(None, None, None, smoothing_transform)
 
         show_smoothing = dimension._show_smoothing
 
@@ -553,7 +567,7 @@ class DescribeDimension(object):
         _show_smoothing_prop_.return_value = show_smoothing
         _is_cat_date_prop_.return_value = is_cat_date
         _smoothing_window_prop_.return_value = 3
-        dimension = Dimension(None, None, None)
+        dimension = Dimension(None, None)
 
         smooth = dimension.smooth
 
@@ -561,8 +575,8 @@ class DescribeDimension(object):
         assert smooth.__name__ == expected_value
 
     def it_knows_its_smoothing_window(self, smoothing_window_fixture):
-        dimension_transform, expected_value = smoothing_window_fixture
-        dimension = Dimension(None, None, dimension_transform)
+        smoothing_transform, expected_value = smoothing_window_fixture
+        dimension = Dimension(None, None, None, smoothing_transform)
 
         window = dimension._smoothing_window
 
@@ -670,17 +684,16 @@ class DescribeDimension(object):
     @pytest.fixture(
         params=[
             ({}, False),
-            ({"insertions": {}}, False),
-            ({"smoothing": {}}, False),
-            ({"smoothing": {"show": True}}, True),
-            ({"smoothing": {"show": False}}, False),
-            ({"smoothing": {"show": 42}}, True),
-            ({"smoothing": {"show": "foo"}}, True),
+            ({"window": 3}, True),
+            ({"show": True}, True),
+            ({"show": False}, False),
+            ({"show": 42}, True),
+            ({"show": "foo"}, True),
         ]
     )
     def show_smoothing_fixture(self, request):
-        transforms_dict, expected_value = request.param
-        return transforms_dict, expected_value
+        smoothing_transform, expected_value = request.param
+        return smoothing_transform, expected_value
 
     @pytest.fixture(
         params=[
@@ -696,16 +709,15 @@ class DescribeDimension(object):
 
     @pytest.fixture(
         params=[
-            ({"smoothing": {"window": 1}}, 1),
-            ({"smoothing": {"show": False}}, 3),
-            ({"smoothing": {"show": False, "window": 4}}, 4),
-            ({"smoothing": {}}, None),
+            ({"window": 1}, 1),
+            ({"show": False}, 3),
+            ({"show": False, "window": 4}, 4),
             ({}, None),
         ]
     )
     def smoothing_window_fixture(self, request):
-        dimension_transform, expected_value = request.param
-        return dimension_transform, expected_value
+        smoothing_transform, expected_value = request.param
+        return smoothing_transform, expected_value
 
     # fixture components ---------------------------------------------
 

@@ -21,12 +21,10 @@ class DescribeSliceSmoothing(object):
     ):
         window, expectation = cat_x_cat_date_col_percent_fixture
         transforms = {
-            "columns_dimension": {
-                "smoothing": {
-                    "method": "one_side_moving_avg",
-                    "window": window,
-                    "show": True,
-                }
+            "smoothing": {
+                "method": "one_side_moving_avg",
+                "window": window,
+                "show": True,
             }
         }
         cube = Cube(CR.CAT_X_CAT_DATE, transforms=transforms)
@@ -37,13 +35,7 @@ class DescribeSliceSmoothing(object):
 
     def it_provides_smoothed_col_percent_for_cat_x_cat_date_wgtd(self):
         transforms = {
-            "columns_dimension": {
-                "smoothing": {
-                    "method": "one_side_moving_avg",
-                    "window": 3,
-                    "show": True,
-                }
-            }
+            "smoothing": {"method": "one_side_moving_avg", "window": 3, "show": True}
         }
         cube = Cube(CR.CAT_X_CAT_DATE_WGTD, transforms=transforms)
         slice_ = cube.partitions[0]
@@ -60,13 +52,7 @@ class DescribeSliceSmoothing(object):
 
     def it_provides_smoothed_col_percent_for_cat_x_mr_x_cat_date(self):
         transforms = {
-            "columns_dimension": {
-                "smoothing": {
-                    "method": "one_side_moving_avg",
-                    "window": 3,
-                    "show": True,
-                }
-            }
+            "smoothing": {"method": "one_side_moving_avg", "window": 3, "show": True}
         }
         cube = Cube(CR.CAT_X_MR_X_CAT_DATE, transforms=transforms)
         slice_ = cube.partitions[0]
@@ -80,12 +66,10 @@ class DescribeSliceSmoothing(object):
     ):
         window, expectation = ca_x_ca_subvar_x_cat_date_col_percent_fixture
         transforms = {
-            "columns_dimension": {
-                "smoothing": {
-                    "method": "one_side_moving_avg",
-                    "window": window,
-                    "show": True,
-                }
+            "smoothing": {
+                "method": "one_side_moving_avg",
+                "window": window,
+                "show": True,
             }
         }
         cube = Cube(CR.CA_X_CA_SUBVAR_X_CAT_DATE, transforms=transforms)
@@ -99,12 +83,10 @@ class DescribeSliceSmoothing(object):
     ):
         window, expectation = cat_hs_x_cat_date_col_percent_fixture
         transforms = {
-            "columns_dimension": {
-                "smoothing": {
-                    "method": "one_side_moving_avg",
-                    "window": window,
-                    "show": True,
-                }
+            "smoothing": {
+                "method": "one_side_moving_avg",
+                "window": window,
+                "show": True,
             }
         }
         cube = Cube(CR.CAT_HS_X_CAT_DATE, transforms=transforms)
@@ -118,12 +100,10 @@ class DescribeSliceSmoothing(object):
     ):
         window, expectation = mr_x_cat_date_col_percent_fixture
         transforms = {
-            "columns_dimension": {
-                "smoothing": {
-                    "method": "one_side_moving_avg",
-                    "window": window,
-                    "show": True,
-                }
+            "smoothing": {
+                "method": "one_side_moving_avg",
+                "window": window,
+                "show": True,
             }
         }
         cube = Cube(CR.MR_X_CAT_DATE, transforms=transforms)
@@ -134,13 +114,7 @@ class DescribeSliceSmoothing(object):
 
     def it_doesnt_smooth_counts_when_window_is_not_valid(self):
         transforms = {
-            "columns_dimension": {
-                "smoothing": {
-                    "method": "one_side_moving_avg",
-                    "window": 30,
-                    "show": True,
-                }
-            }
+            "smoothing": {"method": "one_side_moving_avg", "window": 30, "show": True}
         }
         cube = Cube(CR.CAT_X_CAT_DATE, transforms=transforms)
         slice_ = cube.partitions[0]
@@ -152,13 +126,7 @@ class DescribeSliceSmoothing(object):
 
     def it_doesnt_smooth_col_percent_for_cat_x_mr(self):
         transforms = {
-            "columns_dimension": {
-                "smoothing": {
-                    "method": "one_side_moving_avg",
-                    "window": 3,
-                    "show": True,
-                }
-            }
+            "smoothing": {"method": "one_side_moving_avg", "window": 3, "show": True}
         }
         cube = Cube(CR.CAT_X_MR, transforms=transforms)
         slice_ = cube.partitions[0]
@@ -169,13 +137,7 @@ class DescribeSliceSmoothing(object):
 
     def it_doesnt_smooth_col_percent_for_mr_x_mr(self):
         transforms = {
-            "columns_dimension": {
-                "smoothing": {
-                    "method": "one_side_moving_avg",
-                    "window": 3,
-                    "show": True,
-                }
-            }
+            "smoothing": {"method": "one_side_moving_avg", "window": 3, "show": True}
         }
         cube = Cube(CR.MR_X_MR, transforms=transforms)
         slice_ = cube.partitions[0]
@@ -191,13 +153,7 @@ class DescribeSliceSmoothing(object):
 
     def it_doesnt_smooth_col_percent_for_mr_x_ca_cat_x_ca_subvar(self):
         transforms = {
-            "columns_dimension": {
-                "smoothing": {
-                    "method": "one_side_moving_avg",
-                    "window": 3,
-                    "show": True,
-                }
-            }
+            "smoothing": {"method": "one_side_moving_avg", "window": 3, "show": True}
         }
         cube = Cube(CR.MR_X_CA_CAT_X_CA_SUBVAR, transforms=transforms)
         slice_ = cube.partitions[0]
@@ -208,13 +164,7 @@ class DescribeSliceSmoothing(object):
 
     def it_doesnt_smooth_col_percent_cat_x_cat(self):
         transforms = {
-            "columns_dimension": {
-                "smoothing": {
-                    "method": "one_side_moving_avg",
-                    "window": 3,
-                    "show": True,
-                }
-            }
+            "smoothing": {"method": "one_side_moving_avg", "window": 3, "show": True}
         }
         cube = Cube(CR.CAT_X_CAT, transforms=transforms)
         slice_ = cube.partitions[0]
@@ -276,13 +226,7 @@ class DescribeSliceSmoothing(object):
 class DescribeStrandMeansSmoothing(object):
     def it_provides_smoothed_means_cat_date(self):
         transforms = {
-            "rows_dimension": {
-                "smoothing": {
-                    "method": "one_side_moving_avg",
-                    "window": 3,
-                    "show": True,
-                }
-            }
+            "smoothing": {"method": "one_side_moving_avg", "window": 3, "show": True}
         }
         cube = Cube(CR.CAT_DATE_MEAN, transforms=transforms)
         strand_ = cube.partitions[0]
@@ -293,13 +237,7 @@ class DescribeStrandMeansSmoothing(object):
 
     def it_doesnt_smoot_means_mr_mean_filt_wgtd(self):
         transforms = {
-            "rows_dimension": {
-                "smoothing": {
-                    "method": "one_side_moving_avg",
-                    "window": 3,
-                    "show": True,
-                }
-            }
+            "smoothing": {"method": "one_side_moving_avg", "window": 3, "show": True}
         }
         cube = Cube(CR.MR_MEAN_FILT_WGTD, transforms=transforms)
         strand_ = cube.partitions[0]
