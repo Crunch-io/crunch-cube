@@ -699,7 +699,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
 
     @lazyproperty
     def _column_proportions(self):
-        """2D np.float64 ndarray of column proportions for each matrix cell.
+        """2D np.float64 ndarray of smoothed column proportion for each matrix cell.
 
         Returns smoothed or unsmoothed values according to the smoother expressed in the
         dimension transforms.
@@ -1514,7 +1514,6 @@ class _MrXMrMatrix(_CatXCatMatrix):
         exhausted on each use.
         """
         # --- note zip() returns an iterator in Python 3 ---
-
         return zip(
             self._counts.T[0],
             self._column_proportions,
@@ -1752,7 +1751,7 @@ class _BaseMatrixInsertedVector(object):
 
     @lazyproperty
     def proportions(self):
-        """1D np.float/int64 ndarray of proportions for each vector cell."""
+        """1D np.float/np.nan ndarray of proportions for each vector cell."""
         return self.counts / self.margin
 
     @lazyproperty
@@ -2079,11 +2078,11 @@ class _AssembledVector(_BaseTransformationVector):
 
     @lazyproperty
     def proportions(self):
-        """1D np.float/int64 ndarray of proportions for each vector cell."""
+        """1D np.float/np.nan ndarray of proportions for each vector cell."""
         base_vector_proportions = self._base_vector.proportions
 
         def fsubtot(inserted_vector):
-            """-> np.float/int64 proportions for `inserted_vector`.
+            """-> np.float/np.nan proportion for `inserted_vector`.
 
             Passed to and called by ._apply_interleaved() to compute inserted value
             which it places in the right vector position.
