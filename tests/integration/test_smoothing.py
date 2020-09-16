@@ -94,6 +94,25 @@ class DescribeSliceSmoothing(object):
             slice_.column_percentages, load_python_expression(expectation)
         )
 
+    def it_provides_smoothed_col_percent_for_cat_hs_x_cat_date(
+        self, cat_hs_x_cat_date_col_percent_fixture
+    ):
+        window, expectation = cat_hs_x_cat_date_col_percent_fixture
+        transforms = {
+            "columns_dimension": {
+                "smoothing": {
+                    "method": "one_side_moving_avg",
+                    "window": window,
+                    "show": True,
+                }
+            }
+        }
+        cube = Cube(CR.CAT_HS_X_CAT_DATE, transforms=transforms)
+        slice_ = cube.partitions[0]
+        np.testing.assert_almost_equal(
+            slice_.column_percentages, load_python_expression(expectation)
+        )
+
     def it_provides_smoothed_col_percent_for_mr_x_cat_date(
         self, mr_x_cat_date_col_percent_fixture
     ):
@@ -130,25 +149,6 @@ class DescribeSliceSmoothing(object):
         slice2_ = cube2.partitions[0]
 
         np.testing.assert_array_almost_equal(slice_.counts, slice2_.counts)
-
-    def it_provides_smoothed_col_percent_for_cat_hs_x_cat_date(
-        self, cat_hs_x_cat_date_col_percent_fixture
-    ):
-        window, expectation = cat_hs_x_cat_date_col_percent_fixture
-        transforms = {
-            "columns_dimension": {
-                "smoothing": {
-                    "method": "one_side_moving_avg",
-                    "window": window,
-                    "show": True,
-                }
-            }
-        }
-        cube = Cube(CR.CAT_HS_X_CAT_DATE, transforms=transforms)
-        slice_ = cube.partitions[0]
-        np.testing.assert_almost_equal(
-            slice_.column_percentages, load_python_expression(expectation)
-        )
 
     def it_doesnt_smooth_col_percent_for_cat_x_mr(self):
         transforms = {
