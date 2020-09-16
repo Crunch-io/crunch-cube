@@ -452,12 +452,12 @@ class Dimension(object):
         Only meaningful when the dimension is known to be categorical
         (has base-type `categorical`).
         """
-        dimension_type_categories = self._dimension_dict["type"].get("categories", [])
-        if not dimension_type_categories:
+        categories = self._dimension_dict["type"].get("categories", [])
+        if not categories:
             return False
         return all(
             category.get("date")
-            for category in dimension_type_categories
+            for category in categories
             if not category.get("missing", False)
         )
 
@@ -1002,10 +1002,6 @@ class _Subtotal(object):
 
 class _BaseSmoother(object):
     """Base class for smoothing objects"""
-
-    def __init__(self, dimension_transforms_dict, is_cat_date):
-        self._dimension_transforms_dict = dimension_transforms_dict
-        self._is_cat_date = is_cat_date
 
     @classmethod
     def factory(cls, dimension_transforms_dict, is_cat_date):
