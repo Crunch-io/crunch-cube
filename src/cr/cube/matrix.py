@@ -1226,25 +1226,6 @@ class _CatXMrMatrix(_CatXCatMatrix):
         """2D np.float64 ndarray of column proportions for each matrix cell."""
         return (self._counts / self._columns_margin)[:, :, 0].T
 
-    @property
-    def _row_generator(self):
-        """Iterable of arguments to row-vector constructor call for each row element.
-
-        Used by `.rows` property. Cannot be a lazyproperty because an iterator is
-        exhausted on each use and must be created newly on each call.
-        """
-        # --- Note `zip()` returns an iterator in Python 3 ---
-        return zip(
-            self._counts,
-            self._row_proportions,
-            self._unweighted_counts,
-            self._row_elements,
-            self._zscores,
-            self._table_std_dev,
-            self._table_std_err,
-            self._column_index,
-        )
-
     @lazyproperty
     def _row_proportions(self):
         """2D np.float64 ndarray of row proportions for each matrix cell."""
