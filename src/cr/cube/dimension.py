@@ -387,9 +387,16 @@ class Dimension(object):
         return len(self.all_elements)
 
     @lazyproperty
-    def smoother(self):
-        """Smoother object according to the tranforms dict and `is_cat_date`"""
-        return _BaseSmoother.factory(self._dimension_transforms_dict, self._is_cat_date)
+    def smooth(self):
+        """Function performing smoothing for this dimension, based on transform."""
+
+        def null_smooth(values):
+            return values
+
+        if not self._show_smoothing or not self._is_cat_date:
+            return null_smooth
+
+        return _SingleSideMovingAvgSmoother.smoothing_function(self._smoothing_window)
 
     @lazyproperty
     def sort(self):
@@ -460,6 +467,31 @@ class Dimension(object):
             for category in categories
             if not category.get("missing", False)
         )
+
+    @lazyproperty
+    def _show_smoothing(self):
+        """Return True if a smoothing transform is active for this dimension."""
+        smoothing = self._dimension_transforms_dict.get("smoothing")
+        # --- default is no smoothing when smoothing transform is not present ---
+        if not smoothing:
+            return False
+        # --- no smoothing when the smoothing transform is inactive ---
+        if not smoothing.get("show", True):
+            return False
+        return True
+
+    @lazyproperty
+    def _smoothing_window(self):
+        """ -> int, size of the moving window.
+        This is the number of observations used for calculating the statistic. Each
+        window will be a fixed size. Return last dimension size, if window is greater
+        than the the last dimension size because we cannot have a moving window grater
+        than the number of elements of each column.
+        """
+        smoothing = self._dimension_transforms_dict.get("smoothing")
+        if not smoothing:
+            return None
+        return self._dimension_transforms_dict.get("smoothing").get("window", 3)
 
 
 class _BaseElements(Sequence):
@@ -1000,51 +1032,19 @@ class _Subtotal(object):
         return self._prune
 
 
-class _BaseSmoother(object):
-    """Base class for smoothing objects"""
-
-    @classmethod
-    def factory(cls, dimension_transforms_dict, is_cat_date):
-        """Returns appropriate Smoother object according to transforms_dict"""
-        # --- smoothing is only applied to CAT_DATE dimensions ---
-        if not is_cat_date:
-            return _NullSmoother()
-
-        # --- smoothing is only applied when requested ---
-        if not cls._show_smoothing(dimension_transforms_dict):
-            return _NullSmoother()
-
-        # --- otherwise smoothing is single-side moving-average ---
-        return _SingleSideMovingAvgSmoother(dimension_transforms_dict)
-
-    @classmethod
-    def _show_smoothing(cls, dimension_transforms_dict):
-        """Return True if a smoothing transform is active for this dimension."""
-        smoothing = dimension_transforms_dict.get("smoothing")
-        # --- default is no smoothing when smoothing transform is not present ---
-        if not smoothing:
-            return False
-        # --- no smoothing when the smoothing transform is inactive ---
-        if not smoothing.get("show", True):
-            return False
-        return True
-
-
-class _NullSmoother:
-    """Avoid appling smoothing"""
-
-    def smoothed_values(self, values):
-        """ -> np.ndarray, original values"""
-        return values
-
-
 class _SingleSideMovingAvgSmoother(object):
     """Apply smoothing using single side moving average algorithm"""
 
-    def __init__(self, dimension_transforms):
-        self._dimension_transforms = dimension_transforms
+    def __init__(self, window):
+        self._window = window
 
-    def smoothed_values(self, values):
+    @classmethod
+    def smoothing_function(cls, window):
+        """Returns function that smooths a sequence of numeric values in `window`."""
+        return cls(window)._smoothing_function
+
+    @lazyproperty
+    def _smoothing_function(self):
         """ -> np.float64 ndarray, provide rolling window calculations on given values.
 
         Given a series of numbers and a fixed subset size, the first element of the
@@ -1057,21 +1057,26 @@ class _SingleSideMovingAvgSmoother(object):
         averaging that data, then taking February through January for the next period
         and averaging that, then moving on to March through February and so on.
         """
-        if not self._valid_window(values.shape[-1]):
-            warnings.warn(
-                "Window (value: {}) parameter is not valid: window must be less than "
-                "equal to the total period (value: {}) and positive".format(
-                    self._window, values.shape[-1]
-                ),
-                UserWarning,
-            )
-            return values
 
-        smoothed_values = self._smoother(values)
-        # offset between original values and smoothed values
-        offset = [values.shape[-1] - smoothed_values.shape[-1]]
-        additional_nans = np.full(list(values.shape[:-1]) + offset, np.nan)
-        return np.concatenate([additional_nans, smoothed_values], axis=values.ndim - 1)
+        def smooth(values):
+            if not self._valid_window(values.shape[-1]):
+                warnings.warn(
+                    "Window (value: {}) parameter is not valid: window must be less"
+                    "than equal to the total period (value: {}) and positive".format(
+                        self._window, values.shape[-1]
+                    ),
+                    UserWarning,
+                )
+                return values
+            smoothed_values = self._smoother(values)
+            # offset between original values and smoothed values
+            offset = [values.shape[-1] - smoothed_values.shape[-1]]
+            additional_nans = np.full(list(values.shape[:-1]) + offset, np.nan)
+            return np.concatenate(
+                [additional_nans, smoothed_values], axis=values.ndim - 1
+            )
+
+        return smooth
 
     def _smoother(self, values):
         """ -> np.ndarray, provide smoothing algorithm on the given values.
@@ -1100,14 +1105,3 @@ class _SingleSideMovingAvgSmoother(object):
         if self._window > total_period or self._window == 0:
             return False
         return True
-
-    @lazyproperty
-    def _window(self):
-        """ -> int, size of the moving window.
-
-        This is the number of observations used for calculating the statistic. Each
-        window will be a fixed size. Return last dimension size, if window is greater
-        than the the last dimension size because we cannot have a moving window grater
-        than the number of elements of each column.
-        """
-        return self._dimension_transforms.get("smoothing").get("window", 3)

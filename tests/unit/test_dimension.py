@@ -21,9 +21,7 @@ from cr.cube.dimension import (
     _Subtotal,
     _Subtotals,
     _ValidElements,
-    _BaseSmoother,
     _SingleSideMovingAvgSmoother,
-    _NullSmoother,
 )
 from cr.cube.enum import DIMENSION_TYPE as DT
 
@@ -536,6 +534,40 @@ class DescribeDimension(object):
         )
         assert subtotals is subtotals_
 
+    def it_knows_its_show_smoothing_property(self, show_smoothing_fixture):
+        dimension_transforms, expected_value = show_smoothing_fixture
+        dimension = Dimension(None, None, dimension_transforms)
+
+        show_smoothing = dimension._show_smoothing
+
+        assert show_smoothing is expected_value
+
+    def it_knows_its_smooth_function(
+        self,
+        _show_smoothing_prop_,
+        _is_cat_date_prop_,
+        _smoothing_window_prop_,
+        smooth_fixture,
+    ):
+        show_smoothing, is_cat_date, expected_value = smooth_fixture
+        _show_smoothing_prop_.return_value = show_smoothing
+        _is_cat_date_prop_.return_value = is_cat_date
+        _smoothing_window_prop_.return_value = 3
+        dimension = Dimension(None, None, None)
+
+        smooth = dimension.smooth
+
+        assert str(type(smooth)) == "<type 'function'>"
+        assert smooth.__name__ == expected_value
+
+    def it_knows_its_smoothing_window(self, smoothing_window_fixture):
+        dimension_transform, expected_value = smoothing_window_fixture
+        dimension = Dimension(None, None, dimension_transform)
+
+        window = dimension._smoothing_window
+
+        assert window == expected_value
+
     # fixtures -------------------------------------------------------
 
     @pytest.fixture(
@@ -635,6 +667,46 @@ class DescribeDimension(object):
         dimension_dict["type"] = {"class": "categorical", "categories": []}
         return dimension_dict, insertion_dicts
 
+    @pytest.fixture(
+        params=[
+            ({}, False),
+            ({"insertions": {}}, False),
+            ({"smoothing": {}}, False),
+            ({"smoothing": {"show": True}}, True),
+            ({"smoothing": {"show": False}}, False),
+            ({"smoothing": {"show": 42}}, True),
+            ({"smoothing": {"show": "foo"}}, True),
+        ]
+    )
+    def show_smoothing_fixture(self, request):
+        transforms_dict, expected_value = request.param
+        return transforms_dict, expected_value
+
+    @pytest.fixture(
+        params=[
+            (True, True, "smooth"),
+            (False, False, "null_smooth"),
+            (False, True, "null_smooth"),
+            (True, False, "null_smooth"),
+        ]
+    )
+    def smooth_fixture(self, request):
+        show_smoothing, is_cat_date, expected_value = request.param
+        return show_smoothing, is_cat_date, expected_value
+
+    @pytest.fixture(
+        params=[
+            ({"smoothing": {"window": 1}}, 1),
+            ({"smoothing": {"show": False}}, 3),
+            ({"smoothing": {"show": False, "window": 4}}, 4),
+            ({"smoothing": {}}, None),
+            ({}, None),
+        ]
+    )
+    def smoothing_window_fixture(self, request):
+        dimension_transform, expected_value = request.param
+        return dimension_transform, expected_value
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -656,6 +728,18 @@ class DescribeDimension(object):
     @pytest.fixture
     def valid_elements_prop_(self, request):
         return property_mock(request, Dimension, "valid_elements")
+
+    @pytest.fixture
+    def _show_smoothing_prop_(self, request):
+        return property_mock(request, Dimension, "_show_smoothing")
+
+    @pytest.fixture
+    def _is_cat_date_prop_(self, request):
+        return property_mock(request, Dimension, "_is_cat_date")
+
+    @pytest.fixture
+    def _smoothing_window_prop_(self, request):
+        return property_mock(request, Dimension, "_smoothing_window")
 
 
 class Describe_BaseElements(object):
@@ -1338,106 +1422,28 @@ class Describe_Subtotal(object):
         return instance_mock(request, _ValidElements)
 
 
-class DescribeBaseSmoother(object):
-    def it_has_an_integrated_object_factory(self, factory_fixture):
-        is_cat_date, transforms_dict, SmoothingMethodCls_, smoothing_method_ = (
-            factory_fixture
-        )
-        SmoothingMethodCls_.return_value = smoothing_method_
-
-        smoothing_method = _BaseSmoother.factory(transforms_dict, is_cat_date)
-
-        SmoothingMethodCls_.assert_called_once()
-        assert smoothing_method is smoothing_method_
-
-    def it_knows_its_show_smoothing_property(self, show_smoothing_fixture):
-        transforms_dict, expected_value = show_smoothing_fixture
-        smoother = _BaseSmoother(None, None)
-
-        show_smoothing = smoother._show_smoothing(transforms_dict)
-
-        assert show_smoothing is expected_value
-
-    # fixtures -------------------------------------------------------
-
-    @pytest.fixture(
-        params=[
-            (
-                True,
-                {"smoothing": {"method": "one_side_moving_avg", "show": True}},
-                _SingleSideMovingAvgSmoother,
-            ),
-            (
-                True,
-                {"smoothing": {"method": "another_method", "show": True}},
-                _SingleSideMovingAvgSmoother,
-            ),
-            (
-                True,
-                {"smoothing": {"method": "one_side_moving_avg", "show": False}},
-                _NullSmoother,
-            ),
-            (
-                True,
-                {"smoothing": {"method": "another_method", "show": False}},
-                _NullSmoother,
-            ),
-            (True, {}, _NullSmoother),
-        ]
-    )
-    def factory_fixture(self, request):
-        is_cat_date, transforms_dict, SmoothingMethodCls = request.param
-        SmoothingMethodCls_ = class_mock(
-            request, "cr.cube.dimension.%s" % SmoothingMethodCls.__name__
-        )
-        smoothing_method_ = instance_mock(request, SmoothingMethodCls)
-        return is_cat_date, transforms_dict, SmoothingMethodCls_, smoothing_method_
-
-    @pytest.fixture(
-        params=[
-            ({}, False),
-            ({"insertions": {}}, False),
-            ({"smoothing": {}}, False),
-            ({"smoothing": {"show": True}}, True),
-            ({"smoothing": {"show": False}}, False),
-            ({"smoothing": {"show": 42}}, True),
-            ({"smoothing": {"show": "foo"}}, True),
-        ]
-    )
-    def show_smoothing_fixture(self, request):
-        transforms_dict, expected_value = request.param
-        return transforms_dict, expected_value
-
-
 class DescribeSingleSideMovingAvg(object):
-    def it_knows_if_window_param_is_valid(self, _window, valid_window_fixture):
+    def it_knows_if_smoothing_window_is_valid(self, valid_window_fixture):
         window, total_period, expected_value = valid_window_fixture
-        _window.return_value = window
-        smoothed_measure = _SingleSideMovingAvgSmoother(None)
+        smoother = _SingleSideMovingAvgSmoother(window)
 
-        valid_window = smoothed_measure._valid_window(total_period)
+        valid_window = smoother._valid_window(total_period)
 
         assert valid_window == expected_value
 
-    def it_applies_the_smoother(self, _window, smoother_fixture):
+    def it_applies_the_smoother(self, smoother_fixture):
         values, window, expected_value = smoother_fixture
-        _window.return_value = window
-        smoothing_alg = _SingleSideMovingAvgSmoother(None)
+        smoother = _SingleSideMovingAvgSmoother(window)
 
-        smoothed_values = smoothing_alg._smoother(values)
+        smoothed_values = smoother._smoother(values)
 
         np.testing.assert_array_almost_equal(smoothed_values, expected_value)
-
-    # fixture components ---------------------------------------------
-
-    @pytest.fixture
-    def _window(self, request):
-        return property_mock(request, _SingleSideMovingAvgSmoother, "_window")
 
     # fixtures -------------------------------------------------------
 
     @pytest.fixture(
         params=[
+            (np.array([1, 4, 6, 7, 8, 10]), 3, [3.666667, 5.666667, 7.0, 8.333333]),
             (np.array([[3, 4, 5, 6], [7, 8, 9, 1]]), 1, [[3, 4, 5, 6], [7, 8, 9, 1]]),
             (
                 np.array([[3, 4, 5, 6], [7, 8, 9, 1]]),

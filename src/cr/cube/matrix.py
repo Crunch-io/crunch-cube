@@ -377,11 +377,6 @@ class _BaseBaseMatrix(object):
         return self._dimensions[0]
 
     @lazyproperty
-    def smoother(self):
-        """Smoother object according to the dimension transforms dict"""
-        return self._dimensions[-1].smoother
-
-    @lazyproperty
     def table_margin(self):
         """np.float/int64 scalar or a 1D or 2D np.float/int64 ndarray table margin.
 
@@ -704,7 +699,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
         Returns smoothed or unsmoothed values according to the smoother expressed in the
         dimension transforms.
         """
-        return self.smoother.smoothed_values(self._counts / self._columns_margin.T).T
+        return self.columns_dimension.smooth(self._counts / self._columns_margin.T).T
 
     @property
     def _row_generator(self):
@@ -975,12 +970,12 @@ class _MrXCatMatrix(_CatXCatMatrix):
 
     @lazyproperty
     def _column_proportions(self):
-        """2D np.float64 ndarray of column proportions for each matrix cell.
+        """2D np.float64 ndarray of smoothed column proportions for each matrix cell.
 
         Returns smoothed or unsmoothed values according to the smoother expressed in the
         dimension transforms.
         """
-        return self.smoother.smoothed_values(
+        return self.columns_dimension.smooth(
             (self._counts[:, 0, :] / self._rows_margin)
         ).T
 
