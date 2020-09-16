@@ -172,6 +172,17 @@ class DescribeSliceSmoothing(object):
             slice_.column_percentages, [[50.0, 40.0], [50.0, 60.0]]
         )
 
+    def it_doesnt_smooth_col_percent_cat_date_x_cat(self):
+        transforms = {
+            "smoothing": {"method": "one_side_moving_avg", "window": 3, "show": True}
+        }
+        cube = Cube(CR.CAT_DATE_X_CAT, transforms=transforms)
+        slice_ = cube.partitions[0]
+        np.testing.assert_almost_equal(
+            slice_.column_percentages,
+            load_python_expression("cat-date-x-cat-smoothed-col-pct"),
+        )
+
     # fixtures -------------------------------------------------------
 
     @pytest.fixture(
