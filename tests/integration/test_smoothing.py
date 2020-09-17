@@ -16,6 +16,23 @@ from ..util import load_python_expression
 
 
 class DescribeSliceSmoothing(object):
+    def it_provides_smoothed_col_percent_for_ca_x_cat_date(
+        self, ca_x_cat_date_col_percent_fixture
+    ):
+        window, expectation = ca_x_cat_date_col_percent_fixture
+        transforms = {
+            "smoothing": {
+                "method": "one_side_moving_avg",
+                "window": window,
+                "show": True,
+            }
+        }
+        cube = Cube(CR.CA_X_CAT_DATE, transforms=transforms)
+        slice_ = cube.partitions[0]
+        np.testing.assert_almost_equal(
+            slice_.column_percentages, load_python_expression(expectation)
+        )
+
     def it_provides_smoothed_col_percent_for_cat_x_cat_date(
         self, cat_x_cat_date_col_percent_fixture
     ):
@@ -50,15 +67,21 @@ class DescribeSliceSmoothing(object):
             slice_.column_percentages, load_python_expression(expectation)
         )
 
-    def it_provides_smoothed_col_percent_for_cat_x_mr_x_cat_date(self):
+    def it_provides_smoothed_col_percent_for_cat_x_mr_x_cat_date(
+        self, cat_x_mr_x_cat_date_col_percent_fixture
+    ):
+        window, expectation = cat_x_mr_x_cat_date_col_percent_fixture
         transforms = {
-            "smoothing": {"method": "one_side_moving_avg", "window": 3, "show": True}
+            "smoothing": {
+                "method": "one_side_moving_avg",
+                "window": window,
+                "show": True,
+            }
         }
         cube = Cube(CR.CAT_X_MR_X_CAT_DATE, transforms=transforms)
         slice_ = cube.partitions[0]
         np.testing.assert_array_almost_equal(
-            slice_.column_percentages,
-            load_python_expression("cat-x-mr-x-cat-date-smoothed-col-pct"),
+            slice_.column_percentages, load_python_expression(expectation)
         )
 
     def it_provides_smoothed_col_percent_for_ca_x_ca_subvar_x_cat_date(
@@ -199,6 +222,18 @@ class DescribeSliceSmoothing(object):
 
     @pytest.fixture(
         params=[
+            (1, "ca-x-cat-date-smoothed-col-pct-window-1"),
+            (2, "ca-x-cat-date-smoothed-col-pct-window-2"),
+            (3, "ca-x-cat-date-smoothed-col-pct-window-3"),
+            (4, "ca-x-cat-date-smoothed-col-pct-window-4"),
+        ]
+    )
+    def ca_x_cat_date_col_percent_fixture(self, request):
+        window, expectation = request.param
+        return window, expectation
+
+    @pytest.fixture(
+        params=[
             (1, "cat-x-cat-date-smoothed-col-pct-window-1"),
             (2, "cat-x-cat-date-smoothed-col-pct-window-2"),
             (3, "cat-x-cat-date-smoothed-col-pct-window-3"),
@@ -218,6 +253,18 @@ class DescribeSliceSmoothing(object):
         ]
     )
     def cat_x_cat_date_wgtd_col_percent_fixture(self, request):
+        window, expectation = request.param
+        return window, expectation
+
+    @pytest.fixture(
+        params=[
+            (1, "cat-x-mr-x-cat-date-smoothed-col-pct-window-1"),
+            (2, "cat-x-mr-x-cat-date-smoothed-col-pct-window-2"),
+            (3, "cat-x-mr-x-cat-date-smoothed-col-pct-window-3"),
+            (4, "cat-x-mr-x-cat-date-smoothed-col-pct-window-4"),
+        ]
+    )
+    def cat_x_mr_x_cat_date_col_percent_fixture(self, request):
         window, expectation = request.param
         return window, expectation
 
