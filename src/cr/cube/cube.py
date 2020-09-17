@@ -471,14 +471,6 @@ class Cube(object):
         return range(len(self.dimensions[0].valid_elements))
 
     @lazyproperty
-    def _smoothing_transform(self):
-        """dict of the smoothing information
-
-        e.g. `{u'window': 1, u'method': u'one_side_moving_avg', u'show': True}}`
-        """
-        return self._transforms_dict.get("smoothing")
-
-    @lazyproperty
     def _valid_idxs(self):
         return np.ix_(
             *tuple(d.valid_elements.element_idxs for d in self._all_dimensions)

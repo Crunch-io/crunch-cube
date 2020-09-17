@@ -1048,26 +1048,43 @@ class _SingleSideMovingAvgSmoother(object):
 
     @lazyproperty
     def _smoothing_function(self):
-        """ -> np.float64 ndarray, provide rolling window calculations on given values.
-
-        Given a series of numbers and a fixed subset size, the first element of the
-        moving average is obtained by taking the average of the initial fixed subset of
-        the number series. Then the subset is modified by `shifting forward` the values.
-        A moving average is commonly used with time series data to smooth `out
-        short-term fluctuations and highlight longer-term trends or cycles.
-        Assuming that we want calculate a rolling average for a one year period, for
-        example, it means taking January through December for the first period and
-        averaging that data, then taking February through January for the next period
-        and averaging that, then moving on to March through February and so on.
-        """
+        """function that returns an array of smoothed values."""
 
         def smooth(values):
+            """-> 1D/2D float64 ndarray of smootehd values including additional nans.
+
+            Given a series of numbers and a fixed subset size, the first element of the
+            moving average is obtained by taking the average of the initial fixed subset
+            of the number series. Then the subset is modified by `shifting forward` the
+            values. A moving average is commonly used with time series data to smooth
+            out short-term fluctuations and highlight longer-term trends or cycles.
+
+            The below examples will show 1D array rolling mean calculations with window
+            sizes of two and three, respectively.
+
+            window = 2
+            ------------------------
+                X        smoothed_x
+                1          NaN
+                2          1.5
+                3          2.5
+                4          3.5
+            window = 3
+            ------------------------
+                X        smoothed_x
+                1          NaN
+                2          NaN
+                3           2
+                4           3
+
+            This is performed just taking the average of the last 2/3 rows, all the way
+            down the column.
+            """
             if not self._valid_window(values.shape[-1]):
                 warnings.warn(
-                    "Window (value: {}) parameter is not valid: window must be less"
-                    "than equal to the total period (value: {}) and positive".format(
-                        self._window, values.shape[-1]
-                    ),
+                    "No smoothing performed. Window (value: {}) parameter is not "
+                    "valid: window must be less than equal to the total period "
+                    "(value: {}) and positive".format(self._window, values.shape[-1]),
                     UserWarning,
                 )
                 return values
