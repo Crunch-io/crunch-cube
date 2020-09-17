@@ -33,21 +33,21 @@ class DescribeSliceSmoothing(object):
             slice_.column_percentages, load_python_expression(expectation)
         )
 
-    def it_provides_smoothed_col_percent_for_cat_x_cat_date_wgtd(self):
+    def it_provides_smoothed_col_percent_for_cat_x_cat_date_wgtd(
+        self, cat_x_cat_date_wgtd_col_percent_fixture
+    ):
+        window, expectation = cat_x_cat_date_wgtd_col_percent_fixture
         transforms = {
-            "smoothing": {"method": "one_side_moving_avg", "window": 3, "show": True}
+            "smoothing": {
+                "method": "one_side_moving_avg",
+                "window": window,
+                "show": True,
+            }
         }
         cube = Cube(CR.CAT_X_CAT_DATE_WGTD, transforms=transforms)
         slice_ = cube.partitions[0]
         np.testing.assert_almost_equal(
-            slice_.column_percentages,
-            [
-                [np.nan, np.nan, 29.622066, 33.699492],
-                [np.nan, np.nan, 43.7849254, 47.88095998],
-                [np.nan, np.nan, 14.28844697, 11.08991848],
-                [np.nan, np.nan, 4.26421827, 2.67819475],
-                [np.nan, np.nan, 8.04034337, 4.6514348],
-            ],
+            slice_.column_percentages, load_python_expression(expectation)
         )
 
     def it_provides_smoothed_col_percent_for_cat_x_mr_x_cat_date(self):
@@ -206,6 +206,18 @@ class DescribeSliceSmoothing(object):
         ]
     )
     def cat_x_cat_date_col_percent_fixture(self, request):
+        window, expectation = request.param
+        return window, expectation
+
+    @pytest.fixture(
+        params=[
+            (1, "cat-x-cat-date-wgtd-smoothed-col-pct-window-1"),
+            (2, "cat-x-cat-date-wgtd-smoothed-col-pct-window-2"),
+            (3, "cat-x-cat-date-wgtd-smoothed-col-pct-window-3"),
+            (4, "cat-x-cat-date-wgtd-smoothed-col-pct-window-4"),
+        ]
+    )
+    def cat_x_cat_date_wgtd_col_percent_fixture(self, request):
         window, expectation = request.param
         return window, expectation
 

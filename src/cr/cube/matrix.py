@@ -413,6 +413,24 @@ class _BaseBaseMatrix(object):
         """Sequence of `cr.cube.dimension._Element` object for each matrix column."""
         return self.columns_dimension.valid_elements
 
+    @property
+    def _column_generator(self):
+        """Iterable providing construction parameters for each column vector in turn.
+
+        Used by `.columns` property in each subclass. Cannot be a lazyproperty because
+        an iterator is exhausted on each use.
+        """
+        # --- note zip() returns an iterator in Python 3 ---
+        return zip(
+            self._counts.T,
+            self._column_proportions.T,
+            self._unweighted_counts.T,
+            self._column_elements,
+            self._zscores.T,
+            self._table_std_dev.T,
+            self._table_std_err.T,
+        )
+
     @lazyproperty
     def _column_index(self):
         """2D np.float64/np.nan ndarray of column-index value for each matrix cell.
@@ -429,25 +447,7 @@ class _BaseBaseMatrix(object):
         calculation is "cross-vector") so these values must be passed down from the
         matrix level.
         """
-        return self._column_proportions.T / self._baseline * 100
-
-    @property
-    def _column_generator(self):
-        """Iterable providing construction parameters for each column vector in turn.
-
-        Used by `.columns` property in each subclass. Cannot be a lazyproperty because
-        an iterator is exhausted on each use.
-        """
-        # --- note zip() returns an iterator in Python 3 ---
-        return zip(
-            self._counts.T,
-            self._column_proportions,
-            self._unweighted_counts.T,
-            self._column_elements,
-            self._zscores.T,
-            self._table_std_dev.T,
-            self._table_std_err.T,
-        )
+        return self._column_proportions / self._baseline * 100
 
     @classmethod
     def _means_matrix_factory(cls, cube, dimensions, slice_idx):
@@ -699,7 +699,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
         Returns smoothed or unsmoothed values according to the smoother expressed in the
         dimension transforms.
         """
-        return self.columns_dimension.smooth(self._counts / self._columns_margin.T).T
+        return self.columns_dimension.smooth(self._counts / self._columns_margin)
 
     @property
     def _row_generator(self):
@@ -977,7 +977,7 @@ class _MrXCatMatrix(_CatXCatMatrix):
         """
         return self.columns_dimension.smooth(
             (self._counts[:, 0, :] / self._rows_margin)
-        ).T
+        )
 
     @property
     def _row_generator(self):
@@ -1208,7 +1208,7 @@ class _CatXMrMatrix(_CatXCatMatrix):
         # --- note zip() returns an iterator in Python 3 ---
         return zip(
             np.array([self._counts.T[0].T, self._counts.T[1].T]).T,
-            self._column_proportions,
+            self._column_proportions.T,
             np.array(
                 [self._unweighted_counts.T[0].T, self._unweighted_counts.T[1].T]
             ).T,
@@ -1219,7 +1219,7 @@ class _CatXMrMatrix(_CatXCatMatrix):
     @lazyproperty
     def _column_proportions(self):
         """2D np.float64 ndarray of column proportions for each matrix cell."""
-        return (self._counts / self._columns_margin)[:, :, 0].T
+        return (self._counts / self._columns_margin)[:, :, 0]
 
     @lazyproperty
     def _row_proportions(self):
@@ -1511,7 +1511,7 @@ class _MrXMrMatrix(_CatXCatMatrix):
         # --- note zip() returns an iterator in Python 3 ---
         return zip(
             self._counts.T[0],
-            self._column_proportions,
+            self._column_proportions.T,
             self._unweighted_counts.T[0],
             self._column_elements,
             self.table_margin.T,
@@ -1520,7 +1520,7 @@ class _MrXMrMatrix(_CatXCatMatrix):
     @lazyproperty
     def _column_proportions(self):
         """2D np.float64 ndarray of column proportions for each matrix cell."""
-        return (self._counts[:, 0, :, 0] / self._rows_margin[:, :, 0]).T
+        return self._counts[:, 0, :, 0] / self._rows_margin[:, :, 0]
 
     @lazyproperty
     def _mr_shadow_proportions(self):
