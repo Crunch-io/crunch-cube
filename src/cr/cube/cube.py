@@ -428,7 +428,7 @@ class Cube(object):
 
     @lazyproperty
     def _is_single_filter_col_cube(self):
-        """ -> bool, determines if it is a single column filter cube."""
+        """bool determines if it is a single column filter cube."""
         return self._cube_dict["result"].get("is_single_col_cube", False)
 
     def _measure(self, weighted):

@@ -1051,7 +1051,7 @@ class _SingleSideMovingAvgSmoother(object):
         """function that returns an array of smoothed values."""
 
         def smooth(values):
-            """-> 1D/2D float64 ndarray of smootehd values including additional nans.
+            """ -> 1D/2D float64 ndarray of smootehd values including additional nans.
 
             Given a series of numbers and a fixed subset size, the first element of the
             moving average is obtained by taking the average of the initial fixed subset
@@ -1059,26 +1059,29 @@ class _SingleSideMovingAvgSmoother(object):
             values. A moving average is commonly used with time series data to smooth
             out short-term fluctuations and highlight longer-term trends or cycles.
 
-            The below examples will show 1D array rolling mean calculations with window
-            sizes of two and three, respectively.
+            The below examples will show 1D and 2D array rolling mean calculations with
+            window sizes of 2 and 3, respectively.
 
-            window = 2
-            ------------------------
-                X        smoothed_x
-                1          NaN
-                2          1.5
-                3          2.5
-                4          3.5
-            window = 3
-            ------------------------
-                X        smoothed_x
-                1          NaN
-                2          NaN
-                3           2
-                4           3
+                                        [window = 2]
+            ----------------------------------------------------------------------------
+                x    |   smooth(x)                  x     |        smooth(x)
+            ---------+--------------         -------------+------------------------
+                1    |    NaN                 1  3  2  3  |   NaN  2.0  2.5  2.5
+                2    |    1.5                 2  3  3  2  |   NaN  2.5  3.0  2.5
+                3    |    2.5                 3  2  4  4  |   NaN  2.5  3.0  4.0
+                4    |    3.5                 4  1  5  1  |   NaN  2.5  3.0  3.0
 
-            This is performed just taking the average of the last 2/3 rows, all the way
-            down the column.
+                                        [window = 3]
+            ----------------------------------------------------------------------------
+                x    |   smooth(x)                  x     |        smooth(x)
+            ---------+--------------         -------------+------------------------
+                1    |    NaN                 1  3  2  3  |   NaN  NaN   2.0  2.67
+                2    |    NaN                 2  3  3  2  |   NaN  NaN  2.67  2.67
+                3    |     2                  3  2  4  4  |   NaN  NaN   3.0  3.33
+                4    |     3                  4  1  5  1  |   NaN  NaN  3.33  2.33
+
+            This is performed just taking the average of the last 2 or 3 rows according
+            to the window, all the way down the column.
             """
             if not self._valid_window(values.shape[-1]):
                 warnings.warn(
