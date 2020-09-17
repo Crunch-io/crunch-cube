@@ -866,10 +866,12 @@ class _Slice(CubePartition):
         item is an empty dict (`{}`) when no transforms are specified for that
         dimension.
         """
-        return (
-            self._transforms_dict.get("rows_dimension", {}),
-            self._transforms_dict.get("columns_dimension", {}),
-        )
+        transforms_dict = self._transforms_dict
+        rows_dimension_dict = transforms_dict.get("rows_dimension", {})
+        columns_dimension_dict = transforms_dict.get("columns_dimension", {})
+        if "smoothing" in transforms_dict:
+            columns_dimension_dict["smoothing"] = transforms_dict["smoothing"]
+        return (rows_dimension_dict, columns_dimension_dict)
 
 
 class _Strand(CubePartition):
@@ -893,7 +895,7 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def counts(self):
-        """ tuple, 1D cube counts."""
+        """tuple, 1D cube counts."""
         return tuple(row.count for row in self._stripe.rows)
 
     @lazyproperty
@@ -1179,7 +1181,11 @@ class _Strand(CubePartition):
     @lazyproperty
     def _row_transforms_dict(self):
         """Transforms dict for the single (rows) dimension of this strand."""
-        return self._transforms_dict.get("rows_dimension", {})
+        transforms_dict = self._transforms_dict
+        rows_dimension_dict = transforms_dict.get("rows_dimension", {})
+        if "smoothing" in transforms_dict:
+            rows_dimension_dict["smoothing"] = transforms_dict["smoothing"]
+        return rows_dimension_dict
 
     @lazyproperty
     def _stripe(self):

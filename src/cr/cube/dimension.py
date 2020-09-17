@@ -46,9 +46,8 @@ class _BaseDimensions(Sequence):
 class AllDimensions(_BaseDimensions):
     """Collection containing every dimension defined in cube response."""
 
-    def __init__(self, dimension_dicts, smoothing_transform=None):
+    def __init__(self, dimension_dicts):
         self._dimension_dicts = dimension_dicts
-        self._smoothing_transform = smoothing_transform
 
     @lazyproperty
     def apparent_dimensions(self):
@@ -76,11 +75,7 @@ class AllDimensions(_BaseDimensions):
         This composed tuple is the internal source for the dimension objects
         in this collection.
         """
-        return tuple(
-            _DimensionFactory.iter_dimensions(
-                self._dimension_dicts, self._smoothing_transform
-            )
-        )
+        return tuple(_DimensionFactory.iter_dimensions(self._dimension_dicts))
 
 
 class _ApparentDimensions(_BaseDimensions):
@@ -107,23 +102,18 @@ class _DimensionFactory(object):
     make dimension class choices as well.
     """
 
-    def __init__(self, dimension_dicts, smoothing_transform):
+    def __init__(self, dimension_dicts):
         self._dimension_dicts = dimension_dicts
-        self._smoothing_transform = smoothing_transform
 
     @classmethod
-    def iter_dimensions(cls, dimension_dicts, smoothing_transform):
+    def iter_dimensions(cls, dimension_dicts):
         """Generate Dimension object for each of *dimension_dicts*."""
-        return cls(dimension_dicts, smoothing_transform)._iter_dimensions()
+        return cls(dimension_dicts)._iter_dimensions()
 
     def _iter_dimensions(self):
         """Generate Dimension object for each dimension dict."""
         return (
-            Dimension(
-                dimension_dict=raw_dimension.dimension_dict,
-                dimension_type=raw_dimension.dimension_type,
-                smoothing_transform=self._smoothing_transform,
-            )
+            Dimension(raw_dimension.dimension_dict, raw_dimension.dimension_type)
             for raw_dimension in self._raw_dimensions
         )
 
@@ -269,17 +259,10 @@ class Dimension(object):
     :attr:`.CrunchCube.dimensions`.
     """
 
-    def __init__(
-        self,
-        dimension_dict,
-        dimension_type,
-        dimension_transforms=None,
-        smoothing_transform=None,
-    ):
+    def __init__(self, dimension_dict, dimension_type, dimension_transforms=None):
         self._dimension_dict = dimension_dict
         self._dimension_type = dimension_type
         self._dimension_transforms_arg = dimension_transforms
-        self._smoothing_transform = smoothing_transform
 
     @lazyproperty
     def alias(self):
@@ -308,10 +291,7 @@ class Dimension(object):
         The new dimension object is the same as this one in all other respects.
         """
         return Dimension(
-            self._dimension_dict,
-            self._dimension_type,
-            dimension_transforms,
-            self._smoothing_transform,
+            self._dimension_dict, self._dimension_type, dimension_transforms
         )
 
     @lazyproperty
@@ -413,10 +393,11 @@ class Dimension(object):
         def null_smooth(values):
             return values
 
-        if not self._show_smoothing or not self._is_cat_date:
-            return null_smooth
-
-        return _SingleSideMovingAvgSmoother.smoothing_function(self._smoothing_window)
+        return (
+            _SingleSideMovingAvgSmoother.smoothing_function(self._smoothing_window)
+            if self._show_smoothing
+            else null_smooth
+        )
 
     @lazyproperty
     def sort(self):
@@ -491,9 +472,12 @@ class Dimension(object):
     @lazyproperty
     def _show_smoothing(self):
         """Return True if a smoothing transform is active for this dimension."""
-        smoothing = self._smoothing_transform
+        smoothing = self._dimension_transforms_dict.get("smoothing")
         # --- default is no smoothing when smoothing transform is not present ---
         if not smoothing:
+            return False
+        # --- no smoothing when dimension is not a categorical date ---
+        if not self._is_cat_date:
             return False
         # --- no smoothing when the smoothing transform is inactive ---
         if not smoothing.get("show", True):
@@ -502,15 +486,15 @@ class Dimension(object):
 
     @lazyproperty
     def _smoothing_window(self):
-        """ -> int, size of the moving window.
+        """size of the moving window.
+
         This is the number of observations used for calculating the statistic. Each
-        window will be a fixed size. Return last dimension size, if window is greater
-        than the the last dimension size because we cannot have a moving window grater
-        than the number of elements of each column.
+        window will be a fixed size.
         """
-        if not self._smoothing_transform:
+        smoothing = self._dimension_transforms_dict.get("smoothing")
+        if not smoothing:
             return None
-        return self._smoothing_transform.get("window", 3)
+        return smoothing.get("window", 3)
 
 
 class _BaseElements(Sequence):
@@ -1052,7 +1036,7 @@ class _Subtotal(object):
 
 
 class _SingleSideMovingAvgSmoother(object):
-    """Apply smoothing using single side moving average algorithm"""
+    """Create and configure smoothing function for one-sided moving average."""
 
     def __init__(self, window):
         self._window = window
@@ -1120,7 +1104,12 @@ class _SingleSideMovingAvgSmoother(object):
         )
 
     def _valid_window(self, total_period):
-        """ -> bool, the validity of the window parameter."""
+        """ -> bool, the validity of the window parameter.
+
+        Return last dimension size, if window is greater than the the last dimension
+        size because we cannot have a moving window grater than the number of elements
+        of each column.
+        """
         if self._window > total_period or self._window == 0:
             return False
         return True

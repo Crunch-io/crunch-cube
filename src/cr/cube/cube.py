@@ -391,10 +391,7 @@ class Cube(object):
         user-apparent dimensions (basically the categories dimension of each MR
         dimension-pair is suppressed).
         """
-        return AllDimensions(
-            dimension_dicts=self._cube_dict["result"]["dimensions"],
-            smoothing_transform=self._smoothing_transform,
-        )
+        return AllDimensions(dimension_dicts=self._cube_dict["result"]["dimensions"])
 
     @lazyproperty
     def _ca_as_0th(self):

@@ -98,9 +98,7 @@ class DescribeAllDimensions(object):
 
         dimensions = all_dimensions._dimensions
 
-        _DimensionFactory_.iter_dimensions.assert_called_once_with(
-            dimension_dicts_, None
-        )
+        _DimensionFactory_.iter_dimensions.assert_called_once_with(dimension_dicts_)
         assert dimensions == dimensions_
 
     # fixture components ---------------------------------------------
@@ -148,10 +146,10 @@ class Describe_DimensionFactory(object):
         )
         _iter_dimensions_.return_value = iter(dimensions_)
 
-        dimension_iter = _DimensionFactory.iter_dimensions(dimension_dicts_, None)
+        dimension_iter = _DimensionFactory.iter_dimensions(dimension_dicts_)
 
         # ---ANY is for dimension_factory object (self), which we can't see---
-        _init_.assert_called_once_with(ANY, dimension_dicts_, None)
+        _init_.assert_called_once_with(ANY, dimension_dicts_)
         _iter_dimensions_.assert_called_once_with(ANY)
         assert tuple(dimension_iter) == dimensions_
 
@@ -173,28 +171,16 @@ class Describe_DimensionFactory(object):
             instance_mock(request, Dimension, name="dim-%d" % idx) for idx in range(3)
         )
         Dimension_.side_effect = iter(dimensions_)
-        dimension_factory = _DimensionFactory(None, None)
+        dimension_factory = _DimensionFactory(None)
 
         dimension_iter = dimension_factory._iter_dimensions()
 
         # ---exercising the iterator needs to come first---
         assert tuple(dimension_iter) == dimensions_
         assert Dimension_.call_args_list == [
-            call(
-                dimension_dict=dimension_dicts_[0],
-                dimension_type=dimension_types_[0],
-                smoothing_transform=None,
-            ),
-            call(
-                dimension_dict=dimension_dicts_[1],
-                dimension_type=dimension_types_[1],
-                smoothing_transform=None,
-            ),
-            call(
-                dimension_dict=dimension_dicts_[2],
-                dimension_type=dimension_types_[2],
-                smoothing_transform=None,
-            ),
+            call(dimension_dicts_[0], dimension_types_[0]),
+            call(dimension_dicts_[1], dimension_types_[1]),
+            call(dimension_dicts_[2], dimension_types_[2]),
         ]
 
     def it_constructs_RawDimension_objects_to_help(
@@ -205,7 +191,7 @@ class Describe_DimensionFactory(object):
             for idx in range(3)
         )
         _RawDimension_.side_effect = iter(raw_dimensions_)
-        dimension_factory = _DimensionFactory(dimension_dicts_, None)
+        dimension_factory = _DimensionFactory(dimension_dicts_)
 
         raw_dimensions = dimension_factory._raw_dimensions
 
@@ -493,7 +479,7 @@ class DescribeDimension(object):
             instance_mock(request, _Element, numeric_value=numeric_value)
             for numeric_value in (1, 2.2, np.nan)
         )
-        dimension = Dimension(None, None, None)
+        dimension = Dimension(None, None)
 
         numeric_values = dimension.numeric_values
 
@@ -548,24 +534,22 @@ class DescribeDimension(object):
         )
         assert subtotals is subtotals_
 
-    def it_knows_its_show_smoothing_property(self, show_smoothing_fixture):
-        smoothing_transform, expected_value = show_smoothing_fixture
-        dimension = Dimension(None, None, None, smoothing_transform)
+    def it_knows_its_show_smoothing_property(
+        self, show_smoothing_fixture, _is_cat_date_prop_
+    ):
+        dimension_transform, is_cat_date, expected_value = show_smoothing_fixture
+        _is_cat_date_prop_.return_value = is_cat_date
+        dimension = Dimension(None, None, dimension_transform)
 
         show_smoothing = dimension._show_smoothing
 
         assert show_smoothing is expected_value
 
     def it_knows_its_smooth_function(
-        self,
-        _show_smoothing_prop_,
-        _is_cat_date_prop_,
-        _smoothing_window_prop_,
-        smooth_fixture,
+        self, _show_smoothing_prop_, _smoothing_window_prop_, smooth_fixture
     ):
-        show_smoothing, is_cat_date, expected_value = smooth_fixture
+        show_smoothing, expected_value = smooth_fixture
         _show_smoothing_prop_.return_value = show_smoothing
-        _is_cat_date_prop_.return_value = is_cat_date
         _smoothing_window_prop_.return_value = 3
         dimension = Dimension(None, None)
 
@@ -574,8 +558,8 @@ class DescribeDimension(object):
         assert smooth.__name__ == expected_value
 
     def it_knows_its_smoothing_window(self, smoothing_window_fixture):
-        smoothing_transform, expected_value = smoothing_window_fixture
-        dimension = Dimension(None, None, None, smoothing_transform)
+        dimension_transform, expected_value = smoothing_window_fixture
+        dimension = Dimension(None, None, dimension_transform)
 
         window = dimension._smoothing_window
 
@@ -682,41 +666,40 @@ class DescribeDimension(object):
 
     @pytest.fixture(
         params=[
-            ({}, False),
-            ({"window": 3}, True),
-            ({"show": True}, True),
-            ({"show": False}, False),
-            ({"show": 42}, True),
-            ({"show": "foo"}, True),
+            ({}, True, False),
+            ({}, False, False),
+            ({"smoothing": {"window": 3}}, True, True),
+            ({"smoothing": {"window": 3}}, False, False),
+            ({"smoothing": {"show": True}}, True, True),
+            ({"smoothing": {"show": True}}, False, False),
+            ({"smoothing": {"show": False}}, True, False),
+            ({"smoothing": {"show": False}}, False, False),
+            ({"smoothing": {"show": 42}}, True, True),
+            ({"smoothing": {"show": 42}}, False, False),
+            ({"smoothing": {"show": "foo"}}, True, True),
+            ({"smoothing": {"show": "foo"}}, False, False),
         ]
     )
     def show_smoothing_fixture(self, request):
-        smoothing_transform, expected_value = request.param
-        return smoothing_transform, expected_value
+        dimension_transform, is_cat_date, expected_value = request.param
+        return dimension_transform, is_cat_date, expected_value
 
-    @pytest.fixture(
-        params=[
-            (True, True, "smooth"),
-            (False, False, "null_smooth"),
-            (False, True, "null_smooth"),
-            (True, False, "null_smooth"),
-        ]
-    )
+    @pytest.fixture(params=[(True, "smooth"), (False, "null_smooth")])
     def smooth_fixture(self, request):
-        show_smoothing, is_cat_date, expected_value = request.param
-        return show_smoothing, is_cat_date, expected_value
+        show_smoothing, expected_value = request.param
+        return show_smoothing, expected_value
 
     @pytest.fixture(
         params=[
-            ({"window": 1}, 1),
-            ({"show": False}, 3),
-            ({"show": False, "window": 4}, 4),
+            ({"smoothing": {"window": 1}}, 1),
+            ({"smoothing": {"show": False}}, 3),
+            ({"smoothing": {"show": False, "window": 4}}, 4),
             ({}, None),
         ]
     )
     def smoothing_window_fixture(self, request):
-        smoothing_transform, expected_value = request.param
-        return smoothing_transform, expected_value
+        dimension_transform, expected_value = request.param
+        return dimension_transform, expected_value
 
     # fixture components ---------------------------------------------
 
