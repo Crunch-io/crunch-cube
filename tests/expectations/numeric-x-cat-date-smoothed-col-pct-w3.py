@@ -1,0 +1,17 @@
+[
+    [float("NaN"), float("NaN"), 0.33224098, 0.13577733],
+    [float("NaN"), float("NaN"), 0.72996984, 0.63585338],
+    [float("NaN"), float("NaN"), 2.79260028, 2.21144004],
+    [float("NaN"), float("NaN"), 4.55599349, 3.09486216],
+    [float("NaN"), float("NaN"), 5.63260898, 4.27382484],
+    [float("NaN"), float("NaN"), 7.6952613, 7.41505904],
+    [float("NaN"), float("NaN"), 13.62583349, 15.62160361],
+    [float("NaN"), float("NaN"), 10.5594688, 10.38161372],
+    [float("NaN"), float("NaN"), 8.05940115, 6.89099709],
+    [float("NaN"), float("NaN"), 8.40790608, 6.86697257],
+    [float("NaN"), float("NaN"), 8.38690621, 10.1307448],
+    [float("NaN"), float("NaN"), 9.12831657, 10.7268651],
+    [float("NaN"), float("NaN"), 8.04635802, 10.41644687],
+    [float("NaN"), float("NaN"), 8.02589966, 8.48646199],
+    [float("NaN"), float("NaN"), 4.02123516, 2.71147747],
+]

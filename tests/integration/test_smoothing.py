@@ -19,25 +19,20 @@ class DescribeSliceSmoothing(object):
     @pytest.mark.parametrize(
         "fixture, window, expectation",
         (
-            (CR.CA_X_CAT_DATE, 3, "ca-x-cat-date-smoothed-col-pct-window-3"),
-            (CR.CAT_X_CAT_DATE, 1, "cat-x-cat-date-smoothed-col-pct-window-1"),
-            (
-                CR.CAT_X_CAT_DATE_WGTD,
-                4,
-                "cat-x-cat-date-wgtd-smoothed-col-pct-window-4",
-            ),
-            (
-                CR.CAT_X_MR_X_CAT_DATE,
-                3,
-                "cat-x-mr-x-cat-date-smoothed-col-pct-window-3",
-            ),
+            (CR.CA_X_CAT_DATE, 3, "ca-x-cat-date-smoothed-col-pct-w3"),
+            (CR.CAT_X_CAT_DATE, 1, "cat-x-cat-date-smoothed-col-pct-w1"),
+            (CR.CAT_X_CAT_DATE_WGTD, 4, "cat-x-cat-date-wgtd-smoothed-col-pct-w4"),
+            (CR.CAT_X_MR_X_CAT_DATE, 3, "cat-x-mr-x-cat-date-smoothed-col-pct-w3"),
             (
                 CR.CA_X_CA_SUBVAR_X_CAT_DATE,
                 3,
-                "ca-x-ca-subvar-x-cat-date-smoothed-col-pct-window-3",
+                "ca-x-ca-subvar-x-cat-date-smoothed-col-pct-w3",
             ),
-            (CR.CAT_HS_X_CAT_DATE, 3, "cat-hs-x-cat-date-smoothed-col-pct-window-3"),
-            (CR.MR_X_CAT_DATE, 3, "mr-x-cat-date-smoothed-col-pct-window-3"),
+            (CR.CAT_HS_X_CAT_DATE, 3, "cat-hs-x-cat-date-smoothed-col-pct-w3"),
+            (CR.MR_X_CAT_DATE, 3, "mr-x-cat-date-smoothed-col-pct-w3"),
+            (CR.NUMERIC_X_CAT_DATE, 3, "numeric-x-cat-date-smoothed-col-pct-w3"),
+            (CR.TXT_X_CAT_DATE, 3, "txt-x-cat-date-smoothed-col-pct-w3"),
+            (CR.DATETIME_X_CAT_DATE, 3, "datetime-x-cat-date-smoothed-col-pct-w3"),
         ),
     )
     def it_provides_smoothed_col_pct_for_compatible_cubes(
