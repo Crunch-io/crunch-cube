@@ -19,14 +19,13 @@ class DescribeSliceSmoothing(object):
     @pytest.mark.parametrize(
         "fixture, window, expectation",
         (
-            (CR.CA_X_CAT_DATE, 3, "ca-x-cat-date-smoothed-col-pct-w3"),
             (CR.CAT_X_CAT_DATE, 1, "cat-x-cat-date-smoothed-col-pct-w1"),
             (CR.CAT_X_CAT_DATE_WGTD, 4, "cat-x-cat-date-wgtd-smoothed-col-pct-w4"),
             (CR.CAT_X_MR_X_CAT_DATE, 3, "cat-x-mr-x-cat-date-smoothed-col-pct-w3"),
             (
-                CR.CA_X_CA_SUBVAR_X_CAT_DATE,
+                CR.CA_SUBVAR_X_CA_CAT_X_CAT_DATE,
                 3,
-                "ca-x-ca-subvar-x-cat-date-smoothed-col-pct-w3",
+                "ca-subvar-x-ca-cat-cat-date-smoothed-col-pct-w3",
             ),
             (CR.CAT_HS_X_CAT_DATE, 3, "cat-hs-x-cat-date-smoothed-col-pct-w3"),
             (CR.MR_X_CAT_DATE, 3, "mr-x-cat-date-smoothed-col-pct-w3"),
@@ -45,8 +44,7 @@ class DescribeSliceSmoothing(object):
                 "show": True,
             }
         }
-        cube = Cube(fixture, transforms=transforms)
-        slice_ = cube.partitions[0]
+        slice_ = Cube(fixture, transforms=transforms).partitions[0]
         np.testing.assert_array_almost_equal(
             slice_.column_percentages, load_python_expression(expectation)
         )
@@ -73,10 +71,8 @@ class DescribeSliceSmoothing(object):
 
     def it_doesnt_smooth_counts_when_window_is_not_valid(self):
         transforms = {"smoothing": {"window": 30, "show": True}}
-        cube = Cube(CR.CAT_X_CAT_DATE, transforms=transforms)
-        slice_ = cube.partitions[0]
-        cube2 = Cube(CR.CAT_X_CAT_DATE)
-        slice2_ = cube2.partitions[0]
+        slice_ = Cube(CR.CAT_X_CAT_DATE, transforms=transforms).partitions[0]
+        slice2_ = Cube(CR.CAT_X_CAT_DATE).partitions[0]
         np.testing.assert_array_almost_equal(slice_.counts, slice2_.counts)
 
 
@@ -85,9 +81,7 @@ class DescribeStrandMeansSmoothing(object):
         transforms = {
             "smoothing": {"method": "one_side_moving_avg", "window": 3, "show": True}
         }
-        cube = Cube(CR.CAT_DATE_MEAN, transforms=transforms)
-        strand_ = cube.partitions[0]
-
+        strand_ = Cube(CR.CAT_DATE_MEAN, transforms=transforms).partitions[0]
         np.testing.assert_array_almost_equal(
             strand_.means, [np.nan, np.nan, 2.65670765025029, 2.5774816240050358]
         )
@@ -96,9 +90,7 @@ class DescribeStrandMeansSmoothing(object):
         transforms = {
             "smoothing": {"method": "one_side_moving_avg", "window": 3, "show": True}
         }
-        cube = Cube(CR.MR_MEAN_FILT_WGTD, transforms=transforms)
-        strand_ = cube.partitions[0]
-
+        strand_ = Cube(CR.MR_MEAN_FILT_WGTD, transforms=transforms).partitions[0]
         np.testing.assert_array_almost_equal(
             strand_.means, [3.724051, 2.578429, 2.218593, 1.865335]
         )
