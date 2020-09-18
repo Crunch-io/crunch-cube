@@ -1386,7 +1386,7 @@ class DescribeSingleSideMovingAvg(object):
                 [[3.5, 4.5, 5.5], [7.5, 8.5, 5.0]],
             ),
             (np.array([[3, 4, 5, 6], [7, 8, 9, 1]]), 3, [[4.0, 5.0], [8.0, 6.0]]),
-            (np.array([[3, 4, 5, 6], [7, 8, 9, 1]]), 4, np.array([[4.5], [6.25]])),
+            (np.array([[3, 4, 5, 6], [7, 8, 9, 1]]), 4, [[4.5], [6.25]]),
         ),
     )
     def it_applies_the_smoother(self, values, window, expected_value):
@@ -1395,3 +1395,28 @@ class DescribeSingleSideMovingAvg(object):
         smoothed_values = smoother._smoother(values)
 
         np.testing.assert_array_almost_equal(smoothed_values, expected_value)
+
+    @pytest.mark.parametrize(
+        "smoothed_values, window, expected_value",
+        (
+            (np.array([1, 2, 3, 4]), 30, [1, 2, 3, 4]),
+            (np.array([1, 2, 3, 4]), 2, [np.nan, 1.5, 2.5, 3.5]),
+            (
+                np.array([[3, 4, 5, 6], [7, 8, 9, 1]]),
+                3,
+                [[np.nan, np.nan, 4, 5], [np.nan, np.nan, 8, 6]],
+            ),
+        ),
+    )
+    def it_provides_complete_smoothed_values(
+        self, smoothed_values, window, expected_value
+    ):
+        smoother = _SingleSideMovingAvgSmoother(window)
+
+        smoothed_values_with_additional_nans = smoother._smoothing_function(
+            smoothed_values
+        )
+
+        np.testing.assert_array_almost_equal(
+            smoothed_values_with_additional_nans, expected_value
+        )
