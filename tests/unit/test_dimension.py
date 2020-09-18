@@ -485,8 +485,18 @@ class DescribeDimension(object):
 
         assert numeric_values == (1, 2.2, np.nan)
 
-    def it_knows_its_is_cat_date_prop(self, is_cat_date_fixture):
-        dimension_dict, expected_value = is_cat_date_fixture
+    @pytest.mark.parametrize(
+        "categories, expected_value",
+        (
+            ([], False),
+            ([{"date": "2019-10-10"}, {}], False),
+            ([{"date": "2019-10-10"}, {"missing": False}], False),
+            ([{"date": "2019-10-10"}, {"date": "2019-11-10"}], True),
+            ([{"date": "2019-10-10"}, {"date": "2019-11-10"}, {"missing": True}], True),
+        ),
+    )
+    def it_knows_its_is_cat_date_prop(self, categories, expected_value):
+        dimension_dict = {"type": {"categories": categories}}
         dimension = Dimension(dimension_dict, None)
 
         is_cat_date = dimension._is_cat_date
@@ -534,10 +544,26 @@ class DescribeDimension(object):
         )
         assert subtotals is subtotals_
 
+    @pytest.mark.parametrize(
+        "dimension_transform, is_cat_date, expected_value",
+        (
+            ({}, True, False),
+            ({}, False, False),
+            ({"smoothing": {"window": 3}}, True, True),
+            ({"smoothing": {"window": 3}}, False, False),
+            ({"smoothing": {"show": True}}, True, True),
+            ({"smoothing": {"show": True}}, False, False),
+            ({"smoothing": {"show": False}}, True, False),
+            ({"smoothing": {"show": False}}, False, False),
+            ({"smoothing": {"show": 42}}, True, True),
+            ({"smoothing": {"show": 42}}, False, False),
+            ({"smoothing": {"show": "foo"}}, True, True),
+            ({"smoothing": {"show": "foo"}}, False, False),
+        ),
+    )
     def it_knows_its_show_smoothing_property(
-        self, show_smoothing_fixture, _is_cat_date_prop_
+        self, _is_cat_date_prop_, dimension_transform, is_cat_date, expected_value
     ):
-        dimension_transform, is_cat_date, expected_value = show_smoothing_fixture
         _is_cat_date_prop_.return_value = is_cat_date
         dimension = Dimension(None, None, dimension_transform)
 
@@ -545,10 +571,16 @@ class DescribeDimension(object):
 
         assert show_smoothing is expected_value
 
+    @pytest.mark.parametrize(
+        "show_smoothing, expected_value", ((True, "smooth"), (False, "null_smooth"))
+    )
     def it_knows_its_smooth_function(
-        self, _show_smoothing_prop_, _smoothing_window_prop_, smooth_fixture
+        self,
+        _show_smoothing_prop_,
+        _smoothing_window_prop_,
+        show_smoothing,
+        expected_value,
     ):
-        show_smoothing, expected_value = smooth_fixture
         _show_smoothing_prop_.return_value = show_smoothing
         _smoothing_window_prop_.return_value = 3
         dimension = Dimension(None, None)
@@ -557,8 +589,16 @@ class DescribeDimension(object):
 
         assert smooth.__name__ == expected_value
 
-    def it_knows_its_smoothing_window(self, smoothing_window_fixture):
-        dimension_transform, expected_value = smoothing_window_fixture
+    @pytest.mark.parametrize(
+        "dimension_transform, expected_value",
+        (
+            ({"smoothing": {"window": 1}}, 1),
+            ({"smoothing": {"show": False}}, 3),
+            ({"smoothing": {"show": False, "window": 4}}, 4),
+            ({}, None),
+        ),
+    )
+    def it_knows_its_smoothing_window(self, dimension_transform, expected_value):
         dimension = Dimension(None, None, dimension_transform)
 
         window = dimension._smoothing_window
@@ -576,62 +616,6 @@ class DescribeDimension(object):
         ]
     )
     def description_fixture(self, request):
-        dimension_dict, expected_value = request.param
-        return dimension_dict, expected_value
-
-    @pytest.fixture(
-        params=[
-            ({"type": {"categories": []}}, False),
-            ({"type": {"categories": [{"id": 1}, {"id": 2}]}}, False),
-            (
-                {
-                    "type": {
-                        "categories": [
-                            {"id": 1, "date": "2019-10-10", "missing": False},
-                            {"id": 2, "missing": False},
-                        ]
-                    }
-                },
-                False,
-            ),
-            (
-                {
-                    "type": {
-                        "categories": [
-                            {"id": 1, "date": "2019-10-10", "missing": False},
-                            {"id": 2, "date": "2019-11-10", "missing": False},
-                        ]
-                    }
-                },
-                True,
-            ),
-            (
-                {
-                    "type": {
-                        "categories": [
-                            {"id": 1, "date": "2019-10-10", "missing": False},
-                            {"id": 2, "date": "2019-11-10", "missing": False},
-                            {"id": 3, "missing": True},
-                        ]
-                    }
-                },
-                True,
-            ),
-            (
-                {
-                    "type": {
-                        "categories": [
-                            {"id": 1, "date": "2019-10-10", "missing": False},
-                            {"id": 2, "date": "2019-11-10", "missing": False},
-                            {"id": 3},
-                        ]
-                    }
-                },
-                False,
-            ),
-        ]
-    )
-    def is_cat_date_fixture(self, request):
         dimension_dict, expected_value = request.param
         return dimension_dict, expected_value
 
@@ -663,43 +647,6 @@ class DescribeDimension(object):
         dimension_dict, insertion_dicts = request.param
         dimension_dict["type"] = {"class": "categorical", "categories": []}
         return dimension_dict, insertion_dicts
-
-    @pytest.fixture(
-        params=[
-            ({}, True, False),
-            ({}, False, False),
-            ({"smoothing": {"window": 3}}, True, True),
-            ({"smoothing": {"window": 3}}, False, False),
-            ({"smoothing": {"show": True}}, True, True),
-            ({"smoothing": {"show": True}}, False, False),
-            ({"smoothing": {"show": False}}, True, False),
-            ({"smoothing": {"show": False}}, False, False),
-            ({"smoothing": {"show": 42}}, True, True),
-            ({"smoothing": {"show": 42}}, False, False),
-            ({"smoothing": {"show": "foo"}}, True, True),
-            ({"smoothing": {"show": "foo"}}, False, False),
-        ]
-    )
-    def show_smoothing_fixture(self, request):
-        dimension_transform, is_cat_date, expected_value = request.param
-        return dimension_transform, is_cat_date, expected_value
-
-    @pytest.fixture(params=[(True, "smooth"), (False, "null_smooth")])
-    def smooth_fixture(self, request):
-        show_smoothing, expected_value = request.param
-        return show_smoothing, expected_value
-
-    @pytest.fixture(
-        params=[
-            ({"smoothing": {"window": 1}}, 1),
-            ({"smoothing": {"show": False}}, 3),
-            ({"smoothing": {"show": False, "window": 4}}, 4),
-            ({}, None),
-        ]
-    )
-    def smoothing_window_fixture(self, request):
-        dimension_transform, expected_value = request.param
-        return dimension_transform, expected_value
 
     # fixture components ---------------------------------------------
 
@@ -1417,26 +1364,20 @@ class Describe_Subtotal(object):
 
 
 class DescribeSingleSideMovingAvg(object):
-    def it_knows_if_smoothing_window_is_valid(self, valid_window_fixture):
-        window, total_period, expected_value = valid_window_fixture
+    @pytest.mark.parametrize(
+        "window, total_period, expected_value",
+        ((30, 4, False), (0, 4, False), (3, 12, True), (3, 3, True)),
+    )
+    def it_knows_if_window_is_valid(self, window, total_period, expected_value):
         smoother = _SingleSideMovingAvgSmoother(window)
 
         valid_window = smoother._valid_window(total_period)
 
         assert valid_window == expected_value
 
-    def it_applies_the_smoother(self, smoother_fixture):
-        values, window, expected_value = smoother_fixture
-        smoother = _SingleSideMovingAvgSmoother(window)
-
-        smoothed_values = smoother._smoother(values)
-
-        np.testing.assert_array_almost_equal(smoothed_values, expected_value)
-
-    # fixtures -------------------------------------------------------
-
-    @pytest.fixture(
-        params=[
+    @pytest.mark.parametrize(
+        "values, window, expected_value",
+        (
             (np.array([1, 4, 6, 7, 8, 10]), 3, [3.666667, 5.666667, 7.0, 8.333333]),
             (np.array([[3, 4, 5, 6], [7, 8, 9, 1]]), 1, [[3, 4, 5, 6], [7, 8, 9, 1]]),
             (
@@ -1446,13 +1387,11 @@ class DescribeSingleSideMovingAvg(object):
             ),
             (np.array([[3, 4, 5, 6], [7, 8, 9, 1]]), 3, [[4.0, 5.0], [8.0, 6.0]]),
             (np.array([[3, 4, 5, 6], [7, 8, 9, 1]]), 4, np.array([[4.5], [6.25]])),
-        ]
+        ),
     )
-    def smoother_fixture(self, request):
-        values, window, expected_value = request.param
-        return values, window, expected_value
+    def it_applies_the_smoother(self, values, window, expected_value):
+        smoother = _SingleSideMovingAvgSmoother(window)
 
-    @pytest.fixture(params=[(30, 4, False), (0, 4, False), (3, 12, True), (3, 3, True)])
-    def valid_window_fixture(self, request):
-        window, total_period, expected_value = request.param
-        return window, total_period, expected_value
+        smoothed_values = smoother._smoother(values)
+
+        np.testing.assert_array_almost_equal(smoothed_values, expected_value)
