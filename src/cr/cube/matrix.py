@@ -723,7 +723,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
     @lazyproperty
     def _row_proportions(self):
         """2D np.float64 ndarray of row proportions for each matrix cell."""
-        return (self._counts.T / self._rows_margin.T).T
+        return (self._counts.T / self._rows_margin).T
 
     @lazyproperty
     def _rows_margin(self):
