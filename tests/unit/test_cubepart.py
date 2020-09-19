@@ -128,42 +128,9 @@ class DescribeCubePartition(object):
 
         assert alpha_values == expected_value
 
-    def but_it_raises_on_invalid_alpha_values(self, alpha_values_raises_fixture):
-        pw_indices_dict, exception_type, expected_message = alpha_values_raises_fixture
-        cube_partition = CubePartition(None, {"pairwise_indices": pw_indices_dict})
-
-        with pytest.raises(exception_type) as e:
-            cube_partition._alpha_values
-
-        assert str(e.value) == expected_message
-
     @pytest.mark.parametrize(
-        "pw_indices_dict, expected_value",
+        "pw_indices_dict, exception_type, expected_message",
         (
-            # --- default value is True ---
-            ({}, True),
-            ({"only_larger": "foobar"}, True),
-            ({"only_larger": False}, False),
-        ),
-    )
-    def it_knows_the_only_larger_flag_state_to_help(
-        self, _transforms_dict_prop_, pw_indices_dict, expected_value
-    ):
-        _transforms_dict_prop_.return_value = {"pairwise_indices": pw_indices_dict}
-        assert CubePartition(None)._only_larger == expected_value
-
-    @pytest.mark.parametrize(
-        "transforms, expected_value",
-        ((None, {}), ({"trans": "forms"}, {"trans": "forms"})),
-    )
-    def it_provides_the_transforms_dict_to_help(self, transforms, expected_value):
-        """Handles defaulting of transforms arg."""
-        assert CubePartition(None, transforms)._transforms_dict == expected_value
-
-    # fixtures -------------------------------------------------------
-
-    @pytest.fixture(
-        params=(
             # --- type errors ---
             (
                 {"alpha": {"al": "pha"}},
@@ -199,11 +166,40 @@ class DescribeCubePartition(object):
                 "transforms.pairwise_indices.alpha must be a list of 1 or 2 float "
                 "values between 0.0 and 1.0 exclusive. Got %s" % repr([0.01, ".05"]),
             ),
-        )
+        ),
     )
-    def alpha_values_raises_fixture(self, request):
-        pw_indices_dict, exception_type, expected_message = request.param
-        return pw_indices_dict, exception_type, expected_message
+    def but_it_raises_on_invalid_alpha_values(
+        self, pw_indices_dict, exception_type, expected_message
+    ):
+        cube_partition = CubePartition(None, {"pairwise_indices": pw_indices_dict})
+
+        with pytest.raises(exception_type) as e:
+            cube_partition._alpha_values
+
+        assert str(e.value) == expected_message
+
+    @pytest.mark.parametrize(
+        "pw_indices_dict, expected_value",
+        (
+            # --- default value is True ---
+            ({}, True),
+            ({"only_larger": "foobar"}, True),
+            ({"only_larger": False}, False),
+        ),
+    )
+    def it_knows_the_only_larger_flag_state_to_help(
+        self, _transforms_dict_prop_, pw_indices_dict, expected_value
+    ):
+        _transforms_dict_prop_.return_value = {"pairwise_indices": pw_indices_dict}
+        assert CubePartition(None)._only_larger == expected_value
+
+    @pytest.mark.parametrize(
+        "transforms, expected_value",
+        ((None, {}), ({"trans": "forms"}, {"trans": "forms"})),
+    )
+    def it_provides_the_transforms_dict_to_help(self, transforms, expected_value):
+        """Handles defaulting of transforms arg."""
+        assert CubePartition(None, transforms)._transforms_dict == expected_value
 
     # fixture components ---------------------------------------------
 
