@@ -109,7 +109,7 @@ class DescribeIntegrated_Measures(object):
     """Integration-tests that exercise the `cr.cube.cube._Measures` object."""
 
     @pytest.mark.parametrize(
-        "cube_dict, expected_value",
+        "cube_response, expected_value",
         (
             # ---has {'query': {'weight': url}}---
             (CR.ADMIT_X_GENDER_WEIGHTED, True),
@@ -123,7 +123,8 @@ class DescribeIntegrated_Measures(object):
             ({"weight_url": "https://y"}, True),
         ),
     )
-    def it_knows_when_its_measures_are_weighted(self, cube_dict, expected_value):
+    def it_knows_when_its_measures_are_weighted(self, cube_response, expected_value):
+        cube_dict = cube_response.get("value", cube_response)
         measures = _Measures(cube_dict, None)
 
         is_weighted = measures.is_weighted
