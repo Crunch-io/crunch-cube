@@ -596,7 +596,6 @@ class CubeSlice(object):
         are calculated for each of them separately, and then stacked together
         in the resulting array.
         """
-        # __import__("ipdb").set_trace()
         if self.mr_dim_ind == 0:
             # --This is a special case where broadcasting cannot be
             # --automatically done. We need to "inflate" the single dimensional
