@@ -82,18 +82,26 @@ class Describe_ColumnPairwiseSignificance:
             _ColumnPairwiseSignificance(slice_, col_idx).summary_p_vals, expected
         )
 
+    @pytest.mark.parametrize(
+        "only_larger, col_idx, t_stats, p_vals, expected",
+        (
+            (True, 1, [-0.6793662, 0.0, -1], [0.6201015, 1.0, 0.01], (2,)),
+            (False, 0, None, [1, 0.01, 0.01], (1, 2)),
+        ),
+    )
     def it_can_calculate_summary_pairwise_indices(
         self,
         slice_,
-        summary_pairwise_indices_fixture,
+        only_larger,
+        col_idx,
+        t_stats,
+        p_vals,
+        expected,
         summary_p_vals_prop,
         summary_t_stats_prop,
     ):
-        only_larger, col_idx, t_stats, p_vals, expected = (
-            summary_pairwise_indices_fixture
-        )
-        summary_p_vals_prop.return_value = p_vals
-        summary_t_stats_prop.return_value = t_stats
+        summary_p_vals_prop.return_value = np.array(p_vals)
+        summary_t_stats_prop.return_value = np.array(t_stats)
         np.testing.assert_array_equal(
             _ColumnPairwiseSignificance(
                 slice_, col_idx, only_larger=only_larger
