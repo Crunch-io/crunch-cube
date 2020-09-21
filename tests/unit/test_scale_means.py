@@ -23,18 +23,9 @@ def margin(axis):
     return ROW_MARGIN if axis else COL_MARGIN
 
 
-def test_scale_means_marginal(scale_means_fixture):
-    scale_means, axis, expected = scale_means_fixture
-    assert scale_means.margin(axis) == expected
-
-
-def test_inflate(inflate_fixture):
-    dim_ind, scale_means, expected = inflate_fixture
-    assert scale_means._inflate(dim_ind) == expected
-
-
-@pytest.fixture(
-    params=[
+@pytest.mark.parametrize(
+    "values, margin, axis, ndim, expected",
+    (
         (
             [None, ROWS_DIM_VALUES],
             margin,
@@ -57,48 +48,37 @@ def test_inflate(inflate_fixture):
             np.sum(COL_MARGIN * ROWS_DIM_VALUES) / np.sum(COL_MARGIN),
         ),
         ([None, None], margin, 0, 2, None),
-    ]
+    ),
 )
-def scale_means_fixture(request, values_prop_):
-    values, margin, axis, ndim, expected = request.param
+def test_scale_means_marginal(values, margin, axis, ndim, expected, values_prop_):
     values_prop_.return_value = values
     slice_ = Mock()
     slice_.ndim = ndim
     slice_.margin = margin
     scale_means = ScaleMeans(slice_)
-    return scale_means, axis, expected
+    assert scale_means.margin(axis) == expected
 
 
-@pytest.fixture
-def values_prop_(request):
-    return property_mock(request, ScaleMeans, "values")
-
-
-@pytest.fixture(
-    params=[
+@pytest.mark.parametrize(
+    "dim_ind, ndim, shape, expected ",
+    (
         (0, 2, (Mock(), Mock()), True),
         (1, 2, (Mock(), Mock()), False),
         (0, 2, (Mock(),), False),
         (0, 1, (Mock(),), False),
-    ]
+    ),
 )
-def inflate_fixture(request):
-    dim_ind, ndim, shape, expected = request.param
+def test_inflate(dim_ind, ndim, shape, expected):
     slice_ = Mock()
     slice_.ndim = ndim
     slice_.get_shape.return_value = shape
     scale_means = ScaleMeans(slice_)
-    return dim_ind, scale_means, expected
+    assert scale_means._inflate(dim_ind) == expected
 
 
-def test_valid_indices(valid_indices_fixture):
-    scale_means, axis, expected = valid_indices_fixture
-    actual = scale_means._valid_indices(axis)
-    np.testing.assert_equal(actual, expected)
-
-
-@pytest.fixture(
-    params=[
+@pytest.mark.parametrize(
+    "dimensions, axis, expected",
+    (
         ([Mock(numeric_values=[])], 0, [slice(None)]),
         ([Mock(numeric_values=[1, 2, 3])], 0, [np.array([True, True, True])]),
         (
@@ -113,10 +93,18 @@ def test_valid_indices(valid_indices_fixture):
             [np.array([True, True, True])],
         ),
         ([Mock(numeric_values=[1, 2, 3]), Mock(numeric_values=[])], 1, [slice(None)]),
-    ]
+    ),
 )
-def valid_indices_fixture(request):
-    dimensions, axis, expected = request.param
+def test_valid_indices(dimensions, axis, expected):
     slice_ = Mock()
     slice_.dimensions = dimensions
-    return ScaleMeans(slice_), axis, expected
+    actual = ScaleMeans(slice_)._valid_indices(axis)
+    np.testing.assert_equal(actual, expected)
+
+
+# fixture components ---------------------------------------------
+
+
+@pytest.fixture
+def values_prop_(request):
+    return property_mock(request, ScaleMeans, "values")

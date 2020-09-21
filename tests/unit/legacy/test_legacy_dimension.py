@@ -241,8 +241,17 @@ class Describe_RawDimension(object):
 
         assert dimension_dict == dimension_dict_
 
-    def it_parses_the_base_type_to_help(self, base_type_fixture):
-        dimension_dict, expected_value = base_type_fixture
+    @pytest.mark.parametrize(
+        "dimension_dict, expected_value",
+        (
+            ({"type": {"class": "categorical"}}, "categorical"),
+            (
+                {"type": {"class": "enum", "subtype": {"class": "variable"}}},
+                "enum.variable",
+            ),
+        ),
+    )
+    def it_parses_the_base_type_to_help(self, dimension_dict, expected_value):
         raw_dimension = _RawDimension(dimension_dict, None)
 
         base_type = raw_dimension._base_type
@@ -254,14 +263,26 @@ class Describe_RawDimension(object):
         with pytest.raises(NotImplementedError):
             raw_dimension._base_type
 
+    @pytest.mark.parametrize(
+        "base_type, cat_type, arr_type, expected_value",
+        (
+            ("categorical", DT.CAT, None, DT.CAT),
+            ("enum.variable", None, DT.MR, DT.MR),
+            ("enum.datetime", None, None, DT.DATETIME),
+            ("enum.numeric", None, None, DT.BINNED_NUMERIC),
+            ("enum.text", None, None, DT.TEXT),
+        ),
+    )
     def it_determines_the_dimension_type(
         self,
-        dim_type_fixture,
+        base_type,
+        cat_type,
+        arr_type,
+        expected_value,
         _base_type_prop_,
         _resolve_categorical_,
         _resolve_array_type_,
     ):
-        base_type, cat_type, arr_type, expected_value = dim_type_fixture
         _base_type_prop_.return_value = base_type
         _resolve_categorical_.return_value = cat_type if cat_type else None
         _resolve_array_type_.return_value = arr_type if arr_type else None
@@ -289,18 +310,32 @@ class Describe_RawDimension(object):
 
         assert alias == "varski"
 
+    @pytest.mark.parametrize(
+        "dimension_dict, expected_value",
+        (
+            ({"type": {}}, False),
+            ({"type": {"categories": []}}, False),
+            ({"type": {"categories": [{}, {}]}}, False),
+            ({"type": {"categories": [{"selected": False}, {}]}}, False),
+            ({"type": {"categories": [{"selected": True}, {}]}}, True),
+        ),
+    )
     def it_can_tell_when_a_dimension_has_a_selected_category_to_help(
-        self, has_selected_fixture
+        self, dimension_dict, expected_value
     ):
-        dimension_dict, expected_value = has_selected_fixture
         raw_dimension = _RawDimension(dimension_dict, None)
 
         has_selected_category = raw_dimension._has_selected_category
 
         assert has_selected_category is expected_value
 
-    def it_distinguishes_an_array_categorical_type_to_help(self, is_array_fixture):
-        dimension_dict, expected_value = is_array_fixture
+    @pytest.mark.parametrize(
+        "dimension_dict, expected_value",
+        (({"references": {}}, False), ({"references": {"subreferences": {}}}, True)),
+    )
+    def it_distinguishes_an_array_categorical_type_to_help(
+        self, dimension_dict, expected_value
+    ):
         raw_dimension = _RawDimension(dimension_dict, None)
 
         is_array_cat = raw_dimension._is_array_cat
@@ -328,10 +363,24 @@ class Describe_RawDimension(object):
         next_raw_dimension = raw_dimension._next_raw_dimension
         assert next_raw_dimension is None
 
+    @pytest.mark.parametrize(
+        "is_last, base_type, has_sel_cat, alias, expected_value",
+        ((False, None, None, None, DT.CA),),
+    )
     def it_resolves_an_array_type_to_help(
-        self, resolve_arr_fixture, _next_raw_dimension_prop_
+        self,
+        is_last,
+        base_type,
+        has_sel_cat,
+        alias,
+        expected_value,
+        _next_raw_dimension_prop_,
+        raw_dimension_,
     ):
-        next_raw_dimension, expected_value = resolve_arr_fixture
+        raw_dimension_._base_type = base_type
+        raw_dimension_._has_selected_category = has_sel_cat
+        raw_dimension_._alias = alias
+        next_raw_dimension = None if is_last else raw_dimension_
         _next_raw_dimension_prop_.return_value = next_raw_dimension
         raw_dimension = _RawDimension(None, None)
 
@@ -339,10 +388,23 @@ class Describe_RawDimension(object):
 
         assert dimension_type == expected_value
 
+    @pytest.mark.parametrize(
+        "is_array_cat, has_selected_cat, expected_value",
+        (
+            (False, False, DT.CAT),
+            (False, True, DT.LOGICAL),
+            (True, False, DT.CA_CAT),
+            (True, True, DT.MR_CAT),
+        ),
+    )
     def it_resolves_a_categorical_type_to_help(
-        self, resolve_cat_fixture, _is_array_cat_prop_, _has_selected_category_prop_
+        self,
+        is_array_cat,
+        has_selected_cat,
+        expected_value,
+        _is_array_cat_prop_,
+        _has_selected_category_prop_,
     ):
-        is_array_cat, has_selected_cat, expected_value = resolve_cat_fixture
         _is_array_cat_prop_.return_value = is_array_cat
         _has_selected_category_prop_.return_value = has_selected_cat
         raw_dimension = _RawDimension(None, None)
@@ -350,78 +412,6 @@ class Describe_RawDimension(object):
         dimension_type = raw_dimension._resolve_categorical()
 
         assert dimension_type == expected_value
-
-    # fixtures -------------------------------------------------------
-
-    @pytest.fixture(
-        params=[
-            ({"type": {"class": "categorical"}}, "categorical"),
-            (
-                {"type": {"class": "enum", "subtype": {"class": "variable"}}},
-                "enum.variable",
-            ),
-        ]
-    )
-    def base_type_fixture(self, request):
-        dimension_dict, expected_value = request.param
-        return dimension_dict, expected_value
-
-    @pytest.fixture(
-        params=[
-            ("categorical", DT.CAT, None, DT.CAT),
-            ("enum.variable", None, DT.MR, DT.MR),
-            ("enum.datetime", None, None, DT.DATETIME),
-            ("enum.numeric", None, None, DT.BINNED_NUMERIC),
-            ("enum.text", None, None, DT.TEXT),
-        ]
-    )
-    def dim_type_fixture(self, request):
-        base_type, cat_type, arr_type, expected_value = request.param
-        return base_type, cat_type, arr_type, expected_value
-
-    @pytest.fixture(
-        params=[
-            ({"type": {}}, False),
-            ({"type": {"categories": []}}, False),
-            ({"type": {"categories": [{}, {}]}}, False),
-            ({"type": {"categories": [{"selected": False}, {}]}}, False),
-            ({"type": {"categories": [{"selected": True}, {}]}}, True),
-        ]
-    )
-    def has_selected_fixture(self, request):
-        dimension_dict, expected_value = request.param
-        return dimension_dict, expected_value
-
-    @pytest.fixture(
-        params=[
-            ({"references": {}}, False),
-            ({"references": {"subreferences": {}}}, True),
-        ]
-    )
-    def is_array_fixture(self, request):
-        dimension_dict, expected_value = request.param
-        return dimension_dict, expected_value
-
-    @pytest.fixture(params=[(False, None, None, None, DT.CA)])
-    def resolve_arr_fixture(self, request, raw_dimension_):
-        is_last, base_type, has_sel_cat, alias, expected_value = request.param
-        raw_dimension_._base_type = base_type
-        raw_dimension_._has_selected_category = has_sel_cat
-        raw_dimension_._alias = alias
-        next_raw_dimension_ = None if is_last else raw_dimension_
-        return next_raw_dimension_, expected_value
-
-    @pytest.fixture(
-        params=[
-            (False, False, DT.CAT),
-            (False, True, DT.LOGICAL),
-            (True, False, DT.CA_CAT),
-            (True, True, DT.MR_CAT),
-        ]
-    )
-    def resolve_cat_fixture(self, request):
-        is_array_cat, has_selected_cat, expected_value = request.param
-        return is_array_cat, has_selected_cat, expected_value
 
     # fixture components ---------------------------------------------
 
@@ -459,8 +449,16 @@ class Describe_RawDimension(object):
 
 
 class DescribeDimension(object):
-    def it_knows_its_description(self, description_fixture):
-        dimension_dict, expected_value = description_fixture
+    @pytest.mark.parametrize(
+        "dimension_dict, expected_value",
+        (
+            ({"references": {}}, ""),
+            ({"references": {"description": None}}, ""),
+            ({"references": {"description": ""}}, ""),
+            ({"references": {"description": "Crunchiness"}}, "Crunchiness"),
+        ),
+    )
+    def it_knows_its_description(self, dimension_dict, expected_value):
         dimension = Dimension(dimension_dict, None)
 
         description = dimension.description
@@ -472,10 +470,27 @@ class DescribeDimension(object):
         dimension_type = dimension.dimension_type
         assert dimension_type == DT.CAT
 
+    @pytest.mark.parametrize(
+        "dimension_type, expected_value",
+        ((DT.MR_CAT, ()), (DT.LOGICAL, ()), (DT.CAT, ((0, (1, 2)), (3, (4, 5))))),
+    )
     def it_provides_subtotal_indices(
-        self, hs_indices_fixture, dimension_type_prop_, _subtotals_prop_
+        self,
+        request,
+        dimension_type,
+        expected_value,
+        dimension_type_prop_,
+        _subtotals_prop_,
     ):
-        dimension_type, subtotals_, expected_value = hs_indices_fixture
+        subtotals_ = (
+            instance_mock(
+                request,
+                _Subtotal,
+                anchor_idx=idx * 3,
+                addend_idxs=(idx + 1 + (2 * idx), idx + 2 + (2 * idx)),
+            )
+            for idx in range(2)
+        )
         dimension_type_prop_.return_value = dimension_type
         _subtotals_prop_.return_value = subtotals_
         dimension = Dimension(None, None)
@@ -484,8 +499,21 @@ class DescribeDimension(object):
 
         assert hs_indices == expected_value
 
-    def it_knows_whether_it_is_marginable(self, marginable_fixture):
-        dimension_type, expected_value = marginable_fixture
+    @pytest.mark.parametrize(
+        "dimension_type, expected_value",
+        (
+            (DT.CAT, True),
+            (DT.CA_SUBVAR, False),
+            (DT.CA_CAT, True),
+            (DT.MR_SUBVAR, False),
+            (DT.MR_CAT, False),
+            (DT.LOGICAL, False),
+            (DT.BINNED_NUMERIC, True),
+            (DT.DATETIME, True),
+            (DT.TEXT, True),
+        ),
+    )
+    def it_knows_whether_it_is_marginable(self, dimension_type, expected_value):
         dimension = Dimension(None, dimension_type)
 
         is_marginable = dimension.is_marginable
@@ -505,73 +533,9 @@ class DescribeDimension(object):
 
         assert numeric_values == (1, 2.2, np.nan)
 
-    def it_provides_access_to_its_subtotals_to_help(
-        self,
-        subtotals_fixture,
-        _Subtotals_,
-        subtotals_,
-        _valid_elements_prop_,
-        valid_elements_,
-    ):
-        dimension_dict, insertion_dicts = subtotals_fixture
-        _valid_elements_prop_.return_value = valid_elements_
-        _Subtotals_.return_value = subtotals_
-        dimension = Dimension(dimension_dict, None)
-
-        subtotals = dimension._subtotals
-
-        _Subtotals_.assert_called_once_with(insertion_dicts, valid_elements_)
-        assert subtotals is subtotals_
-
-    # fixtures -------------------------------------------------------
-
-    @pytest.fixture(
-        params=[
-            ({"references": {}}, ""),
-            ({"references": {"description": None}}, ""),
-            ({"references": {"description": ""}}, ""),
-            ({"references": {"description": "Crunchiness"}}, "Crunchiness"),
-        ]
-    )
-    def description_fixture(self, request):
-        dimension_dict, expected_value = request.param
-        return dimension_dict, expected_value
-
-    @pytest.fixture(
-        params=[(DT.MR_CAT, ()), (DT.LOGICAL, ()), (DT.CAT, ((0, (1, 2)), (3, (4, 5))))]
-    )
-    def hs_indices_fixture(self, request):
-        dimension_type, expected_value = request.param
-        subtotals_ = (
-            instance_mock(
-                request,
-                _Subtotal,
-                anchor_idx=idx * 3,
-                addend_idxs=(idx + 1 + (2 * idx), idx + 2 + (2 * idx)),
-            )
-            for idx in range(2)
-        )
-        return dimension_type, subtotals_, expected_value
-
-    @pytest.fixture(
-        params=[
-            (DT.CAT, True),
-            (DT.CA_SUBVAR, False),
-            (DT.CA_CAT, True),
-            (DT.MR_SUBVAR, False),
-            (DT.MR_CAT, False),
-            (DT.LOGICAL, False),
-            (DT.BINNED_NUMERIC, True),
-            (DT.DATETIME, True),
-            (DT.TEXT, True),
-        ]
-    )
-    def marginable_fixture(self, request):
-        dimension_type, expected_value = request.param
-        return dimension_type, expected_value
-
-    @pytest.fixture(
-        params=[
+    @pytest.mark.parametrize(
+        "dimension_dict, insertion_dicts",
+        (
             ({}, []),
             ({"references": {}}, []),
             ({"references": {"view": {}}}, []),
@@ -592,12 +556,26 @@ class DescribeDimension(object):
                 },
                 [{"insertion": "dict-1"}, {"insertion": "dict-2"}],
             ),
-        ]
+        ),
     )
-    def subtotals_fixture(self, request):
-        dimension_dict, insertion_dicts = request.param
+    def it_provides_access_to_its_subtotals_to_help(
+        self,
+        dimension_dict,
+        insertion_dicts,
+        _Subtotals_,
+        subtotals_,
+        _valid_elements_prop_,
+        valid_elements_,
+    ):
         dimension_dict["type"] = {"class": "categorical", "categories": []}
-        return dimension_dict, insertion_dicts
+        _valid_elements_prop_.return_value = valid_elements_
+        _Subtotals_.return_value = subtotals_
+        dimension = Dimension(dimension_dict, None)
+
+        subtotals = dimension._subtotals
+
+        _Subtotals_.assert_called_once_with(insertion_dicts, valid_elements_)
+        assert subtotals is subtotals_
 
     # fixture components ---------------------------------------------
 
@@ -670,14 +648,29 @@ class Describe_BaseElements(object):
 
         assert element is elements_[1]
 
-    def it_provides_element_factory_inputs_to_help(self, makings_fixture):
-        type_dict, expected_element_class = makings_fixture[:2]
-        expected_element_dicts = makings_fixture[2]
+    @pytest.mark.parametrize(
+        "type_dict, expected_element_cls, expected_element_dicts",
+        (
+            (
+                {"class": "categorical", "categories": ["cat", "dicts"]},
+                _Category,
+                ["cat", "dicts"],
+            ),
+            (
+                {"class": "enum", "elements": ["element", "dicts"]},
+                _Element,
+                ["element", "dicts"],
+            ),
+        ),
+    )
+    def it_provides_element_factory_inputs_to_help(
+        self, type_dict, expected_element_cls, expected_element_dicts
+    ):
         elements = _BaseElements(type_dict)
 
         ElementCls, element_dicts = elements._element_makings
 
-        assert ElementCls == expected_element_class
+        assert ElementCls == expected_element_cls
         assert element_dicts == expected_element_dicts
 
     def it_maintains_a_dict_of_elements_by_id_to_help(self, request, _elements_prop_):
@@ -697,26 +690,6 @@ class Describe_BaseElements(object):
         # ---must be implemented by each subclass---
         with pytest.raises(NotImplementedError):
             base_elements._elements
-
-    # fixtures -------------------------------------------------------
-
-    @pytest.fixture(
-        params=[
-            (
-                {"class": "categorical", "categories": ["cat", "dicts"]},
-                _Category,
-                ["cat", "dicts"],
-            ),
-            (
-                {"class": "enum", "elements": ["element", "dicts"]},
-                _Element,
-                ["element", "dicts"],
-            ),
-        ]
-    )
-    def makings_fixture(self, request):
-        type_dict, expected_element_cls, expected_element_dicts = request.param
-        return type_dict, expected_element_cls, expected_element_dicts
 
     # fixture components ---------------------------------------------
 
@@ -831,28 +804,9 @@ class Describe_BaseElement(object):
         index = element.index
         assert index == 17
 
-    def it_knows_whether_its_missing_or_valid(self, missing_fixture):
-        element_dict, expected_value = missing_fixture
-        element = _BaseElement(element_dict, None, None)
-
-        missing = element.missing
-
-        # ---only True or False, no Truthy or Falsy (so use `is` not `==`)---
-        assert missing is expected_value
-
-    def it_knows_its_numeric_value(self, numeric_value_fixture):
-        element_dict, expected_value = numeric_value_fixture
-        element = _BaseElement(element_dict, None, None)
-
-        numeric_value = element.numeric_value
-
-        # ---np.nan != np.nan, but np.nan in [np.nan] works---
-        assert numeric_value in [expected_value]
-
-    # fixtures -------------------------------------------------------
-
-    @pytest.fixture(
-        params=[
+    @pytest.mark.parametrize(
+        "element_dict, expected_value",
+        (
             ({}, False),
             ({"missing": None}, False),
             ({"missing": False}, False),
@@ -860,14 +814,19 @@ class Describe_BaseElement(object):
             # ---not expected values, but just in case---
             ({"missing": 0}, False),
             ({"missing": 1}, True),
-        ]
+        ),
     )
-    def missing_fixture(self, request):
-        element_dict, expected_value = request.param
-        return element_dict, expected_value
+    def it_knows_whether_its_missing_or_valid(self, element_dict, expected_value):
+        element = _BaseElement(element_dict, None, None)
 
-    @pytest.fixture(
-        params=[
+        missing = element.missing
+
+        # ---only True or False, no Truthy or Falsy (so use `is` not `==`)---
+        assert missing is expected_value
+
+    @pytest.mark.parametrize(
+        "element_dict, expected_value",
+        (
             ({}, np.nan),
             ({"numeric_value": None}, np.nan),
             ({"numeric_value": 0}, 0),
@@ -878,51 +837,40 @@ class Describe_BaseElement(object):
             ({"numeric_value": "666"}, "666"),
             ({"numeric_value": {}}, {}),
             ({"numeric_value": {"?": 8}}, {"?": 8}),
-        ]
+        ),
     )
-    def numeric_value_fixture(self, request):
-        element_dict, expected_value = request.param
-        return element_dict, expected_value
+    def it_knows_its_numeric_value(self, element_dict, expected_value):
+        element = _BaseElement(element_dict, None, None)
+
+        numeric_value = element.numeric_value
+
+        # ---np.nan != np.nan, but np.nan in [np.nan] works---
+        assert numeric_value in [expected_value]
 
 
 class Describe_Category(object):
-    def it_knows_its_label(self, label_fixture):
-        category_dict, expected_value = label_fixture
+    @pytest.mark.parametrize(
+        "category_dict, expected_value ",
+        (
+            ({}, ""),
+            ({"name": ""}, ""),
+            ({"name": None}, ""),
+            ({"name": "Bob"}, "Bob"),
+            ({"name": "Hinzufägen"}, "Hinzufägen"),
+        ),
+    )
+    def it_knows_its_label(self, category_dict, expected_value):
         category = _Category(category_dict, None, None)
 
         label = category.label
 
         assert label == expected_value
 
-    # fixtures -------------------------------------------------------
-
-    @pytest.fixture(
-        params=[
-            ({}, ""),
-            ({"name": ""}, ""),
-            ({"name": None}, ""),
-            ({"name": "Bob"}, "Bob"),
-            ({"name": "Hinzufägen"}, "Hinzufägen"),
-        ]
-    )
-    def label_fixture(self, request):
-        category_dict, expected_value = request.param
-        return category_dict, expected_value
-
 
 class Describe_Element(object):
-    def it_knows_its_label(self, label_fixture):
-        element_dict, expected_value = label_fixture
-        element = _Element(element_dict, None, None)
-
-        label = element.label
-
-        assert label == expected_value
-
-    # fixtures -------------------------------------------------------
-
-    @pytest.fixture(
-        params=[
+    @pytest.mark.parametrize(
+        "element_dict, expected_value",
+        (
             ({}, ""),
             ({"value": ["A", "F"]}, "A-F"),
             ({"value": [1.2, 3.4]}, "1.2-3.4"),
@@ -932,11 +880,14 @@ class Describe_Element(object):
             ({"value": "Fähig"}, "Fähig"),
             ({"value": {"references": {}}}, ""),
             ({"value": {"references": {"name": "Tom"}}}, "Tom"),
-        ]
+        ),
     )
-    def label_fixture(self, request):
-        element_dict, expected_value = request.param
-        return element_dict, expected_value
+    def it_knows_its_label(self, element_dict, expected_value):
+        element = _Element(element_dict, None, None)
+
+        label = element.label
+
+        assert label == expected_value
 
 
 class Describe_Subtotals(object):
@@ -969,40 +920,9 @@ class Describe_Subtotals(object):
 
         assert element_ids == {0, 1, 2}
 
-    def it_iterates_the_valid_subtotal_insertion_dicts_to_help(
-        self, iter_valid_fixture, _element_ids_prop_
-    ):
-        insertion_dicts, element_ids, expected_value = iter_valid_fixture
-        _element_ids_prop_.return_value = element_ids
-        subtotals = _Subtotals(insertion_dicts, None)
-
-        subtotal_dicts = tuple(subtotals._iter_valid_subtotal_dicts())
-
-        assert subtotal_dicts == expected_value
-
-    def it_constructs_its_subtotal_objects_to_help(
-        self, request, _iter_valid_subtotal_dicts_, valid_elements_, _Subtotal_
-    ):
-        subtotal_dicts_ = tuple({"subtotal-dict": idx} for idx in range(3))
-        subtotal_objs_ = tuple(
-            instance_mock(request, _Subtotal, name="subtotal-%d" % idx)
-            for idx in range(3)
-        )
-        _iter_valid_subtotal_dicts_.return_value = iter(subtotal_dicts_)
-        _Subtotal_.side_effect = iter(subtotal_objs_)
-        subtotals = _Subtotals(None, valid_elements_)
-
-        subtotal_objs = subtotals._subtotals
-
-        assert _Subtotal_.call_args_list == [
-            call(subtot_dict_, valid_elements_) for subtot_dict_ in subtotal_dicts_
-        ]
-        assert subtotal_objs == subtotal_objs_
-
-    # fixtures -------------------------------------------------------
-
-    @pytest.fixture(
-        params=[
+    @pytest.mark.parametrize(
+        "insertion_dicts, element_ids, expected_value",
+        (
             ([], (), ()),
             (["not-a-dict", None], (), ()),
             ([{"function": "hyperdrive"}], (), ()),
@@ -1030,11 +950,36 @@ class Describe_Subtotals(object):
                     {"function": "subtotal", "anchor": 9, "args": [5, 6], "name": "D"},
                 ),
             ),
-        ]
+        ),
     )
-    def iter_valid_fixture(self, request):
-        insertion_dicts, element_ids, expected_value = request.param
-        return insertion_dicts, element_ids, expected_value
+    def it_iterates_the_valid_subtotal_insertion_dicts_to_help(
+        self, insertion_dicts, element_ids, expected_value, _element_ids_prop_
+    ):
+        _element_ids_prop_.return_value = element_ids
+        subtotals = _Subtotals(insertion_dicts, None)
+
+        subtotal_dicts = tuple(subtotals._iter_valid_subtotal_dicts())
+
+        assert subtotal_dicts == expected_value
+
+    def it_constructs_its_subtotal_objects_to_help(
+        self, request, _iter_valid_subtotal_dicts_, valid_elements_, _Subtotal_
+    ):
+        subtotal_dicts_ = tuple({"subtotal-dict": idx} for idx in range(3))
+        subtotal_objs_ = tuple(
+            instance_mock(request, _Subtotal, name="subtotal-%d" % idx)
+            for idx in range(3)
+        )
+        _iter_valid_subtotal_dicts_.return_value = iter(subtotal_dicts_)
+        _Subtotal_.side_effect = iter(subtotal_objs_)
+        subtotals = _Subtotals(None, valid_elements_)
+
+        subtotal_objs = subtotals._subtotals
+
+        assert _Subtotal_.call_args_list == [
+            call(subtot_dict_, valid_elements_) for subtot_dict_ in subtotal_dicts_
+        ]
+        assert subtotal_objs == subtotal_objs_
 
     # fixture components ---------------------------------------------
 
@@ -1060,8 +1005,19 @@ class Describe_Subtotals(object):
 
 
 class Describe_Subtotal(object):
-    def it_knows_the_insertion_anchor(self, anchor_fixture, valid_elements_):
-        subtotal_dict, element_ids, expected_value = anchor_fixture
+    @pytest.mark.parametrize(
+        "subtotal_dict, element_ids, expected_value",
+        (
+            ({"anchor": 1}, {1, 2, 3}, 1),
+            ({"anchor": 4}, {1, 2, 3}, "bottom"),
+            ({"anchor": "Top"}, {1, 2, 3}, "top"),
+            # For an undefined anchor default to "bottom"
+            ({"anchor": None}, {1, 2, 3}, "bottom"),
+        ),
+    )
+    def it_knows_the_insertion_anchor(
+        self, subtotal_dict, element_ids, expected_value, valid_elements_
+    ):
         valid_elements_.element_ids = element_ids
         subtotal = _Subtotal(subtotal_dict, valid_elements_)
 
@@ -1069,10 +1025,21 @@ class Describe_Subtotal(object):
 
         assert anchor == expected_value
 
+    @pytest.mark.parametrize(
+        "anchor, index, call_count, expected_value",
+        (("top", None, 0, "top"), ("bottom", None, 0, "bottom"), (42, 7, 1, 7)),
+    )
     def it_knows_the_index_of_the_anchor_element(
-        self, anchor_idx_fixture, anchor_prop_, valid_elements_, element_
+        self,
+        anchor,
+        index,
+        call_count,
+        expected_value,
+        anchor_prop_,
+        valid_elements_,
+        element_,
     ):
-        anchor, index, calls, expected_value = anchor_idx_fixture
+        calls = [call(anchor)] * call_count
         anchor_prop_.return_value = anchor
         valid_elements_.get_by_id.return_value = element_
         element_.index_in_valids = index
@@ -1083,10 +1050,21 @@ class Describe_Subtotal(object):
         assert valid_elements_.get_by_id.call_args_list == calls
         assert anchor_idx == expected_value
 
+    @pytest.mark.parametrize(
+        "subtotal_dict, element_ids, expected_value",
+        (
+            ({}, {}, ()),
+            ({"args": [1]}, {1}, (1,)),
+            ({"args": [1, 2, 3]}, {1, 2, 3}, (1, 2, 3)),
+            ({"args": [1, 2, 3]}, {1, 3}, (1, 3)),
+            ({"args": [3, 2]}, {1, 2, 3}, (3, 2)),
+            ({"args": []}, {1, 2, 3}, ()),
+            ({"args": [1, 2, 3]}, {}, ()),
+        ),
+    )
     def it_provides_access_to_the_addend_element_ids(
-        self, addend_ids_fixture, valid_elements_
+        self, subtotal_dict, element_ids, expected_value, valid_elements_
     ):
-        subtotal_dict, element_ids, expected_value = addend_ids_fixture
         valid_elements_.element_ids = element_ids
         subtotal = _Subtotal(subtotal_dict, valid_elements_)
 
@@ -1109,63 +1087,16 @@ class Describe_Subtotal(object):
         assert valid_elements_.get_by_id.call_args_list == [call(3), call(6), call(9)]
         assert addend_idxs == (2, 4, 6)
 
-    def it_knows_the_subtotal_label(self, label_fixture):
-        subtotal_dict, expected_value = label_fixture
+    @pytest.mark.parametrize(
+        "subtotal_dict, expected_value",
+        (({}, ""), ({"name": None}, ""), ({"name": ""}, ""), ({"name": "Joe"}, "Joe")),
+    )
+    def it_knows_the_subtotal_label(self, subtotal_dict, expected_value):
         subtotal = _Subtotal(subtotal_dict, None)
 
         label = subtotal.label
 
         assert label == expected_value
-
-    # fixtures -------------------------------------------------------
-
-    @pytest.fixture(
-        params=[
-            ({}, {}, ()),
-            ({"args": [1]}, {1}, (1,)),
-            ({"args": [1, 2, 3]}, {1, 2, 3}, (1, 2, 3)),
-            ({"args": [1, 2, 3]}, {1, 3}, (1, 3)),
-            ({"args": [3, 2]}, {1, 2, 3}, (3, 2)),
-            ({"args": []}, {1, 2, 3}, ()),
-            ({"args": [1, 2, 3]}, {}, ()),
-        ]
-    )
-    def addend_ids_fixture(self, request):
-        subtotal_dict, element_ids, expected_value = request.param
-        return subtotal_dict, element_ids, expected_value
-
-    @pytest.fixture(
-        params=[
-            ({"anchor": 1}, {1, 2, 3}, 1),
-            ({"anchor": 4}, {1, 2, 3}, "bottom"),
-            ({"anchor": "Top"}, {1, 2, 3}, "top"),
-            # For an undefined anchor default to "bottom"
-            ({"anchor": None}, {1, 2, 3}, "bottom"),
-        ]
-    )
-    def anchor_fixture(self, request):
-        subtotal_dict, element_ids, expected_value = request.param
-        return subtotal_dict, element_ids, expected_value
-
-    @pytest.fixture(
-        params=[("top", None, 0, "top"), ("bottom", None, 0, "bottom"), (42, 7, 1, 7)]
-    )
-    def anchor_idx_fixture(self, request):
-        anchor, index, call_count, expected_value = request.param
-        calls = [call(anchor)] * call_count
-        return anchor, index, calls, expected_value
-
-    @pytest.fixture(
-        params=[
-            ({}, ""),
-            ({"name": None}, ""),
-            ({"name": ""}, ""),
-            ({"name": "Joe"}, "Joe"),
-        ]
-    )
-    def label_fixture(self, request):
-        subtotal_dict, expected_value = request.param
-        return subtotal_dict, expected_value
 
     # fixture components ---------------------------------------------
 

@@ -15,8 +15,25 @@ from ...unitutil import instance_mock, method_mock, property_mock
 
 
 class DescribeCubeSlice(object):
-    def it_can_calculate_correct_axis_for_cube(self, axis_fixture, cube_):
-        axis, ndim, ca_as_0th, expected_value = axis_fixture
+    @pytest.mark.parametrize(
+        "axis, ndim, ca_as_0th, expected_value",
+        (
+            (0, 1, False, 0),
+            (1, 1, False, 1),
+            (None, 1, False, None),
+            (0, 2, False, 0),
+            (1, 2, False, 1),
+            (None, 2, False, None),
+            (0, 3, False, 1),
+            (1, 3, False, 2),
+            (None, 3, False, None),
+            (0, 0, False, 0),
+            (None, 2, True, 1),
+        ),
+    )
+    def it_can_calculate_correct_axis_for_cube(
+        self, axis, ndim, ca_as_0th, expected_value, cube_
+    ):
         cube_.ndim = ndim
         slice_ = CubeSlice(cube_, None)
         slice_.ca_as_0th = ca_as_0th
@@ -30,8 +47,19 @@ class DescribeCubeSlice(object):
         with pytest.raises(NotImplementedError):
             slice_.wishart_pairwise_indices(axis=1)
 
-    def it_can_calculate_std_res(self, std_res_fixture, cube_, dim_types_prop_):
-        dim_types, expected_value = std_res_fixture
+    @pytest.mark.parametrize(
+        "dim_types, is_array", (((DT.CAT, DT.CAT), False), ((DT.MR, DT.CAT), True))
+    )
+    def it_can_calculate_std_res(
+        self,
+        dim_types,
+        is_array,
+        cube_,
+        dim_types_prop_,
+        _array_type_std_res,
+        _scalar_type_std_res,
+    ):
+        expected_value = _array_type_std_res if is_array else _scalar_type_std_res
         dim_types_prop_.return_value = dim_types
         slice_ = CubeSlice(cube_, None)
         counts, total, colsum, rowsum = Mock(), Mock(), Mock(), Mock()
@@ -40,8 +68,27 @@ class DescribeCubeSlice(object):
         # Assert correct methods are invoked
         expected_value.assert_called_once_with(slice_, counts, total, colsum, rowsum)
 
-    def it_can_extract_slice_from_cube_result(self, extract_fixture, cube_):
-        result, ndim, ca_as_0th, index, expected_value = extract_fixture
+    @pytest.mark.parametrize(
+        "result, ndim, ca_as_0th, index, expected_value",
+        (  # Expect same value as result, since cube has < 3 dimensions
+            (1, 1, False, 0, 1),
+            (1, 2, False, 1, 1),
+            # Expect same value as result, since there's nothing to index, even
+            # though the ndim is == 3
+            ([1], 3, False, 1, 1),
+            # Expect slicing to take place
+            ([0, 1, 2], 3, False, 0, 0),
+            ([0, 1, 2], 3, False, 1, 1),
+            ([0, 1, 2], 3, False, 2, 2),
+            # Return entire result if not capable to index correctly
+            ([0, 1, 2], 3, False, 3, [0, 1, 2]),
+            # Check that it converts extracted tuples
+            ((0, 1, (1, 2)), 3, False, 2, [1, 2]),
+        ),
+    )
+    def it_can_extract_slice_from_cube_result(
+        self, result, ndim, ca_as_0th, index, expected_value, cube_
+    ):
         cube_.ndim = ndim
         slice_ = CubeSlice(cube_, None)
         slice_.ca_as_0th = ca_as_0th
@@ -68,8 +115,15 @@ class DescribeCubeSlice(object):
         slice_ = CubeSlice(cube_, None)
         assert slice_.is_weighted == result_mock
 
-    def it_knows_its_dimension_types(self, dim_types_fixture, cube_):
-        cube_dim_types, expected_value = dim_types_fixture
+    @pytest.mark.parametrize(
+        "cube_dim_types, expected_value",
+        (
+            ((DT.CAT,), (DT.CAT,)),
+            ((DT.CA_SUBVAR, DT.CA_CAT), (DT.CA_SUBVAR, DT.CA_CAT)),
+            ((DT.CA_SUBVAR, DT.MR, DT.CA_CAT), (DT.MR, DT.CA_CAT)),
+        ),
+    )
+    def it_knows_its_dimension_types(self, cube_dim_types, expected_value, cube_):
         cube_.dim_types = cube_dim_types
         slice_ = CubeSlice(cube_, None)
 
@@ -77,8 +131,18 @@ class DescribeCubeSlice(object):
 
         assert dim_types == expected_value
 
-    def it_knows_its_name(self, name_fixture, dimensions_prop_):
-        dimensions, expected_name = name_fixture
+    @pytest.mark.parametrize(
+        "dim_names, expected_name",
+        (
+            ((), None),
+            (("fake slice name",), "fake slice name"),
+            (("fake slice name", "this is not the slice name"), "fake slice name"),
+        ),
+    )
+    def it_knows_its_name(self, request, dim_names, expected_name, dimensions_prop_):
+        dimensions = [instance_mock(request, Dimension) for _ in range(len(dim_names))]
+        for dimension, name in zip(dimensions, dim_names):
+            dimension.name = name
         dimensions_prop_.return_value = dimensions
         assert CubeSlice(None, None).name == expected_name
 
@@ -88,171 +152,9 @@ class DescribeCubeSlice(object):
         slice_ = CubeSlice(cube_, None)
         assert slice_.population_fraction == result_mock
 
-    def it_knows_its_scalar_type_std_res(self, scalar_std_res_fixture, cube_):
-        counts, total, colsum, rowsum, expected_value = scalar_std_res_fixture
-        slice_ = CubeSlice(cube_, None)
-        std_res = slice_._scalar_type_std_res(counts, total, colsum, rowsum)
-        np.testing.assert_almost_equal(std_res, expected_value)
-
-    def it_knows_its_univariate_ca_main_axis(self, cube_):
-        result_mock = "I am a fake univariate CA main axis result"
-        cube_.univariate_ca_main_axis = result_mock
-        slice_ = CubeSlice(cube_, None)
-        assert slice_.univariate_ca_main_axis == result_mock
-
-    def it_knows_whether_its_a_double_mr(self, is_double_mr_fixture, dim_types_prop_):
-        dim_types, expected_value = is_double_mr_fixture
-        dim_types_prop_.return_value = dim_types
-        slice_ = CubeSlice(None, None)
-
-        is_double_mr = slice_.is_double_mr
-
-        assert is_double_mr is expected_value
-
-    def it_can_compare_pairwise(
-        self, cube_, dim_types_prop_, ndim_prop_, pairwise_comparisons_fixture
-    ):
-        dim_types, slice_can_show = pairwise_comparisons_fixture
-        dim_types_prop_.return_value = dim_types
-        ndim_prop_.return_value = len(dim_types)
-        slice_ = CubeSlice(cube_, None)
-
-        assert slice_.can_compare_pairwise == slice_can_show
-
-    def it_updates_hs_dims_arguments(self, hs_fixture, cube_):
-        hs_dims, ndim, expected_value = hs_fixture
-        cube_.ndim = ndim
-        slice_ = CubeSlice(cube_, None)
-
-        updated_hs_dims = slice_._hs_dims_for_cube(hs_dims)
-
-        assert updated_hs_dims == expected_value
-
-    # fixtures -------------------------------------------------------
-
-    @pytest.fixture(
-        params=[
-            ((), None),
-            (("fake slice name",), "fake slice name"),
-            (("fake slice name", "this is not the slice name"), "fake slice name"),
-        ]
-    )
-    def name_fixture(self, request):
-        dim_names, expected_name = request.param
-        dimensions = [instance_mock(request, Dimension) for _ in range(len(dim_names))]
-        for dimension, name in zip(dimensions, dim_names):
-            dimension.name = name
-        return dimensions, expected_name
-
-    @pytest.fixture(
-        params=[
-            ((DT.CAT,), False),
-            ((DT.MR,), False),
-            ((DT.BINNED_NUMERIC,), False),
-            ((DT.DATETIME,), False),
-            ((DT.LOGICAL,), False),
-            ((DT.TEXT,), False),
-            ((DT.CA_CAT,), False),
-            ((DT.CA_SUBVAR, DT.CA_CAT), False),
-            ((DT.CA_SUBVAR, DT.MR, DT.CA_CAT), False),
-            ((DT.MR, DT.CAT), False),
-            ((DT.LOGICAL, DT.CAT), False),
-            ((DT.CA_CAT, DT.CAT), True),
-            ((DT.CAT, DT.CA_CAT), True),
-            ((DT.CAT, DT.CAT), True),
-            ((DT.BINNED_NUMERIC, DT.CAT), True),
-            ((DT.CAT, DT.BINNED_NUMERIC), True),
-            ((DT.DATETIME, DT.CAT), True),
-            ((DT.CAT, DT.DATETIME), True),
-            ((DT.CAT, DT.TEXT), True),
-            ((DT.TEXT, DT.CAT), True),
-        ]
-    )
-    def pairwise_comparisons_fixture(self, request):
-        dim_types, slice_can_show = request.param
-        return dim_types, slice_can_show
-
-    @pytest.fixture(
-        params=[
-            (0, 1, False, 0),
-            (1, 1, False, 1),
-            (None, 1, False, None),
-            (0, 2, False, 0),
-            (1, 2, False, 1),
-            (None, 2, False, None),
-            (0, 3, False, 1),
-            (1, 3, False, 2),
-            (None, 3, False, None),
-            (0, 0, False, 0),
-            (None, 2, True, 1),
-        ]
-    )
-    def axis_fixture(self, request):
-        axis, ndim, ca_as_0th, expected_value = request.param
-        return axis, ndim, ca_as_0th, expected_value
-
-    @pytest.fixture(
-        params=[
-            # Expect same value as result, since cube has < 3 dimensions
-            (1, 1, False, 0, 1),
-            (1, 2, False, 1, 1),
-            # Expect same value as result, since there's nothing to index, even
-            # though the ndim is == 3
-            ([1], 3, False, 1, 1),
-            # Expect slicing to take place
-            ([0, 1, 2], 3, False, 0, 0),
-            ([0, 1, 2], 3, False, 1, 1),
-            ([0, 1, 2], 3, False, 2, 2),
-            # Return entire result if not capable to index correctly
-            ([0, 1, 2], 3, False, 3, [0, 1, 2]),
-            # Check that it converts extracted tuples
-            ((0, 1, (1, 2)), 3, False, 2, [1, 2]),
-        ]
-    )
-    def extract_fixture(self, request):
-        result, ndim, ca_as_0th, index, expected = request.param
-        expected_value = np.array(expected)
-        return result, ndim, ca_as_0th, index, expected_value
-
-    @pytest.fixture(
-        params=[
-            ([0, 1], 1, [0, 1]),
-            ([0, 1], 2, [0, 1]),
-            ([0, 1], 3, [1, 2]),
-            (None, 2, None),
-            (None, 3, None),
-        ]
-    )
-    def hs_fixture(self, request):
-        axis, ndim, expected_value = request.param
-        return axis, ndim, expected_value
-
-    @pytest.fixture(
-        params=[
-            ((DT.CAT,), (DT.CAT,)),
-            ((DT.CA_SUBVAR, DT.CA_CAT), (DT.CA_SUBVAR, DT.CA_CAT)),
-            ((DT.CA_SUBVAR, DT.MR, DT.CA_CAT), (DT.MR, DT.CA_CAT)),
-        ]
-    )
-    def dim_types_fixture(self, request):
-        cube_dim_types, expected_value = request.param
-        return cube_dim_types, expected_value
-
-    @pytest.fixture(
-        params=[
-            ((DT.MR,), False),
-            ((DT.CAT, DT.CAT), False),
-            ((DT.MR, DT.CAT), False),
-            ((DT.CAT, DT.MR), False),
-            ((DT.MR, DT.MR), True),
-        ]
-    )
-    def is_double_mr_fixture(self, request):
-        dim_types, expected_value = request.param
-        return dim_types, expected_value
-
-    @pytest.fixture(
-        params=[
+    @pytest.mark.parametrize(
+        "counts, total, colsum, rowsum, expected_value",
+        (
             (
                 [
                     [
@@ -359,22 +261,96 @@ class DescribeCubeSlice(object):
                     ],
                 ],
             ),
-        ]
+        ),
     )
-    def scalar_std_res_fixture(self, request):
-        counts, total, colsum, rowsum, expected = request.param
+    def it_knows_its_scalar_type_std_res(
+        self, counts, total, colsum, rowsum, expected_value, cube_
+    ):
+        slice_ = CubeSlice(cube_, None)
         counts = np.array(counts)
         total = np.array(total)
         rowsum = np.array(rowsum)
         colsum = np.array(colsum)
-        expected_value = np.array(expected)
-        return counts, total, colsum, rowsum, expected_value
+        std_res = slice_._scalar_type_std_res(counts, total, colsum, rowsum)
+        np.testing.assert_almost_equal(std_res, expected_value)
 
-    @pytest.fixture(params=[((DT.CAT, DT.CAT), False), ((DT.MR, DT.CAT), True)])
-    def std_res_fixture(self, request, _array_type_std_res, _scalar_type_std_res):
-        dim_types, is_array = request.param
-        expected_value = _array_type_std_res if is_array else _scalar_type_std_res
-        return dim_types, expected_value
+    def it_knows_its_univariate_ca_main_axis(self, cube_):
+        result_mock = "I am a fake univariate CA main axis result"
+        cube_.univariate_ca_main_axis = result_mock
+        slice_ = CubeSlice(cube_, None)
+        assert slice_.univariate_ca_main_axis == result_mock
+
+    @pytest.mark.parametrize(
+        " dim_types, expected_value",
+        (
+            ((DT.MR,), False),
+            ((DT.CAT, DT.CAT), False),
+            ((DT.MR, DT.CAT), False),
+            ((DT.CAT, DT.MR), False),
+            ((DT.MR, DT.MR), True),
+        ),
+    )
+    def it_knows_whether_its_a_double_mr(
+        self, dim_types, expected_value, dim_types_prop_
+    ):
+        dim_types_prop_.return_value = dim_types
+        slice_ = CubeSlice(None, None)
+
+        is_double_mr = slice_.is_double_mr
+
+        assert is_double_mr is expected_value
+
+    @pytest.mark.parametrize(
+        "dim_types, slice_can_show",
+        (
+            ((DT.CAT,), False),
+            ((DT.MR,), False),
+            ((DT.BINNED_NUMERIC,), False),
+            ((DT.DATETIME,), False),
+            ((DT.LOGICAL,), False),
+            ((DT.TEXT,), False),
+            ((DT.CA_CAT,), False),
+            ((DT.CA_SUBVAR, DT.CA_CAT), False),
+            ((DT.CA_SUBVAR, DT.MR, DT.CA_CAT), False),
+            ((DT.MR, DT.CAT), False),
+            ((DT.LOGICAL, DT.CAT), False),
+            ((DT.CA_CAT, DT.CAT), True),
+            ((DT.CAT, DT.CA_CAT), True),
+            ((DT.CAT, DT.CAT), True),
+            ((DT.BINNED_NUMERIC, DT.CAT), True),
+            ((DT.CAT, DT.BINNED_NUMERIC), True),
+            ((DT.DATETIME, DT.CAT), True),
+            ((DT.CAT, DT.DATETIME), True),
+            ((DT.CAT, DT.TEXT), True),
+            ((DT.TEXT, DT.CAT), True),
+        ),
+    )
+    def it_can_compare_pairwise(
+        self, cube_, dim_types_prop_, ndim_prop_, dim_types, slice_can_show
+    ):
+        dim_types_prop_.return_value = dim_types
+        ndim_prop_.return_value = len(dim_types)
+        slice_ = CubeSlice(cube_, None)
+
+        assert slice_.can_compare_pairwise == slice_can_show
+
+    @pytest.mark.parametrize(
+        "hs_dims, ndim, expected_value",
+        (
+            ([0, 1], 1, [0, 1]),
+            ([0, 1], 2, [0, 1]),
+            ([0, 1], 3, [1, 2]),
+            (None, 2, None),
+            (None, 3, None),
+        ),
+    )
+    def it_updates_hs_dims_arguments(self, hs_dims, ndim, expected_value, cube_):
+        cube_.ndim = ndim
+        slice_ = CubeSlice(cube_, None)
+
+        updated_hs_dims = slice_._hs_dims_for_cube(hs_dims)
+
+        assert updated_hs_dims == expected_value
 
     # fixture components ---------------------------------------------
 
@@ -406,8 +382,25 @@ class DescribeCubeSlice(object):
 class TestCubeSlice(object):
     """Test class for the CubeSlice unit tests."""
 
-    def it_can_apply_pruning_mask(self, mask_fixture):
-        cube_, res, expected_type = mask_fixture
+    @pytest.mark.parametrize(
+        "mask, values, expected_type",
+        (
+            (None, [0, 1], np.ndarray),
+            (None, [0, 1], np.ndarray),
+            ([True, False], [0, 1], np.ma.core.MaskedArray),
+            ([False, False], [0, 1], np.ma.core.MaskedArray),
+        ),
+    )
+    def it_can_apply_pruning_mask(self, request, mask, values, expected_type):
+        res = np.array(values)
+        array = (
+            np.zeros((2,))
+            if mask is None
+            else np.ma.masked_array(np.zeros((2,)), np.array(mask))
+        )
+        cube_ = instance_mock(request, CrunchCube)
+        cube_.as_array.return_value = array
+        cube_.ndim = 2
         slice_ = CubeSlice(cube_, None)
 
         return_type = type(slice_._apply_pruning_mask(res))
@@ -726,51 +719,26 @@ class TestCubeSlice(object):
             # TODO: Remove once 'shape' is removed
             assert cs.shape == (3, 2)
 
-    def test_get_shape(self, shape_fixture):
-        """Test shape based on 'as_array' and pruning."""
-        slice_, prune, expected = shape_fixture
-        actual = slice_.get_shape(prune=prune)
-        assert actual == expected
-
-    # fixtures -------------------------------------------------------
-
-    @pytest.fixture(
-        params=[
-            (None, [0, 1], np.ndarray),
-            (None, [0, 1], np.ndarray),
-            ([True, False], [0, 1], np.ma.core.MaskedArray),
-            ([False, False], [0, 1], np.ma.core.MaskedArray),
-        ]
-    )
-    def mask_fixture(self, request):
-        mask, values, expected_type = request.param
-        res = np.array(values)
-        array = (
-            np.zeros((2,))
-            if mask is None
-            else np.ma.masked_array(np.zeros((2,)), np.array(mask))
-        )
-        cube_ = instance_mock(request, CrunchCube)
-        cube_.as_array.return_value = array
-        cube_.ndim = 2
-        return cube_, res, expected_type
-
-    @pytest.fixture(
-        params=[
+    @pytest.mark.parametrize(
+        "prune, mask, expected",
+        (
             (False, None, (3, 2)),
             (True, [[True, False], [True, False], [True, False]], (3,)),
             (True, [[False, False], [True, True], [True, True]], (2,)),
             (True, [[False, False], [True, True], [False, False]], (2, 2)),
             (True, [[True, True], [True, True], [True, True]], ()),
-        ]
+        ),
     )
-    def shape_fixture(self, request):
-        prune, mask, expected = request.param
+    def test_get_shape(self, prune, mask, expected):
+        """Test shape based on 'as_array' and pruning."""
         array = np.zeros((3, 2))
         cube = Mock()
         cube.ndim = 2
         if mask is not None:
             array = np.ma.masked_array(array, np.array(mask))
         cube.as_array.return_value = array
-        cs = CubeSlice(cube, 0)
-        return cs, prune, expected
+        slice_ = CubeSlice(cube, 0)
+
+        actual = slice_.get_shape(prune=prune)
+
+        assert actual == expected

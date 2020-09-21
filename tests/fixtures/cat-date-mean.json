@@ -1,0 +1,166 @@
+{
+  "query": {
+    "dimensions": [
+      {
+        "variable": "https://alpha.crunch.io/api/datasets/120aa3c58ec94ca29bb948d16e737212/variables/000038/"
+      }
+    ],
+    "measures": {
+      "count": {
+        "args": [],
+        "function": "cube_count"
+      },
+      "mean": {
+        "args": [
+          {
+            "args": [
+              {
+                "variable": "https://alpha.crunch.io/api/datasets/120aa3c58ec94ca29bb948d16e737212/variables/000029/"
+              },
+              {
+                "class": "numeric"
+              }
+            ],
+            "function": "cast"
+          }
+        ],
+        "function": "cube_mean"
+      }
+    },
+    "weight": null
+  },
+  "result": {
+    "counts": [
+      509,
+      491,
+      317,
+      183,
+      0,
+      0,
+      0
+    ],
+    "dimensions": [
+      {
+        "derived": false,
+        "references": {
+          "alias": "educ4",
+          "description": "test description",
+          "name": "CAT DATE VARIABLE WITH 4 DATES",
+          "view": {
+            "column_width": null,
+            "include_missing": false,
+            "show_counts": false,
+            "show_numeric_values": false,
+            "transform": {
+              "insertions": []
+            }
+          }
+        },
+        "type": {
+          "categories": [
+            {
+              "date": "2019-01",
+              "id": 1,
+              "missing": false,
+              "name": "Jan 2019"
+            },
+            {
+              "date": "2019-04",
+              "id": 2,
+              "missing": false,
+              "name": "Apr 2019"
+            },
+            {
+              "date": "2019-07",
+              "id": 3,
+              "missing": false,
+              "name": "Jul 2019"
+            },
+            {
+              "date": "2019-10",
+              "id": 4,
+              "missing": false,
+              "name": "Oct 2019"
+            },
+            {
+              "id": 32766,
+              "missing": true,
+              "name": "skipped"
+            },
+            {
+              "id": 32767,
+              "missing": true,
+              "name": "not asked"
+            },
+            {
+              "id": -1,
+              "missing": true,
+              "name": "No Data"
+            }
+          ],
+          "class": "categorical",
+          "ordinal": false
+        }
+      }
+    ],
+    "measures": {
+      "count": {
+        "data": [
+          509,
+          491,
+          317,
+          183,
+          0,
+          0,
+          0
+        ],
+        "metadata": {
+          "derived": true,
+          "references": {},
+          "type": {
+            "class": "numeric",
+            "integer": true,
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "missing_rules": {}
+          }
+        },
+        "n_missing": 0
+      },
+      "mean": {
+        "data": [
+          2.93713163064833,
+          2.60081466395112,
+          2.4321766561514195,
+          2.699453551912568,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          }
+        ],
+        "metadata": {
+          "derived": true,
+          "references": {},
+          "type": {
+            "class": "numeric",
+            "integer": true,
+            "missing_reasons": {
+              "NaN": -8,
+              "No Data": -1
+            },
+            "missing_rules": {}
+          }
+        },
+        "n_missing": 0
+      }
+    },
+    "missing": 0,
+    "n": 1500
+  }
+}

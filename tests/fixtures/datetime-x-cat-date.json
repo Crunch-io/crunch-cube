@@ -1,0 +1,207 @@
+{
+  "query": {
+    "dimensions": [
+      {
+        "args": [
+          {
+            "variable": "https://alpha.crunch.io/api/datasets/5a772afb255f494487f80813c15f7350/variables/00000a/"
+          },
+          {
+            "value": null
+          }
+        ],
+        "function": "rollup"
+      },
+      {
+        "variable": "https://alpha.crunch.io/api/datasets/5a772afb255f494487f80813c15f7350/variables/000000/"
+      }
+    ],
+    "measures": {
+      "count": {
+        "args": [],
+        "function": "cube_count"
+      }
+    }
+  },
+  "result": {
+    "counts": [
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "dimensions": [
+      {
+        "derived": true,
+        "references": {
+          "alias": "date",
+          "description": null,
+          "name": "date"
+        },
+        "type": {
+          "class": "enum",
+          "elements": [
+            {
+              "id": 0,
+              "missing": false,
+              "value": "2014-11"
+            },
+            {
+              "id": 1,
+              "missing": false,
+              "value": "2014-12"
+            },
+            {
+              "id": 2,
+              "missing": false,
+              "value": "2015-01"
+            },
+            {
+              "id": -1,
+              "missing": true,
+              "value": {
+                "?": -1
+              }
+            }
+          ],
+          "subtype": {
+            "class": "datetime",
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "missing_rules": {},
+            "resolution": "M"
+          }
+        }
+      },
+      {
+        "derived": false,
+        "references": {
+          "alias": "x",
+          "description": "Simple cat date",
+          "name": "Cat Date with 5 dates"
+        },
+        "type": {
+          "categories": [
+            {
+              "date": "2018-02",
+              "id": 1,
+              "missing": false,
+              "name": "Feb"
+            },
+            {
+              "date": "2018-04",
+              "id": 2,
+              "missing": false,
+              "name": "Apr"
+            },
+            {
+              "date": "2018-06",
+              "id": 3,
+              "missing": false,
+              "name": "Jun"
+            },
+            {
+              "date": "2018-08",
+              "id": 4,
+              "missing": false,
+              "name": "Aug"
+            },
+            {
+              "date": "2018-10",
+              "id": 8,
+              "missing": true,
+              "name": "8"
+            },
+            {
+              "date": "2018-12",
+              "id": 9,
+              "missing": false,
+              "name": "Dec"
+            },
+            {
+              "id": -1,
+              "missing": true,
+              "name": "No Data"
+            }
+          ],
+          "class": "categorical",
+          "ordinal": false
+        }
+      }
+    ],
+    "measures": {
+      "count": {
+        "data": [
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "metadata": {
+          "derived": true,
+          "references": {},
+          "type": {
+            "class": "numeric",
+            "integer": true,
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "missing_rules": {}
+          }
+        },
+        "n_missing": 1
+      }
+    },
+    "missing": 1,
+    "n": 6
+  }
+}

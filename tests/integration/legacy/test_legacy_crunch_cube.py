@@ -23,8 +23,17 @@ class DescribeIntegratedCrunchCube(object):
         repr_ = repr(cube)
         assert repr_ == "CrunchCube(name='v4', dim_types='CAT x CAT')"
 
-    def it_provides_access_to_its_dimensions(self, dimensions_fixture):
-        cube_response, expected_dimension_types = dimensions_fixture
+    @pytest.mark.parametrize(
+        "cube_response, expected_dimension_types",
+        (
+            (CR.CA_SUBVAR_HS_X_MR_X_CA_CAT, (DT.CA_SUBVAR, DT.MR, DT.CA_CAT)),
+            (CR.CAT_X_LOGICAL, (DT.CAT, DT.LOGICAL)),
+            (CR.LOGICAL_UNIVARIATE, (DT.LOGICAL,)),
+        ),
+    )
+    def it_provides_access_to_its_dimensions(
+        self, cube_response, expected_dimension_types
+    ):
         cube = CrunchCube(cube_response)
 
         dimension_types = tuple(d.dimension_type for d in cube.dimensions)
@@ -64,23 +73,20 @@ class DescribeIntegratedCrunchCube(object):
             ),
         )
 
-    # fixtures -------------------------------------------------------
-
-    @pytest.fixture(
-        params=[
-            (CR.CA_SUBVAR_HS_X_MR_X_CA_CAT, (DT.CA_SUBVAR, DT.MR, DT.CA_CAT)),
-            (CR.CAT_X_LOGICAL, (DT.CAT, DT.LOGICAL)),
-            (CR.LOGICAL_UNIVARIATE, (DT.LOGICAL,)),
-        ]
-    )
-    def dimensions_fixture(self, request):
-        cube_response, expected_dimension_types = request.param
-        return cube_response, expected_dimension_types
-
 
 class DescribeIntegrated_Measures(object):
-    def it_knows_when_its_measures_are_weighted(self, is_weighted_fixture):
-        cube_dict, expected_value = is_weighted_fixture
+    @pytest.mark.parametrize(
+        "cube_response, expected_value",
+        (  # ---has {'query': {'weight': url}}---
+            (CR.ADMIT_X_GENDER_WEIGHTED, True),
+            # ---has {'weight_var': weight_name_str}---
+            (CR.CAT_X_CAT_X_CAT_WGTD, True),
+            # ---unweighted_counts == measure_count_data---
+            (CR.ADMIT_X_DEPT_UNWEIGHTED, False),
+        ),
+    )
+    def it_knows_when_its_measures_are_weighted(self, cube_response, expected_value):
+        cube_dict = cube_response.get("value", cube_response)
         measures = _Measures(cube_dict, None)
 
         is_weighted = measures.is_weighted
@@ -113,8 +119,15 @@ class DescribeIntegrated_Measures(object):
         missing_count = measures.missing_count
         assert missing_count == 5
 
-    def it_knows_the_population_fraction(self, pop_frac_fixture):
-        cube_dict, expected_value = pop_frac_fixture
+    @pytest.mark.parametrize(
+        "cube_dict, expected_value",
+        (  # ---filtered case---
+            (CR.CAT_X_CAT_FILT, 0.254),
+            # ---unfiltered case---
+            (CR.CAT_X_CAT, 1.0),
+        ),
+    )
+    def it_knows_the_population_fraction(self, cube_dict, expected_value):
         measures = _Measures(cube_dict, None)
 
         population_fraction = measures.population_fraction
@@ -133,74 +146,37 @@ class DescribeIntegrated_Measures(object):
         unweighted_n = measures.unweighted_n
         assert unweighted_n == 20
 
-    def it_provides_access_to_the_weighted_count_measure(self, wgtd_counts_fixture):
-        cube_dict, expected_type_name = wgtd_counts_fixture
+    @pytest.mark.parametrize(
+        "cube_dict, expected_type_name",
+        (  # ---weighted case---
+            (CR.CAT_X_CAT_WGTD, "_WeightedCountMeasure"),
+            # ---unweighted case---
+            (CR.CAT_X_CAT, "_UnweightedCountMeasure"),
+        ),
+    )
+    def it_provides_access_to_the_weighted_count_measure(
+        self, cube_dict, expected_type_name
+    ):
         measures = _Measures(cube_dict, None)
 
         weighted_counts = measures.weighted_counts
 
         assert type(weighted_counts).__name__ == expected_type_name
 
-    def it_knows_the_weighted_n(self, wgtd_n_fixture):
-        cube_dict, expected_value = wgtd_n_fixture
+    @pytest.mark.parametrize(
+        "cube_dict, expected_value",
+        (  # ---weighted case---
+            (CR.CAT_X_CAT_WGTD, 999.557),
+            # ---unweighted case---
+            (CR.CAT_X_CAT, 20.0),
+        ),
+    )
+    def it_knows_the_weighted_n(self, cube_dict, expected_value):
         measures = _Measures(cube_dict, None)
 
         weighted_n = measures.weighted_n
 
         assert round(weighted_n, 3) == expected_value
-
-    # fixtures -------------------------------------------------------
-
-    @pytest.fixture(
-        params=[
-            # ---has {'query': {'weight': url}}---
-            (CR.ADMIT_X_GENDER_WEIGHTED, True),
-            # ---has {'weight_var': weight_name_str}---
-            (CR.CAT_X_CAT_X_CAT_WGTD, True),
-            # ---unweighted_counts == measure_count_data---
-            (CR.ADMIT_X_DEPT_UNWEIGHTED, False),
-        ]
-    )
-    def is_weighted_fixture(self, request):
-        cube_response, expected_value = request.param
-        cube_dict = cube_response.get("value", cube_response)
-        return cube_dict, expected_value
-
-    @pytest.fixture(
-        params=[
-            # ---filtered case---
-            (CR.CAT_X_CAT_FILT, 0.254),
-            # ---unfiltered case---
-            (CR.CAT_X_CAT, 1.0),
-        ]
-    )
-    def pop_frac_fixture(self, request):
-        cube_dict, expected_value = request.param
-        return cube_dict, expected_value
-
-    @pytest.fixture(
-        params=[
-            # ---weighted case---
-            (CR.CAT_X_CAT_WGTD, "_WeightedCountMeasure"),
-            # ---unweighted case---
-            (CR.CAT_X_CAT, "_UnweightedCountMeasure"),
-        ]
-    )
-    def wgtd_counts_fixture(self, request):
-        cube_dict, expected_type_name = request.param
-        return cube_dict, expected_type_name
-
-    @pytest.fixture(
-        params=[
-            # ---weighted case---
-            (CR.CAT_X_CAT_WGTD, 999.557),
-            # ---unweighted case---
-            (CR.CAT_X_CAT, 20.0),
-        ]
-    )
-    def wgtd_n_fixture(self, request):
-        cube_dict, expected_type = request.param
-        return cube_dict, expected_type
 
 
 class DescribeIntegrated_MeanMeasure(object):
@@ -1342,17 +1318,6 @@ class TestCrunchCube(TestCase):
         cube = CrunchCube(CR.CAT_X_CAT_WITH_EMPTY_COLS)
         expected = np.array(
             [
-                [0.4, 0.4, 0.0, 0.2],
-                [np.nan, np.nan, np.nan, np.nan],
-                [0.0, 0.33333333, 0.0, 0.66666667],
-                [0.0, 1.0, 0.0, 0.0],
-                [0.0, 0.66666667, 0.0, 0.33333333],
-                [0.0, 1.0, 0.0, 0.0],
-            ]
-        )
-        actual = cube.proportions(axis=1, prune=False)
-        expected = np.array(
-            [
                 [0.4, 0.4, 0.2],
                 [0.0, 0.33333333, 0.66666667],
                 [0.0, 1.0, 0.0],
@@ -1375,17 +1340,6 @@ class TestCrunchCube(TestCase):
 
     def test_cat_x_cat_props_by_cell_prune_cols(self):
         cube = CrunchCube(CR.CAT_X_CAT_WITH_EMPTY_COLS)
-        expected = np.array(
-            [
-                [0.14285714, 0.14285714, 0.0, 0.07142857],
-                [0.0, 0.0, 0.0, 0.0],
-                [0.0, 0.07142857, 0.0, 0.14285714],
-                [0.0, 0.14285714, 0.0, 0.0],
-                [0.0, 0.14285714, 0.0, 0.07142857],
-                [0.0, 0.07142857, 0.0, 0.0],
-            ]
-        )
-        actual = cube.proportions(axis=None, prune=False)
         expected = np.array(
             [
                 [0.14285714, 0.14285714, 0.07142857],

@@ -1,0 +1,374 @@
+{
+  "query": {
+    "dimensions": [
+      {
+        "args": [
+          {
+            "args": [
+              {
+                "variable": "https://alpha.crunch.io/api/datasets/120aa3c58ec94ca29bb948d16e737212/variables/8f9eefc227b84ccfbd60382c74e0ed1b/"
+              }
+            ],
+            "function": "as_selected"
+          },
+          {
+            "value": "subvariables"
+          }
+        ],
+        "function": "dimension"
+      },
+      {
+        "args": [
+          {
+            "variable": "https://alpha.crunch.io/api/datasets/120aa3c58ec94ca29bb948d16e737212/variables/8f9eefc227b84ccfbd60382c74e0ed1b/"
+          }
+        ],
+        "function": "as_selected"
+      },
+      {
+        "variable": "https://alpha.crunch.io/api/datasets/120aa3c58ec94ca29bb948d16e737212/variables/000038/"
+      }
+    ],
+    "measures": {
+      "count": {
+        "args": [],
+        "function": "cube_count"
+      }
+    },
+    "weight": null
+  },
+  "result": {
+    "counts": [
+      272,
+      265,
+      184,
+      117,
+      0,
+      0,
+      0,
+      237,
+      226,
+      133,
+      66,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      40,
+      39,
+      25,
+      10,
+      0,
+      0,
+      0,
+      469,
+      452,
+      292,
+      173,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      115,
+      133,
+      82,
+      43,
+      0,
+      0,
+      0,
+      394,
+      358,
+      235,
+      140,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "dimensions": [
+      {
+        "derived": true,
+        "references": {
+          "alias": "mr_test",
+          "name": "mr_test",
+          "subreferences": [
+            {
+              "alias": "facebook_uses_2__1",
+              "name": "To keep in contact with friends"
+            },
+            {
+              "alias": "facebook_uses_6__1",
+              "name": "Keep up-to-date with brands I like"
+            },
+            {
+              "alias": "facebook_uses_11__1",
+              "name": "Looking at or watching fun/entertaining content"
+            }
+          ],
+          "uniform_basis": false
+        },
+        "type": {
+          "class": "enum",
+          "elements": [
+            {
+              "id": 1,
+              "missing": false,
+              "value": {
+                "derived": false,
+                "id": "00000",
+                "references": {
+                  "alias": "facebook_uses_2__1",
+                  "name": "To keep in contact with friends"
+                }
+              }
+            },
+            {
+              "id": 2,
+              "missing": false,
+              "value": {
+                "derived": false,
+                "id": "00001",
+                "references": {
+                  "alias": "facebook_uses_6__1",
+                  "name": "Keep up-to-date with brands I like"
+                }
+              }
+            },
+            {
+              "id": 3,
+              "missing": false,
+              "value": {
+                "derived": false,
+                "id": "00002",
+                "references": {
+                  "alias": "facebook_uses_11__1",
+                  "name": "Looking at or watching fun/entertaining content"
+                }
+              }
+            }
+          ],
+          "subtype": {
+            "class": "variable"
+          }
+        }
+      },
+      {
+        "derived": true,
+        "references": {
+          "alias": "mr_test",
+          "name": "mr_test",
+          "subreferences": [
+            {
+              "alias": "facebook_uses_2__1",
+              "name": "To keep in contact with friends"
+            },
+            {
+              "alias": "facebook_uses_6__1",
+              "name": "Keep up-to-date with brands I like"
+            },
+            {
+              "alias": "facebook_uses_11__1",
+              "name": "Looking at or watching fun/entertaining content"
+            }
+          ],
+          "uniform_basis": false
+        },
+        "type": {
+          "categories": [
+            {
+              "id": 1,
+              "missing": false,
+              "name": "Selected",
+              "numeric_value": 1,
+              "selected": true
+            },
+            {
+              "id": 0,
+              "missing": false,
+              "name": "Other",
+              "numeric_value": 0
+            },
+            {
+              "id": -1,
+              "missing": true,
+              "name": "No Data",
+              "numeric_value": null
+            }
+          ],
+          "class": "categorical",
+          "ordinal": false,
+          "subvariables": [
+            "00000",
+            "00001",
+            "00002"
+          ]
+        }
+      },
+      {
+        "derived": false,
+        "references": {
+          "alias": "educ4",
+          "description": "test description",
+          "name": "CAT DATE VARIABLE WITH 4 DATES",
+          "view": {
+            "column_width": null,
+            "include_missing": false,
+            "show_counts": false,
+            "show_numeric_values": false,
+            "transform": {
+              "insertions": []
+            }
+          }
+        },
+        "type": {
+          "categories": [
+            {
+              "date": "2019-01",
+              "id": 1,
+              "missing": false,
+              "name": "Jan 2019"
+            },
+            {
+              "date": "2019-04",
+              "id": 2,
+              "missing": false,
+              "name": "Apr 2019"
+            },
+            {
+              "date": "2019-07",
+              "id": 3,
+              "missing": false,
+              "name": "Jul 2019"
+            },
+            {
+              "date": "2019-10",
+              "id": 4,
+              "missing": false,
+              "name": "Oct 2019"
+            },
+            {
+              "id": 32766,
+              "missing": true,
+              "name": "skipped"
+            },
+            {
+              "id": 32767,
+              "missing": true,
+              "name": "not asked"
+            },
+            {
+              "id": -1,
+              "missing": true,
+              "name": "No Data"
+            }
+          ],
+          "class": "categorical",
+          "ordinal": false
+        }
+      }
+    ],
+    "element": "crunch:cube",
+    "measures": {
+      "count": {
+        "data": [
+          272,
+          265,
+          184,
+          117,
+          0,
+          0,
+          0,
+          237,
+          226,
+          133,
+          66,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          40,
+          39,
+          25,
+          10,
+          0,
+          0,
+          0,
+          469,
+          452,
+          292,
+          173,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          115,
+          133,
+          82,
+          43,
+          0,
+          0,
+          0,
+          394,
+          358,
+          235,
+          140,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "metadata": {
+          "derived": true,
+          "references": {},
+          "type": {
+            "class": "numeric",
+            "integer": true,
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "missing_rules": {}
+          }
+        },
+        "n_missing": 0
+      }
+    },
+    "missing": 0,
+    "n": 1500
+  }
+}

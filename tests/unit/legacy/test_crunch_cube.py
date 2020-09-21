@@ -31,19 +31,42 @@ from ...unitutil import (
 
 
 class DescribeCrunchCube(object):
-    def it_can_compare_pariwise(self, can_compare_pairwise_fixture, slices_prop_):
-        slices, can_compare_pairwise = can_compare_pairwise_fixture
+    @pytest.mark.parametrize(
+        "slices_can_compare_pairwise, cube_can_compare_pairwise",
+        (
+            ([True, True, True], True),
+            ([False, True, True], False),
+            ([True, True, False], False),
+            ([False, False, False], False),
+        ),
+    )
+    def it_can_compare_pariwise(
+        self,
+        request,
+        slices_can_compare_pairwise,
+        cube_can_compare_pairwise,
+        slices_prop_,
+    ):
+        slices = [
+            instance_mock(request, CubeSlice, can_compare_pairwise=can_compare_pairwise)
+            for can_compare_pairwise in slices_can_compare_pairwise
+        ]
         slices_prop_.return_value = slices
         cube = CrunchCube(None)
-        assert cube.can_compare_pairwise is can_compare_pairwise
+        assert cube.can_compare_pairwise is cube_can_compare_pairwise
 
     def it_provides_a_default_repr(self):
         cube = CrunchCube(None)
         repr_ = repr(cube)
         assert repr_.startswith("<cr.cube.crunch_cube.CrunchCube object at 0x")
 
-    def it_knows_its_row_count(self, count_fixture):
-        weighted, expected_value = count_fixture
+    @pytest.mark.parametrize("weighted, expected_value", ((False, 42), (True, 48.732)))
+    def it_knows_its_row_count(
+        self, weighted, expected_value, _measures_prop_, measures_
+    ):
+        _measures_prop_.return_value = measures_
+        measures_.unweighted_n = 42
+        measures_.weighted_n = 48.732
         cube = CrunchCube(None)
 
         count = cube.count(weighted)
@@ -72,10 +95,18 @@ class DescribeCrunchCube(object):
 
         assert dim_types == (DT.CAT, DT.CA_SUBVAR, DT.MR, DT.MR_CAT)
 
+    @pytest.mark.parametrize(
+        "has_mean_measure, expected_value", ((True, True), (False, False))
+    )
     def it_knows_when_it_contains_means_data(
-        self, has_means_fixture, _measures_prop_, measures_
+        self,
+        has_mean_measure,
+        expected_value,
+        _measures_prop_,
+        measures_,
+        mean_measure_,
     ):
-        means, expected_value = has_means_fixture
+        means = mean_measure_ if has_mean_measure else None
         _measures_prop_.return_value = measures_
         measures_.means = means
         cube = CrunchCube(None)
@@ -84,8 +115,13 @@ class DescribeCrunchCube(object):
 
         assert has_means is expected_value
 
-    def it_knows_when_it_has_an_mr_dimension(self, has_mr_fixture, mr_dim_ind_prop_):
-        mr_dim_indices, expected_value = has_mr_fixture
+    @pytest.mark.parametrize(
+        "mr_dim_indices, expected_value",
+        ((None, False), (0, True), (3, True), ([2, 5], True)),
+    )
+    def it_knows_when_it_has_an_mr_dimension(
+        self, mr_dim_indices, expected_value, mr_dim_ind_prop_
+    ):
         mr_dim_ind_prop_.return_value = mr_dim_indices
         cube = CrunchCube(None)
 
@@ -108,10 +144,12 @@ class DescribeCrunchCube(object):
         Index_.data.assert_called_once_with(cube, True, False)
         assert index is index_
 
+    @pytest.mark.parametrize(
+        "is_weighted, expected_value", ((True, True), (False, False))
+    )
     def it_knows_when_it_contains_weighted_data(
-        self, is_weighted_fixture, _measures_prop_, measures_
+        self, is_weighted, expected_value, _measures_prop_, measures_
     ):
-        is_weighted, expected_value = is_weighted_fixture
         _measures_prop_.return_value = measures_
         measures_.is_weighted = is_weighted
         cube = CrunchCube(None)
@@ -138,8 +176,49 @@ class DescribeCrunchCube(object):
 
         assert population_fraction == 0.42
 
-    def it_can_adjust_an_axis_to_help(self, request, adjust_fixture, dimensions_prop_):
-        dimension_types, axis_cases = adjust_fixture
+    @pytest.mark.parametrize(
+        "dimension_types, axis_cases",
+        (
+            (
+                (DT.CAT, DT.CAT),
+                ((0, (0,)), (1, (1,)), (None, (0, 1)), ((0, 1), (0, 1))),
+            ),
+            (
+                (DT.CAT, DT.CAT, DT.CAT),
+                ((0, (0,)), (1, (1,)), (2, (2,)), (None, (1, 2)), ((1, 2), (1, 2))),
+            ),
+            ((DT.MR,), ((0, (1,)), (None, (1,)))),
+            ((DT.CAT, DT.MR), ((0, (0,)), (1, (2,)), (None, (0, 2)), ((0, 1), (0, 2)))),
+            ((DT.MR, DT.CAT), ((0, (1,)), (1, (2,)), (None, (1, 2)), ((0, 1), (1, 2)))),
+            ((DT.MR, DT.MR), ((0, (1,)), (1, (3,)), (None, (1, 3)), ((0, 1), (1, 3)))),
+            (
+                (DT.CAT, DT.MR, DT.MR),
+                ((0, (0,)), (1, (2,)), (2, (4,)), (None, (2, 4)), ((1, 2), (2, 4))),
+            ),
+            (
+                (DT.MR, DT.CAT, DT.MR),
+                ((0, (1,)), (1, (2,)), (2, (4,)), (None, (2, 4)), ((1, 2), (2, 4))),
+            ),
+            (
+                (DT.MR, DT.MR, DT.CAT),
+                ((0, (1,)), (1, (3,)), (2, (4,)), (None, (3, 4)), ((1, 2), (3, 4))),
+            ),
+            ((DT.CA, DT.CAT), ((1, (1,)),)),
+            (
+                (DT.CA, DT.CAT, DT.CAT),
+                ((1, (1,)), (2, (2,)), (None, (1, 2)), ((1, 2), (1, 2))),
+            ),
+            ((DT.CAT, DT.CA, DT.CAT), ((2, (2,)),)),
+            (
+                (DT.CA, DT.CAT, DT.MR),
+                ((1, (1,)), (2, (3,)), (None, (1, 3)), ((1, 2), (1, 3))),
+            ),
+            ((DT.MR, DT.CA, DT.CAT), ((0, (1,)), (2, (3,)))),
+        ),
+    )
+    def it_can_adjust_an_axis_to_help(
+        self, request, dimension_types, axis_cases, dimensions_prop_
+    ):
         dimensions_prop_.return_value = tuple(
             instance_mock(request, Dimension, dimension_type=dimension_type)
             for dimension_type in dimension_types
@@ -188,10 +267,45 @@ class DescribeCrunchCube(object):
             cube._cube_dict
         assert str(e.value).startswith("Unsupported type")
 
+    @pytest.mark.parametrize(
+        "dimension_types, axis_cases",
+        (
+            ((DT.CA, DT.CAT), ((0, False), (1, True), (None, False))),
+            (
+                (DT.CA, DT.CAT, DT.CAT),
+                ((0, False), (1, True), (2, True), (None, True), ((1, 2), True)),
+            ),
+            (
+                (DT.CAT, DT.CA, DT.CAT),
+                ((0, True), (1, False), (2, True), (None, False), ((1, 2), False)),
+            ),
+            (
+                (DT.MR, DT.CA, DT.CAT),
+                ((0, True), (1, False), (2, True), (None, False), ((1, 2), False)),
+            ),
+            (
+                (DT.CA, DT.CAT, DT.MR),
+                ((0, False), (1, True), (2, True), (None, True), ((1, 2), True)),
+            ),
+            ((DT.CAT,), ((0, True), (1, True), (None, True))),
+            ((DT.CAT, DT.CAT), ((0, True), (1, True), (None, True), ((0, 1), True))),
+            (
+                (DT.CAT, DT.MR, DT.MR),
+                ((0, True), (1, True), (2, True), (None, True), ((1, 2), True)),
+            ),
+            (
+                (DT.MR, DT.CAT, DT.MR),
+                ((0, True), (1, True), (2, True), (None, True), ((1, 2), True)),
+            ),
+            (
+                (DT.MR, DT.MR, DT.CAT),
+                ((0, True), (1, True), (2, True), (None, True), ((1, 2), True)),
+            ),
+        ),
+    )
     def it_knows_whether_an_axis_is_marginable_to_help(
-        self, request, allowed_fixture, dimensions_prop_
+        self, request, dimension_types, axis_cases, dimensions_prop_
     ):
-        dimension_types, axis_cases = allowed_fixture
         dimensions_prop_.return_value = tuple(
             instance_mock(request, Dimension, dimension_type=dimension_type)
             for dimension_type in dimension_types
@@ -202,27 +316,81 @@ class DescribeCrunchCube(object):
             axis_is_marginable = cube._is_axis_allowed(axis)
             assert axis_is_marginable is expected_value
 
+    @pytest.mark.parametrize(
+        "weighted, is_weighted, expected_type",
+        (
+            (False, False, "_UnweightedCountMeasure"),
+            (False, True, "_UnweightedCountMeasure"),
+            (True, False, "_UnweightedCountMeasure"),
+            (True, True, "_WeightedCountMeasure"),
+        ),
+    )
     def it_selects_the_best_match_counts_measure_to_help(
-        self, counts_fixture, _measures_prop_
+        self,
+        weighted,
+        is_weighted,
+        expected_type,
+        _measures_prop_,
+        measures_,
+        weighted_count_measure_,
+        unweighted_count_measure_,
     ):
-        weighted, measures_, expected_measure_ = counts_fixture
+        measures_.weighted_counts = (
+            weighted_count_measure_ if is_weighted else unweighted_count_measure_
+        )
+        measures_.unweighted_counts = unweighted_count_measure_
+        expected_measure = {
+            "_UnweightedCountMeasure": unweighted_count_measure_,
+            "_WeightedCountMeasure": weighted_count_measure_,
+        }[expected_type]
         _measures_prop_.return_value = measures_
         cube = CrunchCube(None)
 
         measure = cube._counts(weighted)
 
-        assert measure is expected_measure_
+        assert measure is expected_measure
 
+    @pytest.mark.parametrize(
+        "has_means, weighted, is_weighted, expected_type",
+        (
+            (True, False, False, "_MeanMeasure"),
+            (True, False, True, "_MeanMeasure"),
+            (True, True, False, "_MeanMeasure"),
+            (True, True, True, "_MeanMeasure"),
+            (False, False, False, "_UnweightedCountMeasure"),
+            (False, False, True, "_UnweightedCountMeasure"),
+            (False, True, False, "_UnweightedCountMeasure"),
+            (False, True, True, "_WeightedCountMeasure"),
+        ),
+    )
     def it_selects_the_best_match_measure_to_help(
-        self, measure_fixture, _measures_prop_
+        self,
+        has_means,
+        weighted,
+        is_weighted,
+        expected_type,
+        _measures_prop_,
+        measures_,
+        unweighted_count_measure_,
+        weighted_count_measure_,
+        mean_measure_,
     ):
-        weighted, measures_, expected_measure_ = measure_fixture
+        measures_.means = mean_measure_ if has_means else None
+        measures_.weighted_counts = (
+            weighted_count_measure_ if is_weighted else unweighted_count_measure_
+        )
+        measures_.unweighted_counts = unweighted_count_measure_
+        expected_measure = {
+            "_MeanMeasure": mean_measure_,
+            "_UnweightedCountMeasure": unweighted_count_measure_,
+            "_WeightedCountMeasure": weighted_count_measure_,
+        }[expected_type]
         _measures_prop_.return_value = measures_
         cube = CrunchCube(None)
 
         measure = cube._measure(weighted)
 
-        assert measure is expected_measure_
+        assert measure is expected_measure
 
     def it_provides_access_to_its_Measures_object_to_help(
         self, _all_dimensions_prop_, all_dimensions_, _Measures_, measures_
@@ -236,234 +404,6 @@ class DescribeCrunchCube(object):
 
         _Measures_.assert_called_once_with(cube_dict, all_dimensions_)
         assert measures is measures_
-
-    # fixtures -------------------------------------------------------
-
-    @pytest.fixture(
-        params=[
-            ([True, True, True], True),
-            ([False, True, True], False),
-            ([True, True, False], False),
-            ([False, False, False], False),
-        ]
-    )
-    def can_compare_pairwise_fixture(self, request):
-        slices_can_compare_pairwise, cube_can_compare_pairwise = request.param
-        slices = [
-            instance_mock(request, CubeSlice, can_compare_pairwise=can_compare_pairwise)
-            for can_compare_pairwise in slices_can_compare_pairwise
-        ]
-        return slices, cube_can_compare_pairwise
-
-    @pytest.fixture(
-        params=[
-            # ---0 - CAT x CAT---
-            (
-                (DT.CAT, DT.CAT),
-                ((0, (0,)), (1, (1,)), (None, (0, 1)), ((0, 1), (0, 1))),
-            ),
-            # ---1 - CAT x CAT x CAT---
-            (
-                (DT.CAT, DT.CAT, DT.CAT),
-                ((0, (0,)), (1, (1,)), (2, (2,)), (None, (1, 2)), ((1, 2), (1, 2))),
-            ),
-            # ---2 - MR (univariate)---
-            ((DT.MR,), ((0, (1,)), (None, (1,)))),
-            # ---3 - CAT x MR---
-            ((DT.CAT, DT.MR), ((0, (0,)), (1, (2,)), (None, (0, 2)), ((0, 1), (0, 2)))),
-            # ---4 - MR x CAT---
-            ((DT.MR, DT.CAT), ((0, (1,)), (1, (2,)), (None, (1, 2)), ((0, 1), (1, 2)))),
-            # ---5 - MR x MR---
-            (
-                (DT.MR, DT.MR),
-                # --col---  --row----  --table-------------------------
-                ((0, (1,)), (1, (3,)), (None, (1, 3)), ((0, 1), (1, 3))),
-            ),
-            # ---6 - CAT x MR x MR---
-            (
-                (DT.CAT, DT.MR, DT.MR),
-                # --0th---  --col----  --row----  --table-------------------------
-                ((0, (0,)), (1, (2,)), (2, (4,)), (None, (2, 4)), ((1, 2), (2, 4))),
-            ),
-            # ---7 - MR x CAT x MR---
-            (
-                (DT.MR, DT.CAT, DT.MR),
-                # --0th---  --col----  --row----  --table-------------------------
-                ((0, (1,)), (1, (2,)), (2, (4,)), (None, (2, 4)), ((1, 2), (2, 4))),
-            ),
-            # ---8 - MR x MR x CAT---
-            (
-                (DT.MR, DT.MR, DT.CAT),
-                # --0th---  --col----  --row----  --table-------------------------
-                ((0, (1,)), (1, (3,)), (2, (4,)), (None, (3, 4)), ((1, 2), (3, 4))),
-            ),
-            # ---9 - CA---
-            (
-                (DT.CA, DT.CAT),
-                # --row-----
-                ((1, (1,)),),
-            ),
-            # ---10 - CA x CAT---
-            (
-                (DT.CA, DT.CAT, DT.CAT),
-                # --row-----
-                ((1, (1,)), (2, (2,)), (None, (1, 2)), ((1, 2), (1, 2))),
-            ),
-            # ---11 - CAT x CA---
-            (
-                (DT.CAT, DT.CA, DT.CAT),
-                # --row-----
-                ((2, (2,)),),
-            ),
-            # ---12 - CA x MR---
-            (
-                (DT.CA, DT.CAT, DT.MR),
-                # --row-----
-                ((1, (1,)), (2, (3,)), (None, (1, 3)), ((1, 2), (1, 3))),
-            ),
-            # ---13 - MR x CAT x CA---
-            (
-                (DT.MR, DT.CA, DT.CAT),
-                # --0th---  --row----
-                ((0, (1,)), (2, (3,))),
-            ),
-        ]
-    )
-    def adjust_fixture(self, request):
-        dimension_types, axis_cases = request.param
-        return dimension_types, axis_cases
-
-    @pytest.fixture(
-        params=[
-            # ---0 - CA---
-            ((DT.CA, DT.CAT), ((0, False), (1, True), (None, False))),
-            # ---1 - CA x CAT---
-            (
-                (DT.CA, DT.CAT, DT.CAT),
-                ((0, False), (1, True), (2, True), (None, True), ((1, 2), True)),
-            ),
-            # ---2 - CAT x CA-CAT---
-            (
-                (DT.CAT, DT.CA, DT.CAT),
-                ((0, True), (1, False), (2, True), (None, False), ((1, 2), False)),
-            ),
-            # ---3 - MR x CA---
-            (
-                (DT.MR, DT.CA, DT.CAT),
-                ((0, True), (1, False), (2, True), (None, False), ((1, 2), False)),
-            ),
-            # ---4 - CA x MR---
-            (
-                (DT.CA, DT.CAT, DT.MR),
-                ((0, False), (1, True), (2, True), (None, True), ((1, 2), True)),
-            ),
-            # ---5 - Univariate CAT---
-            ((DT.CAT,), ((0, True), (1, True), (None, True))),
-            # ---6 - CAT x CAT---
-            ((DT.CAT, DT.CAT), ((0, True), (1, True), (None, True), ((0, 1), True))),
-            # ---7 - CAT x MR x MR---
-            (
-                (DT.CAT, DT.MR, DT.MR),
-                ((0, True), (1, True), (2, True), (None, True), ((1, 2), True)),
-            ),
-            # ---8 - MR x CAT x MR---
-            (
-                (DT.MR, DT.CAT, DT.MR),
-                ((0, True), (1, True), (2, True), (None, True), ((1, 2), True)),
-            ),
-            # ---9 - MR x MR x CAT---
-            (
-                (DT.MR, DT.MR, DT.CAT),
-                ((0, True), (1, True), (2, True), (None, True), ((1, 2), True)),
-            ),
-        ]
-    )
-    def allowed_fixture(self, request):
-        dimension_types, axis_cases = request.param
-        return dimension_types, axis_cases
-
-    @pytest.fixture(params=[(False, 42), (True, 48.732)])
-    def count_fixture(self, request, _measures_prop_, measures_):
-        weighted, expected_value = request.param
-        _measures_prop_.return_value = measures_
-        measures_.unweighted_n = 42
-        measures_.weighted_n = 48.732
-        return weighted, expected_value
-
-    @pytest.fixture(
-        params=[
-            (False, False, "_UnweightedCountMeasure"),
-            (False, True, "_UnweightedCountMeasure"),
-            (True, False, "_UnweightedCountMeasure"),
-            (True, True, "_WeightedCountMeasure"),
-        ]
-    )
-    def counts_fixture(
-        self, request, measures_, weighted_count_measure_, unweighted_count_measure_
-    ):
-        weighted, is_weighted, expected_type = request.param
-        # --weighted indicates the caller has requested that weighted values
-        # --be used by passing (weighted=True) to method.
-        measures_.weighted_counts = (
-            weighted_count_measure_ if is_weighted else unweighted_count_measure_
-        )
-        measures_.unweighted_counts = unweighted_count_measure_
-        expected_measure = {
-            "_UnweightedCountMeasure": unweighted_count_measure_,
-            "_WeightedCountMeasure": weighted_count_measure_,
-        }[expected_type]
-        return weighted, measures_, expected_measure
-
-    @pytest.fixture(params=[(True, True), (False, False)])
-    def has_means_fixture(self, request, mean_measure_):
-        has_mean_measure, expected_value = request.param
-        means = mean_measure_ if has_mean_measure else None
-        return means, expected_value
-
-    @pytest.fixture(params=[(None, False), (0, True), (3, True), ([2, 5], True)])
-    def has_mr_fixture(self, request):
-        mr_dim_indices, expected_value = request.param
-        return mr_dim_indices, expected_value
-
-    @pytest.fixture(
-        params=[
-            (True, False, False, "_MeanMeasure"),
-            (True, False, True, "_MeanMeasure"),
-            (True, True, False, "_MeanMeasure"),
-            (True, True, True, "_MeanMeasure"),
-            (False, False, False, "_UnweightedCountMeasure"),
-            (False, False, True, "_UnweightedCountMeasure"),
-            (False, True, False, "_UnweightedCountMeasure"),
-            (False, True, True, "_WeightedCountMeasure"),
-        ]
-    )
-    def measure_fixture(
-        self,
-        request,
-        measures_,
-        weighted_count_measure_,
-        unweighted_count_measure_,
-        mean_measure_,
-    ):
-        has_means, weighted, is_weighted, expected_type = request.param
-        # --weighted indicates the caller has requested that weighted values
-        # --be used by passing (weighted=True) to method.
-        measures_.means = mean_measure_ if has_means else None
-        measures_.weighted_counts = (
-            weighted_count_measure_ if is_weighted else unweighted_count_measure_
-        )
-        measures_.unweighted_counts = unweighted_count_measure_
-        expected_measure = {
-            "_MeanMeasure": mean_measure_,
-            "_UnweightedCountMeasure": unweighted_count_measure_,
-            "_WeightedCountMeasure": weighted_count_measure_,
-        }[expected_type]
-        return weighted, measures_, expected_measure
-
-    @pytest.fixture(params=[(True, True), (False, False)])
-    def is_weighted_fixture(self, request):
-        is_weighted, expected_value = request.param
-        return is_weighted, expected_value
 
     # fixture components ---------------------------------------------
 
@@ -525,8 +465,33 @@ class DescribeCrunchCube(object):
 
 
 class Describe_Measures(object):
-    def it_knows_when_a_measure_is_weighted(self, is_weighted_fixture):
-        cube_dict, expected_value = is_weighted_fixture
+    @pytest.mark.parametrize(
+        "cube_dict, expected_value",
+        (
+            ({"query": {"weight": "https://x"}}, True),
+            ({"weight_var": "weight"}, True),
+            ({"weight_url": "https://y"}, True),
+            (
+                {
+                    "result": {
+                        "counts": [1, 2, 3],
+                        "measures": {"count": {"data": [2, 4, 6]}},
+                    }
+                },
+                True,
+            ),
+            (
+                {
+                    "result": {
+                        "counts": [1, 2, 3],
+                        "measures": {"count": {"data": [1, 2, 3]}},
+                    }
+                },
+                False,
+            ),
+        ),
+    )
+    def it_knows_when_a_measure_is_weighted(self, cube_dict, expected_value):
         measures = _Measures(cube_dict, None)
 
         is_weighted = measures.is_weighted
@@ -550,8 +515,19 @@ class Describe_Measures(object):
         means = measures.means
         assert means is None
 
-    def it_knows_the_missing_count(self, missing_count_fixture, means_prop_):
-        means, cube_dict, expected_value = missing_count_fixture
+    @pytest.mark.parametrize(
+        "cube_dict, has_means, expected_value",
+        (
+            ({}, True, 37),
+            ({"result": {"missing": 42}}, False, 42),
+            ({"result": {}}, False, 0),
+        ),
+    )
+    def it_knows_the_missing_count(
+        self, cube_dict, has_means, expected_value, means_prop_, mean_measure_
+    ):
+        mean_measure_.missing_count = expected_value if has_means else None
+        means = mean_measure_ if has_means else None
         means_prop_.return_value = means
         measures = _Measures(cube_dict, None)
 
@@ -559,8 +535,33 @@ class Describe_Measures(object):
 
         assert missing_count == expected_value
 
-    def it_knows_the_population_fraction(self, pop_frac_fixture):
-        cube_dict, expected_value = pop_frac_fixture
+    @pytest.mark.parametrize(
+        "cube_dict, expected_value",
+        (
+            ({"result": {}}, 1.0),
+            (
+                {
+                    "result": {
+                        "filtered": {"weighted_n": 21},
+                        "unfiltered": {"weighted_n": 42},
+                    }
+                },
+                0.5,
+            ),
+            (
+                {
+                    "result": {
+                        "filtered": {"weighted_n": 0},
+                        "unfiltered": {"weighted_n": 0},
+                    }
+                },
+                np.nan,
+            ),
+            ({"result": {"filtered": {"weighted_n": 43}}}, 1.0),
+            ({"result": {"unfiltered": {"weighted_n": 44}}}, 1.0),
+        ),
+    )
+    def it_knows_the_population_fraction(self, cube_dict, expected_value):
         measures = _Measures(cube_dict, None)
 
         population_fraction = measures.population_fraction
@@ -616,98 +617,28 @@ class Describe_Measures(object):
 
         assert weighted_counts is unweighted_count_measure_
 
-    def it_knows_the_weighted_n(self, weighted_n_fixture):
-        cube_dict, is_weighted, expected_value = weighted_n_fixture
+    @pytest.mark.parametrize(
+        " cube_dict, is_weighted, expected_value",
+        (
+            ({}, False, 24.0),
+            ({"result": {"measures": {"count": {"data": [7, 9]}}}}, True, 16.0),
+        ),
+    )
+    def it_knows_the_weighted_n(
+        self,
+        cube_dict,
+        is_weighted,
+        expected_value,
+        unweighted_n_prop_,
+        is_weighted_prop_,
+    ):
+        is_weighted_prop_.return_value = is_weighted
+        unweighted_n_prop_.return_value = 24
         measures = _Measures(cube_dict, None)
 
         weighted_n = measures.weighted_n
 
         assert weighted_n == expected_value
-
-    # fixtures -------------------------------------------------------
-
-    @pytest.fixture(
-        params=[
-            ({"query": {"weight": "https://x"}}, True),
-            ({"weight_var": "weight"}, True),
-            ({"weight_url": "https://y"}, True),
-            (
-                {
-                    "result": {
-                        "counts": [1, 2, 3],
-                        "measures": {"count": {"data": [2, 4, 6]}},
-                    }
-                },
-                True,
-            ),
-            (
-                {
-                    "result": {
-                        "counts": [1, 2, 3],
-                        "measures": {"count": {"data": [1, 2, 3]}},
-                    }
-                },
-                False,
-            ),
-        ]
-    )
-    def is_weighted_fixture(self, request):
-        cube_dict, expected_value = request.param
-        return cube_dict, expected_value
-
-    @pytest.fixture(
-        params=[
-            ({}, True, 37),
-            ({"result": {"missing": 42}}, False, 42),
-            ({"result": {}}, False, 0),
-        ]
-    )
-    def missing_count_fixture(self, request, mean_measure_):
-        cube_dict, has_means, expected_value = request.param
-        mean_measure_.missing_count = expected_value if has_means else None
-        means = mean_measure_ if has_means else None
-        return means, cube_dict, expected_value
-
-    @pytest.fixture(
-        params=[
-            ({"result": {}}, 1.0),
-            (
-                {
-                    "result": {
-                        "filtered": {"weighted_n": 21},
-                        "unfiltered": {"weighted_n": 42},
-                    }
-                },
-                0.5,
-            ),
-            (
-                {
-                    "result": {
-                        "filtered": {"weighted_n": 0},
-                        "unfiltered": {"weighted_n": 0},
-                    }
-                },
-                np.nan,
-            ),
-            ({"result": {"filtered": {"weighted_n": 43}}}, 1.0),
-            ({"result": {"unfiltered": {"weighted_n": 44}}}, 1.0),
-        ]
-    )
-    def pop_frac_fixture(self, request):
-        cube_dict, expected_value = request.param
-        return cube_dict, expected_value
-
-    @pytest.fixture(
-        params=[
-            ({}, False, 24.0),
-            ({"result": {"measures": {"count": {"data": [7, 9]}}}}, True, 16.0),
-        ]
-    )
-    def weighted_n_fixture(self, request, unweighted_n_prop_, is_weighted_prop_):
-        cube_dict, is_weighted, expected_value = request.param
-        is_weighted_prop_.return_value = is_weighted
-        unweighted_n_prop_.return_value = 24
-        return cube_dict, is_weighted, expected_value
 
     # fixture components ---------------------------------------------
 
@@ -814,8 +745,14 @@ class Describe_BaseMeasure(object):
 
 
 class Describe_MeanMeasure(object):
-    def it_knows_the_missing_count(self, missing_count_fixture):
-        cube_dict, expected_value = missing_count_fixture
+    @pytest.mark.parametrize(
+        "cube_dict, expected_value",
+        (
+            ({"result": {"measures": {"mean": {}}}}, 0),
+            ({"result": {"measures": {"mean": {"n_missing": 42}}}}, 42),
+        ),
+    )
+    def it_knows_the_missing_count(self, cube_dict, expected_value):
         mean_measure = _MeanMeasure(cube_dict, None)
 
         missing_count = mean_measure.missing_count
@@ -829,18 +766,6 @@ class Describe_MeanMeasure(object):
         flat_values = mean_measure._flat_values
 
         assert flat_values == (1, 2, np.nan, 4)
-
-    # fixtures -------------------------------------------------------
-
-    @pytest.fixture(
-        params=[
-            ({"result": {"measures": {"mean": {}}}}, 0),
-            ({"result": {"measures": {"mean": {"n_missing": 42}}}}, 42),
-        ]
-    )
-    def missing_count_fixture(self, request):
-        cube_dict, expected_value = request.param
-        return cube_dict, expected_value
 
 
 class Describe_UnweightedCountMeasure(object):

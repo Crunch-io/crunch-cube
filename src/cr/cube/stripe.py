@@ -265,7 +265,9 @@ class _MeansStripe(_BaseBaseStripe):
         return tuple(
             _MeansStripeRow(element, unweighted_count, mean)
             for element, unweighted_count, mean in zip(
-                self._row_elements, self._unweighted_counts, self._means
+                self._row_elements,
+                self._unweighted_counts,
+                self._rows_dimension.smooth(self._means),
             )
         )
 

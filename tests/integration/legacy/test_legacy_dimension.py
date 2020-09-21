@@ -22,8 +22,15 @@ from ...fixtures import CR  # ---mnemonic: CR = 'cube-response'---
 class DescribeIntegratedAllDimensions(object):
     """Integration-test suite for `cr.cube.legacy_dimension.AllDimensions` object."""
 
-    def it_resolves_the_type_of_each_dimension(self, type_fixture):
-        dimension_dicts, expected_types = type_fixture
+    @pytest.mark.parametrize(
+        "cube_response, expected_types",
+        (
+            (CR.CAT_X_CAT, (DT.CAT, DT.CAT)),
+            (CR.CA_X_MR_WEIGHTED_HS, (DT.CA, DT.CA_CAT, DT.MR, DT.MR_CAT)),
+        ),
+    )
+    def it_resolves_the_type_of_each_dimension(self, cube_response, expected_types):
+        dimension_dicts = cube_response["result"]["dimensions"]
         all_dimensions = AllDimensions(dimension_dicts)
 
         dimension_types = tuple(d.dimension_type for d in all_dimensions)
@@ -39,19 +46,6 @@ class DescribeIntegratedAllDimensions(object):
         )
 
         assert apparent_dimension_types == (DT.CA, DT.CA_CAT, DT.MR)
-
-    # fixtures -------------------------------------------------------
-
-    @pytest.fixture(
-        params=[
-            (CR.CAT_X_CAT, (DT.CAT, DT.CAT)),
-            (CR.CA_X_MR_WEIGHTED_HS, (DT.CA, DT.CA_CAT, DT.MR, DT.MR_CAT)),
-        ]
-    )
-    def type_fixture(self, request):
-        cube_response, expected_types = request.param
-        dimension_dicts = cube_response["result"]["dimensions"]
-        return dimension_dicts, expected_types
 
 
 class TestDimension(TestCase):

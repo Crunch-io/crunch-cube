@@ -1,5 +1,52 @@
 # History of Changes
 
+#### 1.11.31
+- Use bases instead of margin for MR `standard_error` calculation
+
+#### 1.11.30
+- Fix `standard_error` calculation for MR types 
+
+#### 1.11.29
+- Fix `standard_error` denominator for `Strand` 
+
+#### 1.11.28
+- Fix collapsed `scale-mean-pairwise-indices`
+
+#### 1.11.27
+- Standard deviation and standard error for `Strand`
+
+#### 1.11.26
+- Fix `pairwise_indices()` array collapse when all values empty
+
+#### 1.11.25
+- Expose two-level pairwise-t-test
+
+#### 1.11.24
+- Bug fix for scale_median calculation
+
+#### 1.11.23
+- Expose population fraction in cube partitions
+
+#### 1.11.22
+- Additional summary measures for scale (`std_dev`, `std_error`, `median`)
+
+#### 1.11.21
+- Fix slicing for CA + single col filter
+
+#### 1.11.20
+- Fix cube title payload discrepancy
+
+#### 1.11.19
+- Fix problem where pre-ordering anchor-idx was used for locating inserted subtotal vectors
+- Enable handling of filter-only multitable-template placeholders.
+- New measures: table and columns standard deviation and standard error
+
+#### 1.11.18
+- Fix wrong proportions and base values when explicit order is expressed
+
+#### 1.11.17
+- Fix incorrect means values after hiding
+
 #### 1.11.16
 - New base for t_stats overlaps
 
