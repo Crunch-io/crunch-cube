@@ -443,14 +443,14 @@ def test_var_scale_means_for_ca_itmes_x_cat():
 
     # Testing that the scale means (row and col) are equal on the 2 diverse
     # datasets
-    np.testing.assert_array_equal(
+    np.testing.assert_array_almost_equal(
         slice_.var_scale_means_column, slice2_.var_scale_means_row
     )
 
-    np.testing.assert_almost_equal(
+    np.testing.assert_array_almost_equal(
         slice2_.var_scale_means_row, [2.56410909, 5.17893869, 4.75445248, 4.81611278]
     )
-    np.testing.assert_almost_equal(
+    np.testing.assert_array_almost_equal(
         slice_.var_scale_means_column, [2.56410909, 5.17893869, 4.75445248, 4.81611278]
     )
 

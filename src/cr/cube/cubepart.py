@@ -516,12 +516,19 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def scale_means_column(self):
+        """1D float64 ndarray of column scale means
+
+        The calculation is based on multiply of the numeric values by the
+        row_proportions and divide by the rows_margin.
+        """
         if np.all(np.isnan(self._columns_dimension_numeric_values)):
             return None
 
-        inner = np.nansum(self._columns_dimension_numeric_values * self.counts, axis=1)
+        inner = np.nansum(
+            self._columns_dimension_numeric_values * self.row_proportions, axis=1
+        )
         not_a_nan_index = ~np.isnan(self._columns_dimension_numeric_values)
-        denominator = np.sum(self.counts[:, not_a_nan_index], axis=1)
+        denominator = np.sum(self.row_proportions[:, not_a_nan_index], axis=1)
         return inner / denominator
 
     @lazyproperty
@@ -542,13 +549,19 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def scale_means_row(self):
+        """1D float64 ndarray of row scale means
+
+        The calculation is based on multiply of the numeric values by the
+        column_proportions and divide by the columns_margin.
+        """
         if np.all(np.isnan(self._rows_dimension_numeric_values)):
             return None
         inner = np.nansum(
-            self._rows_dimension_numeric_values[:, None] * self.counts, axis=0
+            self._rows_dimension_numeric_values[:, None] * self.column_proportions,
+            axis=0,
         )
         not_a_nan_index = ~np.isnan(self._rows_dimension_numeric_values)
-        denominator = np.sum(self.counts[not_a_nan_index, :], axis=0)
+        denominator = np.sum(self.column_proportions[not_a_nan_index, :], axis=0)
         return inner / denominator
 
     @lazyproperty
