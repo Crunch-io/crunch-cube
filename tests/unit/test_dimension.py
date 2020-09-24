@@ -591,7 +591,7 @@ class DescribeDimension(object):
         _is_cat_date_prop_.return_value = is_cat_date
         dimension = Dimension(None, None, dimension_transform)
 
-        show_smoothing = dimension._show_smoothing
+        show_smoothing = dimension.show_smoothing
 
         assert show_smoothing is expected_value
 
@@ -600,12 +600,12 @@ class DescribeDimension(object):
     )
     def it_knows_its_smooth_function(
         self,
-        _show_smoothing_prop_,
+        show_smoothing_prop_,
         _smoothing_window_prop_,
         show_smoothing,
         expected_value,
     ):
-        _show_smoothing_prop_.return_value = show_smoothing
+        show_smoothing_prop_.return_value = show_smoothing
         _smoothing_window_prop_.return_value = 3
         dimension = Dimension(None, None)
 
@@ -652,8 +652,8 @@ class DescribeDimension(object):
         return property_mock(request, Dimension, "valid_elements")
 
     @pytest.fixture
-    def _show_smoothing_prop_(self, request):
-        return property_mock(request, Dimension, "_show_smoothing")
+    def show_smoothing_prop_(self, request):
+        return property_mock(request, Dimension, "show_smoothing")
 
     @pytest.fixture
     def _is_cat_date_prop_(self, request):

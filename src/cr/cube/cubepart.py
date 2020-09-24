@@ -88,6 +88,12 @@ class CubePartition(object):
         return self._cube.has_means
 
     @lazyproperty
+    def is_smoothed(self):
+        """True if last dimension `show_smoothing` property is True"""
+        last_dimension = self._dimensions[-1]
+        return last_dimension.show_smoothing
+
+    @lazyproperty
     def ndim(self):
         """int count of dimensions for this partition."""
         return len(self._dimensions)
