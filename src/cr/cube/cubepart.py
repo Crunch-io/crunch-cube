@@ -89,7 +89,7 @@ class CubePartition(object):
 
     @lazyproperty
     def is_smoothed(self):
-        """True if last dimension `show_smoothing` property is True"""
+        """True if last `show_smoothing` property in the last dimension is True"""
         last_dimension = self._dimensions[-1]
         return last_dimension.show_smoothing
 
