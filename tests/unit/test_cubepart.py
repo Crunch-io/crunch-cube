@@ -478,3 +478,10 @@ class Describe_Nub(object):
 
     def it_knows_its_cube_is_never_mr_aug(self):
         assert _Nub(None).cube_is_mr_aug is False
+
+    def it_knows_whether_it_is_smoothed(self):
+        nub_ = _Nub(None)
+
+        is_smoothed = nub_.is_smoothed
+
+        assert is_smoothed is False
