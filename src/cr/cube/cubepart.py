@@ -1234,6 +1234,11 @@ class _Nub(CubePartition):
         return False if self.unweighted_count else True
 
     @lazyproperty
+    def is_smoothed(self):
+        """A `_Nub` object is not smoothed by default"""
+        return False
+
+    @lazyproperty
     def means(self):
         return self._scalar.means
 
