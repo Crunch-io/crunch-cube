@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+### 1.12.2
+- Smoothing on scale means
+
 ### 1.12.1
 - Smoothing on column percentages and column index
 
