@@ -39,7 +39,7 @@ class DescribeSliceSmoothing(object):
     ):
         transforms = {
             "smoothing": {
-                "method": "one_side_moving_avg",
+                "method": "one_sided_moving_avg",
                 "window": window,
                 "show": True,
             }
@@ -47,6 +47,33 @@ class DescribeSliceSmoothing(object):
         slice_ = Cube(fixture, transforms=transforms).partitions[0]
         np.testing.assert_array_almost_equal(
             slice_.column_percentages, load_python_expression(expectation)
+        )
+
+    @pytest.mark.parametrize(
+        "fixture, window, expectation",
+        (
+            (CR.CAT_X_CAT_DATE, 3, "cat-x-cat-date-smoothed-scale-means-w3"),
+            (CR.CAT_X_CAT_DATE_WGTD, 3, "cat-x-cat-date-smoothed-scale-means-w3"),
+            (
+                CR.CA_SUBVAR_X_CA_CAT_X_CAT_DATE,
+                3,
+                "ca-subvar-ca-cat-x-cat-date-scale-means-w3",
+            ),
+        ),
+    )
+    def it_provides_smoothed_scale_means_for_compatible_cubes(
+        self, fixture, window, expectation
+    ):
+        transforms = {
+            "smoothing": {
+                "method": "one_sidef_moving_avg",
+                "window": window,
+                "show": True,
+            }
+        }
+        slice_ = Cube(fixture, transforms=transforms).partitions[0]
+        np.testing.assert_array_almost_equal(
+            slice_.scale_means_row, load_python_expression(expectation)
         )
 
     @pytest.mark.parametrize(
@@ -61,7 +88,7 @@ class DescribeSliceSmoothing(object):
     )
     def it_does_not_smooth_col_pct_for_incompatible_cubes(self, fixture, expectation):
         transforms = {
-            "smoothing": {"method": "one_side_moving_avg", "window": 3, "show": True}
+            "smoothing": {"method": "one_sided_moving_avg", "window": 3, "show": True}
         }
         cube = Cube(fixture, transforms=transforms)
         slice_ = cube.partitions[0]
@@ -79,7 +106,7 @@ class DescribeSliceSmoothing(object):
 class DescribeStrandMeansSmoothing(object):
     def it_provides_smoothed_means_cat_date(self):
         transforms = {
-            "smoothing": {"method": "one_side_moving_avg", "window": 3, "show": True}
+            "smoothing": {"method": "one_sided_moving_avg", "window": 3, "show": True}
         }
         strand_ = Cube(CR.CAT_DATE_MEAN, transforms=transforms).partitions[0]
         np.testing.assert_array_almost_equal(
@@ -88,7 +115,7 @@ class DescribeStrandMeansSmoothing(object):
 
     def it_doesnt_smoot_means_mr_mean_filt_wgtd(self):
         transforms = {
-            "smoothing": {"method": "one_side_moving_avg", "window": 3, "show": True}
+            "smoothing": {"method": "one_sided_moving_avg", "window": 3, "show": True}
         }
         strand_ = Cube(CR.MR_MEAN_FILT_WGTD, transforms=transforms).partitions[0]
         np.testing.assert_array_almost_equal(

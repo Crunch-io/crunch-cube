@@ -387,6 +387,21 @@ class Dimension(object):
         return len(self.all_elements)
 
     @lazyproperty
+    def show_smoothing(self):
+        """Return True if a smoothing transform is active for this dimension."""
+        smoothing = self._dimension_transforms_dict.get("smoothing")
+        # --- default is no smoothing when smoothing transform is not present ---
+        if not smoothing:
+            return False
+        # --- no smoothing when dimension is not a categorical date ---
+        if not self._is_cat_date:
+            return False
+        # --- no smoothing when the smoothing transform is inactive ---
+        if not smoothing.get("show", True):
+            return False
+        return True
+
+    @lazyproperty
     def smooth(self):
         """Function performing smoothing for this dimension, based on transform."""
 
@@ -395,7 +410,7 @@ class Dimension(object):
 
         return (
             _SingleSideMovingAvgSmoother.smoothing_function(self._smoothing_window)
-            if self._show_smoothing
+            if self.show_smoothing
             else null_smooth
         )
 
@@ -468,21 +483,6 @@ class Dimension(object):
             for category in categories
             if not category.get("missing", False)
         )
-
-    @lazyproperty
-    def _show_smoothing(self):
-        """Return True if a smoothing transform is active for this dimension."""
-        smoothing = self._dimension_transforms_dict.get("smoothing")
-        # --- default is no smoothing when smoothing transform is not present ---
-        if not smoothing:
-            return False
-        # --- no smoothing when dimension is not a categorical date ---
-        if not self._is_cat_date:
-            return False
-        # --- no smoothing when the smoothing transform is inactive ---
-        if not smoothing.get("show", True):
-            return False
-        return True
 
     @lazyproperty
     def _smoothing_window(self):

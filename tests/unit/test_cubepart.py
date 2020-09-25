@@ -311,6 +311,20 @@ class Describe_Slice(object):
 
         assert slice_.scale_mean_pairwise_indices_alt is None
 
+    @pytest.mark.parametrize(
+        "show_smoothing, expected_value", ((True, True), (False, False))
+    )
+    def it_knows_whether_it_is_smoothed(
+        self, show_smoothing, expected_value, dimension_, _dimensions_prop_
+    ):
+        dimension_.show_smoothing = show_smoothing
+        _dimensions_prop_.return_value = (dimension_,)
+        slice_ = _Slice(None, None, None, None, None)
+
+        is_smoothed = slice_.is_smoothed
+
+        assert is_smoothed is expected_value
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -320,6 +334,14 @@ class Describe_Slice(object):
     @pytest.fixture
     def cube_(self, request):
         return instance_mock(request, Cube)
+
+    @pytest.fixture
+    def dimension_(self, request):
+        return instance_mock(request, Dimension)
+
+    @pytest.fixture
+    def _dimensions_prop_(self, request):
+        return property_mock(request, _Slice, "_dimensions")
 
     @pytest.fixture
     def matrix_(self, request):
@@ -395,6 +417,20 @@ class Describe_Strand(object):
 
         assert population_fraction == 0.5
 
+    @pytest.mark.parametrize(
+        "show_smoothing, expected_value", ((True, True), (False, False))
+    )
+    def it_knows_whether_it_is_smoothed(
+        self, show_smoothing, expected_value, dimension_, _dimensions_prop_
+    ):
+        dimension_.show_smoothing = show_smoothing
+        _dimensions_prop_.return_value = (dimension_,)
+        strand_ = _Strand(None, None, None, None, None, None)
+
+        is_smoothed = strand_.is_smoothed
+
+        assert is_smoothed is expected_value
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -404,6 +440,10 @@ class Describe_Strand(object):
     @pytest.fixture
     def dimension_(self, request):
         return instance_mock(request, Dimension)
+
+    @pytest.fixture
+    def _dimensions_prop_(self, request):
+        return property_mock(request, _Strand, "_dimensions")
 
     @pytest.fixture
     def _rows_dimension_prop_(self, request):
@@ -438,3 +478,10 @@ class Describe_Nub(object):
 
     def it_knows_its_cube_is_never_mr_aug(self):
         assert _Nub(None).cube_is_mr_aug is False
+
+    def it_knows_whether_it_is_smoothed(self):
+        nub_ = _Nub(None)
+
+        is_smoothed = nub_.is_smoothed
+
+        assert is_smoothed is False

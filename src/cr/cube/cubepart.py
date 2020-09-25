@@ -88,6 +88,12 @@ class CubePartition(object):
         return self._cube.has_means
 
     @lazyproperty
+    def is_smoothed(self):
+        """True if last `show_smoothing` property in the last dimension is True"""
+        last_dimension = self._dimensions[-1]
+        return last_dimension.show_smoothing
+
+    @lazyproperty
     def ndim(self):
         """int count of dimensions for this partition."""
         return len(self._dimensions)
@@ -516,12 +522,19 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def scale_means_column(self):
+        """1D float64 ndarray of column scale means
+
+        The calculation is based on multiply of the numeric values by the
+        row_proportions and divide by the rows_margin.
+        """
         if np.all(np.isnan(self._columns_dimension_numeric_values)):
             return None
 
-        inner = np.nansum(self._columns_dimension_numeric_values * self.counts, axis=1)
+        inner = np.nansum(
+            self._columns_dimension_numeric_values * self.row_proportions, axis=1
+        )
         not_a_nan_index = ~np.isnan(self._columns_dimension_numeric_values)
-        denominator = np.sum(self.counts[:, not_a_nan_index], axis=1)
+        denominator = np.sum(self.row_proportions[:, not_a_nan_index], axis=1)
         return inner / denominator
 
     @lazyproperty
@@ -542,13 +555,19 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def scale_means_row(self):
+        """1D float64 ndarray of row scale means
+
+        The calculation is based on multiply of the numeric values by the
+        column_proportions and divide by the columns_margin.
+        """
         if np.all(np.isnan(self._rows_dimension_numeric_values)):
             return None
         inner = np.nansum(
-            self._rows_dimension_numeric_values[:, None] * self.counts, axis=0
+            self._rows_dimension_numeric_values[:, None] * self.column_proportions,
+            axis=0,
         )
         not_a_nan_index = ~np.isnan(self._rows_dimension_numeric_values)
-        denominator = np.sum(self.counts[not_a_nan_index, :], axis=0)
+        denominator = np.sum(self.column_proportions[not_a_nan_index, :], axis=0)
         return inner / denominator
 
     @lazyproperty
@@ -1213,6 +1232,11 @@ class _Nub(CubePartition):
     @lazyproperty
     def is_empty(self):
         return False if self.unweighted_count else True
+
+    @lazyproperty
+    def is_smoothed(self):
+        """A `_Nub` object is not smoothed by default"""
+        return False
 
     @lazyproperty
     def means(self):
