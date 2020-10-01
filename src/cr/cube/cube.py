@@ -8,7 +8,6 @@ CubeSet is the main API class for manipulating Crunch.io JSON cube responses.
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import json
-
 import numpy as np
 
 from cr.cube.cubepart import CubePartition
@@ -262,6 +261,12 @@ class Cube(object):
     def has_means(self):
         """True if cube includes a means measure."""
         return self._measures.means is not None
+
+    @lazyproperty
+    def means_subvariables(self):
+        if not self.has_means:
+            return None
+        return self._measures.means.subvariables
 
     def inflate(self):
         """Return new Cube object with rows-dimension added.
@@ -641,6 +646,10 @@ class _MeanMeasure(_BaseMeasure):
     def __init__(self, cube_dict, all_dimensions, subvariables=None):
         super(_MeanMeasure, self).__init__(cube_dict, all_dimensions)
         self._subvariables = subvariables
+
+    @lazyproperty
+    def subvariables(self):
+        return self._subvariables
 
     @lazyproperty
     def shape(self):
