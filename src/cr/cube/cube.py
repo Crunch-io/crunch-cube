@@ -515,7 +515,10 @@ class _Measures(object):
         )
         if mean_measure_dict is None:
             return None
-        return _MeanMeasure(self._cube_dict, self._all_dimensions)
+        subvariables = (
+            mean_measure_dict.get("metadata", {}).get("type", {}).get("subvariables")
+        )
+        return _MeanMeasure(self._cube_dict, self._all_dimensions, subvariables)
 
     @lazyproperty
     def missing_count(self):
@@ -596,6 +599,21 @@ class _BaseMeasure(object):
         self._all_dimensions = all_dimensions
 
     @lazyproperty
+    def shape(self):
+        """tuple representing measure shape.
+
+        Most often this is the same shape as cube slice itself, but can be different.
+        When we have variables in measures' specification, that are arrays, or when we
+        specify measures such as correlation (that are themselves matrices), this shape
+        needs to change.
+
+        Each subclass is responsible for implementing the correct shape, based on the
+        shape of the provided variable (and if it has subvariables or not), and on the
+        provided measure, and its innate shape.
+        """
+        return self._all_dimensions.shape
+
+    @lazyproperty
     def raw_cube_array(self):
         """Return read-only ndarray of measure values from cube-response.
 
@@ -603,7 +621,7 @@ class _BaseMeasure(object):
         response. Specifically, it includes values for missing elements, any
         MR_CAT dimensions, and any prunable rows and columns.
         """
-        array = np.array(self._flat_values).reshape(self._all_dimensions.shape)
+        array = np.array(self._flat_values).reshape(self.shape)
         # ---must be read-only to avoid hard-to-find bugs---
         array.flags.writeable = False
         return array
@@ -619,6 +637,30 @@ class _BaseMeasure(object):
 
 class _MeanMeasure(_BaseMeasure):
     """Statistical mean values from a cube-response."""
+
+    def __init__(self, cube_dict, all_dimensions, subvariables=None):
+        super(_MeanMeasure, self).__init__(cube_dict, all_dimensions)
+        self._subvariables = subvariables
+
+    @lazyproperty
+    def shape(self):
+        """tuple specifying measure shape.
+
+        If the provided variable (to calculate the means of) doesn't have subvariables,
+        this is the same as the parent class implementation.
+
+        If the variable (and consequently the measure data response) has subvariables,
+        then we need to alter the shape, by augmenting it with the number of subvars.
+        """
+        # Original shape: (m, n, . . .,)
+        shape = super(_MeanMeasure, self).shape
+
+        if self._subvariables is not None:
+            # There are subvariables in the provided variable => augment shape
+            # Shape now becomes: (m, n, . . ., n_subvars,)
+            shape += (len(self._subvariables),)
+
+        return shape
 
     @lazyproperty
     def missing_count(self):
