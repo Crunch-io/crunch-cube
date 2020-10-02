@@ -262,12 +262,6 @@ class Cube(object):
         """True if cube includes a means measure."""
         return self._measures.means is not None
 
-    @lazyproperty
-    def means_subvariables(self):
-        if not self.has_means:
-            return None
-        return self._measures.means.subvariables
-
     def inflate(self):
         """Return new Cube object with rows-dimension added.
 
@@ -316,6 +310,13 @@ class Cube(object):
     def is_weighted(self):
         """True if cube response contains weighted data."""
         return self._measures.is_weighted
+
+    @lazyproperty
+    def means_subvariables(self):
+        """List of subvar names for numeric arrays, None otherwise."""
+        if not self.has_means:
+            return None
+        return self._measures.means.subvariables
 
     @lazyproperty
     def missing(self):
@@ -604,6 +605,19 @@ class _BaseMeasure(object):
         self._all_dimensions = all_dimensions
 
     @lazyproperty
+    def raw_cube_array(self):
+        """Return read-only ndarray of measure values from cube-response.
+
+        The shape of the ndarray mirrors the shape of the (raw) cube
+        response. Specifically, it includes values for missing elements, any
+        MR_CAT dimensions, and any prunable rows and columns.
+        """
+        raw_cube_array = np.array(self._flat_values).reshape(self.shape)
+        # ---must be read-only to avoid hard-to-find bugs---
+        raw_cube_array.flags.writeable = False
+        return raw_cube_array
+
+    @lazyproperty
     def shape(self):
         """tuple representing measure shape.
 
@@ -617,19 +631,6 @@ class _BaseMeasure(object):
         provided measure, and its innate shape.
         """
         return self._all_dimensions.shape
-
-    @lazyproperty
-    def raw_cube_array(self):
-        """Return read-only ndarray of measure values from cube-response.
-
-        The shape of the ndarray mirrors the shape of the (raw) cube
-        response. Specifically, it includes values for missing elements, any
-        MR_CAT dimensions, and any prunable rows and columns.
-        """
-        array = np.array(self._flat_values).reshape(self.shape)
-        # ---must be read-only to avoid hard-to-find bugs---
-        array.flags.writeable = False
-        return array
 
     @lazyproperty
     def _flat_values(self):  # pragma: no cover
@@ -649,6 +650,7 @@ class _MeanMeasure(_BaseMeasure):
 
     @lazyproperty
     def subvariables(self):
+        """List of subvar names for numeric arrays, None otherwise."""
         return self._subvariables
 
     @lazyproperty

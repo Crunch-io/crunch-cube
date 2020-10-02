@@ -7,7 +7,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import pytest
 import numpy as np
 
-from cr.cube.cube import Cube, CubeSet, _Measures
+from cr.cube.cube import Cube, CubeSet, _Measures, _BaseMeasure, _MeanMeasure
 from cr.cube.cubepart import _Slice, _Strand, _Nub
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.dimension import Dimension
@@ -519,3 +519,20 @@ class DescribeMeasures(object):
         population_fraction = measures.population_fraction
 
         np.testing.assert_equal(population_fraction, expected_value)
+
+
+class DescribeMeanMeasure(object):
+    @pytest.mark.parametrize(
+        "base_shape, subvariables, expected_shape",
+        (((3, 4), None, (3, 4)), ((3, 4), ["0001", "0002"], (3, 4, 2))),
+    )
+    def it_knows_basic_measure_shape_wrt_subvars(
+        self, base_shape, subvariables, expected_shape, _base_measure_shape
+    ):
+        _base_measure_shape.return_value = base_shape
+        measure = _MeanMeasure(None, None, subvariables=subvariables)
+        assert measure.shape == expected_shape
+
+    @pytest.fixture
+    def _base_measure_shape(self, request):
+        return property_mock(request, _BaseMeasure, "shape")
