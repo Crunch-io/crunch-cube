@@ -10,8 +10,6 @@ from cr.cube.cube import Cube
 
 from ..fixtures import NA
 
-NAN = np.nan
-
 
 # pylint: disable=no-self-use
 class TestNumericArrays:
