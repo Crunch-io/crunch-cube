@@ -184,7 +184,7 @@ class _ColumnPairwiseSignificance(object):
         )
 
         tstats_scale_means = (
-            self._slice.scale_means_row[self._col_idx] - self._slice.scale_means_row
+            self._slice.scale_means_row - self._slice.scale_means_row[self._col_idx]
         ) / (standard_deviation * np.sqrt((1 / counts[self._col_idx]) + (1 / counts)))
 
         return tstats_scale_means
