@@ -147,7 +147,7 @@ class TestStandardizedResiduals(TestCase):
         assert actual.p_vals_scale_means[0] == 1
         assert actual.t_stats_scale_means[0] == 0
         np.testing.assert_almost_equal(
-            actual.t_stats_scale_means, [0.0, -1.08966143, 1.27412884, 4.14629088]
+            actual.t_stats_scale_means, [0.0, 1.08966143, -1.27412884, -4.14629088]
         )
         np.testing.assert_almost_equal(
             actual.p_vals_scale_means,
@@ -164,7 +164,7 @@ class TestStandardizedResiduals(TestCase):
             [2.7638510e-01, 1.0000000e00, 1.4344585e-03, 1.7905266e-09],
         )
         np.testing.assert_almost_equal(
-            actual.t_stats_scale_means, [1.08966143, 0.0, 3.19741668, 6.10466696]
+            actual.t_stats_scale_means, [-1.08966143, 0.0, -3.19741668, -6.10466696]
         )
 
     def test_ttests_scale_means_cat_x_cat_pruning_and_hs(self):
@@ -177,7 +177,7 @@ class TestStandardizedResiduals(TestCase):
 
         np.testing.assert_almost_equal(
             actual.t_stats_scale_means,
-            [0.0, -1.64461503, -1.92387847, np.nan, -1.06912069],
+            [0.0, 1.64461503, 1.92387847, np.nan, 1.06912069],
         )
         np.testing.assert_almost_equal(
             actual.p_vals_scale_means, [1.0, 0.1046981, 0.059721, np.nan, 0.2918845]
@@ -189,7 +189,7 @@ class TestStandardizedResiduals(TestCase):
 
         np.testing.assert_almost_equal(
             actual.t_stats_scale_means,
-            [0.0, -0.9387958, -1.644615, -1.9238785, np.nan, -1.0691207],
+            [0.0, 0.9387958, 1.644615, 1.9238785, np.nan, 1.0691207],
         )
 
         np.testing.assert_almost_equal(
@@ -207,7 +207,7 @@ class TestStandardizedResiduals(TestCase):
 
         np.testing.assert_almost_equal(
             actual.t_stats_scale_means,
-            [0.0, -0.93879579, -1.64461503, -1.92387847, -1.06912069],
+            [0.0, 0.93879579, 1.64461503, 1.92387847, 1.06912069],
         )
         np.testing.assert_almost_equal(
             actual.p_vals_scale_means, [1.0, 0.3500141, 0.1046981, 0.059721, 0.2918845]
@@ -222,7 +222,7 @@ class TestStandardizedResiduals(TestCase):
         actual = slice_.pairwise_significance_tests[0]
 
         np.testing.assert_almost_equal(
-            actual.t_stats_scale_means, [0.0, -1.64461503, -1.92387847, -1.06912069]
+            actual.t_stats_scale_means, [0.0, 1.64461503, 1.92387847, 1.06912069]
         )
         np.testing.assert_almost_equal(
             actual.p_vals_scale_means, [1.0, 0.1046981, 0.059721, 0.2918845]
@@ -236,16 +236,16 @@ class TestStandardizedResiduals(TestCase):
             actual.t_stats_scale_means,
             [
                 0.0,
-                0.70543134,
-                0.06749456,
-                3.59627589,
-                4.15672996,
-                3.26353764,
-                0.30034779,
-                0.8383222,
-                3.02379687,
-                0.85672124,
-                4.26974185,
+                -0.70543134,
+                -0.06749456,
+                -3.59627589,
+                -4.15672996,
+                -3.26353764,
+                -0.30034779,
+                -0.8383222,
+                -3.02379687,
+                -0.85672124,
+                -4.26974185,
             ],
         )
 
@@ -271,7 +271,7 @@ class TestStandardizedResiduals(TestCase):
         actual = slice_.pairwise_significance_tests[0]
 
         np.testing.assert_almost_equal(
-            actual.t_stats_scale_means, [0.0, 4.38871748, 3.99008596, 5.15679647]
+            actual.t_stats_scale_means, [0.0, -4.38871748, -3.99008596, -5.15679647]
         )
         np.testing.assert_almost_equal(
             actual.p_vals_scale_means,
