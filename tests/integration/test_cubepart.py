@@ -13,7 +13,7 @@ from cr.cube.enum import DIMENSION_TYPE as DT
 
 # ---mnemonic: CR = 'cube-response'---
 # ---mnemonic: TR = 'transforms'---
-from ..fixtures import CR, TR
+from ..fixtures import CR, TR, NA
 from ..util import load_python_expression
 
 
@@ -210,6 +210,18 @@ class Describe_Slice(object):
         np.testing.assert_almost_equal(
             slice_.pvals, load_python_expression("cat-hs-x-mr-pvals")
         )
+
+    @pytest.mark.parametrize(
+        "fixture, expectation",
+        (
+            (CR.MEANS_CAT_X_CAT_HS, None),
+            (CR.MR_X_CAT_HS, None),
+            (NA.NUM_ARR_MEANS_NO_DIMS, ["0001", "0002"]),
+        ),
+    )
+    def it_knows_if_it_has_means_subvariales(self, fixture, expectation):
+        slice_ = Cube(fixture).partitions[0]
+        assert slice_._cube.means_subvariables == expectation
 
     def it_provides_values_for_mean_cat_x_cat_hs(self):
         slice_ = Cube(CR.MEANS_CAT_X_CAT_HS).partitions[0]
