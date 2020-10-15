@@ -23,7 +23,7 @@ from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.min_base_size_mask import MinBaseSizeMask
 from cr.cube.measures.pairwise_significance import PairwiseSignificance
 from cr.cube.matrix import TransformedMatrix
-from cr.cube.noa.smoothing import SingleSideMovingAvgSmoother
+from cr.cube.noa.smoothing import SingleSidedMovingAvgSmoother
 from cr.cube.scalar import MeansScalar
 from cr.cube.stripe import TransformedStripe
 from cr.cube.util import lazyproperty
@@ -100,7 +100,7 @@ class CubePartition(object):
         kwargs = function_spec.get("kwargs", {})
         if function != "one_sided_moving_avg":
             raise NotImplementedError("Function {} is not available.".format(function))
-        return SingleSideMovingAvgSmoother(self, **kwargs).smoothed_values
+        return SingleSidedMovingAvgSmoother(self, **kwargs).smoothed_values
 
     @lazyproperty
     def has_means(self):

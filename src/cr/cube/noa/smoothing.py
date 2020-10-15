@@ -7,7 +7,7 @@ import numpy as np
 from ..util import lazyproperty
 
 
-class SingleSideMovingAvgSmoother(object):
+class SingleSidedMovingAvgSmoother(object):
     """Create and configure smoothing function for one-sided moving average."""
 
     def __init__(self, partition, **kwargs):
