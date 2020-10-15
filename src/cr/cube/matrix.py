@@ -671,6 +671,7 @@ class _CatXCatMatrix(_BaseBaseMatrix):
     @lazyproperty
     def _column_index(self):
         """2D np.float64/np.nan ndarray of column-index value for each matrix cell.
+
         Column-index answers the question "are respondents in this row-category more or
         less likely than the overall table population to choose the answer represented
         by this column?". For example, if the row is "Hispanic" and the column is
