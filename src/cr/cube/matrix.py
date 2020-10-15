@@ -423,7 +423,6 @@ class _BaseBaseMatrix(object):
         # --- note zip() returns an iterator in Python 3 ---
         return zip(
             self._counts.T,
-            self._column_proportions.T,
             self._unweighted_counts.T,
             self._column_elements,
             self._zscores.T,
@@ -432,22 +431,13 @@ class _BaseBaseMatrix(object):
         )
 
     @lazyproperty
-    def _column_index(self):
-        """2D np.float64/np.nan ndarray of column-index value for each matrix cell.
-
-        Column-index answers the question "are respondents in this row-category more or
-        less likely than the overall table population to choose the answer represented
-        by this column?". For example, if the row is "Hispanic" and the column is
-        home-ownership, a value of 100 indicates hispanics are no less and no more
-        likely to own their home than the overall population. If that value was 150, it
-        would indicate hispanics are 50% more likely to own their home than the general
-        population (or the population surveyed anyway).
-
-        These values must be known by vectors but cannot be calculated there (the
-        calculation is "cross-vector") so these values must be passed down from the
-        matrix level.
+    def _column_proportions(self):
+        """2D ndarray of np.float64 between 0.0 and 1.0.
+        
+        The value represents the ratio of each cell count to the total count (margin)
+        for its column.
         """
-        return self._column_proportions / self._baseline * 100
+        return np.array([col.proportions for col in self.columns]).T
 
     @classmethod
     def _means_matrix_factory(cls, cube, dimensions, slice_idx):
@@ -582,7 +572,6 @@ class _CatXCatMatrix(_BaseBaseMatrix):
         return tuple(
             _CategoricalVector(
                 counts,
-                proportions,
                 unweighted_counts,
                 element,
                 self.table_margin,
@@ -593,7 +582,6 @@ class _CatXCatMatrix(_BaseBaseMatrix):
             )
             for (
                 counts,
-                proportions,
                 unweighted_counts,
                 element,
                 zscores,
@@ -608,7 +596,6 @@ class _CatXCatMatrix(_BaseBaseMatrix):
         return tuple(
             _CategoricalVector(
                 counts,
-                proportions,
                 unweighted_counts,
                 element,
                 self.table_margin,
@@ -620,7 +607,6 @@ class _CatXCatMatrix(_BaseBaseMatrix):
             )
             for (
                 counts,
-                proportions,
                 unweighted_counts,
                 element,
                 zscores,
@@ -683,6 +669,22 @@ class _CatXCatMatrix(_BaseBaseMatrix):
         return uncond_row_margin[:, None] / np.sum(uncond_row_margin)
 
     @lazyproperty
+    def _column_index(self):
+        """2D np.float64/np.nan ndarray of column-index value for each matrix cell.
+        Column-index answers the question "are respondents in this row-category more or
+        less likely than the overall table population to choose the answer represented
+        by this column?". For example, if the row is "Hispanic" and the column is
+        home-ownership, a value of 100 indicates hispanics are no less and no more
+        likely to own their home than the overall population. If that value was 150, it
+        would indicate hispanics are 50% more likely to own their home than the general
+        population (or the population surveyed anyway).
+        These values must be known by vectors but cannot be calculated there (the
+        calculation is "cross-vector") so these values must be passed down from the
+        matrix level.
+        """
+        return self._column_proportions / self._baseline * 100
+
+    @lazyproperty
     def _columns_margin(self):
         """1D ndarray of np.float64 (or np.int64) weighted N for each matrix column.
 
@@ -691,15 +693,6 @@ class _CatXCatMatrix(_BaseBaseMatrix):
         cube-result is not weighted.
         """
         return np.sum(self._counts, axis=0)
-
-    @lazyproperty
-    def _column_proportions(self):
-        """2D np.float64 ndarray of smoothed column proportion for each matrix cell.
-
-        Returns smoothed or unsmoothed values according to the smoother expressed in the
-        dimension transforms.
-        """
-        return self.columns_dimension.smooth(self._counts / self._columns_margin)
 
     @property
     def _row_generator(self):
@@ -711,7 +704,6 @@ class _CatXCatMatrix(_BaseBaseMatrix):
         # --- Note `zip()` returns an iterator in Python 3 ---
         return zip(
             self._counts,
-            self._row_proportions,
             self._unweighted_counts,
             self._row_elements,
             self._zscores,
@@ -719,11 +711,6 @@ class _CatXCatMatrix(_BaseBaseMatrix):
             self._table_std_err,
             self._column_index,
         )
-
-    @lazyproperty
-    def _row_proportions(self):
-        """2D np.float64 ndarray of row proportions for each matrix cell."""
-        return (self._counts.T / self._rows_margin).T
 
     @lazyproperty
     def _rows_margin(self):
@@ -855,7 +842,6 @@ class _MrXCatMatrix(_CatXCatMatrix):
         return tuple(
             _OpposingMrVector(
                 counts,
-                proportions,
                 unweighted_counts,
                 element,
                 self.table_margin,
@@ -865,7 +851,6 @@ class _MrXCatMatrix(_CatXCatMatrix):
             )
             for (
                 counts,
-                proportions,
                 unweighted_counts,
                 element,
                 zscores,
@@ -882,7 +867,6 @@ class _MrXCatMatrix(_CatXCatMatrix):
         return tuple(
             _MrOpposingCatVector(
                 counts,
-                proportions,
                 unweighted_counts,
                 element,
                 table_margin,
@@ -893,7 +877,6 @@ class _MrXCatMatrix(_CatXCatMatrix):
             )
             for (
                 counts,
-                proportions,
                 unweighted_counts,
                 element,
                 table_margin,
@@ -968,17 +951,6 @@ class _MrXCatMatrix(_CatXCatMatrix):
         # --- inflate shape to (nrows, 1) for later calculation convenience ---
         return (uncond_row_margin / uncond_row_table_margin)[:, None]
 
-    @lazyproperty
-    def _column_proportions(self):
-        """2D np.float64 ndarray of smoothed column proportions for each matrix cell.
-
-        Returns smoothed or unsmoothed values according to the smoother expressed in the
-        dimension transforms.
-        """
-        return self.columns_dimension.smooth(
-            (self._counts[:, 0, :] / self._rows_margin)
-        )
-
     @property
     def _row_generator(self):
         """Iterable of arguments to row-vector constructor call for each row element.
@@ -989,7 +961,6 @@ class _MrXCatMatrix(_CatXCatMatrix):
         # --- Note `zip()` returns an iterator in Python 3 ---
         return zip(
             self._counts,
-            self._row_proportions,
             self._unweighted_counts,
             self._row_elements,
             self.table_margin,
@@ -998,11 +969,6 @@ class _MrXCatMatrix(_CatXCatMatrix):
             self._table_std_err,
             self._column_index,
         )
-
-    @lazyproperty
-    def _row_proportions(self):
-        """2D np.float64 ndarray of row proportions for each matrix cell."""
-        return (self._counts[:, 0, :].T / np.sum(self._counts[:, 0, :], axis=1)).T
 
     @lazyproperty
     def _table_proportion_variance(self):
@@ -1096,12 +1062,9 @@ class _CatXMrMatrix(_CatXCatMatrix):
     def columns(self):
         """Sequence of _MrOpposingCatVector object for each column of matrix."""
         return tuple(
-            _MrOpposingCatVector(
-                counts.T, proportions, unweighted_counts.T, element, table_margin
-            )
+            _MrOpposingCatVector(counts.T, unweighted_counts.T, element, table_margin)
             for (
                 counts,
-                proportions,
                 unweighted_counts,
                 element,
                 table_margin,
@@ -1128,7 +1091,6 @@ class _CatXMrMatrix(_CatXCatMatrix):
         return tuple(
             _OpposingMrVector(
                 counts.T,
-                proportions,
                 unweighted_counts.T,
                 element,
                 self.table_margin,
@@ -1139,7 +1101,6 @@ class _CatXMrMatrix(_CatXCatMatrix):
             )
             for (
                 counts,
-                proportions,
                 unweighted_counts,
                 element,
                 zscores,
@@ -1208,23 +1169,12 @@ class _CatXMrMatrix(_CatXCatMatrix):
         # --- note zip() returns an iterator in Python 3 ---
         return zip(
             np.array([self._counts.T[0].T, self._counts.T[1].T]).T,
-            self._column_proportions.T,
             np.array(
                 [self._unweighted_counts.T[0].T, self._unweighted_counts.T[1].T]
             ).T,
             self._column_elements,
             self.table_margin,
         )
-
-    @lazyproperty
-    def _column_proportions(self):
-        """2D np.float64 ndarray of column proportions for each matrix cell."""
-        return (self._counts / self._columns_margin)[:, :, 0]
-
-    @lazyproperty
-    def _row_proportions(self):
-        """2D np.float64 ndarray of row proportions for each matrix cell."""
-        return self._counts[:, :, 0] / np.sum(self._counts, axis=2)
 
     @lazyproperty
     def _table_proportion_variance(self):
@@ -1343,12 +1293,9 @@ class _MrXMrMatrix(_CatXCatMatrix):
         Each column corresponds to a subvar of the second MR dimension.
         """
         return tuple(
-            _OpposingMrVector(
-                counts, proportions, unweighted_counts, element, table_margin
-            )
+            _OpposingMrVector(counts, unweighted_counts, element, table_margin)
             for (
                 counts,
-                proportions,
                 unweighted_counts,
                 element,
                 table_margin,
@@ -1372,7 +1319,6 @@ class _MrXMrMatrix(_CatXCatMatrix):
         return tuple(
             _OpposingMrVector(
                 counts[0].T,
-                proportions,
                 unweighted_counts[0].T,
                 element,
                 table_margin,
@@ -1383,7 +1329,6 @@ class _MrXMrMatrix(_CatXCatMatrix):
             )
             for (
                 counts,
-                proportions,
                 unweighted_counts,
                 element,
                 table_margin,
@@ -1511,16 +1456,10 @@ class _MrXMrMatrix(_CatXCatMatrix):
         # --- note zip() returns an iterator in Python 3 ---
         return zip(
             self._counts.T[0],
-            self._column_proportions.T,
             self._unweighted_counts.T[0],
             self._column_elements,
             self.table_margin.T,
         )
-
-    @lazyproperty
-    def _column_proportions(self):
-        """2D np.float64 ndarray of column proportions for each matrix cell."""
-        return self._counts[:, 0, :, 0] / self._rows_margin[:, :, 0]
 
     @lazyproperty
     def _mr_shadow_proportions(self):
@@ -1541,7 +1480,6 @@ class _MrXMrMatrix(_CatXCatMatrix):
         # --- note zip() returns an iterator in Python 3 ---
         return zip(
             self._counts,
-            self._row_proportions,
             self._unweighted_counts,
             self._row_elements,
             self.table_margin,
@@ -1550,11 +1488,6 @@ class _MrXMrMatrix(_CatXCatMatrix):
             self._table_std_err,
             self._column_index,
         )
-
-    @lazyproperty
-    def _row_proportions(self):
-        """2D np.float64 ndarray of row proportions for each matrix cell."""
-        return self._counts[:, 0, :, 0] / np.sum(self._counts, axis=3)[:, 0, :]
 
     @lazyproperty
     def _table_proportion_variance(self):
@@ -1743,11 +1676,6 @@ class _BaseMatrixInsertedVector(object):
         anchored to the same base vector.
         """
         return self._anchor_n, self._neg_idx, self
-
-    @lazyproperty
-    def proportions(self):
-        """1D np.float/np.nan ndarray of proportions for each vector cell."""
-        return self.counts / self.margin
 
     @lazyproperty
     def table_margin(self):
@@ -2073,18 +2001,11 @@ class _AssembledVector(_BaseTransformationVector):
 
     @lazyproperty
     def proportions(self):
-        """1D np.float/np.nan ndarray of proportions for each vector cell."""
-        base_vector_proportions = self._base_vector.proportions
+        """1D np.float64/np.nan ndarray of count proportion for each vector cell.
 
-        def fsubtot(inserted_vector):
-            """-> np.float/np.nan proportion for `inserted_vector`.
-
-            Passed to and called by ._apply_interleaved() to compute inserted value
-            which it places in the right vector position.
-            """
-            return np.sum(base_vector_proportions[inserted_vector.addend_idxs])
-
-        return self._apply_interleaved(base_vector_proportions, fsubtot)
+        A cell value is np.nan if its corresponding margin value is zero.
+        """
+        return self.counts / self.margin
 
     @lazyproperty
     def pvals(self):
@@ -2424,10 +2345,6 @@ class _OrderedVector(_BaseTransformationVector):
         return (self._index, self._index, self)
 
     @lazyproperty
-    def proportions(self):
-        return self._base_vector.proportions[self._opposing_order]
-
-    @lazyproperty
     def unweighted_counts(self):
         """1D np.int64 ndarray of unweighted-count for each vector cell.
 
@@ -2563,7 +2480,6 @@ class _CategoricalVector(_BaseVector):
     def __init__(
         self,
         counts,
-        proportions,
         unweighted_counts,
         element,
         table_margin,
@@ -2575,7 +2491,6 @@ class _CategoricalVector(_BaseVector):
     ):
         super(_CategoricalVector, self).__init__(element, unweighted_counts)
         self._counts = counts
-        self._proportions = proportions
         self._table_margin = table_margin
         self._zscores = zscores
         self._table_std_dev = table_std_dev
@@ -2624,7 +2539,7 @@ class _CategoricalVector(_BaseVector):
         margin value is zero. Note that when this vector opposes an MR dimension the
         vector margin is distinct for each cell and the proportions may not sum to 1.0.
         """
-        return self._proportions
+        return self.counts / self.margin
 
     @lazyproperty
     def table_margin(self):
@@ -2713,7 +2628,6 @@ class _MrOpposingCatVector(_CategoricalVector):
     def __init__(
         self,
         counts,
-        proportions,
         unweighted_counts,
         label,
         table_margin,
@@ -2724,7 +2638,6 @@ class _MrOpposingCatVector(_CategoricalVector):
     ):
         super(_MrOpposingCatVector, self).__init__(
             counts[0],
-            proportions,
             unweighted_counts[0],
             label,
             table_margin,

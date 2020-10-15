@@ -23,6 +23,7 @@ from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.min_base_size_mask import MinBaseSizeMask
 from cr.cube.measures.pairwise_significance import PairwiseSignificance
 from cr.cube.matrix import TransformedMatrix
+from cr.cube.noa.smoothing import SingleSideMovingAvgSmoother
 from cr.cube.scalar import MeansScalar
 from cr.cube.stripe import TransformedStripe
 from cr.cube.util import lazyproperty
@@ -82,16 +83,29 @@ class CubePartition(object):
         """
         return tuple(d.dimension_type for d in self._dimensions)
 
+    def evaluate(self, function_spec):
+        """ -> 1D/2D ndarray, values evaluated given the function specification
+
+        The `function_spec` contains the function to apply and its parameters, e.g.:
+        ```
+        {
+             "function": "one_sided_moving_avg",
+             "kwargs": {"base_measure": "means", "window": 3},
+        }
+        ```
+        This `function_spec` object would apply the function `one_sided_moving_avg` to
+        the `base_measure` means, using 3 as window.
+        """
+        function = function_spec.get("function", None)
+        kwargs = function_spec.get("kwargs", {})
+        if function != "one_sided_moving_avg":
+            raise NotImplementedError("Function {} is not available.".format(function))
+        return SingleSideMovingAvgSmoother(self, **kwargs).smoothed_values
+
     @lazyproperty
     def has_means(self):
         """True if cube-result includes means values."""
         return self._cube.has_means
-
-    @lazyproperty
-    def is_smoothed(self):
-        """True if last `show_smoothing` property in the last dimension is True"""
-        last_dimension = self._dimensions[-1]
-        return last_dimension.show_smoothing
 
     @lazyproperty
     def ndim(self):
@@ -310,6 +324,11 @@ class _Slice(CubePartition):
     def description(self):
         """str description of this slice, which it takes from its rows-dimension."""
         return self._rows_dimension.description
+
+    @lazyproperty
+    def dimension_dict(self):
+        """dict, column dimension definition"""
+        return self._columns_dimension.dimension_dict
 
     @lazyproperty
     def inserted_column_idxs(self):
@@ -885,12 +904,10 @@ class _Slice(CubePartition):
         item is an empty dict (`{}`) when no transforms are specified for that
         dimension.
         """
-        transforms_dict = self._transforms_dict
-        rows_dimension_dict = transforms_dict.get("rows_dimension", {})
-        columns_dimension_dict = transforms_dict.get("columns_dimension", {})
-        if "smoothing" in transforms_dict:
-            columns_dimension_dict["smoothing"] = transforms_dict["smoothing"]
-        return (rows_dimension_dict, columns_dimension_dict)
+        return (
+            self._transforms_dict.get("rows_dimension", {}),
+            self._transforms_dict.get("columns_dimension", {}),
+        )
 
 
 class _Strand(CubePartition):
@@ -916,6 +933,11 @@ class _Strand(CubePartition):
     def counts(self):
         """tuple, 1D cube counts."""
         return tuple(row.count for row in self._stripe.rows)
+
+    @lazyproperty
+    def dimension_dict(self):
+        """dict, row dimension definition"""
+        return self._rows_dimension.dimension_dict
 
     @lazyproperty
     def inserted_row_idxs(self):
@@ -1200,11 +1222,7 @@ class _Strand(CubePartition):
     @lazyproperty
     def _row_transforms_dict(self):
         """Transforms dict for the single (rows) dimension of this strand."""
-        transforms_dict = self._transforms_dict
-        rows_dimension_dict = transforms_dict.get("rows_dimension", {})
-        if "smoothing" in transforms_dict:
-            rows_dimension_dict["smoothing"] = transforms_dict["smoothing"]
-        return rows_dimension_dict
+        return self._transforms_dict.get("rows_dimension", {})
 
     @lazyproperty
     def _stripe(self):
@@ -1232,11 +1250,6 @@ class _Nub(CubePartition):
     @lazyproperty
     def is_empty(self):
         return False if self.unweighted_count else True
-
-    @lazyproperty
-    def is_smoothed(self):
-        """A `_Nub` object is not smoothed by default"""
-        return False
 
     @lazyproperty
     def means(self):
