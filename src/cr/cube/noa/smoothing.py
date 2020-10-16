@@ -10,13 +10,13 @@ from ..util import lazyproperty
 class SingleSidedMovingAvgSmoother(object):
     """Create and configure smoothing function for one-sided moving average."""
 
-    def __init__(self, partition, **kwargs):
+    def __init__(self, partition, function_spec):
         self._partition = partition
-        self._window = kwargs.get("window", 3)
-        self._base_measure = kwargs.get("base_measure", None)
+        self._base_measure = function_spec.get("base_measure", "col_percent")
+        self._window = function_spec.get("window", 3)
 
     @lazyproperty
-    def smoothed_values(self):
+    def values(self):
         """ -> 1D/2D float64 ndarray of smootehd values including additional nans.
 
         Given a series of numbers and a fixed subset size, the first element of the
@@ -49,7 +49,7 @@ class SingleSidedMovingAvgSmoother(object):
         This is performed just taking the average of the last 2 or 3 rows according
         to the window, all the way down the column.
         """
-        values = self._values
+        values = self._base_values
         if not self._show_smoothing:
             # return original values if smoothing cannot be performed
             return values
@@ -83,7 +83,9 @@ class SingleSidedMovingAvgSmoother(object):
             warnings.warn(
                 "No smoothing performed. Window (value: {}) parameter is not "
                 "valid: window must be less than equal to the total period "
-                "(value: {}) and positive".format(self._window, self._values.shape[-1]),
+                "(value: {}) and positive".format(
+                    self._window, self._base_values.shape[-1]
+                ),
                 UserWarning,
             )
             return False
@@ -110,7 +112,7 @@ class SingleSidedMovingAvgSmoother(object):
         underlying trend.
         """
         w = self._window
-        values = self._values
+        values = self._base_values
         return (
             np.array(tuple(np.convolve(values, np.ones(w), mode="valid") / w))
             if values.ndim == 1
@@ -127,13 +129,13 @@ class SingleSidedMovingAvgSmoother(object):
         size because we cannot have a moving window grater than the number of elements
         of each column.
         """
-        total_period = self._values.shape[-1]
+        total_period = self._base_values.shape[-1]
         if self._window > total_period or self._window == 0:
             return False
         return True
 
     @lazyproperty
-    def _values(self):
+    def _base_values(self):
         """ ndarray, base measure values of the current partition
 
         The `base_measure` is expressed in the kwargs of the function_spec and used

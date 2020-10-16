@@ -96,11 +96,10 @@ class CubePartition(object):
         This `function_spec` object would apply the function `one_sided_moving_avg` to
         the `base_measure` means, using 3 as window.
         """
-        function = function_spec.get("function", None)
-        kwargs = function_spec.get("kwargs", {})
+        function = function_spec.pop("function", None)
         if function != "one_sided_moving_avg":
             raise NotImplementedError("Function {} is not available.".format(function))
-        return SingleSidedMovingAvgSmoother(self, **kwargs).smoothed_values
+        return SingleSidedMovingAvgSmoother(self, function_spec).values
 
     @lazyproperty
     def has_means(self):
