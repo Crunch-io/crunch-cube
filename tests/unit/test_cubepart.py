@@ -311,6 +311,22 @@ class Describe_Slice(object):
 
         assert slice_.scale_mean_pairwise_indices_alt is None
 
+    def it_can_evaluate_a_function_spec(self, col_percent_prop):
+        slice_ = _Slice(None, None, None, None, None)
+        col_percent_prop.return_value = np.array([[0.1, 0.2], [0.3, 0.4]])
+
+        evaluate = slice_.evaluate({"function": "one_sided_moving_avg"})
+
+        np.testing.assert_almost_equal(evaluate, [[0.1, 0.2], [0.3, 0.4]])
+
+    def but_it_raises_an_exception_when_function_is_not_available(self):
+        slice_ = _Slice(None, None, None, None, None)
+
+        with pytest.raises(NotImplementedError) as err:
+            slice_.evaluate({"function": "F"})
+
+        assert str(err.value) == "Function F is not available."
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -348,6 +364,10 @@ class Describe_Slice(object):
     @pytest.fixture
     def shape_prop_(self, request):
         return property_mock(request, _Slice, "shape")
+
+    @pytest.fixture
+    def col_percent_prop(self, request):
+        return property_mock(request, _Slice, "column_percentages")
 
 
 class Describe_Strand(object):

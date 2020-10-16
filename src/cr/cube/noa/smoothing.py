@@ -12,7 +12,7 @@ class SingleSidedMovingAvgSmoother(object):
 
     def __init__(self, partition, function_spec):
         self._partition = partition
-        self._base_measure = function_spec.get("base_measure", "col_percent")
+        self._base_measure = function_spec.get("base_measure", "column_percentages")
         self._window = function_spec.get("window", 3)
 
     @lazyproperty
