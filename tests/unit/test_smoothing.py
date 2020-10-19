@@ -32,82 +32,73 @@ class DescribeSingleSideMovingAvgSmoother(object):
     )
     def it_knows_its_is_cat_date_prop(self, categories, expected_value, slice_):
         dimension_dict = {"type": {"categories": categories}}
-        slice_.dimension_dict = dimension_dict
+        slice_._smoothed_dimension_dict = dimension_dict
 
         _is_cat_date = SingleSidedMovingAvgSmoother(slice_, {})._is_cat_date
 
         assert _is_cat_date is expected_value
 
     @pytest.mark.parametrize(
-        "valid_window, is_cat_date, expected_value",
+        "window, is_cat_date, expected_value",
         (
-            (False, True, False),
-            (False, False, False),
-            (True, False, False),
-            (True, True, True),
+            (2, True, True),
+            (2, False, False),
+            (3, False, False),
+            (3, False, False),
+            (1, True, False),
+            (0, True, False),
+            (3, True, True),
         ),
     )
-    def it_knows_its_show_smoothing_property(
+    def it_knows_its_can_smooth_property(
         self,
         _is_cat_date_prop_,
-        _valid_window_prop_,
         _base_values_prop_,
-        valid_window,
+        _window_prop_,
+        window,
         is_cat_date,
         expected_value,
     ):
         _is_cat_date_prop_.return_value = is_cat_date
-        _valid_window_prop_.return_value = valid_window
-        _base_values_prop_.return_value = np.random.rand(3, 2)
+        _window_prop_.return_value = window
+        _base_values_prop_.return_value = np.random.rand(3, 5)
 
-        show_smoothing = SingleSidedMovingAvgSmoother(None, {})._show_smoothing
+        can_smooth = SingleSidedMovingAvgSmoother(None, {})._can_smooth
 
-        assert show_smoothing is expected_value
+        assert can_smooth is expected_value
 
     def but_it_raises_a_warning_when_window_is_invalid(
-        self, _valid_window_prop_, _base_values_prop_
+        self, _base_values_prop_, _window_prop_
     ):
-        _valid_window_prop_.return_value = False
         _base_values_prop_.return_value = np.random.rand(2, 3)
+        _window_prop_.return_value = 1
 
         with pytest.warns(UserWarning) as record:
-            show_smoothing = SingleSidedMovingAvgSmoother(None, {})._show_smoothing
+            can_smooth = SingleSidedMovingAvgSmoother(None, {})._can_smooth
 
         assert (
             record[0].message.args[0]
-            == "No smoothing performed. Window (value: 3) parameter is not valid: "
+            == "No smoothing performed. Window (value: 1) parameter is not valid: "
             "window must be less than equal to the total period (value: 3) and "
             "positive"
         )
-        assert show_smoothing is False
+        assert can_smooth is False
 
     def and_it_raises_a_warning_when_dim_is_not_a_categorical_date(
-        self, _is_cat_date_prop_, _valid_window_prop_
+        self, _is_cat_date_prop_, _base_values_prop_, _window_prop_
     ):
-        _valid_window_prop_.return_value = True
         _is_cat_date_prop_.return_value = False
+        _base_values_prop_.return_value = np.random.rand(4, 5)
+        _window_prop_.return_value = 3
 
         with pytest.warns(UserWarning) as record:
-            show_smoothing = SingleSidedMovingAvgSmoother(None, {})._show_smoothing
+            can_smooth = SingleSidedMovingAvgSmoother(None, {})._can_smooth
 
         assert (
             record[0].message.args[0]
             == "No smoothing performed. Column dimension must be a categorical date"
         )
-        assert show_smoothing is False
-
-    @pytest.mark.parametrize(
-        "window, expected_value", ((3, True), (2, True), (4, False), (0, False))
-    )
-    def it_knows_its_valid_window_prop(
-        self, window, expected_value, _base_values_prop_
-    ):
-        _base_values_prop_.return_value = np.random.rand(2, 3)
-        function_spec = {"window": window}
-
-        _valid_window_ = SingleSidedMovingAvgSmoother(None, function_spec)._valid_window
-
-        assert _valid_window_ is expected_value
+        assert can_smooth is False
 
     @pytest.mark.parametrize(
         "base_values, window, expected_value",
@@ -159,7 +150,7 @@ class DescribeSingleSideMovingAvgSmoother(object):
         self,
         _smoothed_values_prop_,
         _base_values_prop_,
-        _show_smoothing_prop_,
+        _can_smooth_prop_,
         base_values,
         show_smoothing,
         smoothed_values,
@@ -167,7 +158,7 @@ class DescribeSingleSideMovingAvgSmoother(object):
     ):
         _base_values_prop_.return_value = base_values
         _smoothed_values_prop_.return_value = smoothed_values
-        _show_smoothing_prop_.return_value = show_smoothing
+        _can_smooth_prop_.return_value = show_smoothing
 
         values = SingleSidedMovingAvgSmoother(None, {}).values
 
@@ -184,10 +175,6 @@ class DescribeSingleSideMovingAvgSmoother(object):
         return property_mock(request, SingleSidedMovingAvgSmoother, "_is_cat_date")
 
     @pytest.fixture
-    def _valid_window_prop_(self, request):
-        return property_mock(request, SingleSidedMovingAvgSmoother, "_valid_window")
-
-    @pytest.fixture
     def _base_values_prop_(self, request):
         return property_mock(request, SingleSidedMovingAvgSmoother, "_base_values")
 
@@ -196,5 +183,9 @@ class DescribeSingleSideMovingAvgSmoother(object):
         return property_mock(request, SingleSidedMovingAvgSmoother, "_smoothed_values")
 
     @pytest.fixture
-    def _show_smoothing_prop_(self, request):
-        return property_mock(request, SingleSidedMovingAvgSmoother, "_show_smoothing")
+    def _can_smooth_prop_(self, request):
+        return property_mock(request, SingleSidedMovingAvgSmoother, "_can_smooth")
+
+    @pytest.fixture
+    def _window_prop_(self, request):
+        return property_mock(request, SingleSidedMovingAvgSmoother, "_window")

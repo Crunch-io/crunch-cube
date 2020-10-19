@@ -2,15 +2,11 @@
 
 """Integration-test suite for smoothing feature."""
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import numpy as np
 import pytest
 
 from cr.cube.cube import Cube
 
-# ---mnemonic: CR = 'cube-response'---
-# ---mnemonic: TR = 'transforms'---
 from ..fixtures import CR
 from ..util import load_python_expression
 

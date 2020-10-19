@@ -10,14 +10,13 @@ from ..util import lazyproperty
 class SingleSidedMovingAvgSmoother(object):
     """Create and configure smoothing function for one-sided moving average."""
 
-    def __init__(self, partition, function_spec):
+    def __init__(self, partition, measure_expr):
         self._partition = partition
-        self._base_measure = function_spec.get("base_measure", "column_percentages")
-        self._window = function_spec.get("window", 3)
+        self._measure_expression = measure_expr
 
     @lazyproperty
     def values(self):
-        """ -> 1D/2D float64 ndarray of smootehd values including additional nans.
+        """1D/2D float64 ndarray of smoothed values including additional nans.
 
         Given a series of numbers and a fixed subset size, the first element of the
         moving average is obtained by taking the average of the initial fixed subset
@@ -50,7 +49,7 @@ class SingleSidedMovingAvgSmoother(object):
         to the window, all the way down the column.
         """
         values = self._base_values
-        if not self._show_smoothing:
+        if not self._can_smooth:
             # return original values if smoothing cannot be performed
             return values
         smoothed_values = self._smoothed_values
@@ -60,26 +59,29 @@ class SingleSidedMovingAvgSmoother(object):
         return np.concatenate([additional_nans, smoothed_values], axis=values.ndim - 1)
 
     @lazyproperty
-    def _is_cat_date(self):
-        """True for a categorical dimension having date defined on all valid categories.
-
-        Only meaningful when the dimension is known to be categorical
-        (has base-type `categorical`).
-        """
-        categories = self._partition.dimension_dict["type"].get("categories", [])
-        if not categories:
-            return False
-        return all(
-            category.get("date")
-            for category in categories
-            if not category.get("missing", False)
-        )
+    def _base_measure(self):
+        """str, the base_measure parameter specified in the measure expression"""
+        return self._measure_expression.get("base_measure", "column_percentages")
 
     @lazyproperty
-    def _show_smoothing(self):
-        """Return True if smoothing is active"""
-        # --- no smoothing when smoothing transform is not present ---
-        if not self._valid_window:
+    def _base_values(self):
+        """ ndarray, base measure values of the current partition
+
+        The `base_measure` is expressed in the kwargs of the function_spec and used
+        to get the values for the partition.
+        """
+        return np.array(getattr(self._partition, self._base_measure))
+
+    @lazyproperty
+    def _can_smooth(self):
+        """bool, true if current data is smoothable.
+
+        If the measure_expression parameters describe valid smoothing and the column
+        dimensions is a categorical date it returns True.
+        """
+        # --- window cannot be wider than the number of periods in data
+        # --- and it must be at least 2.
+        if self._window > self._base_values.shape[-1] or self._window < 2:
             warnings.warn(
                 "No smoothing performed. Window (value: {}) parameter is not "
                 "valid: window must be less than equal to the total period "
@@ -98,8 +100,28 @@ class SingleSidedMovingAvgSmoother(object):
         return True
 
     @lazyproperty
+    def _is_cat_date(self):
+        """True for a categorical dimension having date defined on all valid categories.
+
+        Only meaningful when the dimension is known to be categorical
+        (has base-type `categorical`).
+        """
+        # TODO: change how this categorical date check type when base measure is managed
+        # directly from the matrix later on.
+        categories = self._partition._smoothed_dimension_dict["type"].get(
+            "categories", []
+        )
+        if not categories:
+            return False
+        return all(
+            category.get("date")
+            for category in categories
+            if not category.get("missing", False)
+        )
+
+    @lazyproperty
     def _smoothed_values(self):
-        """ -> np.ndarray, provide smoothed values on the original values.
+        """1D or 2D float64 ndarray of smoothed base measure.
 
         In this case the moving average smoother is performed using the np.convolve
         (https://numpy.org/doc/stable/reference/generated/numpy.convolve.html)
@@ -122,23 +144,6 @@ class SingleSidedMovingAvgSmoother(object):
         )
 
     @lazyproperty
-    def _valid_window(self):
-        """ -> bool, the validity of the window parameter.
-
-        Return last dimension size, if window is greater than the the last dimension
-        size because we cannot have a moving window grater than the number of elements
-        of each column.
-        """
-        total_period = self._base_values.shape[-1]
-        if self._window > total_period or self._window == 0:
-            return False
-        return True
-
-    @lazyproperty
-    def _base_values(self):
-        """ ndarray, base measure values of the current partition
-
-        The `base_measure` is expressed in the kwargs of the function_spec and used
-        to get the values for the partition.
-        """
-        return np.array(getattr(self._partition, self._base_measure))
+    def _window(self):
+        """int, the window parameter specified in the measure expression"""
+        return self._measure_expression.get("window", 3)

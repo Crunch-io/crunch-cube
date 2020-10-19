@@ -309,11 +309,6 @@ class Dimension(object):
         return description if description else ""
 
     @lazyproperty
-    def dimension_dict(self):
-        """dict, cube result dimension definition"""
-        return self._dimension_dict
-
-    @lazyproperty
     def dimension_type(self):
         """Member of DIMENSION_TYPE appropriate to this cube dimension."""
         return self._dimension_type
