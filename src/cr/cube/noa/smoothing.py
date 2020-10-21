@@ -108,7 +108,7 @@ class SingleSidedMovingAvgSmoother(object):
         """
         # TODO: change how this categorical date check type when base measure is managed
         # directly from the matrix later on.
-        categories = self._partition._smoothed_dimension_dict["type"].get(
+        categories = self._partition.smoothed_dimension_dict["type"].get(
             "categories", []
         )
         if not categories:

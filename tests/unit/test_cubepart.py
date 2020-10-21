@@ -312,11 +312,11 @@ class Describe_Slice(object):
         assert slice_.scale_mean_pairwise_indices_alt is None
 
     def it_can_evaluate_a_measure_expression(
-        self, col_percent_prop, _smoothed_dimension_dict_prop_
+        self, col_percent_prop, smoothed_dimension_dict_prop_
     ):
         slice_ = _Slice(None, None, None, None, None)
         col_percent_prop.return_value = np.array([[0.1, 0.2], [0.3, 0.4]])
-        _smoothed_dimension_dict_prop_.return_value = {"type": {"categories": []}}
+        smoothed_dimension_dict_prop_.return_value = {"type": {"categories": []}}
 
         evaluate = slice_.evaluate({"function": "one_sided_moving_avg"})
 
@@ -373,8 +373,8 @@ class Describe_Slice(object):
         return property_mock(request, _Slice, "column_percentages")
 
     @pytest.fixture
-    def _smoothed_dimension_dict_prop_(self, request):
-        return property_mock(request, _Slice, "_smoothed_dimension_dict")
+    def smoothed_dimension_dict_prop_(self, request):
+        return property_mock(request, _Slice, "smoothed_dimension_dict")
 
 
 class Describe_Strand(object):

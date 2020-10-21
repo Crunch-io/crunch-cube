@@ -32,7 +32,7 @@ class DescribeSingleSideMovingAvgSmoother(object):
     )
     def it_knows_its_is_cat_date_prop(self, categories, expected_value, slice_):
         dimension_dict = {"type": {"categories": categories}}
-        slice_._smoothed_dimension_dict = dimension_dict
+        slice_.smoothed_dimension_dict = dimension_dict
 
         _is_cat_date = SingleSidedMovingAvgSmoother(slice_, {})._is_cat_date
 

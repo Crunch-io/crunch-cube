@@ -96,7 +96,7 @@ class CubePartition(object):
         This `function_spec` object would apply the function `one_sided_moving_avg` to
         the `base_measure` means, using 3 as window.
         """
-        function = measure_expr.pop("function", None)
+        function = measure_expr.get("function", None)
         if function != "one_sided_moving_avg":
             raise NotImplementedError("Function {} is not available.".format(function))
         return SingleSidedMovingAvgSmoother(self, measure_expr).values
@@ -704,6 +704,13 @@ class _Slice(CubePartition):
         return self.counts.shape
 
     @lazyproperty
+    def smoothed_dimension_dict(self):
+        """dict, smoothed column dimension definition"""
+        # TODO:  remove this property when the smoother gets the base measure directly
+        # from the matrix later on.
+        return self._columns_dimension._dimension_dict
+
+    @lazyproperty
     def summary_pairwise_indices(self):
         return PairwiseSignificance(
             self, self._alpha, self._only_larger
@@ -890,13 +897,6 @@ class _Slice(CubePartition):
         return np.array([row.numeric_value for row in self._matrix.rows])
 
     @lazyproperty
-    def _smoothed_dimension_dict(self):
-        """dict, smoothed column dimension definition"""
-        # TODO:  remove this property when the smoother gets the base measure directly
-        # from the matrix later on.
-        return self._columns_dimension._dimension_dict
-
-    @lazyproperty
     def _transform_dicts(self):
         """Pair of dict (rows_dimension_transforms, columns_dimension_transforms).
 
@@ -1079,6 +1079,11 @@ class _Strand(CubePartition):
         return (self.row_count,)
 
     @lazyproperty
+    def smoothed_dimension_dict(self):
+        """dict, row dimension definition"""
+        return self._rows_dimension._dimension_dict
+
+    @lazyproperty
     def standard_deviation(self):
         """ -> np.ndarray, percentages standard deviation"""
         return np.sqrt(self._variance)
@@ -1219,11 +1224,6 @@ class _Strand(CubePartition):
     def _row_transforms_dict(self):
         """Transforms dict for the single (rows) dimension of this strand."""
         return self._transforms_dict.get("rows_dimension", {})
-
-    @lazyproperty
-    def _smoothed_dimension_dict(self):
-        """dict, row dimension definition"""
-        return self._rows_dimension._dimension_dict
 
     @lazyproperty
     def _stripe(self):
