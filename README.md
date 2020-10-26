@@ -112,8 +112,9 @@ The detailed description can be found
 
 ## Changes
 
-### 1.12.4b
+### 1.12.4
 - Measure expression evaluation method
+- Multiple response allowed for pairwise comparison
 
 ### 1.12.3
 - Bug fix for t_stats scale means
