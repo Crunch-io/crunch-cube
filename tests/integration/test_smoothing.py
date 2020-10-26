@@ -2,15 +2,11 @@
 
 """Integration-test suite for smoothing feature."""
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import numpy as np
 import pytest
 
 from cr.cube.cube import Cube
 
-# ---mnemonic: CR = 'cube-response'---
-# ---mnemonic: TR = 'transforms'---
 from ..fixtures import CR
 from ..util import load_python_expression
 
@@ -37,16 +33,16 @@ class DescribeSliceSmoothing(object):
     def it_provides_smoothed_col_pct_for_compatible_cubes(
         self, fixture, window, expectation
     ):
-        transforms = {
-            "smoothing": {
-                "method": "one_sided_moving_avg",
+        slice_ = Cube(fixture).partitions[0]
+        col_percent = slice_.evaluate(
+            {
+                "function": "one_sided_moving_avg",
+                "base_measure": "column_percentages",
                 "window": window,
-                "show": True,
             }
-        }
-        slice_ = Cube(fixture, transforms=transforms).partitions[0]
+        )
         np.testing.assert_array_almost_equal(
-            slice_.column_percentages, load_python_expression(expectation)
+            col_percent, load_python_expression(expectation)
         )
 
     @pytest.mark.parametrize(
@@ -64,16 +60,17 @@ class DescribeSliceSmoothing(object):
     def it_provides_smoothed_scale_means_for_compatible_cubes(
         self, fixture, window, expectation
     ):
-        transforms = {
-            "smoothing": {
-                "method": "one_sidef_moving_avg",
+
+        slice_ = Cube(fixture).partitions[0]
+        scale_means_row = slice_.evaluate(
+            {
+                "function": "one_sided_moving_avg",
+                "base_measure": "scale_means_row",
                 "window": window,
-                "show": True,
             }
-        }
-        slice_ = Cube(fixture, transforms=transforms).partitions[0]
+        )
         np.testing.assert_array_almost_equal(
-            slice_.scale_means_row, load_python_expression(expectation)
+            scale_means_row, load_python_expression(expectation)
         )
 
     @pytest.mark.parametrize(
@@ -87,37 +84,49 @@ class DescribeSliceSmoothing(object):
         ),
     )
     def it_does_not_smooth_col_pct_for_incompatible_cubes(self, fixture, expectation):
-        transforms = {
-            "smoothing": {"method": "one_sided_moving_avg", "window": 3, "show": True}
-        }
-        cube = Cube(fixture, transforms=transforms)
+        cube = Cube(fixture)
         slice_ = cube.partitions[0]
+        col_percent = slice_.evaluate(
+            {
+                "function": "one_sided_moving_avg",
+                "base_measure": "column_percentages",
+                "window": 3,
+            }
+        )
         np.testing.assert_array_almost_equal(
-            slice_.column_percentages, load_python_expression(expectation)
+            col_percent, load_python_expression(expectation)
         )
 
     def it_doesnt_smooth_counts_when_window_is_not_valid(self):
-        transforms = {"smoothing": {"window": 30, "show": True}}
-        slice_ = Cube(CR.CAT_X_CAT_DATE, transforms=transforms).partitions[0]
+        slice_ = Cube(CR.CAT_X_CAT_DATE).partitions[0]
+        col_percent = slice_.evaluate(
+            {
+                "function": "one_sided_moving_avg",
+                "base_measure": "column_percentages",
+                "window": 1,
+            }
+        )
         slice2_ = Cube(CR.CAT_X_CAT_DATE).partitions[0]
-        np.testing.assert_array_almost_equal(slice_.counts, slice2_.counts)
+        col_percent2 = slice2_.column_percentages
+
+        np.testing.assert_array_almost_equal(col_percent, col_percent2)
 
 
 class DescribeStrandMeansSmoothing(object):
     def it_provides_smoothed_means_cat_date(self):
-        transforms = {
-            "smoothing": {"method": "one_sided_moving_avg", "window": 3, "show": True}
-        }
-        strand_ = Cube(CR.CAT_DATE_MEAN, transforms=transforms).partitions[0]
+        strand_ = Cube(CR.CAT_DATE_MEAN).partitions[0]
+        means = strand_.evaluate(
+            {"function": "one_sided_moving_avg", "base_measure": "means", "window": 3}
+        )
         np.testing.assert_array_almost_equal(
-            strand_.means, [np.nan, np.nan, 2.65670765025029, 2.5774816240050358]
+            means, [np.nan, np.nan, 2.65670765025029, 2.5774816240050358]
         )
 
     def it_doesnt_smoot_means_mr_mean_filt_wgtd(self):
-        transforms = {
-            "smoothing": {"method": "one_sided_moving_avg", "window": 3, "show": True}
-        }
-        strand_ = Cube(CR.MR_MEAN_FILT_WGTD, transforms=transforms).partitions[0]
+        strand_ = Cube(CR.MR_MEAN_FILT_WGTD).partitions[0]
+        means = strand_.evaluate(
+            {"function": "one_sided_moving_avg", "base_measure": "means", "window": 3}
+        )
         np.testing.assert_array_almost_equal(
-            strand_.means, [3.724051, 2.578429, 2.218593, 1.865335]
+            means, [3.724051, 2.578429, 2.218593, 1.865335]
         )

@@ -311,19 +311,24 @@ class Describe_Slice(object):
 
         assert slice_.scale_mean_pairwise_indices_alt is None
 
-    @pytest.mark.parametrize(
-        "show_smoothing, expected_value", ((True, True), (False, False))
-    )
-    def it_knows_whether_it_is_smoothed(
-        self, show_smoothing, expected_value, dimension_, _dimensions_prop_
+    def it_can_evaluate_a_measure_expression(
+        self, col_percent_prop, smoothed_dimension_dict_prop_
     ):
-        dimension_.show_smoothing = show_smoothing
-        _dimensions_prop_.return_value = (dimension_,)
+        slice_ = _Slice(None, None, None, None, None)
+        col_percent_prop.return_value = np.array([[0.1, 0.2], [0.3, 0.4]])
+        smoothed_dimension_dict_prop_.return_value = {"type": {"categories": []}}
+
+        evaluate = slice_.evaluate({"function": "one_sided_moving_avg"})
+
+        np.testing.assert_almost_equal(evaluate, [[0.1, 0.2], [0.3, 0.4]])
+
+    def but_it_raises_an_exception_when_function_is_not_available(self):
         slice_ = _Slice(None, None, None, None, None)
 
-        is_smoothed = slice_.is_smoothed
+        with pytest.raises(NotImplementedError) as err:
+            slice_.evaluate({"function": "F"})
 
-        assert is_smoothed is expected_value
+        assert str(err.value) == "Function F is not available."
 
     # fixture components ---------------------------------------------
 
@@ -362,6 +367,14 @@ class Describe_Slice(object):
     @pytest.fixture
     def shape_prop_(self, request):
         return property_mock(request, _Slice, "shape")
+
+    @pytest.fixture
+    def col_percent_prop(self, request):
+        return property_mock(request, _Slice, "column_percentages")
+
+    @pytest.fixture
+    def smoothed_dimension_dict_prop_(self, request):
+        return property_mock(request, _Slice, "smoothed_dimension_dict")
 
 
 class Describe_Strand(object):
@@ -417,20 +430,6 @@ class Describe_Strand(object):
 
         assert population_fraction == 0.5
 
-    @pytest.mark.parametrize(
-        "show_smoothing, expected_value", ((True, True), (False, False))
-    )
-    def it_knows_whether_it_is_smoothed(
-        self, show_smoothing, expected_value, dimension_, _dimensions_prop_
-    ):
-        dimension_.show_smoothing = show_smoothing
-        _dimensions_prop_.return_value = (dimension_,)
-        strand_ = _Strand(None, None, None, None, None, None)
-
-        is_smoothed = strand_.is_smoothed
-
-        assert is_smoothed is expected_value
-
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -478,10 +477,3 @@ class Describe_Nub(object):
 
     def it_knows_its_cube_is_never_mr_aug(self):
         assert _Nub(None).cube_is_mr_aug is False
-
-    def it_knows_whether_it_is_smoothed(self):
-        nub_ = _Nub(None)
-
-        is_smoothed = nub_.is_smoothed
-
-        assert is_smoothed is False
