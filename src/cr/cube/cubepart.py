@@ -84,7 +84,7 @@ class CubePartition(object):
         return tuple(d.dimension_type for d in self._dimensions)
 
     def evaluate(self, measure_expr):
-        """ -> 1D/2D ndarray, values evaluated given the function specification
+        """-> 1D/2D ndarray, values evaluated given the function specification
 
         The `function_spec` contains the function to apply and its parameters, e.g.:
         ```
@@ -337,17 +337,15 @@ class _Slice(CubePartition):
     @lazyproperty
     def insertions(self):
         """Returns masked array with residuals for insertions
+              0     1     2     3      4       5       6
+        0   inf   inf   inf   inf    inf    -2.9     inf
+        1   inf   inf   inf   inf    inf    -4.3     inf
+        2   2.5   1.3   3.3  -0.70  -7.25   -6.52    2.25
+        3   inf   inf   inf   inf    inf    -2.51    inf
+        4  -1.16  2.20  5.84  1.78  -8.48   -5.92    0.93
+        5   inf   inf   inf   inf    inf     9.70    inf
 
-                 0     1	 2	     3	    4	    5	    6
-           0   inf   inf   inf	   inf	  inf	 -2.9	  inf
-           1   inf	 inf   inf	   inf	  inf	 -4.3	  inf
-           2   2.5	 1.3   3.3	 -0.70	-7.25	 -6.52	 2.25
-           3   inf	 inf   inf	   inf	  inf	 -2.51	  inf
-           4  -1.16	 2.20  5.84	  1.78	-8.48	 -5.92	 0.93
-           5   inf   inf   inf	   inf	  inf	  9.70	  inf
-
-           Only the insertions residuals are showed in a inf masked array
-        """
+        Only the insertions residuals are showed in a inf masked array"""
         inserted_rows = self.inserted_row_idxs
         inserted_cols = self.inserted_column_idxs
         if not inserted_cols and not inserted_rows:
@@ -601,7 +599,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def scale_median_column(self):
-        """ -> np.int64 ndarray of the columns scale median
+        """-> np.int64 ndarray of the columns scale median
 
         The median is calculated using the standard algebra applied to the numeric
         values repeated for each related counts value
@@ -621,7 +619,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def scale_median_row(self):
-        """ -> np.int64 ndarray of the rows scale median
+        """-> np.int64 ndarray of the rows scale median
 
         The median is calculated using the standard algebra applied to the numeric
         values repeated for each related counts value
@@ -801,7 +799,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def var_scale_means_column(self):
-        """ -> 1D np.ndarray of the column variance values for scales
+        """-> 1D np.ndarray of the column variance values for scales
 
         Note: the variance for scale is defined as sum((Yi−Y~)2/(N)), where Y~ is the
               mean of the data.
@@ -822,7 +820,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def var_scale_means_row(self):
-        """ -> 1D np.ndarray of the row variance values for scales
+        """-> 1D np.ndarray of the row variance values for scales
 
         Note: the variance for scale is defined as sum((Yi−Y~)2/(N)), where Y~ is the
               mean of the data.
@@ -1039,7 +1037,7 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def scale_median(self):
-        """ -> np.int64, the median of scales
+        """-> np.int64, the median of scales
 
         The median is calculated using the standard algebra applied to the numeric
         values repeated for each related counts value
@@ -1207,7 +1205,7 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def _numeric_values_mask(self):
-        """ -> np.ndarray, boolean elements for each element in rows dimension."
+        """-> np.ndarray, boolean elements for each element in rows dimension."
 
         This array contains True or False according to the nan in the numeric_values
         array
