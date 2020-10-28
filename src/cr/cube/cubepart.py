@@ -239,6 +239,8 @@ class _Slice(CubePartition):
     dimensions which can be crosstabbed in a slice.
     """
 
+    z_alpha = 1.959964
+
     def __init__(self, cube, slice_idx, transforms, population, mask_size):
         super(_Slice, self).__init__(cube, transforms)
         self._slice_idx = slice_idx
@@ -290,6 +292,13 @@ class _Slice(CubePartition):
     @lazyproperty
     def columns_margin(self):
         return np.array([column.margin for column in self._matrix.columns]).T
+
+    @lazyproperty
+    def columns_moe(self):
+        """Returns the margin of error (MoE) for cell percentages
+        `moe = z(0.25) * 100 * std_error`
+        """
+        return self.z_alpha * 100 * self.columns_std_err
 
     @lazyproperty
     def columns_std_dev(self):
@@ -761,6 +770,10 @@ class _Slice(CubePartition):
     @lazyproperty
     def table_margin_unpruned(self):
         return self._matrix.table_margin_unpruned
+
+    @lazyproperty
+    def table_moe(self):
+        return self.z_alpha * 100 * self.table_std_err
 
     @lazyproperty
     def table_name(self):
