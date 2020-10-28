@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+### 1.12.5
+- Allow pairwise t test for scale means and MR
+
 ### 1.12.3
 - Bug fix for t_stats scale means
 
