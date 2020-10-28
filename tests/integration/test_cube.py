@@ -848,10 +848,15 @@ class TestCrunchCubeAs_Slice(object):
             [0.05880176, 0.03705843, 0.02576154, 0.03360238, 0.04526793, 0.07517074],
             [0.05880176, 0.03705843, 0.02576154, 0.03360238, 0.04526793, 0.07517074],
         ]
+        expected_col_moe = [
+            [11.5249326, 7.2633194, 5.0491687, 6.5859452, 8.8723517, 14.7331947],
+            [11.5249326, 7.2633194, 5.0491687, 6.5859452, 8.8723517, 14.7331947],
+        ]
         np.testing.assert_almost_equal(slice_.table_std_dev, expected_table_std_dev)
         np.testing.assert_almost_equal(slice_.table_std_err, expected_table_std_err)
         np.testing.assert_almost_equal(slice_.columns_std_dev, expected_col_std_dev)
         np.testing.assert_almost_equal(slice_.columns_std_err, expected_col_std_err)
+        np.testing.assert_almost_equal(slice_.columns_moe, expected_col_moe)
         np.testing.assert_almost_equal(slice_.zscores, expected_zscore)
 
     def test_pvals(self):
@@ -987,15 +992,20 @@ class TestCrunchCubeAs_Slice(object):
             [0.01567414, 0.01993363, 0.01575024, 0.01682826, 0.01795892, 0.00918798],
             [0.01567414, 0.01993363, 0.01575024, 0.01682826, 0.01795892, 0.00918798],
         ]
+        expected_col_moe = [
+            [3.07207565, 3.90691882, 3.0869894, 3.29827837, 3.51988285, 1.80081013],
+            [3.07207565, 3.90691882, 3.0869894, 3.29827837, 3.51988285, 1.80081013],
+        ]
 
         np.testing.assert_almost_equal(slice_.zscores, expected_zscores)
         np.testing.assert_almost_equal(slice_.table_std_dev, expected_table_std_dev)
         np.testing.assert_almost_equal(slice_.table_std_err, expected_table_std_err)
         np.testing.assert_almost_equal(slice_.columns_std_dev, expected_col_std_dev)
         np.testing.assert_almost_equal(slice_.columns_std_err, expected_col_std_err)
+        np.testing.assert_almost_equal(slice_.columns_moe, expected_col_moe)
 
     def test_various_measures_admit_by_gender_weighted_rows(self):
-        """ see
+        """see
         https://github.com/Crunch-io/whaam/blob/master/base/stats/tests/
         zvalues-spec.js#L67
         """
@@ -1010,12 +1020,14 @@ class TestCrunchCubeAs_Slice(object):
         expected_table_std_err = [[0.00659641, 0.00492018], [0.0070529, 0.00675348]]
         expected_col_std_dev = [[0.49668253, 0.45933735], [0.49668253, 0.45933735]]
         expected_col_std_err = [[0.00966009, 0.01080163], [0.00966009, 0.01080163]]
+        expected_col_moe = [[1.89334366, 2.11708092], [1.89334366, 2.11708092]]
 
         np.testing.assert_almost_equal(slice_.zscores, expected_zscores)
         np.testing.assert_almost_equal(slice_.table_std_dev, expected_table_std_dev)
         np.testing.assert_almost_equal(slice_.table_std_err, expected_table_std_err)
         np.testing.assert_almost_equal(slice_.columns_std_dev, expected_col_std_dev)
         np.testing.assert_almost_equal(slice_.columns_std_err, expected_col_std_err)
+        np.testing.assert_almost_equal(slice_.columns_moe, expected_col_moe)
 
     def test_selected_crosstab_as_array(self):
         slice_ = Cube(CR.SELECTED_CROSSTAB_4).partitions[0]
