@@ -239,7 +239,9 @@ class _Slice(CubePartition):
     dimensions which can be crosstabbed in a slice.
     """
 
-    z_alpha = 1.959964
+    # quantile of the normal cdf at .975 because the confidence
+    # interval is ± (.025 on each side)
+    Z_975 = 1.959964
 
     def __init__(self, cube, slice_idx, transforms, population, mask_size):
         super(_Slice, self).__init__(cube, transforms)
@@ -295,21 +297,21 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def columns_moe(self):
-        """Returns the margin of error (MoE) for cell percentages
-        `moe = z(0.25) * 100 * std_error`
+        """Returns the margin of error (MoE) for col percentages
+        `moe = Z_975 * 100 * std_error` (the * 100 part accounts for percentages)
         """
-        return self.z_alpha * 100 * self.columns_std_err
+        return self.Z_975 * 100 * self.columns_std_err
 
     @lazyproperty
     def columns_std_dev(self):
-        """Returns the standard deviation for cell percentages
+        """Returns the standard deviation for col percentages
         `std_deviation = sqrt(variance)`
         """
         return np.sqrt(self._columns_variance)
 
     @lazyproperty
     def columns_std_err(self):
-        """Returns the standard error for cell percentages
+        """Returns the standard error for col percentages
         `std_error = sqrt(variance/N)`
         """
         return np.sqrt(self._columns_variance / self.columns_margin)
@@ -648,7 +650,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def scale_median_column_margin(self):
-        """ -> np.int64, represents the column scale median margin"""
+        """ -> np.int64 represents the column scale median margin"""
         if np.all(np.isnan(self._columns_dimension_numeric_values)):
             return None
         columns_margin = self.columns_margin
@@ -664,7 +666,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def scale_median_row_margin(self):
-        """ -> np.int64, represents the rows scale median margin"""
+        """ -> np.int64 represents the rows scale median margin"""
         if np.all(np.isnan(self._rows_dimension_numeric_values)):
             return None
         rows_margin = self.rows_margin
@@ -773,7 +775,10 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def table_moe(self):
-        return self.z_alpha * 100 * self.table_std_err
+        """Returns the margin of error (MoE) for table percentages
+        `moe = Z_975 * 100 * std_error` (the * 100 part accounts for percentages)
+        """
+        return self.Z_975 * 100 * self.table_std_err
 
     @lazyproperty
     def table_name(self):
@@ -873,7 +878,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def _columns_variance(self):
-        """Returns the variance for cell percentages
+        """Returns the variance for col percentages
         `variance = p * (1-p)`
         """
         return (
@@ -1050,7 +1055,7 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def scale_median(self):
-        """-> np.int64, the median of scales
+        """-> np.int64 the median of scales
 
         The median is calculated using the standard algebra applied to the numeric
         values repeated for each related counts value
@@ -1096,12 +1101,12 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def standard_deviation(self):
-        """ -> np.ndarray, percentages standard deviation"""
+        """ -> np.ndarray percentages standard deviation"""
         return np.sqrt(self._variance)
 
     @lazyproperty
     def standard_error(self):
-        """ -> np.ndarray, percentages standard error"""
+        """ -> np.ndarray percentages standard error"""
         if self.dimension_types[0] == DT.MR:
             return np.sqrt(self._variance / self.bases)
         return np.sqrt(self._variance / np.sum(self.rows_margin))
@@ -1218,7 +1223,7 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def _numeric_values_mask(self):
-        """-> np.ndarray, boolean elements for each element in rows dimension."
+        """-> np.ndarray boolean elements for each element in rows dimension."
 
         This array contains True or False according to the nan in the numeric_values
         array
