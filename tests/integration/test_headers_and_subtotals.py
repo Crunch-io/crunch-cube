@@ -8,6 +8,7 @@ from cr.cube.crunch_cube import CrunchCube
 from cr.cube.cube import Cube
 
 from ..fixtures import CR
+from ..util import load_python_expression
 
 
 class TestHeadersAndSubtotals(object):
@@ -1007,184 +1008,17 @@ class TestHeadersAndSubtotals(object):
 
     def it_calculate_col_residuals_for_subtotals(self):
         slice_ = Cube(CR.CAT_X_CAT_HS_2ROWS_1COL).partitions[0]
-
         np.testing.assert_almost_equal(
             slice_.columns_std_dev,
-            [
-                [
-                    0.49326036,
-                    0.43967108,
-                    0.43739495,
-                    0.4093598,
-                    0.42242603,
-                    0.41688475,
-                    0.47060217,
-                ],
-                [
-                    0.35255854,
-                    0.47915742,
-                    0.47870319,
-                    0.46986171,
-                    0.3799671,
-                    0.42844691,
-                    0.4752359,
-                ],
-                [
-                    0.44536177,
-                    0.48562091,
-                    0.48697607,
-                    0.49823831,
-                    0.49136926,
-                    0.49885606,
-                    0.46812184,
-                ],
-                [
-                    0.22709084,
-                    0.4103259,
-                    0.41105414,
-                    0.39507899,
-                    0.32201514,
-                    0.35776034,
-                    0.37468029,
-                ],
-                [
-                    0.4,
-                    0.49487166,
-                    0.49493871,
-                    0.49948985,
-                    0.45491071,
-                    0.48840757,
-                    0.49981735,
-                ],
-                [
-                    0.41301152,
-                    0.372678,
-                    0.37676108,
-                    0.44107522,
-                    0.49937461,
-                    0.48614202,
-                    0.36229072,
-                ],
-            ],
+            load_python_expression("col-std-dev-cat-x-cat-hs-2rows-1col"),
         )
-
         np.testing.assert_almost_equal(
             slice_.columns_std_err,
-            [
-                [
-                    0.06651121,
-                    0.03916901,
-                    0.01766622,
-                    0.02325007,
-                    0.0211213,
-                    0.01564541,
-                    0.03868326,
-                ],
-                [
-                    0.04753898,
-                    0.04268674,
-                    0.01933464,
-                    0.02668635,
-                    0.01899836,
-                    0.01607933,
-                    0.03906415,
-                ],
-                [
-                    0.06005257,
-                    0.04326255,
-                    0.01966878,
-                    0.02829803,
-                    0.02456846,
-                    0.01872173,
-                    0.03847938,
-                ],
-                [
-                    0.03062092,
-                    0.03655474,
-                    0.01660232,
-                    0.02243898,
-                    0.01610076,
-                    0.01342651,
-                    0.03079853,
-                ],
-                [
-                    0.05393599,
-                    0.04408667,
-                    0.01999039,
-                    0.02836912,
-                    0.02274554,
-                    0.01832961,
-                    0.04108473,
-                ],
-                [
-                    0.05569046,
-                    0.03320079,
-                    0.01521724,
-                    0.02505139,
-                    0.02496873,
-                    0.01824458,
-                    0.02978011,
-                ],
-            ],
+            load_python_expression("col-std-err-cat-x-cat-hs-2rows-1col"),
         )
         np.testing.assert_almost_equal(
-            slice_.columns_moe,
-            [
-                [
-                    13.03595844,
-                    7.67698551,
-                    3.46251469,
-                    4.55693081,
-                    4.13969905,
-                    3.06644326,
-                    7.58177966,
-                ],
-                [
-                    9.31746956,
-                    8.36644659,
-                    3.78951977,
-                    5.23042895,
-                    3.72360922,
-                    3.15148999,
-                    7.65643283,
-                ],
-                [
-                    11.77008734,
-                    8.47930382,
-                    3.85500973,
-                    5.5463129,
-                    4.8153303,
-                    3.66939254,
-                    7.5418196,
-                ],
-                [
-                    6.0015905,
-                    7.16459682,
-                    3.25399504,
-                    4.39795907,
-                    3.1556904,
-                    2.63154691,
-                    6.03640099,
-                ],
-                [
-                    10.57125967,
-                    8.64082889,
-                    3.91804373,
-                    5.56024488,
-                    4.45804303,
-                    3.59253748,
-                    8.05245981,
-                ],
-                [
-                    10.91512996,
-                    6.50723624,
-                    2.9825236,
-                    4.90998204,
-                    4.89378128,
-                    3.57587294,
-                    5.83679508,
-                ],
-            ],
+            slice_.columns_percentages_moe,
+            load_python_expression("col-per-moe-cat-x-cat-hs-2rows-1col"),
         )
 
     def it_computes_residuals_for_subtotals_1col_2rows(self):
@@ -2041,7 +1875,7 @@ class TestHeadersAndSubtotals(object):
 
         # Test MoE for 1 column insertion
         np.testing.assert_almost_equal(
-            slice_.table_moe,
+            slice_.table_percentages_moe,
             [
                 [17.21652881, 17.21652881, 0.0, 0.0, 21.77737778],
                 [10.58190352, 17.21652881, 14.51825185, 0.0, 19.20584194],
@@ -2071,7 +1905,7 @@ class TestHeadersAndSubtotals(object):
 
         # Test col MoE
         np.testing.assert_almost_equal(
-            slice_.columns_moe,
+            slice_.columns_percentages_moe,
             [
                 [42.43446536, 33.54739046, 0.0, 0.0, 28.28964358],
                 [42.43446536, 33.54739046, 53.34346349, 0.0, 26.67173175],
@@ -2244,7 +2078,7 @@ class TestHeadersAndSubtotals(object):
 
         # Test MoE for 1 row insertion
         np.testing.assert_almost_equal(
-            slice_.table_moe,
+            slice_.table_percentages_moe,
             [
                 [9.47425342, 8.51416179, 6.4011466, 0.0, 2.10138857],
                 [5.48548061, 6.91062699, 5.77563348, 0.0, 3.0001713],
@@ -2285,7 +2119,7 @@ class TestHeadersAndSubtotals(object):
         )
         # Test col MoE for 1 row insertion
         np.testing.assert_almost_equal(
-            slice_.columns_moe,
+            slice_.columns_percentages_moe,
             [
                 [13.51426726, 16.59188199, 22.48817088, np.nan, 53.31123764],
                 [12.89084933, 16.3342716, 22.23457567, np.nan, 53.31123764],
@@ -2605,7 +2439,7 @@ class TestHeadersAndSubtotals(object):
 
         # Test MoE for 1 column insertion at left
         np.testing.assert_almost_equal(
-            slice_.table_moe,
+            slice_.table_percentages_moe,
             [
                 [2.74144167, 0.0, 0.0, 2.01473624, 2.34177324, 1.19627333, 1.47999058],
                 [2.78474723, 2.06247142, 2.41916703, 0.0, 0.0, 1.41377833, 1.4556357],
@@ -2632,7 +2466,7 @@ class TestHeadersAndSubtotals(object):
 
         # Test MoE err for 1 column insertion at left
         np.testing.assert_almost_equal(
-            slice_.columns_moe,
+            slice_.columns_percentages_moe,
             [
                 [3.30479837, 0.0, 0.0, 0.0, 0.0, 8.42914245, 7.58210469],
                 [3.30479837, 0.0, 0.0, 0.0, 0.0, 8.42914245, 7.58210469],

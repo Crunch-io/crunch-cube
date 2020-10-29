@@ -118,7 +118,7 @@ class Describe_Slice(object):
             ],
         )
         np.testing.assert_almost_equal(
-            slice_.columns_moe,
+            slice_.columns_percentages_moe,
             [
                 [
                     13.51426726,
@@ -196,7 +196,7 @@ class Describe_Slice(object):
             ],
         )
         np.testing.assert_almost_equal(
-            slice_.table_moe,
+            slice_.table_percentages_moe,
             [
                 [9.47425342, 10.23031735, 8.51416179, 6.4011466, 0.0, 2.10138857],
                 [5.48548061, 8.3257033, 6.91062699, 5.77563348, 0.0, 3.0001713],
@@ -236,7 +236,8 @@ class Describe_Slice(object):
             slice_.columns_std_err, load_python_expression("cat-hs-x-mr-col-stderr")
         )
         np.testing.assert_almost_equal(
-            slice_.columns_moe, load_python_expression("cat-hs-x-mr-col-moe")
+            slice_.columns_percentages_moe,
+            load_python_expression("cat-hs-x-mr-col-moe"),
         )
         np.testing.assert_almost_equal(
             slice_.zscores, load_python_expression("cat-hs-x-mr-zscores")
@@ -276,7 +277,8 @@ class Describe_Slice(object):
             slice_.columns_std_err, load_python_expression("mr-x-cat-hs-col-stderr")
         )
         np.testing.assert_almost_equal(
-            slice_.columns_moe, load_python_expression("mr-x-cat-hs-col-moe")
+            slice_.columns_percentages_moe,
+            load_python_expression("mr-x-cat-hs-col-moe"),
         )
         np.testing.assert_almost_equal(
             slice_.pvals, load_python_expression("mr-x-cat-hs-pvals")
