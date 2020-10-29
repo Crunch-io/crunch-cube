@@ -39,6 +39,21 @@ class DescribeSingleSideMovingAvgSmoother(object):
         assert _is_cat_date is expected_value
 
     @pytest.mark.parametrize(
+        "measure_expr, expected_value",
+        (
+            ({}, "column_percentages"),
+            ({"base_measure": "col_percent"}, "column_percentages"),
+            ({"base_measure": "col_index"}, "column_index"),
+            ({"base_measure": "scale_mean"}, "scale_means_row"),
+            ({"base_measure": "mean"}, "means"),
+        ),
+    )
+    def it_knows_its_base_measure_mapping(self, measure_expr, expected_value):
+        base_measure = SingleSidedMovingAvgSmoother(None, measure_expr)._base_measure
+
+        assert base_measure == expected_value
+
+    @pytest.mark.parametrize(
         "window, is_cat_date, expected_value",
         (
             (2, True, True),
@@ -163,6 +178,15 @@ class DescribeSingleSideMovingAvgSmoother(object):
         values = SingleSidedMovingAvgSmoother(None, {}).values
 
         np.testing.assert_array_almost_equal(values, expected_value)
+
+    @pytest.mark.parametrize(
+        "measure_expr, expected_value",
+        (({}, 2), ({"window": 3}, 3), ({"win": "dow"}, 2)),
+    )
+    def it_knwos_its_window_parameter(self, measure_expr, expected_value):
+        window = SingleSidedMovingAvgSmoother(None, measure_expr)._window
+
+        assert window == expected_value
 
     # fixture components ---------------------------------------------
 

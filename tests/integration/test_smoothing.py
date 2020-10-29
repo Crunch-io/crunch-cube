@@ -79,28 +79,24 @@ class DescribeSliceSmoothing(object):
         )
 
     @pytest.mark.parametrize(
-        "fixture, window, expectation",
+        "fixture, expectation",
         (
-            (CR.CAT_X_CAT_DATE, 3, "cat-x-cat-date-smoothed-scale-means-w3"),
-            (CR.CAT_X_CAT_DATE_WGTD, 3, "cat-x-cat-date-smoothed-scale-means-w3"),
+            (CR.CAT_X_CAT_DATE, "cat-x-cat-date-smoothed-scale-means-w2"),
+            (CR.CAT_X_CAT_DATE_WGTD, "cat-x-cat-date-smoothed-scale-means-w2"),
             (
                 CR.CA_SUBVAR_X_CA_CAT_X_CAT_DATE,
-                3,
-                "ca-subvar-ca-cat-x-cat-date-scale-means-w3",
+                "ca-subvar-ca-cat-x-cat-date-scale-means-w2",
             ),
         ),
     )
     def it_provides_smoothed_scale_means_for_compatible_cubes(
-        self, fixture, window, expectation
+        self, fixture, expectation
     ):
 
         slice_ = Cube(fixture).partitions[0]
+        # --- window not expressed get the default value : 2
         scale_mean = slice_.evaluate(
-            {
-                "function": "one_sided_moving_avg",
-                "base_measure": "scale_mean",
-                "window": window,
-            }
+            {"function": "one_sided_moving_avg", "base_measure": "scale_mean"}
         )
         np.testing.assert_array_almost_equal(
             scale_mean, load_python_expression(expectation)
