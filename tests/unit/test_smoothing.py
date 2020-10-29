@@ -128,7 +128,7 @@ class DescribeSingleSideMovingAvgSmoother(object):
 
     def it_knows_its_base_values(self, slice_):
         slice_.column_percentages = np.array([[0.3, 0.4], [0.5, 0.6]])
-        function_spec = {"base_measure": "column_percentages"}
+        function_spec = {"base_measure": "col_percent"}
 
         _base_vaules = SingleSidedMovingAvgSmoother(slice_, function_spec)._base_values
 
