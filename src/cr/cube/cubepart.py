@@ -84,7 +84,7 @@ class CubePartition(object):
         return tuple(d.dimension_type for d in self._dimensions)
 
     def evaluate(self, measure_expr):
-        """Returns 1D/2D ndarray, values evaluated given the function specification
+        """Return 1D/2D ndarray, values evaluated given the function specification
 
         The `function_spec` contains the function to apply and its parameters, e.g.:
         ```
@@ -113,7 +113,7 @@ class CubePartition(object):
 
     @lazyproperty
     def population_fraction(self):
-        """Returns the population fraction of the cube"""
+        """population fraction of the cube"""
         return self._cube.population_fraction
 
     @lazyproperty
@@ -309,14 +309,16 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def columns_std_dev(self):
-        """Returns the standard deviation for column percentages
+        """standard deviation for column percentages
+
         `std_deviation = sqrt(variance)`
         """
         return np.sqrt(self._columns_variance)
 
     @lazyproperty
     def columns_std_err(self):
-        """Returns the standard error for column percentages
+        """standard error for column percentages
+
         `std_error = sqrt(variance/N)`
         """
         return np.sqrt(self._columns_variance / self.columns_margin)
@@ -781,17 +783,6 @@ class _Slice(CubePartition):
         return self._matrix.table_margin_unpruned
 
     @lazyproperty
-    def table_percentages_moe(self):
-        """1D/2D np.float64 ndarray of margin-of-error (MoE) for table percentages.
-
-        The values are represented as percentages, analogue to the `table_percentages`
-        property. This means that the value of 3.5% will have the value 3.5 (not 0.035).
-        The values can be np.nan when the corresponding percentage is also np.nan, which
-        happens when the respective table margin is 0.
-        """
-        return self.Z_975 * 100 * self.table_std_err
-
-    @lazyproperty
     def table_name(self):
         """Provides differentiated name for each stacked table of a 3D cube."""
         if self._cube.ndim < 3:
@@ -808,6 +799,17 @@ class _Slice(CubePartition):
     @lazyproperty
     def table_percentages(self):
         return self.table_proportions * 100
+
+    @lazyproperty
+    def table_percentages_moe(self):
+        """1D/2D np.float64 ndarray of margin-of-error (MoE) for table percentages.
+
+        The values are represented as percentages, analogue to the `table_percentages`
+        property. This means that the value of 3.5% will have the value 3.5 (not 0.035).
+        The values can be np.nan when the corresponding percentage is also np.nan, which
+        happens when the respective table margin is 0.
+        """
+        return self.Z_975 * 100 * self.table_std_err
 
     @lazyproperty
     def table_proportions(self):
@@ -889,7 +891,8 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def _columns_variance(self):
-        """Returns the variance for column percentages
+        """variance for column percentages
+
         `variance = p * (1-p)`
         """
         return (
@@ -1265,7 +1268,8 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def _variance(self):
-        """Returns the variance for cell percentages
+        """variance for cell percentages
+
         `variance = p * (1-p)`
         """
         p = self._table_proportions_as_array
