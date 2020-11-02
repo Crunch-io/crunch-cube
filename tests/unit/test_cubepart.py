@@ -318,7 +318,13 @@ class Describe_Slice(object):
         col_percent_prop.return_value = np.array([[0.1, 0.2], [0.3, 0.4]])
         smoothed_dimension_dict_prop_.return_value = {"type": {"categories": []}}
 
-        evaluate = slice_.evaluate({"function": "one_sided_moving_avg"})
+        evaluate = slice_.evaluate(
+            {
+                "function": "one_sided_moving_avg",
+                "base_measure": "col_percent",
+                "window": 2,
+            }
+        )
 
         np.testing.assert_almost_equal(evaluate, [[0.1, 0.2], [0.3, 0.4]])
 

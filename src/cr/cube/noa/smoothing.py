@@ -60,8 +60,21 @@ class SingleSidedMovingAvgSmoother(object):
 
     @lazyproperty
     def _base_measure(self):
-        """str, the base_measure parameter specified in the measure expression"""
-        return self._measure_expression.get("base_measure", "column_percentages")
+        """str base_measure parameter specified in the measure expression"""
+        base_measure = self._measure_expression.get("base_measure")
+        # --- Mapping of measure-keywords to `partition` property-names ---
+        measure_member = {
+            "col_percent": "column_percentages",
+            "col_index": "column_index",
+            "mean": "means",
+            "scale_mean": "scale_means_row",
+        }
+        if base_measure not in measure_member.keys():
+            raise ValueError(
+                "Base measure not recognized. Allowed values: 'col_percent', "
+                "'col_index', 'mean', 'scale_mean', got: {}.".format(base_measure)
+            )
+        return measure_member.get(base_measure)
 
     @lazyproperty
     def _base_values(self):
@@ -146,4 +159,7 @@ class SingleSidedMovingAvgSmoother(object):
     @lazyproperty
     def _window(self):
         """int, the window parameter specified in the measure expression"""
-        return self._measure_expression.get("window", 3)
+        window = self._measure_expression.get("window")
+        if not window:
+            raise ValueError("Window parameter cannot be None.")
+        return window
