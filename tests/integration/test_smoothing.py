@@ -96,7 +96,11 @@ class DescribeSliceSmoothing(object):
         slice_ = Cube(fixture).partitions[0]
         # --- window not expressed get the default value : 2
         scale_mean = slice_.evaluate(
-            {"function": "one_sided_moving_avg", "base_measure": "scale_mean"}
+            {
+                "function": "one_sided_moving_avg",
+                "base_measure": "scale_mean",
+                "window": 2,
+            }
         )
         np.testing.assert_array_almost_equal(
             scale_mean, load_python_expression(expectation)
