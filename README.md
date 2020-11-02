@@ -112,6 +112,10 @@ The detailed description can be found
 
 ## Changes
 
+### 1.12.6
+- T-stats scale means for multiple response
+- Margin of error for column percentages
+
 ### 1.12.4
 - Measure expression evaluation method
 - Multiple response allowed for pairwise comparison
