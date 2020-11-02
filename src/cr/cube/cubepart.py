@@ -84,7 +84,7 @@ class CubePartition(object):
         return tuple(d.dimension_type for d in self._dimensions)
 
     def evaluate(self, measure_expr):
-        """ -> 1D/2D ndarray, values evaluated given the function specification
+        """Return 1D/2D ndarray, values evaluated given the function specification
 
         The `function_spec` contains the function to apply and its parameters, e.g.:
         ```
@@ -113,7 +113,7 @@ class CubePartition(object):
 
     @lazyproperty
     def population_fraction(self):
-        """Returns the population fraction of the cube"""
+        """population fraction of the cube"""
         return self._cube.population_fraction
 
     @lazyproperty
@@ -239,6 +239,11 @@ class _Slice(CubePartition):
     dimensions which can be crosstabbed in a slice.
     """
 
+    # ---This is the quantile of the normal Cumulative Distribution Function (CDF) at
+    # ---probability 97.5% (p=.975), since the computed confidence interval
+    # ---is ±2.5% (.025) on each side of the CDF.
+    Z_975 = 1.959964
+
     def __init__(self, cube, slice_idx, transforms, population, mask_size):
         super(_Slice, self).__init__(cube, transforms)
         self._slice_idx = slice_idx
@@ -292,15 +297,28 @@ class _Slice(CubePartition):
         return np.array([column.margin for column in self._matrix.columns]).T
 
     @lazyproperty
+    def columns_percentages_moe(self):
+        """1D/2D np.float64 ndarray of margin-of-error (MoE) for columns percentages.
+
+        The values are represented as percentages, analogue to the `table_percentages`
+        property. This means that the value of 3.5% will have the value 3.5 (not 0.035).
+        The values can be np.nan when the corresponding percentage is also np.nan, which
+        happens when the respective columns margin is 0.
+        """
+        return self.Z_975 * 100 * self.columns_std_err
+
+    @lazyproperty
     def columns_std_dev(self):
-        """Returns the standard deviation for cell percentages
+        """standard deviation for column percentages
+
         `std_deviation = sqrt(variance)`
         """
         return np.sqrt(self._columns_variance)
 
     @lazyproperty
     def columns_std_err(self):
-        """Returns the standard error for cell percentages
+        """standard error for column percentages
+
         `std_error = sqrt(variance/N)`
         """
         return np.sqrt(self._columns_variance / self.columns_margin)
@@ -336,17 +354,17 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def insertions(self):
-        """Returns masked array with residuals for insertions
+        """2D np.float64 np.ma.core.MaskedArray of residuals for insertions.
 
-                 0     1	 2	     3	    4	    5	    6
-           0   inf   inf   inf	   inf	  inf	 -2.9	  inf
-           1   inf	 inf   inf	   inf	  inf	 -4.3	  inf
-           2   2.5	 1.3   3.3	 -0.70	-7.25	 -6.52	 2.25
-           3   inf	 inf   inf	   inf	  inf	 -2.51	  inf
-           4  -1.16	 2.20  5.84	  1.78	-8.48	 -5.92	 0.93
-           5   inf   inf   inf	   inf	  inf	  9.70	  inf
+              0     1     2     3      4       5       6
+        0   inf   inf   inf   inf    inf    -2.9     inf
+        1   inf   inf   inf   inf    inf    -4.3     inf
+        2   2.5   1.3   3.3  -0.70  -7.25   -6.52    2.25
+        3   inf   inf   inf   inf    inf    -2.51    inf
+        4  -1.16  2.20  5.84  1.78  -8.48   -5.92    0.93
+        5   inf   inf   inf   inf    inf     9.70    inf
 
-           Only the insertions residuals are showed in a inf masked array
+        Only the insertions residuals are showed in a inf masked array.
         """
         inserted_rows = self.inserted_row_idxs
         inserted_cols = self.inserted_column_idxs
@@ -601,7 +619,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def scale_median_column(self):
-        """ -> np.int64 ndarray of the columns scale median
+        """np.int64 ndarray of the columns scale median
 
         The median is calculated using the standard algebra applied to the numeric
         values repeated for each related counts value
@@ -621,7 +639,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def scale_median_row(self):
-        """ -> np.int64 ndarray of the rows scale median
+        """np.int64 ndarray of the rows scale median
 
         The median is calculated using the standard algebra applied to the numeric
         values repeated for each related counts value
@@ -641,7 +659,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def scale_median_column_margin(self):
-        """ -> np.int64, represents the column scale median margin"""
+        """np.int64 represents the column scale median margin"""
         if np.all(np.isnan(self._columns_dimension_numeric_values)):
             return None
         columns_margin = self.columns_margin
@@ -657,7 +675,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def scale_median_row_margin(self):
-        """ -> np.int64, represents the rows scale median margin"""
+        """np.int64 represents the rows scale median margin"""
         if np.all(np.isnan(self._rows_dimension_numeric_values)):
             return None
         rows_margin = self.rows_margin
@@ -673,28 +691,28 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def scale_std_dev_column(self):
-        """ -> 1D np.ndarray of the standard deviation column of scales"""
+        """1D np.ndarray of the standard deviation column of scales"""
         if np.all(np.isnan(self._columns_dimension_numeric_values)):
             return None
         return np.sqrt(self.var_scale_means_column)
 
     @lazyproperty
     def scale_std_dev_row(self):
-        """ -> 1D np.ndarray of the standard deviation row of scales"""
+        """1D np.ndarray of the standard deviation row of scales"""
         if np.all(np.isnan(self._rows_dimension_numeric_values)):
             return None
         return np.sqrt(self.var_scale_means_row)
 
     @lazyproperty
     def scale_std_err_column(self):
-        """ -> 1D np.ndarray of the standard error column of scales"""
+        """1D np.ndarray of the standard error column of scales"""
         if np.all(np.isnan(self._columns_dimension_numeric_values)):
             return None
         return self.scale_std_dev_column / np.sqrt(self.rows_margin)
 
     @lazyproperty
     def scale_std_err_row(self):
-        """ -> 1D np.ndarray of the standard error row of scales"""
+        """1D np.ndarray of the standard error row of scales"""
         if np.all(np.isnan(self._rows_dimension_numeric_values)):
             return None
         return self.scale_std_dev_row / np.sqrt(self.columns_margin)
@@ -783,6 +801,17 @@ class _Slice(CubePartition):
         return self.table_proportions * 100
 
     @lazyproperty
+    def table_percentages_moe(self):
+        """1D/2D np.float64 ndarray of margin-of-error (MoE) for table percentages.
+
+        The values are represented as percentages, analogue to the `table_percentages`
+        property. This means that the value of 3.5% will have the value 3.5 (not 0.035).
+        The values can be np.nan when the corresponding percentage is also np.nan, which
+        happens when the respective table margin is 0.
+        """
+        return self.Z_975 * 100 * self.table_std_err
+
+    @lazyproperty
     def table_proportions(self):
         return np.array([row.table_proportions for row in self._matrix.rows])
 
@@ -801,7 +830,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def var_scale_means_column(self):
-        """ -> 1D np.ndarray of the column variance values for scales
+        """1D np.ndarray of the column variance values for scales
 
         Note: the variance for scale is defined as sum((Yi−Y~)2/(N)), where Y~ is the
               mean of the data.
@@ -822,7 +851,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def var_scale_means_row(self):
-        """ -> 1D np.ndarray of the row variance values for scales
+        """1D np.ndarray of the row variance values for scales
 
         Note: the variance for scale is defined as sum((Yi−Y~)2/(N)), where Y~ is the
               mean of the data.
@@ -862,7 +891,8 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def _columns_variance(self):
-        """Returns the variance for cell percentages
+        """variance for column percentages
+
         `variance = p * (1-p)`
         """
         return (
@@ -1039,7 +1069,7 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def scale_median(self):
-        """ -> np.int64, the median of scales
+        """np.int64 the median of scales
 
         The median is calculated using the standard algebra applied to the numeric
         values repeated for each related counts value
@@ -1053,14 +1083,14 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def scale_std_dev(self):
-        """ -> np.float64, the standard deviation of scales"""
+        """np.float64, the standard deviation of scales"""
         if np.all(np.isnan(self._numeric_values)):
             return None
         return np.sqrt(self.var_scale_mean)
 
     @lazyproperty
     def scale_std_err(self):
-        """ -> np.float64, the standard error of scales"""
+        """np.float64, the standard error of scales"""
         if np.all(np.isnan(self._numeric_values)):
             return None
         counts = self._counts_as_array[self._numeric_values_mask]
@@ -1085,12 +1115,12 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def standard_deviation(self):
-        """ -> np.ndarray, percentages standard deviation"""
+        """np.ndarray percentages standard deviation"""
         return np.sqrt(self._variance)
 
     @lazyproperty
     def standard_error(self):
-        """ -> np.ndarray, percentages standard error"""
+        """np.ndarray percentages standard error"""
         if self.dimension_types[0] == DT.MR:
             return np.sqrt(self._variance / self.bases)
         return np.sqrt(self._variance / np.sum(self.rows_margin))
@@ -1207,7 +1237,7 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def _numeric_values_mask(self):
-        """ -> np.ndarray, boolean elements for each element in rows dimension."
+        """np.ndarray boolean elements for each element in rows dimension."
 
         This array contains True or False according to the nan in the numeric_values
         array
@@ -1238,7 +1268,8 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def _variance(self):
-        """Returns the variance for cell percentages
+        """variance for cell percentages
+
         `variance = p * (1-p)`
         """
         p = self._table_proportions_as_array

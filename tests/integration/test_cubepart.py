@@ -117,6 +117,25 @@ class Describe_Slice(object):
                 [0.02675483, 0.01976428, 0.0292589, 0.05070657, np.nan, 0.0],
             ],
         )
+        np.testing.assert_almost_equal(
+            slice_.columns_percentages_moe,
+            [
+                [
+                    13.51426726,
+                    10.79256616,
+                    16.59188199,
+                    22.48817088,
+                    np.nan,
+                    53.31123764,
+                ],
+                [12.89084933, 10.4849174, 16.3342716, 22.23457567, np.nan, 53.31123764],
+                [5.39900809, 2.84154374, 0.0, 9.93830606, np.nan, 0.0],
+                [8.99374047, 7.09061236, 11.08349041, 14.03617724, np.nan, 53.31123764],
+                [8.99374047, 8.57336265, 14.52191695, 19.75240786, np.nan, 0.0],
+                [0.0, 0.0, 0.0, 0.0, np.nan, 0.0],
+                [5.24385075, 3.87372796, 5.73464003, 9.93830606, np.nan, 0.0],
+            ],
+        )
         assert slice_.dimension_types == (DT.CAT, DT.CAT)
         assert slice_.inserted_column_idxs == (1,)
         assert slice_.inserted_row_idxs == (1,)
@@ -177,6 +196,18 @@ class Describe_Slice(object):
             ],
         )
         np.testing.assert_almost_equal(
+            slice_.table_percentages_moe,
+            [
+                [9.47425342, 10.23031735, 8.51416179, 6.4011466, 0.0, 2.10138857],
+                [5.48548061, 8.3257033, 6.91062699, 5.77563348, 0.0, 3.0001713],
+                [2.16468583, 2.16468583, 0.0, 2.10138857, 0.0, 0.0],
+                [3.67141987, 5.4641654, 4.19511734, 3.04381859, 0.0, 3.0001713],
+                [3.67141987, 6.66431728, 5.77563348, 4.6236001, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                [2.10138857, 2.95581821, 2.10138857, 2.10138857, 0.0, 0.0],
+            ],
+        )
+        np.testing.assert_almost_equal(
             slice_.zscores,
             [
                 [2.06930398, 1.68383013, -0.61133797, -1.25160615, np.nan, -1.19268916],
@@ -203,6 +234,10 @@ class Describe_Slice(object):
         )
         np.testing.assert_almost_equal(
             slice_.columns_std_err, load_python_expression("cat-hs-x-mr-col-stderr")
+        )
+        np.testing.assert_almost_equal(
+            slice_.columns_percentages_moe,
+            load_python_expression("cat-hs-x-mr-col-moe"),
         )
         np.testing.assert_almost_equal(
             slice_.zscores, load_python_expression("cat-hs-x-mr-zscores")
@@ -240,6 +275,10 @@ class Describe_Slice(object):
         )
         np.testing.assert_almost_equal(
             slice_.columns_std_err, load_python_expression("mr-x-cat-hs-col-stderr")
+        )
+        np.testing.assert_almost_equal(
+            slice_.columns_percentages_moe,
+            load_python_expression("mr-x-cat-hs-col-moe"),
         )
         np.testing.assert_almost_equal(
             slice_.pvals, load_python_expression("mr-x-cat-hs-pvals")
