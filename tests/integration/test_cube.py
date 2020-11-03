@@ -476,12 +476,15 @@ class TestCrunchCubeAs_Slice(object):
             (0.1666667, 0.1666667, 0.1666667, 0.1666667, 0.1666667, 0.1666667),
         )
 
-    def test_std_dev_err_univariate_cat_axis_none(self):
+    def test_std_dev_err_moe_univariate_cat_axis_none(self):
         strand = Cube(CR.UNIVARIATE_CATEGORICAL).partitions[0]
         np.testing.assert_almost_equal(
             strand.standard_deviation, [0.47140452, 0.47140452]
         )
         np.testing.assert_almost_equal(strand.standard_error, [0.1217161, 0.1217161])
+        np.testing.assert_almost_equal(
+            strand.table_percentages_moe, [23.8559221, 23.8559221]
+        )
 
     def test_std_dev_err_numeric(self):
         strand = Cube(CR.VOTER_REGISTRATION).partitions[0]
