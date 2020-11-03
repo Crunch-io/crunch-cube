@@ -494,6 +494,9 @@ class TestCrunchCubeAs_Slice(object):
         np.testing.assert_almost_equal(
             strand.standard_error, [0.0100884, 0.0096941, 0.0031464]
         )
+        np.testing.assert_almost_equal(
+            strand.table_percentages_moe, [1.9772822, 1.9000029, 0.6166883]
+        )
 
     def test_std_dev_err_datetime(self):
         strand = Cube(CR.SIMPLE_DATETIME).partitions[0]
