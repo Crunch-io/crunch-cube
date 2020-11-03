@@ -310,7 +310,7 @@ class DescribeCubeSlice(object):
             ((DT.LOGICAL,), False),
             ((DT.TEXT,), False),
             ((DT.CA_CAT,), False),
-            ((DT.CA_SUBVAR, DT.CA_CAT), False),
+            ((DT.CA_SUBVAR, DT.CA_CAT), True),
             ((DT.CA_SUBVAR, DT.MR, DT.CA_CAT), False),
             ((DT.MR, DT.CAT), True),
             ((DT.LOGICAL, DT.CAT), False),

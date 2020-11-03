@@ -456,6 +456,45 @@ class TestStandardizedResiduals(TestCase):
         )
         np.testing.assert_array_equal(pairwise_indices, expected_indices)
 
+    def test_ca_subvar_x_cat_hs_pairwise_t_test(self):
+        slice_ = Cube(CR.CA_SUBVAR_X_CAT_HS).partitions[0]
+        actual = slice_.pairwise_significance_tests[1]
+
+        np.testing.assert_array_almost_equal(
+            actual.t_stats,
+            [
+                [1.35873244, 0.0, -2.19089023, -2.19089023, 0.55829053],
+                [-0.45291081, 0.0, 0.90716763, -2.19089023, -0.19054822],
+                [-1.63299316, 0.0, 0.26686442, 4.89897949, -0.44536177],
+            ],
+        )
+        np.testing.assert_array_almost_equal(
+            actual.p_vals,
+            [
+                [
+                    2.04087876e-01,
+                    1.00000000e00,
+                    5.61686813e-02,
+                    5.61686813e-02,
+                    5.83524533e-01,
+                ],
+                [
+                    6.60280804e-01,
+                    1.00000000e00,
+                    3.87961906e-01,
+                    5.61686813e-02,
+                    8.51012165e-01,
+                ],
+                [
+                    1.33519650e-01,
+                    1.00000000e00,
+                    7.95587544e-01,
+                    8.48841390e-04,
+                    6.61368183e-01,
+                ],
+            ],
+        )
+
     def test_cat_x_mr_weighted_augmented(self):
         """Same behaviour of test_mr_subvar_x_mr_augmented_pairwise_t_test"""
         slice_ = Cube(CR.CAT_X_MR_WEIGHTED_AUGMENTED).partitions[0]

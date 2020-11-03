@@ -51,5 +51,5 @@ class DIMENSION_TYPE(object):
 
     # ---allowed types for pairwise comparison---
     ALLOWED_PAIRWISE_TYPES = frozenset(
-        (BINNED_NUMERIC, CAT, CA_CAT, DATETIME, MR, TEXT)
+        (BINNED_NUMERIC, CA, CAT, CA_CAT, DATETIME, MR, TEXT)
     )
