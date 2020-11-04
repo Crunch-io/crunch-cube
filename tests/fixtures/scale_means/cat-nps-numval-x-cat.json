@@ -1,0 +1,294 @@
+{
+  "query": {
+    "dimensions": [
+      {
+        "variable": "https://app.crunch.io/api/datasets/bc6e2c22a8c14638ae584afaca816311/variables/000020/"
+      },
+      {
+        "variable": "https://app.crunch.io/api/datasets/bc6e2c22a8c14638ae584afaca816311/variables/000029/"
+      }
+    ],
+    "measures": {
+      "count": {
+        "args": [],
+        "function": "cube_count"
+      }
+    },
+    "weight": null
+  },
+  "query_environment": {
+    "filter": []
+  },
+  "result": {
+    "counts": [
+      42,
+      103,
+      120,
+      33,
+      0,
+      0,
+      0,
+      122,
+      237,
+      453,
+      266,
+      0,
+      0,
+      0,
+      14,
+      33,
+      29,
+      6,
+      0,
+      0,
+      0,
+      7,
+      16,
+      3,
+      1,
+      0,
+      0,
+      0,
+      4,
+      6,
+      1,
+      4,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "dimensions": [
+      {
+        "derived": false,
+        "references": {
+          "alias": "facebook_apps",
+          "description": "Have you ever downloaded any of the free apps (eg FarmVille, Airport City, etc.) on Facebook?",
+          "name": "facebook_apps"
+        },
+        "type": {
+          "categories": [
+            {
+              "id": 1,
+              "missing": false,
+              "name": "Yes",
+              "numeric_value": 100
+            },
+            {
+              "id": 2,
+              "missing": false,
+              "name": "No",
+              "numeric_value": 0
+            },
+            {
+              "id": 3,
+              "missing": false,
+              "name": "Don't remember",
+              "numeric_value": null
+            },
+            {
+              "id": 4,
+              "missing": false,
+              "name": "Prefer not to say",
+              "numeric_value": null
+            },
+            {
+              "id": 32766,
+              "missing": true,
+              "name": "skipped",
+              "numeric_value": 32766
+            },
+            {
+              "id": 32767,
+              "missing": true,
+              "name": "not asked",
+              "numeric_value": 32767
+            },
+            {
+              "id": -1,
+              "missing": true,
+              "name": "No Data",
+              "numeric_value": null
+            }
+          ],
+          "class": "categorical",
+          "ordinal": false
+        }
+      },
+      {
+        "derived": false,
+        "references": {
+          "alias": "age4",
+          "description": "Respondent age by category",
+          "name": "age4"
+        },
+        "type": {
+          "categories": [
+            {
+              "id": 1,
+              "missing": false,
+              "name": "Under 30",
+              "numeric_value": null
+            },
+            {
+              "id": 2,
+              "missing": false,
+              "name": "30-44",
+              "numeric_value": null
+            },
+            {
+              "id": 3,
+              "missing": false,
+              "name": "45-64",
+              "numeric_value": null
+            },
+            {
+              "id": 4,
+              "missing": false,
+              "name": "65+",
+              "numeric_value": null
+            },
+            {
+              "id": 32766,
+              "missing": true,
+              "name": "skipped",
+              "numeric_value": null
+            },
+            {
+              "id": 32767,
+              "missing": true,
+              "name": "not asked",
+              "numeric_value": null
+            },
+            {
+              "id": -1,
+              "missing": true,
+              "name": "No Data",
+              "numeric_value": null
+            }
+          ],
+          "class": "categorical",
+          "ordinal": false
+        }
+      }
+    ],
+    "element": "crunch:cube",
+    "filter_stats": {
+      "filtered": {
+        "unweighted": {
+          "missing": 0,
+          "other": 0,
+          "selected": 1500
+        },
+        "weighted": {
+          "missing": 0,
+          "other": 0,
+          "selected": 1500
+        }
+      },
+      "filtered_complete": {
+        "unweighted": {
+          "missing": 0,
+          "other": 0,
+          "selected": 1500
+        },
+        "weighted": {
+          "missing": 0,
+          "other": 0,
+          "selected": 1500
+        }
+      }
+    },
+    "filtered": {
+      "unweighted_n": 1500,
+      "weighted_n": 1500
+    },
+    "measures": {
+      "count": {
+        "data": [
+          42,
+          103,
+          120,
+          33,
+          0,
+          0,
+          0,
+          122,
+          237,
+          453,
+          266,
+          0,
+          0,
+          0,
+          14,
+          33,
+          29,
+          6,
+          0,
+          0,
+          0,
+          7,
+          16,
+          3,
+          1,
+          0,
+          0,
+          0,
+          4,
+          6,
+          1,
+          4,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "metadata": {
+          "derived": true,
+          "references": {},
+          "type": {
+            "class": "numeric",
+            "integer": true,
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "missing_rules": {}
+          }
+        },
+        "n_missing": 15
+      }
+    },
+    "missing": 15,
+    "n": 1500,
+    "unfiltered": {
+      "unweighted_n": 1500,
+      "weighted_n": 1500
+    }
+  }
+}
