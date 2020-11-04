@@ -28,6 +28,11 @@ from cr.cube.scalar import MeansScalar
 from cr.cube.stripe import TransformedStripe
 from cr.cube.util import lazyproperty
 
+# ---This is the quantile of the normal Cumulative Distribution Function (CDF) at
+# ---probability 97.5% (p=.975), since the computed confidence interval
+# ---is ±2.5% (.025) on each side of the CDF.
+Z_975 = 1.959964
+
 
 class CubePartition(object):
     """A slice, a strand, or a nub drawn from a cube-response.
@@ -239,11 +244,6 @@ class _Slice(CubePartition):
     dimensions which can be crosstabbed in a slice.
     """
 
-    # ---This is the quantile of the normal Cumulative Distribution Function (CDF) at
-    # ---probability 97.5% (p=.975), since the computed confidence interval
-    # ---is ±2.5% (.025) on each side of the CDF.
-    Z_975 = 1.959964
-
     def __init__(self, cube, slice_idx, transforms, population, mask_size):
         super(_Slice, self).__init__(cube, transforms)
         self._slice_idx = slice_idx
@@ -305,7 +305,7 @@ class _Slice(CubePartition):
         The values can be np.nan when the corresponding percentage is also np.nan, which
         happens when the respective columns margin is 0.
         """
-        return self.Z_975 * 100 * self.columns_std_err
+        return Z_975 * 100 * self.columns_std_err
 
     @lazyproperty
     def columns_std_dev(self):
@@ -809,7 +809,7 @@ class _Slice(CubePartition):
         The values can be np.nan when the corresponding percentage is also np.nan, which
         happens when the respective table margin is 0.
         """
-        return self.Z_975 * 100 * self.table_std_err
+        return Z_975 * 100 * self.table_std_err
 
     @lazyproperty
     def table_proportions(self):
@@ -1124,6 +1124,17 @@ class _Strand(CubePartition):
         if self.dimension_types[0] == DT.MR:
             return np.sqrt(self._variance / self.bases)
         return np.sqrt(self._variance / np.sum(self.rows_margin))
+
+    @lazyproperty
+    def table_percentages_moe(self):
+        """1D np.float64 ndarray of margin-of-error (MoE) for table percentages.
+
+        The values are represented as percentages, analogue to the `table_percentages`
+        property. This means that the value of 3.5% will have the value 3.5 (not 0.035).
+        The values can be np.nan when the corresponding percentage is also np.nan, which
+        happens when the respective columns margin is 0.
+        """
+        return Z_975 * 100 * self.standard_error
 
     @lazyproperty
     def table_base(self):
