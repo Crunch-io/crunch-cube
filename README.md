@@ -112,6 +112,10 @@ The detailed description can be found
 
 ## Changes
 
+### 1.12.7
+- Margin of error for 1D cubes
+- Allow pairwise significance for CA_SUBVAR
+
 ### 1.12.6
 - T-stats scale means for multiple response
 - Margin of error for column percentages
