@@ -23,6 +23,28 @@ def test_ca_items_x_cat():
     assert slice_.scale_means_rows_margin is None
 
 
+def test_ca_itmes_x_cat_var_scale_means():
+    # These 2 fixtures represent 1 dataset and its transpose version
+    slice_ = Cube(SM.CA_ITEMS_X_CAT).partitions[0]
+    slice2_ = Cube(SM.CA_CAT_X_ITEMS).partitions[0]
+
+    # Testing that the scale means (row and col) are equal on the 2 diverse
+    # datasets
+    np.testing.assert_array_almost_equal(
+        slice_.var_scale_means_column, slice2_.var_scale_means_row
+    )
+
+    np.testing.assert_array_almost_equal(
+        slice2_.var_scale_means_row, [2.56410909, 5.17893869, 4.75445248, 4.81611278]
+    )
+    np.testing.assert_array_almost_equal(
+        slice_.var_scale_means_column, [2.56410909, 5.17893869, 4.75445248, 4.81611278]
+    )
+
+    assert slice2_.var_scale_means_column is None
+    assert slice_.var_scale_means_row is None
+
+
 def test_ca_x_mr():
     slice_ = Cube(SM.CA_X_MR).partitions[0]
     np.testing.assert_almost_equal(
@@ -99,6 +121,30 @@ def test_cat_x_cat():
     assert slice_.scale_means_rows_margin == 2.6846246973365617
 
 
+def test_cat_hs_x_cat_hs_var_scale_means():
+    slice_ = Cube(CR.ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS).partitions[0]
+
+    assert slice_.var_scale_means_column is not None
+    assert slice_.var_scale_means_row is not None
+
+    np.testing.assert_almost_equal(
+        slice_.var_scale_means_column,
+        [0.88930748, 0.93655622, 1.36425875, 0.96388566, 3.55555556, 2.55601211],
+    )
+    np.testing.assert_almost_equal(
+        slice_.var_scale_means_row,
+        [
+            0.51774691,
+            0.51796281,
+            0.99555556,
+            0.84071826,
+            1.12549449,
+            1.19867769,
+            2.4775,
+        ],
+    )
+
+
 def test_cat_x_mr():
     slice_ = Cube(SM.CAT_X_MR).partitions[0]
     np.testing.assert_almost_equal(
@@ -108,34 +154,6 @@ def test_cat_x_mr():
 
     assert slice_.scale_means_columns_margin is None
     assert slice_.scale_means_rows_margin == 2.5323565323565322
-
-
-def test_mr_x_cat():
-    slice_ = Cube(SM.MR_X_CAT).partitions[0]
-    assert slice_.scale_means_row is None
-    np.testing.assert_almost_equal(
-        slice_.scale_means_column, [2.45070423, 2.54471545, 2.54263006, np.nan]
-    )
-
-    assert slice_.scale_means_columns_margin == 2.5323565323565322
-    assert slice_.scale_means_rows_margin is None
-
-
-def test_univariate_cat():
-    strand = Cube(SM.UNIVARIATE_CAT).partitions[0]
-    np.testing.assert_almost_equal(strand.scale_mean, [2.6865854])
-
-
-def test_univariate_cat_with_hiding():
-    strand_ = Cube(SM.BOLSHEVIK_HAIR).partitions[0]
-    np.testing.assert_almost_equal(strand_.scale_mean, [1.504548211])
-
-    # Appling hiding transforms
-    transforms = {
-        "rows_dimension": {"elements": {"5": {"hide": True}, "4": {"hide": True}}}
-    }
-    strand_with_hiding_ = Cube(SM.BOLSHEVIK_HAIR, transforms=transforms).partitions[0]
-    np.testing.assert_almost_equal(strand_.scale_mean, strand_with_hiding_.scale_mean)
 
 
 def test_cat_x_cat_with_hs():
@@ -159,50 +177,6 @@ def test_cat_x_cat_with_hs():
     np.testing.assert_almost_equal(
         slice_.scale_means_row,
         [2.19444444, 2.19230769, 2.26666667, 1.88990826, 1.76363636, 3.85],
-    )
-    np.testing.assert_almost_equal(
-        slice_.scale_means_column,
-        [3.87368421, 2.51767677, 3.0851689, 3.38429752, 3.66666667, 4.13235294],
-    )
-
-
-def test_univariate_with_hs():
-    # Test without H&S
-    transforms = {
-        "columns_dimension": {"insertions": {}},
-        "rows_dimension": {"insertions": {}},
-    }
-    strand = Cube(CR.ECON_BLAME_WITH_HS, transforms).partitions[0]
-    np.testing.assert_almost_equal(strand.scale_mean, [2.17352056])
-
-    # Test with H&S
-    strand = Cube(CR.ECON_BLAME_WITH_HS).partitions[0]
-    np.testing.assert_almost_equal(strand.scale_mean, [2.17352056])
-
-
-def test_cat_x_cat_with_hs_on_both_dims():
-    # Test without H&S
-    transforms = {
-        "columns_dimension": {"insertions": {}},
-        "rows_dimension": {"insertions": {}},
-    }
-    slice_ = Cube(
-        CR.ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS, transforms=transforms
-    ).partitions[0]
-    np.testing.assert_almost_equal(
-        slice_.scale_means_row,
-        [2.19444444, 2.19230769, 2.26666667, 1.88990826, 1.76363636, 3.85],
-    )
-    np.testing.assert_almost_equal(
-        slice_.scale_means_column,
-        [3.87368421, 2.51767677, 3.38429752, 3.66666667, 4.13235294],
-    )
-
-    # Test with H&S
-    slice_ = Cube(CR.ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS).partitions[0]
-    np.testing.assert_almost_equal(
-        slice_.scale_means_row,
-        [2.19444444, 2.19230769, 2.26666667, 2.2423698, 1.88990826, 1.76363636, 3.85],
     )
     np.testing.assert_almost_equal(
         slice_.scale_means_column,
@@ -310,6 +284,85 @@ def test_cat_x_cat_scale_means_margin():
     assert slice_.scale_means_columns_margin == 2.536319612590799
 
 
+def test_cat_x_ca_subvar_scale_means():
+    slice_ = Cube(CR.FRUIT_X_PETS_ARRAY_SUBVARS_FIRST).partitions[0]
+    np.testing.assert_almost_equal(
+        slice_.var_scale_means_row, [0.2054321, 0.24, 0.22558594]
+    )
+    assert slice_.var_scale_means_column is None
+
+    slice_ = Cube(CR.FRUIT_X_PETS_ARRAY_SUBVARS_FIRST).partitions[1]
+    np.testing.assert_almost_equal(
+        slice_.var_scale_means_row, [0.2283737, 0.21, 0.21606648]
+    )
+    assert slice_.scale_means_column is None
+
+
+def test_cat_x_cat_pruning_and_hs_var_scale_means():
+    transforms = {
+        "columns_dimension": {"insertions": {}},
+        "rows_dimension": {"insertions": {}},
+    }
+    slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[0]
+    np.testing.assert_almost_equal(
+        slice_.var_scale_means_row,
+        [1.4459092, 2.14619102, 2.40430987, np.nan, 0.87972883],
+    )
+    np.testing.assert_almost_equal(
+        slice_.var_scale_means_column,
+        [0.72358198, 0.9991, 1.87633763, 0.4859843, np.nan, 0.66666667],
+    )
+
+    # Just H&S
+    slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS).partitions[0]
+    np.testing.assert_almost_equal(
+        slice_.var_scale_means_row,
+        [1.4459092, 1.8494177, 2.14619102, 2.40430987, np.nan, 0.87972883],
+    ),
+    np.testing.assert_almost_equal(
+        slice_.var_scale_means_column,
+        [0.72358198, 1.08423566, 0.9991, 1.87633763, 0.4859843, np.nan, 0.66666667],
+    )
+
+    # Just pruning
+    transforms = {
+        "rows_dimension": {"prune": True},
+        "columns_dimension": {"prune": True},
+    }
+    slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[0]
+    np.testing.assert_almost_equal(
+        slice_.var_scale_means_row,
+        [1.4459092, 1.8494177, 2.14619102, 2.40430987, 0.87972883],
+    )
+    np.testing.assert_almost_equal(
+        slice_.var_scale_means_column,
+        [0.72358198, 1.08423566, 0.9991, 1.87633763, 0.4859843, 0.66666667],
+    )
+
+    # Pruning and H&S
+    transforms = {
+        "rows_dimension": {"insertions": {}, "prune": True},
+        "columns_dimension": {"insertions": {}, "prune": True},
+    }
+    slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[0]
+    np.testing.assert_almost_equal(
+        slice_.var_scale_means_row, [1.4459092, 2.14619102, 2.40430987, 0.87972883]
+    ),
+    np.testing.assert_almost_equal(
+        slice_.var_scale_means_column,
+        [0.72358198, 0.9991, 1.87633763, 0.4859843, 0.66666667],
+    )
+
+
+def test_cat_nps_numval_x_cat_var_scale_means():
+    slice_ = Cube(SM.CAT_NPS_NUMVAL_X_CAT).partitions[0]
+    np.testing.assert_almost_equal(
+        slice_.var_scale_means_row,
+        [1905.11600238, 2111.67820069, 1655.65636907, 981.86821176],
+    )
+    assert slice_.var_scale_means_column is None
+
+
 def test_cat_single_element_x_cat():
     slice_ = Cube(SM.CAT_SINGLE_ELEMENT_X_CAT).partitions[0]
     np.testing.assert_equal(slice_.scale_means_row, [np.nan, np.nan, np.nan, np.nan])
@@ -406,7 +459,7 @@ def test_means_with_null_values():
     assert slice_.scale_means_column is None
 
 
-def test_var_scale_mean_univariate_cat():
+def test_mean_univariate_cat_var_scale_mean():
     # Test nonmissing with no null numeric values
     strand_ = Cube(SM.UNIVARIATE_CAT).partitions[0]
     is_a_number_mask = ~np.isnan(strand_._numeric_values)
@@ -436,26 +489,15 @@ def test_var_scale_mean_univariate_cat():
     np.testing.assert_array_equal(strand_._counts_as_array[is_a_number_mask], [])
 
 
-def test_var_scale_means_for_ca_itmes_x_cat():
-    # These 2 fixtures represent 1 dataset and its transpose version
-    slice_ = Cube(SM.CA_ITEMS_X_CAT).partitions[0]
-    slice2_ = Cube(SM.CA_CAT_X_ITEMS).partitions[0]
-
-    # Testing that the scale means (row and col) are equal on the 2 diverse
-    # datasets
-    np.testing.assert_array_almost_equal(
-        slice_.var_scale_means_column, slice2_.var_scale_means_row
+def test_mr_x_cat():
+    slice_ = Cube(SM.MR_X_CAT).partitions[0]
+    assert slice_.scale_means_row is None
+    np.testing.assert_almost_equal(
+        slice_.scale_means_column, [2.45070423, 2.54471545, 2.54263006, np.nan]
     )
 
-    np.testing.assert_array_almost_equal(
-        slice2_.var_scale_means_row, [2.56410909, 5.17893869, 4.75445248, 4.81611278]
-    )
-    np.testing.assert_array_almost_equal(
-        slice_.var_scale_means_column, [2.56410909, 5.17893869, 4.75445248, 4.81611278]
-    )
-
-    assert slice2_.var_scale_means_column is None
-    assert slice_.var_scale_means_row is None
+    assert slice_.scale_means_columns_margin == 2.5323565323565322
+    assert slice_.scale_means_rows_margin is None
 
 
 def test_var_scale_means_for_fruit_x_pets_array():
@@ -473,69 +515,38 @@ def test_var_scale_means_for_fruit_x_pets_array():
     )
 
 
-def test_var_scale_means_for_econ_blame_x_ideology_row_and_col_hs():
-    slice_ = Cube(CR.ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS).partitions[0]
-
-    assert slice_.var_scale_means_column is not None
-    assert slice_.var_scale_means_row is not None
-
-    np.testing.assert_almost_equal(
-        slice_.var_scale_means_column,
-        [0.88930748, 0.93655622, 1.36425875, 0.96388566, 3.55555556, 2.55601211],
-    )
-    np.testing.assert_almost_equal(
-        slice_.var_scale_means_row,
-        [
-            0.51774691,
-            0.51796281,
-            0.99555556,
-            0.84071826,
-            1.12549449,
-            1.19867769,
-            2.4775,
-        ],
-    )
+def test_univariate_cat():
+    strand = Cube(SM.UNIVARIATE_CAT).partitions[0]
+    np.testing.assert_almost_equal(strand.scale_mean, [2.6865854])
 
 
-def test_var_scale_means_cat_x_cat_with_hs_on_both_dims():
+def test_univariate_cat_with_hiding():
+    strand_ = Cube(SM.BOLSHEVIK_HAIR).partitions[0]
+    np.testing.assert_almost_equal(strand_.scale_mean, [1.504548211])
+
+    # Appling hiding transforms
+    transforms = {
+        "rows_dimension": {"elements": {"5": {"hide": True}, "4": {"hide": True}}}
+    }
+    strand_with_hiding_ = Cube(SM.BOLSHEVIK_HAIR, transforms=transforms).partitions[0]
+    np.testing.assert_almost_equal(strand_.scale_mean, strand_with_hiding_.scale_mean)
+
+
+def test_univariate_with_hs():
     # Test without H&S
     transforms = {
         "columns_dimension": {"insertions": {}},
         "rows_dimension": {"insertions": {}},
     }
-    slice_ = Cube(
-        CR.ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS, transforms=transforms
-    ).partitions[0]
-    np.testing.assert_almost_equal(
-        slice_.var_scale_means_row,
-        [0.51774691, 0.51796281, 0.99555556, 1.12549449, 1.19867769, 2.4775],
-    )
-    np.testing.assert_almost_equal(
-        slice_.var_scale_means_column,
-        [0.88930748, 0.93655622, 0.96388566, 3.55555556, 2.55601211],
-    )
+    strand = Cube(CR.ECON_BLAME_WITH_HS, transforms).partitions[0]
+    np.testing.assert_almost_equal(strand.scale_mean, [2.17352056])
 
     # Test with H&S
-    slice_ = Cube(CR.ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS).partitions[0]
-    np.testing.assert_almost_equal(
-        slice_.var_scale_means_row,
-        [
-            0.51774691,
-            0.51796281,
-            0.99555556,
-            0.84071826,
-            1.12549449,
-            1.19867769,
-            2.4775,
-        ],
-    )
-    np.testing.assert_almost_equal(
-        slice_.var_scale_means_column,
-        [0.88930748, 0.93655622, 1.36425875, 0.96388566, 3.55555556, 2.55601211],
-    )
+    strand = Cube(CR.ECON_BLAME_WITH_HS).partitions[0]
+    np.testing.assert_almost_equal(strand.scale_mean, [2.17352056])
 
 
-def test_var_scale_means_for_univariate_with_hs():
+def test_univariate_with_hs_var_scale_means_row():
     # Test without H&S
     transforms = {
         "columns_dimension": {"insertions": {}},
@@ -547,82 +558,3 @@ def test_var_scale_means_for_univariate_with_hs():
     # Test with H&S
     strand = Cube(CR.ECON_BLAME_WITH_HS).partitions[0]
     np.testing.assert_almost_equal(strand.var_scale_mean, [1.1363901131679894])
-
-
-def test_var_scale_means_cat_x_cat_arr_subvars_first():
-    slice_ = Cube(CR.FRUIT_X_PETS_ARRAY_SUBVARS_FIRST).partitions[0]
-    np.testing.assert_almost_equal(
-        slice_.var_scale_means_row, [0.2054321, 0.24, 0.22558594]
-    )
-    assert slice_.var_scale_means_column is None
-
-    slice_ = Cube(CR.FRUIT_X_PETS_ARRAY_SUBVARS_FIRST).partitions[1]
-    np.testing.assert_almost_equal(
-        slice_.var_scale_means_row, [0.2283737, 0.21, 0.21606648]
-    )
-    assert slice_.scale_means_column is None
-
-
-def test_var_scale_means_cat_x_cat_pruning_and_hs():
-    transforms = {
-        "columns_dimension": {"insertions": {}},
-        "rows_dimension": {"insertions": {}},
-    }
-    slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[0]
-    np.testing.assert_almost_equal(
-        slice_.var_scale_means_row,
-        [1.4459092, 2.14619102, 2.40430987, np.nan, 0.87972883],
-    )
-    np.testing.assert_almost_equal(
-        slice_.var_scale_means_column,
-        [0.72358198, 0.9991, 1.87633763, 0.4859843, np.nan, 0.66666667],
-    )
-
-    # Just H&S
-    slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS).partitions[0]
-    np.testing.assert_almost_equal(
-        slice_.var_scale_means_row,
-        [1.4459092, 1.8494177, 2.14619102, 2.40430987, np.nan, 0.87972883],
-    ),
-    np.testing.assert_almost_equal(
-        slice_.var_scale_means_column,
-        [0.72358198, 1.08423566, 0.9991, 1.87633763, 0.4859843, np.nan, 0.66666667],
-    )
-
-    # Just pruning
-    transforms = {
-        "rows_dimension": {"prune": True},
-        "columns_dimension": {"prune": True},
-    }
-    slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[0]
-    np.testing.assert_almost_equal(
-        slice_.var_scale_means_row,
-        [1.4459092, 1.8494177, 2.14619102, 2.40430987, 0.87972883],
-    )
-    np.testing.assert_almost_equal(
-        slice_.var_scale_means_column,
-        [0.72358198, 1.08423566, 0.9991, 1.87633763, 0.4859843, 0.66666667],
-    )
-
-    # Pruning and H&S
-    transforms = {
-        "rows_dimension": {"insertions": {}, "prune": True},
-        "columns_dimension": {"insertions": {}, "prune": True},
-    }
-    slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[0]
-    np.testing.assert_almost_equal(
-        slice_.var_scale_means_row, [1.4459092, 2.14619102, 2.40430987, 0.87972883]
-    ),
-    np.testing.assert_almost_equal(
-        slice_.var_scale_means_column,
-        [0.72358198, 0.9991, 1.87633763, 0.4859843, 0.66666667],
-    )
-
-
-def test_var_scale_means_nps_type():
-    slice_ = Cube(SM.FACEBOOK_APPS_X_AGE).partitions[0]
-    np.testing.assert_almost_equal(
-        slice_.var_scale_means_row,
-        [1905.11600238, 2111.67820069, 1655.65636907, 981.86821176],
-    )
-    assert slice_.var_scale_means_column is None

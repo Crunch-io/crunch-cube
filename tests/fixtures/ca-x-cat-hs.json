@@ -1,520 +1,500 @@
 {
-    "element": "shoji:view",
-    "self": "https://alpha.crunch.io/api/datasets/ee87b889a43c4465bb8f5bcb239a723a/cube/?filter=%5B%5D&query=%7B%22dimensions%22:%5B%7B%22each%22:%22https:%2F%2Falpha.crunch.io%2Fapi%2Fdatasets%2Fee87b889a43c4465bb8f5bcb239a723a%2Fvariables%2F00000c%2F%22%7D,%7B%22variable%22:%22https:%2F%2Falpha.crunch.io%2Fapi%2Fdatasets%2Fee87b889a43c4465bb8f5bcb239a723a%2Fvariables%2F00000c%2F%22%7D,%7B%22variable%22:%22https:%2F%2Falpha.crunch.io%2Fapi%2Fdatasets%2Fee87b889a43c4465bb8f5bcb239a723a%2Fvariables%2F000000%2F%22%7D%5D,%22measures%22:%7B%22count%22:%7B%22function%22:%22cube_count%22,%22args%22:%5B%5D%7D%7D,%22weight%22:null%7D",
-    "value": {
-        "query": {
-            "measures": {
-                "count": {
-                    "function": "cube_count",
-                    "args": [
-
-                    ]
-                }
-            },
-            "dimensions": [
-                {
-                    "each": "https://alpha.crunch.io/api/datasets/ee87b889a43c4465bb8f5bcb239a723a/variables/00000c/"
-                },
-                {
-                    "variable": "https://alpha.crunch.io/api/datasets/ee87b889a43c4465bb8f5bcb239a723a/variables/00000c/"
-                },
-                {
-                    "variable": "https://alpha.crunch.io/api/datasets/ee87b889a43c4465bb8f5bcb239a723a/variables/000000/"
-                }
-            ],
-            "weight": null
-        },
-        "query_environment": {
-            "filter": [
-
-            ]
-        },
-        "result": {
-            "dimensions": [
-                {
-                    "derived": true,
-                    "references": {
-                        "description": null,
-                        "subreferences": [
-                            {
-                                "alias": "ca_subvar_1",
-                                "name": "ca_subvar_1",
-                                "description": null
-                            },
-                            {
-                                "alias": "ca_subvar_2",
-                                "name": "ca_subvar_2",
-                                "description": null
-                            },
-                            {
-                                "alias": "ca_subvar_3",
-                                "name": "ca_subvar_3",
-                                "description": null
-                            }
-                        ],
-                        "name": "categorical_array",
-                        "alias": "categorical_array",
-                        "is_dichotomous": false,
-                        "view": {
-                            "show_counts": false,
-                            "transform": {
-                                "insertions": [
-
-                                ]
-                            },
-                            "include_missing": false,
-                            "column_width": null
-                        }
-                    },
-                    "type": {
-                        "subtype": {
-                            "class": "variable"
-                        },
-                        "elements": [
-                            {
-                                "id": 1,
-                                "value": {
-                                    "derived": false,
-                                    "references": {
-                                        "alias": "ca_subvar_1",
-                                        "name": "ca_subvar_1",
-                                        "description": null
-                                    },
-                                    "id": "0007"
-                                },
-                                "missing": false
-                            },
-                            {
-                                "id": 2,
-                                "value": {
-                                    "derived": false,
-                                    "references": {
-                                        "alias": "ca_subvar_2",
-                                        "name": "ca_subvar_2",
-                                        "description": null
-                                    },
-                                    "id": "0008"
-                                },
-                                "missing": false
-                            },
-                            {
-                                "id": 3,
-                                "value": {
-                                    "derived": false,
-                                    "references": {
-                                        "alias": "ca_subvar_3",
-                                        "name": "ca_subvar_3",
-                                        "description": null
-                                    },
-                                    "id": "0009"
-                                },
-                                "missing": false
-                            }
-                        ],
-                        "class": "enum"
-                    }
-                },
-                {
-                    "references": {
-                        "description": null,
-                        "subreferences": [
-                            {
-                                "alias": "ca_subvar_1",
-                                "name": "ca_subvar_1",
-                                "description": null
-                            },
-                            {
-                                "alias": "ca_subvar_2",
-                                "name": "ca_subvar_2",
-                                "description": null
-                            },
-                            {
-                                "alias": "ca_subvar_3",
-                                "name": "ca_subvar_3",
-                                "description": null
-                            }
-                        ],
-                        "name": "categorical_array",
-                        "alias": "categorical_array",
-                        "is_dichotomous": false,
-                        "view": {
-                            "show_counts": false,
-                            "transform": {
-                                "insertions": [
-
-                                ]
-                            },
-                            "include_missing": false,
-                            "column_width": null
-                        }
-                    },
-                    "derived": false,
-                    "type": {
-                        "ordinal": false,
-                        "subvariables": [
-                            "0007",
-                            "0008",
-                            "0009"
-                        ],
-                        "class": "categorical",
-                        "categories": [
-                            {
-                                "numeric_value": null,
-                                "id": 1,
-                                "name": "a",
-                                "missing": false
-                            },
-                            {
-                                "numeric_value": null,
-                                "id": 2,
-                                "name": "b",
-                                "missing": false
-                            },
-                            {
-                                "numeric_value": null,
-                                "id": 3,
-                                "name": "c",
-                                "missing": false
-                            },
-                            {
-                                "numeric_value": null,
-                                "id": 4,
-                                "name": "d",
-                                "missing": false
-                            },
-                            {
-                                "numeric_value": null,
-                                "id": -1,
-                                "name": "No Data",
-                                "missing": true
-                            }
-                        ]
-                    }
-                },
-                {
-                    "references": {
-                        "alias": "x",
-                        "view": {
-                            "show_counts": false,
-                            "show_numeric_values": false,
-                            "transform": {
-                                "insertions": [
-                                    {
-                                        "function": "subtotal",
-                                        "args": [
-                                            3,
-                                            2,
-                                            1
-                                        ],
-                                        "name": "colors",
-                                        "anchor": 3
-                                    },
-                                    {
-                                        "function": "subtotal",
-                                        "args": [
-                                            9,
-                                            4
-                                        ],
-                                        "name": "numbers",
-                                        "anchor": 9
-                                    }
-                                ]
-                            },
-                            "include_missing": false,
-                            "column_width": null
-                        },
-                        "description": "Numeric variable with value labels",
-                        "name": "x"
-                    },
-                    "derived": false,
-                    "type": {
-                        "ordinal": false,
-                        "class": "categorical",
-                        "categories": [
-                            {
-                                "numeric_value": 1,
-                                "id": 1,
-                                "name": "red",
-                                "missing": false
-                            },
-                            {
-                                "numeric_value": 2,
-                                "id": 2,
-                                "name": "green",
-                                "missing": false
-                            },
-                            {
-                                "numeric_value": 3,
-                                "id": 3,
-                                "name": "blue",
-                                "missing": false
-                            },
-                            {
-                                "numeric_value": 4,
-                                "id": 4,
-                                "name": "4",
-                                "missing": false
-                            },
-                            {
-                                "numeric_value": 8,
-                                "id": 8,
-                                "name": "8",
-                                "missing": true
-                            },
-                            {
-                                "numeric_value": 9,
-                                "id": 9,
-                                "name": "9",
-                                "missing": false
-                            },
-                            {
-                                "numeric_value": null,
-                                "id": -1,
-                                "name": "No Data",
-                                "missing": true
-                            }
-                        ]
-                    }
-                }
-            ],
-            "missing": 1,
-            "measures": {
-                "count": {
-                    "data": [
-                        1,
-                        1,
-                        0,
-                        0,
-                        1,
-                        0,
-                        0,
-                        0,
-                        0,
-                        1,
-                        1,
-                        0,
-                        1,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        1,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        1,
-                        0,
-                        1,
-                        1,
-                        0,
-                        0,
-                        0,
-                        0,
-                        1,
-                        0,
-                        0,
-                        1,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        1,
-                        0,
-                        0,
-                        1,
-                        0,
-                        0,
-                        0,
-                        0,
-                        1,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        1,
-                        0,
-                        1,
-                        1,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0
-                    ],
-                    "n_missing": 1,
-                    "metadata": {
-                        "references": {
-
-                        },
-                        "derived": true,
-                        "type": {
-                            "integer": true,
-                            "missing_rules": {
-
-                            },
-                            "missing_reasons": {
-                                "No Data": -1
-                            },
-                            "class": "numeric"
-                        }
-                    }
-                }
-            },
-            "element": "crunch:cube",
-            "counts": [
-                1,
-                1,
-                0,
-                0,
-                1,
-                0,
-                0,
-                0,
-                0,
-                1,
-                1,
-                0,
-                1,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                1,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                1,
-                0,
-                1,
-                1,
-                0,
-                0,
-                0,
-                0,
-                1,
-                0,
-                0,
-                1,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                1,
-                0,
-                0,
-                1,
-                0,
-                0,
-                0,
-                0,
-                1,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                1,
-                0,
-                1,
-                1,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0
-            ],
-            "n": 6
-        }
+  "query": {
+    "dimensions": [
+      {
+        "each": "https://alpha.crunch.io/api/datasets/ee87b889a43c4465bb8f5bcb239a723a/variables/00000c/"
+      },
+      {
+        "variable": "https://alpha.crunch.io/api/datasets/ee87b889a43c4465bb8f5bcb239a723a/variables/00000c/"
+      },
+      {
+        "variable": "https://alpha.crunch.io/api/datasets/ee87b889a43c4465bb8f5bcb239a723a/variables/000000/"
+      }
+    ],
+    "measures": {
+      "count": {
+        "args": [],
+        "function": "cube_count"
+      }
     }
+  },
+  "result": {
+    "counts": [
+      1,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "dimensions": [
+      {
+        "derived": true,
+        "references": {
+          "alias": "categorical_array",
+          "description": null,
+          "is_dichotomous": false,
+          "name": "categorical_array",
+          "subreferences": [
+            {
+              "alias": "ca_subvar_1",
+              "description": null,
+              "name": "ca_subvar_1"
+            },
+            {
+              "alias": "ca_subvar_2",
+              "description": null,
+              "name": "ca_subvar_2"
+            },
+            {
+              "alias": "ca_subvar_3",
+              "description": null,
+              "name": "ca_subvar_3"
+            }
+          ],
+          "view": {
+            "column_width": null,
+            "include_missing": false,
+            "show_counts": false,
+            "transform": {
+              "insertions": []
+            }
+          }
+        },
+        "type": {
+          "class": "enum",
+          "elements": [
+            {
+              "id": 1,
+              "missing": false,
+              "value": {
+                "derived": false,
+                "id": "0007",
+                "references": {
+                  "alias": "ca_subvar_1",
+                  "description": null,
+                  "name": "ca_subvar_1"
+                }
+              }
+            },
+            {
+              "id": 2,
+              "missing": false,
+              "value": {
+                "derived": false,
+                "id": "0008",
+                "references": {
+                  "alias": "ca_subvar_2",
+                  "description": null,
+                  "name": "ca_subvar_2"
+                }
+              }
+            },
+            {
+              "id": 3,
+              "missing": false,
+              "value": {
+                "derived": false,
+                "id": "0009",
+                "references": {
+                  "alias": "ca_subvar_3",
+                  "description": null,
+                  "name": "ca_subvar_3"
+                }
+              }
+            }
+          ],
+          "subtype": {
+            "class": "variable"
+          }
+        }
+      },
+      {
+        "derived": false,
+        "references": {
+          "alias": "categorical_array",
+          "description": null,
+          "is_dichotomous": false,
+          "name": "categorical_array",
+          "subreferences": [
+            {
+              "alias": "ca_subvar_1",
+              "description": null,
+              "name": "ca_subvar_1"
+            },
+            {
+              "alias": "ca_subvar_2",
+              "description": null,
+              "name": "ca_subvar_2"
+            },
+            {
+              "alias": "ca_subvar_3",
+              "description": null,
+              "name": "ca_subvar_3"
+            }
+          ],
+          "view": {
+            "column_width": null,
+            "include_missing": false,
+            "show_counts": false,
+            "transform": {
+              "insertions": []
+            }
+          }
+        },
+        "type": {
+          "categories": [
+            {
+              "id": 1,
+              "missing": false,
+              "name": "a",
+              "numeric_value": null
+            },
+            {
+              "id": 2,
+              "missing": false,
+              "name": "b",
+              "numeric_value": null
+            },
+            {
+              "id": 3,
+              "missing": false,
+              "name": "c",
+              "numeric_value": null
+            },
+            {
+              "id": 4,
+              "missing": false,
+              "name": "d",
+              "numeric_value": null
+            },
+            {
+              "id": -1,
+              "missing": true,
+              "name": "No Data",
+              "numeric_value": null
+            }
+          ],
+          "class": "categorical",
+          "ordinal": false,
+          "subvariables": [
+            "0007",
+            "0008",
+            "0009"
+          ]
+        }
+      },
+      {
+        "derived": false,
+        "references": {
+          "alias": "x",
+          "description": "Numeric variable with value labels",
+          "name": "x",
+          "view": {
+            "column_width": null,
+            "include_missing": false,
+            "show_counts": false,
+            "show_numeric_values": false,
+            "transform": {
+              "insertions": [
+                {
+                  "anchor": 3,
+                  "args": [
+                    3,
+                    2,
+                    1
+                  ],
+                  "function": "subtotal",
+                  "name": "colors"
+                },
+                {
+                  "anchor": 9,
+                  "args": [
+                    9,
+                    4
+                  ],
+                  "function": "subtotal",
+                  "name": "numbers"
+                }
+              ]
+            }
+          }
+        },
+        "type": {
+          "categories": [
+            {
+              "id": 1,
+              "missing": false,
+              "name": "red",
+              "numeric_value": 1
+            },
+            {
+              "id": 2,
+              "missing": false,
+              "name": "green",
+              "numeric_value": 2
+            },
+            {
+              "id": 3,
+              "missing": false,
+              "name": "blue",
+              "numeric_value": 3
+            },
+            {
+              "id": 4,
+              "missing": false,
+              "name": "4",
+              "numeric_value": 4
+            },
+            {
+              "id": 8,
+              "missing": true,
+              "name": "8",
+              "numeric_value": 8
+            },
+            {
+              "id": 9,
+              "missing": false,
+              "name": "9",
+              "numeric_value": 9
+            },
+            {
+              "id": -1,
+              "missing": true,
+              "name": "No Data",
+              "numeric_value": null
+            }
+          ],
+          "class": "categorical",
+          "ordinal": false
+        }
+      }
+    ],
+    "element": "crunch:cube",
+    "measures": {
+      "count": {
+        "data": [
+          1,
+          1,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "metadata": {
+          "derived": true,
+          "references": {},
+          "type": {
+            "class": "numeric",
+            "integer": true,
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "missing_rules": {}
+          }
+        },
+        "n_missing": 1
+      }
+    },
+    "missing": 1,
+    "n": 6
+  }
 }
