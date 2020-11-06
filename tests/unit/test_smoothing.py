@@ -67,65 +67,55 @@ class DescribeSingleSideMovingAvgSmoother(object):
         )
 
     @pytest.mark.parametrize(
-        "window, is_cat_date, expected_value",
-        (
-            (2, True, True),
-            (2, False, False),
-            (3, False, False),
-            (3, False, False),
-            (1, True, False),
-            (0, True, False),
-            (3, True, True),
-        ),
+        "window, is_cat_date",
+        ((2, True), (3, True)),
     )
-    def it_knows_its_can_smooth_property(
-        self,
-        _is_cat_date_prop_,
-        _base_values_prop_,
-        _window_prop_,
-        window,
-        is_cat_date,
-        expected_value,
+    def it_knows_when_it_can_apply_smoothing(
+        self, _base_values_prop_, _window_prop_, window, _is_cat_date_prop_, is_cat_date
     ):
+        _base_values_prop_.return_value = np.random.rand(3, 5)
         _is_cat_date_prop_.return_value = is_cat_date
         _window_prop_.return_value = window
-        _base_values_prop_.return_value = np.random.rand(3, 5)
 
-        can_smooth = SingleSidedMovingAvgSmoother(None, {})._can_smooth
+        assert SingleSidedMovingAvgSmoother(None, {})._can_smooth is True
 
-        assert can_smooth is expected_value
-
-    def but_it_raises_a_warning_when_window_is_invalid(
-        self, _base_values_prop_, _window_prop_
+    @pytest.mark.parametrize(
+        "shape, window",
+        (((2, 3), 0), ((2, 3), 1), ((2, 3), 4)),
+    )
+    def but_it_warns_when_window_is_invalid(
+        self, _base_values_prop_, shape, _window_prop_, window, _is_cat_date_prop_
     ):
-        _base_values_prop_.return_value = np.random.rand(2, 3)
-        _window_prop_.return_value = 1
+        _base_values_prop_.return_value = np.random.rand(*shape)
+        _window_prop_.return_value = window
+        _is_cat_date_prop_.return_value = True
+        expected_warning_regex = (
+            r"No smoothing performed. Smoothing window must be between 2 and the "
+            r"number of periods \(%d\), got %d" % (shape[-1], window)
+        )
 
-        with pytest.warns(UserWarning) as record:
+        with pytest.warns(UserWarning, match=expected_warning_regex):
             can_smooth = SingleSidedMovingAvgSmoother(None, {})._can_smooth
 
-        assert (
-            record[0].message.args[0]
-            == "No smoothing performed. Window (value: 1) parameter is not valid: "
-            "window must be less than equal to the total period (value: 3) and "
-            "positive"
-        )
         assert can_smooth is False
 
-    def and_it_raises_a_warning_when_dim_is_not_a_categorical_date(
-        self, _is_cat_date_prop_, _base_values_prop_, _window_prop_
+    @pytest.mark.parametrize(
+        "shape, window",
+        (((2, 3), 2), ((2, 3), 3), ((2, 5), 4)),
+    )
+    def and_it_warns_when_dim_is_not_a_categorical_date(
+        self, _base_values_prop_, shape, _window_prop_, window, _is_cat_date_prop_
     ):
+        _base_values_prop_.return_value = np.random.rand(*shape)
+        _window_prop_.return_value = window
         _is_cat_date_prop_.return_value = False
-        _base_values_prop_.return_value = np.random.rand(4, 5)
-        _window_prop_.return_value = 3
+        expected_warning_regex = (
+            r"No smoothing performed. Column dimension must be a categorical date."
+        )
 
-        with pytest.warns(UserWarning) as record:
+        with pytest.warns(UserWarning, match=expected_warning_regex):
             can_smooth = SingleSidedMovingAvgSmoother(None, {})._can_smooth
 
-        assert (
-            record[0].message.args[0]
-            == "No smoothing performed. Column dimension must be a categorical date"
-        )
         assert can_smooth is False
 
     @pytest.mark.parametrize(

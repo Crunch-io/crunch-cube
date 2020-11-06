@@ -89,17 +89,18 @@ class CubePartition(object):
         return tuple(d.dimension_type for d in self._dimensions)
 
     def evaluate(self, measure_expr):
-        """Return 1D/2D ndarray, values evaluated given the function specification
+        """Return 1D/2D ndarray result of evaluating `measure_expr`.
 
-        The `function_spec` contains the function to apply and its parameters, e.g.:
-        ```
-        {
-             "function": "one_sided_moving_avg",
-             "kwargs": {"base_measure": "means", "window": 3},
-        }
-        ```
-        This `function_spec` object would apply the function `one_sided_moving_avg` to
-        the `base_measure` means, using 3 as window.
+        `measure_expr` contains the function to apply and its parameters, like::
+
+            {
+                 "function": "one_sided_moving_avg",
+                 "base_measure": "col_percent",
+                 "window": 3
+            }
+
+        This expression specifies application of the `one_sided_moving_avg` function to
+        the `col_percent` base-measure, with a sliding window of 3 periods.
         """
         function = measure_expr.get("function", None)
         if function != "one_sided_moving_avg":

@@ -78,7 +78,7 @@ class SingleSidedMovingAvgSmoother(object):
 
     @lazyproperty
     def _base_values(self):
-        """ ndarray, base measure values of the current partition
+        """ndarray base-measure values from the partition.
 
         The `base_measure` is expressed in the kwargs of the function_spec and used
         to get the values for the partition.
@@ -96,10 +96,9 @@ class SingleSidedMovingAvgSmoother(object):
         # --- and it must be at least 2.
         if self._window > self._base_values.shape[-1] or self._window < 2:
             warnings.warn(
-                "No smoothing performed. Window (value: {}) parameter is not "
-                "valid: window must be less than equal to the total period "
-                "(value: {}) and positive".format(
-                    self._window, self._base_values.shape[-1]
+                "No smoothing performed. Smoothing window must be between 2 and the "
+                "number of periods ({}), got {}".format(
+                    self._base_values.shape[-1], self._window
                 ),
                 UserWarning,
             )
@@ -107,7 +106,7 @@ class SingleSidedMovingAvgSmoother(object):
         # --- no smoothing when column dimension is not a categorical date ---
         if not self._is_cat_date:
             warnings.warn(
-                "No smoothing performed. Column dimension must be a categorical date"
+                "No smoothing performed. Column dimension must be a categorical date."
             )
             return False
         return True
