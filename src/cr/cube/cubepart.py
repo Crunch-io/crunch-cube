@@ -554,18 +554,18 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def scale_means_column(self):
-        """1D float64 ndarray of column scale means
+        """1D float64 ndarray of scale mean for each row (making a summary "column").
 
-        The calculation is based on multiply of the numeric values by the
-        row_proportions and divide by the rows_margin.
+        Each scale mean is based on the numeric values of the *columns-dimension*
+        elements.
         """
-        if np.all(np.isnan(self._columns_dimension_numeric_values)):
+        column_numeric_values = self._columns_dimension_numeric_values
+
+        if np.all(np.isnan(column_numeric_values)):
             return None
 
-        inner = np.nansum(
-            self._columns_dimension_numeric_values * self.row_proportions, axis=1
-        )
-        not_a_nan_index = ~np.isnan(self._columns_dimension_numeric_values)
+        inner = np.nansum(column_numeric_values * self.row_proportions, axis=1)
+        not_a_nan_index = ~np.isnan(column_numeric_values)
         denominator = np.sum(self.row_proportions[:, not_a_nan_index], axis=1)
         return inner / denominator
 
