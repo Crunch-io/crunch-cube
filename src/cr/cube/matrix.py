@@ -433,7 +433,7 @@ class _BaseBaseMatrix(object):
     @lazyproperty
     def _column_proportions(self):
         """2D ndarray of np.float64 between 0.0 and 1.0.
-        
+
         The value represents the ratio of each cell count to the total count (margin)
         for its column.
         """

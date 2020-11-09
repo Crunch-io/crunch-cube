@@ -850,8 +850,8 @@ class CrunchCube(object):
 
     def _apply_subtotals(self, res, include_transforms_for_dims):
         """* Insert subtotals (and perhaps other insertions later) for
-          dimensions having their apparent dimension-idx in
-          *include_transforms_for_dims*.
+        dimensions having their apparent dimension-idx in
+        *include_transforms_for_dims*.
         """
         if not include_transforms_for_dims:
             return res
