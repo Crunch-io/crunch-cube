@@ -26,7 +26,7 @@ class TransformedMatrix(object):
 
     @classmethod
     def matrix(cls, cube, dimensions, slice_idx):
-        """-> TransformedMatrix object constructed from values of `cube`.
+        """Return TransformedMatrix object constructed from values of `cube`.
 
         `cube` is the `cr.cube.Cube` object containing the data for this matrix. Note
         that not all the data in `cube` will necessarily be used by this matrix. When
@@ -261,7 +261,7 @@ class TransformedMatrix(object):
 
     @lazyproperty
     def _inserted_columns(self):
-        """-> tuple of _InsertedColumn objects representing subtotal columns.
+        """tuple of _InsertedColumn objects representing subtotal columns.
 
         The returned vectors are in the order subtotals were specified in the cube
         result, which is no particular order. All subtotals defined on the column
@@ -291,7 +291,7 @@ class TransformedMatrix(object):
 
     @lazyproperty
     def _inserted_rows(self):
-        """-> tuple of _InsertedRow objects representing inserted subtotal rows.
+        """tuple of _InsertedRow objects representing inserted subtotal rows.
 
         The returned vectors are in the order subtotals were specified in the cube
         result, which is no particular order.
@@ -316,7 +316,7 @@ class TransformedMatrix(object):
 
     @lazyproperty
     def _row_order(self):
-        """ -> 1D ndarray of int row idx specifying order of unordered-array rows."""
+        """1D ndarray of int row idx specifying order of unordered-array rows."""
         # --- specifying int type prevents failure when there are zero rows ---
         return np.array(self._rows_dimension.display_order, dtype=int)
 
@@ -394,7 +394,7 @@ class _BaseBaseMatrix(object):
         )  # pragma: no cover
 
     def _array_type_std_res(self, counts, total, colsum, rowsum):
-        """-> 2D ndarray of np.float64 std-res value for each cell of MR matrix.
+        """Return 2D np.float64 ndarray of std-res value for each cell of MR matrix.
 
         This is a utility method used by a matrix with one or more MR dimensions. The
         caller forms the input arrays based on which of its dimensions are MR.
@@ -1660,7 +1660,7 @@ class _BaseMatrixInsertedVector(object):
 
     @lazyproperty
     def ordering(self):
-        """-> (position, index, self) tuple used for interleaving with base vectors.
+        """(position, index, self) tuple used for interleaving with base vectors.
 
         This value allows the interleaving of inserted vectors with base vectors to be
         reduced to a sorting operation.
@@ -1955,7 +1955,7 @@ class _AssembledVector(_BaseTransformationVector):
         """
 
         def fsubtot(inserted_vector):
-            """-> np.nan as unconditional col-index value for `inserted_vector`.
+            """Return np.nan as unconditional col-index value for `inserted_vector`.
 
             Called by ._apply_interleaved() to compute inserted value which it places
             in the right vector position.
@@ -1974,7 +1974,7 @@ class _AssembledVector(_BaseTransformationVector):
         base_vector_counts = self._base_vector.counts
 
         def fsubtot(inserted_vector):
-            """-> np.float/int64 count for `inserted_vector`.
+            """Return np.float/int64 count for `inserted_vector`.
 
             Passed to and called by ._apply_interleaved() to compute inserted value
             which it places in the right vector position.
@@ -1991,7 +1991,7 @@ class _AssembledVector(_BaseTransformationVector):
         """
 
         def fsubtot(inserted_vector):
-            """-> np.nan as unconditional mean value for `inserted_vector`.
+            """Return np.nan as unconditional mean value for `inserted_vector`.
 
             Passed to and called by ._apply_interleaved() to compute inserted value
             which it places in the right vector position.
@@ -2041,7 +2041,7 @@ class _AssembledVector(_BaseTransformationVector):
         unweighted_counts = self._base_vector.unweighted_counts
 
         def fsubtot(inserted_vector):
-            """-> np.int64 count for `inserted_vector`.
+            """Return np.int64 count for `inserted_vector`.
 
             Passed to and called by ._apply_interleaved() to compute inserted value
             which it places in the right vector position.
@@ -2058,7 +2058,7 @@ class _AssembledVector(_BaseTransformationVector):
         """
 
         def fsubtot(inserted_vector):
-            """-> np.float64 zscore for `inserted_vector`.
+            """Return np.float64 zscore for `inserted_vector`.
 
             Passed to and called by ._apply_interleaved() to compute inserted value
             which it places in the right vector position.
@@ -2086,7 +2086,7 @@ class _AssembledVector(_BaseTransformationVector):
         return self._apply_interleaved(self._base_vector.zscores, fsubtot)
 
     def _apply_interleaved(self, base_values, fsubtot):
-        """-> 1D array of result of applying fbase or fsubtot to each interleaved item.
+        """Return 1D array result of applying fbase or fsubtot to each interleaved item.
 
         `base_values` is the "unassembled" vector measure values.
 
@@ -2107,7 +2107,7 @@ class _AssembledVector(_BaseTransformationVector):
 
     @lazyproperty
     def _interleaved_idxs(self):
-        """-> tuple of int: idx for base and inserted values, in display order.
+        """tuple of int: idx for base and inserted values, in display order.
 
         Inserted value indicies are negative, to distinguish them from base vector
         indices. The indexes are interleaved simply by sorting their orderings. An
