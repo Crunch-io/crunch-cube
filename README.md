@@ -112,6 +112,11 @@ The detailed description can be found
 
 ## Changes
 
+### 1.12.8
+- Fix pairwise t-test for scale means
+- Fix UserWarning for smoothing measures
+- Move cr.cube.enum -> cr.cube.enums
+
 ### 1.12.7
 - Margin of error for 1D cubes
 - Allow pairwise significance for CA_SUBVAR
