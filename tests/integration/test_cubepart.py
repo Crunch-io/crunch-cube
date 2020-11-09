@@ -9,7 +9,7 @@ import pytest
 
 from cr.cube.cubepart import _Slice
 from cr.cube.cube import Cube
-from cr.cube.enum import DIMENSION_TYPE as DT
+from cr.cube.enums import DIMENSION_TYPE as DT
 
 # ---mnemonic: CR = 'cube-response'---
 # ---mnemonic: TR = 'transforms'---

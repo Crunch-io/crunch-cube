@@ -4,9 +4,9 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from unittest import TestCase
 import numpy as np
 import pytest
+from unittest import TestCase
 
 from cr.cube.cube import (
     Cube,
@@ -16,7 +16,7 @@ from cr.cube.cube import (
     _WeightedCountMeasure,
 )
 from cr.cube.dimension import _ApparentDimensions
-from cr.cube.enum import DIMENSION_TYPE as DT
+from cr.cube.enums import DIMENSION_TYPE as DT
 
 from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
 

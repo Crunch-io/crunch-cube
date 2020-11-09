@@ -17,6 +17,7 @@ matrix:
     allow_failures:
         - env: TOXENV=py37
         - env: TOXENV=lint
+    fast_finish: true
 
 install:
   - travis_retry pip install tox tox-travis

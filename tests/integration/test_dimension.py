@@ -17,7 +17,7 @@ from cr.cube.dimension import (
     _Subtotal,
     _ValidElements,
 )
-from cr.cube.enum import DIMENSION_TYPE as DT
+from cr.cube.enums import DIMENSION_TYPE as DT
 
 from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
 from ..unitutil import instance_mock

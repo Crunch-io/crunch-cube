@@ -27,7 +27,7 @@ from cr.cube.legacy_dimension import (
     _Subtotals,
     _ValidElements,
 )
-from cr.cube.enum import DIMENSION_TYPE as DT
+from cr.cube.enums import DIMENSION_TYPE as DT
 
 from ...unitutil import (
     ANY,

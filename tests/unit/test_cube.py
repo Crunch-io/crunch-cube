@@ -9,7 +9,7 @@ import numpy as np
 
 from cr.cube.cube import Cube, CubeSet, _Measures
 from cr.cube.cubepart import _Slice, _Strand, _Nub
-from cr.cube.enum import DIMENSION_TYPE as DT
+from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.dimension import Dimension
 
 from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---

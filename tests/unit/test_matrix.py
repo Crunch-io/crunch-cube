@@ -11,7 +11,7 @@ import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension, _Element, _Subtotal
-from cr.cube.enum import DIMENSION_TYPE as DT
+from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.matrix import (
     _AssembledVector,
     _BaseBaseMatrix,

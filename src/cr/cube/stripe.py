@@ -14,7 +14,7 @@ import collections
 
 import numpy as np
 
-from cr.cube.enum import DIMENSION_TYPE as DT
+from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.util import lazyproperty
 
 

@@ -19,7 +19,7 @@ from __future__ import division
 
 import numpy as np
 
-from cr.cube.enum import DIMENSION_TYPE as DT
+from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.min_base_size_mask import MinBaseSizeMask
 from cr.cube.measures.pairwise_significance import PairwiseSignificance
 from cr.cube.matrix import TransformedMatrix

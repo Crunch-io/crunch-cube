@@ -9,7 +9,7 @@ import numpy as np
 
 from cr.cube.cube_slice import CubeSlice
 from cr.cube.legacy_min_base_size_mask import MinBaseSizeMask
-from cr.cube.enum import DIMENSION_TYPE as DT
+from cr.cube.enums import DIMENSION_TYPE as DT
 
 from ...unitutil import instance_mock, method_mock, property_mock
 
