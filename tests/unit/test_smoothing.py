@@ -66,10 +66,7 @@ class DescribeSingleSideMovingAvgSmoother(object):
             "'col_index', 'mean', 'scale_mean', got: {}.".format(expected_value)
         )
 
-    @pytest.mark.parametrize(
-        "window, is_cat_date",
-        ((2, True), (3, True)),
-    )
+    @pytest.mark.parametrize("window, is_cat_date", ((2, True), (3, True)))
     def it_knows_when_it_can_apply_smoothing(
         self, _base_values_prop_, _window_prop_, window, _is_cat_date_prop_, is_cat_date
     ):
@@ -79,10 +76,7 @@ class DescribeSingleSideMovingAvgSmoother(object):
 
         assert SingleSidedMovingAvgSmoother(None, {})._can_smooth is True
 
-    @pytest.mark.parametrize(
-        "shape, window",
-        (((2, 3), 0), ((2, 3), 1), ((2, 3), 4)),
-    )
+    @pytest.mark.parametrize("shape, window", (((2, 3), 0), ((2, 3), 1), ((2, 3), 4)))
     def but_it_warns_when_window_is_invalid(
         self, _base_values_prop_, shape, _window_prop_, window, _is_cat_date_prop_
     ):
@@ -99,10 +93,7 @@ class DescribeSingleSideMovingAvgSmoother(object):
 
         assert can_smooth is False
 
-    @pytest.mark.parametrize(
-        "shape, window",
-        (((2, 3), 2), ((2, 3), 3), ((2, 5), 4)),
-    )
+    @pytest.mark.parametrize("shape, window", (((2, 3), 2), ((2, 3), 3), ((2, 5), 4)))
     def and_it_warns_when_dim_is_not_a_categorical_date(
         self, _base_values_prop_, shape, _window_prop_, window, _is_cat_date_prop_
     ):

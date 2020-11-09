@@ -8,12 +8,7 @@ import numpy as np
 import pytest
 
 from cr.cube.cube import Cube
-from cr.cube.cubepart import (
-    CubePartition,
-    _Slice,
-    _Strand,
-    _Nub,
-)
+from cr.cube.cubepart import CubePartition, _Slice, _Strand, _Nub
 from cr.cube.dimension import Dimension
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.matrix import TransformedMatrix, _VectorAfterHiding

@@ -108,12 +108,7 @@ class DescribeSliceSmoothing(object):
 
     @pytest.mark.parametrize(
         "fixture",
-        (
-            CR.CAT_X_MR,
-            CR.MR_X_MR,
-            CR.MR_X_CA_CAT_X_CA_SUBVAR,
-            CR.CAT_DATE_X_CAT,
-        ),
+        (CR.CAT_X_MR, CR.MR_X_MR, CR.MR_X_CA_CAT_X_CA_SUBVAR, CR.CAT_DATE_X_CAT),
     )
     def it_warns_and_does_not_smooth_when_dimension_is_not_smoothable(self, fixture):
         slice_ = Cube(fixture).partitions[0]
