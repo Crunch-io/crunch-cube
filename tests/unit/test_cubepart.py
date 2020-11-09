@@ -8,10 +8,16 @@ import numpy as np
 import pytest
 
 from cr.cube.cube import Cube
-from cr.cube.cubepart import CubePartition, _Slice, _Strand, _Nub
+from cr.cube.cubepart import (
+    CubePartition,
+    _Slice,
+    _Strand,
+    _Nub,
+)
 from cr.cube.dimension import Dimension
 from cr.cube.enum import DIMENSION_TYPE as DT
 from cr.cube.matrix import TransformedMatrix, _VectorAfterHiding
+from cr.cube.noa.smoothing import SingleSidedMovingAvgSmoother
 from cr.cube.stripe import _BaseStripeRow, TransformedStripe
 
 from ..unitutil import class_mock, instance_mock, property_mock
@@ -67,6 +73,29 @@ class DescribeCubePartition(object):
     def it_knows_if_cube_is_mr_aug(self):
         # --- default of False is overridden by subclasses when appropriate ---
         assert CubePartition(None).cube_is_mr_aug is False
+
+    def it_can_evaluate_a_measure_expression(self, request):
+        single_sided_moving_avg_smoother_ = instance_mock(
+            request, SingleSidedMovingAvgSmoother, values=[[0.1, 0.2], [0.3, 0.4]]
+        )
+        SingleSidedMovingAvgSmoother_ = class_mock(
+            request,
+            "cr.cube.cubepart.SingleSidedMovingAvgSmoother",
+            return_value=single_sided_moving_avg_smoother_,
+        )
+        measure_expr = {
+            "function": "one_sided_moving_avg",
+            "base_measure": "col_percent",
+            "window": 2,
+        }
+        cube_partition = CubePartition(None, None)
+
+        values = cube_partition.evaluate(measure_expr)
+
+        SingleSidedMovingAvgSmoother_.assert_called_once_with(
+            cube_partition, measure_expr
+        )
+        assert values == [[0.1, 0.2], [0.3, 0.4]]
 
     @pytest.mark.parametrize(
         "dims, expected_value",
@@ -311,23 +340,6 @@ class Describe_Slice(object):
 
         assert slice_.scale_mean_pairwise_indices_alt is None
 
-    def it_can_evaluate_a_measure_expression(
-        self, col_percent_prop, smoothed_dimension_dict_prop_
-    ):
-        slice_ = _Slice(None, None, None, None, None)
-        col_percent_prop.return_value = np.array([[0.1, 0.2], [0.3, 0.4]])
-        smoothed_dimension_dict_prop_.return_value = {"type": {"categories": []}}
-
-        evaluate = slice_.evaluate(
-            {
-                "function": "one_sided_moving_avg",
-                "base_measure": "col_percent",
-                "window": 2,
-            }
-        )
-
-        np.testing.assert_almost_equal(evaluate, [[0.1, 0.2], [0.3, 0.4]])
-
     def but_it_raises_an_exception_when_function_is_not_available(self):
         slice_ = _Slice(None, None, None, None, None)
 
@@ -373,14 +385,6 @@ class Describe_Slice(object):
     @pytest.fixture
     def shape_prop_(self, request):
         return property_mock(request, _Slice, "shape")
-
-    @pytest.fixture
-    def col_percent_prop(self, request):
-        return property_mock(request, _Slice, "column_percentages")
-
-    @pytest.fixture
-    def smoothed_dimension_dict_prop_(self, request):
-        return property_mock(request, _Slice, "smoothed_dimension_dict")
 
 
 class Describe_Strand(object):

@@ -329,7 +329,11 @@ class TestStandardizedResiduals(TestCase):
             actual.p_vals, load_python_expression("cat-x-cat-wgtd-pw-pvals")
         )
         np.testing.assert_array_equal(
-            pairwise_indices, load_python_expression("cat-x-cat-wgtd-pw-indices")
+            pairwise_indices,
+            np.array(
+                load_python_expression("cat-x-cat-wgtd-pw-indices"),
+                dtype=tuple,
+            ),
         )
 
     def test_cat_x_cat_wgtd_scale_means_pariwise_t_tests(self):
