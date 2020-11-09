@@ -773,7 +773,8 @@ class _CatXCatMatrix(_BaseBaseMatrix):
             / table_margin ** 3
         )
 
-        return residuals / np.sqrt(variance)
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return residuals / np.sqrt(variance)
 
 
 class _CatXCatMeansMatrix(_CatXCatMatrix):
@@ -2006,7 +2007,8 @@ class _AssembledVector(_BaseTransformationVector):
 
         A cell value is np.nan if its corresponding margin value is zero.
         """
-        return self.counts / self.margin
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return self.counts / self.margin
 
     @lazyproperty
     def pvals(self):
@@ -2069,7 +2071,7 @@ class _AssembledVector(_BaseTransformationVector):
                 return inserted_vector.zscores[self._vector_idx]
 
             # --- but when this vector IS itself a subtotal, this cell is an
-            # --- *intersection* cell and is requires a more sophisticated computation
+            # --- *intersection* cell and requires a more sophisticated computation
             margin, table_margin = self.margin, self.table_margin
             opposite_margin = np.sum(self.opposing_margin[inserted_vector.addend_idxs])
             variance = (
@@ -2081,7 +2083,8 @@ class _AssembledVector(_BaseTransformationVector):
             expected_count = opposite_margin * margin / table_margin
             cell_value = np.sum(self._base_vector.counts[inserted_vector.addend_idxs])
             residuals = cell_value - expected_count
-            return residuals / np.sqrt(variance)
+            with np.errstate(divide="ignore", invalid="ignore"):
+                return residuals / np.sqrt(variance)
 
         return self._apply_interleaved(self._base_vector.zscores, fsubtot)
 
