@@ -261,7 +261,7 @@ class Dimension(object):
     def __init__(self, dimension_dict, dimension_type, dimension_transforms=None):
         self._dimension_dict = dimension_dict
         self._dimension_type = dimension_type
-        self._dimension_transforms_arg = dimension_transforms
+        self._dimension_transforms_dict = dimension_transforms or {}
 
     @lazyproperty
     def alias(self):
@@ -403,17 +403,17 @@ class Dimension(object):
         Each item in the sequence is a _Subtotal object specifying a subtotal, including
         its addends and anchor.
         """
-        # ---insertions in dimension-transforms override those on dimension itself---
-        insertion_dicts = self._dimension_transforms_dict.get("insertions")
-        if insertion_dicts is not None:
-            return _Subtotals(insertion_dicts, self.valid_elements, self.prune)
+        # --- insertions in dimension-transforms override those on dimension itself ---
+        if "insertions" in self._dimension_transforms_dict:
+            return _Subtotals(
+                self._dimension_transforms_dict["insertions"],
+                self.valid_elements,
+                self.prune,
+            )
 
-        # ---otherwise, insertions defined as default transforms apply---
-        view = self._dimension_dict.get("references", {}).get("view", {})
-        # ---view can be both None and {}, thus the edge case.---
-        insertion_dicts = (
-            [] if view is None else view.get("transform", {}).get("insertions", [])
-        )
+        # --- otherwise, insertions defined in cube as default transforms apply ---
+        view = self._dimension_dict.get("references", {}).get("view") or {}
+        insertion_dicts = view.get("transform", {}).get("insertions", [])
         return _Subtotals(insertion_dicts, self.valid_elements, self.prune)
 
     @lazyproperty
@@ -425,19 +425,6 @@ class Dimension(object):
         provided by `.all_elements`.
         """
         return self.all_elements.valid_elements
-
-    @lazyproperty
-    def _dimension_transforms_dict(self):
-        """dict complying with dimension-transforms schema for this dimension.
-
-        This value derives from the `dimension_transforms` argument passed on
-        construction. When that argument is not specified, this value is an empty dict.
-        """
-        return (
-            self._dimension_transforms_arg
-            if self._dimension_transforms_arg is not None
-            else {}
-        )
 
 
 class _BaseElements(Sequence):
