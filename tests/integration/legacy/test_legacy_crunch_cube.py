@@ -828,7 +828,7 @@ class TestCrunchCube(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_z_scores_admit_by_gender_weighted_rows(self):
-        """ see
+        """see
         https://github.com/Crunch-io/whaam/blob/master/base/stats/tests/zvalues-spec.js#L67
         """
         cube = CrunchCube(CR.ADMIT_X_GENDER_WEIGHTED)
