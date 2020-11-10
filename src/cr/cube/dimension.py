@@ -11,7 +11,7 @@ else:
 
 import numpy as np
 
-from cr.cube.enums import DIMENSION_TYPE as DT
+from cr.cube.enums import COLLATION_METHOD as CM, DIMENSION_TYPE as DT
 from cr.cube.util import lazyproperty
 
 
@@ -292,6 +292,14 @@ class Dimension(object):
         return Dimension(
             self._dimension_dict, self._dimension_type, dimension_transforms
         )
+
+    @lazyproperty
+    def collation_method(self):
+        """Member of COLLATION_METHOD specifying ordering of dimension elements."""
+        method_keyword = self.order_dict.get("type")
+        if method_keyword is None:
+            return CM.PAYLOAD_ORDER
+        return CM(method_keyword)
 
     @lazyproperty
     def description(self):
