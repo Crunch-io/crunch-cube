@@ -2,6 +2,8 @@
 
 """Enumerated sets related to cubes."""
 
+from enum import Enum
+
 from cr.cube.util import lazyproperty
 
 
@@ -54,3 +56,13 @@ class DIMENSION_TYPE(object):
     ALLOWED_PAIRWISE_TYPES = frozenset(
         (BINNED_NUMERIC, CA, CAT, CA_CAT, DATETIME, MR, TEXT)
     )
+
+
+class COLLATION_METHOD(Enum):
+    """Enumerated values representing the methods of sorting dimension elements."""
+
+    EXPLICIT_ORDER = "explicit"
+    MARGINAL = "marginal"
+    OPPOSING_ELEMENT = "opposing_element"
+    OPPOSING_SUBTOTAL = "opposing_subtotal"
+    PAYLOAD_ORDER = "payload_order"
