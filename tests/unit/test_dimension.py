@@ -2,8 +2,6 @@
 
 """Unit test suite for cr.cube.dimension module."""
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import numpy as np
 import pytest
 
@@ -22,7 +20,7 @@ from cr.cube.dimension import (
     _Subtotals,
     _ValidElements,
 )
-from cr.cube.enums import DIMENSION_TYPE as DT
+from cr.cube.enums import COLLATION_METHOD as CM, DIMENSION_TYPE as DT
 
 from ..unitutil import (
     ANY,
@@ -449,6 +447,18 @@ class DescribeDimension(object):
     """Unit-test suite for `cr.cube.dimension.Dimension` object."""
 
     @pytest.mark.parametrize(
+        "order_dict, expected_value",
+        (
+            ({}, CM.PAYLOAD_ORDER),
+            ({"type": "explicit"}, CM.EXPLICIT_ORDER),
+            ({"type": "payload_order"}, CM.PAYLOAD_ORDER),
+        ),
+    )
+    def it_knows_its_collation_method(self, request, order_dict, expected_value):
+        property_mock(request, Dimension, "order_dict", return_value=order_dict)
+        assert Dimension(None, None).collation_method == expected_value
+
+    @pytest.mark.parametrize(
         "dimension_dict, expected_value",
         (
             ({"references": {}}, ""),
@@ -458,11 +468,7 @@ class DescribeDimension(object):
         ),
     )
     def it_knows_its_description(self, dimension_dict, expected_value):
-        dimension = Dimension(dimension_dict, None)
-
-        description = dimension.description
-
-        assert description == expected_value
+        assert Dimension(dimension_dict, None).description == expected_value
 
     def it_knows_its_dimension_type(self):
         dimension = Dimension(None, DT.CAT)
