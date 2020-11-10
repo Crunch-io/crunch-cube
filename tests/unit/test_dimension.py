@@ -496,11 +496,21 @@ class DescribeDimension(object):
             instance_mock(request, _Element, numeric_value=numeric_value)
             for numeric_value in (1, 2.2, np.nan)
         )
-        dimension = Dimension(None, None)
+        assert Dimension(None, None).numeric_values == (1, 2.2, np.nan)
 
-        numeric_values = dimension.numeric_values
-
-        assert numeric_values == (1, 2.2, np.nan)
+    @pytest.mark.parametrize(
+        "dimension_transforms, expected_value",
+        (
+            (None, {}),
+            ({}, {}),
+            ({"foo": "bar"}, {}),
+            ({"order": {"order": "dict"}}, {"order": "dict"}),
+        ),
+    )
+    def it_provides_access_to_the_transforms_order_dict(
+        self, dimension_transforms, expected_value
+    ):
+        assert Dimension(None, None, dimension_transforms).order_dict == expected_value
 
     @pytest.mark.parametrize(
         "dimension_dict, insertion_dicts",

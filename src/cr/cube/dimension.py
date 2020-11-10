@@ -394,11 +394,11 @@ class Dimension(object):
 
     @lazyproperty
     def order_dict(self):
-        """dict "order": field in dimensions.transforms parsed from JSON payload.
+        """dict dimension.transforms.order field parsed from JSON payload.
 
         Value is `{}` if no "order": field is present.
         """
-        raise NotImplementedError
+        return self._dimension_transforms_dict.get("order", {})
 
     @lazyproperty
     def prune(self):
