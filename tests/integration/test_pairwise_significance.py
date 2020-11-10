@@ -139,15 +139,15 @@ class Describe_Slice(object):
 class TestStandardizedResiduals(TestCase):
     """Test cr.cube implementation of column family pairwise comparisons"""
 
-    def test_ca_subvar_x_cat_hs_pairwise_t_tests(self):
-        slice_ = Cube(CR.CA_SUBVAR_X_CAT_HS).partitions[0]
+    def test_ca_subvar_hs_x_cat_hs_pairwise_t_tests(self):
+        slice_ = Cube(CR.CA_SUBVAR_HS_X_CAT_HS).partitions[0]
         actual = slice_.pairwise_significance_tests[1]
 
         np.testing.assert_array_almost_equal(
-            actual.t_stats, load_python_expression("ca-subvar-x-cat-hs-pw-tstats")
+            actual.t_stats, load_python_expression("ca-subvar-hs-x-cat-hs-pw-tstats")
         )
         np.testing.assert_array_almost_equal(
-            actual.p_vals, load_python_expression("ca-subvar-x-cat-hs-pw-pvals")
+            actual.p_vals, load_python_expression("ca-subvar-hs-x-cat-hs-pw-pvals")
         )
 
     def test_ca_subvar_hs_x_mr_augmented_pairwise_t_tests(self):
