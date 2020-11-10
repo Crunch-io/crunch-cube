@@ -1625,7 +1625,7 @@ class TestCrunchCube(TestCase):
         np.testing.assert_array_equal(actual, expected)
 
     def test_ca_subvar_x_cat_hs_counts_prune(self):
-        cube = CrunchCube(CR.CA_SUBVAR_X_CAT_HS)
+        cube = CrunchCube(CR.CA_SUBVAR_HS_X_CAT_HS)
         expected = np.array([[3, 3, 0, 0, 6], [1, 3, 2, 0, 4], [0, 2, 1, 3, 2]])
         actual = cube.as_array(include_transforms_for_dims=[0, 1], prune=True)
         np.testing.assert_array_equal(actual, expected)
