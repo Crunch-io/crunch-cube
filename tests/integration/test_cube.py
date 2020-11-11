@@ -477,7 +477,7 @@ class TestCrunchCubeAs_Slice(object):
         )
 
     def test_std_dev_err_moe_univariate_cat_axis_none(self):
-        strand = Cube(CR.UNIVARIATE_CATEGORICAL).partitions[0]
+        strand = Cube(CR.UNIVARIATE_CATEGORICAL, population=1000).partitions[0]
         np.testing.assert_almost_equal(
             strand.standard_deviation, [0.47140452, 0.47140452]
         )
@@ -485,9 +485,12 @@ class TestCrunchCubeAs_Slice(object):
         np.testing.assert_almost_equal(
             strand.table_percentages_moe, [23.8559221, 23.8559221]
         )
+        np.testing.assert_almost_equal(
+            strand.population_moe, [238.55922104, 238.55922104]
+        )
 
     def test_std_dev_err_numeric(self):
-        strand = Cube(CR.VOTER_REGISTRATION).partitions[0]
+        strand = Cube(CR.VOTER_REGISTRATION, population=1000).partitions[0]
         np.testing.assert_almost_equal(
             strand.standard_deviation, [0.31902194, 0.30655342, 0.09949874]
         )
@@ -496,6 +499,9 @@ class TestCrunchCubeAs_Slice(object):
         )
         np.testing.assert_almost_equal(
             strand.table_percentages_moe, [1.9772822, 1.9000029, 0.6166883]
+        )
+        np.testing.assert_almost_equal(
+            strand.population_moe, [19.77282169, 19.0000289, 6.16688276]
         )
 
     def test_std_dev_err_datetime(self):
@@ -858,12 +864,27 @@ class TestCrunchCubeAs_Slice(object):
             [11.5249326, 7.2633194, 5.0491687, 6.5859452, 8.8723517, 14.7331947],
             [11.5249326, 7.2633194, 5.0491687, 6.5859452, 8.8723517, 14.7331947],
         ]
+        expected_row_percentages_moe = [
+            [2.17593262, 3.33242829, 4.18778361, 3.71672761, 3.08030997, 1.41567652],
+            [2.34602515, 3.42712442, 4.29055665, 3.54381017, 2.34602515, 1.95365402],
+        ]
+        expected_table_percentages_moe = [
+            [1.10701312, 1.75249771, 2.36182549, 1.99602358, 1.6037868, 0.71269548],
+            [1.19745296, 1.81024584, 2.47465565, 1.88321449, 1.19745296, 0.99024628],
+        ]
+
         np.testing.assert_almost_equal(slice_.table_std_dev, expected_table_std_dev)
         np.testing.assert_almost_equal(slice_.table_std_err, expected_table_std_err)
         np.testing.assert_almost_equal(slice_.columns_std_dev, expected_col_std_dev)
         np.testing.assert_almost_equal(slice_.columns_std_err, expected_col_std_err)
         np.testing.assert_almost_equal(
             slice_.columns_percentages_moe, expected_col_percentages_moe
+        )
+        np.testing.assert_almost_equal(
+            slice_.rows_percentages_moe, expected_row_percentages_moe
+        )
+        np.testing.assert_almost_equal(
+            slice_.table_percentages_moe, expected_table_percentages_moe
         )
         np.testing.assert_almost_equal(slice_.zscores, expected_zscore)
 

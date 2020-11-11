@@ -460,6 +460,18 @@ class _Slice(CubePartition):
         )
 
     @lazyproperty
+    def population_moe(self):
+        """2D np.float64 ndarray of population margin-of-error (MoE) for table percents.
+
+        The values are represented as population estimates, analogue to the `population_counts`
+        property. This means that the values will be presented by actual estimated counts of the population
+        The values can be np.nan when the corresponding percentage is also np.nan, which
+        happens when the respective table margin is 0.
+        """
+        total_filtered_population = self._population * self._cube.population_fraction
+        return Z_975 * total_filtered_population * self.table_std_err
+
+    @lazyproperty
     def pvals(self):
         return np.array([row.pvals for row in self._matrix.rows])
 
@@ -525,6 +537,22 @@ class _Slice(CubePartition):
     @lazyproperty
     def rows_margin(self):
         return np.array([row.margin for row in self._matrix.rows])
+
+    @lazyproperty
+    def rows_percentages_moe(self):
+        """2D np.float64 ndarray of margin-of-error (MoE) for rows percentages.
+
+        The values are represented as percentages, analogue to the `row_percentages`
+        property. This means that the value of 3.5% will have the value 3.5 (not 0.035).
+        The values can be np.nan when the corresponding percentage is also np.nan, which
+        happens when the respective table margin is 0.
+        """
+        return Z_975 * 100 * self.rows_std_err
+
+    @lazyproperty
+    def rows_std_err(self):
+        """2D np.float64 ndarray of standard errors for row percentages """
+        return np.sqrt(self._rows_variance / self.rows_margin[:, None])
 
     @lazyproperty
     def scale_mean_pairwise_indices(self):
@@ -901,6 +929,12 @@ class _Slice(CubePartition):
         )
 
     @lazyproperty
+    def _rows_variance(self):
+        """ndarray of variances for row percentages"""
+        margin = self.rows_margin[:, None]
+        return self.counts / margin * (1 - self.counts / margin)
+
+    @lazyproperty
     def _dimensions(self):
         """tuple of (rows_dimension, columns_dimension) Dimension objects."""
         return tuple(
@@ -1005,6 +1039,19 @@ class _Strand(CubePartition):
             * self._population
             * self._cube.population_fraction
         )
+
+    @lazyproperty
+    def population_moe(self):
+        """1D np.float64 ndarray of population margin-of-error (MoE) for table percents.
+
+        The values are represented as population estimates, analogue to the
+        `population_counts` property. This means that the values will be presented by
+        actual estimated counts of the population The values can be np.nan when the
+        corresponding percentage is also np.nan, which happens when the respective
+        table margin is 0.
+        """
+        total_filtered_population = self._population * self._cube.population_fraction
+        return Z_975 * total_filtered_population * self.standard_error
 
     @lazyproperty
     def row_base(self):
