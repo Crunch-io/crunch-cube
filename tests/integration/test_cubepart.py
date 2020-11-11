@@ -2,8 +2,6 @@
 
 """Integration-test suite for `cr.cube.cubepart` module."""
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import numpy as np
 import pytest
 
@@ -23,7 +21,7 @@ class Describe_Slice(object):
     def it_provides_values_for_cat_x_cat(self):
         slice_ = Cube(CR.CAT_X_CAT).partitions[0]
 
-        assert slice_.column_labels == ("C", "E")
+        assert tuple(slice_.column_labels) == ("C", "E")
         assert slice_.columns_dimension_name == "v7"
         assert slice_.columns_dimension_type == DT.CAT
         assert slice_.cube_is_mr_aug is False
@@ -43,7 +41,7 @@ class Describe_Slice(object):
                 [[0.36596253, -0.36596253], [-0.36596253, 0.36596253]],
             ],
         )
-        assert slice_.row_labels == ("B", "C")
+        assert tuple(slice_.row_labels) == ("B", "C")
         assert slice_.rows_dimension_description == "Pet Owners"
         assert slice_.rows_dimension_fills == (None, None)
         assert slice_.rows_dimension_name == "v4"
@@ -196,6 +194,8 @@ class Describe_Slice(object):
                 [0.54137703, 0.54137703, 0.54137703, 0.54137703, 0.0, 0.0],
             ],
         )
+
+        print(slice_.population_moe)
         np.testing.assert_almost_equal(
             slice_.population_moe,
             [
@@ -431,8 +431,8 @@ class Describe_Slice(object):
         }
         slice_ = _Slice(Cube(CR.CAT_4_X_CAT_4), 0, transforms, None, 0)
 
-        assert slice_.row_labels == ("Apple", "Banana", "Cherry", "Date")
-        assert slice_.column_labels == (
+        assert tuple(slice_.row_labels) == ("Apple", "Banana", "Cherry", "Date")
+        assert tuple(slice_.column_labels) == (
             "Asparagus",
             "Broccoli",
             "Cauliflower",
@@ -500,7 +500,7 @@ class Describe_Slice(object):
         }
         slice_ = Cube(CR.CAT_4_X_CAT_4, transforms=transforms).partitions[0]
 
-        assert slice_.row_labels == (
+        assert tuple(slice_.row_labels) == (
             "Apple+Banana",
             "Banana",
             "Date",
@@ -509,7 +509,7 @@ class Describe_Slice(object):
             "Apple",
             "Cherry+Date",
         )
-        assert slice_.column_labels == (
+        assert tuple(slice_.column_labels) == (
             "Asparagus+Broccoli",
             "Broccoli",
             "Daikon",
@@ -552,10 +552,10 @@ class Describe_Slice(object):
             slice_wo_explicit_order_.row_proportions, [[0.61110996]]
         )
         np.testing.assert_almost_equal(
-            slice_.column_base, slice_wo_explicit_order_.column_base
+            slice_.columns_base, slice_wo_explicit_order_.columns_base
         )
         np.testing.assert_almost_equal(
-            slice_.row_base, slice_wo_explicit_order_.row_base
+            slice_.rows_base, slice_wo_explicit_order_.rows_base
         )
 
     @pytest.mark.parametrize(
@@ -665,7 +665,7 @@ class Describe_Slice(object):
     def it_accommodates_an_all_missing_element_rows_dimension(self):
         slice_ = _Slice(Cube(CR.CAT_X_CAT_ALL_MISSING_ROW_ELEMENTS), 0, None, None, 0)
         row_proportions = slice_.row_proportions
-        np.testing.assert_almost_equal(row_proportions, np.array([]))
+        np.testing.assert_almost_equal(row_proportions, np.array([]).reshape((0, 2)))
 
     def it_knows_means_with_subtotals_on_cat_x_cat(self):
         slice_ = _Slice(Cube(CR.CAT_X_CAT_MEAN_SUBTOT), 0, None, None, 0)
@@ -760,9 +760,9 @@ class Describe_Strand(object):
         assert strand.name == "v7"
         assert strand.ndim == 1
         assert strand.population_counts == (0.0, 0.0)
-        np.testing.assert_equal(strand.row_base, [10, 5])
         assert strand.row_count == 2
         assert strand.row_labels == ("C", "E")
+        np.testing.assert_equal(strand.rows_base, [10, 5])
         assert strand.rows_dimension_fills == (None, None)
         assert strand.rows_dimension_name == "v7"
         assert strand.rows_dimension_type == DT.CAT

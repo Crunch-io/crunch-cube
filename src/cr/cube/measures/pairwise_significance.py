@@ -128,7 +128,7 @@ class _ColumnPairwiseSignificance(object):
 
     @lazyproperty
     def summary_t_stats(self):
-        col_margin_props = self._slice.column_base / self._slice.table_margin
+        col_margin_props = self._slice.columns_base / self._slice.table_margin
         diff = col_margin_props - col_margin_props[self._col_idx]
         var_props = (
             col_margin_props * (1.0 - col_margin_props) / self._slice.table_margin
@@ -142,7 +142,7 @@ class _ColumnPairwiseSignificance(object):
             return self.t_stats_correct
         props = self._slice.column_proportions
         diff = props - props[:, [self._col_idx]]
-        var_props = props * (1.0 - props) / self._slice.column_base
+        var_props = props * (1.0 - props) / self._slice.columns_base
         se_diff = np.sqrt(var_props + var_props[:, [self._col_idx]])
         return diff / se_diff
 
@@ -194,13 +194,13 @@ class _ColumnPairwiseSignificance(object):
         # if the cube to which the slice belongs is a CATxMRxITSELF
         # returns the n1 + n2 as degrees of freedom, n1 + n2 -2 otherwise
         selected_unweighted_n = (
-            self._slice.column_base[self._col_idx]
-            if self._slice.column_base.ndim < 2
-            else self._slice.column_base[:, self._col_idx][:, None]
+            self._slice.columns_base[self._col_idx]
+            if self._slice.columns_base.ndim < 2
+            else self._slice.columns_base[:, self._col_idx][:, None]
         )
         if self._slice.cube_is_mr_aug:
-            return self._slice.column_base + selected_unweighted_n
-        return self._slice.column_base + selected_unweighted_n - 2
+            return self._slice.columns_base + selected_unweighted_n
+        return self._slice.columns_base + selected_unweighted_n - 2
 
     @lazyproperty
     def _two_sample_df(self):

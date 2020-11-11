@@ -131,7 +131,7 @@ class TestHeadersAndSubtotals(object):
 
     def test_1D_subtotals_row_base(self):
         strand = Cube(CR.ECON_BLAME_WITH_HS_MISSING).partitions[0]
-        np.testing.assert_equal(strand.row_base, [285, 396, 681, 242, 6, 68, 74])
+        np.testing.assert_equal(strand.rows_base, [285, 396, 681, 242, 6, 68, 74])
 
     def test_1D_subtotals_rows_dimension_fills(self):
         strand = Cube(CR.ECON_BLAME_WITH_HS_MISSING).partitions[0]
@@ -151,7 +151,7 @@ class TestHeadersAndSubtotals(object):
 
     def test_labels_on_2d_cube_with_hs_on_1st_dim(self):
         slice_ = Cube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS).partitions[0]
-        assert slice_.row_labels == (
+        assert tuple(slice_.row_labels) == (
             "President Obama",
             "Republicans in Congress",
             "Test New Heading (Obama and Republicans)",
@@ -159,7 +159,7 @@ class TestHeadersAndSubtotals(object):
             "Neither",
             "Not sure",
         )
-        assert slice_.column_labels == (
+        assert tuple(slice_.column_labels) == (
             "Very liberal",
             "Liberal",
             "Moderate",
@@ -170,7 +170,7 @@ class TestHeadersAndSubtotals(object):
 
     def test_labels_on_2d_cube_with_hs_on_both_dim(self):
         slice_ = Cube(CR.ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS).partitions[0]
-        assert slice_.row_labels == (
+        assert tuple(slice_.row_labels) == (
             "President Obama",
             "Republicans in Congress",
             "Test New Heading (Obama and Republicans)",
@@ -178,7 +178,7 @@ class TestHeadersAndSubtotals(object):
             "Neither",
             "Not sure",
         )
-        assert slice_.column_labels == (
+        assert tuple(slice_.column_labels) == (
             "Very liberal",
             "Liberal",
             "Moderate",
@@ -196,14 +196,14 @@ class TestHeadersAndSubtotals(object):
         slice_ = Cube(
             CR.ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS, transforms=transforms
         ).partitions[0]
-        assert slice_.row_labels == (
+        assert tuple(slice_.row_labels) == (
             "President Obama",
             "Republicans in Congress",
             "Both",
             "Neither",
             "Not sure",
         )
-        assert slice_.column_labels == (
+        assert tuple(slice_.column_labels) == (
             "Very liberal",
             "Liberal",
             "Moderate",
@@ -382,8 +382,14 @@ class TestHeadersAndSubtotals(object):
 
     def test_ca_labels_with_hs(self):
         slice_ = Cube(CR.SIMPLE_CA_HS).partitions[0]
-        assert slice_.row_labels == ("ca_subvar_1", "ca_subvar_2", "ca_subvar_3")
-        assert slice_.column_labels == ("a", "b", "Test A and B combined", "c", "d")
+        assert tuple(slice_.row_labels) == ("ca_subvar_1", "ca_subvar_2", "ca_subvar_3")
+        assert tuple(slice_.column_labels) == (
+            "a",
+            "b",
+            "Test A and B combined",
+            "c",
+            "d",
+        )
 
     def test_ca_as_array_with_hs(self):
         slice_ = Cube(CR.SIMPLE_CA_HS).partitions[0]
@@ -406,7 +412,7 @@ class TestHeadersAndSubtotals(object):
 
     def test_hs_with_anchor_on_zero_position_labels(self):
         slice_ = Cube(CR.ECON_US_PROBLEM_X_BIGGER_PROBLEM).partitions[0]
-        assert slice_.row_labels == (
+        assert tuple(slice_.row_labels) == (
             "Serious net",
             "Very serious",
             "Somewhat serious",
@@ -414,7 +420,7 @@ class TestHeadersAndSubtotals(object):
             "Not at all serious",
             "Not sure",
         )
-        assert slice_.column_labels == (
+        assert tuple(slice_.column_labels) == (
             "Sexual assaults that go unreported or unpunished",
             "False accusations of sexual assault",
         )
@@ -996,7 +1002,7 @@ class TestHeadersAndSubtotals(object):
 
     def test_col_labels_with_top_hs(self):
         slice_ = Cube(CR.CAT_X_CAT_HS_MISSING).partitions[0]
-        assert slice_.column_labels == (
+        assert tuple(slice_.column_labels) == (
             "Whites",
             "White college women voters",
             "White non-college women voters",

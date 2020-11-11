@@ -103,6 +103,11 @@ def compress_pruned(table):
     return table
 
 
+def empty():
+    """Occasionally handy for null-case of a method that returns an iterator."""
+    return (_ for _ in ())
+
+
 def intersperse_hs_in_std_res(slice_, hs_dims, res):
     """Perform the insertions of place-holding rows and cols for insertions."""
     for dim, inds in enumerate(slice_.inserted_hs_indices()):

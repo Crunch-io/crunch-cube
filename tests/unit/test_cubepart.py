@@ -11,7 +11,6 @@ from cr.cube.dimension import Dimension
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.matrix import Assembler
 from cr.cube.noa.smoothing import SingleSidedMovingAvgSmoother
-from cr.cube.old_matrix import TransformedMatrix, _VectorAfterHiding
 from cr.cube.stripe import _BaseStripeRow, TransformedStripe
 
 from ..unitutil import class_mock, instance_mock, property_mock
@@ -289,32 +288,6 @@ class Describe_Slice(object):
 
         assert population_fraction == 0.5
 
-    def it_knows_the_row_proportions(self, request, _matrix_prop_, matrix_):
-        _matrix_prop_.return_value = matrix_
-        matrix_.rows = (
-            instance_mock(request, _VectorAfterHiding, proportions=(0.1, 0.2, 0.3)),
-            instance_mock(request, _VectorAfterHiding, proportions=(0.4, 0.5, 0.6)),
-        )
-        slice_ = _Slice(None, None, None, None, None)
-
-        row_proportions = slice_.row_proportions
-
-        np.testing.assert_almost_equal(
-            row_proportions, [[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]]
-        )
-
-    def it_knows_the_rows_margin(self, request, _matrix_prop_, matrix_):
-        _matrix_prop_.return_value = matrix_
-        matrix_.rows = (
-            instance_mock(request, _VectorAfterHiding, margin=(1, 2)),
-            instance_mock(request, _VectorAfterHiding, margin=(3, 4)),
-        )
-        slice_ = _Slice(None, None, None, None, None)
-
-        rows_margin = slice_.rows_margin
-
-        np.testing.assert_almost_equal(rows_margin, [[1, 2], [3, 4]])
-
     def it_knows_the_scale_means_column(
         self, request, _columns_dimension_numeric_values_prop_
     ):
@@ -448,10 +421,6 @@ class Describe_Slice(object):
     @pytest.fixture
     def _dimensions_prop_(self, request):
         return property_mock(request, _Slice, "_dimensions")
-
-    @pytest.fixture
-    def matrix_(self, request):
-        return instance_mock(request, TransformedMatrix)
 
     @pytest.fixture
     def _matrix_prop_(self, request):

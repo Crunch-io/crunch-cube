@@ -744,12 +744,12 @@ class Describe_BaseCubeResultMatrix(object):
         assert matrix_class == expected
 
     @pytest.mark.parametrize(
-        ("matrix_class_name",),
+        "matrix_class_name",
         (
-            ("_CatXCatMatrix",),
-            ("_MrXCatMatrix",),
-            ("_CatXMrMatrix",),
-            ("_MrXMrMatrix",),
+            "_CatXCatMatrix",
+            "_MrXCatMatrix",
+            "_CatXMrMatrix",
+            "_MrXMrMatrix",
         ),
     )
     def it_creates_matrix_using_factory_to_help(
@@ -757,6 +757,7 @@ class Describe_BaseCubeResultMatrix(object):
     ):
         cube_.dimension_types = (DT.CAT, DT.MR, DT.CAT)
         MatrixCls_ = class_mock(request, "cr.cube.matrix.%s" % matrix_class_name)
+        sliced_counts = ([[1], [2]], [[3], [4]], [[5], [6]])
         _get_regular_matrix_factory_class = method_mock(
             request,
             _BaseCubeResultMatrix,
@@ -767,7 +768,7 @@ class Describe_BaseCubeResultMatrix(object):
             request,
             _BaseCubeResultMatrix,
             "_get_sliced_counts",
-            return_value=([[1], [2]], [[3], [4]]),
+            return_value=sliced_counts,
         )
 
         matrix = _BaseCubeResultMatrix._regular_matrix_factory(
@@ -776,9 +777,7 @@ class Describe_BaseCubeResultMatrix(object):
 
         _get_regular_matrix_factory_class.assert_called_once_with((DT.MR, DT.CAT))
         _get_sliced_counts.assert_called_once_with(cube_, 17)
-        MatrixCls_.assert_called_once_with(
-            (dimension_, dimension_), [[1], [2]], [[3], [4]]
-        )
+        MatrixCls_.assert_called_once_with((dimension_, dimension_), *sliced_counts)
         assert matrix is MatrixCls_.return_value
 
     def it_knows_its_rows_dimension(self, dimension_):
@@ -885,7 +884,7 @@ class Describe_CatXMrMatrix(object):
             ]
         )
         np.testing.assert_equal(
-            _CatXMrMatrix(None, None, unweighted_counts).unweighted_counts,
+            _CatXMrMatrix(None, None, unweighted_counts, None).unweighted_counts,
             np.array([[1, 2, 3], [4, 5, 6]]),
         )
 

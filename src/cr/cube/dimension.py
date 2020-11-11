@@ -426,7 +426,13 @@ class Dimension(object):
 
     @lazyproperty
     def shape(self):
+        """int count of *all* elements in this dimension, both valid and missing."""
         return len(self.all_elements)
+
+    @lazyproperty
+    def size(self):
+        """int count of valid elements in this dimension."""
+        return len(self.valid_elements)
 
     @lazyproperty
     def subtotals(self):

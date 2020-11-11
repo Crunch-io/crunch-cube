@@ -4,8 +4,13 @@
 
 import pytest
 
-from cr.cube.collator import ExplicitOrderCollator, PayloadOrderCollator
+from cr.cube.collator import (
+    ExplicitOrderCollator,
+    PayloadOrderCollator,
+    SortByValueCollator,
+)
 from cr.cube.dimension import Dimension, _Subtotal
+from cr.cube.enums import DIMENSION_TYPE as DT
 
 from ..unitutil import instance_mock
 
@@ -55,5 +60,64 @@ class DescribePayloadOrderCollator(object):
         )
 
         display_order = PayloadOrderCollator.display_order(dimension_, ())
+
+        assert display_order == expected_value
+
+
+class DescribeSortByValueCollator(object):
+    """Partial-integration test suite for `SortByValueCollator` object."""
+
+    @pytest.mark.parametrize(
+        "order, xtop, xbot, element_vals, subtot_vals, empty_idxs, expected_value",
+        (
+            # --- descending: subtots at top, then body ---
+            ("D", [], [], (10, 30, 20, 40), [60, 40], (), (-2, -1, 3, 1, 2, 0)),
+            ("D", [1], [], (10, 30, 20, 40), [60, 40], (), (-2, -1, 0, 3, 1, 2)),
+            ("D", [], [4], (10, 30, 20, 40), [60, 40], (), (-2, -1, 1, 2, 0, 3)),
+            ("D", [4], [2], (10, 30, 20, 40), [60, 40], (), (-2, -1, 3, 2, 0, 1)),
+            ("D", [], [], (10, 30, 20, 40), [60, 40], (1,), (-2, -1, 3, 2, 0)),
+            ("D", [3], [2], (10, 30, 20, 40), [60, 40], (0, 3), (-2, -1, 2, 1)),
+            ("D", [3], [2], (10, 30, 20, 40), [60, 40], (2, 3), (-2, -1, 0, 1)),
+            # --- ascending: body first, all subtots at bottom ---
+            ("A", [], [], (10, 30, 20, 40), [60, 40], (), (0, 2, 1, 3, -1, -2)),
+            ("A", [2], [], (10, 30, 20, 40), [60, 40], (), (1, 0, 2, 3, -1, -2)),
+            ("A", [], [3], (10, 30, 20, 40), [60, 40], (), (0, 1, 3, 2, -1, -2)),
+            ("A", [4], [1], (10, 30, 20, 40), [60, 40], (), (3, 2, 1, 0, -1, -2)),
+            ("A", [], [], (10, 30, 20, 40), [60, 40], (2,), (0, 1, 3, -1, -2)),
+            ("A", [4], [1], (10, 30, 20, 40), [60, 40], (1, 2), (3, 0, -1, -2)),
+            ("A", [4], [1], (10, 30, 20, 40), [60, 40], (0, 3), (2, 1, -1, -2)),
+        ),
+    )
+    def it_knows_the_display_order_for_a_dimension(
+        self,
+        request,
+        order,
+        xtop,
+        xbot,
+        element_vals,
+        subtot_vals,
+        empty_idxs,
+        expected_value,
+    ):
+        dimension = Dimension(
+            dimension_dict={
+                "type": {
+                    "categories": [{"id": 1}, {"id": 2}, {"id": 3}, {"id": 4}],
+                    "class": "categorical",
+                }
+            },
+            dimension_type=DT.CAT,
+            dimension_transforms={
+                "order": {
+                    "direction": "ascending" if order == "A" else "descending",
+                    "exclude": {"top": xtop, "bottom": xbot},
+                },
+                "prune": True,
+            },
+        )
+
+        display_order = SortByValueCollator.display_order(
+            dimension, element_vals, subtot_vals, empty_idxs
+        )
 
         assert display_order == expected_value

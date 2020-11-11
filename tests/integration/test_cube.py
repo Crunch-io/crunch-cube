@@ -259,7 +259,7 @@ class DescribeIntegrated_MeanMeasure(object):
 
     def it_handles_cat_x_mr_with_means(self):
         slice_ = Cube(CR.MEANS_CAT_X_MR).partitions[0]
-        assert slice_.column_labels == (
+        assert tuple(slice_.column_labels) == (
             "Denmark",
             "Finland",
             "Iceland",
@@ -672,13 +672,13 @@ class TestCrunchCubeAs_Slice(object):
 
     def test_labels_cat_x_cat_exclude_missing(self):
         slice_ = Cube(CR.CAT_X_CAT).partitions[0]
-        assert slice_.row_labels == ("B", "C")
-        assert slice_.column_labels == ("C", "E")
+        assert tuple(slice_.row_labels) == ("B", "C")
+        assert tuple(slice_.column_labels) == ("C", "E")
 
     def test_labels_cat_x_datetime_exclude_missing(self):
         slice_ = Cube(CR.CAT_X_DATETIME).partitions[0]
-        assert slice_.row_labels == ("red", "green", "blue", "4", "9")
-        assert slice_.column_labels == (
+        assert tuple(slice_.row_labels) == ("red", "green", "blue", "4", "9")
+        assert tuple(slice_.column_labels) == (
             "1776-07-04T00:00:00",
             "1950-12-24T00:00:00",
             "2000-01-01T00:00:00",
@@ -687,8 +687,8 @@ class TestCrunchCubeAs_Slice(object):
 
     def test_labels_simple_cat_array_exclude_missing(self):
         slice_ = Cube(CR.SIMPLE_CAT_ARRAY).partitions[0]
-        assert slice_.row_labels == ("ca_subvar_1", "ca_subvar_2", "ca_subvar_3")
-        assert slice_.column_labels == ("a", "b", "c", "d")
+        assert tuple(slice_.row_labels) == ("ca_subvar_1", "ca_subvar_2", "ca_subvar_3")
+        assert tuple(slice_.column_labels) == ("a", "b", "c", "d")
 
     def test_as_array_simple_cat_array_exclude_missing(self):
         slice_ = Cube(CR.SIMPLE_CAT_ARRAY).partitions[0]
@@ -813,12 +813,12 @@ class TestCrunchCubeAs_Slice(object):
     def test_margin_unweighted_gender_x_ideology_axis_0(self):
         slice_ = Cube(CR.ECON_GENDER_X_IDEOLOGY_WEIGHTED).partitions[0]
         expected = np.array([72, 182, 376, 220, 110, 40])
-        np.testing.assert_array_equal(slice_.column_base, expected)
+        np.testing.assert_array_equal(slice_.columns_base, expected)
 
     def test_margin_unweighted_gender_x_ideology_axis_1(self):
         slice_ = Cube(CR.ECON_GENDER_X_IDEOLOGY_WEIGHTED).partitions[0]
         expected = np.array([485, 515])
-        np.testing.assert_array_equal(slice_.row_base, expected)
+        np.testing.assert_array_equal(slice_.rows_base, expected)
 
     def test_margin_weighted_gender_x_ideology_axis_1(self):
         slice_ = Cube(CR.ECON_GENDER_X_IDEOLOGY_WEIGHTED).partitions[0]
@@ -1285,7 +1285,7 @@ class TestCrunchCubeAs_Slice(object):
     def test_ca_with_single_cat(self):
         slice_ = Cube(CR.CA_SINGLE_CAT).partitions[0]
         expected = np.array([79, 80, 70, 0])
-        np.testing.assert_almost_equal(slice_.row_base, expected)
+        np.testing.assert_almost_equal(slice_.rows_base, expected)
 
     def test_pets_array_x_pets_by_col(self):
         slice_ = Cube(CR.PETS_ARRAY_X_PETS).partitions[0]
@@ -1573,7 +1573,7 @@ class TestCrunchCubeAs_Slice(object):
                 12,
             ]
         )
-        np.testing.assert_array_equal(slice_.row_base, expected)
+        np.testing.assert_array_equal(slice_.rows_base, expected)
         # not testing cube.prune_indices() because the margin has 6367 cells
 
     def test_ca_with_single_cat_pruning(self):
@@ -1953,7 +1953,7 @@ class TestCrunchCubeAs_Slice(object):
     def test_ca_x_mr_margin(self):
         slice_ = Cube(CR.CA_X_MR_WEIGHTED_HS).partitions[0]
         expected = np.array([504, 215, 224, 76, 8, 439])
-        np.testing.assert_array_equal(slice_.column_base, expected)
+        np.testing.assert_array_equal(slice_.columns_base, expected)
 
     def test_ca_x_mr_margin_prune(self):
         # ---CA x MR---
@@ -1963,7 +1963,7 @@ class TestCrunchCubeAs_Slice(object):
         }
         slice_ = Cube(CR.CA_X_MR_WEIGHTED_HS, transforms=transforms).partitions[0]
         np.testing.assert_array_equal(
-            slice_.column_base, np.array([504, 215, 224, 76, 8, 439])
+            slice_.columns_base, np.array([504, 215, 224, 76, 8, 439])
         )
         assert slice_.table_name == "q1. Aftensmad: K\xf8d (svin/lam/okse)"
 
