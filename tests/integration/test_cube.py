@@ -483,7 +483,7 @@ class TestCrunchCubeAs_Slice(object):
         )
         np.testing.assert_almost_equal(strand.standard_error, [0.1217161, 0.1217161])
         np.testing.assert_almost_equal(
-            strand.table_percentages_moe, [23.8559221, 23.8559221]
+            strand.table_proportions_moe, [0.238559221, 0.238559221]
         )
         np.testing.assert_almost_equal(
             strand.population_moe, [238.55922104, 238.55922104]
@@ -498,7 +498,7 @@ class TestCrunchCubeAs_Slice(object):
             strand.standard_error, [0.0100884, 0.0096941, 0.0031464]
         )
         np.testing.assert_almost_equal(
-            strand.table_percentages_moe, [1.9772822, 1.9000029, 0.6166883]
+            strand.table_proportions_moe, [0.019772822, 0.019000029, 0.006166883]
         )
         np.testing.assert_almost_equal(
             strand.population_moe, [19.77282169, 19.0000289, 6.16688276]
@@ -860,17 +860,59 @@ class TestCrunchCubeAs_Slice(object):
             [0.05880176, 0.03705843, 0.02576154, 0.03360238, 0.04526793, 0.07517074],
             [0.05880176, 0.03705843, 0.02576154, 0.03360238, 0.04526793, 0.07517074],
         ]
-        expected_col_percentages_moe = [
-            [11.5249326, 7.2633194, 5.0491687, 6.5859452, 8.8723517, 14.7331947],
-            [11.5249326, 7.2633194, 5.0491687, 6.5859452, 8.8723517, 14.7331947],
+        expected_col_proportions_moe = [
+            [
+                0.115249326,
+                0.072633194,
+                0.050491687,
+                0.065859452,
+                0.088723517,
+                0.147331947,
+            ],
+            [
+                0.115249326,
+                0.072633194,
+                0.050491687,
+                0.065859452,
+                0.088723517,
+                0.147331947,
+            ],
         ]
-        expected_row_percentages_moe = [
-            [2.17593262, 3.33242829, 4.18778361, 3.71672761, 3.08030997, 1.41567652],
-            [2.34602515, 3.42712442, 4.29055665, 3.54381017, 2.34602515, 1.95365402],
+        expected_row_proportions_moe = [
+            [
+                0.0217593262,
+                0.0333242829,
+                0.0418778361,
+                0.0371672761,
+                0.0308030997,
+                0.0141567652,
+            ],
+            [
+                0.0234602515,
+                0.0342712442,
+                0.0429055665,
+                0.0354381017,
+                0.0234602515,
+                0.0195365402,
+            ],
         ]
-        expected_table_percentages_moe = [
-            [1.10701312, 1.75249771, 2.36182549, 1.99602358, 1.6037868, 0.71269548],
-            [1.19745296, 1.81024584, 2.47465565, 1.88321449, 1.19745296, 0.99024628],
+        expected_table_proportions_moe = [
+            [
+                0.0110701312,
+                0.0175249771,
+                0.0236182549,
+                0.0199602358,
+                0.016037868,
+                0.0071269548,
+            ],
+            [
+                0.0119745296,
+                0.0181024584,
+                0.0247465565,
+                0.0188321449,
+                0.0119745296,
+                0.0099024628,
+            ],
         ]
 
         np.testing.assert_almost_equal(slice_.table_std_dev, expected_table_std_dev)
@@ -878,13 +920,13 @@ class TestCrunchCubeAs_Slice(object):
         np.testing.assert_almost_equal(slice_.columns_std_dev, expected_col_std_dev)
         np.testing.assert_almost_equal(slice_.columns_std_err, expected_col_std_err)
         np.testing.assert_almost_equal(
-            slice_.columns_percentages_moe, expected_col_percentages_moe
+            slice_.columns_proportions_moe, expected_col_proportions_moe
         )
         np.testing.assert_almost_equal(
-            slice_.rows_percentages_moe, expected_row_percentages_moe
+            slice_.rows_proportions_moe, expected_row_proportions_moe
         )
         np.testing.assert_almost_equal(
-            slice_.table_percentages_moe, expected_table_percentages_moe
+            slice_.table_proportions_moe, expected_table_proportions_moe
         )
         np.testing.assert_almost_equal(slice_.zscores, expected_zscore)
 
@@ -1021,9 +1063,23 @@ class TestCrunchCubeAs_Slice(object):
             [0.01567414, 0.01993363, 0.01575024, 0.01682826, 0.01795892, 0.00918798],
             [0.01567414, 0.01993363, 0.01575024, 0.01682826, 0.01795892, 0.00918798],
         ]
-        expected_col_percentages_moe = [
-            [3.07207565, 3.90691882, 3.0869894, 3.29827837, 3.51988285, 1.80081013],
-            [3.07207565, 3.90691882, 3.0869894, 3.29827837, 3.51988285, 1.80081013],
+        expected_col_proportions_moe = [
+            [
+                0.0307207565,
+                0.0390691882,
+                0.030869894,
+                0.0329827837,
+                0.0351988285,
+                0.0180081013,
+            ],
+            [
+                0.0307207565,
+                0.0390691882,
+                0.030869894,
+                0.0329827837,
+                0.0351988285,
+                0.0180081013,
+            ],
         ]
 
         np.testing.assert_almost_equal(slice_.zscores, expected_zscores)
@@ -1032,7 +1088,7 @@ class TestCrunchCubeAs_Slice(object):
         np.testing.assert_almost_equal(slice_.columns_std_dev, expected_col_std_dev)
         np.testing.assert_almost_equal(slice_.columns_std_err, expected_col_std_err)
         np.testing.assert_almost_equal(
-            slice_.columns_percentages_moe, expected_col_percentages_moe
+            slice_.columns_proportions_moe, expected_col_proportions_moe
         )
 
     def test_various_measures_admit_by_gender_weighted_rows(self):
@@ -1051,9 +1107,9 @@ class TestCrunchCubeAs_Slice(object):
         expected_table_std_err = [[0.00659641, 0.00492018], [0.0070529, 0.00675348]]
         expected_col_std_dev = [[0.49668253, 0.45933735], [0.49668253, 0.45933735]]
         expected_col_std_err = [[0.00966009, 0.01080163], [0.00966009, 0.01080163]]
-        expected_col_percentages_moe = [
-            [1.89334366, 2.11708092],
-            [1.89334366, 2.11708092],
+        expected_col_proportions_moe = [
+            [0.0189334366, 0.0211708092],
+            [0.0189334366, 0.0211708092],
         ]
 
         np.testing.assert_almost_equal(slice_.zscores, expected_zscores)
@@ -1062,7 +1118,7 @@ class TestCrunchCubeAs_Slice(object):
         np.testing.assert_almost_equal(slice_.columns_std_dev, expected_col_std_dev)
         np.testing.assert_almost_equal(slice_.columns_std_err, expected_col_std_err)
         np.testing.assert_almost_equal(
-            slice_.columns_percentages_moe, expected_col_percentages_moe
+            slice_.columns_proportions_moe, expected_col_proportions_moe
         )
 
     def test_selected_crosstab_as_array(self):
