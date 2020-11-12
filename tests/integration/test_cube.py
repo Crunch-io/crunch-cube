@@ -19,6 +19,7 @@ from cr.cube.dimension import _ApparentDimensions
 from cr.cube.enums import DIMENSION_TYPE as DT
 
 from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
+from ..util import load_python_expression
 
 
 class DescribeIntegratedCube(object):
@@ -860,73 +861,22 @@ class TestCrunchCubeAs_Slice(object):
             [0.05880176, 0.03705843, 0.02576154, 0.03360238, 0.04526793, 0.07517074],
             [0.05880176, 0.03705843, 0.02576154, 0.03360238, 0.04526793, 0.07517074],
         ]
-        expected_col_proportions_moe = [
-            [
-                0.115249326,
-                0.072633194,
-                0.050491687,
-                0.065859452,
-                0.088723517,
-                0.147331947,
-            ],
-            [
-                0.115249326,
-                0.072633194,
-                0.050491687,
-                0.065859452,
-                0.088723517,
-                0.147331947,
-            ],
-        ]
-        expected_row_proportions_moe = [
-            [
-                0.0217593262,
-                0.0333242829,
-                0.0418778361,
-                0.0371672761,
-                0.0308030997,
-                0.0141567652,
-            ],
-            [
-                0.0234602515,
-                0.0342712442,
-                0.0429055665,
-                0.0354381017,
-                0.0234602515,
-                0.0195365402,
-            ],
-        ]
-        expected_table_proportions_moe = [
-            [
-                0.0110701312,
-                0.0175249771,
-                0.0236182549,
-                0.0199602358,
-                0.016037868,
-                0.0071269548,
-            ],
-            [
-                0.0119745296,
-                0.0181024584,
-                0.0247465565,
-                0.0188321449,
-                0.0119745296,
-                0.0099024628,
-            ],
-        ]
 
         np.testing.assert_almost_equal(slice_.table_std_dev, expected_table_std_dev)
         np.testing.assert_almost_equal(slice_.table_std_err, expected_table_std_err)
         np.testing.assert_almost_equal(slice_.columns_std_dev, expected_col_std_dev)
         np.testing.assert_almost_equal(slice_.columns_std_err, expected_col_std_err)
         np.testing.assert_almost_equal(
-            slice_.columns_proportions_moe, expected_col_proportions_moe
+            slice_.columns_proportions_moe,
+            load_python_expression("econ-gender-x-ideology-weighted-col-prop-moe"),
         )
         np.testing.assert_almost_equal(
-            slice_.rows_proportions_moe, expected_row_proportions_moe
+            slice_.rows_proportions_moe,
+            load_python_expression("econ-gender-x-ideology-weighted-row-prop-moe"),
         )
         np.testing.assert_almost_equal(
-            slice_.table_proportions_moe, expected_table_proportions_moe
+            slice_.table_proportions_moe,
+            load_python_expression("econ-gender-x-ideology-weighted-table-prop-moe"),
         )
         np.testing.assert_almost_equal(slice_.zscores, expected_zscore)
 
@@ -1063,24 +1013,6 @@ class TestCrunchCubeAs_Slice(object):
             [0.01567414, 0.01993363, 0.01575024, 0.01682826, 0.01795892, 0.00918798],
             [0.01567414, 0.01993363, 0.01575024, 0.01682826, 0.01795892, 0.00918798],
         ]
-        expected_col_proportions_moe = [
-            [
-                0.0307207565,
-                0.0390691882,
-                0.030869894,
-                0.0329827837,
-                0.0351988285,
-                0.0180081013,
-            ],
-            [
-                0.0307207565,
-                0.0390691882,
-                0.030869894,
-                0.0329827837,
-                0.0351988285,
-                0.0180081013,
-            ],
-        ]
 
         np.testing.assert_almost_equal(slice_.zscores, expected_zscores)
         np.testing.assert_almost_equal(slice_.table_std_dev, expected_table_std_dev)
@@ -1088,7 +1020,8 @@ class TestCrunchCubeAs_Slice(object):
         np.testing.assert_almost_equal(slice_.columns_std_dev, expected_col_std_dev)
         np.testing.assert_almost_equal(slice_.columns_std_err, expected_col_std_err)
         np.testing.assert_almost_equal(
-            slice_.columns_proportions_moe, expected_col_proportions_moe
+            slice_.columns_proportions_moe,
+            load_python_expression("admit-x-dept-unweighted-col-prop-moe"),
         )
 
     def test_various_measures_admit_by_gender_weighted_rows(self):

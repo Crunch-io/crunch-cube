@@ -9,6 +9,7 @@ import numpy as np
 from cr.cube.cube import Cube
 
 from ..fixtures import CR
+from ..util import load_python_expression
 
 
 def test_labels_simple_mr_exclude_missing():
@@ -263,173 +264,29 @@ def test_table_base_unpruned_cat_x_mr():
 
 def test_various_measures_from_r_rows_margin():
     slice_ = Cube(CR.MR_X_CAT_PROFILES_STATS_WEIGHTED).partitions[0]
-    expected_zscores = [
-        [
-            -1.465585354569577,
-            3.704125875262655,
-            3.823689449491973,
-            1.53747452587281,
-            2.584734165643072,
-            -7.488143461076757,
-            -0.248968750486873,
-            0.794143540856786,
-        ],
-        [
-            1.465585354569564,
-            -3.704125875262655,
-            -3.823689449491981,
-            -1.537474525872799,
-            -2.584734165643066,
-            7.488143461076757,
-            0.248968750486873,
-            -0.794143540856781,
-        ],
-    ]
-    expected_table_std_dev = [
-        [
-            0.32529036,
-            0.3230502,
-            0.24634286,
-            0.17015146,
-            0.15631497,
-            0.310228,
-            0.07333405,
-            0.09462074,
-        ],
-        [
-            0.34030642,
-            0.32321237,
-            0.24212202,
-            0.17077218,
-            0.15232289,
-            0.34229973,
-            0.07720184,
-            0.09510867,
-        ],
-    ]
-    expected_table_std_err = [
-        [
-            0.00185406,
-            0.0018413,
-            0.00140409,
-            0.00096982,
-            0.00089095,
-            0.00176821,
-            0.00041798,
-            0.00053931,
-        ],
-        [
-            0.00193965,
-            0.00184222,
-            0.00138003,
-            0.00097335,
-            0.0008682,
-            0.00195101,
-            0.00044003,
-            0.00054209,
-        ],
-    ]
-    expected_col_std_err = [
-        [
-            0.00564723,
-            0.00585537,
-            0.00798203,
-            0.01164323,
-            0.01289225,
-            0.00573883,
-            0.02665202,
-            0.02114537,
-        ],
-        [
-            0.00564723,
-            0.00585537,
-            0.00798203,
-            0.01164323,
-            0.01289225,
-            0.00573883,
-            0.02665202,
-            0.02114537,
-        ],
-    ]
-
-    expected_col_std_dev = [
-        [
-            0.49930382,
-            0.49999992,
-            0.49991404,
-            0.49999647,
-            0.49982403,
-            0.4967613,
-            0.49933267,
-            0.49999326,
-        ],
-        [
-            0.49930382,
-            0.49999992,
-            0.49991404,
-            0.49999647,
-            0.49982403,
-            0.4967613,
-            0.49933267,
-            0.49999326,
-        ],
-    ]
-
-    expected_col_proportions_moe = [
-        [
-            0.01106838,
-            0.01147632,
-            0.01564449,
-            0.02282031,
-            0.02526835,
-            0.0112479,
-            0.052237,
-            0.04144417,
-        ],
-        [
-            0.01106838,
-            0.01147632,
-            0.01564449,
-            0.02282031,
-            0.02526835,
-            0.0112479,
-            0.052237,
-            0.04144417,
-        ],
-    ]
-    expected_table_proportions_moe = [
-        [
-            0.0036339,
-            0.00360887,
-            0.00275196,
-            0.0019008,
-            0.00174623,
-            0.00346563,
-            0.00081923,
-            0.00105703,
-        ],
-        [
-            0.00380165,
-            0.00361068,
-            0.0027048,
-            0.00190774,
-            0.00170164,
-            0.00382391,
-            0.00086244,
-            0.00106248,
-        ],
-    ]
-
-    np.testing.assert_almost_equal(slice_.zscores, expected_zscores)
-    np.testing.assert_almost_equal(slice_.table_std_err, expected_table_std_err)
-    np.testing.assert_almost_equal(slice_.table_std_dev, expected_table_std_dev)
-    np.testing.assert_almost_equal(slice_.columns_std_dev, expected_col_std_dev)
-    np.testing.assert_almost_equal(slice_.columns_std_err, expected_col_std_err)
     np.testing.assert_almost_equal(
-        slice_.columns_proportions_moe, expected_col_proportions_moe
+        slice_.zscores, load_python_expression("mr-x-cat-weighted-zscores")
     )
     np.testing.assert_almost_equal(
-        slice_.table_proportions_moe, expected_table_proportions_moe
+        slice_.table_std_err, load_python_expression("mr-x-cat-weighted-table-std-err")
+    )
+    np.testing.assert_almost_equal(
+        slice_.table_std_dev,
+        load_python_expression("mr-x-cat-weighted-table-std-dev"),
+    )
+    np.testing.assert_almost_equal(
+        slice_.columns_std_dev, load_python_expression("mr-x-cat-weighted-col-std-dev")
+    )
+    np.testing.assert_almost_equal(
+        slice_.columns_std_err, load_python_expression("mr-x-cat-weighted-col-std-err")
+    )
+    np.testing.assert_almost_equal(
+        slice_.columns_proportions_moe,
+        load_python_expression("mr-x-cat-weighted-col-moe"),
+    )
+    np.testing.assert_almost_equal(
+        slice_.table_proportions_moe,
+        load_python_expression("mr-x-cat-weighted-table-moe"),
     )
 
 
