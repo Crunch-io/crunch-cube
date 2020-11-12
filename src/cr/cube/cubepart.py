@@ -301,7 +301,7 @@ class _Slice(CubePartition):
     def columns_proportions_moe(self):
         """1D/2D np.float64 ndarray of margin-of-error (MoE) for columns proportions.
 
-        The values are represented as fractions, analogue to the `table_proportions`
+        The values are represented as fractions, analogue to the `column_proportions`
         property. This means that the value of 3.5% will have the value 0.035.
         The values can be np.nan when the corresponding percentage is also np.nan, which
         happens when the respective columns margin is 0.
@@ -465,7 +465,7 @@ class _Slice(CubePartition):
 
         The values are represented as population estimates, analogue to the
         `population_counts` property. This means that the values will be presented by
-        actual estimated counts of the population The values can be np.nan when the
+        actual estimated counts of the population. The values can be np.nan when the
         corresponding percentage is also np.nan, which happens when the respective
         table margin is 0.
         """
@@ -552,8 +552,13 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def rows_std_err(self):
-        """2D np.float64 ndarray of standard errors for row percentages """
+        """2D np.float64 ndarray of standard errors for row percentages."""
         return np.sqrt(self._rows_variance / self.rows_margin[:, None])
+
+    @lazyproperty
+    def rows_std_dev(self):
+        """2D np.float64 ndarray of standard deviation for row percentages."""
+        return np.sqrt(self._rows_variance)
 
     @lazyproperty
     def scale_mean_pairwise_indices(self):

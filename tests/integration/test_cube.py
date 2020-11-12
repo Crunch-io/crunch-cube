@@ -875,6 +875,10 @@ class TestCrunchCubeAs_Slice(object):
             load_python_expression("econ-gender-x-ideology-weighted-row-prop-moe"),
         )
         np.testing.assert_almost_equal(
+            slice_.rows_std_dev,
+            load_python_expression("econ-gender-x-ideology-weighted-row-std-dev"),
+        )
+        np.testing.assert_almost_equal(
             slice_.table_proportions_moe,
             load_python_expression("econ-gender-x-ideology-weighted-table-prop-moe"),
         )
