@@ -298,15 +298,15 @@ class _Slice(CubePartition):
         return np.array([column.margin for column in self._matrix.columns]).T
 
     @lazyproperty
-    def columns_percentages_moe(self):
-        """1D/2D np.float64 ndarray of margin-of-error (MoE) for columns percentages.
+    def columns_proportions_moe(self):
+        """1D/2D np.float64 ndarray of margin-of-error (MoE) for columns proportions.
 
-        The values are represented as percentages, analogue to the `table_percentages`
-        property. This means that the value of 3.5% will have the value 3.5 (not 0.035).
+        The values are represented as fractions, analogue to the `table_proportions`
+        property. This means that the value of 3.5% will have the value 0.035.
         The values can be np.nan when the corresponding percentage is also np.nan, which
         happens when the respective columns margin is 0.
         """
-        return Z_975 * 100 * self.columns_std_err
+        return Z_975 * self.columns_std_err
 
     @lazyproperty
     def columns_std_dev(self):
@@ -463,10 +463,11 @@ class _Slice(CubePartition):
     def population_moe(self):
         """2D np.float64 ndarray of population margin-of-error (MoE) for table percents.
 
-        The values are represented as population estimates, analogue to the `population_counts`
-        property. This means that the values will be presented by actual estimated counts of the population
-        The values can be np.nan when the corresponding percentage is also np.nan, which
-        happens when the respective table margin is 0.
+        The values are represented as population estimates, analogue to the
+        `population_counts` property. This means that the values will be presented by
+        actual estimated counts of the population The values can be np.nan when the
+        corresponding percentage is also np.nan, which happens when the respective
+        table margin is 0.
         """
         total_filtered_population = self._population * self._cube.population_fraction
         return Z_975 * total_filtered_population * self.table_std_err
@@ -539,15 +540,15 @@ class _Slice(CubePartition):
         return np.array([row.margin for row in self._matrix.rows])
 
     @lazyproperty
-    def rows_percentages_moe(self):
-        """2D np.float64 ndarray of margin-of-error (MoE) for rows percentages.
+    def rows_proportions_moe(self):
+        """2D np.float64 ndarray of margin-of-error (MoE) for rows proportions.
 
-        The values are represented as percentages, analogue to the `row_percentages`
-        property. This means that the value of 3.5% will have the value 3.5 (not 0.035).
-        The values can be np.nan when the corresponding percentage is also np.nan, which
-        happens when the respective table margin is 0.
+        The values are represented as percentage-fractions, analogue to the
+        `row_proportions` property. This means that the value of 3.5% will have the
+        value 0.035. The values can be np.nan when the corresponding percentage is also
+        np.nan, which happens when the respective table margin is 0.
         """
-        return Z_975 * 100 * self.rows_std_err
+        return Z_975 * self.rows_std_err
 
     @lazyproperty
     def rows_std_err(self):
@@ -830,15 +831,15 @@ class _Slice(CubePartition):
         return self.table_proportions * 100
 
     @lazyproperty
-    def table_percentages_moe(self):
-        """1D/2D np.float64 ndarray of margin-of-error (MoE) for table percentages.
+    def table_proportions_moe(self):
+        """1D/2D np.float64 ndarray of margin-of-error (MoE) for table proportions.
 
-        The values are represented as percentages, analogue to the `table_percentages`
-        property. This means that the value of 3.5% will have the value 3.5 (not 0.035).
-        The values can be np.nan when the corresponding percentage is also np.nan, which
+        The values are represented as fractions, analogue to the `table_proportions`
+        property. This means that the value of 3.5% will have the value 0.035.  The
+        values can be np.nan when the corresponding percentage is also np.nan, which
         happens when the respective table margin is 0.
         """
-        return Z_975 * 100 * self.table_std_err
+        return Z_975 * self.table_std_err
 
     @lazyproperty
     def table_proportions(self):
@@ -1174,15 +1175,15 @@ class _Strand(CubePartition):
         return np.sqrt(self._variance / np.sum(self.rows_margin))
 
     @lazyproperty
-    def table_percentages_moe(self):
-        """1D np.float64 ndarray of margin-of-error (MoE) for table percentages.
+    def table_proportions_moe(self):
+        """1D np.float64 ndarray of margin-of-error (MoE) for table proportions.
 
-        The values are represented as percentages, analogue to the `table_percentages`
-        property. This means that the value of 3.5% will have the value 3.5 (not 0.035).
-        The values can be np.nan when the corresponding percentage is also np.nan, which
+        The values are represented as fractions, analogue to the `table_proportions`
+        property. This means that the value of 3.5% will have the value 0.035. The
+        values can be np.nan when the corresponding proportion is also np.nan, which
         happens when the respective columns margin is 0.
         """
-        return Z_975 * 100 * self.standard_error
+        return Z_975 * self.standard_error
 
     @lazyproperty
     def table_base(self):
