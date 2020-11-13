@@ -53,7 +53,7 @@ class Describe_Slice(object):
         assert slice_.variable_name == "v7"
 
     def it_provides_values_for_cat_x_cat_pruning_hs(self):
-        slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS).partitions[0]
+        slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, population=1000).partitions[0]
 
         np.testing.assert_array_equal(
             slice_.unweighted_counts,
@@ -94,7 +94,7 @@ class Describe_Slice(object):
         assert slice_.columns_dimension_name == "ShutdownBlame"
         assert slice_.columns_dimension_type == DT.CAT
         np.testing.assert_almost_equal(
-            slice_.columns_std_dev,
+            slice_.column_std_dev,
             [
                 [0.41561694, 0.45910103, 0.48762374, 0.49916867, np.nan, 0.4689693],
                 [0.39644438, 0.44601408, 0.48005275, 0.49353964, np.nan, 0.4689693],
@@ -106,7 +106,7 @@ class Describe_Slice(object):
             ],
         )
         np.testing.assert_almost_equal(
-            slice_.columns_std_err,
+            slice_.column_std_err,
             [
                 [0.06895161, 0.05506512, 0.08465401, 0.11473767, np.nan, 0.27200111],
                 [0.06577085, 0.05349546, 0.08333965, 0.1134438, np.nan, 0.27200111],
@@ -118,23 +118,8 @@ class Describe_Slice(object):
             ],
         )
         np.testing.assert_almost_equal(
-            slice_.columns_percentages_moe,
-            [
-                [
-                    13.51426726,
-                    10.79256616,
-                    16.59188199,
-                    22.48817088,
-                    np.nan,
-                    53.31123764,
-                ],
-                [12.89084933, 10.4849174, 16.3342716, 22.23457567, np.nan, 53.31123764],
-                [5.39900809, 2.84154374, 0.0, 9.93830606, np.nan, 0.0],
-                [8.99374047, 7.09061236, 11.08349041, 14.03617724, np.nan, 53.31123764],
-                [8.99374047, 8.57336265, 14.52191695, 19.75240786, np.nan, 0.0],
-                [0.0, 0.0, 0.0, 0.0, np.nan, 0.0],
-                [5.24385075, 3.87372796, 5.73464003, 9.93830606, np.nan, 0.0],
-            ],
+            slice_.column_proportions_moe,
+            load_python_expression("cat-x-cat-pruning-hs-col-prop-moe"),
         )
         assert slice_.dimension_types == (DT.CAT, DT.CAT)
         assert slice_.inserted_column_idxs == (1,)
@@ -196,15 +181,31 @@ class Describe_Slice(object):
             ],
         )
         np.testing.assert_almost_equal(
-            slice_.table_percentages_moe,
+            slice_.table_proportions_moe,
+            load_python_expression("cat-x-cat-pruning-hs-table-prop-moe"),
+        )
+        np.testing.assert_almost_equal(
+            slice_.row_proportions_moe,
             [
-                [9.47425342, 10.23031735, 8.51416179, 6.4011466, 0.0, 2.10138857],
-                [5.48548061, 8.3257033, 6.91062699, 5.77563348, 0.0, 3.0001713],
-                [2.16468583, 2.16468583, 0.0, 2.10138857, 0.0, 0.0],
-                [3.67141987, 5.4641654, 4.19511734, 3.04381859, 0.0, 3.0001713],
-                [3.67141987, 6.66431728, 5.77563348, 4.6236001, 0.0, 0.0],
+                [0.12688317, 0.09856198, 0.12040055, 0.09504033, 0.0, 0.03218951],
+                [0.1564864, 0.17279947, 0.17915928, 0.16235278, 0.0, 0.09227527],
+                [0.69232826, 0.69232826, 0.0, 0.69232826, 0.0, 0.0],
+                [0.26214652, 0.28339745, 0.28249344, 0.22878774, 0.0, 0.22617896],
+                [0.19317446, 0.22720657, 0.24580874, 0.22720657, 0.0, 0.0],
+                [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
+                [0.54137703, 0.54137703, 0.54137703, 0.54137703, 0.0, 0.0],
+            ],
+        )
+        np.testing.assert_almost_equal(
+            slice_.population_moe,
+            [
+                [94.74253424, 102.30317355, 85.14161791, 64.011466, 0.0, 21.0138857],
+                [54.85480609, 83.25703304, 69.10626987, 57.75633485, 0.0, 30.001713],
+                [21.64685834, 21.64685834, 0.0, 21.0138857, 0.0, 0.0],
+                [36.71419866, 54.64165404, 41.95117344, 30.43818589, 0.0, 30.001713],
+                [36.71419866, 66.64317283, 57.75633485, 46.23600101, 0.0, 0.0],
                 [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                [2.10138857, 2.95581821, 2.10138857, 2.10138857, 0.0, 0.0],
+                [21.0138857, 29.55818215, 21.0138857, 21.0138857, 0.0, 0.0],
             ],
         )
         np.testing.assert_almost_equal(
@@ -230,13 +231,13 @@ class Describe_Slice(object):
             slice_.table_std_err, load_python_expression("cat-hs-x-mr-tbl-stderr")
         )
         np.testing.assert_almost_equal(
-            slice_.columns_std_dev, load_python_expression("cat-hs-x-mr-col-stddev")
+            slice_.column_std_dev, load_python_expression("cat-hs-x-mr-col-stddev")
         )
         np.testing.assert_almost_equal(
-            slice_.columns_std_err, load_python_expression("cat-hs-x-mr-col-stderr")
+            slice_.column_std_err, load_python_expression("cat-hs-x-mr-col-stderr")
         )
         np.testing.assert_almost_equal(
-            slice_.columns_percentages_moe,
+            slice_.column_proportions_moe,
             load_python_expression("cat-hs-x-mr-col-moe"),
         )
         np.testing.assert_almost_equal(
@@ -271,13 +272,13 @@ class Describe_Slice(object):
             slice_.table_std_err, load_python_expression("mr-x-cat-hs-tbl-stderr")
         )
         np.testing.assert_almost_equal(
-            slice_.columns_std_dev, load_python_expression("mr-x-cat-hs-col-stddev")
+            slice_.column_std_dev, load_python_expression("mr-x-cat-hs-col-stddev")
         )
         np.testing.assert_almost_equal(
-            slice_.columns_std_err, load_python_expression("mr-x-cat-hs-col-stderr")
+            slice_.column_std_err, load_python_expression("mr-x-cat-hs-col-stderr")
         )
         np.testing.assert_almost_equal(
-            slice_.columns_percentages_moe,
+            slice_.column_proportions_moe,
             load_python_expression("mr-x-cat-hs-col-moe"),
         )
         np.testing.assert_almost_equal(

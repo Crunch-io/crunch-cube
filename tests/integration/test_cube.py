@@ -19,6 +19,7 @@ from cr.cube.dimension import _ApparentDimensions
 from cr.cube.enums import DIMENSION_TYPE as DT
 
 from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
+from ..util import load_python_expression
 
 
 class DescribeIntegratedCube(object):
@@ -477,17 +478,20 @@ class TestCrunchCubeAs_Slice(object):
         )
 
     def test_std_dev_err_moe_univariate_cat_axis_none(self):
-        strand = Cube(CR.UNIVARIATE_CATEGORICAL).partitions[0]
+        strand = Cube(CR.UNIVARIATE_CATEGORICAL, population=1000).partitions[0]
         np.testing.assert_almost_equal(
             strand.standard_deviation, [0.47140452, 0.47140452]
         )
         np.testing.assert_almost_equal(strand.standard_error, [0.1217161, 0.1217161])
         np.testing.assert_almost_equal(
-            strand.table_percentages_moe, [23.8559221, 23.8559221]
+            strand.table_proportions_moe, [0.238559221, 0.238559221]
+        )
+        np.testing.assert_almost_equal(
+            strand.population_moe, [238.55922104, 238.55922104]
         )
 
     def test_std_dev_err_numeric(self):
-        strand = Cube(CR.VOTER_REGISTRATION).partitions[0]
+        strand = Cube(CR.VOTER_REGISTRATION, population=1000).partitions[0]
         np.testing.assert_almost_equal(
             strand.standard_deviation, [0.31902194, 0.30655342, 0.09949874]
         )
@@ -495,7 +499,10 @@ class TestCrunchCubeAs_Slice(object):
             strand.standard_error, [0.0100884, 0.0096941, 0.0031464]
         )
         np.testing.assert_almost_equal(
-            strand.table_percentages_moe, [1.9772822, 1.9000029, 0.6166883]
+            strand.table_proportions_moe, [0.019772822, 0.019000029, 0.006166883]
+        )
+        np.testing.assert_almost_equal(
+            strand.population_moe, [19.77282169, 19.0000289, 6.16688276]
         )
 
     def test_std_dev_err_datetime(self):
@@ -854,16 +861,26 @@ class TestCrunchCubeAs_Slice(object):
             [0.05880176, 0.03705843, 0.02576154, 0.03360238, 0.04526793, 0.07517074],
             [0.05880176, 0.03705843, 0.02576154, 0.03360238, 0.04526793, 0.07517074],
         ]
-        expected_col_percentages_moe = [
-            [11.5249326, 7.2633194, 5.0491687, 6.5859452, 8.8723517, 14.7331947],
-            [11.5249326, 7.2633194, 5.0491687, 6.5859452, 8.8723517, 14.7331947],
-        ]
+
         np.testing.assert_almost_equal(slice_.table_std_dev, expected_table_std_dev)
         np.testing.assert_almost_equal(slice_.table_std_err, expected_table_std_err)
-        np.testing.assert_almost_equal(slice_.columns_std_dev, expected_col_std_dev)
-        np.testing.assert_almost_equal(slice_.columns_std_err, expected_col_std_err)
+        np.testing.assert_almost_equal(slice_.column_std_dev, expected_col_std_dev)
+        np.testing.assert_almost_equal(slice_.column_std_err, expected_col_std_err)
         np.testing.assert_almost_equal(
-            slice_.columns_percentages_moe, expected_col_percentages_moe
+            slice_.column_proportions_moe,
+            load_python_expression("econ-gender-x-ideology-weighted-col-prop-moe"),
+        )
+        np.testing.assert_almost_equal(
+            slice_.row_proportions_moe,
+            load_python_expression("econ-gender-x-ideology-weighted-row-prop-moe"),
+        )
+        np.testing.assert_almost_equal(
+            slice_.row_std_dev,
+            load_python_expression("econ-gender-x-ideology-weighted-row-std-dev"),
+        )
+        np.testing.assert_almost_equal(
+            slice_.table_proportions_moe,
+            load_python_expression("econ-gender-x-ideology-weighted-table-prop-moe"),
         )
         np.testing.assert_almost_equal(slice_.zscores, expected_zscore)
 
@@ -1000,18 +1017,15 @@ class TestCrunchCubeAs_Slice(object):
             [0.01567414, 0.01993363, 0.01575024, 0.01682826, 0.01795892, 0.00918798],
             [0.01567414, 0.01993363, 0.01575024, 0.01682826, 0.01795892, 0.00918798],
         ]
-        expected_col_percentages_moe = [
-            [3.07207565, 3.90691882, 3.0869894, 3.29827837, 3.51988285, 1.80081013],
-            [3.07207565, 3.90691882, 3.0869894, 3.29827837, 3.51988285, 1.80081013],
-        ]
 
         np.testing.assert_almost_equal(slice_.zscores, expected_zscores)
         np.testing.assert_almost_equal(slice_.table_std_dev, expected_table_std_dev)
         np.testing.assert_almost_equal(slice_.table_std_err, expected_table_std_err)
-        np.testing.assert_almost_equal(slice_.columns_std_dev, expected_col_std_dev)
-        np.testing.assert_almost_equal(slice_.columns_std_err, expected_col_std_err)
+        np.testing.assert_almost_equal(slice_.column_std_dev, expected_col_std_dev)
+        np.testing.assert_almost_equal(slice_.column_std_err, expected_col_std_err)
         np.testing.assert_almost_equal(
-            slice_.columns_percentages_moe, expected_col_percentages_moe
+            slice_.column_proportions_moe,
+            load_python_expression("admit-x-dept-unweighted-col-prop-moe"),
         )
 
     def test_various_measures_admit_by_gender_weighted_rows(self):
@@ -1030,18 +1044,18 @@ class TestCrunchCubeAs_Slice(object):
         expected_table_std_err = [[0.00659641, 0.00492018], [0.0070529, 0.00675348]]
         expected_col_std_dev = [[0.49668253, 0.45933735], [0.49668253, 0.45933735]]
         expected_col_std_err = [[0.00966009, 0.01080163], [0.00966009, 0.01080163]]
-        expected_col_percentages_moe = [
-            [1.89334366, 2.11708092],
-            [1.89334366, 2.11708092],
+        expected_col_proportions_moe = [
+            [0.0189334366, 0.0211708092],
+            [0.0189334366, 0.0211708092],
         ]
 
         np.testing.assert_almost_equal(slice_.zscores, expected_zscores)
         np.testing.assert_almost_equal(slice_.table_std_dev, expected_table_std_dev)
         np.testing.assert_almost_equal(slice_.table_std_err, expected_table_std_err)
-        np.testing.assert_almost_equal(slice_.columns_std_dev, expected_col_std_dev)
-        np.testing.assert_almost_equal(slice_.columns_std_err, expected_col_std_err)
+        np.testing.assert_almost_equal(slice_.column_std_dev, expected_col_std_dev)
+        np.testing.assert_almost_equal(slice_.column_std_err, expected_col_std_err)
         np.testing.assert_almost_equal(
-            slice_.columns_percentages_moe, expected_col_percentages_moe
+            slice_.column_proportions_moe, expected_col_proportions_moe
         )
 
     def test_selected_crosstab_as_array(self):
