@@ -309,20 +309,20 @@ class _Slice(CubePartition):
         return Z_975 * self.column_std_err
 
     @lazyproperty
-    def column_std_dev(self):
-        """standard deviation for column percentages
-
-        `std_deviation = sqrt(variance)`
-        """
-        return np.sqrt(self._column_variance)
-
-    @lazyproperty
     def column_std_err(self):
         """standard error for column percentages
 
         `std_error = sqrt(variance/N)`
         """
         return np.sqrt(self._column_variance / self.columns_margin)
+
+    @lazyproperty
+    def column_std_dev(self):
+        """standard deviation for column percentages
+
+        `std_deviation = sqrt(variance)`
+        """
+        return np.sqrt(self._column_variance)
 
     @lazyproperty
     def counts(self):
@@ -551,14 +551,16 @@ class _Slice(CubePartition):
         return Z_975 * self.row_std_err
 
     @lazyproperty
-    def row_std_err(self):
-        """2D np.float64 ndarray of standard errors for row percentages."""
-        return np.sqrt(self._row_variance / self.rows_margin[:, None])
-
-    @lazyproperty
     def row_std_dev(self):
         """2D np.float64 ndarray of standard deviation for row percentages."""
         return np.sqrt(self._row_variance)
+
+    @lazyproperty
+    def row_std_err(self):
+        """2D np.float64 ndarray of standard errors for row percentages."""
+        # --- We need to add `np.newaxis` to cast the rows margin vector to an actual
+        # --- column, in NumPy terms, to be able to devide correctly.
+        return np.sqrt(self._row_variance / self.rows_margin[:, np.newaxis])
 
     @lazyproperty
     def scale_mean_pairwise_indices(self):
@@ -937,7 +939,11 @@ class _Slice(CubePartition):
     @lazyproperty
     def _row_variance(self):
         """ndarray of variances for row percentages"""
-        margin = self.rows_margin[:, None]
+        # --- Rows margin is a vector, that's supposed to represent a column (to the
+        # --- right of the crosstab). We need to devide all values in the crosstab by it
+        # --- and therefore need to cast it to an actual column (because of how NumPy
+        # --- does broadcasting).
+        margin = self.rows_margin[:, np.newaxis]
         return self.counts / margin * (1 - self.counts / margin)
 
     @lazyproperty
