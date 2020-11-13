@@ -1009,15 +1009,15 @@ class TestHeadersAndSubtotals(object):
     def it_calculate_col_residuals_for_subtotals(self):
         slice_ = Cube(CR.CAT_X_CAT_HS_2ROWS_1COL).partitions[0]
         np.testing.assert_almost_equal(
-            slice_.columns_std_dev,
+            slice_.column_std_dev,
             load_python_expression("col-std-dev-cat-x-cat-hs-2rows-1col"),
         )
         np.testing.assert_almost_equal(
-            slice_.columns_std_err,
+            slice_.column_std_err,
             load_python_expression("col-std-err-cat-x-cat-hs-2rows-1col"),
         )
         np.testing.assert_almost_equal(
-            slice_.columns_proportions_moe,
+            slice_.column_proportions_moe,
             load_python_expression("col-per-moe-cat-x-cat-hs-2rows-1col"),
         )
 
@@ -1885,7 +1885,7 @@ class TestHeadersAndSubtotals(object):
 
         # Test col std dev
         np.testing.assert_almost_equal(
-            slice_.columns_std_dev,
+            slice_.column_std_dev,
             [
                 [0.4330127, 0.48412292, 0.0, 0.0, 0.5],
                 [0.4330127, 0.48412292, 0.47140452, 0.0, 0.47140452],
@@ -1895,7 +1895,7 @@ class TestHeadersAndSubtotals(object):
 
         # Test col std err
         np.testing.assert_almost_equal(
-            slice_.columns_std_err,
+            slice_.column_std_err,
             [
                 [0.21650635, 0.1711633, 0.0, 0.0, 0.14433757],
                 [0.21650635, 0.1711633, 0.27216553, 0.0, 0.13608276],
@@ -1905,7 +1905,7 @@ class TestHeadersAndSubtotals(object):
 
         # Test col MoE
         np.testing.assert_almost_equal(
-            slice_.columns_proportions_moe,
+            slice_.column_proportions_moe,
             [
                 [0.42434465, 0.3354739, 0.0, 0.0, 0.28289644],
                 [0.42434465, 0.3354739, 0.53343463, 0.0, 0.26671732],
@@ -1995,7 +1995,7 @@ class TestHeadersAndSubtotals(object):
 
         # Test col standard dev for 2 columns insertion bottom and interleaved
         np.testing.assert_almost_equal(
-            slice_.columns_std_dev,
+            slice_.column_std_dev,
             [
                 [0.0, 0.0, 0.0, 0.47140452, 0.0, 0.0, 0.0],
                 [0.0, 0.0, 0.0, 0.47140452, 0.0, 0.0, 0.0],
@@ -2006,7 +2006,7 @@ class TestHeadersAndSubtotals(object):
 
         # Test col standard error for 2 columns insertion bottom and interleaved
         np.testing.assert_almost_equal(
-            slice_.columns_std_err,
+            slice_.column_std_err,
             [
                 [0.0, 0.0, 0.0, 0.27216553, 0.0, 0.0, 0.0],
                 [0.0, 0.0, 0.0, 0.27216553, 0.0, 0.0, 0.0],
@@ -2092,7 +2092,7 @@ class TestHeadersAndSubtotals(object):
 
         # Test col std deviation for 1 row insertion
         np.testing.assert_almost_equal(
-            slice_.columns_std_dev,
+            slice_.column_std_dev,
             [
                 [0.41561694, 0.48762374, 0.49916867, np.nan, 0.4689693],
                 [0.39644438, 0.48005275, 0.49353964, np.nan, 0.4689693],
@@ -2106,7 +2106,7 @@ class TestHeadersAndSubtotals(object):
 
         # Test col std error for 1 row insertion
         np.testing.assert_almost_equal(
-            slice_.columns_std_err,
+            slice_.column_std_err,
             [
                 [0.06895161, 0.08465401, 0.11473767, np.nan, 0.27200111],
                 [0.06577085, 0.08333965, 0.1134438, np.nan, 0.27200111],
@@ -2119,7 +2119,7 @@ class TestHeadersAndSubtotals(object):
         )
         # Test col MoE for 1 row insertion
         np.testing.assert_almost_equal(
-            slice_.columns_proportions_moe,
+            slice_.column_proportions_moe,
             [
                 [0.13514267, 0.16591882, 0.22488171, np.nan, 0.53311238],
                 [0.12890849, 0.16334272, 0.22234576, np.nan, 0.53311238],
@@ -2448,7 +2448,7 @@ class TestHeadersAndSubtotals(object):
 
         # Test col std dev for 1 column insertion at left
         np.testing.assert_almost_equal(
-            slice_.columns_std_dev,
+            slice_.column_std_dev,
             [
                 [0.49962497, 0.0, 0.0, 0.0, 0.0, 0.49223325, 0.49991932],
                 [0.49962497, 0.0, 0.0, 0.0, 0.0, 0.49223325, 0.49991932],
@@ -2457,7 +2457,7 @@ class TestHeadersAndSubtotals(object):
 
         # Test col std err for 1 column insertion at left
         np.testing.assert_almost_equal(
-            slice_.columns_std_err,
+            slice_.column_std_err,
             [
                 [0.01686153, 0.0, 0.0, 0.0, 0.0, 0.04300662, 0.03868492],
                 [0.01686153, 0.0, 0.0, 0.0, 0.0, 0.04300662, 0.03868492],
@@ -2466,7 +2466,7 @@ class TestHeadersAndSubtotals(object):
 
         # Test MoE err for 1 column insertion at left
         np.testing.assert_almost_equal(
-            slice_.columns_proportions_moe,
+            slice_.column_proportions_moe,
             [
                 [0.03304798, 0.0, 0.0, 0.0, 0.0, 0.08429142, 0.07582105],
                 [0.03304798, 0.0, 0.0, 0.0, 0.0, 0.08429142, 0.07582105],

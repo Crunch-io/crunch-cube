@@ -298,7 +298,7 @@ class _Slice(CubePartition):
         return np.array([column.margin for column in self._matrix.columns]).T
 
     @lazyproperty
-    def columns_proportions_moe(self):
+    def column_proportions_moe(self):
         """1D/2D np.float64 ndarray of margin-of-error (MoE) for columns proportions.
 
         The values are represented as fractions, analogue to the `column_proportions`
@@ -306,23 +306,23 @@ class _Slice(CubePartition):
         The values can be np.nan when the corresponding percentage is also np.nan, which
         happens when the respective columns margin is 0.
         """
-        return Z_975 * self.columns_std_err
+        return Z_975 * self.column_std_err
 
     @lazyproperty
-    def columns_std_dev(self):
+    def column_std_dev(self):
         """standard deviation for column percentages
 
         `std_deviation = sqrt(variance)`
         """
-        return np.sqrt(self._columns_variance)
+        return np.sqrt(self._column_variance)
 
     @lazyproperty
-    def columns_std_err(self):
+    def column_std_err(self):
         """standard error for column percentages
 
         `std_error = sqrt(variance/N)`
         """
-        return np.sqrt(self._columns_variance / self.columns_margin)
+        return np.sqrt(self._column_variance / self.columns_margin)
 
     @lazyproperty
     def counts(self):
@@ -540,7 +540,7 @@ class _Slice(CubePartition):
         return np.array([row.margin for row in self._matrix.rows])
 
     @lazyproperty
-    def rows_proportions_moe(self):
+    def row_proportions_moe(self):
         """2D np.float64 ndarray of margin-of-error (MoE) for rows proportions.
 
         The values are represented as percentage-fractions, analogue to the
@@ -548,17 +548,17 @@ class _Slice(CubePartition):
         value 0.035. The values can be np.nan when the corresponding percentage is also
         np.nan, which happens when the respective table margin is 0.
         """
-        return Z_975 * self.rows_std_err
+        return Z_975 * self.row_std_err
 
     @lazyproperty
-    def rows_std_err(self):
+    def row_std_err(self):
         """2D np.float64 ndarray of standard errors for row percentages."""
-        return np.sqrt(self._rows_variance / self.rows_margin[:, None])
+        return np.sqrt(self._row_variance / self.rows_margin[:, None])
 
     @lazyproperty
-    def rows_std_dev(self):
+    def row_std_dev(self):
         """2D np.float64 ndarray of standard deviation for row percentages."""
-        return np.sqrt(self._rows_variance)
+        return np.sqrt(self._row_variance)
 
     @lazyproperty
     def scale_mean_pairwise_indices(self):
@@ -925,7 +925,7 @@ class _Slice(CubePartition):
         return np.array([column.numeric_value for column in self._matrix.columns])
 
     @lazyproperty
-    def _columns_variance(self):
+    def _column_variance(self):
         """variance for column percentages
 
         `variance = p * (1-p)`
@@ -935,7 +935,7 @@ class _Slice(CubePartition):
         )
 
     @lazyproperty
-    def _rows_variance(self):
+    def _row_variance(self):
         """ndarray of variances for row percentages"""
         margin = self.rows_margin[:, None]
         return self.counts / margin * (1 - self.counts / margin)

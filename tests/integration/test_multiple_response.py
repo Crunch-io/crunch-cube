@@ -275,13 +275,13 @@ def test_various_measures_from_r_rows_margin():
         load_python_expression("mr-x-cat-weighted-table-std-dev"),
     )
     np.testing.assert_almost_equal(
-        slice_.columns_std_dev, load_python_expression("mr-x-cat-weighted-col-std-dev")
+        slice_.column_std_dev, load_python_expression("mr-x-cat-weighted-col-std-dev")
     )
     np.testing.assert_almost_equal(
-        slice_.columns_std_err, load_python_expression("mr-x-cat-weighted-col-std-err")
+        slice_.column_std_err, load_python_expression("mr-x-cat-weighted-col-std-err")
     )
     np.testing.assert_almost_equal(
-        slice_.columns_proportions_moe,
+        slice_.column_proportions_moe,
         load_python_expression("mr-x-cat-weighted-col-moe"),
     )
     np.testing.assert_almost_equal(
@@ -354,15 +354,15 @@ def test_std_deviation_std_error_array_x_mr_by_row():
         [[0.05838266, 0.01904371, 0.06454158], [0.05719838, 0.06805546, 0.05741888]],
     )
     np.testing.assert_array_almost_equal(
-        slice_.columns_std_dev,
+        slice_.column_std_dev,
         [[0.49978635, 0.20331906, 0.49121125], [0.49978635, 0.20331906, 0.49121125]],
     )
     np.testing.assert_array_almost_equal(
-        slice_.columns_std_err,
+        slice_.column_std_err,
         [[0.05158518, 0.02113084, 0.04615627], [0.05158518, 0.02113084, 0.04615627]],
     )
     np.testing.assert_array_almost_equal(
-        slice_.columns_proportions_moe,
+        slice_.column_proportions_moe,
         [[0.1011051, 0.04141569, 0.09046463], [0.1011051, 0.04141569, 0.09046463]],
     )
 
@@ -419,7 +419,7 @@ def test_cat_x_mr_aug_zscores():
         ],
     )
     np.testing.assert_almost_equal(
-        slice_.columns_std_dev,
+        slice_.column_std_dev,
         [
             [0.45689893, 0.42836987, 0.41706167, 0.4238419, 0.44819968],
             [0.45943524, 0.44539695, 0.46662527, 0.44232528, 0.45647742],
@@ -428,7 +428,7 @@ def test_cat_x_mr_aug_zscores():
         ],
     )
     np.testing.assert_almost_equal(
-        slice_.columns_std_err,
+        slice_.column_std_err,
         [
             [0.02937373, 0.02308169, 0.01952406, 0.02354123, 0.01988999],
             [0.02953678, 0.02399915, 0.0218443, 0.02456784, 0.02025734],
@@ -437,7 +437,7 @@ def test_cat_x_mr_aug_zscores():
         ],
     )
     np.testing.assert_almost_equal(
-        slice_.columns_proportions_moe,
+        slice_.column_proportions_moe,
         [
             [0.05757145, 0.04523928, 0.03826646, 0.04613997, 0.03898367],
             [0.05789104, 0.04703747, 0.04281404, 0.04815209, 0.03970366],
@@ -460,14 +460,10 @@ def test_cat_x_mr_and_cat_x_mr_augmented_various_measures():
     np.testing.assert_array_almost_equal(
         slice_.table_proportions_moe, slice2_.table_proportions_moe
     )
+    np.testing.assert_array_almost_equal(slice_.column_std_dev, slice2_.column_std_dev)
+    np.testing.assert_array_almost_equal(slice_.column_std_err, slice2_.column_std_err)
     np.testing.assert_array_almost_equal(
-        slice_.columns_std_dev, slice2_.columns_std_dev
-    )
-    np.testing.assert_array_almost_equal(
-        slice_.columns_std_err, slice2_.columns_std_err
-    )
-    np.testing.assert_array_almost_equal(
-        slice_.columns_proportions_moe, slice2_.columns_proportions_moe
+        slice_.column_proportions_moe, slice2_.column_proportions_moe
     )
     assert slice_.shape == (4, 5)
     assert slice2_.shape == (4, 5)

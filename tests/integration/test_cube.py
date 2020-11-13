@@ -864,18 +864,18 @@ class TestCrunchCubeAs_Slice(object):
 
         np.testing.assert_almost_equal(slice_.table_std_dev, expected_table_std_dev)
         np.testing.assert_almost_equal(slice_.table_std_err, expected_table_std_err)
-        np.testing.assert_almost_equal(slice_.columns_std_dev, expected_col_std_dev)
-        np.testing.assert_almost_equal(slice_.columns_std_err, expected_col_std_err)
+        np.testing.assert_almost_equal(slice_.column_std_dev, expected_col_std_dev)
+        np.testing.assert_almost_equal(slice_.column_std_err, expected_col_std_err)
         np.testing.assert_almost_equal(
-            slice_.columns_proportions_moe,
+            slice_.column_proportions_moe,
             load_python_expression("econ-gender-x-ideology-weighted-col-prop-moe"),
         )
         np.testing.assert_almost_equal(
-            slice_.rows_proportions_moe,
+            slice_.row_proportions_moe,
             load_python_expression("econ-gender-x-ideology-weighted-row-prop-moe"),
         )
         np.testing.assert_almost_equal(
-            slice_.rows_std_dev,
+            slice_.row_std_dev,
             load_python_expression("econ-gender-x-ideology-weighted-row-std-dev"),
         )
         np.testing.assert_almost_equal(
@@ -1021,10 +1021,10 @@ class TestCrunchCubeAs_Slice(object):
         np.testing.assert_almost_equal(slice_.zscores, expected_zscores)
         np.testing.assert_almost_equal(slice_.table_std_dev, expected_table_std_dev)
         np.testing.assert_almost_equal(slice_.table_std_err, expected_table_std_err)
-        np.testing.assert_almost_equal(slice_.columns_std_dev, expected_col_std_dev)
-        np.testing.assert_almost_equal(slice_.columns_std_err, expected_col_std_err)
+        np.testing.assert_almost_equal(slice_.column_std_dev, expected_col_std_dev)
+        np.testing.assert_almost_equal(slice_.column_std_err, expected_col_std_err)
         np.testing.assert_almost_equal(
-            slice_.columns_proportions_moe,
+            slice_.column_proportions_moe,
             load_python_expression("admit-x-dept-unweighted-col-prop-moe"),
         )
 
@@ -1052,10 +1052,10 @@ class TestCrunchCubeAs_Slice(object):
         np.testing.assert_almost_equal(slice_.zscores, expected_zscores)
         np.testing.assert_almost_equal(slice_.table_std_dev, expected_table_std_dev)
         np.testing.assert_almost_equal(slice_.table_std_err, expected_table_std_err)
-        np.testing.assert_almost_equal(slice_.columns_std_dev, expected_col_std_dev)
-        np.testing.assert_almost_equal(slice_.columns_std_err, expected_col_std_err)
+        np.testing.assert_almost_equal(slice_.column_std_dev, expected_col_std_dev)
+        np.testing.assert_almost_equal(slice_.column_std_err, expected_col_std_err)
         np.testing.assert_almost_equal(
-            slice_.columns_proportions_moe, expected_col_proportions_moe
+            slice_.column_proportions_moe, expected_col_proportions_moe
         )
 
     def test_selected_crosstab_as_array(self):

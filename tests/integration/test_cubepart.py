@@ -94,7 +94,7 @@ class Describe_Slice(object):
         assert slice_.columns_dimension_name == "ShutdownBlame"
         assert slice_.columns_dimension_type == DT.CAT
         np.testing.assert_almost_equal(
-            slice_.columns_std_dev,
+            slice_.column_std_dev,
             [
                 [0.41561694, 0.45910103, 0.48762374, 0.49916867, np.nan, 0.4689693],
                 [0.39644438, 0.44601408, 0.48005275, 0.49353964, np.nan, 0.4689693],
@@ -106,7 +106,7 @@ class Describe_Slice(object):
             ],
         )
         np.testing.assert_almost_equal(
-            slice_.columns_std_err,
+            slice_.column_std_err,
             [
                 [0.06895161, 0.05506512, 0.08465401, 0.11473767, np.nan, 0.27200111],
                 [0.06577085, 0.05349546, 0.08333965, 0.1134438, np.nan, 0.27200111],
@@ -118,7 +118,7 @@ class Describe_Slice(object):
             ],
         )
         np.testing.assert_almost_equal(
-            slice_.columns_proportions_moe,
+            slice_.column_proportions_moe,
             load_python_expression("cat-x-cat-pruning-hs-col-prop-moe"),
         )
         assert slice_.dimension_types == (DT.CAT, DT.CAT)
@@ -185,7 +185,7 @@ class Describe_Slice(object):
             load_python_expression("cat-x-cat-pruning-hs-table-prop-moe"),
         )
         np.testing.assert_almost_equal(
-            slice_.rows_proportions_moe,
+            slice_.row_proportions_moe,
             [
                 [0.12688317, 0.09856198, 0.12040055, 0.09504033, 0.0, 0.03218951],
                 [0.1564864, 0.17279947, 0.17915928, 0.16235278, 0.0, 0.09227527],
@@ -231,13 +231,13 @@ class Describe_Slice(object):
             slice_.table_std_err, load_python_expression("cat-hs-x-mr-tbl-stderr")
         )
         np.testing.assert_almost_equal(
-            slice_.columns_std_dev, load_python_expression("cat-hs-x-mr-col-stddev")
+            slice_.column_std_dev, load_python_expression("cat-hs-x-mr-col-stddev")
         )
         np.testing.assert_almost_equal(
-            slice_.columns_std_err, load_python_expression("cat-hs-x-mr-col-stderr")
+            slice_.column_std_err, load_python_expression("cat-hs-x-mr-col-stderr")
         )
         np.testing.assert_almost_equal(
-            slice_.columns_proportions_moe,
+            slice_.column_proportions_moe,
             load_python_expression("cat-hs-x-mr-col-moe"),
         )
         np.testing.assert_almost_equal(
@@ -272,13 +272,13 @@ class Describe_Slice(object):
             slice_.table_std_err, load_python_expression("mr-x-cat-hs-tbl-stderr")
         )
         np.testing.assert_almost_equal(
-            slice_.columns_std_dev, load_python_expression("mr-x-cat-hs-col-stddev")
+            slice_.column_std_dev, load_python_expression("mr-x-cat-hs-col-stddev")
         )
         np.testing.assert_almost_equal(
-            slice_.columns_std_err, load_python_expression("mr-x-cat-hs-col-stderr")
+            slice_.column_std_err, load_python_expression("mr-x-cat-hs-col-stderr")
         )
         np.testing.assert_almost_equal(
-            slice_.columns_proportions_moe,
+            slice_.column_proportions_moe,
             load_python_expression("mr-x-cat-hs-col-moe"),
         )
         np.testing.assert_almost_equal(
