@@ -1,5 +1,23 @@
 # History of Changes
 
+### 1.11.37
+- PR 216: Document matrix.py classes and properties
+
+### 1.11.36
+- Hypotesis testing for subtotals (heading and insertions)
+
+### 1.11.35
+- Bug fix for hypothesis testing with overlaps
+
+### 1.11.34
+- Bug fix for augmented MRxMR matrices
+
+#### 1.11.33
+- Manage augmentation for MRxMR matrices
+
+#### 1.11.32
+- Handle hidden option for insertions
+
 #### 1.11.31
 - Use bases instead of margin for MR `standard_error` calculation
 

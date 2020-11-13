@@ -112,6 +112,11 @@ The detailed description can be found
 
 ## Changes
 
+### 1.12.9
+- Margin of error for row %
+- Margin of error for population
+- Std deviation and std error for row %
+
 ### 1.12.8
 - Fix pairwise t-test for scale means
 - Fix UserWarning for smoothing measures
@@ -137,24 +142,6 @@ The detailed description can be found
 
 ### 1.12.1
 - Smoothing on column percentages and column index
-
-### 1.11.37
-- PR 216: Document matrix.py classes and properties
-
-### 1.11.36
-- Hypotesis testing for subtotals (heading and insertions)
-
-### 1.11.35
-- Bug fix for hypothesis testing with overlaps
-
-### 1.11.34
-- Bug fix for augmented MRxMR matrices
-
-#### 1.11.33
-- Manage augmentation for MRxMR matrices
-
-#### 1.11.32
-- Handle hidden option for insertions
 
 
 For a complete list of changes see [history](https://github.com/Crunch-io/crunch-cube/blob/master/HISTORY.md).
