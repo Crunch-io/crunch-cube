@@ -1,6 +1,6 @@
 # crunch-cube
 
-Open Source Python implementation of the API for working with CrunchCubes
+Open Source Python implementation of the API for working with Crunch Cubes
 
 ## Introduction
 
