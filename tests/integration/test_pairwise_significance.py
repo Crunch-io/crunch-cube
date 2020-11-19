@@ -33,7 +33,7 @@ class Describe_Slice(object):
                 "cat-x-cat-pw-idxs-recip",
             ),
             (CR.MR_X_CAT, {}, "mr-x-cat-pw-idxs"),
-            (CR.MR_X_CAT_HS, {}, "mr-x-cat-hs-pw-idxs"),
+            (CR.MR_X_CAT_HS_MT, {}, "mr-x-cat-hs-pw-idxs"),
             (CR.EDU_FAV5_FAV5, {}, "cat-x-mr-aug-pw-idxs"),
             (CR.EDU_FAV5_FAV5, {"only_larger": False}, "cat-x-mr-aug-pw-idxs-recip"),
             (CR.CAT_HS_X_MR, {}, "cat-hs-x-mr-pw-idxs"),
@@ -241,7 +241,7 @@ class TestStandardizedResiduals(TestCase):
             "columns_dimension": {"insertions": {}},
             "rows_dimension": {"insertions": {}},
         }
-        slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[0]
+        slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
         actual = slice_.pairwise_significance_tests[0]
 
         np.testing.assert_almost_equal(
@@ -253,7 +253,7 @@ class TestStandardizedResiduals(TestCase):
         )
 
         # Just H&S
-        slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS).partitions[0]
+        slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT).partitions[0]
         actual = slice_.pairwise_significance_tests[0]
 
         np.testing.assert_almost_equal(
@@ -271,7 +271,7 @@ class TestStandardizedResiduals(TestCase):
             "rows_dimension": {"prune": True},
             "columns_dimension": {"prune": True},
         }
-        slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[0]
+        slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
         actual = slice_.pairwise_significance_tests[0]
 
         np.testing.assert_almost_equal(
@@ -287,7 +287,7 @@ class TestStandardizedResiduals(TestCase):
             "rows_dimension": {"insertions": {}, "prune": True},
             "columns_dimension": {"insertions": {}, "prune": True},
         }
-        slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[0]
+        slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
         actual = slice_.pairwise_significance_tests[0]
 
         np.testing.assert_almost_equal(

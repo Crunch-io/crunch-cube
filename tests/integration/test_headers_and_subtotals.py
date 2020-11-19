@@ -2017,7 +2017,7 @@ class TestHeadersAndSubtotals(object):
 
     def it_calculates_residuals_for_rows_insertion(self):
         transforms = {"columns_dimension": {"insertions": {}}}
-        slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[0]
+        slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
 
         # Test zscores for 1 row insertion
         assert slice_.inserted_row_idxs == (1,)

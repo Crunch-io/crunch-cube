@@ -63,7 +63,7 @@ class DescribeIntegratedCubeSlice(object):
         np.testing.assert_array_equal(cube_slice.as_array(prune=True), expected)
 
     def test_mr_single_cat_x_mr_margin_with_pruning(self):
-        cc = CrunchCube(CR.MR_SINGLE_CAT_X_MR)
+        cc = CrunchCube(CR.MR_1_X_MR_3)
         cube_slice = cc.slices[0]
         expected = np.ma.masked_array([2, 2, 2], mask=[False, False, True])
         np.testing.assert_array_equal(cube_slice.margin(prune=True), expected)
@@ -85,7 +85,7 @@ class DescribeCubeSliceAPI(object):
 
 
 def test_labels_with_hs_and_pruning():
-    cs = CrunchCube(CR.CAT_X_CAT_PRUNING_HS).slices[0]
+    cs = CrunchCube(CR.CAT_HS_MT_X_CAT_HS_MT).slices[0]
 
     # Withouut pruning or H&S
     expected = [
@@ -95,11 +95,11 @@ def test_labels_with_hs_and_pruning():
             u"Divorced",
             u"Widowed",
             u"Single",
-            u"Domestic partnership",
+            u"Domestic pa",
         ],
         [
-            u"President Obama",
-            u"Republicans in Congress",
+            u"President O",
+            u"Republicans",
             u"Both",
             u"Neither",
             u"Not sure",
@@ -110,8 +110,8 @@ def test_labels_with_hs_and_pruning():
 
     # Apply pruning
     expected = [
-        [u"Married", u"Separated", u"Divorced", u"Widowed", u"Domestic partnership"],
-        [u"President Obama", u"Republicans in Congress", u"Both", u"Not sure"],
+        [u"Married", u"Separated", u"Divorced", u"Widowed", u"Domestic pa"],
+        [u"President O", u"Republicans", u"Both", u"Not sure"],
     ]
     actual = cs.labels(prune=True)
     assert actual == expected
@@ -125,12 +125,12 @@ def test_labels_with_hs_and_pruning():
             u"Divorced",
             u"Widowed",
             u"Single",
-            u"Domestic partnership",
+            u"Domestic pa",
         ],
         [
-            u"President Obama",
-            u"Obama + Republicans",
-            u"Republicans in Congress",
+            u"President O",
+            u"Obama + Rep",
+            u"Republicans",
             u"Both",
             u"Neither",
             u"Not sure",
@@ -147,12 +147,12 @@ def test_labels_with_hs_and_pruning():
             u"Separated",
             u"Divorced",
             u"Widowed",
-            u"Domestic partnership",
+            u"Domestic pa",
         ],
         [
-            u"President Obama",
-            u"Obama + Republicans",
-            u"Republicans in Congress",
+            u"President O",
+            u"Obama + Rep",
+            u"Republicans",
             u"Both",
             u"Not sure",
         ],

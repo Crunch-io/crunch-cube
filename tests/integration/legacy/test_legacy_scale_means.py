@@ -306,7 +306,7 @@ def test_ca_x_mr_with_hs_and_pruning():
 
 
 def test_cat_x_cat_pruning_and_hs():
-    cube = CrunchCube(CR.CAT_X_CAT_PRUNING_HS)
+    cube = CrunchCube(CR.CAT_HS_MT_X_CAT_HS_MT)
     expected = [
         [
             np.array([1.57933884, 2.10618401, 2.30460074, np.nan, 2.34680135]),

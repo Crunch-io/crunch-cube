@@ -258,7 +258,7 @@ class DescribeIntegrated_MeanMeasure(object):
         )
 
     def it_handles_cat_x_mr_with_means(self):
-        slice_ = Cube(CR.CAT_X_MR_WITH_MEANS).partitions[0]
+        slice_ = Cube(CR.MEANS_CAT_X_MR).partitions[0]
         assert slice_.column_labels == (
             "Denmark",
             "Finland",
@@ -1062,7 +1062,7 @@ class TestCrunchCubeAs_Slice(object):
         )
 
     def test_selected_crosstab_as_array(self):
-        slice_ = Cube(CR.SELECTED_CROSSTAB_4).partitions[0]
+        slice_ = Cube(CR.MR_X_CAT_2).partitions[0]
         expected = np.array(
             [
                 [9928.20954289002, 11524.821237084192],
@@ -1076,7 +1076,7 @@ class TestCrunchCubeAs_Slice(object):
         np.testing.assert_almost_equal(slice_.counts, expected)
 
     def test_selected_crosstab_margin_by_rows(self):
-        slice_ = Cube(CR.SELECTED_CROSSTAB_4).partitions[0]
+        slice_ = Cube(CR.MR_X_CAT_2).partitions[0]
         expected = np.array(
             [
                 21453.03077997421,
@@ -1090,7 +1090,7 @@ class TestCrunchCubeAs_Slice(object):
         np.testing.assert_almost_equal(slice_.rows_margin, expected)
 
     def test_selected_crosstab_margin_by_cols(self):
-        slice_ = Cube(CR.SELECTED_CROSSTAB_4).partitions[0]
+        slice_ = Cube(CR.MR_X_CAT_2).partitions[0]
         expected = np.array(
             [
                 [14566.261567907562, 15607.301233922663],
@@ -1104,7 +1104,7 @@ class TestCrunchCubeAs_Slice(object):
         np.testing.assert_almost_equal(slice_.columns_margin, expected)
 
     def test_selected_crosstab_margin_total(self):
-        slice_ = Cube(CR.SELECTED_CROSSTAB_4).partitions[0]
+        slice_ = Cube(CR.MR_X_CAT_2).partitions[0]
         expected = np.array(
             [
                 30173.5628018302,
@@ -1118,7 +1118,7 @@ class TestCrunchCubeAs_Slice(object):
         np.testing.assert_almost_equal(slice_.table_margin, expected)
 
     def test_selected_crosstab_proportions_by_rows(self):
-        slice_ = Cube(CR.SELECTED_CROSSTAB_4).partitions[0]
+        slice_ = Cube(CR.MR_X_CAT_2).partitions[0]
         expected = np.array(
             [
                 [0.4627882020361299, 0.5372117979638701],
@@ -1132,7 +1132,7 @@ class TestCrunchCubeAs_Slice(object):
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
     def test_selected_crosstab_proportions_by_cols(self):
-        slice_ = Cube(CR.SELECTED_CROSSTAB_4).partitions[0]
+        slice_ = Cube(CR.MR_X_CAT_2).partitions[0]
         expected = np.array(
             [
                 [0.6815894041587091, 0.7384249886863752],
@@ -1146,7 +1146,7 @@ class TestCrunchCubeAs_Slice(object):
         np.testing.assert_almost_equal(slice_.column_proportions, expected)
 
     def test_selected_crosstab_proportions_by_cell(self):
-        slice_ = Cube(CR.SELECTED_CROSSTAB_4).partitions[0]
+        slice_ = Cube(CR.MR_X_CAT_2).partitions[0]
         expected = np.array(
             [
                 [0.329036700375595, 0.381950958618156],

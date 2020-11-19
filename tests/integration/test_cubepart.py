@@ -52,8 +52,8 @@ class Describe_Slice(object):
         assert slice_.table_name is None
         assert slice_.variable_name == "v7"
 
-    def it_provides_values_for_cat_x_cat_pruning_hs(self):
-        slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, population=1000).partitions[0]
+    def it_provides_values_for_cat_hs_mt_x_cat_hs_mt(self):
+        slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, population=1000).partitions[0]
 
         np.testing.assert_array_equal(
             slice_.unweighted_counts,
@@ -70,13 +70,13 @@ class Describe_Slice(object):
         np.testing.assert_almost_equal(
             slice_.column_index,
             [
-                [119.51424328, np.nan, 93.79691922, 81.24002902, np.nan, 50.17378721],
+                [119.51424314, np.nan, 93.79691945, 81.24002871, np.nan, 50.17378808],
                 [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
-                [129.57286502, np.nan, 0.0, 234.24140666, np.nan, 0.0],
-                [68.74132753, np.nan, 99.37070479, 89.71345927, np.nan, 554.5688323],
-                [48.0063805, np.nan, 137.75263952, 149.33201417, np.nan, 0.0],
+                [129.57286183, np.nan, 0.0, 234.24141174, np.nan, 0.0],
+                [68.74132837, np.nan, 99.37070393, 89.71346023, np.nan, 554.56882771],
+                [48.00638105, np.nan, 137.75263905, 149.33201406, np.nan, 0.0],
                 [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
-                [83.86593205, np.nan, 91.83509301, 160.9906575, np.nan, 0.0],
+                [83.86593194, np.nan, 91.83509328, 160.99065701, np.nan, 0.0],
             ],
         )
         np.testing.assert_almost_equal(
@@ -91,7 +91,7 @@ class Describe_Slice(object):
                 [0.02672176, 0.02793377, 0.02926094, 0.05129561, np.nan, 0.0],
             ],
         )
-        assert slice_.columns_dimension_name == "ShutdownBlame"
+        assert slice_.columns_dimension_name == "ShutdownBla"
         assert slice_.columns_dimension_type == DT.CAT
         np.testing.assert_almost_equal(
             slice_.column_std_dev,
@@ -125,7 +125,7 @@ class Describe_Slice(object):
         assert slice_.inserted_column_idxs == (1,)
         assert slice_.inserted_row_idxs == (1,)
         assert slice_.is_empty is False
-        assert slice_.name == "MaritalStatus"
+        assert slice_.name == "MaritalStat"
         assert slice_.ndim == 2
         np.testing.assert_almost_equal(
             slice_.pvals,
@@ -139,7 +139,7 @@ class Describe_Slice(object):
                 [0.82020207, 0.70318269, 0.91486794, 0.58880283, np.nan, 0.75048675],
             ],
         )
-        assert slice_.rows_dimension_description == "What is your marital status?"
+        assert slice_.rows_dimension_description == "What is you"
         assert slice_.rows_dimension_fills == (None, None, None, None, None, None, None)
         assert slice_.rows_dimension_type == DT.CAT
         np.testing.assert_almost_equal(
@@ -199,13 +199,13 @@ class Describe_Slice(object):
         np.testing.assert_almost_equal(
             slice_.population_moe,
             [
-                [94.74253424, 102.30317355, 85.14161791, 64.011466, 0.0, 21.0138857],
-                [54.85480609, 83.25703304, 69.10626987, 57.75633485, 0.0, 30.001713],
-                [21.64685834, 21.64685834, 0.0, 21.0138857, 0.0, 0.0],
-                [36.71419866, 54.64165404, 41.95117344, 30.43818589, 0.0, 30.001713],
-                [36.71419866, 66.64317283, 57.75633485, 46.23600101, 0.0, 0.0],
+                [94.7425342, 102.30317352, 85.14161786, 64.01146595, 0.0, 21.01388583],
+                [54.85480624, 83.25703295, 69.10626964, 57.75633502, 0.0, 30.00171283],
+                [21.64685796, 21.64685796, 0.0, 21.01388583, 0.0, 0.0],
+                [36.71419889, 54.64165401, 41.9511732, 30.43818609, 0.0, 30.00171283],
+                [36.71419889, 66.6431728, 57.75633469, 46.23600106, 0.0, 0.0],
                 [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                [21.0138857, 29.55818215, 21.0138857, 21.0138857, 0.0, 0.0],
+                [21.01388583, 29.55818233, 21.01388583, 21.01388583, 0.0, 0.0],
             ],
         )
         np.testing.assert_almost_equal(
@@ -263,7 +263,7 @@ class Describe_Slice(object):
         )
 
     def it_provides_values_for_mr_x_cat_hs(self):
-        slice_ = Cube(CR.MR_X_CAT_HS).partitions[0]
+        slice_ = Cube(CR.MR_X_CAT_HS_MT).partitions[0]
 
         np.testing.assert_almost_equal(
             slice_.table_std_dev, load_python_expression("mr-x-cat-hs-tbl-stddev")
@@ -292,7 +292,7 @@ class Describe_Slice(object):
         "fixture, expectation",
         (
             (CR.CAT_HS_X_MR, "cat-hs-x-mr-row-proportions"),
-            (CR.MR_X_CAT_HS, "mr-x-cat-hs-row-proportions"),
+            (CR.MR_X_CAT_HS_MT, "mr-x-cat-hs-row-proportions"),
             (CR.MR_X_MR, "mr-x-mr-row-proportions"),
         ),
     )
@@ -311,7 +311,7 @@ class Describe_Slice(object):
         "fixture, expectation",
         (
             (CR.CAT_HS_X_MR, "cat-hs-x-mr-column-proportions"),
-            (CR.MR_X_CAT_HS, "mr-x-cat-hs-column-proportions"),
+            (CR.MR_X_CAT_HS_MT, "mr-x-cat-hs-column-proportions"),
             (CR.MR_X_MR, "mr-x-mr-column-proportions"),
         ),
     )
@@ -335,7 +335,7 @@ class Describe_Slice(object):
             (CR.CAT_X_MR, [2, 1], [3, 2, 1], "cat-x-mr-explicit-order"),
             (CR.MR_X_CAT, [2, 1, 3, 4, 5], [5, 1, 4, 3, 2], "mr-x-cat-explicit-order"),
             (
-                CR.MR_X_CAT_HS,
+                CR.MR_X_CAT_HS_MT,
                 [5, 1, 4, 2, 3],
                 [5, 1, 4, 3, 2],
                 "mr-x-cat-hs-explicit-order",
@@ -577,7 +577,7 @@ class Describe_Slice(object):
         assert Cube(CR.OM_SGP8334215_VN_2019_SEP_19).partitions[0].is_empty is True
 
     def it_provides_unpruned_table_margin(self):
-        slice_ = _Slice(Cube(CR.MR_X_CAT_HS), 0, None, None, 0)
+        slice_ = _Slice(Cube(CR.MR_X_CAT_HS_MT), 0, None, None, 0)
         np.testing.assert_array_equal(
             slice_.table_base_unpruned, [165, 210, 242, 450, 476]
         )
@@ -592,7 +592,7 @@ class Describe_Slice(object):
             "rows_dimension": {"insertions": {}, "prune": True},
             "columns_dimension": {"insertions": {}, "prune": True},
         }
-        slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[0]
+        slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
         expected = np.array(
             [[28, 20, 10, 1], [1, 0, 1, 0], [3, 4, 2, 2], [3, 8, 5, 0], [1, 1, 1, 0]]
         )
@@ -600,7 +600,7 @@ class Describe_Slice(object):
 
         # Pruned (just rows) - with insertions
         transforms = {"rows_dimension": {"prune": True}}
-        slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[0]
+        slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
         expected = np.array(
             [
                 [28, 48, 20, 10, 0, 1],
@@ -615,7 +615,7 @@ class Describe_Slice(object):
 
         # Pruned (just columns) - with insertions
         transforms = {"columns_dimension": {"prune": True}}
-        slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[0]
+        slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
         expected = np.array(
             [
                 [28, 48, 20, 10, 1],
@@ -634,7 +634,7 @@ class Describe_Slice(object):
             "rows_dimension": {"prune": True},
             "columns_dimension": {"prune": True},
         }
-        slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[0]
+        slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
         expected = np.array(
             [
                 [28, 48, 20, 10, 1],
@@ -648,7 +648,7 @@ class Describe_Slice(object):
         np.testing.assert_equal(slice_.unweighted_counts, expected)
 
         # Not pruned - with insertions
-        slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS).partitions[0]
+        slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT).partitions[0]
         expected = np.array(
             [
                 [28, 48, 20, 10, 0, 1],

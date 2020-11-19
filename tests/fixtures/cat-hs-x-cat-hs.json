@@ -1,0 +1,117 @@
+{
+  "query": {
+    "dimensions": [
+      {"variable": "000026"},
+      {"variable": "000067"}
+    ],
+    "measures": {
+      "count": {
+        "function": "cube_count",
+        "args": []
+      }
+    },
+    "weight": null
+  },
+  "query_environment": {
+    "filter": []
+  },
+  "result": {
+    "counts": [
+       33,  45,  27,  21,   0,
+      158, 218, 132, 105,   0,
+       66, 102,  60,  82,   0,
+       93,  70,  47, 190,   0,
+      143, 128, 312, 150,   0,
+        3,   1,   0,   0,   0
+    ],
+    "dimensions": [
+      {
+        "derived": false,
+        "references": {
+          "alias": "pasta",
+          "description": "Geometry",
+          "name": "Pasta Shape",
+          "notes": "A categorical variable",
+          "view": {
+            "transform": {
+              "insertions": [
+                {"anchor": 1, "args": [0, 1], "function": "subtotal", "name": "Top 2"},
+                {"anchor": "bottom", "args": [3, 4], "function": "subtotal", "name": "Bottom 2"}
+              ]
+            }
+          }
+        },
+        "type": {
+          "categories": [
+            {"id": 0, "name": "Alice", "numeric_value": 1},
+            {"id": 1, "name": "Bertha", "numeric_value": 2},
+            {"id": 2, "name": "Charlie", "numeric_value": 3},
+            {"id": 3, "name": "David", "numeric_value": 4},
+            {"id": 4, "name": "Ernie", "numeric_value": 5},
+            {"id": -1, "missing": true, "name": "No Data"}
+          ],
+          "class": "categorical",
+          "ordinal": false
+        }
+      },
+      {
+        "derived": false,
+        "references": {
+          "alias": "food_groups",
+          "description": "Four of the five USDA food groups",
+          "name": "Food groups",
+          "notes": "A categorical variable where the missing categories are interspersed throughout the non-missing categories",
+          "view": {
+            "transform": {
+              "insertions": [
+                {"anchor": "bottom", "args": [2, 3], "function": "subtotal", "name": "Last 2"}
+              ]
+            }
+          }
+        },
+        "type": {
+          "categories": [
+            {"id": 0, "name": "Alpha", "numeric_value": 0},
+            {"id": 1, "name": "Bravo", "numeric_value": 2},
+            {"id": 2, "name": "Charlie", "numeric_value": 5},
+            {"id": 3, "name": "Delta", "numeric_value": 4},
+            {"id": -1, "missing": true, "name": "No Data"}
+          ],
+          "class": "categorical",
+          "ordinal": false
+        }
+      }
+    ],
+    "element": "crunch:cube",
+    "filtered": {
+      "unweighted_n": 1662,
+      "weighted_n": 1662
+    },
+    "measures": {
+      "count": {
+        "data": [
+           33,  45,  27,  21,   0,
+          158, 218, 132, 105,   0,
+           66, 102,  60,  82,   0,
+           93,  70,  47, 190,   0,
+          143, 128, 312, 150,   0,
+            3,   1,   0,   0,   0
+        ],
+        "metadata": {
+          "derived": true,
+          "references": {},
+          "type": {
+            "class": "numeric",
+            "integer": true,
+            "missing_reasons": {"No Data": -1},
+            "missing_rules": {}
+          }
+        },
+        "n_missing": 10
+      }
+    },
+    "missing": 10,
+    "n": 1662,
+    "unfiltered": {"unweighted_n": 1662, "weighted_n": 1662}
+  }
+}

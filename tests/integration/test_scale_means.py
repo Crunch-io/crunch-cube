@@ -229,7 +229,7 @@ def test_cat_x_cat_pruning_and_hs():
         "columns_dimension": {"insertions": {}},
         "rows_dimension": {"insertions": {}},
     }
-    slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[0]
+    slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
     np.testing.assert_almost_equal(
         slice_.scale_means_row, [1.57933884, 2.10618401, 2.30460074, np.nan, 2.34680135]
     )
@@ -239,7 +239,7 @@ def test_cat_x_cat_pruning_and_hs():
     )
 
     # Just H&S
-    slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS).partitions[0]
+    slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT).partitions[0]
     np.testing.assert_almost_equal(
         slice_.scale_means_row,
         [1.57933884, 1.8308135, 2.10618401, 2.30460074, np.nan, 2.34680135],
@@ -254,7 +254,7 @@ def test_cat_x_cat_pruning_and_hs():
         "rows_dimension": {"prune": True},
         "columns_dimension": {"prune": True},
     }
-    slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[0]
+    slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
     np.testing.assert_almost_equal(
         slice_.scale_means_row,
         [1.57933884, 1.83081353, 2.10618401, 2.30460074, 2.34680135],
@@ -269,7 +269,7 @@ def test_cat_x_cat_pruning_and_hs():
         "rows_dimension": {"insertions": {}, "prune": True},
         "columns_dimension": {"insertions": {}, "prune": True},
     }
-    slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[0]
+    slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
     np.testing.assert_almost_equal(
         slice_.scale_means_row, [1.57933884, 2.106184, 2.3046007, 2.34680135]
     ),
@@ -303,7 +303,7 @@ def test_cat_x_cat_pruning_and_hs_var_scale_means():
         "columns_dimension": {"insertions": {}},
         "rows_dimension": {"insertions": {}},
     }
-    slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[0]
+    slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
     np.testing.assert_almost_equal(
         slice_.var_scale_means_row,
         [1.4459092, 2.14619102, 2.40430987, np.nan, 0.87972883],
@@ -314,7 +314,7 @@ def test_cat_x_cat_pruning_and_hs_var_scale_means():
     )
 
     # Just H&S
-    slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS).partitions[0]
+    slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT).partitions[0]
     np.testing.assert_almost_equal(
         slice_.var_scale_means_row,
         [1.4459092, 1.8494177, 2.14619102, 2.40430987, np.nan, 0.87972883],
@@ -329,7 +329,7 @@ def test_cat_x_cat_pruning_and_hs_var_scale_means():
         "rows_dimension": {"prune": True},
         "columns_dimension": {"prune": True},
     }
-    slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[0]
+    slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
     np.testing.assert_almost_equal(
         slice_.var_scale_means_row,
         [1.4459092, 1.8494177, 2.14619102, 2.40430987, 0.87972883],
@@ -344,7 +344,7 @@ def test_cat_x_cat_pruning_and_hs_var_scale_means():
         "rows_dimension": {"insertions": {}, "prune": True},
         "columns_dimension": {"insertions": {}, "prune": True},
     }
-    slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[0]
+    slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
     np.testing.assert_almost_equal(
         slice_.var_scale_means_row, [1.4459092, 2.14619102, 2.40430987, 0.87972883]
     ),

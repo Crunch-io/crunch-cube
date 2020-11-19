@@ -500,7 +500,7 @@ def test_cat_x_cat_pruning_and_hs():
         "columns_dimension": {"insertions": {}},
         "rows_dimension": {"insertions": {}},
     }
-    slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[0]
+    slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
     np.testing.assert_almost_equal(
         slice_.scale_std_dev_row, [1.2024596, 1.4649884, 1.5505837, np.nan, 0.9379386]
     )
@@ -523,7 +523,7 @@ def test_cat_x_cat_pruning_and_hs():
     assert slice_.scale_median_column_margin == 2
 
     # Just H&S
-    slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS).partitions[0]
+    slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT).partitions[0]
     np.testing.assert_almost_equal(
         slice_.scale_std_dev_row,
         [1.2024596, 1.359933, 1.4649884, 1.5505837, np.nan, 0.9379386],
@@ -552,7 +552,7 @@ def test_cat_x_cat_pruning_and_hs():
         "rows_dimension": {"prune": True},
         "columns_dimension": {"prune": True},
     }
-    slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[0]
+    slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
     np.testing.assert_almost_equal(
         slice_.scale_std_dev_row, [1.2024596, 1.359933, 1.4649884, 1.5505837, 0.9379386]
     )
@@ -577,7 +577,7 @@ def test_cat_x_cat_pruning_and_hs():
         "rows_dimension": {"insertions": {}, "prune": True},
         "columns_dimension": {"insertions": {}, "prune": True},
     }
-    slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[0]
+    slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
     np.testing.assert_almost_equal(
         slice_.scale_std_dev_row, [1.2024596, 1.4649884, 1.5505837, 0.9379386]
     )

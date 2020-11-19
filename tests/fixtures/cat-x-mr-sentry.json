@@ -1,48 +1,22 @@
 {
     "result": {
         "counts": [
-            0,
-            108,
-            1,
-            14,
-            94,
-            1,
-            94,
-            14,
-            1,
-            192,
-            791,
-            41,
-            406,
-            577,
-            41,
-            385,
-            598,
-            41
+              0, 108,   1,
+             14,  94,   1,
+             94,  14,   1,
+            
+            192, 791,  41,
+            406, 577,  41,
+            385, 598,  41
         ],
         "dimensions": [
             {
                 "derived": true,
-                "references": {
-                    "alias": "wealth_rc1",
-                    "description": "",
-                    "name": "Emerging Affluent",
-                    "notes": ""
-                },
+                "references": {"alias": "wealth_rc1", "description": "", "name": "Emerging Af", "notes": ""},
                 "type": {
                     "categories": [
-                        {
-                            "id": 1,
-                            "missing": false,
-                            "name": "Emerging Affluent",
-                            "numeric_value": null
-                        },
-                        {
-                            "id": -1,
-                            "missing": true,
-                            "name": "No Data",
-                            "numeric_value": null
-                        }
+                        {"id": 1, "name": "Emerging Af"},
+                        {"id": -1, "missing": true, "name": "No Data"}
                     ],
                     "class": "categorical",
                     "ordinal": false
@@ -52,22 +26,13 @@
                 "derived": true,
                 "references": {
                     "alias": "localincome_hk_rc",
-                    "description": "Monthly household income",
-                    "name": "Monthly household income (NET)",
+                    "description": "Monthly hou",
+                    "name": "Monthly hou",
                     "notes": "",
                     "subreferences": [
-                        {
-                            "alias": "localincome_hk_rc_1",
-                            "name": "Low (below HKD 25,000)"
-                        },
-                        {
-                            "alias": "localincome_hk_rc_2",
-                            "name": "Mid (HKD 25,000 - 49,999)"
-                        },
-                        {
-                            "alias": "localincome_hk_rc_3",
-                            "name": "High (HKD 50,000 or above)"
-                        }
+                        {"alias": "localincome_hk_rc_1", "name": "Low (below "},
+                        {"alias": "localincome_hk_rc_2", "name": "Mid (HKD 25"},
+                        {"alias": "localincome_hk_rc_3", "name": "High (HKD 5"}
                     ]
                 },
                 "type": {
@@ -75,35 +40,15 @@
                     "elements": [
                         {
                             "id": 1,
-                            "missing": false,
                             "value": {
                                 "derived": false,
                                 "id": "0001",
-                                "references": {
-                                    "alias": "localincome_hk_rc_1",
-                                    "name": "Low (below HKD 25,000)"
-                                },
+                                "references": {"alias": "localincome_hk_rc_1", "name": "Low (below "},
                                 "type": {
                                     "categories": [
-                                        {
-                                            "id": 1,
-                                            "missing": false,
-                                            "name": "Selected",
-                                            "numeric_value": 1,
-                                            "selected": true
-                                        },
-                                        {
-                                            "id": 0,
-                                            "missing": false,
-                                            "name": "Other",
-                                            "numeric_value": 0
-                                        },
-                                        {
-                                            "id": -1,
-                                            "missing": true,
-                                            "name": "No Data",
-                                            "numeric_value": null
-                                        }
+                                        {"id": 1, "missing": false, "name": "Selected", "numeric_value": 1, "selected": true},
+                                        {"id": 0, "missing": false, "name": "Other", "numeric_value": 0},
+                                        {"id": -1, "missing": true, "name": "No Data", "numeric_value": null}
                                     ],
                                     "class": "categorical",
                                     "ordinal": false
@@ -112,35 +57,15 @@
                         },
                         {
                             "id": 2,
-                            "missing": false,
                             "value": {
                                 "derived": false,
                                 "id": "0002",
-                                "references": {
-                                    "alias": "localincome_hk_rc_2",
-                                    "name": "Mid (HKD 25,000 - 49,999)"
-                                },
+                                "references": {"alias": "localincome_hk_rc_2", "name": "Mid (HKD 25"},
                                 "type": {
                                     "categories": [
-                                        {
-                                            "id": 1,
-                                            "missing": false,
-                                            "name": "Selected",
-                                            "numeric_value": 1,
-                                            "selected": true
-                                        },
-                                        {
-                                            "id": 0,
-                                            "missing": false,
-                                            "name": "Other",
-                                            "numeric_value": 0
-                                        },
-                                        {
-                                            "id": -1,
-                                            "missing": true,
-                                            "name": "No Data",
-                                            "numeric_value": null
-                                        }
+                                        {"id": 1, "missing": false, "name": "Selected", "numeric_value": 1, "selected": true},
+                                        {"id": 0, "missing": false, "name": "Other", "numeric_value": 0},
+                                        {"id": -1, "missing": true, "name": "No Data", "numeric_value": null}
                                     ],
                                     "class": "categorical",
                                     "ordinal": false
@@ -149,35 +74,15 @@
                         },
                         {
                             "id": 3,
-                            "missing": false,
                             "value": {
                                 "derived": false,
                                 "id": "0003",
-                                "references": {
-                                    "alias": "localincome_hk_rc_3",
-                                    "name": "High (HKD 50,000 or above)"
-                                },
+                                "references": {"alias": "localincome_hk_rc_3", "name": "High (HKD 5"},
                                 "type": {
                                     "categories": [
-                                        {
-                                            "id": 1,
-                                            "missing": false,
-                                            "name": "Selected",
-                                            "numeric_value": 1,
-                                            "selected": true
-                                        },
-                                        {
-                                            "id": 0,
-                                            "missing": false,
-                                            "name": "Other",
-                                            "numeric_value": 0
-                                        },
-                                        {
-                                            "id": -1,
-                                            "missing": true,
-                                            "name": "No Data",
-                                            "numeric_value": null
-                                        }
+                                        {"id": 1, "missing": false, "name": "Selected", "numeric_value": 1, "selected": true},
+                                        {"id": 0, "missing": false, "name": "Other", "numeric_value": 0},
+                                        {"id": -1, "missing": true, "name": "No Data", "numeric_value": null}
                                     ],
                                     "class": "categorical",
                                     "ordinal": false
@@ -185,54 +90,27 @@
                             }
                         }
                     ],
-                    "subtype": {
-                        "class": "variable"
-                    }
+                    "subtype": {"class": "variable"}
                 }
             },
             {
                 "derived": true,
                 "references": {
                     "alias": "localincome_hk_rc",
-                    "description": "Monthly household income",
-                    "name": "Monthly household income (NET)",
+                    "description": "Monthly hou",
+                    "name": "Monthly hou",
                     "notes": "",
                     "subreferences": [
-                        {
-                            "alias": "localincome_hk_rc_1",
-                            "name": "Low (below HKD 25,000)"
-                        },
-                        {
-                            "alias": "localincome_hk_rc_2",
-                            "name": "Mid (HKD 25,000 - 49,999)"
-                        },
-                        {
-                            "alias": "localincome_hk_rc_3",
-                            "name": "High (HKD 50,000 or above)"
-                        }
+                        {"alias": "localincome_hk_rc_1", "name": "Low (below "},
+                        {"alias": "localincome_hk_rc_2", "name": "Mid (HKD 25"},
+                        {"alias": "localincome_hk_rc_3", "name": "High (HKD 5"}
                     ]
                 },
                 "type": {
                     "categories": [
-                        {
-                            "id": 1,
-                            "missing": false,
-                            "name": "Selected",
-                            "numeric_value": 1,
-                            "selected": true
-                        },
-                        {
-                            "id": 0,
-                            "missing": false,
-                            "name": "Other",
-                            "numeric_value": 0
-                        },
-                        {
-                            "id": -1,
-                            "missing": true,
-                            "name": "No Data",
-                            "numeric_value": null
-                        }
+                        {"id": 1, "name": "Selected", "numeric_value": 1, "selected": true},
+                        {"id": 0, "name": "Other", "numeric_value": 0},
+                        {"id": -1, "missing": true, "name": "No Data"}
                     ],
                     "class": "categorical",
                     "ordinal": false,
@@ -247,39 +125,22 @@
         "measures": {
             "count": {
                 "data": [
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0
+                    0, 0, 0,
+                    0, 0, 0,
+                    0, 0, 0,
+                    
+                    0, 0, 0,
+                    0, 0, 0,
+                    0, 0, 0
                 ],
                 "metadata": {
                     "derived": true,
-                    "references": {
-
-                    },
+                    "references": {},
                     "type": {
                         "class": "numeric",
                         "integer": false,
-                        "missing_reasons": {
-                            "No Data": -1
-                        },
-                        "missing_rules": {
-
-                        }
+                        "missing_reasons": {"No Data": -1},
+                        "missing_rules": {}
                     }
                 },
                 "n_missing": 1133

@@ -856,7 +856,7 @@ def test_mr_x_cat_x_mr_pruned_rows():
 
 
 def test_mr_x_num_with_means_pruned():
-    cube = CrunchCube(CR.BBC_NEWS)
+    cube = CrunchCube(CR.MEANS_MR_X_CAT)
     expected = np.array(
         [
             [
@@ -956,7 +956,7 @@ def test_mr_x_num_with_means_pruned():
 
 
 def test_mr_x_num_with_means_not_pruned():
-    cube = CrunchCube(CR.BBC_NEWS)
+    cube = CrunchCube(CR.MEANS_MR_X_CAT)
     expected = np.array(
         [
             [
@@ -1092,14 +1092,14 @@ def test_mr_x_num_with_means_not_pruned():
 
 
 def test_mr_x_num_rows_margin():
-    cube = CrunchCube(CR.BBC_NEWS)
+    cube = CrunchCube(CR.MEANS_MR_X_CAT)
     expected = np.array([4805, 3614, 1156, 1200, 644, 258, 167, 170, 11419])  # noqa
     actual = cube.margin(axis=1, weighted=False)
     np.testing.assert_array_equal(actual, expected)
 
 
 def test_mr_x_num_cols_margin_not_pruned_unweighted():
-    cube = CrunchCube(CR.BBC_NEWS)
+    cube = CrunchCube(CR.MEANS_MR_X_CAT)
     expected = np.array([1728, 1523, 1570, 1434, 1459, 1429, 1461, 1432, 0, 0, 0, 0])
     margin = cube.margin(axis=0, weighted=False)
     for actual in margin:
@@ -1107,7 +1107,7 @@ def test_mr_x_num_cols_margin_not_pruned_unweighted():
 
 
 def test_mr_x_num_cols_margin_not_pruned_weighted():
-    cube = CrunchCube(CR.BBC_NEWS)
+    cube = CrunchCube(CR.MEANS_MR_X_CAT)
     expected = np.array(
         [
             1709.607711404295,
@@ -1130,7 +1130,7 @@ def test_mr_x_num_cols_margin_not_pruned_weighted():
 
 
 def test_mr_x_num_cols_margin_pruned_unweighted():
-    cube = CrunchCube(CR.BBC_NEWS)
+    cube = CrunchCube(CR.MEANS_MR_X_CAT)
     expected = np.array([1728, 1523, 1570, 1434, 1459, 1429, 1461, 1432])
     margin = np.ma.compress_cols(cube.margin(axis=0, weighted=False, prune=True))
     for actual in margin:
@@ -1138,7 +1138,7 @@ def test_mr_x_num_cols_margin_pruned_unweighted():
 
 
 def test_mr_x_num_cols_margin_pruned_weighted():
-    cube = CrunchCube(CR.BBC_NEWS)
+    cube = CrunchCube(CR.MEANS_MR_X_CAT)
     expected = np.array(
         [
             1709.607711404295,
@@ -1654,7 +1654,7 @@ def test_cat_by_mr_hs_cell_percentage():
 
 
 def test_mr_by_cat_hs_col_percentage():
-    cube = CrunchCube(CR.MR_X_CAT_HS)
+    cube = CrunchCube(CR.MR_X_CAT_HS_MT)
     expected = np.array(
         [
             [
@@ -1714,7 +1714,7 @@ def test_mr_by_cat_hs_col_percentage():
 
 
 def test_mr_by_cat_hs_row_percentage():
-    cube = CrunchCube(CR.MR_X_CAT_HS)
+    cube = CrunchCube(CR.MR_X_CAT_HS_MT)
     expected = np.array(
         [
             [
@@ -1774,7 +1774,7 @@ def test_mr_by_cat_hs_row_percentage():
 
 
 def test_mr_by_cat_hs_cell_percentage():
-    cube = CrunchCube(CR.MR_X_CAT_HS)
+    cube = CrunchCube(CR.MR_X_CAT_HS_MT)
     expected = np.array(
         [
             [
@@ -1834,7 +1834,7 @@ def test_mr_by_cat_hs_cell_percentage():
 
 
 def test_mr_x_cat_min_base_size_mask():
-    cube_slice = CrunchCube(CR.MR_X_CAT_HS).slices[0]
+    cube_slice = CrunchCube(CR.MR_X_CAT_HS_MT).slices[0]
 
     # Table margin evaluates to:
     #
