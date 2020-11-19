@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-"""Unit test suite for `cr.cube.matrix` module."""
+"""Unit test suite for `cr.cube.old_matrix` module."""
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
@@ -12,7 +12,7 @@ import pytest
 from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension, _Element, _Subtotal
 from cr.cube.enums import DIMENSION_TYPE as DT
-from cr.cube.matrix import (
+from cr.cube.old_matrix import (
     _AssembledVector,
     _BaseBaseMatrix,
     _BaseInsertedVector,
@@ -36,10 +36,10 @@ from ..unitutil import (
 
 
 class DescribeTransformedMatrix(object):
-    """Unit test suite for `cr.cube.matrix.TransformedMatrix` object."""
+    """Unit test suite for `cr.cube.old_matrix.TransformedMatrix` object."""
 
     def it_provides_a_constructor_classmethod(self, request, base_matrix_, cube_):
-        _BaseBaseMatrix_ = class_mock(request, "cr.cube.matrix._BaseBaseMatrix")
+        _BaseBaseMatrix_ = class_mock(request, "cr.cube.old_matrix._BaseBaseMatrix")
         _BaseBaseMatrix_.factory.return_value = base_matrix_
         dimensions_ = tuple(instance_mock(request, Dimension) for _ in range(2))
         _init_ = initializer_mock(request, TransformedMatrix)
@@ -233,7 +233,7 @@ class DescribeTransformedMatrix(object):
 
     @pytest.fixture
     def _AssembledVector_(self, request):
-        return class_mock(request, "cr.cube.matrix._AssembledVector")
+        return class_mock(request, "cr.cube.old_matrix._AssembledVector")
 
     @pytest.fixture
     def _assembled_vectors_(self, request):
@@ -265,7 +265,7 @@ class DescribeTransformedMatrix(object):
 
     @pytest.fixture
     def _InsertedColumn_(self, request):
-        return class_mock(request, "cr.cube.matrix._InsertedColumn")
+        return class_mock(request, "cr.cube.old_matrix._InsertedColumn")
 
     @pytest.fixture
     def _inserted_columns_prop_(self, request):
@@ -273,7 +273,7 @@ class DescribeTransformedMatrix(object):
 
     @pytest.fixture
     def _InsertedRow_(self, request):
-        return class_mock(request, "cr.cube.matrix._InsertedRow")
+        return class_mock(request, "cr.cube.old_matrix._InsertedRow")
 
     @pytest.fixture
     def _inserted_rows_prop_(self, request):
@@ -289,7 +289,7 @@ class DescribeTransformedMatrix(object):
 
 
 class Describe_BaseInsertedVector(object):
-    """Unit test suite for `cr.cube.matrix._BaseInsertedVector` object."""
+    """Unit test suite for `cr.cube.old_matrix._BaseInsertedVector` object."""
 
     def it_knows_the_indices_of_its_addends(
         self, request, subtotal_, _base_vectors_prop_
@@ -380,7 +380,7 @@ class Describe_BaseInsertedVector(object):
 
 
 class Describe_BaseTransformationVector(object):
-    """Unit test suite for `cr.cube.matrix._BaseTransformationVector` object."""
+    """Unit test suite for `cr.cube.old_matrix._BaseTransformationVector` object."""
 
     def it_knows_its_element_id(self, base_vector_):
         base_vector_.element_id = 42
@@ -398,7 +398,7 @@ class Describe_BaseTransformationVector(object):
 
 
 class Describe_BaseVector(object):
-    """Unit test suite for `cr.cube.matrix._BaseVector` object."""
+    """Unit test suite for `cr.cube.old_matrix._BaseVector` object."""
 
     def it_knows_its_element_id(self, element_):
         element_.element_id = 42
