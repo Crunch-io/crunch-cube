@@ -18,7 +18,7 @@ def test_cat_x_cat_slice_column_index():
 
 
 def test_mr_x_cat_slice_column_index():
-    slice_ = Cube(CR.SELECTED_CROSSTAB_4).partitions[0]
+    slice_ = Cube(CR.MR_X_CAT_2).partitions[0]
     expected = np.array(
         [
             [95.8651525855387, 103.859044435659],
@@ -123,18 +123,16 @@ def test_mr_x_mr_index_tables_parity_with_nssat():
 
 def test_mr_single_cat_x_mr():
     # No pruning
-    slice_ = Cube(CR.MR_SINGLE_CAT_X_MR).partitions[0]
+    slice_ = Cube(CR.MR_1_X_MR_3).partitions[0]
     expected = [[100, 100, np.nan]]
     np.testing.assert_array_equal(slice_.column_index, expected)
-    # TODO: Implement row index table
-    # np.testing.assert_array_equal(cube_slice.index_table(axis=1), expected)
 
     # With pruning
     transforms = {
         "rows_dimension": {"prune": True},
         "columns_dimension": {"prune": True},
     }
-    slice_ = Cube(CR.MR_SINGLE_CAT_X_MR, transforms=transforms).partitions[0]
+    slice_ = Cube(CR.MR_1_X_MR_3, transforms=transforms).partitions[0]
     expected = [[100, 100]]
     np.testing.assert_array_equal(slice_.column_index, expected)
 

@@ -18,10 +18,7 @@
        65,  67,  24,  15,  0,
        63,  55,  23,  11,  0,
        3,   13,  13,   3,  0,
-       3,    3,   2,   0,  0,
        4,   12,  15,   3,  0,
-       1,   13,   4,   3,  0,
-       0,    3,   0,   1,  0,
        0,    0,   0,   0,  0
     ],
     "dimensions": [
@@ -29,14 +26,13 @@
         "derived": false,
         "references": {
           "alias": "race",
-          "description": "What racial or ethnic group best describes you? What racial or ethnic group best describes you? What racial or ethnic group best describes you? What racial or ethnic group best describes you?",
+          "description": "What racial or ethnic group best describes you?",
           "name": "race",
           "view": {
             "transform": {
               "insertions": [
-                {"anchor": "top", "args": [1, 4], "function": "subtotal", "name": "w+a"},
-                {"anchor": 3, "args": [3, 2], "function": "subtotal", "name": "hisp+black"},
-                {"anchor": 8, "args": [8, 7], "function": "subtotal", "name": "other +"}
+                {"anchor": "top", "args": [1, 2], "function": "subtotal", "name": "w+a"},
+                {"anchor": 3, "args": [3, 4], "function": "subtotal", "name": "hisp+black"}
               ]
             }
           }
@@ -47,10 +43,7 @@
             {"id": 2, "name": "Black", "numeric_value": 2},
             {"id": 3, "name": "Hispanic", "numeric_value": 3},
             {"id": 4, "name": "Asian", "numeric_value": 4},
-            {"id": 5, "name": "Native American", "numeric_value": 5},
-            {"id": 6, "name": "Mixed", "numeric_value": 6},
-            {"id": 7, "name": "Other", "numeric_value": 7},
-            {"id": 8, "name": "Middle Eastern", "numeric_value": 8},
+            {"id": 5, "name": "Mixed", "numeric_value": 6},
             {"id": -1, "missing": true, "name": "No Data"}
           ],
           "class": "categorical",
@@ -67,10 +60,10 @@
         },
         "type": {
           "categories": [
-            {"date": "2019-01", "id": 1, "name": "Jan 2019"},
-            {"date": "2019-04", "id": 2, "name": "Apr 2019"},
-            {"date": "2019-07", "id": 3, "name": "Jul 2019"},
-            {"date": "2019-10", "id": 4, "name": "Oct 2019"},
+            {"id": 1, "name": "Jan 2019"},
+            {"id": 2, "name": "Apr 2019"},
+            {"id": 3, "name": "Jul 2019"},
+            {"id": 4, "name": "Oct 2019"},
             {"id": -1, "missing": true, "name": "No Data"}
           ],
           "class": "categorical",
@@ -85,10 +78,7 @@
            65,  67,  24,  15,  0,
            63,  55,  23,  11,  0,
            3,   13,  13,   3,  0,
-           3,    3,   2,   0,  0,
            4,   12,  15,   3,  0,
-           1,   13,   4,   3,  0,
-           0,    3,   0,   1,  0,
            0,    0,   0,   0,  0
         ],
         "metadata": {

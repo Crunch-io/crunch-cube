@@ -1,0 +1,115 @@
+{
+    "query": {
+        "dimensions": [
+            {"variable": "000009"},
+            {"variable": "000000"}
+        ],
+        "measures": {
+            "count": {
+                "args": [],
+                "function": "cube_count"
+            }
+        },
+        "weight": "http://127.0.0.1:8080/datasets/43f0d19eb1f241a39b7d5c547a0a6b6e/variables/aabdc9db95e540369e6fe9ed945af802/"
+    },
+    "query_environment": {
+        "filter": [
+            "http://127.0.0.1:8080/datasets/43f0d19eb1f241a39b7d5c547a0a6b6e/filters/38f5bc15591b45d885db9b41aa35cc15/",
+            "http://127.0.0.1:8080/datasets/43f0d19eb1f241a39b7d5c547a0a6b6e/filters/0477cb6195234daab49a26225c5b48fb/"
+        ]
+    },
+    "result": {
+        "counts": [
+            28, 20, 10,  0,  1,  0,
+             1,  0,  1,  0,  0,  0,
+             3,  4,  2,  0,  2,  0,
+             3,  8,  5,  0,  0,  0,
+             0,  0,  0,  0,  0,  0,
+             1,  1,  1,  0,  0,  0,
+             0,  0,  0,  0,  0,  0
+        ],
+        "dimensions": [
+            {
+                "derived": false,
+                "references": {
+                    "alias": "MaritalStatus",
+                    "description": "What is you",
+                    "name": "MaritalStat",
+                    "view": {
+                        "transform": {
+                            "insertions": [
+                                {"anchor": 1, "args": [2, 3, 4], "function": "subtotal", "name": "left alone"}
+                            ]
+                        }
+                    }
+                },
+                "type": {
+                    "categories": [
+                        {"id": 1, "name": "Married", "numeric_value": 1},
+                        {"id": 2, "name": "Separated", "numeric_value": 2},
+                        {"id": 3, "name": "Divorced", "numeric_value": 3},
+                        {"id": 4, "name": "Widowed", "numeric_value": 4},
+                        {"id": 5, "name": "Single", "numeric_value": 5},
+                        {"id": 6, "name": "Domestic pa", "numeric_value": 6},
+                        {"id": -1, "missing": true, "name": "No Data"}
+                    ],
+                    "class": "categorical",
+                    "ordinal": false
+                }
+            },
+            {
+                "derived": false,
+                "references": {
+                    "alias": "ShutdownBlame",
+                    "description": "If Presiden",
+                    "name": "ShutdownBla",
+                    "view": {
+                        "transform": {
+                            "insertions": [
+                                {"anchor": 1, "args": [1, 2], "function": "subtotal", "name": "Obama + Rep"}
+                            ]
+                        }
+                    }
+                },
+                "type": {
+                    "categories": [
+                        {"id": 1, "name": "President O", "numeric_value": 1},
+                        {"id": 2, "name": "Republicans", "numeric_value": 2},
+                        {"id": 3, "name": "Both", "numeric_value": 3},
+                        {"id": 4, "name": "Neither", "numeric_value": 4},
+                        {"id": 5, "name": "Not sure", "numeric_value": 5},
+                        {"id": -1, "missing": true, "name": "No Data"}
+                    ],
+                    "class": "categorical",
+                    "ordinal": false
+                }
+            }
+        ],
+        "measures": {
+            "count": {
+                "data": [
+                       28.2654389,    20.2582324,    10.0090081,     0.0000000,     0.9708738,     0.0000000,
+                        1.0309278,     0.0000000,     0.9708738,     0.0000000,     0.0000000,     0.0000000,
+                        3.0327295,     4.0036032,     2.0618557,     0.0000000,     2.0018016,     0.0000000,
+                        3.0327295,     7.9471524,     4.9144230,     0.0000000,     0.0000000,     0.0000000,
+                        0.0000000,     0.0000000,     0.0000000,     0.0000000,     0.0000000,     0.0000000,
+                        0.9708738,     0.9708738,     0.9708738,     0.0000000,     0.0000000,     0.0000000,
+                        0.0000000,     0.0000000,     0.0000000,     0.0000000,     0.0000000,     0.0000000
+                ],
+                "metadata": {
+                    "derived": true,
+                    "references": {},
+                    "type": {
+                        "class": "numeric",
+                        "integer": false,
+                        "missing_reasons": {"No Data": -1},
+                        "missing_rules": {}
+                    }
+                },
+                "n_missing": 0
+            }
+        },
+        "missing": 0,
+        "n": 91
+    }
+}

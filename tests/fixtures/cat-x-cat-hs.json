@@ -1,0 +1,106 @@
+{
+  "query": {
+    "dimensions": [
+      {"variable": "000026"},
+      {"variable": "000067"}
+    ],
+    "measures": {
+      "count": {
+        "function": "cube_count",
+        "args": []
+      }
+    },
+    "weight": null
+  },
+  "query_environment": {
+    "filter": []
+  },
+  "result": {
+    "counts": [
+       32,   8,   3,  12,   0,
+       66, 102,  60,  82,   0,
+       93,  70,  47, 190,   0,
+       49,  51,  25,  23,   0,
+        3,   1,   0,   0,   0
+    ],
+    "dimensions": [
+      {
+        "derived": false,
+        "references": {
+          "alias": "pasta",
+          "description": "Geometry",
+          "name": "Pasta Shape",
+          "notes": "A categorical variable"
+        },
+        "type": {
+          "categories": [
+            {"id": 1, "name": "Alpha", "numeric_value": 1},
+            {"id": 2, "name": "Baker", "numeric_value": 2},
+            {"id": 3, "name": "Charlie", "numeric_value": 3},
+            {"id": 4, "name": "Delta", "numeric_value": 4},
+            {"id": -1, "missing": true, "name": "No Data"}
+          ],
+          "class": "categorical",
+          "ordinal": false
+        }
+      },
+      {
+        "derived": false,
+        "references": {
+          "alias": "names",
+          "description": "Names",
+          "name": "Names",
+          "view": {
+            "transform": {
+              "insertions": [
+                {"anchor": 2, "args": [1, 2], "function": "subtotal", "name": "First 2"},
+                {"anchor": "bottom", "args": [3, 4], "function": "subtotal", "name": "Last 2"}
+              ]
+            }
+          }
+        },
+        "type": {
+          "categories": [
+            {"id": 1, "name": "Agnes", "numeric_value": 0},
+            {"id": 2, "name": "Barry", "numeric_value": 2},
+            {"id": 3, "name": "Cindy", "numeric_value": 5},
+            {"id": 4, "name": "Danny", "numeric_value": 4},
+            {"id": -1, "missing": true, "name": "No Data"}
+          ],
+          "class": "categorical",
+          "ordinal": false
+        }
+      }
+    ],
+    "element": "crunch:cube",
+    "filtered": {
+      "unweighted_n": 1662,
+      "weighted_n": 1662
+    },
+    "measures": {
+      "count": {
+        "data": [
+           32,   8,   3,  12,   0,
+           66, 102,  60,  82,   0,
+           93,  70,  47, 190,   0,
+           49,  51,  25,  23,   0,
+            3,   1,   0,   0,   0
+        ],
+        "metadata": {
+          "derived": true,
+          "references": {},
+          "type": {
+            "class": "numeric",
+            "integer": true,
+            "missing_reasons": {"No Data": -1},
+            "missing_rules": {}
+          }
+        },
+        "n_missing": 10
+      }
+    },
+    "missing": 10,
+    "n": 1662,
+    "unfiltered": {"unweighted_n": 1662, "weighted_n": 1662}
+  }
+}

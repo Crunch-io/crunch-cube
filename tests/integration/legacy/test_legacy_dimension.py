@@ -218,7 +218,7 @@ class TestDimension(TestCase):
         self.assertEqual(actual, expected)
 
     def test_hs_indices_for_mr(self):
-        dimension = CrunchCube(CR.MR_X_CAT_HS)._all_dimensions[1]
+        dimension = CrunchCube(CR.MR_X_CAT_HS_MT)._all_dimensions[1]
         hs_indices = dimension.hs_indices
         assert hs_indices == ()
 

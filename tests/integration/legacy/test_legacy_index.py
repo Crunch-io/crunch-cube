@@ -12,7 +12,7 @@ from ...fixtures import CR
 
 class TestIndex(TestCase):
     def test_mr_x_cat_index(self):
-        cube = CrunchCube(CR.SELECTED_CROSSTAB_4)
+        cube = CrunchCube(CR.MR_X_CAT_2)
         expected = np.array(
             [
                 [0.95865152585539, 1.0385904443566],

@@ -47,7 +47,7 @@ class TestStandardizedResiduals(TestCase):
 
     def test_standardized_residuals_selected_crosstab(self):
         """Residuals for MR x CAT unweighted."""
-        cube = CrunchCube(CR.SELECTED_CROSSTAB_4)
+        cube = CrunchCube(CR.MR_X_CAT_2)
         expected = np.array(
             [
                 [-10.88317888, 10.88317888],

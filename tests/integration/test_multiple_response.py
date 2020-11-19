@@ -116,8 +116,8 @@ def test_proportions_simple_mr_prune():
 
 def test_labels_cat_x_mr_exclude_missing():
     slice_ = Cube(CR.CAT_X_MR).partitions[0]
-    assert slice_.row_labels == ("rambutan", "satsuma")
-    assert slice_.column_labels == ("dog", "cat", "wombat")
+    assert tuple(slice_.row_labels) == ("rambutan", "satsuma")
+    assert tuple(slice_.column_labels) == ("dog", "cat", "wombat")
 
 
 def test_as_array_cat_x_mr():
@@ -739,7 +739,7 @@ def test_mr_x_cat_x_mr_pruned_rows():
 
 def test_mr_x_num_with_means_pruned():
     transforms = {"columns_dimension": {"prune": True}}
-    slice_ = Cube(CR.BBC_NEWS, transforms=transforms).partitions[0]
+    slice_ = Cube(CR.MEANS_MR_X_CAT, transforms=transforms).partitions[0]
     expected = [
         [
             38.79868092168848,
@@ -849,7 +849,7 @@ def test_mr_x_mr_augmented_zscores():
 
 
 def test_mr_x_num_with_means_not_pruned():
-    slice_ = Cube(CR.BBC_NEWS).partitions[0]
+    slice_ = Cube(CR.MEANS_MR_X_CAT).partitions[0]
     expected = [
         [
             38.79868092,
@@ -982,20 +982,20 @@ def test_mr_x_num_with_means_not_pruned():
 
 
 def test_mr_x_num_rows_margin():
-    slice_ = Cube(CR.BBC_NEWS).partitions[0]
+    slice_ = Cube(CR.MEANS_MR_X_CAT).partitions[0]
     expected = [4805, 3614, 1156, 1200, 644, 258, 167, 170, 11419]
     np.testing.assert_array_equal(slice_.row_base, expected)
 
 
 def test_mr_x_num_cols_margin_not_pruned_unweighted():
-    slice_ = Cube(CR.BBC_NEWS).partitions[0]
+    slice_ = Cube(CR.MEANS_MR_X_CAT).partitions[0]
     expected = [1728, 1523, 1570, 1434, 1459, 1429, 1461, 1432, 0, 0, 0, 0]
     np.testing.assert_array_equal(slice_.column_base[0], expected)
 
 
 def test_mr_x_num_cols_margin_pruned_unweighted():
     transforms = {"columns_dimension": {"prune": True}}
-    slice_ = Cube(CR.BBC_NEWS, transforms=transforms).partitions[0]
+    slice_ = Cube(CR.MEANS_MR_X_CAT, transforms=transforms).partitions[0]
     expected = [1728, 1523, 1570, 1434, 1459, 1429, 1461, 1432]
     np.testing.assert_array_equal(slice_.column_base[0], expected)
 
@@ -1481,7 +1481,7 @@ def test_cat_by_mr_hs_cell_percentage():
 
 
 def test_mr_by_cat_hs_col_percentage():
-    slice_ = Cube(CR.MR_X_CAT_HS).partitions[0]
+    slice_ = Cube(CR.MR_X_CAT_HS_MT).partitions[0]
     expected = [
         [
             0.6399160598631669,
@@ -1538,7 +1538,7 @@ def test_mr_by_cat_hs_col_percentage():
 
 
 def test_mr_by_cat_hs_row_percentage():
-    slice_ = Cube(CR.MR_X_CAT_HS).partitions[0]
+    slice_ = Cube(CR.MR_X_CAT_HS_MT).partitions[0]
     expected = [
         [
             0.44079255048452126,
@@ -1595,7 +1595,7 @@ def test_mr_by_cat_hs_row_percentage():
 
 
 def test_mr_by_cat_hs_cell_percentage():
-    slice_ = Cube(CR.MR_X_CAT_HS).partitions[0]
+    slice_ = Cube(CR.MR_X_CAT_HS_MT).partitions[0]
     expected = [
         [
             0.07905704201278009,
@@ -1665,7 +1665,7 @@ def test_mr_x_cat_min_base_size_mask():
     # We thus choose the min base size to be 220, and expeect it to broadcast across
     # columns (in the row direction, i.e. axis=1), sincee the MR is what won't be
     # collapsed after doing the base calculation in the table direction.
-    slice_ = Cube(CR.MR_X_CAT_HS, transforms=transforms, mask_size=220).partitions[0]
+    slice_ = Cube(CR.MR_X_CAT_HS_MT, transforms=transforms, mask_size=220).partitions[0]
 
     expected = np.array(
         [
@@ -1691,7 +1691,7 @@ def test_mr_x_cat_min_base_size_mask():
     # )
     #
     # We thus choose the min base size to be 30, and expeect it to not be broadcast.
-    slice_ = Cube(CR.MR_X_CAT_HS, transforms=transforms, mask_size=30).partitions[0]
+    slice_ = Cube(CR.MR_X_CAT_HS_MT, transforms=transforms, mask_size=30).partitions[0]
 
     expected_column_mask = np.array(
         [
@@ -1713,7 +1713,7 @@ def test_mr_x_cat_min_base_size_mask():
     # We thus choose the min base size to be 80, and expeect it to broadcast across
     # columns (in the row direction, i.e. axis=1), sincee the MR is what won't be
     # collapsed after doing the base calculation in the row direction.
-    slice_ = Cube(CR.MR_X_CAT_HS, transforms=transforms, mask_size=80).partitions[0]
+    slice_ = Cube(CR.MR_X_CAT_HS_MT, transforms=transforms, mask_size=80).partitions[0]
 
     expected_row_mask = np.array(
         [

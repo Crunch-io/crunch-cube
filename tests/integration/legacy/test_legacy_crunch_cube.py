@@ -842,13 +842,13 @@ class TestCrunchCube(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_selected_crosstab_dim_names(self):
-        cube = CrunchCube(CR.SELECTED_CROSSTAB_4)
+        cube = CrunchCube(CR.MR_X_CAT_2)
         expected = ["Statements agreed with about Climate", "Gender"]
         actual = [dim.name for dim in cube.dimensions]
         self.assertEqual(actual, expected)
 
     def test_selected_crosstab_as_array(self):
-        cube = CrunchCube(CR.SELECTED_CROSSTAB_4)
+        cube = CrunchCube(CR.MR_X_CAT_2)
         expected = np.array(
             [
                 [9928.20954289002, 11524.821237084192],
@@ -863,7 +863,7 @@ class TestCrunchCube(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_selected_crosstab_margin_by_rows(self):
-        cube = CrunchCube(CR.SELECTED_CROSSTAB_4)
+        cube = CrunchCube(CR.MR_X_CAT_2)
         expected = np.array(
             [
                 21453.03077997421,
@@ -878,7 +878,7 @@ class TestCrunchCube(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_selected_crosstab_margin_by_cols(self):
-        cube = CrunchCube(CR.SELECTED_CROSSTAB_4)
+        cube = CrunchCube(CR.MR_X_CAT_2)
         expected = np.array(
             [
                 [14566.261567907562, 15607.301233922663],
@@ -893,7 +893,7 @@ class TestCrunchCube(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_selected_crosstab_margin_total(self):
-        cube = CrunchCube(CR.SELECTED_CROSSTAB_4)
+        cube = CrunchCube(CR.MR_X_CAT_2)
         expected = np.array(
             [
                 30173.5628018302,
@@ -908,7 +908,7 @@ class TestCrunchCube(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_selected_crosstab_proportions_by_rows(self):
-        cube = CrunchCube(CR.SELECTED_CROSSTAB_4)
+        cube = CrunchCube(CR.MR_X_CAT_2)
         expected = np.array(
             [
                 [0.4627882020361299, 0.5372117979638701],
@@ -923,7 +923,7 @@ class TestCrunchCube(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_selected_crosstab_proportions_by_cols(self):
-        cube = CrunchCube(CR.SELECTED_CROSSTAB_4)
+        cube = CrunchCube(CR.MR_X_CAT_2)
         expected = np.array(
             [
                 [0.6815894041587091, 0.7384249886863752],
@@ -938,7 +938,7 @@ class TestCrunchCube(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_selected_crosstab_proportions_by_cell(self):
-        cube = CrunchCube(CR.SELECTED_CROSSTAB_4)
+        cube = CrunchCube(CR.MR_X_CAT_2)
         expected = np.array(
             [
                 [0.329036700375595, 0.381950958618156],
@@ -953,7 +953,7 @@ class TestCrunchCube(TestCase):
         np.testing.assert_almost_equal(actual, expected)
 
     def test_selected_crosstab_is_double_mr(self):
-        cube = CrunchCube(CR.SELECTED_CROSSTAB_4)
+        cube = CrunchCube(CR.MR_X_CAT_2)
         expected = False
         actual = cube.is_double_mr
         self.assertEqual(actual, expected)
@@ -2037,7 +2037,7 @@ class TestCrunchCube(TestCase):
         np.testing.assert_array_equal(actual[1], expected[1])
 
     def test_mr_x_cat_hs_prune_indices(self):
-        cube = CrunchCube(CR.MR_X_CAT_HS)
+        cube = CrunchCube(CR.MR_X_CAT_HS_MT)
         expected = [
             np.array([False, False, False, False, False]),
             np.array([False, False, False, True, False, False, True, False]),

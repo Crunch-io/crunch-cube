@@ -40,7 +40,7 @@ def test_cat_x_cat_slice_column_index_with_baseline():
 
 
 def test_mr_x_cat_slice_column_index():
-    cube = CrunchCube(CR.SELECTED_CROSSTAB_4)
+    cube = CrunchCube(CR.MR_X_CAT_2)
     expected = np.array(
         [
             [95.8651525855387, 103.859044435659],
@@ -56,7 +56,7 @@ def test_mr_x_cat_slice_column_index():
 
 
 def test_mr_x_cat_slice_row_index():
-    cube = CrunchCube(CR.SELECTED_CROSSTAB_4)
+    cube = CrunchCube(CR.MR_X_CAT_2)
     expected = np.array(
         [
             [95.3416155822363, 104.394053238208],
@@ -271,7 +271,7 @@ def test_mr_x_mr_index_tables_parity_with_nssat():
 
 
 def test_mr_single_cat_x_mr():
-    cube_slice = CrunchCube(CR.MR_SINGLE_CAT_X_MR).slices[0]
+    cube_slice = CrunchCube(CR.MR_1_X_MR_3).slices[0]
     expected = np.array([[100, 100, np.nan]])
     np.testing.assert_array_equal(cube_slice.index_table(axis=0), expected)
     np.testing.assert_array_equal(cube_slice.index_table(axis=1), expected)

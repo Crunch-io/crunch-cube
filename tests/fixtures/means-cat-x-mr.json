@@ -1,0 +1,453 @@
+{
+    "query": {
+        "dimensions": [
+            {"variable": "https://app.crunch.io/api/datasets/7af9b5a206054cc38c84b73ab700e201/variables/000026/"},
+            {"each": "https://app.crunch.io/api/datasets/7af9b5a206054cc38c84b73ab700e201/variables/0000dc/"},
+            {
+                "args": [
+                    {"variable": "https://app.crunch.io/api/datasets/7af9b5a206054cc38c84b73ab700e201/variables/0000dc/"}
+                ],
+                "function": "as_selected"
+            }
+        ],
+        "measures": {
+            "count": {
+                "args": [],
+                "function": "cube_count"
+            },
+            "mean": {
+                "args": [
+                    {"variable": "https://app.crunch.io/api/datasets/7af9b5a206054cc38c84b73ab700e201/variables/0000a1/"}
+                ],
+                "function": "cube_mean"
+            }
+        },
+        "weight": null
+    },
+    "query_environment": {
+        "filter": []
+    },
+    "result": {
+        "counts": [
+            8, 7, 40,
+            7, 8, 40,
+            4, 9, 42,
+            13, 7, 35,
+            27, 5, 23,
+
+            7, 17, 102,
+            16, 18, 92,
+            21, 16, 89,
+            36, 14, 76,
+            58, 11, 57,
+
+            5, 68, 543,
+            56, 65, 495,
+            71, 64, 481,
+            230, 43, 343,
+            307, 39, 270,
+
+            6, 51, 253,
+            26, 49, 235,
+            39, 42, 229,
+            130, 29, 151,
+            134, 33, 143,
+
+            5, 64, 332,
+            27, 59, 315,
+            54, 57, 290,
+            190, 31, 180,
+            166, 42, 193,
+
+            2, 15, 133,
+            11, 12, 127,
+            11, 14, 125,
+            36, 10, 104,
+            101, 8, 41,
+
+            0, 0, 4,
+            0, 0, 4,
+            0, 0, 4,
+            2, 0, 2,
+            2, 0, 2,
+
+            0, 0, 0,
+            0, 0, 0,
+            0, 0, 0,
+            0, 0, 0,
+            0, 0, 0,
+
+            0, 0, 0,
+            0, 0, 0,
+            0, 0, 0,
+            0, 0, 0,
+            0, 0, 0
+        ],
+        "dimensions": [
+            {
+                "derived": false,
+                "references": {
+                    "alias": "pasta",
+                    "description": "The geometry of pasta",
+                    "name": "Shapes of pasta",
+                    "notes": "A categorical variable",
+                    "view": {
+                        "transform": {
+                            "insertions": []
+                        }
+                    }
+                },
+                "type": {
+                    "categories": [
+                        {"id": 1, "name": "Bucatini", "numeric_value": 1},
+                        {"id": 2, "name": "Chitarra", "numeric_value": 2},
+                        {"id": 0, "name": "Boccoli", "numeric_value": 0},
+                        {"id": 4, "name": "Orecchiette", "numeric_value": 4},
+                        {"id": 5, "name": "Quadrefiore", "numeric_value": 5},
+                        {"id": 6, "name": "Fileja", "numeric_value": 6},
+                        {"id": 32766, "missing": true, "name": "Skipped", "numeric_value": 32766},
+                        {"id": 32767, "missing": true, "name": "Not asked", "numeric_value": 32767},
+                        {"id": -1, "missing": true, "name": "No Data"}
+                    ],
+                    "class": "categorical",
+                    "ordinal": false
+                }
+            },
+            {
+                "derived": true,
+                "references": {
+                    "alias": "nordics",
+                    "description": "Which of the following Nordic countries have you visited? (select all that apply)",
+                    "is_dichotomous": true,
+                    "name": "Nordic countries",
+                    "notes": "A multiple response variable",
+                    "subreferences": [
+                        {"alias": "dk", "description": "milstat_1", "name": "Denmark"},
+                        {"alias": "fi", "description": "milstat_2", "name": "Finland"},
+                        {"alias": "is", "description": "milstat_3", "name": "Iceland"},
+                        {"alias": "no", "description": "milstat_4", "name": "Norway"},
+                        {"alias": "se", "description": "milstat_5", "name": "Sweden"}
+                    ],
+                    "uniform_basis": false
+                },
+                "type": {
+                    "class": "enum",
+                    "elements": [
+                        {
+                            "id": 1,
+                            "value": {
+                                "derived": false,
+                                "id": "00c0",
+                                "references": {"alias": "dk", "description": "milstat_1", "name": "Denmark"}
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "derived": false,
+                                "id": "00c1",
+                                "references": {"alias": "fi", "description": "milstat_2", "name": "Finland"}
+                            }
+                        },
+                        {
+                            "id": 3,
+                            "value": {
+                                "derived": false,
+                                "id": "00c2",
+                                "references": {"alias": "is", "description": "milstat_3", "name": "Iceland"}
+                            }
+                        },
+                        {
+                            "id": 4,
+                            "value": {
+                                "derived": false,
+                                "id": "00c3",
+                                "references": {"alias": "no", "description": "milstat_4", "name": "Norway"}
+                            }
+                        },
+                        {
+                            "id": 5,
+                            "value": {
+                                "derived": false,
+                                "id": "00c4",
+                                "references": {"alias": "se", "description": "milstat_5", "name": "Sweden"}
+                            }
+                        }
+                    ],
+                    "subtype": {
+                        "class": "variable"
+                    }
+                }
+            },
+            {
+                "derived": true,
+                "references": {
+                    "alias": "nordics",
+                    "description": "Which of the following Nordic countries have you visited? (select all that apply)",
+                    "is_dichotomous": true,
+                    "name": "Nordic countries",
+                    "notes": "A multiple response variable",
+                    "subreferences": [
+                        {"alias": "dk", "description": "milstat_1", "name": "Denmark"},
+                        {"alias": "fi", "description": "milstat_2", "name": "Finland"},
+                        {"alias": "is", "description": "milstat_3", "name": "Iceland"},
+                        {"alias": "no", "description": "milstat_4", "name": "Norway"},
+                        {"alias": "se", "description": "milstat_5", "name": "Sweden"}
+                    ],
+                    "uniform_basis": false
+                },
+                "type": {
+                    "categories": [
+                        {"id": 1, "name": "Selected", "numeric_value": 1, "selected": true},
+                        {"id": 0, "name": "Other", "numeric_value": 0},
+                        {"id": -1, "missing": true, "name": "No Data"}
+                    ],
+                    "class": "categorical",
+                    "ordinal": false,
+                    "subvariables": ["00c0", "00c1", "00c2", "00c3", "00c4"]
+                }
+            }
+        ],
+        "element": "crunch:cube",
+        "filter_stats": {
+            "filtered": {
+                "unweighted": {"missing": 0, "other": 0, "selected": 1662},
+                "weighted": {"missing": 0, "other": 0, "selected": 1662}
+            },
+            "filtered_complete": {
+                "unweighted": {"missing": 0, "other": 0, "selected": 1662},
+                "weighted": {"missing": 0, "other": 0, "selected": 1662}
+            }
+        },
+        "filtered": {"unweighted_n": 1662, "weighted_n": 1662},
+        "measures": {
+            "count": {
+                "data": [
+                    8,
+                    7,
+                    40,
+                    7,
+                    8,
+                    40,
+                    4,
+                    9,
+                    42,
+                    13,
+                    7,
+                    35,
+                    27,
+                    5,
+                    23,
+                    7,
+                    17,
+                    102,
+                    16,
+                    18,
+                    92,
+                    21,
+                    16,
+                    89,
+                    36,
+                    14,
+                    76,
+                    58,
+                    11,
+                    57,
+                    5,
+                    68,
+                    543,
+                    56,
+                    65,
+                    495,
+                    71,
+                    64,
+                    481,
+                    230,
+                    43,
+                    343,
+                    307,
+                    39,
+                    270,
+                    6,
+                    51,
+                    253,
+                    26,
+                    49,
+                    235,
+                    39,
+                    42,
+                    229,
+                    130,
+                    29,
+                    151,
+                    134,
+                    33,
+                    143,
+                    5,
+                    64,
+                    332,
+                    27,
+                    59,
+                    315,
+                    54,
+                    57,
+                    290,
+                    190,
+                    31,
+                    180,
+                    166,
+                    42,
+                    193,
+                    2,
+                    15,
+                    133,
+                    11,
+                    12,
+                    127,
+                    11,
+                    14,
+                    125,
+                    36,
+                    10,
+                    104,
+                    101,
+                    8,
+                    41,
+                    0,
+                    0,
+                    4,
+                    0,
+                    0,
+                    4,
+                    0,
+                    0,
+                    4,
+                    2,
+                    0,
+                    2,
+                    2,
+                    0,
+                    2,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "metadata": {
+                    "derived": true,
+                    "references": {},
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {"No Data": -1},
+                        "missing_rules": {}
+                    }
+                },
+                "n_missing": 4
+            },
+            "mean": {
+                "data": [
+                    29.0, 39.42857142857143, 41.575,
+                    30.714285714285715, 41.625, 40.575,
+                    48.0, 39.333333333333336, 38.69047619047619,
+                    49.76923076923077, 36.285714285714285, 36.285714285714285,
+                    37.2962962962963, 39.8, 41.95652173913044,
+
+                    35.57142857142857, 51.294117647058826, 48.14705882352941,
+                    45.0, 49.666666666666664, 48.02173913043478,
+                    61.23809523809524, 47.8125, 44.73033707865169,
+                    48.0, 50.0, 47.421052631578945,
+                    45.741379310344826, 49.72727272727273, 49.68421052631579,
+
+                    32.0, 49.1764705882353, 46.54696132596685,
+                    42.517857142857146, 49.646153846153844, 46.81010101010101,
+                    59.42253521126761, 46.796875, 44.83367983367983,
+                    51.95217391304348, 43.97674418604651, 43.55393586005831,
+                    41.57654723127036, 52.48717948717949, 51.733333333333334,
+
+                    28.166666666666668, 49.431372549019606, 50.22924901185771,
+                    50.46153846153846, 47.285714285714285, 50.08085106382979,
+                    55.282051282051285, 46.714285714285715, 49.25764192139738,
+                    54.73076923076923, 46.310344827586206, 45.96026490066225,
+                    44.16417910447761, 49.90909090909091, 54.77622377622377,
+
+                    32.6, 51.0625, 50.93072289156626,
+                    47.148148148148145, 50.152542372881356, 51.13650793650794,
+                    62.388888888888886, 48.40350877192982, 49.00689655172414,
+                    53.90526315789474, 44.645161290322584, 48.41111111111111,
+                    45.4277108433735, 55.785714285714285, 54.17616580310881,
+
+                    24.5, 42.93333333333333, 38.30827067669173,
+                    39.09090909090909, 43.333333333333336, 38.09448818897638,
+                    51.18181818181818, 40.857142857142854, 37.224,
+                    44.19444444444444, 39.7, 36.53846153846154,
+                    35.960396039603964, 46.375, 43.53658536585366,
+
+                    {"?": -8}, {"?": -8}, 47.75,
+                    {"?": -8}, {"?": -8}, 47.75,
+                    {"?": -8}, {"?": -8}, 47.75,
+                    58.0, {"?": -8}, 37.5,
+                    37.5, {"?": -8}, 58.0,
+
+                    {"?": -8}, {"?": -8}, {"?": -8},
+                    {"?": -8}, {"?": -8}, {"?": -8},
+                    {"?": -8}, {"?": -8}, {"?": -8},
+                    {"?": -8}, {"?": -8}, {"?": -8},
+                    {"?": -8}, {"?": -8}, {"?": -8},
+
+                    {"?": -8}, {"?": -8}, {"?": -8},
+                    {"?": -8}, {"?": -8}, {"?": -8},
+                    {"?": -8}, {"?": -8}, {"?": -8},
+                    {"?": -8}, {"?": -8}, {"?": -8},
+                    {"?": -8}, {"?": -8}, {"?": -8}
+                ],
+                "metadata": {
+                    "derived": true,
+                    "references": {},
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {
+                            "NaN": -8,
+                            "No Data": -1
+                        },
+                        "missing_rules": {}
+                    }
+                },
+                "n_missing": 4
+            }
+        },
+        "missing": 4,
+        "n": 1662,
+        "unfiltered": {
+            "unweighted_n": 1662,
+            "weighted_n": 1662
+        }
+    }
+}
