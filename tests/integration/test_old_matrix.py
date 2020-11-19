@@ -1,15 +1,15 @@
 # encoding: utf-8
 
-"""Partial-integration test suite for `cr.cube.matrix` module."""
+"""Partial-integration test suite for `cr.cube.old_matrix` module."""
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from cr.cube.dimension import _Subtotal
-from cr.cube.matrix import _BaseInsertedVector
+from cr.cube.old_matrix import _BaseInsertedVector
 
 
 class Describe_BaseInsertedVector(object):
-    """Unit test suite for `cr.cube.matrix._BaseInsertedVector` object."""
+    """Unit test suite for `cr.cube.old_matrix._BaseInsertedVector` object."""
 
     def it_knows_its_insertion_id_when_it_has_been_assigned_one(self):
         subtotal_dict = {"insertion_id": 42}

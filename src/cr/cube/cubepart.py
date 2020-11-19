@@ -22,8 +22,8 @@ import numpy as np
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.min_base_size_mask import MinBaseSizeMask
 from cr.cube.measures.pairwise_significance import PairwiseSignificance
-from cr.cube.matrix import TransformedMatrix
 from cr.cube.noa.smoothing import SingleSidedMovingAvgSmoother
+from cr.cube.old_matrix import TransformedMatrix
 from cr.cube.scalar import MeansScalar
 from cr.cube.stripe import TransformedStripe
 from cr.cube.util import lazyproperty
