@@ -21,6 +21,7 @@ import numpy as np
 
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.min_base_size_mask import MinBaseSizeMask
+from cr.cube.matrix import Assembler
 from cr.cube.measures.pairwise_significance import PairwiseSignificance
 from cr.cube.noa.smoothing import SingleSidedMovingAvgSmoother
 from cr.cube.old_matrix import TransformedMatrix
@@ -934,7 +935,7 @@ class _Slice(CubePartition):
         The assembler dispatches all second-order measure calculations and insertion
         construction, and orders the result matrix, including removing hidden vectors.
         """
-        raise NotImplementedError
+        return Assembler(self._cube, self._dimensions, self._slice_idx)
 
     @lazyproperty
     def _column_variance(self):
