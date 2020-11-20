@@ -70,7 +70,9 @@ class Assembler(object):
         differences and provides a foundational set of second-order analysis measure and
         margin arrays.
         """
-        raise NotImplementedError
+        return _BaseCubeResultMatrix.factory(
+            self._cube, self._dimensions, self._slice_idx
+        )
 
 
 class _BaseSubtotals(object):
@@ -94,3 +96,8 @@ class _SumSubtotals(_BaseSubtotals):
 
 class _BaseCubeResultMatrix(object):
     """Base class for all cube-result matrix (2D second-order analyzer) objects."""
+
+    @classmethod
+    def factory(cls, cube, dimensions, slice_idx):
+        """Return a base-matrix object of appropriate type for `cube`."""
+        raise NotImplementedError
