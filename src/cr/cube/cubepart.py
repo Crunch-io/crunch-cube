@@ -928,6 +928,15 @@ class _Slice(CubePartition):
     # ---implementation (helpers)-------------------------------------
 
     @lazyproperty
+    def _assembler(self):
+        """The Assembler object for this slice.
+
+        The assembler dispatches all second-order measure calculations and insertion
+        construction, and orders the result matrix, including removing hidden vectors.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
     def _column_variance(self):
         """Variance for column percentages."""
         p = self.counts / self.columns_margin
