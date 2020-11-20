@@ -2,8 +2,6 @@
 
 """Unit test suite for `cr.cube.cubepart` module."""
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import numpy as np
 import pytest
 
@@ -11,6 +9,7 @@ from cr.cube.cube import Cube
 from cr.cube.cubepart import CubePartition, _Slice, _Strand, _Nub
 from cr.cube.dimension import Dimension
 from cr.cube.enums import DIMENSION_TYPE as DT
+from cr.cube.matrix import Assembler
 from cr.cube.noa.smoothing import SingleSidedMovingAvgSmoother
 from cr.cube.old_matrix import TransformedMatrix, _VectorAfterHiding
 from cr.cube.stripe import _BaseStripeRow, TransformedStripe
@@ -91,6 +90,14 @@ class DescribeCubePartition(object):
             cube_partition, measure_expr
         )
         assert values == [[0.1, 0.2], [0.3, 0.4]]
+
+    def but_it_raises_an_exception_when_function_is_not_available(self):
+        slice_ = _Slice(None, None, None, None, None)
+
+        with pytest.raises(NotImplementedError) as err:
+            slice_.evaluate({"function": "F"})
+
+        assert str(err.value) == "Function F is not available."
 
     @pytest.mark.parametrize(
         "dims, expected_value",
@@ -363,14 +370,6 @@ class Describe_Slice(object):
 
         assert slice_.scale_mean_pairwise_indices_alt is None
 
-    def but_it_raises_an_exception_when_function_is_not_available(self):
-        slice_ = _Slice(None, None, None, None, None)
-
-        with pytest.raises(NotImplementedError) as err:
-            slice_.evaluate({"function": "F"})
-
-        assert str(err.value) == "Function F is not available."
-
     @pytest.mark.parametrize(
         "dimensions_dicts, expected_value",
         (
@@ -409,11 +408,30 @@ class Describe_Slice(object):
 
         assert slice_.selected_category_labels == expected_value
 
+    def it_constructs_its_assembler_instance_to_help(
+        self, request, cube_, _dimensions_prop_, dimension_, assembler_
+    ):
+        Assembler_ = class_mock(
+            request, "cr.cube.cubepart.Assembler", return_value=assembler_
+        )
+        _dimensions_prop_.return_value = (dimension_, dimension_)
+        slice_idx = 42
+        slice_ = _Slice(cube_, slice_idx, None, None, None)
+
+        assembler = slice_._assembler
+
+        Assembler_.assert_called_once_with(cube_, (dimension_, dimension_), slice_idx)
+        assert assembler is assembler_
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
     def _alpha_alt_prop_(self, request):
         return property_mock(request, _Slice, "_alpha_alt")
+
+    @pytest.fixture
+    def assembler_(self, request):
+        return instance_mock(request, Assembler)
 
     @pytest.fixture
     def _columns_dimension_numeric_values_prop_(self, request):
@@ -422,6 +440,10 @@ class Describe_Slice(object):
     @pytest.fixture
     def cube_(self, request):
         return instance_mock(request, Cube)
+
+    @pytest.fixture
+    def dimension_(self, request):
+        return instance_mock(request, Dimension)
 
     @pytest.fixture
     def _dimensions_prop_(self, request):

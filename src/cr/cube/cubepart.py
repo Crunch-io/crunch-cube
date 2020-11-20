@@ -21,6 +21,7 @@ import numpy as np
 
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.min_base_size_mask import MinBaseSizeMask
+from cr.cube.matrix import Assembler
 from cr.cube.measures.pairwise_significance import PairwiseSignificance
 from cr.cube.noa.smoothing import SingleSidedMovingAvgSmoother
 from cr.cube.old_matrix import TransformedMatrix
@@ -934,7 +935,7 @@ class _Slice(CubePartition):
         The assembler dispatches all second-order measure calculations and insertion
         construction, and orders the result matrix, including removing hidden vectors.
         """
-        raise NotImplementedError
+        return Assembler(self._cube, self._dimensions, self._slice_idx)
 
     @lazyproperty
     def _columns_dimension(self):
@@ -956,16 +957,6 @@ class _Slice(CubePartition):
         )
 
     @lazyproperty
-    def _row_variance(self):
-        """ndarray of variances for row percentages"""
-        # --- Rows margin is a vector, that's supposed to represent a column (to the
-        # --- right of the crosstab). We need to devide all values in the crosstab by it
-        # --- and therefore need to cast it to an actual column (because of how NumPy
-        # --- does broadcasting).
-        margin = self.rows_margin[:, np.newaxis]
-        return self.counts / margin * (1 - self.counts / margin)
-
-    @lazyproperty
     def _dimensions(self):
         """tuple of (rows_dimension, columns_dimension) Dimension objects."""
         return tuple(
@@ -982,6 +973,16 @@ class _Slice(CubePartition):
 
     def _median(self, values):
         return np.median(values) if values.size != 0 else np.nan
+
+    @lazyproperty
+    def _row_variance(self):
+        """ndarray of variances for row percentages"""
+        # --- Rows margin is a vector, that's supposed to represent a column (to the
+        # --- right of the crosstab). We need to devide all values in the crosstab by it
+        # --- and therefore need to cast it to an actual column (because of how NumPy
+        # --- does broadcasting).
+        margin = self.rows_margin[:, np.newaxis]
+        return self.counts / margin * (1 - self.counts / margin)
 
     @lazyproperty
     def _rows_dimension(self):
