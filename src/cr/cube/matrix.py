@@ -118,6 +118,41 @@ class _BaseCubeResultMatrix(object):
         # --- everything else gets a more conventional matrix ---
         return cls._regular_matrix_factory(cube, dimensions, slice_idx)
 
+    @staticmethod
+    def _extract_counts_for_matrix_creation(cube, slice_idx):
+        """Returns a tuple of cube counts, prepared for matrix construction.
+
+        Depending on the type of the cube, we need to extract the proper counts for the
+        counstruction of a particular slice (matrix). In case of cubes that have more
+        then 2 dimensions, we only need a particular slice (a particular selected
+        element of the 0th dimension).
+
+        If, in addition to being >2D cube, the 0th dimension is multiple response, we
+        need to extract only the selected counts, since we're "just" dealing with the
+        tabulation.
+        """
+
+        # --- If we have a cube with more than 2 dimensions we need to extract the
+        # --- appropriate slice (element of the 0th dimension).
+        if cube.ndim > 2:
+
+            # --- If 0th dimension of a >2D cube is MR, we only need the "Selected"
+            # --- counts, because it's "just" used to tabulate.
+            if cube.dimension_types[0] == DT.MR:
+                return (
+                    cube.counts[slice_idx][0],
+                    cube.unweighted_counts[slice_idx][0],
+                    cube.counts_with_missings[slice_idx][0],
+                )
+
+            return (
+                cube.counts[slice_idx],
+                cube.unweighted_counts[slice_idx],
+                cube.counts_with_missings[slice_idx],
+            )
+
+        return (cube.counts, cube.unweighted_counts, cube.counts_with_missings)
+
     @classmethod
     def _get_sliced_counts(cls, cube, slice_idx):
         """Returns a tuple of cube counts, prepared for regular matrix construction.

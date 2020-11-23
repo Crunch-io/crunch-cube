@@ -192,9 +192,20 @@ class Describe_BaseCubeResultMatrix(object):
 
         assert matrix_class == expected
 
-    def it_creates_matrix_using_factory_to_help(self, request, cube_, dimension_):
+    @pytest.mark.parametrize(
+        "matrix_class_name",
+        (
+            "_CatXCatMatrix",
+            "_MrXCatMatrix",
+            "_CatXMrMatrix",
+            "_MrXMrMatrix",
+        ),
+    )
+    def it_creates_matrix_using_factory_to_help(
+        self, request, cube_, dimension_, matrix_class_name
+    ):
         cube_.dimension_types = (DT.CAT, DT.MR, DT.CAT)
-        MatrixCls_ = class_mock(request, "cr.cube.matrix._BaseCubeResultMatrix")
+        MatrixCls_ = class_mock(request, "cr.cube.matrix.%s" % matrix_class_name)
         _get_regular_matrix_factory_class = method_mock(
             request,
             _BaseCubeResultMatrix,
