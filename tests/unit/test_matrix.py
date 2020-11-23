@@ -75,3 +75,46 @@ class DescribeAssembler(object):
     @pytest.fixture
     def _SumSubtotals_(self, request):
         return class_mock(request, "cr.cube.matrix._SumSubtotals")
+
+
+class Describe_BaseCubeResultMatrix(object):
+    """Unit test suite for `cr.cube.matrix._BaseCubeResultMatrix` object."""
+
+    @pytest.mark.parametrize(
+        ("is_mr_aug", "has_means", "factory_method_name"),
+        (
+            (True, True, "_mr_aug_matrix_factory"),
+            (True, False, "_mr_aug_matrix_factory"),
+            (False, True, "_means_matrix_factory"),
+            (False, False, "_regular_matrix_factory"),
+        ),
+    )
+    def it_calls_the_correct_factory_method_for_appropriate_matrix_type(
+        self, request, cube_, dimension_, is_mr_aug, has_means, factory_method_name
+    ):
+        cube_.is_mr_aug = is_mr_aug
+        cube_.has_means = has_means
+        cube_result_matrix_ = instance_mock(request, _BaseCubeResultMatrix)
+        factory_method = method_mock(
+            request,
+            _BaseCubeResultMatrix,
+            factory_method_name,
+            return_value=cube_result_matrix_,
+        )
+
+        cube_result_matrix = _BaseCubeResultMatrix.factory(
+            cube_, (dimension_, dimension_), slice_idx=71
+        )
+
+        factory_method.assert_called_once_with(cube_, (dimension_, dimension_), 71)
+        assert cube_result_matrix is cube_result_matrix_
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def cube_(self, request):
+        return instance_mock(request, Cube)
+
+    @pytest.fixture
+    def dimension_(self, request):
+        return instance_mock(request, Dimension)

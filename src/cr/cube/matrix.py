@@ -100,4 +100,27 @@ class _BaseCubeResultMatrix(object):
     @classmethod
     def factory(cls, cube, dimensions, slice_idx):
         """Return a base-matrix object of appropriate type for `cube`."""
+        if cube.is_mr_aug:
+            return cls._mr_aug_matrix_factory(cube, dimensions, slice_idx)
+
+        # --- means cube gets one of the means-matrix types ---
+        if cube.has_means:
+            return cls._means_matrix_factory(cube, dimensions, slice_idx)
+
+        # --- everything else gets a more conventional matrix ---
+        return cls._regular_matrix_factory(cube, dimensions, slice_idx)
+
+    @classmethod
+    def _means_matrix_factory(cls, cube, dimensions, slice_idx):
+        """ -> matrix object appropriate to means `cube`."""
+        raise NotImplementedError
+
+    @classmethod
+    def _mr_aug_matrix_factory(cls, cube, dimensions, slice_idx):
+        """ -> matrix for MR_AUG slice."""
+        raise NotImplementedError
+
+    @classmethod
+    def _regular_matrix_factory(cls, cube, dimensions, slice_idx):
+        """ -> matrix object for non-mr-aug and non-means slice."""
         raise NotImplementedError
