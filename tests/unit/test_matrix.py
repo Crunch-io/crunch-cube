@@ -11,13 +11,20 @@ from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.matrix import (
     Assembler,
     _BaseCubeResultMatrix,
+    _BaseSubtotals,
     _CatXCatMatrix,
     _CatXMrMatrix,
     _MrXCatMatrix,
     _MrXMrMatrix,
 )
 
-from ..unitutil import class_mock, instance_mock, method_mock, property_mock
+from ..unitutil import (
+    class_mock,
+    instance_mock,
+    method_mock,
+    property_mock,
+    initializer_mock,
+)
 
 
 class DescribeAssembler(object):
@@ -84,6 +91,34 @@ class DescribeAssembler(object):
     @pytest.fixture
     def _SumSubtotals_(self, request):
         return class_mock(request, "cr.cube.matrix._SumSubtotals")
+
+
+# === SUBTOTALS OBJECTS ===
+
+
+class Describe_BaseSubtotals(object):
+    """Unit test suite for `cr.cube.matrix._BaseSubtotals` object."""
+
+    def it_provides_a_blocks_interface_method(self, request, cube_result_matrix_):
+        _init_ = initializer_mock(request, _BaseSubtotals)
+        _blocks_ = property_mock(
+            request, _BaseSubtotals, "_blocks", return_value=[[1, 2], [3, 4]]
+        )
+
+        blocks = _BaseSubtotals.blocks(cube_result_matrix_, "weighted_counts")
+
+        _init_.assert_called_once()
+        _blocks_.assert_called_once()
+        assert blocks == [[1, 2], [3, 4]]
+
+    @pytest.fixture
+    def cube_result_matrix_(self, request):
+        return instance_mock(request, _BaseCubeResultMatrix)
+
+    # fixture components ---------------------------------------------
+
+
+# === CUBE-RESULT MATRIX OBJECTS ===
 
 
 class Describe_BaseCubeResultMatrix(object):
