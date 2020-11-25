@@ -81,12 +81,21 @@ class Assembler(object):
 class _BaseSubtotals(object):
     """Base class for Subtotals objects."""
 
+    def __init__(self, cube_result_matrix, measure_propname):
+        self._cube_result_matrix = cube_result_matrix
+        self._measure_propname = measure_propname
+
     @classmethod
     def blocks(cls, cube_result_matrix, measure_propname=None):
         """Return base, row and col insertion, and intersection matrices.
 
         These are in the form ready for assembly.
         """
+        return cls(cube_result_matrix, measure_propname)._blocks
+
+    @lazyproperty
+    def _blocks(self):
+        """base, row and col insertion, and intersection matrices."""
         raise NotImplementedError
 
 
