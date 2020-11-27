@@ -200,6 +200,53 @@ class _BaseCubeResultMatrix(object):
         # --- everything else gets a more conventional matrix ---
         return cls._regular_matrix_factory(cube, dimensions, slice_idx)
 
+    @lazyproperty
+    def column_proportions(self):
+        """2D ndarray of np.float64 between 0.0 and 1.0.
+
+        The value represents the ratio of each cell count to the total count (margin)
+        for its column.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
+    def columns_base(self):
+        """1D/2D np.int64 ndarray of unweighted-N for each matrix column/cell."""
+        raise NotImplementedError(
+            "`%s` must implement `.columns_base`" % type(self).__name__
+        )
+
+    @lazyproperty
+    def columns_pruning_base(self):
+        """1D np.int64 ndarray of unweighted-N for each matrix column."""
+        raise NotImplementedError(
+            "`%s` must implement `.columns_pruning_base`" % type(self).__name__
+        )
+
+    @lazyproperty
+    def rows_pruning_base(self):
+        """1D np.int64 ndarray of unweighted-N for each matrix row."""
+        raise NotImplementedError(
+            "`%s` must implement `.rows_pruning_base`" % type(self).__name__
+        )
+
+    @lazyproperty
+    def table_margin(self):
+        """np.float/int64 scalar or a 1D or 2D np.float/int64 ndarray table margin.
+
+        The table margin is the overall sample size of the matrix. This is the weighted
+        count of respondents who were asked both questions and provided a valid response
+        for both (including not-selecting an MR option/subvar).
+
+        A matrix with a multiple-response (MR) dimension produces a 1D ndarray value.
+        When both dimensions are MR, the return value is a 2D ndarray and there is
+        a distinct table-base value for each "cell" of the matrix. A CAT_X_CAT matrix
+        produces a scalar value for this property.
+        """
+        raise NotImplementedError(
+            "`%s` must implement `.table_margin" % self.__class__.__name__
+        )
+
     @staticmethod
     def _extract_counts_for_matrix_creation(cube, slice_idx):
         """Returns a tuple of cube counts, prepared for matrix construction.

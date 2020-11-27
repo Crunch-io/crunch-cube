@@ -177,10 +177,19 @@ class Describe_BaseSubtotals(object):
 class Describe_SumSubtotals(object):
     """Unit test suite for `cr.cube.matrix._SubSubtotals` object."""
 
-    @pytest.mark.parametrize(("prop_name",), (("foo",), ("bar",)))
-    def it_returns_correct_base_values(self, _cube_result_matrix_prop_, prop_name):
-        subtotals = _SumSubtotals(_cube_result_matrix_prop_, prop_name)
-        assert subtotals._base_values == getattr(_cube_result_matrix_prop_, prop_name)
+    @pytest.mark.parametrize(
+        ("prop_name",),
+        (
+            ("columns_base",),
+            ("column_proportions",),
+            ("columns_pruning_base",),
+            ("rows_pruning_base",),
+            ("table_margin",),
+        ),
+    )
+    def it_returns_correct_base_values(self, cube_result_matrix_, prop_name):
+        subtotals = _SumSubtotals(cube_result_matrix_, prop_name)
+        assert subtotals._base_values == getattr(cube_result_matrix_, prop_name)
 
     @pytest.mark.parametrize(
         ("addend_idxs", "expected_value"),
@@ -202,8 +211,8 @@ class Describe_SumSubtotals(object):
         return property_mock(request, _SumSubtotals, "_base_values")
 
     @pytest.fixture
-    def _cube_result_matrix_prop_(self, request):
-        return property_mock(request, Assembler, "_cube_result_matrix")
+    def cube_result_matrix_(self, request):
+        return instance_mock(request, _BaseCubeResultMatrix)
 
     @pytest.fixture
     def subtotal_(self, request):
