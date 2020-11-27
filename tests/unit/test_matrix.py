@@ -111,11 +111,25 @@ class Describe_BaseSubtotals(object):
         _blocks_.assert_called_once()
         assert blocks == [[1, 2], [3, 4]]
 
+    def it_knows_how_to_assemble_its_blocks(self, request):
+        property_mock(request, _BaseSubtotals, "_base_values")
+        property_mock(request, _BaseSubtotals, "_subtotal_columns")
+        property_mock(request, _BaseSubtotals, "_subtotal_rows")
+        property_mock(request, _BaseSubtotals, "_intersections")
+        base_subtotals = _BaseSubtotals(None, None)
+
+        blocks = base_subtotals._blocks
+
+        assert blocks == [
+            [base_subtotals._base_values, base_subtotals._subtotal_columns],
+            [base_subtotals._subtotal_rows, base_subtotals._intersections],
+        ]
+
+    # fixture components ---------------------------------------------
+
     @pytest.fixture
     def cube_result_matrix_(self, request):
         return instance_mock(request, _BaseCubeResultMatrix)
-
-    # fixture components ---------------------------------------------
 
 
 # === CUBE-RESULT MATRIX OBJECTS ===
