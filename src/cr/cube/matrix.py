@@ -278,7 +278,7 @@ class _CatXCatMatrix(_BaseCubeResultMatrix):
 
         A valid matrix cell is one whose row and column elements are both non-missing.
         """
-        raise NotImplementedError
+        return self._unweighted_counts
 
 
 class _CatXMrMatrix(_CatXCatMatrix):

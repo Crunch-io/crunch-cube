@@ -304,3 +304,25 @@ class Describe_BaseCubeResultMatrix(object):
     @pytest.fixture
     def dimension_(self, request):
         return instance_mock(request, Dimension)
+
+
+class Describe_CatXCatMatrix(object):
+    """Unit test suite for `cr.cube.matrix._CatXCatMatrix` object."""
+
+    def it_knows_its_unweighted_counts(self):
+        unweighted_counts = np.array([[1, 2, 3], [4, 5, 6]])
+        np.testing.assert_equal(
+            _CatXCatMatrix(None, None, unweighted_counts).unweighted_counts,
+            unweighted_counts,
+        )
+
+
+class Describe_CatXCatMatrix(object):
+    """Unit test suite for `cr.cube.matrix._CatXCatMatrix` object."""
+
+    def it_knows_its_unweighted_counts(self):
+        unweighted_counts = np.array([[1, 2, 3], [4, 5, 6]])
+        np.testing.assert_equal(
+            _CatXCatMatrix(None, None, unweighted_counts).unweighted_counts,
+            unweighted_counts,
+        )
