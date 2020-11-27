@@ -94,8 +94,36 @@ class _BaseSubtotals(object):
         return cls(cube_result_matrix, measure_propname)._blocks
 
     @lazyproperty
+    def _base_values(self):
+        """2D ndarray of "body" values from cube-result matrix."""
+        raise NotImplementedError(
+            "`%s` must implement `._base_values`" % type(self).__name__
+        )
+
+    @lazyproperty
     def _blocks(self):
         """base, row and col insertion, and intersection matrices."""
+        return [
+            [self._base_values, self._subtotal_columns],
+            [self._subtotal_rows, self._intersections],
+        ]
+
+    @lazyproperty
+    def _intersections(self):
+        """(n_row_subtotals, n_col_subtotals) ndarray of intersection values.
+
+        An intersection value arises where a row-subtotal crosses a column-subtotal.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
+    def _subtotal_columns(self):
+        """(n_rows, n_col_subtotals) ndarray of subtotal columns."""
+        raise NotImplementedError
+
+    @lazyproperty
+    def _subtotal_rows(self):
+        """(n_row_subtotals, n_cols) ndarray of subtotal rows."""
         raise NotImplementedError
 
 
