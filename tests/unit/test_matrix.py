@@ -16,6 +16,7 @@ from cr.cube.matrix import (
     _CatXMrMatrix,
     _MrXCatMatrix,
     _MrXMrMatrix,
+    _SumSubtotals,
 )
 
 from ..unitutil import (
@@ -130,6 +131,21 @@ class Describe_BaseSubtotals(object):
     @pytest.fixture
     def cube_result_matrix_(self, request):
         return instance_mock(request, _BaseCubeResultMatrix)
+
+
+class Describe_SumSubtotals(object):
+    """Unit test suite for `cr.cube.matrix._SubSubtotals` object."""
+
+    @pytest.mark.parametrize(("prop_name",), (("foo",), ("bar",)))
+    def it_returns_correct_base_values(self, _cube_result_matrix_prop_, prop_name):
+        subtotals = _SumSubtotals(_cube_result_matrix_prop_, prop_name)
+        assert subtotals._base_values == getattr(_cube_result_matrix_prop_, prop_name)
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _cube_result_matrix_prop_(self, request):
+        return property_mock(request, Assembler, "_cube_result_matrix")
 
 
 # === CUBE-RESULT MATRIX OBJECTS ===

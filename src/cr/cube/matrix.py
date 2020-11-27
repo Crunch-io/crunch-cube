@@ -130,6 +130,11 @@ class _BaseSubtotals(object):
 class _SumSubtotals(_BaseSubtotals):
     """Subtotal "blocks" created by np.sum() on addends, primarily counts."""
 
+    @lazyproperty
+    def _base_values(self):
+        """2D np.float64 ndarray of table-stderr for each cell of cube-result matrix."""
+        return getattr(self._cube_result_matrix, self._measure_propname)
+
 
 # === CUBE-RESULT MATRIX OBJECTS ===
 
@@ -266,6 +271,14 @@ class _CatXCatMatrix(_BaseCubeResultMatrix):
     ):
         super(_CatXCatMatrix, self).__init__(dimensions, counts, unweighted_counts)
         self._counts_with_missings = counts_with_missings
+
+    @lazyproperty
+    def unweighted_counts(self):
+        """2D np.int64 ndarray of unweighted-count for each valid matrix cell.
+
+        A valid matrix cell is one whose row and column elements are both non-missing.
+        """
+        raise NotImplementedError
 
 
 class _CatXMrMatrix(_CatXCatMatrix):
