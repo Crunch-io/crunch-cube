@@ -167,7 +167,7 @@ class _BaseSubtotals(object):
 
     def _subtotal_row(self, subtotal):
         """Return (n_cols,) ndarray of values for `subtotal` row."""
-        raise NotImplementedError
+        return np.sum(self._base_values[subtotal.addend_idxs, :], axis=0)
 
     @lazyproperty
     def _subtotal_rows(self):

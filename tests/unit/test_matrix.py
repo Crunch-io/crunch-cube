@@ -264,6 +264,23 @@ class Describe_SumSubtotals(object):
 
         assert subtotals._subtotal_column(subtotal_).tolist() == expected_value
 
+    @pytest.mark.parametrize(
+        ("addend_idxs", "expected_value"),
+        (
+            ([1, 2], [12, 14, 16, 18]),
+            ([0, 1], [4, 6, 8, 10]),
+            ([0, 2], [8, 10, 12, 14]),
+        ),
+    )
+    def it_can_compute_the_subtotal_row_for_a_given_row_subtotal(
+        self, _base_values_prop_, subtotal_, addend_idxs, expected_value
+    ):
+        _base_values_prop_.return_value = np.arange(12).reshape(3, 4)
+        subtotal_.addend_idxs = addend_idxs
+        subtotals = _SumSubtotals(None, None)
+
+        assert subtotals._subtotal_row(subtotal_).tolist() == expected_value
+
     # --- fixture components -----------------------------------------
 
     @pytest.fixture
