@@ -190,6 +190,25 @@ class Describe_BaseSubtotals(object):
             _BaseSubtotals(None, None)._subtotal_rows, expected_value
         )
 
+    def it_knows_its_intersections(
+        self, _intersection_, _column_subtotals_prop_, _row_subtotals_prop_
+    ):
+        _intersection_.return_value = 10
+        _column_subtotals_prop_.return_value = [1, 2, 3]
+        _row_subtotals_prop_.return_value = [1, 2]
+        subtotals = _BaseSubtotals(None, None)
+
+        assert (
+            subtotals._intersections.tolist()
+            == np.full(
+                (
+                    2,  # row subtotals has len 2
+                    3,  # column subtotals has len 3
+                ),
+                10,  # dummy fill value from `_intersection` fixture
+            ).tolist()
+        )
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -207,6 +226,10 @@ class Describe_BaseSubtotals(object):
     @pytest.fixture
     def dimension_(self, request):
         return instance_mock(request, Dimension)
+
+    @pytest.fixture
+    def _intersection_(self, request):
+        return method_mock(request, _BaseSubtotals, "_intersection")
 
     @pytest.fixture
     def _ncols_prop_(self, request):
@@ -236,6 +259,24 @@ class Describe_SumSubtotals(object):
     def it_returns_correct_base_values(self, _cube_result_matrix_prop_, prop_name):
         subtotals = _SumSubtotals(_cube_result_matrix_prop_, prop_name)
         assert subtotals._base_values == getattr(_cube_result_matrix_prop_, prop_name)
+
+    @pytest.mark.parametrize(
+        ("row_idxs", "col_idxs", "expected_value"),
+        (
+            ([1, 2], [0, 1], 26),
+            ([0, 1], [0, 1], 10),
+            ([1, 2], [2, 3], 34),
+        ),
+    )
+    def it_can_compute_a_subtotal_intersection_value(
+        self, request, _base_values_prop_, row_idxs, col_idxs, expected_value
+    ):
+        _base_values_prop_.return_value = np.arange(12).reshape(3, 4)
+        col_subtotal_ = instance_mock(request, _Subtotal, addend_idxs=col_idxs)
+        row_subtotal_ = instance_mock(request, _Subtotal, addend_idxs=row_idxs)
+        subtotals = _SumSubtotals(None, None)
+
+        assert subtotals._intersection(row_subtotal_, col_subtotal_) == expected_value
 
     @pytest.mark.parametrize(
         ("addend_idxs", "expected_value"),

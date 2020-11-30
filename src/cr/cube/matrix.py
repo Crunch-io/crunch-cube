@@ -121,13 +121,25 @@ class _BaseSubtotals(object):
         """Numpy data-type for result matrices, used for empty arrays."""
         return np.float64
 
+    def _intersection(self, row_subtotal, column_subtotal):
+        """Value for this row/column subtotal intersection."""
+        raise NotImplementedError(
+            "`%s` must implement `._intersection()`" % type(self).__name__
+        )
+
     @lazyproperty
     def _intersections(self):
         """(n_row_subtotals, n_col_subtotals) ndarray of intersection values.
 
         An intersection value arises where a row-subtotal crosses a column-subtotal.
         """
-        raise NotImplementedError
+        return np.array(
+            [
+                self._intersection(row_subtotal, column_subtotal)
+                for row_subtotal in self._row_subtotals
+                for column_subtotal in self._column_subtotals
+            ]
+        ).reshape(len(self._row_subtotals), len(self._column_subtotals))
 
     @lazyproperty
     def _ncols(self):
@@ -189,6 +201,10 @@ class _SumSubtotals(_BaseSubtotals):
     def _base_values(self):
         """2D np.float64 ndarray of table-stderr for each cell of cube-result matrix."""
         return getattr(self._cube_result_matrix, self._measure_propname)
+
+    def _intersection(self, row_subtotal, column_subtotal):
+        """Sum for this row/column subtotal intersection."""
+        return np.sum(self._subtotal_row(row_subtotal)[column_subtotal.addend_idxs])
 
     def _subtotal_column(self, subtotal):
         """Return (n_rows,) ndarray of np.nan values."""
