@@ -63,6 +63,14 @@ class Assembler(object):
         # --- the ordering method has been applied to determine the sequence each idx
         # --- appears in. This directly produces a final array that is exactly the
         # --- desired output.
+        return np.block(blocks)[np.ix_(self._row_order, self._column_order)]
+
+    @lazyproperty
+    def _column_order(self):
+        """1D np.int64 ndarray of signed int idx for each assembled column.
+
+        Negative values represent inserted subtotal-column locations.
+        """
         raise NotImplementedError
 
     @lazyproperty
@@ -76,6 +84,14 @@ class Assembler(object):
         return _BaseCubeResultMatrix.factory(
             self._cube, self._dimensions, self._slice_idx
         )
+
+    @lazyproperty
+    def _row_order(self):
+        """1D np.int64 ndarray of signed int idx for each assembled row.
+
+        Negative values represent inserted subtotal-row locations.
+        """
+        raise NotImplementedError
 
 
 # === SUBTOTALS OBJECTS ===

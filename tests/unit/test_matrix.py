@@ -51,6 +51,33 @@ class DescribeAssembler(object):
         _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
         assert unweighted_counts == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
+    @pytest.mark.parametrize(
+        ("row_order", "col_order", "blocks", "expected_value"),
+        (
+            ([0, 1], [0, 1, 2], [[1, 2, 3], [4, 5, 6]], [[1, 2, 3], [4, 5, 6]]),
+            ([0, 1], [2, 1, 0], [[1, 2, 3], [4, 5, 6]], [[3, 2, 1], [6, 5, 4]]),
+            ([0, 1], [1, 0], [[1, 2, 3], [4, 5, 6]], [[2, 1], [5, 4]]),
+            ([0, 1], [2, 0], [[1, 2, 3], [4, 5, 6]], [[3, 1], [6, 4]]),
+            ([1, 0], [0, 1, 2], [[1, 2, 3], [4, 5, 6]], [[4, 5, 6], [1, 2, 3]]),
+            ([0], [0, 1, 2], [[1, 2, 3], [4, 5, 6]], [[1, 2, 3]]),
+            ([0], [0], [[1, 2, 3], [4, 5, 6]], [[1]]),
+        ),
+    )
+    def it_can_assemble_a_matrix_from_blocks(
+        self,
+        _row_order_prop_,
+        row_order,
+        _column_order_prop_,
+        col_order,
+        blocks,
+        expected_value,
+    ):
+        _row_order_prop_.return_value = row_order
+        _column_order_prop_.return_value = col_order
+        assembler = Assembler(None, None, None)
+
+        assert assembler._assemble_matrix(blocks).tolist() == expected_value
+
     def it_constructs_the_cube_result_matrix_to_help(
         self, request, cube_, dimension_, cube_result_matrix_
     ):
@@ -74,6 +101,10 @@ class DescribeAssembler(object):
         return method_mock(request, Assembler, "_assemble_matrix")
 
     @pytest.fixture
+    def _column_order_prop_(self, request):
+        return property_mock(request, Assembler, "_column_order")
+
+    @pytest.fixture
     def cube_(self, request):
         return instance_mock(request, Cube)
 
@@ -88,6 +119,10 @@ class DescribeAssembler(object):
     @pytest.fixture
     def dimension_(self, request):
         return instance_mock(request, Dimension)
+
+    @pytest.fixture
+    def _row_order_prop_(self, request):
+        return property_mock(request, Assembler, "_row_order")
 
     @pytest.fixture
     def _SumSubtotals_(self, request):
