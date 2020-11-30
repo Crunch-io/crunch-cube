@@ -130,9 +130,19 @@ class _BaseSubtotals(object):
         raise NotImplementedError
 
     @lazyproperty
+    def _ncols(self):
+        """int count of rows in base-matrix."""
+        raise NotImplementedError
+
+    @lazyproperty
     def _nrows(self):
         """int count of rows in base-matrix."""
         return self._base_values.shape[0]
+
+    @lazyproperty
+    def _row_subtotals(self):
+        """Sequence of _Subtotal object for each subtotal in rows-dimension."""
+        raise NotImplementedError
 
     def _subtotal_column(self, subtotal):
         """Return (n_rows,) ndarray of values for `subtotal` column."""
@@ -155,10 +165,21 @@ class _BaseSubtotals(object):
             ]
         )
 
+    def _subtotal_row(self, subtotal):
+        """Return (n_cols,) ndarray of values for `subtotal` row."""
+        raise NotImplementedError
+
     @lazyproperty
     def _subtotal_rows(self):
         """(n_row_subtotals, n_cols) ndarray of subtotal rows."""
-        raise NotImplementedError
+        subtotals = self._row_subtotals
+
+        if len(subtotals) == 0:
+            return np.empty((0, self._ncols), dtype=self._dtype)
+
+        return np.vstack(
+            [self._subtotal_row(subtotal) for subtotal in self._row_subtotals]
+        )
 
 
 class _SumSubtotals(_BaseSubtotals):
