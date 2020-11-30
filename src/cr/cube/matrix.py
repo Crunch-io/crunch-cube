@@ -109,6 +109,16 @@ class _BaseSubtotals(object):
         ]
 
     @lazyproperty
+    def _column_subtotals(self):
+        """Sequence of _Subtotal object for each subtotal in columns-dimension."""
+        raise NotImplementedError
+
+    @lazyproperty
+    def _dtype(self):
+        """Numpy data-type for result matrices, used for empty arrays."""
+        return np.float64
+
+    @lazyproperty
     def _intersections(self):
         """(n_row_subtotals, n_col_subtotals) ndarray of intersection values.
 
@@ -117,9 +127,30 @@ class _BaseSubtotals(object):
         raise NotImplementedError
 
     @lazyproperty
-    def _subtotal_columns(self):
-        """(n_rows, n_col_subtotals) ndarray of subtotal columns."""
+    def _nrows(self):
+        """int count of rows in base-matrix."""
         raise NotImplementedError
+
+    def _subtotal_column(self, subtotal):
+        """Return (n_rows,) ndarray of values for `subtotal` column."""
+        raise NotImplementedError(
+            "`%s` must implement `._subtotal_column()`" % type(self).__name__
+        )
+
+    @lazyproperty
+    def _subtotal_columns(self):
+        """(n_rows, n_col_subtotals) matrix of subtotal columns."""
+        subtotals = self._column_subtotals
+
+        if len(subtotals) == 0:
+            return np.empty((self._nrows, 0), dtype=self._dtype)
+
+        return np.hstack(
+            [
+                self._subtotal_column(subtotal).reshape(self._nrows, 1)
+                for subtotal in subtotals
+            ]
+        )
 
     @lazyproperty
     def _subtotal_rows(self):
@@ -134,6 +165,10 @@ class _SumSubtotals(_BaseSubtotals):
     def _base_values(self):
         """2D np.float64 ndarray of table-stderr for each cell of cube-result matrix."""
         return getattr(self._cube_result_matrix, self._measure_propname)
+
+    def _subtotal_column(self, subtotal):
+        """Return (n_rows,) ndarray of np.nan values."""
+        return np.sum(self._base_values[:, subtotal.addend_idxs], axis=1)
 
 
 # === CUBE-RESULT MATRIX OBJECTS ===

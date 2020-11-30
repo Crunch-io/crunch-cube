@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from cr.cube.cube import Cube
-from cr.cube.dimension import Dimension
+from cr.cube.dimension import Dimension, _Subtotal
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.matrix import (
     Assembler,
@@ -126,11 +126,47 @@ class Describe_BaseSubtotals(object):
             [base_subtotals._subtotal_rows, base_subtotals._intersections],
         ]
 
+    @pytest.mark.parametrize(
+        ("nrows", "column_subtotals", "expected_value"),
+        (
+            (3, [], np.empty((3, 0), dtype=np.float64)),
+            (3, [1, 2], np.array([[1, 1], [2, 2], [3, 3]])),
+        ),
+    )
+    def it_knows_its_subtotal_columns(
+        self,
+        _column_subtotals_prop_,
+        _nrows_prop_,
+        _subtotal_column_,
+        nrows,
+        column_subtotals,
+        expected_value,
+    ):
+        _column_subtotals_prop_.return_value = column_subtotals
+        _subtotal_column_.return_value = np.array([1, 2, 3])
+        _nrows_prop_.return_value = nrows
+
+        np.testing.assert_equal(
+            _BaseSubtotals(None, None)._subtotal_columns, expected_value
+        )
+
     # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _column_subtotals_prop_(self, request):
+        return property_mock(request, _BaseSubtotals, "_column_subtotals")
 
     @pytest.fixture
     def cube_result_matrix_(self, request):
         return instance_mock(request, _BaseCubeResultMatrix)
+
+    @pytest.fixture
+    def _nrows_prop_(self, request):
+        return property_mock(request, _BaseSubtotals, "_nrows")
+
+    @pytest.fixture
+    def _subtotal_column_(self, request):
+        return method_mock(request, _BaseSubtotals, "_subtotal_column")
 
 
 class Describe_SumSubtotals(object):
@@ -141,11 +177,32 @@ class Describe_SumSubtotals(object):
         subtotals = _SumSubtotals(_cube_result_matrix_prop_, prop_name)
         assert subtotals._base_values == getattr(_cube_result_matrix_prop_, prop_name)
 
-    # fixture components ---------------------------------------------
+    @pytest.mark.parametrize(
+        ("addend_idxs", "expected_value"),
+        (([1, 2], [3, 11, 19]), ([1, 3], [4, 12, 20]), ([0, 3], [3, 11, 19])),
+    )
+    def it_can_compute_the_subtotal_column_for_a_given_column_subtotal(
+        self, _base_values_prop_, subtotal_, addend_idxs, expected_value
+    ):
+        _base_values_prop_.return_value = np.arange(12).reshape(3, 4)
+        subtotal_.addend_idxs = addend_idxs
+        subtotals = _SumSubtotals(None, None)
+
+        assert subtotals._subtotal_column(subtotal_).tolist() == expected_value
+
+    # --- fixture components -----------------------------------------
+
+    @pytest.fixture
+    def _base_values_prop_(self, request):
+        return property_mock(request, _SumSubtotals, "_base_values")
 
     @pytest.fixture
     def _cube_result_matrix_prop_(self, request):
         return property_mock(request, Assembler, "_cube_result_matrix")
+
+    @pytest.fixture
+    def subtotal_(self, request):
+        return instance_mock(request, _Subtotal)
 
 
 # === CUBE-RESULT MATRIX OBJECTS ===
