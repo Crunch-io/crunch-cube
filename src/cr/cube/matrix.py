@@ -142,7 +142,7 @@ class _BaseSubtotals(object):
     @lazyproperty
     def _row_subtotals(self):
         """Sequence of _Subtotal object for each subtotal in rows-dimension."""
-        raise NotImplementedError
+        return self._cube_result_matrix.rows_dimension.subtotals
 
     def _subtotal_column(self, subtotal):
         """Return (n_rows,) ndarray of values for `subtotal` column."""
@@ -223,6 +223,11 @@ class _BaseCubeResultMatrix(object):
     def columns_dimension(self):
         """The `Dimension` object representing column elements of this matrix."""
         return self._dimensions[1]
+
+    @lazyproperty
+    def rows_dimension(self):
+        """The `Dimension` object representing row elements of this matrix."""
+        raise NotImplementedError
 
     @staticmethod
     def _extract_counts_for_matrix_creation(cube, slice_idx):
