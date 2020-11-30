@@ -225,6 +225,10 @@ class DescribeCubePartition(object):
         """Handles defaulting of transforms arg."""
         assert CubePartition(None, transforms)._transforms_dict == expected_value
 
+    def it_knows_its_selected_categories_labels(self):
+        # --- default of {} is overridden by subclasses when appropriate ---
+        assert CubePartition(None).selected_categories_label == {}
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -343,6 +347,44 @@ class Describe_Slice(object):
 
         assert str(err.value) == "Function F is not available."
 
+    @pytest.mark.parametrize(
+        "dimensions_dicts, expected_value",
+        (
+            ([{"references": {}}], set([])),
+            (
+                [
+                    {"references": {}},
+                    {
+                        "references": {
+                            "selected_categories": [{"name": "Foo"}, {"name": "Bar"}]
+                        }
+                    },
+                ],
+                {"Foo", "Bar"},
+            ),
+            (
+                [
+                    {"references": {}},
+                    {
+                        "references": {
+                            "selected_categories": [{"name": "Foo"}, {"id": "Bar"}]
+                        }
+                    },
+                ],
+                {"Foo"},
+            ),
+        ),
+    )
+    def it_knows_its_selected_categories_labels(
+        self, _dimensions_prop_, dimensions_dicts, expected_value
+    ):
+        _dimensions_prop_.return_value = [
+            Dimension(dim_dict, None, None) for dim_dict in dimensions_dicts
+        ]
+        slice_ = _Slice(None, None, None, None, None)
+
+        assert slice_.selected_categories_label == expected_value
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -352,10 +394,6 @@ class Describe_Slice(object):
     @pytest.fixture
     def cube_(self, request):
         return instance_mock(request, Cube)
-
-    @pytest.fixture
-    def dimension_(self, request):
-        return instance_mock(request, Dimension)
 
     @pytest.fixture
     def _dimensions_prop_(self, request):

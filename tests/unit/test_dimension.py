@@ -469,6 +469,26 @@ class DescribeDimension(object):
         dimension_type = dimension.dimension_type
         assert dimension_type == DT.CAT
 
+    @pytest.mark.parametrize(
+        "selected_categories, expected_value",
+        (
+            ({"selected_categories": [{}]}, []),
+            ({"foo": "bar"}, []),
+            ({}, []),
+            (
+                {"selected_categories": [{"name": "Very Fav.", "id": 1}]},
+                [{"name": "Very Fav.", "id": 1}],
+            ),
+        ),
+    )
+    def it_knows_its_selected_categories(self, selected_categories, expected_value):
+        dimension_dict = {"references": selected_categories}
+        dimension = Dimension(dimension_dict, None)
+
+        selected_categories = dimension.selected_categories
+
+        assert selected_categories == expected_value
+
     def it_knows_the_numeric_values_of_its_elements(
         self, request, valid_elements_prop_
     ):

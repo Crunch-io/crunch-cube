@@ -382,6 +382,16 @@ class Dimension(object):
         return False
 
     @lazyproperty
+    def selected_categories(self):
+        """List of selected categories specified for this dimension."""
+        selected_categories = self._dimension_dict["references"].get(
+            "selected_categories"
+        )
+        if not selected_categories or selected_categories == [{}]:
+            return []
+        return selected_categories
+
+    @lazyproperty
     def shape(self):
         return len(self.all_elements)
 

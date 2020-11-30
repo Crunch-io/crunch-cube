@@ -123,6 +123,11 @@ class CubePartition(object):
         return self._cube.population_fraction
 
     @lazyproperty
+    def selected_categories_label(self):
+        """Set of selected categories for all the dimensions."""
+        return {}
+
+    @lazyproperty
     def shape(self):
         """Tuple of int vector counts for this partition.
 
@@ -753,6 +758,16 @@ class _Slice(CubePartition):
         if np.all(np.isnan(self._rows_dimension_numeric_values)):
             return None
         return self.scale_std_dev_row / np.sqrt(self.columns_margin)
+
+    @lazyproperty
+    def selected_categories_label(self):
+        """Set of selected categories for all the dimensions."""
+        labels = []
+        for d in self._dimensions:
+            for s in d.selected_categories:
+                if s.get("name"):
+                    labels.append(s.get("name"))
+        return set(labels)
 
     @lazyproperty
     def shape(self):

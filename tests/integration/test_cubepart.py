@@ -735,6 +735,11 @@ class Describe_Slice(object):
             ),
         )
 
+    def it_knwos_its_selected_categories(self):
+        slice_ = Cube(CR.CA_CAT_X_MR_X_CA_SUBVAR).partitions[0]
+
+        assert slice_.selected_categories_label == {"Very Favorable"}
+
 
 class Describe_Strand(object):
     """Integration-test suite for `cr.cube.cubepart._Strand` object."""
