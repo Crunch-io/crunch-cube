@@ -132,7 +132,7 @@ class _BaseSubtotals(object):
     @lazyproperty
     def _nrows(self):
         """int count of rows in base-matrix."""
-        raise NotImplementedError
+        return self._base_values.shape[0]
 
     def _subtotal_column(self, subtotal):
         """Return (n_rows,) ndarray of values for `subtotal` column."""

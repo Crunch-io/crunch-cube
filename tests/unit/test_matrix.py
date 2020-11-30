@@ -133,6 +133,10 @@ class Describe_BaseSubtotals(object):
         subtotals = _BaseSubtotals(cube_result_matrix_, None)
         assert subtotals._column_subtotals is dimension_.subtotals
 
+    def it_knows_how_many_rows_are_in_the_base_matrix(self, _base_values_prop_):
+        _base_values_prop_.return_value = np.arange(12).reshape(3, 4)
+        assert _BaseSubtotals(None, None)._nrows == 3
+
     @pytest.mark.parametrize(
         ("nrows", "n_subtotals", "expected_value"),
         (
@@ -163,6 +167,10 @@ class Describe_BaseSubtotals(object):
     @pytest.fixture
     def dimension_(self, request):
         return instance_mock(request, Dimension)
+
+    @pytest.fixture
+    def _base_values_prop_(self, request):
+        return property_mock(request, _BaseSubtotals, "_base_values")
 
     @pytest.fixture
     def _column_subtotals_prop_(self, request):
