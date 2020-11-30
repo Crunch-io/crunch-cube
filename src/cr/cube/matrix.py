@@ -201,7 +201,7 @@ class _BaseCubeResultMatrix(object):
     @lazyproperty
     def columns_dimension(self):
         """The `Dimension` object representing column elements of this matrix."""
-        raise NotImplementedError
+        return self._dimensions[1]
 
     @staticmethod
     def _extract_counts_for_matrix_creation(cube, slice_idx):
