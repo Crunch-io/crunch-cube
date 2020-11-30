@@ -78,6 +78,9 @@ class Assembler(object):
         )
 
 
+# === SUBTOTALS OBJECTS ===
+
+
 class _BaseSubtotals(object):
     """Base class for Subtotals objects."""
 
@@ -111,7 +114,7 @@ class _BaseSubtotals(object):
     @lazyproperty
     def _column_subtotals(self):
         """Sequence of _Subtotal object for each subtotal in columns-dimension."""
-        raise NotImplementedError
+        return self._cube_result_matrix.columns_dimension.subtotals
 
     @lazyproperty
     def _dtype(self):
@@ -215,6 +218,11 @@ class _BaseCubeResultMatrix(object):
         raise NotImplementedError(
             "`%s` must implement `.columns_base`" % type(self).__name__
         )
+
+    @lazyproperty
+    def columns_dimension(self):
+        """The `Dimension` object representing column elements of this matrix."""
+        raise NotImplementedError
 
     @lazyproperty
     def columns_pruning_base(self):

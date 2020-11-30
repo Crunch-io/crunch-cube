@@ -126,6 +126,13 @@ class Describe_BaseSubtotals(object):
             [base_subtotals._subtotal_rows, base_subtotals._intersections],
         ]
 
+    def it_provides_access_to_the_column_subtotals(
+        self, cube_result_matrix_, dimension_
+    ):
+        cube_result_matrix_.columns_dimension = dimension_
+        subtotals = _BaseSubtotals(cube_result_matrix_, None)
+        assert subtotals._column_subtotals is dimension_.subtotals
+
     @pytest.mark.parametrize(
         ("nrows", "n_subtotals", "expected_value"),
         (
@@ -152,6 +159,10 @@ class Describe_BaseSubtotals(object):
         assert subtotal_columns.tolist() == expected_value.tolist()
 
     # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def dimension_(self, request):
+        return instance_mock(request, Dimension)
 
     @pytest.fixture
     def _column_subtotals_prop_(self, request):
