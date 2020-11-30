@@ -78,6 +78,9 @@ class Assembler(object):
         )
 
 
+# === SUBTOTALS OBJECTS ===
+
+
 class _BaseSubtotals(object):
     """Base class for Subtotals objects."""
 
@@ -111,7 +114,7 @@ class _BaseSubtotals(object):
     @lazyproperty
     def _column_subtotals(self):
         """Sequence of _Subtotal object for each subtotal in columns-dimension."""
-        raise NotImplementedError
+        return self._cube_result_matrix.columns_dimension.subtotals
 
     @lazyproperty
     def _dtype(self):
@@ -194,6 +197,11 @@ class _BaseCubeResultMatrix(object):
 
         # --- everything else gets a more conventional matrix ---
         return cls._regular_matrix_factory(cube, dimensions, slice_idx)
+
+    @lazyproperty
+    def columns_dimension(self):
+        """The `Dimension` object representing column elements of this matrix."""
+        raise NotImplementedError
 
     @staticmethod
     def _extract_counts_for_matrix_creation(cube, slice_idx):
