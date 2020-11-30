@@ -162,11 +162,31 @@ class Describe_BaseSubtotals(object):
 
         assert subtotal_columns.tolist() == expected_value.tolist()
 
-    # fixture components ---------------------------------------------
+    @pytest.mark.parametrize(
+        ("ncols", "row_subtotals", "expected_value"),
+        (
+            (3, [], np.empty((0, 3), dtype=np.float64)),
+            (3, [1, 2], np.array([[1, 2, 3], [1, 2, 3]])),
+        ),
+    )
+    def it_knows_its_subtotal_rows(
+        self,
+        _row_subtotals_prop_,
+        _ncols_prop_,
+        _subtotal_row_,
+        ncols,
+        row_subtotals,
+        expected_value,
+    ):
+        _row_subtotals_prop_.return_value = row_subtotals
+        _subtotal_row_.return_value = np.array([1, 2, 3])
+        _ncols_prop_.return_value = ncols
 
-    @pytest.fixture
-    def dimension_(self, request):
-        return instance_mock(request, Dimension)
+        np.testing.assert_equal(
+            _BaseSubtotals(None, None)._subtotal_rows, expected_value
+        )
+
+    # fixture components ---------------------------------------------
 
     @pytest.fixture
     def _base_values_prop_(self, request):
@@ -181,8 +201,20 @@ class Describe_BaseSubtotals(object):
         return instance_mock(request, _BaseCubeResultMatrix)
 
     @pytest.fixture
+    def dimension_(self, request):
+        return instance_mock(request, Dimension)
+
+    @pytest.fixture
+    def _ncols_prop_(self, request):
+        return property_mock(request, _BaseSubtotals, "_ncols")
+
+    @pytest.fixture
     def _nrows_prop_(self, request):
         return property_mock(request, _BaseSubtotals, "_nrows")
+
+    @pytest.fixture
+    def _row_subtotals_prop_(self, request):
+        return property_mock(request, _BaseSubtotals, "_row_subtotals")
 
     @pytest.fixture
     def subtotal_(self, request):
@@ -191,6 +223,10 @@ class Describe_BaseSubtotals(object):
     @pytest.fixture
     def _subtotal_column_(self, request):
         return method_mock(request, _BaseSubtotals, "_subtotal_column")
+
+    @pytest.fixture
+    def _subtotal_row_(self, request):
+        return method_mock(request, _BaseSubtotals, "_subtotal_row")
 
 
 class Describe_SumSubtotals(object):
