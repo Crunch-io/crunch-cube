@@ -265,6 +265,10 @@ class Describe_BaseCubeResultMatrix(object):
         factory_method.assert_called_once_with(cube_, (dimension_, dimension_), 71)
         assert cube_result_matrix is cube_result_matrix_
 
+    def it_knows_its_columns_dimension(self, dimension_):
+        matrix = _BaseCubeResultMatrix([None, dimension_], None, None)
+        assert matrix.columns_dimension == dimension_
+
     @pytest.mark.parametrize(
         ("slice_idx", "dim_types", "expected"),
         (

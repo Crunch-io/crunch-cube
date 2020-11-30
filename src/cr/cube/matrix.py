@@ -222,7 +222,7 @@ class _BaseCubeResultMatrix(object):
     @lazyproperty
     def columns_dimension(self):
         """The `Dimension` object representing column elements of this matrix."""
-        raise NotImplementedError
+        return self._dimensions[1]
 
     @lazyproperty
     def columns_pruning_base(self):
