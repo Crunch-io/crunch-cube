@@ -430,6 +430,10 @@ class Describe_BaseCubeResultMatrix(object):
         )
         assert matrix is MatrixCls_.return_value
 
+    def it_knows_its_rows_dimension(self, dimension_):
+        matrix = _BaseCubeResultMatrix([dimension_, None], None, None)
+        assert matrix.rows_dimension == dimension_
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture

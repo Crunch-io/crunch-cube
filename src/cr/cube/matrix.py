@@ -255,7 +255,7 @@ class _BaseCubeResultMatrix(object):
     @lazyproperty
     def rows_dimension(self):
         """The `Dimension` object representing row elements of this matrix."""
-        raise NotImplementedError
+        return self._dimensions[0]
 
     @lazyproperty
     def rows_pruning_base(self):
