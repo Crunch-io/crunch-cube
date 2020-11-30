@@ -137,6 +137,11 @@ class Describe_BaseSubtotals(object):
         _base_values_prop_.return_value = np.arange(12).reshape(3, 4)
         assert _BaseSubtotals(None, None)._nrows == 3
 
+    def it_provides_access_to_the_row_subtotals(self, cube_result_matrix_, dimension_):
+        cube_result_matrix_.rows_dimension = dimension_
+        subtotals = _BaseSubtotals(cube_result_matrix_, None)
+        assert subtotals._row_subtotals is dimension_.subtotals
+
     @pytest.mark.parametrize(
         ("nrows", "n_subtotals", "expected_value"),
         (
