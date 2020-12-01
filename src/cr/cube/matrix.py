@@ -85,12 +85,44 @@ class Assembler(object):
             self._cube, self._dimensions, self._slice_idx
         )
 
+    def _dimension_order(self, dimension, empty_idxs):
+        """1D np.int64 ndarray of signed int idx for each vector in `dimension`.
+
+        Negative values represent inserted-vector locations. Returned sequence reflects
+        insertion, hiding, pruning, and ordering transforms specified in `dimension`.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
+    def _empty_row_idxs(self):
+        """tuple of int index for each row with N = 0.
+
+        These rows are subject to pruning, depending on a user setting in the dimension.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
+    def _prune_subtotal_rows(self):
+        """True if subtotal rows need to be pruned, False otherwise.
+
+        Subtotal-rows need to be pruned when all base-columns are pruned.
+        """
+        raise NotImplementedError
+
     @lazyproperty
     def _row_order(self):
         """1D np.int64 ndarray of signed int idx for each assembled row.
 
         Negative values represent inserted subtotal-row locations.
         """
+        order = self._dimension_order(self._rows_dimension, self._empty_row_idxs)
+        if self._prune_subtotal_rows:
+            return np.array([idx for idx in order if idx >= 0], dtype=int)
+        return order
+
+    @lazyproperty
+    def _rows_dimension(self):
+        """The `Dimension` object representing row elements in this matrix."""
         raise NotImplementedError
 
 

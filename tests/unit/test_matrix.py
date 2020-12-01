@@ -94,6 +94,43 @@ class DescribeAssembler(object):
         )
         assert cube_result_matrix is cube_result_matrix_
 
+    @pytest.mark.parametrize(
+        ("order", "prune", "expected"),
+        (
+            # --- False -> not pruned ---
+            ([0, 1], False, [0, 1]),
+            # --- True, but no negative indices -> not pruned ---
+            ([0, 1], True, [0, 1]),
+            # --- False -> not pruned ---
+            ([0, -1, 1, -2], False, [0, -1, 1, -2]),
+            # --- True, with negative indices -> pruned ---
+            ([0, -1, 1, -2], True, [0, 1]),
+        ),
+    )
+    def it_knows_its_row_order_to_help(
+        self,
+        request,
+        _dimension_order_,
+        dimension_,
+        order,
+        prune,
+        expected,
+    ):
+        # --- Prepare mocks and return values ---
+        property_mock(request, Assembler, "_rows_dimension", return_value=dimension_)
+        fake_row_idxs = [0, 1, 2]
+        property_mock(request, Assembler, "_empty_row_idxs", return_value=fake_row_idxs)
+        _dimension_order_.return_value = np.array(order)
+        property_mock(request, Assembler, "_prune_subtotal_rows", return_value=prune)
+        assembler = Assembler(None, None, None)
+
+        # --- Call the tested property ---
+        row_order = assembler._row_order
+
+        # --- Perform assertions
+        assert row_order.tolist() == expected
+        _dimension_order_.assert_called_once_with(assembler, dimension_, fake_row_idxs)
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -119,6 +156,10 @@ class DescribeAssembler(object):
     @pytest.fixture
     def dimension_(self, request):
         return instance_mock(request, Dimension)
+
+    @pytest.fixture
+    def _dimension_order_(self, request):
+        return method_mock(request, Assembler, "_dimension_order")
 
     @pytest.fixture
     def _row_order_prop_(self, request):
