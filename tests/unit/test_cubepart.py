@@ -469,6 +469,12 @@ class Describe_Strand(object):
 
         assert population_fraction == 0.5
 
+    def it_knows_its_selected_ca_categories_labels(self):
+        # --- default of {} is overridden by subclasses when appropriate ---
+        strand_ = _Strand(None, None, None, None, None, None)
+
+        assert strand_.selected_ca_category_labels == ()
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -516,3 +522,9 @@ class Describe_Nub(object):
 
     def it_knows_its_cube_is_never_mr_aug(self):
         assert _Nub(None).cube_is_mr_aug is False
+
+    def it_knows_its_selected_ca_categories_labels(self):
+        # --- default of {} is overridden by subclasses when appropriate ---
+        nub_ = _Nub(None)
+
+        assert nub_.selected_ca_category_labels == ()

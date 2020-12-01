@@ -1381,6 +1381,11 @@ class _Nub(CubePartition):
         return self._scalar.means
 
     @lazyproperty
+    def selected_ca_category_labels(self):
+        """Set of selected categories for all the dimensions."""
+        return ()
+
+    @lazyproperty
     def table_base(self):
         return self._scalar.table_base
 
