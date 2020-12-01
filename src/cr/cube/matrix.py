@@ -123,7 +123,7 @@ class Assembler(object):
     @lazyproperty
     def _rows_dimension(self):
         """The `Dimension` object representing row elements in this matrix."""
-        raise NotImplementedError
+        return self._cube_result_matrix.rows_dimension
 
 
 # === SUBTOTALS OBJECTS ===
