@@ -126,9 +126,8 @@ class CubePartition(object):
     def selected_ca_category_labels(self):
         """Set of selected categories for all the dimensions."""
         raise NotImplementedError(
-            "`%s` must implement `.selected_ca_category_labels`"
-            % self.__class__.__name__
-        )
+            "must be implemented by each subclass"
+        )  # pragma: no cover
 
     @lazyproperty
     def shape(self):
