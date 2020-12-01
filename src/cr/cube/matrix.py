@@ -99,7 +99,8 @@ class Assembler(object):
 
         These rows are subject to pruning, depending on a user setting in the dimension.
         """
-        raise NotImplementedError
+        base = self._cube_result_matrix.rows_pruning_base
+        return tuple(i for i, N in enumerate(base) if N == 0)
 
     @lazyproperty
     def _prune_subtotal_rows(self):
@@ -293,6 +294,13 @@ class _BaseCubeResultMatrix(object):
         """The `Dimension` object representing row elements of this matrix."""
         return self._dimensions[0]
 
+    @lazyproperty
+    def rows_pruning_base(self):
+        """1D np.int64 ndarray of unweighted-N for each matrix row."""
+        raise NotImplementedError(
+            "`%s` must implement `.rows_pruning_base`" % type(self).__name__
+        )
+
     @staticmethod
     def _extract_counts_for_matrix_creation(cube, slice_idx):
         """Returns a tuple of cube counts, prepared for matrix construction.
@@ -404,6 +412,15 @@ class _CatXCatMatrix(_BaseCubeResultMatrix):
     ):
         super(_CatXCatMatrix, self).__init__(dimensions, counts, unweighted_counts)
         self._counts_with_missings = counts_with_missings
+
+    @lazyproperty
+    def rows_pruning_base(self):
+        """1D np.int64 ndarray of unweighted-N for each matrix row.
+
+        Because this matrix has no MR dimension, this is simply the sum of unweighted
+        counts for each row.
+        """
+        return np.sum(self._unweighted_counts, axis=1)
 
     @lazyproperty
     def unweighted_counts(self):

@@ -95,6 +95,18 @@ class DescribeAssembler(object):
         assert cube_result_matrix is cube_result_matrix_
 
     @pytest.mark.parametrize(
+        ("base", "expected_value"),
+        (((1, 1, 1), ()), ((1, 0, 1), (1,)), ((0, 0, 0), (0, 1, 2))),
+    )
+    def it_knows_its_empty_row_idxs_to_help(
+        self, _cube_result_matrix_prop_, cube_result_matrix_, base, expected_value
+    ):
+        _cube_result_matrix_prop_.return_value = cube_result_matrix_
+        cube_result_matrix_.rows_pruning_base = np.array(base)
+
+        assert Assembler(None, None, None)._empty_row_idxs == expected_value
+
+    @pytest.mark.parametrize(
         ("order", "prune", "expected"),
         (
             # --- False -> not pruned ---
@@ -575,6 +587,18 @@ class Describe_BaseCubeResultMatrix(object):
 
 class Describe_CatXCatMatrix(object):
     """Unit test suite for `cr.cube.matrix._CatXCatMatrix` object."""
+
+    @pytest.mark.parametrize(
+        ("unweighted_counts", "expected"),
+        (
+            ([[1, 2, 3]], [6]),
+            ([[1, 2, 3], [4, 5, 6]], [6, 15]),
+            ([[1], [2], [3]], [1, 2, 3]),
+        ),
+    )
+    def it_knows_its_rows_pruning_base(self, unweighted_counts, expected):
+        matrix = _CatXCatMatrix(None, None, unweighted_counts)
+        assert matrix.rows_pruning_base.tolist() == expected
 
     def it_knows_its_unweighted_counts(self):
         unweighted_counts = np.array([[1, 2, 3], [4, 5, 6]])
