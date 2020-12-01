@@ -123,9 +123,12 @@ class CubePartition(object):
         return self._cube.population_fraction
 
     @lazyproperty
-    def selected_categories_label(self):
+    def selected_ca_category_labels(self):
         """Set of selected categories for all the dimensions."""
-        return {}
+        raise NotImplementedError(
+            "`%s` must implement `.selected_ca_category_labels`"
+            % self.__class__.__name__
+        )
 
     @lazyproperty
     def shape(self):
@@ -760,14 +763,14 @@ class _Slice(CubePartition):
         return self.scale_std_dev_row / np.sqrt(self.columns_margin)
 
     @lazyproperty
-    def selected_categories_label(self):
-        """Set of selected categories for all the dimensions."""
-        labels = []
-        for d in self._dimensions:
-            for s in d.selected_categories:
-                if s.get("name"):
-                    labels.append(s.get("name"))
-        return set(labels)
+    def selected_ca_category_labels(self):
+        """Tuple of selected categories for all the dimensions."""
+        return tuple(
+            s["name"]
+            for d in self._dimensions
+            for s in d.selected_categories
+            if s.get("name")
+        )
 
     @lazyproperty
     def shape(self):
@@ -1170,6 +1173,11 @@ class _Strand(CubePartition):
             return None
         counts = self._counts_as_array[self._numeric_values_mask]
         return np.sqrt(self.var_scale_mean / np.sum(counts))
+
+    @lazyproperty
+    def selected_ca_category_labels(self):
+        """Set of selected categories for all the dimensions."""
+        return ()
 
     @lazyproperty
     def shape(self):

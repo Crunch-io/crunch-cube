@@ -387,9 +387,7 @@ class Dimension(object):
         selected_categories = self._dimension_dict["references"].get(
             "selected_categories"
         )
-        if not selected_categories or selected_categories == [{}]:
-            return []
-        return selected_categories
+        return tuple(selected_categories) if selected_categories else ()
 
     @lazyproperty
     def shape(self):

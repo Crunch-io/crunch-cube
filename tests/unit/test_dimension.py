@@ -472,12 +472,12 @@ class DescribeDimension(object):
     @pytest.mark.parametrize(
         "selected_categories, expected_value",
         (
-            ({"selected_categories": [{}]}, []),
-            ({"foo": "bar"}, []),
-            ({}, []),
+            ({"selected_categories": None}, ()),
+            ({"foo": "bar"}, ()),
+            ({}, ()),
             (
                 {"selected_categories": [{"name": "Very Fav.", "id": 1}]},
-                [{"name": "Very Fav.", "id": 1}],
+                ({"name": "Very Fav.", "id": 1},),
             ),
         ),
     )

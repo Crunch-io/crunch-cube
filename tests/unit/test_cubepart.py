@@ -225,10 +225,6 @@ class DescribeCubePartition(object):
         """Handles defaulting of transforms arg."""
         assert CubePartition(None, transforms)._transforms_dict == expected_value
 
-    def it_knows_its_selected_categories_labels(self):
-        # --- default of {} is overridden by subclasses when appropriate ---
-        assert CubePartition(None).selected_categories_label == {}
-
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -350,7 +346,7 @@ class Describe_Slice(object):
     @pytest.mark.parametrize(
         "dimensions_dicts, expected_value",
         (
-            ([{"references": {}}], set([])),
+            ([{"references": {}}], ()),
             (
                 [
                     {"references": {}},
@@ -360,7 +356,7 @@ class Describe_Slice(object):
                         }
                     },
                 ],
-                {"Foo", "Bar"},
+                ("Foo", "Bar"),
             ),
             (
                 [
@@ -371,11 +367,11 @@ class Describe_Slice(object):
                         }
                     },
                 ],
-                {"Foo"},
+                ("Foo",),
             ),
         ),
     )
-    def it_knows_its_selected_categories_labels(
+    def it_knows_its_selected_ca_category_labels(
         self, _dimensions_prop_, dimensions_dicts, expected_value
     ):
         _dimensions_prop_.return_value = [
@@ -383,7 +379,7 @@ class Describe_Slice(object):
         ]
         slice_ = _Slice(None, None, None, None, None)
 
-        assert slice_.selected_categories_label == expected_value
+        assert slice_.selected_ca_category_labels == expected_value
 
     # fixture components ---------------------------------------------
 
