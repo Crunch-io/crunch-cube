@@ -131,6 +131,14 @@ class DescribeAssembler(object):
         assert row_order.tolist() == expected
         _dimension_order_.assert_called_once_with(assembler, dimension_, fake_row_idxs)
 
+    def it_knows_its_rows_dimension_to_help(
+        self, _cube_result_matrix_prop_, cube_result_matrix_, dimension_
+    ):
+        _cube_result_matrix_prop_.return_value = cube_result_matrix_
+        cube_result_matrix_.rows_dimension = dimension_
+
+        assert Assembler(None, None, None)._rows_dimension is dimension_
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
