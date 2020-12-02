@@ -499,6 +499,15 @@ class _CatXCatMatrix(_BaseCubeResultMatrix):
         self._counts_with_missings = counts_with_missings
 
     @lazyproperty
+    def columns_pruning_base(self):
+        """1D np.int64 ndarray of unweighted-N for each matrix column.
+
+        Because this matrix has no MR dimension, this is simply the sum of unweighted
+        counts for each column.
+        """
+        return np.sum(self._unweighted_counts, axis=0)
+
+    @lazyproperty
     def rows_pruning_base(self):
         """1D np.int64 ndarray of unweighted-N for each matrix row.
 
