@@ -127,6 +127,18 @@ class DescribeAssembler(object):
         ("base", "expected_value"),
         (((1, 1, 1), ()), ((1, 0, 1), (1,)), ((0, 0, 0), (0, 1, 2))),
     )
+    def it_knows_its_empty_column_idxs_to_help(
+        self, _cube_result_matrix_prop_, cube_result_matrix_, base, expected_value
+    ):
+        _cube_result_matrix_prop_.return_value = cube_result_matrix_
+        cube_result_matrix_.columns_pruning_base = np.array(base)
+
+        assert Assembler(None, None, None)._empty_column_idxs == expected_value
+
+    @pytest.mark.parametrize(
+        ("base", "expected_value"),
+        (((1, 1, 1), ()), ((1, 0, 1), (1,)), ((0, 0, 0), (0, 1, 2))),
+    )
     def it_knows_its_empty_row_idxs_to_help(
         self, _cube_result_matrix_prop_, cube_result_matrix_, base, expected_value
     ):

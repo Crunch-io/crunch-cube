@@ -124,7 +124,8 @@ class Assembler(object):
         These columns are subject to pruning, depending on a user setting in the
         dimension.
         """
-        raise NotImplementedError
+        pruning_base = self._cube_result_matrix.columns_pruning_base
+        return tuple(i for i, N in enumerate(pruning_base) if N == 0)
 
     @lazyproperty
     def _empty_row_idxs(self):
