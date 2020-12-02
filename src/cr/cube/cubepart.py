@@ -124,7 +124,7 @@ class CubePartition(object):
 
     @lazyproperty
     def selected_category_labels(self):
-        """Tuple of strings representing names of selected categories."""
+        """Tuple of str: names of any and all underlying categories in 'Selected'."""
         return tuple(
             s["name"]
             for d in self._dimensions
