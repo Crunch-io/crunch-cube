@@ -78,6 +78,14 @@ class DescribeAssembler(object):
 
         assert assembler._assemble_matrix(blocks).tolist() == expected_value
 
+    def it_provides_access_to_the_columns_dimension_to_help(
+        self, _cube_result_matrix_prop_, cube_result_matrix_, dimension_
+    ):
+        _cube_result_matrix_prop_.return_value = cube_result_matrix_
+        cube_result_matrix_.columns_dimension = dimension_
+
+        assert Assembler(None, None, None)._columns_dimension is dimension_
+
     def it_constructs_the_cube_result_matrix_to_help(
         self, request, cube_, dimension_, cube_result_matrix_
     ):
