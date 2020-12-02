@@ -11,7 +11,8 @@ either hidden by the user or "pruned" because they contain no observations.
 
 import numpy as np
 
-from cr.cube.enums import DIMENSION_TYPE as DT
+from cr.cube.collator import ExplicitOrderCollator, PayloadOrderCollator
+from cr.cube.enums import COLLATION_METHOD as CM, DIMENSION_TYPE as DT
 from cr.cube.util import lazyproperty
 
 
@@ -91,7 +92,23 @@ class Assembler(object):
         Negative values represent inserted-vector locations. Returned sequence reflects
         insertion, hiding, pruning, and ordering transforms specified in `dimension`.
         """
-        raise NotImplementedError
+        collation_method = dimension.collation_method
+
+        # --- this will become a significantly more sophisticated dispatch when
+        # --- sort-by-value is implemented in later commits. In particular, the
+        # --- signature for the sort-by-value collator differs from the payload and
+        # --- explicit-order collators. So we'll defer refactoring this until that
+        # --- collator is added. (sc)
+        display_order = (
+            ExplicitOrderCollator.display_order(dimension, empty_idxs)
+            if collation_method == CM.EXPLICIT_ORDER
+            else PayloadOrderCollator.display_order(dimension, empty_idxs)
+        )
+
+        # --- Returning as np.array suits its intended purpose, which is to participate
+        # --- in an np._ix() call. It works fine as a sequence too for any alternate
+        # --- use. Specifying int type prevents failure when there are zero elements.
+        return np.array(display_order, dtype=int)
 
     @lazyproperty
     def _empty_row_idxs(self):
