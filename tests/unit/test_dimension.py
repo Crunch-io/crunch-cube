@@ -36,7 +36,7 @@ from ..unitutil import (
 
 
 class Describe_BaseDimensions(object):
-    def it_has_sequence_behaviors(self, request, _dimensions_prop_):
+    def it_has_sequence_behaviors(self, _dimensions_prop_):
         _dimensions_prop_.return_value = (0, 1, 2)
         base_dimensions = _BaseDimensions()
 

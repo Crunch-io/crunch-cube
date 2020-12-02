@@ -736,9 +736,9 @@ class Describe_Slice(object):
         )
 
     def it_knows_its_selected_categories(self):
-        slice_ = Cube(CR.CA_CAT_X_MR_X_CA_SUBVAR).partitions[0]
+        slice_ = Cube(CR.MR_X_MR_SELECTED_CATEGORIES).partitions[0]
 
-        assert slice_.selected_ca_category_labels == ("Very Favorable",)
+        assert slice_.selected_category_labels == ("Very Favorable",)
 
 
 class Describe_Strand(object):

@@ -32,7 +32,7 @@ class DescribeIntegratedAllDimensions(object):
             (CR.CAT_X_CAT, (DT.CAT, DT.CAT)),
             (CR.CA_X_MR_WEIGHTED_HS, (DT.CA, DT.CA_CAT, DT.MR, DT.MR_CAT)),
             (
-                CR.CA_CAT_X_MR_X_CA_SUBVAR,
+                CR.MR_X_MR_SELECTED_CATEGORIES,
                 (DT.MR_SUBVAR, DT.MR_CAT, DT.MR_SUBVAR, DT.MR_CAT),
             ),
         ),
