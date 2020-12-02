@@ -548,7 +548,30 @@ class DescribeDimension(object):
         _Subtotals_.assert_called_once_with(insertion_dicts, valid_elements_, True)
         assert subtotals is subtotals_
 
-    def but_it_overrides_with_subtotal_transforms_when_present(
+    @pytest.mark.parametrize("dimension_type", (DT.MR, DT.CA_SUBVAR))
+    def but_it_suppresses_any_subtotals_on_an_array_dimension(
+        self,
+        request,
+        dimension_type,
+        _Subtotals_,
+        subtotals_,
+        valid_elements_prop_,
+        valid_elements_,
+        prune_prop_,
+    ):
+        property_mock(request, Dimension, "dimension_type", return_value=dimension_type)
+        _Subtotals_.return_value = subtotals_
+        valid_elements_prop_.return_value = valid_elements_
+        prune_prop_.return_value = True
+        dimension_dict = {"references": {"view": {"transform": {"insertions": [666]}}}}
+        dimension = Dimension(dimension_dict, None)
+
+        subtotals = dimension.subtotals
+
+        _Subtotals_.assert_called_once_with([], valid_elements_, True)
+        assert subtotals is subtotals_
+
+    def and_it_overrides_with_subtotal_transforms_when_present(
         self,
         valid_elements_prop_,
         valid_elements_,
