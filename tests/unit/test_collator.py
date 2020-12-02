@@ -6,10 +6,40 @@ import sys
 
 import pytest
 
-from cr.cube.collator import _BaseAnchoredCollator
+from cr.cube.collator import _BaseAnchoredCollator, _BaseCollator
 from cr.cube.dimension import Dimension
 
 from ..unitutil import ANY, initializer_mock, instance_mock, property_mock
+
+
+class Describe_BaseCollator(object):
+    """Unit-test suite for `cr.cube.collator._BaseCollator` object."""
+
+    @pytest.mark.parametrize(
+        "empty_idxs, prune, hidden_idxs, expected_value",
+        (
+            ((), False, (), ()),
+            ((), False, (4, 5, 6), (4, 5, 6)),
+            ((1, 2, 3), False, (4, 5, 6), (4, 5, 6)),
+            ((), True, (), ()),
+            ((), True, (4, 5, 6), (4, 5, 6)),
+            ((1, 2, 3), True, (4, 5, 6), (1, 2, 3, 4, 5, 6)),
+        ),
+    )
+    def it_knows_the_hidden_idxs_to_help(
+        self, dimension_, empty_idxs, prune, hidden_idxs, expected_value
+    ):
+        dimension_.hidden_idxs = hidden_idxs
+        dimension_.prune = prune
+        collator = _BaseCollator(dimension_, empty_idxs)
+
+        assert collator._hidden_idxs == frozenset(expected_value)
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def dimension_(self, request):
+        return instance_mock(request, Dimension)
 
 
 class Describe_BaseAnchoredCollator(object):

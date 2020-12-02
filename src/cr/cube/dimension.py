@@ -349,6 +349,15 @@ class Dimension(object):
         raise NotImplementedError
 
     @lazyproperty
+    def hidden_idxs(self):
+        """tuple of int element-idx for each hidden valid element in this dimension.
+
+        An element is hidden when a "hide" transform is applied to it in its transforms
+        dict.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
     def name(self):
         """str name of this dimension, the empty string ("") if not specified."""
         references = self._dimension_dict["references"]

@@ -23,7 +23,8 @@ class _BaseCollator(object):
     @lazyproperty
     def _hidden_idxs(self):
         """frozenset of int element-idx of each vector for which to suppress display."""
-        raise NotImplementedError
+        empty_idxs = self._empty_idxs if self._dimension.prune else ()
+        return frozenset(empty_idxs + self._dimension.hidden_idxs)
 
 
 class _BaseAnchoredCollator(_BaseCollator):
