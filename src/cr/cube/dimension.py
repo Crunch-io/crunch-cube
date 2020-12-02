@@ -419,17 +419,18 @@ class Dimension(object):
         Each item in the sequence is a _Subtotal object specifying a subtotal, including
         its addends and anchor.
         """
+        # --- elements of an aggregate/array dimension cannot meaningfully be summed, so
+        # --- an array dimension cannot have subtotals
+        if self.dimension_type in (DT.MR, DT.CA_SUBVAR):
+            insertion_dicts = []
         # --- insertions in dimension-transforms override those on dimension itself ---
-        if "insertions" in self._dimension_transforms_dict:
-            return _Subtotals(
-                self._dimension_transforms_dict["insertions"],
-                self.valid_elements,
-                self.prune,
-            )
+        elif "insertions" in self._dimension_transforms_dict:
+            insertion_dicts = self._dimension_transforms_dict["insertions"]
+        # --- otherwise insertions defined on dimension/variable apply ---
+        else:
+            view = self._dimension_dict.get("references", {}).get("view") or {}
+            insertion_dicts = view.get("transform", {}).get("insertions", [])
 
-        # --- otherwise, insertions defined in cube as default transforms apply ---
-        view = self._dimension_dict.get("references", {}).get("view") or {}
-        insertion_dicts = view.get("transform", {}).get("insertions", [])
         return _Subtotals(insertion_dicts, self.valid_elements, self.prune)
 
     @lazyproperty
