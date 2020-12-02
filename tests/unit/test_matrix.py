@@ -7,7 +7,7 @@ import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension, _Subtotal
-from cr.cube.enums import DIMENSION_TYPE as DT
+from cr.cube.enums import COLLATION_METHOD as CM, DIMENSION_TYPE as DT
 from cr.cube.matrix import (
     Assembler,
     _BaseCubeResultMatrix,
@@ -93,6 +93,27 @@ class DescribeAssembler(object):
             cube_, (dimension_, dimension_), 42
         )
         assert cube_result_matrix is cube_result_matrix_
+
+    @pytest.mark.parametrize(
+        ("collation_method, collator_class_name"),
+        (
+            (CM.PAYLOAD_ORDER, "PayloadOrderCollator"),
+            (CM.EXPLICIT_ORDER, "ExplicitOrderCollator"),
+        ),
+    )
+    def it_computes_the_order_for_a_dimension_to_help(
+        self, request, dimension_, collation_method, collator_class_name
+    ):
+        CollatorCls_ = class_mock(request, "cr.cube.matrix.%s" % collator_class_name)
+        CollatorCls_.display_order.return_value = (1, -2, 3, 5, -1)
+        dimension_.collation_method = collation_method
+        assembler = Assembler(None, None, None)
+
+        dimension_order = assembler._dimension_order(dimension_, empty_idxs=[2, 4, 6])
+
+        CollatorCls_.display_order.assert_called_once_with(dimension_, [2, 4, 6])
+        assert dimension_order.shape == (5,)
+        np.testing.assert_equal(dimension_order, np.array([1, -2, 3, 5, -1]))
 
     @pytest.mark.parametrize(
         ("base", "expected_value"),
