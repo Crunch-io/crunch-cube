@@ -473,6 +473,12 @@ class DescribeDimension(object):
     def it_knows_its_dimension_type(self):
         assert Dimension(None, DT.CAT).dimension_type == DT.CAT
 
+    def it_knows_its_element_ids(self, request, valid_elements_prop_):
+        valid_elements_prop_.return_value = (
+            instance_mock(request, _Element, element_id=(i + 1)) for i in range(6)
+        )
+        assert Dimension(None, None).element_ids == (1, 2, 3, 4, 5, 6)
+
     def it_computes_its_hidden_idxs(self, request, valid_elements_prop_):
         valid_elements_prop_.return_value = (
             instance_mock(request, _Element, is_hidden=bool(i % 2)) for i in range(7)
