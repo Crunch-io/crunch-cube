@@ -361,7 +361,9 @@ class Dimension(object):
         An element is hidden when a "hide" transform is applied to it in its transforms
         dict.
         """
-        raise NotImplementedError
+        return tuple(
+            idx for idx, element in enumerate(self.valid_elements) if element.is_hidden
+        )
 
     @lazyproperty
     def name(self):
