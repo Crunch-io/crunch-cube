@@ -5,9 +5,9 @@
 import sys
 
 if sys.version_info >= (3, 3):
-    from collections.abc import Sequence
+    from collections.abc import Sequence  # pragma: no cover
 else:
-    from collections import Sequence
+    from collections import Sequence  # pragma: no cover
 
 import numpy as np
 
