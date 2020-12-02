@@ -471,29 +471,13 @@ class DescribeDimension(object):
         assert Dimension(dimension_dict, None).description == expected_value
 
     def it_knows_its_dimension_type(self):
-        dimension = Dimension(None, DT.CAT)
-        dimension_type = dimension.dimension_type
-        assert dimension_type == DT.CAT
+        assert Dimension(None, DT.CAT).dimension_type == DT.CAT
 
-    @pytest.mark.parametrize(
-        "selected_categories, expected_value",
-        (
-            ({"selected_categories": None}, ()),
-            ({"foo": "bar"}, ()),
-            ({}, ()),
-            (
-                {"selected_categories": [{"name": "Very Fav.", "id": 1}]},
-                ({"name": "Very Fav.", "id": 1},),
-            ),
-        ),
-    )
-    def it_knows_its_selected_categories(self, selected_categories, expected_value):
-        dimension_dict = {"references": selected_categories}
-        dimension = Dimension(dimension_dict, None)
-
-        selected_categories = dimension.selected_categories
-
-        assert selected_categories == expected_value
+    def it_computes_its_hidden_idxs(self, request, valid_elements_prop_):
+        valid_elements_prop_.return_value = (
+            instance_mock(request, _Element, is_hidden=bool(i % 2)) for i in range(7)
+        )
+        assert Dimension(None, None).hidden_idxs == (1, 3, 5)
 
     def it_knows_the_numeric_values_of_its_elements(
         self, request, valid_elements_prop_
@@ -517,6 +501,22 @@ class DescribeDimension(object):
         self, dimension_transforms, expected_value
     ):
         assert Dimension(None, None, dimension_transforms).order_dict == expected_value
+
+    @pytest.mark.parametrize(
+        "selected_categories, expected_value",
+        (
+            ({"selected_categories": None}, ()),
+            ({"foo": "bar"}, ()),
+            ({}, ()),
+            (
+                {"selected_categories": [{"name": "Very Fav.", "id": 1}]},
+                ({"name": "Very Fav.", "id": 1},),
+            ),
+        ),
+    )
+    def it_knows_its_selected_categories(self, selected_categories, expected_value):
+        dimension_dict = {"references": selected_categories}
+        assert Dimension(dimension_dict, None).selected_categories == expected_value
 
     @pytest.mark.parametrize(
         "dimension_dict, insertion_dicts",
