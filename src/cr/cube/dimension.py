@@ -352,7 +352,7 @@ class Dimension(object):
 
         Element-ids appear in the order defined in the cube-result.
         """
-        raise NotImplementedError
+        return tuple(e.element_id for e in self.valid_elements)
 
     @lazyproperty
     def hidden_idxs(self):
