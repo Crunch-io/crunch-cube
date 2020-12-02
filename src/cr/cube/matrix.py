@@ -124,7 +124,8 @@ class Assembler(object):
         These columns are subject to pruning, depending on a user setting in the
         dimension.
         """
-        raise NotImplementedError
+        pruning_base = self._cube_result_matrix.columns_pruning_base
+        return tuple(i for i, N in enumerate(pruning_base) if N == 0)
 
     @lazyproperty
     def _empty_row_idxs(self):
@@ -326,6 +327,13 @@ class _BaseCubeResultMatrix(object):
     def columns_dimension(self):
         """The `Dimension` object representing column elements of this matrix."""
         return self._dimensions[1]
+
+    @lazyproperty
+    def columns_pruning_base(self):
+        """1D np.int64 ndarray of unweighted-N for each matrix column."""
+        raise NotImplementedError(
+            "`%s` must implement `.columns_pruning_base`" % type(self).__name__
+        )
 
     @lazyproperty
     def rows_dimension(self):
