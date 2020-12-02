@@ -77,7 +77,9 @@ class Assembler(object):
     @lazyproperty
     def _columns_dimension(self):
         """The `Dimension` object representing column elements in this matrix."""
-        raise NotImplementedError
+        # --- the slice dimensions are manipulated by the cube-result factory in the
+        # --- MR_AUG case, so dimensions must come from the cube-result matrix
+        return self._cube_result_matrix.columns_dimension
 
     @lazyproperty
     def _cube_result_matrix(self):
@@ -158,6 +160,8 @@ class Assembler(object):
     @lazyproperty
     def _rows_dimension(self):
         """The `Dimension` object representing row elements in this matrix."""
+        # --- the slice dimensions are manipulated by the cube-result factory in the
+        # --- MR_AUG case, so dimensions must come from the cube-result matrix
         return self._cube_result_matrix.rows_dimension
 
 
