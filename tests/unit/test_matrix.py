@@ -668,6 +668,31 @@ class Describe_CatXCatMatrix(object):
     @pytest.mark.parametrize(
         ("unweighted_counts", "expected"),
         (
+            # --- 1 "row", 0 cols ---
+            ([[]], []),
+            # --- 1 row, 1 col ---
+            ([[1]], [1]),
+            # --- 1 row, 3 cols ---
+            ([[1, 2, 3]], [1, 2, 3]),
+            # --- 3 rows, 0 cols ---
+            ([[], [], []], []),
+            # --- 3 rows, 1 col ---
+            ([[1], [2], [3]], [6]),
+            # --- 3 rows, 3 cols ---
+            ([[1, 2, 3], [4, 5, 6]], [5, 7, 9]),
+        ),
+    )
+    def it_knows_its_columns_pruning_base(self, unweighted_counts, expected):
+        matrix = _CatXCatMatrix(None, None, np.array(unweighted_counts))
+
+        columns_pruning_base = matrix.columns_pruning_base
+
+        assert columns_pruning_base.shape == (len(expected),)
+        np.testing.assert_equal(columns_pruning_base, np.array(expected))
+
+    @pytest.mark.parametrize(
+        ("unweighted_counts", "expected"),
+        (
             ([[1, 2, 3]], [6]),
             ([[1, 2, 3], [4, 5, 6]], [6, 15]),
             ([[1], [2], [3]], [1, 2, 3]),
