@@ -75,6 +75,11 @@ class Assembler(object):
         raise NotImplementedError
 
     @lazyproperty
+    def _columns_dimension(self):
+        """The `Dimension` object representing column elements in this matrix."""
+        raise NotImplementedError
+
+    @lazyproperty
     def _cube_result_matrix(self):
         """_BaseCubeResultMatrix subclass object appropriate to this cube-slice.
 
@@ -111,6 +116,15 @@ class Assembler(object):
         return np.array(display_order, dtype=int)
 
     @lazyproperty
+    def _empty_column_idxs(self):
+        """tuple of int index for each column with (unweighted) N = 0.
+
+        These columns are subject to pruning, depending on a user setting in the
+        dimension.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
     def _empty_row_idxs(self):
         """tuple of int index for each row with N = 0.
 
@@ -125,7 +139,10 @@ class Assembler(object):
 
         Subtotal-rows need to be pruned when all base-columns are pruned.
         """
-        raise NotImplementedError
+        if not self._columns_dimension.prune:
+            return False
+
+        return len(self._empty_column_idxs) == len(self._columns_dimension.element_ids)
 
     @lazyproperty
     def _row_order(self):

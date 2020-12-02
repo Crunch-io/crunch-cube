@@ -128,6 +128,34 @@ class DescribeAssembler(object):
         assert Assembler(None, None, None)._empty_row_idxs == expected_value
 
     @pytest.mark.parametrize(
+        "prune, empty_col_idxs, element_ids, expected_value",
+        (
+            (False, (), (), False),
+            (False, (1, 2, 3), (4, 5, 6), False),
+            (False, (1, 2), (7, 8, 9), False),
+            (True, (), (), True),
+            (True, (1, 2, 3), (4, 5, 6), True),
+            (True, (1, 2), (7, 8, 9), False),
+        ),
+    )
+    def it_knows_whether_its_subtotal_rows_should_be_pruned_to_help(
+        self,
+        _columns_dimension_prop_,
+        dimension_,
+        prune,
+        _empty_column_idxs_prop_,
+        empty_col_idxs,
+        element_ids,
+        expected_value,
+    ):
+        _columns_dimension_prop_.return_value = dimension_
+        dimension_.element_ids = element_ids
+        dimension_.prune = prune
+        _empty_column_idxs_prop_.return_value = empty_col_idxs
+
+        assert Assembler(None, None, None)._prune_subtotal_rows is expected_value
+
+    @pytest.mark.parametrize(
         ("order", "prune", "expected"),
         (
             # --- False -> not pruned ---
@@ -183,6 +211,10 @@ class DescribeAssembler(object):
         return property_mock(request, Assembler, "_column_order")
 
     @pytest.fixture
+    def _columns_dimension_prop_(self, request):
+        return property_mock(request, Assembler, "_columns_dimension")
+
+    @pytest.fixture
     def cube_(self, request):
         return instance_mock(request, Cube)
 
@@ -201,6 +233,10 @@ class DescribeAssembler(object):
     @pytest.fixture
     def _dimension_order_(self, request):
         return method_mock(request, Assembler, "_dimension_order")
+
+    @pytest.fixture
+    def _empty_column_idxs_prop_(self, request):
+        return property_mock(request, Assembler, "_empty_column_idxs")
 
     @pytest.fixture
     def _row_order_prop_(self, request):
