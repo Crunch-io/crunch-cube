@@ -7,7 +7,8 @@ include README.md
 include LICENSE
 
 include .coveragerc
-include tox.ini .travis.yml
+include .flake8
+include tox.ini
 include *.md
 include *.txt
 include *.yaml
