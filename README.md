@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+### 1.12.10
+- Selected category labels partition interface
+
 ### 1.12.9
 - Margin of error for row %
 - Margin of error for population
