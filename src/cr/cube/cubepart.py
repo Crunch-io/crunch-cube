@@ -123,6 +123,16 @@ class CubePartition(object):
         return self._cube.population_fraction
 
     @lazyproperty
+    def selected_category_labels(self):
+        """Tuple of str: names of any and all underlying categories in 'Selected'."""
+        return tuple(
+            s["name"]
+            for d in self._dimensions
+            for s in d.selected_categories
+            if s.get("name")
+        )
+
+    @lazyproperty
     def shape(self):
         """Tuple of int vector counts for this partition.
 

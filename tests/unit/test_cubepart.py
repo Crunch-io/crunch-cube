@@ -343,6 +343,44 @@ class Describe_Slice(object):
 
         assert str(err.value) == "Function F is not available."
 
+    @pytest.mark.parametrize(
+        "dimensions_dicts, expected_value",
+        (
+            ([{"references": {}}], ()),
+            (
+                [
+                    {"references": {}},
+                    {
+                        "references": {
+                            "selected_categories": [{"name": "Foo"}, {"name": "Bar"}]
+                        }
+                    },
+                ],
+                ("Foo", "Bar"),
+            ),
+            (
+                [
+                    {"references": {}},
+                    {
+                        "references": {
+                            "selected_categories": [{"name": "Foo"}, {"id": "Bar"}]
+                        }
+                    },
+                ],
+                ("Foo",),
+            ),
+        ),
+    )
+    def it_knows_its_selected_category_labels(
+        self, _dimensions_prop_, dimensions_dicts, expected_value
+    ):
+        _dimensions_prop_.return_value = [
+            Dimension(dim_dict, None, None) for dim_dict in dimensions_dicts
+        ]
+        slice_ = _Slice(None, None, None, None, None)
+
+        assert slice_.selected_category_labels == expected_value
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -352,10 +390,6 @@ class Describe_Slice(object):
     @pytest.fixture
     def cube_(self, request):
         return instance_mock(request, Cube)
-
-    @pytest.fixture
-    def dimension_(self, request):
-        return instance_mock(request, Dimension)
 
     @pytest.fixture
     def _dimensions_prop_(self, request):
@@ -435,6 +469,12 @@ class Describe_Strand(object):
 
         assert population_fraction == 0.5
 
+    def it_knows_its_selected_categories_labels(self, _dimensions_prop_):
+        _dimensions_prop_.return_value = [Dimension({"references": {}}, None, None)]
+        strand_ = _Strand(None, None, None, None, None, None)
+
+        assert strand_.selected_category_labels == ()
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -482,3 +522,8 @@ class Describe_Nub(object):
 
     def it_knows_its_cube_is_never_mr_aug(self):
         assert _Nub(None).cube_is_mr_aug is False
+
+    def it_knows_its_selected_categories_labels(self):
+        nub_ = _Nub(None)
+
+        assert nub_.selected_category_labels == ()

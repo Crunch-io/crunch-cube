@@ -31,6 +31,10 @@ class DescribeIntegratedAllDimensions(object):
         (
             (CR.CAT_X_CAT, (DT.CAT, DT.CAT)),
             (CR.CA_X_MR_WEIGHTED_HS, (DT.CA, DT.CA_CAT, DT.MR, DT.MR_CAT)),
+            (
+                CR.MR_X_MR_SELECTED_CATEGORIES,
+                (DT.MR_SUBVAR, DT.MR_CAT, DT.MR_SUBVAR, DT.MR_CAT),
+            ),
         ),
     )
     def it_resolves_the_type_of_each_dimension(self, cube_response, expected_types):

@@ -5,9 +5,9 @@
 import sys
 
 if sys.version_info >= (3, 3):
-    from collections.abc import Sequence
+    from collections.abc import Sequence  # pragma: no cover
 else:
-    from collections import Sequence
+    from collections import Sequence  # pragma: no cover
 
 import numpy as np
 
@@ -380,6 +380,14 @@ class Dimension(object):
         if prune is True:
             return True
         return False
+
+    @lazyproperty
+    def selected_categories(self):
+        """List of selected categories specified for this dimension."""
+        selected_categories = self._dimension_dict["references"].get(
+            "selected_categories"
+        )
+        return tuple(selected_categories) if selected_categories else ()
 
     @lazyproperty
     def shape(self):
