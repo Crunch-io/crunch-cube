@@ -645,6 +645,16 @@ class _MrXMrMatrix(_CatXCatMatrix):
     """
 
     @lazyproperty
+    def columns_pruning_base(self):
+        """1D np.int64 ndarray of unweighted-N for each matrix column.
+
+        Because both dimensions of this matrix are MR, this includes both selected and
+        unselected counts, but only for the row MR; only selecteds are considered for
+        the columns dimension.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
     def rows_pruning_base(self):
         """1D np.int64 ndarray of unweighted-N for each matrix row.
 
@@ -652,7 +662,7 @@ class _MrXMrMatrix(_CatXCatMatrix):
         unselected counts, but only for the column MR; only selecteds are considered for
         the rows dimension.
         """
-        raise NotImplementedError
+        return np.sum(self._unweighted_counts[:, 0, :, :], axis=(1, 2))
 
     @lazyproperty
     def unweighted_counts(self):
