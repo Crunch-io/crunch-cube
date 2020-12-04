@@ -28,9 +28,9 @@ class MinBaseSizeMask(object):
     @lazyproperty
     def column_mask(self):
         """ndarray, True where column margin <= min_base_size, same shape as slice."""
-        mask = self._slice.column_base < self._size
+        mask = self._slice.columns_base < self._size
 
-        if self._slice.column_base.shape == self._slice.shape:
+        if self._slice.columns_base.shape == self._slice.shape:
             # If margin shape is the same as slice's (such as in a col margin for
             # MR x CAT), don't broadcast the mask to the array shape, since
             # they're already the same.

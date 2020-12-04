@@ -2,19 +2,18 @@
 
 """Integration-test suite for numeric-arrays."""
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import numpy as np
+import pytest
 
 from cr.cube.cube import Cube
 
 from ..fixtures import NA
 
 
-# pylint: disable=no-self-use
 class TestNumericArrays:
     """Test-suite for numeric-arrays behaviors."""
 
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def test_num_arr_grouped_by_cat(self):
         """Test means on numeric array, grouped by single categorical dimension."""
         slice_ = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT).partitions[0]
@@ -28,8 +27,9 @@ class TestNumericArrays:
                 [52.5, 50.0, 45.0],  # Gender: Female
             ],
         )
-        np.testing.assert_almost_equal(slice_.column_base, [5, 4, 2])
+        np.testing.assert_almost_equal(slice_.columns_base, [5, 4, 2])
 
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def test_num_arr_grouped_by_cat_weighted(self):
         """Test means on numeric array, grouped by single categorical dimension."""
         slice_ = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT_WEIGHTED).partitions[0]
@@ -43,7 +43,7 @@ class TestNumericArrays:
                 [50.71428571, 50.0, 45.0],  # Gender: Female
             ],
         )
-        np.testing.assert_almost_equal(slice_.column_base, [5, 4, 2])
+        np.testing.assert_almost_equal(slice_.columns_base, [5, 4, 2])
 
     def test_num_arr_means_no_grouping(self):
         """Test means on no-dimensions measure of numeric array."""

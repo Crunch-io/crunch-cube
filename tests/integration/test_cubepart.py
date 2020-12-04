@@ -551,7 +551,7 @@ class Describe_Slice(object):
             slice_wo_explicit_order_.row_proportions, [[0.61110996]]
         )
         np.testing.assert_almost_equal(
-            slice_.column_base, slice_wo_explicit_order_.column_base
+            slice_.columns_base, slice_wo_explicit_order_.columns_base
         )
         np.testing.assert_almost_equal(
             slice_.row_base, slice_wo_explicit_order_.row_base

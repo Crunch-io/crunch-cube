@@ -261,10 +261,6 @@ class _Slice(CubePartition):
     # ---interface ---------------------------------------------------
 
     @lazyproperty
-    def column_base(self):
-        return np.array([column.base for column in self._matrix.columns]).T
-
-    @lazyproperty
     def column_index(self):
         """ndarray of column index percentages.
 
@@ -313,6 +309,18 @@ class _Slice(CubePartition):
         `std_error = sqrt(variance/N)`
         """
         return np.sqrt(self._column_variance / self.columns_margin)
+
+    @lazyproperty
+    def columns_base(self):
+        """1D/2D np.int64 ndarray of unweighted-N for each column/cell of slice.
+
+        This array is 2D (a distinct base for each cell) when the rows dimension is MR,
+        because each MR-subvariable has its own unweighted N. This is because not every
+        possible response is necessarily offered to every respondent.
+
+        In all other cases, the array is 1D, containing one value for each column.
+        """
+        return self._assembler.columns_base
 
     @lazyproperty
     def columns_dimension_name(self):

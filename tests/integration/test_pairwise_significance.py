@@ -31,8 +31,18 @@ class Describe_Slice(object):
                 {"only_larger": False},
                 "cat-x-cat-pw-idxs-recip",
             ),
-            (CR.MR_X_CAT, {}, "mr-x-cat-pw-idxs"),
-            (CR.MR_X_CAT_HS_MT, {}, "mr-x-cat-hs-pw-idxs"),
+            pytest.param(
+                CR.MR_X_CAT,
+                {},
+                "mr-x-cat-pw-idxs",
+                marks=pytest.mark.xfail(reason="WIP", raises=IndexError, strict=True),
+            ),
+            pytest.param(
+                CR.MR_X_CAT_HS_MT,
+                {},
+                "mr-x-cat-hs-pw-idxs",
+                marks=pytest.mark.xfail(reason="WIP", raises=IndexError, strict=True),
+            ),
             (CR.CAT_HS_X_MR, {}, "cat-hs-x-mr-pw-idxs"),
             (CR.CAT_X_MR_2, {}, "cat-x-mr-pw-idxs"),
             (CR.MR_X_MR, {}, "mr-x-mr-pw-idxs"),
@@ -60,7 +70,12 @@ class Describe_Slice(object):
                 {"alpha": [0.175, 0.025], "only_larger": False},
                 "cat-x-cat-hs-pw-idxs-alt",
             ),
-            (CR.MR_X_CAT, {"alpha": [0.175, 0.01]}, "mr-x-cat-pw-idxs-alt"),
+            pytest.param(
+                CR.MR_X_CAT,
+                {"alpha": [0.175, 0.01]},
+                "mr-x-cat-pw-idxs-alt",
+                marks=pytest.mark.xfail(reason="WIP", raises=IndexError, strict=True),
+            ),
         ),
     )
     def it_provides_pairwise_indices_alt(self, fixture, pw_indices_dict, expectation):

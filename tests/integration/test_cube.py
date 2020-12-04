@@ -812,7 +812,7 @@ class TestCrunchCubeAs_Slice(object):
     def test_margin_unweighted_gender_x_ideology_axis_0(self):
         slice_ = Cube(CR.ECON_GENDER_X_IDEOLOGY_WEIGHTED).partitions[0]
         expected = np.array([72, 182, 376, 220, 110, 40])
-        np.testing.assert_array_equal(slice_.column_base, expected)
+        np.testing.assert_array_equal(slice_.columns_base, expected)
 
     def test_margin_unweighted_gender_x_ideology_axis_1(self):
         slice_ = Cube(CR.ECON_GENDER_X_IDEOLOGY_WEIGHTED).partitions[0]
@@ -1952,7 +1952,7 @@ class TestCrunchCubeAs_Slice(object):
     def test_ca_x_mr_margin(self):
         slice_ = Cube(CR.CA_X_MR_WEIGHTED_HS).partitions[0]
         expected = np.array([504, 215, 224, 76, 8, 439])
-        np.testing.assert_array_equal(slice_.column_base, expected)
+        np.testing.assert_array_equal(slice_.columns_base, expected)
 
     def test_ca_x_mr_margin_prune(self):
         # ---CA x MR---
@@ -1962,7 +1962,7 @@ class TestCrunchCubeAs_Slice(object):
         }
         slice_ = Cube(CR.CA_X_MR_WEIGHTED_HS, transforms=transforms).partitions[0]
         np.testing.assert_array_equal(
-            slice_.column_base, np.array([504, 215, 224, 76, 8, 439])
+            slice_.columns_base, np.array([504, 215, 224, 76, 8, 439])
         )
         assert slice_.table_name == "q1. Aftensmad: K\xf8d (svin/lam/okse)"
 

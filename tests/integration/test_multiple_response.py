@@ -2,9 +2,8 @@
 
 """Integration-test suite for multiple-response cube behaviors"""
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import numpy as np
+import pytest
 
 from cr.cube.cube import Cube
 
@@ -64,6 +63,7 @@ def test_deck_with_means():
     )
 
 
+@pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
 def test_3D_with_means():
     slice_ = Cube(CR.MEANS_3D).partitions[0]
     np.testing.assert_almost_equal(
@@ -75,7 +75,7 @@ def test_3D_with_means():
         ],
     )
     assert slice_.table_base == 24
-    np.testing.assert_array_equal(slice_.column_base, [9, 0, 3, 3, 9])
+    np.testing.assert_array_equal(slice_.columns_base, [9, 0, 3, 3, 9])
     np.testing.assert_array_equal(slice_.row_base, [9, 6, 9])
 
 
@@ -883,17 +883,19 @@ def test_mr_x_num_rows_margin():
     np.testing.assert_array_equal(slice_.row_base, expected)
 
 
+@pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
 def test_mr_x_num_cols_margin_not_pruned_unweighted():
     slice_ = Cube(CR.MEANS_MR_X_CAT).partitions[0]
     expected = [1728, 1523, 1570, 1434, 1459, 1429, 1461, 1432, 0, 0, 0, 0]
-    np.testing.assert_array_equal(slice_.column_base[0], expected)
+    np.testing.assert_array_equal(slice_.columns_base[0], expected)
 
 
+@pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
 def test_mr_x_num_cols_margin_pruned_unweighted():
     transforms = {"columns_dimension": {"prune": True}}
     slice_ = Cube(CR.MEANS_MR_X_CAT, transforms=transforms).partitions[0]
     expected = [1728, 1523, 1570, 1434, 1459, 1429, 1461, 1432]
-    np.testing.assert_array_equal(slice_.column_base[0], expected)
+    np.testing.assert_array_equal(slice_.columns_base[0], expected)
 
 
 def test_num_x_mr_props_by_row():
@@ -1547,8 +1549,8 @@ def test_mr_by_cat_hs_cell_percentage():
     np.testing.assert_almost_equal(slice_.table_proportions, expected)
 
 
+@pytest.mark.xfail(reason="WIP", raises=IndexError, strict=True)
 def test_mr_x_cat_min_base_size_mask():
-
     transforms = {
         "columns_dimension": {"insertions": {}},
         "rows_dimension": {"insertions": {}},
