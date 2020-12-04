@@ -3,6 +3,7 @@
 """Integration-test suite for `cr.cube.cubepart` module."""
 
 import numpy as np
+import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.cubepart import _Slice
@@ -163,4 +164,35 @@ class DescribeAssembler(object):
         slice_ = Cube(CR.CAT_X_MR_X_MR).partitions[1]
         np.testing.assert_array_equal(
             slice_.unweighted_counts, [[159, 94], [1182, 625], [1142, 623]]
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_ca_x_mr_hs_columns_base(self):
+        slice_ = Cube(CR.CA_X_MR_WEIGHTED_HS).partitions[0]
+        np.testing.assert_array_equal(
+            slice_._assembler.columns_base, np.array([504, 215, 224, 76, 8, 439])
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_mr_x_mr_columns_base(self):
+        slice_ = Cube(CR.MR_X_MR).partitions[0]
+        np.testing.assert_array_equal(
+            slice_._assembler.columns_base,
+            np.array(
+                [[12, 18, 26, 44], [7, 29, 20, 45], [10, 22, 34, 53], [12, 29, 34, 61]]
+            ),
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_cat_x_mr_columns_base(self):
+        slice_ = Cube(CR.CAT_X_MR).partitions[0]
+        np.testing.assert_array_equal(
+            slice_._assembler.columns_base, np.array([40, 34, 38])
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_cat_x_mr_aug_columns_base(self):
+        slice_ = Cube(CR.EDU_FAV5_FAV5).partitions[0]
+        np.testing.assert_array_equal(
+            slice_._assembler.columns_base, np.array([263, 399, 539, 377, 586])
         )
