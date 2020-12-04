@@ -143,7 +143,10 @@ class Assembler(object):
 
         Subtotal-columns need to be pruned when all base-rows are pruned.
         """
-        raise NotImplementedError
+        if not self._rows_dimension.prune:
+            return False
+
+        return len(self._empty_row_idxs) == len(self._rows_dimension.element_ids)
 
     @lazyproperty
     def _prune_subtotal_rows(self):
