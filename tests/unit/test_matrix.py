@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from cr.cube.cube import Cube
-from cr.cube.dimension import Dimension, _Subtotal
+from cr.cube.dimension import Dimension, _Subtotal, _Subtotals
 from cr.cube.enums import COLLATION_METHOD as CM, DIMENSION_TYPE as DT
 from cr.cube.matrix import (
     Assembler,
@@ -163,6 +163,14 @@ class DescribeAssembler(object):
         _dimension_order_.assert_called_once_with(assembler, dimension_, (4, 2))
         assert column_order.dtype == int
         np.testing.assert_equal(column_order, np.array(expected_value))
+
+    def it_provides_access_to_the_column_subtotals_to_help(
+        self, _columns_dimension_prop_, dimension_, subtotals_
+    ):
+        _columns_dimension_prop_.return_value = dimension_
+        dimension_.subtotals = subtotals_
+
+        assert Assembler(None, None, None)._column_subtotals is subtotals_
 
     def it_provides_access_to_the_columns_dimension_to_help(
         self, _cube_result_matrix_prop_, cube_result_matrix_, dimension_
@@ -391,6 +399,10 @@ class DescribeAssembler(object):
     @pytest.fixture
     def _rows_dimension_prop_(self, request):
         return property_mock(request, Assembler, "_rows_dimension")
+
+    @pytest.fixture
+    def subtotals_(self, request):
+        return instance_mock(request, _Subtotals)
 
     @pytest.fixture
     def _SumSubtotals_(self, request):

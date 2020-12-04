@@ -104,7 +104,7 @@ class Assembler(object):
     @lazyproperty
     def _column_subtotals(self):
         """Sequence of _Subtotal object for each inserted column."""
-        raise NotImplementedError
+        return self._columns_dimension.subtotals
 
     @lazyproperty
     def _columns_dimension(self):
