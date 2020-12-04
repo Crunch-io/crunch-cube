@@ -172,7 +172,6 @@ class DescribeAssembler(object):
             slice_._assembler.columns_base, np.array([504, 215, 224, 76, 8, 439])
         )
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_mr_x_mr_columns_base(self):
         slice_ = Cube(CR.MR_X_MR).partitions[0]
         np.testing.assert_array_equal(
