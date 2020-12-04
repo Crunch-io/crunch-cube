@@ -38,7 +38,6 @@ class DescribeIntegratedCube(object):
         assert cube.dimension_types == (DT.CAT, DT.CAT)
         assert isinstance(cube.dimensions, _ApparentDimensions)
         assert cube.has_means is False
-        assert cube.is_mr_aug is False
         assert cube.is_weighted is False
         assert cube.missing == 5
         assert cube.name == "v4"

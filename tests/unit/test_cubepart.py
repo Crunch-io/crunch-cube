@@ -64,10 +64,6 @@ class DescribeCubePartition(object):
 
         assert cube_index == 42
 
-    def it_knows_if_cube_is_mr_aug(self):
-        # --- default of False is overridden by subclasses when appropriate ---
-        assert CubePartition(None).cube_is_mr_aug is False
-
     def it_can_evaluate_a_measure_expression(self, request):
         single_sided_moving_avg_smoother_ = instance_mock(
             request, SingleSidedMovingAvgSmoother, values=[[0.1, 0.2], [0.3, 0.4]]
@@ -573,9 +569,6 @@ class Describe_Nub(object):
         is_empty = nub_.is_empty
 
         assert is_empty == expected_value
-
-    def it_knows_its_cube_is_never_mr_aug(self):
-        assert _Nub(None).cube_is_mr_aug is False
 
     def it_knows_its_selected_categories_labels(self):
         nub_ = _Nub(None)

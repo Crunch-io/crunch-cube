@@ -115,9 +115,7 @@ class Assembler(object):
     @lazyproperty
     def _columns_dimension(self):
         """The `Dimension` object representing column elements in this matrix."""
-        # --- the slice dimensions are manipulated by the cube-result factory in the
-        # --- MR_AUG case, so dimensions must come from the cube-result matrix
-        return self._cube_result_matrix.columns_dimension
+        return self._dimensions[1]
 
     @lazyproperty
     def _cube_result_matrix(self):
@@ -210,9 +208,7 @@ class Assembler(object):
     @lazyproperty
     def _rows_dimension(self):
         """The `Dimension` object representing row elements in this matrix."""
-        # --- the slice dimensions are manipulated by the cube-result factory in the
-        # --- MR_AUG case, so dimensions must come from the cube-result matrix
-        return self._cube_result_matrix.rows_dimension
+        return self._dimensions[0]
 
 
 # === SUBTOTALS OBJECTS ===
@@ -368,9 +364,6 @@ class _BaseCubeResultMatrix(object):
     @classmethod
     def factory(cls, cube, dimensions, slice_idx):
         """Return a base-matrix object of appropriate type for `cube`."""
-        if cube.is_mr_aug:
-            return cls._mr_aug_matrix_factory(cube, dimensions, slice_idx)
-
         # --- means cube gets one of the means-matrix types ---
         if cube.has_means:
             return cls._means_matrix_factory(cube, dimensions, slice_idx)
@@ -520,13 +513,8 @@ class _BaseCubeResultMatrix(object):
         raise NotImplementedError
 
     @classmethod
-    def _mr_aug_matrix_factory(cls, cube, dimensions, slice_idx):
-        """ -> matrix for MR_AUG slice."""
-        raise NotImplementedError
-
-    @classmethod
     def _regular_matrix_factory(cls, cube, dimensions, slice_idx):
-        """ -> matrix object for non-mr-aug and non-means slice."""
+        """ -> matrix object for non-means slice."""
         MatrixCls = cls._get_regular_matrix_factory_class(cube.dimension_types[-2:])
         return MatrixCls(dimensions, *cls._get_sliced_counts(cube, slice_idx))
 

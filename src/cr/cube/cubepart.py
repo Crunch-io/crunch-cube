@@ -73,10 +73,6 @@ class CubePartition(object):
         return self._cube.cube_index
 
     @lazyproperty
-    def cube_is_mr_aug(self):
-        return False
-
-    @lazyproperty
     def cube_row_dimension_type(self):
         """Member of `cr.cube.enum.DIMENSION_TYPE` for cube row dimension"""
         return self._cube.dimensions[0].dimension_type
@@ -341,15 +337,6 @@ class _Slice(CubePartition):
         return np.array([row.counts for row in self._matrix.rows])
 
     @lazyproperty
-    def cube_is_mr_aug(self):
-        """True if this slice derives for an "augmented MR" cube.
-
-        An augmented-MR cube is 3-dimensional, with the last two dimensions being the
-        same MR variable. This structure allows overlap t-tests to be computed.
-        """
-        return self._cube.is_mr_aug
-
-    @lazyproperty
     def description(self):
         """str description of this slice, which it takes from its rows-dimension."""
         return self._rows_dimension.description
@@ -412,10 +399,6 @@ class _Slice(CubePartition):
         A slice takes the name of its rows-dimension.
         """
         return self.rows_dimension_name
-
-    @lazyproperty
-    def overlaps_tstats(self):
-        return self._matrix.overlaps_tstats
 
     @lazyproperty
     def pairwise_indices(self):
@@ -838,10 +821,6 @@ class _Slice(CubePartition):
 
         title = self._cube.name
         table_name = self._cube.dimensions[0].valid_elements[self._slice_idx].label
-
-        if self._cube.is_mr_aug:
-            return title
-
         return "%s: %s" % (title, table_name)
 
     @lazyproperty

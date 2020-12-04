@@ -290,29 +290,6 @@ class Cube(object):
         )
 
     @lazyproperty
-    def is_mr_aug(self):
-        """True if cube is MR_AUG (augmented).
-
-        An augmented-MR cube is required to compute pairwise-t-tests when an MR
-        dimension is involved because that introduces *overlap* which otherwise inflates
-        the case count.
-
-        An MR_AUG cube is used to calculate statistical significance of complete-cases,
-        and is created by artificially *augmenting* the original cube's dimensions, such
-        as MR, or CAT_X_MR, by repeating the MR dimension to make the cube MR_X_MR or
-        CAT_X_MR_X_MR for these respective examples. The repeating of the MR dimension
-        allows the overlaps to be computed.
-        """
-        return (
-            # --- there are at least three dimensions ---
-            self.ndim >= 3
-            # --- the last two are both MR ---
-            and all(dim_type == DT.MR for dim_type in self.dimension_types[-2:])
-            # --- and they both have the same alias ---
-            and len(set(dim.alias for dim in self.dimensions[-2:])) == 1
-        )
-
-    @lazyproperty
     def is_weighted(self):
         """True if cube response contains weighted data."""
         return self._measures.is_weighted

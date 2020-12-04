@@ -2,15 +2,13 @@
 
 """Unit test suite for `cr.cube.cube` module."""
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import pytest
 import numpy as np
 
 from cr.cube.cube import Cube, CubeSet, _BaseMeasure, _Measures
 from cr.cube.cubepart import _Slice, _Strand, _Nub
-from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.dimension import Dimension
+from cr.cube.enums import DIMENSION_TYPE as DT
 
 from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
 from ..unitutil import call, class_mock, instance_mock, property_mock
@@ -342,37 +340,6 @@ class DescribeCube(object):
     )
     def it_knows_its_index_within_its_cube_set(self, cube_idx_arg, expected_value):
         assert Cube(None, cube_idx_arg).cube_index == expected_value
-
-    @pytest.mark.parametrize(
-        ("dim_types", "aliases", "expected_value"),
-        (
-            ((), (), False),
-            ((DT.MR,), ("alias",), False),
-            ((DT.MR, DT.MR), ("alias", "alias"), False),
-            ((DT.MR, DT.CAT, DT.CAT), ("alias1", "alias2", "alias2"), False),
-            ((DT.CAT, DT.MR, DT.MR), ("alias1", "alias2", "alias3"), False),
-            ((DT.CAT, DT.MR, DT.MR), ("alias1", "alias2", "alias2"), True),
-        ),
-    )
-    def it_knows_if_it_is_mr_aug(
-        self, request, dim_types, aliases, expected_value, dimension_types_prop_
-    ):
-        property_mock(request, Cube, "ndim", return_value=len(dim_types))
-        dimension_types_prop_.return_value = dim_types
-        property_mock(
-            request,
-            Cube,
-            "dimensions",
-            return_value=[
-                instance_mock(request, Dimension, alias=aliases[i])
-                for i, _ in enumerate(dim_types)
-            ],
-        )
-        cube = Cube(None, None, None, None)
-
-        is_mr_aug = cube.is_mr_aug
-
-        assert is_mr_aug is expected_value
 
     @pytest.mark.parametrize(
         ("dim_types", "cube_idx", "_is_single_filter_col_cube", "expected_value"),

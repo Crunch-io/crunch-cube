@@ -186,13 +186,9 @@ class DescribeAssembler(object):
 
         assert Assembler(None, None, None)._column_subtotals is subtotals_
 
-    def it_provides_access_to_the_columns_dimension_to_help(
-        self, _cube_result_matrix_prop_, cube_result_matrix_, dimension_
-    ):
-        _cube_result_matrix_prop_.return_value = cube_result_matrix_
-        cube_result_matrix_.columns_dimension = dimension_
-
-        assert Assembler(None, None, None)._columns_dimension is dimension_
+    def it_provides_access_to_the_columns_dimension_to_help(self, dimension_):
+        assembler = Assembler(None, (None, dimension_), None)
+        assert assembler._columns_dimension is dimension_
 
     def it_constructs_the_cube_result_matrix_to_help(
         self, request, cube_, dimension_, cube_result_matrix_
@@ -348,13 +344,9 @@ class DescribeAssembler(object):
         assert row_order.tolist() == expected
         _dimension_order_.assert_called_once_with(assembler, dimension_, fake_row_idxs)
 
-    def it_knows_its_rows_dimension_to_help(
-        self, _cube_result_matrix_prop_, cube_result_matrix_, dimension_
-    ):
-        _cube_result_matrix_prop_.return_value = cube_result_matrix_
-        cube_result_matrix_.rows_dimension = dimension_
-
-        assert Assembler(None, None, None)._rows_dimension is dimension_
+    def it_knows_its_rows_dimension_to_help(self, dimension_):
+        assembler = Assembler(None, (dimension_, None), None)
+        assert assembler._rows_dimension is dimension_
 
     # fixture components ---------------------------------------------
 
@@ -677,18 +669,12 @@ class Describe_BaseCubeResultMatrix(object):
     """Unit test suite for `cr.cube.matrix._BaseCubeResultMatrix` object."""
 
     @pytest.mark.parametrize(
-        ("is_mr_aug", "has_means", "factory_method_name"),
-        (
-            (True, True, "_mr_aug_matrix_factory"),
-            (True, False, "_mr_aug_matrix_factory"),
-            (False, True, "_means_matrix_factory"),
-            (False, False, "_regular_matrix_factory"),
-        ),
+        "has_means, factory_method_name",
+        ((True, "_means_matrix_factory"), (False, "_regular_matrix_factory")),
     )
     def it_calls_the_correct_factory_method_for_appropriate_matrix_type(
-        self, request, cube_, dimension_, is_mr_aug, has_means, factory_method_name
+        self, request, cube_, dimension_, has_means, factory_method_name
     ):
-        cube_.is_mr_aug = is_mr_aug
         cube_.has_means = has_means
         cube_result_matrix_ = instance_mock(request, _BaseCubeResultMatrix)
         factory_method = method_mock(

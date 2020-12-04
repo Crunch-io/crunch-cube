@@ -3,7 +3,6 @@
 """Integration-test suite for `cr.cube.cubepart` module."""
 
 import numpy as np
-import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.cubepart import _Slice
@@ -185,11 +184,4 @@ class DescribeAssembler(object):
         slice_ = Cube(CR.CAT_X_MR).partitions[0]
         np.testing.assert_array_equal(
             slice_._assembler.columns_base, np.array([40, 34, 38])
-        )
-
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
-    def it_computes_cat_x_mr_aug_columns_base(self):
-        slice_ = Cube(CR.EDU_FAV5_FAV5).partitions[0]
-        np.testing.assert_array_equal(
-            slice_._assembler.columns_base, np.array([263, 399, 539, 377, 586])
         )

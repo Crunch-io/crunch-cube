@@ -138,21 +138,11 @@ class _ColumnPairwiseSignificance(object):
 
     @lazyproperty
     def t_stats(self):
-        if self._slice.cube_is_mr_aug:
-            return self.t_stats_correct
         props = self._slice.column_proportions
         diff = props - props[:, [self._col_idx]]
         var_props = props * (1.0 - props) / self._slice.column_base
         se_diff = np.sqrt(var_props + var_props[:, [self._col_idx]])
         return diff / se_diff
-
-    @lazyproperty
-    def t_stats_correct(self):
-        """It returns the t_statistic for MR variables considering the overlaps"""
-        diff, se_diff = self._slice.overlaps_tstats
-        t_stats = diff[:, self._col_idx, :] / se_diff[:, self._col_idx, :]
-        t_stats[:, self._col_idx] = 0
-        return t_stats
 
     @lazyproperty
     def t_stats_scale_means(self):
@@ -191,15 +181,11 @@ class _ColumnPairwiseSignificance(object):
 
     @lazyproperty
     def _df(self):
-        # if the cube to which the slice belongs is a CATxMRxITSELF
-        # returns the n1 + n2 as degrees of freedom, n1 + n2 -2 otherwise
         selected_unweighted_n = (
             self._slice.column_base[self._col_idx]
             if self._slice.column_base.ndim < 2
             else self._slice.column_base[:, self._col_idx][:, None]
         )
-        if self._slice.cube_is_mr_aug:
-            return self._slice.column_base + selected_unweighted_n
         return self._slice.column_base + selected_unweighted_n - 2
 
     @lazyproperty
