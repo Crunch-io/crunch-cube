@@ -244,8 +244,8 @@ class _BaseSubtotals(object):
 
     @lazyproperty
     def _ncols(self):
-        """int count of rows in base-matrix."""
-        raise NotImplementedError
+        """int count of columns in base-matrix."""
+        return self._base_values.shape[1]
 
     @lazyproperty
     def _nrows(self):
@@ -565,6 +565,14 @@ class _CatXMrMatrix(_CatXCatMatrix):
     Each value is np.float64 if the cube-result is weighted (as in this example), or
     np.int64 if unweighted.
     """
+
+    @lazyproperty
+    def unweighted_counts(self):
+        """2D np.int64 ndarray of unweighted-count for each valid matrix cell.
+
+        A valid matrix cell is one whose row and column elements are both non-missing.
+        """
+        raise NotImplementedError
 
 
 class _MrXCatMatrix(_CatXCatMatrix):
