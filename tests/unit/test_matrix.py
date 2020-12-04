@@ -52,7 +52,7 @@ class DescribeAssembler(object):
         assert unweighted_counts == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
     @pytest.mark.parametrize(
-        ("row_order", "col_order", "blocks", "expected_value"),
+        "row_order, col_order, blocks, expected_value",
         (
             ([0, 1], [0, 1, 2], [[1, 2, 3], [4, 5, 6]], [[1, 2, 3], [4, 5, 6]]),
             ([0, 1], [2, 1, 0], [[1, 2, 3], [4, 5, 6]], [[3, 2, 1], [6, 5, 4]]),
@@ -77,6 +77,42 @@ class DescribeAssembler(object):
         assembler = Assembler(None, None, None)
 
         assert assembler._assemble_matrix(blocks).tolist() == expected_value
+
+    @pytest.mark.parametrize(
+        "order, prune_subtotal_columns, expected_value",
+        (
+            (np.array([-1, 1, -2, 2, -3, 3]), False, [-1, 1, -2, 2, -3, 3]),
+            (np.array([-1, 1, -2, 2, -3, 3]), True, [1, 2, 3]),
+            (np.array([], dtype=int), True, []),
+        ),
+    )
+    def it_knows_the_column_order_to_help(
+        self,
+        request,
+        _columns_dimension_prop_,
+        dimension_,
+        _empty_column_idxs_prop_,
+        _dimension_order_,
+        order,
+        prune_subtotal_columns,
+        expected_value,
+    ):
+        _columns_dimension_prop_.return_value = dimension_
+        _empty_column_idxs_prop_.return_value = (4, 2)
+        _dimension_order_.return_value = order
+        property_mock(
+            request,
+            Assembler,
+            "_prune_subtotal_columns",
+            return_value=prune_subtotal_columns,
+        )
+        assembler = Assembler(None, None, None)
+
+        column_order = assembler._column_order
+
+        _dimension_order_.assert_called_once_with(assembler, dimension_, (4, 2))
+        assert column_order.dtype == int
+        np.testing.assert_equal(column_order, np.array(expected_value))
 
     def it_provides_access_to_the_columns_dimension_to_help(
         self, _cube_result_matrix_prop_, cube_result_matrix_, dimension_
@@ -103,7 +139,7 @@ class DescribeAssembler(object):
         assert cube_result_matrix is cube_result_matrix_
 
     @pytest.mark.parametrize(
-        ("collation_method, collator_class_name"),
+        "collation_method, collator_class_name",
         (
             (CM.PAYLOAD_ORDER, "PayloadOrderCollator"),
             (CM.EXPLICIT_ORDER, "ExplicitOrderCollator"),
@@ -124,7 +160,7 @@ class DescribeAssembler(object):
         np.testing.assert_equal(dimension_order, np.array([1, -2, 3, 5, -1]))
 
     @pytest.mark.parametrize(
-        ("base", "expected_value"),
+        "base, expected_value",
         (((1, 1, 1), ()), ((1, 0, 1), (1,)), ((0, 0, 0), (0, 1, 2))),
     )
     def it_knows_its_empty_column_idxs_to_help(
@@ -136,7 +172,7 @@ class DescribeAssembler(object):
         assert Assembler(None, None, None)._empty_column_idxs == expected_value
 
     @pytest.mark.parametrize(
-        ("base", "expected_value"),
+        "base, expected_value",
         (((1, 1, 1), ()), ((1, 0, 1), (1,)), ((0, 0, 0), (0, 1, 2))),
     )
     def it_knows_its_empty_row_idxs_to_help(
@@ -176,7 +212,7 @@ class DescribeAssembler(object):
         assert Assembler(None, None, None)._prune_subtotal_rows is expected_value
 
     @pytest.mark.parametrize(
-        ("order", "prune", "expected"),
+        "order, prune, expected",
         (
             # --- False -> not pruned ---
             ([0, 1], False, [0, 1]),
