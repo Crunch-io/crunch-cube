@@ -44,6 +44,11 @@ class Assembler(object):
         self._slice_idx = slice_idx
 
     @lazyproperty
+    def columns_base(self):
+        """1D/2D np.int64 ndarray of unweighted-N for each slice column/cell."""
+        raise NotImplementedError
+
+    @lazyproperty
     def unweighted_counts(self):
         """2D np.int64 ndarray of unweighted-count for each cell."""
         return self._assemble_matrix(
