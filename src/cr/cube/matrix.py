@@ -621,7 +621,7 @@ class _MrXCatMatrix(_CatXCatMatrix):
         These values include both the selected and unselected counts of the MR rows
         dimension.
         """
-        raise NotImplementedError
+        return np.sum(self._unweighted_counts, axis=(0, 1))
 
     @lazyproperty
     def rows_pruning_base(self):
@@ -682,3 +682,11 @@ class _MrXMrMatrix(_CatXCatMatrix):
            [3398.16687766 3938.16556777]]]]
 
     """
+
+    @lazyproperty
+    def unweighted_counts(self):
+        """2D np.int64 ndarray of unweighted-count for each valid matrix cell.
+
+        A valid matrix cell is one whose row and column elements are both non-missing.
+        """
+        raise NotImplementedError
