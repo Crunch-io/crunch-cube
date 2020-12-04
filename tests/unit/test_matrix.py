@@ -184,6 +184,34 @@ class DescribeAssembler(object):
         assert Assembler(None, None, None)._empty_row_idxs == expected_value
 
     @pytest.mark.parametrize(
+        "prune, empty_row_idxs, element_ids, expected_value",
+        (
+            (False, (), (), False),
+            (False, (1, 2, 3), (4, 5, 6), False),
+            (False, (1, 2), (7, 8, 9), False),
+            (True, (), (), True),
+            (True, (1, 2, 3), (4, 5, 6), True),
+            (True, (1, 2), (7, 8, 9), False),
+        ),
+    )
+    def it_knows_whether_its_subtotal_columns_should_be_pruned_to_help(
+        self,
+        _rows_dimension_prop_,
+        dimension_,
+        prune,
+        _empty_row_idxs_prop_,
+        empty_row_idxs,
+        element_ids,
+        expected_value,
+    ):
+        _rows_dimension_prop_.return_value = dimension_
+        dimension_.element_ids = element_ids
+        dimension_.prune = prune
+        _empty_row_idxs_prop_.return_value = empty_row_idxs
+
+        assert Assembler(None, None, None)._prune_subtotal_columns is expected_value
+
+    @pytest.mark.parametrize(
         "prune, empty_col_idxs, element_ids, expected_value",
         (
             (False, (), (), False),
@@ -295,8 +323,16 @@ class DescribeAssembler(object):
         return property_mock(request, Assembler, "_empty_column_idxs")
 
     @pytest.fixture
+    def _empty_row_idxs_prop_(self, request):
+        return property_mock(request, Assembler, "_empty_row_idxs")
+
+    @pytest.fixture
     def _row_order_prop_(self, request):
         return property_mock(request, Assembler, "_row_order")
+
+    @pytest.fixture
+    def _rows_dimension_prop_(self, request):
+        return property_mock(request, Assembler, "_rows_dimension")
 
     @pytest.fixture
     def _SumSubtotals_(self, request):

@@ -3,7 +3,6 @@
 """Integration-test suite for `cr.cube.cubepart` module."""
 
 import numpy as np
-import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.cubepart import _Slice
@@ -14,7 +13,6 @@ from ..fixtures import CR
 class DescribeAssembler(object):
     """Integration-test suite for `cr.cube.matrix.Assembler`."""
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_assembled_ucounts_for_cat_hs_x_cat_hs_hiddens(self):
         """Assembler inserts, hides, prunes, and places in payload order."""
         slice_ = _Slice(
