@@ -691,7 +691,7 @@ class _MrXMrMatrix(_CatXCatMatrix):
         unselected counts, but only for the row MR; only selecteds are considered for
         the columns dimension.
         """
-        raise NotImplementedError
+        return np.sum(self._unweighted_counts[:, :, :, 0], axis=(0, 1))
 
     @lazyproperty
     def rows_pruning_base(self):
