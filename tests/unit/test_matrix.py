@@ -789,6 +789,18 @@ class Describe_CatXCatMatrix(object):
 class Describe_CatXMrMatrix(object):
     """Unit test suite for `cr.cube.matrix._CatXMrMatrix` object."""
 
+    def it_knows_its_columns_pruning_base(self):
+        unweighted_counts = np.array(
+            [
+                [[1, 6], [2, 5], [3, 5]],  # --- row 0 ---
+                [[5, 3], [6, 3], [7, 2]],  # --- row 1 ---
+            ]
+        )
+        np.testing.assert_equal(
+            _CatXMrMatrix(None, None, unweighted_counts, None).columns_pruning_base,
+            np.array([15, 16, 17]),
+        )
+
     def it_knows_its_rows_pruning_base(self):
         unweighted_counts = np.array(
             [[[1, 6], [2, 5], [3, 4]], [[5, 3], [6, 2], [7, 1]]]
