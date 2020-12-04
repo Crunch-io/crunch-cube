@@ -813,6 +813,10 @@ class Describe_BaseCubeResultMatrix(object):
 class Describe_CatXCatMatrix(object):
     """Unit test suite for `cr.cube.matrix._CatXCatMatrix` object."""
 
+    def it_knows_its_columns_base(self):
+        matrix = _CatXCatMatrix(None, None, np.array([[1, 2, 3], [4, 5, 6]]))
+        np.testing.assert_equal(matrix.columns_base, np.array([5, 7, 9]))
+
     @pytest.mark.parametrize(
         ("unweighted_counts", "expected"),
         (

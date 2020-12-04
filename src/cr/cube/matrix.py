@@ -2,7 +2,7 @@
 
 """A matrix is the 2D cube-data partition used by a slice.
 
-The `Assembler` object provides the external interface for this module. It name derives
+The `Assembler` object provides the external interface for this module. Its name derives
 from its role to "assemble" a finished 2D array ("matrix") for a particular measure from
 the base measure values and inserted subtotals, to reorder the rows and columns
 according to the dimension *order* transforms, and to hide rows and columns that are
@@ -542,6 +542,11 @@ class _CatXCatMatrix(_BaseCubeResultMatrix):
         self._counts_with_missings = counts_with_missings
 
     @lazyproperty
+    def columns_base(self):
+        """1D ndarray of np.int64 unweighted-N for each matrix column."""
+        return np.sum(self.unweighted_counts, axis=0)
+
+    @lazyproperty
     def columns_pruning_base(self):
         """1D np.int64 ndarray of unweighted-N for each matrix column.
 
@@ -713,6 +718,17 @@ class _MrXMrMatrix(_CatXCatMatrix):
            [3398.16687766 3938.16556777]]]]
 
     """
+
+    @lazyproperty
+    def columns_base(self):
+        """2D np.int64 ndarray of unweighted-N for this matrix.
+
+        An MR_X_MR matrix has a distinct column-base for each cell. This is because not
+        all responses (subvars) are necessarily presented to each respondent. The
+        unweighted-count for each MR_X cell is the sum of its selected and unselected
+        unweighted counts.
+        """
+        raise NotImplementedError
 
     @lazyproperty
     def columns_pruning_base(self):
