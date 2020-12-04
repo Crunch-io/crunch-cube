@@ -695,66 +695,12 @@ class Describe_BaseCubeResultMatrix(object):
         matrix = _BaseCubeResultMatrix([None, dimension_], None, None)
         assert matrix.columns_dimension == dimension_
 
-    @pytest.mark.parametrize(
-        ("slice_idx", "dim_types", "expected"),
-        (
-            # <= 2D
-            (0, (DT.CAT,), np.s_[:]),
-            (1, (DT.CAT,), np.s_[:]),
-            (0, (DT.CAT, DT.CAT), np.s_[:]),
-            (1, (DT.CAT, DT.CAT), np.s_[:]),
-            # 3D, no MR as tabs
-            (0, (DT.CAT, DT.CAT, DT.CAT), np.s_[0]),
-            (1, (DT.CAT, DT.CAT, DT.CAT), np.s_[1]),
-            (2, (DT.CAT, DT.CAT, DT.CAT), np.s_[2]),
-            # 3D, MR as tabs
-            (0, (DT.MR, DT.CAT, DT.CAT), np.s_[0, 0]),
-            (1, (DT.MR, DT.CAT, DT.CAT), np.s_[1, 0]),
-            (2, (DT.MR, DT.CAT, DT.CAT), np.s_[2, 0]),
-        ),
-    )
-    def it_knows_its_regular_matrix_slice_for_counts_to_help(
-        self, cube_, slice_idx, dim_types, expected
-    ):
-        cube_.dimension_types = dim_types
-        cube_.ndim = len(dim_types)
-
-        s = _BaseCubeResultMatrix._get_regular_matrix_counts_slice(cube_, slice_idx)
-
-        assert s == expected
+    def it_knows_its_rows_dimension(self, dimension_):
+        matrix = _BaseCubeResultMatrix([dimension_, None], None, None)
+        assert matrix.rows_dimension == dimension_
 
     @pytest.mark.parametrize(
-        ("counts", "counts_slice", "expected"),
-        (
-            ([[1, 2, 3], [4, 5, 6]], np.s_[:], [[1, 2, 3], [4, 5, 6]]),
-            ([[1, 2, 3], [4, 5, 6]], np.s_[0], [1, 2, 3]),
-            ([[1, 2, 3], [4, 5, 6]], np.s_[0, 0], 1),
-        ),
-    )
-    def it_knows_how_to_get_sliced_counts_to_help(
-        self, request, cube_, counts, counts_slice, expected
-    ):
-        counts = np.array(counts)
-        cube_.counts = counts
-        cube_.unweighted_counts = counts
-        cube_.counts_with_missings = counts
-        fake_slice_idx = 1
-        _get_regular_matrix_counts_slice = method_mock(
-            request,
-            _BaseCubeResultMatrix,
-            "_get_regular_matrix_counts_slice",
-            return_value=counts_slice,
-        )
-
-        sliced_counts = _BaseCubeResultMatrix._get_sliced_counts(cube_, fake_slice_idx)
-
-        counts, unweighted, with_missing = sliced_counts
-        assert counts.tolist() == expected
-        assert unweighted.tolist() == expected
-        _get_regular_matrix_counts_slice.assert_called_once_with(cube_, fake_slice_idx)
-
-    @pytest.mark.parametrize(
-        ("dimension_types", "expected"),
+        "dimension_types, expected_value",
         (
             ((DT.MR, DT.MR), _MrXMrMatrix),
             ((DT.MR, DT.CAT), _MrXCatMatrix),
@@ -762,12 +708,41 @@ class Describe_BaseCubeResultMatrix(object):
             ((DT.CAT, DT.CAT), _CatXCatMatrix),
         ),
     )
-    def it_knows_its_regular_matrix_factory_class(self, dimension_types, expected):
-        matrix_class = _BaseCubeResultMatrix._get_regular_matrix_factory_class(
-            dimension_types
+    def it_knows_its_regular_matrix_class_to_help(
+        self, dimension_types, expected_value
+    ):
+        assert (
+            _BaseCubeResultMatrix._regular_matrix_class(dimension_types)
+            is expected_value
         )
 
-        assert matrix_class == expected
+    @pytest.mark.parametrize(
+        ("slice_idx", "dim_types", "expected"),
+        (
+            # --- <= 2D ---
+            (0, (DT.CAT,), np.s_[:]),
+            (1, (DT.CAT,), np.s_[:]),
+            (0, (DT.CAT, DT.CAT), np.s_[:]),
+            (1, (DT.CAT, DT.CAT), np.s_[:]),
+            # --- 3D, no MR as tabs ---
+            (0, (DT.CAT, DT.CAT, DT.CAT), np.s_[0]),
+            (1, (DT.CAT, DT.CAT, DT.CAT), np.s_[1]),
+            (2, (DT.CAT, DT.CAT, DT.CAT), np.s_[2]),
+            # --- 3D, MR as tabs ---
+            (0, (DT.MR, DT.CAT, DT.CAT), np.s_[0, 0]),
+            (1, (DT.MR, DT.CAT, DT.CAT), np.s_[1, 0]),
+            (2, (DT.MR, DT.CAT, DT.CAT), np.s_[2, 0]),
+        ),
+    )
+    def it_knows_its_regular_matrix_counts_slice_to_help(
+        self, cube_, slice_idx, dim_types, expected
+    ):
+        cube_.dimension_types = dim_types
+        cube_.ndim = len(dim_types)
+
+        s = _BaseCubeResultMatrix._regular_matrix_counts_slice(cube_, slice_idx)
+
+        assert s == expected
 
     @pytest.mark.parametrize(
         "matrix_class_name",
@@ -778,21 +753,21 @@ class Describe_BaseCubeResultMatrix(object):
             "_MrXMrMatrix",
         ),
     )
-    def it_creates_matrix_using_factory_to_help(
+    def it_can_construct_a_regular_matrix_to_help(
         self, request, cube_, dimension_, matrix_class_name
     ):
         cube_.dimension_types = (DT.CAT, DT.MR, DT.CAT)
         MatrixCls_ = class_mock(request, "cr.cube.matrix.%s" % matrix_class_name)
-        _get_regular_matrix_factory_class = method_mock(
+        _regular_matrix_class = method_mock(
             request,
             _BaseCubeResultMatrix,
-            "_get_regular_matrix_factory_class",
+            "_regular_matrix_class",
             return_value=MatrixCls_,
         )
-        _get_sliced_counts = method_mock(
+        _sliced_counts = method_mock(
             request,
             _BaseCubeResultMatrix,
-            "_get_sliced_counts",
+            "_sliced_counts",
             return_value=([[1], [2]], [[3], [4]]),
         )
 
@@ -800,16 +775,41 @@ class Describe_BaseCubeResultMatrix(object):
             cube_, (dimension_, dimension_), slice_idx=17
         )
 
-        _get_regular_matrix_factory_class.assert_called_once_with((DT.MR, DT.CAT))
-        _get_sliced_counts.assert_called_once_with(cube_, 17)
+        _regular_matrix_class.assert_called_once_with((DT.MR, DT.CAT))
+        _sliced_counts.assert_called_once_with(cube_, 17)
         MatrixCls_.assert_called_once_with(
             (dimension_, dimension_), [[1], [2]], [[3], [4]]
         )
         assert matrix is MatrixCls_.return_value
 
-    def it_knows_its_rows_dimension(self, dimension_):
-        matrix = _BaseCubeResultMatrix([dimension_, None], None, None)
-        assert matrix.rows_dimension == dimension_
+    @pytest.mark.parametrize(
+        ("counts", "counts_slice", "expected"),
+        (
+            ([[1, 2, 3], [4, 5, 6]], np.s_[:], [[1, 2, 3], [4, 5, 6]]),
+            ([[1, 2, 3], [4, 5, 6]], np.s_[0], [1, 2, 3]),
+            ([[1, 2, 3], [4, 5, 6]], np.s_[0, 0], 1),
+        ),
+    )
+    def it_knows_its_sliced_counts_to_help(
+        self, request, cube_, counts, counts_slice, expected
+    ):
+        counts = np.array(counts)
+        cube_.counts = counts
+        cube_.unweighted_counts = counts
+        cube_.counts_with_missings = counts
+        _regular_matrix_counts_slice = method_mock(
+            request,
+            _BaseCubeResultMatrix,
+            "_regular_matrix_counts_slice",
+            return_value=counts_slice,
+        )
+
+        sliced_counts = _BaseCubeResultMatrix._sliced_counts(cube_, slice_idx=23)
+
+        _regular_matrix_counts_slice.assert_called_once_with(cube_, 23)
+        counts, unweighted, with_missing = sliced_counts
+        assert counts.tolist() == expected
+        assert unweighted.tolist() == expected
 
     # fixture components ---------------------------------------------
 

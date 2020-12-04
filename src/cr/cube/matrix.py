@@ -464,23 +464,47 @@ class _BaseCubeResultMatrix(object):
         return (cube.counts, cube.unweighted_counts, cube.counts_with_missings)
 
     @classmethod
-    def _get_sliced_counts(cls, cube, slice_idx):
-        """Returns a tuple of cube counts, prepared for regular matrix construction.
+    def _means_matrix_factory(cls, cube, dimensions, slice_idx):
+        """ -> matrix object appropriate to means `cube`."""
+        raise NotImplementedError
 
-        Depending on the type of the cube, we need to extract the proper counts for the
-        counstruction of a particular slice (matrix). In case of cubes that have more
-        then 2 dimensions, we only need a particular slice (a particular selected
-        element of the 0th dimension).
+        dimension_types = cube.dimension_types[-2:]
 
-        If, in addition to being >2D cube, the 0th dimension is multiple response, we
-        need to extract only the selected counts, since we're "just" dealing with the
-        tabulation.
-        """
-        i = cls._get_regular_matrix_counts_slice(cube, slice_idx)
-        return (cube.counts[i], cube.unweighted_counts[i], cube.counts_with_missings[i])
+        if dimension_types == (DT.MR, DT.MR):
+            # --- this MEANS_MR_X_MR case hasn't arisen yet ---
+            raise NotImplementedError(
+                "MR x MR with means is not implemented."
+            )  # pragma: no cover
+
+        MatrixCls = (
+            _MrXCatMeansMatrix
+            if dimension_types[0] == DT.MR
+            else _CatXMrMeansMatrix
+            if dimension_types[1] == DT.MR
+            else _CatXCatMeansMatrix
+        )
+        counts, unweighted_counts = (
+            (cube.counts[slice_idx], cube.unweighted_counts[slice_idx])
+            if cube.ndim == 3
+            else (cube.counts, cube.unweighted_counts)
+        )
+        return MatrixCls(dimensions, counts, unweighted_counts)
 
     @staticmethod
-    def _get_regular_matrix_counts_slice(cube, slice_idx):
+    def _regular_matrix_class(dimension_types):
+        """Return _BaseCubeResultMatrix subclass appropriate to `dimension_types`."""
+        return (
+            _MrXMrMatrix
+            if dimension_types == (DT.MR, DT.MR)
+            else _MrXCatMatrix
+            if dimension_types[0] == DT.MR
+            else _CatXMrMatrix
+            if dimension_types[1] == DT.MR
+            else _CatXCatMatrix
+        )
+
+    @staticmethod
+    def _regular_matrix_counts_slice(cube, slice_idx):
         """return `np.s_` object with correct slicing for the cube type."""
         if cube.ndim <= 2:
             return np.s_[:]
@@ -494,29 +518,27 @@ class _BaseCubeResultMatrix(object):
         # --- appropriate slice (element of the 0th dimension).
         return np.s_[slice_idx]
 
-    @staticmethod
-    def _get_regular_matrix_factory_class(dimension_types):
-        """Return correct class for matrix construction, based on dimension types."""
-        return (
-            _MrXMrMatrix
-            if dimension_types == (DT.MR, DT.MR)
-            else _MrXCatMatrix
-            if dimension_types[0] == DT.MR
-            else _CatXMrMatrix
-            if dimension_types[1] == DT.MR
-            else _CatXCatMatrix
-        )
-
-    @classmethod
-    def _means_matrix_factory(cls, cube, dimensions, slice_idx):
-        """ -> matrix object appropriate to means `cube`."""
-        raise NotImplementedError
-
     @classmethod
     def _regular_matrix_factory(cls, cube, dimensions, slice_idx):
         """ -> matrix object for non-means slice."""
-        MatrixCls = cls._get_regular_matrix_factory_class(cube.dimension_types[-2:])
-        return MatrixCls(dimensions, *cls._get_sliced_counts(cube, slice_idx))
+        MatrixCls = cls._regular_matrix_class(cube.dimension_types[-2:])
+        return MatrixCls(dimensions, *cls._sliced_counts(cube, slice_idx))
+
+    @classmethod
+    def _sliced_counts(cls, cube, slice_idx):
+        """Return tuple of cube counts, prepared for regular matrix construction.
+
+        Depending on the type of the cube, we need to extract the proper counts for the
+        counstruction of a particular slice (matrix). In case of cubes that have more
+        then 2 dimensions, we only need a particular slice (a particular selected
+        element of the 0th dimension).
+
+        If, in addition to being >2D cube, the 0th dimension is multiple response, we
+        need to extract only the selected counts, since we're "just" dealing with the
+        tabulation.
+        """
+        i = cls._regular_matrix_counts_slice(cube, slice_idx)
+        return (cube.counts[i], cube.unweighted_counts[i], cube.counts_with_missings[i])
 
 
 class _CatXCatMatrix(_BaseCubeResultMatrix):
@@ -565,6 +587,13 @@ class _CatXCatMatrix(_BaseCubeResultMatrix):
         A valid matrix cell is one whose row and column elements are both non-missing.
         """
         return self._unweighted_counts
+
+
+class _CatXCatMeansMatrix(_CatXCatMatrix):
+    """Cat-x-cat matrix for means measure.
+
+    A means matrix has an array of mean values instead of a `counts` array.
+    """
 
 
 class _CatXMrMatrix(_CatXCatMatrix):
@@ -623,6 +652,10 @@ class _CatXMrMatrix(_CatXCatMatrix):
         return self._unweighted_counts[:, :, 0]
 
 
+class _CatXMrMeansMatrix(_CatXMrMatrix):
+    """Basis for CAT_X_MR slice having mean measure instead of counts."""
+
+
 class _MrXCatMatrix(_CatXCatMatrix):
     """Represents an MR_X_CAT slice.
 
@@ -669,6 +702,14 @@ class _MrXCatMatrix(_CatXCatMatrix):
         A valid matrix cell is one whose row and column elements are both non-missing.
         """
         return self._unweighted_counts[:, 0, :]
+
+
+class _MrXCatMeansMatrix(_MrXCatMatrix):
+    """MR_X_CAT slice with means measure instead of counts.
+
+    Note that its (weighted) counts are all set to zero. A means slice still has
+    meaningful unweighted counts.
+    """
 
 
 class _MrXMrMatrix(_CatXCatMatrix):
