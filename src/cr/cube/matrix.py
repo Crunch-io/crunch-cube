@@ -46,7 +46,18 @@ class Assembler(object):
     @lazyproperty
     def columns_base(self):
         """1D/2D np.int64 ndarray of unweighted-N for each slice column/cell."""
-        raise NotImplementedError
+        # --- an MR_X slice produces a 2D column-base (each cell has its own N) ---
+        if self._rows_dimension.dimension_type == DT.MR_SUBVAR:
+            return self._assemble_matrix(
+                _SumSubtotals.blocks(self._cube_result_matrix, "columns_base")
+            )
+
+        # --- otherwise columns-base is a vector ---
+        return self._assemble_vector(
+            self._cube_result_matrix.columns_base,
+            self._column_subtotals,
+            self._column_order,
+        )
 
     @lazyproperty
     def unweighted_counts(self):
@@ -71,6 +82,16 @@ class Assembler(object):
         # --- desired output.
         return np.block(blocks)[np.ix_(self._row_order, self._column_order)]
 
+    def _assemble_vector(self, base_vector, subtotals, order):
+        """Return 1D ndarray of `base_vector` with inserted `subtotals`, in `order`.
+
+        Each subtotal value is the result of applying np.sum to the addends extracted
+        from `base_vector` according the the `addend_idxs` property of each subtotal in
+        `subtotals`. The returned array is arranged by `order`, including possibly
+        removing hidden or pruned values.
+        """
+        raise NotImplementedError
+
     @lazyproperty
     def _column_order(self):
         """1D np.int64 ndarray of signed int idx for each assembled column.
@@ -79,6 +100,11 @@ class Assembler(object):
         """
         order = self._dimension_order(self._columns_dimension, self._empty_column_idxs)
         return order[order >= 0] if self._prune_subtotal_columns else order
+
+    @lazyproperty
+    def _column_subtotals(self):
+        """Sequence of _Subtotal object for each inserted column."""
+        raise NotImplementedError
 
     @lazyproperty
     def _columns_dimension(self):
