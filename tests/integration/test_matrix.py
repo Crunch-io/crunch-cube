@@ -3,7 +3,6 @@
 """Integration-test suite for `cr.cube.cubepart` module."""
 
 import numpy as np
-import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.cubepart import _Slice
@@ -27,7 +26,7 @@ class DescribeAssembler(object):
             mask_size=0,
         )
 
-        unweighted_counts = slice_._assembler.unweighted_counts
+        unweighted_counts = slice_.unweighted_counts
 
         assert np.array_equal(
             unweighted_counts,
@@ -62,7 +61,7 @@ class DescribeAssembler(object):
             mask_size=0,
         )
 
-        unweighted_counts = slice_._assembler.unweighted_counts
+        unweighted_counts = slice_.unweighted_counts
 
         assert np.array_equal(
             unweighted_counts,
@@ -94,7 +93,7 @@ class DescribeAssembler(object):
             mask_size=0,
         )
 
-        unweighted_counts = slice_._assembler.unweighted_counts
+        unweighted_counts = slice_.unweighted_counts
 
         assert np.array_equal(
             unweighted_counts,
@@ -129,7 +128,7 @@ class DescribeAssembler(object):
             mask_size=0,
         )
 
-        unweighted_counts = slice_._assembler.unweighted_counts
+        unweighted_counts = slice_.unweighted_counts
 
         assert np.array_equal(
             unweighted_counts,
@@ -145,7 +144,7 @@ class DescribeAssembler(object):
     def it_computes_assembled_ucounts_for_mr_x_cat(self):
         slice_ = Cube(CR.MR_X_CAT).partitions[0]
         assert np.array_equal(
-            slice_._assembler.unweighted_counts,
+            slice_.unweighted_counts,
             [
                 [8, 7, 0, 6, 5, 0],
                 [7, 16, 0, 26, 27, 0],
@@ -155,14 +154,13 @@ class DescribeAssembler(object):
             ],
         )
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_assembled_ucounts_for_mr_x_mr_slices(self):
         slice_ = Cube(CR.CAT_X_MR_X_MR).partitions[0]
         np.testing.assert_array_equal(
-            slice_._assembler.unweighted_counts, [[1159, 3597], [197, 604], [192, 582]]
+            slice_.unweighted_counts, [[1159, 3597], [197, 604], [192, 582]]
         )
 
         slice_ = Cube(CR.CAT_X_MR_X_MR).partitions[1]
         np.testing.assert_array_equal(
-            slice_._assembler.unweighted_counts, [[159, 94], [1182, 625], [1142, 623]]
+            slice_.unweighted_counts, [[159, 94], [1182, 625], [1142, 623]]
         )

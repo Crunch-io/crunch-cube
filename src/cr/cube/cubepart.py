@@ -874,7 +874,7 @@ class _Slice(CubePartition):
     @lazyproperty
     def unweighted_counts(self):
         """2D tuple of unweighted counts."""
-        return tuple(tuple(row.unweighted_counts) for row in self._matrix.rows)
+        return self._assembler.unweighted_counts
 
     @lazyproperty
     def var_scale_means_column(self):
