@@ -466,14 +466,12 @@ class _BaseCubeResultMatrix(object):
     @classmethod
     def _means_matrix_factory(cls, cube, dimensions, slice_idx):
         """ -> matrix object appropriate to means `cube`."""
-        raise NotImplementedError
-
         dimension_types = cube.dimension_types[-2:]
 
         if dimension_types == (DT.MR, DT.MR):
             # --- this MEANS_MR_X_MR case hasn't arisen yet ---
             raise NotImplementedError(
-                "MR x MR with means is not implemented."
+                "MR x MR with means is not implemented"
             )  # pragma: no cover
 
         MatrixCls = (
@@ -676,6 +674,17 @@ class _MrXCatMatrix(_CatXCatMatrix):
     Each value is np.float64, or np.int64 if the cube-result is unweighted (as in this
     example).
     """
+
+    @lazyproperty
+    def columns_base(self):
+        """2D np.int64 ndarray of unweighted-N for this matrix.
+
+        An MR_X matrix has a distinct column-base for each cell. This is because not all
+        responses (subvars) are necessarily presented to each respondent. The
+        unweighted-count for each MR_X cell is the sum of its selected and unselected
+        unweighted counts.
+        """
+        raise NotImplementedError
 
     @lazyproperty
     def columns_pruning_base(self):

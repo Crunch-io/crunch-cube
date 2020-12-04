@@ -700,6 +700,66 @@ class Describe_BaseCubeResultMatrix(object):
         assert matrix.rows_dimension == dimension_
 
     @pytest.mark.parametrize(
+        "dimension_types, matrix_class_name",
+        (
+            ((DT.MR, DT.CAT), "_MrXCatMeansMatrix"),
+            ((DT.CAT, DT.MR), "_CatXMrMeansMatrix"),
+            ((DT.CAT, DT.CAT), "_CatXCatMeansMatrix"),
+        ),
+    )
+    def it_can_construct_a_means_matrix_for_a_2D_slice_to_help(
+        self, request, cube_, dimension_types, dimension_, matrix_class_name
+    ):
+        cube_.dimension_types = dimension_types
+        cube_.ndim = 2
+        cube_.counts = [1, 2, 3, 4]
+        cube_.unweighted_counts = [5, 6, 7, 8]
+        MatrixCls_ = class_mock(request, "cr.cube.matrix.%s" % matrix_class_name)
+
+        matrix = _BaseCubeResultMatrix._means_matrix_factory(
+            cube_, (dimension_, dimension_), None
+        )
+
+        MatrixCls_.assert_called_once_with(
+            (dimension_, dimension_), [1, 2, 3, 4], [5, 6, 7, 8]
+        )
+        assert matrix is MatrixCls_.return_value
+
+    @pytest.mark.parametrize(
+        "dimension_types, matrix_class_name",
+        (
+            ((None, DT.MR, DT.CAT), "_MrXCatMeansMatrix"),
+            ((None, DT.CAT, DT.MR), "_CatXMrMeansMatrix"),
+            ((None, DT.CAT, DT.CAT), "_CatXCatMeansMatrix"),
+        ),
+    )
+    def and_it_can_construct_a_means_matrix_for_a_3D_slice_to_help(
+        self, request, cube_, dimension_types, dimension_, matrix_class_name
+    ):
+        cube_.dimension_types = dimension_types
+        cube_.ndim = 3
+        cube_.counts = [None, [1, 2, 3, 4], None]
+        cube_.unweighted_counts = [None, [5, 6, 7, 8], None]
+        MatrixCls_ = class_mock(request, "cr.cube.matrix.%s" % matrix_class_name)
+
+        matrix = _BaseCubeResultMatrix._means_matrix_factory(
+            cube_, (dimension_, dimension_), slice_idx=1
+        )
+
+        MatrixCls_.assert_called_once_with(
+            (dimension_, dimension_), [1, 2, 3, 4], [5, 6, 7, 8]
+        )
+        assert matrix is MatrixCls_.return_value
+
+    def but_it_raises_on_MEANS_MR_X_MR(self, cube_):
+        cube_.dimension_types = (DT.MR, DT.MR)
+
+        with pytest.raises(NotImplementedError) as e:
+            _BaseCubeResultMatrix._means_matrix_factory(cube_, None, None)
+
+        assert str(e.value) == "MR x MR with means is not implemented"
+
+    @pytest.mark.parametrize(
         "dimension_types, expected_value",
         (
             ((DT.MR, DT.MR), _MrXMrMatrix),

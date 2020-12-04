@@ -63,7 +63,6 @@ def test_deck_with_means():
     )
 
 
-@pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
 def test_3D_with_means():
     slice_ = Cube(CR.MEANS_3D).partitions[0]
     np.testing.assert_almost_equal(
@@ -262,7 +261,7 @@ def test_table_base_unpruned_cat_x_mr():
     np.testing.assert_array_equal(slice_.table_base_unpruned, expected)
 
 
-def test_various_measures_from_r_rows_margin():
+def test_mr_x_cat_various_measures():
     slice_ = Cube(CR.MR_X_CAT_PROFILES_STATS_WEIGHTED).partitions[0]
     np.testing.assert_almost_equal(
         slice_.zscores, load_python_expression("mr-x-cat-weighted-zscores")
@@ -1549,7 +1548,7 @@ def test_mr_by_cat_hs_cell_percentage():
     np.testing.assert_almost_equal(slice_.table_proportions, expected)
 
 
-@pytest.mark.xfail(reason="WIP", raises=IndexError, strict=True)
+@pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
 def test_mr_x_cat_min_base_size_mask():
     transforms = {
         "columns_dimension": {"insertions": {}},

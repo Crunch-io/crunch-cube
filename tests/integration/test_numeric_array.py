@@ -3,7 +3,6 @@
 """Integration-test suite for numeric-arrays."""
 
 import numpy as np
-import pytest
 
 from cr.cube.cube import Cube
 
@@ -11,9 +10,8 @@ from ..fixtures import NA
 
 
 class TestNumericArrays:
-    """Test-suite for numeric-arrays behaviors."""
+    """Test-suite for numeric-array behaviors."""
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def test_num_arr_grouped_by_cat(self):
         """Test means on numeric array, grouped by single categorical dimension."""
         slice_ = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT).partitions[0]
@@ -29,7 +27,6 @@ class TestNumericArrays:
         )
         np.testing.assert_almost_equal(slice_.columns_base, [5, 4, 2])
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def test_num_arr_grouped_by_cat_weighted(self):
         """Test means on numeric array, grouped by single categorical dimension."""
         slice_ = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT_WEIGHTED).partitions[0]
