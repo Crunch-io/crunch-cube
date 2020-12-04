@@ -784,3 +784,28 @@ class Describe_CatXCatMatrix(object):
             _CatXCatMatrix(None, None, unweighted_counts).unweighted_counts,
             unweighted_counts,
         )
+
+
+class Describe_CatXMrMatrix(object):
+    """Unit test suite for `cr.cube.matrix._CatXMrMatrix` object."""
+
+    def it_knows_its_unweighted_counts(self):
+        unweighted_counts = np.array(
+            [
+                [  # -- row 0 ------------
+                    [1, 6],  # -- col 0 --
+                    [2, 5],  # -- col 1 --
+                    [3, 4],  # -- col 2 --
+                ],
+                [  # -- row 1 ------------
+                    [4, 3],  # -- col 0 --
+                    [5, 2],  # -- col 1 --
+                    [6, 1],  # -- col 2 --
+                    # --------------------
+                ],
+            ]
+        )
+        np.testing.assert_equal(
+            _CatXMrMatrix(None, None, unweighted_counts).unweighted_counts,
+            np.array([[1, 2, 3], [4, 5, 6]]),
+        )

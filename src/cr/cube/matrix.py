@@ -528,12 +528,21 @@ class _CatXMrMatrix(_CatXCatMatrix):
     """
 
     @lazyproperty
+    def rows_pruning_base(self):
+        """1D np.int64 ndarray of unweighted-N for each matrix row.
+
+        These values include both the selected and unselected counts of the MR columns
+        dimension.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
     def unweighted_counts(self):
         """2D np.int64 ndarray of unweighted-count for each valid matrix cell.
 
         A valid matrix cell is one whose row and column elements are both non-missing.
         """
-        raise NotImplementedError
+        return self._unweighted_counts[:, :, 0]
 
 
 class _MrXCatMatrix(_CatXCatMatrix):
