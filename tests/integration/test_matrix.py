@@ -166,7 +166,6 @@ class DescribeAssembler(object):
             slice_.unweighted_counts, [[159, 94], [1182, 625], [1142, 623]]
         )
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_ca_x_mr_hs_columns_base(self):
         slice_ = Cube(CR.CA_X_MR_WEIGHTED_HS).partitions[0]
         np.testing.assert_array_equal(
@@ -183,7 +182,6 @@ class DescribeAssembler(object):
             ),
         )
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_cat_x_mr_columns_base(self):
         slice_ = Cube(CR.CAT_X_MR).partitions[0]
         np.testing.assert_array_equal(

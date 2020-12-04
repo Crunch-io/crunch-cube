@@ -128,6 +128,20 @@ class DescribeAssembler(object):
 
         assert assembler._assemble_matrix(blocks).tolist() == expected_value
 
+    def it_can_assemble_a_vector(self, request):
+        base_vector = np.array([1, 2, 3, 4])
+        subtotals_ = tuple(
+            instance_mock(request, _Subtotal, addend_idxs=np.array(addend_idxs))
+            for addend_idxs in ((0, 1), (1, 2), (2, 3))
+        )
+        order = np.array([-3, 1, 0, -2, 3, 2, -1])
+        assembler = Assembler(None, None, None)
+
+        np.testing.assert_equal(
+            assembler._assemble_vector(base_vector, subtotals_, order),
+            np.array([3, 2, 1, 5, 4, 3, 7]),
+        )
+
     @pytest.mark.parametrize(
         "order, prune_subtotal_columns, expected_value",
         (

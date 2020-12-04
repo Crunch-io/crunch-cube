@@ -90,7 +90,13 @@ class Assembler(object):
         `subtotals`. The returned array is arranged by `order`, including possibly
         removing hidden or pruned values.
         """
-        raise NotImplementedError
+        # TODO: This only works for "sum" subtotals, which is all that it needs so far,
+        # but a fuller solution will probably get the subtotal values from a
+        # _BaseSubtotals subclass.
+        vector_subtotals = np.array(
+            [np.sum(base_vector[subtotal.addend_idxs]) for subtotal in subtotals]
+        )
+        return np.hstack([base_vector, vector_subtotals])[order]
 
     @lazyproperty
     def _column_order(self):
