@@ -72,7 +72,8 @@ class Assembler(object):
 
         Negative values represent inserted subtotal-column locations.
         """
-        raise NotImplementedError
+        order = self._dimension_order(self._columns_dimension, self._empty_column_idxs)
+        return order[order >= 0] if self._prune_subtotal_columns else order
 
     @lazyproperty
     def _columns_dimension(self):
@@ -135,6 +136,14 @@ class Assembler(object):
         """
         base = self._cube_result_matrix.rows_pruning_base
         return tuple(i for i, N in enumerate(base) if N == 0)
+
+    @lazyproperty
+    def _prune_subtotal_columns(self):
+        """True if subtotal columns need to be pruned, False otherwise.
+
+        Subtotal-columns need to be pruned when all base-rows are pruned.
+        """
+        raise NotImplementedError
 
     @lazyproperty
     def _prune_subtotal_rows(self):
