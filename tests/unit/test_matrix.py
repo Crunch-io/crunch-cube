@@ -835,6 +835,25 @@ class Describe_CatXMrMatrix(object):
 class Describe_MrXCatMatrix(object):
     """Unit test suite for `cr.cube.matrix._MrXCatMatrix` object."""
 
+    def it_knows_its_rows_pruning_base(self):
+        unweighted_counts = np.array(
+            [
+                [  # -- row 0 ------------
+                    [1, 2, 3],  # -- selected --
+                    [4, 5, 6],  # -- not --
+                ],
+                [  # -- row 1 ------------
+                    [7, 8, 9],  # -- selected --
+                    [3, 2, 1],  # -- not --
+                    # --------------------
+                ],
+            ]
+        )
+        np.testing.assert_equal(
+            _MrXCatMatrix(None, None, unweighted_counts, None).rows_pruning_base,
+            np.array([21, 30]),
+        )
+
     def it_knows_its_unweighted_counts(self):
         unweighted_counts = np.array(
             [
