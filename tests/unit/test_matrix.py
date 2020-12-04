@@ -378,6 +378,10 @@ class Describe_BaseSubtotals(object):
         subtotals = _BaseSubtotals(cube_result_matrix_, None)
         assert subtotals._column_subtotals is dimension_.subtotals
 
+    def it_knows_how_many_columns_are_in_the_base_matrix(self, _base_values_prop_):
+        _base_values_prop_.return_value = np.arange(12).reshape(3, 4)
+        assert _BaseSubtotals(None, None)._ncols == 4
+
     def it_knows_how_many_rows_are_in_the_base_matrix(self, _base_values_prop_):
         _base_values_prop_.return_value = np.arange(12).reshape(3, 4)
         assert _BaseSubtotals(None, None)._nrows == 3
