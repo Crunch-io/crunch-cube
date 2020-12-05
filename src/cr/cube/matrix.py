@@ -44,6 +44,16 @@ class Assembler(object):
         self._slice_idx = slice_idx
 
     @lazyproperty
+    def column_labels(self):
+        """1D str ndarray of column name for each matrix column.
+
+        These are suitable for use as column headings; labels for subtotal columns
+        appear in the sequence and labels are ordered to correspond with their
+        respective data column.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
     def columns_base(self):
         """1D/2D np.int64 ndarray of unweighted-N for each slice column/cell."""
         # --- an MR_X slice produces a 2D column-base (each cell has its own N) ---

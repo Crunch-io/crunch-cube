@@ -3,6 +3,7 @@
 """Integration-test suite for `cr.cube.cubepart` module."""
 
 import numpy as np
+import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.cubepart import _Slice
@@ -308,4 +309,17 @@ class DescribeAssembler(object):
                 [126.86878474, 100.00460577, 180.99361257, 180.99361257],
                 [166.0021903, 141.86768069, 180.99361257, 236.5388192],
             ],
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_knows_the_column_labels(self):
+        transforms = {
+            "columns_dimension": {
+                "order": {"type": "explicit", "element_ids": [1, 3, 0, 2]}
+            }
+        }
+        slice_ = Cube(CR.CAT_HS_X_CAT_HS, transforms=transforms).partitions[0]
+        np.testing.assert_equal(
+            slice_._assembler.column_labels,
+            ["Bravo", "Delta", "Alpha", "Charlie", "Last 2"],
         )
