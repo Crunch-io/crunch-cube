@@ -32,6 +32,23 @@ from ..unitutil import (
 class DescribeAssembler(object):
     """Unit test suite for `cr.cube.matrix.Assembler` object."""
 
+    def it_knows_the_column_labels(
+        self,
+        _columns_dimension_prop_,
+        dimension_,
+        _column_order_prop_,
+        _dimension_labels_,
+    ):
+        _columns_dimension_prop_.return_value = dimension_
+        _column_order_prop_.return_value = [0, 1, 2]
+        _dimension_labels_.return_value = np.array(["Alpha", "Baker", "Charlie"])
+        assembler = Assembler(None, None, None)
+
+        column_labels = assembler.column_labels
+
+        _dimension_labels_.assert_called_once_with(assembler, dimension_, [0, 1, 2])
+        np.testing.assert_equal(column_labels, ["Alpha", "Baker", "Charlie"])
+
     def it_knows_the_columns_base(
         self,
         _rows_dimension_prop_,
@@ -494,6 +511,10 @@ class DescribeAssembler(object):
     @pytest.fixture
     def dimension_(self, request):
         return instance_mock(request, Dimension)
+
+    @pytest.fixture
+    def _dimension_labels_(self, request):
+        return method_mock(request, Assembler, "_dimension_labels")
 
     @pytest.fixture
     def _dimension_order_(self, request):

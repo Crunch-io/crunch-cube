@@ -51,7 +51,7 @@ class Assembler(object):
         appear in the sequence and labels are ordered to correspond with their
         respective data column.
         """
-        raise NotImplementedError
+        return self._dimension_labels(self._columns_dimension, self._column_order)
 
     @lazyproperty
     def columns_base(self):
@@ -182,6 +182,15 @@ class Assembler(object):
         return _BaseCubeResultMatrix.factory(
             self._cube, self._dimensions, self._slice_idx
         )
+
+    def _dimension_labels(self, dimension, order):
+        """1D str ndarray of name for each vector of `dimension`.
+
+        These are suitable for use as row/column headings; labels for subtotals appear
+        in the sequence specified by `order`, such that labels are ordered to correspond
+        with their respective data vector.
+        """
+        raise NotImplementedError
 
     def _dimension_order(self, dimension, empty_idxs):
         """1D np.int64 ndarray of signed int idx for each vector in `dimension`.
