@@ -49,7 +49,7 @@ class DescribeAssembler(object):
         _dimension_labels_.assert_called_once_with(assembler, dimension_, [0, 1, 2])
         np.testing.assert_equal(column_labels, ["Alpha", "Baker", "Charlie"])
 
-    def it_knows_the_columns_base(
+    def it_provides_a_1D_columns_base_for_a_CAT_X_cube_result(
         self,
         _rows_dimension_prop_,
         dimension_,
@@ -98,6 +98,54 @@ class DescribeAssembler(object):
         )
         _assemble_matrix_.assert_called_once_with(assembler, [[[1], [2]], [[3], [4]]])
         assert columns_base == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+
+    def it_provides_a_1D_rows_base_for_an_X_CAT_cube_result(
+        self,
+        _columns_dimension_prop_,
+        dimension_,
+        _cube_result_matrix_prop_,
+        cube_result_matrix_,
+        _row_subtotals_prop_,
+        _row_order_prop_,
+        _assemble_vector_,
+    ):
+        _columns_dimension_prop_.return_value = dimension_
+        dimension_.dimension_type = DT.CAT
+        _cube_result_matrix_prop_.return_value = cube_result_matrix_
+        cube_result_matrix_.rows_base = [1, 2, 3]
+        _row_subtotals_prop_.return_value = [3, 5]
+        _row_order_prop_.return_value = [0, -2, 1, 2, -1]
+        _assemble_vector_.return_value = [1, 3, 2, 3, 5]
+        assembler = Assembler(None, None, None)
+
+        rows_base = assembler.rows_base
+
+        _assemble_vector_.assert_called_once_with(
+            assembler, [1, 2, 3], [3, 5], [0, -2, 1, 2, -1]
+        )
+        assert rows_base == [1, 3, 2, 3, 5]
+
+    def but_it_provides_a_2D_rows_base_for_an_X_MR_cube_result(
+        self,
+        _columns_dimension_prop_,
+        dimension_,
+        _cube_result_matrix_prop_,
+        cube_result_matrix_,
+        _SumSubtotals_,
+        _assemble_matrix_,
+    ):
+        _columns_dimension_prop_.return_value = dimension_
+        dimension_.dimension_type = DT.MR_SUBVAR
+        _cube_result_matrix_prop_.return_value = cube_result_matrix_
+        _SumSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
+        _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+        assembler = Assembler(None, None, None)
+
+        rows_base = assembler.rows_base
+
+        _SumSubtotals_.blocks.assert_called_once_with(cube_result_matrix_, "rows_base")
+        _assemble_matrix_.assert_called_once_with(assembler, [[[1], [2]], [[3], [4]]])
+        assert rows_base == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
     def it_knows_the_2D_table_margin_of_an_MR_X_MR_matrix(
         self,
@@ -546,6 +594,10 @@ class DescribeAssembler(object):
     @pytest.fixture
     def _row_order_prop_(self, request):
         return property_mock(request, Assembler, "_row_order")
+
+    @pytest.fixture
+    def _row_subtotals_prop_(self, request):
+        return property_mock(request, Assembler, "_row_subtotals")
 
     @pytest.fixture
     def _rows_dimension_prop_(self, request):

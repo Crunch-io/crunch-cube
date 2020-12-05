@@ -72,7 +72,16 @@ class Assembler(object):
     @lazyproperty
     def rows_base(self):
         """1D/2D np.int64 ndarray of unweighted-N for each slice row/cell."""
-        raise NotImplementedError
+        # --- an X_MR slice produces a 2D row-base (each cell has its own N) ---
+        if self._columns_dimension.dimension_type == DT.MR_SUBVAR:
+            return self._assemble_matrix(
+                _SumSubtotals.blocks(self._cube_result_matrix, "rows_base")
+            )
+
+        # --- otherwise rows-base is a vector ---
+        return self._assemble_vector(
+            self._cube_result_matrix.rows_base, self._row_subtotals, self._row_order
+        )
 
     @lazyproperty
     def table_margin(self):
@@ -277,6 +286,11 @@ class Assembler(object):
         return order
 
     @lazyproperty
+    def _row_subtotals(self):
+        """Sequence of _Subtotal object for each inserted row."""
+        raise NotImplementedError
+
+    @lazyproperty
     def _rows_dimension(self):
         """The `Dimension` object representing row elements in this matrix."""
         return self._dimensions[0]
@@ -468,6 +482,13 @@ class _BaseCubeResultMatrix(object):
         """1D np.int64 ndarray of unweighted-N for each matrix column."""
         raise NotImplementedError(
             "`%s` must implement `.columns_pruning_base`" % type(self).__name__
+        )
+
+    @lazyproperty
+    def rows_base(self):
+        """1D/2D np.int64 ndarray of unweighted-N for each matrix row/cell."""
+        raise NotImplementedError(
+            "`%s` must implement `.rows_base`" % type(self).__name__
         )
 
     @lazyproperty
