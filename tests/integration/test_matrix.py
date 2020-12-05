@@ -226,7 +226,6 @@ class DescribeAssembler(object):
             slice_._assembler.weighted_counts, np.array([[12, 12, 12], [28, 22, 26]])
         )
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_mr_x_cat_weighted_counts(self):
         slice_ = Cube(CR.MR_X_CAT).partitions[0]
         np.testing.assert_almost_equal(

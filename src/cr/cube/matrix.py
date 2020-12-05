@@ -748,7 +748,7 @@ class _MrXCatMatrix(_CatXCatMatrix):
         The cell values are np.int64 when the cube-result has no weight, in which case
         these values are the same as the unweighted-counts.
         """
-        raise NotImplementedError
+        return self._weighted_counts[:, 0, :]
 
 
 class _MrXCatMeansMatrix(_MrXCatMatrix):
