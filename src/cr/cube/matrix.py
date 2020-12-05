@@ -60,6 +60,20 @@ class Assembler(object):
         )
 
     @lazyproperty
+    def table_margin(self):
+        """Scalar, 1D, or 2D ndarray of np.float64 weighted-N for this slice.
+
+        This value has four distinct forms, depending on the slice dimensions:
+
+            * MR_X_MR - 2D ndarray with a distinct table-margin value per cell.
+            * MR_X - 1D ndarray of value per *row* when only rows dimension is MR.
+            * X_MR - 1D ndarray of value per *column* when only columns dimension is MR.
+            * CAT_X_CAT - scalar float value when slice has no MR dimension.
+
+        """
+        raise NotImplementedError
+
+    @lazyproperty
     def unweighted_counts(self):
         """2D np.int64 ndarray of unweighted-count for each cell."""
         return self._assemble_matrix(

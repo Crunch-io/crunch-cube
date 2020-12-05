@@ -3,6 +3,7 @@
 """Integration-test suite for `cr.cube.cubepart` module."""
 
 import numpy as np
+import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.cubepart import _Slice
@@ -247,5 +248,69 @@ class DescribeAssembler(object):
                 [3.79786399, 45.77891654, 12.46883034, 45.77891654],
                 [8.77385271, 12.46883034, 86.97282879, 86.97282879],
                 [22.96727041, 45.77891654, 86.97282879, 130.67846872],
+            ],
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_table_margin_for_cat_hs_x_cat_hs_hiddens_explicit_order(self):
+        slice_ = _Slice(
+            Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),
+            slice_idx=0,
+            transforms={
+                "rows_dimension": {
+                    "elements": {"2": {"hide": True}},
+                    "prune": True,
+                    "order": {"type": "explicit", "element_ids": [0, 5, 2, 1, 4]},
+                },
+                "columns_dimension": {
+                    "elements": {"2": {"hide": True}},
+                    "prune": True,
+                    "order": {"type": "explicit", "element_ids": [4, 2, 5, 0]},
+                },
+            },
+            population=None,
+            mask_size=0,
+        )
+
+        assert slice_._assembler.table_margin == 877
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_cat_x_mr_table_margin_with_explicit_ordering(self):
+        transforms = {
+            "columns_dimension": {
+                "order": {"type": "explicit", "element_ids": [5, 1, 6, 4, 0, 2]}
+            }
+        }
+        slice_ = Cube(CR.CAT_X_MR_2, transforms=transforms).partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_._assembler.table_margin,
+            np.array([471.9317685, 176.3655518, 457.0509557, 211.4205877, 247.7407379]),
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_mr_x_cat_table_margin_with_explicit_ordering(self):
+        transforms = {
+            "rows_dimension": {
+                "order": {"type": "explicit", "element_ids": [5, 1, 6, 4, 0, 2]}
+            }
+        }
+        slice_ = Cube(CR.MR_X_CAT, transforms=transforms).partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_._assembler.table_margin,
+            np.array([471.9317685, 176.3655516, 457.0509557, 211.4205878, 247.740738]),
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_mr_x_mr_table_margin(self):
+        slice_ = Cube(CR.MR_X_MR).partitions[0]
+        np.testing.assert_almost_equal(
+            slice_._assembler.table_margin,
+            [
+                [166.0021903, 107.5444392, 126.86878474, 166.0021903],
+                [107.5444392, 141.86768069, 100.00460577, 141.86768069],
+                [126.86878474, 100.00460577, 180.99361257, 180.99361257],
+                [166.0021903, 141.86768069, 180.99361257, 236.5388192],
             ],
         )
