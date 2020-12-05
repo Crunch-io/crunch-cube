@@ -814,7 +814,7 @@ class _MrXCatMatrix(_CatXCatMatrix):
 
         The values are np.int64 when the source cube-result is unweighted.
         """
-        raise NotImplementedError
+        return np.sum(self._weighted_counts, axis=(1, 2))
 
     @lazyproperty
     def unweighted_counts(self):

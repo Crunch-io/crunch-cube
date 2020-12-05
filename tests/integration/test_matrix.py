@@ -286,7 +286,6 @@ class DescribeAssembler(object):
             np.array([471.9317685, 176.3655518, 457.0509557, 211.4205877, 247.7407379]),
         )
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_mr_x_cat_table_margin_with_explicit_ordering(self):
         transforms = {
             "rows_dimension": {
