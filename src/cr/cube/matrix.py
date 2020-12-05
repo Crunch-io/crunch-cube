@@ -848,4 +848,4 @@ class _MrXMrMatrix(_CatXCatMatrix):
         these values are the same as the unweighted-counts. Only *selected* counts
         contribute to these values.
         """
-        raise NotImplementedError
+        return self._weighted_counts[:, 0, :, 0]
