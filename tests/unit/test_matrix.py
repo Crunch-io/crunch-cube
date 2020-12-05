@@ -101,6 +101,26 @@ class DescribeAssembler(object):
         _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
         assert unweighted_counts == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
+    def it_knows_the_weighted_counts(
+        self,
+        _cube_result_matrix_prop_,
+        cube_result_matrix_,
+        _SumSubtotals_,
+        _assemble_matrix_,
+    ):
+        _cube_result_matrix_prop_.return_value = cube_result_matrix_
+        _SumSubtotals_.blocks.return_value = [["A", "B"], ["C", "D"]]
+        _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+        assembler = Assembler(None, None, None)
+
+        weighted_counts = assembler.weighted_counts
+
+        _SumSubtotals_.blocks.assert_called_once_with(
+            cube_result_matrix_, "weighted_counts"
+        )
+        _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
+        assert weighted_counts == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+
     @pytest.mark.parametrize(
         "row_order, col_order, blocks, expected_value",
         (

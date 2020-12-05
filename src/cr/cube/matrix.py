@@ -69,7 +69,9 @@ class Assembler(object):
     @lazyproperty
     def weighted_counts(self):
         """2D np.float/int64 ndarray of weighted-count for each cell."""
-        raise NotImplementedError
+        return self._assemble_matrix(
+            _SumSubtotals.blocks(self._cube_result_matrix, "weighted_counts")
+        )
 
     def _assemble_matrix(self, blocks):
         """Return 2D ndarray matrix assembled from `blocks`.
@@ -590,6 +592,15 @@ class _CatXCatMatrix(_BaseCubeResultMatrix):
         A valid matrix cell is one whose row and column elements are both non-missing.
         """
         return self._unweighted_counts
+
+    @lazyproperty
+    def weighted_counts(self):
+        """2D np.float/int64 ndarray of weighted-count for each valid matrix cell.
+
+        The cell values are np.int64 when the cube-result has no weight, in which case
+        these values are the same as the unweighted-counts.
+        """
+        raise NotImplementedError
 
 
 class _CatXCatMeansMatrix(_CatXCatMatrix):
