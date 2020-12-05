@@ -3,7 +3,6 @@
 """Integration-test suite for `cr.cube.cubepart` module."""
 
 import numpy as np
-import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.cubepart import _Slice
@@ -271,7 +270,7 @@ class DescribeAssembler(object):
             mask_size=0,
         )
 
-        assert slice_._assembler.table_margin == 877
+        assert slice_.table_margin == 877
 
     def it_computes_cat_x_mr_table_margin_with_explicit_ordering(self):
         transforms = {
@@ -282,7 +281,7 @@ class DescribeAssembler(object):
         slice_ = Cube(CR.CAT_X_MR_2, transforms=transforms).partitions[0]
 
         np.testing.assert_almost_equal(
-            slice_._assembler.table_margin,
+            slice_.table_margin,
             np.array([471.9317685, 176.3655518, 457.0509557, 211.4205877, 247.7407379]),
         )
 
@@ -295,15 +294,14 @@ class DescribeAssembler(object):
         slice_ = Cube(CR.MR_X_CAT, transforms=transforms).partitions[0]
 
         np.testing.assert_almost_equal(
-            slice_._assembler.table_margin,
+            slice_.table_margin,
             np.array([471.9317685, 176.3655516, 457.0509557, 211.4205878, 247.740738]),
         )
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_mr_x_mr_table_margin(self):
         slice_ = Cube(CR.MR_X_MR).partitions[0]
         np.testing.assert_almost_equal(
-            slice_._assembler.table_margin,
+            slice_.table_margin,
             [
                 [166.0021903, 107.5444392, 126.86878474, 166.0021903],
                 [107.5444392, 141.86768069, 100.00460577, 141.86768069],

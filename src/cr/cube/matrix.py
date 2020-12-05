@@ -927,7 +927,7 @@ class _MrXMrMatrix(_CatXCatMatrix):
         # --- producing 2D (nrows, ncols). This sums the (selected, selected),
         # --- (selected, not), (not, selected) and (not, not) cells of the subtable for
         # --- each matrix cell.
-        raise NotImplementedError
+        return np.sum(self._weighted_counts, axis=(1, 3))
 
     @lazyproperty
     def unweighted_counts(self):

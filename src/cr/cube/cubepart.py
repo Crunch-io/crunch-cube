@@ -799,23 +799,15 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def table_margin(self):
+        """Scalar or 1D/2D np.float/int64 ndarray of weighted-N table.
 
-        # We need to prune/order by both dimensions
-        if self.dimension_types == (DT.MR, DT.MR):
-            # TODO: Remove property from the assembler, when we figure out the pruning
-            # by both rows and columns
-            return self._matrix.table_margin
+        This value is scalar when the slice has no MR dimensions, 1D when the slice has
+        one MR dimension (either MR_X or X_MR), and 2D for an MR_X_MR slice.
 
-        # We need to prune/order by rows
-        if self.dimension_types[0] == DT.MR:
-            return np.array([row.table_margin for row in self._matrix.rows])
-
-        # We need to prune/order by columns
-        if self.dimension_types[1] == DT.MR:
-            return np.array([column.table_margin for column in self._matrix.columns])
-
-        # No pruning or reordering since single value
-        return self._matrix.table_margin_unpruned
+        The caller must know the dimensionality of the slice in order to correctly
+        interpret a 1D value for this property.
+        """
+        return self._assembler.table_margin
 
     @lazyproperty
     def table_margin_unpruned(self):
