@@ -1006,6 +1006,27 @@ class Describe_CatXMrMatrix(object):
             np.array([[1, 2, 3], [4, 5, 6]]),
         )
 
+    def it_knows_its_weighted_counts(self):
+        weighted_counts = np.array(
+            [
+                [  # -- row 0 ------------
+                    [1, 6],  # -- col 0 --
+                    [2, 5],  # -- col 1 --
+                    [3, 4],  # -- col 2 --
+                ],
+                [  # -- row 1 ------------
+                    [4, 3],  # -- col 0 --
+                    [5, 2],  # -- col 1 --
+                    [6, 1],  # -- col 2 --
+                    # --------------------
+                ],
+            ]
+        )
+        np.testing.assert_equal(
+            _CatXMrMatrix(None, weighted_counts, None).weighted_counts,
+            np.array([[1, 2, 3], [4, 5, 6]]),
+        )
+
 
 class Describe_MrXCatMatrix(object):
     """Unit test suite for `cr.cube.matrix._MrXCatMatrix` object."""
