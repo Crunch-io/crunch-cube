@@ -633,7 +633,7 @@ class _CatXCatMatrix(_BaseCubeResultMatrix):
         same for all cells of the matrix. Value is np.int64 when source cube-result is
         unweighted.
         """
-        raise NotImplementedError
+        return np.sum(self._weighted_counts)
 
     @lazyproperty
     def unweighted_counts(self):
@@ -721,6 +721,16 @@ class _CatXMrMatrix(_CatXCatMatrix):
         return np.sum(self._unweighted_counts, axis=(1, 2))
 
     @lazyproperty
+    def table_margin(self):
+        """1D np.float/int64 ndarray of weighted-N for each column of matrix.
+
+        Because the matrix is X_MR, each column has a distinct table margin.
+        """
+        # --- weighted-counts is (rows, cols, selected/not) so axis 1 is preserved to
+        # --- provide a distinct value for each MR subvar.
+        raise NotImplementedError
+
+    @lazyproperty
     def unweighted_counts(self):
         """2D np.int64 ndarray of unweighted-count for each valid matrix cell.
 
@@ -792,6 +802,19 @@ class _MrXCatMatrix(_CatXCatMatrix):
         dimension.
         """
         return np.sum(self._unweighted_counts, axis=(1, 2))
+
+    @lazyproperty
+    def table_margin(self):
+        """1D np.float/int64 ndarray of weighted-N for each row of matrix.
+
+        Since the rows-dimension is MR, each row has a distinct table margin, since not
+        all of the multiple responses were necessarily offered to all respondents. The
+        table-margin for each row indicates the weighted number of respondents who were
+        offered that option.
+
+        The values are np.int64 when the source cube-result is unweighted.
+        """
+        raise NotImplementedError
 
     @lazyproperty
     def unweighted_counts(self):
@@ -892,6 +915,19 @@ class _MrXMrMatrix(_CatXCatMatrix):
         the rows dimension.
         """
         return np.sum(self._unweighted_counts[:, 0, :, :], axis=(1, 2))
+
+    @lazyproperty
+    def table_margin(self):
+        """2D np.float/int64 ndarray of weighted N for each cell of matrix.
+
+        Because the matrix is MR_X_MR, each cell corresponds to a 2x2 sub-table
+        (selected/not on each axis), each of which has its own distinct table-margin.
+        """
+        # --- Reduce second and fourth axes (the two MR_CAT dimensions) with sum()
+        # --- producing 2D (nrows, ncols). This sums the (selected, selected),
+        # --- (selected, not), (not, selected) and (not, not) cells of the subtable for
+        # --- each matrix cell.
+        raise NotImplementedError
 
     @lazyproperty
     def unweighted_counts(self):
