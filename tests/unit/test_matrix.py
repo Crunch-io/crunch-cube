@@ -1119,6 +1119,18 @@ class Describe_CatXCatMatrix(object):
             ([[1], [2], [3]], [1, 2, 3]),
         ),
     )
+    def it_knows_its_rows_base(self, unweighted_counts, expected):
+        matrix = _CatXCatMatrix(None, None, unweighted_counts)
+        assert matrix.rows_base.tolist() == expected
+
+    @pytest.mark.parametrize(
+        ("unweighted_counts", "expected"),
+        (
+            ([[1, 2, 3]], [6]),
+            ([[1, 2, 3], [4, 5, 6]], [6, 15]),
+            ([[1], [2], [3]], [1, 2, 3]),
+        ),
+    )
     def it_knows_its_rows_pruning_base(self, unweighted_counts, expected):
         matrix = _CatXCatMatrix(None, None, unweighted_counts)
         assert matrix.rows_pruning_base.tolist() == expected

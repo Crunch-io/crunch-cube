@@ -664,6 +664,11 @@ class _CatXCatMatrix(_BaseCubeResultMatrix):
         return np.sum(self._unweighted_counts, axis=0)
 
     @lazyproperty
+    def rows_base(self):
+        """1D ndarray of np.int64 unweighted-N for each matrix row."""
+        return np.sum(self.unweighted_counts, axis=1)
+
+    @lazyproperty
     def rows_pruning_base(self):
         """1D np.int64 ndarray of unweighted-N for each matrix row.
 
@@ -758,6 +763,17 @@ class _CatXMrMatrix(_CatXCatMatrix):
         dimension.
         """
         return np.sum(self._unweighted_counts, axis=(0, 2))
+
+    @lazyproperty
+    def rows_base(self):
+        """2D np.int64 ndarray of row-wise unweighted-N for this matrix.
+
+        An X_MR matrix has a distinct row-base for each cell. This is because not all
+        responses (subvars) are necessarily presented to each respondent. The
+        unweighted-count for each X_MR cell is the sum of its selected and unselected
+        unweighted counts.
+        """
+        raise NotImplementedError
 
     @lazyproperty
     def rows_pruning_base(self):
@@ -953,6 +969,15 @@ class _MrXMrMatrix(_CatXCatMatrix):
         the columns dimension.
         """
         return np.sum(self._unweighted_counts[:, :, :, 0], axis=(0, 1))
+
+    @lazyproperty
+    def rows_base(self):
+        """2D np.int64 ndarray of unweighted-N for this matrix.
+
+        An MR_X matrix has a distinct row-base for each cell, the sum of sel-sel and
+        sel-not for each cell
+        """
+        raise NotImplementedError
 
     @lazyproperty
     def rows_pruning_base(self):
