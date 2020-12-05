@@ -273,7 +273,6 @@ class DescribeAssembler(object):
 
         assert slice_._assembler.table_margin == 877
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_cat_x_mr_table_margin_with_explicit_ordering(self):
         transforms = {
             "columns_dimension": {

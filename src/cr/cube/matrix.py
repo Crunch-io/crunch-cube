@@ -728,7 +728,7 @@ class _CatXMrMatrix(_CatXCatMatrix):
         """
         # --- weighted-counts is (rows, cols, selected/not) so axis 1 is preserved to
         # --- provide a distinct value for each MR subvar.
-        raise NotImplementedError
+        return np.sum(self._weighted_counts, axis=(0, 2))
 
     @lazyproperty
     def unweighted_counts(self):
