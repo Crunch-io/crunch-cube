@@ -363,9 +363,9 @@ class _SumSubtotals(_BaseSubtotals):
 class _BaseCubeResultMatrix(object):
     """Base class for all cube-result matrix (2D second-order analyzer) objects."""
 
-    def __init__(self, dimensions, counts, unweighted_counts):
+    def __init__(self, dimensions, weighted_counts, unweighted_counts):
         self._dimensions = dimensions
-        self._counts = counts
+        self._weighted_counts = weighted_counts
         self._unweighted_counts = unweighted_counts
 
     @classmethod
@@ -557,9 +557,11 @@ class _CatXCatMatrix(_BaseCubeResultMatrix):
     """
 
     def __init__(
-        self, dimensions, counts, unweighted_counts, counts_with_missings=None
+        self, dimensions, weighted_counts, unweighted_counts, counts_with_missings=None
     ):
-        super(_CatXCatMatrix, self).__init__(dimensions, counts, unweighted_counts)
+        super(_CatXCatMatrix, self).__init__(
+            dimensions, weighted_counts, unweighted_counts
+        )
         self._counts_with_missings = counts_with_missings
 
     @lazyproperty
@@ -600,7 +602,7 @@ class _CatXCatMatrix(_BaseCubeResultMatrix):
         The cell values are np.int64 when the cube-result has no weight, in which case
         these values are the same as the unweighted-counts.
         """
-        raise NotImplementedError
+        return self._weighted_counts
 
 
 class _CatXCatMeansMatrix(_CatXCatMatrix):
@@ -665,6 +667,16 @@ class _CatXMrMatrix(_CatXCatMatrix):
         """
         return self._unweighted_counts[:, :, 0]
 
+    @lazyproperty
+    def weighted_counts(self):
+        """2D np.float/int64 ndarray of weighted-count for each valid matrix cell.
+
+        A valid matrix cell is one whose row and column elements are both non-missing.
+        The cell values are np.int64 when the cube-result has no weight, in which case
+        these values are the same as the unweighted-counts.
+        """
+        raise NotImplementedError
+
 
 class _CatXMrMeansMatrix(_CatXMrMatrix):
     """Basis for CAT_X_MR slice having mean measure instead of counts."""
@@ -727,6 +739,16 @@ class _MrXCatMatrix(_CatXCatMatrix):
         A valid matrix cell is one whose row and column elements are both non-missing.
         """
         return self._unweighted_counts[:, 0, :]
+
+    @lazyproperty
+    def weighted_counts(self):
+        """2D np.float/int64 ndarray of weighted-count for each valid matrix cell.
+
+        A valid matrix cell is one whose row and column elements are both non-missing.
+        The cell values are np.int64 when the cube-result has no weight, in which case
+        these values are the same as the unweighted-counts.
+        """
+        raise NotImplementedError
 
 
 class _MrXCatMeansMatrix(_MrXCatMatrix):
@@ -817,3 +839,13 @@ class _MrXMrMatrix(_CatXCatMatrix):
         A valid matrix cell is one whose row and column elements are both non-missing.
         """
         return self._unweighted_counts[:, 0, :, 0]
+
+    @lazyproperty
+    def weighted_counts(self):
+        """2D np.float/int64 ndarray of weighted-count for each valid matrix cell.
+
+        The cell values are np.int64 when the cube-result has no weight, in which case
+        these values are the same as the unweighted-counts. Only *selected* counts
+        contribute to these values.
+        """
+        raise NotImplementedError
