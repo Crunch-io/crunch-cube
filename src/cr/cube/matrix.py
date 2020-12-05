@@ -70,6 +70,11 @@ class Assembler(object):
         )
 
     @lazyproperty
+    def rows_base(self):
+        """1D/2D np.int64 ndarray of unweighted-N for each slice row/cell."""
+        raise NotImplementedError
+
+    @lazyproperty
     def table_margin(self):
         """Scalar, 1D, or 2D ndarray of np.float64 weighted-N for this slice.
 

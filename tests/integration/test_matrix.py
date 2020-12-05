@@ -3,6 +3,7 @@
 """Integration-test suite for `cr.cube.cubepart` module."""
 
 import numpy as np
+import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.cubepart import _Slice
@@ -319,4 +320,67 @@ class DescribeAssembler(object):
         slice_ = Cube(CR.CAT_HS_X_CAT_HS, transforms=transforms).partitions[0]
         np.testing.assert_equal(
             slice_.column_labels, ["Bravo", "Delta", "Alpha", "Charlie", "Last 2"]
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_rows_base_for_cat_hs_x_cat_hs_hiddens_explicit_order(self):
+        slice_ = _Slice(
+            Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),
+            slice_idx=0,
+            transforms={
+                "rows_dimension": {
+                    "elements": {"2": {"hide": True}},
+                    "prune": True,
+                    "order": {"type": "explicit", "element_ids": [0, 5, 2, 1, 4]},
+                },
+                "columns_dimension": {
+                    "elements": {"2": {"hide": True}},
+                    "prune": True,
+                    "order": {"type": "explicit", "element_ids": [4, 2, 5, 0]},
+                },
+            },
+            population=None,
+            mask_size=0,
+        )
+
+        assert np.array_equal(
+            slice_._assembler.rows_base, [151, 353, 603, 52, 250, 123, 575]
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_cat_x_mr_rows_base(self):
+        slice_ = Cube(CR.CAT_X_MR_2).partitions[0]
+        np.testing.assert_almost_equal(
+            slice_._assembler.rows_base,
+            np.array(
+                [
+                    [15, 15, 13, 20, 32],
+                    [24, 34, 37, 50, 69],
+                    [0, 0, 0, 0, 0],
+                    [57, 75, 81, 159, 167],
+                    [69, 86, 111, 221, 208],
+                    [0, 0, 0, 0, 0],
+                ]
+            ),
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_mr_x_cat_rows_base(self):
+        slice_ = Cube(CR.MR_X_CAT).partitions[0]
+        np.testing.assert_almost_equal(
+            slice_._assembler.rows_base,
+            np.array([26, 76, 118, 369, 385]),
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_mr_x_mr_rows_base(self):
+        slice_ = Cube(CR.MR_X_MR).partitions[0]
+        np.testing.assert_equal(
+            slice_._assembler.rows_base,
+            [
+                [12, 7, 10, 12],
+                [18, 29, 22, 29],
+                [26, 20, 34, 34],
+                [44, 45, 53, 61],
+            ],
         )
