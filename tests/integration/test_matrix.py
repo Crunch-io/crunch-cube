@@ -3,6 +3,7 @@
 """Integration-test suite for `cr.cube.cubepart` module."""
 
 import numpy as np
+import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.cubepart import _Slice
@@ -168,13 +169,13 @@ class DescribeAssembler(object):
     def it_computes_ca_x_mr_hs_columns_base(self):
         slice_ = Cube(CR.CA_X_MR_WEIGHTED_HS).partitions[0]
         np.testing.assert_array_equal(
-            slice_._assembler.columns_base, np.array([504, 215, 224, 76, 8, 439])
+            slice_.columns_base, np.array([504, 215, 224, 76, 8, 439])
         )
 
     def it_computes_mr_x_mr_columns_base(self):
         slice_ = Cube(CR.MR_X_MR).partitions[0]
         np.testing.assert_array_equal(
-            slice_._assembler.columns_base,
+            slice_.columns_base,
             np.array(
                 [[12, 18, 26, 44], [7, 29, 20, 45], [10, 22, 34, 53], [12, 29, 34, 61]]
             ),
@@ -182,6 +183,74 @@ class DescribeAssembler(object):
 
     def it_computes_cat_x_mr_columns_base(self):
         slice_ = Cube(CR.CAT_X_MR).partitions[0]
+        np.testing.assert_array_equal(slice_.columns_base, np.array([40, 34, 38]))
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_weighted_counts_for_cat_hs_x_cat_hs_hiddens_explicit_order(self):
+        slice_ = _Slice(
+            Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),
+            slice_idx=0,
+            transforms={
+                "rows_dimension": {
+                    "elements": {"2": {"hide": True}},
+                    "prune": True,
+                    "order": {"type": "explicit", "element_ids": [0, 5, 2, 1, 4]},
+                },
+                "columns_dimension": {
+                    "elements": {"2": {"hide": True}},
+                    "prune": True,
+                    "order": {"type": "explicit", "element_ids": [4, 2, 5, 0]},
+                },
+            },
+            population=None,
+            mask_size=0,
+        )
+
+        weighted_counts = slice_._assembler.weighted_counts
+
+        assert np.array_equal(
+            weighted_counts,
+            [
+                [118, 33, 53, 65, 33],
+                [163, 190, 70, 93, 190],
+                [331, 272, 172, 159, 272],
+                [40, 12, 8, 32, 12],
+                [168, 82, 102, 66, 82],
+                [100, 23, 51, 49, 23],
+                [341, 234, 166, 175, 234],
+            ],
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_cat_x_mr_weighted_counts(self):
+        slice_ = Cube(CR.CAT_X_MR).partitions[0]
         np.testing.assert_array_equal(
-            slice_._assembler.columns_base, np.array([40, 34, 38])
+            slice_._assembler.weighted_counts, np.array([[12, 12, 12], [28, 22, 26]])
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_mr_x_cat_weighted_counts(self):
+        slice_ = Cube(CR.MR_X_CAT).partitions[0]
+        np.testing.assert_almost_equal(
+            slice_._assembler.weighted_counts,
+            [
+                [13.9429388, 6.0970738, 0.0, 4.1755362, 7.4159721, 0.0],
+                [8.9877522, 12.5606144, 0.0, 24.8653747, 24.3169928, 0.0],
+                [2.8233988, 19.5475854, 0.0, 51.0432736, 52.3448558, 0.0],
+                [14.0988864, 43.2918709, 0.0, 131.9766084, 177.5210258, 0.0],
+                [24.1996722, 73.3217774, 0.0, 129.7684193, 149.4757717, 0.0],
+            ],
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_mr_x_mr_weighted_counts(self):
+        slice_ = Cube(CR.MR_X_MR).partitions[0]
+        np.testing.assert_almost_equal(
+            slice_._assembler.weighted_counts,
+            [
+                [22.96727041, 3.79786399, 8.77385271, 22.96727041],
+                [3.79786399, 45.77891654, 12.46883034, 45.77891654],
+                [8.77385271, 12.46883034, 86.97282879, 86.97282879],
+                [22.96727041, 45.77891654, 86.97282879, 130.67846872],
+            ],
         )

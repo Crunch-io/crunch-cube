@@ -66,6 +66,11 @@ class Assembler(object):
             _SumSubtotals.blocks(self._cube_result_matrix, "unweighted_counts")
         )
 
+    @lazyproperty
+    def weighted_counts(self):
+        """2D np.float/int64 ndarray of weighted-count for each cell."""
+        raise NotImplementedError
+
     def _assemble_matrix(self, blocks):
         """Return 2D ndarray matrix assembled from `blocks`.
 
