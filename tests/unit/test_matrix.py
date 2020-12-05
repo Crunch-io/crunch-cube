@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from cr.cube.cube import Cube
-from cr.cube.dimension import Dimension, _Subtotal, _Subtotals
+from cr.cube.dimension import Dimension, _Element, _Subtotal, _Subtotals
 from cr.cube.enums import COLLATION_METHOD as CM, DIMENSION_TYPE as DT
 from cr.cube.matrix import (
     Assembler,
@@ -352,6 +352,21 @@ class DescribeAssembler(object):
         CollatorCls_.display_order.assert_called_once_with(dimension_, [2, 4, 6])
         assert dimension_order.shape == (5,)
         np.testing.assert_equal(dimension_order, np.array([1, -2, 3, 5, -1]))
+
+    def it_assembles_the_dimension_labels_to_help(self, request, dimension_):
+        dimension_.valid_elements = tuple(
+            instance_mock(request, _Element, label=label)
+            for label in ("Alpha", "Bravo", "Charlie", "Delta")
+        )
+        dimension_.subtotals = tuple(
+            instance_mock(request, _Subtotal, label=label) for label in ("Top 2", "All")
+        )
+        order = np.array([1, 3, -2, 2, -1])
+        assembler = Assembler(None, None, None)
+
+        labels = assembler._dimension_labels(dimension_, order)
+
+        assert labels.tolist() == ["Bravo", "Delta", "Top 2", "Charlie", "All"]
 
     @pytest.mark.parametrize(
         "base, expected_value",

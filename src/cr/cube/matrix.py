@@ -190,7 +190,10 @@ class Assembler(object):
         in the sequence specified by `order`, such that labels are ordered to correspond
         with their respective data vector.
         """
-        raise NotImplementedError
+        return np.array(
+            [e.label for e in dimension.valid_elements]
+            + [s.label for s in dimension.subtotals]
+        )[order]
 
     def _dimension_order(self, dimension, empty_idxs):
         """1D np.int64 ndarray of signed int idx for each vector in `dimension`.

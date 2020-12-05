@@ -3,7 +3,6 @@
 """Integration-test suite for `cr.cube.cubepart` module."""
 
 import numpy as np
-import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.cubepart import _Slice
@@ -311,7 +310,6 @@ class DescribeAssembler(object):
             ],
         )
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_knows_the_column_labels(self):
         transforms = {
             "columns_dimension": {
