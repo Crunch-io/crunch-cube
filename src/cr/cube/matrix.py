@@ -71,7 +71,30 @@ class Assembler(object):
             * CAT_X_CAT - scalar float value when slice has no MR dimension.
 
         """
-        raise NotImplementedError
+        # NOTE: This all works out even though it doesn't include subtotals and isn't
+        # assembled, because an MR dimension can't have subtotals. Because the
+        # dimensionality of table-margin "follows" the MR-dimension(s), it follows that
+        # a table-margin vector or matrix never has subtotals.
+
+        base_table_margin = self._cube_result_matrix.table_margin
+
+        # --- MR_X_MR slice produces a 2D table-margin (each cell has its own N) ---
+        if (
+            self._rows_dimension.dimension_type == DT.MR_SUBVAR
+            and self._columns_dimension.dimension_type == DT.MR_SUBVAR
+        ):
+            return base_table_margin[np.ix_(self._row_order, self._column_order)]
+
+        # --- MR_X_CAT slice produces a 1D table-margin (each row has its own N) ---
+        if self._rows_dimension.dimension_type == DT.MR_SUBVAR:
+            return base_table_margin[self._row_order]
+
+        # --- CAT_X_MR slice produces a 1D table-margin (each column has its own N) ---
+        if self._columns_dimension.dimension_type == DT.MR_SUBVAR:
+            return base_table_margin[self._column_order]
+
+        # --- CAT_X_CAT produces scalar table-margin ---
+        return base_table_margin
 
     @lazyproperty
     def unweighted_counts(self):
@@ -600,6 +623,17 @@ class _CatXCatMatrix(_BaseCubeResultMatrix):
         counts for each row.
         """
         return np.sum(self._unweighted_counts, axis=1)
+
+    @lazyproperty
+    def table_margin(self):
+        """Scalar np.float/int64 weighted-N for overall table.
+
+        This is the weighted count of respondents who provided a valid response to
+        both questions. Because both dimensions are CAT, the table-margin value is the
+        same for all cells of the matrix. Value is np.int64 when source cube-result is
+        unweighted.
+        """
+        raise NotImplementedError
 
     @lazyproperty
     def unweighted_counts(self):

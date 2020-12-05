@@ -82,6 +82,94 @@ class DescribeAssembler(object):
         _assemble_matrix_.assert_called_once_with(assembler, [[[1], [2]], [[3], [4]]])
         assert columns_base == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
+    def it_knows_the_2D_table_margin_of_an_MR_X_MR_matrix(
+        self,
+        request,
+        _cube_result_matrix_prop_,
+        cube_result_matrix_,
+        _rows_dimension_prop_,
+        _columns_dimension_prop_,
+        _row_order_prop_,
+        _column_order_prop_,
+    ):
+        _cube_result_matrix_prop_.return_value = cube_result_matrix_
+        cube_result_matrix_.table_margin = np.array([[1, 2, 3], [4, 5, 6]])
+        _rows_dimension_prop_.return_value = instance_mock(
+            request, Dimension, dimension_type=DT.MR
+        )
+        _columns_dimension_prop_.return_value = instance_mock(
+            request, Dimension, dimension_type=DT.MR
+        )
+        _row_order_prop_.return_value = np.array([1, 0])
+        _column_order_prop_.return_value = np.array([1, 0, 2])
+        assembler = Assembler(None, None, None)
+
+        np.testing.assert_equal(assembler.table_margin, [[5, 4, 6], [2, 1, 3]])
+
+    def and_it_knows_the_1D_table_margin_of_an_MR_X_CAT_matrix(
+        self,
+        request,
+        _cube_result_matrix_prop_,
+        cube_result_matrix_,
+        _rows_dimension_prop_,
+        _columns_dimension_prop_,
+        _row_order_prop_,
+    ):
+        _cube_result_matrix_prop_.return_value = cube_result_matrix_
+        cube_result_matrix_.table_margin = np.array([1, 2, 3])
+        _rows_dimension_prop_.return_value = instance_mock(
+            request, Dimension, dimension_type=DT.MR
+        )
+        _columns_dimension_prop_.return_value = instance_mock(
+            request, Dimension, dimension_type=DT.CAT
+        )
+        _row_order_prop_.return_value = np.array([1, 0, 2])
+        assembler = Assembler(None, None, None)
+
+        np.testing.assert_equal(assembler.table_margin, [2, 1, 3])
+
+    def and_it_knows_the_1D_table_margin_of_a_CAT_X_MR_matrix(
+        self,
+        request,
+        _cube_result_matrix_prop_,
+        cube_result_matrix_,
+        _rows_dimension_prop_,
+        _columns_dimension_prop_,
+        _column_order_prop_,
+    ):
+        _cube_result_matrix_prop_.return_value = cube_result_matrix_
+        cube_result_matrix_.table_margin = np.array([1, 2, 3])
+        _rows_dimension_prop_.return_value = instance_mock(
+            request, Dimension, dimension_type=DT.CAT
+        )
+        _columns_dimension_prop_.return_value = instance_mock(
+            request, Dimension, dimension_type=DT.MR
+        )
+        _column_order_prop_.return_value = np.array([2, 0, 1])
+        assembler = Assembler(None, None, None)
+
+        np.testing.assert_equal(assembler.table_margin, [3, 1, 2])
+
+    def and_it_knows_the_scalar_table_margin_of_a_CAT_X_CAT_matrix(
+        self,
+        request,
+        _cube_result_matrix_prop_,
+        cube_result_matrix_,
+        _rows_dimension_prop_,
+        _columns_dimension_prop_,
+    ):
+        _cube_result_matrix_prop_.return_value = cube_result_matrix_
+        cube_result_matrix_.table_margin = 4242
+        _rows_dimension_prop_.return_value = instance_mock(
+            request, Dimension, dimension_type=DT.CAT
+        )
+        _columns_dimension_prop_.return_value = instance_mock(
+            request, Dimension, dimension_type=DT.CAT
+        )
+        assembler = Assembler(None, None, None)
+
+        assert assembler.table_margin == 4242
+
     def it_knows_the_unweighted_counts(
         self,
         _cube_result_matrix_prop_,
