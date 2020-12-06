@@ -977,7 +977,7 @@ class _MrXMrMatrix(_CatXCatMatrix):
         An MR_X matrix has a distinct row-base for each cell, the sum of sel-sel and
         sel-not for each cell
         """
-        raise NotImplementedError
+        return np.sum(self._unweighted_counts[:, 0, :, :], axis=2)
 
     @lazyproperty
     def rows_pruning_base(self):
