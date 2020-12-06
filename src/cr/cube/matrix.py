@@ -773,7 +773,7 @@ class _CatXMrMatrix(_CatXCatMatrix):
         unweighted-count for each X_MR cell is the sum of its selected and unselected
         unweighted counts.
         """
-        raise NotImplementedError
+        return np.sum(self._unweighted_counts, axis=2)
 
     @lazyproperty
     def rows_pruning_base(self):

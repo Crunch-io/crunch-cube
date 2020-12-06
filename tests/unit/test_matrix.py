@@ -1188,6 +1188,15 @@ class Describe_CatXMrMatrix(object):
             np.array([15, 16, 17]),
         )
 
+    def it_knows_its_rows_base(self):
+        unweighted_counts = np.array(
+            [[[1, 6], [2, 5], [3, 4]], [[5, 3], [6, 2], [7, 1]]]
+        )
+        np.testing.assert_equal(
+            _CatXMrMatrix(None, None, unweighted_counts, None).rows_base,
+            np.array([[7, 7, 7], [8, 8, 8]]),
+        )
+
     def it_knows_its_rows_pruning_base(self):
         unweighted_counts = np.array(
             [[[1, 6], [2, 5], [3, 4]], [[5, 3], [6, 2], [7, 1]]]
