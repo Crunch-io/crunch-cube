@@ -1080,7 +1080,7 @@ class _MrXMrMatrix(_CatXCatMatrix):
         # --- Reduce the second and fourth axes with sum() producing 2D (nrows, ncols).
         # --- This sums (selected, selected), (selected, not), (not, selected) and
         # --- (not, not) cells of the subtable for each matrix cell.
-        raise NotImplementedError
+        return np.sum(self._unweighted_counts, axis=(1, 3))
 
     @lazyproperty
     def table_margin(self):

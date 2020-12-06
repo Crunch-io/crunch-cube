@@ -1586,6 +1586,36 @@ class Describe_MrXMrMatrix(object):
             np.array([25, 27]),
         )
 
+    def it_knows_its_table_base(self):
+        unweighted_counts = np.array(
+            [
+                [  # -- row 0 -------------
+                    [  # -- selected ------
+                        [0, 5],  # -- col 0
+                        [1, 4],  # -- col 1
+                    ],
+                    [  # -- not selected --
+                        [2, 3],  # -- col 0
+                        [3, 1],  # -- col 1
+                    ],
+                ],
+                [  # -- row 1 -------------
+                    [  # -- selected ------
+                        [4, 1],  # -- col 0
+                        [5, 0],  # -- col 1
+                    ],
+                    [  # -- not selected --
+                        [6, 9],  # -- col 0
+                        [7, 6],  # -- col 1
+                    ],
+                ],
+            ]
+        )
+        np.testing.assert_equal(
+            _MrXMrMatrix(None, None, unweighted_counts, None).table_base,
+            np.array([[10, 9], [20, 18]]),
+        )
+
     def it_knows_its_table_margin(self):
         weighted_counts = np.array(
             [
