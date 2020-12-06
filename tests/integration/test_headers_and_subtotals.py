@@ -159,14 +159,14 @@ class TestHeadersAndSubtotals(object):
             "Neither",
             "Not sure",
         )
-        assert slice_.column_labels == (
+        assert slice_.column_labels.tolist() == [
             "Very liberal",
             "Liberal",
             "Moderate",
             "Conservative",
             "Very Conservative",
             "Not sure",
-        )
+        ]
 
     def test_labels_on_2d_cube_with_hs_on_both_dim(self):
         slice_ = Cube(CR.ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS).partitions[0]
@@ -178,7 +178,7 @@ class TestHeadersAndSubtotals(object):
             "Neither",
             "Not sure",
         )
-        assert slice_.column_labels == (
+        assert slice_.column_labels.tolist() == [
             "Very liberal",
             "Liberal",
             "Moderate",
@@ -186,7 +186,7 @@ class TestHeadersAndSubtotals(object):
             "Conservative",
             "Very Conservative",
             "Not sure",
-        )
+        ]
 
     def test_labels_on_2d_cube_with_hs_on_both_dim_do_not_fetch(self):
         transforms = {
@@ -203,14 +203,14 @@ class TestHeadersAndSubtotals(object):
             "Neither",
             "Not sure",
         )
-        assert slice_.column_labels == (
+        assert slice_.column_labels.tolist() == [
             "Very liberal",
             "Liberal",
             "Moderate",
             "Conservative",
             "Very Conservative",
             "Not sure",
-        )
+        ]
 
     def test_subtotals_as_array_2d_cube_with_hs_on_row(self):
         slice_ = Cube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS).partitions[0]
@@ -383,7 +383,10 @@ class TestHeadersAndSubtotals(object):
     def test_ca_labels_with_hs(self):
         slice_ = Cube(CR.SIMPLE_CA_HS).partitions[0]
         assert slice_.row_labels == ("ca_subvar_1", "ca_subvar_2", "ca_subvar_3")
-        assert slice_.column_labels == ("a", "b", "Test A and B combined", "c", "d")
+        np.testing.assert_equal(
+            slice_.column_labels,
+            ["a", "b", "Test A and B combined", "c", "d"],
+        )
 
     def test_ca_as_array_with_hs(self):
         slice_ = Cube(CR.SIMPLE_CA_HS).partitions[0]
@@ -414,10 +417,10 @@ class TestHeadersAndSubtotals(object):
             "Not at all serious",
             "Not sure",
         )
-        assert slice_.column_labels == (
+        assert slice_.column_labels.tolist() == [
             "Sexual assaults that go unreported or unpunished",
             "False accusations of sexual assault",
-        )
+        ]
 
     def test_hs_with_anchor_on_zero_position_as_props_by_col(self):
         slice_ = Cube(CR.ECON_US_PROBLEM_X_BIGGER_PROBLEM).partitions[0]
@@ -996,7 +999,7 @@ class TestHeadersAndSubtotals(object):
 
     def test_col_labels_with_top_hs(self):
         slice_ = Cube(CR.CAT_X_CAT_HS_MISSING).partitions[0]
-        assert slice_.column_labels == (
+        assert slice_.column_labels.tolist() == [
             "Whites",
             "White college women voters",
             "White non-college women voters",
@@ -1004,7 +1007,7 @@ class TestHeadersAndSubtotals(object):
             "White non-college men voters",
             "Black voters",
             "Latino and other voters",
-        )
+        ]
 
     def it_calculate_col_residuals_for_subtotals(self):
         slice_ = Cube(CR.CAT_X_CAT_HS_2ROWS_1COL).partitions[0]

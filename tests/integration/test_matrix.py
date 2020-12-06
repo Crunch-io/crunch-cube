@@ -318,6 +318,5 @@ class DescribeAssembler(object):
         }
         slice_ = Cube(CR.CAT_HS_X_CAT_HS, transforms=transforms).partitions[0]
         np.testing.assert_equal(
-            slice_._assembler.column_labels,
-            ["Bravo", "Delta", "Alpha", "Charlie", "Last 2"],
+            slice_.column_labels, ["Bravo", "Delta", "Alpha", "Charlie", "Last 2"]
         )

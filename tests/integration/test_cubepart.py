@@ -23,7 +23,7 @@ class Describe_Slice(object):
     def it_provides_values_for_cat_x_cat(self):
         slice_ = Cube(CR.CAT_X_CAT).partitions[0]
 
-        assert slice_.column_labels == ("C", "E")
+        assert slice_.column_labels.tolist() == ["C", "E"]
         assert slice_.columns_dimension_name == "v7"
         assert slice_.columns_dimension_type == DT.CAT
         assert slice_.description == "Pet Owners"
@@ -431,12 +431,12 @@ class Describe_Slice(object):
         slice_ = _Slice(Cube(CR.CAT_4_X_CAT_4), 0, transforms, None, 0)
 
         assert slice_.row_labels == ("Apple", "Banana", "Cherry", "Date")
-        assert slice_.column_labels == (
+        assert slice_.column_labels.tolist() == [
             "Asparagus",
             "Broccoli",
             "Cauliflower",
             "Daikon",
-        )
+        ]
         np.testing.assert_equal(
             slice_.counts,
             [[14, 14, 13, 16], [22, 14, 19, 19], [14, 16, 19, 18], [17, 12, 28, 11]],
@@ -508,7 +508,7 @@ class Describe_Slice(object):
             "Apple",
             "Cherry+Date",
         )
-        assert slice_.column_labels == (
+        assert slice_.column_labels.tolist() == [
             "Asparagus+Broccoli",
             "Broccoli",
             "Daikon",
@@ -516,7 +516,7 @@ class Describe_Slice(object):
             "Cauliflower",
             "Asparagus",
             "Cauliflower+Daikon",
-        )
+        ]
         np.testing.assert_equal(
             slice_.counts,
             [

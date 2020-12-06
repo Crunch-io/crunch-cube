@@ -272,8 +272,8 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def column_labels(self):
-        """Sequence of str column element names suitable for use as column headings."""
-        return tuple(column.label for column in self._matrix.columns)
+        """1D str ndarray of name for each column, for use as column headings."""
+        return self._assembler.column_labels
 
     @lazyproperty
     def column_percentages(self):

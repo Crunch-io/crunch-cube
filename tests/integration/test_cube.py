@@ -258,13 +258,13 @@ class DescribeIntegrated_MeanMeasure(object):
 
     def it_handles_cat_x_mr_with_means(self):
         slice_ = Cube(CR.MEANS_CAT_X_MR).partitions[0]
-        assert slice_.column_labels == (
+        assert slice_.column_labels.tolist() == [
             "Denmark",
             "Finland",
             "Iceland",
             "Norway",
             "Sweden",
-        )
+        ]
 
     def it_handles_means_cat_hs_x_cat_hs(self):
         slice_ = Cube(CR.MEANS_CAT_HS_X_CAT_HS).partitions[0]
@@ -672,22 +672,22 @@ class TestCrunchCubeAs_Slice(object):
     def test_labels_cat_x_cat_exclude_missing(self):
         slice_ = Cube(CR.CAT_X_CAT).partitions[0]
         assert slice_.row_labels == ("B", "C")
-        assert slice_.column_labels == ("C", "E")
+        assert slice_.column_labels.tolist() == ["C", "E"]
 
     def test_labels_cat_x_datetime_exclude_missing(self):
         slice_ = Cube(CR.CAT_X_DATETIME).partitions[0]
         assert slice_.row_labels == ("red", "green", "blue", "4", "9")
-        assert slice_.column_labels == (
+        assert slice_.column_labels.tolist() == [
             "1776-07-04T00:00:00",
             "1950-12-24T00:00:00",
             "2000-01-01T00:00:00",
             "2000-01-02T00:00:00",
-        )
+        ]
 
     def test_labels_simple_cat_array_exclude_missing(self):
         slice_ = Cube(CR.SIMPLE_CAT_ARRAY).partitions[0]
         assert slice_.row_labels == ("ca_subvar_1", "ca_subvar_2", "ca_subvar_3")
-        assert slice_.column_labels == ("a", "b", "c", "d")
+        assert slice_.column_labels.tolist() == ["a", "b", "c", "d"]
 
     def test_as_array_simple_cat_array_exclude_missing(self):
         slice_ = Cube(CR.SIMPLE_CAT_ARRAY).partitions[0]
