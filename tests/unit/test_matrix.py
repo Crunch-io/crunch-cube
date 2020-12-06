@@ -1298,6 +1298,26 @@ class Describe_CatXMrMatrix(object):
             np.array([21, 24]),
         )
 
+    def it_knows_its_table_base(self):
+        unweighted_counts = np.array(
+            [
+                [  # -- row 0 ------------
+                    [1, 6],  # -- col 0 --
+                    [2, 5],  # -- col 1 --
+                    [3, 4],  # -- col 2 --
+                ],
+                [  # -- row 1 ------------
+                    [4, 3],  # -- col 0 --
+                    [5, 2],  # -- col 1 --
+                    [6, 1],  # -- col 2 --
+                    # --------------------
+                ],
+            ]
+        )
+        np.testing.assert_equal(
+            _CatXMrMatrix(None, None, unweighted_counts).table_base, [14, 14, 14]
+        )
+
     def it_knows_its_table_margin(self):
         weighted_counts = np.array(
             [

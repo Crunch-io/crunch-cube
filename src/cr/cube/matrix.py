@@ -851,7 +851,7 @@ class _CatXMrMatrix(_CatXCatMatrix):
         """
         # --- unweighted-counts is (nrows, ncols, selected/not) so axis 1 is preserved
         # --- to provide a distinct value for each MR subvar.
-        raise NotImplementedError
+        return np.sum(self._unweighted_counts, axis=(0, 2))
 
     @lazyproperty
     def table_margin(self):

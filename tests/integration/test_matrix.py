@@ -400,7 +400,6 @@ class DescribeAssembler(object):
 
         assert np.array_equal(slice_._assembler.table_base, 877)
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_cat_x_mr_table_base(self):
         slice_ = Cube(CR.CAT_X_MR_2).partitions[0]
         np.testing.assert_almost_equal(
