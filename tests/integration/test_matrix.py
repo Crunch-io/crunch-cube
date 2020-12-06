@@ -3,6 +3,7 @@
 """Integration-test suite for `cr.cube.cubepart` module."""
 
 import numpy as np
+import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.cubepart import _Slice
@@ -374,5 +375,57 @@ class DescribeAssembler(object):
                 [18, 29, 22, 29],
                 [26, 20, 34, 34],
                 [44, 45, 53, 61],
+            ],
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_table_base_for_cat_hs_x_cat_hs_hiddens_explicit_order(self):
+        slice_ = _Slice(
+            Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),
+            slice_idx=0,
+            transforms={
+                "rows_dimension": {
+                    "elements": {"2": {"hide": True}},
+                    "prune": True,
+                    "order": {"type": "explicit", "element_ids": [0, 5, 2, 1, 4]},
+                },
+                "columns_dimension": {
+                    "elements": {"2": {"hide": True}},
+                    "prune": True,
+                    "order": {"type": "explicit", "element_ids": [4, 2, 5, 0]},
+                },
+            },
+            population=None,
+            mask_size=0,
+        )
+
+        assert np.array_equal(slice_._assembler.table_base, 877)
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_cat_x_mr_table_base(self):
+        slice_ = Cube(CR.CAT_X_MR_2).partitions[0]
+        np.testing.assert_almost_equal(
+            slice_._assembler.table_base,
+            np.array([165, 210, 242, 450, 476]),
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_mr_x_cat_table_base(self):
+        slice_ = Cube(CR.MR_X_CAT).partitions[0]
+        np.testing.assert_almost_equal(
+            slice_._assembler.table_base,
+            np.array([165, 210, 242, 450, 476]),
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_mr_x_mr_table_base(self):
+        slice_ = Cube(CR.MR_X_MR).partitions[0]
+        np.testing.assert_equal(
+            slice_._assembler.table_base,
+            [
+                [68, 43, 51, 68],
+                [43, 60, 42, 60],
+                [51, 42, 72, 72],
+                [68, 60, 72, 96],
             ],
         )
