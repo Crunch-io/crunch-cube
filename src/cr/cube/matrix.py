@@ -726,6 +726,17 @@ class _CatXCatMatrix(_BaseCubeResultMatrix):
         return np.sum(self._unweighted_counts, axis=1)
 
     @lazyproperty
+    def table_base(self):
+        """np.int64 count of actual respondents who answered both questions.
+
+        Each dimension of a CAT_X_CAT matrix represents a categorical question. Only
+        responses that include answers to both those questions appear as entries in the
+        valid elements of those dimensions. The sum total of all valid answers is the
+        sample size, aka "N" or "base".
+        """
+        return np.sum(self.unweighted_counts)
+
+    @lazyproperty
     def table_margin(self):
         """Scalar np.float/int64 weighted-N for overall table.
 
@@ -833,6 +844,16 @@ class _CatXMrMatrix(_CatXCatMatrix):
         return np.sum(self._unweighted_counts, axis=(1, 2))
 
     @lazyproperty
+    def table_base(self):
+        """1D np.int64 unweighted N for each column of matrix.
+
+        Because the matrix is X_MR, each column has a distinct table base.
+        """
+        # --- unweighted-counts is (nrows, ncols, selected/not) so axis 1 is preserved
+        # --- to provide a distinct value for each MR subvar.
+        raise NotImplementedError
+
+    @lazyproperty
     def table_margin(self):
         """1D np.float/int64 ndarray of weighted-N for each column of matrix.
 
@@ -914,6 +935,16 @@ class _MrXCatMatrix(_CatXCatMatrix):
         dimension.
         """
         return np.sum(self._unweighted_counts, axis=(1, 2))
+
+    @lazyproperty
+    def table_base(self):
+        """1D np.int64 ndarray of unweighted N for each row of matrix.
+
+        Since the rows-dimension is MR, each row has a distinct base, since not all of
+        the multiple responses were necessarily offered to all respondents. The base for
+        each row indicates the number of respondents who were offered that option.
+        """
+        raise NotImplementedError
 
     @lazyproperty
     def table_margin(self):
@@ -1036,6 +1067,20 @@ class _MrXMrMatrix(_CatXCatMatrix):
         the rows dimension.
         """
         return np.sum(self._unweighted_counts[:, 0, :, :], axis=(1, 2))
+
+    @lazyproperty
+    def table_base(self):
+        """2D np.int64 ndarray of distinct unweighted N for each cell of matrix.
+
+        Because the matrix is MR_X_MR, each cell corresponds to a 2x2 sub-table
+        (selected/not on each axis), each of which has its own distinct table-base.
+        """
+        # --- unweighted_counts is 4D of shape (nrows, 2, ncols, 2):
+        # --- (MR_SUBVAR (nrows), MR_CAT (sel/not), MR_SUBVAR (ncols), MR_CAT (sel/not))
+        # --- Reduce the second and fourth axes with sum() producing 2D (nrows, ncols).
+        # --- This sums (selected, selected), (selected, not), (not, selected) and
+        # --- (not, not) cells of the subtable for each matrix cell.
+        raise NotImplementedError
 
     @lazyproperty
     def table_margin(self):

@@ -1231,6 +1231,10 @@ class Describe_CatXCatMatrix(object):
         matrix = _CatXCatMatrix(None, None, unweighted_counts)
         assert matrix.rows_pruning_base.tolist() == expected
 
+    def it_knows_its_table_base(self):
+        unweighted_counts = np.array([[1, 2, 3], [4, 5, 6]])
+        assert _CatXCatMatrix(None, None, unweighted_counts).table_base == 21
+
     def it_knows_its_table_margin(self):
         weighted_counts = np.array([[1, 2, 3], [4, 5, 6]])
         assert _CatXCatMatrix(None, weighted_counts, None).table_margin == 21
