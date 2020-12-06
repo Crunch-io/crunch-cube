@@ -2,8 +2,6 @@
 
 """Integration-test suite for `cr.cube.cubepart` module."""
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import numpy as np
 import pytest
 
@@ -554,7 +552,7 @@ class Describe_Slice(object):
             slice_.columns_base, slice_wo_explicit_order_.columns_base
         )
         np.testing.assert_almost_equal(
-            slice_.row_base, slice_wo_explicit_order_.row_base
+            slice_.rows_base, slice_wo_explicit_order_.rows_base
         )
 
     def it_knows_when_it_is_empty(self):

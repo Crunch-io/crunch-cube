@@ -74,7 +74,7 @@ def test_3D_with_means():
     )
     assert slice_.table_base == 24
     np.testing.assert_array_equal(slice_.columns_base, [9, 0, 3, 3, 9])
-    np.testing.assert_array_equal(slice_.row_base, [9, 6, 9])
+    np.testing.assert_array_equal(slice_.rows_base, [9, 6, 9])
 
 
 def test_mr_x_cat_with_means():
@@ -878,7 +878,7 @@ def test_mr_x_num_with_means_not_pruned():
 def test_mr_x_num_rows_margin():
     slice_ = Cube(CR.MEANS_MR_X_CAT).partitions[0]
     expected = [4805, 3614, 1156, 1200, 644, 258, 167, 170, 11419]
-    np.testing.assert_array_equal(slice_.row_base, expected)
+    np.testing.assert_array_equal(slice_.rows_base, expected)
 
 
 def test_mr_x_num_cols_margin_not_pruned_unweighted():

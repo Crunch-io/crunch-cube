@@ -341,14 +341,12 @@ class DescribeAssembler(object):
             mask_size=0,
         )
 
-        assert np.array_equal(
-            slice_._assembler.rows_base, [151, 353, 603, 52, 250, 123, 575]
-        )
+        assert np.array_equal(slice_.rows_base, [151, 353, 603, 52, 250, 123, 575])
 
     def it_computes_cat_x_mr_rows_base(self):
         slice_ = Cube(CR.CAT_X_MR_2).partitions[0]
         np.testing.assert_almost_equal(
-            slice_._assembler.rows_base,
+            slice_.rows_base,
             np.array(
                 [
                     [15, 15, 13, 20, 32],
@@ -364,14 +362,13 @@ class DescribeAssembler(object):
     def it_computes_mr_x_cat_rows_base(self):
         slice_ = Cube(CR.MR_X_CAT).partitions[0]
         np.testing.assert_almost_equal(
-            slice_._assembler.rows_base,
-            np.array([26, 76, 118, 369, 385]),
+            slice_.rows_base, np.array([26, 76, 118, 369, 385])
         )
 
     def it_computes_mr_x_mr_rows_base(self):
         slice_ = Cube(CR.MR_X_MR).partitions[0]
         np.testing.assert_equal(
-            slice_._assembler.rows_base,
+            slice_.rows_base,
             [
                 [12, 7, 10, 12],
                 [18, 29, 22, 29],

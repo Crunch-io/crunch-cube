@@ -42,9 +42,9 @@ class MinBaseSizeMask(object):
     @lazyproperty
     def row_mask(self):
         """ndarray, True where row margin <= min_base_size, same shape as slice."""
-        mask = self._slice.row_base < self._size
+        mask = self._slice.rows_base < self._size
 
-        if self._slice.row_base.shape == self._slice.shape:
+        if self._slice.rows_base.shape == self._slice.shape:
             # If margin shape is the same as slice's (such as in a row margin for
             # CAT x MR), don't broadcast the mask to the array shape, since
             # they're already the same.

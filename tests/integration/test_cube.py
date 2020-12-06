@@ -817,7 +817,7 @@ class TestCrunchCubeAs_Slice(object):
     def test_margin_unweighted_gender_x_ideology_axis_1(self):
         slice_ = Cube(CR.ECON_GENDER_X_IDEOLOGY_WEIGHTED).partitions[0]
         expected = np.array([485, 515])
-        np.testing.assert_array_equal(slice_.row_base, expected)
+        np.testing.assert_array_equal(slice_.rows_base, expected)
 
     def test_margin_weighted_gender_x_ideology_axis_1(self):
         slice_ = Cube(CR.ECON_GENDER_X_IDEOLOGY_WEIGHTED).partitions[0]
@@ -1284,7 +1284,7 @@ class TestCrunchCubeAs_Slice(object):
     def test_ca_with_single_cat(self):
         slice_ = Cube(CR.CA_SINGLE_CAT).partitions[0]
         expected = np.array([79, 80, 70, 0])
-        np.testing.assert_almost_equal(slice_.row_base, expected)
+        np.testing.assert_almost_equal(slice_.rows_base, expected)
 
     def test_pets_array_x_pets_by_col(self):
         slice_ = Cube(CR.PETS_ARRAY_X_PETS).partitions[0]
@@ -1532,7 +1532,7 @@ class TestCrunchCubeAs_Slice(object):
         # TODO: Fix after base is implemented for means partitions
         """Tests that total margin is Unweighted N, when cube has means."""
         transforms = {"rows_dimension": {"prune": True}}
-        slice_ = Cube(CR.CAT_MEAN_WGTD, transforms=transforms).partitions[0]
+        strand = Cube(CR.CAT_MEAN_WGTD, transforms=transforms).partitions[0]
         expected = np.array(
             [
                 806,
@@ -1572,8 +1572,8 @@ class TestCrunchCubeAs_Slice(object):
                 12,
             ]
         )
-        np.testing.assert_array_equal(slice_.row_base, expected)
-        # not testing cube.prune_indices() because the margin has 6367 cells
+        np.testing.assert_array_equal(strand.row_base, expected)
+        # --- not testing cube.prune_indices() because the margin has 6367 cells ---
 
     def test_ca_with_single_cat_pruning(self):
         transforms = {"rows_dimension": {"prune": True}}

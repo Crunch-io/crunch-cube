@@ -487,10 +487,6 @@ class _Slice(CubePartition):
         return np.stack([self.pvals, self.zscores])
 
     @lazyproperty
-    def row_base(self):
-        return np.array([row.base for row in self._matrix.rows])
-
-    @lazyproperty
     def row_labels(self):
         return tuple(row.label for row in self._matrix.rows)
 
@@ -501,6 +497,18 @@ class _Slice(CubePartition):
     @lazyproperty
     def row_proportions(self):
         return np.array([row.proportions for row in self._matrix.rows])
+
+    @lazyproperty
+    def rows_base(self):
+        """1D/2D np.int64 ndarray of unweighted-N for each row/cell of slice.
+
+        This array is 2D (a distinct base for each cell) when the columns dimension is
+        MR, because each MR-subvariable has its own unweighted N. This is because not
+        every possible response is necessarily offered to every respondent.
+
+        In all other cases, the array is 1D, containing one value for each column.
+        """
+        return self._assembler.rows_base
 
     @lazyproperty
     def rows_dimension_description(self):
