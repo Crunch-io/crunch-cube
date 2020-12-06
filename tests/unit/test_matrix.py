@@ -533,6 +533,14 @@ class DescribeAssembler(object):
         assert row_order.tolist() == expected
         _dimension_order_.assert_called_once_with(assembler, dimension_, fake_row_idxs)
 
+    def it_provides_access_to_the_row_subtotals_to_help(
+        self, _rows_dimension_prop_, dimension_, subtotals_
+    ):
+        _rows_dimension_prop_.return_value = dimension_
+        dimension_.subtotals = subtotals_
+
+        assert Assembler(None, None, None)._row_subtotals is subtotals_
+
     def it_knows_its_rows_dimension_to_help(self, dimension_):
         assembler = Assembler(None, (dimension_, None), None)
         assert assembler._rows_dimension is dimension_

@@ -322,7 +322,6 @@ class DescribeAssembler(object):
             slice_.column_labels, ["Bravo", "Delta", "Alpha", "Charlie", "Last 2"]
         )
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_rows_base_for_cat_hs_x_cat_hs_hiddens_explicit_order(self):
         slice_ = _Slice(
             Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),
@@ -364,7 +363,6 @@ class DescribeAssembler(object):
             ),
         )
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_mr_x_cat_rows_base(self):
         slice_ = Cube(CR.MR_X_CAT).partitions[0]
         np.testing.assert_almost_equal(
