@@ -95,7 +95,31 @@ class Assembler(object):
             * CAT_X_CAT - scalar float value when slice has no MR dimension.
 
         """
-        raise NotImplementedError
+        # --- an MR dimension cannot have subtotals, and a non-scalar table base only
+        # --- arises in an MR dimension case, so a non-scalar table-base never has
+        # --- subtotals and we need only operate on the base values. There is no need to
+        # --- assemble with subtotals, however the values of a non-scalar table-base do
+        # --- still need to be ordered (which includes hiding).
+        base_table_base = self._cube_result_matrix.table_base
+
+        # --- MR_X_MR slice produces a 2D table-base (each cell has its own N) ---
+        if (
+            self._rows_dimension.dimension_type == DT.MR_SUBVAR
+            and self._columns_dimension.dimension_type == DT.MR_SUBVAR
+        ):
+            return base_table_base[np.ix_(self._row_order, self._column_order)]
+
+        # --- CAT_X_MR slice produces a 1D table-base (each column has its own N) ---
+        if self._columns_dimension.dimension_type == DT.MR_SUBVAR:
+            return base_table_base[self._column_order]
+
+        # --- MR_X_CAT slice produces a 1D table-base (each row has its own N) ---
+        if self._rows_dimension.dimension_type == DT.MR_SUBVAR:
+            return base_table_base[self._row_order]
+
+        # --- CAT_X_CAT produces scalar table-base ---
+        table_base = self._cube_result_matrix.table_base
+        return table_base
 
     @lazyproperty
     def table_margin(self):
@@ -515,6 +539,16 @@ class _BaseCubeResultMatrix(object):
         """1D np.int64 ndarray of unweighted-N for each matrix row."""
         raise NotImplementedError(
             "`%s` must implement `.rows_pruning_base`" % type(self).__name__
+        )
+
+    @lazyproperty
+    def table_base(self):
+        """Scalar, 1D, or 2D ndarray of np.int64 unweighted-N for this slice.
+
+        This value has four distinct forms, depending on the subclass.
+        """
+        raise NotImplementedError(
+            "`%s` must implement `.table_base`" % type(self).__name__
         )
 
     @lazyproperty
