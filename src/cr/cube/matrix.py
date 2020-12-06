@@ -944,7 +944,7 @@ class _MrXCatMatrix(_CatXCatMatrix):
         the multiple responses were necessarily offered to all respondents. The base for
         each row indicates the number of respondents who were offered that option.
         """
-        raise NotImplementedError
+        return np.sum(self._unweighted_counts, axis=(1, 2))
 
     @lazyproperty
     def table_margin(self):
