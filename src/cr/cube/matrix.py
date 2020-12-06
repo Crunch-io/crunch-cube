@@ -70,6 +70,11 @@ class Assembler(object):
         )
 
     @lazyproperty
+    def columns_margin(self):
+        """1D/2D np.float64 ndarray of weighted-N for each column of this slice."""
+        raise NotImplementedError
+
+    @lazyproperty
     def rows_base(self):
         """1D/2D np.int64 ndarray of unweighted-N for each slice row/cell."""
         # --- an X_MR slice produces a 2D row-base (each cell has its own N) ---
