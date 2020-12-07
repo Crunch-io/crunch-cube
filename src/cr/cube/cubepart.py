@@ -281,7 +281,13 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def column_proportions(self):
-        return np.array([col.proportions for col in self._matrix.columns]).T
+        """2D np.float64 ndarray of column-proportion for each matrix cell.
+
+        This is the proportion of the weighted-N (aka. margin) of its column that the
+        *weighted-count* in each cell represents, a number between 0.0 and 1.0.
+        """
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return self.counts / self.columns_margin
 
     @lazyproperty
     def column_proportions_moe(self):
@@ -505,7 +511,43 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def row_proportions(self):
-        return np.array([row.proportions for row in self._matrix.rows])
+        """2D np.float64 ndarray of row-proportion for each matrix cell.
+
+        Each row-proportion value is that cell's fraction of the weighted-N for the row
+        (aka. rows_margin), a number between 0.0 and 1.0.
+        """
+        rows_margin = self.rows_margin
+        with np.errstate(divide="ignore", invalid="ignore"):
+            # --- numpy broadcasting only works "vertically", so in the 1D margin case,
+            # --- we need to "rotate" (transpose) the counts such that rows are running
+            # --- "vertically", and then re-transpose the result to get back
+            # --- (rows, cols) orientation.
+            if rows_margin.ndim == 1:
+                return (self.counts.T / self.rows_margin).T
+            return self.counts / self.rows_margin
+
+    @lazyproperty
+    def row_proportions_moe(self):
+        """2D np.float64 ndarray of margin-of-error (MoE) for rows proportions.
+
+        The values are represented as percentage-fractions, analogue to the
+        `row_proportions` property. This means that the value of 3.5% will have the
+        value 0.035. The values can be np.nan when the corresponding percentage is also
+        np.nan, which happens when the respective table margin is 0.
+        """
+        return Z_975 * self.row_std_err
+
+    @lazyproperty
+    def row_std_dev(self):
+        """2D np.float64 ndarray of standard deviation for row percentages."""
+        return np.sqrt(self._row_variance)
+
+    @lazyproperty
+    def row_std_err(self):
+        """2D np.float64 ndarray of standard errors for row percentages."""
+        # --- We need to add `np.newaxis` to cast the rows margin vector to an actual
+        # --- column, in NumPy terms, to be able to devide correctly.
+        return np.sqrt(self._row_variance / self.rows_margin[:, np.newaxis])
 
     @lazyproperty
     def rows_base(self):
@@ -562,29 +604,6 @@ class _Slice(CubePartition):
         In all other cases, the array is 1D, containing one value for each column.
         """
         return self._assembler.rows_margin
-
-    @lazyproperty
-    def row_proportions_moe(self):
-        """2D np.float64 ndarray of margin-of-error (MoE) for rows proportions.
-
-        The values are represented as percentage-fractions, analogue to the
-        `row_proportions` property. This means that the value of 3.5% will have the
-        value 0.035. The values can be np.nan when the corresponding percentage is also
-        np.nan, which happens when the respective table margin is 0.
-        """
-        return Z_975 * self.row_std_err
-
-    @lazyproperty
-    def row_std_dev(self):
-        """2D np.float64 ndarray of standard deviation for row percentages."""
-        return np.sqrt(self._row_variance)
-
-    @lazyproperty
-    def row_std_err(self):
-        """2D np.float64 ndarray of standard errors for row percentages."""
-        # --- We need to add `np.newaxis` to cast the rows margin vector to an actual
-        # --- column, in NumPy terms, to be able to devide correctly.
-        return np.sqrt(self._row_variance / self.rows_margin[:, np.newaxis])
 
     @lazyproperty
     def scale_mean_pairwise_indices(self):
@@ -842,6 +861,20 @@ class _Slice(CubePartition):
         return self.table_proportions * 100
 
     @lazyproperty
+    def table_proportions(self):
+        """2D ndarray of np.float64 fraction of table count each cell contributes."""
+        table_margin = self.table_margin
+        rows_dimension_type = self._rows_dimension.dimension_type
+
+        # --- table-margin can be scalar, 2D, or two cases of 1D. A scalar, 2D, and one
+        # --- of the 1D table-margins broadcast fine, but the MR-X-CAT case needs
+        # --- transposition to get the broadcasting right.
+        with np.errstate(divide="ignore", invalid="ignore"):
+            if rows_dimension_type == DT.MR_SUBVAR and table_margin.ndim == 1:
+                return (self.counts.T / table_margin).T
+            return self.counts / table_margin
+
+    @lazyproperty
     def table_proportions_moe(self):
         """1D/2D np.float64 ndarray of margin-of-error (MoE) for table proportions.
 
@@ -851,10 +884,6 @@ class _Slice(CubePartition):
         happens when the respective table margin is 0.
         """
         return Z_975 * self.table_std_err
-
-    @lazyproperty
-    def table_proportions(self):
-        return np.array([row.table_proportions for row in self._matrix.rows])
 
     @lazyproperty
     def table_std_dev(self):

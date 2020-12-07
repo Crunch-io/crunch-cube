@@ -11,7 +11,7 @@ from cr.cube.dimension import Dimension
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.matrix import Assembler
 from cr.cube.noa.smoothing import SingleSidedMovingAvgSmoother
-from cr.cube.old_matrix import TransformedMatrix, _VectorAfterHiding
+from cr.cube.old_matrix import TransformedMatrix
 from cr.cube.stripe import _BaseStripeRow, TransformedStripe
 
 from ..unitutil import class_mock, instance_mock, property_mock
@@ -284,20 +284,6 @@ class Describe_Slice(object):
         population_fraction = slice_.population_fraction
 
         assert population_fraction == 0.5
-
-    def it_knows_the_row_proportions(self, request, _matrix_prop_, matrix_):
-        _matrix_prop_.return_value = matrix_
-        matrix_.rows = (
-            instance_mock(request, _VectorAfterHiding, proportions=(0.1, 0.2, 0.3)),
-            instance_mock(request, _VectorAfterHiding, proportions=(0.4, 0.5, 0.6)),
-        )
-        slice_ = _Slice(None, None, None, None, None)
-
-        row_proportions = slice_.row_proportions
-
-        np.testing.assert_almost_equal(
-            row_proportions, [[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]]
-        )
 
     def it_knows_the_rows_margin(self, _assembler_prop_, assembler_):
         _assembler_prop_.return_value = assembler_

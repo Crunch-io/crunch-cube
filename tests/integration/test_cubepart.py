@@ -647,7 +647,7 @@ class Describe_Slice(object):
     def it_accommodates_an_all_missing_element_rows_dimension(self):
         slice_ = _Slice(Cube(CR.CAT_X_CAT_ALL_MISSING_ROW_ELEMENTS), 0, None, None, 0)
         row_proportions = slice_.row_proportions
-        np.testing.assert_almost_equal(row_proportions, np.array([]))
+        np.testing.assert_almost_equal(row_proportions, np.array([]).reshape((0, 2)))
 
     def it_knows_means_with_subtotals_on_cat_x_cat(self):
         slice_ = _Slice(Cube(CR.CAT_X_CAT_MEAN_SUBTOT), 0, None, None, 0)
