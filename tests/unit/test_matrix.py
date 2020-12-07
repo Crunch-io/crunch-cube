@@ -1456,6 +1456,24 @@ class Describe_MrXCatMatrix(object):
             np.array([[5, 7, 9], [10, 10, 10]]),
         )
 
+    def it_knows_its_columns_margin(self):
+        weighted_counts = np.array(
+            [
+                [  # -- row 0 ---------------
+                    [1, 2, 3],  # -- selected
+                    [4, 5, 6],  # -- not
+                ],
+                [  # -- row 1 ---------------
+                    [7, 8, 9],  # -- selected
+                    [3, 2, 1],  # -- not
+                ],
+            ]
+        )
+        np.testing.assert_equal(
+            _MrXCatMatrix(None, weighted_counts, None, None).columns_margin,
+            np.array([[5, 7, 9], [10, 10, 10]]),
+        )
+
     def it_knows_its_columns_pruning_base(self):
         unweighted_counts = np.array(
             [

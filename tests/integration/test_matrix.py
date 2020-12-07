@@ -462,7 +462,6 @@ class DescribeAssembler(object):
             np.array([31.631521, 70.7307341, 125.7591135, 366.8883914, 376.7656406]),
         )
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_mr_x_cat_columns_margin(self):
         slice_ = Cube(CR.MR_X_CAT).partitions[0]
         np.testing.assert_almost_equal(
