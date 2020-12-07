@@ -3,7 +3,6 @@
 """Integration-test suite for `cr.cube.cubepart` module."""
 
 import numpy as np
-import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.cubepart import _Slice
@@ -540,7 +539,6 @@ class DescribeAssembler(object):
             np.array([31.6315209, 70.7307341, 125.7591136, 366.8883915, 376.7656406]),
         )
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_mr_x_mr_rows_margin(self):
         slice_ = Cube(CR.MR_X_MR).partitions[0]
         np.testing.assert_almost_equal(
