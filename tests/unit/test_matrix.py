@@ -1604,6 +1604,24 @@ class Describe_MrXMrMatrix(object):
             np.array([[2, 8, 4], [10, 4, 13]]),
         )
 
+    def it_knows_its_columns_margin(self):
+        weighted_counts = np.array(
+            [
+                [  # -- row 0 ---------------
+                    [[0, 8], [2, 7], [1, 7]],
+                    [[2, 6], [6, 8], [3, 5]],
+                ],
+                [  # -- row 1 ---------------
+                    [[4, 4], [1, 7], [8, 3]],
+                    [[6, 2], [3, 5], [5, 2]],
+                ],
+            ]
+        )
+        np.testing.assert_equal(
+            _MrXMrMatrix(None, weighted_counts, None, None).columns_margin,
+            np.array([[2, 8, 4], [10, 4, 13]]),
+        )
+
     def it_knows_its_columns_pruning_base(self):
         unweighted_counts = np.array(
             [

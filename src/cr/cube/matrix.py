@@ -1087,7 +1087,7 @@ class _MrXMrMatrix(_CatXCatMatrix):
         MR_X_MR cell has four counts: sel-sel, sel-not, not-sel, and not-not. Only
         sel-sel and not-sel contribute to the columns-margin.
         """
-        raise NotImplementedError
+        return np.sum(self._weighted_counts[:, :, :, 0], axis=1)
 
     @lazyproperty
     def columns_pruning_base(self):

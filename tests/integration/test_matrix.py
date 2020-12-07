@@ -3,7 +3,6 @@
 """Integration-test suite for `cr.cube.cubepart` module."""
 
 import numpy as np
-import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.cubepart import _Slice
@@ -444,28 +443,25 @@ class DescribeAssembler(object):
             mask_size=0,
         )
 
-        assert np.array_equal(
-            slice_._assembler.columns_margin, [549, 328, 276, 273, 328]
-        )
+        assert np.array_equal(slice_.columns_margin, [549, 328, 276, 273, 328])
 
     def it_computes_means_cat_x_cat_columns_margin(self):
         slice_ = Cube(CR.MEANS_CAT_HS_X_CAT_HS).partitions[0]
         np.testing.assert_almost_equal(
-            slice_._assembler.columns_margin,
-            np.array([np.nan, np.nan, np.nan, np.nan, np.nan]),
+            slice_.columns_margin, np.array([np.nan, np.nan, np.nan, np.nan, np.nan])
         )
 
     def it_computes_cat_x_mr_columns_margin(self):
         slice_ = Cube(CR.CAT_X_MR_2).partitions[0]
         np.testing.assert_almost_equal(
-            slice_._assembler.columns_margin,
+            slice_.columns_margin,
             np.array([31.631521, 70.7307341, 125.7591135, 366.8883914, 376.7656406]),
         )
 
     def it_computes_mr_x_cat_columns_margin(self):
         slice_ = Cube(CR.MR_X_CAT).partitions[0]
         np.testing.assert_almost_equal(
-            slice_._assembler.columns_margin,
+            slice_.columns_margin,
             np.array(
                 [
                     [21.7886996, 32.8157604, 0.0, 58.866254, 62.8948376, 0.0],
@@ -477,11 +473,10 @@ class DescribeAssembler(object):
             ),
         )
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_mr_x_mr_columns_margin(self):
         slice_ = Cube(CR.MR_X_MR).partitions[0]
         np.testing.assert_almost_equal(
-            slice_._assembler.columns_margin,
+            slice_.columns_margin,
             [
                 [22.9672704, 28.5502092, 70.8068713, 100.7142240],
                 [13.2946142, 45.7789165, 53.0615517, 95.8683881],
