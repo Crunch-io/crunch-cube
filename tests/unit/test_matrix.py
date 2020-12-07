@@ -1323,6 +1323,13 @@ class Describe_CatXCatMatrix(object):
         matrix = _CatXCatMatrix(None, None, unweighted_counts)
         assert matrix.rows_base.tolist() == expected
 
+    def it_knows_its_rows_margin(self):
+        weighted_counts = np.array([[1, 2, 3], [4, 5, 6]])
+        np.testing.assert_equal(
+            _CatXCatMatrix(None, weighted_counts, None).rows_margin,
+            [6, 15],
+        )
+
     @pytest.mark.parametrize(
         ("unweighted_counts", "expected"),
         (

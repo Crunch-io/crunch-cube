@@ -770,6 +770,14 @@ class _CatXCatMatrix(_BaseCubeResultMatrix):
         return np.sum(self.unweighted_counts, axis=1)
 
     @lazyproperty
+    def rows_margin(self):
+        """1D np.float/int64 ndarray of weighted-N for each matrix row.
+
+        Values are `np.int64` when the source cube-result is not weighted.
+        """
+        return np.sum(self.weighted_counts, axis=1)
+
+    @lazyproperty
     def rows_pruning_base(self):
         """1D np.int64 ndarray of unweighted-N for each matrix row.
 
@@ -886,6 +894,17 @@ class _CatXMrMatrix(_CatXCatMatrix):
         unweighted counts.
         """
         return np.sum(self._unweighted_counts, axis=2)
+
+    @lazyproperty
+    def rows_margin(self):
+        """2D np.float64 ndarray of weighted-N for each cell of this matrix.
+
+        A matrix with an MR columns dimension has a distinct rows-margin for each cell.
+        This is because not all column responses (subvars) are necessarily offered to
+        each respondent. The weighted-count for each X_MR cell is the sum of its
+        selected and unselected weighted counts.
+        """
+        raise NotImplementedError
 
     @lazyproperty
     def rows_pruning_base(self):
@@ -1132,6 +1151,16 @@ class _MrXMrMatrix(_CatXCatMatrix):
         sel-not for each cell
         """
         return np.sum(self._unweighted_counts[:, 0, :, :], axis=2)
+
+    @lazyproperty
+    def rows_margin(self):
+        """2D np.float64 ndarray of weighted-N for each cell of matrix.
+
+        An X_MR matrix has a distinct rows-margin for each cell. Each MR_X_MR cell has
+        four counts: sel-sel, sel-not, not-sel, and not-not. Only sel-sel and sel-not
+        contribute to the rows-margin.
+        """
+        raise NotImplementedError
 
     @lazyproperty
     def rows_pruning_base(self):
