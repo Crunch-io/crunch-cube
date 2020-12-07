@@ -946,8 +946,12 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def _columns_dimension_numeric_values(self):
-        """1D ndarray of numeric-value for each columns-dimension element."""
-        return np.array([column.numeric_value for column in self._matrix.columns])
+        """1D optional np.int/float64 ndarray of numeric-value for each column element.
+
+        A value of np.nan appears for a column element without a numeric-value. All
+        subtotal rows have a value of np.nan (subtotals have no numeric value).
+        """
+        return self._assembler.columns_dimension_numeric_values
 
     @lazyproperty
     def _dimensions(self):

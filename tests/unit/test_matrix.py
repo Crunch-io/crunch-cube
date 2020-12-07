@@ -99,6 +99,22 @@ class DescribeAssembler(object):
         _assemble_matrix_.assert_called_once_with(assembler, [[[1], [2]], [[3], [4]]])
         assert columns_base == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
+    def it_knows_the_columns_dimension_numeric_values(
+        self, request, _columns_dimension_prop_, dimension_, _column_order_prop_
+    ):
+        _columns_dimension_prop_.return_value = dimension_
+        dimension_.valid_elements = tuple(
+            instance_mock(request, _Element, numeric_value=numeric_value)
+            for numeric_value in (1, 2, 3)
+        )
+        _column_order_prop_.return_value = [2, -1, 0, -2]
+        assembler = Assembler(None, None, None)
+
+        np.testing.assert_almost_equal(
+            assembler.columns_dimension_numeric_values,
+            [3.0, np.nan, 1.0, np.nan],
+        )
+
     def it_provides_a_1D_columns_margin_for_a_CAT_X_cube_result(
         self,
         _rows_dimension_prop_,

@@ -70,6 +70,21 @@ class Assembler(object):
         )
 
     @lazyproperty
+    def columns_dimension_numeric_values(self):
+        """1D optional np.int/float64 ndarray of numeric-value for each column element.
+
+        A value of np.nan appears for a column element without a numeric-value. All
+        subtotal columns have a value of np.nan (subtotals have no numeric value).
+        """
+        elements = self._columns_dimension.valid_elements
+        return np.array(
+            [
+                (elements[idx].numeric_value if idx >= 0 else np.nan)
+                for idx in self._column_order
+            ]
+        )
+
+    @lazyproperty
     def columns_margin(self):
         """1D/2D np.float64 ndarray of weighted-N for each column of this slice."""
         # --- an MR_X slice produces a 2D columns-margin (each cell has its own N) ---
