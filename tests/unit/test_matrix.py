@@ -1400,6 +1400,13 @@ class Describe_CatXMrMatrix(object):
             np.array([[7, 7, 7], [8, 8, 8]]),
         )
 
+    def it_knows_its_rows_margin(self):
+        weighted_counts = np.array([[[1, 6], [2, 5], [3, 4]], [[5, 3], [6, 2], [7, 1]]])
+        np.testing.assert_equal(
+            _CatXMrMatrix(None, weighted_counts, None, None).rows_margin,
+            np.array([[7, 7, 7], [8, 8, 8]]),
+        )
+
     def it_knows_its_rows_pruning_base(self):
         unweighted_counts = np.array(
             [[[1, 6], [2, 5], [3, 4]], [[5, 3], [6, 2], [7, 1]]]

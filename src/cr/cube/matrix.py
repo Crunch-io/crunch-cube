@@ -904,7 +904,7 @@ class _CatXMrMatrix(_CatXCatMatrix):
         each respondent. The weighted-count for each X_MR cell is the sum of its
         selected and unselected weighted counts.
         """
-        raise NotImplementedError
+        return np.sum(self._weighted_counts, axis=2)
 
     @lazyproperty
     def rows_pruning_base(self):
