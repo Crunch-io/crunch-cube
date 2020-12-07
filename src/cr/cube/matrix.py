@@ -110,6 +110,14 @@ class Assembler(object):
         )
 
     @lazyproperty
+    def rows_dimension_fills(self):
+        """tuple of RGB str like "#def032" fill color for each row in slice."""
+        elements = self._rows_dimension.valid_elements
+        return tuple(
+            (elements[idx].fill if idx >= 0 else None) for idx in self._row_order
+        )
+
+    @lazyproperty
     def rows_margin(self):
         """1D/2D np.float64 ndarray of weighted-N for each column of this slice.
 

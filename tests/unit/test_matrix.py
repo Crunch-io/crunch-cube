@@ -214,6 +214,19 @@ class DescribeAssembler(object):
         _assemble_matrix_.assert_called_once_with(assembler, [[[1], [2]], [[3], [4]]])
         assert rows_base == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
+    def it_knows_the_rows_dimension_fills(
+        self, request, _rows_dimension_prop_, dimension_, _row_order_prop_
+    ):
+        _rows_dimension_prop_.return_value = dimension_
+        dimension_.valid_elements = tuple(
+            instance_mock(request, _Element, fill=fill)
+            for fill in ("#000000", "#111111", "#f00ba5")
+        )
+        _row_order_prop_.return_value = [2, -1, 0, -2]
+        assembler = Assembler(None, None, None)
+
+        assert assembler.rows_dimension_fills == ("#f00ba5", None, "#000000", None)
+
     def it_provides_a_1D_rows_margin_for_an_X_CAT_cube_result(
         self,
         _columns_dimension_prop_,
