@@ -547,10 +547,6 @@ class _Slice(CubePartition):
         return self._rows_dimension.name
 
     @lazyproperty
-    def rows_dimension_numeric_values(self):
-        return self._rows_dimension_numeric_values
-
-    @lazyproperty
     def rows_dimension_type(self):
         """Member of `cr.cube.enum.DIMENSION_TYPE` specifying type of rows dimension."""
         return self._rows_dimension.dimension_type
@@ -988,8 +984,12 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def _rows_dimension_numeric_values(self):
-        """1D ndarray of numeric-value for each rows-dimension element."""
-        return np.array([row.numeric_value for row in self._matrix.rows])
+        """1D optional np.int/float64 ndarray of numeric-value for each row element.
+
+        A value of np.nan appears for a row element without a numeric-value. All
+        subtotal rows have a value of np.nan (subtotals have no numeric value).
+        """
+        return self._assembler.rows_dimension_numeric_values
 
     @lazyproperty
     def _transform_dicts(self):

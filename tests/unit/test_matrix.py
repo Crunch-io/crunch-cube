@@ -243,6 +243,22 @@ class DescribeAssembler(object):
 
         assert assembler.rows_dimension_fills == ("#f00ba5", None, "#000000", None)
 
+    def it_knows_the_rows_dimension_numeric_values(
+        self, request, _rows_dimension_prop_, dimension_, _row_order_prop_
+    ):
+        _rows_dimension_prop_.return_value = dimension_
+        dimension_.valid_elements = tuple(
+            instance_mock(request, _Element, numeric_value=numeric_value)
+            for numeric_value in (1, 2, 3)
+        )
+        _row_order_prop_.return_value = [2, -1, 0, -2]
+        assembler = Assembler(None, None, None)
+
+        np.testing.assert_almost_equal(
+            assembler.rows_dimension_numeric_values,
+            [3.0, np.nan, 1.0, np.nan],
+        )
+
     def it_provides_a_1D_rows_margin_for_an_X_CAT_cube_result(
         self,
         _columns_dimension_prop_,

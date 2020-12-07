@@ -133,6 +133,21 @@ class Assembler(object):
         )
 
     @lazyproperty
+    def rows_dimension_numeric_values(self):
+        """1D optional np.int/float64 ndarray of numeric-value for each row element.
+
+        A value of np.nan appears for a row element without a numeric-value. All
+        subtotal rows have a value of np.nan (subtotals have no numeric value).
+        """
+        elements = self._rows_dimension.valid_elements
+        return np.array(
+            [
+                (elements[idx].numeric_value if idx >= 0 else np.nan)
+                for idx in self._row_order
+            ]
+        )
+
+    @lazyproperty
     def rows_margin(self):
         """1D/2D np.float64 ndarray of weighted-N for each column of this slice.
 
