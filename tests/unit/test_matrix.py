@@ -197,6 +197,56 @@ class DescribeAssembler(object):
         _assemble_matrix_.assert_called_once_with(assembler, [[[1], [2]], [[3], [4]]])
         assert rows_base == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
+    def it_provides_a_1D_rows_margin_for_an_X_CAT_cube_result(
+        self,
+        _columns_dimension_prop_,
+        dimension_,
+        _cube_result_matrix_prop_,
+        cube_result_matrix_,
+        _row_subtotals_prop_,
+        _row_order_prop_,
+        _assemble_vector_,
+    ):
+        _columns_dimension_prop_.return_value = dimension_
+        dimension_.dimension_type = DT.CAT
+        _cube_result_matrix_prop_.return_value = cube_result_matrix_
+        cube_result_matrix_.rows_margin = [1, 2, 3]
+        _row_subtotals_prop_.return_value = [3, 5]
+        _row_order_prop_.return_value = [0, -2, 1, 2, -1]
+        _assemble_vector_.return_value = [1, 3, 2, 3, 5]
+        assembler = Assembler(None, None, None)
+
+        rows_margin = assembler.rows_margin
+
+        _assemble_vector_.assert_called_once_with(
+            assembler, [1, 2, 3], [3, 5], [0, -2, 1, 2, -1]
+        )
+        assert rows_margin == [1, 3, 2, 3, 5]
+
+    def but_it_provides_a_2D_rows_margin_for_an_X_MR_cube_result(
+        self,
+        _columns_dimension_prop_,
+        dimension_,
+        _cube_result_matrix_prop_,
+        cube_result_matrix_,
+        _SumSubtotals_,
+        _assemble_matrix_,
+    ):
+        _columns_dimension_prop_.return_value = dimension_
+        dimension_.dimension_type = DT.MR_SUBVAR
+        _cube_result_matrix_prop_.return_value = cube_result_matrix_
+        _SumSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
+        _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+        assembler = Assembler(None, None, None)
+
+        rows_margin = assembler.rows_margin
+
+        _SumSubtotals_.blocks.assert_called_once_with(
+            cube_result_matrix_, "rows_margin"
+        )
+        _assemble_matrix_.assert_called_once_with(assembler, [[[1], [2]], [[3], [4]]])
+        assert rows_margin == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+
     def it_knows_the_2D_table_base_of_an_MR_X_MR_matrix(
         self,
         request,

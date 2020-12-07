@@ -106,7 +106,16 @@ class Assembler(object):
         This value is a 2D array if one or both of the slice dimensions are MR. This is
         because each cell has a distinct margin in such a slice.
         """
-        raise NotImplementedError
+        # --- an X_MR slice produces a 2D rows-margin (each cell has its own N) ---
+        if self._columns_dimension.dimension_type == DT.MR_SUBVAR:
+            return self._assemble_matrix(
+                _SumSubtotals.blocks(self._cube_result_matrix, "rows_margin")
+            )
+
+        # --- otherwise rows-margin is a vector ---
+        return self._assemble_vector(
+            self._cube_result_matrix.rows_margin, self._row_subtotals, self._row_order
+        )
 
     @lazyproperty
     def table_base(self):
@@ -565,6 +574,13 @@ class _BaseCubeResultMatrix(object):
     def rows_dimension(self):
         """The `Dimension` object representing row elements of this matrix."""
         return self._dimensions[0]
+
+    @lazyproperty
+    def rows_margin(self):
+        """1D/2D np.int64 ndarray of weighted-N for each matrix row/cell."""
+        raise NotImplementedError(
+            "`%s` must implement `.rows_margin`" % type(self).__name__
+        )
 
     @lazyproperty
     def rows_pruning_base(self):
