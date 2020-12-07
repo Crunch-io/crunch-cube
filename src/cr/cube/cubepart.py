@@ -496,7 +496,8 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def row_labels(self):
-        return tuple(row.label for row in self._matrix.rows)
+        """1D str ndarray of name for each row, suitable for use as row headings."""
+        return self._assembler.row_labels
 
     @lazyproperty
     def row_percentages(self):

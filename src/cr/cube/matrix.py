@@ -86,6 +86,16 @@ class Assembler(object):
         )
 
     @lazyproperty
+    def row_labels(self):
+        """1D str ndarray of row name for each matrix row.
+
+        These are suitable for use as row headings; labels for subtotal rows appear in
+        the sequence and labels are ordered to correspond with their respective data
+        row.
+        """
+        return self._dimension_labels(self._rows_dimension, self._row_order)
+
+    @lazyproperty
     def rows_base(self):
         """1D/2D np.int64 ndarray of unweighted-N for each slice row/cell."""
         # --- an X_MR slice produces a 2D row-base (each cell has its own N) ---

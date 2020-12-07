@@ -149,6 +149,23 @@ class DescribeAssembler(object):
         _assemble_matrix_.assert_called_once_with(assembler, [[[1], [2]], [[3], [4]]])
         assert columns_margin == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
+    def it_knows_the_row_labels(
+        self,
+        _rows_dimension_prop_,
+        dimension_,
+        _row_order_prop_,
+        _dimension_labels_,
+    ):
+        _rows_dimension_prop_.return_value = dimension_
+        _row_order_prop_.return_value = [0, 1, 2]
+        _dimension_labels_.return_value = np.array(["Alpha", "Baker", "Charlie"])
+        assembler = Assembler(None, None, None)
+
+        row_labels = assembler.row_labels
+
+        _dimension_labels_.assert_called_once_with(assembler, dimension_, [0, 1, 2])
+        np.testing.assert_equal(row_labels, ["Alpha", "Baker", "Charlie"])
+
     def it_provides_a_1D_rows_base_for_an_X_CAT_cube_result(
         self,
         _columns_dimension_prop_,

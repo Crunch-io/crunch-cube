@@ -40,7 +40,7 @@ class Describe_Slice(object):
                 [[0.36596253, -0.36596253], [-0.36596253, 0.36596253]],
             ],
         )
-        assert slice_.row_labels == ("B", "C")
+        assert slice_.row_labels.tolist() == ["B", "C"]
         assert slice_.rows_dimension_description == "Pet Owners"
         assert slice_.rows_dimension_fills == (None, None)
         assert slice_.rows_dimension_name == "v4"
@@ -428,7 +428,7 @@ class Describe_Slice(object):
         }
         slice_ = _Slice(Cube(CR.CAT_4_X_CAT_4), 0, transforms, None, 0)
 
-        assert slice_.row_labels == ("Apple", "Banana", "Cherry", "Date")
+        assert slice_.row_labels.tolist() == ["Apple", "Banana", "Cherry", "Date"]
         assert slice_.column_labels.tolist() == [
             "Asparagus",
             "Broccoli",
@@ -497,7 +497,7 @@ class Describe_Slice(object):
         }
         slice_ = Cube(CR.CAT_4_X_CAT_4, transforms=transforms).partitions[0]
 
-        assert slice_.row_labels == (
+        assert slice_.row_labels.tolist() == [
             "Apple+Banana",
             "Banana",
             "Date",
@@ -505,7 +505,7 @@ class Describe_Slice(object):
             "Cherry",
             "Apple",
             "Cherry+Date",
-        )
+        ]
         assert slice_.column_labels.tolist() == [
             "Asparagus+Broccoli",
             "Broccoli",
