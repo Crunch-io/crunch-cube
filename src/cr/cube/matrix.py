@@ -106,6 +106,11 @@ class Assembler(object):
         return tuple(i for i, col_idx in enumerate(self._column_order) if col_idx < 0)
 
     @lazyproperty
+    def inserted_row_idxs(self):
+        """tuple of int index of each subtotal row in slice."""
+        return tuple(i for i, row_idx in enumerate(self._row_order) if row_idx < 0)
+
+    @lazyproperty
     def row_labels(self):
         """1D str ndarray of row name for each matrix row.
 

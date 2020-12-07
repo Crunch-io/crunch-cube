@@ -364,7 +364,8 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def inserted_row_idxs(self):
-        return tuple(i for i, row in enumerate(self._matrix.rows) if row.is_inserted)
+        """tuple of int index of each subtotal row in slice."""
+        return self._assembler.inserted_row_idxs
 
     @lazyproperty
     def insertions(self):

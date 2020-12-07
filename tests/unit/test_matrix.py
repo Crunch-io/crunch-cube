@@ -169,6 +169,10 @@ class DescribeAssembler(object):
         _column_order_prop_.return_value = [2, -1, 0, -2]
         assert Assembler(None, None, None).inserted_column_idxs == (1, 3)
 
+    def it_knows_the_inserted_row_idxs(self, _row_order_prop_):
+        _row_order_prop_.return_value = [0, 1, -2, 2, -1, 3]
+        assert Assembler(None, None, None).inserted_row_idxs == (2, 4)
+
     def it_knows_the_row_labels(
         self,
         _rows_dimension_prop_,
