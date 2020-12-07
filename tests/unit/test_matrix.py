@@ -165,6 +165,10 @@ class DescribeAssembler(object):
         _assemble_matrix_.assert_called_once_with(assembler, [[[1], [2]], [[3], [4]]])
         assert columns_margin == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
+    def it_knows_the_inserted_column_idxs(self, _column_order_prop_):
+        _column_order_prop_.return_value = [2, -1, 0, -2]
+        assert Assembler(None, None, None).inserted_column_idxs == (1, 3)
+
     def it_knows_the_row_labels(
         self,
         _rows_dimension_prop_,

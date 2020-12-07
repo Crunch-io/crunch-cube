@@ -359,9 +359,8 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def inserted_column_idxs(self):
-        return tuple(
-            i for i, column in enumerate(self._matrix.columns) if column.is_inserted
-        )
+        """tuple of int index of each subtotal column in slice."""
+        return self._assembler.inserted_column_idxs
 
     @lazyproperty
     def inserted_row_idxs(self):
