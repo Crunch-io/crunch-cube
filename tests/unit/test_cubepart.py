@@ -299,17 +299,11 @@ class Describe_Slice(object):
             row_proportions, [[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]]
         )
 
-    def it_knows_the_rows_margin(self, request, _matrix_prop_, matrix_):
-        _matrix_prop_.return_value = matrix_
-        matrix_.rows = (
-            instance_mock(request, _VectorAfterHiding, margin=(1, 2)),
-            instance_mock(request, _VectorAfterHiding, margin=(3, 4)),
-        )
-        slice_ = _Slice(None, None, None, None, None)
+    def it_knows_the_rows_margin(self, _assembler_prop_, assembler_):
+        _assembler_prop_.return_value = assembler_
+        assembler_.rows_margin = [[1, 2], [3, 4]]
 
-        rows_margin = slice_.rows_margin
-
-        np.testing.assert_almost_equal(rows_margin, [[1, 2], [3, 4]])
+        assert _Slice(None, None, None, None, None).rows_margin == [[1, 2], [3, 4]]
 
     def it_knows_the_scale_means_column(
         self, request, _columns_dimension_numeric_values_prop_
@@ -428,6 +422,10 @@ class Describe_Slice(object):
     @pytest.fixture
     def assembler_(self, request):
         return instance_mock(request, Assembler)
+
+    @pytest.fixture
+    def _assembler_prop_(self, request):
+        return property_mock(request, _Slice, "_assembler")
 
     @pytest.fixture
     def _columns_dimension_numeric_values_prop_(self, request):

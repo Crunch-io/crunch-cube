@@ -555,7 +555,15 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def rows_margin(self):
-        return np.array([row.margin for row in self._matrix.rows])
+        """1D or 2D np.float/int64 ndarray of weighted-N for each column of slice.
+
+        This array is 2D (a distinct margin value for each cell) when the columns
+        dimension is MR, because each MR-subvariable has its own weighted N. This is
+        because not every possible response is necessarily offered to every respondent.
+
+        In all other cases, the array is 1D, containing one value for each column.
+        """
+        return self._assembler.rows_margin
 
     @lazyproperty
     def row_proportions_moe(self):

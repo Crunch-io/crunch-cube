@@ -505,21 +505,19 @@ class DescribeAssembler(object):
             mask_size=0,
         )
 
-        assert np.array_equal(
-            slice_._assembler.rows_margin, [151, 353, 603, 52, 250, 123, 575]
-        )
+        assert np.array_equal(slice_.rows_margin, [151, 353, 603, 52, 250, 123, 575])
 
     def it_computes_means_cat_x_cat_rows_margin(self):
         slice_ = Cube(CR.MEANS_CAT_HS_X_CAT_HS).partitions[0]
         np.testing.assert_almost_equal(
-            slice_._assembler.rows_margin,
+            slice_.rows_margin,
             np.array([np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan]),
         )
 
     def it_computes_cat_x_mr_rows_margin(self):
         slice_ = Cube(CR.CAT_X_MR_2).partitions[0]
         np.testing.assert_almost_equal(
-            slice_._assembler.rows_margin,
+            slice_.rows_margin,
             np.array(
                 [
                     [21.7886997, 15.7386377, 12.2215027, 20.9530003, 30.9432236],
@@ -535,14 +533,14 @@ class DescribeAssembler(object):
     def it_computes_mr_x_cat_rows_margin(self):
         slice_ = Cube(CR.MR_X_CAT).partitions[0]
         np.testing.assert_almost_equal(
-            slice_._assembler.rows_margin,
+            slice_.rows_margin,
             np.array([31.6315209, 70.7307341, 125.7591136, 366.8883915, 376.7656406]),
         )
 
     def it_computes_mr_x_mr_rows_margin(self):
         slice_ = Cube(CR.MR_X_MR).partitions[0]
         np.testing.assert_almost_equal(
-            slice_._assembler.rows_margin,
+            slice_.rows_margin,
             [
                 [22.9672704, 13.2946142, 20.1898745, 22.9672704],
                 [28.5502092, 45.7789165, 35.6664538, 45.7789165],
