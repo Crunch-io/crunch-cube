@@ -100,6 +100,15 @@ class Assembler(object):
         )
 
     @lazyproperty
+    def rows_margin(self):
+        """1D/2D np.float64 ndarray of weighted-N for each column of this slice.
+
+        This value is a 2D array if one or both of the slice dimensions are MR. This is
+        because each cell has a distinct margin in such a slice.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
     def table_base(self):
         """Scalar, 1D, or 2D ndarray of np.int64 unweighted-N for this slice.
 
