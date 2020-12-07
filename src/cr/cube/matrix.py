@@ -44,6 +44,11 @@ class Assembler(object):
         self._slice_idx = slice_idx
 
     @lazyproperty
+    def column_index(self):
+        """2D np.float64 ndarray of column-index "percentage" for each table cell."""
+        raise NotImplementedError
+
+    @lazyproperty
     def column_labels(self):
         """1D str ndarray of column name for each matrix column.
 

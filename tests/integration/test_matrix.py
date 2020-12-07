@@ -3,6 +3,7 @@
 """Integration-test suite for `cr.cube.cubepart` module."""
 
 import numpy as np
+import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.cubepart import _Slice
@@ -547,4 +548,88 @@ class DescribeAssembler(object):
                 [70.8068713, 53.0615517, 86.9728288, 86.9728288],
                 [100.7142240, 95.8683881, 119.4044105, 130.6784687],
             ],
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_column_index_for_cat_hs_x_cat_hs_hiddens_explicit_order(self):
+        slice_ = _Slice(
+            Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),
+            slice_idx=0,
+            transforms={
+                "rows_dimension": {
+                    "elements": {"2": {"hide": True}},
+                    "prune": True,
+                    "order": {"type": "explicit", "element_ids": [0, 5, 2, 1, 4]},
+                },
+                "columns_dimension": {
+                    "elements": {"2": {"hide": True}},
+                    "prune": True,
+                    "order": {"type": "explicit", "element_ids": [4, 2, 5, 0]},
+                },
+            },
+            population=None,
+            mask_size=0,
+        )
+
+        np.testing.assert_almost_equal(
+            slice_._assembler.column_index,
+            np.array(
+                [
+                    [np.nan, np.nan, np.nan, np.nan, np.nan],
+                    [np.nan, 143.9988976, np.nan, 84.6836779, np.nan],
+                    [np.nan, np.nan, np.nan, np.nan, np.nan],
+                    [np.nan, 61.9136961, np.nan, 198.3657368, np.nan],
+                    [np.nan, 88.0000000, np.nan, 85.0989011, np.nan],
+                    [np.nan, 49.3658537, np.nan, 126.3589744, np.nan],
+                    [np.nan, np.nan, np.nan, np.nan, np.nan],
+                ]
+            ),
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_cat_x_mr_column_index(self):
+        slice_ = Cube(CR.CAT_X_MR_2).partitions[0]
+        np.testing.assert_almost_equal(
+            slice_._assembler.column_index,
+            np.array(
+                [
+                    [658.3848782, 189.796643, 33.5334594, 57.3979578, 95.9364833],
+                    [120.0355512, 110.5888219, 96.7970596, 73.4819881, 121.190955],
+                    [np.nan, np.nan, np.nan, np.nan, np.nan],
+                    [37.2110379, 99.0983551, 114.4138644, 101.4010835, 97.0906317],
+                    [56.1256863, 82.3029403, 99.6433204, 115.8322464, 94.9758447],
+                    [np.nan, np.nan, np.nan, np.nan, np.nan],
+                ]
+            ),
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_mr_x_cat_column_index(self):
+        slice_ = Cube(CR.MR_X_CAT).partitions[0]
+        np.testing.assert_almost_equal(
+            slice_._assembler.column_index,
+            np.array(
+                [
+                    [356.7933052, 103.5935382, np.nan, 39.5493673, 65.7425846, np.nan],
+                    [170.6958892, 92.0537803, np.nan, 96.542201, 93.2952896, np.nan],
+                    [45.5098681, 93.9644011, np.nan, 109.3514342, 100.5204994, np.nan],
+                    [83.763346, 85.3581548, np.nan, 99.1660877, 106.6073023, np.nan],
+                    [97.80107, 103.9131364, np.nan, 97.8651086, 99.999255, np.nan],
+                ]
+            ),
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_mr_x_mr_column_index(self):
+        slice_ = Cube(CR.MR_X_MR).partitions[0]
+        np.testing.assert_almost_equal(
+            slice_._assembler.column_index,
+            np.array(
+                [
+                    [722.7771838, 96.1467363, 89.5610897, 164.8249708],
+                    [88.5281989, 309.8974187, 72.8221888, 147.9817106],
+                    [90.4349646, 72.7520838, 208.1036286, 151.580341],
+                    [181.0082575, 181.0082575, 181.0082575, 181.0082575],
+                ]
+            ),
         )
