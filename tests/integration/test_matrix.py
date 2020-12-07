@@ -424,7 +424,6 @@ class DescribeAssembler(object):
             ],
         )
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_columns_margin_for_cat_hs_x_cat_hs_hiddens_explicit_order(self):
         slice_ = _Slice(
             Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),
@@ -449,7 +448,6 @@ class DescribeAssembler(object):
             slice_._assembler.columns_margin, [549, 328, 276, 273, 328]
         )
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_means_cat_x_cat_columns_margin(self):
         slice_ = Cube(CR.MEANS_CAT_HS_X_CAT_HS).partitions[0]
         np.testing.assert_almost_equal(
@@ -457,7 +455,6 @@ class DescribeAssembler(object):
             np.array([np.nan, np.nan, np.nan, np.nan, np.nan]),
         )
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_cat_x_mr_columns_margin(self):
         slice_ = Cube(CR.CAT_X_MR_2).partitions[0]
         np.testing.assert_almost_equal(

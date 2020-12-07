@@ -1232,6 +1232,10 @@ class Describe_CatXCatMatrix(object):
         matrix = _CatXCatMatrix(None, None, np.array([[1, 2, 3], [4, 5, 6]]))
         np.testing.assert_equal(matrix.columns_base, np.array([5, 7, 9]))
 
+    def it_knows_its_columns_margin(self):
+        matrix = _CatXCatMatrix(None, np.array([[1, 2, 3], [4, 5, 6]]), None)
+        np.testing.assert_equal(matrix.columns_margin, np.array([5, 7, 9]))
+
     @pytest.mark.parametrize(
         ("unweighted_counts", "expected"),
         (
