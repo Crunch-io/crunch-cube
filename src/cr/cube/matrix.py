@@ -1269,7 +1269,23 @@ class _MrXCatMatrix(_CatXCatMatrix):
         included. This ensures that the baseline is not distorted by a large number of
         missing responses to the columns-question.
         """
-        raise NotImplementedError
+        # --- unconditional row-margin is a 1D ndarray of size nrows computed by:
+        # --- 1. summing across all columns: np.sum(self._counts_with_missings, axis=2)
+        # --- 2. taking only selected counts: [:, 0]
+        # --- 3. taking only valid rows: [self._valid_row_idxs]
+        uncond_row_margin = np.sum(self._counts_with_missings, axis=2)[:, 0][
+            self._valid_row_idxs
+        ]
+        # --- The "total" (uncond_row_table_margin) is a 1D ndarray of size nrows. Each
+        # --- sum includes only valid rows (MR_SUBVAR, axis 0), selected and unselected
+        # --- but not missing counts ([0:2]) of the MR_CAT axis (axis 1), and all column
+        # --- counts, both valid and missing (axis 2). The rows axis (0) is preserved
+        # --- because each MR subvar has a distinct table margin.
+        uncond_row_table_margin = np.sum(
+            self._counts_with_missings[self._valid_row_idxs][:, 0:2], axis=(1, 2)
+        )
+        # --- inflate shape to (nrows, 1) for later calculation convenience ---
+        return (uncond_row_margin / uncond_row_table_margin)[:, None]
 
 
 class _MrXCatMeansMatrix(_MrXCatMatrix):
@@ -1435,6 +1451,6 @@ class _MrXMrMatrix(_CatXCatMatrix):
 
         The shape is (nrows, ncols) and all values in a given row are the same. So
         really there are only nrows distinct baseline values, but the returned shape
-        makes calculating zscores in a general way more convenient.
+        makes calculating column-index in a general way more convenient.
         """
         raise NotImplementedError
