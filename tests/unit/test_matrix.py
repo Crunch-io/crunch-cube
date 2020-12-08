@@ -1258,11 +1258,41 @@ class Describe_ZscoreSubtotals(object):
 
         assert subtotals._base_values == [[1, 2], [3, 4]]
 
+    def it_can_compute_a_subtotal_column_to_help(
+        self,
+        subtotal_,
+        _base_counts_prop_,
+        _table_margin_prop_,
+        cube_result_matrix_,
+    ):
+        subtotal_.addend_idxs = np.array([0, 1])
+        _base_counts_prop_.return_value = np.arange(12).reshape(3, 4)
+        cube_result_matrix_.rows_margin = np.array([6, 22, 38])
+        _table_margin_prop_.return_value = 66
+        subtotals = _ZscoreSubtotals(cube_result_matrix_, None)
+
+        np.testing.assert_almost_equal(
+            subtotals._subtotal_column(subtotal_),
+            np.array([-1.2667117, 0.0, 0.7368146]),
+        )
+
     # --- fixture components -----------------------------------------
+
+    @pytest.fixture
+    def _base_counts_prop_(self, request):
+        return property_mock(request, _ZscoreSubtotals, "_base_counts")
 
     @pytest.fixture
     def cube_result_matrix_(self, request):
         return instance_mock(request, _BaseCubeResultMatrix)
+
+    @pytest.fixture
+    def subtotal_(self, request):
+        return instance_mock(request, _Subtotal)
+
+    @pytest.fixture
+    def _table_margin_prop_(self, request):
+        return property_mock(request, _ZscoreSubtotals, "_table_margin")
 
 
 # === CUBE-RESULT MATRIX OBJECTS ===

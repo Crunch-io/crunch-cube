@@ -472,6 +472,11 @@ class _BaseSubtotals(object):
         return cls(cube_result_matrix, measure_propname)._blocks
 
     @lazyproperty
+    def _base_counts(self):
+        """2D np.float64 ndarray of weighted-count for each cell of base matrix."""
+        raise NotImplementedError
+
+    @lazyproperty
     def _base_values(self):
         """2D ndarray of "body" values from cube-result matrix."""
         if self._measure_propname is None:
@@ -573,6 +578,11 @@ class _BaseSubtotals(object):
             [self._subtotal_row(subtotal) for subtotal in self._row_subtotals]
         )
 
+    @lazyproperty
+    def _table_margin(self):
+        """Scalar or ndarray table-margin of cube-result matrix."""
+        raise NotImplementedError
+
 
 class _NanSubtotals(_BaseSubtotals):
     """Subtotal blocks for measures that cannot meaningfully be subtotaled.
@@ -625,6 +635,38 @@ class _ZscoreSubtotals(_BaseSubtotals):
     def _base_values(self):
         """2D np.float64 ndarray of z-score for each cell of cube-result matrix."""
         return self._cube_result_matrix.zscores
+
+    def _subtotal_column(self, subtotal):
+        """Return (n_rows,) ndarray of table-stderr `subtotal` value."""
+        # --- the weighted-counts version of this subtotal-column ---
+        subtotal_counts = np.sum(self._base_counts[:, subtotal.addend_idxs], axis=1)
+
+        # --- subtotal-margin is scalar, like 547 ---
+        subtotal_margin = np.sum(subtotal_counts)
+
+        # --- base-rows-margin is 1D because no MR dimensions ---
+        opposing_margin = self._cube_result_matrix.rows_margin
+
+        # --- table_margin is scalar because no MR dimensions ---
+        table_margin = self._table_margin
+
+        # --- expected_counts is 1D ---
+        expected_counts = opposing_margin * subtotal_margin / table_margin
+
+        # --- residuals is 1D, like: [ 11.04819 -37.72836  43.35049 -16.67031]
+        residuals = subtotal_counts - expected_counts
+
+        # --- variance is 1D, like: [12.413837 49.173948 53.980069 29.783739] ---
+        variance = (
+            opposing_margin
+            * subtotal_margin
+            * ((table_margin - opposing_margin) * (table_margin - subtotal_margin))
+            / table_margin ** 3
+        )
+
+        # --- result is scalar or 1D, depending on dimensionality of residuals ---
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return residuals / np.sqrt(variance)
 
 
 # === CUBE-RESULT MATRIX OBJECTS ===
