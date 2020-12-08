@@ -558,6 +558,10 @@ class _NanSubtotals(_BaseSubtotals):
     Each subtotal value (and intersection value) is `np.nan`.
     """
 
+    def _subtotal_column(self, subtotal):
+        """Return (n_rows,) ndarray of np.nan values."""
+        return np.full(self._nrows, np.nan)
+
 
 class _SumSubtotals(_BaseSubtotals):
     """Subtotal "blocks" created by np.sum() on addends, primarily counts."""

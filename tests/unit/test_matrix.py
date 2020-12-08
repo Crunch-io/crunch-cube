@@ -17,6 +17,7 @@ from cr.cube.matrix import (
     _CatXMrMatrix,
     _MrXCatMatrix,
     _MrXMrMatrix,
+    _NanSubtotals,
     _SumSubtotals,
 )
 
@@ -1082,6 +1083,19 @@ class Describe_BaseSubtotals(object):
     @pytest.fixture
     def _subtotal_row_(self, request):
         return method_mock(request, _BaseSubtotals, "_subtotal_row")
+
+
+class Describe_NanSubtotals(object):
+    """Unit test suite for `cr.cube.matrix._NanSubtotals` object."""
+
+    def it_can_compute_a_subtotal_column_to_help(self, request):
+        property_mock(request, _NanSubtotals, "_nrows", return_value=3)
+        subtotals = _NanSubtotals(None, None)
+
+        np.testing.assert_equal(
+            subtotals._subtotal_column(None),
+            np.array([np.nan] * 3),
+        )
 
 
 class Describe_SumSubtotals(object):
