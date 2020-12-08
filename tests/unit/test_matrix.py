@@ -1023,7 +1023,13 @@ class Describe_BaseSubtotals(object):
             [base_subtotals._subtotal_rows, base_subtotals._intersections],
         ]
 
-    def it_provides_access_to_the_column_subtotals(
+    def it_provides_access_to_the_base_counts_to_help(self, cube_result_matrix_):
+        cube_result_matrix_.weighted_counts = [[1, 2], [3, 4]]
+        subtotals = _BaseSubtotals(cube_result_matrix_, None)
+
+        assert subtotals._base_counts == [[1, 2], [3, 4]]
+
+    def it_provides_access_to_the_column_subtotals_to_help(
         self, cube_result_matrix_, dimension_
     ):
         cube_result_matrix_.columns_dimension = dimension_

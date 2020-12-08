@@ -474,7 +474,7 @@ class _BaseSubtotals(object):
     @lazyproperty
     def _base_counts(self):
         """2D np.float64 ndarray of weighted-count for each cell of base matrix."""
-        raise NotImplementedError
+        return self._cube_result_matrix.weighted_counts
 
     @lazyproperty
     def _base_values(self):
