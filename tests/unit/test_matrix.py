@@ -556,6 +556,74 @@ class DescribeAssembler(object):
         _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
         assert weighted_counts == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
+    def it_computes_zscores_for_a_CAT_X_CAT_slice(
+        self,
+        request,
+        _rows_dimension_prop_,
+        _columns_dimension_prop_,
+        _cube_result_matrix_prop_,
+        cube_result_matrix_,
+        _ZscoreSubtotals_,
+        _assemble_matrix_,
+    ):
+        _rows_dimension_prop_.return_value = instance_mock(
+            request, Dimension, dimension_type=DT.CAT
+        )
+        _columns_dimension_prop_.return_value = instance_mock(
+            request, Dimension, dimension_type=DT.CAT
+        )
+        _cube_result_matrix_prop_.return_value = cube_result_matrix_
+        _ZscoreSubtotals_.blocks.return_value = [[[4], [3]], [[2], [1]]]
+        _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6]]
+        assembler = Assembler(None, None, None)
+
+        zscores = assembler.zscores
+
+        _ZscoreSubtotals_.blocks.assert_called_once_with(cube_result_matrix_)
+        _assemble_matrix_.assert_called_once_with(assembler, [[[4], [3]], [[2], [1]]])
+        assert zscores == [[1, 2, 3], [4, 5, 6]]
+
+    @pytest.mark.parametrize(
+        "rows_dim_type, cols_dim_type",
+        (
+            (DT.CAT, DT.MR),
+            (DT.MR, DT.CAT),
+            (DT.MR, DT.MR),
+        ),
+    )
+    def but_it_provides_zscores_with_NaN_subtotals_when_cube_has_an_MR_dimension(
+        self,
+        request,
+        _rows_dimension_prop_,
+        rows_dim_type,
+        _columns_dimension_prop_,
+        cols_dim_type,
+        _cube_result_matrix_prop_,
+        cube_result_matrix_,
+        _NanSubtotals_,
+        _assemble_matrix_,
+    ):
+        _rows_dimension_prop_.return_value = instance_mock(
+            request, Dimension, dimension_type=rows_dim_type
+        )
+        _columns_dimension_prop_.return_value = instance_mock(
+            request, Dimension, dimension_type=cols_dim_type
+        )
+        _cube_result_matrix_prop_.return_value = cube_result_matrix_
+        _NanSubtotals_.blocks.return_value = [[[1], [np.nan]], [[3], []]]
+        _assemble_matrix_.return_value = [[1, np.nan, 3], [4, np.nan, 6]]
+        assembler = Assembler(None, None, None)
+
+        zscores = assembler.zscores
+
+        _NanSubtotals_.blocks.assert_called_once_with(cube_result_matrix_, "zscores")
+        _assemble_matrix_.assert_called_once_with(
+            assembler, [[[1], [np.nan]], [[3], []]]
+        )
+        assert zscores == [[1, np.nan, 3], [4, np.nan, 6]]
+
+    # === implementation methods/properties ===
+
     @pytest.mark.parametrize(
         "row_order, col_order, blocks, expected_value",
         (
@@ -903,6 +971,10 @@ class DescribeAssembler(object):
     @pytest.fixture
     def _SumSubtotals_(self, request):
         return class_mock(request, "cr.cube.matrix._SumSubtotals")
+
+    @pytest.fixture
+    def _ZscoreSubtotals_(self, request):
+        return class_mock(request, "cr.cube.matrix._ZscoreSubtotals")
 
 
 # === SUBTOTALS OBJECTS ===

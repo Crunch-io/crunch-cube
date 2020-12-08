@@ -279,7 +279,16 @@ class Assembler(object):
         deviations above (positive) or below (negative) the population mean a cell's
         value is.
         """
-        raise NotImplementedError
+        # --- punt except on CAT_X_CAT (if any MR dimensions it gets np.nans) ---
+        if (
+            self._rows_dimension.dimension_type == DT.MR_SUBVAR
+            or self._columns_dimension.dimension_type == DT.MR_SUBVAR
+        ):
+            return self._assemble_matrix(
+                _NanSubtotals.blocks(self._cube_result_matrix, "zscores")
+            )
+
+        return self._assemble_matrix(_ZscoreSubtotals.blocks(self._cube_result_matrix))
 
     def _assemble_matrix(self, blocks):
         """Return 2D ndarray matrix assembled from `blocks`.
@@ -602,6 +611,14 @@ class _SumSubtotals(_BaseSubtotals):
     def _subtotal_row(self, subtotal):
         """Return (n_cols,) ndarray of values for `subtotal` row."""
         return np.sum(self._base_values[subtotal.addend_idxs, :], axis=0)
+
+
+class _ZscoreSubtotals(_BaseSubtotals):
+    """Computes subtotal values for the z-score measure.
+
+    This is only operative for a CAT_X_CAT cube-result; an MR dimension causes all
+    subtotals to be computed (elsewhere) as `np.nan`.
+    """
 
 
 # === CUBE-RESULT MATRIX OBJECTS ===
@@ -1121,6 +1138,16 @@ class _CatXMrMatrix(_CatXCatMatrix):
         return self._weighted_counts[:, :, 0]
 
     @lazyproperty
+    def zscores(self):
+        """2D ndarray of np.float64 std-res value for each cell of matrix.
+
+        A z-score is also known as a *standard score* and is the number of standard
+        deviations above (positive) or below (negative) the population mean each cell's
+        value is.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
     def _baseline(self):
         """2D np.float64 (or NaN) ndarray of baseline value for each matrix cell.
 
@@ -1255,6 +1282,11 @@ class _MrXCatMatrix(_CatXCatMatrix):
         these values are the same as the unweighted-counts.
         """
         return self._weighted_counts[:, 0, :]
+
+    @lazyproperty
+    def zscores(self):
+        """2D np.float64 ndarray of z-score for each matrix cell."""
+        raise NotImplementedError
 
     @lazyproperty
     def _baseline(self):
@@ -1454,6 +1486,16 @@ class _MrXMrMatrix(_CatXCatMatrix):
         contribute to these values.
         """
         return self._weighted_counts[:, 0, :, 0]
+
+    @lazyproperty
+    def zscores(self):
+        """2D ndarray of np.float64 std-res value for each cell of matrix.
+
+        A z-score is also known as a *standard score* and is the number of standard
+        deviations above (positive) or below (negative) the population mean each cell's
+        value is.
+        """
+        raise NotImplementedError
 
     @lazyproperty
     def _baseline(self):
