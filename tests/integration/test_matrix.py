@@ -550,7 +550,6 @@ class DescribeAssembler(object):
             ],
         )
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_column_index_for_cat_hs_x_cat_hs_hiddens_explicit_order(self):
         slice_ = _Slice(
             Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),

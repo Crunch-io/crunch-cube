@@ -568,6 +568,10 @@ class _NanSubtotals(_BaseSubtotals):
         """Return (n_rows,) ndarray of np.nan values."""
         return np.full(self._nrows, np.nan)
 
+    def _subtotal_row(self, subtotal):
+        """Return (n_cols,) ndarray of np.nan values."""
+        return np.full(self._ncols, np.nan)
+
 
 class _SumSubtotals(_BaseSubtotals):
     """Subtotal "blocks" created by np.sum() on addends, primarily counts."""
@@ -582,7 +586,7 @@ class _SumSubtotals(_BaseSubtotals):
         return np.sum(self._subtotal_row(row_subtotal)[column_subtotal.addend_idxs])
 
     def _subtotal_column(self, subtotal):
-        """Return (n_rows,) ndarray of np.nan values."""
+        """Return (n_rows,) ndarray of values for `subtotal` column."""
         return np.sum(self._base_values[:, subtotal.addend_idxs], axis=1)
 
     def _subtotal_row(self, subtotal):

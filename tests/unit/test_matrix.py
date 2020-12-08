@@ -1100,6 +1100,15 @@ class Describe_NanSubtotals(object):
             np.array([np.nan] * 3),
         )
 
+    def it_can_compute_a_subtotal_row_to_help(self, request):
+        property_mock(request, _NanSubtotals, "_ncols", return_value=4)
+        subtotals = _NanSubtotals(None, None)
+
+        np.testing.assert_equal(
+            subtotals._subtotal_row(None),
+            np.array([np.nan] * 4),
+        )
+
 
 class Describe_SumSubtotals(object):
     """Unit test suite for `cr.cube.matrix._SubSubtotals` object."""
