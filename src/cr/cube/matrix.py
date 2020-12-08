@@ -833,7 +833,7 @@ class _CatXCatMatrix(_BaseCubeResultMatrix):
         would indicate hispanics are 50% more likely to own their home than the general
         population (or the population surveyed anyway).
         """
-        raise NotImplementedError
+        return self.column_proportions / self._baseline * 100
 
     @lazyproperty
     def columns_base(self):
@@ -914,6 +914,30 @@ class _CatXCatMatrix(_BaseCubeResultMatrix):
         these values are the same as the unweighted-counts.
         """
         return self._weighted_counts
+
+    @lazyproperty
+    def _baseline(self):
+        """2D np.float64 ndarray of baseline value for each row in matrix.
+
+        The shape of the return value is (nrows, 1). The baseline value for a row is the
+        proportion of all values that appear in that row. A baseline for a 4 x 3 matrix
+        looks like this:
+
+            [[0.2006734 ]
+             [0.72592593]
+             [0.05521886]
+             [0.01818182]]
+
+        Note that the baseline values sum to 1.0. This is because each represents the
+        portion of all responses that fall in that row. This baseline value is the
+        denominator of the `._column_index` computation.
+
+        Baseline is a straightforward function of the *unconditional row margin*.
+        Unconditional here means that both valid and invalid responses (to the
+        columns-var question) are included. This ensures that the baseline is not
+        distorted by a large number of missing responses to the columns-question.
+        """
+        raise NotImplementedError
 
 
 class _CatXCatMeansMatrix(_CatXCatMatrix):

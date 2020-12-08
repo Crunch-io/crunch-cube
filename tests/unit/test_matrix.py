@@ -1373,6 +1373,25 @@ class Describe_BaseCubeResultMatrix(object):
 class Describe_CatXCatMatrix(object):
     """Unit test suite for `cr.cube.matrix._CatXCatMatrix` object."""
 
+    def it_knows_its_columns_index(self, request):
+        property_mock(
+            request,
+            _CatXCatMatrix,
+            "column_proportions",
+            return_value=np.array([[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]]),
+        )
+        property_mock(
+            request,
+            _CatXCatMatrix,
+            "_baseline",
+            return_value=np.array([[0.2], [0.8]]),
+        )
+        matrix = _CatXCatMatrix(None, None, None)
+
+        np.testing.assert_almost_equal(
+            matrix.column_index, np.array([[50.0, 100.0, 150.0], [50.0, 62.5, 75.0]])
+        )
+
     def it_knows_its_columns_base(self):
         matrix = _CatXCatMatrix(None, None, np.array([[1, 2, 3], [4, 5, 6]]))
         np.testing.assert_equal(matrix.columns_base, np.array([5, 7, 9]))
