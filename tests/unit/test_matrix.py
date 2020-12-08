@@ -32,6 +32,28 @@ from ..unitutil import (
 class DescribeAssembler(object):
     """Unit test suite for `cr.cube.matrix.Assembler` object."""
 
+    def it_knows_the_column_index(
+        self,
+        _cube_result_matrix_prop_,
+        cube_result_matrix_,
+        _NanSubtotals_,
+        _assemble_matrix_,
+    ):
+        _cube_result_matrix_prop_.return_value = cube_result_matrix_
+        _NanSubtotals_.blocks.return_value = [[[1], [np.nan]], [[3], []]]
+        _assemble_matrix_.return_value = [[1, np.nan, 3], [4, np.nan, 6]]
+        assembler = Assembler(None, None, None)
+
+        column_index = assembler.column_index
+
+        _NanSubtotals_.blocks.assert_called_once_with(
+            cube_result_matrix_, "column_index"
+        )
+        _assemble_matrix_.assert_called_once_with(
+            assembler, [[[1], [np.nan]], [[3], []]]
+        )
+        assert column_index == [[1, np.nan, 3], [4, np.nan, 6]]
+
     def it_knows_the_column_labels(
         self,
         _columns_dimension_prop_,
@@ -856,6 +878,10 @@ class DescribeAssembler(object):
     @pytest.fixture
     def _empty_row_idxs_prop_(self, request):
         return property_mock(request, Assembler, "_empty_row_idxs")
+
+    @pytest.fixture
+    def _NanSubtotals_(self, request):
+        return class_mock(request, "cr.cube.matrix._NanSubtotals")
 
     @pytest.fixture
     def _row_order_prop_(self, request):

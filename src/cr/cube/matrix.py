@@ -46,7 +46,9 @@ class Assembler(object):
     @lazyproperty
     def column_index(self):
         """2D np.float64 ndarray of column-index "percentage" for each table cell."""
-        raise NotImplementedError
+        return self._assemble_matrix(
+            _NanSubtotals.blocks(self._cube_result_matrix, "column_index")
+        )
 
     @lazyproperty
     def column_labels(self):
@@ -550,6 +552,13 @@ class _BaseSubtotals(object):
         )
 
 
+class _NanSubtotals(_BaseSubtotals):
+    """Subtotal blocks for measures that cannot meaningfully be subtotaled.
+
+    Each subtotal value (and intersection value) is `np.nan`.
+    """
+
+
 class _SumSubtotals(_BaseSubtotals):
     """Subtotal "blocks" created by np.sum() on addends, primarily counts."""
 
@@ -811,6 +820,20 @@ class _CatXCatMatrix(_BaseCubeResultMatrix):
             dimensions, weighted_counts, unweighted_counts
         )
         self._counts_with_missings = counts_with_missings
+
+    @lazyproperty
+    def column_index(self):
+        """2D np.float64/np.nan ndarray of column-index value for each matrix cell.
+
+        Column-index answers the question "are respondents in this row-category more or
+        less likely than the overall table population to choose the answer represented
+        by this column?". For example, if the row is "Hispanic" and the column is
+        home-ownership, a value of 100 indicates hispanics are no less and no more
+        likely to own their home than the overall population. If that value was 150, it
+        would indicate hispanics are 50% more likely to own their home than the general
+        population (or the population surveyed anyway).
+        """
+        raise NotImplementedError
 
     @lazyproperty
     def columns_base(self):
