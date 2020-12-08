@@ -630,7 +630,6 @@ class DescribeAssembler(object):
             ),
         )
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_cat_hs_x_cat_hs_zscore_subtotals(self):
         slice_ = Cube(CR.CAT_HS_X_CAT_HS).partitions[0]
         np.testing.assert_almost_equal(

@@ -636,6 +636,44 @@ class _ZscoreSubtotals(_BaseSubtotals):
         """2D np.float64 ndarray of z-score for each cell of cube-result matrix."""
         return self._cube_result_matrix.zscores
 
+    def _intersection(self, row_subtotal, column_subtotal):
+        """Return value for intersection of `row_subtotal` and `column_subtotal`."""
+        row_subtotal_counts = np.sum(
+            self._base_counts[row_subtotal.addend_idxs, :], axis=0
+        )
+
+        # --- the weighted-counts version of this intersection cell ---
+        intersection_count = np.sum(row_subtotal_counts[column_subtotal.addend_idxs])
+
+        # --- subtotal-margin is scalar, like 547 ---
+        subtotal_margin = np.sum(row_subtotal_counts)
+
+        # --- opposite-margin is scalar because no MR dimensions ---
+        opposite_margin = np.sum(
+            self._cube_result_matrix.columns_margin[column_subtotal.addend_idxs]
+        )
+
+        # --- table_margin is scalar because no MR dimensions ---
+        table_margin = self._table_margin
+
+        # --- expected_count is scalar ---
+        expected_count = opposite_margin * subtotal_margin / table_margin
+
+        # --- residuals is scalar ---
+        residuals = intersection_count - expected_count
+
+        # --- variance is scalar (I think) ---
+        variance = (
+            opposite_margin
+            * subtotal_margin
+            * ((table_margin - opposite_margin) * (table_margin - subtotal_margin))
+            / table_margin ** 3
+        )
+
+        # --- result is scalar ---
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return residuals / np.sqrt(variance)
+
     def _subtotal_column(self, subtotal):
         """Return (n_rows,) ndarray of zscore `subtotal` value."""
         # --- the weighted-counts version of this subtotal-column ---

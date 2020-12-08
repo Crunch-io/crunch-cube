@@ -1274,6 +1274,25 @@ class Describe_ZscoreSubtotals(object):
 
         assert subtotals._base_values == [[1, 2], [3, 4]]
 
+    def it_can_compute_a_subtotal_intersection_to_help(
+        self,
+        request,
+        _base_counts_prop_,
+        cube_result_matrix_,
+        _table_margin_prop_,
+    ):
+        row_subtotal_ = instance_mock(request, _Subtotal, addend_idxs=np.array([0, 1]))
+        col_subtotal_ = instance_mock(request, _Subtotal, addend_idxs=np.array([0, 1]))
+        _base_counts_prop_.return_value = np.arange(12).reshape(3, 4)
+        cube_result_matrix_.columns_margin = np.array([12, 15, 18, 21])
+        _table_margin_prop_.return_value = 66
+        subtotals = _ZscoreSubtotals(cube_result_matrix_, None)
+
+        np.testing.assert_almost_equal(
+            subtotals._intersection(row_subtotal_, col_subtotal_),
+            -0.7368146,
+        )
+
     def it_can_compute_a_subtotal_column_to_help(
         self,
         subtotal_,
