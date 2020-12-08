@@ -1621,6 +1621,35 @@ class Describe_CatXCatMatrix(object):
             weighted_counts,
         )
 
+    def it_knows_its_zscores(self):
+        weighted_counts = np.array([[3, 2, 1], [6, 5, 4]])
+        matrix = _CatXCatMatrix(None, weighted_counts, None)
+
+        np.testing.assert_almost_equal(
+            matrix.zscores,
+            np.array([[0.41833001, 0.0, -0.48605555], [-0.41833001, 0.0, 0.48605555]]),
+        )
+
+    @pytest.mark.parametrize(
+        "weighted_counts, expected_value",
+        (
+            (
+                np.array([[1, 2], [0, 0]]),
+                np.array([[np.nan, np.nan], [np.nan, np.nan]]),
+            ),
+            (
+                np.array([[0, 2], [0, 4]]),
+                np.array([[np.nan, np.nan], [np.nan, np.nan]]),
+            ),
+        ),
+    )
+    def but_its_zscores_are_NaNs_for_a_deficient_matrix(
+        self, weighted_counts, expected_value
+    ):
+        np.testing.assert_almost_equal(
+            _CatXCatMatrix(None, weighted_counts, None).zscores, expected_value
+        )
+
     def it_knows_its_baseline_to_help(self, request):
         property_mock(
             request, _CatXCatMatrix, "_valid_row_idxs", return_value=np.array([0, 1])

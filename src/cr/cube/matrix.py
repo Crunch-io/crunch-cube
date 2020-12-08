@@ -10,6 +10,7 @@ either hidden by the user or "pruned" because they contain no observations.
 """
 
 import numpy as np
+from scipy.stats.contingency import expected_freq
 
 from cr.cube.collator import ExplicitOrderCollator, PayloadOrderCollator
 from cr.cube.enums import COLLATION_METHOD as CM, DIMENSION_TYPE as DT
@@ -995,6 +996,36 @@ class _CatXCatMatrix(_BaseCubeResultMatrix):
         these values are the same as the unweighted-counts.
         """
         return self._weighted_counts
+
+    @lazyproperty
+    def zscores(self):
+        """2D ndarray of np.float64 std-res value for each cell of matrix.
+
+        A z-score is also known as a *standard score* and is the number of standard
+        deviations above (positive) or below (negative) the population mean a cell's
+        value is.
+        """
+        counts = self._weighted_counts
+
+        # --- If the matrix is "defective", in the sense that it doesn't have at least
+        # --- two rows and two columns that are "full" of data, don't calculate zscores.
+        if not np.all(counts.shape) or np.linalg.matrix_rank(counts) < 2:
+            return np.full(counts.shape, np.nan)
+
+        residuals = counts - expected_freq(counts)
+
+        # --- variance of the residuals ---
+        rows_margin = self.rows_margin
+        columns_margin = self.columns_margin
+        table_margin = self.table_margin
+        variance_of_residuals = (
+            np.outer(rows_margin, columns_margin)
+            * np.outer(table_margin - rows_margin, table_margin - columns_margin)
+            / table_margin ** 3
+        )
+
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return residuals / np.sqrt(variance_of_residuals)
 
     @lazyproperty
     def _baseline(self):
