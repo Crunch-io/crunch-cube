@@ -19,6 +19,7 @@ from cr.cube.matrix import (
     _MrXMrMatrix,
     _NanSubtotals,
     _SumSubtotals,
+    _ZscoreSubtotals,
 )
 
 from ..unitutil import (
@@ -1183,7 +1184,7 @@ class Describe_NanSubtotals(object):
 
 
 class Describe_SumSubtotals(object):
-    """Unit test suite for `cr.cube.matrix._SubSubtotals` object."""
+    """Unit test suite for `cr.cube.matrix._SumSubtotals` object."""
 
     @pytest.mark.parametrize(
         ("row_idxs", "col_idxs", "expected_value"),
@@ -1246,6 +1247,22 @@ class Describe_SumSubtotals(object):
     @pytest.fixture
     def subtotal_(self, request):
         return instance_mock(request, _Subtotal)
+
+
+class Describe_ZscoreSubtotals(object):
+    """Unit test suite for `cr.cube.matrix._ZscoreSubtotals` object."""
+
+    def it_provides_access_to_the_base_values_to_help(self, cube_result_matrix_):
+        cube_result_matrix_.zscores = [[1, 2], [3, 4]]
+        subtotals = _ZscoreSubtotals(cube_result_matrix_, None)
+
+        assert subtotals._base_values == [[1, 2], [3, 4]]
+
+    # --- fixture components -----------------------------------------
+
+    @pytest.fixture
+    def cube_result_matrix_(self, request):
+        return instance_mock(request, _BaseCubeResultMatrix)
 
 
 # === CUBE-RESULT MATRIX OBJECTS ===
