@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from cr.cube.cube import Cube
-from cr.cube.dimension import Dimension, _Element, _Subtotal, _Subtotals
+from cr.cube.dimension import Dimension, _Element, _Subtotal, _Subtotals, _ValidElements
 from cr.cube.enums import COLLATION_METHOD as CM, DIMENSION_TYPE as DT
 from cr.cube.matrix import (
     Assembler,
@@ -1378,6 +1378,14 @@ class Describe_BaseCubeResultMatrix(object):
         counts, unweighted, with_missing = sliced_counts
         assert counts.tolist() == expected
         assert unweighted.tolist() == expected
+
+    def it_produces_a_valid_row_indexer_to_help(self, request, dimension_):
+        dimension_.valid_elements = instance_mock(
+            request, _ValidElements, element_idxs=(0, 1, 2)
+        )
+        matrix = _BaseCubeResultMatrix((dimension_, None), None, None)
+
+        np.testing.assert_equal(matrix._valid_row_idxs, np.array([[0, 1, 2]]))
 
     # fixture components ---------------------------------------------
 

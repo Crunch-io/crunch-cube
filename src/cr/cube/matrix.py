@@ -819,7 +819,7 @@ class _BaseCubeResultMatrix(object):
 
         Suitable for indexing a raw measure array to include only valid rows.
         """
-        raise NotImplementedError
+        return np.ix_(self._dimensions[-2].valid_elements.element_idxs)
 
 
 class _CatXCatMatrix(_BaseCubeResultMatrix):
@@ -1092,6 +1092,22 @@ class _CatXMrMatrix(_CatXCatMatrix):
         """
         return self._weighted_counts[:, :, 0]
 
+    @lazyproperty
+    def _baseline(self):
+        """2D np.float64 (or NaN) ndarray of baseline value for each matrix cell.
+
+        Its shape is (nrows, ncols) which corresponds to CAT_X_MR_SUBVAR.
+
+        The baseline value is compared with the column-proportion value for each cell to
+        form the column-index value. The baseline is a function of the unconditional row
+        margin, which is the sum of counts across both valid and missing columns.
+
+        For CAT_X_MR, `uncond_row_margin` sums across the MR_CAT (selected, not,
+        missing) dimension to include missing values (an MR_SUBVAR element is never
+        "missing": true).
+        """
+        raise NotImplementedError
+
 
 class _CatXMrMeansMatrix(_CatXMrMatrix):
     """Basis for CAT_X_MR slice having mean measure instead of counts."""
@@ -1198,6 +1214,31 @@ class _MrXCatMatrix(_CatXCatMatrix):
         these values are the same as the unweighted-counts.
         """
         return self._weighted_counts[:, 0, :]
+
+    @lazyproperty
+    def _baseline(self):
+        """2D np.float64 ndarray of baseline value for each row in matrix.
+
+        `._baseline` is the denominator of the column-index and represents the
+        proportion of the overall row-count present in each row. A cell with
+        a column-proportion exactly equal to this basline will have a column-index of
+        100.
+
+        The shape of the return value is (nrows, 1). A baseline for a 4 x 3 matrix looks
+        something like this:
+
+            [[0.17935204]
+             [0.33454989]
+             [0.50762388]
+             [0.80331259]
+             [0.7996507 ]]
+
+        Baseline is a function of the *unconditional row margin*. Unconditional here
+        means that both valid and invalid responses (to the columns-var question) are
+        included. This ensures that the baseline is not distorted by a large number of
+        missing responses to the columns-question.
+        """
+        raise NotImplementedError
 
 
 class _MrXCatMeansMatrix(_MrXCatMatrix):
@@ -1356,3 +1397,13 @@ class _MrXMrMatrix(_CatXCatMatrix):
         contribute to these values.
         """
         return self._weighted_counts[:, 0, :, 0]
+
+    @lazyproperty
+    def _baseline(self):
+        """2D np.float64 ndarray of baseline value for each matrix cell.
+
+        The shape is (nrows, ncols) and all values in a given row are the same. So
+        really there are only nrows distinct baseline values, but the returned shape
+        makes calculating zscores in a general way more convenient.
+        """
+        raise NotImplementedError
