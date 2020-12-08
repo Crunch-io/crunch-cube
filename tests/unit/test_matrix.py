@@ -1677,6 +1677,19 @@ class Describe_CatXMrMatrix(object):
             np.array([[1, 2, 3], [4, 5, 6]]),
         )
 
+    def it_knows_its_baseline_to_help(self, request):
+        property_mock(
+            request, _CatXMrMatrix, "_valid_row_idxs", return_value=np.array([0, 1])
+        )
+        counts_with_missings = np.array(
+            [[[1, 6], [2, 5], [3, 4]], [[4, 3], [5, 2], [6, 1]]]
+        )
+
+        np.testing.assert_almost_equal(
+            _CatXMrMatrix(None, None, None, counts_with_missings)._baseline,
+            np.array([[0.5, 0.5, 0.5], [0.5, 0.5, 0.5]]),
+        )
+
 
 class Describe_MrXCatMatrix(object):
     """Unit test suite for `cr.cube.matrix._MrXCatMatrix` object."""

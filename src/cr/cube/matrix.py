@@ -1124,7 +1124,20 @@ class _CatXMrMatrix(_CatXCatMatrix):
         missing) dimension to include missing values (an MR_SUBVAR element is never
         "missing": true).
         """
-        raise NotImplementedError
+        # --- counts_with_missings.shape is (nall_rows, ncols, selected/not/missing).
+        # --- axes[1] corresponds to the MR_SUBVAR dimension, in which there are never
+        # --- "missing" subvars (so nall_cols always equals ncols for that dimension
+        # --- type). uncond_row_margin selects only valid rows, retains all columns and
+        # --- reduces the selected/not/missing axis by summing those three counts. Its
+        # --- shape is (nrows, ncols).
+        uncond_row_margin = np.sum(self._counts_with_missings, axis=2)[
+            self._valid_row_idxs
+        ]
+        # --- uncond_table_margin sums across rows, producing 1D array of size ncols,
+        # --- (although all its values are always the same).
+        uncond_table_margin = np.sum(uncond_row_margin, axis=0)
+        # --- division produces a 2D matrix of shape (nrows, ncols) ---
+        return uncond_row_margin / uncond_table_margin
 
 
 class _CatXMrMeansMatrix(_CatXMrMatrix):
