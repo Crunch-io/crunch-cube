@@ -1088,6 +1088,9 @@ class Describe_BaseSubtotals(object):
 class Describe_NanSubtotals(object):
     """Unit test suite for `cr.cube.matrix._NanSubtotals` object."""
 
+    def it_can_compute_a_intersection_cell_value_to_help(self, request):
+        assert np.isnan(_NanSubtotals(None, None)._intersection(None, None))
+
     def it_can_compute_a_subtotal_column_to_help(self, request):
         property_mock(request, _NanSubtotals, "_nrows", return_value=3)
         subtotals = _NanSubtotals(None, None)
@@ -1123,7 +1126,7 @@ class Describe_SumSubtotals(object):
         ("addend_idxs", "expected_value"),
         (([1, 2], [3, 11, 19]), ([1, 3], [4, 12, 20]), ([0, 3], [3, 11, 19])),
     )
-    def it_can_compute_the_subtotal_column_for_a_given_column_subtotal(
+    def it_can_compute_a_subtotal_column_to_help(
         self, _base_values_prop_, subtotal_, addend_idxs, expected_value
     ):
         _base_values_prop_.return_value = np.arange(12).reshape(3, 4)
@@ -1140,7 +1143,7 @@ class Describe_SumSubtotals(object):
             ([0, 2], [8, 10, 12, 14]),
         ),
     )
-    def it_can_compute_the_subtotal_row_for_a_given_row_subtotal(
+    def it_can_compute_a_subtotal_row_to_help(
         self, _base_values_prop_, subtotal_, addend_idxs, expected_value
     ):
         _base_values_prop_.return_value = np.arange(12).reshape(3, 4)

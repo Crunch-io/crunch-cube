@@ -537,7 +537,9 @@ class _BaseSubtotals(object):
 
     def _subtotal_row(self, subtotal):
         """Return (n_cols,) ndarray of values for `subtotal` row."""
-        return np.sum(self._base_values[subtotal.addend_idxs, :], axis=0)
+        raise NotImplementedError(
+            "`%s` must implement `._subtotal_row()`" % type(self).__name__
+        )
 
     @lazyproperty
     def _subtotal_rows(self):
@@ -557,6 +559,10 @@ class _NanSubtotals(_BaseSubtotals):
 
     Each subtotal value (and intersection value) is `np.nan`.
     """
+
+    def _intersection(self, row_subtotal, column_subtotal):
+        """Unconditionally return np.nan for each intersection cell."""
+        return np.nan
 
     def _subtotal_column(self, subtotal):
         """Return (n_rows,) ndarray of np.nan values."""
@@ -578,6 +584,10 @@ class _SumSubtotals(_BaseSubtotals):
     def _subtotal_column(self, subtotal):
         """Return (n_rows,) ndarray of np.nan values."""
         return np.sum(self._base_values[:, subtotal.addend_idxs], axis=1)
+
+    def _subtotal_row(self, subtotal):
+        """Return (n_cols,) ndarray of values for `subtotal` row."""
+        return np.sum(self._base_values[subtotal.addend_idxs, :], axis=0)
 
 
 # === CUBE-RESULT MATRIX OBJECTS ===
