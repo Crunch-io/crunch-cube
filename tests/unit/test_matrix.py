@@ -1498,6 +1498,17 @@ class Describe_CatXCatMatrix(object):
             weighted_counts,
         )
 
+    def it_knows_its_baseline_to_help(self, request):
+        property_mock(
+            request, _CatXCatMatrix, "_valid_row_idxs", return_value=np.array([0, 1])
+        )
+        counts_with_missings = np.array([[1, 2, 3], [4, 5, 6]])
+
+        np.testing.assert_almost_equal(
+            _CatXCatMatrix(None, None, None, counts_with_missings)._baseline,
+            np.array([[0.2857143], [0.7142857]]),
+        )
+
 
 class Describe_CatXCatMeansMatrix(object):
     """Unit test suite for `cr.cube.matrix._CatXCatMeansMatrix` object."""

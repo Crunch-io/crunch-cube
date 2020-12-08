@@ -813,6 +813,14 @@ class _BaseCubeResultMatrix(object):
         i = cls._regular_matrix_counts_slice(cube, slice_idx)
         return (cube.counts[i], cube.unweighted_counts[i], cube.counts_with_missings[i])
 
+    @lazyproperty
+    def _valid_row_idxs(self):
+        """ndarray-style index for only valid (non-missing) rows.
+
+        Suitable for indexing a raw measure array to include only valid rows.
+        """
+        raise NotImplementedError
+
 
 class _CatXCatMatrix(_BaseCubeResultMatrix):
     """Matrix for CAT_X_CAT cubes and base class for most other matrix classes.
@@ -948,7 +956,13 @@ class _CatXCatMatrix(_BaseCubeResultMatrix):
         columns-var question) are included. This ensures that the baseline is not
         distorted by a large number of missing responses to the columns-question.
         """
-        raise NotImplementedError
+        # --- uncond_row_margin is a 1D ndarray of the weighted total observation count
+        # --- involving each valid row. Counts consider both valid and invalid columns,
+        # --- but are only produced for valid rows.
+        uncond_row_margin = np.sum(self._counts_with_missings, axis=1)[
+            self._valid_row_idxs
+        ]
+        return uncond_row_margin[:, None] / np.sum(uncond_row_margin)
 
 
 class _CatXCatMeansMatrix(_CatXCatMatrix):
