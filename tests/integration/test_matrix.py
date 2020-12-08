@@ -3,6 +3,7 @@
 """Integration-test suite for `cr.cube.cubepart` module."""
 
 import numpy as np
+import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.cubepart import _Slice
@@ -625,6 +626,72 @@ class DescribeAssembler(object):
                     [88.5281989, 309.8974187, 72.8221888, 147.9817106],
                     [90.4349646, 72.7520838, 208.1036286, 151.580341],
                     [181.0082575, 181.0082575, 181.0082575, 181.0082575],
+                ]
+            ),
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_cat_hs_x_cat_hs_zscore_subtotals(self):
+        slice_ = Cube(CR.CAT_HS_X_CAT_HS).partitions[0]
+        np.testing.assert_almost_equal(
+            slice_._assembler.zscores,
+            np.array(
+                [
+                    [0.99449068, 2.61969845, -1.32622266, -2.25262377, -3.12587272],
+                    [2.22083515, 6.51340682, -3.27919756, -5.37647385, -7.56121545],
+                    [2.59929144, 7.47697854, -3.7679221, -6.21630971, -8.72156546],
+                    [-0.59255056, 3.08506796, -3.07336981, 0.58605429, -2.2052394],
+                    [0.34718151, -4.19917753, -7.39220009, 11.42371415, 3.38602009],
+                    [-2.45091618, -6.33233748, 12.10302862, -3.56290643, 7.59522049],
+                    [-2.04805767, -9.23811055, 5.71662907, 5.47872349, 9.80221982],
+                ]
+            ),
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_cat_x_mr_zscores(self):
+        slice_ = Cube(CR.CAT_X_MR_2).partitions[0]
+        np.testing.assert_almost_equal(
+            slice_._assembler.zscores,
+            np.array(
+                [
+                    [5.9856141, 2.067039, -1.9837558, -1.5290931, -0.2334994],
+                    [0.1066704, -0.4005228, -0.4294405, -2.517253, 0.8463009],
+                    [np.nan, np.nan, np.nan, np.nan, np.nan],
+                    [-2.6564277, -0.2697743, 1.1482081, -0.2477619, -0.6283745],
+                    [-1.5834406, -0.5280341, 0.0699296, 2.6263071, 0.0568733],
+                    [np.nan, np.nan, np.nan, np.nan, np.nan],
+                ]
+            ),
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_mr_x_cat_zscores(self):
+        slice_ = Cube(CR.MR_X_CAT).partitions[0]
+        np.testing.assert_almost_equal(
+            slice_._assembler.zscores,
+            np.array(
+                [
+                    [5.9856141, 0.1066704, np.nan, -2.6564277, -1.5834406, np.nan],
+                    [2.067039, -0.4005228, np.nan, -0.2697743, -0.5280341, np.nan],
+                    [-1.9837558, -0.4294405, np.nan, 1.1482081, 0.0699295, np.nan],
+                    [-1.5290931, -2.517253, np.nan, -0.2477619, 2.6263071, np.nan],
+                    [-0.2334994, 0.8463008, np.nan, -0.6283745, 0.0568733, np.nan],
+                ]
+            ),
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_mr_x_mr_zscores(self):
+        slice_ = Cube(CR.MR_X_MR).partitions[0]
+        np.testing.assert_almost_equal(
+            slice_._assembler.zscores,
+            np.array(
+                [
+                    [12.8841837, 0.1781302, -1.2190176, 4.1568249],
+                    [0.1781302, 11.910822, -2.7003378, 5.6947682],
+                    [-1.2190176, -2.7003378, 13.4533867, 9.2929498],
+                    [4.1568249, 5.6947682, 9.2929498, 15.3798186],
                 ]
             ),
         )

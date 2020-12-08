@@ -271,6 +271,16 @@ class Assembler(object):
             _SumSubtotals.blocks(self._cube_result_matrix, "weighted_counts")
         )
 
+    @lazyproperty
+    def zscores(self):
+        """2D np.float64 ndarray of std-res value for each cell of matrix.
+
+        A z-score is also known as a *standard score* and is the number of standard
+        deviations above (positive) or below (negative) the population mean a cell's
+        value is.
+        """
+        raise NotImplementedError
+
     def _assemble_matrix(self, blocks):
         """Return 2D ndarray matrix assembled from `blocks`.
 
