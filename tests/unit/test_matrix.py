@@ -1405,6 +1405,34 @@ class Describe_BaseCubeResultMatrix(object):
         matrix = _BaseCubeResultMatrix([dimension_, None], None, None)
         assert matrix.rows_dimension == dimension_
 
+    def it_can_compute_array_type_std_residual_to_help(self):
+        counts = np.array([[0, 2, 4, 6], [8, 10, 12, 14], [16, 18, 20, 22]])
+        total = np.array([51, 63, 75, 87])
+        rowsum = np.array([[1, 5, 9, 13], [17, 21, 25, 29], [33, 37, 41, 45]])
+        colsum = np.array([24, 30, 36, 42])
+        matrix = _BaseCubeResultMatrix(None, None, None)
+
+        residuals = matrix._array_type_std_res(counts, total, rowsum, colsum)
+
+        np.testing.assert_almost_equal(
+            residuals,
+            np.array(
+                [
+                    [-0.9521905, -0.3555207, -0.2275962, -0.1660169],
+                    [0.0, 0.0, 0.0, 0.0],
+                    [0.2762585, 0.1951985, 0.1485686, 0.1184429],
+                ]
+            ),
+        )
+
+    def but_it_produces_zero_valued_zscores_for_a_deficient_matrix(self):
+        counts = np.array([[0, 2], [0, 10]])
+        matrix = _BaseCubeResultMatrix(None, None, None)
+
+        residuals = matrix._array_type_std_res(counts, None, None, None)
+
+        np.testing.assert_equal(residuals, np.array([[0, 0], [0, 0]]))
+
     @pytest.mark.parametrize(
         "dimension_types, matrix_class_name",
         (

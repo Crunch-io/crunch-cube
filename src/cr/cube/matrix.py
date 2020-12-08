@@ -884,7 +884,14 @@ class _BaseCubeResultMatrix(object):
         This is a utility method used by a matrix with one or more MR dimensions. The
         caller forms the input arrays based on which of its dimensions are MR.
         """
-        raise NotImplementedError
+        # --- if the matrix is "defective", in the sense that it doesn't have at least
+        # --- two rows and two columns that are "full" of data, don't calculate zscores.
+        if not np.all(counts.shape) or np.linalg.matrix_rank(counts) < 2:
+            return np.zeros(counts.shape)
+
+        expected_counts = rowsum * colsum / total
+        variance = rowsum * colsum * (total - rowsum) * (total - colsum) / total ** 3
+        return (counts - expected_counts) / np.sqrt(variance)
 
     @classmethod
     def _means_matrix_factory(cls, cube, dimensions, slice_idx):
