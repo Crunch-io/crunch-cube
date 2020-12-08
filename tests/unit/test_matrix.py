@@ -1009,7 +1009,7 @@ class Describe_BaseSubtotals(object):
             _BaseSubtotals(None, None)._base_values
         assert str(e.value).endswith(" must implement `._base_values`")
 
-    def it_knows_how_to_assemble_its_blocks(self, request):
+    def it_can_compute_its_blocks(self, request):
         property_mock(request, _BaseSubtotals, "_base_values")
         property_mock(request, _BaseSubtotals, "_subtotal_columns")
         property_mock(request, _BaseSubtotals, "_subtotal_rows")
@@ -1036,15 +1036,38 @@ class Describe_BaseSubtotals(object):
         subtotals = _BaseSubtotals(cube_result_matrix_, None)
         assert subtotals._column_subtotals is dimension_.subtotals
 
-    def it_knows_how_many_columns_are_in_the_base_matrix(self, _base_values_prop_):
+    def it_assembles_its_intersections_to_help(
+        self, _intersection_, _column_subtotals_prop_, _row_subtotals_prop_
+    ):
+        _intersection_.return_value = 10
+        _column_subtotals_prop_.return_value = [1, 2, 3]
+        _row_subtotals_prop_.return_value = [1, 2]
+        subtotals = _BaseSubtotals(None, None)
+
+        assert (
+            subtotals._intersections.tolist()
+            == np.full(
+                (
+                    2,  # row subtotals has len 2
+                    3,  # column subtotals has len 3
+                ),
+                10,  # dummy fill value from `_intersection` fixture
+            ).tolist()
+        )
+
+    def it_knows_how_many_columns_are_in_the_base_matrix_to_help(
+        self, _base_values_prop_
+    ):
         _base_values_prop_.return_value = np.arange(12).reshape(3, 4)
         assert _BaseSubtotals(None, None)._ncols == 4
 
-    def it_knows_how_many_rows_are_in_the_base_matrix(self, _base_values_prop_):
+    def it_knows_how_many_rows_are_in_the_base_matrix_to_help(self, _base_values_prop_):
         _base_values_prop_.return_value = np.arange(12).reshape(3, 4)
         assert _BaseSubtotals(None, None)._nrows == 3
 
-    def it_provides_access_to_the_row_subtotals(self, cube_result_matrix_, dimension_):
+    def it_provides_access_to_the_row_subtotals_to_help(
+        self, cube_result_matrix_, dimension_
+    ):
         cube_result_matrix_.rows_dimension = dimension_
         subtotals = _BaseSubtotals(cube_result_matrix_, None)
         assert subtotals._row_subtotals is dimension_.subtotals
@@ -1056,7 +1079,7 @@ class Describe_BaseSubtotals(object):
             (3, 2, np.array([[1, 1], [2, 2], [3, 3]])),
         ),
     )
-    def it_knows_its_subtotal_columns(
+    def it_assembles_its_subtotal_columns_to_help(
         self,
         _column_subtotals_prop_,
         _nrows_prop_,
@@ -1081,7 +1104,7 @@ class Describe_BaseSubtotals(object):
             (3, [1, 2], np.array([[1, 2, 3], [1, 2, 3]])),
         ),
     )
-    def it_knows_its_subtotal_rows(
+    def it_assembles_its_subtotal_rows_to_help(
         self,
         _row_subtotals_prop_,
         _ncols_prop_,
@@ -1098,24 +1121,11 @@ class Describe_BaseSubtotals(object):
             _BaseSubtotals(None, None)._subtotal_rows, expected_value
         )
 
-    def it_knows_its_intersections(
-        self, _intersection_, _column_subtotals_prop_, _row_subtotals_prop_
-    ):
-        _intersection_.return_value = 10
-        _column_subtotals_prop_.return_value = [1, 2, 3]
-        _row_subtotals_prop_.return_value = [1, 2]
-        subtotals = _BaseSubtotals(None, None)
+    def it_provides_access_to_the_table_margin_to_help(self, cube_result_matrix_):
+        cube_result_matrix_.table_margin = 42
+        subtotals = _BaseSubtotals(cube_result_matrix_, None)
 
-        assert (
-            subtotals._intersections.tolist()
-            == np.full(
-                (
-                    2,  # row subtotals has len 2
-                    3,  # column subtotals has len 3
-                ),
-                10,  # dummy fill value from `_intersection` fixture
-            ).tolist()
-        )
+        assert subtotals._table_margin == 42
 
     # fixture components ---------------------------------------------
 

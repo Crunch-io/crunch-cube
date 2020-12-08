@@ -472,6 +472,14 @@ class _BaseSubtotals(object):
         return cls(cube_result_matrix, measure_propname)._blocks
 
     @lazyproperty
+    def _blocks(self):
+        """base, row and col insertion, and intersection matrices."""
+        return [
+            [self._base_values, self._subtotal_columns],
+            [self._subtotal_rows, self._intersections],
+        ]
+
+    @lazyproperty
     def _base_counts(self):
         """2D np.float64 ndarray of weighted-count for each cell of base matrix."""
         return self._cube_result_matrix.weighted_counts
@@ -484,14 +492,6 @@ class _BaseSubtotals(object):
                 "`%s` must implement `._base_values`" % type(self).__name__
             )
         return getattr(self._cube_result_matrix, self._measure_propname)
-
-    @lazyproperty
-    def _blocks(self):
-        """base, row and col insertion, and intersection matrices."""
-        return [
-            [self._base_values, self._subtotal_columns],
-            [self._subtotal_rows, self._intersections],
-        ]
 
     @lazyproperty
     def _column_subtotals(self):
@@ -581,7 +581,7 @@ class _BaseSubtotals(object):
     @lazyproperty
     def _table_margin(self):
         """Scalar or ndarray table-margin of cube-result matrix."""
-        raise NotImplementedError
+        return self._cube_result_matrix.table_margin
 
 
 class _NanSubtotals(_BaseSubtotals):
