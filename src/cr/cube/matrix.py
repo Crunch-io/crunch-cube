@@ -878,40 +878,13 @@ class _BaseCubeResultMatrix(object):
             "`%s` must implement `.zscores`" % type(self).__name__
         )
 
-    @staticmethod
-    def _extract_counts_for_matrix_creation(cube, slice_idx):
-        """Returns a tuple of cube counts, prepared for matrix construction.
+    def _array_type_std_res(self, counts, total, rowsum, colsum):
+        """Return 2D np.float64 ndarray of std-res value for each cell of MR matrix.
 
-        Depending on the type of the cube, we need to extract the proper counts for the
-        counstruction of a particular slice (matrix). In case of cubes that have more
-        then 2 dimensions, we only need a particular slice (a particular selected
-        element of the 0th dimension).
-
-        If, in addition to being >2D cube, the 0th dimension is multiple response, we
-        need to extract only the selected counts, since we're "just" dealing with the
-        tabulation.
+        This is a utility method used by a matrix with one or more MR dimensions. The
+        caller forms the input arrays based on which of its dimensions are MR.
         """
-
-        # --- If we have a cube with more than 2 dimensions we need to extract the
-        # --- appropriate slice (element of the 0th dimension).
-        if cube.ndim > 2:
-
-            # --- If 0th dimension of a >2D cube is MR, we only need the "Selected"
-            # --- counts, because it's "just" used to tabulate.
-            if cube.dimension_types[0] == DT.MR:
-                return (
-                    cube.counts[slice_idx][0],
-                    cube.unweighted_counts[slice_idx][0],
-                    cube.counts_with_missings[slice_idx][0],
-                )
-
-            return (
-                cube.counts[slice_idx],
-                cube.unweighted_counts[slice_idx],
-                cube.counts_with_missings[slice_idx],
-            )
-
-        return (cube.counts, cube.unweighted_counts, cube.counts_with_missings)
+        raise NotImplementedError
 
     @classmethod
     def _means_matrix_factory(cls, cube, dimensions, slice_idx):
@@ -1305,7 +1278,12 @@ class _CatXMrMatrix(_CatXCatMatrix):
         deviations above (positive) or below (negative) the population mean each cell's
         value is.
         """
-        raise NotImplementedError
+        return self._array_type_std_res(
+            self._weighted_counts[:, :, 0],
+            self.table_margin,
+            np.sum(self._weighted_counts, axis=2),
+            np.sum(self._weighted_counts[:, :, 0], axis=0),
+        )
 
     @lazyproperty
     def _baseline(self):

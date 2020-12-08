@@ -1878,6 +1878,25 @@ class Describe_CatXMrMatrix(object):
             np.array([[1, 2, 3], [4, 5, 6]]),
         )
 
+    def it_knows_its_zscores(self, _array_type_std_res_):
+        weighted_counts = np.arange(24).reshape(3, 4, 2)
+        _array_type_std_res_.return_value = [[1, 2], [3, 4]]
+        matrix = _CatXMrMatrix(None, weighted_counts, None)
+
+        zscores = matrix.zscores
+
+        self, counts, total, rowsum, colsum = _array_type_std_res_.call_args.args
+        assert self is matrix
+        np.testing.assert_equal(
+            counts, np.array([[0, 2, 4, 6], [8, 10, 12, 14], [16, 18, 20, 22]])
+        )
+        np.testing.assert_equal(total, np.array([51, 63, 75, 87]))
+        np.testing.assert_equal(
+            rowsum, np.array([[1, 5, 9, 13], [17, 21, 25, 29], [33, 37, 41, 45]])
+        )
+        np.testing.assert_equal(colsum, np.array([24, 30, 36, 42]))
+        assert zscores == [[1, 2], [3, 4]]
+
     def it_knows_its_baseline_to_help(self, request):
         property_mock(
             request, _CatXMrMatrix, "_valid_row_idxs", return_value=np.array([0, 1])
@@ -1890,6 +1909,12 @@ class Describe_CatXMrMatrix(object):
             _CatXMrMatrix(None, None, None, counts_with_missings)._baseline,
             np.array([[0.5, 0.5, 0.5], [0.5, 0.5, 0.5]]),
         )
+
+    # --- fixture components -----------------------------------------
+
+    @pytest.fixture
+    def _array_type_std_res_(self, request):
+        return method_mock(request, _CatXMrMatrix, "_array_type_std_res")
 
 
 class Describe_MrXCatMatrix(object):
