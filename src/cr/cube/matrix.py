@@ -637,7 +637,7 @@ class _ZscoreSubtotals(_BaseSubtotals):
         return self._cube_result_matrix.zscores
 
     def _subtotal_column(self, subtotal):
-        """Return (n_rows,) ndarray of table-stderr `subtotal` value."""
+        """Return (n_rows,) ndarray of zscore `subtotal` value."""
         # --- the weighted-counts version of this subtotal-column ---
         subtotal_counts = np.sum(self._base_counts[:, subtotal.addend_idxs], axis=1)
 
@@ -646,6 +646,38 @@ class _ZscoreSubtotals(_BaseSubtotals):
 
         # --- base-rows-margin is 1D because no MR dimensions ---
         opposing_margin = self._cube_result_matrix.rows_margin
+
+        # --- table_margin is scalar because no MR dimensions ---
+        table_margin = self._table_margin
+
+        # --- expected_counts is 1D ---
+        expected_counts = opposing_margin * subtotal_margin / table_margin
+
+        # --- residuals is 1D, like: [ 11.04819 -37.72836  43.35049 -16.67031]
+        residuals = subtotal_counts - expected_counts
+
+        # --- variance is 1D, like: [12.413837 49.173948 53.980069 29.783739] ---
+        variance = (
+            opposing_margin
+            * subtotal_margin
+            * ((table_margin - opposing_margin) * (table_margin - subtotal_margin))
+            / table_margin ** 3
+        )
+
+        # --- result is scalar or 1D, depending on dimensionality of residuals ---
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return residuals / np.sqrt(variance)
+
+    def _subtotal_row(self, subtotal):
+        """Return (n_cols,) ndarray of z-score `subtotal` value."""
+        # --- the weighted-counts version of this subtotal-row ---
+        subtotal_counts = np.sum(self._base_counts[subtotal.addend_idxs, :], axis=0)
+
+        # --- subtotal-margin is scalar, like 547 ---
+        subtotal_margin = np.sum(subtotal_counts)
+
+        # --- base-cols-margin is 1D because no MR dimensions ---
+        opposing_margin = self._cube_result_matrix.columns_margin
 
         # --- table_margin is scalar because no MR dimensions ---
         table_margin = self._table_margin

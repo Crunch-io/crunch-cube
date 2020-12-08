@@ -1292,6 +1292,24 @@ class Describe_ZscoreSubtotals(object):
             np.array([-1.2667117, 0.0, 0.7368146]),
         )
 
+    def it_can_compute_a_subtotal_row_to_help(
+        self,
+        subtotal_,
+        _base_counts_prop_,
+        _table_margin_prop_,
+        cube_result_matrix_,
+    ):
+        subtotal_.addend_idxs = np.array([0, 1])
+        _base_counts_prop_.return_value = np.arange(12).reshape(3, 4)
+        cube_result_matrix_.columns_margin = np.array([12, 15, 18, 21])
+        _table_margin_prop_.return_value = 66
+        subtotals = _ZscoreSubtotals(cube_result_matrix_, None)
+
+        np.testing.assert_almost_equal(
+            subtotals._subtotal_row(subtotal_),
+            np.array([-0.7044435, -0.2161134, 0.2033553, 0.5833346]),
+        )
+
     # --- fixture components -----------------------------------------
 
     @pytest.fixture
