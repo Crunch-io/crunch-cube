@@ -2082,3 +2082,19 @@ class Describe_MrXMrMatrix(object):
             _MrXMrMatrix(None, weighted_counts, None, None).weighted_counts,
             np.array([[0, 1], [4, 5]]),
         )
+
+    def it_knows_its_baseline_to_help(self, request):
+        property_mock(
+            request, _MrXMrMatrix, "_valid_row_idxs", return_value=np.array([0, 1])
+        )
+        counts_with_missings = np.array(
+            [
+                [[[0, 8], [1, 7]], [[2, 6], [3, 5]]],
+                [[[4, 4], [5, 3]], [[6, 2], [7, 1]]],
+            ]
+        )
+
+        np.testing.assert_almost_equal(
+            _MrXMrMatrix(None, None, None, counts_with_missings)._baseline,
+            np.array([[0.5, 0.5], [0.5, 0.5]]),
+        )

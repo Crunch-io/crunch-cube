@@ -3,7 +3,6 @@
 """Integration-test suite for `cr.cube.cubepart` module."""
 
 import numpy as np
-import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.cubepart import _Slice
@@ -571,7 +570,7 @@ class DescribeAssembler(object):
         )
 
         np.testing.assert_almost_equal(
-            slice_._assembler.column_index,
+            slice_.column_index,
             np.array(
                 [
                     [np.nan, np.nan, np.nan, np.nan, np.nan],
@@ -588,7 +587,7 @@ class DescribeAssembler(object):
     def it_computes_cat_x_mr_column_index(self):
         slice_ = Cube(CR.CAT_X_MR_2).partitions[0]
         np.testing.assert_almost_equal(
-            slice_._assembler.column_index,
+            slice_.column_index,
             np.array(
                 [
                     [658.3848782, 189.796643, 33.5334594, 57.3979578, 95.9364833],
@@ -604,7 +603,7 @@ class DescribeAssembler(object):
     def it_computes_mr_x_cat_column_index(self):
         slice_ = Cube(CR.MR_X_CAT).partitions[0]
         np.testing.assert_almost_equal(
-            slice_._assembler.column_index,
+            slice_.column_index,
             np.array(
                 [
                     [356.7933052, 103.5935382, np.nan, 39.5493673, 65.7425846, np.nan],
@@ -616,11 +615,10 @@ class DescribeAssembler(object):
             ),
         )
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_mr_x_mr_column_index(self):
         slice_ = Cube(CR.MR_X_MR).partitions[0]
         np.testing.assert_almost_equal(
-            slice_._assembler.column_index,
+            slice_.column_index,
             np.array(
                 [
                     [722.7771838, 96.1467363, 89.5610897, 164.8249708],

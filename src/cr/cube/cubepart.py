@@ -262,13 +262,13 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def column_index(self):
-        """ndarray of column index percentages.
+        """2D np.float64 ndarray of column-index "percentage".
 
         The index values represent the difference of the percentages to the
         corresponding baseline values. The baseline values are the univariate
-        percentages of the corresponding variable.
+        percentages of the rows variable.
         """
-        return np.array([row.column_index for row in self._matrix.rows])
+        return self._assembler.column_index
 
     @lazyproperty
     def column_labels(self):

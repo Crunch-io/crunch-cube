@@ -1453,4 +1453,21 @@ class _MrXMrMatrix(_CatXCatMatrix):
         really there are only nrows distinct baseline values, but the returned shape
         makes calculating column-index in a general way more convenient.
         """
-        raise NotImplementedError
+        # --- `counts_with_missings` for MR_X_MR is 4D of size (nrows, 3, ncols, 3)
+        # --- (MR_SUBVAR, MR_CAT, MR_SUBVAR, MR_CAT). Unconditional row margin:
+        # --- * Takes all rows and all cols (axes 0 & 2), because MR_SUBVAR dimension
+        # ---   can contain only valid elements (no such thing as "missing": true
+        # ---   subvar).
+        # --- * Sums selected + unselected + missing categories in second MR_CAT
+        # ---   dimension (columns MR, axes[3]). Including missings here fulfills
+        # ---   "unconditional" characteristic of margin.
+        # --- * Takes only those totals associated with selected categories of first
+        # ---    MR_CAT dimension (rows MR). ("counts" for MR are "selected" counts).
+        # --- Produces a 2D (nrows, ncols) array.
+        uncond_row_margin = np.sum(self._counts_with_missings[:, 0:2], axis=3)[:, 0]
+        # --- Unconditional table margin is also 2D (nrows, ncols) but the values for
+        # --- all columns in a row have the same value; basically each row has
+        # --- a distinct table margin.
+        uncond_table_margin = np.sum(self._counts_with_missings[:, 0:2], axis=(1, 3))
+        # --- baseline is produced by dividing uncond_row_margin by uncond_table_margin.
+        return uncond_row_margin / uncond_table_margin
