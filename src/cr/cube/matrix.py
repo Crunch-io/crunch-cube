@@ -604,7 +604,7 @@ class _BaseCubeResultMatrix(object):
         The value represents the ratio of each cell count to the total count (margin)
         for its column.
         """
-        raise NotImplementedError
+        return self.weighted_counts / self.columns_margin
 
     @lazyproperty
     def columns_base(self):
@@ -690,6 +690,17 @@ class _BaseCubeResultMatrix(object):
         """2D np.int64 ndarray of unweighted-count for each valid matrix cell."""
         raise NotImplementedError(
             "`%s` must implement `.unweighted_counts" % type(self).__name__
+        )
+
+    @lazyproperty
+    def weighted_counts(self):
+        """2D np.float/int64 ndarray of weighted-count for each valid matrix cell.
+
+        The cell values are np.int64 when the cube-result has no weight, in which case
+        these values are the same as the unweighted-counts.
+        """
+        raise NotImplementedError(
+            "`%s` must implement `.weighted_counts`" % type(self).__name__
         )
 
     @staticmethod

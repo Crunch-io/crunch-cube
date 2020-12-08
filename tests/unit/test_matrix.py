@@ -1179,6 +1179,26 @@ class Describe_BaseCubeResultMatrix(object):
         factory_method.assert_called_once_with(cube_, (dimension_, dimension_), 71)
         assert cube_result_matrix is cube_result_matrix_
 
+    def it_knows_its_column_proportions(self, request):
+        property_mock(
+            request,
+            _BaseCubeResultMatrix,
+            "weighted_counts",
+            return_value=np.array([[1, 2, 3], [4, 5, 6]]),
+        )
+        property_mock(
+            request,
+            _BaseCubeResultMatrix,
+            "columns_margin",
+            return_value=np.array([5, 7, 9]),
+        )
+        matrix = _BaseCubeResultMatrix(None, None, None)
+
+        np.testing.assert_almost_equal(
+            matrix.column_proportions,
+            np.array([[0.2, 0.2857143, 0.3333333], [0.8, 0.7142857, 0.6666667]]),
+        )
+
     def it_knows_its_columns_dimension(self, dimension_):
         matrix = _BaseCubeResultMatrix([None, dimension_], None, None)
         assert matrix.columns_dimension == dimension_
