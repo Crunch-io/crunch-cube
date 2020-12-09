@@ -3,6 +3,7 @@
 """Integration-test suite for `cr.cube.cubepart` module."""
 
 import numpy as np
+import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.cubepart import _Slice
@@ -687,6 +688,178 @@ class DescribeAssembler(object):
                     [0.1781302, 11.910822, -2.7003378, 5.6947682],
                     [-1.2190176, -2.7003378, 13.4533867, 9.2929498],
                     [4.1568249, 5.6947682, 9.2929498, 15.3798186],
+                ]
+            ),
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_means_cat_hs_x_cat_hs(self):
+        slice_ = Cube(CR.MEANS_CAT_HS_X_CAT_HS).partitions[0]
+        np.testing.assert_almost_equal(
+            slice_._assembler.means,
+            np.array(
+                [
+                    [41.96875, 30.875, 25.66666667, np.nan, 42.0],
+                    [51.51515152, 47.95555556, 45.44444444, np.nan, 45.0952381],
+                    [46.17088608, 44.55504587, 48.09090909, np.nan, 50.8],
+                    [np.nan, np.nan, np.nan, np.nan, np.nan],
+                    [44.03030303, 45.21568627, 54.53333333, np.nan, 56.19512195],
+                    [45.64516129, 47.41428571, 46.89361702, np.nan, 55.27894737],
+                    [34.20408163, 43.2745098, 41.2, np.nan, 35.26086957],
+                ]
+            ),
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_means_cat_x_mr(self):
+        slice_ = Cube(CR.MEANS_CAT_X_MR).partitions[0]
+        np.testing.assert_almost_equal(
+            slice_._assembler.means,
+            np.array(
+                [
+                    [29.0, 30.71428571, 48.0, 49.76923077, 37.2962963],
+                    [35.57142857, 45.0, 61.23809524, 48.0, 45.74137931],
+                    [32.0, 42.51785714, 59.42253521, 51.95217391, 41.57654723],
+                    [28.16666667, 50.46153846, 55.28205128, 54.73076923, 44.1641791],
+                    [32.6, 47.14814815, 62.38888889, 53.90526316, 45.42771084],
+                    [24.5, 39.09090909, 51.18181818, 44.19444444, 35.96039604],
+                ]
+            ),
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_means_mr_x_cat(self):
+        slice_ = Cube(CR.MEANS_MR_X_CAT).partitions[0]
+        np.testing.assert_almost_equal(
+            slice_._assembler.means,
+            np.array(
+                [
+                    [
+                        38.79868092,
+                        37.91146097,
+                        21.56682623,
+                        28.90316683,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                    ],
+                    [
+                        12.36141735,
+                        10.91788449,
+                        8.55836344,
+                        -9.23336151,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                    ],
+                    [
+                        25.35566536,
+                        -1.87323918,
+                        -10.45832265,
+                        -19.00932593,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                    ],
+                    [
+                        -1.22773321,
+                        -7.99671664,
+                        -30.95431483,
+                        -18.03417097,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                    ],
+                    [
+                        -23.80382413,
+                        -26.69728288,
+                        -61.23218388,
+                        -48.49820981,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                    ],
+                    [
+                        19.6045351,
+                        -24.87663078,
+                        -52.08108014,
+                        7.63833075,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                    ],
+                    [
+                        -26.98268155,
+                        -9.66231773,
+                        -90.91475189,
+                        -46.92610738,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                    ],
+                    [
+                        19.45552783,
+                        -27.48308453,
+                        -62.33543385,
+                        -39.83388919,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                    ],
+                    [
+                        20.59956268,
+                        17.49911157,
+                        6.29951372,
+                        2.28572239,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                        np.nan,
+                    ],
                 ]
             ),
         )

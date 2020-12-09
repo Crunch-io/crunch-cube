@@ -120,6 +120,14 @@ class Assembler(object):
         return tuple(i for i, row_idx in enumerate(self._row_order) if row_idx < 0)
 
     @lazyproperty
+    def means(self):
+        """2D optional np.float64 ndarray of mean for each cell.
+
+        Raises `ValueError` if the cube-result does not include a means cube-measure.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
     def pvalues(self):
         """2D np.float64/np.nan ndarray of p-value for each matrix cell."""
         return 2 * (1 - norm.cdf(np.abs(self.zscores)))
