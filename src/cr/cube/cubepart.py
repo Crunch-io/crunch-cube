@@ -490,7 +490,16 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def pvals(self):
-        return np.array([row.pvals for row in self._matrix.rows])
+        """2D optional np.float64 ndarray of p-value for each cell.
+
+        A p-value is a measure of the probability that an observed difference could have
+        occurred just by random chance. The lower the p-value, the greater the
+        statistical significance of the observed difference.
+
+        A cell value of np.nan indicates a meaningful p-value could not be computed for
+        that cell.
+        """
+        return self._assembler.pvalues
 
     @lazyproperty
     def residual_test_stats(self):

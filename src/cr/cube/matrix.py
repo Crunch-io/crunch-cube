@@ -10,6 +10,7 @@ either hidden by the user or "pruned" because they contain no observations.
 """
 
 import numpy as np
+from scipy.stats import norm
 from scipy.stats.contingency import expected_freq
 
 from cr.cube.collator import ExplicitOrderCollator, PayloadOrderCollator
@@ -117,6 +118,11 @@ class Assembler(object):
     def inserted_row_idxs(self):
         """tuple of int index of each subtotal row in slice."""
         return tuple(i for i, row_idx in enumerate(self._row_order) if row_idx < 0)
+
+    @lazyproperty
+    def pvalues(self):
+        """2D np.float64/np.nan ndarray of p-value for each matrix cell."""
+        return 2 * (1 - norm.cdf(np.abs(self.zscores)))
 
     @lazyproperty
     def row_labels(self):

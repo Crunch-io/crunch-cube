@@ -197,6 +197,16 @@ class DescribeAssembler(object):
         _row_order_prop_.return_value = [0, 1, -2, 2, -1, 3]
         assert Assembler(None, None, None).inserted_row_idxs == (2, 4)
 
+    def it_knows_the_pvalues(self, request):
+        property_mock(
+            request, Assembler, "zscores", return_value=np.array([0.7, 0.8, 0.9])
+        )
+        assembler = Assembler(None, None, None)
+
+        np.testing.assert_almost_equal(
+            assembler.pvalues, np.array([0.4839273, 0.4237108, 0.3681203])
+        )
+
     def it_knows_the_row_labels(
         self,
         _rows_dimension_prop_,
