@@ -1431,7 +1431,12 @@ class _MrXCatMatrix(_CatXCatMatrix):
     @lazyproperty
     def zscores(self):
         """2D np.float64 ndarray of z-score for each matrix cell."""
-        raise NotImplementedError
+        return self._array_type_std_res(
+            self._weighted_counts[:, 0, :],
+            self.table_margin[:, None],
+            np.sum(self._weighted_counts[:, 0, :], axis=1)[:, None],
+            np.sum(self._weighted_counts, axis=1),
+        )
 
     @lazyproperty
     def _baseline(self):

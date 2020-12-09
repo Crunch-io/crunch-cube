@@ -1906,15 +1906,17 @@ class Describe_CatXMrMatrix(object):
             np.array([[1, 2, 3], [4, 5, 6]]),
         )
 
-    def it_knows_its_zscores(self, _array_type_std_res_):
+    def it_knows_its_zscores(self, request):
+        _array_type_std_res_ = method_mock(
+            request, _CatXMrMatrix, "_array_type_std_res", return_value=[[1, 2], [3, 4]]
+        )
         weighted_counts = np.arange(24).reshape(3, 4, 2)
-        _array_type_std_res_.return_value = [[1, 2], [3, 4]]
         matrix = _CatXMrMatrix(None, weighted_counts, None)
 
         zscores = matrix.zscores
 
-        self, counts, total, rowsum, colsum = _array_type_std_res_.call_args.args
-        assert self is matrix
+        self_, counts, total, rowsum, colsum = _array_type_std_res_.call_args.args
+        assert self_ is matrix
         np.testing.assert_equal(
             counts, np.array([[0, 2, 4, 6], [8, 10, 12, 14], [16, 18, 20, 22]])
         )
@@ -1937,12 +1939,6 @@ class Describe_CatXMrMatrix(object):
             _CatXMrMatrix(None, None, None, counts_with_missings)._baseline,
             np.array([[0.5, 0.5, 0.5], [0.5, 0.5, 0.5]]),
         )
-
-    # --- fixture components -----------------------------------------
-
-    @pytest.fixture
-    def _array_type_std_res_(self, request):
-        return method_mock(request, _CatXMrMatrix, "_array_type_std_res")
 
 
 class Describe_MrXCatMatrix(object):
@@ -2091,6 +2087,27 @@ class Describe_MrXCatMatrix(object):
             _MrXCatMatrix(None, weighted_counts, None).weighted_counts,
             np.array([[1, 2, 3], [7, 8, 9]]),
         )
+
+    def it_knows_its_zscores(self, request):
+        _array_type_std_res_ = method_mock(
+            request, _MrXCatMatrix, "_array_type_std_res", return_value=[[1, 2], [3, 4]]
+        )
+        weighted_counts = np.arange(24).reshape(3, 2, 4)
+        matrix = _MrXCatMatrix(None, weighted_counts, None)
+
+        zscores = matrix.zscores
+
+        self_, counts, total, rowsum, colsum = _array_type_std_res_.call_args.args
+        assert self_ is matrix
+        np.testing.assert_equal(
+            counts, np.array([[0, 1, 2, 3], [8, 9, 10, 11], [16, 17, 18, 19]])
+        )
+        np.testing.assert_equal(total, np.array([[28], [92], [156]]))
+        np.testing.assert_equal(rowsum, np.array([[6], [38], [70]]))
+        np.testing.assert_equal(
+            colsum, np.array([[4, 6, 8, 10], [20, 22, 24, 26], [36, 38, 40, 42]])
+        )
+        assert zscores == [[1, 2], [3, 4]]
 
     def it_knows_its_baseline_to_help(self, request):
         property_mock(
