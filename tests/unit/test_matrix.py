@@ -2354,6 +2354,31 @@ class Describe_MrXMrMatrix(object):
             np.array([[0, 1], [4, 5]]),
         )
 
+    def it_knows_its_zscores(self, request):
+        _array_type_std_res_ = method_mock(
+            request, _MrXMrMatrix, "_array_type_std_res", return_value=[[1, 2], [3, 4]]
+        )
+        weighted_counts = np.arange(48).reshape(3, 2, 4, 2)
+        matrix = _MrXMrMatrix(None, weighted_counts, None)
+
+        zscores = matrix.zscores
+
+        self_, counts, total, rowsum, colsum = _array_type_std_res_.call_args.args
+        assert self_ is matrix
+        np.testing.assert_equal(
+            counts, np.array([[0, 2, 4, 6], [16, 18, 20, 22], [32, 34, 36, 38]])
+        )
+        np.testing.assert_equal(
+            total, np.array([[18, 26, 34, 42], [82, 90, 98, 106], [146, 154, 162, 170]])
+        )
+        np.testing.assert_equal(
+            rowsum, np.array([[1, 5, 9, 13], [33, 37, 41, 45], [65, 69, 73, 77]])
+        )
+        np.testing.assert_equal(
+            colsum, np.array([[8, 12, 16, 20], [40, 44, 48, 52], [72, 76, 80, 84]])
+        )
+        assert zscores == [[1, 2], [3, 4]]
+
     def it_knows_its_baseline_to_help(self, request):
         property_mock(
             request, _MrXMrMatrix, "_valid_row_idxs", return_value=np.array([0, 1])

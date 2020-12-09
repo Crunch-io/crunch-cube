@@ -1645,7 +1645,12 @@ class _MrXMrMatrix(_CatXCatMatrix):
         deviations above (positive) or below (negative) the population mean each cell's
         value is.
         """
-        raise NotImplementedError
+        return self._array_type_std_res(
+            self._weighted_counts[:, 0, :, 0],
+            self.table_margin,
+            np.sum(self._weighted_counts, axis=3)[:, 0, :],
+            np.sum(self._weighted_counts, axis=1)[:, :, 0],
+        )
 
     @lazyproperty
     def _baseline(self):

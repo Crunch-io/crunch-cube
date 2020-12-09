@@ -946,7 +946,13 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def zscores(self):
-        return np.array([row.zscores for row in self._matrix.rows])
+        """2D np.float64 ndarray of std-res value for each cell of matrix.
+
+        A z-score is also known as a *standard score* and is the number of standard
+        deviations above (positive) or below (negative) the population mean a cell's
+        value is.
+        """
+        return self._assembler.zscores
 
     # ---implementation (helpers)-------------------------------------
 

@@ -3,7 +3,6 @@
 """Integration-test suite for `cr.cube.cubepart` module."""
 
 import numpy as np
-import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.cubepart import _Slice
@@ -633,7 +632,7 @@ class DescribeAssembler(object):
     def it_computes_cat_hs_x_cat_hs_zscore_subtotals(self):
         slice_ = Cube(CR.CAT_HS_X_CAT_HS).partitions[0]
         np.testing.assert_almost_equal(
-            slice_._assembler.zscores,
+            slice_.zscores,
             np.array(
                 [
                     [0.99449068, 2.61969845, -1.32622266, -2.25262377, -3.12587272],
@@ -650,7 +649,7 @@ class DescribeAssembler(object):
     def it_computes_cat_x_mr_zscores(self):
         slice_ = Cube(CR.CAT_X_MR_2).partitions[0]
         np.testing.assert_almost_equal(
-            slice_._assembler.zscores,
+            slice_.zscores,
             np.array(
                 [
                     [5.9856141, 2.067039, -1.9837558, -1.5290931, -0.2334994],
@@ -666,7 +665,7 @@ class DescribeAssembler(object):
     def it_computes_mr_x_cat_zscores(self):
         slice_ = Cube(CR.MR_X_CAT).partitions[0]
         np.testing.assert_almost_equal(
-            slice_._assembler.zscores,
+            slice_.zscores,
             np.array(
                 [
                     [5.9856141, 0.1066704, np.nan, -2.6564277, -1.5834406, np.nan],
@@ -678,11 +677,10 @@ class DescribeAssembler(object):
             ),
         )
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_mr_x_mr_zscores(self):
         slice_ = Cube(CR.MR_X_MR).partitions[0]
         np.testing.assert_almost_equal(
-            slice_._assembler.zscores,
+            slice_.zscores,
             np.array(
                 [
                     [12.8841837, 0.1781302, -1.2190176, 4.1568249],
