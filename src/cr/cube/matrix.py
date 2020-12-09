@@ -125,7 +125,11 @@ class Assembler(object):
 
         Raises `ValueError` if the cube-result does not include a means cube-measure.
         """
-        raise NotImplementedError
+        if not self._cube.has_means:
+            raise ValueError("cube-result does not include a means cube-measure")
+        return self._assemble_matrix(
+            _NanSubtotals.blocks(self._cube_result_matrix, "means")
+        )
 
     @lazyproperty
     def pvalues(self):
@@ -1175,6 +1179,11 @@ class _CatXCatMeansMatrix(_CatXCatMatrix):
         self._means = means
 
     @lazyproperty
+    def means(self):
+        """2D np.float64 ndarray of mean for each valid matrix cell."""
+        raise NotImplementedError
+
+    @lazyproperty
     def weighted_counts(self):
         """2D ndarray of np.nan for each valid matrix cell.
 
@@ -1339,6 +1348,11 @@ class _CatXMrMatrix(_CatXCatMatrix):
 class _CatXMrMeansMatrix(_CatXMrMatrix):
     """Basis for CAT_X_MR slice having mean measure instead of counts."""
 
+    @lazyproperty
+    def means(self):
+        """2D np.float64 ndarray of mean for each valid matrix cell."""
+        raise NotImplementedError
+
 
 class _MrXCatMatrix(_CatXCatMatrix):
     """Represents an MR_X_CAT slice.
@@ -1500,6 +1514,11 @@ class _MrXCatMeansMatrix(_MrXCatMatrix):
     Note that its (weighted) counts are all set to zero. A means slice still has
     meaningful unweighted counts.
     """
+
+    @lazyproperty
+    def means(self):
+        """2D np.float64 ndarray of mean for each valid matrix cell."""
+        raise NotImplementedError
 
 
 class _MrXMrMatrix(_CatXCatMatrix):

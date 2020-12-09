@@ -197,6 +197,32 @@ class DescribeAssembler(object):
         _row_order_prop_.return_value = [0, 1, -2, 2, -1, 3]
         assert Assembler(None, None, None).inserted_row_idxs == (2, 4)
 
+    def it_knows_the_means(
+        self,
+        cube_,
+        _cube_result_matrix_prop_,
+        cube_result_matrix_,
+        _NanSubtotals_,
+        _assemble_matrix_,
+    ):
+        cube_.has_means = True
+        _cube_result_matrix_prop_.return_value = cube_result_matrix_
+        _NanSubtotals_.blocks.return_value = [[[3], [2]], [[4], [1]]]
+        _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6]]
+        assembler = Assembler(cube_, None, None)
+
+        means = assembler.means
+
+        _NanSubtotals_.blocks.assert_called_once_with(cube_result_matrix_, "means")
+        _assemble_matrix_.assert_called_once_with(assembler, [[[3], [2]], [[4], [1]]])
+        assert means == [[1, 2, 3], [4, 5, 6]]
+
+    def but_it_raises_when_the_cube_result_does_not_contain_means_measure(self, cube_):
+        cube_.has_means = False
+        with pytest.raises(ValueError) as e:
+            Assembler(cube_, None, None).means
+        assert str(e.value) == "cube-result does not include a means cube-measure"
+
     def it_knows_the_pvalues(self, request):
         property_mock(
             request, Assembler, "zscores", return_value=np.array([0.7, 0.8, 0.9])
