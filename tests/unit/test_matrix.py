@@ -896,6 +896,19 @@ class Describe_BaseSubtotals(object):
         _blocks_.assert_called_once()
         assert blocks == [[1, 2], [3, 4]]
 
+    def it_provides_access_to_the_base_values_to_help(self, cube_result_matrix_):
+        cube_result_matrix_.unweighted_counts = [[1, 2], [3, 4]]
+        subtotals = _BaseSubtotals(cube_result_matrix_, "unweighted_counts")
+
+        base_values = subtotals._base_values
+
+        assert base_values == [[1, 2], [3, 4]]
+
+    def but_it_raises_when_no_measure_propname_is_specified(self):
+        with pytest.raises(NotImplementedError) as e:
+            _BaseSubtotals(None, None)._base_values
+        assert str(e.value).endswith(" must implement `._base_values`")
+
     def it_knows_how_to_assemble_its_blocks(self, request):
         property_mock(request, _BaseSubtotals, "_base_values")
         property_mock(request, _BaseSubtotals, "_subtotal_columns")
@@ -1047,20 +1060,6 @@ class Describe_BaseSubtotals(object):
 
 class Describe_SumSubtotals(object):
     """Unit test suite for `cr.cube.matrix._SubSubtotals` object."""
-
-    @pytest.mark.parametrize(
-        ("prop_name",),
-        (
-            ("columns_base",),
-            ("column_proportions",),
-            ("columns_pruning_base",),
-            ("rows_pruning_base",),
-            ("table_margin",),
-        ),
-    )
-    def it_returns_correct_base_values(self, cube_result_matrix_, prop_name):
-        subtotals = _SumSubtotals(cube_result_matrix_, prop_name)
-        assert subtotals._base_values == getattr(cube_result_matrix_, prop_name)
 
     @pytest.mark.parametrize(
         ("row_idxs", "col_idxs", "expected_value"),
