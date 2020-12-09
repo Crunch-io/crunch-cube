@@ -291,6 +291,33 @@ class _Slice(CubePartition):
         return np.array([col.proportions for col in self._matrix.columns]).T
 
     @lazyproperty
+    def column_proportions_moe(self):
+        """1D/2D np.float64 ndarray of margin-of-error (MoE) for columns proportions.
+
+        The values are represented as fractions, analogue to the `column_proportions`
+        property. This means that the value of 3.5% will have the value 0.035.
+        The values can be np.nan when the corresponding percentage is also np.nan, which
+        happens when the respective columns margin is 0.
+        """
+        return Z_975 * self.column_std_err
+
+    @lazyproperty
+    def column_std_dev(self):
+        """standard deviation for column percentages
+
+        `std_deviation = sqrt(variance)`
+        """
+        return np.sqrt(self._column_variance)
+
+    @lazyproperty
+    def column_std_err(self):
+        """standard error for column percentages
+
+        `std_error = sqrt(variance/N)`
+        """
+        return np.sqrt(self._column_variance / self.columns_margin)
+
+    @lazyproperty
     def columns_dimension_name(self):
         """str name assigned to columns-dimension.
 
@@ -306,33 +333,6 @@ class _Slice(CubePartition):
     @lazyproperty
     def columns_margin(self):
         return np.array([column.margin for column in self._matrix.columns]).T
-
-    @lazyproperty
-    def column_proportions_moe(self):
-        """1D/2D np.float64 ndarray of margin-of-error (MoE) for columns proportions.
-
-        The values are represented as fractions, analogue to the `column_proportions`
-        property. This means that the value of 3.5% will have the value 0.035.
-        The values can be np.nan when the corresponding percentage is also np.nan, which
-        happens when the respective columns margin is 0.
-        """
-        return Z_975 * self.column_std_err
-
-    @lazyproperty
-    def column_std_err(self):
-        """standard error for column percentages
-
-        `std_error = sqrt(variance/N)`
-        """
-        return np.sqrt(self._column_variance / self.columns_margin)
-
-    @lazyproperty
-    def column_std_dev(self):
-        """standard deviation for column percentages
-
-        `std_deviation = sqrt(variance)`
-        """
-        return np.sqrt(self._column_variance)
 
     @lazyproperty
     def counts(self):
@@ -928,6 +928,12 @@ class _Slice(CubePartition):
     # ---implementation (helpers)-------------------------------------
 
     @lazyproperty
+    def _column_variance(self):
+        """Variance for column percentages."""
+        p = self.counts / self.columns_margin
+        return p * (1 - p)
+
+    @lazyproperty
     def _columns_dimension(self):
         return self._dimensions[1]
 
@@ -935,26 +941,6 @@ class _Slice(CubePartition):
     def _columns_dimension_numeric_values(self):
         """1D ndarray of numeric-value for each columns-dimension element."""
         return np.array([column.numeric_value for column in self._matrix.columns])
-
-    @lazyproperty
-    def _column_variance(self):
-        """variance for column percentages
-
-        `variance = p * (1-p)`
-        """
-        return (
-            self.counts / self.columns_margin * (1 - self.counts / self.columns_margin)
-        )
-
-    @lazyproperty
-    def _row_variance(self):
-        """ndarray of variances for row percentages"""
-        # --- Rows margin is a vector, that's supposed to represent a column (to the
-        # --- right of the crosstab). We need to devide all values in the crosstab by it
-        # --- and therefore need to cast it to an actual column (because of how NumPy
-        # --- does broadcasting).
-        margin = self.rows_margin[:, np.newaxis]
-        return self.counts / margin * (1 - self.counts / margin)
 
     @lazyproperty
     def _dimensions(self):
@@ -973,6 +959,17 @@ class _Slice(CubePartition):
 
     def _median(self, values):
         return np.median(values) if values.size != 0 else np.nan
+
+    @lazyproperty
+    def _row_variance(self):
+        """2D np.float64 ndarray of row-percentage variance for each cell."""
+        # --- rows-margin is a vector that represents a column (to the right of the
+        # --- crosstab). We need to divide all values in the crosstab by it and
+        # --- therefore need to cast it to an actual column (because of how NumPy does
+        # --- broadcasting).
+        rows_margin = self.rows_margin[:, np.newaxis]
+        p = self.counts / rows_margin
+        return p * (1 - p)
 
     @lazyproperty
     def _rows_dimension(self):
