@@ -204,7 +204,7 @@ class DescribeAssembler(object):
             mask_size=0,
         )
 
-        weighted_counts = slice_._assembler.weighted_counts
+        weighted_counts = slice_.counts
 
         assert np.array_equal(
             weighted_counts,
@@ -222,13 +222,13 @@ class DescribeAssembler(object):
     def it_computes_cat_x_mr_weighted_counts(self):
         slice_ = Cube(CR.CAT_X_MR).partitions[0]
         np.testing.assert_array_equal(
-            slice_._assembler.weighted_counts, np.array([[12, 12, 12], [28, 22, 26]])
+            slice_.counts, np.array([[12, 12, 12], [28, 22, 26]])
         )
 
     def it_computes_mr_x_cat_weighted_counts(self):
         slice_ = Cube(CR.MR_X_CAT).partitions[0]
         np.testing.assert_almost_equal(
-            slice_._assembler.weighted_counts,
+            slice_.counts,
             [
                 [13.9429388, 6.0970738, 0.0, 4.1755362, 7.4159721, 0.0],
                 [8.9877522, 12.5606144, 0.0, 24.8653747, 24.3169928, 0.0],
@@ -241,7 +241,7 @@ class DescribeAssembler(object):
     def it_computes_mr_x_mr_weighted_counts(self):
         slice_ = Cube(CR.MR_X_MR).partitions[0]
         np.testing.assert_almost_equal(
-            slice_._assembler.weighted_counts,
+            slice_.counts,
             [
                 [22.96727041, 3.79786399, 8.77385271, 22.96727041],
                 [3.79786399, 45.77891654, 12.46883034, 45.77891654],

@@ -342,7 +342,7 @@ class _Slice(CubePartition):
     @lazyproperty
     def counts(self):
         """2D np.float64 ndarray of weighted cube counts."""
-        return np.array([row.counts for row in self._matrix.rows])
+        return self._assembler.weighted_counts
 
     @lazyproperty
     def description(self):

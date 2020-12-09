@@ -13,6 +13,7 @@ from cr.cube.matrix import (
     _BaseCubeResultMatrix,
     _BaseSubtotals,
     _CatXCatMatrix,
+    _CatXCatMeansMatrix,
     _CatXMrMatrix,
     _MrXCatMatrix,
     _MrXMrMatrix,
@@ -958,6 +959,17 @@ class Describe_CatXCatMatrix(object):
         np.testing.assert_equal(
             _CatXCatMatrix(None, weighted_counts, None).weighted_counts,
             weighted_counts,
+        )
+
+
+class Describe_CatXCatMeansMatrix(object):
+    """Unit test suite for `cr.cube.matrix._CatXCatMeansMatrix` object."""
+
+    def it_knows_its_weighted_counts(self):
+        means = np.array([[3, 2, 1], [6, 5, 4]])
+        np.testing.assert_equal(
+            _CatXCatMeansMatrix(None, means, None).weighted_counts,
+            np.array([[np.nan, np.nan, np.nan], [np.nan, np.nan, np.nan]]),
         )
 
 

@@ -611,6 +611,19 @@ class _CatXCatMeansMatrix(_CatXCatMatrix):
     A means matrix has an array of mean values instead of a `counts` array.
     """
 
+    def __init__(self, dimensions, means, unweighted_counts):
+        super(_CatXCatMeansMatrix, self).__init__(dimensions, None, unweighted_counts)
+        self._means = means
+
+    @lazyproperty
+    def weighted_counts(self):
+        """2D ndarray of np.nan for each valid matrix cell.
+
+        Weighted-counts have no meaning for a means matrix (although unweighted counts
+        do).
+        """
+        return np.full(self._means.shape, np.nan)
+
 
 class _CatXMrMatrix(_CatXCatMatrix):
     """Represents a CAT x MR slice.
