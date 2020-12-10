@@ -1353,18 +1353,18 @@ class Describe_TableStdErrSubtotals(object):
 
     def it_can_compute_a_subtotal_row_to_help(
         self,
-        subtotal_,
+        request,
         _base_counts_prop_,
         _table_margin_prop_,
     ):
-        subtotal_.addend_idxs = np.array([0, 1])
+        row_subtotal_ = instance_mock(request, _Subtotal, addend_idxs=np.array([0, 1]))
+        col_subtotal_ = instance_mock(request, _Subtotal, addend_idxs=np.array([1, 2]))
         _base_counts_prop_.return_value = np.arange(12).reshape(3, 4)
         _table_margin_prop_.return_value = 67
         subtotals = _TableStdErrSubtotals(None, None)
 
         np.testing.assert_almost_equal(
-            subtotals._subtotal_row(subtotal_),
-            np.array([0.0289460, 0.0348842, 0.0396149, 0.0435337]),
+            subtotals._intersection(row_subtotal_, col_subtotal_), 0.0496694
         )
 
     # --- fixture components -----------------------------------------

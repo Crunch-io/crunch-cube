@@ -861,7 +861,6 @@ class DescribeAssembler(object):
             ),
         )
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_cat_hs_mt_x_cat_hs_mt_tbl_stderr(self):
         slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT).partitions[0]
         np.testing.assert_almost_equal(

@@ -657,6 +657,21 @@ class _TableStdErrSubtotals(_BaseSubtotals):
         """2D np.float64 ndarray of table-stderr for each cell of cube-result matrix."""
         return self._cube_result_matrix.table_stderrs
 
+    def _intersection(self, row_subtotal, column_subtotal):
+        """Return value for intersection of `row_subtotal` and `column_subtotal`."""
+        # --- column of base subtotal counts is 1D, like [44 148 283 72] ---
+        # --- the inserted-row for counts measure, like: [159 172 107 272] ---
+        row_subtotal_counts = np.sum(
+            self._base_counts[row_subtotal.addend_idxs, :], axis=0
+        )
+        intersection_count = np.sum(row_subtotal_counts[column_subtotal.addend_idxs])
+
+        # --- `p` is intersection-table-proportion ---
+        p = intersection_count / self._table_margin
+        table_proportion_variance = p * (1 - p)
+
+        return np.sqrt(table_proportion_variance / self._table_margin)
+
     def _subtotal_column(self, subtotal):
         """Return (n_rows,) ndarray of table-stderr `subtotal` value."""
         # --- column of base subtotal counts is 1D, like [44 148 283 72] ---
