@@ -240,6 +240,35 @@ class Assembler(object):
         return table_base
 
     @lazyproperty
+    def table_base_unpruned(self):
+        """np.int64 scalar or a 1D or 2D ndarray of np.int64 representing table base.
+
+        This value includes hidden vectors, those with either a hide transform on
+        their element or that have been pruned (because their base (N) is zero). Also,
+        it does *not* include inserted subtotals. This does not affect a scalar value
+        but when the return value is an ndarray, the shape may be different than the
+        array returned by `.table_base`.
+
+        A multiple-response (MR) dimension produces an array of table-base values
+        because each element (subvariable) of the dimension represents a logically
+        distinct question which may not have been asked of all respondents. When both
+        dimensions are MR, the return value is a 2D ndarray. A CAT_X_CAT matrix produces
+        a scalar value for this property.
+        """
+        # TODO: This name is misleading. It's not only "unpruned" it's "before_hiding"
+        # (of either kind, prune or hide-transform). But the real problem is having this
+        # interface property at all. The need for this is related to expressing ranges
+        # for base and margin in cubes that have an MR dimension. The real solution is
+        # to compute ranges in `cr.cube` rather than leaking this sort of internal
+        # detail through the interface and making the client compute those for
+        # themselves. So this will require reconstructing that "show-ranges" requirement
+        # and either adding some sort of a `.range` property that returns a sequence of
+        # (min, max) tuples, or maybe just returning margin or base as tuples when
+        # appropriate and having something like a `.margin_is_ranges` predicate the
+        # client can switch on to control their rendering.
+        return self._cube_result_matrix.table_base
+
+    @lazyproperty
     def table_margin(self):
         """Scalar, 1D, or 2D ndarray of np.float64 weighted-N for this slice.
 

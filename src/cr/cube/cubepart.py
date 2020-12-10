@@ -844,7 +844,20 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def table_base_unpruned(self):
-        return self._matrix.table_base_unpruned
+        """np.int64 scalar or a 1D or 2D ndarray of np.int64 representing table base.
+
+        This value includes hidden vectors, those with either a hide transform on
+        their element or that have been pruned (because their base (N) is zero). This
+        does not affect a scalar value but when the return value is an ndarray, the
+        shape may be different than the array returned by `.table_base`.
+
+        A multiple-response (MR) dimension produces an array of table-base values
+        because each element (subvariable) of the dimension represents a logically
+        distinct question which may not have been asked of all respondents. When both
+        dimensions are MR, the return value is a 2D ndarray. A CAT_X_CAT slice produces
+        a scalar value for this property.
+        """
+        return self._assembler.table_base_unpruned
 
     @lazyproperty
     def table_margin(self):
