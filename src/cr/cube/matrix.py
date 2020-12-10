@@ -652,6 +652,11 @@ class _SumSubtotals(_BaseSubtotals):
 class _TableStdErrSubtotals(_BaseSubtotals):
     """Computes subtotal values for the table-stderrs measure."""
 
+    @lazyproperty
+    def _base_values(self):
+        """2D np.float64 ndarray of table-stderr for each cell of cube-result matrix."""
+        return self._cube_result_matrix.table_stderrs
+
 
 class _ZscoreSubtotals(_BaseSubtotals):
     """Computes subtotal values for the z-score measure.
@@ -875,6 +880,13 @@ class _BaseCubeResultMatrix(object):
         """
         raise NotImplementedError(
             "`%s` must implement `.table_margin" % self.__class__.__name__
+        )
+
+    @lazyproperty
+    def table_stderrs(self):
+        """2D np.float64 ndarray of table-percent std-error for each matrix cell."""
+        raise NotImplementedError(
+            "`%s` must implement `.table_stderrs" % self.__class__.__name__
         )
 
     @lazyproperty

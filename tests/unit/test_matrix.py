@@ -21,6 +21,7 @@ from cr.cube.matrix import (
     _MrXMrMatrix,
     _NanSubtotals,
     _SumSubtotals,
+    _TableStdErrSubtotals,
     _ZscoreSubtotals,
 )
 
@@ -1323,6 +1324,22 @@ class Describe_SumSubtotals(object):
     @pytest.fixture
     def subtotal_(self, request):
         return instance_mock(request, _Subtotal)
+
+
+class Describe_TableStdErrSubtotals(object):
+    """Unit test suite for `cr.cube.matrix._TableStdErrSubtotals` object."""
+
+    def it_provides_access_to_the_base_values_to_help(self, cube_result_matrix_):
+        cube_result_matrix_.table_stderrs = [[1, 2], [3, 4]]
+        subtotals = _TableStdErrSubtotals(cube_result_matrix_, None)
+
+        assert subtotals._base_values == [[1, 2], [3, 4]]
+
+    # --- fixture components -----------------------------------------
+
+    @pytest.fixture
+    def cube_result_matrix_(self, request):
+        return instance_mock(request, _BaseCubeResultMatrix)
 
 
 class Describe_ZscoreSubtotals(object):
