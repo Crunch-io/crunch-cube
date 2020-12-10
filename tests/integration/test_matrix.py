@@ -3,6 +3,7 @@
 """Integration-test suite for `cr.cube.cubepart` module."""
 
 import numpy as np
+import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.cubepart import _Slice
@@ -856,6 +857,72 @@ class DescribeAssembler(object):
                         np.nan,
                         np.nan,
                     ],
+                ]
+            ),
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_cat_hs_mt_x_cat_hs_mt_tbl_stderr(self):
+        slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT).partitions[0]
+        np.testing.assert_almost_equal(
+            slice_._assembler.table_stderrs,
+            np.array(
+                [
+                    [0.0483389, 0.0521965, 0.0434404, 0.0326595, 0.0, 0.0107216],
+                    [0.0279877, 0.0424789, 0.0352589, 0.0294681, 0.0, 0.0153073],
+                    [0.0110445, 0.0110445, 0.0, 0.0107216, 0.0, 0.0],
+                    [0.0187321, 0.0278789, 0.0214041, 0.01553, 0.0, 0.0153073],
+                    [0.0187321, 0.0340022, 0.0294681, 0.0235902, 0.0, 0.0],
+                    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                    [0.0107216, 0.015081, 0.0107216, 0.0107216, 0.0, 0.0],
+                ]
+            ),
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_cat_x_mr_table_stderr(self):
+        slice_ = Cube(CR.CAT_X_MR_2).partitions[0]
+        np.testing.assert_almost_equal(
+            slice_._assembler.table_stderrs,
+            np.array(
+                [
+                    [0.0203179, 0.0138754, 0.0067437, 0.0080877, 0.010153],
+                    [0.0137565, 0.0162577, 0.0171278, 0.0136971, 0.0166752],
+                    [0.0, 0.0, 0.0, 0.0, 0.0],
+                    [0.0114483, 0.0221554, 0.0256964, 0.0211979, 0.0205533],
+                    [0.0151127, 0.0219419, 0.0259357, 0.0227978, 0.0214142],
+                    [0.0, 0.0, 0.0, 0.0, 0.0],
+                ]
+            ),
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_mr_x_cat_table_stderr(self):
+        slice_ = Cube(CR.MR_X_CAT).partitions[0]
+        np.testing.assert_almost_equal(
+            slice_._assembler.table_stderrs,
+            np.array(
+                [
+                    [0.0203179, 0.0137565, 0.0, 0.0114483, 0.0151127, 0.0],
+                    [0.0138754, 0.0162577, 0.0, 0.0221554, 0.0219419, 0.0],
+                    [0.0067437, 0.0171278, 0.0, 0.0256964, 0.0259357, 0.0],
+                    [0.0080877, 0.0136971, 0.0, 0.0211979, 0.0227978, 0.0],
+                    [0.010153, 0.0166752, 0.0, 0.0205533, 0.0214142, 0.0],
+                ]
+            ),
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_mr_x_mr_table_stderr(self):
+        slice_ = Cube(CR.MR_X_MR).partitions[0]
+        np.testing.assert_almost_equal(
+            slice_._assembler.table_stderrs,
+            np.array(
+                [
+                    [0.0267982, 0.0177981, 0.0225257, 0.0267982],
+                    [0.0177981, 0.0392504, 0.0330351, 0.0392504],
+                    [0.0225257, 0.0330351, 0.0371372, 0.0371372],
+                    [0.0267982, 0.0392504, 0.0371372, 0.0323307],
                 ]
             ),
         )

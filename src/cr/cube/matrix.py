@@ -277,6 +277,11 @@ class Assembler(object):
         return base_table_margin
 
     @lazyproperty
+    def table_stderrs(self):
+        """2D np.float64 ndarray of std-error of table-percent for each matrix cell."""
+        raise NotImplementedError
+
+    @lazyproperty
     def unweighted_counts(self):
         """2D np.int64 ndarray of unweighted-count for each cell."""
         return self._assemble_matrix(
