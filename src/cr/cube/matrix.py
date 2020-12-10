@@ -279,7 +279,9 @@ class Assembler(object):
     @lazyproperty
     def table_stderrs(self):
         """2D np.float64 ndarray of std-error of table-percent for each matrix cell."""
-        raise NotImplementedError
+        return self._assemble_matrix(
+            _TableStdErrSubtotals.blocks(self._cube_result_matrix)
+        )
 
     @lazyproperty
     def unweighted_counts(self):
@@ -645,6 +647,10 @@ class _SumSubtotals(_BaseSubtotals):
     def _subtotal_row(self, subtotal):
         """Return (n_cols,) ndarray of values for `subtotal` row."""
         return np.sum(self._base_values[subtotal.addend_idxs, :], axis=0)
+
+
+class _TableStdErrSubtotals(_BaseSubtotals):
+    """Computes subtotal values for the table-stderrs measure."""
 
 
 class _ZscoreSubtotals(_BaseSubtotals):

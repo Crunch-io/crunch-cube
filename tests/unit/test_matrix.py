@@ -555,6 +555,24 @@ class DescribeAssembler(object):
 
         assert assembler.table_margin == 4242
 
+    def it_knows_the_table_stderrs(
+        self,
+        _cube_result_matrix_prop_,
+        cube_result_matrix_,
+        _TableStdErrSubtotals_,
+        _assemble_matrix_,
+    ):
+        _cube_result_matrix_prop_.return_value = cube_result_matrix_
+        _TableStdErrSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
+        _assemble_matrix_.return_value = [[1, 3, 2], [4, 6, 5]]
+        assembler = Assembler(None, None, None)
+
+        table_stderrs = assembler.table_stderrs
+
+        _TableStdErrSubtotals_.blocks.assert_called_once_with(cube_result_matrix_)
+        _assemble_matrix_.assert_called_once_with(assembler, [[[1], [2]], [[3], [4]]])
+        assert table_stderrs == [[1, 3, 2], [4, 6, 5]]
+
     def it_knows_the_unweighted_counts(
         self,
         _cube_result_matrix_prop_,
@@ -1010,6 +1028,10 @@ class DescribeAssembler(object):
     @pytest.fixture
     def _SumSubtotals_(self, request):
         return class_mock(request, "cr.cube.matrix._SumSubtotals")
+
+    @pytest.fixture
+    def _TableStdErrSubtotals_(self, request):
+        return class_mock(request, "cr.cube.matrix._TableStdErrSubtotals")
 
     @pytest.fixture
     def _ZscoreSubtotals_(self, request):
