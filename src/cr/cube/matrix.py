@@ -1532,7 +1532,7 @@ class _MrXCatMatrix(_CatXCatMatrix):
 
         Standard error is sqrt(variance/N).
         """
-        raise NotImplementedError
+        return np.sqrt(self._table_proportion_variances / self.table_margin[:, None])
 
     @lazyproperty
     def unweighted_counts(self):

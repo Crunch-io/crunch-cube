@@ -2218,6 +2218,30 @@ class Describe_MrXCatMatrix(object):
             _MrXCatMatrix(None, weighted_counts, None).table_margin, [21, 30]
         )
 
+    def it_knows_its_table_stderrs(self, request):
+        property_mock(
+            request,
+            _MrXCatMatrix,
+            "_table_proportion_variances",
+            return_value=np.array([[0.5, 1.0], [0.25, 2.0]]),
+        )
+        property_mock(
+            request,
+            _MrXCatMatrix,
+            "table_margin",
+            return_value=np.array([[1, 2], [3, 4]]),
+        )
+
+        np.testing.assert_almost_equal(
+            _MrXCatMatrix(None, None, None).table_stderrs,
+            np.array(
+                [
+                    [[0.7071068, 0.7071068], [0.5, 1.0]],
+                    [[0.4082483, 0.5], [0.2886751, 0.7071068]],
+                ]
+            ),
+        )
+
     def it_knows_its_unweighted_counts(self):
         unweighted_counts = np.array(
             [
