@@ -930,7 +930,8 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def table_std_dev(self):
-        return np.array([row.table_std_dev for row in self._matrix.rows])
+        """2D np.float64 ndarray of std-dev of table-percent for each table cell."""
+        return np.sqrt(self._table_proportion_variance)
 
     @lazyproperty
     def table_std_err(self):
@@ -1072,6 +1073,12 @@ class _Slice(CubePartition):
         subtotal rows have a value of np.nan (subtotals have no numeric value).
         """
         return self._assembler.rows_dimension_numeric_values
+
+    @lazyproperty
+    def _table_proportion_variance(self):
+        """2D ndarray of np.float64 table-proportion variance for each matrix cell."""
+        p = self.table_proportions
+        return p * (1 - p)
 
     @lazyproperty
     def _transform_dicts(self):
