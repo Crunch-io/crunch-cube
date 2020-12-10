@@ -408,7 +408,14 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def means(self):
-        return np.array([row.means for row in self._matrix.rows])
+        """2D optional np.float64 ndarray of mean value for each table cell.
+
+        Cell value is `np.nan` for each cell corresponding to an inserted subtotal
+        (mean of addend cells cannot simply be added to get the mean of the subtotal).
+
+        Raises `ValueError` if the cube-result does not include a means cube-measure.
+        """
+        return self._assembler.means
 
     @lazyproperty
     def min_base_size_mask(self):

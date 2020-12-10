@@ -3,7 +3,6 @@
 """Integration-test suite for `cr.cube.cubepart` module."""
 
 import numpy as np
-import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.cubepart import _Slice
@@ -695,7 +694,7 @@ class DescribeAssembler(object):
     def it_computes_means_cat_hs_x_cat_hs(self):
         slice_ = Cube(CR.MEANS_CAT_HS_X_CAT_HS).partitions[0]
         np.testing.assert_almost_equal(
-            slice_._assembler.means,
+            slice_.means,
             np.array(
                 [
                     [41.96875, 30.875, 25.66666667, np.nan, 42.0],
@@ -712,7 +711,7 @@ class DescribeAssembler(object):
     def it_computes_means_cat_x_mr(self):
         slice_ = Cube(CR.MEANS_CAT_X_MR).partitions[0]
         np.testing.assert_almost_equal(
-            slice_._assembler.means,
+            slice_.means,
             np.array(
                 [
                     [29.0, 30.71428571, 48.0, 49.76923077, 37.2962963],
@@ -725,11 +724,10 @@ class DescribeAssembler(object):
             ),
         )
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_means_mr_x_cat(self):
         slice_ = Cube(CR.MEANS_MR_X_CAT).partitions[0]
         np.testing.assert_almost_equal(
-            slice_._assembler.means,
+            slice_.means,
             np.array(
                 [
                     [

@@ -1520,10 +1520,15 @@ class _MrXCatMeansMatrix(_MrXCatMatrix):
     meaningful unweighted counts.
     """
 
+    def __init__(self, dimensions, means, unweighted_counts):
+        counts = np.zeros(means.shape)
+        super(_MrXCatMeansMatrix, self).__init__(dimensions, counts, unweighted_counts)
+        self._means = means
+
     @lazyproperty
     def means(self):
         """2D np.float64 ndarray of mean for each valid matrix cell."""
-        raise NotImplementedError
+        return self._means[:, 0, :]
 
 
 class _MrXMrMatrix(_CatXCatMatrix):

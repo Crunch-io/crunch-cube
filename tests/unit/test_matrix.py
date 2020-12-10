@@ -17,6 +17,7 @@ from cr.cube.matrix import (
     _CatXMrMatrix,
     _CatXMrMeansMatrix,
     _MrXCatMatrix,
+    _MrXCatMeansMatrix,
     _MrXMrMatrix,
     _NanSubtotals,
     _SumSubtotals,
@@ -2175,6 +2176,17 @@ class Describe_MrXCatMatrix(object):
         np.testing.assert_almost_equal(
             _MrXCatMatrix(None, None, None, counts_with_missings)._baseline,
             np.array([[0.2857143], [0.8]]),
+        )
+
+
+class Describe_MrXCatMeansMatrix(object):
+    """Unit test suite for `cr.cube.matrix._MrXCatMeansMatrix` object."""
+
+    def it_knows_its_means(self):
+        means = np.arange(24).reshape(3, 2, 4)
+        np.testing.assert_equal(
+            _MrXCatMeansMatrix(None, means, None).means,
+            np.array([[0, 1, 2, 3], [8, 9, 10, 11], [16, 17, 18, 19]]),
         )
 
 
