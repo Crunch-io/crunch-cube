@@ -1348,10 +1348,15 @@ class _CatXMrMatrix(_CatXCatMatrix):
 class _CatXMrMeansMatrix(_CatXMrMatrix):
     """Basis for CAT_X_MR slice having mean measure instead of counts."""
 
+    def __init__(self, dimensions, means, unweighted_counts):
+        counts = np.zeros(means.shape)
+        super(_CatXMrMeansMatrix, self).__init__(dimensions, counts, unweighted_counts)
+        self._means = means
+
     @lazyproperty
     def means(self):
         """2D np.float64 ndarray of mean for each valid matrix cell."""
-        raise NotImplementedError
+        return self._means[:, :, 0]
 
 
 class _MrXCatMatrix(_CatXCatMatrix):
