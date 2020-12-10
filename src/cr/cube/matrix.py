@@ -1201,7 +1201,8 @@ class _CatXCatMatrix(_BaseCubeResultMatrix):
     @lazyproperty
     def _table_proportion_variances(self):
         """2D ndarray of np.float64 cell proportion variance for each cell of matrix."""
-        raise NotImplementedError
+        p = self._weighted_counts / self.table_margin
+        return p * (1 - p)
 
 
 class _CatXCatMeansMatrix(_CatXCatMatrix):
@@ -1380,6 +1381,11 @@ class _CatXMrMatrix(_CatXCatMatrix):
         # --- division produces a 2D matrix of shape (nrows, ncols) ---
         return uncond_row_margin / uncond_table_margin
 
+    @lazyproperty
+    def _table_proportion_variances(self):
+        """2D ndarray of np.float64 table proportion variance for each matrix cell."""
+        raise NotImplementedError
+
 
 class _CatXMrMeansMatrix(_CatXMrMatrix):
     """Basis for CAT_X_MR slice having mean measure instead of counts."""
@@ -1480,6 +1486,14 @@ class _MrXCatMatrix(_CatXCatMatrix):
         return np.sum(self._weighted_counts, axis=(1, 2))
 
     @lazyproperty
+    def table_stderrs(self):
+        """2D np.float64 ndarray of table-percent std-error for each matrix cell.
+
+        Standard error is sqrt(variance/N).
+        """
+        raise NotImplementedError
+
+    @lazyproperty
     def unweighted_counts(self):
         """2D np.int64 ndarray of unweighted-count for each valid matrix cell.
 
@@ -1547,6 +1561,11 @@ class _MrXCatMatrix(_CatXCatMatrix):
         )
         # --- inflate shape to (nrows, 1) for later calculation convenience ---
         return (uncond_row_margin / uncond_row_table_margin)[:, None]
+
+    @lazyproperty
+    def _table_proportion_variances(self):
+        """2D ndarray of np.float64 table proportion variance for each matrix cell."""
+        raise NotImplementedError
 
 
 class _MrXCatMeansMatrix(_MrXCatMatrix):
@@ -1757,3 +1776,8 @@ class _MrXMrMatrix(_CatXCatMatrix):
         uncond_table_margin = np.sum(self._counts_with_missings[:, 0:2], axis=(1, 3))
         # --- baseline is produced by dividing uncond_row_margin by uncond_table_margin.
         return uncond_row_margin / uncond_table_margin
+
+    @lazyproperty
+    def _table_proportion_variances(self):
+        """2D ndarray of np.float64 table proportion variance for each matrix cell."""
+        raise NotImplementedError

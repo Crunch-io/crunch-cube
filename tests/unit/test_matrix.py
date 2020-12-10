@@ -1863,6 +1863,13 @@ class Describe_CatXCatMatrix(object):
             np.array([[0.2857143], [0.7142857]]),
         )
 
+    def it_knows_its_table_proportion_variances_to_help(self, request):
+        weighted_counts = np.arange(6).reshape(2, 3)
+        np.testing.assert_almost_equal(
+            _CatXCatMatrix(None, weighted_counts, None)._table_proportion_variances,
+            np.array([[0.0, 0.0622222, 0.1155556], [0.16, 0.1955556, 0.2222222]]),
+        )
+
 
 class Describe_CatXCatMeansMatrix(object):
     """Unit test suite for `cr.cube.matrix._CatXCatMeansMatrix` object."""
