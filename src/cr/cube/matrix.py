@@ -1181,7 +1181,7 @@ class _CatXCatMeansMatrix(_CatXCatMatrix):
     @lazyproperty
     def means(self):
         """2D np.float64 ndarray of mean for each valid matrix cell."""
-        raise NotImplementedError
+        return self._means
 
     @lazyproperty
     def weighted_counts(self):

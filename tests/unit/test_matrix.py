@@ -1812,6 +1812,13 @@ class Describe_CatXCatMatrix(object):
 class Describe_CatXCatMeansMatrix(object):
     """Unit test suite for `cr.cube.matrix._CatXCatMeansMatrix` object."""
 
+    def it_knows_its_means(self):
+        means = np.array([[2, 3, 1], [5, 6, 4]])
+        np.testing.assert_equal(
+            _CatXCatMeansMatrix(None, means, None).means,
+            np.array([[2, 3, 1], [5, 6, 4]]),
+        )
+
     def it_knows_its_weighted_counts(self):
         means = np.array([[3, 2, 1], [6, 5, 4]])
         np.testing.assert_equal(
