@@ -657,6 +657,20 @@ class _TableStdErrSubtotals(_BaseSubtotals):
         """2D np.float64 ndarray of table-stderr for each cell of cube-result matrix."""
         return self._cube_result_matrix.table_stderrs
 
+    def _subtotal_column(self, subtotal):
+        """Return (n_rows,) ndarray of table-stderr `subtotal` value."""
+        # --- column of base subtotal counts is 1D, like [44 148 283 72] ---
+        subtotal_counts = np.sum(
+            self._base_counts[:, subtotal.addend_idxs],
+            axis=1,
+        )
+
+        # --- `p` is subtotal-table-proportions ---
+        p = subtotal_counts / self._table_margin
+        table_proportion_variance = p * (1 - p)
+
+        return np.sqrt(table_proportion_variance / self._table_margin)
+
 
 class _ZscoreSubtotals(_BaseSubtotals):
     """Computes subtotal values for the z-score measure.

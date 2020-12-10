@@ -1335,11 +1335,39 @@ class Describe_TableStdErrSubtotals(object):
 
         assert subtotals._base_values == [[1, 2], [3, 4]]
 
+    def it_can_compute_a_subtotal_column_to_help(
+        self,
+        subtotal_,
+        _base_counts_prop_,
+        _table_margin_prop_,
+    ):
+        subtotal_.addend_idxs = np.array([0, 1])
+        _base_counts_prop_.return_value = np.arange(12).reshape(3, 4)
+        _table_margin_prop_.return_value = 67
+        subtotals = _TableStdErrSubtotals(None, None)
+
+        np.testing.assert_almost_equal(
+            subtotals._subtotal_column(subtotal_),
+            np.array([0.0148136, 0.0416604, 0.0531615]),
+        )
+
     # --- fixture components -----------------------------------------
+
+    @pytest.fixture
+    def _base_counts_prop_(self, request):
+        return property_mock(request, _TableStdErrSubtotals, "_base_counts")
 
     @pytest.fixture
     def cube_result_matrix_(self, request):
         return instance_mock(request, _BaseCubeResultMatrix)
+
+    @pytest.fixture
+    def subtotal_(self, request):
+        return instance_mock(request, _Subtotal)
+
+    @pytest.fixture
+    def _table_margin_prop_(self, request):
+        return property_mock(request, _TableStdErrSubtotals, "_table_margin")
 
 
 class Describe_ZscoreSubtotals(object):
