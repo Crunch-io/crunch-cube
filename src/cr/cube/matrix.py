@@ -306,6 +306,25 @@ class Assembler(object):
         return base_table_margin
 
     @lazyproperty
+    def table_margin_unpruned(self):
+        """np.float/int64 scalar or a 1D or 2D ndarray of np.float/int64 table margin.
+
+        This value includes hidden vectors, those with either a hide transform on
+        their element or that have been pruned (because their base (N) is zero). Also,
+        it does not include inserted subtotals. This
+        does not affect a scalar value but when the return value is an ndarray, the
+        shape may be different than the array returned by `.table_margin`.
+
+        A matrix with a multiple-response (MR) dimension produces an array of
+        table-margin values because each element (subvariable) of the dimension
+        represents a logically distinct question which may not have been asked of all
+        respondents. When both dimensions are MR, the return value is a 2D ndarray.
+        A CAT_X_CAT matrix produces a scalar value for this property.
+        """
+        # TODO: see TODO in `.table_base_unpruned`
+        return self._cube_result_matrix.table_margin
+
+    @lazyproperty
     def table_stderrs(self):
         """2D np.float64 ndarray of std-error of table-percent for each matrix cell."""
         return self._assemble_matrix(
