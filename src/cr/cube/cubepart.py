@@ -907,7 +907,11 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def table_std_err(self):
-        return np.array([row.table_std_err for row in self._matrix.rows])
+        """2D optional np.float64 ndarray of std-error of table-percent for each cell.
+
+        A cell value can be np.nan under certain conditions.
+        """
+        return self._assembler.table_stderrs
 
     @lazyproperty
     def unweighted_counts(self):

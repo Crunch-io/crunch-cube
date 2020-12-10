@@ -2603,3 +2603,10 @@ class Describe_MrXMrMatrix(object):
             _MrXMrMatrix(None, None, None, counts_with_missings)._baseline,
             np.array([[0.5, 0.5], [0.5, 0.5]]),
         )
+
+    def it_knows_its_table_proportion_variances_to_help(self, request):
+        weighted_counts = np.arange(24).reshape(2, 2, 3, 2)
+        np.testing.assert_almost_equal(
+            _MrXMrMatrix(None, weighted_counts, None)._table_proportion_variances,
+            np.array([[0.0, 0.0826446, 0.1155556], [0.1560874, 0.16, 0.1630506]]),
+        )
