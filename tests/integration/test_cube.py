@@ -1576,7 +1576,7 @@ class TestCrunchCubeAs_Slice(object):
                 12,
             ]
         )
-        np.testing.assert_array_equal(strand.row_base, expected)
+        np.testing.assert_array_equal(strand.rows_base, expected)
         # --- not testing cube.prune_indices() because the margin has 6367 cells ---
 
     def test_ca_with_single_cat_pruning(self):

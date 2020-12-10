@@ -741,9 +741,9 @@ class Describe_Strand(object):
         assert strand.name == "v7"
         assert strand.ndim == 1
         assert strand.population_counts == (0.0, 0.0)
-        np.testing.assert_equal(strand.row_base, [10, 5])
         assert strand.row_count == 2
         assert strand.row_labels == ("C", "E")
+        np.testing.assert_equal(strand.rows_base, [10, 5])
         assert strand.rows_dimension_fills == (None, None)
         assert strand.rows_dimension_name == "v7"
         assert strand.rows_dimension_type == DT.CAT

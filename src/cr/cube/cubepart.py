@@ -1167,16 +1167,16 @@ class _Strand(CubePartition):
         return Z_975 * total_filtered_population * self.standard_error
 
     @lazyproperty
-    def row_base(self):
-        return np.array([row.base for row in self._stripe.rows])
-
-    @lazyproperty
     def row_count(self):
         return len(self._stripe.rows)
 
     @lazyproperty
     def row_labels(self):
         return tuple(row.label for row in self._stripe.rows)
+
+    @lazyproperty
+    def rows_base(self):
+        return np.array([row.base for row in self._stripe.rows])
 
     @lazyproperty
     def rows_dimension_fills(self):

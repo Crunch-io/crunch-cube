@@ -15,8 +15,8 @@ class TestHeadersAndSubtotals(object):
     """Legacy unit-test suite for inserted rows and columns."""
 
     def test_headings_econ_blame_one_subtotal(self):
-        slice_ = Cube(CR.ECON_BLAME_WITH_HS).partitions[0]
-        expected = (
+        strand = Cube(CR.ECON_BLAME_WITH_HS).partitions[0]
+        assert strand.row_labels == (
             "President Obama",
             "Republicans in Congress",
             "Test New Heading (Obama and Republicans)",
@@ -24,26 +24,25 @@ class TestHeadersAndSubtotals(object):
             "Neither",
             "Not sure",
         )
-        assert slice_.row_labels == expected
 
     def test_headings_econ_blame_one_subtotal_do_not_fetch(self):
         transforms = {
             "columns_dimension": {"insertions": {}},
             "rows_dimension": {"insertions": {}},
         }
-        slice_ = Cube(CR.ECON_BLAME_WITH_HS, transforms=transforms).partitions[0]
-        expected = (
+        strand = Cube(CR.ECON_BLAME_WITH_HS, transforms=transforms).partitions[0]
+
+        assert strand.row_labels == (
             "President Obama",
             "Republicans in Congress",
             "Both",
             "Neither",
             "Not sure",
         )
-        assert slice_.row_labels == expected
 
     def test_headings_econ_blame_two_subtotal_without_missing(self):
-        slice_ = Cube(CR.ECON_BLAME_WITH_HS_MISSING).partitions[0]
-        expected = (
+        strand = Cube(CR.ECON_BLAME_WITH_HS_MISSING).partitions[0]
+        assert strand.row_labels == (
             "President Obama",
             "Republicans in Congress",
             "Test New Heading (Obama and Republicans)",
@@ -52,24 +51,22 @@ class TestHeadersAndSubtotals(object):
             "Not sure",
             "Test Heading with Skipped",
         )
-        assert slice_.row_labels == expected
 
     def test_headings_two_subtotal_without_missing_do_not_fetch(self):
         transforms = {
             "columns_dimension": {"insertions": {}},
             "rows_dimension": {"insertions": {}},
         }
-        slice_ = Cube(CR.ECON_BLAME_WITH_HS_MISSING, transforms=transforms).partitions[
+        strand = Cube(CR.ECON_BLAME_WITH_HS_MISSING, transforms=transforms).partitions[
             0
         ]
-        expected = (
+        assert strand.row_labels == (
             "President Obama",
             "Republicans in Congress",
             "Both",
             "Neither",
             "Not sure",
         )
-        assert slice_.row_labels == expected
 
     def test_1D_one_subtotal(self):
         strand = Cube(CR.ECON_BLAME_WITH_HS).partitions[0]
@@ -131,7 +128,7 @@ class TestHeadersAndSubtotals(object):
 
     def test_1D_subtotals_row_base(self):
         strand = Cube(CR.ECON_BLAME_WITH_HS_MISSING).partitions[0]
-        np.testing.assert_equal(strand.row_base, [285, 396, 681, 242, 6, 68, 74])
+        np.testing.assert_equal(strand.rows_base, [285, 396, 681, 242, 6, 68, 74])
 
     def test_1D_subtotals_rows_dimension_fills(self):
         strand = Cube(CR.ECON_BLAME_WITH_HS_MISSING).partitions[0]
@@ -522,8 +519,14 @@ class TestHeadersAndSubtotals(object):
         np.testing.assert_almost_equal(slice_.pvals, expected)
 
     def test_fruit_hs_top_bottom_labels(self):
-        slice_ = Cube(CR.FRUIT_HS_TOP_BOTTOM).partitions[0]
-        assert slice_.row_labels == ("TOP", "rambutan", "MIDDLE", "satsuma", "BOTTOM")
+        strand = Cube(CR.FRUIT_HS_TOP_BOTTOM).partitions[0]
+        assert strand.row_labels == (
+            "TOP",
+            "rambutan",
+            "MIDDLE",
+            "satsuma",
+            "BOTTOM",
+        )
 
     def test_fruit_hs_top_bottom_inserted_indices(self):
         # TODO: Figure how to do with new slice
@@ -629,8 +632,8 @@ class TestHeadersAndSubtotals(object):
         )
 
     def test_missing_cat_hs_labels(self):
-        slice_ = Cube(CR.MISSING_CAT_HS).partitions[0]
-        assert slice_.row_labels == (
+        strand = Cube(CR.MISSING_CAT_HS).partitions[0]
+        assert strand.row_labels == (
             "Whites",
             "White college women voters",
             "White non-college women voters",
