@@ -1424,7 +1424,8 @@ class _CatXMrMatrix(_CatXCatMatrix):
     @lazyproperty
     def _table_proportion_variances(self):
         """2D ndarray of np.float64 table proportion variance for each matrix cell."""
-        raise NotImplementedError
+        p = self._weighted_counts[:, :, 0] / self.table_margin
+        return p * (1 - p)
 
 
 class _CatXMrMeansMatrix(_CatXMrMatrix):
