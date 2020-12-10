@@ -1114,6 +1114,14 @@ class _CatXCatMatrix(_BaseCubeResultMatrix):
         return np.sum(self._weighted_counts)
 
     @lazyproperty
+    def table_stderrs(self):
+        """2D np.float64 ndarray of table-percent std-error for each matrix cell.
+
+        Standard error is sqrt(variance/N).
+        """
+        return np.sqrt(self._table_proportion_variances / self.table_margin)
+
+    @lazyproperty
     def unweighted_counts(self):
         """2D np.int64 ndarray of unweighted-count for each valid matrix cell.
 
@@ -1189,6 +1197,11 @@ class _CatXCatMatrix(_BaseCubeResultMatrix):
             self._valid_row_idxs
         ]
         return uncond_row_margin[:, None] / np.sum(uncond_row_margin)
+
+    @lazyproperty
+    def _table_proportion_variances(self):
+        """2D ndarray of np.float64 cell proportion variance for each cell of matrix."""
+        raise NotImplementedError
 
 
 class _CatXCatMeansMatrix(_CatXCatMatrix):

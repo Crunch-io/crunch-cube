@@ -1795,6 +1795,20 @@ class Describe_CatXCatMatrix(object):
         weighted_counts = np.array([[1, 2, 3], [4, 5, 6]])
         assert _CatXCatMatrix(None, weighted_counts, None).table_margin == 21
 
+    def it_knows_its_table_stderrs(self, request):
+        property_mock(
+            request,
+            _CatXCatMatrix,
+            "_table_proportion_variances",
+            return_value=np.array([[0.5, 1.0], [0.25, 2.0]]),
+        )
+        property_mock(request, _CatXCatMatrix, "table_margin", return_value=2.0)
+
+        np.testing.assert_almost_equal(
+            _CatXCatMatrix(None, None, None).table_stderrs,
+            np.array([[0.5, 0.7071068], [0.3535534, 1.0]]),
+        )
+
     def it_knows_its_unweighted_counts(self):
         unweighted_counts = np.array([[1, 2, 3], [4, 5, 6]])
         np.testing.assert_equal(
