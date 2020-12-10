@@ -11,7 +11,6 @@ from cr.cube.dimension import Dimension
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.matrix import Assembler
 from cr.cube.noa.smoothing import SingleSidedMovingAvgSmoother
-from cr.cube.old_matrix import TransformedMatrix
 from cr.cube.stripe import _BaseStripeRow, TransformedStripe
 
 from ..unitutil import class_mock, instance_mock, property_mock
@@ -428,14 +427,6 @@ class Describe_Slice(object):
     @pytest.fixture
     def _dimensions_prop_(self, request):
         return property_mock(request, _Slice, "_dimensions")
-
-    @pytest.fixture
-    def matrix_(self, request):
-        return instance_mock(request, TransformedMatrix)
-
-    @pytest.fixture
-    def _matrix_prop_(self, request):
-        return property_mock(request, _Slice, "_matrix")
 
     @pytest.fixture
     def _only_larger_prop_(self, request):

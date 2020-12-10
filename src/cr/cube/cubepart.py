@@ -24,7 +24,6 @@ from cr.cube.min_base_size_mask import MinBaseSizeMask
 from cr.cube.matrix import Assembler
 from cr.cube.measures.pairwise_significance import PairwiseSignificance
 from cr.cube.noa.smoothing import SingleSidedMovingAvgSmoother
-from cr.cube.old_matrix import TransformedMatrix
 from cr.cube.scalar import MeansScalar
 from cr.cube.stripe import TransformedStripe
 from cr.cube.util import lazyproperty
@@ -473,7 +472,7 @@ class _Slice(CubePartition):
         """
         return tuple(
             PairwiseSignificance(self).values[column_idx]
-            for column_idx in range(len(self._matrix.columns))
+            for column_idx in range(len(self.column_labels))
         )
 
     @lazyproperty
@@ -1041,11 +1040,6 @@ class _Slice(CubePartition):
                 self._cube.dimensions[-2:], self._transform_dicts
             )
         )
-
-    @lazyproperty
-    def _matrix(self):
-        """The TransformedMatrix object for this slice."""
-        return TransformedMatrix.matrix(self._cube, self._dimensions, self._slice_idx)
 
     def _median(self, values):
         return np.median(values) if values.size != 0 else np.nan
