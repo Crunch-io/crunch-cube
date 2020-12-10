@@ -671,6 +671,17 @@ class _TableStdErrSubtotals(_BaseSubtotals):
 
         return np.sqrt(table_proportion_variance / self._table_margin)
 
+    def _subtotal_row(self, subtotal):
+        """Return (n_cols,) ndarray of table-stderr `subtotal` value."""
+        # --- row of base subtotal counts is 1D, like [435 392 260 162] ---
+        subtotal_counts = np.sum(self._base_counts[subtotal.addend_idxs, :], axis=0)
+
+        # --- `p` is subtotal-table-proportions ---
+        p = subtotal_counts / self._table_margin
+        table_proportion_variance = p * (1 - p)
+
+        return np.sqrt(table_proportion_variance / self._table_margin)
+
 
 class _ZscoreSubtotals(_BaseSubtotals):
     """Computes subtotal values for the z-score measure.
