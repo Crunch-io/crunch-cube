@@ -2313,6 +2313,13 @@ class Describe_MrXCatMatrix(object):
             np.array([[0.2857143], [0.8]]),
         )
 
+    def it_knows_its_table_proportion_variances_to_help(self, request):
+        weighted_counts = np.arange(12).reshape(2, 2, 3)
+        np.testing.assert_almost_equal(
+            _MrXCatMatrix(None, weighted_counts, None)._table_proportion_variances,
+            np.array([[0.0, 0.0622222, 0.1155556], [0.1038062, 0.118416, 0.1322568]]),
+        )
+
 
 class Describe_MrXCatMeansMatrix(object):
     """Unit test suite for `cr.cube.matrix._MrXCatMeansMatrix` object."""
