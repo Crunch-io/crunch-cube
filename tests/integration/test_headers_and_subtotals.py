@@ -4,7 +4,6 @@
 
 import numpy as np
 
-from cr.cube.crunch_cube import CrunchCube
 from cr.cube.cube import Cube
 
 from ..fixtures import CR
@@ -528,13 +527,6 @@ class TestHeadersAndSubtotals(object):
             "BOTTOM",
         )
 
-    def test_fruit_hs_top_bottom_inserted_indices(self):
-        # TODO: Figure how to do with new slice
-        cube = CrunchCube(CR.FRUIT_HS_TOP_BOTTOM)
-        expected = [[0, 2, 4]]
-        actual = cube.inserted_hs_indices(prune=True)
-        assert actual == expected
-
     def test_fruit_hs_top_bottom_counts(self):
         strand = Cube(CR.FRUIT_HS_TOP_BOTTOM).partitions[0]
         counts = strand.counts
@@ -561,25 +553,6 @@ class TestHeadersAndSubtotals(object):
             [40, 34, 38],
         ]
         np.testing.assert_array_equal(slice_.counts, expected)
-
-    def test_hs_indices_pruned_cat_x_date(self):
-        # TODO: Figure in frozen slice
-        cube = CrunchCube(CR.CAT_X_DATE_HS_PRUNE)
-        expected = [0, 3, 6]
-        actual = cube.inserted_hs_indices(prune=True)[0]
-        assert actual == expected
-
-    def test_hs_indices_pruned_cat_x_num(self):
-        cube = CrunchCube(CR.CAT_X_NUM_HS_PRUNE)
-        expected = [0, 1, 3]
-        actual = cube.inserted_hs_indices(prune=True)[0]
-        assert actual == expected
-
-        # Ensure cached properties are not updated
-        actual = cube.inserted_hs_indices(prune=True)[0]
-        assert actual == expected
-        actual = cube.inserted_hs_indices(prune=True)[0]
-        assert actual == expected
 
     def test_cat_x_num_counts_pruned_with_hs(self):
         transforms = {

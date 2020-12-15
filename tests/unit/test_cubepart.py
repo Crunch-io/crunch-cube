@@ -2,6 +2,8 @@
 
 """Unit test suite for `cr.cube.cubepart` module."""
 
+from __future__ import division
+
 import numpy as np
 import pytest
 

@@ -1318,10 +1318,6 @@ class Describe_SumSubtotals(object):
         return property_mock(request, _SumSubtotals, "_base_values")
 
     @pytest.fixture
-    def cube_result_matrix_(self, request):
-        return instance_mock(request, _BaseCubeResultMatrix)
-
-    @pytest.fixture
     def subtotal_(self, request):
         return instance_mock(request, _Subtotal)
 

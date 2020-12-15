@@ -267,12 +267,8 @@ class Dimension(object):
 
     @lazyproperty
     def alias(self):
-        """Return the alias for the dimension if it exists, None otherwise
-
-        This property is needed to identify one of the mandatory condition
-        for a MRxItself cube.
-        """
-        return self._dimension_dict["references"].get("alias", None)
+        """Return the alias for the dimension if it exists, None otherwise."""
+        return self._dimension_dict["references"].get("alias")
 
     @lazyproperty
     def all_elements(self):
@@ -450,7 +446,7 @@ class Dimension(object):
             view = self._dimension_dict.get("references", {}).get("view") or {}
             insertion_dicts = view.get("transform", {}).get("insertions", [])
 
-        return _Subtotals(insertion_dicts, self.valid_elements, self.prune)
+        return _Subtotals(insertion_dicts, self.valid_elements)
 
     @lazyproperty
     def valid_elements(self):
@@ -832,10 +828,9 @@ class _Subtotals(Sequence):
     A subtotal can only involve valid (i.e. non-missing) elements.
     """
 
-    def __init__(self, insertion_dicts, valid_elements, prune):
+    def __init__(self, insertion_dicts, valid_elements):
         self._insertion_dicts = insertion_dicts
         self._valid_elements = valid_elements
-        self._prune = prune
 
     def __getitem__(self, idx_or_slice):
         """Implements indexed access."""
@@ -848,37 +843,6 @@ class _Subtotals(Sequence):
     def __len__(self):
         """Implements len(subtotals)."""
         return len(self._subtotals)
-
-    @lazyproperty
-    def anchor_idxs(self):
-        """List of int indicating the actual position of the subtotals."""
-        # TODO: this appears wrong, using an anchor (element_id) as an index (offset of
-        # anchor element within elements). This may appear to work if category-ids are
-        # assigned consecutively starting at 1, but will not work in the general case.
-        # I'll bet it also doesn't work when more than one subtotal is anchored to the
-        # same element-id.
-
-        def occurrences(s, lst):
-            return (i for i, e in enumerate(lst) if e == s)
-
-        anchors = self._anchors
-        top_anchors = list(occurrences("top", anchors))
-        int_anchors = [a + len(top_anchors) for a in anchors if isinstance(a, int)]
-        bottom_anchors = [
-            a + len(self._valid_elements) + len(top_anchors + int_anchors)
-            for a, _ in enumerate(list(occurrences("bottom", anchors)))
-        ]
-        final_anchors = top_anchors + int_anchors + bottom_anchors
-        return final_anchors
-
-    def iter_for_anchor(self, anchor):
-        """Generate each subtotal having matching *anchor*."""
-        return (subtotal for subtotal in self._subtotals if subtotal.anchor == anchor)
-
-    @lazyproperty
-    def _anchors(self):
-        """Sequence of int or str anchor for each subtotal."""
-        return tuple(s.anchor for s in self._subtotals)
 
     @lazyproperty
     def _element_ids(self):
@@ -916,7 +880,7 @@ class _Subtotals(Sequence):
     def _subtotals(self):
         """Composed tuple storing actual sequence of _Subtotal objects."""
         return tuple(
-            _Subtotal(subtotal_dict, self._valid_elements, self._prune, idx + 1)
+            _Subtotal(subtotal_dict, self._valid_elements, idx + 1)
             for idx, subtotal_dict in enumerate(self._iter_valid_subtotal_dicts())
         )
 
@@ -929,10 +893,9 @@ class _Subtotal(object):
     within the insertions transform collection.
     """
 
-    def __init__(self, subtotal_dict, valid_elements, prune, fallback_insertion_id):
+    def __init__(self, subtotal_dict, valid_elements, fallback_insertion_id):
         self._subtotal_dict = subtotal_dict
         self._valid_elements = valid_elements
-        self._prune = prune
         self._fallback_insertion_id = fallback_insertion_id
 
     @lazyproperty
@@ -1002,8 +965,3 @@ class _Subtotal(object):
         """str display name for this subtotal, suitable for use as label."""
         name = self._subtotal_dict.get("name")
         return name if name else ""
-
-    @lazyproperty
-    def prune(self):
-        """True if this subtotal should not appear when empty."""
-        return self._prune

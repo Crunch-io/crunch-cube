@@ -9,6 +9,8 @@ according to the dimension *order* transforms, and to hide rows and columns that
 either hidden by the user or "pruned" because they contain no observations.
 """
 
+from __future__ import division
+
 import numpy as np
 from scipy.stats import norm
 from scipy.stats.contingency import expected_freq
@@ -563,7 +565,7 @@ class _BaseSubtotals(object):
         if self._measure_propname is None:
             raise NotImplementedError(
                 "`%s` must implement `._base_values`" % type(self).__name__
-            )
+            )  # pragma: no cover
         return getattr(self._cube_result_matrix, self._measure_propname)
 
     @lazyproperty
@@ -580,7 +582,7 @@ class _BaseSubtotals(object):
         """Value for this row/column subtotal intersection."""
         raise NotImplementedError(
             "`%s` must implement `._intersection()`" % type(self).__name__
-        )
+        )  # pragma: no cover
 
     @lazyproperty
     def _intersections(self):
@@ -616,7 +618,7 @@ class _BaseSubtotals(object):
         """Return (n_rows,) ndarray of values for `subtotal` column."""
         raise NotImplementedError(
             "`%s` must implement `._subtotal_column()`" % type(self).__name__
-        )
+        )  # pragma: no cover
 
     @lazyproperty
     def _subtotal_columns(self):
@@ -637,7 +639,7 @@ class _BaseSubtotals(object):
         """Return (n_cols,) ndarray of values for `subtotal` row."""
         raise NotImplementedError(
             "`%s` must implement `._subtotal_row()`" % type(self).__name__
-        )
+        )  # pragma: no cover
 
     @lazyproperty
     def _subtotal_rows(self):
@@ -896,7 +898,7 @@ class _BaseCubeResultMatrix(object):
         """1D/2D np.int64 ndarray of unweighted-N for each matrix column/cell."""
         raise NotImplementedError(
             "`%s` must implement `.columns_base`" % type(self).__name__
-        )
+        )  # pragma: no cover
 
     @lazyproperty
     def columns_dimension(self):
@@ -908,21 +910,21 @@ class _BaseCubeResultMatrix(object):
         """1D/2D np.float64 ndarray of weighted-N for each column of matrix."""
         raise NotImplementedError(
             "`%s` must implement `.columns_margin`" % type(self).__name__
-        )
+        )  # pragma: no cover
 
     @lazyproperty
     def columns_pruning_base(self):
         """1D np.int64 ndarray of unweighted-N for each matrix column."""
         raise NotImplementedError(
             "`%s` must implement `.columns_pruning_base`" % type(self).__name__
-        )
+        )  # pragma: no cover
 
     @lazyproperty
     def rows_base(self):
         """1D/2D np.int64 ndarray of unweighted-N for each matrix row/cell."""
         raise NotImplementedError(
             "`%s` must implement `.rows_base`" % type(self).__name__
-        )
+        )  # pragma: no cover
 
     @lazyproperty
     def rows_dimension(self):
@@ -934,14 +936,14 @@ class _BaseCubeResultMatrix(object):
         """1D/2D np.int64 ndarray of weighted-N for each matrix row/cell."""
         raise NotImplementedError(
             "`%s` must implement `.rows_margin`" % type(self).__name__
-        )
+        )  # pragma: no cover
 
     @lazyproperty
     def rows_pruning_base(self):
         """1D np.int64 ndarray of unweighted-N for each matrix row."""
         raise NotImplementedError(
             "`%s` must implement `.rows_pruning_base`" % type(self).__name__
-        )
+        )  # pragma: no cover
 
     @lazyproperty
     def table_base(self):
@@ -951,7 +953,7 @@ class _BaseCubeResultMatrix(object):
         """
         raise NotImplementedError(
             "`%s` must implement `.table_base`" % type(self).__name__
-        )
+        )  # pragma: no cover
 
     @lazyproperty
     def table_margin(self):
@@ -968,21 +970,21 @@ class _BaseCubeResultMatrix(object):
         """
         raise NotImplementedError(
             "`%s` must implement `.table_margin" % self.__class__.__name__
-        )
+        )  # pragma: no cover
 
     @lazyproperty
     def table_stderrs(self):
         """2D np.float64 ndarray of table-percent std-error for each matrix cell."""
         raise NotImplementedError(
             "`%s` must implement `.table_stderrs" % self.__class__.__name__
-        )
+        )  # pragma: no cover
 
     @lazyproperty
     def unweighted_counts(self):
         """2D np.int64 ndarray of unweighted-count for each valid matrix cell."""
         raise NotImplementedError(
             "`%s` must implement `.unweighted_counts" % type(self).__name__
-        )
+        )  # pragma: no cover
 
     @lazyproperty
     def weighted_counts(self):
@@ -993,7 +995,7 @@ class _BaseCubeResultMatrix(object):
         """
         raise NotImplementedError(
             "`%s` must implement `.weighted_counts`" % type(self).__name__
-        )
+        )  # pragma: no cover
 
     @lazyproperty
     def zscores(self):
@@ -1005,7 +1007,7 @@ class _BaseCubeResultMatrix(object):
         """
         raise NotImplementedError(
             "`%s` must implement `.zscores`" % type(self).__name__
-        )
+        )  # pragma: no cover
 
     def _array_type_std_res(self, counts, total, rowsum, colsum):
         """Return 2D np.float64 ndarray of std-res value for each cell of MR matrix.

@@ -2,38 +2,9 @@
 
 """Unit test suite for cr.cube.util module."""
 
-import numpy as np
 import pytest
 
-from cr.cube.util import compress_pruned, lazyproperty
-
-
-class Describe_compress_pruned(object):
-    def it_returns_an_unmasked_array_unchanged(self):
-        table = np.zeros((2, 2))
-        return_value = compress_pruned(table)
-        assert return_value is table
-
-    def it_returns_the_data_of_a_0D_masked_array(self):
-        table = np.ma.masked_array(np.array(42), True)
-        return_value = compress_pruned(table)
-        assert return_value == 42
-
-    def it_returns_a_compressed_1D_masked_array(self):
-        table = np.ma.masked_array(np.array([42, 43, 44]), [False, True, False])
-        return_value = compress_pruned(table)
-        np.testing.assert_array_equal(return_value, [42, 44])
-
-    def it_NaNs_isolated_pruned_float_values(self):
-        table = np.ma.masked_array(
-            np.array([[4.2, 0.0, 4.4], [4.5, 4.6, 4.7]]),
-            [[False, True, False], [False, False, False]],
-            dtype=float,
-        )
-        return_value = compress_pruned(table)
-        np.testing.assert_array_equal(
-            return_value, [[4.2, np.nan, 4.4], [4.5, 4.6, 4.7]]
-        )
+from cr.cube.util import lazyproperty
 
 
 class DescribeLazyPropertyDecorator(object):
