@@ -8,7 +8,6 @@ import pytest
 from cr.cube.cube import Cube
 from cr.cube.cubepart import CubePartition, _Slice, _Strand, _Nub
 from cr.cube.dimension import Dimension
-from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.matrix import Assembler
 from cr.cube.noa.smoothing import SingleSidedMovingAvgSmoother
 from cr.cube.stripe import _BaseStripeRow, TransformedStripe
@@ -93,26 +92,6 @@ class DescribeCubePartition(object):
             slice_.evaluate({"function": "F"})
 
         assert str(err.value) == "Function F is not available."
-
-    @pytest.mark.parametrize(
-        "dims, expected_value",
-        (
-            ((DT.CAT, DT.MR, DT.MR_CAT), DT.CAT),
-            ((DT.MR, DT.MR_CAT), DT.MR),
-            ((DT.MR_CAT,), DT.MR_CAT),
-        ),
-    )
-    def it_knows_cube_row_dimension_type(self, request, cube_, dims, expected_value):
-        all_dimensions_ = tuple(
-            instance_mock(request, Dimension, name="dim-%d" % idx, dimension_type=dt)
-            for idx, dt in enumerate(dims)
-        )
-        cube_.dimensions = all_dimensions_
-        cube_partition = CubePartition(cube_)
-
-        cube_row_dimension_type = cube_partition.cube_row_dimension_type
-
-        assert cube_row_dimension_type == expected_value
 
     def it_knows_the_primary_alpha_value_to_help(self, _alpha_values_prop_):
         """alpha is the primary confidence-interval threshold specified by the user."""

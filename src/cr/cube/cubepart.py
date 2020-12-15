@@ -72,11 +72,6 @@ class CubePartition(object):
         return self._cube.cube_index
 
     @lazyproperty
-    def cube_row_dimension_type(self):
-        """Member of `cr.cube.enum.DIMENSION_TYPE` for cube row dimension"""
-        return self._cube.dimensions[0].dimension_type
-
-    @lazyproperty
     def dimension_types(self):
         """Sequence of member of `cr.cube.enum.DIMENSION_TYPE` for each dimension.
 
@@ -371,35 +366,6 @@ class _Slice(CubePartition):
     def inserted_row_idxs(self):
         """tuple of int index of each subtotal row in slice."""
         return self._assembler.inserted_row_idxs
-
-    @lazyproperty
-    def insertions(self):
-        """2D np.float64 np.ma.core.MaskedArray of residuals for insertions.
-
-              0     1     2     3      4       5       6
-        0   inf   inf   inf   inf    inf    -2.9     inf
-        1   inf   inf   inf   inf    inf    -4.3     inf
-        2   2.5   1.3   3.3  -0.70  -7.25   -6.52    2.25
-        3   inf   inf   inf   inf    inf    -2.51    inf
-        4  -1.16  2.20  5.84  1.78  -8.48   -5.92    0.93
-        5   inf   inf   inf   inf    inf     9.70    inf
-
-        Only the insertions residuals are showed in a inf masked array.
-        """
-        inserted_rows = self.inserted_row_idxs
-        inserted_cols = self.inserted_column_idxs
-        if not inserted_cols and not inserted_rows:
-            return []
-        mask = np.zeros(self.pvals.shape)
-        mask[inserted_rows, :] = 1
-        mask[:, inserted_cols] = 1
-        masked_pvals = np.ma.masked_array(self.pvals, np.logical_not(mask)).filled(
-            np.inf
-        )
-        masked_zscores = np.ma.masked_array(self.zscores, np.logical_not(mask)).filled(
-            np.inf
-        )
-        return np.stack([masked_pvals, masked_zscores])
 
     @lazyproperty
     def is_empty(self):

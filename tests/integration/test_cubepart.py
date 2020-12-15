@@ -30,7 +30,6 @@ class Describe_Slice(object):
         )
         assert slice_.inserted_column_idxs == ()
         assert slice_.inserted_row_idxs == ()
-        assert slice_.insertions == []
         assert slice_.is_empty is False
         assert slice_.name == "v4"
         np.testing.assert_array_almost_equal(
@@ -656,65 +655,6 @@ class Describe_Slice(object):
 
         np.testing.assert_almost_equal(
             means, np.array([[38.3333333, np.nan, 65.0, 55.0, 34.0]])
-        )
-
-    def it_knows_its_insertions(self):
-        slice_ = Cube(CR.CAT_X_CAT_HS_2ROWS_1COL).partitions[0]
-
-        np.testing.assert_array_almost_equal(
-            slice_.insertions,
-            np.array(
-                [
-                    [
-                        [np.inf, np.inf, np.inf, np.inf, np.inf, 2.9842060e-03, np.inf],
-                        [np.inf, np.inf, np.inf, np.inf, np.inf, 1.2085762e-05, np.inf],
-                        [
-                            1.09954577e-02,
-                            1.64231069e-01,
-                            7.74991104e-04,
-                            4.78920155e-01,
-                            1.73194792e-12,
-                            2.68565170e-11,
-                            2.94880115e-03,
-                        ],
-                        [np.inf, np.inf, np.inf, np.inf, np.inf, 1.1900698e-02, np.inf],
-                        [
-                            2.87540141e-05,
-                            2.72376900e-02,
-                            4.27168678e-09,
-                            7.46184742e-02,
-                            0.0,
-                            2.89875191e-09,
-                            3.51260516e-01,
-                        ],
-                        [np.inf, np.inf, np.inf, np.inf, np.inf, 0.0, np.inf],
-                    ],
-                    [
-                        [np.inf, np.inf, np.inf, np.inf, np.inf, -2.96936015, np.inf],
-                        [np.inf, np.inf, np.inf, np.inf, np.inf, -4.37603499, np.inf],
-                        [
-                            2.54284314e00,
-                            1.39098139e00,
-                            3.36157570e00,
-                            -7.08040423e-01,
-                            -7.05452463e00,
-                            -6.66285184e00,
-                            2.97302533e00,
-                        ],
-                        [np.inf, np.inf, np.inf, np.inf, np.inf, -2.51507523, np.inf],
-                        [
-                            -4.18311635e00,
-                            2.20809445e00,
-                            5.87331384e00,
-                            1.78280240e00,
-                            -8.48620633e00,
-                            -5.93723152e00,
-                            9.32147088e-01,
-                        ],
-                        [np.inf, np.inf, np.inf, np.inf, np.inf, 9.70800153, np.inf],
-                    ],
-                ]
-            ),
         )
 
     def it_knows_its_selected_categories(self):
