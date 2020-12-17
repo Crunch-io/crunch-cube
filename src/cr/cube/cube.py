@@ -181,7 +181,7 @@ class CubeSet(object):
             )
             # --- all numeric-mean cubes require inflation to restore their
             # --- rows-dimension, others don't
-            yield cube.inflate() if self._is_numeric_mean else cube
+            yield cube.inflate()  # if self._is_numeric_mean else cube
 
 
 class Cube(object):
@@ -270,11 +270,40 @@ class Cube(object):
         """
         cube_dict = self._cube_dict
         dimensions = cube_dict["result"]["dimensions"]
-        rows_dimension = {
-            "references": {"alias": "mean", "name": "mean"},
-            "type": {"categories": [{"id": 1, "name": "Mean"}], "class": "categorical"},
-        }
-        dimensions.insert(0, rows_dimension)
+        subrefs = cube_dict["result"]["measures"]["mean"]["metadata"]["references"][
+            "subreferences"
+        ]
+        if subrefs:
+            rows_dimension = {
+                "references": {"alias": "mean", "name": "mean"},
+                "type": {
+                    "elements": [],
+                    "class": "enum",
+                    "subtype": {"class": "variable"},
+                },
+            }
+            for i, subref in enumerate(subrefs):
+                rows_dimension["type"].get("elements", []).append(
+                    {
+                        "id": i,
+                        "value": {
+                            "references": {
+                                "alias": subref.get("alias"),
+                                "name": subref.get("name"),
+                            }
+                        },
+                    },
+                )
+            dimensions.append(rows_dimension)
+        else:
+            rows_dimension = {
+                "references": {"alias": "mean", "name": "mean"},
+                "type": {
+                    "categories": [{"id": 1, "name": "Mean"}],
+                    "class": "categorical",
+                },
+            }
+            dimensions.insert(0, rows_dimension)
         return Cube(
             cube_dict,
             self._cube_idx_arg,
@@ -612,7 +641,7 @@ class _BaseMeasure(object):
         response. Specifically, it includes values for missing elements, any
         MR_CAT dimensions, and any prunable rows and columns.
         """
-        raw_cube_array = np.array(self._flat_values).reshape(self.shape)
+        raw_cube_array = np.array(self._flat_values).flatten().reshape(self.shape)
         # ---must be read-only to avoid hard-to-find bugs---
         raw_cube_array.flags.writeable = False
         return raw_cube_array
@@ -654,26 +683,6 @@ class _MeanMeasure(_BaseMeasure):
         return self._subvariables
 
     @lazyproperty
-    def shape(self):
-        """tuple specifying measure shape.
-
-        If the provided variable (to calculate the means of) doesn't have subvariables,
-        this is the same as the parent class implementation.
-
-        If the variable (and consequently the measure data response) has subvariables,
-        then we need to alter the shape, by augmenting it with the number of subvars.
-        """
-        # Original shape: (m, n, . . .,)
-        shape = super(_MeanMeasure, self).shape
-
-        if self._subvariables is not None:
-            # There are subvariables in the provided variable => augment shape
-            # Shape now becomes: (m, n, . . ., n_subvars,)
-            shape += (len(self._subvariables),)
-
-        return shape
-
-    @lazyproperty
     def missing_count(self):
         """numeric representing count of missing rows reflected in response."""
         return self._cube_dict["result"]["measures"]["mean"].get("n_missing", 0)
@@ -698,6 +707,8 @@ class _UnweightedCountMeasure(_BaseMeasure):
     @lazyproperty
     def _flat_values(self):
         """tuple of int counts before weighting."""
+        if self._cube_dict["result"]["measures"]["valid_count"]["data"]:
+            return tuple(self._cube_dict["result"]["measures"]["valid_count"]["data"])
         return tuple(self._cube_dict["result"]["counts"])
 
 
@@ -707,4 +718,6 @@ class _WeightedCountMeasure(_BaseMeasure):
     @lazyproperty
     def _flat_values(self):
         """tuple of numeric counts after weighting."""
+        if self._cube_dict["result"]["measures"]["valid_count"]["data"]:
+            return tuple(self._cube_dict["result"]["measures"]["valid_count"]["data"])
         return tuple(self._cube_dict["result"]["measures"]["count"]["data"])

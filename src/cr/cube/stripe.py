@@ -590,8 +590,6 @@ class _MeansStripeRow(_BaseStripeRow):
         # create tuple out of `self._mean` (which would be a numpy array). If it's a
         # normal numerical variable (and doesn't have subvars), we just return the
         # original result (which is already a tuple).
-        if self._subvariables is not None:
-            return tuple(self._mean)
         return self._mean
 
     @lazyproperty
