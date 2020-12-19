@@ -444,31 +444,6 @@ class _CatXCatMatrix(BaseCubeResultMatrix):
         return p * (1 - p)
 
 
-class _CatXCatMeansMatrix(_CatXCatMatrix):
-    """Cat-x-cat matrix for means measure.
-
-    A means matrix has an array of mean values instead of a `counts` array.
-    """
-
-    def __init__(self, dimensions, means, unweighted_counts):
-        super(_CatXCatMeansMatrix, self).__init__(dimensions, None, unweighted_counts)
-        self._means = means
-
-    @lazyproperty
-    def means(self):
-        """2D np.float64 ndarray of mean for each valid matrix cell."""
-        return self._means
-
-    @lazyproperty
-    def weighted_counts(self):
-        """2D ndarray of np.nan for each valid matrix cell.
-
-        Weighted-counts have no meaning for a means matrix (although unweighted counts
-        do).
-        """
-        return np.full(self._means.shape, np.nan)
-
-
 class _CatXMrMatrix(_CatXCatMatrix):
     """Represents a CAT x MR slice.
 
@@ -625,20 +600,6 @@ class _CatXMrMatrix(_CatXCatMatrix):
         """2D ndarray of np.float64 table proportion variance for each matrix cell."""
         p = self._weighted_counts[:, :, 0] / self.table_margin
         return p * (1 - p)
-
-
-class _CatXMrMeansMatrix(_CatXMrMatrix):
-    """Basis for CAT_X_MR slice having mean measure instead of counts."""
-
-    def __init__(self, dimensions, means, unweighted_counts):
-        counts = np.zeros(means.shape)
-        super(_CatXMrMeansMatrix, self).__init__(dimensions, counts, unweighted_counts)
-        self._means = means
-
-    @lazyproperty
-    def means(self):
-        """2D np.float64 ndarray of mean for each valid matrix cell."""
-        return self._means[:, :, 0]
 
 
 class _MrXCatMatrix(_CatXCatMatrix):
@@ -807,24 +768,6 @@ class _MrXCatMatrix(_CatXCatMatrix):
         """2D ndarray of np.float64 table proportion variance for each matrix cell."""
         p = self._weighted_counts[:, 0, :] / self.table_margin[:, None]
         return p * (1 - p)
-
-
-class _MrXCatMeansMatrix(_MrXCatMatrix):
-    """MR_X_CAT slice with means measure instead of counts.
-
-    Note that its (weighted) counts are all set to zero. A means slice still has
-    meaningful unweighted counts.
-    """
-
-    def __init__(self, dimensions, means, unweighted_counts):
-        counts = np.zeros(means.shape)
-        super(_MrXCatMeansMatrix, self).__init__(dimensions, counts, unweighted_counts)
-        self._means = means
-
-    @lazyproperty
-    def means(self):
-        """2D np.float64 ndarray of mean for each valid matrix cell."""
-        return self._means[:, 0, :]
 
 
 class _MrXMrMatrix(_CatXCatMatrix):
@@ -1023,3 +966,63 @@ class _MrXMrMatrix(_CatXCatMatrix):
         """2D ndarray of np.float64 table proportion variance for each matrix cell."""
         p = self._weighted_counts[:, 0, :, 0] / self.table_margin
         return p * (1 - p)
+
+
+# === LEGACY MEANS MATRIX OBJECTS ===
+
+
+class _CatXCatMeansMatrix(_CatXCatMatrix):
+    """CAT_X_CAT matrix for means measure.
+
+    A means matrix has an array of mean values instead of a `counts` array.
+    """
+
+    def __init__(self, dimensions, means, unweighted_counts):
+        super(_CatXCatMeansMatrix, self).__init__(dimensions, None, unweighted_counts)
+        self._means = means
+
+    @lazyproperty
+    def means(self):
+        """2D np.float64 ndarray of mean for each valid matrix cell."""
+        return self._means
+
+    @lazyproperty
+    def weighted_counts(self):
+        """2D ndarray of np.nan for each valid matrix cell.
+
+        Weighted-counts have no meaning for a means matrix (although unweighted counts
+        do).
+        """
+        return np.full(self._means.shape, np.nan)
+
+
+class _CatXMrMeansMatrix(_CatXMrMatrix):
+    """Basis for CAT_X_MR slice having mean measure instead of counts."""
+
+    def __init__(self, dimensions, means, unweighted_counts):
+        counts = np.zeros(means.shape)
+        super(_CatXMrMeansMatrix, self).__init__(dimensions, counts, unweighted_counts)
+        self._means = means
+
+    @lazyproperty
+    def means(self):
+        """2D np.float64 ndarray of mean for each valid matrix cell."""
+        return self._means[:, :, 0]
+
+
+class _MrXCatMeansMatrix(_MrXCatMatrix):
+    """MR_X_CAT slice with means measure instead of counts.
+
+    Note that its (weighted) counts are all set to zero. A means slice still has
+    meaningful unweighted counts.
+    """
+
+    def __init__(self, dimensions, means, unweighted_counts):
+        counts = np.zeros(means.shape)
+        super(_MrXCatMeansMatrix, self).__init__(dimensions, counts, unweighted_counts)
+        self._means = means
+
+    @lazyproperty
+    def means(self):
+        """2D np.float64 ndarray of mean for each valid matrix cell."""
+        return self._means[:, 0, :]
