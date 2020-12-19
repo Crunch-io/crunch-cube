@@ -67,7 +67,7 @@ class SingleSidedMovingAvgSmoother(object):
             "col_percent": "column_percentages",
             "col_index": "column_index",
             "mean": "means",
-            "scale_mean": "scale_means_row",
+            "scale_mean": "columns_scale_mean",
         }
         if base_measure not in measure_member.keys():
             raise ValueError(

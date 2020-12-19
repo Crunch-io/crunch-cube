@@ -313,7 +313,7 @@ class Describe_Slice(object):
         )
         slice_ = _Slice(None, None, None, None, None)
 
-        rows_scale_means = slice_.scale_means_column
+        rows_scale_means = slice_.rows_scale_mean
 
         np.testing.assert_almost_equal(rows_scale_means, [1.75, 1.57142857])
 
@@ -325,7 +325,7 @@ class Describe_Slice(object):
         )
         slice_ = _Slice(None, None, None, None, None)
 
-        assert slice_.scale_means_column is None
+        assert slice_.rows_scale_mean is None
 
     def it_provides_the_secondary_scale_mean_pairwise_indices(
         self, _alpha_alt_prop_, _only_larger_prop_, PairwiseSignificance_
@@ -339,20 +339,20 @@ class Describe_Slice(object):
         _only_larger_prop_.return_value = True
         slice_ = _Slice(None, None, None, None, None)
 
-        scale_mean_pairwise_indices_alt = slice_.scale_mean_pairwise_indices_alt
+        columns_scale_mean_pw_idxs_alt = slice_.columns_scale_mean_pairwise_indices_alt
 
         PairwiseSignificance_.scale_mean_pairwise_indices.assert_called_once_with(
             slice_, 0.42, True
         )
-        assert scale_mean_pairwise_indices_alt == ((2,), (0,), ())
+        assert columns_scale_mean_pw_idxs_alt == ((2,), (0,), ())
 
-    def but_scale_mean_pairwise_indices_alt_is_None_when_no_secondary_alpha_specified(
+    def but_columns_scale_mean_pairwise_indices_alt_is_None_when_no_secondary_alpha_specified(
         self, _alpha_alt_prop_
     ):
         _alpha_alt_prop_.return_value = None
         slice_ = _Slice(None, None, None, None, None)
 
-        assert slice_.scale_mean_pairwise_indices_alt is None
+        assert slice_.columns_scale_mean_pairwise_indices_alt is None
 
     @pytest.mark.parametrize(
         "dimensions_dicts, expected_value",

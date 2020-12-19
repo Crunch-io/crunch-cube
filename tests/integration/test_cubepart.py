@@ -193,7 +193,7 @@ class Describe_Slice(object):
             ],
         )
         np.testing.assert_almost_equal(
-            slice_.population_moe,
+            slice_.population_counts_moe,
             [
                 [94.7425342, 102.30317352, 85.14161786, 64.01146595, 0.0, 21.01388583],
                 [54.85480624, 83.25703295, 69.10626964, 57.75633502, 0.0, 30.00171283],
