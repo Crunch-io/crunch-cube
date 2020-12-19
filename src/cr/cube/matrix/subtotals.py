@@ -20,17 +20,17 @@ from cr.cube.util import lazyproperty
 class _BaseSubtotals(object):
     """Base class for Subtotals objects."""
 
-    def __init__(self, cube_result_matrix, measure_propname):
-        self._cube_result_matrix = cube_result_matrix
-        self._measure_propname = measure_propname
+    def __init__(self, base_values, dimensions):
+        self._base_values = base_values
+        self._dimensions = dimensions
 
     @classmethod
-    def blocks(cls, cube_result_matrix, measure_propname=None):
+    def blocks(cls, base_values, dimensions):
         """Return base, row and col insertion, and intersection matrices.
 
         These are in the form ready for assembly.
         """
-        return cls(cube_result_matrix, measure_propname)._blocks
+        return cls(base_values, dimensions)._blocks
 
     @lazyproperty
     def _blocks(self):
@@ -41,23 +41,14 @@ class _BaseSubtotals(object):
         ]
 
     @lazyproperty
-    def _base_counts(self):
-        """2D np.float64 ndarray of weighted-count for each cell of base matrix."""
-        return self._cube_result_matrix.weighted_counts
-
-    @lazyproperty
-    def _base_values(self):
-        """2D ndarray of "body" values from cube-result matrix."""
-        if self._measure_propname is None:
-            raise NotImplementedError(
-                "`%s` must implement `._base_values`" % type(self).__name__
-            )  # pragma: no cover
-        return getattr(self._cube_result_matrix, self._measure_propname)
-
-    @lazyproperty
     def _column_subtotals(self):
         """Sequence of _Subtotal object for each subtotal in columns-dimension."""
-        return self._cube_result_matrix.columns_dimension.subtotals
+        return self._columns_dimension.subtotals
+
+    @lazyproperty
+    def _columns_dimension(self):
+        """Dimension object for matrix columns."""
+        return self._dimensions[1]
 
     @lazyproperty
     def _dtype(self):
@@ -98,7 +89,12 @@ class _BaseSubtotals(object):
     @lazyproperty
     def _row_subtotals(self):
         """Sequence of _Subtotal object for each subtotal in rows-dimension."""
-        return self._cube_result_matrix.rows_dimension.subtotals
+        return self._rows_dimension.subtotals
+
+    @lazyproperty
+    def _rows_dimension(self):
+        """Dimension object for rows of matrix."""
+        return self._dimensions[0]
 
     def _subtotal_column(self, subtotal):
         """Return (n_rows,) ndarray of values for `subtotal` column."""
@@ -138,11 +134,6 @@ class _BaseSubtotals(object):
         return np.vstack(
             [self._subtotal_row(subtotal) for subtotal in self._row_subtotals]
         )
-
-    @lazyproperty
-    def _table_margin(self):
-        """Scalar or ndarray table-margin of cube-result matrix."""
-        return self._cube_result_matrix.table_margin
 
 
 class NanSubtotals(_BaseSubtotals):
@@ -188,10 +179,22 @@ class SumSubtotals(_BaseSubtotals):
 class TableStdErrSubtotals(_BaseSubtotals):
     """Computes subtotal values for the table-stderrs measure."""
 
+    def __init__(self, base_values, dimensions, cube_result_matrix):
+        super(TableStdErrSubtotals, self).__init__(base_values, dimensions)
+        self._cube_result_matrix = cube_result_matrix
+
+    @classmethod
+    def blocks(cls, base_values, dimensions, cube_result_matrix):
+        """Return base, row and col insertion, and intersection matrices.
+
+        These are in the form ready for assembly.
+        """
+        return cls(base_values, dimensions, cube_result_matrix)._blocks
+
     @lazyproperty
-    def _base_values(self):
-        """2D np.float64 ndarray of table-stderr for each cell of cube-result matrix."""
-        return self._cube_result_matrix.table_stderrs
+    def _base_counts(self):
+        """2D np.float64 ndarray of weighted-count for each cell of base matrix."""
+        return self._cube_result_matrix.weighted_counts
 
     def _intersection(self, row_subtotal, column_subtotal):
         """Return value for intersection of `row_subtotal` and `column_subtotal`."""
@@ -233,6 +236,11 @@ class TableStdErrSubtotals(_BaseSubtotals):
 
         return np.sqrt(table_proportion_variance / self._table_margin)
 
+    @lazyproperty
+    def _table_margin(self):
+        """Scalar or ndarray table-margin of cube-result matrix."""
+        return self._cube_result_matrix.table_margin
+
 
 class ZscoreSubtotals(_BaseSubtotals):
     """Computes subtotal values for the z-score measure.
@@ -241,10 +249,22 @@ class ZscoreSubtotals(_BaseSubtotals):
     subtotals to be computed (elsewhere) as `np.nan`.
     """
 
+    def __init__(self, base_values, dimensions, cube_result_matrix):
+        super(ZscoreSubtotals, self).__init__(base_values, dimensions)
+        self._cube_result_matrix = cube_result_matrix
+
+    @classmethod
+    def blocks(cls, base_values, dimensions, cube_result_matrix):
+        """Return base, row and col insertion, and intersection matrices.
+
+        These are in the form ready for assembly.
+        """
+        return cls(base_values, dimensions, cube_result_matrix)._blocks
+
     @lazyproperty
-    def _base_values(self):
-        """2D np.float64 ndarray of z-score for each cell of cube-result matrix."""
-        return self._cube_result_matrix.zscores
+    def _base_counts(self):
+        """2D np.float64 ndarray of weighted-count for each cell of base matrix."""
+        return self._cube_result_matrix.weighted_counts
 
     def _intersection(self, row_subtotal, column_subtotal):
         """Return value for intersection of `row_subtotal` and `column_subtotal`."""
@@ -347,3 +367,8 @@ class ZscoreSubtotals(_BaseSubtotals):
         # --- result is scalar or 1D, depending on dimensionality of residuals ---
         with np.errstate(divide="ignore", invalid="ignore"):
             return residuals / np.sqrt(variance)
+
+    @lazyproperty
+    def _table_margin(self):
+        """Scalar or ndarray table-margin of cube-result matrix."""
+        return self._cube_result_matrix.table_margin

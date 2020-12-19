@@ -33,44 +33,21 @@ class Describe_BaseSubtotals(object):
         _blocks_.assert_called_once()
         assert blocks == [[1, 2], [3, 4]]
 
-    def it_provides_access_to_the_base_values_to_help(self, cube_result_matrix_):
-        cube_result_matrix_.unweighted_counts = [[1, 2], [3, 4]]
-        subtotals = _BaseSubtotals(cube_result_matrix_, "unweighted_counts")
-
-        base_values = subtotals._base_values
-
-        assert base_values == [[1, 2], [3, 4]]
-
-    def but_it_raises_when_no_measure_propname_is_specified(self):
-        with pytest.raises(NotImplementedError) as e:
-            _BaseSubtotals(None, None)._base_values
-        assert str(e.value).endswith(" must implement `._base_values`")
-
     def it_can_compute_its_blocks(self, request):
-        property_mock(request, _BaseSubtotals, "_base_values")
         property_mock(request, _BaseSubtotals, "_subtotal_columns")
         property_mock(request, _BaseSubtotals, "_subtotal_rows")
         property_mock(request, _BaseSubtotals, "_intersections")
-        base_subtotals = _BaseSubtotals(None, None)
+        base_subtotals = _BaseSubtotals("_base_values", None)
 
         blocks = base_subtotals._blocks
 
         assert blocks == [
-            [base_subtotals._base_values, base_subtotals._subtotal_columns],
+            ["_base_values", base_subtotals._subtotal_columns],
             [base_subtotals._subtotal_rows, base_subtotals._intersections],
         ]
 
-    def it_provides_access_to_the_base_counts_to_help(self, cube_result_matrix_):
-        cube_result_matrix_.weighted_counts = [[1, 2], [3, 4]]
-        subtotals = _BaseSubtotals(cube_result_matrix_, None)
-
-        assert subtotals._base_counts == [[1, 2], [3, 4]]
-
-    def it_provides_access_to_the_column_subtotals_to_help(
-        self, cube_result_matrix_, dimension_
-    ):
-        cube_result_matrix_.columns_dimension = dimension_
-        subtotals = _BaseSubtotals(cube_result_matrix_, None)
+    def it_provides_access_to_the_column_subtotals_to_help(self, dimension_):
+        subtotals = _BaseSubtotals(None, (None, dimension_))
         assert subtotals._column_subtotals is dimension_.subtotals
 
     def it_assembles_its_intersections_to_help(
@@ -92,21 +69,16 @@ class Describe_BaseSubtotals(object):
             ).tolist()
         )
 
-    def it_knows_how_many_columns_are_in_the_base_matrix_to_help(
-        self, _base_values_prop_
-    ):
-        _base_values_prop_.return_value = np.arange(12).reshape(3, 4)
-        assert _BaseSubtotals(None, None)._ncols == 4
+    def it_knows_how_many_columns_are_in_the_base_matrix_to_help(self):
+        base_values = np.arange(12).reshape(3, 4)
+        assert _BaseSubtotals(base_values, None)._ncols == 4
 
-    def it_knows_how_many_rows_are_in_the_base_matrix_to_help(self, _base_values_prop_):
-        _base_values_prop_.return_value = np.arange(12).reshape(3, 4)
-        assert _BaseSubtotals(None, None)._nrows == 3
+    def it_knows_how_many_rows_are_in_the_base_matrix_to_help(self):
+        base_values = np.arange(12).reshape(3, 4)
+        assert _BaseSubtotals(base_values, None)._nrows == 3
 
-    def it_provides_access_to_the_row_subtotals_to_help(
-        self, cube_result_matrix_, dimension_
-    ):
-        cube_result_matrix_.rows_dimension = dimension_
-        subtotals = _BaseSubtotals(cube_result_matrix_, None)
+    def it_provides_access_to_the_row_subtotals_to_help(self, dimension_):
+        subtotals = _BaseSubtotals(None, (dimension_, None))
         assert subtotals._row_subtotals is dimension_.subtotals
 
     @pytest.mark.parametrize(
@@ -158,17 +130,7 @@ class Describe_BaseSubtotals(object):
             _BaseSubtotals(None, None)._subtotal_rows, expected_value
         )
 
-    def it_provides_access_to_the_table_margin_to_help(self, cube_result_matrix_):
-        cube_result_matrix_.table_margin = 42
-        subtotals = _BaseSubtotals(cube_result_matrix_, None)
-
-        assert subtotals._table_margin == 42
-
     # fixture components ---------------------------------------------
-
-    @pytest.fixture
-    def _base_values_prop_(self, request):
-        return property_mock(request, _BaseSubtotals, "_base_values")
 
     @pytest.fixture
     def _column_subtotals_prop_(self, request):
@@ -248,12 +210,12 @@ class DescribeSumSubtotals(object):
         ),
     )
     def it_can_compute_a_subtotal_intersection_value(
-        self, request, _base_values_prop_, row_idxs, col_idxs, expected_value
+        self, request, row_idxs, col_idxs, expected_value
     ):
-        _base_values_prop_.return_value = np.arange(12).reshape(3, 4)
         col_subtotal_ = instance_mock(request, _Subtotal, addend_idxs=col_idxs)
         row_subtotal_ = instance_mock(request, _Subtotal, addend_idxs=row_idxs)
-        subtotals = SumSubtotals(None, None)
+        base_values = np.arange(12).reshape(3, 4)
+        subtotals = SumSubtotals(base_values, None)
 
         assert subtotals._intersection(row_subtotal_, col_subtotal_) == expected_value
 
@@ -262,11 +224,11 @@ class DescribeSumSubtotals(object):
         (([1, 2], [3, 11, 19]), ([1, 3], [4, 12, 20]), ([0, 3], [3, 11, 19])),
     )
     def it_can_compute_a_subtotal_column_to_help(
-        self, _base_values_prop_, subtotal_, addend_idxs, expected_value
+        self, subtotal_, addend_idxs, expected_value
     ):
-        _base_values_prop_.return_value = np.arange(12).reshape(3, 4)
         subtotal_.addend_idxs = addend_idxs
-        subtotals = SumSubtotals(None, None)
+        base_values = np.arange(12).reshape(3, 4)
+        subtotals = SumSubtotals(base_values, None)
 
         assert subtotals._subtotal_column(subtotal_).tolist() == expected_value
 
@@ -279,19 +241,15 @@ class DescribeSumSubtotals(object):
         ),
     )
     def it_can_compute_a_subtotal_row_to_help(
-        self, _base_values_prop_, subtotal_, addend_idxs, expected_value
+        self, subtotal_, addend_idxs, expected_value
     ):
-        _base_values_prop_.return_value = np.arange(12).reshape(3, 4)
         subtotal_.addend_idxs = addend_idxs
-        subtotals = SumSubtotals(None, None)
+        base_values = np.arange(12).reshape(3, 4)
+        subtotals = SumSubtotals(base_values, None)
 
         assert subtotals._subtotal_row(subtotal_).tolist() == expected_value
 
     # --- fixture components -----------------------------------------
-
-    @pytest.fixture
-    def _base_values_prop_(self, request):
-        return property_mock(request, SumSubtotals, "_base_values")
 
     @pytest.fixture
     def subtotal_(self, request):
@@ -301,11 +259,10 @@ class DescribeSumSubtotals(object):
 class DescribeTableStdErrSubtotals(object):
     """Unit test suite for `cr.cube.matrix.TableStdErrSubtotals` object."""
 
-    def it_provides_access_to_the_base_values_to_help(self, cube_result_matrix_):
-        cube_result_matrix_.table_stderrs = [[1, 2], [3, 4]]
-        subtotals = TableStdErrSubtotals(cube_result_matrix_, None)
-
-        assert subtotals._base_values == [[1, 2], [3, 4]]
+    def it_provides_access_to_the_base_counts_to_help(self, cube_result_matrix_):
+        cube_result_matrix_.weighted_counts = [[1, 2], [3, 4]]
+        subtotals = TableStdErrSubtotals(None, None, cube_result_matrix_)
+        assert subtotals._base_counts == [[1, 2], [3, 4]]
 
     def it_can_compute_a_subtotal_column_to_help(
         self,
@@ -316,7 +273,7 @@ class DescribeTableStdErrSubtotals(object):
         subtotal_.addend_idxs = np.array([0, 1])
         _base_counts_prop_.return_value = np.arange(12).reshape(3, 4)
         _table_margin_prop_.return_value = 67
-        subtotals = TableStdErrSubtotals(None, None)
+        subtotals = TableStdErrSubtotals(None, None, None)
 
         np.testing.assert_almost_equal(
             subtotals._subtotal_column(subtotal_),
@@ -333,11 +290,16 @@ class DescribeTableStdErrSubtotals(object):
         col_subtotal_ = instance_mock(request, _Subtotal, addend_idxs=np.array([1, 2]))
         _base_counts_prop_.return_value = np.arange(12).reshape(3, 4)
         _table_margin_prop_.return_value = 67
-        subtotals = TableStdErrSubtotals(None, None)
+        subtotals = TableStdErrSubtotals(None, None, None)
 
         np.testing.assert_almost_equal(
             subtotals._intersection(row_subtotal_, col_subtotal_), 0.0496694
         )
+
+    def it_provides_access_to_the_table_margin_to_help(self, cube_result_matrix_):
+        cube_result_matrix_.table_margin = 42
+        subtotals = TableStdErrSubtotals(None, None, cube_result_matrix_)
+        assert subtotals._table_margin == 42
 
     # --- fixture components -----------------------------------------
 
@@ -361,11 +323,10 @@ class DescribeTableStdErrSubtotals(object):
 class DescribeZscoreSubtotals(object):
     """Unit test suite for `cr.cube.matrix.ZscoreSubtotals` object."""
 
-    def it_provides_access_to_the_base_values_to_help(self, cube_result_matrix_):
-        cube_result_matrix_.zscores = [[1, 2], [3, 4]]
-        subtotals = ZscoreSubtotals(cube_result_matrix_, None)
-
-        assert subtotals._base_values == [[1, 2], [3, 4]]
+    def it_provides_access_to_the_base_counts_to_help(self, cube_result_matrix_):
+        cube_result_matrix_.weighted_counts = [[1, 2], [3, 4]]
+        subtotals = ZscoreSubtotals(None, None, cube_result_matrix_)
+        assert subtotals._base_counts == [[1, 2], [3, 4]]
 
     def it_can_compute_a_subtotal_intersection_to_help(
         self,
@@ -379,7 +340,7 @@ class DescribeZscoreSubtotals(object):
         _base_counts_prop_.return_value = np.arange(12).reshape(3, 4)
         cube_result_matrix_.columns_margin = np.array([12, 15, 18, 21])
         _table_margin_prop_.return_value = 66
-        subtotals = ZscoreSubtotals(cube_result_matrix_, None)
+        subtotals = ZscoreSubtotals(None, None, cube_result_matrix_)
 
         np.testing.assert_almost_equal(
             subtotals._intersection(row_subtotal_, col_subtotal_),
@@ -397,7 +358,7 @@ class DescribeZscoreSubtotals(object):
         _base_counts_prop_.return_value = np.arange(12).reshape(3, 4)
         cube_result_matrix_.rows_margin = np.array([6, 22, 38])
         _table_margin_prop_.return_value = 66
-        subtotals = ZscoreSubtotals(cube_result_matrix_, None)
+        subtotals = ZscoreSubtotals(None, None, cube_result_matrix_)
 
         np.testing.assert_almost_equal(
             subtotals._subtotal_column(subtotal_),
@@ -415,12 +376,17 @@ class DescribeZscoreSubtotals(object):
         _base_counts_prop_.return_value = np.arange(12).reshape(3, 4)
         cube_result_matrix_.columns_margin = np.array([12, 15, 18, 21])
         _table_margin_prop_.return_value = 66
-        subtotals = ZscoreSubtotals(cube_result_matrix_, None)
+        subtotals = ZscoreSubtotals(None, None, cube_result_matrix_)
 
         np.testing.assert_almost_equal(
             subtotals._subtotal_row(subtotal_),
             np.array([-0.7044435, -0.2161134, 0.2033553, 0.5833346]),
         )
+
+    def it_provides_access_to_the_table_margin_to_help(self, cube_result_matrix_):
+        cube_result_matrix_.table_margin = 42
+        subtotals = ZscoreSubtotals(None, None, cube_result_matrix_)
+        assert subtotals._table_margin == 42
 
     # --- fixture components -----------------------------------------
 

@@ -57,7 +57,7 @@ class Assembler(object):
     def column_index(self):
         """2D np.float64 ndarray of column-index "percentage" for each table cell."""
         return self._assemble_matrix(
-            NanSubtotals.blocks(self._cube_result_matrix, "column_index")
+            NanSubtotals.blocks(self._cube_result_matrix.column_index, self._dimensions)
         )
 
     @lazyproperty
@@ -76,7 +76,9 @@ class Assembler(object):
         # --- an MR_X slice produces a 2D column-base (each cell has its own N) ---
         if self._rows_dimension.dimension_type == DT.MR_SUBVAR:
             return self._assemble_matrix(
-                SumSubtotals.blocks(self._cube_result_matrix, "columns_base")
+                SumSubtotals.blocks(
+                    self._cube_result_matrix.columns_base, self._dimensions
+                )
             )
 
         # --- otherwise columns-base is a vector ---
@@ -107,7 +109,9 @@ class Assembler(object):
         # --- an MR_X slice produces a 2D columns-margin (each cell has its own N) ---
         if self._rows_dimension.dimension_type == DT.MR_SUBVAR:
             return self._assemble_matrix(
-                SumSubtotals.blocks(self._cube_result_matrix, "columns_margin")
+                SumSubtotals.blocks(
+                    self._cube_result_matrix.columns_margin, self._dimensions
+                )
             )
 
         # --- otherwise columns-base is a vector ---
@@ -136,7 +140,7 @@ class Assembler(object):
         if not self._cube.has_means:
             raise ValueError("cube-result does not include a means cube-measure")
         return self._assemble_matrix(
-            NanSubtotals.blocks(self._cube_result_matrix, "means")
+            NanSubtotals.blocks(self._cube_result_matrix.means, self._dimensions)
         )
 
     @lazyproperty
@@ -160,7 +164,9 @@ class Assembler(object):
         # --- an X_MR slice produces a 2D row-base (each cell has its own N) ---
         if self._columns_dimension.dimension_type == DT.MR_SUBVAR:
             return self._assemble_matrix(
-                SumSubtotals.blocks(self._cube_result_matrix, "rows_base")
+                SumSubtotals.blocks(
+                    self._cube_result_matrix.rows_base, self._dimensions
+                )
             )
 
         # --- otherwise rows-base is a vector ---
@@ -201,7 +207,9 @@ class Assembler(object):
         # --- an X_MR slice produces a 2D rows-margin (each cell has its own N) ---
         if self._columns_dimension.dimension_type == DT.MR_SUBVAR:
             return self._assemble_matrix(
-                SumSubtotals.blocks(self._cube_result_matrix, "rows_margin")
+                SumSubtotals.blocks(
+                    self._cube_result_matrix.rows_margin, self._dimensions
+                )
             )
 
         # --- otherwise rows-margin is a vector ---
@@ -336,21 +344,29 @@ class Assembler(object):
     def table_stderrs(self):
         """2D np.float64 ndarray of std-error of table-percent for each matrix cell."""
         return self._assemble_matrix(
-            TableStdErrSubtotals.blocks(self._cube_result_matrix)
+            TableStdErrSubtotals.blocks(
+                self._cube_result_matrix.table_stderrs,
+                self._dimensions,
+                self._cube_result_matrix,
+            )
         )
 
     @lazyproperty
     def unweighted_counts(self):
         """2D np.int64 ndarray of unweighted-count for each cell."""
         return self._assemble_matrix(
-            SumSubtotals.blocks(self._cube_result_matrix, "unweighted_counts")
+            SumSubtotals.blocks(
+                self._cube_result_matrix.unweighted_counts, self._dimensions
+            )
         )
 
     @lazyproperty
     def weighted_counts(self):
         """2D np.float/int64 ndarray of weighted-count for each cell."""
         return self._assemble_matrix(
-            SumSubtotals.blocks(self._cube_result_matrix, "weighted_counts")
+            SumSubtotals.blocks(
+                self._cube_result_matrix.weighted_counts, self._dimensions
+            )
         )
 
     @lazyproperty
@@ -367,10 +383,16 @@ class Assembler(object):
             or self._columns_dimension.dimension_type == DT.MR_SUBVAR
         ):
             return self._assemble_matrix(
-                NanSubtotals.blocks(self._cube_result_matrix, "zscores")
+                NanSubtotals.blocks(self._cube_result_matrix.zscores, self._dimensions)
             )
 
-        return self._assemble_matrix(ZscoreSubtotals.blocks(self._cube_result_matrix))
+        return self._assemble_matrix(
+            ZscoreSubtotals.blocks(
+                self._cube_result_matrix.zscores,
+                self._dimensions,
+                self._cube_result_matrix,
+            )
+        )
 
     def _assemble_matrix(self, blocks):
         """Return 2D ndarray matrix assembled from `blocks`.
