@@ -7,6 +7,7 @@ CubeSet is the main API class for manipulating Crunch.io JSON cube responses.
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import copy
 import json
 import numpy as np
 
@@ -181,7 +182,7 @@ class CubeSet(object):
             )
             # --- all numeric-mean cubes require inflation to restore their
             # --- rows-dimension, others don't
-            yield cube.inflate()  # if self._is_numeric_mean else cube
+            yield cube.inflate() if self._is_numeric_mean else cube
 
 
 class Cube(object):
@@ -270,40 +271,14 @@ class Cube(object):
         """
         cube_dict = self._cube_dict
         dimensions = cube_dict["result"]["dimensions"]
-        subrefs = cube_dict["result"]["measures"]["mean"]["metadata"]["references"][
-            "subreferences"
-        ]
-        if subrefs:
-            rows_dimension = {
-                "references": {"alias": "mean", "name": "mean"},
-                "type": {
-                    "elements": [],
-                    "class": "enum",
-                    "subtype": {"class": "variable"},
-                },
-            }
-            for i, subref in enumerate(subrefs):
-                rows_dimension["type"].get("elements", []).append(
-                    {
-                        "id": i,
-                        "value": {
-                            "references": {
-                                "alias": subref.get("alias"),
-                                "name": subref.get("name"),
-                            }
-                        },
-                    },
-                )
-            dimensions.append(rows_dimension)
-        else:
-            rows_dimension = {
-                "references": {"alias": "mean", "name": "mean"},
-                "type": {
-                    "categories": [{"id": 1, "name": "Mean"}],
-                    "class": "categorical",
-                },
-            }
-            dimensions.insert(0, rows_dimension)
+        rows_dimension = {
+            "references": {"alias": "mean", "name": "mean"},
+            "type": {
+                "categories": [{"id": 1, "name": "Mean"}],
+                "class": "categorical",
+            },
+        }
+        dimensions.insert(0, rows_dimension)
         return Cube(
             cube_dict,
             self._cube_idx_arg,
@@ -443,18 +418,15 @@ class Cube(object):
         )
 
     @lazyproperty
-    def _cube_dict(self):
-        """dict containing raw cube response, parsed from JSON payload."""
+    def _cube_response(self):
         try:
-            cube_response = self._cube_response_arg
+            response = self._cube_response_arg
             # ---parse JSON to a dict when constructed with JSON---
-            cube_dict = (
-                cube_response
-                if isinstance(cube_response, dict)
-                else json.loads(cube_response)
+            cube_response = (
+                response if isinstance(response, dict) else json.loads(response)
             )
             # ---cube is 'value' item in a shoji response---
-            return cube_dict.get("value", cube_dict)
+            return cube_response.get("value", cube_response)
         except TypeError:
             raise TypeError(
                 "Unsupported type <%s> provided. Cube response must be JSON "
@@ -462,9 +434,59 @@ class Cube(object):
             )
 
     @lazyproperty
+    def _cube_dict(self):
+        """dict containing raw cube response, parsed from JSON payload."""
+        cube_dict = copy.deepcopy(self._cube_response)
+        # ---cube inflation---
+        # ---In case of numeric arrays, we need to inflate the rows dimension
+        # ---according to the mean subvariables. For each subvar the rows dimension
+        # ---will have a new element related to the subvar metadata.
+        if self._mean_subvariables:
+            dimensions = cube_dict.get("result", {}).get("dimensions", {})
+            rows_dimension = {
+                "references": {"alias": "mean", "name": "mean"},
+                "type": {
+                    "elements": [],
+                    "class": "enum",
+                    "subtype": {"class": "variable"},
+                },
+            }
+            subrefs = self._mean_subreferences
+            for i, _ in enumerate(self._mean_subvariables):
+                rows_dimension["type"].get("elements", []).append(
+                    {
+                        "id": i,
+                        "value": {
+                            "references": {
+                                "alias": subrefs[i].get("alias") if subrefs else None,
+                                "name": subrefs[i].get("name") if subrefs else None,
+                            }
+                        },
+                    },
+                )
+            dimensions.append(rows_dimension)
+        return cube_dict
+
+    @lazyproperty
     def _is_single_filter_col_cube(self):
         """bool determines if it is a single column filter cube."""
         return self._cube_dict["result"].get("is_single_col_cube", False)
+
+    @lazyproperty
+    def _mean_subreferences(self):
+        """List of mean subreferences, tipically for numeric arrays."""
+        cube_response = self._cube_response
+        cube_measures = cube_response.get("result", {}).get("measures", {})
+        metadata = cube_measures.get("mean", {}).get("metadata", {})
+        return metadata.get("references", {}).get("subreferences", [])
+
+    @lazyproperty
+    def _mean_subvariables(self):
+        """List of mean subvariables, tipically for numeric arrays."""
+        cube_response = self._cube_response
+        cube_measures = cube_response.get("result", {}).get("measures", {})
+        metadata = cube_measures.get("mean", {}).get("metadata", {})
+        return metadata.get("type", {}).get("subvariables", [])
 
     def _measure(self, weighted):
         """_BaseMeasure subclass representing primary measure for this cube.
@@ -641,25 +663,12 @@ class _BaseMeasure(object):
         response. Specifically, it includes values for missing elements, any
         MR_CAT dimensions, and any prunable rows and columns.
         """
-        raw_cube_array = np.array(self._flat_values).flatten().reshape(self.shape)
+        raw_cube_array = (
+            np.array(self._flat_values).flatten().reshape(self._all_dimensions.shape)
+        )
         # ---must be read-only to avoid hard-to-find bugs---
         raw_cube_array.flags.writeable = False
         return raw_cube_array
-
-    @lazyproperty
-    def shape(self):
-        """tuple representing measure shape.
-
-        Most often this is the same shape as cube slice itself, but can be different.
-        When we have variables in measures' specification, that are arrays, or when we
-        specify measures such as correlation (that are themselves matrices), this shape
-        needs to change.
-
-        Each subclass is responsible for implementing the correct shape, based on the
-        shape of the provided variable (and if it has subvariables or not), and on the
-        provided measure, and its innate shape.
-        """
-        return self._all_dimensions.shape
 
     @lazyproperty
     def _flat_values(self):  # pragma: no cover
@@ -707,7 +716,8 @@ class _UnweightedCountMeasure(_BaseMeasure):
     @lazyproperty
     def _flat_values(self):
         """tuple of int counts before weighting."""
-        if self._cube_dict["result"]["measures"]["valid_count"]["data"]:
+        # ---If valid_count are expressed in the cube dict, returns its data---
+        if self._cube_dict["result"]["measures"].get("valid_count", {}).get("data"):
             return tuple(self._cube_dict["result"]["measures"]["valid_count"]["data"])
         return tuple(self._cube_dict["result"]["counts"])
 
@@ -718,6 +728,4 @@ class _WeightedCountMeasure(_BaseMeasure):
     @lazyproperty
     def _flat_values(self):
         """tuple of numeric counts after weighting."""
-        if self._cube_dict["result"]["measures"]["valid_count"]["data"]:
-            return tuple(self._cube_dict["result"]["measures"]["valid_count"]["data"])
         return tuple(self._cube_dict["result"]["measures"]["count"]["data"])

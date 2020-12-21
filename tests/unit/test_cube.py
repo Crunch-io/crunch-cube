@@ -7,7 +7,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import pytest
 import numpy as np
 
-from cr.cube.cube import Cube, CubeSet, _Measures, _BaseMeasure, _MeanMeasure
+from cr.cube.cube import Cube, CubeSet, _Measures
 from cr.cube.cubepart import _Slice, _Strand, _Nub
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.dimension import Dimension
@@ -453,7 +453,7 @@ class DescribeCube(object):
         ((CR.CAT_X_CAT, CR.CAT_X_CAT), ({"value": "val"}, "val")),
     )
     def and_it_accepts_a_JSON_format_cube_response(self, cube_response, expected_value):
-        assert Cube(cube_response)._cube_dict == expected_value
+        assert Cube(cube_response)._cube_response == expected_value
 
     @pytest.mark.parametrize(
         ("cube_response", "expected_value"),
@@ -470,17 +470,169 @@ class DescribeCube(object):
             ),
         ),
     )
-    def but_it_raises_on_other_cube_response_types(self, cube_response, expected_value):
+    def but_it_raises_on_other_cube_response_types(
+        self,
+        cube_response,
+        expected_value,
+    ):
         with pytest.raises(TypeError) as e:
             Cube(cube_response)._cube_dict
 
         assert str(e.value) == expected_value
+
+    @pytest.mark.parametrize(
+        "cube_response, expected_value",
+        (
+            (
+                {
+                    "result": {
+                        "dimensions": [],
+                        "measures": {
+                            "mean": {
+                                "metadata": {
+                                    "type": {"subvariables": ["A", "B"]},
+                                    "references": {
+                                        "subreferences": [
+                                            {"name": "A", "alias": "A"},
+                                            {"name": "B", "alias": "B"},
+                                        ]
+                                    },
+                                }
+                            }
+                        },
+                    }
+                },
+                {
+                    "result": {
+                        "dimensions": [
+                            {
+                                "references": {"alias": "mean", "name": "mean"},
+                                "type": {
+                                    "elements": [
+                                        {
+                                            "id": 0,
+                                            "value": {
+                                                "references": {
+                                                    "alias": "A",
+                                                    "name": "A",
+                                                }
+                                            },
+                                        },
+                                        {
+                                            "id": 1,
+                                            "value": {
+                                                "references": {
+                                                    "alias": "B",
+                                                    "name": "B",
+                                                }
+                                            },
+                                        },
+                                    ],
+                                    "class": "enum",
+                                    "subtype": {"class": "variable"},
+                                },
+                            }
+                        ],
+                        "measures": {
+                            "mean": {
+                                "metadata": {
+                                    "type": {"subvariables": ["A", "B"]},
+                                    "references": {
+                                        "subreferences": [
+                                            {"name": "A", "alias": "A"},
+                                            {"name": "B", "alias": "B"},
+                                        ]
+                                    },
+                                }
+                            }
+                        },
+                    }
+                },
+            ),
+        ),
+    )
+    def it_knows_its_cube_dict_composition(
+        self, _cube_response_prop_, cube_response, expected_value
+    ):
+        _cube_response_prop_.return_value = cube_response
+        cube = Cube(None)
+
+        cube_dict = cube._cube_dict
+
+        assert cube_dict == expected_value
+
+    @pytest.mark.parametrize(
+        "cube_response, expected_value",
+        (
+            ({}, []),
+            ({"foo": "bar"}, []),
+            (
+                {
+                    "result": {
+                        "measures": {
+                            "mean": {"metadata": {"type": {"subvariables": ["A", "B"]}}}
+                        }
+                    }
+                },
+                ["A", "B"],
+            ),
+        ),
+    )
+    def it_knows_its_mean_subvariables(
+        self, _cube_response_prop_, cube_response, expected_value
+    ):
+        _cube_response_prop_.return_value = cube_response
+        cube = Cube(None)
+
+        mean_subvariables = cube._mean_subvariables
+
+        assert mean_subvariables == expected_value
+
+    @pytest.mark.parametrize(
+        "cube_response, expected_value",
+        (
+            ({}, []),
+            ({"foo": "bar"}, []),
+            (
+                {
+                    "result": {
+                        "measures": {
+                            "mean": {
+                                "metadata": {
+                                    "references": {
+                                        "subreferences": [
+                                            {"name": "A", "alias": "A"},
+                                            {"name": "B", "alias": "B"},
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                [{"name": "A", "alias": "A"}, {"name": "B", "alias": "B"}],
+            ),
+        ),
+    )
+    def it_knows_its_mean_subreferences(
+        self, _cube_response_prop_, cube_response, expected_value
+    ):
+        _cube_response_prop_.return_value = cube_response
+        cube = Cube(None)
+
+        mean_subreferences = cube._mean_subreferences
+
+        assert mean_subreferences == expected_value
 
     # fixture components ---------------------------------------------
 
     @pytest.fixture
     def _cube_dict_prop_(self, request):
         return property_mock(request, Cube, "_cube_dict")
+
+    @pytest.fixture
+    def _cube_response_prop_(self, request):
+        return property_mock(request, Cube, "_cube_response")
 
     @pytest.fixture
     def dimension_types_prop_(self, request):
@@ -519,20 +671,3 @@ class DescribeMeasures(object):
         population_fraction = measures.population_fraction
 
         np.testing.assert_equal(population_fraction, expected_value)
-
-
-class DescribeMeanMeasure(object):
-    @pytest.mark.parametrize(
-        "base_shape, subvariables, expected_shape",
-        (((3, 4), None, (3, 4)), ((3, 4), ["0001", "0002"], (3, 4, 2))),
-    )
-    def it_knows_basic_measure_shape_wrt_subvars(
-        self, base_shape, subvariables, expected_shape, _base_measure_shape
-    ):
-        _base_measure_shape.return_value = base_shape
-        measure = _MeanMeasure(None, None, subvariables=subvariables)
-        assert measure.shape == expected_shape
-
-    @pytest.fixture
-    def _base_measure_shape(self, request):
-        return property_mock(request, _BaseMeasure, "shape")

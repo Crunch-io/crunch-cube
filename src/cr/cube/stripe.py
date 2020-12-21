@@ -582,16 +582,7 @@ class _MeansStripeRow(_BaseStripeRow):
 
     @lazyproperty
     def mean(self):
-        """Return stripe of means.
-
-        For numeric arrays, the stripe will have an additional dimension (subvariables).
-        """
-        # If the variables for which we performed mean is a numeric array, we need to
-        # create tuple out of `self._mean` (which would be a numpy array). If it's a
-        # normal numerical variable (and doesn't have subvars), we just return the
-        # original result (which is already a tuple).
-        if self._subvariables is not None:
-            return tuple(self._mean)
+        """Return stripe of means."""
         return self._mean
 
     @lazyproperty
