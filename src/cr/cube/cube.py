@@ -424,7 +424,7 @@ class Cube(object):
         cube_dict = copy.deepcopy(self._cube_response)
         if self._mean_subvariables:
             dimensions = cube_dict.get("result", {}).get("dimensions", {})
-            dimensions.append(self._numeric_array_dimensions)
+            dimensions.append(self._numeric_array_dimension)
         return cube_dict
 
     @lazyproperty
@@ -463,7 +463,7 @@ class Cube(object):
         cube_response = self._cube_response
         cube_measures = cube_response.get("result", {}).get("measures", {})
         metadata = cube_measures.get("mean", {}).get("metadata", {})
-        return metadata.get("type", {}).get("subvariables", [])
+        return metadata.get("type", {}).get("subvariables")
 
     def _measure(self, weighted):
         """_BaseMeasure subclass representing primary measure for this cube.
@@ -494,9 +494,9 @@ class Cube(object):
         return _Measures(self._cube_dict, self._all_dimensions)
 
     @lazyproperty
-    def _numeric_array_dimensions(self):
+    def _numeric_array_dimension(self):
         """Column dimensions object inflated according to the mean subvariables."""
-        column_dimensions = {
+        column_dimension = {
             "references": {"alias": "mean", "name": "mean"},
             "type": {"elements": [], "class": "enum", "subtype": {"class": "variable"}},
         }
@@ -506,7 +506,7 @@ class Cube(object):
         # ---according to the mean subvariables. For each subvar the column dimension
         # ---will have a new element related to the subvar metadata.
         for i, _ in enumerate(self._mean_subvariables):
-            column_dimensions["type"].get("elements", []).append(
+            column_dimension["type"].get("elements", []).append(
                 {
                     "id": i,
                     "value": {
@@ -517,7 +517,7 @@ class Cube(object):
                     },
                 },
             )
-        return column_dimensions
+        return column_dimension
 
     @lazyproperty
     def _slice_idxs(self):

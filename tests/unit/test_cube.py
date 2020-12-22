@@ -505,15 +505,15 @@ class DescribeCube(object):
         _mean_subvariables_prop_.return_value = mean_subvariables
         cube = Cube(None)
 
-        _num_array_dimensions = cube._numeric_array_dimensions
+        _num_array_dimensions = cube._numeric_array_dimension
 
         assert _num_array_dimensions["type"]["elements"] == expected_value
 
     @pytest.mark.parametrize(
         "cube_response, expected_value",
         (
-            ({}, []),
-            ({"foo": "bar"}, []),
+            ({}, None),
+            ({"foo": "bar"}, None),
             (
                 {
                     "result": {
