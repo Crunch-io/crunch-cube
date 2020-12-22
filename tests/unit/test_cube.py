@@ -13,6 +13,7 @@ from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.dimension import Dimension
 
 from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
+from ..fixtures import NA
 from ..unitutil import call, class_mock, instance_mock, property_mock, method_mock
 
 
@@ -623,6 +624,19 @@ class DescribeCube(object):
         mean_subreferences = cube._mean_subreferences
 
         assert mean_subreferences == expected_value
+
+    @pytest.mark.parametrize(
+        "fixture, expectation",
+        (
+            (CR.MEANS_CAT_X_CAT_HS, None),
+            (CR.MR_X_CAT_HS, None),
+            (NA.NUM_ARR_MEANS_NO_DIMS, ["0001", "0002"]),
+        ),
+    )
+    def it_knows_if_it_has_means_subvariales(self, fixture, expectation):
+        cube = Cube(fixture)
+
+        assert cube.means_subvariables == expectation
 
     # fixture components ---------------------------------------------
 
