@@ -422,38 +422,14 @@ class Cube(object):
     def _cube_dict(self):
         """dict containing raw cube response, parsed from JSON payload."""
         cube_dict = copy.deepcopy(self._cube_response)
-        # ---cube inflation---
-        # ---In case of numeric arrays, we need to inflate the rows dimension
-        # ---according to the mean subvariables. For each subvar the rows dimension
-        # ---will have a new element related to the subvar metadata.
         if self._mean_subvariables:
             dimensions = cube_dict.get("result", {}).get("dimensions", {})
-            rows_dimension = {
-                "references": {"alias": "mean", "name": "mean"},
-                "type": {
-                    "elements": [],
-                    "class": "enum",
-                    "subtype": {"class": "variable"},
-                },
-            }
-            subrefs = self._mean_subreferences
-            for i, _ in enumerate(self._mean_subvariables):
-                rows_dimension["type"].get("elements", []).append(
-                    {
-                        "id": i,
-                        "value": {
-                            "references": {
-                                "alias": subrefs[i].get("alias") if subrefs else None,
-                                "name": subrefs[i].get("name") if subrefs else None,
-                            }
-                        },
-                    },
-                )
-            dimensions.append(rows_dimension)
+            dimensions.append(self._numeric_array_dimensions)
         return cube_dict
 
     @lazyproperty
     def _cube_response(self):
+        """dict representing the parsed cube response arguments."""
         try:
             response = self._cube_response_arg
             # ---parse JSON to a dict when constructed with JSON---
@@ -516,6 +492,32 @@ class Cube(object):
         when available.
         """
         return _Measures(self._cube_dict, self._all_dimensions)
+
+    @lazyproperty
+    def _numeric_array_dimensions(self):
+        """Column dimensions object inflated according to the mean subvariables."""
+        column_dimensions = {
+            "references": {"alias": "mean", "name": "mean"},
+            "type": {"elements": [], "class": "enum", "subtype": {"class": "variable"}},
+        }
+        subrefs = self._mean_subreferences
+        # ---cube inflation---
+        # ---In case of numeric arrays, we need to inflate the columns dimension
+        # ---according to the mean subvariables. For each subvar the column dimension
+        # ---will have a new element related to the subvar metadata.
+        for i, _ in enumerate(self._mean_subvariables):
+            column_dimensions["type"].get("elements", []).append(
+                {
+                    "id": i,
+                    "value": {
+                        "references": {
+                            "alias": subrefs[i].get("alias") if subrefs else None,
+                            "name": subrefs[i].get("name") if subrefs else None,
+                        }
+                    },
+                },
+            )
+        return column_dimensions
 
     @lazyproperty
     def _slice_idxs(self):

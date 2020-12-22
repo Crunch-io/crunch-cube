@@ -13,7 +13,6 @@ from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.dimension import Dimension
 
 from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
-from ..fixtures import NA
 from ..unitutil import call, class_mock, instance_mock, property_mock, method_mock
 
 
@@ -482,85 +481,33 @@ class DescribeCube(object):
         assert str(e.value) == expected_value
 
     @pytest.mark.parametrize(
-        "cube_response, expected_value",
+        "mean_subvariables, mean_subreferences, expected_value",
         (
             (
-                {
-                    "result": {
-                        "dimensions": [],
-                        "measures": {
-                            "mean": {
-                                "metadata": {
-                                    "type": {"subvariables": ["A", "B"]},
-                                    "references": {
-                                        "subreferences": [
-                                            {"name": "A", "alias": "A"},
-                                            {"name": "B", "alias": "B"},
-                                        ]
-                                    },
-                                }
-                            }
-                        },
-                    }
-                },
-                {
-                    "result": {
-                        "dimensions": [
-                            {
-                                "references": {"alias": "mean", "name": "mean"},
-                                "type": {
-                                    "elements": [
-                                        {
-                                            "id": 0,
-                                            "value": {
-                                                "references": {
-                                                    "alias": "A",
-                                                    "name": "A",
-                                                }
-                                            },
-                                        },
-                                        {
-                                            "id": 1,
-                                            "value": {
-                                                "references": {
-                                                    "alias": "B",
-                                                    "name": "B",
-                                                }
-                                            },
-                                        },
-                                    ],
-                                    "class": "enum",
-                                    "subtype": {"class": "variable"},
-                                },
-                            }
-                        ],
-                        "measures": {
-                            "mean": {
-                                "metadata": {
-                                    "type": {"subvariables": ["A", "B"]},
-                                    "references": {
-                                        "subreferences": [
-                                            {"name": "A", "alias": "A"},
-                                            {"name": "B", "alias": "B"},
-                                        ]
-                                    },
-                                }
-                            }
-                        },
-                    }
-                },
+                ["001", "002"],
+                [{"alias": "A", "name": "A"}, {"alias": "B", "name": "B"}],
+                [
+                    {"id": 0, "value": {"references": {"alias": "A", "name": "A"}}},
+                    {"id": 1, "value": {"references": {"alias": "B", "name": "B"}}},
+                ],
             ),
         ),
     )
-    def it_knows_its_cube_dict_composition(
-        self, _cube_response_prop_, cube_response, expected_value
+    def it_knows_its_num_array_dimensions(
+        self,
+        _mean_subreferences_prop_,
+        _mean_subvariables_prop_,
+        mean_subvariables,
+        mean_subreferences,
+        expected_value,
     ):
-        _cube_response_prop_.return_value = cube_response
+        _mean_subreferences_prop_.return_value = mean_subreferences
+        _mean_subvariables_prop_.return_value = mean_subvariables
         cube = Cube(None)
 
-        cube_dict = cube._cube_dict
+        _num_array_dimensions = cube._numeric_array_dimensions
 
-        assert cube_dict == expected_value
+        assert _num_array_dimensions["type"]["elements"] == expected_value
 
     @pytest.mark.parametrize(
         "cube_response, expected_value",
@@ -626,15 +573,28 @@ class DescribeCube(object):
         assert mean_subreferences == expected_value
 
     @pytest.mark.parametrize(
-        "fixture, expectation",
+        "dimensions, measures, expectation",
         (
-            (CR.MEANS_CAT_X_CAT_HS, None),
-            (CR.MR_X_CAT_HS, None),
-            (NA.NUM_ARR_MEANS_NO_DIMS, ["0001", "0002"]),
+            ([], {}, None),
+            ([], {"mean": {"metadata": {"type": {"class": "categorical"}}}}, None),
+            (
+                [],
+                {"mean": {"metadata": {"type": {"subvariables": ["0001", "0002"]}}}},
+                ["0001", "0002"],
+            ),
         ),
     )
-    def it_knows_if_it_has_means_subvariales(self, fixture, expectation):
-        cube = Cube(fixture)
+    def it_knows_if_it_has_means_subvariales(
+        self, dimensions, measures, expectation, _cube_dict_prop_
+    ):
+        cube_dict = {
+            "result": {
+                "dimensions": dimensions,
+                "measures": measures,
+            }
+        }
+        _cube_dict_prop_.return_value = cube_dict
+        cube = Cube(None)
 
         assert cube.means_subvariables == expectation
 
@@ -647,6 +607,14 @@ class DescribeCube(object):
     @pytest.fixture
     def _cube_response_prop_(self, request):
         return property_mock(request, Cube, "_cube_response")
+
+    @pytest.fixture
+    def _mean_subreferences_prop_(self, request):
+        return property_mock(request, Cube, "_mean_subreferences")
+
+    @pytest.fixture
+    def _mean_subvariables_prop_(self, request):
+        return property_mock(request, Cube, "_mean_subvariables")
 
     @pytest.fixture
     def dimension_types_prop_(self, request):
