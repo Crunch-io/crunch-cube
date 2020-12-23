@@ -185,10 +185,9 @@ class _BaseBaseStripe(object):
 
         # ---for cubes with means, create one of the means-stripe types---
         if cube.has_means:
-            subvariables = cube.means_subvariables
             if rows_dimension.dimension_type == DT.MR:
                 return _MeansWithMrStripe(rows_dimension, counts, unweighted_counts)
-            return _MeansStripe(rows_dimension, counts, unweighted_counts, subvariables)
+            return _MeansStripe(rows_dimension, counts, unweighted_counts)
 
         if ca_as_0th:
             return _CatStripe(
@@ -256,16 +255,15 @@ class _CatStripe(_BaseBaseStripe):
 class _MeansStripe(_BaseBaseStripe):
     """A 1D calculator for a strand containing mean first-order measure."""
 
-    def __init__(self, rows_dimension, means, unweighted_counts, subvariables=None):
+    def __init__(self, rows_dimension, means, unweighted_counts):
         super(_MeansStripe, self).__init__(rows_dimension, unweighted_counts)
         self._means = means
-        self._subvariables = subvariables
 
     @lazyproperty
     def rows(self):
         """Sequence of _MeansStripeRow for each valid element in rows-dimension."""
         return tuple(
-            _MeansStripeRow(element, unweighted_count, mean, self._subvariables)
+            _MeansStripeRow(element, unweighted_count, mean)
             for element, unweighted_count, mean in zip(
                 self._row_elements, self._unweighted_counts, self._means
             )
@@ -560,13 +558,12 @@ class _CatStripeRow(_BaseStripeRow):
 class _MeansStripeRow(_BaseStripeRow):
     """Stripe-row for a non-MR 1D cube-result with means."""
 
-    def __init__(self, element, unweighted_count, mean, subvariables=None):
+    def __init__(self, element, unweighted_count, mean):
         super(_MeansStripeRow, self).__init__(element)
         # ---unweighted_count is np.int64---
         self._unweighted_count = unweighted_count
         # ---mean is np.float64 or np.nan---
         self._mean = mean
-        self._subvariables = subvariables
 
     @lazyproperty
     def base(self):

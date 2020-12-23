@@ -67,7 +67,7 @@
         "weighted_n": 6
       },
       "measures": {
-        "valid_count": {
+        "valid_count_unweighted": {
           "data": [
             [
               6

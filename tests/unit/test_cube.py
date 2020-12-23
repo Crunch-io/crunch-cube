@@ -572,32 +572,6 @@ class DescribeCube(object):
 
         assert mean_subreferences == expected_value
 
-    @pytest.mark.parametrize(
-        "dimensions, measures, expectation",
-        (
-            ([], {}, None),
-            ([], {"mean": {"metadata": {"type": {"class": "categorical"}}}}, None),
-            (
-                [],
-                {"mean": {"metadata": {"type": {"subvariables": ["0001", "0002"]}}}},
-                ["0001", "0002"],
-            ),
-        ),
-    )
-    def it_knows_if_it_has_means_subvariales(
-        self, dimensions, measures, expectation, _cube_dict_prop_
-    ):
-        cube_dict = {
-            "result": {
-                "dimensions": dimensions,
-                "measures": measures,
-            }
-        }
-        _cube_dict_prop_.return_value = cube_dict
-        cube = Cube(None)
-
-        assert cube.means_subvariables == expectation
-
     # fixture components ---------------------------------------------
 
     @pytest.fixture

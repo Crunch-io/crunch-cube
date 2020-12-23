@@ -3,7 +3,7 @@
   "value": {
     "query": {
       "measures": {
-        "valid_count": {
+        "valid_count_unweighted": {
           "function": "cube_valid_count",
           "args": [
             {
@@ -80,7 +80,7 @@
       ],
       "missing": 0,
       "measures": {
-        "valid_count": {
+        "valid_count_unweighted": {
           "data": [
             [
               3,

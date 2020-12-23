@@ -317,13 +317,6 @@ class Cube(object):
         return self._measures.is_weighted
 
     @lazyproperty
-    def means_subvariables(self):
-        """List of subvar names for numeric arrays, None otherwise."""
-        if not self.has_means:
-            return None
-        return self._measures.means.subvariables
-
-    @lazyproperty
     def missing(self):
         """Get missing count of a cube."""
         return self._measures.missing_count
@@ -573,12 +566,11 @@ class _Measures(object):
         mean_measure_dict = (
             self._cube_dict.get("result", {}).get("measures", {}).get("mean")
         )
-        if mean_measure_dict is None:
-            return None
-        subvariables = (
-            mean_measure_dict.get("metadata", {}).get("type", {}).get("subvariables")
+        return (
+            _MeanMeasure(self._cube_dict, self._all_dimensions)
+            if mean_measure_dict
+            else None
         )
-        return _MeanMeasure(self._cube_dict, self._all_dimensions, subvariables)
 
     @lazyproperty
     def missing_count(self):
@@ -685,14 +677,8 @@ class _BaseMeasure(object):
 class _MeanMeasure(_BaseMeasure):
     """Statistical mean values from a cube-response."""
 
-    def __init__(self, cube_dict, all_dimensions, subvariables=None):
+    def __init__(self, cube_dict, all_dimensions):
         super(_MeanMeasure, self).__init__(cube_dict, all_dimensions)
-        self._subvariables = subvariables
-
-    @lazyproperty
-    def subvariables(self):
-        """List of subvar names for numeric arrays, None otherwise."""
-        return self._subvariables
 
     @lazyproperty
     def missing_count(self):
@@ -720,8 +706,14 @@ class _UnweightedCountMeasure(_BaseMeasure):
     def _flat_values(self):
         """tuple of int counts before weighting."""
         # ---If valid_count are expressed in the cube dict, returns its data---
-        if self._cube_dict["result"]["measures"].get("valid_count", {}).get("data"):
-            return tuple(self._cube_dict["result"]["measures"]["valid_count"]["data"])
+        if (
+            self._cube_dict["result"]["measures"]
+            .get("valid_count_unweighted", {})
+            .get("data")
+        ):
+            return tuple(
+                self._cube_dict["result"]["measures"]["valid_count_unweighted"]["data"]
+            )
         return tuple(self._cube_dict["result"]["counts"])
 
 
