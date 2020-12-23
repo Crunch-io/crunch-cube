@@ -416,7 +416,11 @@ class Cube(object):
         """dict containing raw cube response, parsed from JSON payload."""
         cube_dict = copy.deepcopy(self._cube_response)
         if self._mean_subvariables:
-            dimensions = cube_dict.get("result", {}).get("dimensions", {})
+            dimensions = cube_dict.get("result", {}).get("dimensions", [])
+            # ---cube inflation---
+            # ---In case of numeric arrays, we need to inflate the columns dimension
+            # ---according to the mean subvariables. For each subvar the col dimension
+            # ---will have a new element related to the subvar metadata.
             dimensions.append(self._numeric_array_dimension)
         return cube_dict
 
@@ -456,7 +460,7 @@ class Cube(object):
         cube_response = self._cube_response
         cube_measures = cube_response.get("result", {}).get("measures", {})
         metadata = cube_measures.get("mean", {}).get("metadata", {})
-        return metadata.get("type", {}).get("subvariables")
+        return metadata.get("type", {}).get("subvariables", [])
 
     def _measure(self, weighted):
         """_BaseMeasure subclass representing primary measure for this cube.
@@ -488,17 +492,20 @@ class Cube(object):
 
     @lazyproperty
     def _numeric_array_dimension(self):
-        """Column dimensions object inflated according to the mean subvariables."""
+        """Column dimension object according to the mean subvariables."""
+        if not self._mean_subvariables:
+            return None
+        subrefs = self._mean_subreferences
         column_dimension = {
             "references": {"alias": "mean", "name": "mean"},
             "type": {"elements": [], "class": "enum", "subtype": {"class": "variable"}},
         }
-        subrefs = self._mean_subreferences
-        # ---cube inflation---
-        # ---In case of numeric arrays, we need to inflate the columns dimension
-        # ---according to the mean subvariables. For each subvar the column dimension
-        # ---will have a new element related to the subvar metadata.
+        # ---In case of numeric arrays the column dimension should contains additional
+        # ---information related to the subreferences for each subvariable of the
+        # ---array.
         for i, _ in enumerate(self._mean_subvariables):
+            # ---The column dimensions elements must be expanded with the alias and the
+            # ---name of the numeric array mean measure subreferences.
             column_dimension["type"].get("elements", []).append(
                 {
                     "id": i,
@@ -705,12 +712,15 @@ class _UnweightedCountMeasure(_BaseMeasure):
     @lazyproperty
     def _flat_values(self):
         """tuple of int counts before weighting."""
-        # ---If valid_count are expressed in the cube dict, returns its data---
         if (
             self._cube_dict["result"]["measures"]
             .get("valid_count_unweighted", {})
             .get("data")
         ):
+            # ---If valid_count are expressed in the cube dict, returns its data.
+            # ---This condition can happen in case of numeric array cube response.
+            # ---Under this circumstances the numeric array measures will contain the
+            # ---mean measure and a valid count measure for the unweighted counts.
             return tuple(
                 self._cube_dict["result"]["measures"]["valid_count_unweighted"]["data"]
             )

@@ -509,11 +509,19 @@ class DescribeCube(object):
 
         assert _num_array_dimensions["type"]["elements"] == expected_value
 
+    def but_it_returns_None_when_mean_subvars_is_empty(self, _mean_subvariables_prop_):
+        _mean_subvariables_prop_.return_value = []
+        cube = Cube(None)
+
+        _num_array_dimensions = cube._numeric_array_dimension
+
+        assert _num_array_dimensions is None
+
     @pytest.mark.parametrize(
         "cube_response, expected_value",
         (
-            ({}, None),
-            ({"foo": "bar"}, None),
+            ({}, []),
+            ({"foo": "bar"}, []),
             (
                 {
                     "result": {
@@ -572,6 +580,37 @@ class DescribeCube(object):
 
         assert mean_subreferences == expected_value
 
+    @pytest.mark.parametrize(
+        "cube_response, mean_subvars, num_array_dim, expected_value",
+        (
+            ({}, [], {}, {}),
+            ({"result": {"foo": "bar"}}, [], {}, {"result": {"foo": "bar"}}),
+            ({"result": {"foo": "bar"}}, ["A", "B"], {}, {"result": {"foo": "bar"}}),
+            (
+                {"result": {"dimensions": []}},
+                ["A", "B"],
+                {"A": "B"},
+                {"result": {"dimensions": [{"A": "B"}]}},
+            ),
+        ),
+    )
+    def it_knows_its_cube_dict(
+        self,
+        cube_response,
+        mean_subvars,
+        num_array_dim,
+        expected_value,
+        _cube_response_prop_,
+        _mean_subvariables_prop_,
+        _numeric_array_dimension_prop_,
+    ):
+        _cube_response_prop_.return_value = cube_response
+        _mean_subvariables_prop_.return_value = mean_subvars
+        _numeric_array_dimension_prop_.return_value = num_array_dim
+        cube = Cube(None)
+
+        assert cube._cube_dict == expected_value
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -589,6 +628,10 @@ class DescribeCube(object):
     @pytest.fixture
     def _mean_subvariables_prop_(self, request):
         return property_mock(request, Cube, "_mean_subvariables")
+
+    @pytest.fixture
+    def _numeric_array_dimension_prop_(self, request):
+        return property_mock(request, Cube, "_numeric_array_dimension")
 
     @pytest.fixture
     def dimension_types_prop_(self, request):
