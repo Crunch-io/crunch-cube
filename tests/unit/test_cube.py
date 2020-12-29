@@ -481,11 +481,16 @@ class DescribeCube(object):
         assert str(e.value) == expected_value
 
     @pytest.mark.parametrize(
-        "mean_subvariables, mean_subreferences, expected_value",
+        "mean_subvariables, mean_references, expected_value",
         (
             (
                 ["001", "002"],
-                [{"alias": "A", "name": "A"}, {"alias": "B", "name": "B"}],
+                {
+                    "subreferences": [
+                        {"alias": "A", "name": "A"},
+                        {"alias": "B", "name": "B"},
+                    ]
+                },
                 [
                     {"id": 0, "value": {"references": {"alias": "A", "name": "A"}}},
                     {"id": 1, "value": {"references": {"alias": "B", "name": "B"}}},
@@ -495,13 +500,13 @@ class DescribeCube(object):
     )
     def it_knows_its_num_array_dimensions(
         self,
-        _mean_subreferences_prop_,
+        _mean_references_prop_,
         _mean_subvariables_prop_,
         mean_subvariables,
-        mean_subreferences,
+        mean_references,
         expected_value,
     ):
-        _mean_subreferences_prop_.return_value = mean_subreferences
+        _mean_references_prop_.return_value = mean_references
         _mean_subvariables_prop_.return_value = mean_subvariables
         cube = Cube(None)
 
@@ -547,8 +552,8 @@ class DescribeCube(object):
     @pytest.mark.parametrize(
         "cube_response, expected_value",
         (
-            ({}, []),
-            ({"foo": "bar"}, []),
+            ({}, {}),
+            ({"foo": "bar"}, {}),
             (
                 {
                     "result": {
@@ -566,17 +571,22 @@ class DescribeCube(object):
                         }
                     }
                 },
-                [{"name": "A", "alias": "A"}, {"name": "B", "alias": "B"}],
+                {
+                    "subreferences": [
+                        {"name": "A", "alias": "A"},
+                        {"name": "B", "alias": "B"},
+                    ]
+                },
             ),
         ),
     )
-    def it_knows_its_mean_subreferences(
+    def it_knows_its_mean_references(
         self, _cube_response_prop_, cube_response, expected_value
     ):
         _cube_response_prop_.return_value = cube_response
         cube = Cube(None)
 
-        mean_subreferences = cube._mean_subreferences
+        mean_subreferences = cube._mean_references
 
         assert mean_subreferences == expected_value
 
@@ -622,8 +632,8 @@ class DescribeCube(object):
         return property_mock(request, Cube, "_cube_response")
 
     @pytest.fixture
-    def _mean_subreferences_prop_(self, request):
-        return property_mock(request, Cube, "_mean_subreferences")
+    def _mean_references_prop_(self, request):
+        return property_mock(request, Cube, "_mean_references")
 
     @pytest.fixture
     def _mean_subvariables_prop_(self, request):

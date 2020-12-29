@@ -447,12 +447,12 @@ class Cube(object):
         return self._cube_dict["result"].get("is_single_col_cube", False)
 
     @lazyproperty
-    def _mean_subreferences(self):
-        """List of mean subreferences, tipically for numeric arrays."""
+    def _mean_references(self):
+        """Dict of mean references, tipically for numeric arrays."""
         cube_response = self._cube_response
         cube_measures = cube_response.get("result", {}).get("measures", {})
         metadata = cube_measures.get("mean", {}).get("metadata", {})
-        return metadata.get("references", {}).get("subreferences", [])
+        return metadata.get("references", {})
 
     @lazyproperty
     def _mean_subvariables(self):
@@ -495,9 +495,12 @@ class Cube(object):
         """Column dimension object according to the mean subvariables."""
         if not self._mean_subvariables:
             return None
-        subrefs = self._mean_subreferences
+        subrefs = self._mean_references.get("subreferences", [])
         column_dimension = {
-            "references": {"alias": "mean", "name": "mean"},
+            "references": {
+                "alias": self._mean_references.get("alias", "mean"),
+                "name": self._mean_references.get("name", "mean"),
+            },
             "type": {"elements": [], "class": "enum", "subtype": {"class": "variable"}},
         }
         # ---In case of numeric arrays the column dimension should contains additional
