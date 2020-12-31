@@ -1,0 +1,131 @@
+{
+  "element": "shoji:view",
+  "value": {
+    "query": {
+      "dimensions": [],
+      "measures": {
+        "count": {
+          "args": [],
+          "function": "cube_count"
+        },
+        "mean": {
+          "args": [
+            {
+              "args": [
+                {
+                  "variable": "https://app.crunch.io/api/datasets/95c2706e9ded4a74b275363be1ccd31d/variables/ec657e0ab8d5436bbc3703c6e2cf5fe4/"
+                },
+                {
+                  "class": "numeric"
+                }
+              ],
+              "function": "cast"
+            }
+          ],
+          "function": "cube_mean"
+        }
+      },
+      "weight": null
+    },
+    "query_environment": {
+      "filter": []
+    },
+    "result": {
+      "counts": [
+        6
+      ],
+      "dimensions": [],
+      "element": "crunch:cube",
+      "filter_stats": {
+        "filtered": {
+          "unweighted": {
+            "missing": 0,
+            "other": 0,
+            "selected": 6
+          },
+          "weighted": {
+            "missing": 0,
+            "other": 0,
+            "selected": 6
+          }
+        },
+        "filtered_complete": {
+          "unweighted": {
+            "missing": 0,
+            "other": 0,
+            "selected": 6
+          },
+          "weighted": {
+            "missing": 0,
+            "other": 0,
+            "selected": 6
+          }
+        }
+      },
+      "filtered": {
+        "unweighted_n": 6,
+        "weighted_n": 6
+      },
+      "measures": {
+        "valid_count_unweighted": {
+          "data": [
+            [
+              6
+            ],
+            [
+              6
+            ]
+          ],
+          "n_missing": 0,
+          "metadata": {
+            "references": {},
+            "derived": true,
+            "type": {
+              "integer": false,
+              "class": "numeric",
+              "missing_rules": {},
+              "missing_reasons": {
+                "No Data": -1
+              },
+              "subvariables": [
+                "0001",
+                "0002"
+              ]
+            }
+          }
+        },
+        "mean": {
+          "data": [
+            [
+              2.5,
+              25
+            ]
+          ],
+          "metadata": {
+            "derived": true,
+            "references": {},
+            "type": {
+              "class": "numeric",
+              "integer": true,
+              "missing_reasons": {
+                "No Data": -1
+              },
+              "missing_rules": {},
+              "subvariables": [
+                "0001",
+                "0002"
+              ]
+            }
+          },
+          "n_missing": 0
+        }
+      },
+      "missing": 0,
+      "n": 6,
+      "unfiltered": {
+        "unweighted_n": 6,
+        "weighted_n": 6
+      }
+    }
+  }
+}

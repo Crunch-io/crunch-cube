@@ -1,0 +1,226 @@
+{
+  "element": "shoji:view",
+  "value": {
+    "query": {
+      "measures": {
+        "valid_count_unweighted": {
+          "function": "cube_valid_count",
+          "args": [
+            {
+              "variable": "143e8e61adff423bbeb855b282aa9f00"
+            }
+          ]
+        },
+        "valid_count_weighted": {
+          "function": "cube_valid_count",
+          "args": [
+            {
+              "variable": "143e8e61adff423bbeb855b282aa9f00"
+            },
+            {
+              "variable": "5cf7506015a9476fb89cec54a3a57e6a"
+            }
+          ]
+        },
+        "mean": {
+          "function": "cube_mean",
+          "args": [
+            {
+              "variable": "143e8e61adff423bbeb855b282aa9f00"
+            },
+            {
+              "variable": "5cf7506015a9476fb89cec54a3a57e6a"
+            }
+          ]
+        }
+      },
+      "dimensions": [
+        {
+          "variable": "5c87d348cde94a3599585041fd147455"
+        }
+      ],
+      "weight": null
+    },
+    "query_environment": {
+      "filter": []
+    },
+    "result": {
+      "dimensions": [
+        {
+          "references": {
+            "alias": "Gender",
+            "name": "Gender"
+          },
+          "derived": false,
+          "type": {
+            "ordinal": false,
+            "class": "categorical",
+            "categories": [
+              {
+                "numeric_value": null,
+                "missing": false,
+                "id": 1,
+                "name": "Male"
+              },
+              {
+                "numeric_value": null,
+                "missing": false,
+                "id": 2,
+                "name": "Female"
+              },
+              {
+                "numeric_value": null,
+                "missing": true,
+                "id": -1,
+                "name": "No Data"
+              }
+            ]
+          }
+        }
+      ],
+      "missing": 0,
+      "measures": {
+        "valid_count_unweighted": {
+          "data": [
+            [
+              3,
+              3,
+              1
+            ],
+            [
+              2,
+              1,
+              1
+            ],
+            [
+              0,
+              0,
+              0
+            ]
+          ],
+          "n_missing": 0,
+          "metadata": {
+            "references": {},
+            "derived": true,
+            "type": {
+              "integer": false,
+              "class": "numeric",
+              "missing_rules": {},
+              "missing_reasons": {
+                "No Data": -1
+              },
+              "subvariables": [
+                "S1",
+                "S2",
+                "S3"
+              ]
+            }
+          }
+        },
+        "mean": {
+          "data": [
+            [
+              91.62499999999999,
+              94.375,
+              1.0
+            ],
+            [
+              50.714285714285715,
+              50.0,
+              45.0
+            ],
+            [
+              {
+                "?": -8
+              },
+              {
+                "?": -8
+              },
+              {
+                "?": -8
+              }
+            ]
+          ],
+          "n_missing": 0,
+          "metadata": {
+            "references": {
+              "alias": "Movies",
+              "uniform_basis": false,
+              "name": "Movies",
+              "subreferences": [
+                {
+                  "alias": "Dark Knight",
+                  "name": "Dark Knight"
+                },
+                {
+                  "alias": "Fight Club",
+                  "name": "Fight Club"
+                },
+                {
+                  "alias": "Meets the Par.",
+                  "name": "Meets the Par."
+                }
+              ]
+            },
+            "derived": true,
+            "type": {
+              "integer": false,
+              "class": "numeric",
+              "missing_rules": {},
+              "missing_reasons": {
+                "No Data": -1,
+                "NaN": -8
+              },
+              "subvariables": [
+                "S1",
+                "S2",
+                "S3"
+              ]
+            }
+          }
+        }
+      },
+      "n": 5,
+      "filter_stats": {
+        "filtered_complete": {
+          "unweighted": {
+            "selected": 5,
+            "other": 0,
+            "missing": 0
+          },
+          "weighted": {
+            "selected": 5,
+            "other": 0,
+            "missing": 0
+          }
+        },
+        "filtered": {
+          "unweighted": {
+            "selected": 5,
+            "other": 0,
+            "missing": 0
+          },
+          "weighted": {
+            "selected": 5,
+            "other": 0,
+            "missing": 0
+          }
+        }
+      },
+      "unfiltered": {
+        "unweighted_n": 5,
+        "weighted_n": 5
+      },
+      "filtered": {
+        "unweighted_n": 5,
+        "weighted_n": 5
+      },
+      "counts": [
+        3,
+        2,
+        0
+      ],
+      "element": "crunch:cube"
+    }
+  }
+}

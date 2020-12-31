@@ -579,6 +579,7 @@ class _MeansStripeRow(_BaseStripeRow):
 
     @lazyproperty
     def mean(self):
+        """Stripe of means."""
         return self._mean
 
     @lazyproperty
