@@ -501,7 +501,7 @@ class Cube(object):
                 "alias": self._mean_references.get("alias", "mean"),
                 "name": self._mean_references.get("name", "mean"),
             },
-            "type": {"elements": [], "class": "enum", "subtype": {"class": "variable"}},
+            "type": {"elements": [], "class": "enum", "subtype": {"class": "num_arr"}},
         }
         # ---In case of numeric arrays the column dimension should contains additional
         # ---information related to the subreferences for each subvariable of the

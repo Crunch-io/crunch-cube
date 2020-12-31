@@ -35,6 +35,7 @@ class DIMENSION_TYPE(object):
     LOGICAL = _DimensionType("LOGICAL")
     MR_CAT = _DimensionType("MR_CAT")
     MR_SUBVAR = _DimensionType("MR_SUBVAR")
+    NUM_ARRAY = _DimensionType("NUM_ARRAY")
     TEXT = _DimensionType("TEXT")
 
     # ---aliases---
