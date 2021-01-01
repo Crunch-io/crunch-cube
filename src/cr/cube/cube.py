@@ -421,7 +421,11 @@ class Cube(object):
             # ---In case of numeric arrays, we need to inflate the columns dimension
             # ---according to the mean subvariables. For each subvar the col dimension
             # ---will have a new element related to the subvar metadata.
-            dimensions.append(self._numeric_array_dimension)
+            (
+                dimensions.insert(0, self._numeric_array_dimension)
+                if self._cube_idx_arg
+                else dimensions.append(self._numeric_array_dimension)
+            )
         return cube_dict
 
     @lazyproperty
