@@ -415,6 +415,8 @@ class Cube(object):
     def _cube_dict(self):
         """dict containing raw cube response, parsed from JSON payload."""
         cube_dict = copy.deepcopy(self._cube_response)
+        if self._cube_idx_arg:
+            cube_dict["cube_idx"] = self._cube_idx_arg
         if self._mean_subvariables:
             dimensions = cube_dict.get("result", {}).get("dimensions", [])
             # ---cube inflation---
@@ -677,7 +679,22 @@ class _BaseMeasure(object):
         )
         # ---must be read-only to avoid hard-to-find bugs---
         raw_cube_array.flags.writeable = False
-        return raw_cube_array
+        return raw_cube_array.T if self._require_array_transposition else raw_cube_array
+
+    @lazyproperty
+    def _require_array_transposition(self):
+        """True of False if the raw cube array need to be transposed.
+
+        When a Cube is part of a cubeset and one of the dimension type is a NUM_ARRAY,
+        it's cube_array values have to be transposed.
+        This business rule needs to drive correctly tabbook exports when a numeric array
+        dimension is expressed.
+        """
+        return (
+            self._cube_dict.get("cube_idx") is not None
+            and len(self._all_dimensions) >= 2
+            and any([d.dimension_type == DT.NUM_ARRAY for d in self._all_dimensions])
+        )
 
     @lazyproperty
     def _flat_values(self):  # pragma: no cover

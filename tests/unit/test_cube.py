@@ -7,7 +7,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import pytest
 import numpy as np
 
-from cr.cube.cube import Cube, CubeSet, _Measures
+from cr.cube.cube import Cube, CubeSet, _BaseMeasure, _Measures
 from cr.cube.cubepart import _Slice, _Strand, _Nub
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.dimension import Dimension
@@ -340,7 +340,8 @@ class DescribeCube(object):
                         },
                         {"other": "dim"},
                     ]
-                }
+                },
+                "cube_idx": 1,
             },
             1,
             {"trans": "forms"},
@@ -680,3 +681,27 @@ class DescribeMeasures(object):
         population_fraction = measures.population_fraction
 
         np.testing.assert_equal(population_fraction, expected_value)
+
+
+class Describe_BaseMeasure(object):
+    @pytest.mark.parametrize(
+        "cube_dict, dim_types, expected_value",
+        (
+            ({"cube_idx": 1}, (DT.CAT, DT.NUM_ARRAY), True),
+            ({"cube_idx": 1}, (DT.CAT, DT.CA_SUBVAR), False),
+            ({"cube_idx": 1}, (DT.NUM_ARRAY,), False),
+            ({}, (DT.CAT, DT.NUM_ARRAY), False),
+        ),
+    )
+    def it_knows_if_require_array_transposition(
+        self, request, cube_dict, dim_types, expected_value
+    ):
+        all_dimensions = tuple(
+            instance_mock(request, Dimension, name="dim-%d" % idx, dimension_type=dt)
+            for idx, dt in enumerate(dim_types)
+        )
+
+        assert (
+            _BaseMeasure(cube_dict, all_dimensions)._require_array_transposition
+            is expected_value
+        )
