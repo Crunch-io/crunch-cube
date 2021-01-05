@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+### 1.12.11
+- Numeric array measures available
+
 ### 1.12.10
 - Selected category labels partition interface
 
