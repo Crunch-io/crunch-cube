@@ -7,7 +7,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import pytest
 import numpy as np
 
-from cr.cube.cube import Cube, CubeSet, _Measures
+from cr.cube.cube import Cube, CubeSet, _BaseMeasure, _Measures
 from cr.cube.cubepart import _Slice, _Strand, _Nub
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.dimension import Dimension
@@ -340,7 +340,7 @@ class DescribeCube(object):
                         },
                         {"other": "dim"},
                     ]
-                }
+                },
             },
             1,
             {"trans": "forms"},
@@ -591,22 +591,37 @@ class DescribeCube(object):
         assert mean_subreferences == expected_value
 
     @pytest.mark.parametrize(
-        "cube_response, mean_subvars, num_array_dim, expected_value",
+        "cube_response, cube_idx_arg, mean_subvars, num_array_dim, expected_value",
         (
-            ({}, [], {}, {}),
-            ({"result": {"foo": "bar"}}, [], {}, {"result": {"foo": "bar"}}),
-            ({"result": {"foo": "bar"}}, ["A", "B"], {}, {"result": {"foo": "bar"}}),
+            ({}, None, [], {}, {}),
+            ({"result": {"foo": "bar"}}, None, [], {}, {"result": {"foo": "bar"}}),
+            (
+                {"result": {"foo": "bar"}},
+                None,
+                ["A", "B"],
+                {},
+                {"result": {"foo": "bar"}},
+            ),
             (
                 {"result": {"dimensions": []}},
+                None,
                 ["A", "B"],
                 {"A": "B"},
                 {"result": {"dimensions": [{"A": "B"}]}},
+            ),
+            (
+                {"result": {"dimensions": ["A", "B"]}},
+                1,
+                ["A", "B"],
+                {"A": "B"},
+                {"result": {"dimensions": [{"A": "B"}, "A", "B"]}},
             ),
         ),
     )
     def it_knows_its_cube_dict(
         self,
         cube_response,
+        cube_idx_arg,
         mean_subvars,
         num_array_dim,
         expected_value,
@@ -617,7 +632,7 @@ class DescribeCube(object):
         _cube_response_prop_.return_value = cube_response
         _mean_subvariables_prop_.return_value = mean_subvars
         _numeric_array_dimension_prop_.return_value = num_array_dim
-        cube = Cube(None)
+        cube = Cube(None, cube_idx=cube_idx_arg)
 
         assert cube._cube_dict == expected_value
 
@@ -680,3 +695,27 @@ class DescribeMeasures(object):
         population_fraction = measures.population_fraction
 
         np.testing.assert_equal(population_fraction, expected_value)
+
+
+class Describe_BaseMeasure(object):
+    @pytest.mark.parametrize(
+        "cube_idx_arg, dim_types, expected_value",
+        (
+            (1, (DT.CAT, DT.NUM_ARRAY), True),
+            (1, (DT.CAT, DT.CA_SUBVAR), False),
+            (1, (DT.NUM_ARRAY,), False),
+            (None, (DT.CAT, DT.NUM_ARRAY), False),
+        ),
+    )
+    def it_knows_if_require_array_transposition(
+        self, request, cube_idx_arg, dim_types, expected_value
+    ):
+        all_dimensions = tuple(
+            instance_mock(request, Dimension, name="dim-%d" % idx, dimension_type=dt)
+            for idx, dt in enumerate(dim_types)
+        )
+
+        assert (
+            _BaseMeasure({}, all_dimensions, cube_idx_arg)._requires_array_transposition
+            is expected_value
+        )

@@ -35,6 +35,7 @@ class DIMENSION_TYPE(object):
     LOGICAL = _DimensionType("LOGICAL")
     MR_CAT = _DimensionType("MR_CAT")
     MR_SUBVAR = _DimensionType("MR_SUBVAR")
+    NUM_ARRAY = _DimensionType("NUM_ARRAY")
     TEXT = _DimensionType("TEXT")
 
     # ---aliases---
@@ -47,7 +48,7 @@ class DIMENSION_TYPE(object):
     MULTIPLE_RESPONSE = MR_SUBVAR
 
     # ---subsets---
-    ARRAY_TYPES = frozenset((CA_SUBVAR, MR_SUBVAR))
+    ARRAY_TYPES = frozenset((CA_SUBVAR, MR_SUBVAR, NUM_ARRAY))
 
     # ---allowed types for pairwise comparison---
     ALLOWED_PAIRWISE_TYPES = frozenset(

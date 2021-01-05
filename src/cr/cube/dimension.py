@@ -156,6 +156,8 @@ class _RawDimension(object):
             return DT.BINNED_NUMERIC
         if base_type == "enum.text":
             return DT.TEXT
+        if base_type == "enum.num_arr":
+            return DT.NUM_ARRAY
         raise NotImplementedError("unrecognized dimension type %s" % base_type)
 
     @lazyproperty

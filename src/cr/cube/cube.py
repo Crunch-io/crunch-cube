@@ -421,7 +421,10 @@ class Cube(object):
             # ---In case of numeric arrays, we need to inflate the columns dimension
             # ---according to the mean subvariables. For each subvar the col dimension
             # ---will have a new element related to the subvar metadata.
-            dimensions.append(self._numeric_array_dimension)
+            if self._cube_idx_arg:
+                dimensions.insert(0, self._numeric_array_dimension)
+            else:
+                dimensions.append(self._numeric_array_dimension)
         return cube_dict
 
     @lazyproperty
@@ -488,7 +491,7 @@ class Cube(object):
         Provides access to unweighted counts, and weighted counts and/or means
         when available.
         """
-        return _Measures(self._cube_dict, self._all_dimensions)
+        return _Measures(self._cube_dict, self._all_dimensions, self._cube_idx_arg)
 
     @lazyproperty
     def _numeric_array_dimension(self):
@@ -501,7 +504,7 @@ class Cube(object):
                 "alias": self._mean_references.get("alias", "mean"),
                 "name": self._mean_references.get("name", "mean"),
             },
-            "type": {"elements": [], "class": "enum", "subtype": {"class": "variable"}},
+            "type": {"elements": [], "class": "enum", "subtype": {"class": "num_arr"}},
         }
         # ---In case of numeric arrays the column dimension should contains additional
         # ---information related to the subreferences for each subvariable of the
@@ -543,9 +546,10 @@ class Cube(object):
 class _Measures(object):
     """Provides access to measures contained in cube response."""
 
-    def __init__(self, cube_dict, all_dimensions):
+    def __init__(self, cube_dict, all_dimensions, cube_idx_arg=None):
         self._cube_dict = cube_dict
         self._all_dimensions = all_dimensions
+        self._cube_idx_arg = cube_idx_arg
 
     @lazyproperty
     def is_weighted(self):
@@ -577,7 +581,7 @@ class _Measures(object):
             self._cube_dict.get("result", {}).get("measures", {}).get("mean")
         )
         return (
-            _MeanMeasure(self._cube_dict, self._all_dimensions)
+            _MeanMeasure(self._cube_dict, self._all_dimensions, self._cube_idx_arg)
             if mean_measure_dict
             else None
         )
@@ -636,7 +640,9 @@ class _Measures(object):
         This object provides access to unweighted counts for this cube,
         whether or not the cube contains weighted counts.
         """
-        return _UnweightedCountMeasure(self._cube_dict, self._all_dimensions)
+        return _UnweightedCountMeasure(
+            self._cube_dict, self._all_dimensions, self._cube_idx_arg
+        )
 
     @lazyproperty
     def weighted_counts(self):
@@ -647,18 +653,23 @@ class _Measures(object):
         _UnweightedCountMeasure object for this cube is returned.
         """
         return (
-            _WeightedCountMeasure(self._cube_dict, self._all_dimensions)
+            _WeightedCountMeasure(
+                self._cube_dict, self._all_dimensions, self._cube_idx_arg
+            )
             if self.is_weighted
-            else _UnweightedCountMeasure(self._cube_dict, self._all_dimensions)
+            else _UnweightedCountMeasure(
+                self._cube_dict, self._all_dimensions, self._cube_idx_arg
+            )
         )
 
 
 class _BaseMeasure(object):
     """Base class for measure objects."""
 
-    def __init__(self, cube_dict, all_dimensions):
+    def __init__(self, cube_dict, all_dimensions, cube_idx_arg=None):
         self._cube_dict = cube_dict
         self._all_dimensions = all_dimensions
+        self._cube_idx_arg = cube_idx_arg
 
     @lazyproperty
     def raw_cube_array(self):
@@ -673,7 +684,26 @@ class _BaseMeasure(object):
         )
         # ---must be read-only to avoid hard-to-find bugs---
         raw_cube_array.flags.writeable = False
-        return raw_cube_array
+        # NOTE: The transpose operation cannot be enough in future when we'll have more
+        # than 2 dimensions.
+        return (
+            raw_cube_array.T if self._requires_array_transposition else raw_cube_array
+        )
+
+    @lazyproperty
+    def _requires_array_transposition(self):
+        """True if raw cube array needs transposition, False otherwise.
+
+        When a Cube is part of a cubeset and one of the dimension type is a NUM_ARRAY,
+        it's cube_array values have to be transposed.
+        This business rule needs to drive correctly tabbook exports when a numeric array
+        dimension is expressed.
+        """
+        return (
+            self._cube_idx_arg is not None
+            and len(self._all_dimensions) >= 2
+            and any([d.dimension_type == DT.NUM_ARRAY for d in self._all_dimensions])
+        )
 
     @lazyproperty
     def _flat_values(self):  # pragma: no cover
@@ -686,9 +716,6 @@ class _BaseMeasure(object):
 
 class _MeanMeasure(_BaseMeasure):
     """Statistical mean values from a cube-response."""
-
-    def __init__(self, cube_dict, all_dimensions):
-        super(_MeanMeasure, self).__init__(cube_dict, all_dimensions)
 
     @lazyproperty
     def missing_count(self):
