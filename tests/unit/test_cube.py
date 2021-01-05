@@ -591,22 +591,37 @@ class DescribeCube(object):
         assert mean_subreferences == expected_value
 
     @pytest.mark.parametrize(
-        "cube_response, mean_subvars, num_array_dim, expected_value",
+        "cube_response, cube_idx_arg, mean_subvars, num_array_dim, expected_value",
         (
-            ({}, [], {}, {}),
-            ({"result": {"foo": "bar"}}, [], {}, {"result": {"foo": "bar"}}),
-            ({"result": {"foo": "bar"}}, ["A", "B"], {}, {"result": {"foo": "bar"}}),
+            ({}, None, [], {}, {}),
+            ({"result": {"foo": "bar"}}, None, [], {}, {"result": {"foo": "bar"}}),
+            (
+                {"result": {"foo": "bar"}},
+                None,
+                ["A", "B"],
+                {},
+                {"result": {"foo": "bar"}},
+            ),
             (
                 {"result": {"dimensions": []}},
+                None,
                 ["A", "B"],
                 {"A": "B"},
                 {"result": {"dimensions": [{"A": "B"}]}},
+            ),
+            (
+                {"result": {"dimensions": ["A", "B"]}},
+                1,
+                ["A", "B"],
+                {"A": "B"},
+                {"result": {"dimensions": [{"A": "B"}, "A", "B"]}},
             ),
         ),
     )
     def it_knows_its_cube_dict(
         self,
         cube_response,
+        cube_idx_arg,
         mean_subvars,
         num_array_dim,
         expected_value,
@@ -617,7 +632,7 @@ class DescribeCube(object):
         _cube_response_prop_.return_value = cube_response
         _mean_subvariables_prop_.return_value = mean_subvars
         _numeric_array_dimension_prop_.return_value = num_array_dim
-        cube = Cube(None)
+        cube = Cube(None, cube_idx=cube_idx_arg)
 
         assert cube._cube_dict == expected_value
 
