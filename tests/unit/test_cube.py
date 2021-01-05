@@ -341,7 +341,6 @@ class DescribeCube(object):
                         {"other": "dim"},
                     ]
                 },
-                "cube_idx": 1,
             },
             1,
             {"trans": "forms"},
@@ -685,16 +684,16 @@ class DescribeMeasures(object):
 
 class Describe_BaseMeasure(object):
     @pytest.mark.parametrize(
-        "cube_dict, dim_types, expected_value",
+        "cube_idx_arg, dim_types, expected_value",
         (
-            ({"cube_idx": 1}, (DT.CAT, DT.NUM_ARRAY), True),
-            ({"cube_idx": 1}, (DT.CAT, DT.CA_SUBVAR), False),
-            ({"cube_idx": 1}, (DT.NUM_ARRAY,), False),
-            ({}, (DT.CAT, DT.NUM_ARRAY), False),
+            (1, (DT.CAT, DT.NUM_ARRAY), True),
+            (1, (DT.CAT, DT.CA_SUBVAR), False),
+            (1, (DT.NUM_ARRAY,), False),
+            (None, (DT.CAT, DT.NUM_ARRAY), False),
         ),
     )
     def it_knows_if_require_array_transposition(
-        self, request, cube_dict, dim_types, expected_value
+        self, request, cube_idx_arg, dim_types, expected_value
     ):
         all_dimensions = tuple(
             instance_mock(request, Dimension, name="dim-%d" % idx, dimension_type=dt)
@@ -702,6 +701,6 @@ class Describe_BaseMeasure(object):
         )
 
         assert (
-            _BaseMeasure(cube_dict, all_dimensions)._require_array_transposition
+            _BaseMeasure({}, all_dimensions, cube_idx_arg)._requires_array_transposition
             is expected_value
         )
