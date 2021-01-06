@@ -62,7 +62,7 @@ class DescribeAssembler(object):
         column_labels = assembler.column_labels
 
         _dimension_labels_.assert_called_once_with(assembler, dimension_, [0, 1, 2])
-        np.testing.assert_equal(column_labels, ["Alpha", "Baker", "Charlie"])
+        assert column_labels.tolist() == ["Alpha", "Baker", "Charlie"]
 
     def it_provides_a_1D_columns_base_for_a_CAT_X_cube_result(
         self,
@@ -88,7 +88,7 @@ class DescribeAssembler(object):
         _assemble_vector_.assert_called_once_with(
             assembler, [1, 2, 3], [3, 5], [0, -2, 1, 2, -1]
         )
-        np.testing.assert_equal(columns_base, np.array([1, 3, 2, 3, 5]))
+        assert columns_base.tolist() == [1, 3, 2, 3, 5]
 
     def but_it_provides_a_2D_columns_base_for_an_MR_X_cube_result(
         self,
@@ -155,7 +155,7 @@ class DescribeAssembler(object):
         _assemble_vector_.assert_called_once_with(
             assembler, [1, 2, 3], [3, 5], [0, -2, 1, 2, -1]
         )
-        np.testing.assert_equal(columns_margin, np.array([1, 3, 2, 3, 5]))
+        assert columns_margin.tolist() == [1, 3, 2, 3, 5]
 
     def but_it_provides_a_2D_columns_margin_for_an_MR_X_cube_result(
         self,
@@ -247,7 +247,7 @@ class DescribeAssembler(object):
         row_labels = assembler.row_labels
 
         _dimension_labels_.assert_called_once_with(assembler, dimension_, [0, 1, 2])
-        np.testing.assert_equal(row_labels, ["Alpha", "Baker", "Charlie"])
+        assert row_labels.tolist() == ["Alpha", "Baker", "Charlie"]
 
     def it_provides_a_1D_rows_base_for_an_X_CAT_cube_result(
         self,
@@ -402,7 +402,7 @@ class DescribeAssembler(object):
         _column_order_prop_.return_value = np.array([1, 0, 2])
         assembler = Assembler(None, None, None)
 
-        np.testing.assert_equal(assembler.table_base, [[5, 4, 6], [2, 1, 3]])
+        assert assembler.table_base.tolist() == [[5, 4, 6], [2, 1, 3]]
 
     def and_it_knows_the_1D_table_base_of_a_CAT_X_MR_matrix(
         self,
@@ -424,7 +424,7 @@ class DescribeAssembler(object):
         _column_order_prop_.return_value = np.array([2, 0, 1])
         assembler = Assembler(None, None, None)
 
-        np.testing.assert_equal(assembler.table_base, [3, 1, 2])
+        assert assembler.table_base.tolist() == [3, 1, 2]
 
     def and_it_knows_the_1D_table_base_of_an_MR_X_CAT_matrix(
         self,
@@ -446,7 +446,7 @@ class DescribeAssembler(object):
         _row_order_prop_.return_value = np.array([1, 0, 2])
         assembler = Assembler(None, None, None)
 
-        np.testing.assert_equal(assembler.table_base, [2, 1, 3])
+        assert assembler.table_base.tolist() == [2, 1, 3]
 
     def and_it_knows_the_scalar_table_base_of_a_CAT_X_CAT_matrix(
         self,
@@ -490,7 +490,7 @@ class DescribeAssembler(object):
         _column_order_prop_.return_value = np.array([1, 0, 2])
         assembler = Assembler(None, None, None)
 
-        np.testing.assert_equal(assembler.table_margin, [[5, 4, 6], [2, 1, 3]])
+        assert assembler.table_margin.tolist() == [[5, 4, 6], [2, 1, 3]]
 
     def and_it_knows_the_1D_table_margin_of_an_MR_X_CAT_matrix(
         self,
@@ -512,7 +512,7 @@ class DescribeAssembler(object):
         _row_order_prop_.return_value = np.array([1, 0, 2])
         assembler = Assembler(None, None, None)
 
-        np.testing.assert_equal(assembler.table_margin, [2, 1, 3])
+        assert assembler.table_margin.tolist() == [2, 1, 3]
 
     def and_it_knows_the_1D_table_margin_of_a_CAT_X_MR_matrix(
         self,
@@ -534,7 +534,7 @@ class DescribeAssembler(object):
         _column_order_prop_.return_value = np.array([2, 0, 1])
         assembler = Assembler(None, None, None)
 
-        np.testing.assert_equal(assembler.table_margin, [3, 1, 2])
+        assert assembler.table_margin.tolist() == [3, 1, 2]
 
     def and_it_knows_the_scalar_table_margin_of_a_CAT_X_CAT_matrix(
         self,
@@ -734,10 +734,9 @@ class DescribeAssembler(object):
         order = np.array([-3, 1, 0, -2, 3, 2, -1])
         assembler = Assembler(None, None, None)
 
-        np.testing.assert_equal(
-            assembler._assemble_vector(base_vector, subtotals_, order),
-            np.array([3, 2, 1, 5, 4, 3, 7]),
-        )
+        vector = assembler._assemble_vector(base_vector, subtotals_, order)
+
+        assert vector.tolist() == [3, 2, 1, 5, 4, 3, 7]
 
     @pytest.mark.parametrize(
         "order, prune_subtotal_columns, expected_value",
@@ -773,7 +772,7 @@ class DescribeAssembler(object):
 
         _dimension_order_.assert_called_once_with(assembler, dimension_, (4, 2))
         assert column_order.dtype == int
-        np.testing.assert_equal(column_order, np.array(expected_value))
+        assert column_order.tolist() == expected_value
 
     def it_provides_access_to_the_column_subtotals_to_help(
         self, _columns_dimension_prop_, dimension_, subtotals_
@@ -824,7 +823,7 @@ class DescribeAssembler(object):
 
         CollatorCls_.display_order.assert_called_once_with(dimension_, [2, 4, 6])
         assert dimension_order.shape == (5,)
-        np.testing.assert_equal(dimension_order, np.array([1, -2, 3, 5, -1]))
+        assert dimension_order.tolist() == [1, -2, 3, 5, -1]
 
     def it_assembles_the_dimension_labels_to_help(self, request, dimension_):
         dimension_.valid_elements = tuple(

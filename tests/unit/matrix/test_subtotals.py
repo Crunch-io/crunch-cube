@@ -107,10 +107,10 @@ class Describe_BaseSubtotals(object):
         assert subtotal_columns.tolist() == expected_value.tolist()
 
     @pytest.mark.parametrize(
-        ("ncols", "row_subtotals", "expected_value"),
+        ("ncols", "row_subtotals", "dtype", "shape", "expected_value"),
         (
-            (3, [], np.empty((0, 3), dtype=np.float64)),
-            (3, [1, 2], np.array([[1, 2, 3], [1, 2, 3]])),
+            (3, [], np.float64, (0, 3), []),
+            (3, [1, 2], np.int64, (2, 3), [[1, 2, 3], [1, 2, 3]]),
         ),
     )
     def it_assembles_its_subtotal_rows_to_help(
@@ -120,15 +120,19 @@ class Describe_BaseSubtotals(object):
         _subtotal_row_,
         ncols,
         row_subtotals,
+        dtype,
+        shape,
         expected_value,
     ):
         _row_subtotals_prop_.return_value = row_subtotals
         _subtotal_row_.return_value = np.array([1, 2, 3])
         _ncols_prop_.return_value = ncols
 
-        np.testing.assert_equal(
-            _BaseSubtotals(None, None)._subtotal_rows, expected_value
-        )
+        subtotal_rows = _BaseSubtotals(None, None)._subtotal_rows
+
+        assert subtotal_rows.dtype == dtype
+        assert subtotal_rows.shape == shape
+        assert subtotal_rows.tolist() == expected_value
 
     # fixture components ---------------------------------------------
 

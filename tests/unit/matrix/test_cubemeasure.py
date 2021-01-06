@@ -102,7 +102,7 @@ class DescribeBaseCubeResultMatrix(object):
 
         residuals = matrix._array_type_std_res(counts, None, None, None)
 
-        np.testing.assert_equal(residuals, np.array([[0, 0], [0, 0]]))
+        assert residuals.tolist() == [[0, 0], [0, 0]]
 
     @pytest.mark.parametrize(
         "dimension_types, matrix_class_name",
@@ -288,7 +288,11 @@ class DescribeBaseCubeResultMatrix(object):
         )
         matrix = BaseCubeResultMatrix((dimension_, None), None, None)
 
-        np.testing.assert_equal(matrix._valid_row_idxs, np.array([[0, 1, 2]]))
+        valid_row_idxs = matrix._valid_row_idxs
+
+        assert isinstance(valid_row_idxs, tuple)
+        assert len(valid_row_idxs) == 1
+        assert valid_row_idxs[0].tolist() == [0, 1, 2]
 
     # fixture components ---------------------------------------------
 
@@ -325,11 +329,11 @@ class Describe_CatXCatMatrix(object):
 
     def it_knows_its_columns_base(self):
         matrix = _CatXCatMatrix(None, None, np.array([[1, 2, 3], [4, 5, 6]]))
-        np.testing.assert_equal(matrix.columns_base, np.array([5, 7, 9]))
+        assert matrix.columns_base.tolist() == [5, 7, 9]
 
     def it_knows_its_columns_margin(self):
         matrix = _CatXCatMatrix(None, np.array([[1, 2, 3], [4, 5, 6]]), None)
-        np.testing.assert_equal(matrix.columns_margin, np.array([5, 7, 9]))
+        assert matrix.columns_margin.tolist() == [5, 7, 9]
 
     @pytest.mark.parametrize(
         ("unweighted_counts", "expected"),
@@ -354,7 +358,7 @@ class Describe_CatXCatMatrix(object):
         columns_pruning_base = matrix.columns_pruning_base
 
         assert columns_pruning_base.shape == (len(expected),)
-        np.testing.assert_equal(columns_pruning_base, np.array(expected))
+        assert columns_pruning_base.tolist() == expected
 
     @pytest.mark.parametrize(
         ("unweighted_counts", "expected"),
@@ -370,10 +374,9 @@ class Describe_CatXCatMatrix(object):
 
     def it_knows_its_rows_margin(self):
         weighted_counts = np.array([[1, 2, 3], [4, 5, 6]])
-        np.testing.assert_equal(
-            _CatXCatMatrix(None, weighted_counts, None).rows_margin,
-            [6, 15],
-        )
+        matrix = _CatXCatMatrix(None, weighted_counts, None)
+
+        assert matrix.rows_margin.tolist() == [6, 15]
 
     @pytest.mark.parametrize(
         ("unweighted_counts", "expected"),
@@ -410,18 +413,16 @@ class Describe_CatXCatMatrix(object):
         )
 
     def it_knows_its_unweighted_counts(self):
-        unweighted_counts = np.array([[1, 2, 3], [4, 5, 6]])
-        np.testing.assert_equal(
-            _CatXCatMatrix(None, None, unweighted_counts).unweighted_counts,
-            unweighted_counts,
-        )
+        unweighted_cube_counts = np.array([[1, 2, 3], [4, 5, 6]])
+        matrix = _CatXCatMatrix(None, None, unweighted_cube_counts)
+
+        assert matrix.unweighted_counts.tolist() == [[1, 2, 3], [4, 5, 6]]
 
     def it_knows_its_weighted_counts(self):
-        weighted_counts = np.array([[3, 2, 1], [6, 5, 4]])
-        np.testing.assert_equal(
-            _CatXCatMatrix(None, weighted_counts, None).weighted_counts,
-            weighted_counts,
-        )
+        weighted_cube_counts = np.array([[3, 2, 1], [6, 5, 4]])
+        matrix = _CatXCatMatrix(None, weighted_cube_counts, None)
+
+        assert matrix.weighted_counts.tolist() == [[3, 2, 1], [6, 5, 4]]
 
     def it_knows_its_zscores(self):
         weighted_counts = np.array([[3, 2, 1], [6, 5, 4]])
@@ -475,17 +476,18 @@ class Describe_CatXCatMeansMatrix(object):
     """Unit test suite for `cr.cube.matrix._CatXCatMeansMatrix` object."""
 
     def it_knows_its_means(self):
-        means = np.array([[2, 3, 1], [5, 6, 4]])
-        np.testing.assert_equal(
-            _CatXCatMeansMatrix(None, means, None).means,
-            np.array([[2, 3, 1], [5, 6, 4]]),
-        )
+        cube_means = np.array([[2, 3, 1], [5, 6, 4]])
+        matrix = _CatXCatMeansMatrix(None, cube_means, None)
+
+        assert matrix.means.tolist() == [[2, 3, 1], [5, 6, 4]]
 
     def it_knows_its_weighted_counts(self):
-        means = np.array([[3, 2, 1], [6, 5, 4]])
+        cube_means = np.array([[3, 2, 1], [6, 5, 4]])
+        matrix = _CatXCatMeansMatrix(None, cube_means, None)
+
         np.testing.assert_equal(
-            _CatXCatMeansMatrix(None, means, None).weighted_counts,
-            np.array([[np.nan, np.nan, np.nan], [np.nan, np.nan, np.nan]]),
+            matrix.weighted_counts,
+            [[np.nan, np.nan, np.nan], [np.nan, np.nan, np.nan]],
         )
 
 
@@ -493,44 +495,42 @@ class Describe_CatXMrMatrix(object):
     """Unit test suite for `cr.cube.matrix._CatXMrMatrix` object."""
 
     def it_knows_its_columns_pruning_base(self):
-        unweighted_counts = np.array(
+        unweighted_cube_counts = np.array(
             [
                 [[1, 6], [2, 5], [3, 5]],  # --- row 0 ---
                 [[5, 3], [6, 3], [7, 2]],  # --- row 1 ---
             ]
         )
-        np.testing.assert_equal(
-            _CatXMrMatrix(None, None, unweighted_counts, None).columns_pruning_base,
-            np.array([15, 16, 17]),
-        )
+        matrix = _CatXMrMatrix(None, None, unweighted_cube_counts, None)
+
+        assert matrix.columns_pruning_base.tolist() == [15, 16, 17]
 
     def it_knows_its_rows_base(self):
-        unweighted_counts = np.array(
+        unweighted_cube_counts = np.array(
             [[[1, 6], [2, 5], [3, 4]], [[5, 3], [6, 2], [7, 1]]]
         )
-        np.testing.assert_equal(
-            _CatXMrMatrix(None, None, unweighted_counts, None).rows_base,
-            np.array([[7, 7, 7], [8, 8, 8]]),
-        )
+        matrix = _CatXMrMatrix(None, None, unweighted_cube_counts, None)
+
+        assert matrix.rows_base.tolist() == [[7, 7, 7], [8, 8, 8]]
 
     def it_knows_its_rows_margin(self):
-        weighted_counts = np.array([[[1, 6], [2, 5], [3, 4]], [[5, 3], [6, 2], [7, 1]]])
-        np.testing.assert_equal(
-            _CatXMrMatrix(None, weighted_counts, None, None).rows_margin,
-            np.array([[7, 7, 7], [8, 8, 8]]),
-        )
-
-    def it_knows_its_rows_pruning_base(self):
-        unweighted_counts = np.array(
+        weighted_cube_counts = np.array(
             [[[1, 6], [2, 5], [3, 4]], [[5, 3], [6, 2], [7, 1]]]
         )
-        np.testing.assert_equal(
-            _CatXMrMatrix(None, None, unweighted_counts, None).rows_pruning_base,
-            np.array([21, 24]),
+        matrix = _CatXMrMatrix(None, weighted_cube_counts, None, None)
+
+        assert matrix.rows_margin.tolist() == [[7, 7, 7], [8, 8, 8]]
+
+    def it_knows_its_rows_pruning_base(self):
+        unweighted_cube_counts = np.array(
+            [[[1, 6], [2, 5], [3, 4]], [[5, 3], [6, 2], [7, 1]]]
         )
+        matrix = _CatXMrMatrix(None, None, unweighted_cube_counts, None)
+
+        assert matrix.rows_pruning_base.tolist() == [21, 24]
 
     def it_knows_its_table_base(self):
-        unweighted_counts = np.array(
+        unweighted_cube_counts = np.array(
             [
                 [  # -- row 0 ------------
                     [1, 6],  # -- col 0 --
@@ -545,12 +545,12 @@ class Describe_CatXMrMatrix(object):
                 ],
             ]
         )
-        np.testing.assert_equal(
-            _CatXMrMatrix(None, None, unweighted_counts).table_base, [14, 14, 14]
-        )
+        matrix = _CatXMrMatrix(None, None, unweighted_cube_counts, None)
+
+        assert matrix.table_base.tolist() == [14, 14, 14]
 
     def it_knows_its_table_margin(self):
-        weighted_counts = np.array(
+        weighted_cube_counts = np.array(
             [
                 [  # -- row 0 ------------
                     [1, 6],  # -- col 0 --
@@ -565,12 +565,12 @@ class Describe_CatXMrMatrix(object):
                 ],
             ]
         )
-        np.testing.assert_equal(
-            _CatXMrMatrix(None, weighted_counts, None).table_margin, [14, 14, 14]
-        )
+        matrix = _CatXMrMatrix(None, weighted_cube_counts, None, None)
+
+        assert matrix.table_margin.tolist() == [14, 14, 14]
 
     def it_knows_its_unweighted_counts(self):
-        unweighted_counts = np.array(
+        unweighted_cube_counts = np.array(
             [
                 [  # -- row 0 ------------
                     [1, 6],  # -- col 0 --
@@ -585,13 +585,12 @@ class Describe_CatXMrMatrix(object):
                 ],
             ]
         )
-        np.testing.assert_equal(
-            _CatXMrMatrix(None, None, unweighted_counts).unweighted_counts,
-            np.array([[1, 2, 3], [4, 5, 6]]),
-        )
+        matrix = _CatXMrMatrix(None, None, unweighted_cube_counts, None)
+
+        assert matrix.unweighted_counts.tolist() == [[1, 2, 3], [4, 5, 6]]
 
     def it_knows_its_weighted_counts(self):
-        weighted_counts = np.array(
+        weighted_cube_counts = np.array(
             [
                 [  # -- row 0 ------------
                     [1, 6],  # -- col 0 --
@@ -606,31 +605,29 @@ class Describe_CatXMrMatrix(object):
                 ],
             ]
         )
-        np.testing.assert_equal(
-            _CatXMrMatrix(None, weighted_counts, None).weighted_counts,
-            np.array([[1, 2, 3], [4, 5, 6]]),
-        )
+        matrix = _CatXMrMatrix(None, weighted_cube_counts, None, None)
+
+        assert matrix.weighted_counts.tolist() == [[1, 2, 3], [4, 5, 6]]
 
     def it_knows_its_zscores(self, request):
         _array_type_std_res_ = method_mock(
-            request, _CatXMrMatrix, "_array_type_std_res", return_value=[[1, 2], [3, 4]]
+            request,
+            _CatXMrMatrix,
+            "_array_type_std_res",
+            return_value=np.array([[1, 2], [3, 4]]),
         )
-        weighted_counts = np.arange(24).reshape(3, 4, 2)
-        matrix = _CatXMrMatrix(None, weighted_counts, None)
+        weighted_cube_counts = np.arange(24).reshape(3, 4, 2)
+        matrix = _CatXMrMatrix(None, weighted_cube_counts, None)
 
         zscores = matrix.zscores
 
         self_, counts, total, rowsum, colsum = _array_type_std_res_.call_args.args
         assert self_ is matrix
-        np.testing.assert_equal(
-            counts, np.array([[0, 2, 4, 6], [8, 10, 12, 14], [16, 18, 20, 22]])
-        )
-        np.testing.assert_equal(total, np.array([51, 63, 75, 87]))
-        np.testing.assert_equal(
-            rowsum, np.array([[1, 5, 9, 13], [17, 21, 25, 29], [33, 37, 41, 45]])
-        )
-        np.testing.assert_equal(colsum, np.array([24, 30, 36, 42]))
-        assert zscores == [[1, 2], [3, 4]]
+        assert counts.tolist() == [[0, 2, 4, 6], [8, 10, 12, 14], [16, 18, 20, 22]]
+        assert total.tolist() == [51, 63, 75, 87]
+        assert rowsum.tolist() == [[1, 5, 9, 13], [17, 21, 25, 29], [33, 37, 41, 45]]
+        assert colsum.tolist() == [24, 30, 36, 42]
+        assert zscores.tolist() == [[1, 2], [3, 4]]
 
     def it_knows_its_baseline_to_help(self, request):
         property_mock(
@@ -646,9 +643,9 @@ class Describe_CatXMrMatrix(object):
         )
 
     def it_knows_its_table_proportion_variances_to_help(self, request):
-        weighted_counts = np.arange(12).reshape(2, 3, 2)
+        weighted_cube_counts = np.arange(12).reshape(2, 3, 2)
         np.testing.assert_almost_equal(
-            _CatXMrMatrix(None, weighted_counts, None)._table_proportion_variances,
+            _CatXMrMatrix(None, weighted_cube_counts, None)._table_proportion_variances,
             np.array([[0.0, 0.0826446, 0.1155556], [0.244898, 0.231405, 0.2222222]]),
         )
 

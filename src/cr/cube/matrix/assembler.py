@@ -124,11 +124,13 @@ class Assembler(object):
     @lazyproperty
     def inserted_column_idxs(self):
         """tuple of int index of each subtotal column in slice."""
+        # --- insertions have a negative idx in their order sequence ---
         return tuple(i for i, col_idx in enumerate(self._column_order) if col_idx < 0)
 
     @lazyproperty
     def inserted_row_idxs(self):
         """tuple of int index of each subtotal row in slice."""
+        # --- insertions have a negative idx in their order sequence ---
         return tuple(i for i, row_idx in enumerate(self._row_order) if row_idx < 0)
 
     @lazyproperty
@@ -252,8 +254,7 @@ class Assembler(object):
             return base_table_base[self._row_order]
 
         # --- CAT_X_CAT produces scalar table-base ---
-        table_base = self._cube_result_matrix.table_base
-        return table_base
+        return self._cube_result_matrix.table_base
 
     @lazyproperty
     def table_base_unpruned(self):

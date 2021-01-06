@@ -504,8 +504,8 @@ class _Slice(CubePartition):
             # --- "vertically", and then re-transpose the result to get back
             # --- (rows, cols) orientation.
             if rows_margin.ndim == 1:
-                return (self.counts.T / self.rows_margin).T
-            return self.counts / self.rows_margin
+                return (self.counts.T / rows_margin).T
+            return self.counts / rows_margin
 
     @lazyproperty
     def row_proportions_moe(self):
