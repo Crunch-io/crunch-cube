@@ -355,7 +355,7 @@ class Assembler(object):
     @lazyproperty
     def new_unweighted_counts(self):
         """2D np.int64 ndarray of unweighted-count for each cell."""
-        raise NotImplementedError
+        return self._assemble_matrix(self._measures.unweighted_counts.blocks)
 
     @lazyproperty
     def unweighted_counts(self):
@@ -517,6 +517,11 @@ class Assembler(object):
         """
         pruning_base = self._cube_result_matrix.rows_pruning_base
         return tuple(i for i, N in enumerate(pruning_base) if N == 0)
+
+    @lazyproperty
+    def _measures(self):
+        """SecondOrderMeasures collection object for this cube-result."""
+        raise NotImplementedError
 
     @lazyproperty
     def _prune_subtotal_columns(self):

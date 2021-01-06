@@ -14,6 +14,7 @@ from cr.cube.matrix.cubemeasure import (
     _CatXCatMatrix,
     _CatXCatMeansMatrix,
 )
+from cr.cube.matrix.measure import SecondOrderMeasures, _UnweightedCounts
 
 from ...unitutil import class_mock, instance_mock, method_mock, property_mock
 
@@ -600,6 +601,22 @@ class DescribeAssembler(object):
         _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
         assert unweighted_counts == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
+    def it_knows_the_new_unweighted_counts(
+        self, request, _measures_prop_, second_order_measures_, _assemble_matrix_
+    ):
+        unweighted_counts_ = instance_mock(
+            request, _UnweightedCounts, blocks=[["A", "B"], ["C", "D"]]
+        )
+        _measures_prop_.return_value = second_order_measures_
+        second_order_measures_.unweighted_counts = unweighted_counts_
+        _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+        assembler = Assembler(None, None, None)
+
+        unweighted_counts = assembler.new_unweighted_counts
+
+        _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
+        assert unweighted_counts == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+
     def it_knows_the_weighted_counts(
         self,
         _cube_result_matrix_prop_,
@@ -1024,6 +1041,10 @@ class DescribeAssembler(object):
         return property_mock(request, Assembler, "_empty_row_idxs")
 
     @pytest.fixture
+    def _measures_prop_(self, request):
+        return property_mock(request, Assembler, "_measures")
+
+    @pytest.fixture
     def NanSubtotals_(self, request):
         return class_mock(request, "cr.cube.matrix.assembler.NanSubtotals")
 
@@ -1038,6 +1059,10 @@ class DescribeAssembler(object):
     @pytest.fixture
     def _rows_dimension_prop_(self, request):
         return property_mock(request, Assembler, "_rows_dimension")
+
+    @pytest.fixture
+    def second_order_measures_(self, request):
+        return instance_mock(request, SecondOrderMeasures)
 
     @pytest.fixture
     def subtotals_(self, request):
