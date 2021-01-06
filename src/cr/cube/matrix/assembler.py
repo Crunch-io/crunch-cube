@@ -17,6 +17,7 @@ from scipy.stats import norm
 from cr.cube.collator import ExplicitOrderCollator, PayloadOrderCollator
 from cr.cube.enums import COLLATION_METHOD as CM, DIMENSION_TYPE as DT
 from cr.cube.matrix.cubemeasure import BaseCubeResultMatrix
+from cr.cube.matrix.measure import SecondOrderMeasures
 from cr.cube.matrix.subtotals import (
     NanSubtotals,
     SumSubtotals,
@@ -521,7 +522,7 @@ class Assembler(object):
     @lazyproperty
     def _measures(self):
         """SecondOrderMeasures collection object for this cube-result."""
-        raise NotImplementedError
+        return SecondOrderMeasures(self._cube, self._dimensions, self._slice_idx)
 
     @lazyproperty
     def _prune_subtotal_columns(self):

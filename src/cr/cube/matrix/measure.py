@@ -16,6 +16,11 @@ class SecondOrderMeasures(object):
     requested measures consume resources.
     """
 
+    def __init__(self, cube, dimensions, slice_idx):
+        self._cube = cube
+        self._dimensions = dimensions
+        self._slice_idx = slice_idx
+
     @lazyproperty
     def unweighted_counts(self):
         """_UnweightedCounts measure object for this cube-result."""
