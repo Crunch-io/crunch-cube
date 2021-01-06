@@ -353,6 +353,11 @@ class Assembler(object):
         )
 
     @lazyproperty
+    def new_unweighted_counts(self):
+        """2D np.int64 ndarray of unweighted-count for each cell."""
+        raise NotImplementedError
+
+    @lazyproperty
     def unweighted_counts(self):
         """2D np.int64 ndarray of unweighted-count for each cell."""
         return self._assemble_matrix(
