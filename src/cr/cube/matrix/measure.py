@@ -24,11 +24,26 @@ class SecondOrderMeasures(object):
     @lazyproperty
     def unweighted_counts(self):
         """_UnweightedCounts measure object for this cube-result."""
+        return _UnweightedCounts(self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
+    def _cube_measures(self):
+        """CubeMeasures collection object for this cube-result.
+
+        This collection provides access to all cube-measure objects for the cube-result.
+        The collection is provided to each measure object so it can access the cube
+        measures it is based on.
+        """
         raise NotImplementedError
 
 
 class _BaseSecondOrderMeasure(object):
     """Base class for all second-order measure objects."""
+
+    def __init__(self, dimensions, second_order_measures, cube_measures):
+        self._dimensions = dimensions
+        self._second_order_measures = second_order_measures
+        self._cube_measures = cube_measures
 
 
 class _UnweightedCounts(_BaseSecondOrderMeasure):

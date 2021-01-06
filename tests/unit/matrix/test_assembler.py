@@ -20,7 +20,7 @@ from ...unitutil import class_mock, instance_mock, method_mock, property_mock
 
 
 class DescribeAssembler(object):
-    """Unit test suite for `cr.cube.matrix.Assembler` object."""
+    """Unit test suite for `cr.cube.matrix.assembler.Assembler` object."""
 
     def it_knows_the_column_index(
         self,

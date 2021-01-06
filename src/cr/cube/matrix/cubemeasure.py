@@ -15,6 +15,13 @@ from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.util import lazyproperty
 
 
+class CubeMeasures(object):
+    """Provides access to all cube-measure objects for this cube-result."""
+
+
+# === LEGACY MATRIX OBJECTS ===
+
+
 class BaseCubeResultMatrix(object):
     """Base class for all cube-result matrix (2D second-order analyzer) objects."""
 
