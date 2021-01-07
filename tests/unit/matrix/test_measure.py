@@ -4,6 +4,7 @@
 
 import pytest
 
+from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension
 from cr.cube.matrix.cubemeasure import CubeMeasures
 from cr.cube.matrix.measure import SecondOrderMeasures, _UnweightedCounts
@@ -33,7 +34,26 @@ class DescribeSecondOrderMeasures(object):
         )
         assert unweighted_counts is unweighted_counts_
 
+    def it_provides_access_to_the_cube_measures_to_help(
+        self, request, cube_, dimensions_, cube_measures_
+    ):
+        CubeMeasures_ = class_mock(
+            request,
+            "cr.cube.matrix.measure.CubeMeasures",
+            return_value=cube_measures_,
+        )
+        measures = SecondOrderMeasures(cube_, dimensions_, slice_idx=42)
+
+        cube_measures = measures._cube_measures
+
+        CubeMeasures_.assert_called_once_with(cube_, dimensions_, 42)
+        assert cube_measures is cube_measures_
+
     # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def cube_(self, request):
+        return instance_mock(request, Cube)
 
     @pytest.fixture
     def cube_measures_(self, request):

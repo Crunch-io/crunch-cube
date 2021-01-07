@@ -18,6 +18,11 @@ from cr.cube.util import lazyproperty
 class CubeMeasures(object):
     """Provides access to all cube-measure objects for this cube-result."""
 
+    def __init__(self, cube, dimensions, slice_idx):
+        self._cube = cube
+        self._dimensions = dimensions
+        self._slice_idx = slice_idx
+
 
 # === LEGACY MATRIX OBJECTS ===
 

@@ -4,6 +4,7 @@
 
 from __future__ import division
 
+from cr.cube.matrix.cubemeasure import CubeMeasures
 from cr.cube.util import lazyproperty
 
 
@@ -34,7 +35,7 @@ class SecondOrderMeasures(object):
         The collection is provided to each measure object so it can access the cube
         measures it is based on.
         """
-        raise NotImplementedError
+        return CubeMeasures(self._cube, self._dimensions, self._slice_idx)
 
 
 class _BaseSecondOrderMeasure(object):
