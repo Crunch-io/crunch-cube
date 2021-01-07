@@ -112,6 +112,10 @@ The detailed description can be found
 
 ## Changes
 
+### 2.0.0
+- De-vectorize matrix.py and add sort-by-value
+- Remove old api interface
+
 ### 1.12.11
 - Numeric array measures available
 

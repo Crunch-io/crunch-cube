@@ -1,8 +1,8 @@
 
-CrunchCube objects
+Cube objects
 ==================
 
-.. autoclass:: cr.cube.crunch_cube.CrunchCube
+.. autoclass:: cr.cube.cube.Cube
    :members:
    :undoc-members:
    :inherited-members:

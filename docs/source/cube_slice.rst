@@ -1,8 +1,8 @@
 
-CubeSlice objects
+Slice objects
 =================
 
-.. autoclass:: cr.cube.cube_slice.CubeSlice
+.. autoclass:: cr.cube.cubepart.CubePartition
    :members:
    :undoc-members:
    :inherited-members:
