@@ -156,6 +156,27 @@ class Describe_CatXMrUnweightedCubeCounts(object):
         assert cube_measure.unweighted_counts.tolist() == [[1, 2, 3], [4, 5, 6]]
 
 
+class Describe_MrXCatUnweightedCubeCounts(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._MrXCatUnweightedCubeCounts`."""
+
+    def it_knows_its_unweighted_counts(self):
+        unweighted_cube_counts = np.array(
+            [
+                [  # -- row 0 ------------
+                    [1, 2, 3],  # -- selected --
+                    [4, 5, 6],  # -- not --
+                ],
+                [  # -- row 1 ------------
+                    [7, 8, 9],  # -- selected --
+                    [0, 4, 2],  # -- not --
+                ],
+            ]
+        )
+        cube_measure = _MrXCatUnweightedCubeCounts(None, unweighted_cube_counts)
+
+        assert cube_measure.unweighted_counts.tolist() == [[1, 2, 3], [7, 8, 9]]
+
+
 # === LEGACY CUBE-RESULT MATRIX TESTS (should go away after measure consolidation) ===
 
 

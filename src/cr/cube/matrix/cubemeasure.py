@@ -133,6 +133,11 @@ class _MrXCatUnweightedCubeCounts(_BaseUnweightedCubeCounts):
     Its `._unweighted_counts` is a 3D ndarray with axes (rows, sel/not, cols).
     """
 
+    @lazyproperty
+    def unweighted_counts(self):
+        """2D np.int64 ndarray of unweighted-count for each valid matrix cell."""
+        return self._unweighted_counts[:, 0, :]
+
 
 class _MrXMrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
     """Unweighted-counts cube-measure for an MR_X_MR slice.
