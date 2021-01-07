@@ -2,11 +2,12 @@
 
 """Unit test suite for `cr.cube.matrix.measure` module."""
 
+import numpy as np
 import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension
-from cr.cube.matrix.cubemeasure import CubeMeasures
+from cr.cube.matrix.cubemeasure import CubeMeasures, _BaseUnweightedCubeCounts
 from cr.cube.matrix.measure import SecondOrderMeasures, _UnweightedCounts
 
 from ...unitutil import class_mock, instance_mock, property_mock
@@ -62,6 +63,39 @@ class DescribeSecondOrderMeasures(object):
     @pytest.fixture
     def _cube_measures_prop_(self, request):
         return property_mock(request, SecondOrderMeasures, "_cube_measures")
+
+    @pytest.fixture
+    def dimensions_(self, request):
+        return (instance_mock(request, Dimension), instance_mock(request, Dimension))
+
+
+class Describe_UnweightedCounts(object):
+    """Unit test suite for `cr.cube.matrix.measure._UnweightedCounts` object."""
+
+    def it_computes_its_blocks_to_help(self, request, dimensions_):
+        # --- these need to be in list form because the assert-called-with mechanism
+        # --- uses equality, which doesn't work on numpy arrays. Normally this would be
+        # --- the array itself.
+        ucounts = np.arange(12).reshape(3, 4).tolist()
+        unweighted_cube_counts_ = instance_mock(
+            request, _BaseUnweightedCubeCounts, unweighted_counts=ucounts
+        )
+        property_mock(
+            request,
+            _UnweightedCounts,
+            "_unweighted_cube_counts",
+            return_value=unweighted_cube_counts_,
+        )
+        SumSubtotals_ = class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
+        SumSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
+        unweighted_counts = _UnweightedCounts(dimensions_, None, None)
+
+        blocks = unweighted_counts.blocks
+
+        SumSubtotals_.blocks.assert_called_once_with(ucounts, dimensions_)
+        assert blocks == [[[1], [2]], [[3], [4]]]
+
+    # fixture components ---------------------------------------------
 
     @pytest.fixture
     def dimensions_(self, request):

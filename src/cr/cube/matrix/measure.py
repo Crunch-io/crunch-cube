@@ -5,6 +5,7 @@
 from __future__ import division
 
 from cr.cube.matrix.cubemeasure import CubeMeasures
+from cr.cube.matrix.subtotals import SumSubtotals
 from cr.cube.util import lazyproperty
 
 
@@ -46,6 +47,15 @@ class _BaseSecondOrderMeasure(object):
         self._second_order_measures = second_order_measures
         self._cube_measures = cube_measures
 
+    @lazyproperty
+    def _unweighted_cube_counts(self):
+        """_BaseUnweightedCubeCounts subclass instance for this measure.
+
+        Provides cube measures associated with unweighted counts, including
+        unweighted-counts and cell, vector, and table bases.
+        """
+        raise NotImplementedError
+
 
 class _UnweightedCounts(_BaseSecondOrderMeasure):
     """Provides the unweighted-counts measure for a matrix."""
@@ -57,4 +67,6 @@ class _UnweightedCounts(_BaseSecondOrderMeasure):
         These are the base-values, the column-subtotals, the row-subtotals, and the
         subtotal intersection-cell values.
         """
-        raise NotImplementedError
+        return SumSubtotals.blocks(
+            self._unweighted_cube_counts.unweighted_counts, self._dimensions
+        )

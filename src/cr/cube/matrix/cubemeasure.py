@@ -24,6 +24,27 @@ class CubeMeasures(object):
         self._slice_idx = slice_idx
 
 
+class _BaseCubeMeasure(object):
+    """Base class for all cube-measure objects."""
+
+
+# === UNWEIGHTED COUNTS ===
+
+
+class _BaseUnweightedCubeCounts(_BaseCubeMeasure):
+    """Base class for unweighted-count cube-measure variants."""
+
+    @lazyproperty
+    def unweighted_counts(self):
+        """2D np.int64 ndarray of unweighted-count for each valid matrix cell.
+
+        A valid matrix cell is one whose row and column elements are both non-missing.
+        """
+        raise NotImplementedError(
+            "`%s` must implement `.unweighted_counts`" % type(self).__name__
+        )
+
+
 # === LEGACY MATRIX OBJECTS ===
 
 
