@@ -34,6 +34,19 @@ class CubeMeasures(object):
 class _BaseCubeMeasure(object):
     """Base class for all cube-measure objects."""
 
+    def __init__(self, dimensions):
+        self._dimensions = dimensions
+
+    @classmethod
+    def _slice_idx_expr(cls, cube, slice_idx):
+        """Return np.s_ advanced-indexing slice object to extract values for slice_idx.
+
+        `cube` can contain data for multiple `_Slice` objects. The returned `numpy`
+        advanced-indexing expression selects only those values of `cube` that pertain
+        to the slice indicated by `slice_idx`.
+        """
+        raise NotImplementedError
+
 
 # === UNWEIGHTED COUNTS ===
 
@@ -41,10 +54,28 @@ class _BaseCubeMeasure(object):
 class _BaseUnweightedCubeCounts(_BaseCubeMeasure):
     """Base class for unweighted-count cube-measure variants."""
 
+    def __init__(self, dimensions, unweighted_counts):
+        super(_BaseUnweightedCubeCounts, self).__init__(dimensions)
+        self._unweighted_counts = unweighted_counts
+
     @classmethod
     def factory(cls, cube, dimensions, slice_idx):
         """Return _BaseUnweightedCubeCounts subclass instance appropriate to `cube`."""
-        raise NotImplementedError
+        dimension_types = cube.dimension_types[-2:]
+
+        UnweightedCubeCountsCls = (
+            _MrXMrUnweightedCubeCounts
+            if dimension_types == (DT.MR, DT.MR)
+            else _MrXCatUnweightedCubeCounts
+            if dimension_types[0] == DT.MR
+            else _CatXMrUnweightedCubeCounts
+            if dimension_types[1] == DT.MR
+            else _CatXCatUnweightedCubeCounts
+        )
+
+        return UnweightedCubeCountsCls(
+            dimensions, cube.unweighted_counts[cls._slice_idx_expr(cube, slice_idx)]
+        )
 
     @lazyproperty
     def unweighted_counts(self):
@@ -55,6 +86,33 @@ class _BaseUnweightedCubeCounts(_BaseCubeMeasure):
         raise NotImplementedError(
             "`%s` must implement `.unweighted_counts`" % type(self).__name__
         )
+
+
+class _CatXCatUnweightedCubeCounts(_BaseUnweightedCubeCounts):
+    """Unweighted-counts cube-measure for a slice with no MR dimensions."""
+
+
+class _CatXMrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
+    """Unweighted-counts cube-measure for a NOT_MR_X_MR slice.
+
+    Note that the rows-dimension need not actually be CAT, as long as it's not MR.
+    Its `._unweighted_counts` is a 3D ndarray with axes (rows, cols, selected/not).
+    """
+
+
+class _MrXCatUnweightedCubeCounts(_BaseUnweightedCubeCounts):
+    """Unweighted-counts cube-measure for an MR_X_NOT_MR slice.
+
+    Note that the columns-dimension need not actually be CAT, as long as it's not MR.
+    Its `._unweighted_counts` is a 3D ndarray with axes (rows, sel/not, cols).
+    """
+
+
+class _MrXMrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
+    """Unweighted-counts cube-measure for an MR_X_MR slice.
+
+    Its `._unweighted_counts` is a 4D ndarray with axes (rows, sel/not, cols, sel/not).
+    """
 
 
 # === LEGACY MATRIX OBJECTS ===
