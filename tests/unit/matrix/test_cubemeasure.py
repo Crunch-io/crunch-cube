@@ -10,10 +10,12 @@ from cr.cube.dimension import Dimension, _ValidElements
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.matrix.cubemeasure import (
     BaseCubeResultMatrix,
+    _BaseUnweightedCubeCounts,
     _CatXCatMatrix,
     _CatXCatMeansMatrix,
     _CatXMrMatrix,
     _CatXMrMeansMatrix,
+    CubeMeasures,
     _MrXCatMatrix,
     _MrXCatMeansMatrix,
     _MrXMrMatrix,
@@ -22,11 +24,42 @@ from cr.cube.matrix.cubemeasure import (
 from ...unitutil import class_mock, instance_mock, method_mock, property_mock
 
 
+class DescribeCubeMeasures(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure.CubeMeasures` object."""
+
+    def it_provides_access_to_the_unweighted_cube_counts_object(
+        self, request, cube_, dimensions_
+    ):
+        unweighted_cube_counts_ = instance_mock(request, _BaseUnweightedCubeCounts)
+        _BaseUnweightedCubeCounts_ = class_mock(
+            request, "cr.cube.matrix.cubemeasure._BaseUnweightedCubeCounts"
+        )
+        _BaseUnweightedCubeCounts_.factory.return_value = unweighted_cube_counts_
+        cube_measures = CubeMeasures(cube_, dimensions_, slice_idx=37)
+
+        unweighted_cube_counts = cube_measures.unweighted_cube_counts
+
+        _BaseUnweightedCubeCounts_.factory.assert_called_once_with(
+            cube_, dimensions_, 37
+        )
+        assert unweighted_cube_counts is unweighted_cube_counts_
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def cube_(self, request):
+        return instance_mock(request, Cube)
+
+    @pytest.fixture
+    def dimensions_(self, request):
+        return (instance_mock(request, Dimension), instance_mock(request, Dimension))
+
+
 # === LEGACY CUBE-RESULT MATRIX TESTS (should go away after measure consolidation) ===
 
 
 class DescribeBaseCubeResultMatrix(object):
-    """Unit test suite for `cr.cube.matrix.BaseCubeResultMatrix` object."""
+    """Unit test suite for `cr.cube.matrix.cubemeasure.BaseCubeResultMatrix` object."""
 
     @pytest.mark.parametrize(
         "has_means, factory_method_name",
