@@ -3,7 +3,6 @@
 """Integration-test suite for `cr.cube.cubepart` module."""
 
 import numpy as np
-import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.cubepart import _Slice
@@ -132,7 +131,6 @@ class DescribeAssembler(object):
             [27, 58, 0, 134, 166, 0],
         ]
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_unweighted_counts_for_mr_x_mr_slices(self):
         slice_ = Cube(CR.CAT_X_MR_X_MR).partitions[0]
         assert slice_._assembler.new_unweighted_counts.tolist() == [

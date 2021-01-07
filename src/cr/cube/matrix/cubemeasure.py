@@ -145,6 +145,12 @@ class _MrXMrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
     Its `._unweighted_counts` is a 4D ndarray with axes (rows, sel/not, cols, sel/not).
     """
 
+    @lazyproperty
+    def unweighted_counts(self):
+        """2D np.int64 ndarray of unweighted-count for each valid matrix cell."""
+        # --- indexing is: all-rows, sel-only, all-cols, sel-only ---
+        return self._unweighted_counts[:, 0, :, 0]
+
 
 # === LEGACY MATRIX OBJECTS ===
 
