@@ -14,7 +14,6 @@ from ..fixtures import CR
 class DescribeAssembler(object):
     """Integration-test suite for `cr.cube.matrix.Assembler`."""
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_unweighted_counts_for_cat_hs_x_cat_hs_hiddens(self):
         """Assembler inserts, hides, prunes, and places in payload order."""
         slice_ = _Slice(
@@ -38,7 +37,6 @@ class DescribeAssembler(object):
             [341, 175, 166, 234, 234],
         ]
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_unweighted_counts_for_ca_subvar_x_ca_cat_hiddens(self):
         """Assembler hides, prunes, and places in payload order.
 
@@ -65,7 +63,6 @@ class DescribeAssembler(object):
             [347, 2577, 4467],
         ]
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_unweighted_counts_for_cat_hs_x_cat_hs_hiddens_explicit_order(self):
         """Assembler inserts, hides, prunes, and places in explicit order."""
         slice_ = _Slice(
