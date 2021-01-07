@@ -26,7 +26,7 @@ class DescribeAssembler(object):
             mask_size=0,
         )
 
-        assert slice_._assembler.new_unweighted_counts.tolist() == [
+        assert slice_.unweighted_counts.tolist() == [
             [118, 65, 53, 33, 33],
             [40, 32, 8, 12, 12],
             [168, 66, 102, 82, 82],
@@ -56,7 +56,7 @@ class DescribeAssembler(object):
             mask_size=0,
         )
 
-        assert slice_._assembler.new_unweighted_counts.tolist() == [
+        assert slice_.unweighted_counts.tolist() == [
             [2734, 5887, 1017],
             [2810, 7000, 474],
             [347, 2577, 4467],
@@ -83,7 +83,7 @@ class DescribeAssembler(object):
             mask_size=0,
         )
 
-        assert slice_._assembler.new_unweighted_counts.tolist() == [
+        assert slice_.unweighted_counts.tolist() == [
             [118, 33, 53, 65, 33],
             [163, 190, 70, 93, 190],
             [331, 272, 172, 159, 272],
@@ -113,7 +113,7 @@ class DescribeAssembler(object):
             mask_size=0,
         )
 
-        assert slice_._assembler.new_unweighted_counts.tolist() == [
+        assert slice_.unweighted_counts.tolist() == [
             [300, 320, 53, 93],
             [27, 13, 7, 4],
             [58, 36, 16, 21],
@@ -123,7 +123,7 @@ class DescribeAssembler(object):
 
     def it_computes_unweighted_counts_for_mr_x_cat(self):
         slice_ = Cube(CR.MR_X_CAT).partitions[0]
-        assert slice_._assembler.new_unweighted_counts.tolist() == [
+        assert slice_.unweighted_counts.tolist() == [
             [8, 7, 0, 6, 5, 0],
             [7, 16, 0, 26, 27, 0],
             [4, 21, 0, 39, 54, 0],
@@ -133,14 +133,14 @@ class DescribeAssembler(object):
 
     def it_computes_unweighted_counts_for_mr_x_mr_slices(self):
         slice_ = Cube(CR.CAT_X_MR_X_MR).partitions[0]
-        assert slice_._assembler.new_unweighted_counts.tolist() == [
+        assert slice_.unweighted_counts.tolist() == [
             [1159, 3597],
             [197, 604],
             [192, 582],
         ]
 
         slice_ = Cube(CR.CAT_X_MR_X_MR).partitions[1]
-        assert slice_._assembler.new_unweighted_counts.tolist() == [
+        assert slice_.unweighted_counts.tolist() == [
             [159, 94],
             [1182, 625],
             [1142, 623],

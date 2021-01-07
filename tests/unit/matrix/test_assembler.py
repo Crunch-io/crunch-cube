@@ -568,26 +568,6 @@ class DescribeAssembler(object):
         assert table_stderrs == [[1, 3, 2], [4, 6, 5]]
 
     def it_knows_the_unweighted_counts(
-        self,
-        _cube_result_matrix_prop_,
-        cube_result_matrix_,
-        dimensions_,
-        SumSubtotals_,
-        _assemble_matrix_,
-    ):
-        cube_result_matrix_.unweighted_counts = [[1, 2], [3, 4]]
-        _cube_result_matrix_prop_.return_value = cube_result_matrix_
-        SumSubtotals_.blocks.return_value = [["A", "B"], ["C", "D"]]
-        _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-        assembler = Assembler(None, dimensions_, None)
-
-        unweighted_counts = assembler.unweighted_counts
-
-        SumSubtotals_.blocks.assert_called_once_with([[1, 2], [3, 4]], dimensions_)
-        _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
-        assert unweighted_counts == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-
-    def it_knows_the_new_unweighted_counts(
         self, request, _measures_prop_, second_order_measures_, _assemble_matrix_
     ):
         unweighted_counts_ = instance_mock(
@@ -598,7 +578,7 @@ class DescribeAssembler(object):
         _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
         assembler = Assembler(None, None, None)
 
-        unweighted_counts = assembler.new_unweighted_counts
+        unweighted_counts = assembler.unweighted_counts
 
         _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
         assert unweighted_counts == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
