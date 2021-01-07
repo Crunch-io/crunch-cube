@@ -9,6 +9,7 @@ from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension, _ValidElements
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.matrix.cubemeasure import (
+    _BaseCubeMeasure,
     BaseCubeResultMatrix,
     _BaseUnweightedCubeCounts,
     _CatXCatMatrix,
@@ -57,6 +58,26 @@ class DescribeCubeMeasures(object):
     @pytest.fixture
     def dimensions_(self, request):
         return (instance_mock(request, Dimension), instance_mock(request, Dimension))
+
+
+class Describe_BaseCubeMeasure(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._BaseCubeMeasure`."""
+
+    @pytest.mark.parametrize(
+        "ndim, tab_dim_type, expected_value",
+        (
+            (2, None, slice(None, None, None)),
+            (3, DT.MR, (3, 0)),
+            (3, DT.CAT, 3),
+        ),
+    )
+    def it_computes_index_expression_that_selects_measure_values_from_cube_to_help(
+        self, request, ndim, tab_dim_type, expected_value
+    ):
+        cube_ = instance_mock(request, Cube, ndim=ndim, dimension_types=(tab_dim_type,))
+        measure = _BaseCubeMeasure(None)
+
+        assert measure._slice_idx_expr(cube_, slice_idx=3) == expected_value
 
 
 class Describe_BaseUnweightedCubeCounts(object):

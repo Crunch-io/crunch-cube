@@ -45,7 +45,20 @@ class _BaseCubeMeasure(object):
         advanced-indexing expression selects only those values of `cube` that pertain
         to the slice indicated by `slice_idx`.
         """
-        raise NotImplementedError
+        # --- for a 2D cube we take the whole thing (1D is not expected here) ---
+        if cube.ndim < 3:
+            return np.s_[:]
+
+        # --- if 0th dimension of a >2D cube is MR, we only take the "Selected" portion
+        # --- of the indicated initial-MR subvar, because the slice is to represent the
+        # --- values for "respondents who selected" that MR response (and not those who
+        # --- didn't select it or did not respond).
+        if cube.dimension_types[0] == DT.MR:
+            return np.s_[slice_idx, 0]
+
+        # --- for other 3D cubes we just select the 2D "table" portion associated with
+        # --- the `slice_idx`-th table dimension element.
+        return np.s_[slice_idx]
 
 
 # === UNWEIGHTED COUNTS ===
