@@ -54,7 +54,7 @@ class _BaseSecondOrderMeasure(object):
         Provides cube measures associated with unweighted counts, including
         unweighted-counts and cell, vector, and table bases.
         """
-        raise NotImplementedError
+        return self._cube_measures.unweighted_cube_counts
 
 
 class _UnweightedCounts(_BaseSecondOrderMeasure):

@@ -8,7 +8,11 @@ import pytest
 from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension
 from cr.cube.matrix.cubemeasure import CubeMeasures, _BaseUnweightedCubeCounts
-from cr.cube.matrix.measure import SecondOrderMeasures, _UnweightedCounts
+from cr.cube.matrix.measure import (
+    _BaseSecondOrderMeasure,
+    SecondOrderMeasures,
+    _UnweightedCounts,
+)
 
 from ...unitutil import class_mock, instance_mock, property_mock
 
@@ -67,6 +71,27 @@ class DescribeSecondOrderMeasures(object):
     @pytest.fixture
     def dimensions_(self, request):
         return (instance_mock(request, Dimension), instance_mock(request, Dimension))
+
+
+class Describe_BaseSecondOrderMeasure(object):
+    """Unit test suite for `cr.cube.matrix.measure._BaseSecondOrderMeasure` object."""
+
+    def it_provides_access_to_the_unweighted_cube_counts_object_to_help(
+        self, request, cube_measures_
+    ):
+        unweighted_cube_counts_ = instance_mock(request, _BaseUnweightedCubeCounts)
+        cube_measures_.unweighted_cube_counts = unweighted_cube_counts_
+        measure = _BaseSecondOrderMeasure(None, None, cube_measures_)
+
+        unweighted_cube_counts = measure._unweighted_cube_counts
+
+        assert unweighted_cube_counts is unweighted_cube_counts_
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def cube_measures_(self, request):
+        return instance_mock(request, CubeMeasures)
 
 
 class Describe_UnweightedCounts(object):

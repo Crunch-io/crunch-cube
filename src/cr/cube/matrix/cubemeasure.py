@@ -23,6 +23,11 @@ class CubeMeasures(object):
         self._dimensions = dimensions
         self._slice_idx = slice_idx
 
+    @lazyproperty
+    def unweighted_cube_counts(self):
+        """_BaseUnweightedCubeCounts subclass object for this cube-result."""
+        raise NotImplementedError
+
 
 class _BaseCubeMeasure(object):
     """Base class for all cube-measure objects."""
