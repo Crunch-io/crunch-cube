@@ -94,7 +94,6 @@ class DescribeAssembler(object):
             [341, 234, 166, 175, 234],
         ]
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_unweighted_counts_for_cat_hs_x_mr_hiddens_explicit_order(self):
         """Assembler inserts, hides, prunes, and places in explicit order."""
         slice_ = _Slice(
