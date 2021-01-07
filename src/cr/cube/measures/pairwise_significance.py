@@ -128,7 +128,7 @@ class _ColumnPairwiseSignificance(object):
 
     @lazyproperty
     def summary_t_stats(self):
-        col_margin_props = self._slice.column_base / self._slice.table_margin
+        col_margin_props = self._slice.columns_base / self._slice.table_margin
         diff = col_margin_props - col_margin_props[self._col_idx]
         var_props = (
             col_margin_props * (1.0 - col_margin_props) / self._slice.table_margin
@@ -138,21 +138,11 @@ class _ColumnPairwiseSignificance(object):
 
     @lazyproperty
     def t_stats(self):
-        if self._slice.cube_is_mr_aug:
-            return self.t_stats_correct
         props = self._slice.column_proportions
         diff = props - props[:, [self._col_idx]]
-        var_props = props * (1.0 - props) / self._slice.column_base
+        var_props = props * (1.0 - props) / self._slice.columns_base
         se_diff = np.sqrt(var_props + var_props[:, [self._col_idx]])
         return diff / se_diff
-
-    @lazyproperty
-    def t_stats_correct(self):
-        """It returns the t_statistic for MR variables considering the overlaps"""
-        diff, se_diff = self._slice.overlaps_tstats
-        t_stats = diff[:, self._col_idx, :] / se_diff[:, self._col_idx, :]
-        t_stats[:, self._col_idx] = 0
-        return t_stats
 
     @lazyproperty
     def t_stats_scale_means(self):
@@ -172,7 +162,9 @@ class _ColumnPairwiseSignificance(object):
         variance = self._slice.var_scale_means_row
         # Sum for each column of the counts that have not a nan index in the
         # related numeric counts
-        not_a_nan_index = ~np.isnan(self._slice.rows_dimension_numeric_values)
+        # TODO: get numeric values from assembler or wherever, do not extend _Slice
+        # public interface for internal purposes.
+        not_a_nan_index = ~np.isnan(self._slice._rows_dimension_numeric_values)
         counts = np.sum(self._slice.counts[not_a_nan_index, :], axis=0)
 
         standard_deviation = np.sqrt(
@@ -191,19 +183,17 @@ class _ColumnPairwiseSignificance(object):
 
     @lazyproperty
     def _df(self):
-        # if the cube to which the slice belongs is a CATxMRxITSELF
-        # returns the n1 + n2 as degrees of freedom, n1 + n2 -2 otherwise
         selected_unweighted_n = (
-            self._slice.column_base[self._col_idx]
-            if self._slice.column_base.ndim < 2
-            else self._slice.column_base[:, self._col_idx][:, None]
+            self._slice.columns_base[self._col_idx]
+            if self._slice.columns_base.ndim < 2
+            else self._slice.columns_base[:, self._col_idx][:, None]
         )
-        if self._slice.cube_is_mr_aug:
-            return self._slice.column_base + selected_unweighted_n
-        return self._slice.column_base + selected_unweighted_n - 2
+        return self._slice.columns_base + selected_unweighted_n - 2
 
     @lazyproperty
     def _two_sample_df(self):
-        not_a_nan_index = ~np.isnan(self._slice.rows_dimension_numeric_values)
+        # TODO: get numeric values from assembler or wherever, do not extend _Slice
+        # public interface for internal purposes.
+        not_a_nan_index = ~np.isnan(self._slice._rows_dimension_numeric_values)
         counts = np.sum(self._slice.counts[not_a_nan_index, :], axis=0)
         return counts[self._col_idx] + counts - 2

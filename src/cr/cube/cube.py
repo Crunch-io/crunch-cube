@@ -135,7 +135,26 @@ class CubeSet(object):
     @lazyproperty
     def _cubes(self):
         """Sequence of Cube objects containing data for this analysis."""
-        return tuple(self._iter_cubes())
+
+        def iter_cubes():
+            """Generate a Cube object for each of cube_responses.
+
+            0D cube-responses and 1D second-and-later cubes are "inflated" to add their
+            missing row dimension.
+            """
+            for idx, cube_response in enumerate(self._cube_responses):
+                cube = Cube(
+                    cube_response,
+                    cube_idx=idx if self._is_multi_cube else None,
+                    transforms=self._transforms_dicts[idx],
+                    population=self._population,
+                    mask_size=self._min_base,
+                )
+                # --- numeric-mean cubes require inflation to restore their
+                # --- rows-dimension, others don't
+                yield cube.inflate() if self._is_numeric_mean else cube
+
+        return tuple(iter_cubes())
 
     @lazyproperty
     def _is_multi_cube(self):
@@ -166,24 +185,6 @@ class CubeSet(object):
         # --- We need the cube to tell us the dimensionality. This redundant
         # --- construction is low-overhead because all Cube properties are lazy.
         return Cube(self._cube_responses[0]).ndim == 0
-
-    def _iter_cubes(self):
-        """Generate a Cube object for each of cube_responses.
-
-        0D cube-responses and 1D second-and-later cubes are "inflated" to add their
-        missing row dimension.
-        """
-        for idx, cube_response in enumerate(self._cube_responses):
-            cube = Cube(
-                cube_response,
-                cube_idx=idx if self._is_multi_cube else None,
-                transforms=self._transforms_dicts[idx],
-                population=self._population,
-                mask_size=self._min_base,
-            )
-            # --- all numeric-mean cubes require inflation to restore their
-            # --- rows-dimension, others don't
-            yield cube.inflate() if self._is_numeric_mean else cube
 
 
 class Cube(object):
@@ -286,29 +287,6 @@ class Cube(object):
             self._transforms_dict,
             self._population,
             self._mask_size,
-        )
-
-    @lazyproperty
-    def is_mr_aug(self):
-        """True if cube is MR_AUG (augmented).
-
-        An augmented-MR cube is required to compute pairwise-t-tests when an MR
-        dimension is involved because that introduces *overlap* which otherwise inflates
-        the case count.
-
-        An MR_AUG cube is used to calculate statistical significance of complete-cases,
-        and is created by artificially *augmenting* the original cube's dimensions, such
-        as MR, or CAT_X_MR, by repeating the MR dimension to make the cube MR_X_MR or
-        CAT_X_MR_X_MR for these respective examples. The repeating of the MR dimension
-        allows the overlaps to be computed.
-        """
-        return (
-            # --- there are at least three dimensions ---
-            self.ndim >= 3
-            # --- the last two are both MR ---
-            and all(dim_type == DT.MR for dim_type in self.dimension_types[-2:])
-            # --- and they both have the same alias ---
-            and len(set(dim.alias for dim in self.dimensions[-2:])) == 1
         )
 
     @lazyproperty

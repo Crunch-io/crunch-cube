@@ -2,8 +2,6 @@
 
 """Integration-test suite for `cr.cube.cubepart` module."""
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import numpy as np
 import pytest
 
@@ -23,17 +21,15 @@ class Describe_Slice(object):
     def it_provides_values_for_cat_x_cat(self):
         slice_ = Cube(CR.CAT_X_CAT).partitions[0]
 
-        assert slice_.column_labels == ("C", "E")
+        assert slice_.column_labels.tolist() == ["C", "E"]
         assert slice_.columns_dimension_name == "v7"
         assert slice_.columns_dimension_type == DT.CAT
-        assert slice_.cube_is_mr_aug is False
         assert slice_.description == "Pet Owners"
         np.testing.assert_almost_equal(
             slice_.row_proportions, np.array([[0.71428571, 0.28571429], [0.625, 0.375]])
         )
         assert slice_.inserted_column_idxs == ()
         assert slice_.inserted_row_idxs == ()
-        assert slice_.insertions == []
         assert slice_.is_empty is False
         assert slice_.name == "v4"
         np.testing.assert_array_almost_equal(
@@ -43,7 +39,7 @@ class Describe_Slice(object):
                 [[0.36596253, -0.36596253], [-0.36596253, 0.36596253]],
             ],
         )
-        assert slice_.row_labels == ("B", "C")
+        assert slice_.row_labels.tolist() == ["B", "C"]
         assert slice_.rows_dimension_description == "Pet Owners"
         assert slice_.rows_dimension_fills == (None, None)
         assert slice_.rows_dimension_name == "v4"
@@ -52,8 +48,8 @@ class Describe_Slice(object):
         assert slice_.table_name is None
         assert slice_.variable_name == "v7"
 
-    def it_provides_values_for_cat_x_cat_pruning_hs(self):
-        slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, population=1000).partitions[0]
+    def it_provides_values_for_cat_hs_mt_x_cat_hs_mt(self):
+        slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, population=1000).partitions[0]
 
         np.testing.assert_array_equal(
             slice_.unweighted_counts,
@@ -70,13 +66,13 @@ class Describe_Slice(object):
         np.testing.assert_almost_equal(
             slice_.column_index,
             [
-                [119.51424328, np.nan, 93.79691922, 81.24002902, np.nan, 50.17378721],
+                [119.51424314, np.nan, 93.79691945, 81.24002871, np.nan, 50.17378808],
                 [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
-                [129.57286502, np.nan, 0.0, 234.24140666, np.nan, 0.0],
-                [68.74132753, np.nan, 99.37070479, 89.71345927, np.nan, 554.5688323],
-                [48.0063805, np.nan, 137.75263952, 149.33201417, np.nan, 0.0],
+                [129.57286183, np.nan, 0.0, 234.24141174, np.nan, 0.0],
+                [68.74132837, np.nan, 99.37070393, 89.71346023, np.nan, 554.56882771],
+                [48.00638105, np.nan, 137.75263905, 149.33201406, np.nan, 0.0],
                 [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
-                [83.86593205, np.nan, 91.83509301, 160.9906575, np.nan, 0.0],
+                [83.86593194, np.nan, 91.83509328, 160.99065701, np.nan, 0.0],
             ],
         )
         np.testing.assert_almost_equal(
@@ -91,7 +87,7 @@ class Describe_Slice(object):
                 [0.02672176, 0.02793377, 0.02926094, 0.05129561, np.nan, 0.0],
             ],
         )
-        assert slice_.columns_dimension_name == "ShutdownBlame"
+        assert slice_.columns_dimension_name == "ShutdownBla"
         assert slice_.columns_dimension_type == DT.CAT
         np.testing.assert_almost_equal(
             slice_.column_std_dev,
@@ -125,7 +121,7 @@ class Describe_Slice(object):
         assert slice_.inserted_column_idxs == (1,)
         assert slice_.inserted_row_idxs == (1,)
         assert slice_.is_empty is False
-        assert slice_.name == "MaritalStatus"
+        assert slice_.name == "MaritalStat"
         assert slice_.ndim == 2
         np.testing.assert_almost_equal(
             slice_.pvals,
@@ -139,7 +135,7 @@ class Describe_Slice(object):
                 [0.82020207, 0.70318269, 0.91486794, 0.58880283, np.nan, 0.75048675],
             ],
         )
-        assert slice_.rows_dimension_description == "What is your marital status?"
+        assert slice_.rows_dimension_description == "What is you"
         assert slice_.rows_dimension_fills == (None, None, None, None, None, None, None)
         assert slice_.rows_dimension_type == DT.CAT
         np.testing.assert_almost_equal(
@@ -199,13 +195,13 @@ class Describe_Slice(object):
         np.testing.assert_almost_equal(
             slice_.population_moe,
             [
-                [94.74253424, 102.30317355, 85.14161791, 64.011466, 0.0, 21.0138857],
-                [54.85480609, 83.25703304, 69.10626987, 57.75633485, 0.0, 30.001713],
-                [21.64685834, 21.64685834, 0.0, 21.0138857, 0.0, 0.0],
-                [36.71419866, 54.64165404, 41.95117344, 30.43818589, 0.0, 30.001713],
-                [36.71419866, 66.64317283, 57.75633485, 46.23600101, 0.0, 0.0],
+                [94.7425342, 102.30317352, 85.14161786, 64.01146595, 0.0, 21.01388583],
+                [54.85480624, 83.25703295, 69.10626964, 57.75633502, 0.0, 30.00171283],
+                [21.64685796, 21.64685796, 0.0, 21.01388583, 0.0, 0.0],
+                [36.71419889, 54.64165401, 41.9511732, 30.43818609, 0.0, 30.00171283],
+                [36.71419889, 66.6431728, 57.75633469, 46.23600106, 0.0, 0.0],
                 [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                [21.0138857, 29.55818215, 21.0138857, 21.0138857, 0.0, 0.0],
+                [21.01388583, 29.55818233, 21.01388583, 21.01388583, 0.0, 0.0],
             ],
         )
         np.testing.assert_almost_equal(
@@ -263,7 +259,7 @@ class Describe_Slice(object):
         )
 
     def it_provides_values_for_mr_x_cat_hs(self):
-        slice_ = Cube(CR.MR_X_CAT_HS).partitions[0]
+        slice_ = Cube(CR.MR_X_CAT_HS_MT).partitions[0]
 
         np.testing.assert_almost_equal(
             slice_.table_std_dev, load_python_expression("mr-x-cat-hs-tbl-stddev")
@@ -292,7 +288,7 @@ class Describe_Slice(object):
         "fixture, expectation",
         (
             (CR.CAT_HS_X_MR, "cat-hs-x-mr-row-proportions"),
-            (CR.MR_X_CAT_HS, "mr-x-cat-hs-row-proportions"),
+            (CR.MR_X_CAT_HS_MT, "mr-x-cat-hs-row-proportions"),
             (CR.MR_X_MR, "mr-x-mr-row-proportions"),
         ),
     )
@@ -311,7 +307,7 @@ class Describe_Slice(object):
         "fixture, expectation",
         (
             (CR.CAT_HS_X_MR, "cat-hs-x-mr-column-proportions"),
-            (CR.MR_X_CAT_HS, "mr-x-cat-hs-column-proportions"),
+            (CR.MR_X_CAT_HS_MT, "mr-x-cat-hs-column-proportions"),
             (CR.MR_X_MR, "mr-x-mr-column-proportions"),
         ),
     )
@@ -335,7 +331,7 @@ class Describe_Slice(object):
             (CR.CAT_X_MR, [2, 1], [3, 2, 1], "cat-x-mr-explicit-order"),
             (CR.MR_X_CAT, [2, 1, 3, 4, 5], [5, 1, 4, 3, 2], "mr-x-cat-explicit-order"),
             (
-                CR.MR_X_CAT_HS,
+                CR.MR_X_CAT_HS_MT,
                 [5, 1, 4, 2, 3],
                 [5, 1, 4, 3, 2],
                 "mr-x-cat-hs-explicit-order",
@@ -431,13 +427,13 @@ class Describe_Slice(object):
         }
         slice_ = _Slice(Cube(CR.CAT_4_X_CAT_4), 0, transforms, None, 0)
 
-        assert slice_.row_labels == ("Apple", "Banana", "Cherry", "Date")
-        assert slice_.column_labels == (
+        assert slice_.row_labels.tolist() == ["Apple", "Banana", "Cherry", "Date"]
+        assert slice_.column_labels.tolist() == [
             "Asparagus",
             "Broccoli",
             "Cauliflower",
             "Daikon",
-        )
+        ]
         np.testing.assert_equal(
             slice_.counts,
             [[14, 14, 13, 16], [22, 14, 19, 19], [14, 16, 19, 18], [17, 12, 28, 11]],
@@ -500,7 +496,7 @@ class Describe_Slice(object):
         }
         slice_ = Cube(CR.CAT_4_X_CAT_4, transforms=transforms).partitions[0]
 
-        assert slice_.row_labels == (
+        assert slice_.row_labels.tolist() == [
             "Apple+Banana",
             "Banana",
             "Date",
@@ -508,8 +504,8 @@ class Describe_Slice(object):
             "Cherry",
             "Apple",
             "Cherry+Date",
-        )
-        assert slice_.column_labels == (
+        ]
+        assert slice_.column_labels.tolist() == [
             "Asparagus+Broccoli",
             "Broccoli",
             "Daikon",
@@ -517,7 +513,7 @@ class Describe_Slice(object):
             "Cauliflower",
             "Asparagus",
             "Cauliflower+Daikon",
-        )
+        ]
         np.testing.assert_equal(
             slice_.counts,
             [
@@ -552,32 +548,17 @@ class Describe_Slice(object):
             slice_wo_explicit_order_.row_proportions, [[0.61110996]]
         )
         np.testing.assert_almost_equal(
-            slice_.column_base, slice_wo_explicit_order_.column_base
+            slice_.columns_base, slice_wo_explicit_order_.columns_base
         )
         np.testing.assert_almost_equal(
-            slice_.row_base, slice_wo_explicit_order_.row_base
+            slice_.rows_base, slice_wo_explicit_order_.rows_base
         )
-
-    @pytest.mark.parametrize(
-        "fixture, table_name, expected",
-        [
-            (CR.EDU_FAV5_FAV5, "Education", True),
-            (CR.CAT_HS_X_MR_AUGMENTED_WGTD, "F_AGECAT", True),
-            (CR.MR_X_MR_AUGMENTED, "Military Status", True),
-            (CR.AGE_FAVMR, None, False),
-        ],
-    )
-    def it_knows_when_its_cube_is_augmented(self, fixture, table_name, expected):
-        slice_ = Cube(fixture).partitions[0]
-
-        assert slice_.table_name == table_name
-        assert slice_.cube_is_mr_aug is expected
 
     def it_knows_when_it_is_empty(self):
         assert Cube(CR.OM_SGP8334215_VN_2019_SEP_19).partitions[0].is_empty is True
 
     def it_provides_unpruned_table_margin(self):
-        slice_ = _Slice(Cube(CR.MR_X_CAT_HS), 0, None, None, 0)
+        slice_ = _Slice(Cube(CR.MR_X_CAT_HS_MT), 0, None, None, 0)
         np.testing.assert_array_equal(
             slice_.table_base_unpruned, [165, 210, 242, 450, 476]
         )
@@ -592,7 +573,7 @@ class Describe_Slice(object):
             "rows_dimension": {"insertions": {}, "prune": True},
             "columns_dimension": {"insertions": {}, "prune": True},
         }
-        slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[0]
+        slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
         expected = np.array(
             [[28, 20, 10, 1], [1, 0, 1, 0], [3, 4, 2, 2], [3, 8, 5, 0], [1, 1, 1, 0]]
         )
@@ -600,7 +581,7 @@ class Describe_Slice(object):
 
         # Pruned (just rows) - with insertions
         transforms = {"rows_dimension": {"prune": True}}
-        slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[0]
+        slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
         expected = np.array(
             [
                 [28, 48, 20, 10, 0, 1],
@@ -615,7 +596,7 @@ class Describe_Slice(object):
 
         # Pruned (just columns) - with insertions
         transforms = {"columns_dimension": {"prune": True}}
-        slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[0]
+        slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
         expected = np.array(
             [
                 [28, 48, 20, 10, 1],
@@ -634,7 +615,7 @@ class Describe_Slice(object):
             "rows_dimension": {"prune": True},
             "columns_dimension": {"prune": True},
         }
-        slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[0]
+        slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
         expected = np.array(
             [
                 [28, 48, 20, 10, 1],
@@ -648,7 +629,7 @@ class Describe_Slice(object):
         np.testing.assert_equal(slice_.unweighted_counts, expected)
 
         # Not pruned - with insertions
-        slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS).partitions[0]
+        slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT).partitions[0]
         expected = np.array(
             [
                 [28, 48, 20, 10, 0, 1],
@@ -665,7 +646,7 @@ class Describe_Slice(object):
     def it_accommodates_an_all_missing_element_rows_dimension(self):
         slice_ = _Slice(Cube(CR.CAT_X_CAT_ALL_MISSING_ROW_ELEMENTS), 0, None, None, 0)
         row_proportions = slice_.row_proportions
-        np.testing.assert_almost_equal(row_proportions, np.array([]))
+        np.testing.assert_almost_equal(row_proportions, np.array([]).reshape((0, 2)))
 
     def it_knows_means_with_subtotals_on_cat_x_cat(self):
         slice_ = _Slice(Cube(CR.CAT_X_CAT_MEAN_SUBTOT), 0, None, None, 0)
@@ -674,65 +655,6 @@ class Describe_Slice(object):
 
         np.testing.assert_almost_equal(
             means, np.array([[38.3333333, np.nan, 65.0, 55.0, 34.0]])
-        )
-
-    def it_knows_its_insertions(self):
-        slice_ = Cube(CR.CAT_X_CAT_HS_2ROWS_1COL).partitions[0]
-
-        np.testing.assert_array_almost_equal(
-            slice_.insertions,
-            np.array(
-                [
-                    [
-                        [np.inf, np.inf, np.inf, np.inf, np.inf, 2.9842060e-03, np.inf],
-                        [np.inf, np.inf, np.inf, np.inf, np.inf, 1.2085762e-05, np.inf],
-                        [
-                            1.09954577e-02,
-                            1.64231069e-01,
-                            7.74991104e-04,
-                            4.78920155e-01,
-                            1.73194792e-12,
-                            2.68565170e-11,
-                            2.94880115e-03,
-                        ],
-                        [np.inf, np.inf, np.inf, np.inf, np.inf, 1.1900698e-02, np.inf],
-                        [
-                            2.87540141e-05,
-                            2.72376900e-02,
-                            4.27168678e-09,
-                            7.46184742e-02,
-                            0.0,
-                            2.89875191e-09,
-                            3.51260516e-01,
-                        ],
-                        [np.inf, np.inf, np.inf, np.inf, np.inf, 0.0, np.inf],
-                    ],
-                    [
-                        [np.inf, np.inf, np.inf, np.inf, np.inf, -2.96936015, np.inf],
-                        [np.inf, np.inf, np.inf, np.inf, np.inf, -4.37603499, np.inf],
-                        [
-                            2.54284314e00,
-                            1.39098139e00,
-                            3.36157570e00,
-                            -7.08040423e-01,
-                            -7.05452463e00,
-                            -6.66285184e00,
-                            2.97302533e00,
-                        ],
-                        [np.inf, np.inf, np.inf, np.inf, np.inf, -2.51507523, np.inf],
-                        [
-                            -4.18311635e00,
-                            2.20809445e00,
-                            5.87331384e00,
-                            1.78280240e00,
-                            -8.48620633e00,
-                            -5.93723152e00,
-                            9.32147088e-01,
-                        ],
-                        [np.inf, np.inf, np.inf, np.inf, np.inf, 9.70800153, np.inf],
-                    ],
-                ]
-            ),
         )
 
     def it_knows_its_selected_categories(self):
@@ -750,7 +672,6 @@ class Describe_Strand(object):
         assert strand.bases == (15, 15)
         assert strand.counts == (10, 5)
         assert strand.cube_index == 0
-        assert strand.cube_is_mr_aug is False
         assert strand.dimension_types == (DT.CAT,)
         assert strand.has_means is False
         assert strand.inserted_row_idxs == ()
@@ -760,9 +681,9 @@ class Describe_Strand(object):
         assert strand.name == "v7"
         assert strand.ndim == 1
         assert strand.population_counts == (0.0, 0.0)
-        np.testing.assert_equal(strand.row_base, [10, 5])
         assert strand.row_count == 2
         assert strand.row_labels == ("C", "E")
+        np.testing.assert_equal(strand.rows_base, [10, 5])
         assert strand.rows_dimension_fills == (None, None)
         assert strand.rows_dimension_name == "v7"
         assert strand.rows_dimension_type == DT.CAT

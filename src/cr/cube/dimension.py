@@ -11,7 +11,7 @@ else:
 
 import numpy as np
 
-from cr.cube.enums import DIMENSION_TYPE as DT
+from cr.cube.enums import COLLATION_METHOD as CM, DIMENSION_TYPE as DT
 from cr.cube.util import lazyproperty
 
 
@@ -263,16 +263,12 @@ class Dimension(object):
     def __init__(self, dimension_dict, dimension_type, dimension_transforms=None):
         self._dimension_dict = dimension_dict
         self._dimension_type = dimension_type
-        self._dimension_transforms_arg = dimension_transforms
+        self._dimension_transforms_dict = dimension_transforms or {}
 
     @lazyproperty
     def alias(self):
-        """Return the alias for the dimension if it exists, None otherwise
-
-        This property is needed to identify one of the mandatory condition
-        for a MRxItself cube.
-        """
-        return self._dimension_dict["references"].get("alias", None)
+        """Return the alias for the dimension if it exists, None otherwise."""
+        return self._dimension_dict["references"].get("alias")
 
     @lazyproperty
     def all_elements(self):
@@ -294,6 +290,14 @@ class Dimension(object):
         return Dimension(
             self._dimension_dict, self._dimension_type, dimension_transforms
         )
+
+    @lazyproperty
+    def collation_method(self):
+        """Member of COLLATION_METHOD specifying ordering of dimension elements."""
+        method_keyword = self.order_dict.get("type")
+        if method_keyword is None:
+            return CM.PAYLOAD_ORDER
+        return CM(method_keyword)
 
     @lazyproperty
     def description(self):
@@ -341,6 +345,25 @@ class Dimension(object):
         return self.valid_elements.display_order
 
     @lazyproperty
+    def element_ids(self):
+        """tuple of int element-id for each valid element in this dimension.
+
+        Element-ids appear in the order defined in the cube-result.
+        """
+        return tuple(e.element_id for e in self.valid_elements)
+
+    @lazyproperty
+    def hidden_idxs(self):
+        """tuple of int element-idx for each hidden valid element in this dimension.
+
+        An element is hidden when a "hide" transform is applied to it in its transforms
+        dict.
+        """
+        return tuple(
+            idx for idx, element in enumerate(self.valid_elements) if element.is_hidden
+        )
+
+    @lazyproperty
     def name(self):
         """str name of this dimension, the empty string ("") if not specified."""
         references = self._dimension_dict["references"]
@@ -376,6 +399,14 @@ class Dimension(object):
         return tuple(element.numeric_value for element in self.valid_elements)
 
     @lazyproperty
+    def order_dict(self):
+        """dict dimension.transforms.order field parsed from JSON payload.
+
+        Value is `{}` if no "order": field is present.
+        """
+        return self._dimension_transforms_dict.get("order", {})
+
+    @lazyproperty
     def prune(self):
         """True if empty elements should be automatically hidden on this dimension."""
         prune = self._dimension_transforms_dict.get("prune")
@@ -393,18 +424,8 @@ class Dimension(object):
 
     @lazyproperty
     def shape(self):
+        """int count of *all* elements in this dimension, both valid and missing."""
         return len(self.all_elements)
-
-    @lazyproperty
-    def sort(self):
-        """A _BaseSort-subclass object or None, describing the applied sort method.
-
-        This value is None if no sort transform was specified for this dimension.
-        Currently that is its only possible value. The returned sort object describes
-        the sort method which can include sorting on the value of an opposing element or
-        on the margin and specify ascending or descending order.
-        """
-        return None  # pragma: no cover
 
     @lazyproperty
     def subtotals(self):
@@ -413,18 +434,19 @@ class Dimension(object):
         Each item in the sequence is a _Subtotal object specifying a subtotal, including
         its addends and anchor.
         """
-        # ---insertions in dimension-transforms override those on dimension itself---
-        insertion_dicts = self._dimension_transforms_dict.get("insertions")
-        if insertion_dicts is not None:
-            return _Subtotals(insertion_dicts, self.valid_elements, self.prune)
+        # --- elements of an aggregate/array dimension cannot meaningfully be summed, so
+        # --- an array dimension cannot have subtotals
+        if self.dimension_type in (DT.MR, DT.CA_SUBVAR):
+            insertion_dicts = []
+        # --- insertions in dimension-transforms override those on dimension itself ---
+        elif "insertions" in self._dimension_transforms_dict:
+            insertion_dicts = self._dimension_transforms_dict["insertions"]
+        # --- otherwise insertions defined on dimension/variable apply ---
+        else:
+            view = self._dimension_dict.get("references", {}).get("view") or {}
+            insertion_dicts = view.get("transform", {}).get("insertions", [])
 
-        # ---otherwise, insertions defined as default transforms apply---
-        view = self._dimension_dict.get("references", {}).get("view", {})
-        # ---view can be both None and {}, thus the edge case.---
-        insertion_dicts = (
-            [] if view is None else view.get("transform", {}).get("insertions", [])
-        )
-        return _Subtotals(insertion_dicts, self.valid_elements, self.prune)
+        return _Subtotals(insertion_dicts, self.valid_elements)
 
     @lazyproperty
     def valid_elements(self):
@@ -435,19 +457,6 @@ class Dimension(object):
         provided by `.all_elements`.
         """
         return self.all_elements.valid_elements
-
-    @lazyproperty
-    def _dimension_transforms_dict(self):
-        """dict complying with dimension-transforms schema for this dimension.
-
-        This value derives from the `dimension_transforms` argument passed on
-        construction. When that argument is not specified, this value is an empty dict.
-        """
-        return (
-            self._dimension_transforms_arg
-            if self._dimension_transforms_arg is not None
-            else {}
-        )
 
 
 class _BaseElements(Sequence):
@@ -819,10 +828,9 @@ class _Subtotals(Sequence):
     A subtotal can only involve valid (i.e. non-missing) elements.
     """
 
-    def __init__(self, insertion_dicts, valid_elements, prune):
+    def __init__(self, insertion_dicts, valid_elements):
         self._insertion_dicts = insertion_dicts
         self._valid_elements = valid_elements
-        self._prune = prune
 
     def __getitem__(self, idx_or_slice):
         """Implements indexed access."""
@@ -835,40 +843,6 @@ class _Subtotals(Sequence):
     def __len__(self):
         """Implements len(subtotals)."""
         return len(self._subtotals)
-
-    @lazyproperty
-    def anchor_idxs(self):
-        """List of int indicating the actual position of the subtotals."""
-        # TODO: this appears wrong, using an anchor (element_id) as an index (offset of
-        # anchor element within elements). This may appear to work if category-ids are
-        # assigned consecutively starting at 1, but will not work in the general case.
-        # I'll bet it also doesn't work when more than one subtotal is anchored to the
-        # same element-id.
-
-        def occurrences(s, lst):
-            return (i for i, e in enumerate(lst) if e == s)
-
-        anchors = self._anchors
-        top_anchors = list(occurrences("top", anchors))
-        int_anchors = [a + len(top_anchors) for a in anchors if isinstance(a, int)]
-        bottom_anchors = [
-            a + len(self._valid_elements) + len(top_anchors + int_anchors)
-            for a, _ in enumerate(list(occurrences("bottom", anchors)))
-        ]
-        final_anchors = top_anchors + int_anchors + bottom_anchors
-        return final_anchors
-
-    def iter_for_anchor(self, anchor):
-        """Generate each subtotal having matching *anchor*."""
-        return (subtotal for subtotal in self._subtotals if subtotal.anchor == anchor)
-
-    @lazyproperty
-    def _anchors(self):
-        """List of int or str indicating element under which to insert this subtotal."""
-        return list(
-            _Subtotal(subtotal_dict, self._valid_elements, self._prune).anchor
-            for subtotal_dict in self._iter_valid_subtotal_dicts()
-        )
 
     @lazyproperty
     def _element_ids(self):
@@ -906,18 +880,23 @@ class _Subtotals(Sequence):
     def _subtotals(self):
         """Composed tuple storing actual sequence of _Subtotal objects."""
         return tuple(
-            _Subtotal(subtotal_dict, self._valid_elements, self._prune)
-            for subtotal_dict in self._iter_valid_subtotal_dicts()
+            _Subtotal(subtotal_dict, self._valid_elements, idx + 1)
+            for idx, subtotal_dict in enumerate(self._iter_valid_subtotal_dicts())
         )
 
 
 class _Subtotal(object):
-    """A subtotal insertion on a cube dimension."""
+    """A subtotal insertion on a cube dimension.
 
-    def __init__(self, subtotal_dict, valid_elements, prune):
+    `fallback_insertion_id` is a fallback unique identifier for this insertion, until
+    real insertion-ids can be added. Its value is just the index+1 of this subtotal
+    within the insertions transform collection.
+    """
+
+    def __init__(self, subtotal_dict, valid_elements, fallback_insertion_id):
         self._subtotal_dict = subtotal_dict
         self._valid_elements = valid_elements
-        self._prune = prune
+        self._fallback_insertion_id = fallback_insertion_id
 
     @lazyproperty
     def anchor(self):
@@ -977,12 +956,12 @@ class _Subtotal(object):
         )
 
     @lazyproperty
+    def insertion_id(self):
+        """int unique identifier of this subtotal within this dimension's insertions."""
+        return self._subtotal_dict.get("insertion_id", self._fallback_insertion_id)
+
+    @lazyproperty
     def label(self):
         """str display name for this subtotal, suitable for use as label."""
         name = self._subtotal_dict.get("name")
         return name if name else ""
-
-    @lazyproperty
-    def prune(self):
-        """True if this subtotal should not appear when empty."""
-        return self._prune

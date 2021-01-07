@@ -2,71 +2,9 @@
 
 """Unit test suite for cr.cube.util module."""
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-import numpy as np
 import pytest
 
-from cr.cube.util import compress_pruned, lazyproperty, counts_with_subtotals
-
-
-class Describe_counts_with_subtotals(object):
-    def it_returns_a_reshaped_array_with_interleaved_vectors(self):
-        addend_idxs = [np.array([0, 1])]
-        inserted_rows_idxs = [2]
-        counts = np.array(
-            [
-                [
-                    [[[1, 2, 3], [1, 2, 3]], [[1, 2, 3], [1, 2, 3]]],
-                    [[[1, 2, 3], [1, 2, 3]], [[1, 2, 3], [1, 2, 3]]],
-                ],
-                [
-                    [[[1, 2, 3], [1, 2, 3]], [[1, 2, 3], [1, 2, 3]]],
-                    [[[1, 2, 3], [1, 2, 3]], [[1, 2, 3], [1, 2, 3]]],
-                ],
-            ]
-        )
-
-        counts_with_hs = counts_with_subtotals(addend_idxs, inserted_rows_idxs, counts)
-
-        assert counts_with_hs.shape == (3, 2, 2, 2, 3)
-        np.testing.assert_array_almost_equal(
-            counts_with_hs[2],
-            np.array(
-                [
-                    [[[2, 4, 6], [2, 4, 6]], [[2, 4, 6], [2, 4, 6]]],
-                    [[[2, 4, 6], [2, 4, 6]], [[2, 4, 6], [2, 4, 6]]],
-                ]
-            ),
-        )
-
-
-class Describe_compress_pruned(object):
-    def it_returns_an_unmasked_array_unchanged(self):
-        table = np.zeros((2, 2))
-        return_value = compress_pruned(table)
-        assert return_value is table
-
-    def it_returns_the_data_of_a_0D_masked_array(self):
-        table = np.ma.masked_array(np.array(42), True)
-        return_value = compress_pruned(table)
-        assert return_value == 42
-
-    def it_returns_a_compressed_1D_masked_array(self):
-        table = np.ma.masked_array(np.array([42, 43, 44]), [False, True, False])
-        return_value = compress_pruned(table)
-        np.testing.assert_array_equal(return_value, [42, 44])
-
-    def it_NaNs_isolated_pruned_float_values(self):
-        table = np.ma.masked_array(
-            np.array([[4.2, 0.0, 4.4], [4.5, 4.6, 4.7]]),
-            [[False, True, False], [False, False, False]],
-            dtype=float,
-        )
-        return_value = compress_pruned(table)
-        np.testing.assert_array_equal(
-            return_value, [[4.2, np.nan, 4.4], [4.5, 4.6, 4.7]]
-        )
+from cr.cube.util import lazyproperty
 
 
 class DescribeLazyPropertyDecorator(object):

@@ -2,12 +2,10 @@
 
 """Integration test suite for the cr.cube.dimension module."""
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import numpy as np
 import pytest
 
-from cr.cube.crunch_cube import CrunchCube
+from cr.cube.cube import Cube
 from cr.cube.dimension import (
     AllDimensions,
     _AllElements,
@@ -167,7 +165,7 @@ class DescribeIntegrated_AllElements(object):
 
     @pytest.fixture
     def type_dict(self):
-        return CrunchCube(CR.ECON_BLAME_WITH_HS).dimensions[0]._dimension_dict["type"]
+        return Cube(CR.ECON_BLAME_WITH_HS).dimensions[0]._dimension_dict["type"]
 
 
 class DescribeIntegrated_ValidElements(object):
@@ -243,7 +241,7 @@ class DescribeIntegrated_Element(object):
     @pytest.fixture
     def element_dict(self):
         return (
-            CrunchCube(CR.ECON_BLAME_WITH_HS)
+            Cube(CR.ECON_BLAME_WITH_HS)
             .dimensions[0]
             ._dimension_dict["type"]["categories"][0]
         )

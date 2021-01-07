@@ -1,0 +1,243 @@
+{
+    "query": {
+        "dimensions": [
+            {"each": "/api/datasets/123/variables/012509/"},
+            {
+                "args": [{"variable": "/api/datasets/123/variables/012509/"}],
+                "function": "as_selected"
+            },
+            {"variable": "/api/datasets/123/variables/003571/"}
+        ],
+        "measures": {
+            "count": {
+                "args": [],
+                "function": "cube_count"
+            }
+        },
+        "weight": "/api/datasets/123/variables/001090/"
+    },
+    "query_environment": {
+        "filter": []
+    },
+    "result": {
+        "counts": [
+            8533,  9478, 0,
+            3703,  3234, 0,
+           25204, 23001, 0,
+
+            8136,  8185, 0,
+            3986,  4387, 0,
+           25318, 23141, 0,
+
+           10028, 10602, 0,
+            2046,  1926, 0,
+           25366, 23185, 0,
+
+            7683,  8168, 0,
+            1252,  1055, 0,
+           28505, 26490, 0,
+
+            3572,  2604, 0,
+            5554,  6798, 0,
+           28314, 26311, 0,
+
+            4822,  5127, 0,
+            4172,  4146, 0,
+           28446, 26440, 0
+        ],
+        "dimensions": [
+            {
+                "derived": true,
+                "references": {
+                    "alias": "attitudes_recoded_klima_2",
+                    "name": "Statements agreed with about Climate",
+                    "subreferences": [
+                        {"alias": "attitudes_recoded_65f074a0_a7d8_11e5_adbc_005056904df0", "name": "Climate change is the biggest threat to civilisation"},
+                        {"alias": "attitudes_recoded_6b4ed090_a7d8_11e5_adbc_005056904df0", "name": "Electric cars are the future of the motor industry"},
+                        {"alias": "attitudes_recoded_7041c080_a7d8_11e5_adbc_005056904df0", "name": "I always make an effort to recycle"},
+                        {"alias": "attitudes_recoded_20e02250_a7e4_11e5_adbc_005056904df0", "name": "I always make sure I turn lights off when I leave a room"},
+                        {"alias": "attitudes_recoded_9c0ed360_a7d8_11e5_adbc_005056904df0", "name": "I don't care what my carbon footprint is"},
+                        {"alias": "attitudes_recoded_a37c6040_a7d8_11e5_adbc_005056904df0", "name": "I don't mind paying more for products that are good for the environment"}
+                    ],
+                    "uniform_basis": false,
+                    "view": {
+                        "roles": [
+                            "market_sizing",
+                            "group_definition",
+                            "profiles_datapoints"
+                        ]
+                    }
+                },
+                "type": {
+                    "class": "enum",
+                    "elements": [
+                        {
+                            "id": 1,
+                            "value": {
+                                "derived": false,
+                                "id": "0001",
+                                "references": {
+                                    "alias": "attitudes_recoded_65f074a0_a7d8_11e5_adbc_005056904df0",
+                                    "name": "Climate change is the biggest threat to civilisation"
+                                }
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "derived": false,
+                                "id": "0002",
+                                "references": {
+                                    "alias": "attitudes_recoded_6b4ed090_a7d8_11e5_adbc_005056904df0",
+                                    "name": "Electric cars are the future of the motor industry"
+                                }
+                            }
+                        },
+                        {
+                            "id": 3,
+                            "value": {
+                                "derived": false,
+                                "id": "0003",
+                                "references": {
+                                    "alias": "attitudes_recoded_7041c080_a7d8_11e5_adbc_005056904df0",
+                                    "name": "I always make an effort to recycle"
+                                }
+                            }
+                        },
+                        {
+                            "id": 4,
+                            "value": {
+                                "derived": false,
+                                "id": "0004",
+                                "references": {
+                                    "alias": "attitudes_recoded_20e02250_a7e4_11e5_adbc_005056904df0",
+                                    "name": "I always make sure I turn lights off when I leave a room"
+                                }
+                            }
+                        },
+                        {
+                            "id": 5,
+                            "value": {
+                                "derived": false,
+                                "id": "0005",
+                                "references": {
+                                    "alias": "attitudes_recoded_9c0ed360_a7d8_11e5_adbc_005056904df0",
+                                    "name": "I don't care what my carbon footprint is"
+                                }
+                            }
+                        },
+                        {
+                            "id": 6,
+                            "value": {
+                                "derived": false,
+                                "id": "0006",
+                                "references": {
+                                    "alias": "attitudes_recoded_a37c6040_a7d8_11e5_adbc_005056904df0",
+                                    "name": "I don't mind paying more for products that are good for the environment"
+                                }
+                            }
+                        }
+                    ],
+                    "subtype": {
+                        "class": "variable"
+                    }
+                }
+            },
+            {
+                "derived": true,
+                "references": {
+                    "alias": "attitudes_recoded_klima_2",
+                    "name": "Statements agreed with about Climate",
+                    "subreferences": [
+                        {"alias": "attitudes_recoded_65f074a0_a7d8_11e5_adbc_005056904df0", "name": "Climate change is the biggest threat to civilisation"},
+                        {"alias": "attitudes_recoded_6b4ed090_a7d8_11e5_adbc_005056904df0", "name": "Electric cars are the future of the motor industry"},
+                        {"alias": "attitudes_recoded_7041c080_a7d8_11e5_adbc_005056904df0", "name": "I always make an effort to recycle"},
+                        {"alias": "attitudes_recoded_20e02250_a7e4_11e5_adbc_005056904df0", "name": "I always make sure I turn lights off when I leave a room"},
+                        {"alias": "attitudes_recoded_9c0ed360_a7d8_11e5_adbc_005056904df0", "name": "I don't care what my carbon footprint is"},
+                        {"alias": "attitudes_recoded_a37c6040_a7d8_11e5_adbc_005056904df0", "name": "I don't mind paying more for products that are good for the environment"}
+                    ],
+                    "uniform_basis": false,
+                    "view": {
+                        "roles": [
+                            "market_sizing",
+                            "group_definition",
+                            "profiles_datapoints"
+                        ]
+                    }
+                },
+                "type": {
+                    "categories": [
+                        {"id": 1, "name": "Selected", "numeric_value": 1, "selected": true},
+                        {"id": 0, "name": "Not Selected", "numeric_value": 0},
+                        {"id": -1, "missing": true, "name": "No Data"}
+                    ],
+                    "class": "categorical",
+                    "ordinal": false,
+                    "subvariables": ["0001", "0002", "0003", "0004", "0005", "0006"]
+                }
+            },
+            {
+                "derived": false,
+                "references": {
+                    "alias": "pdl_gender",
+                    "description": "Gender",
+                    "name": "Gender",
+                    "view": {
+                        "roles": [
+                            "market_sizing",
+                            "group_definition",
+                            "profiles_datapoints"
+                        ]
+                    }
+                },
+                "type": {
+                    "categories": [
+                        {"id": 1, "name": "Male"},
+                        {"id": 2, "name": "Female"},
+                        {"id": -1, "missing": true, "name": "No Data"}
+                    ],
+                    "class": "categorical",
+                    "ordinal": false
+                }
+            }
+        ],
+        "element": "crunch:cube",
+        "measures": {
+            "count": {
+                "data": [
+                    9928.209542890, 11524.821237084,  0,
+                    4638.052025017,  4082.479996838,  0,
+                   20942.204632088, 22037.232566080,  0,
+                    9588.843313998,  9801.254016136,  0,
+                    4867.670011489,  5649.355887696,  0,
+                   21051.952874508, 22193.923896169,  0,
+                   11697.435357575, 13095.670425525,  0,
+                    2717.701118157,  2310.228252544,  0,
+                   21093.329724263, 22238.635121932,  0,
+                    9782.899554774, 10531.918128024,  0,
+                    1702.761649889,  1380.670758467,  0,
+                   24022.804995331, 25731.944913511,  0,
+                    4417.596222134,  3448.380316269,  0,
+                    7247.103116018,  8661.816031016,  0,
+                   23843.766861843, 25534.337452716,  0,
+                    6179.175512581,  6490.427474934,  0,
+                    5368.238040970,  5471.148108062,  0,
+                   23961.052646443, 25682.958217005,  0
+                ],
+                "metadata": {
+                    "derived": true,
+                    "references": {},
+                    "type": {
+                        "class": "numeric",
+                        "integer": false,
+                        "missing_reasons": {"No Data": -1},
+                        "missing_rules": {}
+                    }
+                },
+                "n_missing": 45690
+            }
+        },
+        "missing": 45690,
+        "n": 73153
+    }
+}

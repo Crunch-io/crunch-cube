@@ -2,7 +2,7 @@
 
 """Unit test suite for `cr.cube.cubepart` module."""
 
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import division
 
 import numpy as np
 import pytest
@@ -10,8 +10,7 @@ import pytest
 from cr.cube.cube import Cube
 from cr.cube.cubepart import CubePartition, _Slice, _Strand, _Nub
 from cr.cube.dimension import Dimension
-from cr.cube.enums import DIMENSION_TYPE as DT
-from cr.cube.matrix import TransformedMatrix, _VectorAfterHiding
+from cr.cube.matrix import Assembler
 from cr.cube.noa.smoothing import SingleSidedMovingAvgSmoother
 from cr.cube.stripe import _BaseStripeRow, TransformedStripe
 
@@ -65,10 +64,6 @@ class DescribeCubePartition(object):
 
         assert cube_index == 42
 
-    def it_knows_if_cube_is_mr_aug(self):
-        # --- default of False is overridden by subclasses when appropriate ---
-        assert CubePartition(None).cube_is_mr_aug is False
-
     def it_can_evaluate_a_measure_expression(self, request):
         single_sided_moving_avg_smoother_ = instance_mock(
             request, SingleSidedMovingAvgSmoother, values=[[0.1, 0.2], [0.3, 0.4]]
@@ -92,25 +87,13 @@ class DescribeCubePartition(object):
         )
         assert values == [[0.1, 0.2], [0.3, 0.4]]
 
-    @pytest.mark.parametrize(
-        "dims, expected_value",
-        (
-            ((DT.CAT, DT.MR, DT.MR_CAT), DT.CAT),
-            ((DT.MR, DT.MR_CAT), DT.MR),
-            ((DT.MR_CAT,), DT.MR_CAT),
-        ),
-    )
-    def it_knows_cube_row_dimension_type(self, request, cube_, dims, expected_value):
-        all_dimensions_ = tuple(
-            instance_mock(request, Dimension, name="dim-%d" % idx, dimension_type=dt)
-            for idx, dt in enumerate(dims)
-        )
-        cube_.dimensions = all_dimensions_
-        cube_partition = CubePartition(cube_)
+    def but_it_raises_an_exception_when_function_is_not_available(self):
+        slice_ = _Slice(None, None, None, None, None)
 
-        cube_row_dimension_type = cube_partition.cube_row_dimension_type
+        with pytest.raises(NotImplementedError) as err:
+            slice_.evaluate({"function": "F"})
 
-        assert cube_row_dimension_type == expected_value
+        assert str(err.value) == "Function F is not available."
 
     def it_knows_the_primary_alpha_value_to_help(self, _alpha_values_prop_):
         """alpha is the primary confidence-interval threshold specified by the user."""
@@ -282,31 +265,39 @@ class Describe_Slice(object):
 
         assert population_fraction == 0.5
 
-    def it_knows_the_row_proportions(self, request, _matrix_prop_, matrix_):
-        _matrix_prop_.return_value = matrix_
-        matrix_.rows = (
-            instance_mock(request, _VectorAfterHiding, proportions=(0.1, 0.2, 0.3)),
-            instance_mock(request, _VectorAfterHiding, proportions=(0.4, 0.5, 0.6)),
+    def it_knows_the_rows_margin(self, _assembler_prop_, assembler_):
+        _assembler_prop_.return_value = assembler_
+        assembler_.rows_margin = [[1, 2], [3, 4]]
+
+        assert _Slice(None, None, None, None, None).rows_margin == [[1, 2], [3, 4]]
+
+    def it_knows_the_scale_means_column(
+        self, request, _columns_dimension_numeric_values_prop_
+    ):
+        _columns_dimension_numeric_values_prop_.return_value = np.array([1, np.nan, 3])
+        property_mock(
+            request,
+            _Slice,
+            "row_proportions",
+            return_value=(
+                (np.array([[20, 30, 12], [10, 8, 4]]).T / np.array([62, 22])).T
+            ),
         )
         slice_ = _Slice(None, None, None, None, None)
 
-        row_proportions = slice_.row_proportions
+        rows_scale_means = slice_.scale_means_column
 
-        np.testing.assert_almost_equal(
-            row_proportions, [[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]]
-        )
+        np.testing.assert_almost_equal(rows_scale_means, [1.75, 1.57142857])
 
-    def it_knows_the_rows_margin(self, request, _matrix_prop_, matrix_):
-        _matrix_prop_.return_value = matrix_
-        matrix_.rows = (
-            instance_mock(request, _VectorAfterHiding, margin=(1, 2)),
-            instance_mock(request, _VectorAfterHiding, margin=(3, 4)),
+    def but_the_scale_means_column_is_None_if_columns_have_no_numeric_values(
+        self, _columns_dimension_numeric_values_prop_
+    ):
+        _columns_dimension_numeric_values_prop_.return_value = np.array(
+            [np.nan, np.nan, np.nan]
         )
         slice_ = _Slice(None, None, None, None, None)
 
-        rows_margin = slice_.rows_margin
-
-        np.testing.assert_almost_equal(rows_margin, [[1, 2], [3, 4]])
+        assert slice_.scale_means_column is None
 
     def it_provides_the_secondary_scale_mean_pairwise_indices(
         self, _alpha_alt_prop_, _only_larger_prop_, PairwiseSignificance_
@@ -334,14 +325,6 @@ class Describe_Slice(object):
         slice_ = _Slice(None, None, None, None, None)
 
         assert slice_.scale_mean_pairwise_indices_alt is None
-
-    def but_it_raises_an_exception_when_function_is_not_available(self):
-        slice_ = _Slice(None, None, None, None, None)
-
-        with pytest.raises(NotImplementedError) as err:
-            slice_.evaluate({"function": "F"})
-
-        assert str(err.value) == "Function F is not available."
 
     @pytest.mark.parametrize(
         "dimensions_dicts, expected_value",
@@ -381,6 +364,21 @@ class Describe_Slice(object):
 
         assert slice_.selected_category_labels == expected_value
 
+    def it_constructs_its_assembler_instance_to_help(
+        self, request, cube_, _dimensions_prop_, dimension_, assembler_
+    ):
+        Assembler_ = class_mock(
+            request, "cr.cube.cubepart.Assembler", return_value=assembler_
+        )
+        _dimensions_prop_.return_value = (dimension_, dimension_)
+        slice_idx = 42
+        slice_ = _Slice(cube_, slice_idx, None, None, None)
+
+        assembler = slice_._assembler
+
+        Assembler_.assert_called_once_with(cube_, (dimension_, dimension_), slice_idx)
+        assert assembler is assembler_
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -388,20 +386,28 @@ class Describe_Slice(object):
         return property_mock(request, _Slice, "_alpha_alt")
 
     @pytest.fixture
+    def assembler_(self, request):
+        return instance_mock(request, Assembler)
+
+    @pytest.fixture
+    def _assembler_prop_(self, request):
+        return property_mock(request, _Slice, "_assembler")
+
+    @pytest.fixture
+    def _columns_dimension_numeric_values_prop_(self, request):
+        return property_mock(request, _Slice, "_columns_dimension_numeric_values")
+
+    @pytest.fixture
     def cube_(self, request):
         return instance_mock(request, Cube)
 
     @pytest.fixture
+    def dimension_(self, request):
+        return instance_mock(request, Dimension)
+
+    @pytest.fixture
     def _dimensions_prop_(self, request):
         return property_mock(request, _Slice, "_dimensions")
-
-    @pytest.fixture
-    def matrix_(self, request):
-        return instance_mock(request, TransformedMatrix)
-
-    @pytest.fixture
-    def _matrix_prop_(self, request):
-        return property_mock(request, _Slice, "_matrix")
 
     @pytest.fixture
     def _only_larger_prop_(self, request):
@@ -519,9 +525,6 @@ class Describe_Nub(object):
         is_empty = nub_.is_empty
 
         assert is_empty == expected_value
-
-    def it_knows_its_cube_is_never_mr_aug(self):
-        assert _Nub(None).cube_is_mr_aug is False
 
     def it_knows_its_selected_categories_labels(self):
         nub_ = _Nub(None)

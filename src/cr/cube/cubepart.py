@@ -21,8 +21,8 @@ import numpy as np
 
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.min_base_size_mask import MinBaseSizeMask
+from cr.cube.matrix import Assembler
 from cr.cube.measures.pairwise_significance import PairwiseSignificance
-from cr.cube.matrix import TransformedMatrix
 from cr.cube.noa.smoothing import SingleSidedMovingAvgSmoother
 from cr.cube.scalar import MeansScalar
 from cr.cube.stripe import TransformedStripe
@@ -70,15 +70,6 @@ class CubePartition(object):
         Used to differentiate certain partitions like a filtered rows-summary strand.
         """
         return self._cube.cube_index
-
-    @lazyproperty
-    def cube_is_mr_aug(self):
-        return False
-
-    @lazyproperty
-    def cube_row_dimension_type(self):
-        """Member of `cr.cube.enum.DIMENSION_TYPE` for cube row dimension"""
-        return self._cube.dimensions[0].dimension_type
 
     @lazyproperty
     def dimension_types(self):
@@ -264,23 +255,19 @@ class _Slice(CubePartition):
     # ---interface ---------------------------------------------------
 
     @lazyproperty
-    def column_base(self):
-        return np.array([column.base for column in self._matrix.columns]).T
-
-    @lazyproperty
     def column_index(self):
-        """ndarray of column index percentages.
+        """2D np.float64 ndarray of column-index "percentage".
 
         The index values represent the difference of the percentages to the
         corresponding baseline values. The baseline values are the univariate
-        percentages of the corresponding variable.
+        percentages of the rows variable.
         """
-        return np.array([row.column_index for row in self._matrix.rows])
+        return self._assembler.column_index
 
     @lazyproperty
     def column_labels(self):
-        """Sequence of str column element names suitable for use as column headings."""
-        return tuple(column.label for column in self._matrix.columns)
+        """1D str ndarray of name for each column, for use as column headings."""
+        return self._assembler.column_labels
 
     @lazyproperty
     def column_percentages(self):
@@ -288,7 +275,52 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def column_proportions(self):
-        return np.array([col.proportions for col in self._matrix.columns]).T
+        """2D np.float64 ndarray of column-proportion for each matrix cell.
+
+        This is the proportion of the weighted-N (aka. margin) of its column that the
+        *weighted-count* in each cell represents, a number between 0.0 and 1.0.
+        """
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return self.counts / self.columns_margin
+
+    @lazyproperty
+    def column_proportions_moe(self):
+        """1D/2D np.float64 ndarray of margin-of-error (MoE) for columns proportions.
+
+        The values are represented as fractions, analogue to the `column_proportions`
+        property. This means that the value of 3.5% will have the value 0.035.
+        The values can be np.nan when the corresponding percentage is also np.nan, which
+        happens when the respective columns margin is 0.
+        """
+        return Z_975 * self.column_std_err
+
+    @lazyproperty
+    def column_std_dev(self):
+        """standard deviation for column percentages
+
+        `std_deviation = sqrt(variance)`
+        """
+        return np.sqrt(self._column_variance)
+
+    @lazyproperty
+    def column_std_err(self):
+        """standard error for column percentages
+
+        `std_error = sqrt(variance/N)`
+        """
+        return np.sqrt(self._column_variance / self.columns_margin)
+
+    @lazyproperty
+    def columns_base(self):
+        """1D/2D np.int64 ndarray of unweighted-N for each column/cell of slice.
+
+        This array is 2D (a distinct base for each cell) when the rows dimension is MR,
+        because each MR-subvariable has its own unweighted N. This is because not every
+        possible response is necessarily offered to every respondent.
+
+        In all other cases, the array is 1D, containing one value for each column.
+        """
+        return self._assembler.columns_base
 
     @lazyproperty
     def columns_dimension_name(self):
@@ -305,48 +337,20 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def columns_margin(self):
-        return np.array([column.margin for column in self._matrix.columns]).T
+        """1D or 2D np.float/int64 ndarray of weighted-N for each column of slice.
 
-    @lazyproperty
-    def column_proportions_moe(self):
-        """1D/2D np.float64 ndarray of margin-of-error (MoE) for columns proportions.
+        This array is 2D (a distinct margin value for each cell) when the rows dimension
+        is MR, because each MR-subvariable has its own weighted N. This is because not
+        every possible response is necessarily offered to every respondent.
 
-        The values are represented as fractions, analogue to the `column_proportions`
-        property. This means that the value of 3.5% will have the value 0.035.
-        The values can be np.nan when the corresponding percentage is also np.nan, which
-        happens when the respective columns margin is 0.
+        In all other cases, the array is 1D, containing one value for each column.
         """
-        return Z_975 * self.column_std_err
-
-    @lazyproperty
-    def column_std_err(self):
-        """standard error for column percentages
-
-        `std_error = sqrt(variance/N)`
-        """
-        return np.sqrt(self._column_variance / self.columns_margin)
-
-    @lazyproperty
-    def column_std_dev(self):
-        """standard deviation for column percentages
-
-        `std_deviation = sqrt(variance)`
-        """
-        return np.sqrt(self._column_variance)
+        return self._assembler.columns_margin
 
     @lazyproperty
     def counts(self):
         """2D np.float64 ndarray of weighted cube counts."""
-        return np.array([row.counts for row in self._matrix.rows])
-
-    @lazyproperty
-    def cube_is_mr_aug(self):
-        """True if this slice derives for an "augmented MR" cube.
-
-        An augmented-MR cube is 3-dimensional, with the last two dimensions being the
-        same MR variable. This structure allows overlap t-tests to be computed.
-        """
-        return self._cube.is_mr_aug
+        return self._assembler.weighted_counts
 
     @lazyproperty
     def description(self):
@@ -355,42 +359,13 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def inserted_column_idxs(self):
-        return tuple(
-            i for i, column in enumerate(self._matrix.columns) if column.is_inserted
-        )
+        """tuple of int index of each subtotal column in slice."""
+        return self._assembler.inserted_column_idxs
 
     @lazyproperty
     def inserted_row_idxs(self):
-        return tuple(i for i, row in enumerate(self._matrix.rows) if row.is_inserted)
-
-    @lazyproperty
-    def insertions(self):
-        """2D np.float64 np.ma.core.MaskedArray of residuals for insertions.
-
-              0     1     2     3      4       5       6
-        0   inf   inf   inf   inf    inf    -2.9     inf
-        1   inf   inf   inf   inf    inf    -4.3     inf
-        2   2.5   1.3   3.3  -0.70  -7.25   -6.52    2.25
-        3   inf   inf   inf   inf    inf    -2.51    inf
-        4  -1.16  2.20  5.84  1.78  -8.48   -5.92    0.93
-        5   inf   inf   inf   inf    inf     9.70    inf
-
-        Only the insertions residuals are showed in a inf masked array.
-        """
-        inserted_rows = self.inserted_row_idxs
-        inserted_cols = self.inserted_column_idxs
-        if not inserted_cols and not inserted_rows:
-            return []
-        mask = np.zeros(self.pvals.shape)
-        mask[inserted_rows, :] = 1
-        mask[:, inserted_cols] = 1
-        masked_pvals = np.ma.masked_array(self.pvals, np.logical_not(mask)).filled(
-            np.inf
-        )
-        masked_zscores = np.ma.masked_array(self.zscores, np.logical_not(mask)).filled(
-            np.inf
-        )
-        return np.stack([masked_pvals, masked_zscores])
+        """tuple of int index of each subtotal row in slice."""
+        return self._assembler.inserted_row_idxs
 
     @lazyproperty
     def is_empty(self):
@@ -398,7 +373,14 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def means(self):
-        return np.array([row.means for row in self._matrix.rows])
+        """2D optional np.float64 ndarray of mean value for each table cell.
+
+        Cell value is `np.nan` for each cell corresponding to an inserted subtotal
+        (mean of addend cells cannot simply be added to get the mean of the subtotal).
+
+        Raises `ValueError` if the cube-result does not include a means cube-measure.
+        """
+        return self._assembler.means
 
     @lazyproperty
     def min_base_size_mask(self):
@@ -411,10 +393,6 @@ class _Slice(CubePartition):
         A slice takes the name of its rows-dimension.
         """
         return self.rows_dimension_name
-
-    @lazyproperty
-    def overlaps_tstats(self):
-        return self._matrix.overlaps_tstats
 
     @lazyproperty
     def pairwise_indices(self):
@@ -460,7 +438,7 @@ class _Slice(CubePartition):
         """
         return tuple(
             PairwiseSignificance(self).values[column_idx]
-            for column_idx in range(len(self._matrix.columns))
+            for column_idx in range(len(self.column_labels))
         )
 
     @lazyproperty
@@ -484,7 +462,16 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def pvals(self):
-        return np.array([row.pvals for row in self._matrix.rows])
+        """2D optional np.float64 ndarray of p-value for each cell.
+
+        A p-value is a measure of the probability that an observed difference could have
+        occurred just by random chance. The lower the p-value, the greater the
+        statistical significance of the observed difference.
+
+        A cell value of np.nan indicates a meaningful p-value could not be computed for
+        that cell.
+        """
+        return self._assembler.pvalues
 
     @lazyproperty
     def residual_test_stats(self):
@@ -495,12 +482,9 @@ class _Slice(CubePartition):
         return np.stack([self.pvals, self.zscores])
 
     @lazyproperty
-    def row_base(self):
-        return np.array([row.base for row in self._matrix.rows])
-
-    @lazyproperty
     def row_labels(self):
-        return tuple(row.label for row in self._matrix.rows)
+        """1D str ndarray of name for each row, suitable for use as row headings."""
+        return self._assembler.row_labels
 
     @lazyproperty
     def row_percentages(self):
@@ -508,46 +492,20 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def row_proportions(self):
-        return np.array([row.proportions for row in self._matrix.rows])
+        """2D np.float64 ndarray of row-proportion for each matrix cell.
 
-    @lazyproperty
-    def rows_dimension_description(self):
-        """str description assigned to rows-dimension.
-
-        Reflects the resolved dimension-description transform cascade.
+        Each row-proportion value is that cell's fraction of the weighted-N for the row
+        (aka. rows_margin), a number between 0.0 and 1.0.
         """
-        return self._rows_dimension.description
-
-    @lazyproperty
-    def rows_dimension_fills(self):
-        """sequence of RGB str like "#def032" fill colors for row elements.
-
-        The values reflect the resolved element-fill transform cascade. The length and
-        ordering of the sequence correspond to the rows in the slice, including
-        accounting for insertions and hidden rows.
-        """
-        return tuple(row.fill for row in self._matrix.rows)
-
-    @lazyproperty
-    def rows_dimension_name(self):
-        """str name assigned to rows-dimension.
-
-        Reflects the resolved dimension-name transform cascade.
-        """
-        return self._rows_dimension.name
-
-    @lazyproperty
-    def rows_dimension_numeric_values(self):
-        return self._rows_dimension_numeric_values
-
-    @lazyproperty
-    def rows_dimension_type(self):
-        """Member of `cr.cube.enum.DIMENSION_TYPE` specifying type of rows dimension."""
-        return self._rows_dimension.dimension_type
-
-    @lazyproperty
-    def rows_margin(self):
-        return np.array([row.margin for row in self._matrix.rows])
+        rows_margin = self.rows_margin
+        with np.errstate(divide="ignore", invalid="ignore"):
+            # --- numpy broadcasting only works "vertically", so in the 1D margin case,
+            # --- we need to "rotate" (transpose) the counts such that rows are running
+            # --- "vertically", and then re-transpose the result to get back
+            # --- (rows, cols) orientation.
+            if rows_margin.ndim == 1:
+                return (self.counts.T / rows_margin).T
+            return self.counts / rows_margin
 
     @lazyproperty
     def row_proportions_moe(self):
@@ -571,6 +529,62 @@ class _Slice(CubePartition):
         # --- We need to add `np.newaxis` to cast the rows margin vector to an actual
         # --- column, in NumPy terms, to be able to devide correctly.
         return np.sqrt(self._row_variance / self.rows_margin[:, np.newaxis])
+
+    @lazyproperty
+    def rows_base(self):
+        """1D/2D np.int64 ndarray of unweighted-N for each row/cell of slice.
+
+        This array is 2D (a distinct base for each cell) when the columns dimension is
+        MR, because each MR-subvariable has its own unweighted N. This is because not
+        every possible response is necessarily offered to every respondent.
+
+        In all other cases, the array is 1D, containing one value for each column.
+        """
+        return self._assembler.rows_base
+
+    @lazyproperty
+    def rows_dimension_description(self):
+        """str description assigned to rows-dimension.
+
+        Reflects the resolved dimension-description transform cascade.
+        """
+        return self._rows_dimension.description
+
+    @lazyproperty
+    def rows_dimension_fills(self):
+        """tuple of optional RGB str like "#def032" fill color for each row in slice.
+
+        The values reflect the resolved element-fill transform cascade. The length and
+        ordering of the sequence correspond to the rows in the slice, including
+        accounting for insertions and hidden rows. A value of `None` indicates the
+        default fill, possibly determined by a theme or template.
+        """
+        return self._assembler.rows_dimension_fills
+
+    @lazyproperty
+    def rows_dimension_name(self):
+        """str name assigned to rows-dimension.
+
+        Reflects the resolved dimension-name transform cascade.
+        """
+        return self._rows_dimension.name
+
+    @lazyproperty
+    def rows_dimension_type(self):
+        """Member of `cr.cube.enum.DIMENSION_TYPE` specifying type of rows dimension."""
+        return self._rows_dimension.dimension_type
+
+    @lazyproperty
+    def rows_margin(self):
+        """1D or 2D np.float/int64 ndarray of weighted-N for each column of slice.
+
+        This array is 2D (a distinct margin value for each cell) when the columns
+        dimension is MR, because each MR-subvariable has its own weighted N. This is
+        because not every possible response is necessarily offered to every respondent.
+
+        In all other cases, the array is 1D, containing one value for each column.
+        """
+        return self._assembler.rows_margin
 
     @lazyproperty
     def scale_mean_pairwise_indices(self):
@@ -600,18 +614,18 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def scale_means_column(self):
-        """1D float64 ndarray of column scale means
+        """1D float64 ndarray of scale mean for each row (making a summary "column").
 
-        The calculation is based on multiply of the numeric values by the
-        row_proportions and divide by the rows_margin.
+        Each scale mean is based on the numeric values of the *columns-dimension*
+        elements.
         """
-        if np.all(np.isnan(self._columns_dimension_numeric_values)):
+        column_numeric_values = self._columns_dimension_numeric_values
+
+        if np.all(np.isnan(column_numeric_values)):
             return None
 
-        inner = np.nansum(
-            self._columns_dimension_numeric_values * self.row_proportions, axis=1
-        )
-        not_a_nan_index = ~np.isnan(self._columns_dimension_numeric_values)
+        inner = np.nansum(column_numeric_values * self.row_proportions, axis=1)
+        not_a_nan_index = ~np.isnan(column_numeric_values)
         denominator = np.sum(self.row_proportions[:, not_a_nan_index], axis=1)
         return inner / denominator
 
@@ -783,51 +797,62 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def table_base(self):
+        """Scalar or 1D/2D np.int64 ndarray of unweighted-N for table.
 
-        # We need to prune/order by both dimensions
-        if self.dimension_types == (DT.MR, DT.MR):
-            # TODO: Remove property from the assembler, when we figure out the pruning
-            # by both rows and columns
-            return self._matrix.table_base
+        This value is scalar when the slice has no MR dimensions, 1D when the slice has
+        one MR dimension (either MR_X or X_MR), and 2D for an MR_X_MR slice.
 
-        # We need to prune/order by rows
-        if self.dimension_types[0] == DT.MR:
-            return np.array([row.table_base for row in self._matrix.rows])
-
-        # We need to prune/order by columns
-        if self.dimension_types[1] == DT.MR:
-            return np.array([column.table_base for column in self._matrix.columns])
-
-        # No pruning or reordering since single value
-        return self._matrix.table_base_unpruned
+        The caller must know the dimensionality of the slice in order to correctly
+        interpret a 1D value for this property.
+        """
+        return self._assembler.table_base
 
     @lazyproperty
     def table_base_unpruned(self):
-        return self._matrix.table_base_unpruned
+        """np.int64 scalar or a 1D or 2D ndarray of np.int64 representing table base.
+
+        This value includes hidden vectors, those with either a hide transform on
+        their element or that have been pruned (because their base (N) is zero). This
+        does not affect a scalar value but when the return value is an ndarray, the
+        shape may be different than the array returned by `.table_base`.
+
+        A multiple-response (MR) dimension produces an array of table-base values
+        because each element (subvariable) of the dimension represents a logically
+        distinct question which may not have been asked of all respondents. When both
+        dimensions are MR, the return value is a 2D ndarray. A CAT_X_CAT slice produces
+        a scalar value for this property.
+        """
+        return self._assembler.table_base_unpruned
 
     @lazyproperty
     def table_margin(self):
+        """Scalar or 1D/2D np.float/int64 ndarray of weighted-N table.
 
-        # We need to prune/order by both dimensions
-        if self.dimension_types == (DT.MR, DT.MR):
-            # TODO: Remove property from the assembler, when we figure out the pruning
-            # by both rows and columns
-            return self._matrix.table_margin
+        This value is scalar when the slice has no MR dimensions, 1D when the slice has
+        one MR dimension (either MR_X or X_MR), and 2D for an MR_X_MR slice.
 
-        # We need to prune/order by rows
-        if self.dimension_types[0] == DT.MR:
-            return np.array([row.table_margin for row in self._matrix.rows])
-
-        # We need to prune/order by columns
-        if self.dimension_types[1] == DT.MR:
-            return np.array([column.table_margin for column in self._matrix.columns])
-
-        # No pruning or reordering since single value
-        return self._matrix.table_margin_unpruned
+        The caller must know the dimensionality of the slice in order to correctly
+        interpret a 1D value for this property.
+        """
+        return self._assembler.table_margin
 
     @lazyproperty
     def table_margin_unpruned(self):
-        return self._matrix.table_margin_unpruned
+        """np.float/int64 scalar or a 1D or 2D ndarray of np.float/int64 table margin.
+
+        This value includes hidden vectors, those with either a hide transform on
+        their element or that have been pruned (because their base (N) is zero). Also,
+        it does not include inserted subtotals. This
+        does not affect a scalar value but when the return value is an ndarray, the
+        shape may be different than the array returned by `.table_margin`.
+
+        A matrix with a multiple-response (MR) dimension produces an array of
+        table-margin values because each element (subvariable) of the dimension
+        represents a logically distinct question which may not have been asked of all
+        respondents. When both dimensions are MR, the return value is a 2D ndarray.
+        A CAT_X_CAT matrix produces a scalar value for this property.
+        """
+        return self._assembler.table_margin_unpruned
 
     @lazyproperty
     def table_name(self):
@@ -837,15 +862,25 @@ class _Slice(CubePartition):
 
         title = self._cube.name
         table_name = self._cube.dimensions[0].valid_elements[self._slice_idx].label
-
-        if self._cube.is_mr_aug:
-            return title
-
         return "%s: %s" % (title, table_name)
 
     @lazyproperty
     def table_percentages(self):
         return self.table_proportions * 100
+
+    @lazyproperty
+    def table_proportions(self):
+        """2D ndarray of np.float64 fraction of table count each cell contributes."""
+        table_margin = self.table_margin
+        rows_dimension_type = self._rows_dimension.dimension_type
+
+        # --- table-margin can be scalar, 2D, or two cases of 1D. A scalar, 2D, and one
+        # --- of the 1D table-margins broadcast fine, but the MR-X-CAT case needs
+        # --- transposition to get the broadcasting right.
+        with np.errstate(divide="ignore", invalid="ignore"):
+            if rows_dimension_type == DT.MR_SUBVAR and table_margin.ndim == 1:
+                return (self.counts.T / table_margin).T
+            return self.counts / table_margin
 
     @lazyproperty
     def table_proportions_moe(self):
@@ -859,21 +894,22 @@ class _Slice(CubePartition):
         return Z_975 * self.table_std_err
 
     @lazyproperty
-    def table_proportions(self):
-        return np.array([row.table_proportions for row in self._matrix.rows])
-
-    @lazyproperty
     def table_std_dev(self):
-        return np.array([row.table_std_dev for row in self._matrix.rows])
+        """2D np.float64 ndarray of std-dev of table-percent for each table cell."""
+        return np.sqrt(self._table_proportion_variance)
 
     @lazyproperty
     def table_std_err(self):
-        return np.array([row.table_std_err for row in self._matrix.rows])
+        """2D optional np.float64 ndarray of std-error of table-percent for each cell.
+
+        A cell value can be np.nan under certain conditions.
+        """
+        return self._assembler.table_stderrs
 
     @lazyproperty
     def unweighted_counts(self):
-        """2D tuple of unweighted counts."""
-        return tuple(tuple(row.unweighted_counts) for row in self._matrix.rows)
+        """2D np.int64 ndarray of unweighted count for each slice matrix cell."""
+        return self._assembler.unweighted_counts
 
     @lazyproperty
     def var_scale_means_column(self):
@@ -923,9 +959,30 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def zscores(self):
-        return np.array([row.zscores for row in self._matrix.rows])
+        """2D np.float64 ndarray of std-res value for each cell of matrix.
+
+        A z-score is also known as a *standard score* and is the number of standard
+        deviations above (positive) or below (negative) the population mean a cell's
+        value is.
+        """
+        return self._assembler.zscores
 
     # ---implementation (helpers)-------------------------------------
+
+    @lazyproperty
+    def _assembler(self):
+        """The Assembler object for this slice.
+
+        The assembler dispatches all second-order measure calculations and insertion
+        construction, and orders the result matrix, including removing hidden vectors.
+        """
+        return Assembler(self._cube, self._dimensions, self._slice_idx)
+
+    @lazyproperty
+    def _column_variance(self):
+        """Variance for column percentages."""
+        p = self.counts / self.columns_margin
+        return p * (1 - p)
 
     @lazyproperty
     def _columns_dimension(self):
@@ -933,28 +990,12 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def _columns_dimension_numeric_values(self):
-        """1D ndarray of numeric-value for each columns-dimension element."""
-        return np.array([column.numeric_value for column in self._matrix.columns])
+        """1D optional np.int/float64 ndarray of numeric-value for each column element.
 
-    @lazyproperty
-    def _column_variance(self):
-        """variance for column percentages
-
-        `variance = p * (1-p)`
+        A value of np.nan appears for a column element without a numeric-value. All
+        subtotal rows have a value of np.nan (subtotals have no numeric value).
         """
-        return (
-            self.counts / self.columns_margin * (1 - self.counts / self.columns_margin)
-        )
-
-    @lazyproperty
-    def _row_variance(self):
-        """ndarray of variances for row percentages"""
-        # --- Rows margin is a vector, that's supposed to represent a column (to the
-        # --- right of the crosstab). We need to devide all values in the crosstab by it
-        # --- and therefore need to cast it to an actual column (because of how NumPy
-        # --- does broadcasting).
-        margin = self.rows_margin[:, np.newaxis]
-        return self.counts / margin * (1 - self.counts / margin)
+        return self._assembler.columns_dimension_numeric_values
 
     @lazyproperty
     def _dimensions(self):
@@ -966,13 +1007,19 @@ class _Slice(CubePartition):
             )
         )
 
-    @lazyproperty
-    def _matrix(self):
-        """The TransformedMatrix object for this slice."""
-        return TransformedMatrix.matrix(self._cube, self._dimensions, self._slice_idx)
-
     def _median(self, values):
         return np.median(values) if values.size != 0 else np.nan
+
+    @lazyproperty
+    def _row_variance(self):
+        """2D np.float64 ndarray of row-percentage variance for each cell."""
+        # --- rows-margin is a vector that represents a column (to the right of the
+        # --- crosstab). We need to divide all values in the crosstab by it and
+        # --- therefore need to cast it to an actual column (because of how NumPy does
+        # --- broadcasting).
+        rows_margin = self.rows_margin[:, np.newaxis]
+        p = self.counts / rows_margin
+        return p * (1 - p)
 
     @lazyproperty
     def _rows_dimension(self):
@@ -980,8 +1027,18 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def _rows_dimension_numeric_values(self):
-        """1D ndarray of numeric-value for each rows-dimension element."""
-        return np.array([row.numeric_value for row in self._matrix.rows])
+        """1D optional np.int/float64 ndarray of numeric-value for each row element.
+
+        A value of np.nan appears for a row element without a numeric-value. All
+        subtotal rows have a value of np.nan (subtotals have no numeric value).
+        """
+        return self._assembler.rows_dimension_numeric_values
+
+    @lazyproperty
+    def _table_proportion_variance(self):
+        """2D ndarray of np.float64 table-proportion variance for each matrix cell."""
+        p = self.table_proportions
+        return p * (1 - p)
 
     @lazyproperty
     def _transform_dicts(self):
@@ -1076,16 +1133,16 @@ class _Strand(CubePartition):
         return Z_975 * total_filtered_population * self.standard_error
 
     @lazyproperty
-    def row_base(self):
-        return np.array([row.base for row in self._stripe.rows])
-
-    @lazyproperty
     def row_count(self):
         return len(self._stripe.rows)
 
     @lazyproperty
     def row_labels(self):
         return tuple(row.label for row in self._stripe.rows)
+
+    @lazyproperty
+    def rows_base(self):
+        return np.array([row.base for row in self._stripe.rows])
 
     @lazyproperty
     def rows_dimension_fills(self):

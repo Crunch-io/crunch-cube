@@ -38,7 +38,6 @@ class DescribeIntegratedCube(object):
         assert cube.dimension_types == (DT.CAT, DT.CAT)
         assert isinstance(cube.dimensions, _ApparentDimensions)
         assert cube.has_means is False
-        assert cube.is_mr_aug is False
         assert cube.is_weighted is False
         assert cube.missing == 5
         assert cube.name == "v4"
@@ -258,19 +257,22 @@ class DescribeIntegrated_MeanMeasure(object):
         )
 
     def it_handles_cat_x_mr_with_means(self):
-        slice_ = Cube(CR.CAT_X_MR_WITH_MEANS).partitions[0]
-        assert slice_.column_labels == (
+        slice_ = Cube(CR.MEANS_CAT_X_MR).partitions[0]
+        assert slice_.column_labels.tolist() == [
             "Denmark",
             "Finland",
             "Iceland",
             "Norway",
             "Sweden",
-        )
+        ]
 
-    def it_handles_cat_x_cat_means_with_insertions(self):
-        slice_ = Cube(CR.CAT_X_CAT_MEANS_WITH_HS).partitions[0]
+    def it_handles_means_cat_hs_x_cat_hs(self):
+        slice_ = Cube(CR.MEANS_CAT_HS_X_CAT_HS).partitions[0]
+
+        means = slice_.means
+
         np.testing.assert_array_almost_equal(
-            slice_.means,
+            means,
             [
                 [41.96875, 30.875, 25.66666667, np.nan, 42.0],
                 [51.51515152, 47.95555556, 45.44444444, np.nan, 45.0952381],
@@ -283,7 +285,7 @@ class DescribeIntegrated_MeanMeasure(object):
         )
 
     def it_knows_if_it_has_means(self):
-        slice_ = Cube(CR.CAT_X_CAT_MEANS_WITH_HS).partitions[0]
+        slice_ = Cube(CR.MEANS_CAT_HS_X_CAT_HS).partitions[0]
         assert slice_.has_means
 
 
@@ -669,23 +671,27 @@ class TestCrunchCubeAs_Slice(object):
 
     def test_labels_cat_x_cat_exclude_missing(self):
         slice_ = Cube(CR.CAT_X_CAT).partitions[0]
-        assert slice_.row_labels == ("B", "C")
-        assert slice_.column_labels == ("C", "E")
+        assert slice_.row_labels.tolist() == ["B", "C"]
+        assert slice_.column_labels.tolist() == ["C", "E"]
 
     def test_labels_cat_x_datetime_exclude_missing(self):
         slice_ = Cube(CR.CAT_X_DATETIME).partitions[0]
-        assert slice_.row_labels == ("red", "green", "blue", "4", "9")
-        assert slice_.column_labels == (
+        assert slice_.row_labels.tolist() == ["red", "green", "blue", "4", "9"]
+        assert slice_.column_labels.tolist() == [
             "1776-07-04T00:00:00",
             "1950-12-24T00:00:00",
             "2000-01-01T00:00:00",
             "2000-01-02T00:00:00",
-        )
+        ]
 
     def test_labels_simple_cat_array_exclude_missing(self):
         slice_ = Cube(CR.SIMPLE_CAT_ARRAY).partitions[0]
-        assert slice_.row_labels == ("ca_subvar_1", "ca_subvar_2", "ca_subvar_3")
-        assert slice_.column_labels == ("a", "b", "c", "d")
+        assert slice_.row_labels.tolist() == [
+            "ca_subvar_1",
+            "ca_subvar_2",
+            "ca_subvar_3",
+        ]
+        assert slice_.column_labels.tolist() == ["a", "b", "c", "d"]
 
     def test_as_array_simple_cat_array_exclude_missing(self):
         slice_ = Cube(CR.SIMPLE_CAT_ARRAY).partitions[0]
@@ -810,12 +816,12 @@ class TestCrunchCubeAs_Slice(object):
     def test_margin_unweighted_gender_x_ideology_axis_0(self):
         slice_ = Cube(CR.ECON_GENDER_X_IDEOLOGY_WEIGHTED).partitions[0]
         expected = np.array([72, 182, 376, 220, 110, 40])
-        np.testing.assert_array_equal(slice_.column_base, expected)
+        np.testing.assert_array_equal(slice_.columns_base, expected)
 
     def test_margin_unweighted_gender_x_ideology_axis_1(self):
         slice_ = Cube(CR.ECON_GENDER_X_IDEOLOGY_WEIGHTED).partitions[0]
         expected = np.array([485, 515])
-        np.testing.assert_array_equal(slice_.row_base, expected)
+        np.testing.assert_array_equal(slice_.rows_base, expected)
 
     def test_margin_weighted_gender_x_ideology_axis_1(self):
         slice_ = Cube(CR.ECON_GENDER_X_IDEOLOGY_WEIGHTED).partitions[0]
@@ -1059,7 +1065,7 @@ class TestCrunchCubeAs_Slice(object):
         )
 
     def test_selected_crosstab_as_array(self):
-        slice_ = Cube(CR.SELECTED_CROSSTAB_4).partitions[0]
+        slice_ = Cube(CR.MR_X_CAT_2).partitions[0]
         expected = np.array(
             [
                 [9928.20954289002, 11524.821237084192],
@@ -1073,7 +1079,7 @@ class TestCrunchCubeAs_Slice(object):
         np.testing.assert_almost_equal(slice_.counts, expected)
 
     def test_selected_crosstab_margin_by_rows(self):
-        slice_ = Cube(CR.SELECTED_CROSSTAB_4).partitions[0]
+        slice_ = Cube(CR.MR_X_CAT_2).partitions[0]
         expected = np.array(
             [
                 21453.03077997421,
@@ -1087,7 +1093,7 @@ class TestCrunchCubeAs_Slice(object):
         np.testing.assert_almost_equal(slice_.rows_margin, expected)
 
     def test_selected_crosstab_margin_by_cols(self):
-        slice_ = Cube(CR.SELECTED_CROSSTAB_4).partitions[0]
+        slice_ = Cube(CR.MR_X_CAT_2).partitions[0]
         expected = np.array(
             [
                 [14566.261567907562, 15607.301233922663],
@@ -1101,7 +1107,7 @@ class TestCrunchCubeAs_Slice(object):
         np.testing.assert_almost_equal(slice_.columns_margin, expected)
 
     def test_selected_crosstab_margin_total(self):
-        slice_ = Cube(CR.SELECTED_CROSSTAB_4).partitions[0]
+        slice_ = Cube(CR.MR_X_CAT_2).partitions[0]
         expected = np.array(
             [
                 30173.5628018302,
@@ -1115,7 +1121,7 @@ class TestCrunchCubeAs_Slice(object):
         np.testing.assert_almost_equal(slice_.table_margin, expected)
 
     def test_selected_crosstab_proportions_by_rows(self):
-        slice_ = Cube(CR.SELECTED_CROSSTAB_4).partitions[0]
+        slice_ = Cube(CR.MR_X_CAT_2).partitions[0]
         expected = np.array(
             [
                 [0.4627882020361299, 0.5372117979638701],
@@ -1129,7 +1135,7 @@ class TestCrunchCubeAs_Slice(object):
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
     def test_selected_crosstab_proportions_by_cols(self):
-        slice_ = Cube(CR.SELECTED_CROSSTAB_4).partitions[0]
+        slice_ = Cube(CR.MR_X_CAT_2).partitions[0]
         expected = np.array(
             [
                 [0.6815894041587091, 0.7384249886863752],
@@ -1143,7 +1149,7 @@ class TestCrunchCubeAs_Slice(object):
         np.testing.assert_almost_equal(slice_.column_proportions, expected)
 
     def test_selected_crosstab_proportions_by_cell(self):
-        slice_ = Cube(CR.SELECTED_CROSSTAB_4).partitions[0]
+        slice_ = Cube(CR.MR_X_CAT_2).partitions[0]
         expected = np.array(
             [
                 [0.329036700375595, 0.381950958618156],
@@ -1282,7 +1288,7 @@ class TestCrunchCubeAs_Slice(object):
     def test_ca_with_single_cat(self):
         slice_ = Cube(CR.CA_SINGLE_CAT).partitions[0]
         expected = np.array([79, 80, 70, 0])
-        np.testing.assert_almost_equal(slice_.row_base, expected)
+        np.testing.assert_almost_equal(slice_.rows_base, expected)
 
     def test_pets_array_x_pets_by_col(self):
         slice_ = Cube(CR.PETS_ARRAY_X_PETS).partitions[0]
@@ -1530,7 +1536,7 @@ class TestCrunchCubeAs_Slice(object):
         # TODO: Fix after base is implemented for means partitions
         """Tests that total margin is Unweighted N, when cube has means."""
         transforms = {"rows_dimension": {"prune": True}}
-        slice_ = Cube(CR.CAT_MEAN_WGTD, transforms=transforms).partitions[0]
+        strand = Cube(CR.CAT_MEAN_WGTD, transforms=transforms).partitions[0]
         expected = np.array(
             [
                 806,
@@ -1570,8 +1576,8 @@ class TestCrunchCubeAs_Slice(object):
                 12,
             ]
         )
-        np.testing.assert_array_equal(slice_.row_base, expected)
-        # not testing cube.prune_indices() because the margin has 6367 cells
+        np.testing.assert_array_equal(strand.rows_base, expected)
+        # --- not testing cube.prune_indices() because the margin has 6367 cells ---
 
     def test_ca_with_single_cat_pruning(self):
         transforms = {"rows_dimension": {"prune": True}}
@@ -1650,7 +1656,7 @@ class TestCrunchCubeAs_Slice(object):
 
     def test_ca_subvar_x_cat_hs_counts_prune(self):
         transforms = {"rows_dimension": {"prune": True}}
-        slice_ = Cube(CR.CA_SUBVAR_X_CAT_HS, transforms=transforms).partitions[0]
+        slice_ = Cube(CR.CA_SUBVAR_HS_X_CAT_HS, transforms=transforms).partitions[0]
         expected = np.array([[3, 3, 0, 0, 6], [1, 3, 2, 0, 4], [0, 2, 1, 3, 2]])
         np.testing.assert_array_equal(slice_.counts, expected)
 
@@ -1950,7 +1956,7 @@ class TestCrunchCubeAs_Slice(object):
     def test_ca_x_mr_margin(self):
         slice_ = Cube(CR.CA_X_MR_WEIGHTED_HS).partitions[0]
         expected = np.array([504, 215, 224, 76, 8, 439])
-        np.testing.assert_array_equal(slice_.column_base, expected)
+        np.testing.assert_array_equal(slice_.columns_base, expected)
 
     def test_ca_x_mr_margin_prune(self):
         # ---CA x MR---
@@ -1960,7 +1966,7 @@ class TestCrunchCubeAs_Slice(object):
         }
         slice_ = Cube(CR.CA_X_MR_WEIGHTED_HS, transforms=transforms).partitions[0]
         np.testing.assert_array_equal(
-            slice_.column_base, np.array([504, 215, 224, 76, 8, 439])
+            slice_.columns_base, np.array([504, 215, 224, 76, 8, 439])
         )
         assert slice_.table_name == "q1. Aftensmad: K\xf8d (svin/lam/okse)"
 

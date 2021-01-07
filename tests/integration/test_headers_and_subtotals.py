@@ -4,7 +4,6 @@
 
 import numpy as np
 
-from cr.cube.crunch_cube import CrunchCube
 from cr.cube.cube import Cube
 
 from ..fixtures import CR
@@ -15,8 +14,8 @@ class TestHeadersAndSubtotals(object):
     """Legacy unit-test suite for inserted rows and columns."""
 
     def test_headings_econ_blame_one_subtotal(self):
-        slice_ = Cube(CR.ECON_BLAME_WITH_HS).partitions[0]
-        expected = (
+        strand = Cube(CR.ECON_BLAME_WITH_HS).partitions[0]
+        assert strand.row_labels == (
             "President Obama",
             "Republicans in Congress",
             "Test New Heading (Obama and Republicans)",
@@ -24,26 +23,25 @@ class TestHeadersAndSubtotals(object):
             "Neither",
             "Not sure",
         )
-        assert slice_.row_labels == expected
 
     def test_headings_econ_blame_one_subtotal_do_not_fetch(self):
         transforms = {
             "columns_dimension": {"insertions": {}},
             "rows_dimension": {"insertions": {}},
         }
-        slice_ = Cube(CR.ECON_BLAME_WITH_HS, transforms=transforms).partitions[0]
-        expected = (
+        strand = Cube(CR.ECON_BLAME_WITH_HS, transforms=transforms).partitions[0]
+
+        assert strand.row_labels == (
             "President Obama",
             "Republicans in Congress",
             "Both",
             "Neither",
             "Not sure",
         )
-        assert slice_.row_labels == expected
 
     def test_headings_econ_blame_two_subtotal_without_missing(self):
-        slice_ = Cube(CR.ECON_BLAME_WITH_HS_MISSING).partitions[0]
-        expected = (
+        strand = Cube(CR.ECON_BLAME_WITH_HS_MISSING).partitions[0]
+        assert strand.row_labels == (
             "President Obama",
             "Republicans in Congress",
             "Test New Heading (Obama and Republicans)",
@@ -52,24 +50,22 @@ class TestHeadersAndSubtotals(object):
             "Not sure",
             "Test Heading with Skipped",
         )
-        assert slice_.row_labels == expected
 
     def test_headings_two_subtotal_without_missing_do_not_fetch(self):
         transforms = {
             "columns_dimension": {"insertions": {}},
             "rows_dimension": {"insertions": {}},
         }
-        slice_ = Cube(CR.ECON_BLAME_WITH_HS_MISSING, transforms=transforms).partitions[
+        strand = Cube(CR.ECON_BLAME_WITH_HS_MISSING, transforms=transforms).partitions[
             0
         ]
-        expected = (
+        assert strand.row_labels == (
             "President Obama",
             "Republicans in Congress",
             "Both",
             "Neither",
             "Not sure",
         )
-        assert slice_.row_labels == expected
 
     def test_1D_one_subtotal(self):
         strand = Cube(CR.ECON_BLAME_WITH_HS).partitions[0]
@@ -131,7 +127,7 @@ class TestHeadersAndSubtotals(object):
 
     def test_1D_subtotals_row_base(self):
         strand = Cube(CR.ECON_BLAME_WITH_HS_MISSING).partitions[0]
-        np.testing.assert_equal(strand.row_base, [285, 396, 681, 242, 6, 68, 74])
+        np.testing.assert_equal(strand.rows_base, [285, 396, 681, 242, 6, 68, 74])
 
     def test_1D_subtotals_rows_dimension_fills(self):
         strand = Cube(CR.ECON_BLAME_WITH_HS_MISSING).partitions[0]
@@ -151,34 +147,34 @@ class TestHeadersAndSubtotals(object):
 
     def test_labels_on_2d_cube_with_hs_on_1st_dim(self):
         slice_ = Cube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS).partitions[0]
-        assert slice_.row_labels == (
+        assert slice_.row_labels.tolist() == [
             "President Obama",
             "Republicans in Congress",
             "Test New Heading (Obama and Republicans)",
             "Both",
             "Neither",
             "Not sure",
-        )
-        assert slice_.column_labels == (
+        ]
+        assert slice_.column_labels.tolist() == [
             "Very liberal",
             "Liberal",
             "Moderate",
             "Conservative",
             "Very Conservative",
             "Not sure",
-        )
+        ]
 
     def test_labels_on_2d_cube_with_hs_on_both_dim(self):
         slice_ = Cube(CR.ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS).partitions[0]
-        assert slice_.row_labels == (
+        assert slice_.row_labels.tolist() == [
             "President Obama",
             "Republicans in Congress",
             "Test New Heading (Obama and Republicans)",
             "Both",
             "Neither",
             "Not sure",
-        )
-        assert slice_.column_labels == (
+        ]
+        assert slice_.column_labels.tolist() == [
             "Very liberal",
             "Liberal",
             "Moderate",
@@ -186,7 +182,7 @@ class TestHeadersAndSubtotals(object):
             "Conservative",
             "Very Conservative",
             "Not sure",
-        )
+        ]
 
     def test_labels_on_2d_cube_with_hs_on_both_dim_do_not_fetch(self):
         transforms = {
@@ -196,21 +192,21 @@ class TestHeadersAndSubtotals(object):
         slice_ = Cube(
             CR.ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS, transforms=transforms
         ).partitions[0]
-        assert slice_.row_labels == (
+        assert slice_.row_labels.tolist() == [
             "President Obama",
             "Republicans in Congress",
             "Both",
             "Neither",
             "Not sure",
-        )
-        assert slice_.column_labels == (
+        ]
+        assert slice_.column_labels.tolist() == [
             "Very liberal",
             "Liberal",
             "Moderate",
             "Conservative",
             "Very Conservative",
             "Not sure",
-        )
+        ]
 
     def test_subtotals_as_array_2d_cube_with_hs_on_row(self):
         slice_ = Cube(CR.ECON_BLAME_X_IDEOLOGY_ROW_HS).partitions[0]
@@ -382,8 +378,18 @@ class TestHeadersAndSubtotals(object):
 
     def test_ca_labels_with_hs(self):
         slice_ = Cube(CR.SIMPLE_CA_HS).partitions[0]
-        assert slice_.row_labels == ("ca_subvar_1", "ca_subvar_2", "ca_subvar_3")
-        assert slice_.column_labels == ("a", "b", "Test A and B combined", "c", "d")
+        assert slice_.row_labels.tolist() == [
+            "ca_subvar_1",
+            "ca_subvar_2",
+            "ca_subvar_3",
+        ]
+        assert slice_.column_labels.tolist() == [
+            "a",
+            "b",
+            "Test A and B combined",
+            "c",
+            "d",
+        ]
 
     def test_ca_as_array_with_hs(self):
         slice_ = Cube(CR.SIMPLE_CA_HS).partitions[0]
@@ -406,18 +412,18 @@ class TestHeadersAndSubtotals(object):
 
     def test_hs_with_anchor_on_zero_position_labels(self):
         slice_ = Cube(CR.ECON_US_PROBLEM_X_BIGGER_PROBLEM).partitions[0]
-        assert slice_.row_labels == (
+        assert slice_.row_labels.tolist() == [
             "Serious net",
             "Very serious",
             "Somewhat serious",
             "Not very serious",
             "Not at all serious",
             "Not sure",
-        )
-        assert slice_.column_labels == (
+        ]
+        assert slice_.column_labels.tolist() == [
             "Sexual assaults that go unreported or unpunished",
             "False accusations of sexual assault",
-        )
+        ]
 
     def test_hs_with_anchor_on_zero_position_as_props_by_col(self):
         slice_ = Cube(CR.ECON_US_PROBLEM_X_BIGGER_PROBLEM).partitions[0]
@@ -512,15 +518,14 @@ class TestHeadersAndSubtotals(object):
         np.testing.assert_almost_equal(slice_.pvals, expected)
 
     def test_fruit_hs_top_bottom_labels(self):
-        slice_ = Cube(CR.FRUIT_HS_TOP_BOTTOM).partitions[0]
-        assert slice_.row_labels == ("TOP", "rambutan", "MIDDLE", "satsuma", "BOTTOM")
-
-    def test_fruit_hs_top_bottom_inserted_indices(self):
-        # TODO: Figure how to do with new slice
-        cube = CrunchCube(CR.FRUIT_HS_TOP_BOTTOM)
-        expected = [[0, 2, 4]]
-        actual = cube.inserted_hs_indices(prune=True)
-        assert actual == expected
+        strand = Cube(CR.FRUIT_HS_TOP_BOTTOM).partitions[0]
+        assert strand.row_labels == (
+            "TOP",
+            "rambutan",
+            "MIDDLE",
+            "satsuma",
+            "BOTTOM",
+        )
 
     def test_fruit_hs_top_bottom_counts(self):
         strand = Cube(CR.FRUIT_HS_TOP_BOTTOM).partitions[0]
@@ -548,25 +553,6 @@ class TestHeadersAndSubtotals(object):
             [40, 34, 38],
         ]
         np.testing.assert_array_equal(slice_.counts, expected)
-
-    def test_hs_indices_pruned_cat_x_date(self):
-        # TODO: Figure in frozen slice
-        cube = CrunchCube(CR.CAT_X_DATE_HS_PRUNE)
-        expected = [0, 3, 6]
-        actual = cube.inserted_hs_indices(prune=True)[0]
-        assert actual == expected
-
-    def test_hs_indices_pruned_cat_x_num(self):
-        cube = CrunchCube(CR.CAT_X_NUM_HS_PRUNE)
-        expected = [0, 1, 3]
-        actual = cube.inserted_hs_indices(prune=True)[0]
-        assert actual == expected
-
-        # Ensure cached properties are not updated
-        actual = cube.inserted_hs_indices(prune=True)[0]
-        assert actual == expected
-        actual = cube.inserted_hs_indices(prune=True)[0]
-        assert actual == expected
 
     def test_cat_x_num_counts_pruned_with_hs(self):
         transforms = {
@@ -619,8 +605,8 @@ class TestHeadersAndSubtotals(object):
         )
 
     def test_missing_cat_hs_labels(self):
-        slice_ = Cube(CR.MISSING_CAT_HS).partitions[0]
-        assert slice_.row_labels == (
+        strand = Cube(CR.MISSING_CAT_HS).partitions[0]
+        assert strand.row_labels == (
             "Whites",
             "White college women voters",
             "White non-college women voters",
@@ -996,7 +982,7 @@ class TestHeadersAndSubtotals(object):
 
     def test_col_labels_with_top_hs(self):
         slice_ = Cube(CR.CAT_X_CAT_HS_MISSING).partitions[0]
-        assert slice_.column_labels == (
+        assert slice_.column_labels.tolist() == [
             "Whites",
             "White college women voters",
             "White non-college women voters",
@@ -1004,7 +990,7 @@ class TestHeadersAndSubtotals(object):
             "White non-college men voters",
             "Black voters",
             "Latino and other voters",
-        )
+        ]
 
     def it_calculate_col_residuals_for_subtotals(self):
         slice_ = Cube(CR.CAT_X_CAT_HS_2ROWS_1COL).partitions[0]
@@ -1829,7 +1815,7 @@ class TestHeadersAndSubtotals(object):
         )
 
     def it_calculates_residuals_for_columns_insertion(self):
-        slice_ = Cube(CR.CA_SUBVAR_X_CAT_HS).partitions[0]
+        slice_ = Cube(CR.CA_SUBVAR_HS_X_CAT_HS).partitions[0]
 
         # Test zscores for 1 column insertion
         assert slice_.inserted_column_idxs == (4,)
@@ -2017,7 +2003,7 @@ class TestHeadersAndSubtotals(object):
 
     def it_calculates_residuals_for_rows_insertion(self):
         transforms = {"columns_dimension": {"insertions": {}}}
-        slice_ = Cube(CR.CAT_X_CAT_PRUNING_HS, transforms=transforms).partitions[0]
+        slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
 
         # Test zscores for 1 row insertion
         assert slice_.inserted_row_idxs == (1,)

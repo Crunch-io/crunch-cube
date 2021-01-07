@@ -2,18 +2,16 @@
 
 """Unit test suite for `cr.cube.cube` module."""
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import pytest
 import numpy as np
 
 from cr.cube.cube import Cube, CubeSet, _BaseMeasure, _Measures
 from cr.cube.cubepart import _Slice, _Strand, _Nub
-from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.dimension import Dimension
+from cr.cube.enums import DIMENSION_TYPE as DT
 
 from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
-from ..unitutil import call, class_mock, instance_mock, property_mock, method_mock
+from ..unitutil import call, class_mock, instance_mock, property_mock
 
 
 class DescribeCubeSet(object):
@@ -159,37 +157,6 @@ class DescribeCubeSet(object):
 
         np.testing.assert_almost_equal(cubeset_population_fraction, expected_value)
 
-    def it_provides_access_to_its_Cube_objects_to_help(self, _iter_cubes_, cube_):
-        _iter_cubes_.return_value = (c for c in (cube_, cube_, cube_))
-        cube_set = CubeSet(None, None, None, None)
-
-        cubes = cube_set._cubes
-
-        assert cubes == (cube_, cube_, cube_)
-
-    @pytest.mark.parametrize(
-        ("is_multi_cube", "cube_0_ndim", "expected_value"),
-        ((False, 1, False), (False, 0, False), (True, 1, False), (True, 0, True)),
-    )
-    def it_knows_whether_it_is_numeric_mean_to_help(
-        self,
-        _is_multi_cube_prop_,
-        is_multi_cube,
-        Cube_,
-        cube_,
-        cube_0_ndim,
-        expected_value,
-    ):
-        _is_multi_cube_prop_.return_value = is_multi_cube
-        cube_.ndim = cube_0_ndim
-        Cube_.return_value = cube_
-        cube_set = CubeSet(({"cube": 0}, {"cube": 1}), None, None, None)
-
-        is_numeric_mean = cube_set._is_numeric_mean
-
-        assert Cube_.call_args_list == ([call({"cube": 0})] if is_multi_cube else [])
-        assert is_numeric_mean == expected_value
-
     def it_constructs_its_sequence_of_cube_objects_to_help(
         self, request, Cube_, _is_numeric_mean_prop_
     ):
@@ -203,7 +170,7 @@ class DescribeCubeSet(object):
             min_base=10,
         )
 
-        cubes = tuple(cube_set._iter_cubes())
+        cubes = cube_set._cubes
 
         assert Cube_.call_args_list == [
             call(
@@ -244,7 +211,7 @@ class DescribeCubeSet(object):
             min_base=10,
         )
 
-        cubes = tuple(cube_set._iter_cubes())
+        cubes = cube_set._cubes
 
         assert Cube_.call_args_list == [
             call(
@@ -272,6 +239,29 @@ class DescribeCubeSet(object):
         assert cube_.inflate.call_args_list == [call(), call(), call()]
         assert cubes == cubes_[:3]
 
+    @pytest.mark.parametrize(
+        ("is_multi_cube", "cube_0_ndim", "expected_value"),
+        ((False, 1, False), (False, 0, False), (True, 1, False), (True, 0, True)),
+    )
+    def it_knows_whether_it_is_numeric_mean_to_help(
+        self,
+        _is_multi_cube_prop_,
+        is_multi_cube,
+        Cube_,
+        cube_,
+        cube_0_ndim,
+        expected_value,
+    ):
+        _is_multi_cube_prop_.return_value = is_multi_cube
+        cube_.ndim = cube_0_ndim
+        Cube_.return_value = cube_
+        cube_set = CubeSet(({"cube": 0}, {"cube": 1}), None, None, None)
+
+        is_numeric_mean = cube_set._is_numeric_mean
+
+        assert Cube_.call_args_list == ([call({"cube": 0})] if is_multi_cube else [])
+        assert is_numeric_mean == expected_value
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -293,10 +283,6 @@ class DescribeCubeSet(object):
     @pytest.fixture
     def _is_numeric_mean_prop_(self, request):
         return property_mock(request, CubeSet, "_is_numeric_mean")
-
-    @pytest.fixture
-    def _iter_cubes_(self, request):
-        return method_mock(request, CubeSet, "_iter_cubes")
 
 
 class DescribeCube(object):
@@ -354,37 +340,6 @@ class DescribeCube(object):
     )
     def it_knows_its_index_within_its_cube_set(self, cube_idx_arg, expected_value):
         assert Cube(None, cube_idx_arg).cube_index == expected_value
-
-    @pytest.mark.parametrize(
-        ("dim_types", "aliases", "expected_value"),
-        (
-            ((), (), False),
-            ((DT.MR,), ("alias",), False),
-            ((DT.MR, DT.MR), ("alias", "alias"), False),
-            ((DT.MR, DT.CAT, DT.CAT), ("alias1", "alias2", "alias2"), False),
-            ((DT.CAT, DT.MR, DT.MR), ("alias1", "alias2", "alias3"), False),
-            ((DT.CAT, DT.MR, DT.MR), ("alias1", "alias2", "alias2"), True),
-        ),
-    )
-    def it_knows_if_it_is_mr_aug(
-        self, request, dim_types, aliases, expected_value, dimension_types_prop_
-    ):
-        property_mock(request, Cube, "ndim", return_value=len(dim_types))
-        dimension_types_prop_.return_value = dim_types
-        property_mock(
-            request,
-            Cube,
-            "dimensions",
-            return_value=[
-                instance_mock(request, Dimension, alias=aliases[i])
-                for i, _ in enumerate(dim_types)
-            ],
-        )
-        cube = Cube(None, None, None, None)
-
-        is_mr_aug = cube.is_mr_aug
-
-        assert is_mr_aug is expected_value
 
     @pytest.mark.parametrize(
         ("dim_types", "cube_idx", "_is_single_filter_col_cube", "expected_value"),

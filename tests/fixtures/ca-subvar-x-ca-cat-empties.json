@@ -1,0 +1,179 @@
+{
+    "query": {
+        "dimensions": [
+            {
+                "args": [
+                    {"variable": "https://alpha.crunch.io/api/datasets/f6d04137cce547e8acbd46b8d0d66f13/variables/f89b704a14de4a319e8afcbf3a9d358a/"},
+                    {"value": "subvariables"}
+                ],
+                "function": "dimension"
+            },
+            {"variable": "https://alpha.crunch.io/api/datasets/f6d04137cce547e8acbd46b8d0d66f13/variables/f89b704a14de4a319e8afcbf3a9d358a/"}
+        ],
+        "measures": {
+            "count": {
+                "args": [],
+                "function": "cube_count"
+            }
+        },
+        "weight": "https://alpha.crunch.io/api/datasets/f6d04137cce547e8acbd46b8d0d66f13/variables/0yADwLRARYg8QMoiERXLx300011d/"
+    },
+    "query_environment": {
+        "filter": []
+    },
+    "result": {
+        "counts": [
+            2734, 5887,    0, 1017,   51,    0,
+            2810, 7000,    0,  474,   85,    0,
+               0,    0,    0,    0,    0,    0,
+             347, 2577,    0, 4467,  133,    0,
+             311, 5529,    0, 1469,   74,    0
+        ],
+        "dimensions": [
+            {
+                "derived": true,
+                "references": {
+                    "alias": "Trust in sources",
+                    "name": "Trust in so",
+                    "subreferences": [
+                        {"alias": "GROUP_TRUST_a_W57__1", "name": "Nat’l news"},
+                        {"alias": "GROUP_TRUST_b_W57__1", "name": "Local news"},
+                        {"alias": "GROUP_TRUST_c_W57__1", "name": "Friends & f"},
+                        {"alias": "GROUP_TRUST_d_W57__1", "name": "Social medi"},
+                        {"alias": "GROUP_TRUST_e_W57__1", "name": "Political l"}
+                    ],
+                    "uniform_basis": false,
+                    "view": {
+                        "transform": {
+                            "insertions": [
+                                {"anchor": "top", "args": [1, 2], "function": "subtotal", "name": "High"},
+                                {"anchor": "top", "args": [3, 4], "function": "subtotal", "name": "Low"}
+                            ]
+                        }
+                    }
+                },
+                "type": {
+                    "class": "enum",
+                    "elements": [
+                        {
+                            "id": 1,
+                            "value": {
+                                "derived": false,
+                                "id": "00000",
+                                "references": {"alias": "GROUP_TRUST_a_W57__1", "name": "Nat’l news"}
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "derived": false,
+                                "id": "00001",
+                                "references": {"alias": "GROUP_TRUST_b_W57__1", "name": "Local news"}
+                            }
+                        },
+                        {
+                            "id": 3,
+                            "value": {
+                                "derived": false,
+                                "id": "00002",
+                                "references": {"alias": "GROUP_TRUST_c_W57__1", "name": "Friends & f"}
+                            }
+                        },
+                        {
+                            "id": 4,
+                            "value": {
+                                "derived": false,
+                                "id": "00003",
+                                "references": {"alias": "GROUP_TRUST_d_W57__1", "name": "Social medi"}
+                            }
+                        },
+                        {
+                            "id": 5,
+                            "value": {
+                                "derived": false,
+                                "id": "00004",
+                                "references": {"alias": "GROUP_TRUST_e_W57__1", "name": "Political l"}
+                            }
+                        }
+                    ],
+                    "subtype": {"class": "variable"}
+                }
+            },
+            {
+                "derived": true,
+                "references": {
+                    "alias": "Trust in sources",
+                    "name": "Trust in so",
+                    "subreferences": [
+                        {"alias": "GROUP_TRUST_a_W57__1", "name": "Nat’l news"},
+                        {"alias": "GROUP_TRUST_b_W57__1", "name": "Local news"},
+                        {"alias": "GROUP_TRUST_c_W57__1", "name": "Friends & f"},
+                        {"alias": "GROUP_TRUST_d_W57__1", "name": "Social medi"},
+                        {"alias": "GROUP_TRUST_e_W57__1", "name": "Political l"}
+                    ],
+                    "uniform_basis": false,
+                    "view": {
+                        "transform": {
+                            "insertions": []
+                        }
+                    }
+                },
+                "type": {
+                    "categories": [
+                        {"id": 1, "name": "A lot", "numeric_value": 1},
+                        {"id": 2, "name": "Some", "numeric_value": 2},
+                        {"id": 3, "name": "Not too muc", "numeric_value": 3},
+                        {"id": 4, "name": "Not at all", "numeric_value": 4},
+                        {"id": 99, "name": "Refused", "numeric_value": 99},
+                        {"id": -1, "missing": true, "name": "No Data"}
+                    ],
+                    "class": "categorical",
+                    "ordinal": false,
+                    "subvariables": [
+                        "00000",
+                        "00001",
+                        "00002",
+                        "00003",
+                        "00004"
+                    ]
+                }
+            }
+        ],
+        "filter_stats": {
+            "filtered": {
+                "unweighted": {"missing": 0, "other": 0, "selected": 12043},
+                "weighted": {"missing": 0, "other": 0, "selected": 12043.000484249482}
+            },
+            "filtered_complete": {
+                "unweighted": {"missing": 0, "other": 0, "selected": 12043},
+                "weighted": {"missing": 0, "other": 0, "selected": 12043.000484249482}
+            }
+        },
+        "filtered": {"unweighted_n": 12043, "weighted_n": 12043.000484249482},
+        "measures": {
+            "count": {
+                "data": [
+                     2029.56824,  5846.13842,     0.00000,  1283.81640,    50.85937,     0.00000,
+                     2546.39500,  6910.21002,     0.00000,   662.14588,    60.00625,     0.00000,
+                        0.00000,     0.00000,     0.00000,     0.00000,     0.00000,     0.00000,
+                      451.46231,  2735.90568,     0.00000,  4145.34423,   105.62784,     0.00000,
+                      366.85830,  5197.49616,     0.00000,  1851.41694,    86.79902,     0.00000
+                ],
+                "metadata": {
+                    "derived": true,
+                    "references": {},
+                    "type": {
+                        "class": "numeric",
+                        "integer": false,
+                        "missing_reasons": {"No Data": -1},
+                        "missing_rules": {}
+                    }
+                },
+                "n_missing": 0
+            }
+        },
+        "missing": 0,
+        "n": 12043,
+        "unfiltered": {"unweighted_n": 12043, "weighted_n": 12043.000484249482}
+    }
+}
