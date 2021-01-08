@@ -342,6 +342,39 @@ class Describe_MrXCatWeightedCubeCounts(object):
         ]
 
 
+class Describe_MrXMrWeightedCubeCounts(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._MrXMrWeightedCubeCounts`."""
+
+    def it_knows_its_weighted_counts(self):
+        weighted_cube_counts = np.array(
+            [
+                [  # -- row 0 -------------
+                    [  # -- selected ------
+                        [0, 8],  # -- col 0
+                        [1, 7],  # -- col 1
+                    ],
+                    [  # -- not selected --
+                        [2, 6],  # -- col 0
+                        [3, 5],  # -- col 1
+                    ],
+                ],
+                [  # -- row 1 -------------
+                    [  # -- selected ------
+                        [4, 4],  # -- col 0
+                        [5, 3],  # -- col 1
+                    ],
+                    [  # -- not selected --
+                        [6, 2],  # -- col 0
+                        [7, 1],  # -- col 1
+                    ],
+                ],
+            ]
+        )
+        cube_measure = _MrXMrWeightedCubeCounts(None, weighted_cube_counts)
+
+        assert cube_measure.weighted_counts.tolist() == [[0, 1], [4, 5]]
+
+
 # === LEGACY CUBE-RESULT MATRIX TESTS (should go away after measure consolidation) ===
 
 

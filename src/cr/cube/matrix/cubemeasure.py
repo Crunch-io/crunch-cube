@@ -239,6 +239,16 @@ class _MrXMrWeightedCubeCounts(_BaseWeightedCubeCounts):
     Its `._weighted_counts` is a 4D ndarray with axes (rows, sel/not, cols, sel/not).
     """
 
+    @lazyproperty
+    def weighted_counts(self):
+        """2D np.float/int64 ndarray of weighted-count for each valid matrix cell.
+
+        The cell values are np.int64 when the cube-result has no weight, in which case
+        these values are the same as the unweighted-counts. Only *selected* counts
+        contribute to these values.
+        """
+        return self._weighted_counts[:, 0, :, 0]
+
 
 # === LEGACY MATRIX OBJECTS ===
 

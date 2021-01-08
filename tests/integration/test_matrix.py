@@ -217,7 +217,6 @@ class DescribeAssembler(object):
             )
         )
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_weighted_counts_for_mr_x_mr(self):
         slice_ = Cube(CR.MR_X_MR).partitions[0]
         assert slice_._assembler.new_weighted_counts == pytest.approx(
