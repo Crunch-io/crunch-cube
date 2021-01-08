@@ -359,6 +359,11 @@ class Assembler(object):
         return self._assemble_matrix(self._measures.unweighted_counts.blocks)
 
     @lazyproperty
+    def new_weighted_counts(self):
+        """2D np.float/int64 ndarray of weighted-count for each cell."""
+        raise NotImplementedError
+
+    @lazyproperty
     def weighted_counts(self):
         """2D np.float/int64 ndarray of weighted-count for each cell."""
         return self._assemble_matrix(
