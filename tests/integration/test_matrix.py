@@ -166,7 +166,6 @@ class DescribeAssembler(object):
         slice_ = Cube(CR.CAT_X_MR).partitions[0]
         np.testing.assert_array_equal(slice_.columns_base, np.array([40, 34, 38]))
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_weighted_counts_for_cat_hs_x_cat_hs_hiddens_explicit_order(self):
         slice_ = _Slice(
             Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),
