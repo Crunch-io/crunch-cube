@@ -16,15 +16,19 @@ from cr.cube.matrix.cubemeasure import (
     _CatXCatMatrix,
     _CatXCatMeansMatrix,
     _CatXCatUnweightedCubeCounts,
+    _CatXCatWeightedCubeCounts,
     _CatXMrMatrix,
     _CatXMrMeansMatrix,
     _CatXMrUnweightedCubeCounts,
+    _CatXMrWeightedCubeCounts,
     CubeMeasures,
     _MrXCatMatrix,
     _MrXCatMeansMatrix,
     _MrXCatUnweightedCubeCounts,
+    _MrXCatWeightedCubeCounts,
     _MrXMrMatrix,
     _MrXMrUnweightedCubeCounts,
+    _MrXMrWeightedCubeCounts,
 )
 
 from ...unitutil import class_mock, instance_mock, method_mock, property_mock
@@ -94,6 +98,9 @@ class Describe_BaseCubeMeasure(object):
         measure = _BaseCubeMeasure(None)
 
         assert measure._slice_idx_expr(cube_, slice_idx=3) == expected_value
+
+
+# === UNWEIGHTED COUNTS ===
 
 
 class Describe_BaseUnweightedCubeCounts(object):
@@ -225,6 +232,50 @@ class Describe_MrXMrUnweightedCubeCounts(object):
         cube_measure = _MrXMrUnweightedCubeCounts(None, unweighted_cube_counts)
 
         assert cube_measure.unweighted_counts.tolist() == [[0, 1], [4, 5]]
+
+
+# === WEIGHTED COUNTS ===
+
+
+class Describe_BaseWeightedCubeCounts(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._BaseWeightedCubeCounts`."""
+
+    @pytest.mark.parametrize(
+        "dimension_types, WeightedCubeCountsCls",
+        (
+            ((DT.MR, DT.MR), _MrXMrWeightedCubeCounts),
+            ((DT.MR, DT.CAT), _MrXCatWeightedCubeCounts),
+            ((DT.CAT, DT.MR), _CatXMrWeightedCubeCounts),
+            ((DT.CAT, DT.CAT), _CatXCatWeightedCubeCounts),
+        ),
+    )
+    def it_provides_a_factory_for_constructing_weighted_cube_count_objects(
+        self, request, dimension_types, WeightedCubeCountsCls
+    ):
+        cube_ = instance_mock(request, Cube)
+        dimensions_ = (
+            instance_mock(request, Dimension),
+            instance_mock(request, Dimension),
+        )
+        weighted_cube_counts_ = instance_mock(request, WeightedCubeCountsCls)
+        WeightedCubeCountsCls_ = class_mock(
+            request,
+            "cr.cube.matrix.cubemeasure.%s" % WeightedCubeCountsCls.__name__,
+            return_value=weighted_cube_counts_,
+        )
+        _slice_idx_expr_ = method_mock(
+            request, _BaseWeightedCubeCounts, "_slice_idx_expr", return_value=1
+        )
+        cube_.dimension_types = dimension_types
+        cube_.counts = [[1, 2], [3, 4]]
+
+        weighted_cube_counts = _BaseWeightedCubeCounts.factory(
+            cube_, dimensions_, slice_idx=2
+        )
+
+        _slice_idx_expr_.assert_called_once_with(cube_, 2)
+        WeightedCubeCountsCls_.assert_called_once_with(dimensions_, [3, 4])
+        assert weighted_cube_counts is weighted_cube_counts_
 
 
 # === LEGACY CUBE-RESULT MATRIX TESTS (should go away after measure consolidation) ===

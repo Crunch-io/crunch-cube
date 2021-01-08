@@ -165,10 +165,27 @@ class _MrXMrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
 class _BaseWeightedCubeCounts(_BaseCubeMeasure):
     """Base class for weighted-count cube-measure variants."""
 
+    def __init__(self, dimensions, weighted_counts):
+        super(_BaseWeightedCubeCounts, self).__init__(dimensions)
+        self._weighted_counts = weighted_counts
+
     @classmethod
     def factory(cls, cube, dimensions, slice_idx):
         """Return _BaseWeightedCounts subclass instance appropriate to `cube`."""
-        raise NotImplementedError
+        dimension_types = cube.dimension_types[-2:]
+
+        WeightedCubeCountsCls = (
+            _MrXMrWeightedCubeCounts
+            if dimension_types == (DT.MR, DT.MR)
+            else _MrXCatWeightedCubeCounts
+            if dimension_types[0] == DT.MR
+            else _CatXMrWeightedCubeCounts
+            if dimension_types[1] == DT.MR
+            else _CatXCatWeightedCubeCounts
+        )
+        return WeightedCubeCountsCls(
+            dimensions, cube.counts[cls._slice_idx_expr(cube, slice_idx)]
+        )
 
     @lazyproperty
     def weighted_counts(self):
@@ -176,6 +193,28 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
         raise NotImplementedError(
             "`%s` must implement `.weighted_counts`" % type(self).__name__
         )
+
+
+class _CatXCatWeightedCubeCounts(_BaseWeightedCubeCounts):
+    """Weighted-counts cube-measure for a slice with no MR dimensions."""
+
+
+class _CatXMrWeightedCubeCounts(_BaseWeightedCubeCounts):
+    """Weighted-counts cube-measure for a NOT_MR_X_MR slice."""
+
+
+class _MrXCatWeightedCubeCounts(_BaseWeightedCubeCounts):
+    """Weighted-counts cube-measure for an MR_X_NOT_MR slice.
+
+    Its `._weighted_counts` is a 3D ndarray with axes (rows, sel/not, cols).
+    """
+
+
+class _MrXMrWeightedCubeCounts(_BaseWeightedCubeCounts):
+    """Weighted-counts cube-measure for an MR_X_MR slice.
+
+    Its `._weighted_counts` is a 4D ndarray with axes (rows, sel/not, cols, sel/not).
+    """
 
 
 # === LEGACY MATRIX OBJECTS ===
