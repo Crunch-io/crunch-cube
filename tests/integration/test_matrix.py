@@ -196,7 +196,6 @@ class DescribeAssembler(object):
             [341, 234, 166, 175, 234],
         ]
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_weighted_counts_for_cat_x_mr(self):
         slice_ = Cube(CR.CAT_X_MR).partitions[0]
         assert slice_._assembler.new_weighted_counts.tolist() == [

@@ -211,6 +211,15 @@ class _CatXCatWeightedCubeCounts(_BaseWeightedCubeCounts):
 class _CatXMrWeightedCubeCounts(_BaseWeightedCubeCounts):
     """Weighted-counts cube-measure for a NOT_MR_X_MR slice."""
 
+    @lazyproperty
+    def weighted_counts(self):
+        """2D np.float/int64 ndarray of weighted-count for each valid matrix cell.
+
+        The cell values are np.int64 when the cube-result has no weight, in which case
+        these values are the same as the unweighted-counts.
+        """
+        return self._weighted_counts[:, :, 0]
+
 
 class _MrXCatWeightedCubeCounts(_BaseWeightedCubeCounts):
     """Weighted-counts cube-measure for an MR_X_NOT_MR slice.
