@@ -12,6 +12,7 @@ from cr.cube.matrix.cubemeasure import (
     _BaseCubeMeasure,
     BaseCubeResultMatrix,
     _BaseUnweightedCubeCounts,
+    _BaseWeightedCubeCounts,
     _CatXCatMatrix,
     _CatXCatMeansMatrix,
     _CatXCatUnweightedCubeCounts,
@@ -48,6 +49,21 @@ class DescribeCubeMeasures(object):
             cube_, dimensions_, 37
         )
         assert unweighted_cube_counts is unweighted_cube_counts_
+
+    def it_provides_access_to_the_weighted_cube_counts_object(
+        self, request, cube_, dimensions_
+    ):
+        weighted_cube_counts_ = instance_mock(request, _BaseWeightedCubeCounts)
+        _BaseWeightedCubeCounts_ = class_mock(
+            request, "cr.cube.matrix.cubemeasure._BaseWeightedCubeCounts"
+        )
+        _BaseWeightedCubeCounts_.factory.return_value = weighted_cube_counts_
+        cube_measures = CubeMeasures(cube_, dimensions_, slice_idx=4)
+
+        weighted_cube_counts = cube_measures.weighted_cube_counts
+
+        _BaseWeightedCubeCounts_.factory.assert_called_once_with(cube_, dimensions_, 4)
+        assert weighted_cube_counts is weighted_cube_counts_
 
     # fixture components ---------------------------------------------
 
