@@ -61,6 +61,15 @@ class _BaseSecondOrderMeasure(object):
         """
         return self._cube_measures.unweighted_cube_counts
 
+    @lazyproperty
+    def _weighted_cube_counts(self):
+        """_BaseWeightedCubeCounts subclass instance for this measure.
+
+        Provides cube measures associated with weighted counts, including
+        weighted-counts and cell, vector, and table margins.
+        """
+        raise NotImplementedError
+
 
 class _UnweightedCounts(_BaseSecondOrderMeasure):
     """Provides the unweighted-counts measure for a matrix."""
@@ -83,4 +92,6 @@ class _WeightedCounts(_BaseSecondOrderMeasure):
     @lazyproperty
     def blocks(self):
         """2D array of the four 2D "blocks" making up this measure."""
-        raise NotImplementedError
+        return SumSubtotals.blocks(
+            self._weighted_cube_counts.weighted_counts, self._dimensions
+        )

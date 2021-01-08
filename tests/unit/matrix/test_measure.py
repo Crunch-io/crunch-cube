@@ -7,7 +7,11 @@ import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension
-from cr.cube.matrix.cubemeasure import CubeMeasures, _BaseUnweightedCubeCounts
+from cr.cube.matrix.cubemeasure import (
+    CubeMeasures,
+    _BaseUnweightedCubeCounts,
+    _BaseWeightedCubeCounts,
+)
 from cr.cube.matrix.measure import (
     _BaseSecondOrderMeasure,
     SecondOrderMeasures,
@@ -136,6 +140,39 @@ class Describe_UnweightedCounts(object):
         blocks = unweighted_counts.blocks
 
         SumSubtotals_.blocks.assert_called_once_with(ucounts, dimensions_)
+        assert blocks == [[[1], [2]], [[3], [4]]]
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def dimensions_(self, request):
+        return (instance_mock(request, Dimension), instance_mock(request, Dimension))
+
+
+class Describe_WeightedCounts(object):
+    """Unit test suite for `cr.cube.matrix.measure._WeightedCounts` object."""
+
+    def it_computes_its_blocks_to_help(self, request, dimensions_):
+        # --- these need to be in list form because the assert-called-with mechanism
+        # --- uses equality, which doesn't work on numpy arrays. Normally this would be
+        # --- the array itself.
+        counts = np.arange(12).reshape(3, 4).tolist()
+        weighted_cube_counts_ = instance_mock(
+            request, _BaseWeightedCubeCounts, weighted_counts=counts
+        )
+        property_mock(
+            request,
+            _WeightedCounts,
+            "_weighted_cube_counts",
+            return_value=weighted_cube_counts_,
+        )
+        SumSubtotals_ = class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
+        SumSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
+        weighted_counts = _WeightedCounts(dimensions_, None, None)
+
+        blocks = weighted_counts.blocks
+
+        SumSubtotals_.blocks.assert_called_once_with(counts, dimensions_)
         assert blocks == [[[1], [2]], [[3], [4]]]
 
     # fixture components ---------------------------------------------

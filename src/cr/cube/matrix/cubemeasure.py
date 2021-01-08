@@ -152,6 +152,20 @@ class _MrXMrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
         return self._unweighted_counts[:, 0, :, 0]
 
 
+# === WEIGHTED COUNTS ===
+
+
+class _BaseWeightedCubeCounts(_BaseCubeMeasure):
+    """Base class for weighted-count cube-measure variants."""
+
+    @lazyproperty
+    def weighted_counts(self):
+        """2D np.int64 ndarray of weighted-count for each valid matrix cell."""
+        raise NotImplementedError(
+            "`%s` must implement `.weighted_counts`" % type(self).__name__
+        )
+
+
 # === LEGACY MATRIX OBJECTS ===
 
 
