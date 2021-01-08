@@ -22,6 +22,9 @@ from cr.cube.matrix.cubemeasure import (
 from ...unitutil import class_mock, instance_mock, method_mock, property_mock
 
 
+# === LEGACY CUBE-RESULT MATRIX TESTS (should go away after measure consolidation) ===
+
+
 class DescribeBaseCubeResultMatrix(object):
     """Unit test suite for `cr.cube.matrix.BaseCubeResultMatrix` object."""
 
@@ -472,25 +475,6 @@ class Describe_CatXCatMatrix(object):
         )
 
 
-class Describe_CatXCatMeansMatrix(object):
-    """Unit test suite for `cr.cube.matrix._CatXCatMeansMatrix` object."""
-
-    def it_knows_its_means(self):
-        cube_means = np.array([[2, 3, 1], [5, 6, 4]])
-        matrix = _CatXCatMeansMatrix(None, cube_means, None)
-
-        assert matrix.means.tolist() == [[2, 3, 1], [5, 6, 4]]
-
-    def it_knows_its_weighted_counts(self):
-        cube_means = np.array([[3, 2, 1], [6, 5, 4]])
-        matrix = _CatXCatMeansMatrix(None, cube_means, None)
-
-        np.testing.assert_equal(
-            matrix.weighted_counts,
-            [[np.nan, np.nan, np.nan], [np.nan, np.nan, np.nan]],
-        )
-
-
 class Describe_CatXMrMatrix(object):
     """Unit test suite for `cr.cube.matrix._CatXMrMatrix` object."""
 
@@ -647,17 +631,6 @@ class Describe_CatXMrMatrix(object):
         np.testing.assert_almost_equal(
             _CatXMrMatrix(None, weighted_cube_counts, None)._table_proportion_variances,
             np.array([[0.0, 0.0826446, 0.1155556], [0.244898, 0.231405, 0.2222222]]),
-        )
-
-
-class Describe_CatXMrMeansMatrix(object):
-    """Unit test suite for `cr.cube.matrix._CatXMrMeansMatrix` object."""
-
-    def it_knows_its_means(self):
-        means = np.array([[[1, 6], [2, 5], [3, 4]], [[5, 3], [6, 2], [7, 1]]])
-        np.testing.assert_equal(
-            _CatXMrMeansMatrix(None, means, None).means,
-            np.array([[1, 2, 3], [5, 6, 7]]),
         )
 
 
@@ -871,17 +844,6 @@ class Describe_MrXCatMatrix(object):
         np.testing.assert_almost_equal(
             _MrXCatMatrix(None, weighted_counts, None)._table_proportion_variances,
             np.array([[0.0, 0.0622222, 0.1155556], [0.1038062, 0.118416, 0.1322568]]),
-        )
-
-
-class Describe_MrXCatMeansMatrix(object):
-    """Unit test suite for `cr.cube.matrix._MrXCatMeansMatrix` object."""
-
-    def it_knows_its_means(self):
-        means = np.arange(24).reshape(3, 2, 4)
-        np.testing.assert_equal(
-            _MrXCatMeansMatrix(None, means, None).means,
-            np.array([[0, 1, 2, 3], [8, 9, 10, 11], [16, 17, 18, 19]]),
         )
 
 
@@ -1162,4 +1124,48 @@ class Describe_MrXMrMatrix(object):
         np.testing.assert_almost_equal(
             _MrXMrMatrix(None, weighted_counts, None)._table_proportion_variances,
             np.array([[0.0, 0.0826446, 0.1155556], [0.1560874, 0.16, 0.1630506]]),
+        )
+
+
+# === LEGACY MEANS MATRIX OBJECTS ===
+
+
+class Describe_CatXCatMeansMatrix(object):
+    """Unit test suite for `cr.cube.matrix._CatXCatMeansMatrix` object."""
+
+    def it_knows_its_means(self):
+        cube_means = np.array([[2, 3, 1], [5, 6, 4]])
+        matrix = _CatXCatMeansMatrix(None, cube_means, None)
+
+        assert matrix.means.tolist() == [[2, 3, 1], [5, 6, 4]]
+
+    def it_knows_its_weighted_counts(self):
+        cube_means = np.array([[3, 2, 1], [6, 5, 4]])
+        matrix = _CatXCatMeansMatrix(None, cube_means, None)
+
+        np.testing.assert_equal(
+            matrix.weighted_counts,
+            [[np.nan, np.nan, np.nan], [np.nan, np.nan, np.nan]],
+        )
+
+
+class Describe_CatXMrMeansMatrix(object):
+    """Unit test suite for `cr.cube.matrix._CatXMrMeansMatrix` object."""
+
+    def it_knows_its_means(self):
+        means = np.array([[[1, 6], [2, 5], [3, 4]], [[5, 3], [6, 2], [7, 1]]])
+        np.testing.assert_equal(
+            _CatXMrMeansMatrix(None, means, None).means,
+            np.array([[1, 2, 3], [5, 6, 7]]),
+        )
+
+
+class Describe_MrXCatMeansMatrix(object):
+    """Unit test suite for `cr.cube.matrix._MrXCatMeansMatrix` object."""
+
+    def it_knows_its_means(self):
+        means = np.arange(24).reshape(3, 2, 4)
+        np.testing.assert_equal(
+            _MrXCatMeansMatrix(None, means, None).means,
+            np.array([[0, 1, 2, 3], [8, 9, 10, 11], [16, 17, 18, 19]]),
         )
