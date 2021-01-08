@@ -227,6 +227,11 @@ class _MrXCatWeightedCubeCounts(_BaseWeightedCubeCounts):
     Its `._weighted_counts` is a 3D ndarray with axes (rows, sel/not, cols).
     """
 
+    @lazyproperty
+    def weighted_counts(self):
+        """2D np.float/int64 ndarray of weighted-count for each valid matrix cell."""
+        return self._weighted_counts[:, 0, :]
+
 
 class _MrXMrWeightedCubeCounts(_BaseWeightedCubeCounts):
     """Weighted-counts cube-measure for an MR_X_MR slice.
