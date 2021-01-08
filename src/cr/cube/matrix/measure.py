@@ -31,7 +31,7 @@ class SecondOrderMeasures(object):
     @lazyproperty
     def weighted_counts(self):
         """_WeightedCounts measure object for this cube-result."""
-        raise NotImplementedError
+        return _WeightedCounts(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
     def _cube_measures(self):

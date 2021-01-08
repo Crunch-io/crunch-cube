@@ -12,6 +12,7 @@ from cr.cube.matrix.measure import (
     _BaseSecondOrderMeasure,
     SecondOrderMeasures,
     _UnweightedCounts,
+    _WeightedCounts,
 )
 
 from ...unitutil import class_mock, instance_mock, property_mock
@@ -38,6 +39,23 @@ class DescribeSecondOrderMeasures(object):
             dimensions_, measures, cube_measures_
         )
         assert unweighted_counts is unweighted_counts_
+
+    def it_provides_access_to_weighted_counts_measure_object(
+        self, request, dimensions_, _cube_measures_prop_, cube_measures_
+    ):
+        weighted_counts_ = instance_mock(request, _WeightedCounts)
+        _WeightedCounts_ = class_mock(
+            request,
+            "cr.cube.matrix.measure._WeightedCounts",
+            return_value=weighted_counts_,
+        )
+        _cube_measures_prop_.return_value = cube_measures_
+        measures = SecondOrderMeasures(None, dimensions_, None)
+
+        weighted_counts = measures.weighted_counts
+
+        _WeightedCounts_.assert_called_once_with(dimensions_, measures, cube_measures_)
+        assert weighted_counts is weighted_counts_
 
     def it_provides_access_to_the_cube_measures_to_help(
         self, request, cube_, dimensions_, cube_measures_
