@@ -14,7 +14,11 @@ from cr.cube.matrix.cubemeasure import (
     _CatXCatMatrix,
     _CatXCatMeansMatrix,
 )
-from cr.cube.matrix.measure import SecondOrderMeasures, _UnweightedCounts
+from cr.cube.matrix.measure import (
+    SecondOrderMeasures,
+    _UnweightedCounts,
+    _WeightedCounts,
+)
 
 from ...unitutil import class_mock, instance_mock, method_mock, property_mock
 
@@ -582,6 +586,22 @@ class DescribeAssembler(object):
 
         _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
         assert unweighted_counts == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+
+    def it_knows_the_new_weighted_counts(
+        self, request, _measures_prop_, second_order_measures_, _assemble_matrix_
+    ):
+        weighted_counts_ = instance_mock(
+            request, _WeightedCounts, blocks=[["A", "B"], ["C", "D"]]
+        )
+        _measures_prop_.return_value = second_order_measures_
+        second_order_measures_.weighted_counts = weighted_counts_
+        _assemble_matrix_.return_value = [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]
+        assembler = Assembler(None, None, None)
+
+        weighted_counts = assembler.new_weighted_counts
+
+        _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
+        assert weighted_counts == [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]
 
     def it_knows_the_weighted_counts(
         self,
