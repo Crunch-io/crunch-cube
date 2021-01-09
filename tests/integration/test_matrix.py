@@ -186,7 +186,7 @@ class DescribeAssembler(object):
             mask_size=0,
         )
 
-        assert slice_._assembler.new_weighted_counts.tolist() == [
+        assert slice_.counts.tolist() == [
             [118, 33, 53, 65, 33],
             [163, 190, 70, 93, 190],
             [331, 272, 172, 159, 272],
@@ -198,14 +198,14 @@ class DescribeAssembler(object):
 
     def it_computes_weighted_counts_for_cat_x_mr(self):
         slice_ = Cube(CR.CAT_X_MR).partitions[0]
-        assert slice_._assembler.new_weighted_counts.tolist() == [
+        assert slice_.counts.tolist() == [
             [12, 12, 12],
             [28, 22, 26],
         ]
 
     def it_computes_weighted_counts_for_mr_x_cat(self):
         slice_ = Cube(CR.MR_X_CAT).partitions[0]
-        assert slice_._assembler.new_weighted_counts == pytest.approx(
+        assert slice_.counts == pytest.approx(
             np.array(
                 [
                     [13.9429388, 6.0970738, 0.0, 4.1755362, 7.4159721, 0.0],
@@ -219,7 +219,7 @@ class DescribeAssembler(object):
 
     def it_computes_weighted_counts_for_mr_x_mr(self):
         slice_ = Cube(CR.MR_X_MR).partitions[0]
-        assert slice_._assembler.new_weighted_counts == pytest.approx(
+        assert slice_.counts == pytest.approx(
             np.array(
                 [
                     [22.96727041, 3.79786399, 8.77385271, 22.96727041],
