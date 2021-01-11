@@ -24,6 +24,11 @@ class SecondOrderMeasures(object):
         self._slice_idx = slice_idx
 
     @lazyproperty
+    def column_unweighted_bases(self):
+        """_ColumnUnweightedBases measure object for this cube-result."""
+        raise NotImplementedError
+
+    @lazyproperty
     def unweighted_counts(self):
         """_UnweightedCounts measure object for this cube-result."""
         return _UnweightedCounts(self._dimensions, self, self._cube_measures)
@@ -53,6 +58,16 @@ class _BaseSecondOrderMeasure(object):
         self._cube_measures = cube_measures
 
     @lazyproperty
+    def blocks(self):
+        """2D array of the four 2D "blocks" making up this measure.
+
+        These are the base-values, the column-subtotals, the row-subtotals, and the
+        subtotal intersection-cell values. This default implementation assumes the
+        subclass will implement each block separately.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
     def _unweighted_cube_counts(self):
         """_BaseUnweightedCubeCounts subclass instance for this measure.
 
@@ -69,6 +84,15 @@ class _BaseSecondOrderMeasure(object):
         weighted-counts and cell, vector, and table margins.
         """
         return self._cube_measures.weighted_cube_counts
+
+
+class _ColumnUnweightedBases(_BaseSecondOrderMeasure):
+    """Provides the column-bases measure for a matrix.
+
+    Column-bases is a 2D np.int64 ndarray of unweighted-N "basis" for each matrix cell.
+    Depending on the dimensionality of the underlying cube-result some or all of these
+    values may be the same.
+    """
 
 
 class _UnweightedCounts(_BaseSecondOrderMeasure):

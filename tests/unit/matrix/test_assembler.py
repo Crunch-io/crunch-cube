@@ -15,6 +15,7 @@ from cr.cube.matrix.cubemeasure import (
     _CatXCatMeansMatrix,
 )
 from cr.cube.matrix.measure import (
+    _ColumnUnweightedBases,
     SecondOrderMeasures,
     _UnweightedCounts,
     _WeightedCounts,
@@ -66,6 +67,22 @@ class DescribeAssembler(object):
 
         _dimension_labels_.assert_called_once_with(assembler, dimension_, [0, 1, 2])
         assert column_labels.tolist() == ["Alpha", "Baker", "Charlie"]
+
+    def it_knows_the_column_unweighted_bases(
+        self, request, _measures_prop_, second_order_measures_, _assemble_matrix_
+    ):
+        column_unweighted_bases_ = instance_mock(
+            request, _ColumnUnweightedBases, blocks=[["A", "B"], ["C", "D"]]
+        )
+        _measures_prop_.return_value = second_order_measures_
+        second_order_measures_.column_unweighted_bases = column_unweighted_bases_
+        _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+        assembler = Assembler(None, None, None)
+
+        column_unweighted_bases = assembler.column_unweighted_bases
+
+        _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
+        assert column_unweighted_bases == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
     def it_provides_a_1D_columns_base_for_a_CAT_X_cube_result(
         self,

@@ -74,7 +74,7 @@ class Assembler(object):
     @lazyproperty
     def column_unweighted_bases(self):
         """2D np.int64 ndarray of unweighted col-proportions denominator per cell."""
-        raise NotImplementedError
+        return self._assemble_matrix(self._measures.column_unweighted_bases.blocks)
 
     @lazyproperty
     def columns_base(self):
