@@ -59,13 +59,56 @@ class _BaseSecondOrderMeasure(object):
 
     @lazyproperty
     def blocks(self):
-        """2D array of the four 2D "blocks" making up this measure.
+        """Nested list of the four 2D ndarray "blocks" making up this measure.
 
         These are the base-values, the column-subtotals, the row-subtotals, and the
         subtotal intersection-cell values. This default implementation assumes the
         subclass will implement each block separately.
         """
-        raise NotImplementedError
+        return [
+            [self._base_values, self._subtotal_columns],
+            [self._subtotal_rows, self._intersections],
+        ]
+
+    @lazyproperty
+    def _base_values(self):
+        """2D np.int64 ndarray of column-wise proportions denominator for each cell.
+
+        This is the first "block" and has the shape of the cube-measure (no insertions).
+        """
+        raise NotImplementedError(
+            "%s must implement `._base_values`" % type(self).__name__
+        )
+
+    @lazyproperty
+    def _intersections(self):
+        """(n_row_subtotals, n_col_subtotals) ndarray of intersection values.
+
+        An intersection value arises where a row-subtotal crosses a column-subtotal.
+        """
+        raise NotImplementedError(
+            "%s must implement `._intersections`" % type(self).__name__
+        )
+
+    @lazyproperty
+    def _subtotal_columns(self):
+        """2D np.int64 ndarray of inserted column proportions denominator value.
+
+        This is the second "block" and has the shape (n_rows, n_col_subtotals).
+        """
+        raise NotImplementedError(
+            "%s must implement `._subtotal_columns`" % type(self).__name__
+        )
+
+    @lazyproperty
+    def _subtotal_rows(self):
+        """2D np.int64 ndarray of column-proportions denominator for subtotal rows.
+
+        This is the third "block" and has the shape (n_row_subtotals, n_cols).
+        """
+        raise NotImplementedError(
+            "%s must implement `._subtotal_rows`" % type(self).__name__
+        )
 
     @lazyproperty
     def _unweighted_cube_counts(self):

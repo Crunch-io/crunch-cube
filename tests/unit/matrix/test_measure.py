@@ -118,6 +118,25 @@ class DescribeSecondOrderMeasures(object):
 class Describe_BaseSecondOrderMeasure(object):
     """Unit test suite for `cr.cube.matrix.measure._BaseSecondOrderMeasure` object."""
 
+    def it_assembles_the_blocks_for_the_measure(self, request):
+        property_mock(
+            request, _BaseSecondOrderMeasure, "_base_values", return_value="A"
+        )
+        property_mock(
+            request, _BaseSecondOrderMeasure, "_subtotal_columns", return_value="B"
+        )
+        property_mock(
+            request, _BaseSecondOrderMeasure, "_subtotal_rows", return_value="C"
+        )
+        property_mock(
+            request, _BaseSecondOrderMeasure, "_intersections", return_value="D"
+        )
+        measure = _BaseSecondOrderMeasure(None, None, None)
+
+        blocks = measure.blocks
+
+        assert blocks == [["A", "B"], ["C", "D"]]
+
     def it_provides_access_to_the_unweighted_cube_counts_object_to_help(
         self, request, cube_measures_
     ):
