@@ -72,6 +72,11 @@ class Assembler(object):
         return self._dimension_labels(self._columns_dimension, self._column_order)
 
     @lazyproperty
+    def column_unweighted_bases(self):
+        """2D np.int64 ndarray of unweighted col-proportions denominator per cell."""
+        raise NotImplementedError
+
+    @lazyproperty
     def columns_base(self):
         """1D/2D np.int64 ndarray of unweighted-N for each slice column/cell."""
         # --- an MR_X slice produces a 2D column-base (each cell has its own N) ---

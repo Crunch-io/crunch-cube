@@ -313,7 +313,7 @@ class _Slice(CubePartition):
     @lazyproperty
     def column_unweighted_bases(self):
         """2D np.int64 ndarray of unweighted column-proportion denominator per cell."""
-        raise NotImplementedError
+        return self._assembler.column_unweighted_bases
 
     @lazyproperty
     def columns_base(self):
