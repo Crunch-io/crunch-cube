@@ -166,6 +166,29 @@ class Describe_BaseSecondOrderMeasure(object):
         return instance_mock(request, CubeMeasures)
 
 
+class Describe_ColumnUnweightedBases(object):
+    """Unit test suite for `cr.cube.matrix.measure._ColumnUnweightedBases` object."""
+
+    def it_computes_its_base_values_to_help(
+        self, _unweighted_cube_counts_prop_, unweighted_cube_counts_
+    ):
+        _unweighted_cube_counts_prop_.return_value = unweighted_cube_counts_
+        unweighted_cube_counts_.column_bases = np.arange(6).reshape(2, 3)
+        column_unweighted_bases = _ColumnUnweightedBases(None, None, None)
+
+        assert column_unweighted_bases._base_values.tolist() == [[0, 1, 2], [3, 4, 5]]
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def unweighted_cube_counts_(self, request):
+        return instance_mock(request, _BaseUnweightedCubeCounts)
+
+    @pytest.fixture
+    def _unweighted_cube_counts_prop_(self, request):
+        return property_mock(request, _ColumnUnweightedBases, "_unweighted_cube_counts")
+
+
 class Describe_UnweightedCounts(object):
     """Unit test suite for `cr.cube.matrix.measure._UnweightedCounts` object."""
 

@@ -137,6 +137,14 @@ class _ColumnUnweightedBases(_BaseSecondOrderMeasure):
     values may be the same.
     """
 
+    @lazyproperty
+    def _base_values(self):
+        """2D np.int64 ndarray of column-wise proportions denominator for each cell.
+
+        This is the first "block" and has the shape of the cube-measure (no insertions).
+        """
+        return self._unweighted_cube_counts.column_bases
+
 
 class _UnweightedCounts(_BaseSecondOrderMeasure):
     """Provides the unweighted-counts measure for a matrix."""
