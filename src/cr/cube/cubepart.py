@@ -311,6 +311,11 @@ class _Slice(CubePartition):
         return np.sqrt(self._column_variance / self.columns_margin)
 
     @lazyproperty
+    def column_unweighted_bases(self):
+        """2D np.int64 ndarray of unweighted column-proportion denominator per cell."""
+        raise NotImplementedError
+
+    @lazyproperty
     def columns_base(self):
         """1D/2D np.int64 ndarray of unweighted-N for each column/cell of slice.
 
