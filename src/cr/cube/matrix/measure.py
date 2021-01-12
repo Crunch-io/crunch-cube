@@ -4,6 +4,8 @@
 
 from __future__ import division
 
+import numpy as np
+
 from cr.cube.matrix.cubemeasure import CubeMeasures
 from cr.cube.matrix.subtotals import SumSubtotals
 from cr.cube.util import lazyproperty
@@ -158,6 +160,30 @@ class _ColumnUnweightedBases(_BaseSecondOrderMeasure):
         # --- subtotal columns on an MR dimension (X_MR slice) so that case never
         # --- arises.
         return SumSubtotals.subtotal_columns(self._base_values, self._dimensions)
+
+    @lazyproperty
+    def _subtotal_rows(self):
+        """2D np.int64 ndarray of column-proportions denominator for subtotal rows.
+
+        This is the third "block" and has the shape (n_row_subtotals, n_cols).
+        """
+        # --- the strategy here is simply to broadcast the columns_base to the shape of
+        # --- the subtotal-rows matrix because a subtotal-row value has the same
+        # --- column-base as all other cells in that column. Note that this initial
+        # --- subtotal-rows matrix is used only for its shape (and when it is empty)
+        # --- because it computes the wrong cell values for this case.
+        subtotal_rows = SumSubtotals.subtotal_rows(self._base_values, self._dimensions)
+
+        # --- in the "no-row-subtotals" case, short-circuit with a (0, ncols) array
+        # --- return value, both because that is the right answer, but also because the
+        # --- non-empty columns-base array cannot be broadcast into that shape. dtype
+        # --- must be `int` to avoid changing type of assembled array to float.
+        if subtotal_rows.shape[0] == 0:
+            return subtotal_rows
+
+        return np.broadcast_to(
+            self._unweighted_cube_counts.columns_base, subtotal_rows.shape
+        )
 
 
 class _UnweightedCounts(_BaseSecondOrderMeasure):
