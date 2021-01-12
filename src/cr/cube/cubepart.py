@@ -526,9 +526,12 @@ class _Slice(CubePartition):
     @lazyproperty
     def row_std_err(self):
         """2D np.float64 ndarray of standard errors for row percentages."""
-        # --- We need to add `np.newaxis` to cast the rows margin vector to an actual
-        # --- column, in NumPy terms, to be able to devide correctly.
-        return np.sqrt(self._row_variance / self.rows_margin[:, np.newaxis])
+        rows_margin = (
+            self.rows_margin  # --- no need to cast (MR dim involved)
+            if len(self.rows_margin.shape) > 1
+            else self.rows_margin[:, np.newaxis]  # --- cast to actual vector column
+        )
+        return np.sqrt(self._row_variance / rows_margin)
 
     @lazyproperty
     def rows_base(self):
@@ -1014,10 +1017,15 @@ class _Slice(CubePartition):
     def _row_variance(self):
         """2D np.float64 ndarray of row-percentage variance for each cell."""
         # --- rows-margin is a vector that represents a column (to the right of the
-        # --- crosstab). We need to divide all values in the crosstab by it and
-        # --- therefore need to cast it to an actual column (because of how NumPy does
-        # --- broadcasting).
-        rows_margin = self.rows_margin[:, np.newaxis]
+        # --- crosstab), or a table-like structure, in the case of Multiple Response.
+        # --- We need to divide all values in the crosstab by it and therefore need to
+        # --- cast it to an actual column, when it's not a table already, because
+        # --- of how NumPy does broadcasting.
+        rows_margin = (
+            self.rows_margin  # --- No need to inflate (MR dim involved)
+            if len(self.rows_margin.shape) > 1
+            else self.rows_margin[:, np.newaxis]  # --- Inflate for correct broadcasting
+        )
         p = self.counts / rows_margin
         return p * (1 - p)
 
