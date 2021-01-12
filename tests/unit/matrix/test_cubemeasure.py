@@ -219,6 +219,25 @@ class Describe_CatXMrUnweightedCubeCounts(object):
 class Describe_MrXCatUnweightedCubeCounts(object):
     """Unit test suite for `cr.cube.matrix.cubemeasure._MrXCatUnweightedCubeCounts`."""
 
+    def it_knows_its_columns_base(self):
+        unweighted_cube_counts = _MrXCatUnweightedCubeCounts(
+            None,
+            np.array(
+                [
+                    # -- 0  1  2 cols --
+                    [  # -- row 0 ---------------
+                        [1, 2, 3],  # -- selected
+                        [4, 5, 6],  # -- not
+                    ],
+                    [  # -- row 1 ---------------
+                        [7, 8, 9],  # -- selected
+                        [3, 2, 1],  # -- not
+                    ],
+                ]
+            ),
+        )
+        assert unweighted_cube_counts.columns_base.tolist() == [[5, 7, 9], [10, 10, 10]]
+
     def it_knows_its_unweighted_counts(self):
         unweighted_cube_counts = np.array(
             [
