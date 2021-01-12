@@ -205,6 +205,22 @@ class DescribeNanSubtotals(object):
 class DescribeSumSubtotals(object):
     """Unit test suite for `cr.cube.matrix.SumSubtotals` object."""
 
+    def it_provides_an_intersections_interface_method(
+        self, request, dimensions_, _init_
+    ):
+        base_values = [[1, 5], [8, 0]]
+        property_mock(
+            request,
+            SumSubtotals,
+            "_intersections",
+            return_value=np.array([[1, 2], [3, 4]]),
+        )
+
+        intersections = SumSubtotals.intersections(base_values, dimensions_)
+
+        _init_.assert_called_once_with(ANY, [[1, 5], [8, 0]], dimensions_)
+        assert intersections.tolist() == [[1, 2], [3, 4]]
+
     def it_provides_a_subtotal_columns_interface_method(
         self, request, dimensions_, _init_
     ):

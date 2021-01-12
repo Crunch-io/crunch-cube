@@ -14,7 +14,6 @@ from ..fixtures import CR
 class DescribeAssembler(object):
     """Integration-test suite for `cr.cube.matrix.Assembler`."""
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_column_unweighted_bases_for_cat_hs_x_cat_hs(self):
         slice_ = _Slice(
             Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),

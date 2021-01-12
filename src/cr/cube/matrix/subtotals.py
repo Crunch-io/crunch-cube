@@ -164,7 +164,7 @@ class SumSubtotals(_BaseSubtotals):
 
         An intersection value arises where a row-subtotal crosses a column-subtotal.
         """
-        raise NotImplementedError
+        return cls(base_values, dimensions)._intersections
 
     @classmethod
     def subtotal_columns(cls, base_values, dimensions):
