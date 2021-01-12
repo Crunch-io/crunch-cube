@@ -143,6 +143,31 @@ class Describe_BaseUnweightedCubeCounts(object):
         UnweightedCubeCountsCls_.assert_called_once_with(dimensions_, [3, 4])
         assert unweighted_cube_counts is unweighted_cube_counts_
 
+    @pytest.mark.parametrize(
+        "columns_base, expected_value",
+        (
+            (7, [[7, 7, 7], [7, 7, 7]]),
+            (np.arange(3), [[0, 1, 2], [0, 1, 2]]),
+            (np.arange(6).reshape(2, 3), [[0, 1, 2], [3, 4, 5]]),
+        ),
+    )
+    def it_computes_the_column_bases(self, request, columns_base, expected_value):
+        property_mock(
+            request,
+            _BaseUnweightedCubeCounts,
+            "columns_base",
+            return_value=columns_base,
+        )
+        property_mock(
+            request,
+            _BaseUnweightedCubeCounts,
+            "unweighted_counts",
+            return_value=np.array([[0, 0, 0], [0, 0, 0]]),
+        )
+        unweighted_cube_counts = _BaseUnweightedCubeCounts(None, None)
+
+        assert unweighted_cube_counts.column_bases.tolist() == expected_value
+
 
 class Describe_CatXCatUnweightedCubeCounts(object):
     """Unit test suite for `cr.cube.matrix.cubemeasure._CatXCatUnweightedCubeCounts`."""

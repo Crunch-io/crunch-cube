@@ -100,7 +100,14 @@ class _BaseUnweightedCubeCounts(_BaseCubeMeasure):
     @lazyproperty
     def column_bases(self):
         """2D np.int64 ndarray of column-wise unweighted-N for each matrix cell."""
-        raise NotImplementedError
+        return np.broadcast_to(self.columns_base, self.unweighted_counts.shape)
+
+    @lazyproperty
+    def columns_base(self):
+        """1D ndarray of np.int64 unweighted-N for each matrix column."""
+        raise NotImplementedError(
+            "%s must implement `.columns_base`" % type(self).__name__
+        )
 
     @lazyproperty
     def unweighted_counts(self):
