@@ -186,6 +186,17 @@ class _MrXMrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
     """
 
     @lazyproperty
+    def columns_base(self):
+        """2D np.int64 ndarray of unweighted-N for this matrix.
+
+        An MR_X_MR matrix has a distinct column-base for each cell. This is because not
+        all responses (subvars) are necessarily presented to each respondent. The
+        unweighted-count for each MR_X cell is the sum of the selected column counts for
+        both the selected and unselected row values.
+        """
+        return np.sum(self._unweighted_counts[:, :, :, 0], axis=1)
+
+    @lazyproperty
     def unweighted_counts(self):
         """2D np.int64 ndarray of unweighted-count for each valid matrix cell."""
         # --- indexing is: all-rows, sel-only, all-cols, sel-only ---
