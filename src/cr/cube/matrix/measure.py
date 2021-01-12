@@ -145,6 +145,20 @@ class _ColumnUnweightedBases(_BaseSecondOrderMeasure):
         """
         return self._unweighted_cube_counts.column_bases
 
+    @lazyproperty
+    def _subtotal_columns(self):
+        """2D np.int64 ndarray of inserted column proportions denominator value.
+
+        This is the second "block" and has the shape (n_rows, n_col_subtotals).
+        """
+        # --- Summing works on columns because column-proportion denominators add along
+        # --- that axis, like column-proportions denominator of a subtotal of two
+        # --- columns each with a base of 25 is indeed 50. This doesn't work on rows
+        # --- though, see below. This wouldn't work on MR-columns but there can be no
+        # --- subtotal columns on an MR dimension (X_MR slice) so that case never
+        # --- arises.
+        return SumSubtotals.subtotal_columns(self._base_values, self._dimensions)
+
 
 class _UnweightedCounts(_BaseSecondOrderMeasure):
     """Provides the unweighted-counts measure for a matrix."""

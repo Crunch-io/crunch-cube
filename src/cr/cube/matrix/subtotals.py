@@ -158,6 +158,11 @@ class NanSubtotals(_BaseSubtotals):
 class SumSubtotals(_BaseSubtotals):
     """Subtotal "blocks" created by np.sum() on addends, primarily counts."""
 
+    @classmethod
+    def subtotal_columns(cls, base_values, dimensions):
+        """Return (n_base_rows, n_col_subtotals) ndarray of subtotal columns."""
+        raise NotImplementedError
+
     @lazyproperty
     def _dtype(self):
         """Numpy data-type for result matrices, used for empty arrays."""

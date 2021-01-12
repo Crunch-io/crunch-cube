@@ -178,7 +178,33 @@ class Describe_ColumnUnweightedBases(object):
 
         assert column_unweighted_bases._base_values.tolist() == [[0, 1, 2], [3, 4, 5]]
 
+    def it_computes_its_subtotal_columns_to_help(
+        self, _base_values_prop_, dimensions_, SumSubtotals_
+    ):
+        _base_values_prop_.return_value = [[1, 2], [3, 4]]
+        SumSubtotals_.subtotal_columns.return_value = np.array([[5, 8], [3, 7]])
+        column_unweighted_bases = _ColumnUnweightedBases(dimensions_, None, None)
+
+        subtotal_columns = column_unweighted_bases._subtotal_columns
+
+        SumSubtotals_.subtotal_columns.assert_called_once_with(
+            [[1, 2], [3, 4]], dimensions_
+        )
+        assert subtotal_columns.tolist() == [[5, 8], [3, 7]]
+
     # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _base_values_prop_(self, request):
+        return property_mock(request, _ColumnUnweightedBases, "_base_values")
+
+    @pytest.fixture
+    def dimensions_(self, request):
+        return (instance_mock(request, Dimension), instance_mock(request, Dimension))
+
+    @pytest.fixture
+    def SumSubtotals_(self, request):
+        return class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
 
     @pytest.fixture
     def unweighted_cube_counts_(self, request):
