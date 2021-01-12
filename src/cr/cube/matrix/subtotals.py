@@ -163,6 +163,11 @@ class SumSubtotals(_BaseSubtotals):
         """Return (n_base_rows, n_col_subtotals) ndarray of subtotal columns."""
         return cls(base_values, dimensions)._subtotal_columns
 
+    @classmethod
+    def subtotal_rows(cls, base_values, dimensions):
+        """Return (n_row_subtotals, n_base_cols) ndarray of subtotal rows."""
+        return cls(base_values, dimensions)._subtotal_rows
+
     @lazyproperty
     def _dtype(self):
         """Numpy data-type for result matrices, used for empty arrays."""

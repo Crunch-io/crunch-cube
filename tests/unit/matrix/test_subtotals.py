@@ -221,6 +221,22 @@ class DescribeSumSubtotals(object):
         _init_.assert_called_once_with(ANY, [[0, 4], [7, 9]], dimensions_)
         assert subtotal_columns.tolist() == [[1, 2], [3, 4]]
 
+    def it_provides_a_subtotal_rows_interface_method(
+        self, request, dimensions_, _init_
+    ):
+        base_values = [[4, 1], [3, 5]]
+        property_mock(
+            request,
+            SumSubtotals,
+            "_subtotal_rows",
+            return_value=np.array([[4, 3], [2, 1]]),
+        )
+
+        subtotal_rows = SumSubtotals.subtotal_rows(base_values, dimensions_)
+
+        _init_.assert_called_once_with(ANY, [[4, 1], [3, 5]], dimensions_)
+        assert subtotal_rows.tolist() == [[4, 3], [2, 1]]
+
     @pytest.mark.parametrize(
         ("row_idxs", "col_idxs", "expected_value"),
         (
