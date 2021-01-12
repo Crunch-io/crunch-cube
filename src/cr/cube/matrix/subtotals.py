@@ -161,7 +161,7 @@ class SumSubtotals(_BaseSubtotals):
     @classmethod
     def subtotal_columns(cls, base_values, dimensions):
         """Return (n_base_rows, n_col_subtotals) ndarray of subtotal columns."""
-        raise NotImplementedError
+        return cls(base_values, dimensions)._subtotal_columns
 
     @lazyproperty
     def _dtype(self):
