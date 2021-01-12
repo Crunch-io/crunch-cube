@@ -148,6 +148,20 @@ class _ColumnUnweightedBases(_BaseSecondOrderMeasure):
         return self._unweighted_cube_counts.column_bases
 
     @lazyproperty
+    def _intersections(self):
+        """(n_row_subtotals, n_col_subtotals) ndarray of intersection values.
+
+        An intersection value arises where a row-subtotal crosses a column-subtotal.
+        """
+        # --- the strategy here is to broadcast one row of the subtotal-columns to the
+        # --- shape of the intersections. This works in the X_CAT case because each row
+        # --- of subtotal-columns is the same. In the X_MR case there can be no subtotal
+        # --- columns and so it is just an empty row that is broadcast.
+        shape = SumSubtotals.intersections(self._base_values, self._dimensions).shape
+        columns_base = self._subtotal_columns[0]
+        return np.broadcast_to(columns_base, shape)
+
+    @lazyproperty
     def _subtotal_columns(self):
         """2D np.int64 ndarray of inserted column proportions denominator value.
 

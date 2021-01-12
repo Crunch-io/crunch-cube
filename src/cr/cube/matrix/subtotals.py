@@ -159,6 +159,14 @@ class SumSubtotals(_BaseSubtotals):
     """Subtotal "blocks" created by np.sum() on addends, primarily counts."""
 
     @classmethod
+    def intersections(cls, base_values, dimensions):
+        """Return (n_row_subtotals, n_col_subtotals) ndarray of intersection values.
+
+        An intersection value arises where a row-subtotal crosses a column-subtotal.
+        """
+        raise NotImplementedError
+
+    @classmethod
     def subtotal_columns(cls, base_values, dimensions):
         """Return (n_base_rows, n_col_subtotals) ndarray of subtotal columns."""
         return cls(base_values, dimensions)._subtotal_columns

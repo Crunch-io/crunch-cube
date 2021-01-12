@@ -178,6 +178,26 @@ class Describe_ColumnUnweightedBases(object):
 
         assert column_unweighted_bases._base_values.tolist() == [[0, 1, 2], [3, 4, 5]]
 
+    def it_computes_its_intersections_block(
+        self, request, _base_values_prop_, dimensions_, SumSubtotals_
+    ):
+        property_mock(
+            request,
+            _ColumnUnweightedBases,
+            "_subtotal_columns",
+            return_value=np.array([[9, 6], [9, 6], [9, 6]]),
+        )
+        _base_values_prop_.return_value = [[9, 8, 7], [6, 5, 4], [3, 2, 1]]
+        SumSubtotals_.intersections.return_value = np.array([[8, 4], [3, 7]])
+        column_unweighted_bases = _ColumnUnweightedBases(dimensions_, None, None)
+
+        intersections = column_unweighted_bases._intersections
+
+        SumSubtotals_.intersections.assert_called_once_with(
+            [[9, 8, 7], [6, 5, 4], [3, 2, 1]], dimensions_
+        )
+        assert intersections.tolist() == [[9, 6], [9, 6]]
+
     def it_computes_its_subtotal_columns_to_help(
         self, _base_values_prop_, dimensions_, SumSubtotals_
     ):
