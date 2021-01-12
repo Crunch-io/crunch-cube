@@ -172,6 +172,12 @@ class Describe_BaseUnweightedCubeCounts(object):
 class Describe_CatXCatUnweightedCubeCounts(object):
     """Unit test suite for `cr.cube.matrix.cubemeasure._CatXCatUnweightedCubeCounts`."""
 
+    def it_knows_its_columns_base(self):
+        unweighted_cube_counts = _CatXCatUnweightedCubeCounts(
+            None, np.arange(6).reshape(2, 3)
+        )
+        assert unweighted_cube_counts.columns_base.tolist() == [3, 5, 7]
+
     def it_knows_its_unweighted_counts(self):
         unweighted_cube_counts = np.array([[1, 2, 3], [4, 5, 6]])
         cube_measure = _CatXCatUnweightedCubeCounts(None, unweighted_cube_counts)

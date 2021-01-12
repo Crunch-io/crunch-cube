@@ -124,6 +124,11 @@ class _CatXCatUnweightedCubeCounts(_BaseUnweightedCubeCounts):
     """Unweighted-counts cube-measure for a slice with no MR dimensions."""
 
     @lazyproperty
+    def columns_base(self):
+        """1D ndarray of np.int64 unweighted-N for each matrix column."""
+        return np.sum(self.unweighted_counts, axis=0)
+
+    @lazyproperty
     def unweighted_counts(self):
         """2D np.int64 ndarray of unweighted-count for each valid matrix cell.
 
