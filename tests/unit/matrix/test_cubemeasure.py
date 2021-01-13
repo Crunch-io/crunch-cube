@@ -447,25 +447,35 @@ class Describe_CatXMrWeightedCubeCounts(object):
 class Describe_MrXCatWeightedCubeCounts(object):
     """Unit test suite for `cr.cube.matrix.cubemeasure._MrXCatWeightedCubeCounts`."""
 
-    def it_knows_its_weighted_counts(self):
-        weighted_cube_counts = np.array(
-            [
-                [  # -- row 0 ---------------
-                    [1.1, 2.2, 3.3],  # -- selected
+    def it_knows_its_columns_margin(self, raw_weighted_counts):
+        weighted_cube_counts = _MrXCatWeightedCubeCounts(None, raw_weighted_counts)
+        assert weighted_cube_counts.columns_margin == pytest.approx(
+            np.array([[5.5, 7.7, 9.9], [7.7, 13.2, 12.1]])
+        )
+
+    def it_knows_its_weighted_counts(self, raw_weighted_counts):
+        weighted_cube_counts = _MrXCatWeightedCubeCounts(None, raw_weighted_counts)
+        assert weighted_cube_counts.weighted_counts.tolist() == pytest.approx(
+            np.array([[1.1, 2.2, 3.3], [7.7, 8.8, 9.9]])
+        )
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_weighted_counts(self, request):
+        """(2, 3, 2) np.float ndarray of weighted cube-counts as received from Cube."""
+        return np.array(
+            [  # --   0    1    2  cols ------
+                [  # -- row 0 ----------------
+                    [1.1, 2.2, 3.3],  # -- sel
                     [4.4, 5.5, 6.6],  # -- not
                 ],
-                [  # -- row 1 ---------------
-                    [7.7, 8.8, 9.9],  # -- selected
+                [  # -- row 1 ----------------
+                    [7.7, 8.8, 9.9],  # -- sel
                     [0.0, 4.4, 2.2],  # -- not
                 ],
             ]
         )
-        cube_measure = _MrXCatWeightedCubeCounts(None, weighted_cube_counts)
-
-        assert cube_measure.weighted_counts.tolist() == [
-            [1.1, 2.2, 3.3],
-            [7.7, 8.8, 9.9],
-        ]
 
 
 class Describe_MrXMrWeightedCubeCounts(object):

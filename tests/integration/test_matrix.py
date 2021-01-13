@@ -123,7 +123,6 @@ class DescribeAssembler(object):
             )
         )
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_column_weighted_bases_for_mr_x_cat_hs(self):
         slice_ = Cube(CR.MR_X_CAT_HS_MT).partitions[0]
         assert slice_.column_weighted_bases == pytest.approx(
