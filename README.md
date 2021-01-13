@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+### 2.0.1
+- Fix row standard error for MR x MR
+
 ### 2.0.0
 - De-vectorize matrix.py and add sort-by-value
 - Remove old api interface
