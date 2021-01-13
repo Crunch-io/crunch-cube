@@ -463,7 +463,7 @@ class Describe_MrXCatWeightedCubeCounts(object):
 
     @pytest.fixture
     def raw_weighted_counts(self, request):
-        """(2, 3, 2) np.float ndarray of weighted cube-counts as received from Cube."""
+        """(2, 2, 3) np.float ndarray of weighted cube-counts as received from Cube."""
         return np.array(
             [  # --   0    1    2  cols ------
                 [  # -- row 0 ----------------
@@ -481,34 +481,48 @@ class Describe_MrXCatWeightedCubeCounts(object):
 class Describe_MrXMrWeightedCubeCounts(object):
     """Unit test suite for `cr.cube.matrix.cubemeasure._MrXMrWeightedCubeCounts`."""
 
-    def it_knows_its_weighted_counts(self):
-        weighted_cube_counts = np.array(
-            [
+    def it_knows_its_columns_margin(self, raw_weighted_counts):
+        weighted_cube_counts = _MrXMrWeightedCubeCounts(None, raw_weighted_counts)
+        assert weighted_cube_counts.columns_margin == pytest.approx(
+            np.array([[2.2, 4.4], [11.0, 13.2]])
+        )
+
+    def it_knows_its_weighted_counts(self, raw_weighted_counts):
+        weighted_cube_counts = _MrXMrWeightedCubeCounts(None, raw_weighted_counts)
+
+        assert weighted_cube_counts.weighted_counts == pytest.approx(
+            np.array([[0.0, 1.1], [4.4, 5.5]])
+        )
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_weighted_counts(self, request):
+        """(2, 2, 2, 2) np.float ndarray of weighted cube-counts as from Cube."""
+        return np.array(
+            [  # ------ sel/not (col) -----
                 [  # -- row 0 -------------
                     [  # -- selected ------
-                        [0, 8],  # -- col 0
-                        [1, 7],  # -- col 1
+                        [0.0, 8.8],  # -- col 0
+                        [1.1, 7.7],  # -- col 1
                     ],
                     [  # -- not selected --
-                        [2, 6],  # -- col 0
-                        [3, 5],  # -- col 1
+                        [2.2, 6.6],  # -- col 0
+                        [3.3, 5.5],  # -- col 1
                     ],
                 ],
                 [  # -- row 1 -------------
                     [  # -- selected ------
-                        [4, 4],  # -- col 0
-                        [5, 3],  # -- col 1
+                        [4.4, 4.4],  # -- col 0
+                        [5.5, 3.3],  # -- col 1
                     ],
                     [  # -- not selected --
-                        [6, 2],  # -- col 0
-                        [7, 1],  # -- col 1
+                        [6.6, 2.2],  # -- col 0
+                        [7.7, 1.1],  # -- col 1
                     ],
                 ],
             ]
         )
-        cube_measure = _MrXMrWeightedCubeCounts(None, weighted_cube_counts)
-
-        assert cube_measure.weighted_counts.tolist() == [[0, 1], [4, 5]]
 
 
 # === LEGACY CUBE-RESULT MATRIX TESTS (should go away after measure consolidation) ===

@@ -324,6 +324,19 @@ class _MrXMrWeightedCubeCounts(_BaseWeightedCubeCounts):
     """
 
     @lazyproperty
+    def columns_margin(self):
+        """2D np.float64 ndarray of weighted-N for each cell of matrix.
+
+        An MR_X matrix has a distinct columns-margin for each cell. This is because not
+        all responses (subvars) are necessarily presented to each respondent. Each
+        MR_X_MR cell has four counts: sel-sel, sel-not, not-sel, and not-not. Only
+        sel-sel and not-sel contribute to the columns-margin.
+        """
+        # --- only column-selected counts contribute ([:, :, :, 0]), row-selected and
+        # --- not-selected are summed (axis=1), rows and columns are retained.
+        return np.sum(self._weighted_counts[:, :, :, 0], axis=1)
+
+    @lazyproperty
     def weighted_counts(self):
         """2D np.float/int64 ndarray of weighted-count for each valid matrix cell.
 
