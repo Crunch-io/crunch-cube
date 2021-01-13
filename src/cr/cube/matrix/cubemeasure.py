@@ -232,6 +232,11 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
         )
 
     @lazyproperty
+    def column_bases(self):
+        """2D np.float64 ndarray of column-proportion denominator for each cell."""
+        raise NotImplementedError
+
+    @lazyproperty
     def weighted_counts(self):
         """2D np.int64 ndarray of weighted-count for each valid matrix cell."""
         raise NotImplementedError(

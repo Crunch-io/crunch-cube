@@ -293,6 +293,29 @@ class Describe_ColumnUnweightedBases(object):
         return property_mock(request, _ColumnUnweightedBases, "_unweighted_cube_counts")
 
 
+class Describe_ColumnWeightedBases(object):
+    """Unit test suite for `cr.cube.matrix.measure._ColumnWeightedBases` object."""
+
+    def it_computes_its_base_values_to_help(
+        self, _weighted_cube_counts_prop_, weighted_cube_counts_
+    ):
+        _weighted_cube_counts_prop_.return_value = weighted_cube_counts_
+        weighted_cube_counts_.column_bases = np.arange(6).reshape(3, 2)
+        column_weighted_bases = _ColumnWeightedBases(None, None, None)
+
+        assert column_weighted_bases._base_values.tolist() == [[0, 1], [2, 3], [4, 5]]
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def weighted_cube_counts_(self, request):
+        return instance_mock(request, _BaseWeightedCubeCounts)
+
+    @pytest.fixture
+    def _weighted_cube_counts_prop_(self, request):
+        return property_mock(request, _ColumnWeightedBases, "_weighted_cube_counts")
+
+
 class Describe_UnweightedCounts(object):
     """Unit test suite for `cr.cube.matrix.measure._UnweightedCounts` object."""
 
