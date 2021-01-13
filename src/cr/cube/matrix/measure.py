@@ -38,7 +38,7 @@ class SecondOrderMeasures(object):
     @lazyproperty
     def row_unweighted_bases(self):
         """_RowUnweightedBases measure object for this cube-result."""
-        raise NotImplementedError
+        return _RowUnweightedBases(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
     def unweighted_counts(self):
