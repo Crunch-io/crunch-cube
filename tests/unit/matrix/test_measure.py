@@ -319,6 +319,44 @@ class Describe_ColumnWeightedBases(object):
         )
         assert subtotal_columns.tolist() == [[5.5, 8.8], [3.3, 7.7]]
 
+    def it_computes_its_subtotal_rows_to_help(
+        self,
+        _base_values_prop_,
+        dimensions_,
+        SumSubtotals_,
+        _weighted_cube_counts_prop_,
+        weighted_cube_counts_,
+    ):
+        _base_values_prop_.return_value = [[4.4, 3.3], [2.2, 1.1]]
+        SumSubtotals_.subtotal_rows.return_value = np.array([[8.8, 3.3], [6.6, 4.4]])
+        _weighted_cube_counts_prop_.return_value = weighted_cube_counts_
+        weighted_cube_counts_.columns_margin = np.array([4.4, 7.7])
+        column_weighted_bases = _ColumnWeightedBases(dimensions_, None, None)
+
+        subtotal_rows = column_weighted_bases._subtotal_rows
+
+        SumSubtotals_.subtotal_rows.assert_called_once_with(
+            [[4.4, 3.3], [2.2, 1.1]], dimensions_
+        )
+        assert subtotal_rows.tolist() == [[4.4, 7.7], [4.4, 7.7]]
+
+    def but_it_returns_empty_array_of_right_shape_when_there_are_no_row_subtotals(
+        self, _base_values_prop_, dimensions_, SumSubtotals_
+    ):
+        """Empty shape must be (0, ncols) to compose properly in `np.block()` call."""
+        _base_values_prop_.return_value = [[4.4, 3.3, 2.2], [1.1, 0.0, 9.9]]
+        SumSubtotals_.subtotal_rows.return_value = np.array([], dtype=int).reshape(0, 3)
+        column_weighted_bases = _ColumnWeightedBases(dimensions_, None, None)
+
+        subtotal_rows = column_weighted_bases._subtotal_rows
+
+        SumSubtotals_.subtotal_rows.assert_called_once_with(
+            [[4.4, 3.3, 2.2], [1.1, 0.0, 9.9]], dimensions_
+        )
+        assert subtotal_rows.tolist() == []
+        assert subtotal_rows.shape == (0, 3)
+        assert subtotal_rows.dtype == int
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
