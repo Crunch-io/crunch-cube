@@ -233,6 +233,13 @@ class Describe_Slice(object):
 
         assert slice_.column_unweighted_bases.tolist() == [[0, 1], [2, 3]]
 
+    def it_knows_the_column_weighted_bases(self, _assembler_prop_, assembler_):
+        _assembler_prop_.return_value = assembler_
+        assembler_.column_weighted_bases = np.array([[0.0, 1.1], [2.2, 3.3]])
+        slice_ = _Slice(None, None, None, None, None)
+
+        assert slice_.column_weighted_bases.tolist() == [[0.0, 1.1], [2.2, 3.3]]
+
     @pytest.mark.parametrize(
         ("shape", "expected_value"),
         (((4, 2), False), ((4, 0), True), ((0, 2), True), ((0, 0), True)),
