@@ -282,6 +282,14 @@ class _RowUnweightedBases(_BaseSecondOrderMeasure):
     denominator (base) for each matrix cell.
     """
 
+    @lazyproperty
+    def _base_values(self):
+        """2D np.int64 ndarray of row-proportions denominator for each cell.
+
+        This is the first "block" and has the shape of the cube-measure (no insertions).
+        """
+        return self._unweighted_cube_counts.row_bases
+
 
 class _UnweightedCounts(_BaseSecondOrderMeasure):
     """Provides the unweighted-counts measure for a matrix."""
