@@ -395,6 +395,42 @@ def test_cat_x_mr_x_mr_proportions_by_row():
     )
 
 
+def test_cat_x_mr_x_mr_row_std_err():
+    slice_ = Cube(CR.CAT_X_MR_X_MR).partitions[0]
+
+    row_std_err = slice_.row_std_err
+
+    assert row_std_err.tolist() == [
+        [0.005062449141597438, 0.006313386789860505],
+        [0.012489721142934502, 0.015435416534978305],
+        [0.012747222182198531, 0.015713252542485612],
+    ]
+
+
+def test_cat_x_mr_x_mr_column_std_err():
+    slice_ = Cube(CR.CAT_X_MR_X_MR).partitions[0]
+
+    column_std_err = slice_.column_std_err
+
+    assert column_std_err.tolist() == [
+        [0.011171263445095775, 0.006336762995064969],
+        [0.006945529504027231, 0.0039102714263034456],
+        [0.006866798249349935, 0.0038462753714309968],
+    ]
+
+
+def test_cat_x_mr_x_mr_table_std_err():
+    slice_ = Cube(CR.CAT_X_MR_X_MR).partitions[0]
+
+    table_std_err = slice_.table_std_err
+
+    assert table_std_err.tolist() == [
+        [0.003201049671592117, 0.004799123982561817],
+        [0.0013896729831150924, 0.0023822644689454613],
+        [0.0013722740251130602, 0.0023412125063735673],
+    ]
+
+
 def test_cat_x_mr_x_mr_pruned_rows():
     # Not pruned
     slice_ = Cube(CR.CAT_X_MR_X_MR_PRUNED_ROWS).partitions[0]
