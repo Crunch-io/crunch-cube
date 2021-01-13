@@ -255,6 +255,11 @@ class _CatXCatWeightedCubeCounts(_BaseWeightedCubeCounts):
     """Weighted-counts cube-measure for a slice with no MR dimensions."""
 
     @lazyproperty
+    def columns_margin(self):
+        """1D ndarray of np.float64 (or np.int64) weighted N for each matrix column."""
+        return np.sum(self._weighted_counts, axis=0)
+
+    @lazyproperty
     def weighted_counts(self):
         """2D np.float/int64 ndarray of weighted-count for each valid matrix cell.
 

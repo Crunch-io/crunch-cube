@@ -385,6 +385,12 @@ class Describe_BaseWeightedCubeCounts(object):
 class Describe_CatXCatWeightedCubeCounts(object):
     """Unit test suite for `cr.cube.matrix.cubemeasure._CatXCatWeightedCubeCounts`."""
 
+    def it_knows_its_columns_margin(self):
+        weighted_cube_counts = np.array([[3.3, 1.1, 2.2], [6.6, 4.4, 5.5]])
+        cube_measure = _CatXCatWeightedCubeCounts(None, weighted_cube_counts)
+
+        assert cube_measure.columns_margin == pytest.approx(np.array([9.9, 5.5, 7.7]))
+
     def it_knows_its_weighted_counts(self):
         weighted_cube_counts = np.array([[3.3, 2.2, 1.1], [6.6, 5.5, 4.4]])
         cube_measure = _CatXCatWeightedCubeCounts(None, weighted_cube_counts)
