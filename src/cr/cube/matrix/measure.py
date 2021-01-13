@@ -31,6 +31,11 @@ class SecondOrderMeasures(object):
         return _ColumnUnweightedBases(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
+    def column_weighted_bases(self):
+        """_ColumnWeightedBases measure object for this cube-result."""
+        raise NotImplementedError
+
+    @lazyproperty
     def unweighted_counts(self):
         """_UnweightedCounts measure object for this cube-result."""
         return _UnweightedCounts(self._dimensions, self, self._cube_measures)
@@ -198,6 +203,17 @@ class _ColumnUnweightedBases(_BaseSecondOrderMeasure):
         return np.broadcast_to(
             self._unweighted_cube_counts.columns_base, subtotal_rows.shape
         )
+
+
+class _ColumnWeightedBases(_BaseSecondOrderMeasure):
+    """Provides the column-weighted-bases measure for a matrix.
+
+    Column-weighted-bases is a 2D np.float64 ndarray of the weighted "base", aka.
+    "denominator" for the column-proportion of each cell. This measure is generally only
+    interesting where the rows dimension is MR, causing each column cell to have a
+    distinct proportions denominator. In the CAT_X case, the denominator is the same for
+    each cell in a particular column.
+    """
 
 
 class _UnweightedCounts(_BaseSecondOrderMeasure):
