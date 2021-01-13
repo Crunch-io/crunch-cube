@@ -172,6 +172,11 @@ class Assembler(object):
         return self._dimension_labels(self._rows_dimension, self._row_order)
 
     @lazyproperty
+    def row_unweighted_bases(self):
+        """2D np.int64 ndarray of unweighted row-proportions denominator per cell."""
+        raise NotImplementedError
+
+    @lazyproperty
     def rows_base(self):
         """1D/2D np.int64 ndarray of unweighted-N for each slice row/cell."""
         # --- an X_MR slice produces a 2D row-base (each cell has its own N) ---
