@@ -223,6 +223,16 @@ class _ColumnWeightedBases(_BaseSecondOrderMeasure):
         """
         return self._weighted_cube_counts.column_bases
 
+    @lazyproperty
+    def _subtotal_columns(self):
+        """2D np.float64 ndarray of inserted-column denominator values.
+
+        This is the second "block" and has the shape (n_rows, n_col_subtotals).
+        """
+        # --- Summing works on columns because column-proportion denominators add along
+        # --- that axis.
+        return SumSubtotals.subtotal_columns(self._base_values, self._dimensions)
+
 
 class _UnweightedCounts(_BaseSecondOrderMeasure):
     """Provides the unweighted-counts measure for a matrix."""
