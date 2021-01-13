@@ -146,7 +146,6 @@ class Describe_BaseUnweightedCubeCounts(object):
     @pytest.mark.parametrize(
         "columns_base, expected_value",
         (
-            (7, [[7, 7, 7], [7, 7, 7]]),
             (np.arange(3), [[0, 1, 2], [0, 1, 2]]),
             (np.arange(6).reshape(2, 3), [[0, 1, 2], [3, 4, 5]]),
         ),
@@ -177,6 +176,23 @@ class Describe_CatXCatUnweightedCubeCounts(object):
             None, np.arange(6).reshape(2, 3)
         )
         assert unweighted_cube_counts.columns_base.tolist() == [3, 5, 7]
+
+    def it_knows_its_row_bases(self, request):
+        property_mock(
+            request,
+            _CatXCatUnweightedCubeCounts,
+            "rows_base",
+            return_value=np.array([2, 1]),
+        )
+        property_mock(
+            request,
+            _CatXCatUnweightedCubeCounts,
+            "unweighted_counts",
+            return_value=np.array([[0, 0, 0], [0, 0, 0]]),
+        )
+        unweighted_cube_counts = _CatXCatUnweightedCubeCounts(None, None)
+
+        assert unweighted_cube_counts.row_bases.tolist() == [[2, 2, 2], [1, 1, 1]]
 
     def it_knows_its_unweighted_counts(self):
         unweighted_cube_counts = np.array([[1, 2, 3], [4, 5, 6]])
