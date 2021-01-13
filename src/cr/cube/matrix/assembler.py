@@ -174,7 +174,7 @@ class Assembler(object):
     @lazyproperty
     def row_unweighted_bases(self):
         """2D np.int64 ndarray of unweighted row-proportions denominator per cell."""
-        raise NotImplementedError
+        return self._assemble_matrix(self._measures.row_unweighted_bases.blocks)
 
     @lazyproperty
     def rows_base(self):
