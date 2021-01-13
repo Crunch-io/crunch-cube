@@ -270,7 +270,18 @@ class _CatXCatWeightedCubeCounts(_BaseWeightedCubeCounts):
 
 
 class _CatXMrWeightedCubeCounts(_BaseWeightedCubeCounts):
-    """Weighted-counts cube-measure for a NOT_MR_X_MR slice."""
+    """Weighted-counts cube-measure for a NOT_MR_X_MR slice.
+
+    Note that the rows-dimension need not actually be CAT, as long as it's not MR.
+    Its `._weighted_counts` is a 3D ndarray with axes (rows, cols, selected/not).
+    """
+
+    @lazyproperty
+    def columns_margin(self):
+        """1D ndarray of np.float/int64 weighted N for each matrix column."""
+        # --- only selected counts contribute to the columns margin, which is summed
+        # --- across the rows (axis 0).
+        return np.sum(self._weighted_counts[:, :, 0], axis=0)
 
     @lazyproperty
     def weighted_counts(self):

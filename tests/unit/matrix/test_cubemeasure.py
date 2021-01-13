@@ -404,28 +404,44 @@ class Describe_CatXCatWeightedCubeCounts(object):
 class Describe_CatXMrWeightedCubeCounts(object):
     """Unit test suite for `cr.cube.matrix.cubemeasure._CatXMrWeightedCubeCounts`."""
 
-    def it_knows_its_weighted_counts(self):
-        weighted_cube_counts = np.array(
+    def it_knows_its_columns_margin(self, raw_weighted_counts):
+        weighted_cube_counts = _CatXMrWeightedCubeCounts(None, raw_weighted_counts)
+        assert weighted_cube_counts.columns_margin == pytest.approx(
+            np.array([5.5, 7.7, 9.9])
+        )
+
+    def it_knows_its_weighted_counts(self, raw_weighted_counts):
+        weighted_cube_counts = _CatXMrWeightedCubeCounts(None, raw_weighted_counts)
+
+        assert weighted_cube_counts.weighted_counts == pytest.approx(
+            np.array(
+                [
+                    [1.1, 2.2, 3.3],
+                    [4.4, 5.5, 6.6],
+                ]
+            )
+        )
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_weighted_counts(self, request):
+        """(2, 3, 2) np.float ndarray of weighted cube-counts as received from Cube."""
+        return np.array(
             [
-                [  # -- row 0 ------------
+                # -- sel / not ---------------
+                [  # -- row 0 ----------------
                     [1.1, 6.6],  # -- col 0 --
                     [2.2, 5.5],  # -- col 1 --
                     [3.3, 4.4],  # -- col 2 --
                 ],
-                [  # -- row 1 ------------
+                [  # -- row 1 ----------------
                     [4.4, 3.3],  # -- col 0 --
                     [5.5, 2.2],  # -- col 1 --
                     [6.6, 1.1],  # -- col 2 --
-                    # --------------------
                 ],
             ]
         )
-        cube_measure = _CatXMrWeightedCubeCounts(None, weighted_cube_counts)
-
-        assert cube_measure.weighted_counts.tolist() == [
-            [1.1, 2.2, 3.3],
-            [4.4, 5.5, 6.6],
-        ]
 
 
 class Describe_MrXCatWeightedCubeCounts(object):
