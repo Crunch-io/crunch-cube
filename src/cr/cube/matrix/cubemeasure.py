@@ -234,7 +234,14 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
     @lazyproperty
     def column_bases(self):
         """2D np.float64 ndarray of column-proportion denominator for each cell."""
-        raise NotImplementedError
+        return np.broadcast_to(self.columns_margin, self.weighted_counts.shape)
+
+    @lazyproperty
+    def columns_margin(self):
+        """1D ndarray of np.float/int64 weighted-N for each matrix column."""
+        raise NotImplementedError(
+            "%s must implement `.columns_margin`" % type(self).__name__
+        )
 
     @lazyproperty
     def weighted_counts(self):
