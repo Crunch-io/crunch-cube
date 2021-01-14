@@ -221,6 +221,13 @@ class _MrXCatUnweightedCubeCounts(_BaseUnweightedCubeCounts):
         return np.broadcast_to(self.rows_base[:, None], self.unweighted_counts.shape)
 
     @lazyproperty
+    def rows_base(self):
+        """1D ndarray of np.int64 unweighted-N for each matrix row."""
+        # --- only row-selecteds contribute ([:, 0, :]), sum is across columns (axis=1
+        # --- after rows sel/not axis is collapsed), rows are retained.
+        return np.sum(self._unweighted_counts[:, 0, :], axis=1)
+
+    @lazyproperty
     def unweighted_counts(self):
         """2D np.int64 ndarray of unweighted-count for each valid matrix cell."""
         return self._unweighted_counts[:, 0, :]
