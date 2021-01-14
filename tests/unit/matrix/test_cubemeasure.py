@@ -356,6 +356,10 @@ class Describe_MrXMrUnweightedCubeCounts(object):
 
         assert unweighted_cube_counts.row_bases.tolist() == [[1, 2], [5, 6]]
 
+    def it_knows_its_rows_base(self, raw_unweighted_counts):
+        unweighted_cube_counts = _MrXMrUnweightedCubeCounts(None, raw_unweighted_counts)
+        assert unweighted_cube_counts.rows_base.tolist() == [[8, 8], [8, 8]]
+
     def it_knows_its_unweighted_counts(self, raw_unweighted_counts):
         unweighted_cube_counts = _MrXMrUnweightedCubeCounts(None, raw_unweighted_counts)
         assert unweighted_cube_counts.unweighted_counts.tolist() == [[0, 1], [4, 5]]
