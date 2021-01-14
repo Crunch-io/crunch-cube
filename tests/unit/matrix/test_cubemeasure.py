@@ -227,6 +227,17 @@ class Describe_CatXMrUnweightedCubeCounts(object):
         )
         assert unweighted_cube_counts.columns_base.tolist() == [6, 10, 14]
 
+    def it_knows_its_row_bases(self, request):
+        property_mock(
+            request,
+            _CatXMrUnweightedCubeCounts,
+            "rows_base",
+            return_value=np.array([[1, 2, 3], [4, 5, 6]]),
+        )
+        unweighted_cube_counts = _CatXMrUnweightedCubeCounts(None, None)
+
+        assert unweighted_cube_counts.row_bases.tolist() == [[1, 2, 3], [4, 5, 6]]
+
     def it_knows_its_unweighted_counts(self):
         unweighted_cube_counts = np.array(
             [
