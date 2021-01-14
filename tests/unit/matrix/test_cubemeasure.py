@@ -492,6 +492,10 @@ class Describe_CatXCatWeightedCubeCounts(object):
             np.array([[8.8, 8.8, 8.8], [9.9, 9.9, 9.9]])
         )
 
+    def it_knows_its_rows_margin(self, raw_weighted_counts):
+        weighted_cube_counts = _CatXCatWeightedCubeCounts(None, raw_weighted_counts)
+        assert weighted_cube_counts.rows_margin.tolist() == [6.6, 16.5]
+
     def it_knows_its_weighted_counts(self, raw_weighted_counts):
         weighted_cube_counts = _CatXCatWeightedCubeCounts(None, raw_weighted_counts)
         assert weighted_cube_counts.weighted_counts.tolist() == [

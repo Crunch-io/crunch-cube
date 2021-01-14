@@ -349,7 +349,7 @@ class _CatXCatWeightedCubeCounts(_BaseWeightedCubeCounts):
 
         Values are `np.int64` when the source cube-result is not weighted.
         """
-        raise NotImplementedError
+        return np.sum(self._weighted_counts, axis=1)
 
     @lazyproperty
     def weighted_counts(self):
