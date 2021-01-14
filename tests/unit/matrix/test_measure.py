@@ -521,20 +521,6 @@ class Describe_RowUnweightedBases(object):
         )
         assert subtotal_columns.tolist() == [[7, 7], [4, 4]]
 
-    def it_computes_its_subtotal_rows_to_help(
-        self, _base_values_prop_, dimensions_, SumSubtotals_
-    ):
-        _base_values_prop_.return_value = [[1, 2], [3, 4]]
-        SumSubtotals_.subtotal_rows.return_value = np.array([[5, 8], [3, 7]])
-        row_unweighted_bases = _RowUnweightedBases(dimensions_, None, None)
-
-        subtotal_rows = row_unweighted_bases._subtotal_rows
-
-        SumSubtotals_.subtotal_rows.assert_called_once_with(
-            [[1, 2], [3, 4]], dimensions_
-        )
-        assert subtotal_rows.tolist() == [[5, 8], [3, 7]]
-
     def but_it_returns_empty_array_of_right_shape_when_there_are_no_column_subtotals(
         self, _base_values_prop_, dimensions_, SumSubtotals_
     ):
@@ -553,6 +539,20 @@ class Describe_RowUnweightedBases(object):
         assert subtotal_columns.tolist() == [[], [], []]
         assert subtotal_columns.shape == (3, 0)
         assert subtotal_columns.dtype == int
+
+    def it_computes_its_subtotal_rows_to_help(
+        self, _base_values_prop_, dimensions_, SumSubtotals_
+    ):
+        _base_values_prop_.return_value = [[1, 2], [3, 4]]
+        SumSubtotals_.subtotal_rows.return_value = np.array([[5, 8], [3, 7]])
+        row_unweighted_bases = _RowUnweightedBases(dimensions_, None, None)
+
+        subtotal_rows = row_unweighted_bases._subtotal_rows
+
+        SumSubtotals_.subtotal_rows.assert_called_once_with(
+            [[1, 2], [3, 4]], dimensions_
+        )
+        assert subtotal_rows.tolist() == [[5, 8], [3, 7]]
 
     # fixture components ---------------------------------------------
 
@@ -631,6 +631,20 @@ class Describe_RowWeightedBases(object):
         assert subtotal_columns.tolist() == [[], [], []]
         assert subtotal_columns.shape == (3, 0)
         assert subtotal_columns.dtype == int
+
+    def it_computes_its_subtotal_rows_to_help(
+        self, _base_values_prop_, dimensions_, SumSubtotals_
+    ):
+        _base_values_prop_.return_value = [[1.1, 2.2], [3.3, 4.4]]
+        SumSubtotals_.subtotal_rows.return_value = np.array([[5.5, 8.8], [3.3, 7.7]])
+        row_weighted_bases = _RowWeightedBases(dimensions_, None, None)
+
+        subtotal_rows = row_weighted_bases._subtotal_rows
+
+        SumSubtotals_.subtotal_rows.assert_called_once_with(
+            [[1.1, 2.2], [3.3, 4.4]], dimensions_
+        )
+        assert subtotal_rows.tolist() == [[5.5, 8.8], [3.3, 7.7]]
 
     # fixture components ---------------------------------------------
 
