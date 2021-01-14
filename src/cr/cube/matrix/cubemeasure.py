@@ -339,6 +339,19 @@ class _CatXCatWeightedCubeCounts(_BaseWeightedCubeCounts):
         return np.sum(self._weighted_counts, axis=0)
 
     @lazyproperty
+    def row_bases(self):
+        """2D np.float64 ndarray of row-proportion denominator for each matrix cell."""
+        return np.broadcast_to(self.rows_margin[:, None], self._weighted_counts.shape)
+
+    @lazyproperty
+    def rows_margin(self):
+        """1D np.float/int64 ndarray of weighted-N for each matrix row.
+
+        Values are `np.int64` when the source cube-result is not weighted.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
     def weighted_counts(self):
         """2D np.float/int64 ndarray of weighted-count for each valid matrix cell.
 
