@@ -290,6 +290,29 @@ class _RowUnweightedBases(_BaseSecondOrderMeasure):
         """
         return self._unweighted_cube_counts.row_bases
 
+    @lazyproperty
+    def _subtotal_columns(self):
+        """2D np.int64 ndarray of column-subtotal row-proportions denominator values.
+
+        This is the second "block" and has the shape (n_rows, n_col_subtotals).
+        """
+        # --- the strategy here is simply to broadcast the rows_base to the shape of
+        # --- the subtotal-columns matrix because these don't add. Note that this
+        # --- initial subtotal-columns matrix is used only for its shape because it
+        # --- computes the wrong values.
+        subtotal_columns = SumSubtotals.subtotal_columns(
+            self._base_values, self._dimensions
+        )
+        # --- in the "no-column-subtotals" case, short-circuit with an (nrows, 0) array
+        # --- return value, both because that is the right answer, but also because the
+        # --- non-empty rows-base array cannot be broadcast into that "empty" shape.
+        if subtotal_columns.shape[1] == 0:
+            return subtotal_columns
+
+        return np.broadcast_to(
+            self._unweighted_cube_counts.rows_base[:, None], subtotal_columns.shape
+        )
+
 
 class _UnweightedCounts(_BaseSecondOrderMeasure):
     """Provides the unweighted-counts measure for a matrix."""
