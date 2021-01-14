@@ -180,6 +180,18 @@ class _CatXMrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
         return self.rows_base
 
     @lazyproperty
+    def rows_base(self):
+        """2D np.int64 ndarray of row-wise unweighted-N for this matrix.
+
+        An X_MR matrix has a distinct row-base for each cell. This is because not all
+        responses (subvars) are necessarily presented to each respondent. The
+        unweighted-count for each X_MR cell is the sum of its selected and unselected
+        unweighted counts.
+        """
+        # --- sel/not axis (2) is summed, rows and columns are preserved ---
+        return np.sum(self._unweighted_counts, axis=2)
+
+    @lazyproperty
     def unweighted_counts(self):
         """2D np.int64 ndarray of unweighted-count for each valid matrix cell."""
         return self._unweighted_counts[:, :, 0]

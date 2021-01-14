@@ -225,7 +225,6 @@ class DescribeAssembler(object):
             [575, 575, 575, 575, 575],
         ]
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_row_unweighted_bases_for_cat_hs_x_mr_for(self):
         slice_ = Cube(CR.CAT_HS_X_MR).partitions[0]
         assert slice_.row_unweighted_bases.tolist() == [
