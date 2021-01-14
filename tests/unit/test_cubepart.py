@@ -286,6 +286,13 @@ class Describe_Slice(object):
 
         assert slice_.row_unweighted_bases.tolist() == [[3, 2], [1, 0]]
 
+    def it_knows_the_row_weighted_bases(self, _assembler_prop_, assembler_):
+        _assembler_prop_.return_value = assembler_
+        assembler_.row_weighted_bases = np.array([[3.3, 2.2], [1.1, 0.0]])
+        slice_ = _Slice(None, None, None, None, None)
+
+        assert slice_.row_weighted_bases.tolist() == [[3.3, 2.2], [1.1, 0.0]]
+
     def it_knows_the_rows_margin(self, _assembler_prop_, assembler_):
         _assembler_prop_.return_value = assembler_
         assembler_.rows_margin = [[1, 2], [3, 4]]

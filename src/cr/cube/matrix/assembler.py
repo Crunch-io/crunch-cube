@@ -177,6 +177,11 @@ class Assembler(object):
         return self._assemble_matrix(self._measures.row_unweighted_bases.blocks)
 
     @lazyproperty
+    def row_weighted_bases(self):
+        """2D np.float64 ndarray of row-proportions denominator for each cell."""
+        raise NotImplementedError
+
+    @lazyproperty
     def rows_base(self):
         """1D/2D np.int64 ndarray of unweighted-N for each slice row/cell."""
         # --- an X_MR slice produces a 2D row-base (each cell has its own N) ---
