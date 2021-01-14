@@ -279,41 +279,57 @@ class Describe_CatXMrUnweightedCubeCounts(object):
 class Describe_MrXCatUnweightedCubeCounts(object):
     """Unit test suite for `cr.cube.matrix.cubemeasure._MrXCatUnweightedCubeCounts`."""
 
-    def it_knows_its_columns_base(self):
+    def it_knows_its_columns_base(self, raw_unweighted_counts):
         unweighted_cube_counts = _MrXCatUnweightedCubeCounts(
-            None,
-            np.array(
-                [
-                    # -- 0  1  2 cols --
-                    [  # -- row 0 ---------------
-                        [1, 2, 3],  # -- selected
-                        [4, 5, 6],  # -- not
-                    ],
-                    [  # -- row 1 ---------------
-                        [7, 8, 9],  # -- selected
-                        [3, 2, 1],  # -- not
-                    ],
-                ]
-            ),
+            None, raw_unweighted_counts
         )
-        assert unweighted_cube_counts.columns_base.tolist() == [[5, 7, 9], [10, 10, 10]]
+        assert unweighted_cube_counts.columns_base.tolist() == [[5, 7, 9], [7, 12, 11]]
 
-    def it_knows_its_unweighted_counts(self):
-        unweighted_cube_counts = np.array(
+    def it_knows_its_row_bases(self, request):
+        property_mock(
+            request,
+            _MrXCatUnweightedCubeCounts,
+            "rows_base",
+            return_value=np.array([1, 2, 3]),
+        )
+        property_mock(
+            request,
+            _MrXCatUnweightedCubeCounts,
+            "unweighted_counts",
+            return_value=np.array([[0, 0], [0, 0], [0, 0]]),
+        )
+        unweighted_cube_counts = _MrXCatUnweightedCubeCounts(None, None)
+
+        assert unweighted_cube_counts.row_bases.tolist() == [[1, 1], [2, 2], [3, 3]]
+
+    def it_knows_its_unweighted_counts(self, raw_unweighted_counts):
+        unweighted_cube_counts = _MrXCatUnweightedCubeCounts(
+            None, raw_unweighted_counts
+        )
+        assert unweighted_cube_counts.unweighted_counts.tolist() == [
+            [1, 2, 3],
+            [7, 8, 9],
+        ]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_unweighted_counts(self, request):
+        """(2, 3, 2) np.int ndarray of unweighted cube-counts as received from Cube."""
+        return np.array(
+            # -- axes are (rows, sel/not, cols) --
             [
-                [  # -- row 0 ------------
-                    [1, 2, 3],  # -- selected --
-                    [4, 5, 6],  # -- not --
+                # -- 0  1  2 -- cols ---
+                [  # -- row 0 ----------
+                    [1, 2, 3],  # -- sel
+                    [4, 5, 6],  # -- not
                 ],
-                [  # -- row 1 ------------
-                    [7, 8, 9],  # -- selected --
-                    [0, 4, 2],  # -- not --
+                [  # -- row 1 ----------
+                    [7, 8, 9],  # -- sel
+                    [0, 4, 2],  # -- not
                 ],
             ]
         )
-        cube_measure = _MrXCatUnweightedCubeCounts(None, unweighted_cube_counts)
-
-        assert cube_measure.unweighted_counts.tolist() == [[1, 2, 3], [7, 8, 9]]
 
 
 class Describe_MrXMrUnweightedCubeCounts(object):
