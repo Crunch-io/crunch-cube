@@ -520,6 +520,20 @@ class Describe_CatXMrWeightedCubeCounts(object):
             np.array([5.5, 7.7, 9.9])
         )
 
+    def it_knows_its_row_bases(self, request):
+        property_mock(
+            request,
+            _CatXMrWeightedCubeCounts,
+            "rows_margin",
+            return_value=np.array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]),
+        )
+        weighted_cube_counts = _CatXMrWeightedCubeCounts(None, None)
+
+        assert weighted_cube_counts.row_bases.tolist() == [
+            [1.1, 2.2, 3.3],
+            [4.4, 5.5, 6.6],
+        ]
+
     def it_knows_its_weighted_counts(self, raw_weighted_counts):
         weighted_cube_counts = _CatXMrWeightedCubeCounts(None, raw_weighted_counts)
 
