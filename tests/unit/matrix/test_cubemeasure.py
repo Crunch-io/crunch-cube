@@ -194,6 +194,23 @@ class Describe_CatXCatUnweightedCubeCounts(object):
 
         assert unweighted_cube_counts.row_bases.tolist() == [[2, 2, 2], [1, 1, 1]]
 
+    @pytest.mark.parametrize(
+        ("raw_unweighted_counts", "expected"),
+        (
+            # --- (1, 3) array ---
+            ([[1, 2, 3]], [6]),
+            # --- (2, 3) array ---
+            ([[1, 2, 3], [4, 5, 6]], [6, 15]),
+            # --- (3, 1) array ---
+            ([[1], [2], [3]], [1, 2, 3]),
+        ),
+    )
+    def it_knows_its_rows_base(self, raw_unweighted_counts, expected):
+        unweighted_cube_counts = _CatXCatUnweightedCubeCounts(
+            None, raw_unweighted_counts
+        )
+        assert unweighted_cube_counts.rows_base.tolist() == expected
+
     def it_knows_its_unweighted_counts(self):
         unweighted_cube_counts = np.array([[1, 2, 3], [4, 5, 6]])
         cube_measure = _CatXCatUnweightedCubeCounts(None, unweighted_cube_counts)

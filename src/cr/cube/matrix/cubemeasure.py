@@ -143,7 +143,7 @@ class _CatXCatUnweightedCubeCounts(_BaseUnweightedCubeCounts):
     @lazyproperty
     def rows_base(self):
         """1D ndarray of np.int64 unweighted-N for each matrix row."""
-        raise NotImplementedError
+        return np.sum(self.unweighted_counts, axis=1)
 
     @lazyproperty
     def unweighted_counts(self):
