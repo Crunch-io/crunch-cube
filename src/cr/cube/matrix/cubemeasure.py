@@ -430,6 +430,11 @@ class _MrXCatWeightedCubeCounts(_BaseWeightedCubeCounts):
         return np.sum(self._weighted_counts, axis=1)
 
     @lazyproperty
+    def row_bases(self):
+        """2D np.float64 ndarray of row-proportion denominator for each matrix cell."""
+        return np.broadcast_to(self.rows_margin[:, None], self.weighted_counts.shape)
+
+    @lazyproperty
     def weighted_counts(self):
         """2D np.float/int64 ndarray of weighted-count for each valid matrix cell."""
         return self._weighted_counts[:, 0, :]

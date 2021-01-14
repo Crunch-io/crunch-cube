@@ -583,6 +583,25 @@ class Describe_MrXCatWeightedCubeCounts(object):
             np.array([[5.5, 7.7, 9.9], [7.7, 13.2, 12.1]])
         )
 
+    def it_knows_its_row_bases(self, request):
+        property_mock(
+            request,
+            _MrXCatWeightedCubeCounts,
+            "rows_margin",
+            return_value=np.array([1.1, 2.2, 3.3]),
+        )
+        property_mock(
+            request,
+            _MrXCatWeightedCubeCounts,
+            "weighted_counts",
+            return_value=np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]),
+        )
+        weighted_cube_counts = _MrXCatWeightedCubeCounts(None, None)
+
+        assert weighted_cube_counts.row_bases == pytest.approx(
+            np.array([[1.1, 1.1], [2.2, 2.2], [3.3, 3.3]])
+        )
+
     def it_knows_its_weighted_counts(self, raw_weighted_counts):
         weighted_cube_counts = _MrXCatWeightedCubeCounts(None, raw_weighted_counts)
         assert weighted_cube_counts.weighted_counts.tolist() == pytest.approx(
