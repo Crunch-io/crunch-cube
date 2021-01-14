@@ -602,6 +602,10 @@ class Describe_MrXCatWeightedCubeCounts(object):
             np.array([[1.1, 1.1], [2.2, 2.2], [3.3, 3.3]])
         )
 
+    def it_knows_its_rows_margin(self, raw_weighted_counts):
+        weighted_cube_counts = _MrXCatWeightedCubeCounts(None, raw_weighted_counts)
+        assert weighted_cube_counts.rows_margin == pytest.approx(np.array([6.6, 26.4]))
+
     def it_knows_its_weighted_counts(self, raw_weighted_counts):
         weighted_cube_counts = _MrXCatWeightedCubeCounts(None, raw_weighted_counts)
         assert weighted_cube_counts.weighted_counts.tolist() == pytest.approx(
