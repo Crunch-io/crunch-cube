@@ -389,6 +389,19 @@ class _CatXMrWeightedCubeCounts(_BaseWeightedCubeCounts):
         return self.rows_margin
 
     @lazyproperty
+    def rows_margin(self):
+        """2D np.float64 ndarray of weighted-N for each cell of this matrix.
+
+        A matrix with an MR columns dimension has a distinct rows-margin for each cell.
+        This is because not all column responses (subvars) are necessarily offered to
+        each respondent. The weighted-count for each X_MR cell is the sum of its
+        selected and unselected weighted counts.
+        """
+        # --- selected and not-selected both contribute to margin (axis=2), both rows
+        # --- and columns are retained.
+        return np.sum(self._weighted_counts, axis=2)
+
+    @lazyproperty
     def weighted_counts(self):
         """2D np.float/int64 ndarray of weighted-count for each valid matrix cell.
 

@@ -287,7 +287,6 @@ class DescribeAssembler(object):
             [575, 575, 575, 575, 575],
         ]
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_row_weighted_bases_for_cat_hs_x_mr(self):
         slice_ = Cube(CR.CAT_HS_X_MR).partitions[0]
         assert slice_.row_weighted_bases == pytest.approx(
