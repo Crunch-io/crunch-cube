@@ -592,6 +592,54 @@ class Describe_RowWeightedBases(object):
             [4.4, 5.5, 6.6],
         ]
 
+    @pytest.mark.parametrize(
+        "subtotal_rows, intersections, expected_value, expected_shape",
+        (
+            (
+                np.array([[9.9, 9.9, 9.9], [6.6, 6.6, 6.6]]),
+                np.array([[8.8, 4.4], [3.3, 7.7]]),
+                [[9.9, 9.9], [6.6, 6.6]],
+                (2, 2),
+            ),
+            (
+                np.array([], dtype=float).reshape(0, 3),
+                np.array([], dtype=float).reshape(0, 2),
+                [],
+                (0, 2),
+            ),
+        ),
+    )
+    def it_computes_its_intersections_block_to_help(
+        self,
+        request,
+        subtotal_rows,
+        intersections,
+        _base_values_prop_,
+        dimensions_,
+        SumSubtotals_,
+        expected_value,
+        expected_shape,
+    ):
+        property_mock(
+            request, _RowWeightedBases, "_subtotal_rows", return_value=subtotal_rows
+        )
+        _base_values_prop_.return_value = [
+            [9.9, 8.8, 7.7],
+            [6.6, 5.5, 4.4],
+            [3.3, 2.2, 1.1],
+        ]
+        SumSubtotals_.intersections.return_value = intersections
+        row_weighted_bases = _RowWeightedBases(dimensions_, None, None)
+
+        intersections = row_weighted_bases._intersections
+
+        SumSubtotals_.intersections.assert_called_once_with(
+            [[9.9, 8.8, 7.7], [6.6, 5.5, 4.4], [3.3, 2.2, 1.1]], dimensions_
+        )
+        assert intersections.tolist() == expected_value
+        assert intersections.shape == expected_shape
+        assert intersections.dtype == float
+
     def it_computes_its_subtotal_columns_to_help(
         self,
         _base_values_prop_,

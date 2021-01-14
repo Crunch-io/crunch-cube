@@ -361,6 +361,21 @@ class _RowWeightedBases(_BaseSecondOrderMeasure):
         return self._weighted_cube_counts.row_bases
 
     @lazyproperty
+    def _intersections(self):
+        """(n_row_subtotals, n_col_subtotals) ndarray of intersection values.
+
+        An intersection value arises where a row-subtotal crosses a column-subtotal.
+        This is the fourth and final "block" required by the assembler.
+        """
+        # --- to broadcast one column of the subtotal-rows to the shape of the
+        # --- intersections. This works in the CAT_X case because each column of
+        # --- subtotal-rows is the same. In the MR_X case there can be no subtotal rows
+        # --- so an empty column is broadcast.
+        shape = SumSubtotals.intersections(self._base_values, self._dimensions).shape
+        intersection_column = self._subtotal_rows[:, 0]
+        return np.broadcast_to(intersection_column[:, None], shape)
+
+    @lazyproperty
     def _subtotal_columns(self):
         """2D np.float64 ndarray of column-subtotal row-proportions denominator values.
 
