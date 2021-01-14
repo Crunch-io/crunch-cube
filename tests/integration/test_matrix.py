@@ -257,6 +257,129 @@ class DescribeAssembler(object):
             [44, 45, 53, 61],
         ]
 
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_row_weighted_bases_for_cat_hs_x_cat_hs(self):
+        slice_ = _Slice(
+            Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),
+            slice_idx=0,
+            transforms={
+                "rows_dimension": {
+                    "elements": {"2": {"hide": True}},
+                    "prune": True,
+                    "order": {"type": "explicit", "element_ids": [0, 5, 2, 1, 4]},
+                },
+                "columns_dimension": {
+                    "elements": {"2": {"hide": True}},
+                    "prune": True,
+                    "order": {"type": "explicit", "element_ids": [4, 2, 5, 0]},
+                },
+            },
+            population=None,
+            mask_size=0,
+        )
+
+        assert slice_.row_weighted_bases.tolist() == [
+            [151, 151, 151, 151, 151],
+            [353, 353, 353, 353, 353],
+            [603, 603, 603, 603, 603],
+            [52, 52, 52, 52, 52],
+            [250, 250, 250, 250, 250],
+            [123, 123, 123, 123, 123],
+            [575, 575, 575, 575, 575],
+        ]
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_row_weighted_bases_for_cat_hs_x_mr(self):
+        slice_ = Cube(CR.CAT_HS_X_MR).partitions[0]
+        assert slice_.row_weighted_bases == pytest.approx(
+            np.array(
+                [
+                    [21.7886996, 15.7386377, 12.2215027, 20.9530004, 30.9432236],
+                    [32.8157604, 40.7857418, 40.9814885, 63.1359564, 88.2393316],
+                    [54.60446, 56.5243795, 53.2029912, 84.0889568, 119.1825552],
+                    [0.0, 0.0, 0.0, 0.0, 0.0],
+                    [58.866254, 76.986916, 91.95429, 165.6720366, 165.8214891],
+                    [62.8948376, 77.9092923, 102.5834568, 207.2899623, 186.9277242],
+                    [0.0, 0.0, 0.0, 0.0, 0.0],
+                    [121.7610916, 154.8962083, 194.5377468, 372.9619989, 352.7492133],
+                ]
+            )
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_row_weighted_bases_for_mr_x_cat_hs(self):
+        slice_ = Cube(CR.MR_X_CAT_HS_MT).partitions[0]
+        assert slice_.row_weighted_bases == pytest.approx(
+            np.array(
+                [
+                    [
+                        31.631521,
+                        31.631521,
+                        31.631521,
+                        31.631521,
+                        31.631521,
+                        31.631521,
+                        31.631521,
+                        31.631521,
+                    ],
+                    [
+                        70.7307341,
+                        70.7307341,
+                        70.7307341,
+                        70.7307341,
+                        70.7307341,
+                        70.7307341,
+                        70.7307341,
+                        70.7307341,
+                    ],
+                    [
+                        125.7591135,
+                        125.7591135,
+                        125.7591135,
+                        125.7591135,
+                        125.7591135,
+                        125.7591135,
+                        125.7591135,
+                        125.7591135,
+                    ],
+                    [
+                        366.8883914,
+                        366.8883914,
+                        366.8883914,
+                        366.8883914,
+                        366.8883914,
+                        366.8883914,
+                        366.8883914,
+                        366.8883914,
+                    ],
+                    [
+                        376.7656406,
+                        376.7656406,
+                        376.7656406,
+                        376.7656406,
+                        376.7656406,
+                        376.7656406,
+                        376.7656406,
+                        376.7656406,
+                    ],
+                ]
+            )
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_row_weighted_bases_for_mr_x_mr(self):
+        slice_ = Cube(CR.MR_X_MR).partitions[0]
+        assert slice_.row_weighted_bases == pytest.approx(
+            np.array(
+                [
+                    [22.9672704, 13.2946142, 20.1898745, 22.9672704],
+                    [28.5502092, 45.7789165, 35.6664538, 45.7789165],
+                    [70.8068713, 53.0615517, 86.9728288, 86.9728288],
+                    [100.714224, 95.8683881, 119.4044105, 130.6784687],
+                ]
+            )
+        )
+
     def it_computes_unweighted_counts_for_cat_hs_x_cat_hs_hiddens(self):
         """Assembler inserts, hides, prunes, and places in payload order."""
         slice_ = _Slice(
