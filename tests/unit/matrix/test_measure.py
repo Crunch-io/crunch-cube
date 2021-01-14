@@ -436,6 +436,50 @@ class Describe_RowUnweightedBases(object):
 
         assert row_unweighted_bases._base_values.tolist() == [[0, 1, 2], [3, 4, 5]]
 
+    @pytest.mark.parametrize(
+        "subtotal_rows, intersections, expected_value, expected_shape",
+        (
+            (
+                np.array([[9, 9, 9], [6, 6, 6]]),
+                np.array([[8, 4], [3, 7]]),
+                [[9, 9], [6, 6]],
+                (2, 2),
+            ),
+            (
+                np.array([], dtype=int).reshape(0, 3),
+                np.array([], dtype=int).reshape(0, 2),
+                [],
+                (0, 2),
+            ),
+        ),
+    )
+    def it_computes_its_intersections_block_to_help(
+        self,
+        request,
+        subtotal_rows,
+        intersections,
+        _base_values_prop_,
+        dimensions_,
+        SumSubtotals_,
+        expected_value,
+        expected_shape,
+    ):
+        property_mock(
+            request, _RowUnweightedBases, "_subtotal_rows", return_value=subtotal_rows
+        )
+        _base_values_prop_.return_value = [[9, 8, 7], [6, 5, 4], [3, 2, 1]]
+        SumSubtotals_.intersections.return_value = intersections
+        row_unweighted_bases = _RowUnweightedBases(dimensions_, None, None)
+
+        intersections = row_unweighted_bases._intersections
+
+        SumSubtotals_.intersections.assert_called_once_with(
+            [[9, 8, 7], [6, 5, 4], [3, 2, 1]], dimensions_
+        )
+        assert intersections.tolist() == expected_value
+        assert intersections.shape == expected_shape
+        assert intersections.dtype == int
+
     def it_computes_its_subtotal_columns_to_help(
         self,
         _base_values_prop_,
