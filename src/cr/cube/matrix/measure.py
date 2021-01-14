@@ -41,6 +41,11 @@ class SecondOrderMeasures(object):
         return _RowUnweightedBases(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
+    def row_weighted_bases(self):
+        """_RowWeightedBases measure object for this cube-result."""
+        raise NotImplementedError
+
+    @lazyproperty
     def unweighted_counts(self):
         """_UnweightedCounts measure object for this cube-result."""
         return _UnweightedCounts(self._dimensions, self, self._cube_measures)
@@ -338,6 +343,14 @@ class _RowUnweightedBases(_BaseSecondOrderMeasure):
         # --- axis. This wouldn't work on MR-rows but there can be no subtotals on an
         # --- MR rows dimension (or any MR dimension) so that case never arises.
         return SumSubtotals.subtotal_rows(self._base_values, self._dimensions)
+
+
+class _RowWeightedBases(_BaseSecondOrderMeasure):
+    """Provides the row-weighted-bases measure for a matrix.
+
+    row-weighted-bases is a 2D np.float64 ndarray of the (weighted) row-proportion
+    denominator (base) for each matrix cell.
+    """
 
 
 class _UnweightedCounts(_BaseSecondOrderMeasure):
