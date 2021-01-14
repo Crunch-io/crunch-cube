@@ -313,6 +313,17 @@ class _RowUnweightedBases(_BaseSecondOrderMeasure):
             self._unweighted_cube_counts.rows_base[:, None], subtotal_columns.shape
         )
 
+    @lazyproperty
+    def _subtotal_rows(self):
+        """2D np.int64 ndarray of row-subtotal row-proportions denominator values.
+
+        This is the third "block" and has the shape (n_row_subtotals, n_cols).
+        """
+        # --- Summing works on rows because row-proportion denominators add along this
+        # --- axis. This wouldn't work on MR-rows but there can be no subtotals on an
+        # --- MR rows dimension (or any MR dimension) so that case never arises.
+        return SumSubtotals.subtotal_rows(self._base_values, self._dimensions)
+
 
 class _UnweightedCounts(_BaseSecondOrderMeasure):
     """Provides the unweighted-counts measure for a matrix."""
