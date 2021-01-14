@@ -323,6 +323,13 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
         )
 
     @lazyproperty
+    def rows_margin(self):
+        """1D ndarray of np.float64 weighted-N for each matrix row."""
+        raise NotImplementedError(
+            "%s must implement `.rows_margin`" % type(self).__name__
+        )
+
+    @lazyproperty
     def weighted_counts(self):
         """2D np.int64 ndarray of weighted-count for each valid matrix cell."""
         raise NotImplementedError(

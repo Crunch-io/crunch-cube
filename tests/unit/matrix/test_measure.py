@@ -538,7 +538,7 @@ class Describe_RowUnweightedBases(object):
     def but_it_returns_empty_array_of_right_shape_when_there_are_no_column_subtotals(
         self, _base_values_prop_, dimensions_, SumSubtotals_
     ):
-        """Empty shape must be (0, ncols) to compose properly in `np.block()` call."""
+        """Empty shape must be (nrows, 0) to compose properly in `np.block()` call."""
         _base_values_prop_.return_value = [[2, 3, 4], [9, 0, 1]]
         SumSubtotals_.subtotal_columns.return_value = np.array([], dtype=int).reshape(
             3, 0
@@ -592,7 +592,59 @@ class Describe_RowWeightedBases(object):
             [4.4, 5.5, 6.6],
         ]
 
+    def it_computes_its_subtotal_columns_to_help(
+        self,
+        _base_values_prop_,
+        dimensions_,
+        SumSubtotals_,
+        _weighted_cube_counts_prop_,
+        weighted_cube_counts_,
+    ):
+        _base_values_prop_.return_value = [[3.3, 4.4, 5.5], [1.1, 2.2, 3.3]]
+        SumSubtotals_.subtotal_columns.return_value = np.array([[3.3, 8.8], [4.4, 6.6]])
+        _weighted_cube_counts_prop_.return_value = weighted_cube_counts_
+        weighted_cube_counts_.rows_margin = np.array([7.7, 4.4])
+        row_weighted_bases = _RowWeightedBases(dimensions_, None, None)
+
+        subtotal_columns = row_weighted_bases._subtotal_columns
+
+        SumSubtotals_.subtotal_columns.assert_called_once_with(
+            [[3.3, 4.4, 5.5], [1.1, 2.2, 3.3]], dimensions_
+        )
+        assert subtotal_columns.tolist() == [[7.7, 7.7], [4.4, 4.4]]
+
+    def but_it_returns_empty_array_of_right_shape_when_there_are_no_column_subtotals(
+        self, _base_values_prop_, dimensions_, SumSubtotals_
+    ):
+        """Empty shape must be (nrows, 0) to compose properly in `np.block()` call."""
+        _base_values_prop_.return_value = [[2.2, 3.3, 4.4], [9.9, 0.0, 1.1]]
+        SumSubtotals_.subtotal_columns.return_value = np.array([], dtype=int).reshape(
+            3, 0
+        )
+        row_weighted_bases = _RowWeightedBases(dimensions_, None, None)
+
+        subtotal_columns = row_weighted_bases._subtotal_columns
+
+        SumSubtotals_.subtotal_columns.assert_called_once_with(
+            [[2.2, 3.3, 4.4], [9.9, 0.0, 1.1]], dimensions_
+        )
+        assert subtotal_columns.tolist() == [[], [], []]
+        assert subtotal_columns.shape == (3, 0)
+        assert subtotal_columns.dtype == int
+
     # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _base_values_prop_(self, request):
+        return property_mock(request, _RowWeightedBases, "_base_values")
+
+    @pytest.fixture
+    def dimensions_(self, request):
+        return (instance_mock(request, Dimension), instance_mock(request, Dimension))
+
+    @pytest.fixture
+    def SumSubtotals_(self, request):
+        return class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
 
     @pytest.fixture
     def weighted_cube_counts_(self, request):
