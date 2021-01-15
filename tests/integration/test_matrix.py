@@ -376,6 +376,72 @@ class DescribeAssembler(object):
             )
         )
 
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_table_unweighted_bases_for_cat_hs_x_cat_hs(self):
+        slice_ = _Slice(
+            Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),
+            slice_idx=0,
+            transforms={
+                "rows_dimension": {
+                    "elements": {"2": {"hide": True}},
+                    "prune": True,
+                    "order": {"type": "explicit", "element_ids": [0, 5, 2, 1, 4]},
+                },
+                "columns_dimension": {
+                    "elements": {"2": {"hide": True}},
+                    "prune": True,
+                    "order": {"type": "explicit", "element_ids": [4, 2, 5, 0]},
+                },
+            },
+            population=None,
+            mask_size=0,
+        )
+
+        assert slice_.table_unweighted_bases.tolist() == [
+            [877, 877, 877, 877, 877],
+            [877, 877, 877, 877, 877],
+            [877, 877, 877, 877, 877],
+            [877, 877, 877, 877, 877],
+            [877, 877, 877, 877, 877],
+            [877, 877, 877, 877, 877],
+            [877, 877, 877, 877, 877],
+        ]
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_table_unweighted_bases_for_cat_hs_x_mr(self):
+        slice_ = Cube(CR.CAT_HS_X_MR).partitions[0]
+        assert slice_.table_unweighted_bases.tolist() == [
+            [165, 210, 242, 450, 476],
+            [165, 210, 242, 450, 476],
+            [165, 210, 242, 450, 476],
+            [165, 210, 242, 450, 476],
+            [165, 210, 242, 450, 476],
+            [165, 210, 242, 450, 476],
+            [165, 210, 242, 450, 476],
+            [165, 210, 242, 450, 476],
+        ]
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_table_unweighted_bases_for_mr_x_cat_hs(self):
+        slice_ = Cube(CR.MR_X_CAT_HS_MT).partitions[0]
+        assert slice_.table_unweighted_bases.tolist() == [
+            [165, 165, 165, 165, 165, 165, 165, 165],
+            [210, 210, 210, 210, 210, 210, 210, 210],
+            [242, 242, 242, 242, 242, 242, 242, 242],
+            [450, 450, 450, 450, 450, 450, 450, 450],
+            [476, 476, 476, 476, 476, 476, 476, 476],
+        ]
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_table_unweighted_bases_for_mr_x_mr(self):
+        slice_ = Cube(CR.MR_X_MR).partitions[0]
+        assert slice_.table_unweighted_bases.tolist() == [
+            [68, 43, 51, 68],
+            [43, 60, 42, 60],
+            [51, 42, 72, 72],
+            [68, 60, 72, 96],
+        ]
+
     def it_computes_unweighted_counts_for_cat_hs_x_cat_hs_hiddens(self):
         """Assembler inserts, hides, prunes, and places in payload order."""
         slice_ = _Slice(
