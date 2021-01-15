@@ -19,6 +19,7 @@ from cr.cube.matrix.measure import (
     _RowUnweightedBases,
     _RowWeightedBases,
     SecondOrderMeasures,
+    _TableUnweightedBases,
     _UnweightedCounts,
     _WeightedCounts,
 )
@@ -104,6 +105,25 @@ class DescribeSecondOrderMeasures(object):
             dimensions_, measures, cube_measures_
         )
         assert row_weighted_bases is row_weighted_bases_
+
+    def it_provides_access_to_the_table_unweighted_bases_measure_object(
+        self, request, dimensions_, _cube_measures_prop_, cube_measures_
+    ):
+        table_unweighted_bases_ = instance_mock(request, _TableUnweightedBases)
+        _TableUnweightedBases_ = class_mock(
+            request,
+            "cr.cube.matrix.measure._TableUnweightedBases",
+            return_value=table_unweighted_bases_,
+        )
+        _cube_measures_prop_.return_value = cube_measures_
+        measures = SecondOrderMeasures(None, dimensions_, None)
+
+        table_unweighted_bases = measures.table_unweighted_bases
+
+        _TableUnweightedBases_.assert_called_once_with(
+            dimensions_, measures, cube_measures_
+        )
+        assert table_unweighted_bases is table_unweighted_bases_
 
     def it_provides_access_to_unweighted_counts_measure_object(
         self, request, dimensions_, _cube_measures_prop_, cube_measures_
