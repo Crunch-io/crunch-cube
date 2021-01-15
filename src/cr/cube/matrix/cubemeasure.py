@@ -124,6 +124,13 @@ class _BaseUnweightedCubeCounts(_BaseCubeMeasure):
         )
 
     @lazyproperty
+    def table_bases(self):
+        """2D np.int64 ndarray of unweighted table-proportion denominator per cell."""
+        raise NotImplementedError(
+            "%s must implement `.table_bases`" % type(self).__name__
+        )
+
+    @lazyproperty
     def unweighted_counts(self):
         """2D np.int64 ndarray of unweighted-count for each valid matrix cell.
 
