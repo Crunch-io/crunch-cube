@@ -167,6 +167,18 @@ class _CatXCatUnweightedCubeCounts(_BaseUnweightedCubeCounts):
         return np.sum(self.unweighted_counts, axis=1)
 
     @lazyproperty
+    def table_base(self):
+        """np.int64 count of actual respondents who answered both questions.
+
+        Each dimension of a CAT_X_CAT matrix represents a categorical question. Only
+        responses that include answers to both those questions appear as entries in the
+        valid elements of those dimensions. The sum total of all valid answers is the
+        sample size, aka "N". The term "base" derives from its use as the denominator
+        for the table-proportions measure.
+        """
+        return np.sum(self.unweighted_counts)
+
+    @lazyproperty
     def table_bases(self):
         """2D np.int64 ndarray of table-proportion denominator for each matrix cell."""
         return np.broadcast_to(self.table_base, self._unweighted_counts.shape)
