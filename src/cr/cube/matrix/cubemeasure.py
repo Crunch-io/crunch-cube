@@ -331,6 +331,20 @@ class _MrXMrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
         return np.sum(self._unweighted_counts[:, 0, :, :], axis=2)
 
     @lazyproperty
+    def table_base(self):
+        """2D np.int64 ndarray of distinct unweighted N for each cell of matrix.
+
+        Because the matrix is MR_X_MR, each cell corresponds to a 2x2 sub-table
+        (selected/not on each axis), each of which has its own distinct table-base.
+        """
+        # --- unweighted_counts is 4D of shape (nrows, 2, ncols, 2):
+        # --- (MR_SUBVAR (nrows), MR_CAT (sel/not), MR_SUBVAR (ncols), MR_CAT (sel/not))
+        # --- Reduce the second and fourth axes with sum() producing 2D (nrows, ncols).
+        # --- This sums (selected, selected), (selected, not), (not, selected) and
+        # --- (not, not) cells of the subtable for each matrix cell.
+        return np.sum(self._unweighted_counts, axis=(1, 3))
+
+    @lazyproperty
     def table_bases(self):
         """2D np.int64 ndarray of table-proportion denominator for each matrix cell."""
         # --- in the MR_X_MR case, table-base is already the 2D table-bases.

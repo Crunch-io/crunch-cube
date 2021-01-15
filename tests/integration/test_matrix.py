@@ -429,7 +429,6 @@ class DescribeAssembler(object):
             [476, 476, 476, 476, 476, 476, 476, 476],
         ]
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_table_unweighted_bases_for_mr_x_mr(self):
         slice_ = Cube(CR.MR_X_MR).partitions[0]
         assert slice_.table_unweighted_bases.tolist() == [
