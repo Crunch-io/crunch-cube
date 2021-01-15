@@ -795,6 +795,44 @@ class Describe_TableUnweightedBases(object):
         assert subtotal_columns.shape == (3, 0)
         assert subtotal_columns.dtype == int
 
+    @pytest.mark.parametrize(
+        "subtotal_rows, table_base, expected_value, expected_shape",
+        (
+            # --- no subtotal-rows case (including MR_X_CAT and MR_X_MR cases) ---
+            (np.array([], dtype=int).reshape(0, 2), None, [], (0, 2)),
+            # --- scalar table-base (CAT_X_CAT case) ---
+            (np.array([[0, 0], [0, 0]]), 8, [[8, 8], [8, 8]], (2, 2)),
+            # --- vector table-base (CAT_X_MR case) ---
+            (np.array([[0, 0], [0, 0]]), np.array([4, 2]), [[4, 2], [4, 2]], (2, 2)),
+        ),
+    )
+    def it_computes_its_subtotal_rows_to_help(
+        self,
+        _base_values_prop_,
+        dimensions_,
+        SumSubtotals_,
+        _unweighted_cube_counts_prop_,
+        unweighted_cube_counts_,
+        subtotal_rows,
+        table_base,
+        expected_value,
+        expected_shape,
+    ):
+        _base_values_prop_.return_value = [[3, 5, 6], [2, 4, 1]]
+        SumSubtotals_.subtotal_rows.return_value = subtotal_rows
+        _unweighted_cube_counts_prop_.return_value = unweighted_cube_counts_
+        unweighted_cube_counts_.table_base = table_base
+        table_unweighted_bases = _TableUnweightedBases(dimensions_, None, None)
+
+        subtotal_rows = table_unweighted_bases._subtotal_rows
+
+        SumSubtotals_.subtotal_rows.assert_called_once_with(
+            [[3, 5, 6], [2, 4, 1]], dimensions_
+        )
+        assert subtotal_rows.tolist() == expected_value
+        assert subtotal_rows.dtype == int
+        assert subtotal_rows.shape == expected_shape
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture

@@ -436,21 +436,25 @@ class _TableUnweightedBases(_BaseSecondOrderMeasure):
 
         This is the second "block" and has the shape (n_rows, n_col_subtotals).
         """
-        # --- Fill correct shape with scalar table-base. Note that in general,
-        # --- SumSubtotals.subtotal_columns cannot be used directly; it has the right
-        # --- shape, but its values are wrong except when it is empty (in which case we
-        # --- use it).
+        # --- There are three cases. For all of them we need the shape of the
+        # --- subtotal-rows array, which we can get from SumSubtotals. Note that in
+        # --- general, the summed values it returns are wrong for this case, but the
+        # --- shape and dtype are right and when empty, it gives the right answer
+        # --- directly.
         subtotal_columns = SumSubtotals.subtotal_columns(
             self._base_values, self._dimensions
         )
 
-        # --- in the "no-column-subtotals" case, short-circuit with an (nrows, 0) array
-        # --- return value, both because that is the right answer, but also because the
-        # --- non-empty table-base value cannot be broadcast into that (empty) shape.
+        # --- Case 1: in the "no-row-subtotals" case, short-circuit with an (nrows, 0)
+        # --- array return value, both because that is the right answer, but also
+        # --- because the non-empty table-base value cannot be broadcast into that
+        # --- shape. Note that because an X_MR cube can have no column subtotals, this
+        # --- automatically takes care of the CAT_X_MR and MR_X_MR cases.
         if subtotal_columns.shape[1] == 0:
             return subtotal_columns
 
         table_base = self._unweighted_cube_counts.table_base
+        shape = subtotal_columns.shape
 
         # TODO: Resolve this abstraction leakage from _BaseUnweightedCounts where the
         # table-margin (for MR_X_CAT) is a (column) vector instead of a scalar and
@@ -459,10 +463,44 @@ class _TableUnweightedBases(_BaseSecondOrderMeasure):
         # "rotation" is performed in `_MrXCatUnweightedCounts`. This same shape
         # diversity happens with `._subtotal_rows` below, but since that vector is a row
         # it is handled without special-casing.
-        if isinstance(table_base, np.ndarray):
-            return np.broadcast_to(table_base[:, None], subtotal_columns.shape)
 
-        return np.broadcast_to(table_base, subtotal_columns.shape)
+        # --- Case 2: in the "vector table-base" (MR_X_CAT) case, rotate the vector into
+        # --- a "column" and broadcast it into the subtotal-columns shape.
+        if isinstance(table_base, np.ndarray):
+            return np.broadcast_to(table_base[:, None], shape)
+
+        # --- Case 3: in the "scalar table-base" (CAT_X_CAT) case, simply fill the
+        # --- subtotal-columns shape with that scalar.
+        return np.broadcast_to(table_base, shape)
+
+    @lazyproperty
+    def _subtotal_rows(self):
+        """2D np.int64 ndarray of inserted-row table-proportions denominator values.
+
+        This is the third "block" and has the shape (n_row_subtotals, n_cols).
+        """
+        # --- There are three cases. For all of them we need the shape of the
+        # --- subtotal-rows array, which we can get from SumSubtotals.subtotal_rows().
+        # --- Note that in general, the summed values it returns are wrong for this
+        # --- case, but the shape and dtype are right and when empty, it gives the
+        # --- right answer directly.
+        subtotal_rows = SumSubtotals.subtotal_rows(self._base_values, self._dimensions)
+
+        # --- Case 1: in the "no-row-subtotals" case, short-circuit with a (0, ncols)
+        # --- array return value, both because that is the right answer, but also
+        # --- because the non-empty table-base value cannot be broadcast into that
+        # --- shape. Note that because an MR_X cube can have no row subtotals, this
+        # --- automatically takes care of the MR_X_CAT and MR_X_MR case.
+        if subtotal_rows.shape[0] == 0:
+            return subtotal_rows
+
+        # --- Case 2 & 3: in the "scalar table-base" (CAT_X_CAT) case, fill the
+        # --- subtotal-rows shape with the scalar value. The same numpy operation also
+        # --- works for the vector table-base (CAT_X_MR) case because the vector
+        # --- table-base is a "row" of base values.
+        return np.broadcast_to(
+            self._unweighted_cube_counts.table_base, subtotal_rows.shape
+        )
 
 
 class _UnweightedCounts(_BaseSecondOrderMeasure):
