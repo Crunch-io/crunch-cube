@@ -266,6 +266,22 @@ class Describe_CatXMrUnweightedCubeCounts(object):
         )
         assert unweighted_cube_counts.rows_base.tolist() == [[7, 7, 7], [7, 7, 7]]
 
+    def it_knows_its_table_bases(
+        self, request, raw_unweighted_counts, unweighted_counts_prop_
+    ):
+        property_mock(
+            request,
+            _CatXMrUnweightedCubeCounts,
+            "table_base",
+            return_value=np.array([5, 4, 3]),
+        )
+        unweighted_counts_prop_.return_value = np.array([[0, 0, 0], [0, 0, 0]])
+        unweighted_cube_counts = _CatXMrUnweightedCubeCounts(
+            None, raw_unweighted_counts
+        )
+
+        assert unweighted_cube_counts.table_bases.tolist() == [[5, 4, 3], [5, 4, 3]]
+
     def it_knows_its_unweighted_counts(self, raw_unweighted_counts):
         unweighted_cube_counts = _CatXMrUnweightedCubeCounts(
             None, raw_unweighted_counts
@@ -296,6 +312,10 @@ class Describe_CatXMrUnweightedCubeCounts(object):
                 ],
             ]
         )
+
+    @pytest.fixture
+    def unweighted_counts_prop_(self, request):
+        return property_mock(request, _CatXMrUnweightedCubeCounts, "unweighted_counts")
 
 
 class Describe_MrXCatUnweightedCubeCounts(object):

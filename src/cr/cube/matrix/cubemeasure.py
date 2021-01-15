@@ -223,6 +223,11 @@ class _CatXMrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
         return np.sum(self._unweighted_counts, axis=2)
 
     @lazyproperty
+    def table_bases(self):
+        """2D np.int64 ndarray of unweighted table-proportion denominator per cell."""
+        return np.broadcast_to(self.table_base, self.unweighted_counts.shape)
+
+    @lazyproperty
     def unweighted_counts(self):
         """2D np.int64 ndarray of unweighted-count for each valid matrix cell."""
         return self._unweighted_counts[:, :, 0]
