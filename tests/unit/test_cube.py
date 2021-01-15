@@ -671,6 +671,6 @@ class Describe_BaseMeasure(object):
         )
 
         assert (
-            _BaseMeasure({}, all_dimensions, cube_idx_arg)._requires_array_transposition
+            _BaseMeasure({}, all_dimensions, cube_idx_arg).requires_array_transposition
             is expected_value
         )

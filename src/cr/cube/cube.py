@@ -516,8 +516,13 @@ class Cube(object):
 
     @lazyproperty
     def _valid_idxs(self):
-        return np.ix_(
+        valid_idxs = np.ix_(
             *tuple(d.valid_elements.element_idxs for d in self._all_dimensions)
+        )
+        return (
+            valid_idxs[::-1]
+            if self._measure(self.is_weighted).requires_array_transposition
+            else valid_idxs
         )
 
 
@@ -664,12 +669,10 @@ class _BaseMeasure(object):
         raw_cube_array.flags.writeable = False
         # NOTE: The transpose operation cannot be enough in future when we'll have more
         # than 2 dimensions.
-        return (
-            raw_cube_array.T if self._requires_array_transposition else raw_cube_array
-        )
+        return raw_cube_array.T if self.requires_array_transposition else raw_cube_array
 
     @lazyproperty
-    def _requires_array_transposition(self):
+    def requires_array_transposition(self):
         """True if raw cube array needs transposition, False otherwise.
 
         When a Cube is part of a cubeset and one of the dimension type is a NUM_ARRAY,
