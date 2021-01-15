@@ -20,6 +20,7 @@ from cr.cube.matrix.measure import (
     _RowUnweightedBases,
     _RowWeightedBases,
     SecondOrderMeasures,
+    _TableUnweightedBases,
     _UnweightedCounts,
     _WeightedCounts,
 )
@@ -638,6 +639,22 @@ class DescribeAssembler(object):
         )
         _assemble_matrix_.assert_called_once_with(assembler, [[[1], [2]], [[3], [4]]])
         assert table_stderrs == [[1, 3, 2], [4, 6, 5]]
+
+    def it_knows_the_table_unweighted_bases(
+        self, request, _measures_prop_, second_order_measures_, _assemble_matrix_
+    ):
+        table_unweighted_bases_ = instance_mock(
+            request, _TableUnweightedBases, blocks=[["A", "B"], ["C", "D"]]
+        )
+        _measures_prop_.return_value = second_order_measures_
+        second_order_measures_.table_unweighted_bases = table_unweighted_bases_
+        _assemble_matrix_.return_value = [[9, 8, 7], [6, 5, 4], [3, 2, 1]]
+        assembler = Assembler(None, None, None)
+
+        table_unweighted_bases = assembler.table_unweighted_bases
+
+        _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
+        assert table_unweighted_bases == [[9, 8, 7], [6, 5, 4], [3, 2, 1]]
 
     def it_knows_the_unweighted_counts(
         self, request, _measures_prop_, second_order_measures_, _assemble_matrix_
