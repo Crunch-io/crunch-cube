@@ -104,7 +104,7 @@ class _BaseUnweightedCubeCounts(_BaseCubeMeasure):
 
     @lazyproperty
     def columns_base(self):
-        """1D ndarray of np.int64 unweighted-N for each matrix column."""
+        """1D or 2D np.int64 ndarray of unweighted column-proportion denominator."""
         raise NotImplementedError(
             "%s must implement `.columns_base`" % type(self).__name__
         )
@@ -118,9 +118,16 @@ class _BaseUnweightedCubeCounts(_BaseCubeMeasure):
 
     @lazyproperty
     def rows_base(self):
-        """1D ndarray of np.int64 unweighted-N for each matrix row."""
+        """1D or 2D np.int64 ndarray of unweighted row-proportion denominator."""
         raise NotImplementedError(
             "%s must implement `.rows_base`" % type(self).__name__
+        )
+
+    @lazyproperty
+    def table_base(self):
+        """Scalar, 1D, or 2D np.int64 ndarray of unweighted table proportion denom."""
+        raise NotImplementedError(
+            "%s must implement `.table_base`" % type(self).__name__
         )
 
     @lazyproperty
@@ -152,12 +159,17 @@ class _CatXCatUnweightedCubeCounts(_BaseUnweightedCubeCounts):
     @lazyproperty
     def row_bases(self):
         """2D np.int64 ndarray of unweighted row-proportion denominator per cell."""
-        return np.broadcast_to(self.rows_base[:, None], self.unweighted_counts.shape)
+        return np.broadcast_to(self.rows_base[:, None], self._unweighted_counts.shape)
 
     @lazyproperty
     def rows_base(self):
         """1D ndarray of np.int64 unweighted-N for each matrix row."""
         return np.sum(self.unweighted_counts, axis=1)
+
+    @lazyproperty
+    def table_bases(self):
+        """2D np.int64 ndarray of table-proportion denominator for each matrix cell."""
+        return np.broadcast_to(self.table_base, self._unweighted_counts.shape)
 
     @lazyproperty
     def unweighted_counts(self):
