@@ -392,6 +392,13 @@ class Describe_Slice(object):
 
         assert slice_.selected_category_labels == expected_value
 
+    def it_knows_the_table_unweighted_bases(self, _assembler_prop_, assembler_):
+        _assembler_prop_.return_value = assembler_
+        assembler_.table_unweighted_bases = np.array([[2, 3], [0, 1]])
+        slice_ = _Slice(None, None, None, None, None)
+
+        assert slice_.table_unweighted_bases.tolist() == [[2, 3], [0, 1]]
+
     def it_constructs_its_assembler_instance_to_help(
         self, request, cube_, _dimensions_prop_, dimension_, assembler_
     ):
