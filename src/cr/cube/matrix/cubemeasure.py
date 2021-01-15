@@ -331,6 +331,12 @@ class _MrXMrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
         return np.sum(self._unweighted_counts[:, 0, :, :], axis=2)
 
     @lazyproperty
+    def table_bases(self):
+        """2D np.int64 ndarray of table-proportion denominator for each matrix cell."""
+        # --- in the MR_X_MR case, table-base is already the 2D table-bases.
+        return self.table_base
+
+    @lazyproperty
     def unweighted_counts(self):
         """2D np.int64 ndarray of unweighted-count for each valid matrix cell."""
         # --- indexing is: all-rows, sel-only, all-cols, sel-only ---
