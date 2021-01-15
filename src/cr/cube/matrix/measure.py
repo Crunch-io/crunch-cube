@@ -431,6 +431,33 @@ class _TableUnweightedBases(_BaseSecondOrderMeasure):
         return self._unweighted_cube_counts.table_bases
 
     @lazyproperty
+    def _intersections(self):
+        """(n_row_subtotals, n_col_subtotals) ndarray of intersection values.
+
+        An intersection value arises where a row-subtotal crosses a column-subtotal.
+        This is the fourth and final "block" required by the assembler.
+        """
+        # --- There are only two cases. Note that intersections can only occur when
+        # --- there are *both* row-subtotals and column-subtotals. Since an MR dimension
+        # --- can have no subtotals, this rules out all but the CAT_X_CAT case. We need
+        # --- the shape of the intersections array for all cases, and we get it from
+        # --- SumSubtotals. Note that in general, the summed values it returns are wrong
+        # --- for this case, but the shape and dtype are right and when empty, it gives
+        # --- the right answer directly.
+        intersections = SumSubtotals.intersections(self._base_values, self._dimensions)
+        shape = intersections.shape
+
+        # --- if intersections is empty, return it, because it is the right shape and
+        # --- because the table-base cannot be broadcast to an empty shape if it is an
+        # --- array value (which it will be when the slice has an MR dimension).
+        if 0 in shape:
+            return intersections
+
+        # --- Otherwise, we know that table-base must be a scalar (only CAT_X_CAT can
+        # --- have intersections, so fill the intersections shape with that scalar.
+        return np.broadcast_to(self._unweighted_cube_counts.table_base, shape)
+
+    @lazyproperty
     def _subtotal_columns(self):
         """2D np.int64 ndarray of inserted-column table-proportions denominator value.
 

@@ -750,6 +750,59 @@ class Describe_TableUnweightedBases(object):
         assert table_unweighted_bases._base_values.tolist() == [[3, 0, 5], [1, 4, 2]]
 
     @pytest.mark.parametrize(
+        "intersections, table_base, expected_value, expected_shape",
+        (
+            # --- CAT_X_CAT with both row-subtotals and column-subtotals ---
+            (
+                np.array([[8, 4], [3, 7]]),
+                7,
+                [[7, 7], [7, 7]],
+                (2, 2),
+            ),
+            # --- No intersections but table-base is an array (one of the MR cases) ---
+            (
+                np.array([], dtype=int).reshape(0, 2),
+                [6, 6, 6],
+                [],
+                (0, 2),
+            ),
+            # --- No intersections and table-base is a scalar ---
+            (
+                np.array([], dtype=int).reshape(0, 2),
+                9,
+                [],
+                (0, 2),
+            ),
+        ),
+    )
+    def it_computes_its_intersections_block_to_help(
+        self,
+        _base_values_prop_,
+        dimensions_,
+        SumSubtotals_,
+        _unweighted_cube_counts_prop_,
+        unweighted_cube_counts_,
+        intersections,
+        table_base,
+        expected_value,
+        expected_shape,
+    ):
+        _base_values_prop_.return_value = [[6, 5, 4], [9, 8, 7], [3, 2, 1]]
+        SumSubtotals_.intersections.return_value = intersections
+        _unweighted_cube_counts_prop_.return_value = unweighted_cube_counts_
+        unweighted_cube_counts_.table_base = table_base
+        table_unweighted_bases = _TableUnweightedBases(dimensions_, None, None)
+
+        intersections = table_unweighted_bases._intersections
+
+        SumSubtotals_.intersections.assert_called_once_with(
+            [[6, 5, 4], [9, 8, 7], [3, 2, 1]], dimensions_
+        )
+        assert intersections.tolist() == expected_value
+        assert intersections.shape == expected_shape
+        assert intersections.dtype == int
+
+    @pytest.mark.parametrize(
         "table_base, expected_value",
         ((np.array([7, 4]), [[7, 7], [4, 4]]), (9, [[9, 9], [9, 9]])),
     )
