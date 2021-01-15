@@ -223,6 +223,17 @@ class _CatXMrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
         return np.sum(self._unweighted_counts, axis=2)
 
     @lazyproperty
+    def table_base(self):
+        """1D np.int64 unweighted-N for each column of table.
+
+        Because the matrix is X_MR, each column (MR-subvar) has a distinct base.
+        """
+        # --- unweighted-counts is (nrows, ncols, selected/not) so axis 1 is preserved
+        # --- to provide a distinct value for each MR subvar. Both selected and
+        # --- not-selected counts contribute to base.
+        return np.sum(self._unweighted_counts, axis=(0, 2))
+
+    @lazyproperty
     def table_bases(self):
         """2D np.int64 ndarray of unweighted table-proportion denominator per cell."""
         return np.broadcast_to(self.table_base, self.unweighted_counts.shape)

@@ -266,6 +266,12 @@ class Describe_CatXMrUnweightedCubeCounts(object):
         )
         assert unweighted_cube_counts.rows_base.tolist() == [[7, 7, 7], [7, 7, 7]]
 
+    def it_knows_its_table_base(self, raw_unweighted_counts):
+        unweighted_cube_counts = _CatXMrUnweightedCubeCounts(
+            None, raw_unweighted_counts
+        )
+        assert unweighted_cube_counts.table_base.tolist() == [14, 14, 14]
+
     def it_knows_its_table_bases(
         self, request, raw_unweighted_counts, unweighted_counts_prop_
     ):
