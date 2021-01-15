@@ -430,6 +430,40 @@ class _TableUnweightedBases(_BaseSecondOrderMeasure):
         """
         return self._unweighted_cube_counts.table_bases
 
+    @lazyproperty
+    def _subtotal_columns(self):
+        """2D np.int64 ndarray of inserted-column table-proportions denominator value.
+
+        This is the second "block" and has the shape (n_rows, n_col_subtotals).
+        """
+        # --- Fill correct shape with scalar table-base. Note that in general,
+        # --- SumSubtotals.subtotal_columns cannot be used directly; it has the right
+        # --- shape, but its values are wrong except when it is empty (in which case we
+        # --- use it).
+        subtotal_columns = SumSubtotals.subtotal_columns(
+            self._base_values, self._dimensions
+        )
+
+        # --- in the "no-column-subtotals" case, short-circuit with an (nrows, 0) array
+        # --- return value, both because that is the right answer, but also because the
+        # --- non-empty table-base value cannot be broadcast into that (empty) shape.
+        if subtotal_columns.shape[1] == 0:
+            return subtotal_columns
+
+        table_base = self._unweighted_cube_counts.table_base
+
+        # TODO: Resolve this abstraction leakage from _BaseUnweightedCounts where the
+        # table-margin (for MR_X_CAT) is a (column) vector instead of a scalar and
+        # column subtotals can still occur. When `.table_base` becomes a min-max range,
+        # we might need something like `.table_base_column` that is (nrows, 1) so this
+        # "rotation" is performed in `_MrXCatUnweightedCounts`. This same shape
+        # diversity happens with `._subtotal_rows` below, but since that vector is a row
+        # it is handled without special-casing.
+        if isinstance(table_base, np.ndarray):
+            return np.broadcast_to(table_base[:, None], subtotal_columns.shape)
+
+        return np.broadcast_to(table_base, subtotal_columns.shape)
+
 
 class _UnweightedCounts(_BaseSecondOrderMeasure):
     """Provides the unweighted-counts measure for a matrix."""

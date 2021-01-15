@@ -749,7 +749,65 @@ class Describe_TableUnweightedBases(object):
 
         assert table_unweighted_bases._base_values.tolist() == [[3, 0, 5], [1, 4, 2]]
 
+    @pytest.mark.parametrize(
+        "table_base, expected_value",
+        ((np.array([7, 4]), [[7, 7], [4, 4]]), (9, [[9, 9], [9, 9]])),
+    )
+    def it_computes_its_subtotal_columns_to_help(
+        self,
+        _base_values_prop_,
+        dimensions_,
+        SumSubtotals_,
+        _unweighted_cube_counts_prop_,
+        unweighted_cube_counts_,
+        table_base,
+        expected_value,
+    ):
+        _base_values_prop_.return_value = [[5, 6, 3], [4, 1, 2]]
+        SumSubtotals_.subtotal_columns.return_value = np.array([[0, 0], [0, 0]])
+        _unweighted_cube_counts_prop_.return_value = unweighted_cube_counts_
+        unweighted_cube_counts_.table_base = table_base
+        table_unweighted_bases = _TableUnweightedBases(dimensions_, None, None)
+
+        subtotal_columns = table_unweighted_bases._subtotal_columns
+
+        SumSubtotals_.subtotal_columns.assert_called_once_with(
+            [[5, 6, 3], [4, 1, 2]], dimensions_
+        )
+        assert subtotal_columns.tolist() == expected_value
+
+    def but_it_returns_empty_array_of_right_shape_when_there_are_no_column_subtotals(
+        self, _base_values_prop_, dimensions_, SumSubtotals_
+    ):
+        """Empty shape must be (nrows, 0) to compose properly in `np.block()` call."""
+        _base_values_prop_.return_value = [[2, 3], [4, 9], [0, 1]]
+        SumSubtotals_.subtotal_columns.return_value = np.array([], dtype=int).reshape(
+            3, 0
+        )
+        table_unweighted_bases = _TableUnweightedBases(dimensions_, None, None)
+
+        subtotal_columns = table_unweighted_bases._subtotal_columns
+
+        SumSubtotals_.subtotal_columns.assert_called_once_with(
+            [[2, 3], [4, 9], [0, 1]], dimensions_
+        )
+        assert subtotal_columns.tolist() == [[], [], []]
+        assert subtotal_columns.shape == (3, 0)
+        assert subtotal_columns.dtype == int
+
     # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _base_values_prop_(self, request):
+        return property_mock(request, _TableUnweightedBases, "_base_values")
+
+    @pytest.fixture
+    def dimensions_(self, request):
+        return (instance_mock(request, Dimension), instance_mock(request, Dimension))
+
+    @pytest.fixture
+    def SumSubtotals_(self, request):
+        return class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
 
     @pytest.fixture
     def unweighted_cube_counts_(self, request):
