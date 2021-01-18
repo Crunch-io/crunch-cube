@@ -104,15 +104,20 @@ class DescribeIntegratedCube(object):
             ),
         )
 
-    def it_provides_valid_count_for_NUM_ARRAY_GROUPED_BY_CAT(self):
+    def it_provides_valid_counts_for_NUM_ARRAY_GROUPED_BY_CAT(self):
         cube = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT)
 
-        np.testing.assert_array_equal(cube.valid_count, [5, 4, 2])
+        np.testing.assert_array_equal(cube.valid_counts, [[3, 3, 1], [2, 1, 1]])
 
-    def it_provides_total_n_for_NUM_ARRAY_GROUPED_BY_CAT(self):
+    def it_provides_valid_counts_summary_for_NUM_ARRAY_GROUPED_BY_CAT(self):
         cube = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT)
 
-        assert cube.total_n == 5
+        np.testing.assert_array_equal(cube.valid_counts_summary, [5, 4, 2])
+
+    def it_provides_n_responses_for_NUM_ARRAY_GROUPED_BY_CAT(self):
+        cube = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT)
+
+        assert cube.n_responses == 5
 
 
 class DescribeIntegrated_Measures(object):
