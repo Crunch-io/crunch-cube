@@ -5,9 +5,9 @@
 import pytest
 import numpy as np
 
-from cr.cube.cube import Cube, CubeSet, _BaseMeasure, _Measures
+from cr.cube.cube import Cube, CubeSet, _BaseMeasure, _Measures, _MeanMeasure
 from cr.cube.cubepart import _Slice, _Strand, _Nub
-from cr.cube.dimension import Dimension
+from cr.cube.dimension import AllDimensions, Dimension
 from cr.cube.enums import DIMENSION_TYPE as DT
 
 from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
@@ -261,6 +261,25 @@ class DescribeCubeSet(object):
 
         assert Cube_.call_args_list == ([call({"cube": 0})] if is_multi_cube else [])
         assert is_numeric_mean == expected_value
+
+    def it_knows_its_valid_counts_summary_to_help(self, _cubes_prop_, cube_):
+        cube_.valid_counts_summary = np.array([1, 2, 3])
+        cube_.has_means = True
+        _cubes_prop_.return_value = (cube_,)
+        cube_set = CubeSet(None, None, None, None)
+
+        valid_counts_summary = cube_set.valid_counts_summary
+
+        np.testing.assert_array_equal(valid_counts_summary, [1, 2, 3])
+
+    def it_knows_its_n_reposnes_to_help(self, _cubes_prop_, cube_):
+        cube_.n_responses = 6
+        _cubes_prop_.return_value = (cube_,)
+        cube_set = CubeSet(None, None, None, None)
+
+        n_responses = cube_set.n_responses
+
+        assert n_responses == 6
 
     # fixture components ---------------------------------------------
 
@@ -671,6 +690,37 @@ class Describe_BaseMeasure(object):
         )
 
         assert (
-            _BaseMeasure({}, all_dimensions, cube_idx_arg)._requires_array_transposition
+            _BaseMeasure({}, all_dimensions, cube_idx_arg).requires_array_transposition
             is expected_value
         )
+
+
+class Describe_MeanMeasure(object):
+    @pytest.mark.parametrize(
+        "valid_counts_u, cube_idx_arg, expected_value",
+        (
+            ([], None, []),
+            ([[3, 2, 1], [2, 2, 0]], None, [[3, 2, 1], [2, 2, 0]]),
+            ([[3, 2, 1], [2, 2, 0]], 1, [[3, 2, 1], [2, 2, 0]]),
+        ),
+    )
+    def it_knows_its_valid_counts_to_help(
+        self,
+        request,
+        valid_counts_u,
+        cube_idx_arg,
+        expected_value,
+    ):
+        _all_dimensions_ = instance_mock(request, AllDimensions)
+        _all_dimensions_.shape = (2, 3)
+        _mean_measure = _MeanMeasure(
+            {
+                "result": {
+                    "measures": {"valid_count_unweighted": {"data": valid_counts_u}}
+                }
+            },
+            _all_dimensions_,
+            cube_idx_arg,
+        )
+
+        np.testing.assert_array_equal(_mean_measure.valid_counts, expected_value)

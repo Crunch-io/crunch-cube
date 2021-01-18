@@ -18,7 +18,7 @@ from cr.cube.cube import (
 from cr.cube.dimension import _ApparentDimensions
 from cr.cube.enums import DIMENSION_TYPE as DT
 
-from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
+from ..fixtures import CR, NA  # ---mnemonic: CR = 'cube-response'---
 from ..util import load_python_expression
 
 
@@ -103,6 +103,31 @@ class DescribeIntegratedCube(object):
                 ]
             ),
         )
+
+    def it_provides_valid_counts_for_NUM_ARRAY_GROUPED_BY_CAT(self):
+        cube = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT)
+
+        np.testing.assert_array_equal(cube.valid_counts, [[3, 3, 1], [2, 1, 1]])
+
+    def and_it_returns_empty_array_if_valid_counts_are_not_available(self):
+        cube = Cube(CR.CAT_X_CAT)
+
+        np.testing.assert_array_equal(cube.valid_counts, [])
+
+    def it_provides_valid_counts_summary_for_NUM_ARRAY_GROUPED_BY_CAT(self):
+        cube = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT)
+
+        np.testing.assert_array_equal(cube.valid_counts_summary, [5, 4, 2])
+
+    def and_it_returns_empty_array_for_summary_if_valid_counts_are_not_available(self):
+        cube = Cube(CR.CAT_X_CAT)
+
+        np.testing.assert_array_equal(cube.valid_counts_summary, [])
+
+    def it_provides_n_responses_for_NUM_ARRAY_GROUPED_BY_CAT(self):
+        cube = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT)
+
+        assert cube.n_responses == 5
 
 
 class DescribeIntegrated_Measures(object):

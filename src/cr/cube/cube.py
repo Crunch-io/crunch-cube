@@ -133,6 +133,16 @@ class CubeSet(object):
         return self._cubes[0].population_fraction
 
     @lazyproperty
+    def n_responses(self):
+        """Total number of responses considered from first cube in this set."""
+        return self._cubes[0].n_responses
+
+    @lazyproperty
+    def valid_counts_summary(self):
+        """The valid count summary values from first cube in this set."""
+        return self._cubes[0].valid_counts_summary
+
+    @lazyproperty
     def _cubes(self):
         """Sequence of Cube objects containing data for this analysis."""
 
@@ -353,6 +363,11 @@ class Cube(object):
         return self._cube_dict["result"].get("title", "Untitled")
 
     @lazyproperty
+    def n_responses(self):
+        """Total (int) number of responses considered."""
+        return self._cube_response["result"].get("n", 0)
+
+    @lazyproperty
     def unweighted_counts(self):
         """ndarray of unweighted counts, valid elements only.
 
@@ -362,6 +377,24 @@ class Cube(object):
         cube is "weighted".
         """
         return self._measures.unweighted_counts.raw_cube_array[self._valid_idxs]
+
+    @lazyproperty
+    def valid_counts(self):
+        """ndarray of valid counts, valid elements only."""
+        valid_counts = self._measure(self.is_weighted).valid_counts
+        if valid_counts.any():
+            return valid_counts[self._valid_idxs]
+        return np.empty(0)
+
+    @lazyproperty
+    def valid_counts_summary(self):
+        """ndarray of summary valid counts"""
+        # --- In case of ndim > 2 the sum should be done on the second axes to get the
+        # --- correct sequence of valid count (e.g. CA_SUBVAR).
+        if self.valid_counts.any():
+            axes = 1 if len(self._all_dimensions) > 2 else 0
+            return np.sum(self.valid_counts, axis=axes)
+        return np.empty(0)
 
     @lazyproperty
     def _all_dimensions(self):
@@ -516,8 +549,16 @@ class Cube(object):
 
     @lazyproperty
     def _valid_idxs(self):
-        return np.ix_(
+        valid_idxs = np.ix_(
             *tuple(d.valid_elements.element_idxs for d in self._all_dimensions)
+        )
+        # ---NOTE FOR FUTURE: We'll need a way to tell to the cube which dimensions we
+        # ---want transposed and which not. So the ::-1 can be converted in something
+        # ---more robust.
+        return (
+            valid_idxs[::-1]
+            if self._measure(self.is_weighted).requires_array_transposition
+            else valid_idxs
         )
 
 
@@ -664,12 +705,10 @@ class _BaseMeasure(object):
         raw_cube_array.flags.writeable = False
         # NOTE: The transpose operation cannot be enough in future when we'll have more
         # than 2 dimensions.
-        return (
-            raw_cube_array.T if self._requires_array_transposition else raw_cube_array
-        )
+        return raw_cube_array.T if self.requires_array_transposition else raw_cube_array
 
     @lazyproperty
-    def _requires_array_transposition(self):
+    def requires_array_transposition(self):
         """True if raw cube array needs transposition, False otherwise.
 
         When a Cube is part of a cubeset and one of the dimension type is a NUM_ARRAY,
@@ -681,6 +720,23 @@ class _BaseMeasure(object):
             self._cube_idx_arg is not None
             and len(self._all_dimensions) >= 2
             and any([d.dimension_type == DT.NUM_ARRAY for d in self._all_dimensions])
+        )
+
+    @lazyproperty
+    def valid_counts(self):
+        """np.array of valid count measure in the cube response."""
+        valid_counts = (
+            self._cube_dict["result"]["measures"]
+            .get("valid_count_unweighted", {})
+            .get("data", [])
+        )
+        if not valid_counts:
+            return np.empty(0)
+        valid_counts_array = np.array(valid_counts).reshape(self._all_dimensions.shape)
+        return (
+            valid_counts_array.T
+            if self.requires_array_transposition
+            else valid_counts_array
         )
 
     @lazyproperty
