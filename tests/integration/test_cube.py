@@ -18,7 +18,7 @@ from cr.cube.cube import (
 from cr.cube.dimension import _ApparentDimensions
 from cr.cube.enums import DIMENSION_TYPE as DT
 
-from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
+from ..fixtures import CR, NA  # ---mnemonic: CR = 'cube-response'---
 from ..util import load_python_expression
 
 
@@ -103,6 +103,16 @@ class DescribeIntegratedCube(object):
                 ]
             ),
         )
+
+    def it_provides_valid_count_for_NUM_ARRAY_GROUPED_BY_CAT(self):
+        cube = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT)
+
+        np.testing.assert_array_equal(cube.valid_count, [5, 4, 2])
+
+    def it_provides_total_n_for_NUM_ARRAY_GROUPED_BY_CAT(self):
+        cube = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT)
+
+        assert cube.total_n == 5
 
 
 class DescribeIntegrated_Measures(object):

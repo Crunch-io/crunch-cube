@@ -262,6 +262,24 @@ class DescribeCubeSet(object):
         assert Cube_.call_args_list == ([call({"cube": 0})] if is_multi_cube else [])
         assert is_numeric_mean == expected_value
 
+    def it_knows_its_valid_counts_to_help(self, _cubes_prop_, cube_):
+        cube_.valid_count = np.array([1, 2, 3])
+        _cubes_prop_.return_value = (cube_,)
+        cube_set = CubeSet(None, None, None, None)
+
+        valid_count = cube_set.valid_count
+
+        np.testing.assert_array_equal(valid_count, [1, 2, 3])
+
+    def it_knows_its_total_n_to_help(self, _cubes_prop_, cube_):
+        cube_.total_n = 6
+        _cubes_prop_.return_value = (cube_,)
+        cube_set = CubeSet(None, None, None, None)
+
+        total_n = cube_set.total_n
+
+        assert total_n == 6
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture

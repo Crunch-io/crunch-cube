@@ -133,6 +133,16 @@ class CubeSet(object):
         return self._cubes[0].population_fraction
 
     @lazyproperty
+    def total_n(self):
+        """The number of total N value from first cube in this set."""
+        return self._cubes[0].total_n
+
+    @lazyproperty
+    def valid_count(self):
+        """The valid count values from first cube in this set."""
+        return self._cubes[0].valid_count
+
+    @lazyproperty
     def _cubes(self):
         """Sequence of Cube objects containing data for this analysis."""
 
@@ -353,6 +363,11 @@ class Cube(object):
         return self._cube_dict["result"].get("title", "Untitled")
 
     @lazyproperty
+    def total_n(self):
+        """Total (int) N of counts."""
+        return self._cube_response["result"].get("n", 0)
+
+    @lazyproperty
     def unweighted_counts(self):
         """ndarray of unweighted counts, valid elements only.
 
@@ -362,6 +377,14 @@ class Cube(object):
         cube is "weighted".
         """
         return self._measures.unweighted_counts.raw_cube_array[self._valid_idxs]
+
+    @lazyproperty
+    def valid_count(self):
+        """ndarray of valid counts, valid elements only."""
+        # --- In case of ndim > 2 the sum should be done on the second axes to get the
+        # --- correct sequence of valid count (e.g. CA_SUBVAR).
+        axes = 1 if len(self._all_dimensions) > 2 else 0
+        return np.sum(self._measures.means.valid_count[self._valid_idxs], axis=axes)
 
     @lazyproperty
     def _all_dimensions(self):
@@ -702,6 +725,21 @@ class _MeanMeasure(_BaseMeasure):
     def missing_count(self):
         """numeric representing count of missing rows reflected in response."""
         return self._cube_dict["result"]["measures"]["mean"].get("n_missing", 0)
+
+    @lazyproperty
+    def valid_count(self):
+        """np.array of valid count measure in the cube response."""
+        valid_count = (
+            self._cube_dict["result"]["measures"]
+            .get("valid_count_unweighted", {})
+            .get("data", [])
+        )
+        valid_count_array = np.array(valid_count).reshape(self._all_dimensions.shape)
+        return (
+            valid_count_array.T
+            if self.requires_array_transposition
+            else valid_count_array
+        )
 
     @lazyproperty
     def _flat_values(self):
