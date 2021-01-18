@@ -381,8 +381,9 @@ class Cube(object):
     @lazyproperty
     def valid_counts(self):
         """ndarray of valid counts, valid elements only."""
-        if self.has_means and self._measures.means.valid_counts.any():
-            return self._measures.means.valid_counts[self._valid_idxs]
+        valid_counts = self._measure(self.is_weighted).valid_counts
+        if valid_counts.any():
+            return valid_counts[self._valid_idxs]
         return np.empty(0)
 
     @lazyproperty
@@ -722,23 +723,6 @@ class _BaseMeasure(object):
         )
 
     @lazyproperty
-    def _flat_values(self):  # pragma: no cover
-        """Return tuple of mean values as found in cube response.
-
-        This property must be implemented by each subclass.
-        """
-        raise NotImplementedError("must be implemented by each subclass")
-
-
-class _MeanMeasure(_BaseMeasure):
-    """Statistical mean values from a cube-response."""
-
-    @lazyproperty
-    def missing_count(self):
-        """numeric representing count of missing rows reflected in response."""
-        return self._cube_dict["result"]["measures"]["mean"].get("n_missing", 0)
-
-    @lazyproperty
     def valid_counts(self):
         """np.array of valid count measure in the cube response."""
         valid_counts = (
@@ -754,6 +738,23 @@ class _MeanMeasure(_BaseMeasure):
             if self.requires_array_transposition
             else valid_counts_array
         )
+
+    @lazyproperty
+    def _flat_values(self):  # pragma: no cover
+        """Return tuple of mean values as found in cube response.
+
+        This property must be implemented by each subclass.
+        """
+        raise NotImplementedError("must be implemented by each subclass")
+
+
+class _MeanMeasure(_BaseMeasure):
+    """Statistical mean values from a cube-response."""
+
+    @lazyproperty
+    def missing_count(self):
+        """numeric representing count of missing rows reflected in response."""
+        return self._cube_dict["result"]["measures"]["mean"].get("n_missing", 0)
 
     @lazyproperty
     def _flat_values(self):
