@@ -945,6 +945,56 @@ class Describe_TableWeightedBases(object):
         ]
 
     @pytest.mark.parametrize(
+        "intersections, table_margin, expected_value, expected_shape",
+        (
+            # --- CAT_X_CAT with both row-subtotals and column-subtotals ---
+            (
+                np.array([[8, 4], [3, 7]]),
+                7,
+                [[7, 7], [7, 7]],
+                (2, 2),
+            ),
+            # --- All other cases, intersections array is empty ---
+            (
+                np.array([], dtype=int).reshape(0, 2),
+                None,
+                [],
+                (0, 2),
+            ),
+        ),
+    )
+    def it_computes_its_intersections_block_to_help(
+        self,
+        _base_values_prop_,
+        dimensions_,
+        SumSubtotals_,
+        _weighted_cube_counts_prop_,
+        weighted_cube_counts_,
+        intersections,
+        table_margin,
+        expected_value,
+        expected_shape,
+    ):
+        _base_values_prop_.return_value = [
+            [6.6, 5.5, 4.4],
+            [9.9, 8.8, 7.7],
+            [3.3, 2.2, 1.1],
+        ]
+        SumSubtotals_.intersections.return_value = intersections
+        _weighted_cube_counts_prop_.return_value = weighted_cube_counts_
+        weighted_cube_counts_.table_margin = table_margin
+        table_weighted_bases = _TableWeightedBases(dimensions_, None, None)
+
+        intersections = table_weighted_bases._intersections
+
+        SumSubtotals_.intersections.assert_called_once_with(
+            [[6.6, 5.5, 4.4], [9.9, 8.8, 7.7], [3.3, 2.2, 1.1]], dimensions_
+        )
+        assert intersections.tolist() == expected_value
+        assert intersections.shape == expected_shape
+        assert intersections.dtype == int
+
+    @pytest.mark.parametrize(
         "subtotal_columns_, table_margin, expected_value",
         (
             # --- CAT_X_CAT case, scalar table-margin ---

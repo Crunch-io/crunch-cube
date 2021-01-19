@@ -438,7 +438,6 @@ class DescribeAssembler(object):
             [68, 60, 72, 96],
         ]
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_table_weighted_bases_for_cat_hs_x_cat_hs(self):
         slice_ = _Slice(
             Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),
