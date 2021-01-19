@@ -448,6 +448,22 @@ class _CatXCatWeightedCubeCounts(_BaseWeightedCubeCounts):
         return np.sum(self._weighted_counts, axis=1)
 
     @lazyproperty
+    def table_bases(self):
+        """2D np.float64 ndarray of table-proportion denominator for each cell."""
+        return np.broadcast_to(self.table_margin, self._weighted_counts.shape)
+
+    @lazyproperty
+    def table_margin(self):
+        """Scalar np.float/int64 weighted-N for overall table.
+
+        This is the weighted count of respondents who provided a valid response to
+        both questions. Because both dimensions are CAT, the table-margin value is the
+        same for all cells of the matrix. Value is np.int64 when source cube-result is
+        unweighted.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
     def weighted_counts(self):
         """2D np.float/int64 ndarray of weighted-count for each valid matrix cell.
 

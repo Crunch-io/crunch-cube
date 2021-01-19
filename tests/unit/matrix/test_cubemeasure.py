@@ -583,6 +583,17 @@ class Describe_CatXCatWeightedCubeCounts(object):
         weighted_cube_counts = _CatXCatWeightedCubeCounts(None, raw_weighted_counts)
         assert weighted_cube_counts.rows_margin.tolist() == [6.6, 16.5]
 
+    def it_knows_its_table_bases(self, request, raw_weighted_counts):
+        property_mock(
+            request, _CatXCatWeightedCubeCounts, "table_margin", return_value=9.9
+        )
+        weighted_cube_counts = _CatXCatWeightedCubeCounts(None, raw_weighted_counts)
+
+        assert weighted_cube_counts.table_bases.tolist() == [
+            [9.9, 9.9, 9.9],
+            [9.9, 9.9, 9.9],
+        ]
+
     def it_knows_its_weighted_counts(self, raw_weighted_counts):
         weighted_cube_counts = _CatXCatWeightedCubeCounts(None, raw_weighted_counts)
         assert weighted_cube_counts.weighted_counts.tolist() == [
