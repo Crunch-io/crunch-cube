@@ -51,6 +51,11 @@ class SecondOrderMeasures(object):
         return _TableUnweightedBases(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
+    def table_weighted_bases(self):
+        """_TableWeightedBases measure object for this cube-result."""
+        raise NotImplementedError
+
+    @lazyproperty
     def unweighted_counts(self):
         """_UnweightedCounts measure object for this cube-result."""
         return _UnweightedCounts(self._dimensions, self, self._cube_measures)
@@ -528,6 +533,14 @@ class _TableUnweightedBases(_BaseSecondOrderMeasure):
         return np.broadcast_to(
             self._unweighted_cube_counts.table_base, subtotal_rows.shape
         )
+
+
+class _TableWeightedBases(_BaseSecondOrderMeasure):
+    """Provides the table-weighted-bases measure for a matrix.
+
+    table-weighted-bases is a 2D np.float64 ndarray of the (weighted) table-proportion
+    denominator (base) for each matrix cell.
+    """
 
 
 class _UnweightedCounts(_BaseSecondOrderMeasure):

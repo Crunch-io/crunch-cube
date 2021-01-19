@@ -381,7 +381,7 @@ class Assembler(object):
     @lazyproperty
     def table_weighted_bases(self):
         """2D np.float64 ndarray of weighted table-proportion denominator per cell."""
-        raise NotImplementedError
+        return self._assemble_matrix(self._measures.table_weighted_bases.blocks)
 
     @lazyproperty
     def unweighted_counts(self):
