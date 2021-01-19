@@ -419,6 +419,18 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
         )
 
     @lazyproperty
+    def table_margin(self):
+        """Scalar, 1D, or 2D np.float64 ndarray of weighted-N for matrix.
+
+        There are four cases, one for each of CAT_X_CAT, CAT_X_MR, MR_X_CAT, and
+        MR_X_MR. Both CAT_X_MR and MR_X_CAT produce a 1D array, but the former is a
+        "row" and the latter is a "column".
+        """
+        raise NotImplementedError(
+            "%s must implement `.table_margin`" % type(self).__name__
+        )
+
+    @lazyproperty
     def weighted_counts(self):
         """2D np.int64 ndarray of weighted-count for each valid matrix cell."""
         raise NotImplementedError(

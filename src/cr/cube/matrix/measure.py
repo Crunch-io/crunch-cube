@@ -547,6 +547,49 @@ class _TableWeightedBases(_BaseSecondOrderMeasure):
         """2D np.float64 ndarray of weighted table-proportion denominator per cell."""
         return self._weighted_cube_counts.table_bases
 
+    @lazyproperty
+    def _subtotal_columns(self):
+        """2D np.float64 ndarray of inserted-column table-proportion denominator values.
+
+        This is the second "block" and has the shape (n_rows, n_col_subtotals).
+        """
+        # --- There are three cases. For all of them we need the shape of the
+        # --- subtotal-rows array, which we can get from SumSubtotals. Note that in
+        # --- general, the summed values it returns are wrong for this case, but the
+        # --- shape and dtype are right and when empty, it gives the right answer
+        # --- directly.
+        subtotal_columns = SumSubtotals.subtotal_columns(
+            self._base_values, self._dimensions
+        )
+
+        # --- Case 1: in the "no-row-subtotals" case, short-circuit with an (nrows, 0)
+        # --- array return value, both because that is the right answer, but also
+        # --- because the non-empty table-base value cannot be broadcast into that
+        # --- shape. Note that because an X_MR cube can have no column subtotals, this
+        # --- automatically takes care of the CAT_X_MR and MR_X_MR cases.
+        if subtotal_columns.shape[1] == 0:
+            return subtotal_columns
+
+        table_margin = self._weighted_cube_counts.table_margin
+        shape = subtotal_columns.shape
+
+        # TODO: Resolve this abstraction leakage from _BaseWeightedCounts where the
+        # table-margin (for MR_X_CAT) is a (column) vector instead of a scalar and
+        # therefore cannot be directly broadcast. When `.table_margin` becomes a min-max
+        # range, we might need something like `.table_margin_column` that is (nrows, 1)
+        # such that this "rotation" is performed in `_MrXCatWeightedCounts`. This same
+        # shape diversity happens with `._subtotal_rows` below, but since that vector is
+        # a row it is handled without special-casing.
+
+        # --- Case 2: in the "vector table-base" (MR_X_CAT) case, rotate the vector into
+        # --- a "column" and broadcast it into the subtotal-columns shape.
+        if isinstance(table_margin, np.ndarray):
+            return np.broadcast_to(table_margin[:, None], shape)
+
+        # --- Case 3: in the "scalar table-base" (CAT_X_CAT) case, simply fill the
+        # --- subtotal-columns shape with that scalar.
+        return np.broadcast_to(table_margin, shape)
+
 
 class _UnweightedCounts(_BaseSecondOrderMeasure):
     """Provides the unweighted-counts measure for a matrix."""

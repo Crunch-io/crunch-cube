@@ -944,7 +944,72 @@ class Describe_TableWeightedBases(object):
             [1.1, 4.4, 2.2],
         ]
 
+    @pytest.mark.parametrize(
+        "subtotal_columns, table_margin, expected_value",
+        (
+            # --- CAT_X_CAT case, scalar table-margin ---
+            (
+                np.array([[6.1, 6.2], [6.3, 6.4]]),
+                9.9,
+                np.array([[9.9, 9.9], [9.9, 9.9]]),
+            ),
+            # --- CAT_X_MR case, subtotal-columns is (nrows, 0) array ---
+            (
+                np.array([[], []]),
+                np.array([1.2, 3.4]),
+                np.array([[], []]),
+            ),
+            # --- MR_X_CAT case, table-margin is a 1D array "column" ---
+            (
+                np.array([[6.6, 7.7], [8.8, 9.9]]),
+                np.array([3.4, 5.6]),
+                np.array([[3.4, 3.4], [5.6, 5.6]]),
+            ),
+            # --- MR_X_CAT case, table-margin is a 2D array ---
+            (
+                np.array([]).reshape(0, 0),
+                np.array([[1.2, 3.4], [5.6, 7.8]]),
+                np.array([]).reshape(0, 0),
+            ),
+        ),
+    )
+    def it_computes_its_subtotal_columns_to_help(
+        self,
+        _base_values_prop_,
+        dimensions_,
+        SumSubtotals_,
+        subtotal_columns,
+        _weighted_cube_counts_prop_,
+        weighted_cube_counts_,
+        table_margin,
+        expected_value,
+    ):
+        _base_values_prop_.return_value = [[5.5, 6.6, 3.3], [4.4, 1.1, 2.2]]
+        SumSubtotals_.subtotal_columns.return_value = subtotal_columns
+        _weighted_cube_counts_prop_.return_value = weighted_cube_counts_
+        weighted_cube_counts_.table_margin = table_margin
+        table_weighted_bases = _TableWeightedBases(dimensions_, None, None)
+
+        subtotal_columns = table_weighted_bases._subtotal_columns
+
+        SumSubtotals_.subtotal_columns.assert_called_once_with(
+            [[5.5, 6.6, 3.3], [4.4, 1.1, 2.2]], dimensions_
+        )
+        assert subtotal_columns == pytest.approx(expected_value)
+
     # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _base_values_prop_(self, request):
+        return property_mock(request, _TableWeightedBases, "_base_values")
+
+    @pytest.fixture
+    def dimensions_(self, request):
+        return (instance_mock(request, Dimension), instance_mock(request, Dimension))
+
+    @pytest.fixture
+    def SumSubtotals_(self, request):
+        return class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
 
     @pytest.fixture
     def weighted_cube_counts_(self, request):
