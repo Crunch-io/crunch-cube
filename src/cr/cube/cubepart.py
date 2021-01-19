@@ -937,7 +937,7 @@ class _Slice(CubePartition):
     @lazyproperty
     def table_weighted_bases(self):
         """2D np.float64 ndarray of table-proportion denominator for each cell."""
-        raise NotImplementedError
+        return self._assembler.table_weighted_bases
 
     @lazyproperty
     def unweighted_counts(self):
