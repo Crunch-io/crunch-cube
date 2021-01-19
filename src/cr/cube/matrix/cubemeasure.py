@@ -461,7 +461,7 @@ class _CatXCatWeightedCubeCounts(_BaseWeightedCubeCounts):
         same for all cells of the matrix. Value is np.int64 when source cube-result is
         unweighted.
         """
-        raise NotImplementedError
+        return np.sum(self._weighted_counts)
 
     @lazyproperty
     def weighted_counts(self):
