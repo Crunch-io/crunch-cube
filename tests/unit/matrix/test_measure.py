@@ -945,7 +945,7 @@ class Describe_TableWeightedBases(object):
         ]
 
     @pytest.mark.parametrize(
-        "subtotal_columns, table_margin, expected_value",
+        "subtotal_columns_, table_margin, expected_value",
         (
             # --- CAT_X_CAT case, scalar table-margin ---
             (
@@ -953,10 +953,10 @@ class Describe_TableWeightedBases(object):
                 9.9,
                 np.array([[9.9, 9.9], [9.9, 9.9]]),
             ),
-            # --- CAT_X_MR case, subtotal-columns is (nrows, 0) array ---
+            # --- CAT_X_MR and MR_X_MR cases, subtotal-columns is (nrows, 0) array ---
             (
                 np.array([[], []]),
-                np.array([1.2, 3.4]),
+                None,
                 np.array([[], []]),
             ),
             # --- MR_X_CAT case, table-margin is a 1D array "column" ---
@@ -965,12 +965,6 @@ class Describe_TableWeightedBases(object):
                 np.array([3.4, 5.6]),
                 np.array([[3.4, 3.4], [5.6, 5.6]]),
             ),
-            # --- MR_X_CAT case, table-margin is a 2D array ---
-            (
-                np.array([]).reshape(0, 0),
-                np.array([[1.2, 3.4], [5.6, 7.8]]),
-                np.array([]).reshape(0, 0),
-            ),
         ),
     )
     def it_computes_its_subtotal_columns_to_help(
@@ -978,14 +972,14 @@ class Describe_TableWeightedBases(object):
         _base_values_prop_,
         dimensions_,
         SumSubtotals_,
-        subtotal_columns,
+        subtotal_columns_,
         _weighted_cube_counts_prop_,
         weighted_cube_counts_,
         table_margin,
         expected_value,
     ):
         _base_values_prop_.return_value = [[5.5, 6.6, 3.3], [4.4, 1.1, 2.2]]
-        SumSubtotals_.subtotal_columns.return_value = subtotal_columns
+        SumSubtotals_.subtotal_columns.return_value = subtotal_columns_
         _weighted_cube_counts_prop_.return_value = weighted_cube_counts_
         weighted_cube_counts_.table_margin = table_margin
         table_weighted_bases = _TableWeightedBases(dimensions_, None, None)
@@ -996,6 +990,58 @@ class Describe_TableWeightedBases(object):
             [[5.5, 6.6, 3.3], [4.4, 1.1, 2.2]], dimensions_
         )
         assert subtotal_columns == pytest.approx(expected_value)
+
+    @pytest.mark.parametrize(
+        "subtotal_rows_, table_margin, expected_value",
+        (
+            # --- CAT_X_CAT case, scalar table-margin ---
+            (
+                np.array([[6.1, 6.2, 6.3], [6.4, 6.5, 6.6]]),
+                9.9,
+                np.array([[9.9, 9.9, 9.9], [9.9, 9.9, 9.9]]),
+            ),
+            # --- CAT_X_MR case, table-margin is a 1D array "row" ---
+            (
+                np.array([[6.1, 6.2, 6.3], [6.4, 6.5, 6.6]]),
+                np.array([3.4, 5.6, 7.8]),
+                np.array(
+                    [
+                        [3.4, 5.6, 7.8],
+                        [3.4, 5.6, 7.8],
+                    ]
+                ),
+            ),
+            # --- MR_X_CAT and MR_X_MR cases, subtotal-rows is (0, ncols) array ---
+            (
+                np.array([]).reshape(0, 3),
+                None,
+                np.array([]).reshape(0, 3),
+            ),
+        ),
+    )
+    def it_computes_its_subtotal_rows_to_help(
+        self,
+        _base_values_prop_,
+        dimensions_,
+        SumSubtotals_,
+        subtotal_rows_,
+        _weighted_cube_counts_prop_,
+        weighted_cube_counts_,
+        table_margin,
+        expected_value,
+    ):
+        _base_values_prop_.return_value = [[5.5, 6.6, 3.3], [4.4, 1.1, 2.2]]
+        SumSubtotals_.subtotal_rows.return_value = subtotal_rows_
+        _weighted_cube_counts_prop_.return_value = weighted_cube_counts_
+        weighted_cube_counts_.table_margin = table_margin
+        table_weighted_bases = _TableWeightedBases(dimensions_, None, None)
+
+        subtotal_rows = table_weighted_bases._subtotal_rows
+
+        SumSubtotals_.subtotal_rows.assert_called_once_with(
+            [[5.5, 6.6, 3.3], [4.4, 1.1, 2.2]], dimensions_
+        )
+        assert subtotal_rows == pytest.approx(expected_value)
 
     # fixture components ---------------------------------------------
 
