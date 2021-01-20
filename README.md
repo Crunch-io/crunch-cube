@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+### 2.0.3
+- Fix mean measure for CubeSet
+
 ### 2.0.2
 - Expose `cube.valid_counts` and `cube.valid_counts_summary`
 
