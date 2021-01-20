@@ -642,7 +642,7 @@ class Describe_CatXMrWeightedCubeCounts(object):
             np.array([[7.7, 7.7, 7.7], [7.7, 7.7, 7.7]])
         )
 
-    def it_knows_its_table_bases(self, request, raw_weighted_counts):
+    def it_knows_its_table_bases(self, request):
         property_mock(
             request,
             _CatXMrWeightedCubeCounts,
@@ -655,7 +655,7 @@ class Describe_CatXMrWeightedCubeCounts(object):
             "weighted_counts",
             return_value=np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]),
         )
-        weighted_cube_counts = _CatXMrWeightedCubeCounts(None, raw_weighted_counts)
+        weighted_cube_counts = _CatXMrWeightedCubeCounts(None, None)
 
         assert weighted_cube_counts.table_bases.tolist() == [
             [9.8, 7.6, 5.4],
@@ -731,6 +731,26 @@ class Describe_MrXCatWeightedCubeCounts(object):
     def it_knows_its_rows_margin(self, raw_weighted_counts):
         weighted_cube_counts = _MrXCatWeightedCubeCounts(None, raw_weighted_counts)
         assert weighted_cube_counts.rows_margin == pytest.approx(np.array([6.6, 26.4]))
+
+    def it_knows_its_table_bases(self, request):
+        property_mock(
+            request,
+            _MrXCatWeightedCubeCounts,
+            "table_margin",
+            return_value=np.array([9.8, 7.6]),
+        )
+        property_mock(
+            request,
+            _MrXCatWeightedCubeCounts,
+            "weighted_counts",
+            return_value=np.arange(6).reshape(2, 3),
+        )
+        weighted_cube_counts = _MrXCatWeightedCubeCounts(None, None)
+
+        assert weighted_cube_counts.table_bases.tolist() == [
+            [9.8, 9.8, 9.8],
+            [7.6, 7.6, 7.6],
+        ]
 
     def it_knows_its_weighted_counts(self, raw_weighted_counts):
         weighted_cube_counts = _MrXCatWeightedCubeCounts(None, raw_weighted_counts)
