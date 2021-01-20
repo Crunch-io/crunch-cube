@@ -105,35 +105,35 @@ class _BaseUnweightedCubeCounts(_BaseCubeMeasure):
     @lazyproperty
     def columns_base(self):
         """1D or 2D np.int64 ndarray of unweighted column-proportion denominator."""
-        raise NotImplementedError(
+        raise NotImplementedError(  # pragma: no cover
             "%s must implement `.columns_base`" % type(self).__name__
         )
 
     @lazyproperty
     def row_bases(self):
         """2D np.int64 ndarray of unweighted row-proportion denominator per cell."""
-        raise NotImplementedError(
+        raise NotImplementedError(  # pragma: no cover
             "%s must implement `.row_bases`" % type(self).__name__
         )
 
     @lazyproperty
     def rows_base(self):
         """1D or 2D np.int64 ndarray of unweighted row-proportion denominator."""
-        raise NotImplementedError(
+        raise NotImplementedError(  # pragma: no cover
             "%s must implement `.rows_base`" % type(self).__name__
         )
 
     @lazyproperty
     def table_base(self):
         """Scalar, 1D, or 2D np.int64 ndarray of unweighted table proportion denom."""
-        raise NotImplementedError(
+        raise NotImplementedError(  # pragma: no cover
             "%s must implement `.table_base`" % type(self).__name__
         )
 
     @lazyproperty
     def table_bases(self):
         """2D np.int64 ndarray of unweighted table-proportion denominator per cell."""
-        raise NotImplementedError(
+        raise NotImplementedError(  # pragma: no cover
             "%s must implement `.table_bases`" % type(self).__name__
         )
 
@@ -143,7 +143,7 @@ class _BaseUnweightedCubeCounts(_BaseCubeMeasure):
 
         A valid matrix cell is one whose row and column elements are both non-missing.
         """
-        raise NotImplementedError(
+        raise NotImplementedError(  # pragma: no cover
             "`%s` must implement `.unweighted_counts`" % type(self).__name__
         )
 
@@ -393,28 +393,28 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
     @lazyproperty
     def columns_margin(self):
         """1D ndarray of np.float/int64 weighted-N for each matrix column."""
-        raise NotImplementedError(
+        raise NotImplementedError(  # pragma: no cover
             "%s must implement `.columns_margin`" % type(self).__name__
         )
 
     @lazyproperty
     def row_bases(self):
         """2D np.float64 ndarray of (weighted) row-proportion denominator per cell."""
-        raise NotImplementedError(
+        raise NotImplementedError(  # pragma: no cover
             "%s must implement `.row_bases`" % type(self).__name__
         )
 
     @lazyproperty
     def rows_margin(self):
         """1D ndarray of np.float64 weighted-N for each matrix row."""
-        raise NotImplementedError(
+        raise NotImplementedError(  # pragma: no cover
             "%s must implement `.rows_margin`" % type(self).__name__
         )
 
     @lazyproperty
     def table_bases(self):
         """2D np.float64 ndarray of weighted table-proportion denominator per cell."""
-        raise NotImplementedError(
+        raise NotImplementedError(  # pragma: no cover
             "%s must implement `.table_bases`" % type(self).__name__
         )
 
@@ -426,14 +426,14 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
         MR_X_MR. Both CAT_X_MR and MR_X_CAT produce a 1D array, but the former is a
         "row" and the latter is a "column".
         """
-        raise NotImplementedError(
+        raise NotImplementedError(  # pragma: no cover
             "%s must implement `.table_margin`" % type(self).__name__
         )
 
     @lazyproperty
     def weighted_counts(self):
         """2D np.int64 ndarray of weighted-count for each valid matrix cell."""
-        raise NotImplementedError(
+        raise NotImplementedError(  # pragma: no cover
             "`%s` must implement `.weighted_counts`" % type(self).__name__
         )
 

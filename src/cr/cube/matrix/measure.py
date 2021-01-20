@@ -103,7 +103,7 @@ class _BaseSecondOrderMeasure(object):
 
         This is the first "block" and has the shape of the cube-measure (no insertions).
         """
-        raise NotImplementedError(
+        raise NotImplementedError(  # pragma: no cover
             "%s must implement `._base_values`" % type(self).__name__
         )
 
@@ -113,7 +113,7 @@ class _BaseSecondOrderMeasure(object):
 
         An intersection value arises where a row-subtotal crosses a column-subtotal.
         """
-        raise NotImplementedError(
+        raise NotImplementedError(  # pragma: no cover
             "%s must implement `._intersections`" % type(self).__name__
         )
 
@@ -123,7 +123,7 @@ class _BaseSecondOrderMeasure(object):
 
         This is the second "block" and has the shape (n_rows, n_col_subtotals).
         """
-        raise NotImplementedError(
+        raise NotImplementedError(  # pragma: no cover
             "%s must implement `._subtotal_columns`" % type(self).__name__
         )
 
@@ -133,7 +133,7 @@ class _BaseSecondOrderMeasure(object):
 
         This is the third "block" and has the shape (n_row_subtotals, n_cols).
         """
-        raise NotImplementedError(
+        raise NotImplementedError(  # pragma: no cover
             "%s must implement `._subtotal_rows`" % type(self).__name__
         )
 
