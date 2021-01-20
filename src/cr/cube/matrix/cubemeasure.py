@@ -582,6 +582,19 @@ class _MrXCatWeightedCubeCounts(_BaseWeightedCubeCounts):
         return np.broadcast_to(self.table_margin[:, None], self.weighted_counts.shape)
 
     @lazyproperty
+    def table_margin(self):
+        """1D np.float/int64 ndarray of weighted-N for each row of matrix.
+
+        Since the rows-dimension is MR, each row has a distinct table margin, since not
+        all of the multiple responses were necessarily offered to all respondents. The
+        table-margin for each row indicates the weighted number of respondents who were
+        offered that option.
+
+        The values are np.int64 when the source cube-result is unweighted.
+        """
+        return np.sum(self._weighted_counts, axis=(1, 2))
+
+    @lazyproperty
     def weighted_counts(self):
         """2D np.float/int64 ndarray of weighted-count for each valid matrix cell."""
         return self._weighted_counts[:, 0, :]

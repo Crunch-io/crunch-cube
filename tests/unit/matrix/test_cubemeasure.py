@@ -752,6 +752,10 @@ class Describe_MrXCatWeightedCubeCounts(object):
             [7.6, 7.6, 7.6],
         ]
 
+    def it_knows_its_table_margin(self, raw_weighted_counts):
+        weighted_cube_counts = _MrXCatWeightedCubeCounts(None, raw_weighted_counts)
+        assert weighted_cube_counts.table_margin == pytest.approx([23.1, 33.0])
+
     def it_knows_its_weighted_counts(self, raw_weighted_counts):
         weighted_cube_counts = _MrXCatWeightedCubeCounts(None, raw_weighted_counts)
         assert weighted_cube_counts.weighted_counts.tolist() == pytest.approx(
