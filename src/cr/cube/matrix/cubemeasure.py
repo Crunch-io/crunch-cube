@@ -519,6 +519,13 @@ class _CatXMrWeightedCubeCounts(_BaseWeightedCubeCounts):
         return np.sum(self._weighted_counts, axis=2)
 
     @lazyproperty
+    def table_bases(self):
+        """2D np.float64 ndarray of table-proportion denominator for each cell."""
+        # --- table-margin is a row-vector (distinct margin for each column), so
+        # --- broadcast is vertical
+        return np.broadcast_to(self.table_margin, self.weighted_counts.shape)
+
+    @lazyproperty
     def weighted_counts(self):
         """2D np.float/int64 ndarray of weighted-count for each valid matrix cell.
 

@@ -642,6 +642,26 @@ class Describe_CatXMrWeightedCubeCounts(object):
             np.array([[7.7, 7.7, 7.7], [7.7, 7.7, 7.7]])
         )
 
+    def it_knows_its_table_bases(self, request, raw_weighted_counts):
+        property_mock(
+            request,
+            _CatXMrWeightedCubeCounts,
+            "table_margin",
+            return_value=np.array([9.8, 7.6, 5.4]),
+        )
+        property_mock(
+            request,
+            _CatXMrWeightedCubeCounts,
+            "weighted_counts",
+            return_value=np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]),
+        )
+        weighted_cube_counts = _CatXMrWeightedCubeCounts(None, raw_weighted_counts)
+
+        assert weighted_cube_counts.table_bases.tolist() == [
+            [9.8, 7.6, 5.4],
+            [9.8, 7.6, 5.4],
+        ]
+
     def it_knows_its_weighted_counts(self, raw_weighted_counts):
         weighted_cube_counts = _CatXMrWeightedCubeCounts(None, raw_weighted_counts)
 
