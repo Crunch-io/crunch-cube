@@ -526,6 +526,16 @@ class _CatXMrWeightedCubeCounts(_BaseWeightedCubeCounts):
         return np.broadcast_to(self.table_margin, self.weighted_counts.shape)
 
     @lazyproperty
+    def table_margin(self):
+        """1D np.float/int64 ndarray of weighted-N for each column of matrix.
+
+        Because the matrix is X_MR, each column has a distinct table margin.
+        """
+        # --- weighted-counts is (rows, cols, selected/not) so axis 1 is preserved to
+        # --- provide a distinct value for each MR subvar.
+        return np.sum(self._weighted_counts, axis=(0, 2))
+
+    @lazyproperty
     def weighted_counts(self):
         """2D np.float/int64 ndarray of weighted-count for each valid matrix cell.
 

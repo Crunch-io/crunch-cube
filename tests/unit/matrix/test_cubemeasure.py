@@ -662,6 +662,10 @@ class Describe_CatXMrWeightedCubeCounts(object):
             [9.8, 7.6, 5.4],
         ]
 
+    def it_knows_its_table_margin(self, raw_weighted_counts):
+        weighted_cube_counts = _CatXMrWeightedCubeCounts(None, raw_weighted_counts)
+        assert weighted_cube_counts.table_margin == pytest.approx([15.4, 15.4, 15.4])
+
     def it_knows_its_weighted_counts(self, raw_weighted_counts):
         weighted_cube_counts = _CatXMrWeightedCubeCounts(None, raw_weighted_counts)
 
