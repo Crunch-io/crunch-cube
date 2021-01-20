@@ -130,7 +130,11 @@ class Describe_BaseUnweightedCubeCounts(object):
             return_value=unweighted_cube_counts_,
         )
         _slice_idx_expr_ = method_mock(
-            request, _BaseUnweightedCubeCounts, "_slice_idx_expr", return_value=1
+            request,
+            _BaseUnweightedCubeCounts,
+            "_slice_idx_expr",
+            return_value=1,
+            autospec=False,
         )
         cube_.dimension_types = dimension_types
         cube_.unweighted_counts = [[1, 2], [3, 4]]
@@ -514,7 +518,11 @@ class Describe_BaseWeightedCubeCounts(object):
             return_value=weighted_cube_counts_,
         )
         _slice_idx_expr_ = method_mock(
-            request, _BaseWeightedCubeCounts, "_slice_idx_expr", return_value=1
+            request,
+            _BaseWeightedCubeCounts,
+            "_slice_idx_expr",
+            return_value=1,
+            autospec=False,
         )
         cube_.dimension_types = dimension_types
         cube_.counts = [[1, 2], [3, 4]]
