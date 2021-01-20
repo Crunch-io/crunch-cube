@@ -639,6 +639,12 @@ class _MrXMrWeightedCubeCounts(_BaseWeightedCubeCounts):
         return np.sum(self._weighted_counts[:, 0, :, :], axis=2)
 
     @lazyproperty
+    def table_bases(self):
+        """2D np.float64 ndarray of table-proportion denominator for each cell."""
+        # --- in MR_X_MR case, table-bases is the already-2D table-margin ---
+        return self.table_margin
+
+    @lazyproperty
     def weighted_counts(self):
         """2D np.float/int64 ndarray of weighted-count for each valid matrix cell.
 

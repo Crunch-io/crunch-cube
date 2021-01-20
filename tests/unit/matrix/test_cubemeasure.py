@@ -809,6 +809,19 @@ class Describe_MrXMrWeightedCubeCounts(object):
             np.array([[8.8, 8.8], [8.8, 8.8]])
         )
 
+    def it_knows_its_table_bases(self, request):
+        property_mock(
+            request,
+            _MrXMrWeightedCubeCounts,
+            "table_margin",
+            return_value=np.array([[3.3, 2.2, 1.1], [7.7, 6.6, 5.5]]),
+        )
+        weighted_cube_counts = _MrXMrWeightedCubeCounts(None, None)
+
+        assert weighted_cube_counts.table_bases == pytest.approx(
+            np.array([[3.3, 2.2, 1.1], [7.7, 6.6, 5.5]])
+        )
+
     def it_knows_its_weighted_counts(self, raw_weighted_counts):
         weighted_cube_counts = _MrXMrWeightedCubeCounts(None, raw_weighted_counts)
 
