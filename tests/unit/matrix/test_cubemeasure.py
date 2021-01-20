@@ -754,7 +754,9 @@ class Describe_MrXCatWeightedCubeCounts(object):
 
     def it_knows_its_table_margin(self, raw_weighted_counts):
         weighted_cube_counts = _MrXCatWeightedCubeCounts(None, raw_weighted_counts)
-        assert weighted_cube_counts.table_margin == pytest.approx([23.1, 33.0])
+        assert weighted_cube_counts.table_margin == pytest.approx(
+            np.array([23.1, 33.0])
+        )
 
     def it_knows_its_weighted_counts(self, raw_weighted_counts):
         weighted_cube_counts = _MrXCatWeightedCubeCounts(None, raw_weighted_counts)
@@ -820,6 +822,12 @@ class Describe_MrXMrWeightedCubeCounts(object):
 
         assert weighted_cube_counts.table_bases == pytest.approx(
             np.array([[3.3, 2.2, 1.1], [7.7, 6.6, 5.5]])
+        )
+
+    def it_knows_its_table_margin(self, raw_weighted_counts):
+        weighted_cube_counts = _MrXMrWeightedCubeCounts(None, raw_weighted_counts)
+        assert weighted_cube_counts.table_margin == pytest.approx(
+            np.array([[17.6, 17.6], [17.6, 17.6]])
         )
 
     def it_knows_its_weighted_counts(self, raw_weighted_counts):

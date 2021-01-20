@@ -645,6 +645,19 @@ class _MrXMrWeightedCubeCounts(_BaseWeightedCubeCounts):
         return self.table_margin
 
     @lazyproperty
+    def table_margin(self):
+        """2D np.float/int64 ndarray of weighted-N for each cell of matrix.
+
+        Because the matrix is MR_X_MR, each cell corresponds to a 2x2 sub-table
+        (selected/not on each axis), each of which has its own distinct table-margin.
+        """
+        # --- Reduce second and fourth axes (the two MR_CAT dimensions) with sum()
+        # --- producing 2D (nrows, ncols). This sums the (selected, selected),
+        # --- (selected, not), (not, selected) and (not, not) cells of the subtable for
+        # --- each matrix cell. Rows and columns are retained.
+        return np.sum(self._weighted_counts, axis=(1, 3))
+
+    @lazyproperty
     def weighted_counts(self):
         """2D np.float/int64 ndarray of weighted-count for each valid matrix cell.
 
