@@ -698,14 +698,10 @@ class _BaseMeasure(object):
         response. Specifically, it includes values for missing elements, any
         MR_CAT dimensions, and any prunable rows and columns.
         """
-        raw_cube_array = (
-            np.array(self._flat_values).flatten().reshape(self._all_dimensions.shape)
-        )
+        raw_cube_array = np.array(self._flat_values).flatten().reshape(self._shape)
         # ---must be read-only to avoid hard-to-find bugs---
         raw_cube_array.flags.writeable = False
-        # NOTE: The transpose operation cannot be enough in future when we'll have more
-        # than 2 dimensions.
-        return raw_cube_array.T if self.requires_array_transposition else raw_cube_array
+        return raw_cube_array
 
     @lazyproperty
     def requires_array_transposition(self):
@@ -746,6 +742,17 @@ class _BaseMeasure(object):
         This property must be implemented by each subclass.
         """
         raise NotImplementedError("must be implemented by each subclass")
+
+    @lazyproperty
+    def _shape(self):
+        """All dimensions shape (row, col)"""
+        # NOTE: Inverting the shape cannot be enough in future when we'll have more than
+        # 2 dimensions in the new dim_order option.
+        return (
+            self._all_dimensions.shape[::-1]
+            if self.requires_array_transposition
+            else self._all_dimensions.shape
+        )
 
 
 class _MeanMeasure(_BaseMeasure):
