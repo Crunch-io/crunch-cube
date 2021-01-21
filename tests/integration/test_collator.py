@@ -67,7 +67,6 @@ class DescribePayloadOrderCollator(object):
 class DescribeSortByValueCollator(object):
     """Partial-integration test suite for `SortByValueCollator` object."""
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     @pytest.mark.parametrize(
         "order, xtop, xbot, element_vals, empty_idxs, expected_value",
         (

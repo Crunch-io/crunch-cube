@@ -391,6 +391,15 @@ class DescribeSortByValueCollator(object):
 
         assert collator._body_idxs == expected_value
 
+    def it_computes_the_bottom_exclusion_idxs_to_help(self, _iter_exclusion_idxs_):
+        _iter_exclusion_idxs_.return_value = (n for n in (4, 0, 5, 2))
+        collator = SortByValueCollator(None, None, None, None)
+
+        bottom_exclusion_idxs = collator._bottom_exclusion_idxs
+
+        _iter_exclusion_idxs_.assert_called_once_with(collator, "bottom")
+        assert bottom_exclusion_idxs == (4, 0, 5, 2)
+
     @pytest.mark.parametrize(
         "descending, subtotal_idxs, expected_value",
         (
