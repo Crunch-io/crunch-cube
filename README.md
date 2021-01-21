@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+### 2.1.0
+- Measure Consolidation
+
 ### 2.0.3
 - Fix mean measure for CubeSet
 
