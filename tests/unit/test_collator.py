@@ -359,6 +359,29 @@ class DescribeSortByValueCollator(object):
         assert collator._display_order == (-2, -3, 3, 2, 1, 0, 4)
 
     @pytest.mark.parametrize(
+        "order_dict, top_or_bottom, expected_value",
+        (
+            ({}, "top", ()),
+            ({}, "bottom", ()),
+            ({"exclude": {}}, "top", ()),
+            ({"exclude": {"foobar": [4, 2]}}, "top", ()),
+            ({"exclude": {"top": [1, 3]}}, "top", (0, 2)),
+            ({"exclude": {"top": [1, 3, 7]}}, "top", (0, 2)),
+            ({"exclude": {"bottom": [4, 2]}}, "bottom", (3, 1)),
+        ),
+    )
+    def it_can_iterate_the_exclusion_idxs_for_top_or_bottom(
+        self, request, _order_dict_prop_, order_dict, top_or_bottom, expected_value
+    ):
+        property_mock(
+            request, SortByValueCollator, "_element_ids", return_value=(1, 2, 3, 4, 5)
+        )
+        _order_dict_prop_.return_value = order_dict
+        collator = SortByValueCollator(None, None, None, None)
+
+        assert tuple(collator._iter_exclusion_idxs(top_or_bottom)) == expected_value
+
+    @pytest.mark.parametrize(
         "order_dict, expected_value",
         (
             ({}, True),

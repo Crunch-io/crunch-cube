@@ -395,7 +395,14 @@ class SortByValueCollator(_BaseCollator):
         important because an element (e.g. category) can be removed after the analysis
         is saved and may no longer be present at export time.
         """
-        raise NotImplementedError
+        element_idxs_by_id = {id_: idx for idx, id_ in enumerate(self._element_ids)}
+        excluded_element_ids = self._order_dict.get("exclude", {}).get(
+            top_or_bottom, []
+        )
+        for excluded_element_id in excluded_element_ids:
+            if excluded_element_id not in element_idxs_by_id:
+                continue
+            yield element_idxs_by_id[excluded_element_id]
 
     @lazyproperty
     def _subtotal_idxs(self):
