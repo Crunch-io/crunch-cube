@@ -281,3 +281,27 @@ class PayloadOrderCollator(_BaseAnchoredCollator):
         return tuple(
             (idx, idx, element_id) for idx, element_id in enumerate(self._element_ids)
         )
+
+
+class SortByValueCollator(_BaseCollator):
+    """Produces an idx ordering based on values in a vector.
+
+    The items in `element_values` must correspond directly the the (valid) elements of
+    `dimension`, both in number and sequence (payload order). The items in
+    `subtotal_values` must also correspond directly in number and sequence with the
+    subtotals defined on `dimension`.
+
+    In general, the anchors used to position inserted subtotals lose their meaning when
+    the dimension is sorted by-value. In sort-by-value cases, subtotals are grouped at
+    the top (when sort direction is descending (default)) or the bottom (when direction
+    is ascending), while also being sorted by the specified value.
+    """
+
+    @classmethod
+    def display_order(cls, dimension, element_values, subtotal_values, empty_idxs):
+        """Return sequence of int element-idxs ordered by sort on `element_values`.
+
+        The returned tuple contains a signed-int value for each vector and subtotal of
+        `dimension` that is not hidden, sorted (primarily) by the element value.
+        """
+        raise NotImplementedError
