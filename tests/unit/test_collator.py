@@ -11,6 +11,7 @@ from cr.cube.collator import (
     _BaseCollator,
     ExplicitOrderCollator,
     PayloadOrderCollator,
+    SortByValueCollator,
 )
 from cr.cube.dimension import Dimension, _Subtotal
 
@@ -302,3 +303,35 @@ class DescribePayloadOrderCollator(object):
         collator = PayloadOrderCollator(None, None)
 
         assert collator._element_order_descriptors == expected_value
+
+
+class DescribeSortByValueCollator(object):
+    """Unit-test suite for `cr.cube.collator.SortByValueCollator` object.
+
+    SortByValueCollator computes element ordering for sort-by-value order transforms. It
+    is used for all sort-by-value cases, performing the sort based on a base-vector
+    provided to it on construction. This base vector can be a "body" vector, a subtotal,
+    or a marginal.
+    """
+
+    def it_provides_an_interface_classmethod(self, request):
+        dimension_ = instance_mock(request, Dimension)
+        _init_ = initializer_mock(request, SortByValueCollator)
+        property_mock(
+            request,
+            SortByValueCollator,
+            "_display_order",
+            return_value=(-3, -1, -2, 1, 0, 2, 3),
+        )
+        element_values = [2, 3, 1, 0]
+        subtotal_values = [9, 7, 8]
+        empty_idxs = [3]
+
+        display_order = SortByValueCollator.display_order(
+            dimension_, element_values, subtotal_values, empty_idxs
+        )
+
+        _init_.assert_called_once_with(
+            ANY, dimension_, element_values, subtotal_values, empty_idxs
+        )
+        assert display_order == (-3, -1, -2, 1, 0, 2, 3)

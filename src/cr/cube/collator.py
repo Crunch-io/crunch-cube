@@ -297,11 +297,38 @@ class SortByValueCollator(_BaseCollator):
     is ascending), while also being sorted by the specified value.
     """
 
+    def __init__(self, dimension, element_values, subtotal_values, empty_idxs):
+        super(SortByValueCollator, self).__init__(dimension, empty_idxs)
+        self._element_values = element_values
+        self._subtotal_values = subtotal_values
+
     @classmethod
     def display_order(cls, dimension, element_values, subtotal_values, empty_idxs):
         """Return sequence of int element-idxs ordered by sort on `element_values`.
 
         The returned tuple contains a signed-int value for each vector and subtotal of
         `dimension` that is not hidden, sorted (primarily) by the element value.
+        """
+        return cls(
+            dimension, element_values, subtotal_values, empty_idxs
+        )._display_order
+
+    @property
+    def _display_order(self):
+        """tuple of int element-idx specifying ordering of dimension elements.
+
+        The element-indices are signed; positive indices are base-elements and negative
+        indices refer to inserted subtotals.
+
+        Subtotal elements all appear at the top when the sort direction is descending
+        and all appear at the bottom when sort-direction is ascending. Top-anchored
+        "excluded-from-sort" elements appear after any top subtotals, followed by
+        non-excluded base-elements, bottom-anchored base-elements, and finally
+        bottom-subtotals (only when sort-direction is ascending).
+
+        Subtotal elements appear in value-sorted order, respecting the sort-direction
+        specified in the request. Excluded base elements appear in the order mentioned
+        in the `"exclude": [...]` array of the order transform. Base elements appear in
+        value-sorted order within their grouping.
         """
         raise NotImplementedError
