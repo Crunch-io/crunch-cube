@@ -382,7 +382,7 @@ class SortByValueCollator(_BaseCollator):
         Descending is the default direction because it is so much more common than
         ascending in survey analysis.
         """
-        raise NotImplementedError
+        return self._order_dict.get("direction", "descending") != "ascending"
 
     @lazyproperty
     def _subtotal_idxs(self):

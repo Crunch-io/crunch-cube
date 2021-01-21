@@ -375,11 +375,32 @@ class DescribeSortByValueCollator(object):
 
         assert collator._top_subtotal_idxs == expected_value
 
+    @pytest.mark.parametrize(
+        "order_dict, expected_value",
+        (
+            ({}, True),
+            ({"direction": "foobar"}, True),
+            ({"direction": "descending"}, True),
+            ({"direction": "ascending"}, False),
+        ),
+    )
+    def it_knows_whether_the_sort_direction_is_descending_to_help(
+        self, _order_dict_prop_, order_dict, expected_value
+    ):
+        _order_dict_prop_.return_value = order_dict
+        collator = SortByValueCollator(None, None, None, None)
+
+        assert collator._descending == expected_value
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
     def _descending_prop_(self, request):
         return property_mock(request, SortByValueCollator, "_descending")
+
+    @pytest.fixture
+    def _order_dict_prop_(self, request):
+        return property_mock(request, SortByValueCollator, "_order_dict")
 
     @pytest.fixture
     def _subtotal_idxs_prop_(self, request):
