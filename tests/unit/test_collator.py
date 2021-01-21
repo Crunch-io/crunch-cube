@@ -356,3 +356,31 @@ class DescribeSortByValueCollator(object):
         collator = SortByValueCollator(None, None, None, None)
 
         assert collator._display_order == (-2, -3, 3, 2, 1, 0, 4)
+
+    @pytest.mark.parametrize(
+        "subtotal_idxs, descending, expected_value",
+        (((-3, -1, -2), True, (-3, -1, -2)), ((-1, -2, -3), False, ())),
+    )
+    def it_computes_the_top_subtotal_idxs_to_help(
+        self,
+        _subtotal_idxs_prop_,
+        subtotal_idxs,
+        _descending_prop_,
+        descending,
+        expected_value,
+    ):
+        _subtotal_idxs_prop_.return_value = subtotal_idxs
+        _descending_prop_.return_value = descending
+        collator = SortByValueCollator(None, None, None, None)
+
+        assert collator._top_subtotal_idxs == expected_value
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _descending_prop_(self, request):
+        return property_mock(request, SortByValueCollator, "_descending")
+
+    @pytest.fixture
+    def _subtotal_idxs_prop_(self, request):
+        return property_mock(request, SortByValueCollator, "_subtotal_idxs")
