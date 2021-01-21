@@ -335,3 +335,24 @@ class DescribeSortByValueCollator(object):
             ANY, dimension_, element_values, subtotal_values, empty_idxs
         )
         assert display_order == (-3, -1, -2, 1, 0, 2, 3)
+
+    def it_computes_the_element_order_descriptors_to_help(self, request):
+        property_mock(
+            request, SortByValueCollator, "_top_subtotal_idxs", return_value=(-2, -3)
+        )
+        property_mock(
+            request, SortByValueCollator, "_top_exclusion_idxs", return_value=(3,)
+        )
+        property_mock(
+            request, SortByValueCollator, "_body_idxs", return_value=(2, 1, 5)
+        )
+        property_mock(
+            request, SortByValueCollator, "_bottom_exclusion_idxs", return_value=(0, 4)
+        )
+        property_mock(
+            request, SortByValueCollator, "_bottom_subtotal_idxs", return_value=()
+        )
+        property_mock(request, SortByValueCollator, "_hidden_idxs", return_value=(5,))
+        collator = SortByValueCollator(None, None, None, None)
+
+        assert collator._display_order == (-2, -3, 3, 2, 1, 0, 4)

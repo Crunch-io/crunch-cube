@@ -331,4 +331,65 @@ class SortByValueCollator(_BaseCollator):
         in the `"exclude": [...]` array of the order transform. Base elements appear in
         value-sorted order within their grouping.
         """
+        hidden_idxs = self._hidden_idxs
+        return tuple(
+            idx
+            for idx in (
+                self._top_subtotal_idxs
+                + self._top_exclusion_idxs
+                + self._body_idxs
+                + self._bottom_exclusion_idxs
+                + self._bottom_subtotal_idxs
+            )
+            if idx not in hidden_idxs
+        )
+
+    @lazyproperty
+    def _body_idxs(self):
+        """tuple of int element-idx for each non-anchored dimension element.
+
+        These values appear in sorted order. The sequence is determined by the
+        `._target_values` property defined in the subclass and the "top" and "bottom"
+        anchored elements specified in the `"order": {}` dict.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
+    def _bottom_exclusion_idxs(self):
+        """Tuple of (positive) idx of each excluded base element anchored to bottom.
+
+        The items appear in the order specified in the "bottom" exclude-grouping of the
+        transform; they are not subject to sorting-by-value.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
+    def _bottom_subtotal_idxs(self):
+        """Tuple of negative idx of each subtotal vector in order it appears on bottom.
+
+        Subtotal vectors all appear as a sorted group at the top of the table when the
+        sort-direction is descending (the default). Otherwise all subtotal vectors
+        appear at the bottom. In either case, they are ordered by the value of the
+        specified measure in each subtotal, except that any NaN values drop to the end
+        of the subtotal group.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
+    def _top_exclusion_idxs(self):
+        """Tuple of (positive) payload-order idx for each top-anchored element.
+
+        The items appear in the order specified in the "top" exclude-grouping of the
+        transform; they are not subject to sorting-by-value.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
+    def _top_subtotal_idxs(self):
+        """Tuple of negative idx of each subtotal vector in the order it appears on top.
+
+        Subtotal vectors all appear as a sorted group at the top of the table when the
+        sort-direction is descending. When sort-direction is ascending, all subtotal
+        vectors appear at the bottom and this tuple will be empty.
+        """
         raise NotImplementedError
