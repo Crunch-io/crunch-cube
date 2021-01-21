@@ -4,6 +4,7 @@
 
 import sys
 
+import numpy as np
 import pytest
 
 from cr.cube.collator import (
@@ -391,6 +392,25 @@ class DescribeSortByValueCollator(object):
         collator = SortByValueCollator(None, None, None, None)
 
         assert collator._descending == expected_value
+
+    @pytest.mark.parametrize(
+        "subtotal_values, descending, expected_value",
+        (
+            ((1, 2, 3), True, (-1, -2, -3)),
+            ((1, 2, 3), False, (-3, -2, -1)),
+            # --- NaN values fall to end of sequence in payload order ---
+            ((1, np.nan, 2, np.nan, 3), True, (-1, -3, -5, -4, -2)),
+            # --- regardless of collation-order ---
+            ((1, np.nan, 2, np.nan, 3), False, (-5, -3, -1, -4, -2)),
+        ),
+    )
+    def it_computes_the_subtotal_idxs_to_help(
+        self, _descending_prop_, descending, subtotal_values, expected_value
+    ):
+        _descending_prop_.return_value = descending
+        collator = SortByValueCollator(None, None, subtotal_values, None)
+
+        assert collator._subtotal_idxs == expected_value
 
     # fixture components ---------------------------------------------
 

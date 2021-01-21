@@ -13,6 +13,8 @@ base vectors and inserted vectors, respectively.
 import collections
 import sys
 
+import numpy as np
+
 from cr.cube.util import lazyproperty
 
 
@@ -286,15 +288,16 @@ class PayloadOrderCollator(_BaseAnchoredCollator):
 class SortByValueCollator(_BaseCollator):
     """Produces an idx ordering based on values in a vector.
 
-    The items in `element_values` must correspond directly the the (valid) elements of
-    `dimension`, both in number and sequence (payload order). The items in
-    `subtotal_values` must also correspond directly in number and sequence with the
-    subtotals defined on `dimension`.
-
     In general, the anchors used to position inserted subtotals lose their meaning when
     the dimension is sorted by-value. In sort-by-value cases, subtotals are grouped at
     the top (when sort direction is descending (default)) or the bottom (when direction
     is ascending), while also being sorted by the specified value.
+
+    `element_values`, `subtotal_values`, and `empty_idxs` must each be a sequence; a 1D
+    numpy array works fine but so does a list or tuple. The items in `element_values`
+    must correspond directly the the (valid) elements of `dimension`, both in number and
+    sequence (payload order). The items in `subtotal_values` must also correspond
+    directly in number and sequence with the subtotals defined on `dimension`.
     """
 
     def __init__(self, dimension, element_values, subtotal_values, empty_idxs):
@@ -392,7 +395,17 @@ class SortByValueCollator(_BaseCollator):
         `._subtotal_values` property defined in the subclass and the sort direction
         is derived from the `"order": {}` dict.
         """
-        raise NotImplementedError
+        subtotal_values = self._subtotal_values
+        n_values = len(subtotal_values)
+        # --- `keys` looks like [(75.36, -3), (18.17, -2), (23.46, -1)], providing a
+        # --- sequence that can be sorted and then harvested for ordered idxs.
+        keys, nans = [], []
+        for i, val in enumerate(subtotal_values):
+            neg_idx = i - n_values
+            group = nans if np.isnan(val) else keys
+            group.append((val, neg_idx))
+
+        return tuple(idx for _, idx in (sorted(keys, reverse=self._descending) + nans))
 
     @lazyproperty
     def _top_exclusion_idxs(self):
