@@ -387,7 +387,7 @@ class SortByValueCollator(_BaseCollator):
         specified measure in each subtotal, except that any NaN values drop to the end
         of the subtotal group.
         """
-        raise NotImplementedError
+        return () if self._descending else self._subtotal_idxs
 
     @lazyproperty
     def _descending(self):
