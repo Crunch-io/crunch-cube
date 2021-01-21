@@ -89,13 +89,13 @@ class Describe_Slice(object):
             (CR.CAT_X_MR_2, "cat-x-mr-scale-mean-pw-idxs"),
         ),
     )
-    def it_provides_scale_mean_pairwise_indices(self, fixture, expectation):
+    def it_provides_columns_scale_mean_pairwise_indices(self, fixture, expectation):
         """Provides column-indicies meeting sig-test threshold on column scale means."""
         slice_ = _Slice(
             Cube(fixture), slice_idx=0, transforms={}, population=None, mask_size=0
         )
 
-        actual = slice_.scale_mean_pairwise_indices
+        actual = slice_.columns_scale_mean_pairwise_indices
 
         expected = load_python_expression(expectation)
         assert expected == actual, "\n%s\n\n%s" % (expected, actual)
@@ -114,7 +114,7 @@ class Describe_Slice(object):
             (CR.CAT_X_MR_2, "cat-x-mr-scale-mean-pw-idxs-alt"),
         ),
     )
-    def it_provides_scale_mean_pairwise_indices_alt(self, fixture, expectation):
+    def it_provides_columns_scale_mean_pairwise_indices_alt(self, fixture, expectation):
         """Provides col idxs meeting secondary sig-test threshold on scale mean."""
         slice_ = _Slice(
             Cube(fixture),
@@ -124,7 +124,7 @@ class Describe_Slice(object):
             mask_size=0,
         )
 
-        actual = slice_.scale_mean_pairwise_indices_alt
+        actual = slice_.columns_scale_mean_pairwise_indices_alt
 
         expected = load_python_expression(expectation)
         assert expected == actual, "\n%s\n\n%s" % (expected, actual)

@@ -158,8 +158,7 @@ class _ColumnPairwiseSignificance(object):
 
         :return: numpy 1D array of tstats
         """
-
-        variance = self._slice.var_scale_means_row
+        variance = self._slice._columns_scale_mean_variance
         # Sum for each column of the counts that have not a nan index in the
         # related numeric counts
         # TODO: get numeric values from assembler or wherever, do not extend _Slice
@@ -176,7 +175,8 @@ class _ColumnPairwiseSignificance(object):
         )
 
         tstats_scale_means = (
-            self._slice.scale_means_row - self._slice.scale_means_row[self._col_idx]
+            self._slice.columns_scale_mean
+            - self._slice.columns_scale_mean[self._col_idx]
         ) / (standard_deviation * np.sqrt((1 / counts[self._col_idx]) + (1 / counts)))
 
         return tstats_scale_means

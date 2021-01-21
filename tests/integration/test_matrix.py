@@ -3,6 +3,7 @@
 """Integration-test suite for `cr.cube.cubepart` module."""
 
 import numpy as np
+import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.cubepart import _Slice
@@ -13,7 +14,550 @@ from ..fixtures import CR
 class DescribeAssembler(object):
     """Integration-test suite for `cr.cube.matrix.Assembler`."""
 
-    def it_computes_assembled_ucounts_for_cat_hs_x_cat_hs_hiddens(self):
+    def it_computes_column_unweighted_bases_for_cat_hs_x_cat_hs(self):
+        slice_ = _Slice(
+            Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),
+            slice_idx=0,
+            transforms={
+                "rows_dimension": {
+                    "elements": {"2": {"hide": True}},
+                    "prune": True,
+                    "order": {"type": "explicit", "element_ids": [0, 5, 2, 1, 4]},
+                },
+                "columns_dimension": {
+                    "elements": {"2": {"hide": True}},
+                    "prune": True,
+                    "order": {"type": "explicit", "element_ids": [4, 2, 5, 0]},
+                },
+            },
+            population=None,
+            mask_size=0,
+        )
+
+        assert slice_.column_unweighted_bases.tolist() == [
+            [549, 328, 276, 273, 328],
+            [549, 328, 276, 273, 328],
+            [549, 328, 276, 273, 328],
+            [549, 328, 276, 273, 328],
+            [549, 328, 276, 273, 328],
+            [549, 328, 276, 273, 328],
+            [549, 328, 276, 273, 328],
+        ]
+
+    def it_computes_column_unweighted_bases_for_cat_hs_x_mr(self):
+        slice_ = Cube(CR.CAT_HS_X_MR).partitions[0]
+        assert slice_.column_unweighted_bases.tolist() == [
+            [26, 76, 118, 369, 385],
+            [26, 76, 118, 369, 385],
+            [26, 76, 118, 369, 385],
+            [26, 76, 118, 369, 385],
+            [26, 76, 118, 369, 385],
+            [26, 76, 118, 369, 385],
+            [26, 76, 118, 369, 385],
+            [26, 76, 118, 369, 385],
+        ]
+
+    def it_computes_column_unweighted_bases_for_mr_x_cat_hs(self):
+        slice_ = Cube(CR.MR_X_CAT_HS_MT).partitions[0]
+        assert slice_.column_unweighted_bases.tolist() == [
+            [15, 24, 39, 0, 57, 69, 0, 126],
+            [15, 34, 49, 0, 75, 86, 0, 161],
+            [13, 37, 50, 0, 81, 111, 0, 192],
+            [20, 50, 70, 0, 159, 221, 0, 380],
+            [32, 69, 101, 0, 167, 208, 0, 375],
+        ]
+
+    def it_computes_column_unweighted_bases_for_mr_x_mr(self):
+        slice_ = Cube(CR.MR_X_MR).partitions[0]
+        assert slice_.column_unweighted_bases.tolist() == [
+            [12, 18, 26, 44],
+            [7, 29, 20, 45],
+            [10, 22, 34, 53],
+            [12, 29, 34, 61],
+        ]
+
+    def it_computes_column_weighted_bases_for_cat_hs_x_cat_hs(self):
+        slice_ = _Slice(
+            Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),
+            slice_idx=0,
+            transforms={
+                "rows_dimension": {
+                    "elements": {"2": {"hide": True}},
+                    "prune": True,
+                    "order": {"type": "explicit", "element_ids": [0, 5, 2, 1, 4]},
+                },
+                "columns_dimension": {
+                    "elements": {"2": {"hide": True}},
+                    "prune": True,
+                    "order": {"type": "explicit", "element_ids": [4, 2, 5, 0]},
+                },
+            },
+            population=None,
+            mask_size=0,
+        )
+
+        assert slice_.column_weighted_bases.tolist() == [
+            [549, 328, 276, 273, 328],
+            [549, 328, 276, 273, 328],
+            [549, 328, 276, 273, 328],
+            [549, 328, 276, 273, 328],
+            [549, 328, 276, 273, 328],
+            [549, 328, 276, 273, 328],
+            [549, 328, 276, 273, 328],
+        ]
+
+    def it_computes_column_weighted_bases_for_cat_hs_x_mr(self):
+        slice_ = Cube(CR.CAT_HS_X_MR).partitions[0]
+        assert slice_.column_weighted_bases == pytest.approx(
+            np.array(
+                [
+                    [31.6315209, 70.7307341, 125.7591136, 366.8883915, 376.7656406],
+                    [31.6315209, 70.7307341, 125.7591136, 366.8883915, 376.7656406],
+                    [31.6315209, 70.7307341, 125.7591136, 366.8883915, 376.7656406],
+                    [31.6315209, 70.7307341, 125.7591136, 366.8883915, 376.7656406],
+                    [31.6315209, 70.7307341, 125.7591136, 366.8883915, 376.7656406],
+                    [31.6315209, 70.7307341, 125.7591136, 366.8883915, 376.7656406],
+                    [31.6315209, 70.7307341, 125.7591136, 366.8883915, 376.7656406],
+                    [31.6315209, 70.7307341, 125.7591136, 366.8883915, 376.7656406],
+                ]
+            )
+        )
+
+    def it_computes_column_weighted_bases_for_mr_x_cat_hs(self):
+        slice_ = Cube(CR.MR_X_CAT_HS_MT).partitions[0]
+        assert slice_.column_weighted_bases == pytest.approx(
+            np.array(
+                [
+                    [
+                        21.7886997,
+                        32.8157604,
+                        54.6044601,
+                        0.0,
+                        58.8662541,
+                        62.8948376,
+                        0.0,
+                        121.7610917,
+                    ],
+                    [
+                        15.7386377,
+                        40.7857418,
+                        56.5243795,
+                        0.0,
+                        76.986916,
+                        77.9092922,
+                        0.0,
+                        154.8962082,
+                    ],
+                    [
+                        12.2215027,
+                        40.9814885,
+                        53.2029912,
+                        0.0,
+                        91.9542899,
+                        102.5834568,
+                        0.0,
+                        194.5377467,
+                    ],
+                    [
+                        20.9530003,
+                        63.1359564,
+                        84.0889568,
+                        0.0,
+                        165.6720366,
+                        207.2899623,
+                        0.0,
+                        372.9619989,
+                    ],
+                    [
+                        30.9432236,
+                        88.2393316,
+                        119.1825552,
+                        0.0,
+                        165.8214891,
+                        186.9277242,
+                        0.0,
+                        352.7492133,
+                    ],
+                ]
+            )
+        )
+
+    def it_computes_column_weighted_bases_for_mr_x_mr(self):
+        slice_ = Cube(CR.MR_X_MR).partitions[0]
+        assert slice_.column_weighted_bases == pytest.approx(
+            np.array(
+                [
+                    [22.9672704, 28.5502092, 70.8068713, 100.714224],
+                    [13.2946142, 45.7789165, 53.0615517, 95.8683881],
+                    [20.1898745, 35.6664538, 86.9728288, 119.4044105],
+                    [22.9672704, 45.7789165, 86.9728288, 130.6784687],
+                ]
+            )
+        )
+
+    def it_computes_row_unweighted_bases_for_cat_hs_x_cat_hs(self):
+        slice_ = _Slice(
+            Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),
+            slice_idx=0,
+            transforms={
+                "rows_dimension": {
+                    "elements": {"2": {"hide": True}},
+                    "prune": True,
+                    "order": {"type": "explicit", "element_ids": [0, 5, 2, 1, 4]},
+                },
+                "columns_dimension": {
+                    "elements": {"2": {"hide": True}},
+                    "prune": True,
+                    "order": {"type": "explicit", "element_ids": [4, 2, 5, 0]},
+                },
+            },
+            population=None,
+            mask_size=0,
+        )
+
+        assert slice_.row_unweighted_bases.tolist() == [
+            [151, 151, 151, 151, 151],
+            [353, 353, 353, 353, 353],
+            [603, 603, 603, 603, 603],
+            [52, 52, 52, 52, 52],
+            [250, 250, 250, 250, 250],
+            [123, 123, 123, 123, 123],
+            [575, 575, 575, 575, 575],
+        ]
+
+    def it_computes_row_unweighted_bases_for_cat_hs_x_mr_for(self):
+        slice_ = Cube(CR.CAT_HS_X_MR).partitions[0]
+        assert slice_.row_unweighted_bases.tolist() == [
+            [15, 15, 13, 20, 32],
+            [24, 34, 37, 50, 69],
+            [39, 49, 50, 70, 101],
+            [0, 0, 0, 0, 0],
+            [57, 75, 81, 159, 167],
+            [69, 86, 111, 221, 208],
+            [0, 0, 0, 0, 0],
+            [126, 161, 192, 380, 375],
+        ]
+
+    def it_computes_row_unweighted_bases_for_mr_x_cat_hs_for(self):
+        slice_ = Cube(CR.MR_X_CAT_HS_MT).partitions[0]
+        assert slice_.row_unweighted_bases.tolist() == [
+            [26, 26, 26, 26, 26, 26, 26, 26],
+            [76, 76, 76, 76, 76, 76, 76, 76],
+            [118, 118, 118, 118, 118, 118, 118, 118],
+            [369, 369, 369, 369, 369, 369, 369, 369],
+            [385, 385, 385, 385, 385, 385, 385, 385],
+        ]
+
+    def it_computes_row_unweighted_bases_for_mr_x_mr_for(self):
+        slice_ = Cube(CR.MR_X_MR).partitions[0]
+        assert slice_.row_unweighted_bases.tolist() == [
+            [12, 7, 10, 12],
+            [18, 29, 22, 29],
+            [26, 20, 34, 34],
+            [44, 45, 53, 61],
+        ]
+
+    def it_computes_row_weighted_bases_for_cat_hs_x_cat_hs(self):
+        slice_ = _Slice(
+            Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),
+            slice_idx=0,
+            transforms={
+                "rows_dimension": {
+                    "elements": {"2": {"hide": True}},
+                    "prune": True,
+                    "order": {"type": "explicit", "element_ids": [0, 5, 2, 1, 4]},
+                },
+                "columns_dimension": {
+                    "elements": {"2": {"hide": True}},
+                    "prune": True,
+                    "order": {"type": "explicit", "element_ids": [4, 2, 5, 0]},
+                },
+            },
+            population=None,
+            mask_size=0,
+        )
+
+        assert slice_.row_weighted_bases.tolist() == [
+            [151, 151, 151, 151, 151],
+            [353, 353, 353, 353, 353],
+            [603, 603, 603, 603, 603],
+            [52, 52, 52, 52, 52],
+            [250, 250, 250, 250, 250],
+            [123, 123, 123, 123, 123],
+            [575, 575, 575, 575, 575],
+        ]
+
+    def it_computes_row_weighted_bases_for_cat_hs_x_mr(self):
+        slice_ = Cube(CR.CAT_HS_X_MR).partitions[0]
+        assert slice_.row_weighted_bases == pytest.approx(
+            np.array(
+                [
+                    [21.7886996, 15.7386377, 12.2215027, 20.9530004, 30.9432236],
+                    [32.8157604, 40.7857418, 40.9814885, 63.1359564, 88.2393316],
+                    [54.60446, 56.5243795, 53.2029912, 84.0889568, 119.1825552],
+                    [0.0, 0.0, 0.0, 0.0, 0.0],
+                    [58.866254, 76.986916, 91.95429, 165.6720366, 165.8214891],
+                    [62.8948376, 77.9092923, 102.5834568, 207.2899623, 186.9277242],
+                    [0.0, 0.0, 0.0, 0.0, 0.0],
+                    [121.7610916, 154.8962083, 194.5377468, 372.9619989, 352.7492133],
+                ]
+            )
+        )
+
+    def it_computes_row_weighted_bases_for_mr_x_cat_hs(self):
+        slice_ = Cube(CR.MR_X_CAT_HS_MT).partitions[0]
+        assert slice_.row_weighted_bases == pytest.approx(
+            np.array(
+                [
+                    [
+                        31.631521,
+                        31.631521,
+                        31.631521,
+                        31.631521,
+                        31.631521,
+                        31.631521,
+                        31.631521,
+                        31.631521,
+                    ],
+                    [
+                        70.7307341,
+                        70.7307341,
+                        70.7307341,
+                        70.7307341,
+                        70.7307341,
+                        70.7307341,
+                        70.7307341,
+                        70.7307341,
+                    ],
+                    [
+                        125.7591135,
+                        125.7591135,
+                        125.7591135,
+                        125.7591135,
+                        125.7591135,
+                        125.7591135,
+                        125.7591135,
+                        125.7591135,
+                    ],
+                    [
+                        366.8883914,
+                        366.8883914,
+                        366.8883914,
+                        366.8883914,
+                        366.8883914,
+                        366.8883914,
+                        366.8883914,
+                        366.8883914,
+                    ],
+                    [
+                        376.7656406,
+                        376.7656406,
+                        376.7656406,
+                        376.7656406,
+                        376.7656406,
+                        376.7656406,
+                        376.7656406,
+                        376.7656406,
+                    ],
+                ]
+            )
+        )
+
+    def it_computes_row_weighted_bases_for_mr_x_mr(self):
+        slice_ = Cube(CR.MR_X_MR).partitions[0]
+        assert slice_.row_weighted_bases == pytest.approx(
+            np.array(
+                [
+                    [22.9672704, 13.2946142, 20.1898745, 22.9672704],
+                    [28.5502092, 45.7789165, 35.6664538, 45.7789165],
+                    [70.8068713, 53.0615517, 86.9728288, 86.9728288],
+                    [100.714224, 95.8683881, 119.4044105, 130.6784687],
+                ]
+            )
+        )
+
+    def it_computes_table_unweighted_bases_for_cat_hs_x_cat_hs(self):
+        slice_ = _Slice(
+            Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),
+            slice_idx=0,
+            transforms={
+                "rows_dimension": {
+                    "elements": {"2": {"hide": True}},
+                    "prune": True,
+                    "order": {"type": "explicit", "element_ids": [0, 5, 2, 1, 4]},
+                },
+                "columns_dimension": {
+                    "elements": {"2": {"hide": True}},
+                    "prune": True,
+                    "order": {"type": "explicit", "element_ids": [4, 2, 5, 0]},
+                },
+            },
+            population=None,
+            mask_size=0,
+        )
+
+        assert slice_.table_unweighted_bases.tolist() == [
+            [877, 877, 877, 877, 877],
+            [877, 877, 877, 877, 877],
+            [877, 877, 877, 877, 877],
+            [877, 877, 877, 877, 877],
+            [877, 877, 877, 877, 877],
+            [877, 877, 877, 877, 877],
+            [877, 877, 877, 877, 877],
+        ]
+
+    def it_computes_table_unweighted_bases_for_cat_hs_x_mr(self):
+        slice_ = Cube(CR.CAT_HS_X_MR).partitions[0]
+        assert slice_.table_unweighted_bases.tolist() == [
+            [165, 210, 242, 450, 476],
+            [165, 210, 242, 450, 476],
+            [165, 210, 242, 450, 476],
+            [165, 210, 242, 450, 476],
+            [165, 210, 242, 450, 476],
+            [165, 210, 242, 450, 476],
+            [165, 210, 242, 450, 476],
+            [165, 210, 242, 450, 476],
+        ]
+
+    def it_computes_table_unweighted_bases_for_mr_x_cat_hs(self):
+        slice_ = Cube(CR.MR_X_CAT_HS_MT).partitions[0]
+        assert slice_.table_unweighted_bases.tolist() == [
+            [165, 165, 165, 165, 165, 165, 165, 165],
+            [210, 210, 210, 210, 210, 210, 210, 210],
+            [242, 242, 242, 242, 242, 242, 242, 242],
+            [450, 450, 450, 450, 450, 450, 450, 450],
+            [476, 476, 476, 476, 476, 476, 476, 476],
+        ]
+
+    def it_computes_table_unweighted_bases_for_mr_x_mr(self):
+        slice_ = Cube(CR.MR_X_MR).partitions[0]
+        assert slice_.table_unweighted_bases.tolist() == [
+            [68, 43, 51, 68],
+            [43, 60, 42, 60],
+            [51, 42, 72, 72],
+            [68, 60, 72, 96],
+        ]
+
+    def it_computes_table_weighted_bases_for_cat_hs_x_cat_hs(self):
+        slice_ = _Slice(
+            Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),
+            slice_idx=0,
+            transforms={
+                "rows_dimension": {
+                    "elements": {"2": {"hide": True}},
+                    "prune": True,
+                    "order": {"type": "explicit", "element_ids": [0, 5, 2, 1, 4]},
+                },
+                "columns_dimension": {
+                    "elements": {"2": {"hide": True}},
+                    "prune": True,
+                    "order": {"type": "explicit", "element_ids": [4, 2, 5, 0]},
+                },
+            },
+            population=None,
+            mask_size=0,
+        )
+
+        assert slice_.table_weighted_bases.tolist() == [
+            [877, 877, 877, 877, 877],
+            [877, 877, 877, 877, 877],
+            [877, 877, 877, 877, 877],
+            [877, 877, 877, 877, 877],
+            [877, 877, 877, 877, 877],
+            [877, 877, 877, 877, 877],
+            [877, 877, 877, 877, 877],
+        ]
+
+    def it_computes_table_weighted_bases_for_cat_hs_x_mr(self):
+        slice_ = Cube(CR.CAT_HS_X_MR).partitions[0]
+        assert slice_.table_weighted_bases == pytest.approx(
+            np.array(
+                [
+                    [176.3655516, 211.4205878, 247.740738, 457.0509557, 471.9317685],
+                    [176.3655516, 211.4205878, 247.740738, 457.0509557, 471.9317685],
+                    [176.3655516, 211.4205878, 247.740738, 457.0509557, 471.9317685],
+                    [176.3655516, 211.4205878, 247.740738, 457.0509557, 471.9317685],
+                    [176.3655516, 211.4205878, 247.740738, 457.0509557, 471.9317685],
+                    [176.3655516, 211.4205878, 247.740738, 457.0509557, 471.9317685],
+                    [176.3655516, 211.4205878, 247.740738, 457.0509557, 471.9317685],
+                    [176.3655516, 211.4205878, 247.740738, 457.0509557, 471.9317685],
+                ]
+            )
+        )
+
+    def it_computes_table_weighted_bases_for_mr_x_cat_hs(self):
+        slice_ = Cube(CR.MR_X_CAT_HS_MT).partitions[0]
+        assert slice_.table_weighted_bases == pytest.approx(
+            np.array(
+                [
+                    [
+                        176.3655518,
+                        176.3655518,
+                        176.3655518,
+                        176.3655518,
+                        176.3655518,
+                        176.3655518,
+                        176.3655518,
+                        176.3655518,
+                    ],
+                    [
+                        211.4205877,
+                        211.4205877,
+                        211.4205877,
+                        211.4205877,
+                        211.4205877,
+                        211.4205877,
+                        211.4205877,
+                        211.4205877,
+                    ],
+                    [
+                        247.7407379,
+                        247.7407379,
+                        247.7407379,
+                        247.7407379,
+                        247.7407379,
+                        247.7407379,
+                        247.7407379,
+                        247.7407379,
+                    ],
+                    [
+                        457.0509557,
+                        457.0509557,
+                        457.0509557,
+                        457.0509557,
+                        457.0509557,
+                        457.0509557,
+                        457.0509557,
+                        457.0509557,
+                    ],
+                    [
+                        471.9317685,
+                        471.9317685,
+                        471.9317685,
+                        471.9317685,
+                        471.9317685,
+                        471.9317685,
+                        471.9317685,
+                        471.9317685,
+                    ],
+                ]
+            )
+        )
+
+    def it_computes_table_weighted_bases_for_mr_x_mr(self):
+        slice_ = Cube(CR.MR_X_MR).partitions[0]
+        assert slice_.table_weighted_bases == pytest.approx(
+            np.array(
+                [
+                    [166.0021903, 107.5444392, 126.8687847, 166.0021903],
+                    [107.5444392, 141.8676807, 100.0046058, 141.8676807],
+                    [126.8687847, 100.0046058, 180.9936126, 180.9936126],
+                    [166.0021903, 141.8676807, 180.9936126, 236.5388192],
+                ]
+            )
+        )
+
+    def it_computes_unweighted_counts_for_cat_hs_x_cat_hs_hiddens(self):
         """Assembler inserts, hides, prunes, and places in payload order."""
         slice_ = _Slice(
             Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),
@@ -26,22 +570,17 @@ class DescribeAssembler(object):
             mask_size=0,
         )
 
-        unweighted_counts = slice_.unweighted_counts
+        assert slice_.unweighted_counts.tolist() == [
+            [118, 65, 53, 33, 33],
+            [40, 32, 8, 12, 12],
+            [168, 66, 102, 82, 82],
+            [163, 93, 70, 190, 190],
+            [331, 159, 172, 272, 272],
+            [100, 49, 51, 23, 23],
+            [341, 175, 166, 234, 234],
+        ]
 
-        assert np.array_equal(
-            unweighted_counts,
-            [
-                [118, 65, 53, 33, 33],
-                [40, 32, 8, 12, 12],
-                [168, 66, 102, 82, 82],
-                [163, 93, 70, 190, 190],
-                [331, 159, 172, 272, 272],
-                [100, 49, 51, 23, 23],
-                [341, 175, 166, 234, 234],
-            ],
-        )
-
-    def it_computes_assembled_ucounts_for_ca_subvar_x_ca_cat_hiddens(self):
+    def it_computes_unweighted_counts_for_ca_subvar_x_ca_cat_hiddens(self):
         """Assembler hides, prunes, and places in payload order.
 
         This fixture has no insertions, and exercises the "no-insertions" case which
@@ -61,18 +600,13 @@ class DescribeAssembler(object):
             mask_size=0,
         )
 
-        unweighted_counts = slice_.unweighted_counts
+        assert slice_.unweighted_counts.tolist() == [
+            [2734, 5887, 1017],
+            [2810, 7000, 474],
+            [347, 2577, 4467],
+        ]
 
-        assert np.array_equal(
-            unweighted_counts,
-            [
-                [2734, 5887, 1017],
-                [2810, 7000, 474],
-                [347, 2577, 4467],
-            ],
-        )
-
-    def it_computes_assembled_ucounts_for_cat_hs_x_cat_hs_hiddens_explicit_order(self):
+    def it_computes_unweighted_counts_for_cat_hs_x_cat_hs_hiddens_explicit_order(self):
         """Assembler inserts, hides, prunes, and places in explicit order."""
         slice_ = _Slice(
             Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),
@@ -93,22 +627,17 @@ class DescribeAssembler(object):
             mask_size=0,
         )
 
-        unweighted_counts = slice_.unweighted_counts
+        assert slice_.unweighted_counts.tolist() == [
+            [118, 33, 53, 65, 33],
+            [163, 190, 70, 93, 190],
+            [331, 272, 172, 159, 272],
+            [40, 12, 8, 32, 12],
+            [168, 82, 102, 66, 82],
+            [100, 23, 51, 49, 23],
+            [341, 234, 166, 175, 234],
+        ]
 
-        assert np.array_equal(
-            unweighted_counts,
-            [
-                [118, 33, 53, 65, 33],
-                [163, 190, 70, 93, 190],
-                [331, 272, 172, 159, 272],
-                [40, 12, 8, 32, 12],
-                [168, 82, 102, 66, 82],
-                [100, 23, 51, 49, 23],
-                [341, 234, 166, 175, 234],
-            ],
-        )
-
-    def it_computes_assembled_ucounts_for_cat_hs_x_mr_hiddens_explicit_order(self):
+    def it_computes_unweighted_counts_for_cat_hs_x_mr_hiddens_explicit_order(self):
         """Assembler inserts, hides, prunes, and places in explicit order."""
         slice_ = _Slice(
             Cube(CR.CAT_HS_X_MR),
@@ -128,42 +657,38 @@ class DescribeAssembler(object):
             mask_size=0,
         )
 
-        unweighted_counts = slice_.unweighted_counts
+        assert slice_.unweighted_counts.tolist() == [
+            [300, 320, 53, 93],
+            [27, 13, 7, 4],
+            [58, 36, 16, 21],
+            [85, 49, 23, 25],
+            [134, 130, 26, 39],
+        ]
 
-        assert np.array_equal(
-            unweighted_counts,
-            [
-                [300, 320, 53, 93],
-                [27, 13, 7, 4],
-                [58, 36, 16, 21],
-                [85, 49, 23, 25],
-                [134, 130, 26, 39],
-            ],
-        )
-
-    def it_computes_assembled_ucounts_for_mr_x_cat(self):
+    def it_computes_unweighted_counts_for_mr_x_cat(self):
         slice_ = Cube(CR.MR_X_CAT).partitions[0]
-        assert np.array_equal(
-            slice_.unweighted_counts,
-            [
-                [8, 7, 0, 6, 5, 0],
-                [7, 16, 0, 26, 27, 0],
-                [4, 21, 0, 39, 54, 0],
-                [13, 36, 0, 130, 190, 0],
-                [27, 58, 0, 134, 166, 0],
-            ],
-        )
+        assert slice_.unweighted_counts.tolist() == [
+            [8, 7, 0, 6, 5, 0],
+            [7, 16, 0, 26, 27, 0],
+            [4, 21, 0, 39, 54, 0],
+            [13, 36, 0, 130, 190, 0],
+            [27, 58, 0, 134, 166, 0],
+        ]
 
-    def it_computes_assembled_ucounts_for_mr_x_mr_slices(self):
+    def it_computes_unweighted_counts_for_mr_x_mr_slices(self):
         slice_ = Cube(CR.CAT_X_MR_X_MR).partitions[0]
-        np.testing.assert_array_equal(
-            slice_.unweighted_counts, [[1159, 3597], [197, 604], [192, 582]]
-        )
+        assert slice_.unweighted_counts.tolist() == [
+            [1159, 3597],
+            [197, 604],
+            [192, 582],
+        ]
 
         slice_ = Cube(CR.CAT_X_MR_X_MR).partitions[1]
-        np.testing.assert_array_equal(
-            slice_.unweighted_counts, [[159, 94], [1182, 625], [1142, 623]]
-        )
+        assert slice_.unweighted_counts.tolist() == [
+            [159, 94],
+            [1182, 625],
+            [1142, 623],
+        ]
 
     def it_computes_ca_x_mr_hs_columns_base(self):
         slice_ = Cube(CR.CA_X_MR_WEIGHTED_HS).partitions[0]
@@ -204,50 +729,48 @@ class DescribeAssembler(object):
             mask_size=0,
         )
 
-        weighted_counts = slice_.counts
+        assert slice_.counts.tolist() == [
+            [118, 33, 53, 65, 33],
+            [163, 190, 70, 93, 190],
+            [331, 272, 172, 159, 272],
+            [40, 12, 8, 32, 12],
+            [168, 82, 102, 66, 82],
+            [100, 23, 51, 49, 23],
+            [341, 234, 166, 175, 234],
+        ]
 
-        assert np.array_equal(
-            weighted_counts,
-            [
-                [118, 33, 53, 65, 33],
-                [163, 190, 70, 93, 190],
-                [331, 272, 172, 159, 272],
-                [40, 12, 8, 32, 12],
-                [168, 82, 102, 66, 82],
-                [100, 23, 51, 49, 23],
-                [341, 234, 166, 175, 234],
-            ],
-        )
-
-    def it_computes_cat_x_mr_weighted_counts(self):
+    def it_computes_weighted_counts_for_cat_x_mr(self):
         slice_ = Cube(CR.CAT_X_MR).partitions[0]
-        np.testing.assert_array_equal(
-            slice_.counts, np.array([[12, 12, 12], [28, 22, 26]])
-        )
+        assert slice_.counts.tolist() == [
+            [12, 12, 12],
+            [28, 22, 26],
+        ]
 
-    def it_computes_mr_x_cat_weighted_counts(self):
+    def it_computes_weighted_counts_for_mr_x_cat(self):
         slice_ = Cube(CR.MR_X_CAT).partitions[0]
-        np.testing.assert_almost_equal(
-            slice_.counts,
-            [
-                [13.9429388, 6.0970738, 0.0, 4.1755362, 7.4159721, 0.0],
-                [8.9877522, 12.5606144, 0.0, 24.8653747, 24.3169928, 0.0],
-                [2.8233988, 19.5475854, 0.0, 51.0432736, 52.3448558, 0.0],
-                [14.0988864, 43.2918709, 0.0, 131.9766084, 177.5210258, 0.0],
-                [24.1996722, 73.3217774, 0.0, 129.7684193, 149.4757717, 0.0],
-            ],
+        assert slice_.counts == pytest.approx(
+            np.array(
+                [
+                    [13.9429388, 6.0970738, 0.0, 4.1755362, 7.4159721, 0.0],
+                    [8.9877522, 12.5606144, 0.0, 24.8653747, 24.3169928, 0.0],
+                    [2.8233988, 19.5475854, 0.0, 51.0432736, 52.3448558, 0.0],
+                    [14.0988864, 43.2918709, 0.0, 131.9766084, 177.5210258, 0.0],
+                    [24.1996722, 73.3217774, 0.0, 129.7684193, 149.4757717, 0.0],
+                ]
+            )
         )
 
-    def it_computes_mr_x_mr_weighted_counts(self):
+    def it_computes_weighted_counts_for_mr_x_mr(self):
         slice_ = Cube(CR.MR_X_MR).partitions[0]
-        np.testing.assert_almost_equal(
-            slice_.counts,
-            [
-                [22.96727041, 3.79786399, 8.77385271, 22.96727041],
-                [3.79786399, 45.77891654, 12.46883034, 45.77891654],
-                [8.77385271, 12.46883034, 86.97282879, 86.97282879],
-                [22.96727041, 45.77891654, 86.97282879, 130.67846872],
-            ],
+        assert slice_.counts == pytest.approx(
+            np.array(
+                [
+                    [22.96727041, 3.79786399, 8.77385271, 22.96727041],
+                    [3.79786399, 45.77891654, 12.46883034, 45.77891654],
+                    [8.77385271, 12.46883034, 86.97282879, 86.97282879],
+                    [22.96727041, 45.77891654, 86.97282879, 130.67846872],
+                ]
+            )
         )
 
     def it_computes_table_margin_for_cat_hs_x_cat_hs_hiddens_explicit_order(self):
@@ -648,8 +1171,7 @@ class DescribeAssembler(object):
 
     def it_computes_cat_x_mr_zscores(self):
         slice_ = Cube(CR.CAT_X_MR_2).partitions[0]
-        np.testing.assert_almost_equal(
-            slice_.zscores,
+        assert slice_.zscores == pytest.approx(
             np.array(
                 [
                     [5.9856141, 2.067039, -1.9837558, -1.5290931, -0.2334994],
@@ -660,6 +1182,7 @@ class DescribeAssembler(object):
                     [np.nan, np.nan, np.nan, np.nan, np.nan],
                 ]
             ),
+            nan_ok=True,
         )
 
     def it_computes_mr_x_cat_zscores(self):

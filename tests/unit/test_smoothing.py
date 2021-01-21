@@ -43,7 +43,7 @@ class DescribeSingleSideMovingAvgSmoother(object):
         (
             ({"base_measure": "col_percent"}, "column_percentages"),
             ({"base_measure": "col_index"}, "column_index"),
-            ({"base_measure": "scale_mean"}, "scale_means_row"),
+            ({"base_measure": "scale_mean"}, "columns_scale_mean"),
             ({"base_measure": "mean"}, "means"),
         ),
     )

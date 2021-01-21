@@ -14,18 +14,29 @@ from cr.cube.matrix.cubemeasure import (
     _CatXCatMatrix,
     _CatXCatMeansMatrix,
 )
+from cr.cube.matrix.measure import (
+    _ColumnUnweightedBases,
+    _ColumnWeightedBases,
+    _RowUnweightedBases,
+    _RowWeightedBases,
+    SecondOrderMeasures,
+    _TableUnweightedBases,
+    _TableWeightedBases,
+    _UnweightedCounts,
+    _WeightedCounts,
+)
 
 from ...unitutil import class_mock, instance_mock, method_mock, property_mock
 
 
 class DescribeAssembler(object):
-    """Unit test suite for `cr.cube.matrix.Assembler` object."""
+    """Unit test suite for `cr.cube.matrix.assembler.Assembler` object."""
 
     def it_knows_the_column_index(
         self,
         request,
         _cube_result_matrix_prop_,
-        dimension_,
+        dimensions_,
         NanSubtotals_,
         _assemble_matrix_,
     ):
@@ -35,13 +46,11 @@ class DescribeAssembler(object):
         _cube_result_matrix_prop_.return_value = cube_result_matrix_
         NanSubtotals_.blocks.return_value = [[[1], [np.nan]], [[3], []]]
         _assemble_matrix_.return_value = [[1, np.nan, 3], [4, np.nan, 6]]
-        assembler = Assembler(None, (dimension_, dimension_), None)
+        assembler = Assembler(None, dimensions_, None)
 
         column_index = assembler.column_index
 
-        NanSubtotals_.blocks.assert_called_once_with(
-            [[1, 2], [3, 4]], (dimension_, dimension_)
-        )
+        NanSubtotals_.blocks.assert_called_once_with([[1, 2], [3, 4]], dimensions_)
         _assemble_matrix_.assert_called_once_with(
             assembler, [[[1], [np.nan]], [[3], []]]
         )
@@ -63,6 +72,38 @@ class DescribeAssembler(object):
 
         _dimension_labels_.assert_called_once_with(assembler, dimension_, [0, 1, 2])
         assert column_labels.tolist() == ["Alpha", "Baker", "Charlie"]
+
+    def it_knows_the_column_unweighted_bases(
+        self, request, _measures_prop_, second_order_measures_, _assemble_matrix_
+    ):
+        column_unweighted_bases_ = instance_mock(
+            request, _ColumnUnweightedBases, blocks=[["A", "B"], ["C", "D"]]
+        )
+        _measures_prop_.return_value = second_order_measures_
+        second_order_measures_.column_unweighted_bases = column_unweighted_bases_
+        _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+        assembler = Assembler(None, None, None)
+
+        column_unweighted_bases = assembler.column_unweighted_bases
+
+        _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
+        assert column_unweighted_bases == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+
+    def it_knows_the_column_weighted_bases(
+        self, request, _measures_prop_, second_order_measures_, _assemble_matrix_
+    ):
+        column_weighted_bases_ = instance_mock(
+            request, _ColumnWeightedBases, blocks=[["A", "B"], ["C", "D"]]
+        )
+        _measures_prop_.return_value = second_order_measures_
+        second_order_measures_.column_weighted_bases = column_weighted_bases_
+        _assemble_matrix_.return_value = [[7, 8, 9], [4, 5, 6], [1, 2, 3]]
+        assembler = Assembler(None, None, None)
+
+        column_weighted_bases = assembler.column_weighted_bases
+
+        _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
+        assert column_weighted_bases == [[7, 8, 9], [4, 5, 6], [1, 2, 3]]
 
     def it_provides_a_1D_columns_base_for_a_CAT_X_cube_result(
         self,
@@ -93,25 +134,23 @@ class DescribeAssembler(object):
     def but_it_provides_a_2D_columns_base_for_an_MR_X_cube_result(
         self,
         _rows_dimension_prop_,
-        dimension_,
+        dimensions_,
         _cube_result_matrix_prop_,
         cube_result_matrix_,
         SumSubtotals_,
         _assemble_matrix_,
     ):
-        _rows_dimension_prop_.return_value = dimension_
-        dimension_.dimension_type = DT.MR_SUBVAR
+        _rows_dimension_prop_.return_value = dimensions_[0]
+        dimensions_[0].dimension_type = DT.MR_SUBVAR
         cube_result_matrix_.columns_base = [[1, 2], [3, 4]]
         _cube_result_matrix_prop_.return_value = cube_result_matrix_
         SumSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
         _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-        assembler = Assembler(None, (dimension_, dimension_), None)
+        assembler = Assembler(None, dimensions_, None)
 
         columns_base = assembler.columns_base
 
-        SumSubtotals_.blocks.assert_called_once_with(
-            [[1, 2], [3, 4]], (dimension_, dimension_)
-        )
+        SumSubtotals_.blocks.assert_called_once_with([[1, 2], [3, 4]], dimensions_)
         _assemble_matrix_.assert_called_once_with(assembler, [[[1], [2]], [[3], [4]]])
         assert columns_base == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
@@ -160,25 +199,23 @@ class DescribeAssembler(object):
     def but_it_provides_a_2D_columns_margin_for_an_MR_X_cube_result(
         self,
         _rows_dimension_prop_,
-        dimension_,
+        dimensions_,
         _cube_result_matrix_prop_,
         cube_result_matrix_,
         SumSubtotals_,
         _assemble_matrix_,
     ):
-        _rows_dimension_prop_.return_value = dimension_
-        dimension_.dimension_type = DT.MR_SUBVAR
+        _rows_dimension_prop_.return_value = dimensions_[0]
+        dimensions_[0].dimension_type = DT.MR_SUBVAR
         cube_result_matrix_.columns_margin = [[1, 2], [3, 4]]
         _cube_result_matrix_prop_.return_value = cube_result_matrix_
         SumSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
         _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-        assembler = Assembler(None, (dimension_, dimension_), None)
+        assembler = Assembler(None, dimensions_, None)
 
         columns_margin = assembler.columns_margin
 
-        SumSubtotals_.blocks.assert_called_once_with(
-            [[1, 2], [3, 4]], (dimension_, dimension_)
-        )
+        SumSubtotals_.blocks.assert_called_once_with([[1, 2], [3, 4]], dimensions_)
         _assemble_matrix_.assert_called_once_with(assembler, [[[1], [2]], [[3], [4]]])
         assert columns_margin == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
@@ -195,7 +232,7 @@ class DescribeAssembler(object):
         request,
         cube_,
         _cube_result_matrix_prop_,
-        dimension_,
+        dimensions_,
         NanSubtotals_,
         _assemble_matrix_,
     ):
@@ -206,13 +243,11 @@ class DescribeAssembler(object):
         _cube_result_matrix_prop_.return_value = cube_result_matrix_
         NanSubtotals_.blocks.return_value = [[[3], [2]], [[4], [1]]]
         _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6]]
-        assembler = Assembler(cube_, (dimension_, dimension_), None)
+        assembler = Assembler(cube_, dimensions_, None)
 
         means = assembler.means
 
-        NanSubtotals_.blocks.assert_called_once_with(
-            [[1, 2], [3, 4]], (dimension_, dimension_)
-        )
+        NanSubtotals_.blocks.assert_called_once_with([[1, 2], [3, 4]], dimensions_)
         _assemble_matrix_.assert_called_once_with(assembler, [[[3], [2]], [[4], [1]]])
         assert means == [[1, 2, 3], [4, 5, 6]]
 
@@ -249,6 +284,38 @@ class DescribeAssembler(object):
         _dimension_labels_.assert_called_once_with(assembler, dimension_, [0, 1, 2])
         assert row_labels.tolist() == ["Alpha", "Baker", "Charlie"]
 
+    def it_knows_the_row_unweighted_bases(
+        self, request, _measures_prop_, second_order_measures_, _assemble_matrix_
+    ):
+        row_unweighted_bases_ = instance_mock(
+            request, _RowUnweightedBases, blocks=[["A", "B"], ["C", "D"]]
+        )
+        _measures_prop_.return_value = second_order_measures_
+        second_order_measures_.row_unweighted_bases = row_unweighted_bases_
+        _assemble_matrix_.return_value = [[9, 8, 7], [6, 5, 4], [3, 2, 1]]
+        assembler = Assembler(None, None, None)
+
+        row_unweighted_bases = assembler.row_unweighted_bases
+
+        _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
+        assert row_unweighted_bases == [[9, 8, 7], [6, 5, 4], [3, 2, 1]]
+
+    def it_knows_the_row_weighted_bases(
+        self, request, _measures_prop_, second_order_measures_, _assemble_matrix_
+    ):
+        row_weighted_bases_ = instance_mock(
+            request, _RowWeightedBases, blocks=[["A", "B"], ["C", "D"]]
+        )
+        _measures_prop_.return_value = second_order_measures_
+        second_order_measures_.row_weighted_bases = row_weighted_bases_
+        _assemble_matrix_.return_value = [[9.9, 8.8, 7.7], [6.6, 5.5, 4.4]]
+        assembler = Assembler(None, None, None)
+
+        row_weighted_bases = assembler.row_weighted_bases
+
+        _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
+        assert row_weighted_bases == [[9.9, 8.8, 7.7], [6.6, 5.5, 4.4]]
+
     def it_provides_a_1D_rows_base_for_an_X_CAT_cube_result(
         self,
         _columns_dimension_prop_,
@@ -278,25 +345,23 @@ class DescribeAssembler(object):
     def but_it_provides_a_2D_rows_base_for_an_X_MR_cube_result(
         self,
         _columns_dimension_prop_,
-        dimension_,
+        dimensions_,
         _cube_result_matrix_prop_,
         cube_result_matrix_,
         SumSubtotals_,
         _assemble_matrix_,
     ):
-        _columns_dimension_prop_.return_value = dimension_
-        dimension_.dimension_type = DT.MR_SUBVAR
+        _columns_dimension_prop_.return_value = dimensions_[1]
+        dimensions_[1].dimension_type = DT.MR_SUBVAR
         cube_result_matrix_.rows_base = [[1, 2], [3, 4]]
         _cube_result_matrix_prop_.return_value = cube_result_matrix_
         SumSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
         _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-        assembler = Assembler(None, (dimension_, dimension_), None)
+        assembler = Assembler(None, dimensions_, None)
 
         rows_base = assembler.rows_base
 
-        SumSubtotals_.blocks.assert_called_once_with(
-            [[1, 2], [3, 4]], (dimension_, dimension_)
-        )
+        SumSubtotals_.blocks.assert_called_once_with([[1, 2], [3, 4]], dimensions_)
         _assemble_matrix_.assert_called_once_with(assembler, [[[1], [2]], [[3], [4]]])
         assert rows_base == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
@@ -358,25 +423,23 @@ class DescribeAssembler(object):
     def but_it_provides_a_2D_rows_margin_for_an_X_MR_cube_result(
         self,
         _columns_dimension_prop_,
-        dimension_,
+        dimensions_,
         _cube_result_matrix_prop_,
         cube_result_matrix_,
         SumSubtotals_,
         _assemble_matrix_,
     ):
-        _columns_dimension_prop_.return_value = dimension_
-        dimension_.dimension_type = DT.MR_SUBVAR
+        _columns_dimension_prop_.return_value = dimensions_[1]
+        dimensions_[1].dimension_type = DT.MR_SUBVAR
         cube_result_matrix_.rows_margin = [[1, 2], [3, 4]]
         _cube_result_matrix_prop_.return_value = cube_result_matrix_
         SumSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
         _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-        assembler = Assembler(None, (dimension_, dimension_), None)
+        assembler = Assembler(None, dimensions_, None)
 
         rows_margin = assembler.rows_margin
 
-        SumSubtotals_.blocks.assert_called_once_with(
-            [[1, 2], [3, 4]], (dimension_, dimension_)
-        )
+        SumSubtotals_.blocks.assert_called_once_with([[1, 2], [3, 4]], dimensions_)
         _assemble_matrix_.assert_called_once_with(assembler, [[[1], [2]], [[3], [4]]])
         assert rows_margin == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
@@ -560,7 +623,7 @@ class DescribeAssembler(object):
         self,
         _cube_result_matrix_prop_,
         cube_result_matrix_,
-        dimension_,
+        dimensions_,
         TableStdErrSubtotals_,
         _assemble_matrix_,
     ):
@@ -568,64 +631,92 @@ class DescribeAssembler(object):
         _cube_result_matrix_prop_.return_value = cube_result_matrix_
         TableStdErrSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
         _assemble_matrix_.return_value = [[1, 3, 2], [4, 6, 5]]
-        assembler = Assembler(None, (dimension_, dimension_), None)
+        assembler = Assembler(None, dimensions_, None)
 
         table_stderrs = assembler.table_stderrs
 
         TableStdErrSubtotals_.blocks.assert_called_once_with(
-            [[1, 2], [3, 4]], (dimension_, dimension_), cube_result_matrix_
+            [[1, 2], [3, 4]], dimensions_, cube_result_matrix_
         )
         _assemble_matrix_.assert_called_once_with(assembler, [[[1], [2]], [[3], [4]]])
         assert table_stderrs == [[1, 3, 2], [4, 6, 5]]
 
-    def it_knows_the_unweighted_counts(
-        self,
-        _cube_result_matrix_prop_,
-        cube_result_matrix_,
-        dimension_,
-        SumSubtotals_,
-        _assemble_matrix_,
+    def it_knows_the_table_unweighted_bases(
+        self, request, _measures_prop_, second_order_measures_, _assemble_matrix_
     ):
-        cube_result_matrix_.unweighted_counts = [[1, 2], [3, 4]]
-        _cube_result_matrix_prop_.return_value = cube_result_matrix_
-        SumSubtotals_.blocks.return_value = [["A", "B"], ["C", "D"]]
+        table_unweighted_bases_ = instance_mock(
+            request, _TableUnweightedBases, blocks=[["A", "B"], ["C", "D"]]
+        )
+        _measures_prop_.return_value = second_order_measures_
+        second_order_measures_.table_unweighted_bases = table_unweighted_bases_
+        _assemble_matrix_.return_value = [[9, 8, 7], [6, 5, 4], [3, 2, 1]]
+        assembler = Assembler(None, None, None)
+
+        table_unweighted_bases = assembler.table_unweighted_bases
+
+        _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
+        assert table_unweighted_bases == [[9, 8, 7], [6, 5, 4], [3, 2, 1]]
+
+    def it_knows_the_table_weighted_bases(
+        self, request, _measures_prop_, second_order_measures_, _assemble_matrix_
+    ):
+        table_weighted_bases_ = instance_mock(
+            request, _TableWeightedBases, blocks=[["A", "B"], ["C", "D"]]
+        )
+        _measures_prop_.return_value = second_order_measures_
+        second_order_measures_.table_weighted_bases = table_weighted_bases_
+        _assemble_matrix_.return_value = [
+            [9.9, 8.8, 7.7],
+            [6.6, 5.5, 4.4],
+            [3.3, 2.2, 1.1],
+        ]
+        assembler = Assembler(None, None, None)
+
+        table_weighted_bases = assembler.table_weighted_bases
+
+        _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
+        assert table_weighted_bases == [
+            [9.9, 8.8, 7.7],
+            [6.6, 5.5, 4.4],
+            [3.3, 2.2, 1.1],
+        ]
+
+    def it_knows_the_unweighted_counts(
+        self, request, _measures_prop_, second_order_measures_, _assemble_matrix_
+    ):
+        unweighted_counts_ = instance_mock(
+            request, _UnweightedCounts, blocks=[["A", "B"], ["C", "D"]]
+        )
+        _measures_prop_.return_value = second_order_measures_
+        second_order_measures_.unweighted_counts = unweighted_counts_
         _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-        assembler = Assembler(None, (dimension_, dimension_), None)
+        assembler = Assembler(None, None, None)
 
         unweighted_counts = assembler.unweighted_counts
 
-        SumSubtotals_.blocks.assert_called_once_with(
-            [[1, 2], [3, 4]], (dimension_, dimension_)
-        )
         _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
         assert unweighted_counts == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
     def it_knows_the_weighted_counts(
-        self,
-        _cube_result_matrix_prop_,
-        cube_result_matrix_,
-        dimension_,
-        SumSubtotals_,
-        _assemble_matrix_,
+        self, request, _measures_prop_, second_order_measures_, _assemble_matrix_
     ):
-        cube_result_matrix_.weighted_counts = [[1, 2], [3, 4]]
-        _cube_result_matrix_prop_.return_value = cube_result_matrix_
-        SumSubtotals_.blocks.return_value = [["A", "B"], ["C", "D"]]
-        _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-        assembler = Assembler(None, (dimension_, dimension_), None)
+        weighted_counts_ = instance_mock(
+            request, _WeightedCounts, blocks=[["A", "B"], ["C", "D"]]
+        )
+        _measures_prop_.return_value = second_order_measures_
+        second_order_measures_.weighted_counts = weighted_counts_
+        _assemble_matrix_.return_value = [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]
+        assembler = Assembler(None, None, None)
 
         weighted_counts = assembler.weighted_counts
 
-        SumSubtotals_.blocks.assert_called_once_with(
-            [[1, 2], [3, 4]], (dimension_, dimension_)
-        )
         _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
-        assert weighted_counts == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+        assert weighted_counts == [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]
 
     def it_computes_zscores_for_a_CAT_X_CAT_slice(
         self,
         request,
-        dimension_,
+        dimensions_,
         _rows_dimension_prop_,
         _columns_dimension_prop_,
         _cube_result_matrix_prop_,
@@ -643,12 +734,12 @@ class DescribeAssembler(object):
         _cube_result_matrix_prop_.return_value = cube_result_matrix_
         ZscoreSubtotals_.blocks.return_value = [[[4], [3]], [[2], [1]]]
         _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6]]
-        assembler = Assembler(None, (dimension_, dimension_), None)
+        assembler = Assembler(None, dimensions_, None)
 
         zscores = assembler.zscores
 
         ZscoreSubtotals_.blocks.assert_called_once_with(
-            [[1, 2], [3, 4]], (dimension_, dimension_), cube_result_matrix_
+            [[1, 2], [3, 4]], dimensions_, cube_result_matrix_
         )
         _assemble_matrix_.assert_called_once_with(assembler, [[[4], [3]], [[2], [1]]])
         assert zscores == [[1, 2, 3], [4, 5, 6]]
@@ -664,7 +755,7 @@ class DescribeAssembler(object):
     def but_it_provides_zscores_with_NaN_subtotals_when_cube_has_an_MR_dimension(
         self,
         request,
-        dimension_,
+        dimensions_,
         _rows_dimension_prop_,
         rows_dim_type,
         _columns_dimension_prop_,
@@ -684,13 +775,11 @@ class DescribeAssembler(object):
         _cube_result_matrix_prop_.return_value = cube_result_matrix_
         NanSubtotals_.blocks.return_value = [[[1], [np.nan]], [[3], []]]
         _assemble_matrix_.return_value = [[1, np.nan, 3], [4, np.nan, 6]]
-        assembler = Assembler(None, (dimension_, dimension_), None)
+        assembler = Assembler(None, dimensions_, None)
 
         zscores = assembler.zscores
 
-        NanSubtotals_.blocks.assert_called_once_with(
-            [[1, 2], [3, 4]], (dimension_, dimension_)
-        )
+        NanSubtotals_.blocks.assert_called_once_with([[1, 2], [3, 4]], dimensions_)
         _assemble_matrix_.assert_called_once_with(
             assembler, [[[1], [np.nan]], [[3], []]]
         )
@@ -787,19 +876,17 @@ class DescribeAssembler(object):
         assert assembler._columns_dimension is dimension_
 
     def it_constructs_the_cube_result_matrix_to_help(
-        self, request, cube_, dimension_, cube_result_matrix_
+        self, request, cube_, dimensions_, cube_result_matrix_
     ):
         BaseCubeResultMatrix_ = class_mock(
             request, "cr.cube.matrix.assembler.BaseCubeResultMatrix"
         )
         BaseCubeResultMatrix_.factory.return_value = cube_result_matrix_
-        assembler = Assembler(cube_, (dimension_, dimension_), slice_idx=42)
+        assembler = Assembler(cube_, dimensions_, slice_idx=42)
 
         cube_result_matrix = assembler._cube_result_matrix
 
-        BaseCubeResultMatrix_.factory.assert_called_once_with(
-            cube_, (dimension_, dimension_), 42
-        )
+        BaseCubeResultMatrix_.factory.assert_called_once_with(cube_, dimensions_, 42)
         assert cube_result_matrix is cube_result_matrix_
 
     @pytest.mark.parametrize(
@@ -863,6 +950,21 @@ class DescribeAssembler(object):
         cube_result_matrix_.rows_pruning_base = np.array(base)
 
         assert Assembler(None, None, None)._empty_row_idxs == expected_value
+
+    def it_constructs_its_measures_collaborator_object_to_help(
+        self, request, cube_, dimensions_, second_order_measures_
+    ):
+        SecondOrderMeasures_ = class_mock(
+            request,
+            "cr.cube.matrix.assembler.SecondOrderMeasures",
+            return_value=second_order_measures_,
+        )
+        assembler = Assembler(cube_, dimensions_, slice_idx=17)
+
+        measures = assembler._measures
+
+        SecondOrderMeasures_.assert_called_once_with(cube_, dimensions_, 17)
+        assert measures == second_order_measures_
 
     @pytest.mark.parametrize(
         "prune, empty_row_idxs, element_ids, expected_value",
@@ -1016,12 +1118,20 @@ class DescribeAssembler(object):
         return method_mock(request, Assembler, "_dimension_order")
 
     @pytest.fixture
+    def dimensions_(self, request):
+        return (instance_mock(request, Dimension), instance_mock(request, Dimension))
+
+    @pytest.fixture
     def _empty_column_idxs_prop_(self, request):
         return property_mock(request, Assembler, "_empty_column_idxs")
 
     @pytest.fixture
     def _empty_row_idxs_prop_(self, request):
         return property_mock(request, Assembler, "_empty_row_idxs")
+
+    @pytest.fixture
+    def _measures_prop_(self, request):
+        return property_mock(request, Assembler, "_measures")
 
     @pytest.fixture
     def NanSubtotals_(self, request):
@@ -1038,6 +1148,10 @@ class DescribeAssembler(object):
     @pytest.fixture
     def _rows_dimension_prop_(self, request):
         return property_mock(request, Assembler, "_rows_dimension")
+
+    @pytest.fixture
+    def second_order_measures_(self, request):
+        return instance_mock(request, SecondOrderMeasures)
 
     @pytest.fixture
     def subtotals_(self, request):

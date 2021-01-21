@@ -300,7 +300,7 @@ class _Slice(CubePartition):
 
         `std_deviation = sqrt(variance)`
         """
-        return np.sqrt(self._column_variance)
+        return np.sqrt(self._column_variances)
 
     @lazyproperty
     def column_std_err(self):
@@ -308,7 +308,17 @@ class _Slice(CubePartition):
 
         `std_error = sqrt(variance/N)`
         """
-        return np.sqrt(self._column_variance / self.columns_margin)
+        return np.sqrt(self._column_variances / self.columns_margin)
+
+    @lazyproperty
+    def column_unweighted_bases(self):
+        """2D np.int64 ndarray of unweighted column-proportion denominator per cell."""
+        return self._assembler.column_unweighted_bases
+
+    @lazyproperty
+    def column_weighted_bases(self):
+        """2D np.float64 ndarray of column-proportion denominator for each cell."""
+        return self._assembler.column_weighted_bases
 
     @lazyproperty
     def columns_base(self):
@@ -346,6 +356,176 @@ class _Slice(CubePartition):
         In all other cases, the array is 1D, containing one value for each column.
         """
         return self._assembler.columns_margin
+
+    @lazyproperty
+    def columns_scale_mean(self):
+        """Optional 1D np.float64 ndarray of scale mean for each column.
+
+        The returned vector is to be interpreted as a summary *row*. Also note that
+        the underlying scale values are based on the numeric values of the opposing
+        *rows-dimension* elements.
+
+        This value is `None` if no row element has an assigned numeric value.
+        """
+        if not self._rows_have_numeric_value:
+            return None
+
+        inner = np.nansum(
+            self._rows_dimension_numeric_values[:, None] * self.column_proportions,
+            axis=0,
+        )
+        not_a_nan_mask = ~np.isnan(self._rows_dimension_numeric_values)
+        denominator = np.sum(self.column_proportions[not_a_nan_mask, :], axis=0)
+        return inner / denominator
+
+    @lazyproperty
+    def columns_scale_mean_margin(self):
+        """Optional float overall mean of column-scale values.
+
+        This value is the "margin" of the `.columns_scale_mean` vector and might
+        typically appear in the cell immediately to the right of the
+        `.columns_scale_mean` summary-row. It is similar to a "table-total" value, in
+        that it is a scalar that might appear in the lower right-hand corner of a table,
+        but note that it does *not* represent the overall table in that
+        `.rows_scale_mean_margin` will not have the same value (except by chance).
+        This value derives from the numeric values of the row elements whereas its
+        counterpart `.rows_scale_mean_margin` derives from the numeric values of the
+        column elements.
+
+        This value is `None` if no row has an assigned numeric-value.
+        """
+        if not self._rows_have_numeric_value:
+            return None
+
+        rows_margin = self.rows_margin
+        # TODO: This is a hack for X_MR slices, where rows-margin is 2D. Figure out a
+        # better way to do this, perhaps using ranges.
+        if rows_margin.ndim > 1:
+            rows_margin = rows_margin[:, 0]
+
+        scale_total = np.nansum(self._rows_dimension_numeric_values * rows_margin)
+        not_a_nan_mask = ~np.isnan(self._rows_dimension_numeric_values)
+        scale_count = np.sum(rows_margin[not_a_nan_mask])
+        return scale_total / scale_count
+
+    @lazyproperty
+    def columns_scale_mean_pairwise_indices(self):
+        """Sequence of column-idx tuples indicating pairwise-t result of scale-means.
+
+        The sequence contains one tuple for each column. The indicies in a column's
+        tuple each identify *another* of the columns who's scale-mean is
+        pairwise-significant to that of the tuple's column. Pairwise significance is
+        computed based on the more restrictive (lesser-value) threshold specified in the
+        analysis.
+        """
+        return PairwiseSignificance.scale_mean_pairwise_indices(
+            self, self._alpha, self._only_larger
+        )
+
+    @lazyproperty
+    def columns_scale_mean_pairwise_indices_alt(self):
+        """Optional sequence of column-idx tuples indicating pairwise-t of scale-means.
+
+        This value is `None` if no secondary threshold value (alpha) was specified in
+        the analysis. Otherwise, it is the same calculation as
+        `.columns_scale_mean_pairwise_indices` computed using the less restrictive
+        (greater-valued) threshold.
+        """
+        if self._alpha_alt is None:
+            return None
+
+        return PairwiseSignificance.scale_mean_pairwise_indices(
+            self, self._alpha_alt, self._only_larger
+        )
+
+    @lazyproperty
+    def columns_scale_mean_stddev(self):
+        """Optional 1D np.float64 ndarray of scale-mean std-deviation for each column.
+
+        The returned vector (1D array) is to be interpreted as a summary *row*. Also
+        note that the underlying scale values are based on the numeric values of the
+        opposing *rows-dimension* elements.
+
+        This value is `None` if no row element has been assigned a numeric value.
+        """
+        return (
+            np.sqrt(self._columns_scale_mean_variance)
+            if self._rows_have_numeric_value
+            else None
+        )
+
+    @lazyproperty
+    def columns_scale_mean_stderr(self):
+        """Optional 1D np.float64 ndarray of scale-mean standard-error for each row.
+
+        The returned vector is to be interpreted as a summary *row*. Also note that the
+        underlying scale values are based on the numeric values of the opposing
+        *rows-dimension* elements.
+
+        This value is `None` if no row element has been assigned a numeric value.
+        """
+        return (
+            self.columns_scale_mean_stddev / np.sqrt(self.columns_margin)
+            if self._rows_have_numeric_value
+            else None
+        )
+
+    @lazyproperty
+    def columns_scale_median(self):
+        """Optional 1D np.int/float64 ndarray of scale median for each column.
+
+        The returned vector is to be interpreted as a summary *row*. Also note that the
+        underlying scale values are based on the numeric values of the opposing
+        *rows-dimension* elements.
+
+        This value is `None` if no row element has been assigned a numeric value.
+        """
+        if not self._rows_have_numeric_value:
+            return None
+
+        not_a_nan_index = ~np.isnan(self._rows_dimension_numeric_values)
+        numeric_values = self._rows_dimension_numeric_values[not_a_nan_index]
+        counts = self.counts[not_a_nan_index, :].astype("int64")
+        scale_median = np.array(
+            [
+                self._median(np.repeat(numeric_values, counts[:, i]))
+                for i in range(counts.shape[1])
+            ]
+        )
+        return scale_median
+
+    @lazyproperty
+    def columns_scale_median_margin(self):
+        """Optional scalar numeric median of all column-scale values.
+
+        This value is the "margin" of the `.columns_scale_median` vector and might
+        typically appear in the cell immediately to the right of the
+        `.columns_scale_median` summary-row. It is similar to a "table-total" value, in
+        that it is a scalar that might appear in the lower right-hand corner of a table,
+        but note that it does *not* represent the overall table in that
+        `.rows_scale_median_margin` will not have the same value (except by chance).
+        This value derives from the numeric values of the row elements whereas its
+        counterpart `.rows_scale_median_margin` derives from the numeric values of
+        the column elements.
+
+        This value is `None` if no row has an assigned numeric-value.
+        """
+        if not self._rows_have_numeric_value:
+            return None
+
+        rows_margin = self.rows_margin
+
+        # --- hack to accommodate 2D rows-margin of an X_MR slice ---
+        if len(rows_margin.shape) > 1:
+            rows_margin = rows_margin[:, 0]
+
+        not_a_nan_mask = ~np.isnan(self._rows_dimension_numeric_values)
+        numeric_values = self._rows_dimension_numeric_values[not_a_nan_mask]
+        counts = rows_margin[not_a_nan_mask].astype("int64")
+        unwrapped_num_values = np.repeat(numeric_values, counts)
+        return (
+            np.median(unwrapped_num_values) if unwrapped_num_values.size != 0 else None
+        )
 
     @lazyproperty
     def counts(self):
@@ -448,8 +628,8 @@ class _Slice(CubePartition):
         )
 
     @lazyproperty
-    def population_moe(self):
-        """2D np.float64 ndarray of population margin-of-error (MoE) for table percents.
+    def population_counts_moe(self):
+        """2D np.float64 ndarray of population-count margin-of-error (MoE) per cell.
 
         The values are represented as population estimates, analogue to the
         `population_counts` property. This means that the values will be presented by
@@ -534,6 +714,16 @@ class _Slice(CubePartition):
         return np.sqrt(self._row_variance / rows_margin)
 
     @lazyproperty
+    def row_unweighted_bases(self):
+        """2D np.int64 ndarray of unweighted row-proportion denominator per cell."""
+        return self._assembler.row_unweighted_bases
+
+    @lazyproperty
+    def row_weighted_bases(self):
+        """2D np.float64 ndarray of row-proportion denominator for each table cell."""
+        return self._assembler.row_weighted_bases
+
+    @lazyproperty
     def rows_base(self):
         """1D/2D np.int64 ndarray of unweighted-N for each row/cell of slice.
 
@@ -590,106 +780,98 @@ class _Slice(CubePartition):
         return self._assembler.rows_margin
 
     @lazyproperty
-    def scale_mean_pairwise_indices(self):
-        """Sequence of column-idx tuples indicating pairwise-t result of scale-means.
+    def rows_scale_mean(self):
+        """Optional 1D np.float64 ndarray of scale mean for each row.
 
-        The calculation is based on the mean of the scale (category numeric-values) for
-        each column. The length of the array is that of the columns-dimension.
+        The returned vector is to be interpreted as a summary *column*. Also note that
+        the underlying scale values are based on the numeric values of the opposing
+        *columns-dimension* elements.
+
+        This value is `None` if no column element has an assigned numeric value.
         """
-        return PairwiseSignificance.scale_mean_pairwise_indices(
-            self, self._alpha, self._only_larger
-        )
-
-    @lazyproperty
-    def scale_mean_pairwise_indices_alt(self):
-        """Sequence of column-idx tuples indicating pairwise-t result of scale-means.
-
-        Same calculation as `.scale_mean_pairwise_indices` using the `._alpha_alt`
-        value. None when no secondary alpha value was specified. The length of the
-        sequence is that of the columns-dimension.
-        """
-        if self._alpha_alt is None:
+        if not self._columns_have_numeric_value:
             return None
 
-        return PairwiseSignificance.scale_mean_pairwise_indices(
-            self, self._alpha_alt, self._only_larger
-        )
-
-    @lazyproperty
-    def scale_means_column(self):
-        """1D float64 ndarray of scale mean for each row (making a summary "column").
-
-        Each scale mean is based on the numeric values of the *columns-dimension*
-        elements.
-        """
         column_numeric_values = self._columns_dimension_numeric_values
-
-        if np.all(np.isnan(column_numeric_values)):
-            return None
-
         inner = np.nansum(column_numeric_values * self.row_proportions, axis=1)
         not_a_nan_index = ~np.isnan(column_numeric_values)
         denominator = np.sum(self.row_proportions[:, not_a_nan_index], axis=1)
         return inner / denominator
 
     @lazyproperty
-    def scale_means_columns_margin(self):
-        if np.all(np.isnan(self._columns_dimension_numeric_values)):
+    def rows_scale_mean_margin(self):
+        """Optional float overall mean of row-scale values.
+
+        This value is the "margin" of the `.rows_scale_mean` vector and might typically
+        appear in the cell immediately below the `.rows_scale_mean` summary-column. It
+        is similar to a "table-total" value, in that it is a scalar that might appear in
+        the lower right-hand corner of a table, but note that it does *not* represent
+        the overall table in that `.columns_scale_mean_margin` will not have the same
+        value (except by chance). This value derives from the numeric values of the
+        column elements whereas its counterpart `.columns_scale_mean_margin` derives
+        from the numeric values of the row elements.
+
+        This value is `None` if no column has an assigned numeric-value.
+        """
+        if not self._columns_have_numeric_value:
             return None
 
         columns_margin = self.columns_margin
+        # TODO: This is a hack for MR_X slices, where columns-margin is 2D. Figure out
+        # a better way to do this, perhaps using ranges.
         if len(columns_margin.shape) > 1:
-            # Hack for MR, where column margin is a table. Figure how to
-            # fix with subclassing
             columns_margin = columns_margin[0]
 
-        not_a_nan_index = ~np.isnan(self._columns_dimension_numeric_values)
-        return np.nansum(
-            self._columns_dimension_numeric_values * columns_margin
-        ) / np.sum(columns_margin[not_a_nan_index])
+        scale_total = np.nansum(self._columns_dimension_numeric_values * columns_margin)
+        not_a_nan_mask = ~np.isnan(self._columns_dimension_numeric_values)
+        scale_count = np.sum(columns_margin[not_a_nan_mask])
+        return scale_total / scale_count
 
     @lazyproperty
-    def scale_means_row(self):
-        """1D float64 ndarray of row scale means
+    def rows_scale_mean_stddev(self):
+        """Optional 1D np.float64 ndarray of std-deviation of scale-mean for each row.
 
-        The calculation is based on multiply of the numeric values by the
-        column_proportions and divide by the columns_margin.
+        The returned vector (1D array) is to be interpreted as a summary *column*. Also
+        note that the underlying scale values are based on the numeric values of the
+        opposing *columns-dimension* elements.
+
+        This value is `None` if no column elements have an assigned numeric value.
         """
-        if np.all(np.isnan(self._rows_dimension_numeric_values)):
-            return None
-        inner = np.nansum(
-            self._rows_dimension_numeric_values[:, None] * self.column_proportions,
-            axis=0,
-        )
-        not_a_nan_index = ~np.isnan(self._rows_dimension_numeric_values)
-        denominator = np.sum(self.column_proportions[not_a_nan_index, :], axis=0)
-        return inner / denominator
-
-    @lazyproperty
-    def scale_means_rows_margin(self):
-        if np.all(np.isnan(self._rows_dimension_numeric_values)):
-            return None
-
-        rows_margin = self.rows_margin
-        if len(rows_margin.shape) > 1:
-            # Hack for MR, where row margin is a table. Figure how to
-            # fix with subclassing
-            rows_margin = rows_margin[:, 0]
-
-        not_a_nan_index = ~np.isnan(self._rows_dimension_numeric_values)
-        return np.nansum(self._rows_dimension_numeric_values * rows_margin) / np.sum(
-            rows_margin[not_a_nan_index]
+        return (
+            np.sqrt(self._rows_scale_mean_variance)
+            if self._columns_have_numeric_value
+            else None
         )
 
     @lazyproperty
-    def scale_median_column(self):
-        """np.int64 ndarray of the columns scale median
+    def rows_scale_mean_stderr(self):
+        """Optional 1D np.float64 ndarray of standard-error of scale-mean for each row.
 
-        The median is calculated using the standard algebra applied to the numeric
-        values repeated for each related counts value
+        The returned vector is to be interpreted as a summary *column*. Also note that
+        the underlying scale values are based on the numeric values of the opposing
+        *columns-dimension* elements.
+
+        This value is `None` if no column element has an assigned numeric value.
         """
-        if np.all(np.isnan(self._columns_dimension_numeric_values)):
+        return (
+            self.rows_scale_mean_stddev / np.sqrt(self.rows_margin)
+            if self._columns_have_numeric_value
+            else None
+        )
+
+    @lazyproperty
+    def rows_scale_median(self):
+        """Optional 1D np.int/float64 ndarray of scale median for each row.
+
+        The returned vector is to be interpreted as a summary *column*. Also note that
+        the underlying scale values are based on the numeric values of the opposing
+        *columns-dimension* elements.
+
+        This value is `None` if no column element has an assigned numeric value.
+        """
+        if not self._columns_have_numeric_value:
             return None
+
         not_a_nan_index = ~np.isnan(self._columns_dimension_numeric_values)
         numeric_values = self._columns_dimension_numeric_values[not_a_nan_index]
         counts = self.counts[:, not_a_nan_index].astype("int64")
@@ -702,33 +884,30 @@ class _Slice(CubePartition):
         return scale_median
 
     @lazyproperty
-    def scale_median_row(self):
-        """np.int64 ndarray of the rows scale median
+    def rows_scale_median_margin(self):
+        """Optional scalar numeric median of all row-scale values.
 
-        The median is calculated using the standard algebra applied to the numeric
-        values repeated for each related counts value
+        This value is the "margin" of the `.rows_scale_median` vector and might
+        typically appear in the cell immediately below the `.rows_scale_median`
+        summary-column. It is similar to a "table-total" value, in that it is a scalar
+        that might appear in the lower right-hand corner of a table, but note that it
+        does *not* represent the overall table in that `.columns_scale_mean_margin` will
+        not have the same value (except by chance). This value derives from the numeric
+        values of the column elements whereas its counterpart
+        `.columns_scale_median_margin` derives from the numeric values of the row
+        elements.
+
+        This value is `None` if no column has an assigned numeric-value.
         """
-        if np.all(np.isnan(self._rows_dimension_numeric_values)):
+        if not self._columns_have_numeric_value:
             return None
-        not_a_nan_index = ~np.isnan(self._rows_dimension_numeric_values)
-        numeric_values = self._rows_dimension_numeric_values[not_a_nan_index]
-        counts = self.counts[not_a_nan_index, :].astype("int64")
-        scale_median = np.array(
-            [
-                self._median(np.repeat(numeric_values, counts[:, i]))
-                for i in range(counts.shape[1])
-            ]
-        )
-        return scale_median
 
-    @lazyproperty
-    def scale_median_column_margin(self):
-        """np.int64 represents the column scale median margin"""
-        if np.all(np.isnan(self._columns_dimension_numeric_values)):
-            return None
         columns_margin = self.columns_margin
+
+        # --- hack to accommodate the 2D columns-margin of an MR_X slice ---
         if len(columns_margin.shape) > 1:
             columns_margin = columns_margin[0]
+
         not_a_nan_index = ~np.isnan(self._columns_dimension_numeric_values)
         numeric_values = self._columns_dimension_numeric_values[not_a_nan_index]
         counts = columns_margin[not_a_nan_index].astype("int64")
@@ -736,50 +915,6 @@ class _Slice(CubePartition):
         return (
             np.median(unwrapped_num_values) if unwrapped_num_values.size != 0 else None
         )
-
-    @lazyproperty
-    def scale_median_row_margin(self):
-        """np.int64 represents the rows scale median margin"""
-        if np.all(np.isnan(self._rows_dimension_numeric_values)):
-            return None
-        rows_margin = self.rows_margin
-        if len(rows_margin.shape) > 1:
-            rows_margin = rows_margin[:, 0]
-        not_a_nan_index = ~np.isnan(self._rows_dimension_numeric_values)
-        numeric_values = self._rows_dimension_numeric_values[not_a_nan_index]
-        counts = rows_margin[not_a_nan_index].astype("int64")
-        unwrapped_num_values = np.repeat(numeric_values, counts)
-        return (
-            np.median(unwrapped_num_values) if unwrapped_num_values.size != 0 else None
-        )
-
-    @lazyproperty
-    def scale_std_dev_column(self):
-        """1D np.ndarray of the standard deviation column of scales"""
-        if np.all(np.isnan(self._columns_dimension_numeric_values)):
-            return None
-        return np.sqrt(self.var_scale_means_column)
-
-    @lazyproperty
-    def scale_std_dev_row(self):
-        """1D np.ndarray of the standard deviation row of scales"""
-        if np.all(np.isnan(self._rows_dimension_numeric_values)):
-            return None
-        return np.sqrt(self.var_scale_means_row)
-
-    @lazyproperty
-    def scale_std_err_column(self):
-        """1D np.ndarray of the standard error column of scales"""
-        if np.all(np.isnan(self._columns_dimension_numeric_values)):
-            return None
-        return self.scale_std_dev_column / np.sqrt(self.rows_margin)
-
-    @lazyproperty
-    def scale_std_err_row(self):
-        """1D np.ndarray of the standard error row of scales"""
-        if np.all(np.isnan(self._rows_dimension_numeric_values)):
-            return None
-        return self.scale_std_dev_row / np.sqrt(self.columns_margin)
 
     @lazyproperty
     def shape(self):
@@ -910,55 +1045,19 @@ class _Slice(CubePartition):
         return self._assembler.table_stderrs
 
     @lazyproperty
+    def table_unweighted_bases(self):
+        """2D np.int64 ndarray of unweighted table-proportion denominator per cell."""
+        return self._assembler.table_unweighted_bases
+
+    @lazyproperty
+    def table_weighted_bases(self):
+        """2D np.float64 ndarray of table-proportion denominator for each cell."""
+        return self._assembler.table_weighted_bases
+
+    @lazyproperty
     def unweighted_counts(self):
         """2D np.int64 ndarray of unweighted count for each slice matrix cell."""
         return self._assembler.unweighted_counts
-
-    @lazyproperty
-    def var_scale_means_column(self):
-        """1D np.ndarray of the column variance values for scales
-
-        Note: the variance for scale is defined as sum((Yi−Y~)2/(N)), where Y~ is the
-              mean of the data.
-        """
-        if np.all(np.isnan(self._columns_dimension_numeric_values)):
-            return None
-
-        not_a_nan_index = ~np.isnan(self._columns_dimension_numeric_values)
-        col_dim_numeric = self._columns_dimension_numeric_values[not_a_nan_index]
-
-        numerator = self.counts[:, not_a_nan_index] * pow(
-            np.broadcast_to(col_dim_numeric, self.counts[:, not_a_nan_index].shape)
-            - self.scale_means_column.reshape(-1, 1),
-            2,
-        )
-        denominator = np.sum(self.counts[:, not_a_nan_index], axis=1)
-        return np.nansum(numerator, axis=1) / denominator
-
-    @lazyproperty
-    def var_scale_means_row(self):
-        """1D np.ndarray of the row variance values for scales
-
-        Note: the variance for scale is defined as sum((Yi−Y~)2/(N)), where Y~ is the
-              mean of the data.
-        """
-        if np.all(np.isnan(self._rows_dimension_numeric_values)):
-            return None
-
-        not_a_nan_index = ~np.isnan(self._rows_dimension_numeric_values)
-        row_dim_numeric_values = self._rows_dimension_numeric_values[not_a_nan_index]
-        numerator = (
-            self.counts[not_a_nan_index, :]
-            * pow(
-                np.broadcast_to(
-                    row_dim_numeric_values, self.counts[not_a_nan_index, :].T.shape
-                )
-                - self.scale_means_row.reshape(-1, 1),
-                2,
-            ).T
-        )
-        denominator = np.sum(self.counts[not_a_nan_index, :], axis=0)
-        return np.nansum(numerator, axis=0) / denominator
 
     @lazyproperty
     def zscores(self):
@@ -982,7 +1081,7 @@ class _Slice(CubePartition):
         return Assembler(self._cube, self._dimensions, self._slice_idx)
 
     @lazyproperty
-    def _column_variance(self):
+    def _column_variances(self):
         """Variance for column percentages."""
         p = self.counts / self.columns_margin
         return p * (1 - p)
@@ -999,6 +1098,34 @@ class _Slice(CubePartition):
         subtotal rows have a value of np.nan (subtotals have no numeric value).
         """
         return self._assembler.columns_dimension_numeric_values
+
+    @lazyproperty
+    def _columns_have_numeric_value(self):
+        """True when one or more column elements have an assigned numeric-value."""
+        return not np.all(np.isnan(self._columns_dimension_numeric_values))
+
+    @lazyproperty
+    def _columns_scale_mean_variance(self):
+        """Optional 1D np.float64 ndarray of scale-mean variance for each column."""
+        if not self._rows_have_numeric_value:
+            return None
+
+        # --- Note: the variance for scale is defined as sum((Yi−Y~)2/(N)), where Y~ is
+        # --- the mean of the data.
+        not_a_nan_index = ~np.isnan(self._rows_dimension_numeric_values)
+        row_dim_numeric_values = self._rows_dimension_numeric_values[not_a_nan_index]
+        numerator = (
+            self.counts[not_a_nan_index, :]
+            * pow(
+                np.broadcast_to(
+                    row_dim_numeric_values, self.counts[not_a_nan_index, :].T.shape
+                )
+                - self.columns_scale_mean.reshape(-1, 1),
+                2,
+            ).T
+        )
+        denominator = np.sum(self.counts[not_a_nan_index, :], axis=0)
+        return np.nansum(numerator, axis=0) / denominator
 
     @lazyproperty
     def _dimensions(self):
@@ -1041,6 +1168,30 @@ class _Slice(CubePartition):
         subtotal rows have a value of np.nan (subtotals have no numeric value).
         """
         return self._assembler.rows_dimension_numeric_values
+
+    @lazyproperty
+    def _rows_have_numeric_value(self):
+        """True when one or more row elements have an assigned numeric-value."""
+        return not np.all(np.isnan(self._rows_dimension_numeric_values))
+
+    @lazyproperty
+    def _rows_scale_mean_variance(self):
+        """Optional 1D np.float64 ndarray of scale-mean variance for each row."""
+        if not self._columns_have_numeric_value:
+            return None
+
+        # --- Note: the variance for scale is defined as sum((Yi−Y~)2/(N)), where Y~ is
+        # --- the mean of the data.
+        not_a_nan_index = ~np.isnan(self._columns_dimension_numeric_values)
+        col_dim_numeric = self._columns_dimension_numeric_values[not_a_nan_index]
+
+        numerator = self.counts[:, not_a_nan_index] * pow(
+            np.broadcast_to(col_dim_numeric, self.counts[:, not_a_nan_index].shape)
+            - self.rows_scale_mean.reshape(-1, 1),
+            2,
+        )
+        denominator = np.sum(self.counts[:, not_a_nan_index], axis=1)
+        return np.nansum(numerator, axis=1) / denominator
 
     @lazyproperty
     def _table_proportion_variance(self):

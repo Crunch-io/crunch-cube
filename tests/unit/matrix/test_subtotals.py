@@ -15,7 +15,7 @@ from cr.cube.matrix.subtotals import (
     ZscoreSubtotals,
 )
 
-from ...unitutil import initializer_mock, instance_mock, method_mock, property_mock
+from ...unitutil import ANY, initializer_mock, instance_mock, method_mock, property_mock
 
 
 class Describe_BaseSubtotals(object):
@@ -205,6 +205,54 @@ class DescribeNanSubtotals(object):
 class DescribeSumSubtotals(object):
     """Unit test suite for `cr.cube.matrix.SumSubtotals` object."""
 
+    def it_provides_an_intersections_interface_method(
+        self, request, dimensions_, _init_
+    ):
+        base_values = [[1, 5], [8, 0]]
+        property_mock(
+            request,
+            SumSubtotals,
+            "_intersections",
+            return_value=np.array([[1, 2], [3, 4]]),
+        )
+
+        intersections = SumSubtotals.intersections(base_values, dimensions_)
+
+        _init_.assert_called_once_with(ANY, [[1, 5], [8, 0]], dimensions_)
+        assert intersections.tolist() == [[1, 2], [3, 4]]
+
+    def it_provides_a_subtotal_columns_interface_method(
+        self, request, dimensions_, _init_
+    ):
+        base_values = [[0, 4], [7, 9]]
+        property_mock(
+            request,
+            SumSubtotals,
+            "_subtotal_columns",
+            return_value=np.array([[1, 2], [3, 4]]),
+        )
+
+        subtotal_columns = SumSubtotals.subtotal_columns(base_values, dimensions_)
+
+        _init_.assert_called_once_with(ANY, [[0, 4], [7, 9]], dimensions_)
+        assert subtotal_columns.tolist() == [[1, 2], [3, 4]]
+
+    def it_provides_a_subtotal_rows_interface_method(
+        self, request, dimensions_, _init_
+    ):
+        base_values = [[4, 1], [3, 5]]
+        property_mock(
+            request,
+            SumSubtotals,
+            "_subtotal_rows",
+            return_value=np.array([[4, 3], [2, 1]]),
+        )
+
+        subtotal_rows = SumSubtotals.subtotal_rows(base_values, dimensions_)
+
+        _init_.assert_called_once_with(ANY, [[4, 1], [3, 5]], dimensions_)
+        assert subtotal_rows.tolist() == [[4, 3], [2, 1]]
+
     @pytest.mark.parametrize(
         ("row_idxs", "col_idxs", "expected_value"),
         (
@@ -254,6 +302,14 @@ class DescribeSumSubtotals(object):
         assert subtotals._subtotal_row(subtotal_).tolist() == expected_value
 
     # --- fixture components -----------------------------------------
+
+    @pytest.fixture
+    def dimensions_(self, request):
+        return (instance_mock(request, Dimension), instance_mock(request, Dimension))
+
+    @pytest.fixture
+    def _init_(self, request):
+        return initializer_mock(request, SumSubtotals)
 
     @pytest.fixture
     def subtotal_(self, request):

@@ -17,6 +17,7 @@ from scipy.stats import norm
 from cr.cube.collator import ExplicitOrderCollator, PayloadOrderCollator
 from cr.cube.enums import COLLATION_METHOD as CM, DIMENSION_TYPE as DT
 from cr.cube.matrix.cubemeasure import BaseCubeResultMatrix
+from cr.cube.matrix.measure import SecondOrderMeasures
 from cr.cube.matrix.subtotals import (
     NanSubtotals,
     SumSubtotals,
@@ -69,6 +70,16 @@ class Assembler(object):
         respective data column.
         """
         return self._dimension_labels(self._columns_dimension, self._column_order)
+
+    @lazyproperty
+    def column_unweighted_bases(self):
+        """2D np.int64 ndarray of unweighted col-proportions denominator per cell."""
+        return self._assemble_matrix(self._measures.column_unweighted_bases.blocks)
+
+    @lazyproperty
+    def column_weighted_bases(self):
+        """2D np.float64 ndarray of column-proportions denominator for each cell."""
+        return self._assemble_matrix(self._measures.column_weighted_bases.blocks)
 
     @lazyproperty
     def columns_base(self):
@@ -159,6 +170,16 @@ class Assembler(object):
         row.
         """
         return self._dimension_labels(self._rows_dimension, self._row_order)
+
+    @lazyproperty
+    def row_unweighted_bases(self):
+        """2D np.int64 ndarray of unweighted row-proportions denominator per cell."""
+        return self._assemble_matrix(self._measures.row_unweighted_bases.blocks)
+
+    @lazyproperty
+    def row_weighted_bases(self):
+        """2D np.float64 ndarray of row-proportions denominator for each cell."""
+        return self._assemble_matrix(self._measures.row_weighted_bases.blocks)
 
     @lazyproperty
     def rows_base(self):
@@ -353,22 +374,24 @@ class Assembler(object):
         )
 
     @lazyproperty
+    def table_unweighted_bases(self):
+        """2D np.int64 ndarray of unweighted table-proportion denominator per cell."""
+        return self._assemble_matrix(self._measures.table_unweighted_bases.blocks)
+
+    @lazyproperty
+    def table_weighted_bases(self):
+        """2D np.float64 ndarray of weighted table-proportion denominator per cell."""
+        return self._assemble_matrix(self._measures.table_weighted_bases.blocks)
+
+    @lazyproperty
     def unweighted_counts(self):
         """2D np.int64 ndarray of unweighted-count for each cell."""
-        return self._assemble_matrix(
-            SumSubtotals.blocks(
-                self._cube_result_matrix.unweighted_counts, self._dimensions
-            )
-        )
+        return self._assemble_matrix(self._measures.unweighted_counts.blocks)
 
     @lazyproperty
     def weighted_counts(self):
         """2D np.float/int64 ndarray of weighted-count for each cell."""
-        return self._assemble_matrix(
-            SumSubtotals.blocks(
-                self._cube_result_matrix.weighted_counts, self._dimensions
-            )
-        )
+        return self._assemble_matrix(self._measures.weighted_counts.blocks)
 
     @lazyproperty
     def zscores(self):
@@ -512,6 +535,11 @@ class Assembler(object):
         """
         pruning_base = self._cube_result_matrix.rows_pruning_base
         return tuple(i for i, N in enumerate(pruning_base) if N == 0)
+
+    @lazyproperty
+    def _measures(self):
+        """SecondOrderMeasures collection object for this cube-result."""
+        return SecondOrderMeasures(self._cube, self._dimensions, self._slice_idx)
 
     @lazyproperty
     def _prune_subtotal_columns(self):
