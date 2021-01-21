@@ -355,7 +355,18 @@ class SortByValueCollator(_BaseCollator):
         `._target_values` property defined in the subclass and the "top" and "bottom"
         anchored elements specified in the `"order": {}` dict.
         """
-        raise NotImplementedError
+        excluded_idxs = frozenset(
+            self._top_exclusion_idxs + self._bottom_exclusion_idxs
+        )
+        sorted_value_idx_pairs = sorted(
+            (
+                (value, idx)
+                for idx, value in enumerate(self._element_values)
+                if idx not in excluded_idxs
+            ),
+            reverse=self._descending,
+        )
+        return tuple(idx for _, idx in sorted_value_idx_pairs)
 
     @lazyproperty
     def _bottom_exclusion_idxs(self):
