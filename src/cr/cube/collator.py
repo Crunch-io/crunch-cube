@@ -17,7 +17,11 @@ from cr.cube.util import lazyproperty
 
 
 class _BaseCollator(object):
-    """Base class for all collator objects, providing shared properties."""
+    """Base class for all collator objects, providing shared properties.
+
+    `empty_idxs` is a tuple of int element-index for each element vector with a zero
+    unweighted N (N = 0).
+    """
 
     def __init__(self, dimension, empty_idxs):
         self._dimension = dimension
@@ -63,10 +67,13 @@ class _BaseAnchoredCollator(_BaseCollator):
         The returned indices are "signed", with positive indices applying to base
         vectors and negative indices applying to inserted vectors. Both work for
         indexing in their respective unordered collections.
+
+        `empty_idxs` identifies vectors with N=0, which may be "pruned", depending on
+        a user setting in the dimension.
         """
         return cls(dimension, empty_idxs)._display_order
 
-    @property
+    @lazyproperty
     def _display_order(self):
         """tuple of int element-idx for each element in assembly order.
 

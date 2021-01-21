@@ -2,7 +2,7 @@
 
 """Enumerated sets related to cubes."""
 
-from enum import Enum
+import enum
 
 from cr.cube.util import lazyproperty
 
@@ -58,7 +58,7 @@ class DIMENSION_TYPE(object):
     )
 
 
-class COLLATION_METHOD(Enum):
+class COLLATION_METHOD(enum.Enum):
     """Enumerated values representing the methods of sorting dimension elements."""
 
     EXPLICIT_ORDER = "explicit"
