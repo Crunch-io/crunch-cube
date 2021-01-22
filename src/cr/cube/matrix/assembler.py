@@ -579,6 +579,9 @@ class Assembler(object):
 
         Negative values represent inserted subtotal-row locations.
         """
+        if self._rows_dimension.collation_method == CM.OPPOSING_ELEMENT:
+            raise NotImplementedError("sort-by-value not implemented")
+
         order = self._dimension_order(self._rows_dimension, self._empty_row_idxs)
         if self._prune_subtotal_rows:
             return np.array([idx for idx in order if idx >= 0], dtype=int)
