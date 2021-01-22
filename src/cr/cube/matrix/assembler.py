@@ -72,6 +72,16 @@ class Assembler(object):
         return self._dimension_labels(self._columns_dimension, self._column_order)
 
     @lazyproperty
+    def column_proportions(self):
+        """2D np.float64 ndarray of column-proportion for each matrix cell.
+
+        This is the proportion of the weighted-count for cell to the weighted-N of the
+        column the cell appears in (aka. column-margin). Always a number between 0.0 and
+        1.0 inclusive.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
     def column_unweighted_bases(self):
         """2D np.int64 ndarray of unweighted col-proportions denominator per cell."""
         return self._assemble_matrix(self._measures.column_unweighted_bases.blocks)

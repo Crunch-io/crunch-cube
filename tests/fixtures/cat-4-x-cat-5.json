@@ -1,0 +1,105 @@
+{
+    "query": {
+        "dimensions": [
+            {"variable": "000009"},
+            {"variable": "000008"}
+        ],
+        "measures": {
+            "count": {
+                "args": [],
+                "function": "cube_count"
+            }
+        },
+        "weight": null
+    },
+    "query_environment": {
+        "filter": []
+    },
+    "result": {
+        "counts": [
+              46,  21,   3,   0,    7,  5, 0, 0,
+             127,  55,  13,   1,   29,  3, 0, 0,
+             253,  17,  41,   1,   47,  5, 0, 0,
+             247,  80,  19,   4,   26,  5, 0, 0,
+            1433, 424, 286, 173, 1068, 31, 0, 0,
+               0,   0,   0,   0,    0,  0, 0, 0,
+               0,   0,   0,   0,    0,  0, 0, 0
+        ],
+        "dimensions": [
+            {
+                "derived": false,
+                "references": {"alias": "MSP_Q1", "description": "How much?", "name": "Support", "notes": "Base: All GB Parents of children 18 and under"},
+                "type": {
+                    "categories": [
+                        {"id": 1, "name": "Plenty"},
+                        {"id": 2, "name": "Enough"},
+                        {"id": 3, "name": "Not enough"},
+                        {"id": 999, "name": "N/A"},
+                        {"id": 9999, "missing": true, "name": "not asked"},
+                        {"id": 9998, "missing": true, "name": "skipped"},
+                        {"id": -1, "missing": true, "name": "No Data"}
+                    ],
+                    "class": "categorical",
+                    "ordinal": false
+                }
+            },
+            {
+                "derived": false,
+                "references": {"alias": "profile_marital_stat_r", "description": "Status", "name": "Status", "notes": ""},
+                "type": {
+                    "categories": [
+                        {"id": 1, "name": "Married"},
+                        {"id": 2, "name": "As married"},
+                        {"id": 3, "name": "Divorced"},
+                        {"id": 4, "name": "Widowed"},
+                        {"id": 5, "name": "Never"},
+                        {"id": 99, "missing": true, "name": "not asked"},
+                        {"id": 98, "missing": true, "name": "skipped"},
+                        {"id": -1, "missing": true, "name": "No Data"}
+                    ],
+                    "class": "categorical",
+                    "ordinal": false
+                }
+            }
+        ],
+        "element": "crunch:cube",
+        "filter_stats": {
+            "filtered": {
+                "unweighted": {"missing": 0, "other": 0, "selected": 4470},
+                "weighted": {"missing": 0, "other": 0, "selected": 4470}
+            },
+            "filtered_complete": {
+                "unweighted": {"missing": 0, "other": 0, "selected": 4470},
+                "weighted": {"missing": 0, "other": 0, "selected": 4470}
+            }
+        },
+        "filtered": {"unweighted_n": 4470, "weighted_n": 4470},
+        "measures": {
+            "count": {
+                "data": [
+                      46,  21,   3,   0,    7,  5, 0, 0,
+                     127,  55,  13,   1,   29,  3, 0, 0,
+                     253,  17,  41,   1,   47,  5, 0, 0,
+                     247,  80,  19,   4,   26,  5, 0, 0,
+                    1433, 424, 286, 173, 1068, 31, 0, 0,
+                       0,   0,   0,   0,    0,  0, 0, 0,
+                       0,   0,   0,   0,    0,  0, 0, 0
+                ],
+                "metadata": {
+                    "derived": true,
+                    "references": {},
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {"No Data": -1},
+                        "missing_rules": {}
+                    }
+                },
+                "n_missing": 3433
+            }
+        },
+        "missing": 3433,
+        "n": 4470,
+        "unfiltered": {"unweighted_n": 4470, "weighted_n": 4470}
+    }
+}

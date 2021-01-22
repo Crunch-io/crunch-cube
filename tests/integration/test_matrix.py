@@ -14,6 +14,20 @@ from ..fixtures import CR
 class DescribeAssembler(object):
     """Integration-test suite for `cr.cube.matrix.Assembler`."""
 
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_computes_column_proportions_for_cat_x_cat(self):
+        slice_ = _Slice(Cube(CR.CAT_4_X_CAT_5), 0, None, None, 0)
+        assert np.round(slice_._assembler.column_proportions, 2) == pytest.approx(
+            np.array(
+                [
+                    [0.07, 0.12, 0.04, 0.00, 0.06],
+                    [0.19, 0.32, 0.17, 0.17, 0.27],
+                    [0.38, 0.10, 0.54, 0.17, 0.43],
+                    [0.37, 0.46, 0.25, 0.67, 0.24],
+                ]
+            )
+        )
+
     def it_computes_column_unweighted_bases_for_cat_hs_x_cat_hs(self):
         slice_ = _Slice(
             Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),
