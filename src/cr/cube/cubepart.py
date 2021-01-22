@@ -280,8 +280,7 @@ class _Slice(CubePartition):
         This is the proportion of the weighted-N (aka. margin) of its column that the
         *weighted-count* in each cell represents, a number between 0.0 and 1.0.
         """
-        with np.errstate(divide="ignore", invalid="ignore"):
-            return self.counts / self.columns_margin
+        return self._assembler.column_proportions
 
     @lazyproperty
     def column_proportions_moe(self):
