@@ -79,7 +79,7 @@ class Assembler(object):
         column the cell appears in (aka. column-margin). Always a number between 0.0 and
         1.0 inclusive.
         """
-        raise NotImplementedError
+        return self._assemble_matrix(self._measures.column_proportions.blocks)
 
     @lazyproperty
     def column_unweighted_bases(self):

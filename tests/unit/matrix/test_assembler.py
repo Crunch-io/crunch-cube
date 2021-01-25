@@ -15,6 +15,7 @@ from cr.cube.matrix.cubemeasure import (
     _CatXCatMeansMatrix,
 )
 from cr.cube.matrix.measure import (
+    _ColumnProportions,
     _ColumnUnweightedBases,
     _ColumnWeightedBases,
     _RowUnweightedBases,
@@ -31,6 +32,43 @@ from ...unitutil import class_mock, instance_mock, method_mock, property_mock
 
 class DescribeAssembler(object):
     """Unit test suite for `cr.cube.matrix.assembler.Assembler` object."""
+
+    @pytest.mark.parametrize(
+        "measure_prop_name, MeasureCls",
+        (
+            ("column_proportions", _ColumnProportions),
+            ("column_unweighted_bases", _ColumnUnweightedBases),
+            ("column_weighted_bases", _ColumnWeightedBases),
+            ("row_unweighted_bases", _RowUnweightedBases),
+            ("row_weighted_bases", _RowWeightedBases),
+            ("table_unweighted_bases", _TableUnweightedBases),
+            ("table_weighted_bases", _TableWeightedBases),
+            ("weighted_counts", _WeightedCounts),
+            ("unweighted_counts", _UnweightedCounts),
+        ),
+    )
+    def it_assembles_various_measures(
+        self,
+        request,
+        _measures_prop_,
+        second_order_measures_,
+        _assemble_matrix_,
+        measure_prop_name,
+        MeasureCls,
+    ):
+        _measures_prop_.return_value = second_order_measures_
+        setattr(
+            second_order_measures_,
+            measure_prop_name,
+            instance_mock(request, MeasureCls, blocks=[["A", "B"], ["C", "D"]]),
+        )
+        _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+        assembler = Assembler(None, None, None)
+
+        value = getattr(assembler, measure_prop_name)
+
+        _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
+        assert value == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
     def it_knows_the_column_index(
         self,
@@ -72,38 +110,6 @@ class DescribeAssembler(object):
 
         _dimension_labels_.assert_called_once_with(assembler, dimension_, [0, 1, 2])
         assert column_labels.tolist() == ["Alpha", "Baker", "Charlie"]
-
-    def it_knows_the_column_unweighted_bases(
-        self, request, _measures_prop_, second_order_measures_, _assemble_matrix_
-    ):
-        column_unweighted_bases_ = instance_mock(
-            request, _ColumnUnweightedBases, blocks=[["A", "B"], ["C", "D"]]
-        )
-        _measures_prop_.return_value = second_order_measures_
-        second_order_measures_.column_unweighted_bases = column_unweighted_bases_
-        _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-        assembler = Assembler(None, None, None)
-
-        column_unweighted_bases = assembler.column_unweighted_bases
-
-        _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
-        assert column_unweighted_bases == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-
-    def it_knows_the_column_weighted_bases(
-        self, request, _measures_prop_, second_order_measures_, _assemble_matrix_
-    ):
-        column_weighted_bases_ = instance_mock(
-            request, _ColumnWeightedBases, blocks=[["A", "B"], ["C", "D"]]
-        )
-        _measures_prop_.return_value = second_order_measures_
-        second_order_measures_.column_weighted_bases = column_weighted_bases_
-        _assemble_matrix_.return_value = [[7, 8, 9], [4, 5, 6], [1, 2, 3]]
-        assembler = Assembler(None, None, None)
-
-        column_weighted_bases = assembler.column_weighted_bases
-
-        _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
-        assert column_weighted_bases == [[7, 8, 9], [4, 5, 6], [1, 2, 3]]
 
     def it_provides_a_1D_columns_base_for_a_CAT_X_cube_result(
         self,
@@ -287,38 +293,6 @@ class DescribeAssembler(object):
 
         _dimension_labels_.assert_called_once_with(assembler, dimension_, [0, 1, 2])
         assert row_labels.tolist() == ["Alpha", "Baker", "Charlie"]
-
-    def it_knows_the_row_unweighted_bases(
-        self, request, _measures_prop_, second_order_measures_, _assemble_matrix_
-    ):
-        row_unweighted_bases_ = instance_mock(
-            request, _RowUnweightedBases, blocks=[["A", "B"], ["C", "D"]]
-        )
-        _measures_prop_.return_value = second_order_measures_
-        second_order_measures_.row_unweighted_bases = row_unweighted_bases_
-        _assemble_matrix_.return_value = [[9, 8, 7], [6, 5, 4], [3, 2, 1]]
-        assembler = Assembler(None, None, None)
-
-        row_unweighted_bases = assembler.row_unweighted_bases
-
-        _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
-        assert row_unweighted_bases == [[9, 8, 7], [6, 5, 4], [3, 2, 1]]
-
-    def it_knows_the_row_weighted_bases(
-        self, request, _measures_prop_, second_order_measures_, _assemble_matrix_
-    ):
-        row_weighted_bases_ = instance_mock(
-            request, _RowWeightedBases, blocks=[["A", "B"], ["C", "D"]]
-        )
-        _measures_prop_.return_value = second_order_measures_
-        second_order_measures_.row_weighted_bases = row_weighted_bases_
-        _assemble_matrix_.return_value = [[9.9, 8.8, 7.7], [6.6, 5.5, 4.4]]
-        assembler = Assembler(None, None, None)
-
-        row_weighted_bases = assembler.row_weighted_bases
-
-        _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
-        assert row_weighted_bases == [[9.9, 8.8, 7.7], [6.6, 5.5, 4.4]]
 
     def it_provides_a_1D_rows_base_for_an_X_CAT_cube_result(
         self,
@@ -644,78 +618,6 @@ class DescribeAssembler(object):
         )
         _assemble_matrix_.assert_called_once_with(assembler, [[[1], [2]], [[3], [4]]])
         assert table_stderrs == [[1, 3, 2], [4, 6, 5]]
-
-    def it_knows_the_table_unweighted_bases(
-        self, request, _measures_prop_, second_order_measures_, _assemble_matrix_
-    ):
-        table_unweighted_bases_ = instance_mock(
-            request, _TableUnweightedBases, blocks=[["A", "B"], ["C", "D"]]
-        )
-        _measures_prop_.return_value = second_order_measures_
-        second_order_measures_.table_unweighted_bases = table_unweighted_bases_
-        _assemble_matrix_.return_value = [[9, 8, 7], [6, 5, 4], [3, 2, 1]]
-        assembler = Assembler(None, None, None)
-
-        table_unweighted_bases = assembler.table_unweighted_bases
-
-        _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
-        assert table_unweighted_bases == [[9, 8, 7], [6, 5, 4], [3, 2, 1]]
-
-    def it_knows_the_table_weighted_bases(
-        self, request, _measures_prop_, second_order_measures_, _assemble_matrix_
-    ):
-        table_weighted_bases_ = instance_mock(
-            request, _TableWeightedBases, blocks=[["A", "B"], ["C", "D"]]
-        )
-        _measures_prop_.return_value = second_order_measures_
-        second_order_measures_.table_weighted_bases = table_weighted_bases_
-        _assemble_matrix_.return_value = [
-            [9.9, 8.8, 7.7],
-            [6.6, 5.5, 4.4],
-            [3.3, 2.2, 1.1],
-        ]
-        assembler = Assembler(None, None, None)
-
-        table_weighted_bases = assembler.table_weighted_bases
-
-        _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
-        assert table_weighted_bases == [
-            [9.9, 8.8, 7.7],
-            [6.6, 5.5, 4.4],
-            [3.3, 2.2, 1.1],
-        ]
-
-    def it_knows_the_unweighted_counts(
-        self, request, _measures_prop_, second_order_measures_, _assemble_matrix_
-    ):
-        unweighted_counts_ = instance_mock(
-            request, _UnweightedCounts, blocks=[["A", "B"], ["C", "D"]]
-        )
-        _measures_prop_.return_value = second_order_measures_
-        second_order_measures_.unweighted_counts = unweighted_counts_
-        _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-        assembler = Assembler(None, None, None)
-
-        unweighted_counts = assembler.unweighted_counts
-
-        _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
-        assert unweighted_counts == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-
-    def it_knows_the_weighted_counts(
-        self, request, _measures_prop_, second_order_measures_, _assemble_matrix_
-    ):
-        weighted_counts_ = instance_mock(
-            request, _WeightedCounts, blocks=[["A", "B"], ["C", "D"]]
-        )
-        _measures_prop_.return_value = second_order_measures_
-        second_order_measures_.weighted_counts = weighted_counts_
-        _assemble_matrix_.return_value = [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]
-        assembler = Assembler(None, None, None)
-
-        weighted_counts = assembler.weighted_counts
-
-        _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
-        assert weighted_counts == [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]
 
     def it_computes_zscores_for_a_CAT_X_CAT_slice(
         self,

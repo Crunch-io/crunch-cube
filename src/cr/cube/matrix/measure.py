@@ -26,6 +26,11 @@ class SecondOrderMeasures(object):
         self._slice_idx = slice_idx
 
     @lazyproperty
+    def column_proportions(self):
+        """_ColumnProportions measure object for this cube-result."""
+        raise NotImplementedError
+
+    @lazyproperty
     def column_unweighted_bases(self):
         """_ColumnUnweightedBases measure object for this cube-result."""
         return _ColumnUnweightedBases(self._dimensions, self, self._cube_measures)
@@ -154,6 +159,14 @@ class _BaseSecondOrderMeasure(object):
         weighted-counts and cell, vector, and table margins.
         """
         return self._cube_measures.weighted_cube_counts
+
+
+class _ColumnProportions(_BaseSecondOrderMeasure):
+    """Provides the column-proportions measure for a matrix.
+
+    Column-proportions is a 2D np.float64 ndarray of the proportion of its column margin
+    contributed by the weighted count of each matrix cell.
+    """
 
 
 class _ColumnUnweightedBases(_BaseSecondOrderMeasure):
