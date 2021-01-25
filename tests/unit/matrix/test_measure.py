@@ -14,6 +14,7 @@ from cr.cube.matrix.cubemeasure import (
 )
 from cr.cube.matrix.measure import (
     _BaseSecondOrderMeasure,
+    _ColumnProportions,
     _ColumnUnweightedBases,
     _ColumnWeightedBases,
     _RowUnweightedBases,
@@ -31,155 +32,42 @@ from ...unitutil import class_mock, instance_mock, property_mock
 class DescribeSecondOrderMeasures(object):
     """Unit test suite for `cr.cube.matrix.measure.SecondOrderMeasures` object."""
 
-    def it_provides_access_to_the_column_unweighted_bases_measure_object(
-        self, request, dimensions_, _cube_measures_prop_, cube_measures_
+    @pytest.mark.parametrize(
+        "measure_prop_name, MeasureCls",
+        (
+            ("column_proportions", _ColumnProportions),
+            ("column_unweighted_bases", _ColumnUnweightedBases),
+            ("column_weighted_bases", _ColumnWeightedBases),
+            ("row_unweighted_bases", _RowUnweightedBases),
+            ("row_weighted_bases", _RowWeightedBases),
+            ("table_unweighted_bases", _TableUnweightedBases),
+            ("table_weighted_bases", _TableWeightedBases),
+            ("weighted_counts", _WeightedCounts),
+            ("unweighted_counts", _UnweightedCounts),
+        ),
+    )
+    def it_provides_access_to_various_measure_objects(
+        self,
+        request,
+        dimensions_,
+        _cube_measures_prop_,
+        cube_measures_,
+        measure_prop_name,
+        MeasureCls,
     ):
-        column_unweighted_bases_ = instance_mock(request, _ColumnUnweightedBases)
-        _ColumnUnweightedBases_ = class_mock(
+        measure_ = instance_mock(request, _ColumnUnweightedBases)
+        MeasureCls_ = class_mock(
             request,
-            "cr.cube.matrix.measure._ColumnUnweightedBases",
-            return_value=column_unweighted_bases_,
+            "cr.cube.matrix.measure.%s" % MeasureCls.__name__,
+            return_value=measure_,
         )
         _cube_measures_prop_.return_value = cube_measures_
         measures = SecondOrderMeasures(None, dimensions_, None)
 
-        column_unweighted_bases = measures.column_unweighted_bases
+        measure = getattr(measures, measure_prop_name)
 
-        _ColumnUnweightedBases_.assert_called_once_with(
-            dimensions_, measures, cube_measures_
-        )
-        assert column_unweighted_bases is column_unweighted_bases_
-
-    def it_provides_access_to_the_column_weighted_bases_measure_object(
-        self, request, dimensions_, _cube_measures_prop_, cube_measures_
-    ):
-        column_weighted_bases_ = instance_mock(request, _ColumnWeightedBases)
-        _ColumnWeightedBases_ = class_mock(
-            request,
-            "cr.cube.matrix.measure._ColumnWeightedBases",
-            return_value=column_weighted_bases_,
-        )
-        _cube_measures_prop_.return_value = cube_measures_
-        measures = SecondOrderMeasures(None, dimensions_, None)
-
-        column_weighted_bases = measures.column_weighted_bases
-
-        _ColumnWeightedBases_.assert_called_once_with(
-            dimensions_, measures, cube_measures_
-        )
-        assert column_weighted_bases is column_weighted_bases_
-
-    def it_provides_access_to_the_row_unweighted_bases_measure_object(
-        self, request, dimensions_, _cube_measures_prop_, cube_measures_
-    ):
-        row_unweighted_bases_ = instance_mock(request, _RowUnweightedBases)
-        _RowUnweightedBases_ = class_mock(
-            request,
-            "cr.cube.matrix.measure._RowUnweightedBases",
-            return_value=row_unweighted_bases_,
-        )
-        _cube_measures_prop_.return_value = cube_measures_
-        measures = SecondOrderMeasures(None, dimensions_, None)
-
-        row_unweighted_bases = measures.row_unweighted_bases
-
-        _RowUnweightedBases_.assert_called_once_with(
-            dimensions_, measures, cube_measures_
-        )
-        assert row_unweighted_bases is row_unweighted_bases_
-
-    def it_provides_access_to_the_row_weighted_bases_measure_object(
-        self, request, dimensions_, _cube_measures_prop_, cube_measures_
-    ):
-        row_weighted_bases_ = instance_mock(request, _RowWeightedBases)
-        _RowWeightedBases_ = class_mock(
-            request,
-            "cr.cube.matrix.measure._RowWeightedBases",
-            return_value=row_weighted_bases_,
-        )
-        _cube_measures_prop_.return_value = cube_measures_
-        measures = SecondOrderMeasures(None, dimensions_, None)
-
-        row_weighted_bases = measures.row_weighted_bases
-
-        _RowWeightedBases_.assert_called_once_with(
-            dimensions_, measures, cube_measures_
-        )
-        assert row_weighted_bases is row_weighted_bases_
-
-    def it_provides_access_to_the_table_unweighted_bases_measure_object(
-        self, request, dimensions_, _cube_measures_prop_, cube_measures_
-    ):
-        table_unweighted_bases_ = instance_mock(request, _TableUnweightedBases)
-        _TableUnweightedBases_ = class_mock(
-            request,
-            "cr.cube.matrix.measure._TableUnweightedBases",
-            return_value=table_unweighted_bases_,
-        )
-        _cube_measures_prop_.return_value = cube_measures_
-        measures = SecondOrderMeasures(None, dimensions_, None)
-
-        table_unweighted_bases = measures.table_unweighted_bases
-
-        _TableUnweightedBases_.assert_called_once_with(
-            dimensions_, measures, cube_measures_
-        )
-        assert table_unweighted_bases is table_unweighted_bases_
-
-    def it_provides_access_to_the_table_weighted_bases_measure_object(
-        self, request, dimensions_, _cube_measures_prop_, cube_measures_
-    ):
-        table_weighted_bases_ = instance_mock(request, _TableWeightedBases)
-        _TableWeightedBases_ = class_mock(
-            request,
-            "cr.cube.matrix.measure._TableWeightedBases",
-            return_value=table_weighted_bases_,
-        )
-        _cube_measures_prop_.return_value = cube_measures_
-        measures = SecondOrderMeasures(None, dimensions_, None)
-
-        table_weighted_bases = measures.table_weighted_bases
-
-        _TableWeightedBases_.assert_called_once_with(
-            dimensions_, measures, cube_measures_
-        )
-        assert table_weighted_bases is table_weighted_bases_
-
-    def it_provides_access_to_unweighted_counts_measure_object(
-        self, request, dimensions_, _cube_measures_prop_, cube_measures_
-    ):
-        unweighted_counts_ = instance_mock(request, _UnweightedCounts)
-        _UnweightedCounts_ = class_mock(
-            request,
-            "cr.cube.matrix.measure._UnweightedCounts",
-            return_value=unweighted_counts_,
-        )
-        _cube_measures_prop_.return_value = cube_measures_
-        measures = SecondOrderMeasures(None, dimensions_, None)
-
-        unweighted_counts = measures.unweighted_counts
-
-        _UnweightedCounts_.assert_called_once_with(
-            dimensions_, measures, cube_measures_
-        )
-        assert unweighted_counts is unweighted_counts_
-
-    def it_provides_access_to_weighted_counts_measure_object(
-        self, request, dimensions_, _cube_measures_prop_, cube_measures_
-    ):
-        weighted_counts_ = instance_mock(request, _WeightedCounts)
-        _WeightedCounts_ = class_mock(
-            request,
-            "cr.cube.matrix.measure._WeightedCounts",
-            return_value=weighted_counts_,
-        )
-        _cube_measures_prop_.return_value = cube_measures_
-        measures = SecondOrderMeasures(None, dimensions_, None)
-
-        weighted_counts = measures.weighted_counts
-
-        _WeightedCounts_.assert_called_once_with(dimensions_, measures, cube_measures_)
-        assert weighted_counts is weighted_counts_
+        MeasureCls_.assert_called_once_with(dimensions_, measures, cube_measures_)
+        assert measure is measure_
 
     def it_provides_access_to_the_cube_measures_to_help(
         self, request, cube_, dimensions_, cube_measures_

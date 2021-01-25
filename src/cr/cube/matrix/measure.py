@@ -28,7 +28,7 @@ class SecondOrderMeasures(object):
     @lazyproperty
     def column_proportions(self):
         """_ColumnProportions measure object for this cube-result."""
-        raise NotImplementedError
+        return _ColumnProportions(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
     def column_unweighted_bases(self):
