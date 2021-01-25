@@ -154,6 +154,27 @@ class Describe_BaseSecondOrderMeasure(object):
         return instance_mock(request, CubeMeasures)
 
 
+class Describe_ColumnProportions(object):
+    """Unit test suite for `cr.cube.matrix.measure._ColumnProportions` object."""
+
+    def it_computes_its_blocks(self, request):
+        weighted_counts_ = instance_mock(
+            request, _WeightedCounts, blocks=[[5.0, 12.0], [21.0, 32.0]]
+        )
+        column_weighted_bases_ = instance_mock(
+            request, _ColumnWeightedBases, blocks=[[5.0, 6.0], [7.0, 8.0]]
+        )
+        second_order_measures_ = instance_mock(
+            request,
+            SecondOrderMeasures,
+            weighted_counts=weighted_counts_,
+            column_weighted_bases=column_weighted_bases_,
+        )
+        column_proportions = _ColumnProportions(None, second_order_measures_, None)
+
+        assert column_proportions.blocks == [[1.0, 2.0], [3.0, 4.0]]
+
+
 class Describe_ColumnUnweightedBases(object):
     """Unit test suite for `cr.cube.matrix.measure._ColumnUnweightedBases` object."""
 

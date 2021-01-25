@@ -14,7 +14,6 @@ from ..fixtures import CR
 class DescribeAssembler(object):
     """Integration-test suite for `cr.cube.matrix.Assembler`."""
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_computes_column_proportions_for_cat_x_cat(self):
         slice_ = _Slice(Cube(CR.CAT_4_X_CAT_5), 0, None, None, 0)
         assert np.round(slice_._assembler.column_proportions, 2) == pytest.approx(

@@ -168,6 +168,34 @@ class _ColumnProportions(_BaseSecondOrderMeasure):
     contributed by the weighted count of each matrix cell.
     """
 
+    @lazyproperty
+    def blocks(self):
+        """Nested list of the four 2D ndarray "blocks" making up this measure.
+
+        These are the base-values, the column-subtotals, the row-subtotals, and the
+        subtotal intersection-cell values. Column-proportions is derivative of two other
+        measures, so it overrides this method rather than providing separate blocks.
+        """
+        count_blocks = self._second_order_measures.weighted_counts.blocks
+        weighted_base_blocks = self._second_order_measures.column_weighted_bases.blocks
+
+        # --- do not propagate divide-by-zero warnings to stderr ---
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return [
+                [
+                    # --- base values ---
+                    count_blocks[0][0] / weighted_base_blocks[0][0],
+                    # --- inserted columns ---
+                    count_blocks[0][1] / weighted_base_blocks[0][1],
+                ],
+                [
+                    # --- inserted rows ---
+                    count_blocks[1][0] / weighted_base_blocks[1][0],
+                    # --- intersections ---
+                    count_blocks[1][1] / weighted_base_blocks[1][1],
+                ],
+            ]
+
 
 class _ColumnUnweightedBases(_BaseSecondOrderMeasure):
     """Provides the column-bases measure for a matrix.
