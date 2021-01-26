@@ -580,7 +580,7 @@ class Assembler(object):
         Negative values represent inserted subtotal-row locations.
         """
         if self._rows_dimension.collation_method == CM.OPPOSING_ELEMENT:
-            raise NotImplementedError("sort-by-value not implemented")
+            return _BaseOrderHelper.row_display_order(self._dimensions, self._measures)
 
         order = self._dimension_order(self._rows_dimension, self._empty_row_idxs)
         if self._prune_subtotal_rows:
@@ -596,3 +596,17 @@ class Assembler(object):
     def _rows_dimension(self):
         """The `Dimension` object representing row elements in this matrix."""
         return self._dimensions[0]
+
+
+class _BaseOrderHelper(object):
+    """Base class for ordering helpers."""
+
+    @classmethod
+    def row_display_order(cls, dimensions, second_order_measures):
+        """1D np.int64 ndarray of signed int idx for each row of measure matrix.
+
+        Negative values represent inserted-vector locations. Returned sequence reflects
+        insertion, hiding, pruning, and ordering transforms specified in the
+        rows-dimension.
+        """
+        raise NotImplementedError

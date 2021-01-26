@@ -928,6 +928,30 @@ class DescribeAssembler(object):
 
         assert Assembler(None, None, None)._prune_subtotal_rows is expected_value
 
+    def it_knows_the_sort_by_value_row_order_to_help(
+        self,
+        request,
+        _BaseOrderHelper_,
+        dimensions_,
+        _rows_dimension_prop_,
+        _measures_prop_,
+        second_order_measures_,
+    ):
+        _measures_prop_.return_value = second_order_measures_
+        _BaseOrderHelper_.row_display_order.return_value = np.array(
+            [-1, 1, -2, 2, -3, 3]
+        )
+        _rows_dimension_prop_.return_value = dimensions_[0]
+        dimensions_[0].collation_method = CM.OPPOSING_ELEMENT
+        assembler = Assembler(None, dimensions_, None)
+
+        row_order = assembler._row_order
+
+        _BaseOrderHelper_.row_display_order.assert_called_once_with(
+            dimensions_, second_order_measures_
+        )
+        assert row_order.tolist() == [-1, 1, -2, 2, -3, 3]
+
     @pytest.mark.parametrize(
         "order, prune, expected",
         (
@@ -986,6 +1010,10 @@ class DescribeAssembler(object):
     @pytest.fixture
     def _assemble_vector_(self, request):
         return method_mock(request, Assembler, "_assemble_vector")
+
+    @pytest.fixture
+    def _BaseOrderHelper_(self, request):
+        return class_mock(request, "cr.cube.matrix.assembler._BaseOrderHelper")
 
     @pytest.fixture
     def _column_order_prop_(self, request):
