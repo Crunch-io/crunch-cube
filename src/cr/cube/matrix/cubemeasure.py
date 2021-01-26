@@ -1724,7 +1724,7 @@ class _NumArrayXMrMeansMatrix(_CatXMrMeansMatrix):
     def columns_base(self):
         """2D np.int64 ndarray of unweighted-N for this matrix.
 
-        An NUM_ARR_X_MR matrix has a distinct column-base for each cell. In this case
+        A NUM_ARR_X_MR matrix has a distinct column-base for each cell. In this case
         the column base is the unweighted counts sliced for all the subvar on the NUM
         ARRAY dimension and all the subvars on the MR (selected) one.
         """
