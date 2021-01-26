@@ -557,7 +557,9 @@ class Cube(object):
             if self._measure(self.is_weighted).requires_array_transposition:
                 if len(self._all_dimensions) == 3:
                     # ---In case of 3D array and a numeric array is involved we have to
-                    # ---change the order of the valid idxs, from [0,1,2] to [1,2,0]
+                    # ---change the order of the valid idxs, from [0,1,2] to [1,2,0].
+                    # ---This way to reshape the valid index will be changed when the
+                    # ---dim_order option will be available within the cube dict.
                     return valid_indices[1], valid_indices[-1], valid_indices[0]
                 # ---NOTE FOR FUTURE: We'll need a way to tell to the cube which
                 # ---dimensions we want transposed and which not. So the ::-1 can be
