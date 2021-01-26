@@ -142,7 +142,7 @@ class DescribeAssembler(object):
     ):
         _rows_dimension_prop_.return_value = dimensions_[0]
         dimensions_[0].dimension_type = DT.MR_SUBVAR
-        cube_result_matrix_.columns_base = [[1, 2], [3, 4]]
+        cube_result_matrix_.columns_base = np.array([[1, 2], [3, 4]])
         _cube_result_matrix_prop_.return_value = cube_result_matrix_
         SumSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
         _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
@@ -150,7 +150,11 @@ class DescribeAssembler(object):
 
         columns_base = assembler.columns_base
 
-        SumSubtotals_.blocks.assert_called_once_with([[1, 2], [3, 4]], dimensions_)
+        assert SumSubtotals_.blocks.call_count == 1
+        np.testing.assert_array_equal(
+            SumSubtotals_.blocks.call_args_list[0][0][0], [[1, 2], [3, 4]]
+        )
+        assert SumSubtotals_.blocks.call_args_list[0][0][1] == dimensions_
         _assemble_matrix_.assert_called_once_with(assembler, [[[1], [2]], [[3], [4]]])
         assert columns_base == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
