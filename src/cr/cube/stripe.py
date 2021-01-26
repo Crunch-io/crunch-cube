@@ -185,6 +185,10 @@ class _BaseBaseStripe(object):
 
         # ---for cubes with means, create one of the means-stripe types---
         if cube.has_means:
+            if rows_dimension.dimension_type == DT.NUM_ARRAY:
+                return _MeansWithNumArrayStripe(
+                    rows_dimension, counts, unweighted_counts
+                )
             if rows_dimension.dimension_type == DT.MR:
                 return _MeansWithMrStripe(rows_dimension, counts, unweighted_counts)
             return _MeansStripe(rows_dimension, counts, unweighted_counts)
@@ -296,6 +300,15 @@ class _MeansWithMrStripe(_BaseBaseStripe):
     def table_margin(self):
         # TODO: explain in docstring why this is unweighted for means instead of _counts
         return np.sum(self._unweighted_counts)
+
+
+class _MeansWithNumArrayStripe(_MeansStripe):
+    """Special case stripe when dimension is Numeric Array."""
+
+    @lazyproperty
+    def table_base(self):
+        """np.int64 count of actual respondents asked this question."""
+        return self._unweighted_counts
 
 
 class _MrStripe(_BaseBaseStripe):

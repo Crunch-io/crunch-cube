@@ -307,7 +307,7 @@ class Cube(object):
     @lazyproperty
     def missing(self):
         """Get missing count of a cube."""
-        return self._measures.missing_count
+        return self._measures.missing_count if self._show_missing else 0
 
     @lazyproperty
     def name(self):
@@ -391,7 +391,7 @@ class Cube(object):
         """ndarray of summary valid counts"""
         # --- In case of ndim > 2 the sum should be done on the second axes to get the
         # --- correct sequence of valid count (e.g. CA_SUBVAR).
-        if self.valid_counts.any():
+        if self.valid_counts.any() and self._show_missing:
             axes = 1 if len(self._all_dimensions) > 2 else 0
             return np.sum(self.valid_counts, axis=axes)
         return np.empty(0)
@@ -548,18 +548,29 @@ class Cube(object):
         return range(len(self.dimensions[0].valid_elements))
 
     @lazyproperty
+    def _show_missing(self):
+        """True if cube dimensions doesn't contain MR and NUM_ARRAY else False."""
+        return not all(d in self.dimension_types for d in [DT.MR, DT.NUM_ARRAY])
+
+    @lazyproperty
     def _valid_idxs(self):
         valid_idxs = np.ix_(
             *tuple(d.valid_elements.element_idxs for d in self._all_dimensions)
         )
-        # ---NOTE FOR FUTURE: We'll need a way to tell to the cube which dimensions we
-        # ---want transposed and which not. So the ::-1 can be converted in something
-        # ---more robust.
-        return (
-            valid_idxs[::-1]
-            if self._measure(self.is_weighted).requires_array_transposition
-            else valid_idxs
-        )
+
+        def _reshape_idxs(valid_indices):
+            if self._measure(self.is_weighted).requires_array_transposition:
+                if len(self._all_dimensions) == 3:
+                    # ---In case of 3D array and a numeric array is involved we have to
+                    # ---change the order of the valid idxs, from [0,1,2] to [1,2,0]
+                    return valid_indices[1], valid_indices[-1], valid_indices[0]
+                # ---NOTE FOR FUTURE: We'll need a way to tell to the cube which
+                # ---dimensions we want transposed and which not. So the ::-1 can be
+                # ---converted in something more robust.
+                return valid_indices[::-1]
+            return valid_indices
+
+        return _reshape_idxs(valid_idxs)
 
 
 class _Measures(object):
@@ -726,6 +737,7 @@ class _BaseMeasure(object):
             .get("valid_count_unweighted", {})
             .get("data", [])
         )
+
         if not valid_counts:
             return np.empty(0)
         valid_counts_array = np.array(valid_counts).reshape(self._all_dimensions.shape)

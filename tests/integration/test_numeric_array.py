@@ -34,7 +34,7 @@ class TestNumericArrays:
                     [93.3333333, 50.0],  # S2: Fight Club
                     [1.00000000, 45.0],  # S3: Meet the parents
                 ],
-                [7, 4],
+                [[3, 2], [3, 1], [1, 1]],
             ),
         ),
     )
