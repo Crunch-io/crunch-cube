@@ -630,7 +630,31 @@ class _BaseOrderHelper(object):
         insertion, hiding, pruning, and ordering transforms specified in the
         rows-dimension.
         """
-        raise NotImplementedError
+        # --- Returning as np.array suits its intended purpose, which is to participate
+        # --- in an np._ix() call. It works fine as a sequence too for any alternate
+        # --- use. Specifying int type prevents failure when there are zero elements.
+        if self._prune_subtotals:
+            return np.array([idx for idx in self._order if idx >= 0], dtype=int)
+        return np.array(self._order, dtype=int)
+
+    @lazyproperty
+    def _order(self):
+        """tuple of signed int idx for each sorted vector of measure matrix.
+
+        Negative values represent inserted-vector locations. Returned sequence reflects
+        insertion, hiding, pruning, and ordering transforms specified in the
+        rows-dimension.
+        """
+        raise NotImplementedError(  # pragma: no cover
+            "%s must implement `._order`" % type(self).__name__
+        )
+
+    @lazyproperty
+    def _prune_subtotals(self):
+        """True if subtotal vectors need to be pruned, False otherwise."""
+        raise NotImplementedError(  # pragma: no cover
+            "%s must implement `._prune_subtotals`" % type(self).__name__
+        )
 
 
 class _RowOrderHelper(_BaseOrderHelper):
