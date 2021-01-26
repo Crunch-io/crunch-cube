@@ -1,7 +1,52 @@
 {
   "element": "shoji:view",
   "value": {
-    "query": {},
+    "query": {
+      "measures": {
+        "valid_count_unweighted": {
+          "function": "cube_valid_count",
+          "args": [
+            {
+              "variable": "1fd5d91cbc554a67bc6d1a30ef87231f"
+            }
+          ]
+        },
+        "mean": {
+          "function": "cube_mean",
+          "args": [
+            {
+              "variable": "1fd5d91cbc554a67bc6d1a30ef87231f"
+            }
+          ]
+        }
+      },
+      "dimensions": [
+        {
+          "function": "dimension",
+          "args": [
+            {
+              "function": "as_selected",
+              "args": [
+                {
+                  "variable": "3QPnyW5KMYriuoG5PCewcD000000"
+                }
+              ]
+            },
+            {
+              "value": "subvariables"
+            }
+          ]
+        },
+        {
+          "function": "as_selected",
+          "args": [
+            {
+              "variable": "3QPnyW5KMYriuoG5PCewcD000000"
+            }
+          ]
+        }
+      ]
+    },
     "result": {
       "dimensions": [
         {
@@ -22,7 +67,7 @@
                 "name": "Bird"
               }
             ],
-            "description": "",
+            "description": "Do you have any of these animals as pets? Please select all that apply.",
             "name": "All pets owned"
           },
           "derived": true,
@@ -76,7 +121,7 @@
           "references": {
             "alias": "allpets",
             "uniform_basis": false,
-            "description": "",
+            "description": "Do you have any of these animals as pets? Please select all that apply.",
             "name": "All pets owned",
             "subreferences": [
               {
@@ -125,6 +170,7 @@
           }
         }
       ],
+      "missing": 3,
       "measures": {
         "valid_count_unweighted": {
           "data": [
@@ -159,7 +205,7 @@
           "n_missing": 3,
           "metadata": {
             "references": {
-              "alias": "Num Array",
+              "alias": "Num Array with 3 subvariables",
               "uniform_basis": false,
               "subreferences": [
                 {
@@ -167,8 +213,8 @@
                   "name": "First Mov"
                 },
                 {
-                  "alias": "Second Mov",
-                  "name": "Second Mov"
+                  "alias": "Second Mov test4",
+                  "name": "Second Mov test4"
                 },
                 {
                   "alias": "Third Mov",
@@ -176,7 +222,7 @@
                 }
               ],
               "description": "MJ modified description",
-              "name": "Num Array"
+              "name": "Num Array with 3 subvariables"
             },
             "derived": true,
             "type": {
@@ -227,7 +273,7 @@
           "n_missing": 3,
           "metadata": {
             "references": {
-              "alias": "Num Array",
+              "alias": "Num Array with 3 subvariables",
               "uniform_basis": false,
               "subreferences": [
                 {
@@ -235,8 +281,8 @@
                   "name": "First Mov"
                 },
                 {
-                  "alias": "Second Mov",
-                  "name": "Second Mov"
+                  "alias": "Second Mov test4",
+                  "name": "Second Mov test4"
                 },
                 {
                   "alias": "Third Mov",
@@ -244,7 +290,7 @@
                 }
               ],
               "description": "MJ modified description",
-              "name": "Num Array"
+              "name": "Num Array with 3 subvariables"
             },
             "derived": true,
             "type": {
@@ -308,7 +354,8 @@
         5,
         6,
         9
-      ]
+      ],
+      "element": "crunch:cube"
     }
   }
 }
