@@ -601,6 +601,10 @@ class Assembler(object):
 class _BaseOrderHelper(object):
     """Base class for ordering helpers."""
 
+    def __init__(self, dimensions, second_order_measures):
+        self._dimensions = dimensions
+        self._second_order_measures = second_order_measures
+
     @classmethod
     def row_display_order(cls, dimensions, second_order_measures):
         """1D np.int64 ndarray of signed int idx for each row of measure matrix.
@@ -609,4 +613,34 @@ class _BaseOrderHelper(object):
         insertion, hiding, pruning, and ordering transforms specified in the
         rows-dimension.
         """
+        collation_method = dimensions[0].collation_method
+        HelperCls = (
+            _SortRowsByColumnValueHelper
+            if collation_method == CM.OPPOSING_ELEMENT
+            else _RowOrderHelper
+        )
+
+        return HelperCls(dimensions, second_order_measures)._display_order
+
+    @lazyproperty
+    def _display_order(self):
+        """1D np.int64 ndarray of signed int idx for each vector of dimension.
+
+        Negative values represent inserted-vector locations. Returned sequence reflects
+        insertion, hiding, pruning, and ordering transforms specified in the
+        rows-dimension.
+        """
         raise NotImplementedError
+
+
+class _RowOrderHelper(_BaseOrderHelper):
+    """Encapsulates the complexity of the various kinds of row ordering."""
+
+
+class _SortRowsByColumnValueHelper(_RowOrderHelper):
+    """Orders elements by the values of an opposing base (not a subtotal) vector.
+
+    This would be like "order rows in descending order by value of 'Strongly Agree'
+    column. An opposing-element ordering is only available on a matrix, because only
+    a matrix dimension has an opposing dimension.
+    """

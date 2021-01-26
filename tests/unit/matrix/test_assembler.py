@@ -8,7 +8,12 @@ import pytest
 from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension, _Element, _Subtotal, _Subtotals
 from cr.cube.enums import COLLATION_METHOD as CM, DIMENSION_TYPE as DT
-from cr.cube.matrix.assembler import Assembler
+from cr.cube.matrix.assembler import (
+    Assembler,
+    _BaseOrderHelper,
+    _RowOrderHelper,
+    _SortRowsByColumnValueHelper,
+)
 from cr.cube.matrix.cubemeasure import (
     BaseCubeResultMatrix,
     _CatXCatMatrix,
@@ -27,7 +32,12 @@ from cr.cube.matrix.measure import (
     _WeightedCounts,
 )
 
-from ...unitutil import class_mock, instance_mock, method_mock, property_mock
+from ...unitutil import (
+    class_mock,
+    instance_mock,
+    method_mock,
+    property_mock,
+)
 
 
 class DescribeAssembler(object):
@@ -1102,3 +1112,45 @@ class DescribeAssembler(object):
     @pytest.fixture
     def ZscoreSubtotals_(self, request):
         return class_mock(request, "cr.cube.matrix.assembler.ZscoreSubtotals")
+
+
+class Describe_BaseOrderHelper(object):
+    """Unit test suite for `cr.cube.matrix.assembler._BaseOrderHelper` object."""
+
+    @pytest.mark.parametrize(
+        "collation_method, HelperCls",
+        (
+            (CM.OPPOSING_ELEMENT, _SortRowsByColumnValueHelper),
+            (CM.EXPLICIT_ORDER, _RowOrderHelper),
+            (CM.PAYLOAD_ORDER, _RowOrderHelper),
+        ),
+    )
+    def it_dispatches_to_the_right_row_order_helper(
+        self, request, dimensions_, second_order_measures_, collation_method, HelperCls
+    ):
+        dimensions_[0].collation_method = collation_method
+        helper_ = instance_mock(
+            request, HelperCls, _display_order=np.array([-1, 1, -2, 2])
+        )
+        HelperCls_ = class_mock(
+            request,
+            "cr.cube.matrix.assembler.%s" % HelperCls.__name__,
+            return_value=helper_,
+        )
+
+        row_order = _BaseOrderHelper.row_display_order(
+            dimensions_, second_order_measures_
+        )
+
+        HelperCls_.assert_called_once_with(dimensions_, second_order_measures_)
+        assert row_order.tolist() == [-1, 1, -2, 2]
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def dimensions_(self, request):
+        return (instance_mock(request, Dimension), instance_mock(request, Dimension))
+
+    @pytest.fixture
+    def second_order_measures_(self, request):
+        return instance_mock(request, SecondOrderMeasures)
