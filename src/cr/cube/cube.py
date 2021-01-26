@@ -307,7 +307,7 @@ class Cube(object):
     @lazyproperty
     def missing(self):
         """Get missing count of a cube."""
-        return self._measures.missing_count if self._has_missing else 0
+        return self._measures.missing_count
 
     @lazyproperty
     def name(self):
@@ -389,7 +389,7 @@ class Cube(object):
     @lazyproperty
     def valid_counts_summary(self):
         """ndarray of summary valid counts"""
-        if self.valid_counts.any() and self._has_missing:
+        if self.valid_counts.any():
             # --- In case of ndim > 2 the sum should be done on the second axes to get
             # --- the correct sequence of valid count (e.g. CA_SUBVAR).
             axis = 1 if len(self._all_dimensions) > 2 else 0
@@ -454,11 +454,6 @@ class Cube(object):
                 "Unsupported type <%s> provided. Cube response must be JSON "
                 "(str) or dict." % type(self._cube_response_arg).__name__
             )
-
-    @lazyproperty
-    def _has_missing(self):
-        """True if cube dimensions doesn't contain MR and NUM_ARRAY else False."""
-        return not all(d in self.dimension_types for d in [DT.MR, DT.NUM_ARRAY])
 
     @lazyproperty
     def _is_single_filter_col_cube(self):
