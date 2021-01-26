@@ -389,11 +389,11 @@ class Cube(object):
     @lazyproperty
     def valid_counts_summary(self):
         """ndarray of summary valid counts"""
-        # --- In case of ndim > 2 the sum should be done on the second axes to get the
-        # --- correct sequence of valid count (e.g. CA_SUBVAR).
         if self.valid_counts.any() and self._has_missing:
-            axes = 1 if len(self._all_dimensions) > 2 else 0
-            return np.sum(self.valid_counts, axis=axes)
+            # --- In case of ndim > 2 the sum should be done on the second axes to get
+            # --- the correct sequence of valid count (e.g. CA_SUBVAR).
+            axis = 1 if len(self._all_dimensions) > 2 else 0
+            return np.sum(self.valid_counts, axis=axis)
         return np.empty(0)
 
     @lazyproperty
