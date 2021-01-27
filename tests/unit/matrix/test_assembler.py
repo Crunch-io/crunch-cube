@@ -1219,3 +1219,51 @@ class Describe_RowOrderHelper(object):
     @pytest.fixture
     def dimension_(self, request):
         return instance_mock(request, Dimension)
+
+
+class Describe_SortRowsByColumnValueHelper(object):
+    """Unit test suite for `cr.cube.matrix.assembler._SortRowsByColumnValueHelper`."""
+
+    def it_computes_the_sorted_element_order_to_help(
+        self, request, _rows_dimension_prop_, dimension_
+    ):
+        _rows_dimension_prop_.return_value = dimension_
+        property_mock(
+            request,
+            _SortRowsByColumnValueHelper,
+            "_element_values",
+            # --- return type is ndarray in real life, but assert_called_once_with()
+            # --- won't match on those, so use list instead.
+            return_value=[16, 3, 12],
+        )
+        property_mock(
+            request,
+            _SortRowsByColumnValueHelper,
+            "_subtotal_values",
+            return_value=[15, 19],  # --- ndarray in real life ---
+        )
+        property_mock(
+            request, _SortRowsByColumnValueHelper, "_empty_row_idxs", return_value=()
+        )
+        SortByValueCollator_ = class_mock(
+            request, "cr.cube.matrix.assembler.SortByValueCollator"
+        )
+        SortByValueCollator_.display_order.return_value = (-1, -2, 0, 2, 1)
+        order_helper = _SortRowsByColumnValueHelper(None, None)
+
+        order = order_helper._order
+
+        SortByValueCollator_.display_order.assert_called_once_with(
+            dimension_, [16, 3, 12], [15, 19], ()
+        )
+        assert order == (-1, -2, 0, 2, 1)
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def dimension_(self, request):
+        return instance_mock(request, Dimension)
+
+    @pytest.fixture
+    def _rows_dimension_prop_(self, request):
+        return property_mock(request, _SortRowsByColumnValueHelper, "_rows_dimension")

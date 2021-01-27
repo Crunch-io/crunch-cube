@@ -14,7 +14,11 @@ from __future__ import division
 import numpy as np
 from scipy.stats import norm
 
-from cr.cube.collator import ExplicitOrderCollator, PayloadOrderCollator
+from cr.cube.collator import (
+    ExplicitOrderCollator,
+    PayloadOrderCollator,
+    SortByValueCollator,
+)
 from cr.cube.enums import COLLATION_METHOD as CM, DIMENSION_TYPE as DT
 from cr.cube.matrix.cubemeasure import BaseCubeResultMatrix
 from cr.cube.matrix.measure import SecondOrderMeasures
@@ -652,6 +656,14 @@ class _BaseOrderHelper(object):
         raise NotImplementedError
 
     @lazyproperty
+    def _empty_row_idxs(self):
+        """tuple of int index for each row with N = 0.
+
+        These rows are subject to pruning, depending on a user setting in the dimension.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
     def _order(self):
         """tuple of signed int idx for each sorted vector of measure matrix.
 
@@ -669,6 +681,11 @@ class _BaseOrderHelper(object):
         raise NotImplementedError(  # pragma: no cover
             "%s must implement `._prune_subtotals`" % type(self).__name__
         )
+
+    @lazyproperty
+    def _rows_dimension(self):
+        """The `Dimension` object representing row elements in the matrix."""
+        raise NotImplementedError
 
 
 class _RowOrderHelper(_BaseOrderHelper):
@@ -693,3 +710,31 @@ class _SortRowsByColumnValueHelper(_RowOrderHelper):
     column. An opposing-element ordering is only available on a matrix, because only
     a matrix dimension has an opposing dimension.
     """
+
+    @lazyproperty
+    def _order(self):
+        """tuple of int element-idx specifying ordering of dimension elements."""
+        return SortByValueCollator.display_order(
+            self._rows_dimension,
+            self._element_values,
+            self._subtotal_values,
+            self._empty_row_idxs,
+        )
+
+    @lazyproperty
+    def _element_values(self):
+        """Sequence of body values that form the basis for sort order.
+
+        There is one value per row and values appear in payload (dimension) element
+        order.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
+    def _subtotal_values(self):
+        """Sequence of row-subtotal values that contribute to the sort basis.
+
+        There is one value per row subtotal and values appear in payload (dimension)
+        insertion order.
+        """
+        raise NotImplementedError
