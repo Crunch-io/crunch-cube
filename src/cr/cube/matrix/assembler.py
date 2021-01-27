@@ -661,7 +661,11 @@ class _BaseOrderHelper(object):
 
         These rows are subject to pruning, depending on a user setting in the dimension.
         """
-        raise NotImplementedError
+        return tuple(
+            i
+            for i, N in enumerate(self._second_order_measures.rows_pruning_base)
+            if N == 0
+        )
 
     @lazyproperty
     def _order(self):

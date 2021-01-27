@@ -1171,6 +1171,18 @@ class Describe_BaseOrderHelper(object):
 
         assert display_order.tolist() == expected_value
 
+    @pytest.mark.parametrize(
+        "base, expected_value",
+        (([1, 1, 1], ()), ([1, 0, 1], (1,)), ([0, 0, 0], (0, 1, 2))),
+    )
+    def it_knows_its_empty_row_idxs_to_help(
+        self, second_order_measures_, base, expected_value
+    ):
+        second_order_measures_.rows_pruning_base = np.array(base)
+        order_helper = _BaseOrderHelper(None, second_order_measures_)
+
+        assert order_helper._empty_row_idxs == expected_value
+
     def it_provides_access_to_the_rows_dimension_to_help(self, dimension_):
         order_helper = _BaseOrderHelper((dimension_, None), None)
         assert order_helper._rows_dimension is dimension_
