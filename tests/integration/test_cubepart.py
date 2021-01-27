@@ -402,7 +402,6 @@ class Describe_Slice(object):
         expected = load_python_expression(expectation)
         np.testing.assert_almost_equal(actual, expected)
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_can_sort_by_column_percent(self):
         """Responds to order:opposing_element sort-by-value.
 

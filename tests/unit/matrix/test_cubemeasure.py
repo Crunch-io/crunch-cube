@@ -194,6 +194,12 @@ class Describe_CatXCatUnweightedCubeCounts(object):
 
         assert unweighted_cube_counts.row_bases.tolist() == [[2, 2, 2], [1, 1, 1]]
 
+    def it_knows_its_rows_pruning_base(self, raw_unweighted_counts):
+        unweighted_cube_counts = _CatXCatUnweightedCubeCounts(
+            None, raw_unweighted_counts
+        )
+        assert unweighted_cube_counts.rows_pruning_base.tolist() == [6, 15]
+
     def it_knows_its_table_base(self, raw_unweighted_counts):
         unweighted_cube_counts = _CatXCatUnweightedCubeCounts(
             None, raw_unweighted_counts

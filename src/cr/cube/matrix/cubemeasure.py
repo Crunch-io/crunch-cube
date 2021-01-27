@@ -174,6 +174,15 @@ class _CatXCatUnweightedCubeCounts(_BaseUnweightedCubeCounts):
         return np.sum(self.unweighted_counts, axis=1)
 
     @lazyproperty
+    def rows_pruning_base(self):
+        """1D np.int64 ndarray of unweighted-N for each matrix row.
+
+        Because this matrix has no MR dimension, this is simply the sum of unweighted
+        counts for each row.
+        """
+        return np.sum(self._unweighted_counts, axis=1)
+
+    @lazyproperty
     def table_base(self):
         """np.int64 count of actual respondents who answered both questions.
 
