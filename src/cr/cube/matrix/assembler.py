@@ -767,4 +767,5 @@ class _SortRowsByColumnValueHelper(_RowOrderHelper):
         There is one value per row subtotal and values appear in payload (dimension)
         insertion order.
         """
-        raise NotImplementedError
+        measure_subtotal_rows = self._measure.blocks[1][0]
+        return measure_subtotal_rows[:, self._column_idx]

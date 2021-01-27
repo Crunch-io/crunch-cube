@@ -1229,7 +1229,7 @@ class Describe_RowOrderHelper(object):
 class Describe_SortRowsByColumnValueHelper(object):
     """Unit test suite for `cr.cube.matrix.assembler._SortRowsByColumnValueHelper`."""
 
-    def it_extracts_the_sort_column_idx_to_help(
+    def it_extracts_the_sort_column_idx_from_the_order_spec_dict_to_help(
         self, _rows_dimension_prop_, dimension_, _order_dict_prop_
     ):
         _rows_dimension_prop_.return_value = dimension_
@@ -1312,6 +1312,16 @@ class Describe_SortRowsByColumnValueHelper(object):
         order_helper = _SortRowsByColumnValueHelper(None, None)
 
         assert order_helper._order_dict == {"order": "dict"}
+
+    def it_extracts_the_subtotal_values_to_help(
+        self, _measure_prop_, measure_, _column_idx_prop_
+    ):
+        _measure_prop_.return_value = measure_
+        measure_.blocks = [[None, None], [np.arange(10, 101, 10).reshape(2, 5), None]]
+        _column_idx_prop_.return_value = 2
+        order_helper = _SortRowsByColumnValueHelper(None, None)
+
+        assert order_helper._subtotal_values.tolist() == [30, 80]
 
     # fixture components ---------------------------------------------
 
