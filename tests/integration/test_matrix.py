@@ -1457,3 +1457,54 @@ class DescribeAssembler(object):
                 ]
             ),
         )
+
+    @pytest.mark.parametrize(
+        "fixture, element_id, descending, expected_value",
+        (
+            (CR.CAT_4_X_CAT_5, 1, False, [0, 1, 3, 2]),
+            pytest.param(
+                CR.CAT_X_MR_2,
+                1,
+                True,
+                [0, 4, 1, 3, 5, 2],
+                marks=pytest.mark.xfail(
+                    reason="WIP", raises=NotImplementedError, strict=True
+                ),
+            ),
+            pytest.param(
+                CR.MR_X_CAT,
+                2,
+                True,
+                [4, 3, 2, 1, 0],
+                marks=pytest.mark.xfail(
+                    reason="WIP", raises=NotImplementedError, strict=True
+                ),
+            ),
+            pytest.param(
+                CR.MR_X_MR,
+                3,
+                True,
+                [3, 2, 1, 0],
+                marks=pytest.mark.xfail(
+                    reason="WIP", raises=NotImplementedError, strict=True
+                ),
+            ),
+        ),
+    )
+    def it_computes_the_sort_by_value_row_order_to_help(
+        self, fixture, element_id, descending, expected_value
+    ):
+        transforms = {
+            "rows_dimension": {
+                "order": {
+                    "type": "opposing_element",
+                    "element_id": element_id,
+                    "measure": "col_percent",
+                    "direction": "descending" if descending else "ascending",
+                }
+            }
+        }
+        slice_ = _Slice(Cube(fixture), 0, transforms, None, 0)
+        assembler = slice_._assembler
+
+        assert assembler._row_order.tolist() == expected_value
