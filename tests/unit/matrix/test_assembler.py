@@ -1239,6 +1239,27 @@ class Describe_SortRowsByColumnValueHelper(object):
 
         assert order_helper._element_values.tolist() == [2, 7, 12, 17]
 
+    def it_retrieves_the_measure_object_to_help(self, request, _order_dict_prop_):
+        column_proportions_ = instance_mock(request, _ColumnProportions)
+        second_order_measures_ = instance_mock(
+            request, SecondOrderMeasures, column_proportions=column_proportions_
+        )
+        _order_dict_prop_.return_value = {"measure": "col_percent"}
+        order_helper = _SortRowsByColumnValueHelper(None, second_order_measures_)
+
+        assert order_helper._measure is column_proportions_
+
+    def but_it_raises_when_an_unsupported_sort_by_value_measure_is_requested(
+        self, _order_dict_prop_
+    ):
+        _order_dict_prop_.return_value = {"measure": "foobar"}
+        order_helper = _SortRowsByColumnValueHelper(None, None)
+
+        with pytest.raises(NotImplementedError) as e:
+            order_helper._measure
+
+        assert str(e.value) == "sort-by-value for measure 'foobar' is not yet supported"
+
     def it_computes_the_sorted_element_order_to_help(
         self, request, _rows_dimension_prop_, dimension_
     ):
@@ -1290,6 +1311,10 @@ class Describe_SortRowsByColumnValueHelper(object):
     @pytest.fixture
     def _measure_prop_(self, request):
         return property_mock(request, _SortRowsByColumnValueHelper, "_measure")
+
+    @pytest.fixture
+    def _order_dict_prop_(self, request):
+        return property_mock(request, _SortRowsByColumnValueHelper, "_order_dict")
 
     @pytest.fixture
     def _rows_dimension_prop_(self, request):

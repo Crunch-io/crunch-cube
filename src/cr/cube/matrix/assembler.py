@@ -19,7 +19,7 @@ from cr.cube.collator import (
     PayloadOrderCollator,
     SortByValueCollator,
 )
-from cr.cube.enums import COLLATION_METHOD as CM, DIMENSION_TYPE as DT
+from cr.cube.enums import COLLATION_METHOD as CM, DIMENSION_TYPE as DT, MEASURE as M
 from cr.cube.matrix.cubemeasure import BaseCubeResultMatrix
 from cr.cube.matrix.measure import SecondOrderMeasures
 from cr.cube.matrix.subtotals import (
@@ -739,6 +739,23 @@ class _SortRowsByColumnValueHelper(_RowOrderHelper):
     @lazyproperty
     def _measure(self):
         """Second-order measure object providing values for sort."""
+        propname_by_keyname = {
+            M.COL_PERCENT.value: "column_proportions",
+            # --- add others as sort-by-value for those measures comes online ---
+        }
+        measure_keyname = self._order_dict["measure"]
+        measure_propname = propname_by_keyname.get(measure_keyname)
+
+        if measure_propname is None:
+            raise NotImplementedError(
+                "sort-by-value for measure '%s' is not yet supported" % measure_keyname
+            )
+
+        return getattr(self._second_order_measures, measure_propname)
+
+    @lazyproperty
+    def _order_dict(self):
+        """dict specifying ordering details like measure and sort-direction."""
         raise NotImplementedError
 
     @lazyproperty
