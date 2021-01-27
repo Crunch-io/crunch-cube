@@ -20,6 +20,7 @@ from cr.cube.matrix.cubemeasure import (
     _CatXCatMeansMatrix,
 )
 from cr.cube.matrix.measure import (
+    _BaseSecondOrderMeasure,
     _ColumnProportions,
     _ColumnUnweightedBases,
     _ColumnWeightedBases,
@@ -1228,6 +1229,16 @@ class Describe_RowOrderHelper(object):
 class Describe_SortRowsByColumnValueHelper(object):
     """Unit test suite for `cr.cube.matrix.assembler._SortRowsByColumnValueHelper`."""
 
+    def it_extracts_the_element_values_to_help(
+        self, _measure_prop_, measure_, _column_idx_prop_
+    ):
+        _measure_prop_.return_value = measure_
+        measure_.blocks = [[np.arange(20).reshape(4, 5), None], [None, None]]
+        _column_idx_prop_.return_value = 2
+        order_helper = _SortRowsByColumnValueHelper(None, None)
+
+        assert order_helper._element_values.tolist() == [2, 7, 12, 17]
+
     def it_computes_the_sorted_element_order_to_help(
         self, request, _rows_dimension_prop_, dimension_
     ):
@@ -1265,8 +1276,20 @@ class Describe_SortRowsByColumnValueHelper(object):
     # fixture components ---------------------------------------------
 
     @pytest.fixture
+    def _column_idx_prop_(self, request):
+        return property_mock(request, _SortRowsByColumnValueHelper, "_column_idx")
+
+    @pytest.fixture
     def dimension_(self, request):
         return instance_mock(request, Dimension)
+
+    @pytest.fixture
+    def measure_(self, request):
+        return instance_mock(request, _BaseSecondOrderMeasure)
+
+    @pytest.fixture
+    def _measure_prop_(self, request):
+        return property_mock(request, _SortRowsByColumnValueHelper, "_measure")
 
     @pytest.fixture
     def _rows_dimension_prop_(self, request):

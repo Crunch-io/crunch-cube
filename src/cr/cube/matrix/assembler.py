@@ -722,12 +722,23 @@ class _SortRowsByColumnValueHelper(_RowOrderHelper):
         )
 
     @lazyproperty
+    def _column_idx(self):
+        """int index of column whose values the sort is based on."""
+        raise NotImplementedError
+
+    @lazyproperty
     def _element_values(self):
         """Sequence of body values that form the basis for sort order.
 
         There is one value per row and values appear in payload (dimension) element
-        order.
+        order. These are only the "base" values and do not include insertions.
         """
+        measure_base_values = self._measure.blocks[0][0]
+        return measure_base_values[:, self._column_idx]
+
+    @lazyproperty
+    def _measure(self):
+        """Second-order measure object providing values for sort."""
         raise NotImplementedError
 
     @lazyproperty
