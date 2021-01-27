@@ -1145,6 +1145,10 @@ class Describe_BaseOrderHelper(object):
         HelperCls_.assert_called_once_with(dimensions_, second_order_measures_)
         assert row_order.tolist() == [-1, 1, -2, 2]
 
+    def it_provides_access_to_the_columns_dimension_to_help(self, dimension_):
+        order_helper = _BaseOrderHelper((None, dimension_), None)
+        assert order_helper._columns_dimension is dimension_
+
     @pytest.mark.parametrize(
         "prune_subtotals, order, expected_value",
         (
@@ -1167,6 +1171,10 @@ class Describe_BaseOrderHelper(object):
         assert display_order.tolist() == expected_value
 
     # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def dimension_(self, request):
+        return instance_mock(request, Dimension)
 
     @pytest.fixture
     def dimensions_(self, request):

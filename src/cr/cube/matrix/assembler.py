@@ -640,7 +640,7 @@ class _BaseOrderHelper(object):
     @lazyproperty
     def _columns_dimension(self):
         """The `Dimension` object representing column elements in the matrix."""
-        raise NotImplementedError
+        return self._dimensions[1]
 
     @lazyproperty
     def _empty_column_idxs(self):
