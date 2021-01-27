@@ -841,7 +841,13 @@ class BaseCubeResultMatrix(object):
             )  # pragma: no cover
 
         MatrixCls = (
-            _MrXCatMeansMatrix
+            _NumArrayXMrMeansMatrix
+            if dimension_types == (DT.NUM_ARRAY, DT.MR)
+            else _MrXNumArrayMeansMatrix
+            if dimension_types == (DT.MR, DT.NUM_ARRAY)
+            else _NumArrayXCatMeansMatrix
+            if dimension_types == (DT.NUM_ARRAY, DT.CAT)
+            else _MrXCatMeansMatrix
             if dimension_types[0] == DT.MR
             else _CatXMrMeansMatrix
             if dimension_types[1] == DT.MR
@@ -1682,3 +1688,44 @@ class _MrXCatMeansMatrix(_MrXCatMatrix):
     def means(self):
         """2D np.float64 ndarray of mean for each valid matrix cell."""
         return self._means[:, 0, :]
+
+
+class _MrXNumArrayMeansMatrix(_MrXCatMeansMatrix):
+    """MR_X_NUM_ARR slice with means measure instead of counts."""
+
+    @lazyproperty
+    def columns_base(self):
+        """2D np.int64 ndarray of unweighted-N for this matrix.
+
+        An MR_X_NUM_ARR matrix has a distinct column-base for each cell. In this case
+        the column base is the unweighted counts sliced for all the subvar on the MR
+        (selected) dimension and all the subvars on the NUM ARRAY one.
+        """
+        return self._unweighted_counts[:, 0, :]
+
+
+class _NumArrayXCatMeansMatrix(_CatXCatMeansMatrix):
+    """NUM_ARR_X_CAT slice with means measure instead of counts."""
+
+    @lazyproperty
+    def columns_base(self):
+        """2D np.int64 ndarray of unweighted-N for this matrix.
+
+        In this case the columns base correspond to the unweighted counts that for the
+        numeric arrays cases corresponds to the valid counts measure result.
+        """
+        return self._unweighted_counts
+
+
+class _NumArrayXMrMeansMatrix(_CatXMrMeansMatrix):
+    """NUM_ARR_X_MR slice with means measure instead of counts."""
+
+    @lazyproperty
+    def columns_base(self):
+        """2D np.int64 ndarray of unweighted-N for this matrix.
+
+        A NUM_ARR_X_MR matrix has a distinct column-base for each cell. In this case
+        the column base is the unweighted counts sliced for all the subvar on the NUM
+        ARRAY dimension and all the subvars on the MR (selected) one.
+        """
+        return self._unweighted_counts[:, :, 0]

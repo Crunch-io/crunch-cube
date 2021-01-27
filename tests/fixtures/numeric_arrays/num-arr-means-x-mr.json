@@ -1,0 +1,361 @@
+{
+  "element": "shoji:view",
+  "value": {
+    "query": {
+      "measures": {
+        "valid_count_unweighted": {
+          "function": "cube_valid_count",
+          "args": [
+            {
+              "variable": "1fd5d91cbc554a67bc6d1a30ef87231f"
+            }
+          ]
+        },
+        "mean": {
+          "function": "cube_mean",
+          "args": [
+            {
+              "variable": "1fd5d91cbc554a67bc6d1a30ef87231f"
+            }
+          ]
+        }
+      },
+      "dimensions": [
+        {
+          "function": "dimension",
+          "args": [
+            {
+              "function": "as_selected",
+              "args": [
+                {
+                  "variable": "3QPnyW5KMYriuoG5PCewcD000000"
+                }
+              ]
+            },
+            {
+              "value": "subvariables"
+            }
+          ]
+        },
+        {
+          "function": "as_selected",
+          "args": [
+            {
+              "variable": "3QPnyW5KMYriuoG5PCewcD000000"
+            }
+          ]
+        }
+      ]
+    },
+    "result": {
+      "dimensions": [
+        {
+          "references": {
+            "alias": "allpets",
+            "uniform_basis": false,
+            "subreferences": [
+              {
+                "alias": "allpets_1",
+                "name": "Cat"
+              },
+              {
+                "alias": "allpets_2",
+                "name": "Dog"
+              },
+              {
+                "alias": "allpets_3",
+                "name": "Bird"
+              }
+            ],
+            "description": "Do you have any of these animals as pets? Please select all that apply.",
+            "name": "All pets owned"
+          },
+          "derived": true,
+          "type": {
+            "subtype": {
+              "class": "variable"
+            },
+            "elements": [
+              {
+                "id": 1,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "allpets_1",
+                    "name": "Cat"
+                  },
+                  "id": "0001"
+                },
+                "missing": false
+              },
+              {
+                "id": 2,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "allpets_2",
+                    "name": "Dog"
+                  },
+                  "id": "0002"
+                },
+                "missing": false
+              },
+              {
+                "id": 3,
+                "value": {
+                  "derived": false,
+                  "references": {
+                    "alias": "allpets_3",
+                    "name": "Bird"
+                  },
+                  "id": "0003"
+                },
+                "missing": false
+              }
+            ],
+            "class": "enum"
+          }
+        },
+        {
+          "derived": true,
+          "references": {
+            "alias": "allpets",
+            "uniform_basis": false,
+            "description": "Do you have any of these animals as pets? Please select all that apply.",
+            "name": "All pets owned",
+            "subreferences": [
+              {
+                "alias": "allpets_1",
+                "name": "Cat"
+              },
+              {
+                "alias": "allpets_2",
+                "name": "Dog"
+              },
+              {
+                "alias": "allpets_3",
+                "name": "Bird"
+              }
+            ]
+          },
+          "type": {
+            "ordinal": false,
+            "subvariables": [
+              "0001",
+              "0002",
+              "0003"
+            ],
+            "class": "categorical",
+            "categories": [
+              {
+                "numeric_value": 1,
+                "selected": true,
+                "id": 1,
+                "missing": false,
+                "name": "Selected"
+              },
+              {
+                "numeric_value": 0,
+                "missing": false,
+                "id": 0,
+                "name": "Other"
+              },
+              {
+                "numeric_value": null,
+                "missing": true,
+                "id": -1,
+                "name": "No Data"
+              }
+            ]
+          }
+        }
+      ],
+      "missing": 3,
+      "measures": {
+        "valid_count_unweighted": {
+          "data": [
+            4,
+            3,
+            4,
+            4,
+            3,
+            4,
+            11,
+            12,
+            11,
+            4,
+            5,
+            5,
+            3,
+            3,
+            3,
+            12,
+            10,
+            11,
+            4,
+            5,
+            5,
+            6,
+            6,
+            6,
+            9,
+            7,
+            8
+          ],
+          "n_missing": 3,
+          "metadata": {
+            "references": {
+              "alias": "Num Array with 3 subvariables",
+              "uniform_basis": false,
+              "subreferences": [
+                {
+                  "alias": "First Mov",
+                  "name": "First Mov"
+                },
+                {
+                  "alias": "Second Mov test4",
+                  "name": "Second Mov test4"
+                },
+                {
+                  "alias": "Third Mov",
+                  "name": "Third Mov"
+                }
+              ],
+              "description": "MJ modified description",
+              "name": "Num Array with 3 subvariables"
+            },
+            "derived": true,
+            "type": {
+              "integer": false,
+              "class": "numeric",
+              "missing_rules": {},
+              "missing_reasons": {
+                "No Data": -1
+              },
+              "subvariables": [
+                "0001",
+                "0002",
+                "0003"
+              ]
+            }
+          }
+        },
+        "mean": {
+          "data": [
+            62.5,
+            90,
+            42.5,
+            75,
+            80,
+            67.5,
+            77.2727272727,
+            85,
+            70.9090909091,
+            87.5,
+            81,
+            70,
+            66.6666666667,
+            90,
+            63.3333333333,
+            70.8333333333,
+            85.5,
+            61.8181818182,
+            87.5,
+            81,
+            80,
+            83.3333333333,
+            85,
+            63.3333333333,
+            61.1111111111,
+            87.8571428571,
+            55
+          ],
+          "n_missing": 3,
+          "metadata": {
+            "references": {
+              "alias": "Num Array with 3 subvariables",
+              "uniform_basis": false,
+              "subreferences": [
+                {
+                  "alias": "First Mov",
+                  "name": "First Mov"
+                },
+                {
+                  "alias": "Second Mov test4",
+                  "name": "Second Mov test4"
+                },
+                {
+                  "alias": "Third Mov",
+                  "name": "Third Mov"
+                }
+              ],
+              "description": "MJ modified description",
+              "name": "Num Array with 3 subvariables"
+            },
+            "derived": true,
+            "type": {
+              "integer": true,
+              "class": "numeric",
+              "missing_rules": {},
+              "missing_reasons": {
+                "No Data": -1
+              },
+              "subvariables": [
+                "0001",
+                "0002",
+                "0003"
+              ]
+            }
+          }
+        }
+      },
+      "n": 20,
+      "filter_stats": {
+        "filtered_complete": {
+          "unweighted": {
+            "selected": 20,
+            "other": 0,
+            "missing": 0
+          },
+          "weighted": {
+            "selected": 20,
+            "other": 0,
+            "missing": 0
+          }
+        },
+        "filtered": {
+          "unweighted": {
+            "selected": 20,
+            "other": 0,
+            "missing": 0
+          },
+          "weighted": {
+            "selected": 20,
+            "other": 0,
+            "missing": 0
+          }
+        }
+      },
+      "unfiltered": {
+        "unweighted_n": 20,
+        "weighted_n": 20
+      },
+      "filtered": {
+        "unweighted_n": 20,
+        "weighted_n": 20
+      },
+      "counts": [
+        4,
+        4,
+        12,
+        5,
+        3,
+        12,
+        5,
+        6,
+        9
+      ],
+      "element": "crunch:cube"
+    }
+  }
+}
