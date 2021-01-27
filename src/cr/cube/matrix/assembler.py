@@ -685,7 +685,7 @@ class _BaseOrderHelper(object):
     @lazyproperty
     def _rows_dimension(self):
         """The `Dimension` object representing row elements in the matrix."""
-        raise NotImplementedError
+        return self._dimensions[0]
 
 
 class _RowOrderHelper(_BaseOrderHelper):

@@ -1170,6 +1170,10 @@ class Describe_BaseOrderHelper(object):
 
         assert display_order.tolist() == expected_value
 
+    def it_provides_access_to_the_rows_dimension_to_help(self, dimension_):
+        order_helper = _BaseOrderHelper((dimension_, None), None)
+        assert order_helper._rows_dimension is dimension_
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
