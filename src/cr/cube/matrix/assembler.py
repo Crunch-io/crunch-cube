@@ -638,6 +638,20 @@ class _BaseOrderHelper(object):
         return np.array(self._order, dtype=int)
 
     @lazyproperty
+    def _columns_dimension(self):
+        """The `Dimension` object representing column elements in the matrix."""
+        raise NotImplementedError
+
+    @lazyproperty
+    def _empty_column_idxs(self):
+        """tuple of int index for each column with (unweighted) N = 0.
+
+        These columns are subject to pruning, depending on a user setting in the
+        dimension.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
     def _order(self):
         """tuple of signed int idx for each sorted vector of measure matrix.
 
@@ -659,6 +673,17 @@ class _BaseOrderHelper(object):
 
 class _RowOrderHelper(_BaseOrderHelper):
     """Encapsulates the complexity of the various kinds of row ordering."""
+
+    @lazyproperty
+    def _prune_subtotals(self):
+        """True if subtotal rows need to be pruned, False otherwise.
+
+        Subtotal-rows need to be pruned when all base-columns are pruned.
+        """
+        if not self._columns_dimension.prune:
+            return False
+
+        return len(self._empty_column_idxs) == len(self._columns_dimension.element_ids)
 
 
 class _SortRowsByColumnValueHelper(_RowOrderHelper):
