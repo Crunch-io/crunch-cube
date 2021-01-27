@@ -1229,6 +1229,16 @@ class Describe_RowOrderHelper(object):
 class Describe_SortRowsByColumnValueHelper(object):
     """Unit test suite for `cr.cube.matrix.assembler._SortRowsByColumnValueHelper`."""
 
+    def it_extracts_the_sort_column_idx_to_help(
+        self, _rows_dimension_prop_, dimension_, _order_dict_prop_
+    ):
+        _rows_dimension_prop_.return_value = dimension_
+        dimension_.element_ids = (1, 2, 3, 4, 5)
+        _order_dict_prop_.return_value = {"element_id": 3}
+        order_helper = _SortRowsByColumnValueHelper(None, None)
+
+        assert order_helper._column_idx == 2
+
     def it_extracts_the_element_values_to_help(
         self, _measure_prop_, measure_, _column_idx_prop_
     ):

@@ -724,7 +724,9 @@ class _SortRowsByColumnValueHelper(_RowOrderHelper):
     @lazyproperty
     def _column_idx(self):
         """int index of column whose values the sort is based on."""
-        raise NotImplementedError
+        row_element_ids = self._rows_dimension.element_ids
+        sort_column_id = self._order_dict["element_id"]
+        return row_element_ids.index(sort_column_id)
 
     @lazyproperty
     def _element_values(self):
