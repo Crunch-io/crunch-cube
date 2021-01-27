@@ -1294,6 +1294,15 @@ class Describe_SortRowsByColumnValueHelper(object):
         )
         assert order == (-1, -2, 0, 2, 1)
 
+    def it_provides_access_to_the_order_dict_to_help(
+        self, _rows_dimension_prop_, dimension_
+    ):
+        _rows_dimension_prop_.return_value = dimension_
+        dimension_.order_dict = {"order": "dict"}
+        order_helper = _SortRowsByColumnValueHelper(None, None)
+
+        assert order_helper._order_dict == {"order": "dict"}
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture

@@ -756,7 +756,7 @@ class _SortRowsByColumnValueHelper(_RowOrderHelper):
     @lazyproperty
     def _order_dict(self):
         """dict specifying ordering details like measure and sort-direction."""
-        raise NotImplementedError
+        return self._rows_dimension.order_dict
 
     @lazyproperty
     def _subtotal_values(self):
