@@ -69,6 +69,16 @@ class DescribeSecondOrderMeasures(object):
         MeasureCls_.assert_called_once_with(dimensions_, measures, cube_measures_)
         assert measure is measure_
 
+    def it_provides_access_to_the_rows_pruning_base(
+        self, _cube_measures_prop_, cube_measures_, unweighted_cube_counts_
+    ):
+        _cube_measures_prop_.return_value = cube_measures_
+        cube_measures_.unweighted_cube_counts = unweighted_cube_counts_
+        unweighted_cube_counts_.rows_pruning_base = np.array([7, 4, 0, 2])
+        measures = SecondOrderMeasures(None, None, None)
+
+        assert measures.rows_pruning_base.tolist() == [7, 4, 0, 2]
+
     def it_provides_access_to_the_cube_measures_to_help(
         self, request, cube_, dimensions_, cube_measures_
     ):
@@ -101,6 +111,10 @@ class DescribeSecondOrderMeasures(object):
     @pytest.fixture
     def dimensions_(self, request):
         return (instance_mock(request, Dimension), instance_mock(request, Dimension))
+
+    @pytest.fixture
+    def unweighted_cube_counts_(self, request):
+        return instance_mock(request, _BaseUnweightedCubeCounts)
 
 
 class Describe_BaseSecondOrderMeasure(object):

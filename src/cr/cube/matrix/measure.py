@@ -53,7 +53,7 @@ class SecondOrderMeasures(object):
     @lazyproperty
     def rows_pruning_base(self):
         """1D np.int64 ndarray of unweighted-N for each matrix row."""
-        raise NotImplementedError
+        return self._cube_measures.unweighted_cube_counts.rows_pruning_base
 
     @lazyproperty
     def table_unweighted_bases(self):
