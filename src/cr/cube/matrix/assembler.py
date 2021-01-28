@@ -711,6 +711,23 @@ class _ColumnOrderHelper(_BaseOrderHelper):
     """Encapsulates the complexity of the various kinds of column ordering."""
 
     @lazyproperty
+    def _order(self):
+        """tuple of signed int idx for each column of measure matrix.
+
+        Negative values represent inserted-vector locations. Returned sequence reflects
+        insertion, hiding, pruning, and ordering transforms specified in the
+        rows-dimension.
+        """
+        CollatorCls = (
+            ExplicitOrderCollator
+            if self._columns_dimension.collation_method == CM.EXPLICIT_ORDER
+            else PayloadOrderCollator
+        )
+        return CollatorCls.display_order(
+            self._columns_dimension, self._empty_column_idxs
+        )
+
+    @lazyproperty
     def _prune_subtotals(self):
         """True if subtotal columns need to be pruned, False otherwise.
 

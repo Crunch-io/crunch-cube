@@ -1226,6 +1226,34 @@ class Describe_ColumnOrderHelper(object):
     """Unit test suite for `cr.cube.matrix.assembler._ColumnOrderHelper` object."""
 
     @pytest.mark.parametrize(
+        "collation_method, collator_class_name",
+        (
+            (CM.PAYLOAD_ORDER, "PayloadOrderCollator"),
+            (CM.EXPLICIT_ORDER, "ExplicitOrderCollator"),
+        ),
+    )
+    def it_computes_the_order_of_a_columns_dimension_to_help(
+        self, request, dimension_, collation_method, collator_class_name
+    ):
+        property_mock(
+            request, _ColumnOrderHelper, "_columns_dimension", return_value=dimension_
+        )
+        dimension_.collation_method = collation_method
+        CollatorCls_ = class_mock(
+            request, "cr.cube.matrix.assembler.%s" % collator_class_name
+        )
+        CollatorCls_.display_order.return_value = (3, -1, 5, 1, -2)
+        property_mock(
+            request, _ColumnOrderHelper, "_empty_column_idxs", return_value=(1, 3)
+        )
+        order_helper = _ColumnOrderHelper(None, None)
+
+        order = order_helper._order
+
+        CollatorCls_.display_order.assert_called_once_with(dimension_, (1, 3))
+        assert order == (3, -1, 5, 1, -2)
+
+    @pytest.mark.parametrize(
         "prune, empty_row_idxs, expected_value",
         (
             (False, None, False),
@@ -1280,13 +1308,13 @@ class Describe_RowOrderHelper(object):
         )
         CollatorCls_.display_order.return_value = (1, -2, 3, 5, -1)
         property_mock(
-            request, _RowOrderHelper, "_empty_row_idxs", return_value=[2, 4, 6]
+            request, _RowOrderHelper, "_empty_row_idxs", return_value=(2, 4, 6)
         )
         order_helper = _RowOrderHelper(None, None)
 
         order = order_helper._order
 
-        CollatorCls_.display_order.assert_called_once_with(dimension_, [2, 4, 6])
+        CollatorCls_.display_order.assert_called_once_with(dimension_, (2, 4, 6))
         assert order == (1, -2, 3, 5, -1)
 
     @pytest.mark.parametrize(
