@@ -846,7 +846,7 @@ class BaseCubeResultMatrix(object):
             else _MrXNumArrayMeansMatrix
             if dimension_types == (DT.MR, DT.NUM_ARRAY)
             else _NumArrayXCatMeansMatrix
-            if dimension_types == (DT.NUM_ARRAY, DT.CAT)
+            if dimension_types[0] == DT.NUM_ARRAY
             else _MrXCatMeansMatrix
             if dimension_types[0] == DT.MR
             else _CatXMrMeansMatrix
