@@ -1195,6 +1195,18 @@ class Describe_BaseOrderHelper(object):
         "base, expected_value",
         (([1, 1, 1], ()), ([1, 0, 1], (1,)), ([0, 0, 0], (0, 1, 2))),
     )
+    def it_knows_its_empty_column_idxs_to_help(
+        self, second_order_measures_, base, expected_value
+    ):
+        second_order_measures_.columns_pruning_base = np.array(base)
+        order_helper = _BaseOrderHelper(None, second_order_measures_)
+
+        assert order_helper._empty_column_idxs == expected_value
+
+    @pytest.mark.parametrize(
+        "base, expected_value",
+        (([1, 1, 1], ()), ([1, 0, 1], (1,)), ([0, 0, 0], (0, 1, 2))),
+    )
     def it_knows_its_empty_row_idxs_to_help(
         self, second_order_measures_, base, expected_value
     ):

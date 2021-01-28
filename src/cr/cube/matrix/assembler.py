@@ -668,7 +668,11 @@ class _BaseOrderHelper(object):
         These columns are subject to pruning, depending on a user setting in the
         dimension.
         """
-        raise NotImplementedError
+        return tuple(
+            i
+            for i, N in enumerate(self._second_order_measures.columns_pruning_base)
+            if N == 0
+        )
 
     @lazyproperty
     def _empty_row_idxs(self):
