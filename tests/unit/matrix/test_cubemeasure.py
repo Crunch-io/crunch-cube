@@ -457,6 +457,10 @@ class Describe_MrXMrUnweightedCubeCounts(object):
         unweighted_cube_counts = _MrXMrUnweightedCubeCounts(None, raw_unweighted_counts)
         assert unweighted_cube_counts.columns_base.tolist() == [[2, 4], [10, 12]]
 
+    def it_knows_its_columns_pruning_base(self, raw_unweighted_counts):
+        unweighted_cube_counts = _MrXMrUnweightedCubeCounts(None, raw_unweighted_counts)
+        assert unweighted_cube_counts.columns_pruning_base.tolist() == [12, 16]
+
     def it_knows_its_row_bases(self, request):
         property_mock(
             request,

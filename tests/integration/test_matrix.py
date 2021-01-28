@@ -1523,14 +1523,7 @@ class Describe_BaseOrderHelper(object):
             (CR.CAT_4_X_CAT_5, [3, 1, 2], [2, 0, 1, 3, 4]),
             (CR.CAT_X_MR_2, [5, 1, 4, 2], [4, 0, 3, 1, 2]),
             (CR.MR_X_CAT, [0, 5, 1, 4, 2], [2, 4, 0, 3, 1, 5]),
-            pytest.param(
-                CR.MR_X_MR,
-                [2, 0, 3, 1],
-                [1, 3, 2, 0],
-                marks=pytest.mark.xfail(
-                    reason="WIP", raises=NotImplementedError, strict=True
-                ),
-            ),
+            (CR.MR_X_MR, [2, 0, 3, 1], [1, 3, 2, 0]),
         ),
     )
     def it_can_compute_an_explicit_column_order(
