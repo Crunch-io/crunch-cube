@@ -567,29 +567,12 @@ class Assembler(object):
         return len(self._empty_row_idxs) == len(self._rows_dimension.element_ids)
 
     @lazyproperty
-    def _prune_subtotal_rows(self):
-        """True if subtotal rows need to be pruned, False otherwise.
-
-        Subtotal-rows need to be pruned when all base-columns are pruned.
-        """
-        if not self._columns_dimension.prune:
-            return False
-
-        return len(self._empty_column_idxs) == len(self._columns_dimension.element_ids)
-
-    @lazyproperty
     def _row_order(self):
         """1D np.int64 ndarray of signed int idx for each assembled row.
 
         Negative values represent inserted subtotal-row locations.
         """
-        if self._rows_dimension.collation_method == CM.OPPOSING_ELEMENT:
-            return _BaseOrderHelper.row_display_order(self._dimensions, self._measures)
-
-        order = self._dimension_order(self._rows_dimension, self._empty_row_idxs)
-        if self._prune_subtotal_rows:
-            return np.array([idx for idx in order if idx >= 0], dtype=int)
-        return order
+        return _BaseOrderHelper.row_display_order(self._dimensions, self._measures)
 
     @lazyproperty
     def _row_subtotals(self):

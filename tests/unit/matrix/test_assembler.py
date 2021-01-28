@@ -912,40 +912,11 @@ class DescribeAssembler(object):
 
         assert Assembler(None, None, None)._prune_subtotal_columns is expected_value
 
-    @pytest.mark.parametrize(
-        "prune, empty_col_idxs, element_ids, expected_value",
-        (
-            (False, (), (), False),
-            (False, (1, 2, 3), (4, 5, 6), False),
-            (False, (1, 2), (7, 8, 9), False),
-            (True, (), (), True),
-            (True, (1, 2, 3), (4, 5, 6), True),
-            (True, (1, 2), (7, 8, 9), False),
-        ),
-    )
-    def it_knows_whether_its_subtotal_rows_should_be_pruned_to_help(
-        self,
-        _columns_dimension_prop_,
-        dimension_,
-        prune,
-        _empty_column_idxs_prop_,
-        empty_col_idxs,
-        element_ids,
-        expected_value,
-    ):
-        _columns_dimension_prop_.return_value = dimension_
-        dimension_.element_ids = element_ids
-        dimension_.prune = prune
-        _empty_column_idxs_prop_.return_value = empty_col_idxs
-
-        assert Assembler(None, None, None)._prune_subtotal_rows is expected_value
-
-    def it_knows_the_sort_by_value_row_order_to_help(
+    def it_knows_the_row_order_to_help(
         self,
         request,
         _BaseOrderHelper_,
         dimensions_,
-        _rows_dimension_prop_,
         _measures_prop_,
         second_order_measures_,
     ):
@@ -953,8 +924,6 @@ class DescribeAssembler(object):
         _BaseOrderHelper_.row_display_order.return_value = np.array(
             [-1, 1, -2, 2, -3, 3]
         )
-        _rows_dimension_prop_.return_value = dimensions_[0]
-        dimensions_[0].collation_method = CM.OPPOSING_ELEMENT
         assembler = Assembler(None, dimensions_, None)
 
         row_order = assembler._row_order
@@ -963,43 +932,6 @@ class DescribeAssembler(object):
             dimensions_, second_order_measures_
         )
         assert row_order.tolist() == [-1, 1, -2, 2, -3, 3]
-
-    @pytest.mark.parametrize(
-        "order, prune, expected",
-        (
-            # --- False -> not pruned ---
-            ([0, 1], False, [0, 1]),
-            # --- True, but no negative indices -> not pruned ---
-            ([0, 1], True, [0, 1]),
-            # --- False -> not pruned ---
-            ([0, -1, 1, -2], False, [0, -1, 1, -2]),
-            # --- True, with negative indices -> pruned ---
-            ([0, -1, 1, -2], True, [0, 1]),
-        ),
-    )
-    def it_knows_its_row_order_to_help(
-        self,
-        request,
-        _dimension_order_,
-        dimension_,
-        order,
-        prune,
-        expected,
-    ):
-        # --- Prepare mocks and return values ---
-        property_mock(request, Assembler, "_rows_dimension", return_value=dimension_)
-        fake_row_idxs = [0, 1, 2]
-        property_mock(request, Assembler, "_empty_row_idxs", return_value=fake_row_idxs)
-        _dimension_order_.return_value = np.array(order)
-        property_mock(request, Assembler, "_prune_subtotal_rows", return_value=prune)
-        assembler = Assembler(None, None, None)
-
-        # --- Call the tested property ---
-        row_order = assembler._row_order
-
-        # --- Perform assertions
-        assert row_order.tolist() == expected
-        _dimension_order_.assert_called_once_with(assembler, dimension_, fake_row_idxs)
 
     def it_provides_access_to_the_row_subtotals_to_help(
         self, _rows_dimension_prop_, dimension_, subtotals_
