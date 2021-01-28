@@ -365,6 +365,15 @@ class _MrXMrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
         return np.sum(self._unweighted_counts[:, 0, :, :], axis=2)
 
     @lazyproperty
+    def rows_pruning_base(self):
+        """1D np.int64 ndarray of unweighted-N for each matrix row.
+
+        This includes both selected and unselected counts for the column MR, but only
+        selecteds are considered for the rows dimension.
+        """
+        return np.sum(self._unweighted_counts[:, 0, :, :], axis=(1, 2))
+
+    @lazyproperty
     def table_base(self):
         """2D np.int64 ndarray of distinct unweighted N for each cell of matrix.
 

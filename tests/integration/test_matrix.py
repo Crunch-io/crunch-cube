@@ -1464,15 +1464,7 @@ class DescribeAssembler(object):
             (CR.CAT_4_X_CAT_5, 1, False, [0, 1, 3, 2]),
             (CR.CAT_X_MR_2, 1, True, [0, 4, 1, 3, 5, 2]),
             (CR.MR_X_CAT, 2, True, [4, 3, 2, 1, 0]),
-            pytest.param(
-                CR.MR_X_MR,
-                3,
-                True,
-                [3, 2, 1, 0],
-                marks=pytest.mark.xfail(
-                    reason="WIP", raises=NotImplementedError, strict=True
-                ),
-            ),
+            (CR.MR_X_MR, 3, True, [3, 2, 1, 0]),
         ),
     )
     def it_computes_the_sort_by_value_row_order_to_help(
