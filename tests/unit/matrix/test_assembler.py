@@ -745,41 +745,26 @@ class DescribeAssembler(object):
 
         assert vector.tolist() == [3, 2, 1, 5, 4, 3, 7]
 
-    @pytest.mark.parametrize(
-        "order, prune_subtotal_columns, expected_value",
-        (
-            (np.array([-1, 1, -2, 2, -3, 3]), False, [-1, 1, -2, 2, -3, 3]),
-            (np.array([-1, 1, -2, 2, -3, 3]), True, [1, 2, 3]),
-            (np.array([], dtype=int), True, []),
-        ),
-    )
     def it_knows_the_column_order_to_help(
         self,
         request,
-        _columns_dimension_prop_,
-        dimension_,
-        _empty_column_idxs_prop_,
-        _dimension_order_,
-        order,
-        prune_subtotal_columns,
-        expected_value,
+        _BaseOrderHelper_,
+        dimensions_,
+        _measures_prop_,
+        second_order_measures_,
     ):
-        _columns_dimension_prop_.return_value = dimension_
-        _empty_column_idxs_prop_.return_value = (4, 2)
-        _dimension_order_.return_value = order
-        property_mock(
-            request,
-            Assembler,
-            "_prune_subtotal_columns",
-            return_value=prune_subtotal_columns,
+        _measures_prop_.return_value = second_order_measures_
+        _BaseOrderHelper_.column_display_order.return_value = np.array(
+            [-1, 1, -2, 2, -3, 3]
         )
-        assembler = Assembler(None, None, None)
+        assembler = Assembler(None, dimensions_, None)
 
         column_order = assembler._column_order
 
-        _dimension_order_.assert_called_once_with(assembler, dimension_, (4, 2))
-        assert column_order.dtype == int
-        assert column_order.tolist() == expected_value
+        _BaseOrderHelper_.column_display_order.assert_called_once_with(
+            dimensions_, second_order_measures_
+        )
+        assert column_order.tolist() == [-1, 1, -2, 2, -3, 3]
 
     def it_provides_access_to_the_column_subtotals_to_help(
         self, _columns_dimension_prop_, dimension_, subtotals_
@@ -807,29 +792,6 @@ class DescribeAssembler(object):
         BaseCubeResultMatrix_.factory.assert_called_once_with(cube_, dimensions_, 42)
         assert cube_result_matrix is cube_result_matrix_
 
-    @pytest.mark.parametrize(
-        "collation_method, collator_class_name",
-        (
-            (CM.PAYLOAD_ORDER, "PayloadOrderCollator"),
-            (CM.EXPLICIT_ORDER, "ExplicitOrderCollator"),
-        ),
-    )
-    def it_computes_the_order_for_a_dimension_to_help(
-        self, request, dimension_, collation_method, collator_class_name
-    ):
-        CollatorCls_ = class_mock(
-            request, "cr.cube.matrix.assembler.%s" % collator_class_name
-        )
-        CollatorCls_.display_order.return_value = (1, -2, 3, 5, -1)
-        dimension_.collation_method = collation_method
-        assembler = Assembler(None, None, None)
-
-        dimension_order = assembler._dimension_order(dimension_, empty_idxs=[2, 4, 6])
-
-        CollatorCls_.display_order.assert_called_once_with(dimension_, [2, 4, 6])
-        assert dimension_order.shape == (5,)
-        assert dimension_order.tolist() == [1, -2, 3, 5, -1]
-
     def it_assembles_the_dimension_labels_to_help(self, request, dimension_):
         dimension_.valid_elements = tuple(
             instance_mock(request, _Element, label=label)
@@ -845,30 +807,6 @@ class DescribeAssembler(object):
 
         assert labels.tolist() == ["Bravo", "Delta", "Top 2", "Charlie", "All"]
 
-    @pytest.mark.parametrize(
-        "base, expected_value",
-        (((1, 1, 1), ()), ((1, 0, 1), (1,)), ((0, 0, 0), (0, 1, 2))),
-    )
-    def it_knows_its_empty_column_idxs_to_help(
-        self, _cube_result_matrix_prop_, cube_result_matrix_, base, expected_value
-    ):
-        _cube_result_matrix_prop_.return_value = cube_result_matrix_
-        cube_result_matrix_.columns_pruning_base = np.array(base)
-
-        assert Assembler(None, None, None)._empty_column_idxs == expected_value
-
-    @pytest.mark.parametrize(
-        "base, expected_value",
-        (((1, 1, 1), ()), ((1, 0, 1), (1,)), ((0, 0, 0), (0, 1, 2))),
-    )
-    def it_knows_its_empty_row_idxs_to_help(
-        self, _cube_result_matrix_prop_, cube_result_matrix_, base, expected_value
-    ):
-        _cube_result_matrix_prop_.return_value = cube_result_matrix_
-        cube_result_matrix_.rows_pruning_base = np.array(base)
-
-        assert Assembler(None, None, None)._empty_row_idxs == expected_value
-
     def it_constructs_its_measures_collaborator_object_to_help(
         self, request, cube_, dimensions_, second_order_measures_
     ):
@@ -883,34 +821,6 @@ class DescribeAssembler(object):
 
         SecondOrderMeasures_.assert_called_once_with(cube_, dimensions_, 17)
         assert measures == second_order_measures_
-
-    @pytest.mark.parametrize(
-        "prune, empty_row_idxs, element_ids, expected_value",
-        (
-            (False, (), (), False),
-            (False, (1, 2, 3), (4, 5, 6), False),
-            (False, (1, 2), (7, 8, 9), False),
-            (True, (), (), True),
-            (True, (1, 2, 3), (4, 5, 6), True),
-            (True, (1, 2), (7, 8, 9), False),
-        ),
-    )
-    def it_knows_whether_its_subtotal_columns_should_be_pruned_to_help(
-        self,
-        _rows_dimension_prop_,
-        dimension_,
-        prune,
-        _empty_row_idxs_prop_,
-        empty_row_idxs,
-        element_ids,
-        expected_value,
-    ):
-        _rows_dimension_prop_.return_value = dimension_
-        dimension_.element_ids = element_ids
-        dimension_.prune = prune
-        _empty_row_idxs_prop_.return_value = empty_row_idxs
-
-        assert Assembler(None, None, None)._prune_subtotal_columns is expected_value
 
     def it_knows_the_row_order_to_help(
         self,
@@ -992,20 +902,8 @@ class DescribeAssembler(object):
         return method_mock(request, Assembler, "_dimension_labels")
 
     @pytest.fixture
-    def _dimension_order_(self, request):
-        return method_mock(request, Assembler, "_dimension_order")
-
-    @pytest.fixture
     def dimensions_(self, request):
         return (instance_mock(request, Dimension), instance_mock(request, Dimension))
-
-    @pytest.fixture
-    def _empty_column_idxs_prop_(self, request):
-        return property_mock(request, Assembler, "_empty_column_idxs")
-
-    @pytest.fixture
-    def _empty_row_idxs_prop_(self, request):
-        return property_mock(request, Assembler, "_empty_row_idxs")
 
     @pytest.fixture
     def _measures_prop_(self, request):

@@ -470,8 +470,7 @@ class Assembler(object):
 
         Negative values represent inserted subtotal-column locations.
         """
-        order = self._dimension_order(self._columns_dimension, self._empty_column_idxs)
-        return order[order >= 0] if self._prune_subtotal_columns else order
+        return _BaseOrderHelper.column_display_order(self._dimensions, self._measures)
 
     @lazyproperty
     def _column_subtotals(self):
@@ -507,64 +506,10 @@ class Assembler(object):
             + [s.label for s in dimension.subtotals]
         )[order]
 
-    def _dimension_order(self, dimension, empty_idxs):
-        """1D np.int64 ndarray of signed int idx for each vector in `dimension`.
-
-        Negative values represent inserted-vector locations. Returned sequence reflects
-        insertion, hiding, pruning, and ordering transforms specified in `dimension`.
-        """
-        collation_method = dimension.collation_method
-
-        # --- this will become a significantly more sophisticated dispatch when
-        # --- sort-by-value is implemented in later commits. In particular, the
-        # --- signature for the sort-by-value collator differs from the payload and
-        # --- explicit-order collators. So we'll defer refactoring this until that
-        # --- collator is added. (sc)
-        display_order = (
-            ExplicitOrderCollator.display_order(dimension, empty_idxs)
-            if collation_method == CM.EXPLICIT_ORDER
-            else PayloadOrderCollator.display_order(dimension, empty_idxs)
-        )
-
-        # --- Returning as np.array suits its intended purpose, which is to participate
-        # --- in an np._ix() call. It works fine as a sequence too for any alternate
-        # --- use. Specifying int type prevents failure when there are zero elements.
-        return np.array(display_order, dtype=int)
-
-    @lazyproperty
-    def _empty_column_idxs(self):
-        """tuple of int index for each column with (unweighted) N = 0.
-
-        These columns are subject to pruning, depending on a user setting in the
-        dimension.
-        """
-        pruning_base = self._cube_result_matrix.columns_pruning_base
-        return tuple(i for i, N in enumerate(pruning_base) if N == 0)
-
-    @lazyproperty
-    def _empty_row_idxs(self):
-        """tuple of int index for each row with N = 0.
-
-        These rows are subject to pruning, depending on a user setting in the dimension.
-        """
-        pruning_base = self._cube_result_matrix.rows_pruning_base
-        return tuple(i for i, N in enumerate(pruning_base) if N == 0)
-
     @lazyproperty
     def _measures(self):
         """SecondOrderMeasures collection object for this cube-result."""
         return SecondOrderMeasures(self._cube, self._dimensions, self._slice_idx)
-
-    @lazyproperty
-    def _prune_subtotal_columns(self):
-        """True if subtotal columns need to be pruned, False otherwise.
-
-        Subtotal-columns need to be pruned when all base-rows are pruned.
-        """
-        if not self._rows_dimension.prune:
-            return False
-
-        return len(self._empty_row_idxs) == len(self._rows_dimension.element_ids)
 
     @lazyproperty
     def _row_order(self):
