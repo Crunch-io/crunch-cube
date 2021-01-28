@@ -1517,14 +1517,34 @@ class Describe_BaseOrderHelper(object):
 
         assert row_display_order.tolist() == expected_value
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     @pytest.mark.parametrize(
         "fixture, element_ids, expected_value",
         (
             (CR.CAT_4_X_CAT_5, [3, 1, 2], [2, 0, 1, 3, 4]),
-            (CR.CAT_X_MR_2, [5, 1, 4, 2], [4, 0, 3, 1, 2]),
-            (CR.MR_X_CAT, [0, 5, 1, 4, 2], [2, 4, 0, 3, 1, 5]),
-            (CR.MR_X_MR, [2, 0, 3, 1], [1, 3, 2, 0]),
+            pytest.param(
+                CR.CAT_X_MR_2,
+                [5, 1, 4, 2],
+                [4, 0, 3, 1, 2],
+                marks=pytest.mark.xfail(
+                    reason="WIP", raises=NotImplementedError, strict=True
+                ),
+            ),
+            pytest.param(
+                CR.MR_X_CAT,
+                [0, 5, 1, 4, 2],
+                [2, 4, 0, 3, 1, 5],
+                marks=pytest.mark.xfail(
+                    reason="WIP", raises=NotImplementedError, strict=True
+                ),
+            ),
+            pytest.param(
+                CR.MR_X_MR,
+                [2, 0, 3, 1],
+                [1, 3, 2, 0],
+                marks=pytest.mark.xfail(
+                    reason="WIP", raises=NotImplementedError, strict=True
+                ),
+            ),
         ),
     )
     def it_can_compute_an_explicit_column_order(
@@ -1542,6 +1562,5 @@ class Describe_BaseOrderHelper(object):
         column_display_order = _BaseOrderHelper.column_display_order(
             assembler._dimensions, assembler._measures
         )
-        print("element_ids == %s" % (assembler._dimensions[1].element_ids,))
 
         assert column_display_order.tolist() == expected_value
