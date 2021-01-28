@@ -237,6 +237,15 @@ class _CatXMrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
         return np.sum(self.unweighted_counts, axis=0)
 
     @lazyproperty
+    def columns_pruning_base(self):
+        """1D np.int64 ndarray of unweighted-N for each matrix column.
+
+        These values include both the selected and unselected counts of the MR columns
+        dimension.
+        """
+        return np.sum(self._unweighted_counts, axis=(0, 2))
+
+    @lazyproperty
     def row_bases(self):
         """2D np.int64 ndarray of unweighted row-proportion denominator per cell."""
         # --- in the CAT_X_MR case, rows_base is already the right (2D) value ---

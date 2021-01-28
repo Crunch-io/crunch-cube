@@ -1521,14 +1521,7 @@ class Describe_BaseOrderHelper(object):
         "fixture, element_ids, expected_value",
         (
             (CR.CAT_4_X_CAT_5, [3, 1, 2], [2, 0, 1, 3, 4]),
-            pytest.param(
-                CR.CAT_X_MR_2,
-                [5, 1, 4, 2],
-                [4, 0, 3, 1, 2],
-                marks=pytest.mark.xfail(
-                    reason="WIP", raises=NotImplementedError, strict=True
-                ),
-            ),
+            (CR.CAT_X_MR_2, [5, 1, 4, 2], [4, 0, 3, 1, 2]),
             pytest.param(
                 CR.MR_X_CAT,
                 [0, 5, 1, 4, 2],
