@@ -1462,15 +1462,7 @@ class DescribeAssembler(object):
         "fixture, element_id, descending, expected_value",
         (
             (CR.CAT_4_X_CAT_5, 1, False, [0, 1, 3, 2]),
-            pytest.param(
-                CR.CAT_X_MR_2,
-                1,
-                True,
-                [0, 4, 1, 3, 5, 2],
-                marks=pytest.mark.xfail(
-                    reason="WIP", raises=NotImplementedError, strict=True
-                ),
-            ),
+            (CR.CAT_X_MR_2, 1, True, [0, 4, 1, 3, 5, 2]),
             pytest.param(
                 CR.MR_X_CAT,
                 2,
