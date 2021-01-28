@@ -706,6 +706,21 @@ class _RowOrderHelper(_BaseOrderHelper):
     """Encapsulates the complexity of the various kinds of row ordering."""
 
     @lazyproperty
+    def _order(self):
+        """tuple of signed int idx for each row of measure matrix.
+
+        Negative values represent inserted-vector locations. Returned sequence reflects
+        insertion, hiding, pruning, and ordering transforms specified in the
+        rows-dimension.
+        """
+        CollatorCls = (
+            ExplicitOrderCollator
+            if self._rows_dimension.collation_method == CM.EXPLICIT_ORDER
+            else PayloadOrderCollator
+        )
+        return CollatorCls.display_order(self._rows_dimension, self._empty_row_idxs)
+
+    @lazyproperty
     def _prune_subtotals(self):
         """True if subtotal rows need to be pruned, False otherwise.
 

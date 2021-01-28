@@ -1490,7 +1490,6 @@ class DescribeAssembler(object):
 class Describe_BaseOrderHelper(object):
     """Integration-test suite for `cr.cube.matrix._BaseOrderHelper`."""
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     @pytest.mark.parametrize(
         "fixture, element_ids, expected_value",
         (
