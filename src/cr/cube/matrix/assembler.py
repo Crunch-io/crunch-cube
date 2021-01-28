@@ -617,7 +617,12 @@ class _BaseOrderHelper(object):
         insertion, hiding, pruning, and ordering transforms specified in the
         columns-dimension.
         """
-        raise NotImplementedError
+        # --- This is essentially a factory method. There is no sort-columns-by-value
+        # --- yet, and both explicit and payload ordering are handled by
+        # --- _ColumnOrderHelper, so there's not much to this yet, just keeping
+        # --- form consistent with `.row_display_order()` and we'll elaborate this when
+        # --- we add sort-by-value to columns.
+        return _ColumnOrderHelper(dimensions, second_order_measures)._display_order
 
     @classmethod
     def row_display_order(cls, dimensions, second_order_measures):
@@ -700,6 +705,10 @@ class _BaseOrderHelper(object):
     def _rows_dimension(self):
         """The `Dimension` object representing row elements in the matrix."""
         return self._dimensions[0]
+
+
+class _ColumnOrderHelper(_BaseOrderHelper):
+    """Encapsulates the complexity of the various kinds of column ordering."""
 
 
 class _RowOrderHelper(_BaseOrderHelper):

@@ -11,6 +11,7 @@ from cr.cube.enums import COLLATION_METHOD as CM, DIMENSION_TYPE as DT
 from cr.cube.matrix.assembler import (
     Assembler,
     _BaseOrderHelper,
+    _ColumnOrderHelper,
     _RowOrderHelper,
     _SortRowsByColumnValueHelper,
 )
@@ -1117,6 +1118,25 @@ class DescribeAssembler(object):
 
 class Describe_BaseOrderHelper(object):
     """Unit test suite for `cr.cube.matrix.assembler._BaseOrderHelper` object."""
+
+    def it_dispatches_to_the_right_column_order_helper(
+        self, request, dimensions_, second_order_measures_
+    ):
+        column_order_helper_ = instance_mock(
+            request, _ColumnOrderHelper, _display_order=np.array([-2, 1, -1, 2])
+        )
+        _ColumnOrderHelper_ = class_mock(
+            request,
+            "cr.cube.matrix.assembler._ColumnOrderHelper",
+            return_value=column_order_helper_,
+        )
+
+        column_order = _BaseOrderHelper.column_display_order(
+            dimensions_, second_order_measures_
+        )
+
+        _ColumnOrderHelper_.assert_called_once_with(dimensions_, second_order_measures_)
+        assert column_order.tolist() == [-2, 1, -1, 2]
 
     @pytest.mark.parametrize(
         "collation_method, HelperCls",
