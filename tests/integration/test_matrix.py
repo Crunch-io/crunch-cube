@@ -7,6 +7,7 @@ import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.cubepart import _Slice
+from cr.cube.matrix.assembler import _BaseOrderHelper
 
 from ..fixtures import CR
 
@@ -1484,3 +1485,64 @@ class DescribeAssembler(object):
         assembler = slice_._assembler
 
         assert assembler._row_order.tolist() == expected_value
+
+
+class Describe_BaseOrderHelper(object):
+    """Integration-test suite for `cr.cube.matrix._BaseOrderHelper`."""
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    @pytest.mark.parametrize(
+        "fixture, element_ids, expected_value",
+        (
+            (CR.CAT_4_X_CAT_5, [999, 1, 3, 2], [3, 0, 2, 1]),
+            (CR.CAT_X_MR_2, [5, 1, 6, 4, 0, 2], [4, 0, 5, 3, 2, 1]),
+            (CR.MR_X_CAT, [3, 5, 1, 4, 2], [2, 4, 0, 3, 1]),
+            (CR.MR_X_MR, [2, 0, 3, 1], [1, 3, 2, 0]),
+        ),
+    )
+    def it_can_compute_an_explicit_row_order(
+        self, fixture, element_ids, expected_value
+    ):
+        transforms = {
+            "rows_dimension": {
+                "order": {
+                    "type": "explicit",
+                    "element_ids": element_ids,
+                }
+            }
+        }
+        assembler = _Slice(Cube(fixture), 0, transforms, None, 0)._assembler
+        row_display_order = _BaseOrderHelper.row_display_order(
+            assembler._dimensions, assembler._measures
+        )
+
+        assert row_display_order.tolist() == expected_value
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    @pytest.mark.parametrize(
+        "fixture, element_ids, expected_value",
+        (
+            (CR.CAT_4_X_CAT_5, [3, 1, 2], [2, 0, 1, 3, 4]),
+            (CR.CAT_X_MR_2, [5, 1, 4, 2], [4, 0, 3, 1, 2]),
+            (CR.MR_X_CAT, [0, 5, 1, 4, 2], [2, 4, 0, 3, 1, 5]),
+            (CR.MR_X_MR, [2, 0, 3, 1], [1, 3, 2, 0]),
+        ),
+    )
+    def it_can_compute_an_explicit_column_order(
+        self, fixture, element_ids, expected_value
+    ):
+        transforms = {
+            "columns_dimension": {
+                "order": {
+                    "type": "explicit",
+                    "element_ids": element_ids,
+                }
+            }
+        }
+        assembler = _Slice(Cube(fixture), 0, transforms, None, 0)._assembler
+        column_display_order = _BaseOrderHelper.column_display_order(
+            assembler._dimensions, assembler._measures
+        )
+        print("element_ids == %s" % (assembler._dimensions[1].element_ids,))
+
+        assert column_display_order.tolist() == expected_value

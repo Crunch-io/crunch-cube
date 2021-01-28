@@ -610,6 +610,16 @@ class _BaseOrderHelper(object):
         self._second_order_measures = second_order_measures
 
     @classmethod
+    def column_display_order(cls, dimensions, second_order_measures):
+        """1D np.int64 ndarray of signed int idx for each column of measure matrix.
+
+        Negative values represent inserted-vector locations. Returned sequence reflects
+        insertion, hiding, pruning, and ordering transforms specified in the
+        columns-dimension.
+        """
+        raise NotImplementedError
+
+    @classmethod
     def row_display_order(cls, dimensions, second_order_measures):
         """1D np.int64 ndarray of signed int idx for each row of measure matrix.
 
