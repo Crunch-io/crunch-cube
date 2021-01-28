@@ -110,6 +110,13 @@ class _BaseUnweightedCubeCounts(_BaseCubeMeasure):
         )
 
     @lazyproperty
+    def columns_pruning_base(self):
+        """1D np.int64 ndarray of unweighted-N for each matrix column."""
+        raise NotImplementedError(  # pragma: no cover
+            "%s must implement `.columns_pruning_base`" % type(self).__name__
+        )
+
+    @lazyproperty
     def row_bases(self):
         """2D np.int64 ndarray of unweighted row-proportion denominator per cell."""
         raise NotImplementedError(  # pragma: no cover

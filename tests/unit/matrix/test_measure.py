@@ -69,6 +69,16 @@ class DescribeSecondOrderMeasures(object):
         MeasureCls_.assert_called_once_with(dimensions_, measures, cube_measures_)
         assert measure is measure_
 
+    def it_provides_access_to_the_columns_pruning_base(
+        self, _cube_measures_prop_, cube_measures_, unweighted_cube_counts_
+    ):
+        _cube_measures_prop_.return_value = cube_measures_
+        cube_measures_.unweighted_cube_counts = unweighted_cube_counts_
+        unweighted_cube_counts_.columns_pruning_base = np.array([8, 5, 7, 4])
+        measures = SecondOrderMeasures(None, None, None)
+
+        assert measures.columns_pruning_base.tolist() == [8, 5, 7, 4]
+
     def it_provides_access_to_the_rows_pruning_base(
         self, _cube_measures_prop_, cube_measures_, unweighted_cube_counts_
     ):
