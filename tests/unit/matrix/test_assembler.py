@@ -1222,6 +1222,42 @@ class Describe_BaseOrderHelper(object):
         return instance_mock(request, SecondOrderMeasures)
 
 
+class Describe_ColumnOrderHelper(object):
+    """Unit test suite for `cr.cube.matrix.assembler._ColumnOrderHelper` object."""
+
+    @pytest.mark.parametrize(
+        "prune, empty_row_idxs, expected_value",
+        (
+            (False, None, False),
+            (True, (3,), False),
+            (True, (0, 1, 2), True),
+        ),
+    )
+    def it_knows_whether_to_prune_the_subtotal_columns_to_help(
+        self, request, dimension_, prune, empty_row_idxs, expected_value
+    ):
+        property_mock(
+            request, _ColumnOrderHelper, "_rows_dimension", return_value=dimension_
+        )
+        property_mock(
+            request,
+            _ColumnOrderHelper,
+            "_empty_row_idxs",
+            return_value=empty_row_idxs,
+        )
+        dimension_.prune = prune
+        dimension_.element_ids = (1, 2, 3)
+        order_helper = _ColumnOrderHelper(None, None)
+
+        assert order_helper._prune_subtotals is expected_value
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def dimension_(self, request):
+        return instance_mock(request, Dimension)
+
+
 class Describe_RowOrderHelper(object):
     """Unit test suite for `cr.cube.matrix.assembler._RowOrderHelper` object."""
 

@@ -710,6 +710,20 @@ class _BaseOrderHelper(object):
 class _ColumnOrderHelper(_BaseOrderHelper):
     """Encapsulates the complexity of the various kinds of column ordering."""
 
+    @lazyproperty
+    def _prune_subtotals(self):
+        """True if subtotal columns need to be pruned, False otherwise.
+
+        Subtotal-columns need to be pruned when all base-rows are pruned. Subtotal
+        columns are only subject to pruning when row-pruning is specified in the
+        request.
+        """
+        return (
+            len(self._empty_row_idxs) == len(self._rows_dimension.element_ids)
+            if self._rows_dimension.prune
+            else False
+        )
+
 
 class _RowOrderHelper(_BaseOrderHelper):
     """Encapsulates the complexity of the various kinds of row ordering."""
@@ -733,12 +747,14 @@ class _RowOrderHelper(_BaseOrderHelper):
     def _prune_subtotals(self):
         """True if subtotal rows need to be pruned, False otherwise.
 
-        Subtotal-rows need to be pruned when all base-columns are pruned.
+        Subtotal-rows need to be pruned when all base-columns are pruned. Subtotal rows
+        only subject to pruning when column-pruning is specified in the request.
         """
-        if not self._columns_dimension.prune:
-            return False
-
-        return len(self._empty_column_idxs) == len(self._columns_dimension.element_ids)
+        return (
+            len(self._empty_column_idxs) == len(self._columns_dimension.element_ids)
+            if self._columns_dimension.prune
+            else False
+        )
 
 
 class _SortRowsByColumnValueHelper(_RowOrderHelper):
