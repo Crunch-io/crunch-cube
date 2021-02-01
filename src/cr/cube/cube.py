@@ -530,7 +530,8 @@ class Cube(object):
                         "references": {
                             "alias": subrefs[i].get("alias") if subrefs else None,
                             "name": subrefs[i].get("name") if subrefs else None,
-                        }
+                        },
+                        "id": self._mean_subvariables[i],
                     },
                 },
             )

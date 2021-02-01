@@ -335,7 +335,12 @@ class Describe_Slice(object):
         "fixture, row_order, col_order, expectation",
         (
             (CR.CA_X_CAT_HS, [3, 1, 2], [3, 1, 2], "ca-x-cat-hs-explicit-order"),
-            (CR.CA_X_MR, [0, 1, 2, 5, 4], [3, 1, 2], "ca-x-mr-explicit-order"),
+            (
+                CR.CA_X_MR,
+                [0, 1, 2, 5, 4],
+                ["00c7", "00c5", "00c6"],
+                "ca-x-mr-explicit-order",
+            ),
             (CR.CAT_X_CAT, [1, 2], [3, 1], "cat-x-cat-explicit-order"),
             (CR.CAT_X_MR, [2, 1], [3, 2, 1], "cat-x-mr-explicit-order"),
             (CR.MR_X_CAT, [2, 1, 3, 4, 5], [5, 1, 4, 3, 2], "mr-x-cat-explicit-order"),
