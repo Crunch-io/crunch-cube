@@ -670,6 +670,14 @@ class _Element(object):
     @lazyproperty
     def element_id(self):
         """int identifier for this category or subvariable."""
+
+        value = self._element_dict.get("value", {})
+
+        # For subvariables, return the _actual_ (str) id.
+        if isinstance(value, dict) and "id" in value:
+            return value["id"]
+
+        # For categoricals, return the "normal" (int) id.
         return self._element_dict["id"]
 
     @lazyproperty

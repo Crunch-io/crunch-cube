@@ -45,6 +45,38 @@ class TestNumericArrays:
         np.testing.assert_almost_equal(slice_.means, expected_means)
         np.testing.assert_almost_equal(slice_.columns_base, expected_col_base)
 
+    @pytest.mark.parametrize(
+        "cube_idx, expected_means, expected_col_base",
+        (
+            (
+                None,
+                [
+                    #  --------Movies------------
+                    # S1    S2       S3
+                    [50.0, 90.0, 46.6666667],  # Wave: 2014-12
+                    [100.0, 81.0, 80.0],  # Wave: 2015-01
+                ],
+                [19, 18, 19],
+            ),
+            (
+                1,
+                [  # -------Wave-----
+                    # 2014-12   2015-01
+                    [50.000000, 100.0000],  # S1: Mov A
+                    [90.000000, 81.00000],  # S2: Mov B
+                    [46.6666667, 80.0000],  # S3: Mov C
+                ],
+                [[10, 9], [8, 10], [9, 10]],
+            ),
+        ),
+    )
+    def test_num_arr_grouped_by_date(self, cube_idx, expected_means, expected_col_base):
+        """Test means on numeric array, grouped by single categorical dimension."""
+        slice_ = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_DATE, cube_idx=cube_idx).partitions[0]
+
+        np.testing.assert_almost_equal(slice_.means, expected_means)
+        np.testing.assert_almost_equal(slice_.columns_base, expected_col_base)
+
     def test_num_arr_grouped_by_cat_weighted(self):
         """Test means on numeric array, grouped by single categorical dimension."""
         slice_ = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT_WEIGHTED).partitions[0]
