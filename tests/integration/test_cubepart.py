@@ -342,15 +342,35 @@ class Describe_Slice(object):
                 "ca-x-mr-explicit-order",
             ),
             (CR.CAT_X_CAT, [1, 2], [3, 1], "cat-x-cat-explicit-order"),
-            (CR.CAT_X_MR, [2, 1], [3, 2, 1], "cat-x-mr-explicit-order"),
-            (CR.MR_X_CAT, [2, 1, 3, 4, 5], [5, 1, 4, 3, 2], "mr-x-cat-explicit-order"),
+            (CR.CAT_X_MR, [2, 1], ["0002", "0001", "0000"], "cat-x-mr-explicit-order"),
+            (
+                CR.MR_X_CAT,
+                ["00c1", "00c0", "00c2", "00c3", "00c4"],
+                [5, 1, 4, 3, 2],
+                "mr-x-cat-explicit-order",
+            ),
             (
                 CR.MR_X_CAT_HS_MT,
-                [5, 1, 4, 2, 3],
+                ["00c4", "00c0", "00c3", "00c1", "00c2"],
                 [5, 1, 4, 3, 2],
                 "mr-x-cat-hs-explicit-order",
             ),
-            (CR.MR_X_MR, [1, 2, 3, 0], [2, 1, 3, 0], "mr-x-mr-explicit-order"),
+            (
+                CR.MR_X_MR,
+                [
+                    "da1129bc216d48e9b8ee5229c1b26c79",
+                    "8e6c724d95994da1a483b96f39fcd661",
+                    "8190dd271bea45f8b2a4204780ce7168",
+                    "Any",
+                ],
+                [
+                    "8e6c724d95994da1a483b96f39fcd661",
+                    "da1129bc216d48e9b8ee5229c1b26c79",
+                    "8190dd271bea45f8b2a4204780ce7168",
+                    "Any",
+                ],
+                "mr-x-mr-explicit-order",
+            ),
         ),
     )
     def it_respects_explicit_order_transform_for_dim_types(
