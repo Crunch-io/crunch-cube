@@ -672,8 +672,7 @@ class _Element(object):
         """int identifier for this category or subvariable."""
 
         value = self._element_dict.get("value", {})
-        # __import__("pprint").pprint(value)
-        # __import__("ipdb").set_trace()
+
         # For subvariables, return the _actual_ (str) id.
         if isinstance(value, dict) and "id" in value:
             return value["id"]
