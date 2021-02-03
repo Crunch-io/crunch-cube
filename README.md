@@ -113,6 +113,9 @@ The detailed description can be found
 ## Changes
 
 ### 2.1.1
+- Handle numeric array explicit order
+
+### 2.1.1
 - Custom column bases for Numeric Array matrix types
 
 ### 2.1.0
