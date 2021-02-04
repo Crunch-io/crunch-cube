@@ -13,6 +13,23 @@ from ..fixtures import NA
 class TestNumericArrays:
     """Test-suite for numeric-array behaviors."""
 
+    def test_nur_arr_scale_measures(self):
+        slice_ = Cube(NA.NUM_ARR_MEANS_SCALE_MEASURES).partitions[0]
+
+        np.testing.assert_array_almost_equal(
+            slice_.means,
+            [
+                [np.nan, np.nan, np.nan, np.nan],
+                [70.0, 66.66666667, 65.0, 63.33333333],
+                [53.2, 70.0, 63.4, 26.8],
+                [62.7520436, 65.58528428, 62.3880597, 57.02997275],
+                [70.0, 67.69230769, 49.23076923, 39.23076923],
+            ],
+        )
+        np.testing.assert_array_almost_equal(
+            slice_.columns_scale_median, [4.0, 3.0, 3.0, 4.0]
+        )
+
     @pytest.mark.parametrize(
         "cube_idx, expected_means, expected_col_base",
         (
