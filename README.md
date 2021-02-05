@@ -112,7 +112,10 @@ The detailed description can be found
 
 ## Changes
 
-### 2.1.1
+### 2.1.3
+- Transpose dimension for numeric arrays
+
+### 2.1.2
 - Handle numeric array explicit order
 
 ### 2.1.1
