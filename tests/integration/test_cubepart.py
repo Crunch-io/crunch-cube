@@ -886,12 +886,11 @@ class Describe_Strand(object):
 
         assert strand.means == pytest.approx(
             [
-                74.50346,
-                83.41506,
+                74.50347,
                 83.82950,
                 80.44270,
                 79.38796,
-                68.23024,
+                68.23023,
                 77.02289,
                 78.86550,
                 85.31353,
@@ -918,21 +917,14 @@ class Describe_Strand(object):
                 78.11554,
                 76.16142,
                 76.43885,
-                71.04146,
-                82.79688,
-                54.20534,
             ]
         )
         assert strand.ndim == 1
         assert strand.rows_base.tolist() == [
             806,
             14,
-            14,
             28,
             780,
-            42,
-            1114,
-            28,
             24,
             746,
             2,
@@ -961,8 +953,8 @@ class Describe_Strand(object):
             28,
             12,
         ]
-        assert strand.shape == (35,)
-        assert strand.table_base_range.tolist() == [17615, 17615]
+        assert strand.shape == (31,)
+        assert strand.table_base_range.tolist() == [16417, 16417]
         # --- means cube that also has counts has a table-margin ---
         # TODO: This should be something like [2685.782, 2685.782] because weighted
         # cube_counts are present in the payload. It's NaN here because there's

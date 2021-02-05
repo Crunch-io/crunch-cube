@@ -40,15 +40,15 @@ class TestHeadersAndSubtotals(object):
         ]
 
     def test_headings_econ_blame_two_subtotal_without_missing(self):
-        strand = Cube(CR.ECON_BLAME_WITH_HS_MISSING).partitions[0]
+        strand = Cube(CR.CAT_HS_MT).partitions[0]
         assert strand.row_labels.tolist() == [
-            "President Obama",
-            "Republicans in Congress",
-            "Test New Heading (Obama and Republicans)",
+            "President O",
+            "Republicans",
+            "Test New He",
             "Both",
             "Neither",
             "Not sure",
-            "Test Heading with Skipped",
+            "Test Headin",
         ]
 
     def test_headings_two_subtotal_without_missing_do_not_fetch(self):
@@ -56,12 +56,10 @@ class TestHeadersAndSubtotals(object):
             "columns_dimension": {"insertions": {}},
             "rows_dimension": {"insertions": {}},
         }
-        strand = Cube(CR.ECON_BLAME_WITH_HS_MISSING, transforms=transforms).partitions[
-            0
-        ]
+        strand = Cube(CR.CAT_HS_MT, transforms=transforms).partitions[0]
         assert strand.row_labels.tolist() == [
-            "President Obama",
-            "Republicans in Congress",
+            "President O",
+            "Republicans",
             "Both",
             "Neither",
             "Not sure",
@@ -84,7 +82,7 @@ class TestHeadersAndSubtotals(object):
         np.testing.assert_array_equal(counts, (285, 396, 242, 6, 68))
 
     def test_1D_subtotals_counts_missing_excluded(self):
-        strand = Cube(CR.ECON_BLAME_WITH_HS_MISSING).partitions[0]
+        strand = Cube(CR.CAT_HS_MT).partitions[0]
         counts = strand.counts
         np.testing.assert_array_equal(counts, (285, 396, 681, 242, 6, 68, 74))
 
@@ -110,7 +108,7 @@ class TestHeadersAndSubtotals(object):
         )
 
     def test_1D_subtotals_proportions_missing_excluded(self):
-        strand = Cube(CR.ECON_BLAME_WITH_HS_MISSING).partitions[0]
+        strand = Cube(CR.CAT_HS_MT).partitions[0]
         table_proportions = strand.table_proportions
         np.testing.assert_almost_equal(
             table_proportions,
@@ -126,15 +124,15 @@ class TestHeadersAndSubtotals(object):
         )
 
     def test_1D_subtotals_row_base(self):
-        strand = Cube(CR.ECON_BLAME_WITH_HS_MISSING).partitions[0]
-        np.testing.assert_equal(strand.rows_base, [285, 396, 681, 242, 6, 68, 74])
+        strand = Cube(CR.CAT_HS_MT).partitions[0]
+        assert strand.rows_base.tolist() == [285, 396, 681, 242, 6, 68, 74]
 
     def test_1D_subtotals_rows_dimension_fills(self):
-        strand = Cube(CR.ECON_BLAME_WITH_HS_MISSING).partitions[0]
+        strand = Cube(CR.CAT_HS_MT).partitions[0]
         assert strand.rows_dimension_fills == (None,) * 7
 
     def test_1D_subtotals_inserted_row_idxs(self):
-        strand = Cube(CR.ECON_BLAME_WITH_HS_MISSING).partitions[0]
+        strand = Cube(CR.CAT_HS_MT).partitions[0]
         assert strand.inserted_row_idxs == (2, 6)
 
     def test_1D_means_mr_subtotals_hidden(self):
