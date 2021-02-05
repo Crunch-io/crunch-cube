@@ -390,9 +390,9 @@ class Cube(object):
     def valid_counts_summary(self):
         """ndarray of summary valid counts"""
         if self.valid_counts.any():
-            # --- In case of ndim > 2 the sum should be done on the second axes to get
+            # --- In case of ndim >= 2 the sum should be done on the second axes to get
             # --- the correct sequence of valid count (e.g. CA_SUBVAR).
-            axis = 1 if len(self._all_dimensions) > 2 else 0
+            axis = 1 if len(self._all_dimensions) >= 2 else 0
             return np.sum(self.valid_counts, axis=axis)
         return np.empty(0)
 
@@ -428,14 +428,11 @@ class Cube(object):
         cube_dict = copy.deepcopy(self._cube_response)
         if self._mean_subvariables:
             dimensions = cube_dict.get("result", {}).get("dimensions", [])
-            # ---cube inflation---
-            # ---In case of numeric arrays, we need to inflate the columns dimension
-            # ---according to the mean subvariables. For each subvar the col dimension
+            # ---dim inflation---
+            # ---In case of numeric arrays, we need to inflate the row dimension
+            # ---according to the mean subvariables. For each subvar the row dimension
             # ---will have a new element related to the subvar metadata.
-            if self._cube_idx_arg:
-                dimensions.insert(0, self._numeric_array_dimension)
-            else:
-                dimensions.append(self._numeric_array_dimension)
+            dimensions.insert(0, self._numeric_array_dimension)
         return cube_dict
 
     @lazyproperty
@@ -506,24 +503,24 @@ class Cube(object):
 
     @lazyproperty
     def _numeric_array_dimension(self):
-        """Column dimension object according to the mean subvariables."""
+        """Row dimension object according to the mean subvariables."""
         if not self._mean_subvariables:
             return None
         subrefs = self._mean_references.get("subreferences", [])
-        column_dimension = {
+        row_dimension = {
             "references": {
                 "alias": self._mean_references.get("alias", "mean"),
                 "name": self._mean_references.get("name", "mean"),
             },
             "type": {"elements": [], "class": "enum", "subtype": {"class": "num_arr"}},
         }
-        # ---In case of numeric arrays the column dimension should contains additional
+        # ---In case of numeric arrays the row dimension should contains additional
         # ---information related to the subreferences for each subvariable of the
         # ---array.
         for i, _ in enumerate(self._mean_subvariables):
-            # ---The column dimensions elements must be expanded with the alias and the
+            # ---The row dimensions elements must be expanded with the alias and the
             # ---name of the numeric array mean measure subreferences.
-            column_dimension["type"].get("elements", []).append(
+            row_dimension["type"].get("elements", []).append(
                 {
                     "id": i,
                     "value": {
@@ -535,7 +532,7 @@ class Cube(object):
                     },
                 },
             )
-        return column_dimension
+        return row_dimension
 
     @lazyproperty
     def _slice_idxs(self):
@@ -716,15 +713,12 @@ class _BaseMeasure(object):
     def requires_array_transposition(self):
         """True if raw cube array needs transposition, False otherwise.
 
-        When a Cube is part of a cubeset and one of the dimension type is a NUM_ARRAY,
-        it's cube_array values have to be transposed.
-        This business rule needs to drive correctly tabbook exports when a numeric array
-        dimension is expressed.
+        When one of the dimension type is a NUM_ARRAY, it's cube_array values have to be
+        transposed. This business rule needs to drive correctly tabbook and deck exports
+        when a numeric array dimension is expressed.
         """
-        return (
-            self._cube_idx_arg is not None
-            and len(self._all_dimensions) >= 2
-            and any([d.dimension_type == DT.NUM_ARRAY for d in self._all_dimensions])
+        return len(self._all_dimensions) >= 2 and any(
+            [d.dimension_type == DT.NUM_ARRAY for d in self._all_dimensions]
         )
 
     @lazyproperty
@@ -737,12 +731,8 @@ class _BaseMeasure(object):
         )
         if not valid_counts:
             return np.empty(0)
-        valid_counts_array = np.array(valid_counts).reshape(self._all_dimensions.shape)
-        return (
-            valid_counts_array.T
-            if self.requires_array_transposition
-            else valid_counts_array
-        )
+
+        return np.array(valid_counts).reshape(self._shape)
 
     @lazyproperty
     def _flat_values(self):  # pragma: no cover

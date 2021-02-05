@@ -685,16 +685,15 @@ class DescribeMeasures(object):
 
 class Describe_BaseMeasure(object):
     @pytest.mark.parametrize(
-        "cube_idx_arg, dim_types, expected_value",
+        "dim_types, expected_value",
         (
-            (1, (DT.CAT, DT.NUM_ARRAY), True),
-            (1, (DT.CAT, DT.CA_SUBVAR), False),
-            (1, (DT.NUM_ARRAY,), False),
-            (None, (DT.CAT, DT.NUM_ARRAY), False),
+            ((DT.CAT, DT.NUM_ARRAY), True),
+            ((DT.CAT, DT.CA_SUBVAR), False),
+            ((DT.NUM_ARRAY,), False),
         ),
     )
     def it_knows_if_require_array_transposition(
-        self, request, cube_idx_arg, dim_types, expected_value
+        self, request, dim_types, expected_value
     ):
         all_dimensions = tuple(
             instance_mock(request, Dimension, name="dim-%d" % idx, dimension_type=dt)
@@ -702,7 +701,7 @@ class Describe_BaseMeasure(object):
         )
 
         assert (
-            _BaseMeasure({}, all_dimensions, cube_idx_arg).requires_array_transposition
+            _BaseMeasure({}, all_dimensions, None).requires_array_transposition
             is expected_value
         )
 
