@@ -1,0 +1,318 @@
+{
+  "query": {
+    "measures": {
+      "count": {
+        "function": "cube_count",
+        "args": []
+      },
+      "valid_count_unweighted": {
+        "function": "cube_valid_count",
+        "args": [
+          {
+            "variable": "5208432eb22e43c88d601520b062eedd"
+          }
+        ]
+      },
+      "mean": {
+        "function": "cube_mean",
+        "args": [
+          {
+            "variable": "5208432eb22e43c88d601520b062eedd"
+          }
+        ]
+      }
+    },
+    "dimensions": [
+      {
+        "variable": "3QPnyW5KMYriuoG5PCewcD000002"
+      }
+    ],
+    "weight": "http://127.0.0.1:8080/datasets/03a093a767784455959dc93da9834ae6/variables/19d549d65717451f839c52194efbe5c2/"
+  },
+  "query_environment": {
+    "filter": []
+  },
+  "result": {
+    "dimensions": [
+      {
+        "references": {
+          "alias": "country",
+          "name": "Country",
+          "description": ""
+        },
+        "derived": false,
+        "type": {
+          "ordinal": false,
+          "class": "categorical",
+          "categories": [
+            {
+              "numeric_value": 1,
+              "id": 1,
+              "name": "Argentina",
+              "missing": false
+            },
+            {
+              "numeric_value": 2,
+              "id": 2,
+              "name": "Australia",
+              "missing": false
+            },
+            {
+              "numeric_value": 3,
+              "id": 3,
+              "name": "Austria",
+              "missing": false
+            },
+            {
+              "numeric_value": 4,
+              "id": 4,
+              "name": "Belgium",
+              "missing": false
+            },
+            {
+              "numeric_value": 5,
+              "id": 5,
+              "name": "Brazil",
+              "missing": false
+            },
+            {
+              "numeric_value": null,
+              "id": -1,
+              "name": "No Data",
+              "missing": true
+            }
+          ]
+        }
+      }
+    ],
+    "missing": 0,
+    "measures": {
+      "count": {
+        "data": [
+          0.0,
+          2.21,
+          2.1666666667,
+          3.9758333333,
+          4.6475,
+          0.0
+        ],
+        "n_missing": 0,
+        "metadata": {
+          "references": {},
+          "derived": true,
+          "type": {
+            "integer": false,
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "class": "numeric"
+          }
+        }
+      },
+      "valid_count_unweighted": {
+        "data": [
+          4,
+          3,
+          4,
+          4,
+          4,
+          3,
+          3,
+          4,
+          4,
+          3,
+          3,
+          4,
+          4,
+          3,
+          3,
+          4,
+          3,
+          4,
+          4,
+          4,
+          0,
+          0,
+          0,
+          0
+        ],
+        "n_missing": 0,
+        "metadata": {
+          "references": {
+            "uniform_basis": false,
+            "description": "Testing-Description Text",
+            "subreferences": [
+              {
+                "alias": "My c1 H",
+                "name": "My c1 H"
+              },
+              {
+                "alias": "My c3",
+                "name": "My c3"
+              },
+              {
+                "alias": "My c2 H",
+                "name": "My c2 H"
+              },
+              {
+                "alias": "My c4",
+                "name": "My c4"
+              }
+            ],
+            "notes": "Test note",
+            "alias": "Num array appended",
+            "name": "Num array"
+          },
+          "derived": true,
+          "type": {
+            "integer": false,
+            "class": "numeric",
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "subvariables": [
+              "0001",
+              "0003",
+              "0002",
+              "0004"
+            ]
+          }
+        }
+      },
+      "mean": {
+        "data": [
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          70.0,
+          66.6666666667,
+          65.0,
+          63.3333333333,
+          53.2,
+          70.0,
+          63.4,
+          26.8,
+          62.7520435967,
+          65.5852842809,
+          62.3880597015,
+          57.029972752,
+          70.0,
+          67.6923076923,
+          49.2307692308,
+          39.2307692308,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          }
+        ],
+        "n_missing": 0,
+        "metadata": {
+          "references": {
+            "uniform_basis": false,
+            "description": "Testing-Description Text",
+            "subreferences": [
+              {
+                "alias": "My c1 H",
+                "name": "My c1 H"
+              },
+              {
+                "alias": "My c3",
+                "name": "My c3"
+              },
+              {
+                "alias": "My c2 H",
+                "name": "My c2 H"
+              },
+              {
+                "alias": "My c4",
+                "name": "My c4"
+              }
+            ],
+            "notes": "Test note",
+            "alias": "Num array appended",
+            "name": "Num array"
+          },
+          "derived": true,
+          "type": {
+            "integer": false,
+            "class": "numeric",
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1,
+              "NaN": -8
+            },
+            "subvariables": [
+              "0001",
+              "0003",
+              "0002",
+              "0004"
+            ]
+          }
+        }
+      }
+    },
+    "n": 20,
+    "filter_stats": {
+      "filtered_complete": {
+        "unweighted": {
+          "selected": 20,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 13.0,
+          "other": 0,
+          "missing": 0
+        }
+      },
+      "filtered": {
+        "unweighted": {
+          "selected": 20,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 13.0,
+          "other": 0,
+          "missing": 0
+        }
+      }
+    },
+    "unfiltered": {
+      "unweighted_n": 20,
+      "weighted_n": 13.0
+    },
+    "filtered": {
+      "unweighted_n": 20,
+      "weighted_n": 13.0
+    },
+    "counts": [
+      4,
+      4,
+      4,
+      4,
+      4,
+      0
+    ],
+    "element": "crunch:cube"
+  }
+}

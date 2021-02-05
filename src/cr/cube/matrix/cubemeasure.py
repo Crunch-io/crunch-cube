@@ -843,8 +843,6 @@ class BaseCubeResultMatrix(object):
         MatrixCls = (
             _NumArrayXMrMeansMatrix
             if dimension_types == (DT.NUM_ARRAY, DT.MR)
-            else _MrXNumArrayMeansMatrix
-            if dimension_types == (DT.MR, DT.NUM_ARRAY)
             else _NumArrayXCatMeansMatrix
             if dimension_types[0] == DT.NUM_ARRAY
             else _MrXCatMeansMatrix
@@ -1688,20 +1686,6 @@ class _MrXCatMeansMatrix(_MrXCatMatrix):
     def means(self):
         """2D np.float64 ndarray of mean for each valid matrix cell."""
         return self._means[:, 0, :]
-
-
-class _MrXNumArrayMeansMatrix(_MrXCatMeansMatrix):
-    """MR_X_NUM_ARR slice with means measure instead of counts."""
-
-    @lazyproperty
-    def columns_base(self):
-        """2D np.int64 ndarray of unweighted-N for this matrix.
-
-        An MR_X_NUM_ARR matrix has a distinct column-base for each cell. In this case
-        the column base is the unweighted counts sliced for all the subvar on the MR
-        (selected) dimension and all the subvars on the NUM ARRAY one.
-        """
-        return self._unweighted_counts[:, 0, :]
 
 
 class _NumArrayXCatMeansMatrix(_CatXCatMeansMatrix):

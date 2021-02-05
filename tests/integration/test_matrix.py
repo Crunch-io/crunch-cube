@@ -650,10 +650,7 @@ class DescribeAssembler(object):
                 },
                 "columns_dimension": {
                     "elements": {"1": {"hide": True}},
-                    "order": {
-                        "type": "explicit",
-                        "element_ids": ["00c4", "00c0", "00c3", "00c1", "00c2"],
-                    },
+                    "order": {"type": "explicit", "element_ids": [5, 1, 4, 2, 3]},
                 },
             },
             population=None,
@@ -801,10 +798,7 @@ class DescribeAssembler(object):
     def it_computes_cat_x_mr_table_margin_with_explicit_ordering(self):
         transforms = {
             "columns_dimension": {
-                "order": {
-                    "type": "explicit",
-                    "element_ids": ["00c4", "00c0", "00c3", "00c1"],
-                }
+                "order": {"type": "explicit", "element_ids": [5, 1, 6, 4, 0, 2]}
             }
         }
         slice_ = Cube(CR.CAT_X_MR_2, transforms=transforms).partitions[0]
@@ -817,10 +811,7 @@ class DescribeAssembler(object):
     def it_computes_mr_x_cat_table_margin_with_explicit_ordering(self):
         transforms = {
             "rows_dimension": {
-                "order": {
-                    "type": "explicit",
-                    "element_ids": ["00c4", "00c0", "00c3", "00c1"],
-                }
+                "order": {"type": "explicit", "element_ids": [5, 1, 6, 4, 0, 2]}
             }
         }
         slice_ = Cube(CR.MR_X_CAT, transforms=transforms).partitions[0]

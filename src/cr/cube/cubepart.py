@@ -485,13 +485,14 @@ class _Slice(CubePartition):
 
         not_a_nan_index = ~np.isnan(self._rows_dimension_numeric_values)
         numeric_values = self._rows_dimension_numeric_values[not_a_nan_index]
-        counts = self.counts[not_a_nan_index, :].astype("int64")
+        counts = np.nan_to_num(self.counts[not_a_nan_index, :]).astype("int64")
         scale_median = np.array(
             [
                 self._median(np.repeat(numeric_values, counts[:, i]))
                 for i in range(counts.shape[1])
             ]
         )
+
         return scale_median
 
     @lazyproperty
@@ -521,7 +522,7 @@ class _Slice(CubePartition):
 
         not_a_nan_mask = ~np.isnan(self._rows_dimension_numeric_values)
         numeric_values = self._rows_dimension_numeric_values[not_a_nan_mask]
-        counts = rows_margin[not_a_nan_mask].astype("int64")
+        counts = np.nan_to_num(rows_margin[not_a_nan_mask]).astype("int64")
         unwrapped_num_values = np.repeat(numeric_values, counts)
         return (
             np.median(unwrapped_num_values) if unwrapped_num_values.size != 0 else None
@@ -874,7 +875,7 @@ class _Slice(CubePartition):
 
         not_a_nan_index = ~np.isnan(self._columns_dimension_numeric_values)
         numeric_values = self._columns_dimension_numeric_values[not_a_nan_index]
-        counts = self.counts[:, not_a_nan_index].astype("int64")
+        counts = np.nan_to_num(self.counts[:, not_a_nan_index]).astype("int64")
         scale_median = np.array(
             [
                 self._median(np.repeat(numeric_values, counts[i, :]))
@@ -910,7 +911,7 @@ class _Slice(CubePartition):
 
         not_a_nan_index = ~np.isnan(self._columns_dimension_numeric_values)
         numeric_values = self._columns_dimension_numeric_values[not_a_nan_index]
-        counts = columns_margin[not_a_nan_index].astype("int64")
+        counts = np.nan_to_num(columns_margin[not_a_nan_index]).astype("int64")
         unwrapped_num_values = np.repeat(numeric_values, counts)
         return (
             np.median(unwrapped_num_values) if unwrapped_num_values.size != 0 else None
@@ -1363,7 +1364,9 @@ class _Strand(CubePartition):
         if np.all(np.isnan(self._numeric_values)):
             return None
         numeric_values = self._numeric_values[self._numeric_values_mask]
-        counts = self._counts_as_array[self._numeric_values_mask].astype("int64")
+        counts = np.nan_to_num(self._counts_as_array[self._numeric_values_mask]).astype(
+            "int64"
+        )
         unwrapped_numeric_values = np.repeat(numeric_values, counts)
         return np.median(unwrapped_numeric_values)
 
