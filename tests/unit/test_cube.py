@@ -466,8 +466,20 @@ class DescribeCube(object):
                     ]
                 },
                 [
-                    {"id": 0, "value": {"references": {"alias": "A", "name": "A"}}},
-                    {"id": 1, "value": {"references": {"alias": "B", "name": "B"}}},
+                    {
+                        "id": 0,
+                        "value": {
+                            "id": "001",
+                            "references": {"alias": "A", "name": "A"},
+                        },
+                    },
+                    {
+                        "id": 1,
+                        "value": {
+                            "id": "002",
+                            "references": {"alias": "B", "name": "B"},
+                        },
+                    },
                 ],
             ),
         ),
