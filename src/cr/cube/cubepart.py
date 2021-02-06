@@ -24,7 +24,6 @@ from cr.cube.min_base_size_mask import MinBaseSizeMask
 from cr.cube.matrix import Assembler
 from cr.cube.measures.pairwise_significance import PairwiseSignificance
 from cr.cube.noa.smoothing import SingleSidedMovingAvgSmoother
-from cr.cube.old_stripe import TransformedStripe
 from cr.cube.scalar import MeansScalar
 from cr.cube.stripe.assembler import StripeAssembler
 from cr.cube.util import lazyproperty
@@ -1540,13 +1539,6 @@ class _Strand(CubePartition):
     def _row_transforms_dict(self):
         """Transforms dict for the single (rows) dimension of this strand."""
         return self._transforms_dict.get("rows_dimension", {})
-
-    @lazyproperty
-    def _stripe(self):
-        """The post-transforms 1D data-partition for this strand."""
-        return TransformedStripe.stripe(
-            self._cube, self._rows_dimension, self._ca_as_0th, self._slice_idx
-        )
 
 
 class _Nub(CubePartition):
