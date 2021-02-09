@@ -181,6 +181,12 @@ class Describe_CatXCatUnweightedCubeCounts(object):
         )
         assert unweighted_cube_counts.columns_base.tolist() == [5, 7, 9]
 
+    def it_knows_its_columns_pruning_base(self, raw_unweighted_counts):
+        unweighted_cube_counts = _CatXCatUnweightedCubeCounts(
+            None, raw_unweighted_counts
+        )
+        assert unweighted_cube_counts.columns_pruning_base.tolist() == [5, 7, 9]
+
     def it_knows_its_row_bases(self, request, raw_unweighted_counts):
         property_mock(
             request,
@@ -193,6 +199,12 @@ class Describe_CatXCatUnweightedCubeCounts(object):
         )
 
         assert unweighted_cube_counts.row_bases.tolist() == [[2, 2, 2], [1, 1, 1]]
+
+    def it_knows_its_rows_pruning_base(self, raw_unweighted_counts):
+        unweighted_cube_counts = _CatXCatUnweightedCubeCounts(
+            None, raw_unweighted_counts
+        )
+        assert unweighted_cube_counts.rows_pruning_base.tolist() == [6, 15]
 
     def it_knows_its_table_base(self, raw_unweighted_counts):
         unweighted_cube_counts = _CatXCatUnweightedCubeCounts(
@@ -253,6 +265,12 @@ class Describe_CatXMrUnweightedCubeCounts(object):
         )
         assert unweighted_cube_counts.columns_base.tolist() == [5, 7, 9]
 
+    def it_knows_its_columns_pruning_base(self, raw_unweighted_counts):
+        unweighted_cube_counts = _CatXMrUnweightedCubeCounts(
+            None, raw_unweighted_counts
+        )
+        assert unweighted_cube_counts.columns_pruning_base.tolist() == [14, 14, 14]
+
     def it_knows_its_row_bases(self, request):
         property_mock(
             request,
@@ -269,6 +287,12 @@ class Describe_CatXMrUnweightedCubeCounts(object):
             None, raw_unweighted_counts
         )
         assert unweighted_cube_counts.rows_base.tolist() == [[7, 7, 7], [7, 7, 7]]
+
+    def it_knows_its_rows_pruning_base(self, raw_unweighted_counts):
+        unweighted_cube_counts = _CatXMrUnweightedCubeCounts(
+            None, raw_unweighted_counts
+        )
+        assert unweighted_cube_counts.rows_pruning_base.tolist() == [21, 21]
 
     def it_knows_its_table_base(self, raw_unweighted_counts):
         unweighted_cube_counts = _CatXMrUnweightedCubeCounts(
@@ -336,6 +360,12 @@ class Describe_MrXCatUnweightedCubeCounts(object):
         )
         assert unweighted_cube_counts.columns_base.tolist() == [[5, 7, 9], [7, 12, 11]]
 
+    def it_knows_its_columns_pruning_base(self, raw_unweighted_counts):
+        unweighted_cube_counts = _MrXCatUnweightedCubeCounts(
+            None, raw_unweighted_counts
+        )
+        assert unweighted_cube_counts.columns_pruning_base.tolist() == [12, 19, 20]
+
     def it_knows_its_row_bases(self, request):
         property_mock(
             request,
@@ -358,6 +388,12 @@ class Describe_MrXCatUnweightedCubeCounts(object):
             None, raw_unweighted_counts
         )
         assert unweighted_cube_counts.rows_base.tolist() == [6, 24]
+
+    def it_knows_its_rows_pruning_base(self, raw_unweighted_counts):
+        unweighted_cube_counts = _MrXCatUnweightedCubeCounts(
+            None, raw_unweighted_counts
+        )
+        assert unweighted_cube_counts.rows_pruning_base.tolist() == [21, 30]
 
     def it_knows_its_table_base(self, raw_unweighted_counts):
         unweighted_cube_counts = _MrXCatUnweightedCubeCounts(
@@ -421,6 +457,10 @@ class Describe_MrXMrUnweightedCubeCounts(object):
         unweighted_cube_counts = _MrXMrUnweightedCubeCounts(None, raw_unweighted_counts)
         assert unweighted_cube_counts.columns_base.tolist() == [[2, 4], [10, 12]]
 
+    def it_knows_its_columns_pruning_base(self, raw_unweighted_counts):
+        unweighted_cube_counts = _MrXMrUnweightedCubeCounts(None, raw_unweighted_counts)
+        assert unweighted_cube_counts.columns_pruning_base.tolist() == [12, 16]
+
     def it_knows_its_row_bases(self, request):
         property_mock(
             request,
@@ -435,6 +475,10 @@ class Describe_MrXMrUnweightedCubeCounts(object):
     def it_knows_its_rows_base(self, raw_unweighted_counts):
         unweighted_cube_counts = _MrXMrUnweightedCubeCounts(None, raw_unweighted_counts)
         assert unweighted_cube_counts.rows_base.tolist() == [[8, 8], [8, 8]]
+
+    def it_knows_its_rows_pruning_base(self, raw_unweighted_counts):
+        unweighted_cube_counts = _MrXMrUnweightedCubeCounts(None, raw_unweighted_counts)
+        assert unweighted_cube_counts.rows_pruning_base.tolist() == [16, 16]
 
     def it_knows_its_table_base(self, raw_unweighted_counts):
         unweighted_cube_counts = _MrXMrUnweightedCubeCounts(None, raw_unweighted_counts)

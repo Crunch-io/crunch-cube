@@ -8,13 +8,21 @@ import pytest
 from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension, _Element, _Subtotal, _Subtotals
 from cr.cube.enums import COLLATION_METHOD as CM, DIMENSION_TYPE as DT
-from cr.cube.matrix.assembler import Assembler
+from cr.cube.matrix.assembler import (
+    Assembler,
+    _BaseOrderHelper,
+    _ColumnOrderHelper,
+    _RowOrderHelper,
+    _SortRowsByColumnValueHelper,
+)
 from cr.cube.matrix.cubemeasure import (
     BaseCubeResultMatrix,
     _CatXCatMatrix,
     _CatXCatMeansMatrix,
 )
 from cr.cube.matrix.measure import (
+    _BaseSecondOrderMeasure,
+    _ColumnProportions,
     _ColumnUnweightedBases,
     _ColumnWeightedBases,
     _RowUnweightedBases,
@@ -26,11 +34,53 @@ from cr.cube.matrix.measure import (
     _WeightedCounts,
 )
 
-from ...unitutil import class_mock, instance_mock, method_mock, property_mock
+from ...unitutil import (
+    class_mock,
+    instance_mock,
+    method_mock,
+    property_mock,
+)
 
 
 class DescribeAssembler(object):
     """Unit test suite for `cr.cube.matrix.assembler.Assembler` object."""
+
+    @pytest.mark.parametrize(
+        "measure_prop_name, MeasureCls",
+        (
+            ("column_proportions", _ColumnProportions),
+            ("column_unweighted_bases", _ColumnUnweightedBases),
+            ("column_weighted_bases", _ColumnWeightedBases),
+            ("row_unweighted_bases", _RowUnweightedBases),
+            ("row_weighted_bases", _RowWeightedBases),
+            ("table_unweighted_bases", _TableUnweightedBases),
+            ("table_weighted_bases", _TableWeightedBases),
+            ("weighted_counts", _WeightedCounts),
+            ("unweighted_counts", _UnweightedCounts),
+        ),
+    )
+    def it_assembles_various_measures(
+        self,
+        request,
+        _measures_prop_,
+        second_order_measures_,
+        _assemble_matrix_,
+        measure_prop_name,
+        MeasureCls,
+    ):
+        _measures_prop_.return_value = second_order_measures_
+        setattr(
+            second_order_measures_,
+            measure_prop_name,
+            instance_mock(request, MeasureCls, blocks=[["A", "B"], ["C", "D"]]),
+        )
+        _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+        assembler = Assembler(None, None, None)
+
+        value = getattr(assembler, measure_prop_name)
+
+        _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
+        assert value == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
     def it_knows_the_column_index(
         self,
@@ -72,38 +122,6 @@ class DescribeAssembler(object):
 
         _dimension_labels_.assert_called_once_with(assembler, dimension_, [0, 1, 2])
         assert column_labels.tolist() == ["Alpha", "Baker", "Charlie"]
-
-    def it_knows_the_column_unweighted_bases(
-        self, request, _measures_prop_, second_order_measures_, _assemble_matrix_
-    ):
-        column_unweighted_bases_ = instance_mock(
-            request, _ColumnUnweightedBases, blocks=[["A", "B"], ["C", "D"]]
-        )
-        _measures_prop_.return_value = second_order_measures_
-        second_order_measures_.column_unweighted_bases = column_unweighted_bases_
-        _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-        assembler = Assembler(None, None, None)
-
-        column_unweighted_bases = assembler.column_unweighted_bases
-
-        _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
-        assert column_unweighted_bases == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-
-    def it_knows_the_column_weighted_bases(
-        self, request, _measures_prop_, second_order_measures_, _assemble_matrix_
-    ):
-        column_weighted_bases_ = instance_mock(
-            request, _ColumnWeightedBases, blocks=[["A", "B"], ["C", "D"]]
-        )
-        _measures_prop_.return_value = second_order_measures_
-        second_order_measures_.column_weighted_bases = column_weighted_bases_
-        _assemble_matrix_.return_value = [[7, 8, 9], [4, 5, 6], [1, 2, 3]]
-        assembler = Assembler(None, None, None)
-
-        column_weighted_bases = assembler.column_weighted_bases
-
-        _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
-        assert column_weighted_bases == [[7, 8, 9], [4, 5, 6], [1, 2, 3]]
 
     def it_provides_a_1D_columns_base_for_a_CAT_X_cube_result(
         self,
@@ -287,38 +305,6 @@ class DescribeAssembler(object):
 
         _dimension_labels_.assert_called_once_with(assembler, dimension_, [0, 1, 2])
         assert row_labels.tolist() == ["Alpha", "Baker", "Charlie"]
-
-    def it_knows_the_row_unweighted_bases(
-        self, request, _measures_prop_, second_order_measures_, _assemble_matrix_
-    ):
-        row_unweighted_bases_ = instance_mock(
-            request, _RowUnweightedBases, blocks=[["A", "B"], ["C", "D"]]
-        )
-        _measures_prop_.return_value = second_order_measures_
-        second_order_measures_.row_unweighted_bases = row_unweighted_bases_
-        _assemble_matrix_.return_value = [[9, 8, 7], [6, 5, 4], [3, 2, 1]]
-        assembler = Assembler(None, None, None)
-
-        row_unweighted_bases = assembler.row_unweighted_bases
-
-        _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
-        assert row_unweighted_bases == [[9, 8, 7], [6, 5, 4], [3, 2, 1]]
-
-    def it_knows_the_row_weighted_bases(
-        self, request, _measures_prop_, second_order_measures_, _assemble_matrix_
-    ):
-        row_weighted_bases_ = instance_mock(
-            request, _RowWeightedBases, blocks=[["A", "B"], ["C", "D"]]
-        )
-        _measures_prop_.return_value = second_order_measures_
-        second_order_measures_.row_weighted_bases = row_weighted_bases_
-        _assemble_matrix_.return_value = [[9.9, 8.8, 7.7], [6.6, 5.5, 4.4]]
-        assembler = Assembler(None, None, None)
-
-        row_weighted_bases = assembler.row_weighted_bases
-
-        _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
-        assert row_weighted_bases == [[9.9, 8.8, 7.7], [6.6, 5.5, 4.4]]
 
     def it_provides_a_1D_rows_base_for_an_X_CAT_cube_result(
         self,
@@ -645,78 +631,6 @@ class DescribeAssembler(object):
         _assemble_matrix_.assert_called_once_with(assembler, [[[1], [2]], [[3], [4]]])
         assert table_stderrs == [[1, 3, 2], [4, 6, 5]]
 
-    def it_knows_the_table_unweighted_bases(
-        self, request, _measures_prop_, second_order_measures_, _assemble_matrix_
-    ):
-        table_unweighted_bases_ = instance_mock(
-            request, _TableUnweightedBases, blocks=[["A", "B"], ["C", "D"]]
-        )
-        _measures_prop_.return_value = second_order_measures_
-        second_order_measures_.table_unweighted_bases = table_unweighted_bases_
-        _assemble_matrix_.return_value = [[9, 8, 7], [6, 5, 4], [3, 2, 1]]
-        assembler = Assembler(None, None, None)
-
-        table_unweighted_bases = assembler.table_unweighted_bases
-
-        _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
-        assert table_unweighted_bases == [[9, 8, 7], [6, 5, 4], [3, 2, 1]]
-
-    def it_knows_the_table_weighted_bases(
-        self, request, _measures_prop_, second_order_measures_, _assemble_matrix_
-    ):
-        table_weighted_bases_ = instance_mock(
-            request, _TableWeightedBases, blocks=[["A", "B"], ["C", "D"]]
-        )
-        _measures_prop_.return_value = second_order_measures_
-        second_order_measures_.table_weighted_bases = table_weighted_bases_
-        _assemble_matrix_.return_value = [
-            [9.9, 8.8, 7.7],
-            [6.6, 5.5, 4.4],
-            [3.3, 2.2, 1.1],
-        ]
-        assembler = Assembler(None, None, None)
-
-        table_weighted_bases = assembler.table_weighted_bases
-
-        _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
-        assert table_weighted_bases == [
-            [9.9, 8.8, 7.7],
-            [6.6, 5.5, 4.4],
-            [3.3, 2.2, 1.1],
-        ]
-
-    def it_knows_the_unweighted_counts(
-        self, request, _measures_prop_, second_order_measures_, _assemble_matrix_
-    ):
-        unweighted_counts_ = instance_mock(
-            request, _UnweightedCounts, blocks=[["A", "B"], ["C", "D"]]
-        )
-        _measures_prop_.return_value = second_order_measures_
-        second_order_measures_.unweighted_counts = unweighted_counts_
-        _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-        assembler = Assembler(None, None, None)
-
-        unweighted_counts = assembler.unweighted_counts
-
-        _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
-        assert unweighted_counts == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-
-    def it_knows_the_weighted_counts(
-        self, request, _measures_prop_, second_order_measures_, _assemble_matrix_
-    ):
-        weighted_counts_ = instance_mock(
-            request, _WeightedCounts, blocks=[["A", "B"], ["C", "D"]]
-        )
-        _measures_prop_.return_value = second_order_measures_
-        second_order_measures_.weighted_counts = weighted_counts_
-        _assemble_matrix_.return_value = [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]
-        assembler = Assembler(None, None, None)
-
-        weighted_counts = assembler.weighted_counts
-
-        _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
-        assert weighted_counts == [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]
-
     def it_computes_zscores_for_a_CAT_X_CAT_slice(
         self,
         request,
@@ -831,41 +745,26 @@ class DescribeAssembler(object):
 
         assert vector.tolist() == [3, 2, 1, 5, 4, 3, 7]
 
-    @pytest.mark.parametrize(
-        "order, prune_subtotal_columns, expected_value",
-        (
-            (np.array([-1, 1, -2, 2, -3, 3]), False, [-1, 1, -2, 2, -3, 3]),
-            (np.array([-1, 1, -2, 2, -3, 3]), True, [1, 2, 3]),
-            (np.array([], dtype=int), True, []),
-        ),
-    )
     def it_knows_the_column_order_to_help(
         self,
         request,
-        _columns_dimension_prop_,
-        dimension_,
-        _empty_column_idxs_prop_,
-        _dimension_order_,
-        order,
-        prune_subtotal_columns,
-        expected_value,
+        _BaseOrderHelper_,
+        dimensions_,
+        _measures_prop_,
+        second_order_measures_,
     ):
-        _columns_dimension_prop_.return_value = dimension_
-        _empty_column_idxs_prop_.return_value = (4, 2)
-        _dimension_order_.return_value = order
-        property_mock(
-            request,
-            Assembler,
-            "_prune_subtotal_columns",
-            return_value=prune_subtotal_columns,
+        _measures_prop_.return_value = second_order_measures_
+        _BaseOrderHelper_.column_display_order.return_value = np.array(
+            [-1, 1, -2, 2, -3, 3]
         )
-        assembler = Assembler(None, None, None)
+        assembler = Assembler(None, dimensions_, None)
 
         column_order = assembler._column_order
 
-        _dimension_order_.assert_called_once_with(assembler, dimension_, (4, 2))
-        assert column_order.dtype == int
-        assert column_order.tolist() == expected_value
+        _BaseOrderHelper_.column_display_order.assert_called_once_with(
+            dimensions_, second_order_measures_
+        )
+        assert column_order.tolist() == [-1, 1, -2, 2, -3, 3]
 
     def it_provides_access_to_the_column_subtotals_to_help(
         self, _columns_dimension_prop_, dimension_, subtotals_
@@ -893,29 +792,6 @@ class DescribeAssembler(object):
         BaseCubeResultMatrix_.factory.assert_called_once_with(cube_, dimensions_, 42)
         assert cube_result_matrix is cube_result_matrix_
 
-    @pytest.mark.parametrize(
-        "collation_method, collator_class_name",
-        (
-            (CM.PAYLOAD_ORDER, "PayloadOrderCollator"),
-            (CM.EXPLICIT_ORDER, "ExplicitOrderCollator"),
-        ),
-    )
-    def it_computes_the_order_for_a_dimension_to_help(
-        self, request, dimension_, collation_method, collator_class_name
-    ):
-        CollatorCls_ = class_mock(
-            request, "cr.cube.matrix.assembler.%s" % collator_class_name
-        )
-        CollatorCls_.display_order.return_value = (1, -2, 3, 5, -1)
-        dimension_.collation_method = collation_method
-        assembler = Assembler(None, None, None)
-
-        dimension_order = assembler._dimension_order(dimension_, empty_idxs=[2, 4, 6])
-
-        CollatorCls_.display_order.assert_called_once_with(dimension_, [2, 4, 6])
-        assert dimension_order.shape == (5,)
-        assert dimension_order.tolist() == [1, -2, 3, 5, -1]
-
     def it_assembles_the_dimension_labels_to_help(self, request, dimension_):
         dimension_.valid_elements = tuple(
             instance_mock(request, _Element, label=label)
@@ -930,30 +806,6 @@ class DescribeAssembler(object):
         labels = assembler._dimension_labels(dimension_, order)
 
         assert labels.tolist() == ["Bravo", "Delta", "Top 2", "Charlie", "All"]
-
-    @pytest.mark.parametrize(
-        "base, expected_value",
-        (((1, 1, 1), ()), ((1, 0, 1), (1,)), ((0, 0, 0), (0, 1, 2))),
-    )
-    def it_knows_its_empty_column_idxs_to_help(
-        self, _cube_result_matrix_prop_, cube_result_matrix_, base, expected_value
-    ):
-        _cube_result_matrix_prop_.return_value = cube_result_matrix_
-        cube_result_matrix_.columns_pruning_base = np.array(base)
-
-        assert Assembler(None, None, None)._empty_column_idxs == expected_value
-
-    @pytest.mark.parametrize(
-        "base, expected_value",
-        (((1, 1, 1), ()), ((1, 0, 1), (1,)), ((0, 0, 0), (0, 1, 2))),
-    )
-    def it_knows_its_empty_row_idxs_to_help(
-        self, _cube_result_matrix_prop_, cube_result_matrix_, base, expected_value
-    ):
-        _cube_result_matrix_prop_.return_value = cube_result_matrix_
-        cube_result_matrix_.rows_pruning_base = np.array(base)
-
-        assert Assembler(None, None, None)._empty_row_idxs == expected_value
 
     def it_constructs_its_measures_collaborator_object_to_help(
         self, request, cube_, dimensions_, second_order_measures_
@@ -970,98 +822,26 @@ class DescribeAssembler(object):
         SecondOrderMeasures_.assert_called_once_with(cube_, dimensions_, 17)
         assert measures == second_order_measures_
 
-    @pytest.mark.parametrize(
-        "prune, empty_row_idxs, element_ids, expected_value",
-        (
-            (False, (), (), False),
-            (False, (1, 2, 3), (4, 5, 6), False),
-            (False, (1, 2), (7, 8, 9), False),
-            (True, (), (), True),
-            (True, (1, 2, 3), (4, 5, 6), True),
-            (True, (1, 2), (7, 8, 9), False),
-        ),
-    )
-    def it_knows_whether_its_subtotal_columns_should_be_pruned_to_help(
-        self,
-        _rows_dimension_prop_,
-        dimension_,
-        prune,
-        _empty_row_idxs_prop_,
-        empty_row_idxs,
-        element_ids,
-        expected_value,
-    ):
-        _rows_dimension_prop_.return_value = dimension_
-        dimension_.element_ids = element_ids
-        dimension_.prune = prune
-        _empty_row_idxs_prop_.return_value = empty_row_idxs
-
-        assert Assembler(None, None, None)._prune_subtotal_columns is expected_value
-
-    @pytest.mark.parametrize(
-        "prune, empty_col_idxs, element_ids, expected_value",
-        (
-            (False, (), (), False),
-            (False, (1, 2, 3), (4, 5, 6), False),
-            (False, (1, 2), (7, 8, 9), False),
-            (True, (), (), True),
-            (True, (1, 2, 3), (4, 5, 6), True),
-            (True, (1, 2), (7, 8, 9), False),
-        ),
-    )
-    def it_knows_whether_its_subtotal_rows_should_be_pruned_to_help(
-        self,
-        _columns_dimension_prop_,
-        dimension_,
-        prune,
-        _empty_column_idxs_prop_,
-        empty_col_idxs,
-        element_ids,
-        expected_value,
-    ):
-        _columns_dimension_prop_.return_value = dimension_
-        dimension_.element_ids = element_ids
-        dimension_.prune = prune
-        _empty_column_idxs_prop_.return_value = empty_col_idxs
-
-        assert Assembler(None, None, None)._prune_subtotal_rows is expected_value
-
-    @pytest.mark.parametrize(
-        "order, prune, expected",
-        (
-            # --- False -> not pruned ---
-            ([0, 1], False, [0, 1]),
-            # --- True, but no negative indices -> not pruned ---
-            ([0, 1], True, [0, 1]),
-            # --- False -> not pruned ---
-            ([0, -1, 1, -2], False, [0, -1, 1, -2]),
-            # --- True, with negative indices -> pruned ---
-            ([0, -1, 1, -2], True, [0, 1]),
-        ),
-    )
-    def it_knows_its_row_order_to_help(
+    def it_knows_the_row_order_to_help(
         self,
         request,
-        _dimension_order_,
-        dimension_,
-        order,
-        prune,
-        expected,
+        _BaseOrderHelper_,
+        dimensions_,
+        _measures_prop_,
+        second_order_measures_,
     ):
-        # --- Prepare mocks and return values ---
-        property_mock(request, Assembler, "_rows_dimension", return_value=dimension_)
-        fake_row_idxs = [0, 1, 2]
-        property_mock(request, Assembler, "_empty_row_idxs", return_value=fake_row_idxs)
-        _dimension_order_.return_value = np.array(order)
-        property_mock(request, Assembler, "_prune_subtotal_rows", return_value=prune)
-        assembler = Assembler(None, None, None)
+        _measures_prop_.return_value = second_order_measures_
+        _BaseOrderHelper_.row_display_order.return_value = np.array(
+            [-1, 1, -2, 2, -3, 3]
+        )
+        assembler = Assembler(None, dimensions_, None)
 
-        # --- Call the tested property ---
         row_order = assembler._row_order
 
-        # --- Perform assertions
-        assert row_order.tolist() == expected
-        _dimension_order_.assert_called_once_with(assembler, dimension_, fake_row_idxs)
+        _BaseOrderHelper_.row_display_order.assert_called_once_with(
+            dimensions_, second_order_measures_
+        )
+        assert row_order.tolist() == [-1, 1, -2, 2, -3, 3]
 
     def it_provides_access_to_the_row_subtotals_to_help(
         self, _rows_dimension_prop_, dimension_, subtotals_
@@ -1084,6 +864,10 @@ class DescribeAssembler(object):
     @pytest.fixture
     def _assemble_vector_(self, request):
         return method_mock(request, Assembler, "_assemble_vector")
+
+    @pytest.fixture
+    def _BaseOrderHelper_(self, request):
+        return class_mock(request, "cr.cube.matrix.assembler._BaseOrderHelper")
 
     @pytest.fixture
     def _column_order_prop_(self, request):
@@ -1118,20 +902,8 @@ class DescribeAssembler(object):
         return method_mock(request, Assembler, "_dimension_labels")
 
     @pytest.fixture
-    def _dimension_order_(self, request):
-        return method_mock(request, Assembler, "_dimension_order")
-
-    @pytest.fixture
     def dimensions_(self, request):
         return (instance_mock(request, Dimension), instance_mock(request, Dimension))
-
-    @pytest.fixture
-    def _empty_column_idxs_prop_(self, request):
-        return property_mock(request, Assembler, "_empty_column_idxs")
-
-    @pytest.fixture
-    def _empty_row_idxs_prop_(self, request):
-        return property_mock(request, Assembler, "_empty_row_idxs")
 
     @pytest.fixture
     def _measures_prop_(self, request):
@@ -1172,3 +944,373 @@ class DescribeAssembler(object):
     @pytest.fixture
     def ZscoreSubtotals_(self, request):
         return class_mock(request, "cr.cube.matrix.assembler.ZscoreSubtotals")
+
+
+class Describe_BaseOrderHelper(object):
+    """Unit test suite for `cr.cube.matrix.assembler._BaseOrderHelper` object."""
+
+    def it_dispatches_to_the_right_column_order_helper(
+        self, request, dimensions_, second_order_measures_
+    ):
+        column_order_helper_ = instance_mock(
+            request, _ColumnOrderHelper, _display_order=np.array([-2, 1, -1, 2])
+        )
+        _ColumnOrderHelper_ = class_mock(
+            request,
+            "cr.cube.matrix.assembler._ColumnOrderHelper",
+            return_value=column_order_helper_,
+        )
+
+        column_order = _BaseOrderHelper.column_display_order(
+            dimensions_, second_order_measures_
+        )
+
+        _ColumnOrderHelper_.assert_called_once_with(dimensions_, second_order_measures_)
+        assert column_order.tolist() == [-2, 1, -1, 2]
+
+    @pytest.mark.parametrize(
+        "collation_method, HelperCls",
+        (
+            (CM.OPPOSING_ELEMENT, _SortRowsByColumnValueHelper),
+            (CM.EXPLICIT_ORDER, _RowOrderHelper),
+            (CM.PAYLOAD_ORDER, _RowOrderHelper),
+        ),
+    )
+    def it_dispatches_to_the_right_row_order_helper(
+        self, request, dimensions_, second_order_measures_, collation_method, HelperCls
+    ):
+        dimensions_[0].collation_method = collation_method
+        helper_ = instance_mock(
+            request, HelperCls, _display_order=np.array([-1, 1, -2, 2])
+        )
+        HelperCls_ = class_mock(
+            request,
+            "cr.cube.matrix.assembler.%s" % HelperCls.__name__,
+            return_value=helper_,
+        )
+
+        row_order = _BaseOrderHelper.row_display_order(
+            dimensions_, second_order_measures_
+        )
+
+        HelperCls_.assert_called_once_with(dimensions_, second_order_measures_)
+        assert row_order.tolist() == [-1, 1, -2, 2]
+
+    def it_provides_access_to_the_columns_dimension_to_help(self, dimension_):
+        order_helper = _BaseOrderHelper((None, dimension_), None)
+        assert order_helper._columns_dimension is dimension_
+
+    @pytest.mark.parametrize(
+        "prune_subtotals, order, expected_value",
+        (
+            (True, (-1, 1, -2, 2, -3, 3), [1, 2, 3]),
+            (True, (1, 2, 3), [1, 2, 3]),
+            (False, (-1, 1, -2, 2, -3, 3), [-1, 1, -2, 2, -3, 3]),
+        ),
+    )
+    def it_post_processes_the_display_order_to_help(
+        self, request, prune_subtotals, order, expected_value
+    ):
+        property_mock(
+            request, _BaseOrderHelper, "_prune_subtotals", return_value=prune_subtotals
+        )
+        property_mock(request, _BaseOrderHelper, "_order", return_value=order)
+        order_helper = _BaseOrderHelper(None, None)
+
+        display_order = order_helper._display_order
+
+        assert display_order.tolist() == expected_value
+
+    @pytest.mark.parametrize(
+        "base, expected_value",
+        (([1, 1, 1], ()), ([1, 0, 1], (1,)), ([0, 0, 0], (0, 1, 2))),
+    )
+    def it_knows_its_empty_column_idxs_to_help(
+        self, second_order_measures_, base, expected_value
+    ):
+        second_order_measures_.columns_pruning_base = np.array(base)
+        order_helper = _BaseOrderHelper(None, second_order_measures_)
+
+        assert order_helper._empty_column_idxs == expected_value
+
+    @pytest.mark.parametrize(
+        "base, expected_value",
+        (([1, 1, 1], ()), ([1, 0, 1], (1,)), ([0, 0, 0], (0, 1, 2))),
+    )
+    def it_knows_its_empty_row_idxs_to_help(
+        self, second_order_measures_, base, expected_value
+    ):
+        second_order_measures_.rows_pruning_base = np.array(base)
+        order_helper = _BaseOrderHelper(None, second_order_measures_)
+
+        assert order_helper._empty_row_idxs == expected_value
+
+    def it_provides_access_to_the_rows_dimension_to_help(self, dimension_):
+        order_helper = _BaseOrderHelper((dimension_, None), None)
+        assert order_helper._rows_dimension is dimension_
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def dimension_(self, request):
+        return instance_mock(request, Dimension)
+
+    @pytest.fixture
+    def dimensions_(self, request):
+        return (instance_mock(request, Dimension), instance_mock(request, Dimension))
+
+    @pytest.fixture
+    def second_order_measures_(self, request):
+        return instance_mock(request, SecondOrderMeasures)
+
+
+class Describe_ColumnOrderHelper(object):
+    """Unit test suite for `cr.cube.matrix.assembler._ColumnOrderHelper` object."""
+
+    @pytest.mark.parametrize(
+        "collation_method, collator_class_name",
+        (
+            (CM.PAYLOAD_ORDER, "PayloadOrderCollator"),
+            (CM.EXPLICIT_ORDER, "ExplicitOrderCollator"),
+        ),
+    )
+    def it_computes_the_order_of_a_columns_dimension_to_help(
+        self, request, dimension_, collation_method, collator_class_name
+    ):
+        property_mock(
+            request, _ColumnOrderHelper, "_columns_dimension", return_value=dimension_
+        )
+        dimension_.collation_method = collation_method
+        CollatorCls_ = class_mock(
+            request, "cr.cube.matrix.assembler.%s" % collator_class_name
+        )
+        CollatorCls_.display_order.return_value = (3, -1, 5, 1, -2)
+        property_mock(
+            request, _ColumnOrderHelper, "_empty_column_idxs", return_value=(1, 3)
+        )
+        order_helper = _ColumnOrderHelper(None, None)
+
+        order = order_helper._order
+
+        CollatorCls_.display_order.assert_called_once_with(dimension_, (1, 3))
+        assert order == (3, -1, 5, 1, -2)
+
+    @pytest.mark.parametrize(
+        "prune, empty_row_idxs, expected_value",
+        (
+            (False, None, False),
+            (True, (3,), False),
+            (True, (0, 1, 2), True),
+        ),
+    )
+    def it_knows_whether_to_prune_the_subtotal_columns_to_help(
+        self, request, dimension_, prune, empty_row_idxs, expected_value
+    ):
+        property_mock(
+            request, _ColumnOrderHelper, "_rows_dimension", return_value=dimension_
+        )
+        property_mock(
+            request,
+            _ColumnOrderHelper,
+            "_empty_row_idxs",
+            return_value=empty_row_idxs,
+        )
+        dimension_.prune = prune
+        dimension_.element_ids = (1, 2, 3)
+        order_helper = _ColumnOrderHelper(None, None)
+
+        assert order_helper._prune_subtotals is expected_value
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def dimension_(self, request):
+        return instance_mock(request, Dimension)
+
+
+class Describe_RowOrderHelper(object):
+    """Unit test suite for `cr.cube.matrix.assembler._RowOrderHelper` object."""
+
+    @pytest.mark.parametrize(
+        "collation_method, collator_class_name",
+        (
+            (CM.PAYLOAD_ORDER, "PayloadOrderCollator"),
+            (CM.EXPLICIT_ORDER, "ExplicitOrderCollator"),
+        ),
+    )
+    def it_computes_the_order_of_a_rows_dimension_to_help(
+        self, request, dimension_, collation_method, collator_class_name
+    ):
+        property_mock(
+            request, _RowOrderHelper, "_rows_dimension", return_value=dimension_
+        )
+        dimension_.collation_method = collation_method
+        CollatorCls_ = class_mock(
+            request, "cr.cube.matrix.assembler.%s" % collator_class_name
+        )
+        CollatorCls_.display_order.return_value = (1, -2, 3, 5, -1)
+        property_mock(
+            request, _RowOrderHelper, "_empty_row_idxs", return_value=(2, 4, 6)
+        )
+        order_helper = _RowOrderHelper(None, None)
+
+        order = order_helper._order
+
+        CollatorCls_.display_order.assert_called_once_with(dimension_, (2, 4, 6))
+        assert order == (1, -2, 3, 5, -1)
+
+    @pytest.mark.parametrize(
+        "prune, empty_column_idxs, expected_value",
+        (
+            (False, None, False),
+            (True, (3,), False),
+            (True, (0, 1, 2), True),
+        ),
+    )
+    def it_knows_whether_to_prune_the_subtotal_rows_to_help(
+        self, request, dimension_, prune, empty_column_idxs, expected_value
+    ):
+        property_mock(
+            request, _RowOrderHelper, "_columns_dimension", return_value=dimension_
+        )
+        property_mock(
+            request,
+            _RowOrderHelper,
+            "_empty_column_idxs",
+            return_value=empty_column_idxs,
+        )
+        dimension_.prune = prune
+        dimension_.element_ids = (1, 2, 3)
+        order_helper = _RowOrderHelper(None, None)
+
+        assert order_helper._prune_subtotals is expected_value
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def dimension_(self, request):
+        return instance_mock(request, Dimension)
+
+
+class Describe_SortRowsByColumnValueHelper(object):
+    """Unit test suite for `cr.cube.matrix.assembler._SortRowsByColumnValueHelper`."""
+
+    def it_extracts_the_sort_column_idx_from_the_order_spec_dict_to_help(
+        self, _rows_dimension_prop_, dimension_, _order_dict_prop_
+    ):
+        _rows_dimension_prop_.return_value = dimension_
+        dimension_.element_ids = (1, 2, 3, 4, 5)
+        _order_dict_prop_.return_value = {"element_id": 3}
+        order_helper = _SortRowsByColumnValueHelper(None, None)
+
+        assert order_helper._column_idx == 2
+
+    def it_extracts_the_element_values_to_help(
+        self, _measure_prop_, measure_, _column_idx_prop_
+    ):
+        _measure_prop_.return_value = measure_
+        measure_.blocks = [[np.arange(20).reshape(4, 5), None], [None, None]]
+        _column_idx_prop_.return_value = 2
+        order_helper = _SortRowsByColumnValueHelper(None, None)
+
+        assert order_helper._element_values.tolist() == [2, 7, 12, 17]
+
+    def it_retrieves_the_measure_object_to_help(self, request, _order_dict_prop_):
+        column_proportions_ = instance_mock(request, _ColumnProportions)
+        second_order_measures_ = instance_mock(
+            request, SecondOrderMeasures, column_proportions=column_proportions_
+        )
+        _order_dict_prop_.return_value = {"measure": "col_percent"}
+        order_helper = _SortRowsByColumnValueHelper(None, second_order_measures_)
+
+        assert order_helper._measure is column_proportions_
+
+    def but_it_raises_when_an_unsupported_sort_by_value_measure_is_requested(
+        self, _order_dict_prop_
+    ):
+        _order_dict_prop_.return_value = {"measure": "foobar"}
+        order_helper = _SortRowsByColumnValueHelper(None, None)
+
+        with pytest.raises(NotImplementedError) as e:
+            order_helper._measure
+
+        assert str(e.value) == "sort-by-value for measure 'foobar' is not yet supported"
+
+    def it_computes_the_sorted_element_order_to_help(
+        self, request, _rows_dimension_prop_, dimension_
+    ):
+        _rows_dimension_prop_.return_value = dimension_
+        property_mock(
+            request,
+            _SortRowsByColumnValueHelper,
+            "_element_values",
+            # --- return type is ndarray in real life, but assert_called_once_with()
+            # --- won't match on those, so use list instead.
+            return_value=[16, 3, 12],
+        )
+        property_mock(
+            request,
+            _SortRowsByColumnValueHelper,
+            "_subtotal_values",
+            return_value=[15, 19],  # --- ndarray in real life ---
+        )
+        property_mock(
+            request, _SortRowsByColumnValueHelper, "_empty_row_idxs", return_value=()
+        )
+        SortByValueCollator_ = class_mock(
+            request, "cr.cube.matrix.assembler.SortByValueCollator"
+        )
+        SortByValueCollator_.display_order.return_value = (-1, -2, 0, 2, 1)
+        order_helper = _SortRowsByColumnValueHelper(None, None)
+
+        order = order_helper._order
+
+        SortByValueCollator_.display_order.assert_called_once_with(
+            dimension_, [16, 3, 12], [15, 19], ()
+        )
+        assert order == (-1, -2, 0, 2, 1)
+
+    def it_provides_access_to_the_order_dict_to_help(
+        self, _rows_dimension_prop_, dimension_
+    ):
+        _rows_dimension_prop_.return_value = dimension_
+        dimension_.order_dict = {"order": "dict"}
+        order_helper = _SortRowsByColumnValueHelper(None, None)
+
+        assert order_helper._order_dict == {"order": "dict"}
+
+    def it_extracts_the_subtotal_values_to_help(
+        self, _measure_prop_, measure_, _column_idx_prop_
+    ):
+        _measure_prop_.return_value = measure_
+        measure_.blocks = [[None, None], [np.arange(10, 101, 10).reshape(2, 5), None]]
+        _column_idx_prop_.return_value = 2
+        order_helper = _SortRowsByColumnValueHelper(None, None)
+
+        assert order_helper._subtotal_values.tolist() == [30, 80]
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _column_idx_prop_(self, request):
+        return property_mock(request, _SortRowsByColumnValueHelper, "_column_idx")
+
+    @pytest.fixture
+    def dimension_(self, request):
+        return instance_mock(request, Dimension)
+
+    @pytest.fixture
+    def measure_(self, request):
+        return instance_mock(request, _BaseSecondOrderMeasure)
+
+    @pytest.fixture
+    def _measure_prop_(self, request):
+        return property_mock(request, _SortRowsByColumnValueHelper, "_measure")
+
+    @pytest.fixture
+    def _order_dict_prop_(self, request):
+        return property_mock(request, _SortRowsByColumnValueHelper, "_order_dict")
+
+    @pytest.fixture
+    def _rows_dimension_prop_(self, request):
+        return property_mock(request, _SortRowsByColumnValueHelper, "_rows_dimension")

@@ -402,6 +402,38 @@ class Describe_Slice(object):
         expected = load_python_expression(expectation)
         np.testing.assert_almost_equal(actual, expected)
 
+    def it_can_sort_by_column_percent(self):
+        """Responds to order:opposing_element sort-by-value.
+
+        So far, this is limited to column-percents (column-proportions) measure, but
+        others will follow.
+        """
+        transforms = {
+            "rows_dimension": {
+                "order": {
+                    "type": "opposing_element",
+                    "element_id": 1,
+                    "measure": "col_percent",
+                    "direction": "ascending",
+                    # --- element-ids are 1, 2, 3, 999 ---
+                    "exclude": {"top": [999], "bottom": [1]},
+                }
+            }
+        }
+        slice_ = _Slice(Cube(CR.CAT_4_X_CAT_5), 0, transforms, None, 0)
+
+        expected = [
+            # --- row-element 999 is a top-exclusion, so it appears first ---
+            [36.7, 46.2, 25.0, 66.7, 23.9],  # --- 999 - N/A ---
+            # --- 2 and 3 appear in ascending order by first col (col-id 1) ---
+            [18.9, 31.8, 17.1, 16.7, 26.6],  # --- 2 - Enough ---
+            [37.6, 9.8, 53.9, 16.7, 43.1],  # --- 3 - Not Enough ---
+            # --- row-element 1 is a bottom-exclusion, so it appears last ---
+            [6.8, 12.1, 3.9, 0.0, 6.4],  # --- 1 - Plenty ---
+        ]
+        actual = np.round(slice_.column_percentages, 1).tolist()
+        assert expected == actual, "\n%s\n\n%s" % (expected, actual)
+
     def it_ignores_hidden_subtotals(self):
         """A subtotal with `"hide": True` does not appear.
 

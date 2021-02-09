@@ -7,12 +7,26 @@ import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.cubepart import _Slice
+from cr.cube.matrix.assembler import _BaseOrderHelper
 
 from ..fixtures import CR
 
 
 class DescribeAssembler(object):
     """Integration-test suite for `cr.cube.matrix.Assembler`."""
+
+    def it_computes_column_proportions_for_cat_x_cat(self):
+        slice_ = _Slice(Cube(CR.CAT_4_X_CAT_5), 0, None, None, 0)
+        assert np.round(slice_._assembler.column_proportions, 2) == pytest.approx(
+            np.array(
+                [
+                    [0.07, 0.12, 0.04, 0.00, 0.06],
+                    [0.19, 0.32, 0.17, 0.17, 0.27],
+                    [0.38, 0.10, 0.54, 0.17, 0.43],
+                    [0.37, 0.46, 0.25, 0.67, 0.24],
+                ]
+            )
+        )
 
     def it_computes_column_unweighted_bases_for_cat_hs_x_cat_hs(self):
         slice_ = _Slice(
@@ -1444,3 +1458,88 @@ class DescribeAssembler(object):
                 ]
             ),
         )
+
+    @pytest.mark.parametrize(
+        "fixture, element_id, descending, expected_value",
+        (
+            (CR.CAT_4_X_CAT_5, 1, False, [0, 1, 3, 2]),
+            (CR.CAT_X_MR_2, 1, True, [0, 4, 1, 3, 5, 2]),
+            (CR.MR_X_CAT, 2, True, [4, 3, 2, 1, 0]),
+            (CR.MR_X_MR, 3, True, [3, 2, 1, 0]),
+        ),
+    )
+    def it_computes_the_sort_by_value_row_order_to_help(
+        self, fixture, element_id, descending, expected_value
+    ):
+        transforms = {
+            "rows_dimension": {
+                "order": {
+                    "type": "opposing_element",
+                    "element_id": element_id,
+                    "measure": "col_percent",
+                    "direction": "descending" if descending else "ascending",
+                }
+            }
+        }
+        slice_ = _Slice(Cube(fixture), 0, transforms, None, 0)
+        assembler = slice_._assembler
+
+        assert assembler._row_order.tolist() == expected_value
+
+
+class Describe_BaseOrderHelper(object):
+    """Integration-test suite for `cr.cube.matrix._BaseOrderHelper`."""
+
+    @pytest.mark.parametrize(
+        "fixture, element_ids, expected_value",
+        (
+            (CR.CAT_4_X_CAT_5, [999, 1, 3, 2], [3, 0, 2, 1]),
+            (CR.CAT_X_MR_2, [5, 1, 6, 4, 0, 2], [4, 0, 5, 3, 2, 1]),
+            (CR.MR_X_CAT, [3, 5, 1, 4, 2], [2, 4, 0, 3, 1]),
+            (CR.MR_X_MR, [2, 0, 3, 1], [1, 3, 2, 0]),
+        ),
+    )
+    def it_can_compute_an_explicit_row_order(
+        self, fixture, element_ids, expected_value
+    ):
+        transforms = {
+            "rows_dimension": {
+                "order": {
+                    "type": "explicit",
+                    "element_ids": element_ids,
+                }
+            }
+        }
+        assembler = _Slice(Cube(fixture), 0, transforms, None, 0)._assembler
+        row_display_order = _BaseOrderHelper.row_display_order(
+            assembler._dimensions, assembler._measures
+        )
+
+        assert row_display_order.tolist() == expected_value
+
+    @pytest.mark.parametrize(
+        "fixture, element_ids, expected_value",
+        (
+            (CR.CAT_4_X_CAT_5, [3, 1, 2], [2, 0, 1, 3, 4]),
+            (CR.CAT_X_MR_2, [5, 1, 4, 2], [4, 0, 3, 1, 2]),
+            (CR.MR_X_CAT, [0, 5, 1, 4, 2], [2, 4, 0, 3, 1, 5]),
+            (CR.MR_X_MR, [2, 0, 3, 1], [1, 3, 2, 0]),
+        ),
+    )
+    def it_can_compute_an_explicit_column_order(
+        self, fixture, element_ids, expected_value
+    ):
+        transforms = {
+            "columns_dimension": {
+                "order": {
+                    "type": "explicit",
+                    "element_ids": element_ids,
+                }
+            }
+        }
+        assembler = _Slice(Cube(fixture), 0, transforms, None, 0)._assembler
+        column_display_order = _BaseOrderHelper.column_display_order(
+            assembler._dimensions, assembler._measures
+        )
+
+        assert column_display_order.tolist() == expected_value

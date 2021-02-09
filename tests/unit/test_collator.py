@@ -4,6 +4,7 @@
 
 import sys
 
+import numpy as np
 import pytest
 
 from cr.cube.collator import (
@@ -11,6 +12,7 @@ from cr.cube.collator import (
     _BaseCollator,
     ExplicitOrderCollator,
     PayloadOrderCollator,
+    SortByValueCollator,
 )
 from cr.cube.dimension import Dimension, _Subtotal
 
@@ -302,3 +304,233 @@ class DescribePayloadOrderCollator(object):
         collator = PayloadOrderCollator(None, None)
 
         assert collator._element_order_descriptors == expected_value
+
+
+class DescribeSortByValueCollator(object):
+    """Unit-test suite for `cr.cube.collator.SortByValueCollator` object.
+
+    SortByValueCollator computes element ordering for sort-by-value order transforms. It
+    is used for all sort-by-value cases, performing the sort based on a base-vector
+    provided to it on construction. This base vector can be a "body" vector, a subtotal,
+    or a marginal.
+    """
+
+    def it_provides_an_interface_classmethod(self, request):
+        dimension_ = instance_mock(request, Dimension)
+        _init_ = initializer_mock(request, SortByValueCollator)
+        property_mock(
+            request,
+            SortByValueCollator,
+            "_display_order",
+            return_value=(-3, -1, -2, 1, 0, 2, 3),
+        )
+        element_values = [2, 3, 1, 0]
+        subtotal_values = [9, 7, 8]
+        empty_idxs = [3]
+
+        display_order = SortByValueCollator.display_order(
+            dimension_, element_values, subtotal_values, empty_idxs
+        )
+
+        _init_.assert_called_once_with(
+            ANY, dimension_, element_values, subtotal_values, empty_idxs
+        )
+        assert display_order == (-3, -1, -2, 1, 0, 2, 3)
+
+    def it_computes_the_display_order_to_help(
+        self, request, _top_exclusion_idxs_prop_, _bottom_exclusion_idxs_prop_
+    ):
+        property_mock(
+            request, SortByValueCollator, "_top_subtotal_idxs", return_value=(-2, -3)
+        )
+        _top_exclusion_idxs_prop_.return_value = (3,)
+        property_mock(
+            request, SortByValueCollator, "_body_idxs", return_value=(2, 1, 5)
+        )
+        _bottom_exclusion_idxs_prop_.return_value = (0, 4)
+        property_mock(
+            request, SortByValueCollator, "_bottom_subtotal_idxs", return_value=()
+        )
+        property_mock(request, SortByValueCollator, "_hidden_idxs", return_value=(5,))
+        collator = SortByValueCollator(None, None, None, None)
+
+        assert collator._display_order
+
+    @pytest.mark.parametrize(
+        "top_excl_idxs, bottom_excl_idxs, descending, element_values, expected_value",
+        (
+            # --- ascending sort ---
+            ((), (), False, (8.0, 2.0, 4.0, 1.0), (3, 1, 2, 0)),
+            # --- ascending with top exclusions (which therefore do not appear ---
+            ((2, 1), (), False, (8.0, 2.0, 4.0, 1.0), (3, 0)),
+            # --- descending sort ---
+            ((), (), True, (8.0, 2.0, 4.0, 1.0), (0, 2, 1, 3)),
+            # --- descending with bottom exclusions ---
+            ((), (1, 0), True, (8.0, 2.0, 4.0, 1.0), (2, 3)),
+            # --- descending with both kinds of exclusion ---
+            ((0,), (3,), True, (8.0, 2.0, 4.0, 1.0), (2, 1)),
+        ),
+    )
+    def it_computes_the_sorted_body_idxs_to_help(
+        self,
+        request,
+        _top_exclusion_idxs_prop_,
+        _bottom_exclusion_idxs_prop_,
+        _descending_prop_,
+        top_excl_idxs,
+        bottom_excl_idxs,
+        descending,
+        element_values,
+        expected_value,
+    ):
+        """Body-idxs are for elements that are not subtotals and not excluded."""
+        _top_exclusion_idxs_prop_.return_value = top_excl_idxs
+        _bottom_exclusion_idxs_prop_.return_value = bottom_excl_idxs
+        _descending_prop_.return_value = descending
+        collator = SortByValueCollator(None, element_values, None, None)
+
+        assert collator._body_idxs == expected_value
+
+    def it_computes_the_bottom_exclusion_idxs_to_help(self, _iter_exclusion_idxs_):
+        _iter_exclusion_idxs_.return_value = (n for n in (4, 0, 5, 2))
+        collator = SortByValueCollator(None, None, None, None)
+
+        bottom_exclusion_idxs = collator._bottom_exclusion_idxs
+
+        _iter_exclusion_idxs_.assert_called_once_with(collator, "bottom")
+        assert bottom_exclusion_idxs == (4, 0, 5, 2)
+
+    @pytest.mark.parametrize(
+        "descending, subtotal_idxs, expected_value",
+        (
+            # --- ascending sort, all subtotals at bottom ---
+            (False, (-3, -1, -2), (-3, -1, -2)),
+            # --- descending sort, no subtotals at bottom ---
+            (True, (-3, -1, -2), ()),
+        ),
+    )
+    def it_computes_the_bottom_subtotal_idxs_to_help(
+        self,
+        _descending_prop_,
+        _subtotal_idxs_prop_,
+        descending,
+        subtotal_idxs,
+        expected_value,
+    ):
+        _descending_prop_.return_value = descending
+        _subtotal_idxs_prop_.return_value = subtotal_idxs
+        collator = SortByValueCollator(None, None, None, None)
+
+        assert collator._bottom_subtotal_idxs == expected_value
+
+    @pytest.mark.parametrize(
+        "order_dict, top_or_bottom, expected_value",
+        (
+            ({}, "top", ()),
+            ({}, "bottom", ()),
+            ({"exclude": {}}, "top", ()),
+            ({"exclude": {"foobar": [4, 2]}}, "top", ()),
+            ({"exclude": {"top": [1, 3]}}, "top", (0, 2)),
+            ({"exclude": {"top": [1, 3, 7]}}, "top", (0, 2)),
+            ({"exclude": {"bottom": [4, 2]}}, "bottom", (3, 1)),
+        ),
+    )
+    def it_can_iterate_the_exclusion_idxs_for_top_or_bottom(
+        self, request, _order_dict_prop_, order_dict, top_or_bottom, expected_value
+    ):
+        property_mock(
+            request, SortByValueCollator, "_element_ids", return_value=(1, 2, 3, 4, 5)
+        )
+        _order_dict_prop_.return_value = order_dict
+        collator = SortByValueCollator(None, None, None, None)
+
+        assert tuple(collator._iter_exclusion_idxs(top_or_bottom)) == expected_value
+
+    @pytest.mark.parametrize(
+        "order_dict, expected_value",
+        (
+            ({}, True),
+            ({"direction": "foobar"}, True),
+            ({"direction": "descending"}, True),
+            ({"direction": "ascending"}, False),
+        ),
+    )
+    def it_knows_whether_the_sort_direction_is_descending_to_help(
+        self, _order_dict_prop_, order_dict, expected_value
+    ):
+        _order_dict_prop_.return_value = order_dict
+        collator = SortByValueCollator(None, None, None, None)
+
+        assert collator._descending == expected_value
+
+    @pytest.mark.parametrize(
+        "subtotal_values, descending, expected_value",
+        (
+            ((1, 2, 3), True, (-1, -2, -3)),
+            ((1, 2, 3), False, (-3, -2, -1)),
+            # --- NaN values fall to end of sequence in payload order ---
+            ((1, np.nan, 2, np.nan, 3), True, (-1, -3, -5, -4, -2)),
+            # --- regardless of collation-order ---
+            ((1, np.nan, 2, np.nan, 3), False, (-5, -3, -1, -4, -2)),
+        ),
+    )
+    def it_computes_the_subtotal_idxs_to_help(
+        self, _descending_prop_, descending, subtotal_values, expected_value
+    ):
+        _descending_prop_.return_value = descending
+        collator = SortByValueCollator(None, None, subtotal_values, None)
+
+        assert collator._subtotal_idxs == expected_value
+
+    def it_computes_the_top_exclusion_idxs_to_help(self, _iter_exclusion_idxs_):
+        _iter_exclusion_idxs_.return_value = (i for i in (1, 2, 4))
+        collator = SortByValueCollator(None, None, None, None)
+
+        top_exclusion_idxs = collator._top_exclusion_idxs
+
+        _iter_exclusion_idxs_.assert_called_once_with(collator, "top")
+        assert top_exclusion_idxs == (1, 2, 4)
+
+    @pytest.mark.parametrize(
+        "subtotal_idxs, descending, expected_value",
+        (((-3, -1, -2), True, (-3, -1, -2)), ((-1, -2, -3), False, ())),
+    )
+    def it_computes_the_top_subtotal_idxs_to_help(
+        self,
+        _subtotal_idxs_prop_,
+        subtotal_idxs,
+        _descending_prop_,
+        descending,
+        expected_value,
+    ):
+        _subtotal_idxs_prop_.return_value = subtotal_idxs
+        _descending_prop_.return_value = descending
+        collator = SortByValueCollator(None, None, None, None)
+
+        assert collator._top_subtotal_idxs == expected_value
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _bottom_exclusion_idxs_prop_(self, request):
+        return property_mock(request, SortByValueCollator, "_bottom_exclusion_idxs")
+
+    @pytest.fixture
+    def _descending_prop_(self, request):
+        return property_mock(request, SortByValueCollator, "_descending")
+
+    @pytest.fixture
+    def _iter_exclusion_idxs_(self, request):
+        return method_mock(request, SortByValueCollator, "_iter_exclusion_idxs")
+
+    @pytest.fixture
+    def _order_dict_prop_(self, request):
+        return property_mock(request, SortByValueCollator, "_order_dict")
+
+    @pytest.fixture
+    def _subtotal_idxs_prop_(self, request):
+        return property_mock(request, SortByValueCollator, "_subtotal_idxs")
+
+    @pytest.fixture
+    def _top_exclusion_idxs_prop_(self, request):
+        return property_mock(request, SortByValueCollator, "_top_exclusion_idxs")

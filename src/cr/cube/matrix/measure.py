@@ -26,6 +26,11 @@ class SecondOrderMeasures(object):
         self._slice_idx = slice_idx
 
     @lazyproperty
+    def column_proportions(self):
+        """_ColumnProportions measure object for this cube-result."""
+        return _ColumnProportions(self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
     def column_unweighted_bases(self):
         """_ColumnUnweightedBases measure object for this cube-result."""
         return _ColumnUnweightedBases(self._dimensions, self, self._cube_measures)
@@ -36,6 +41,11 @@ class SecondOrderMeasures(object):
         return _ColumnWeightedBases(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
+    def columns_pruning_base(self):
+        """1D np.int64 ndarray of unweighted-N for each matrix column."""
+        return self._cube_measures.unweighted_cube_counts.columns_pruning_base
+
+    @lazyproperty
     def row_unweighted_bases(self):
         """_RowUnweightedBases measure object for this cube-result."""
         return _RowUnweightedBases(self._dimensions, self, self._cube_measures)
@@ -44,6 +54,11 @@ class SecondOrderMeasures(object):
     def row_weighted_bases(self):
         """_RowWeightedBases measure object for this cube-result."""
         return _RowWeightedBases(self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
+    def rows_pruning_base(self):
+        """1D np.int64 ndarray of unweighted-N for each matrix row."""
+        return self._cube_measures.unweighted_cube_counts.rows_pruning_base
 
     @lazyproperty
     def table_unweighted_bases(self):
@@ -154,6 +169,42 @@ class _BaseSecondOrderMeasure(object):
         weighted-counts and cell, vector, and table margins.
         """
         return self._cube_measures.weighted_cube_counts
+
+
+class _ColumnProportions(_BaseSecondOrderMeasure):
+    """Provides the column-proportions measure for a matrix.
+
+    Column-proportions is a 2D np.float64 ndarray of the proportion of its column margin
+    contributed by the weighted count of each matrix cell.
+    """
+
+    @lazyproperty
+    def blocks(self):
+        """Nested list of the four 2D ndarray "blocks" making up this measure.
+
+        These are the base-values, the column-subtotals, the row-subtotals, and the
+        subtotal intersection-cell values. Column-proportions is derivative of two other
+        measures, so it overrides this method rather than providing separate blocks.
+        """
+        count_blocks = self._second_order_measures.weighted_counts.blocks
+        weighted_base_blocks = self._second_order_measures.column_weighted_bases.blocks
+
+        # --- do not propagate divide-by-zero warnings to stderr ---
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return [
+                [
+                    # --- base values ---
+                    count_blocks[0][0] / weighted_base_blocks[0][0],
+                    # --- inserted columns ---
+                    count_blocks[0][1] / weighted_base_blocks[0][1],
+                ],
+                [
+                    # --- inserted rows ---
+                    count_blocks[1][0] / weighted_base_blocks[1][0],
+                    # --- intersections ---
+                    count_blocks[1][1] / weighted_base_blocks[1][1],
+                ],
+            ]
 
 
 class _ColumnUnweightedBases(_BaseSecondOrderMeasure):

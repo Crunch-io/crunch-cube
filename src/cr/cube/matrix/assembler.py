@@ -14,8 +14,12 @@ from __future__ import division
 import numpy as np
 from scipy.stats import norm
 
-from cr.cube.collator import ExplicitOrderCollator, PayloadOrderCollator
-from cr.cube.enums import COLLATION_METHOD as CM, DIMENSION_TYPE as DT
+from cr.cube.collator import (
+    ExplicitOrderCollator,
+    PayloadOrderCollator,
+    SortByValueCollator,
+)
+from cr.cube.enums import COLLATION_METHOD as CM, DIMENSION_TYPE as DT, MEASURE as M
 from cr.cube.matrix.cubemeasure import BaseCubeResultMatrix
 from cr.cube.matrix.measure import SecondOrderMeasures
 from cr.cube.matrix.subtotals import (
@@ -70,6 +74,16 @@ class Assembler(object):
         respective data column.
         """
         return self._dimension_labels(self._columns_dimension, self._column_order)
+
+    @lazyproperty
+    def column_proportions(self):
+        """2D np.float64 ndarray of column-proportion for each matrix cell.
+
+        This is the proportion of the weighted-count for cell to the weighted-N of the
+        column the cell appears in (aka. column-margin). Always a number between 0.0 and
+        1.0 inclusive.
+        """
+        return self._assemble_matrix(self._measures.column_proportions.blocks)
 
     @lazyproperty
     def column_unweighted_bases(self):
@@ -456,8 +470,7 @@ class Assembler(object):
 
         Negative values represent inserted subtotal-column locations.
         """
-        order = self._dimension_order(self._columns_dimension, self._empty_column_idxs)
-        return order[order >= 0] if self._prune_subtotal_columns else order
+        return _BaseOrderHelper.column_display_order(self._dimensions, self._measures)
 
     @lazyproperty
     def _column_subtotals(self):
@@ -493,75 +506,10 @@ class Assembler(object):
             + [s.label for s in dimension.subtotals]
         )[order]
 
-    def _dimension_order(self, dimension, empty_idxs):
-        """1D np.int64 ndarray of signed int idx for each vector in `dimension`.
-
-        Negative values represent inserted-vector locations. Returned sequence reflects
-        insertion, hiding, pruning, and ordering transforms specified in `dimension`.
-        """
-        collation_method = dimension.collation_method
-
-        # --- this will become a significantly more sophisticated dispatch when
-        # --- sort-by-value is implemented in later commits. In particular, the
-        # --- signature for the sort-by-value collator differs from the payload and
-        # --- explicit-order collators. So we'll defer refactoring this until that
-        # --- collator is added. (sc)
-        display_order = (
-            ExplicitOrderCollator.display_order(dimension, empty_idxs)
-            if collation_method == CM.EXPLICIT_ORDER
-            else PayloadOrderCollator.display_order(dimension, empty_idxs)
-        )
-
-        # --- Returning as np.array suits its intended purpose, which is to participate
-        # --- in an np._ix() call. It works fine as a sequence too for any alternate
-        # --- use. Specifying int type prevents failure when there are zero elements.
-        return np.array(display_order, dtype=int)
-
-    @lazyproperty
-    def _empty_column_idxs(self):
-        """tuple of int index for each column with (unweighted) N = 0.
-
-        These columns are subject to pruning, depending on a user setting in the
-        dimension.
-        """
-        pruning_base = self._cube_result_matrix.columns_pruning_base
-        return tuple(i for i, N in enumerate(pruning_base) if N == 0)
-
-    @lazyproperty
-    def _empty_row_idxs(self):
-        """tuple of int index for each row with N = 0.
-
-        These rows are subject to pruning, depending on a user setting in the dimension.
-        """
-        pruning_base = self._cube_result_matrix.rows_pruning_base
-        return tuple(i for i, N in enumerate(pruning_base) if N == 0)
-
     @lazyproperty
     def _measures(self):
         """SecondOrderMeasures collection object for this cube-result."""
         return SecondOrderMeasures(self._cube, self._dimensions, self._slice_idx)
-
-    @lazyproperty
-    def _prune_subtotal_columns(self):
-        """True if subtotal columns need to be pruned, False otherwise.
-
-        Subtotal-columns need to be pruned when all base-rows are pruned.
-        """
-        if not self._rows_dimension.prune:
-            return False
-
-        return len(self._empty_row_idxs) == len(self._rows_dimension.element_ids)
-
-    @lazyproperty
-    def _prune_subtotal_rows(self):
-        """True if subtotal rows need to be pruned, False otherwise.
-
-        Subtotal-rows need to be pruned when all base-columns are pruned.
-        """
-        if not self._columns_dimension.prune:
-            return False
-
-        return len(self._empty_column_idxs) == len(self._columns_dimension.element_ids)
 
     @lazyproperty
     def _row_order(self):
@@ -569,10 +517,7 @@ class Assembler(object):
 
         Negative values represent inserted subtotal-row locations.
         """
-        order = self._dimension_order(self._rows_dimension, self._empty_row_idxs)
-        if self._prune_subtotal_rows:
-            return np.array([idx for idx in order if idx >= 0], dtype=int)
-        return order
+        return _BaseOrderHelper.row_display_order(self._dimensions, self._measures)
 
     @lazyproperty
     def _row_subtotals(self):
@@ -583,3 +528,247 @@ class Assembler(object):
     def _rows_dimension(self):
         """The `Dimension` object representing row elements in this matrix."""
         return self._dimensions[0]
+
+
+class _BaseOrderHelper(object):
+    """Base class for ordering helpers."""
+
+    def __init__(self, dimensions, second_order_measures):
+        self._dimensions = dimensions
+        self._second_order_measures = second_order_measures
+
+    @classmethod
+    def column_display_order(cls, dimensions, second_order_measures):
+        """1D np.int64 ndarray of signed int idx for each column of measure matrix.
+
+        Negative values represent inserted-vector locations. Returned sequence reflects
+        insertion, hiding, pruning, and ordering transforms specified in the
+        columns-dimension.
+        """
+        # --- This is essentially a factory method. There is no sort-columns-by-value
+        # --- yet, and both explicit and payload ordering are handled by
+        # --- _ColumnOrderHelper, so there's not much to this yet, just keeping
+        # --- form consistent with `.row_display_order()` and we'll elaborate this when
+        # --- we add sort-by-value to columns.
+        return _ColumnOrderHelper(dimensions, second_order_measures)._display_order
+
+    @classmethod
+    def row_display_order(cls, dimensions, second_order_measures):
+        """1D np.int64 ndarray of signed int idx for each row of measure matrix.
+
+        Negative values represent inserted-vector locations. Returned sequence reflects
+        insertion, hiding, pruning, and ordering transforms specified in the
+        rows-dimension.
+        """
+        collation_method = dimensions[0].collation_method
+        HelperCls = (
+            _SortRowsByColumnValueHelper
+            if collation_method == CM.OPPOSING_ELEMENT
+            else _RowOrderHelper
+        )
+
+        return HelperCls(dimensions, second_order_measures)._display_order
+
+    @lazyproperty
+    def _display_order(self):
+        """1D np.int64 ndarray of signed int idx for each vector of dimension.
+
+        Negative values represent inserted-vector locations. Returned sequence reflects
+        insertion, hiding, pruning, and ordering transforms specified in the
+        rows-dimension.
+        """
+        # --- Returning as np.array suits its intended purpose, which is to participate
+        # --- in an np._ix() call. It works fine as a sequence too for any alternate
+        # --- use. Specifying int type prevents failure when there are zero elements.
+        if self._prune_subtotals:
+            return np.array([idx for idx in self._order if idx >= 0], dtype=int)
+        return np.array(self._order, dtype=int)
+
+    @lazyproperty
+    def _columns_dimension(self):
+        """The `Dimension` object representing column elements in the matrix."""
+        return self._dimensions[1]
+
+    @lazyproperty
+    def _empty_column_idxs(self):
+        """tuple of int index for each column with (unweighted) N = 0.
+
+        These columns are subject to pruning, depending on a user setting in the
+        dimension.
+        """
+        return tuple(
+            i
+            for i, N in enumerate(self._second_order_measures.columns_pruning_base)
+            if N == 0
+        )
+
+    @lazyproperty
+    def _empty_row_idxs(self):
+        """tuple of int index for each row with N = 0.
+
+        These rows are subject to pruning, depending on a user setting in the dimension.
+        """
+        return tuple(
+            i
+            for i, N in enumerate(self._second_order_measures.rows_pruning_base)
+            if N == 0
+        )
+
+    @lazyproperty
+    def _order(self):
+        """tuple of signed int idx for each sorted vector of measure matrix.
+
+        Negative values represent inserted-vector locations. Returned sequence reflects
+        insertion, hiding, pruning, and ordering transforms specified in the
+        rows-dimension.
+        """
+        raise NotImplementedError(  # pragma: no cover
+            "%s must implement `._order`" % type(self).__name__
+        )
+
+    @lazyproperty
+    def _prune_subtotals(self):
+        """True if subtotal vectors need to be pruned, False otherwise."""
+        raise NotImplementedError(  # pragma: no cover
+            "%s must implement `._prune_subtotals`" % type(self).__name__
+        )
+
+    @lazyproperty
+    def _rows_dimension(self):
+        """The `Dimension` object representing row elements in the matrix."""
+        return self._dimensions[0]
+
+
+class _ColumnOrderHelper(_BaseOrderHelper):
+    """Encapsulates the complexity of the various kinds of column ordering."""
+
+    @lazyproperty
+    def _order(self):
+        """tuple of signed int idx for each column of measure matrix.
+
+        Negative values represent inserted-vector locations. Returned sequence reflects
+        insertion, hiding, pruning, and ordering transforms specified in the
+        rows-dimension.
+        """
+        CollatorCls = (
+            ExplicitOrderCollator
+            if self._columns_dimension.collation_method == CM.EXPLICIT_ORDER
+            else PayloadOrderCollator
+        )
+        return CollatorCls.display_order(
+            self._columns_dimension, self._empty_column_idxs
+        )
+
+    @lazyproperty
+    def _prune_subtotals(self):
+        """True if subtotal columns need to be pruned, False otherwise.
+
+        Subtotal-columns need to be pruned when all base-rows are pruned. Subtotal
+        columns are only subject to pruning when row-pruning is specified in the
+        request.
+        """
+        return (
+            len(self._empty_row_idxs) == len(self._rows_dimension.element_ids)
+            if self._rows_dimension.prune
+            else False
+        )
+
+
+class _RowOrderHelper(_BaseOrderHelper):
+    """Encapsulates the complexity of the various kinds of row ordering."""
+
+    @lazyproperty
+    def _order(self):
+        """tuple of signed int idx for each row of measure matrix.
+
+        Negative values represent inserted-vector locations. Returned sequence reflects
+        insertion, hiding, pruning, and ordering transforms specified in the
+        rows-dimension.
+        """
+        CollatorCls = (
+            ExplicitOrderCollator
+            if self._rows_dimension.collation_method == CM.EXPLICIT_ORDER
+            else PayloadOrderCollator
+        )
+        return CollatorCls.display_order(self._rows_dimension, self._empty_row_idxs)
+
+    @lazyproperty
+    def _prune_subtotals(self):
+        """True if subtotal rows need to be pruned, False otherwise.
+
+        Subtotal-rows need to be pruned when all base-columns are pruned. Subtotal rows
+        only subject to pruning when column-pruning is specified in the request.
+        """
+        return (
+            len(self._empty_column_idxs) == len(self._columns_dimension.element_ids)
+            if self._columns_dimension.prune
+            else False
+        )
+
+
+class _SortRowsByColumnValueHelper(_RowOrderHelper):
+    """Orders elements by the values of an opposing base (not a subtotal) vector.
+
+    This would be like "order rows in descending order by value of 'Strongly Agree'
+    column. An opposing-element ordering is only available on a matrix, because only
+    a matrix dimension has an opposing dimension.
+    """
+
+    @lazyproperty
+    def _order(self):
+        """tuple of int element-idx specifying ordering of dimension elements."""
+        return SortByValueCollator.display_order(
+            self._rows_dimension,
+            self._element_values,
+            self._subtotal_values,
+            self._empty_row_idxs,
+        )
+
+    @lazyproperty
+    def _column_idx(self):
+        """int index of column whose values the sort is based on."""
+        row_element_ids = self._rows_dimension.element_ids
+        sort_column_id = self._order_dict["element_id"]
+        return row_element_ids.index(sort_column_id)
+
+    @lazyproperty
+    def _element_values(self):
+        """Sequence of body values that form the basis for sort order.
+
+        There is one value per row and values appear in payload (dimension) element
+        order. These are only the "base" values and do not include insertions.
+        """
+        measure_base_values = self._measure.blocks[0][0]
+        return measure_base_values[:, self._column_idx]
+
+    @lazyproperty
+    def _measure(self):
+        """Second-order measure object providing values for sort."""
+        propname_by_keyname = {
+            M.COL_PERCENT.value: "column_proportions",
+            # --- add others as sort-by-value for those measures comes online ---
+        }
+        measure_keyname = self._order_dict["measure"]
+        measure_propname = propname_by_keyname.get(measure_keyname)
+
+        if measure_propname is None:
+            raise NotImplementedError(
+                "sort-by-value for measure '%s' is not yet supported" % measure_keyname
+            )
+
+        return getattr(self._second_order_measures, measure_propname)
+
+    @lazyproperty
+    def _order_dict(self):
+        """dict specifying ordering details like measure and sort-direction."""
+        return self._rows_dimension.order_dict
+
+    @lazyproperty
+    def _subtotal_values(self):
+        """Sequence of row-subtotal values that contribute to the sort basis.
+
+        There is one value per row subtotal and values appear in payload (dimension)
+        insertion order.
+        """
+        measure_subtotal_rows = self._measure.blocks[1][0]
+        return measure_subtotal_rows[:, self._column_idx]
