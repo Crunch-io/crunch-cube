@@ -1280,7 +1280,7 @@ class _Strand(CubePartition):
         )
 
     @lazyproperty
-    def population_moe(self):
+    def population_counts_moe(self):
         """1D np.float64 ndarray of population margin-of-error (MoE) for table percents.
 
         The values are represented as population estimates, analogue to the

@@ -506,31 +506,45 @@ class TestCrunchCubeAs_Slice(object):
 
     def test_std_dev_err_moe_univariate_cat_axis_none(self):
         strand = Cube(CR.UNIVARIATE_CATEGORICAL, population=1000).partitions[0]
-        np.testing.assert_almost_equal(
-            strand.standard_deviation, [0.47140452, 0.47140452]
-        )
-        np.testing.assert_almost_equal(strand.standard_error, [0.1217161, 0.1217161])
-        np.testing.assert_almost_equal(
-            strand.table_proportions_moe, [0.238559221, 0.238559221]
-        )
-        np.testing.assert_almost_equal(
-            strand.population_moe, [238.55922104, 238.55922104]
-        )
+        assert strand.standard_deviation.tolist() == [
+            0.4714045207910317,
+            0.4714045207910317,
+        ]
+        assert strand.standard_error.tolist() == [
+            0.12171612389003691,
+            0.12171612389003691,
+        ]
+        assert strand.table_proportions_moe.tolist() == [
+            0.2385592210440123,
+            0.2385592210440123,
+        ]
+        assert strand.population_counts_moe.tolist() == [
+            238.5592210440123,
+            238.5592210440123,
+        ]
 
     def test_std_dev_err_numeric(self):
         strand = Cube(CR.VOTER_REGISTRATION, population=1000).partitions[0]
-        np.testing.assert_almost_equal(
-            strand.standard_deviation, [0.31902194, 0.30655342, 0.09949874]
-        )
-        np.testing.assert_almost_equal(
-            strand.standard_error, [0.0100884, 0.0096941, 0.0031464]
-        )
-        np.testing.assert_almost_equal(
-            strand.table_proportions_moe, [0.019772822, 0.019000029, 0.006166883]
-        )
-        np.testing.assert_almost_equal(
-            strand.population_moe, [19.77282169, 19.0000289, 6.16688276]
-        )
+        assert strand.standard_deviation.tolist() == [
+            0.3190219428189854,
+            0.30655342111938666,
+            0.099498743710662,
+        ]
+        assert strand.standard_error.tolist() == [
+            0.010088359628799917,
+            0.009694070352540258,
+            0.003146426544510455,
+        ]
+        assert strand.table_proportions_moe.tolist() == [
+            0.0197728216915012,
+            0.019000028904446215,
+            0.00616688275588489,
+        ]
+        assert strand.population_counts_moe.tolist() == [
+            19.7728216915012,
+            19.000028904446214,
+            6.166882755884889,
+        ]
 
     def test_std_dev_err_datetime(self):
         strand = Cube(CR.SIMPLE_DATETIME).partitions[0]
