@@ -1,5 +1,61 @@
 # History of Changes
 
+### 2.1.1
+- Custom column bases for Numeric Array matrix types
+
+### 2.1.0
+- Measure Consolidation
+
+### 2.0.3
+- Fix mean measure for CubeSet
+
+### 2.0.2
+- Expose `cube.valid_counts` and `cube.valid_counts_summary`
+
+### 2.0.1
+- Fix row standard error for MR x MR
+
+### 2.0.0
+- De-vectorize matrix.py and add sort-by-value
+- Remove old api interface
+
+### 1.12.11
+- Numeric array measures available
+
+### 1.12.10
+- Selected category labels partition interface
+
+### 1.12.9
+- Margin of error for row %
+- Margin of error for population
+- Std deviation and std error for row %
+
+### 1.12.8
+- Fix pairwise t-test for scale means
+- Fix UserWarning for smoothing measures
+- Move cr.cube.enum -> cr.cube.enums
+
+### 1.12.7
+- Margin of error for 1D cubes
+- Allow pairwise significance for CA_SUBVAR
+
+### 1.12.6
+- T-stats scale means for multiple response
+- Margin of error for column percentages
+
+### 1.12.4
+- Measure expression evaluation method
+- Multiple response allowed for pairwise comparison
+
+### 1.12.3
+- Bug fix for t_stats scale means
+
+### 1.12.2
+- Smoothing on scale means
+
+### 1.12.1
+- Smoothing on column percentages and column index
+
 ### 1.11.37
 - PR 216: Document matrix.py classes and properties
 
@@ -22,10 +78,10 @@
 - Use bases instead of margin for MR `standard_error` calculation
 
 #### 1.11.30
-- Fix `standard_error` calculation for MR types 
+- Fix `standard_error` calculation for MR types
 
 #### 1.11.29
-- Fix `standard_error` denominator for `Strand` 
+- Fix `standard_error` denominator for `Strand`
 
 #### 1.11.28
 - Fix collapsed `scale-mean-pairwise-indices`
