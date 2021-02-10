@@ -829,6 +829,27 @@ class Describe_Strand(object):
         )
         assert strand.table_proportions == pytest.approx([0.885, 0.105, 0.010])
 
+    def it_provides_values_for_univariate_text(self):
+        strand = Cube(CR.TEXT, population=9001).partitions[0]
+
+        assert strand.counts == (1, 1, 1, 1, 1, 1)
+        assert strand.table_margin == 6
+        assert strand.table_percentages == pytest.approx(
+            [16.66667, 16.66667, 16.66667, 16.66667, 16.66667, 16.66667],
+        )
+        assert strand.population_counts == pytest.approx(
+            [1500.167, 1500.167, 1500.167, 1500.167, 1500.167, 1500.167]
+        )
+        assert strand.standard_deviation == pytest.approx(
+            [0.372678, 0.372678, 0.372678, 0.372678, 0.372678, 0.372678],
+        )
+        assert strand.standard_error == pytest.approx(
+            [0.1521452, 0.1521452, 0.1521452, 0.1521452, 0.1521452, 0.1521452],
+        )
+        assert strand.table_proportions == pytest.approx(
+            [0.1666667, 0.1666667, 0.1666667, 0.1666667, 0.1666667, 0.1666667],
+        )
+
     def it_provides_std_dev_err_univ_mr_with_hs(self):
         strand = Cube(CR.UNIV_MR_WITH_HS["slides"][0]["cube"]).partitions[0]
 
@@ -932,10 +953,6 @@ class Test_Slice(object):
     probably redundancies to be eliminated.
     """
 
-    def test_as_array_text(self):
-        strand = Cube(CR.SIMPLE_TEXT).partitions[0]
-        assert strand.counts == (1, 1, 1, 1, 1, 1)
-
     def test_as_array_cat_x_cat_exclude_missing(self):
         slice_ = Cube(CR.CAT_X_CAT).partitions[0]
         expected = np.array([[5, 2], [5, 3]])
@@ -952,11 +969,6 @@ class Test_Slice(object):
             [[0, 0, 1, 0], [0, 0, 0, 1], [0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 0]]
         )
         np.testing.assert_array_equal(slice_.counts, expected)
-
-    def test_margin_text(self):
-        slice_ = Cube(CR.SIMPLE_TEXT).partitions[0]
-        expected = np.array([6])
-        np.testing.assert_array_equal(slice_.table_margin, expected)
 
     def test_cat_x_cat_table_margin(self):
         slice_ = Cube(CR.CAT_X_CAT).partitions[0]
@@ -1014,25 +1026,6 @@ class Test_Slice(object):
         expected = np.array([1, 1, 1, 1, 0])
         np.testing.assert_array_equal(slice_.rows_margin, expected)
 
-    def test_proportions_text(self):
-        strand = Cube(CR.SIMPLE_TEXT).partitions[0]
-        table_proportions = strand.table_proportions
-        np.testing.assert_almost_equal(
-            table_proportions,
-            (0.1666667, 0.1666667, 0.1666667, 0.1666667, 0.1666667, 0.1666667),
-        )
-
-    def test_std_dev_err_text(self):
-        strand = Cube(CR.SIMPLE_TEXT).partitions[0]
-        np.testing.assert_almost_equal(
-            strand.standard_deviation,
-            [0.372678, 0.372678, 0.372678, 0.372678, 0.372678, 0.372678],
-        )
-        np.testing.assert_almost_equal(
-            strand.standard_error,
-            [0.1521452, 0.1521452, 0.1521452, 0.1521452, 0.1521452, 0.1521452],
-        )
-
     def test_proportions_cat_x_cat_axis_none(self):
         slice_ = Cube(CR.CAT_X_CAT).partitions[0]
         expected = np.array([[0.3333333, 0.1333333], [0.3333333, 0.2000000]])
@@ -1081,14 +1074,6 @@ class Test_Slice(object):
         )
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
-    def test_percentages_text(self):
-        strand = Cube(CR.SIMPLE_TEXT).partitions[0]
-        table_percentages = strand.table_percentages
-        np.testing.assert_almost_equal(
-            table_percentages,
-            (16.6666667, 16.6666667, 16.6666667, 16.6666667, 16.6666667, 16.6666667),
-        )
-
     def test_percentages_cat_x_cat_axis_none(self):
         slice_ = Cube(CR.CAT_X_CAT).partitions[0]
         expected = np.array([[33.3333333, 13.3333333], [33.3333333, 20.0]])
@@ -1103,21 +1088,6 @@ class Test_Slice(object):
         slice_ = Cube(CR.CAT_X_CAT).partitions[0]
         expected = np.array([[71.4285714, 28.5714286], [62.50000, 37.50000]])
         np.testing.assert_almost_equal(slice_.row_percentages, expected)
-
-    def test_population_counts_text(self):
-        strand = Cube(CR.SIMPLE_TEXT, population=9001).partitions[0]
-        population_counts = strand.population_counts
-        np.testing.assert_almost_equal(
-            population_counts,
-            (
-                1500.1666667,
-                1500.1666667,
-                1500.1666667,
-                1500.1666667,
-                1500.1666667,
-                1500.1666667,
-            ),
-        )
 
     def test_population_counts_cat_x_cat(self):
         slice_ = Cube(CR.CAT_X_CAT, population=9001).partitions[0]
