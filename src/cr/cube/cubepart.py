@@ -1272,10 +1272,14 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def population_counts(self):
-        return tuple(
-            self._table_proportions_as_array
-            * self._population
-            * self._cube.population_fraction
+        """1D np.float64 ndarray of population count for each row of strand.
+
+        The (estimated) population count is computed based on the `population` value
+        provided when the Strand is created. It is also adjusted to account for any
+        filters that were applied as part of the query.
+        """
+        return (
+            self.table_proportions * self._population * self._cube.population_fraction
         )
 
     @lazyproperty
@@ -1472,7 +1476,7 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def table_proportions(self):
-        return tuple(row.table_proportions for row in self._stripe.rows)
+        return np.array([row.table_proportions for row in self._stripe.rows])
 
     @lazyproperty
     def title(self):

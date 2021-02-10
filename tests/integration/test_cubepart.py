@@ -739,7 +739,7 @@ class Describe_Strand(object):
     """Integration-test suite for `cr.cube.cubepart._Strand` object."""
 
     def it_provides_values_for_univariate_cat(self):
-        strand = Cube(CR.UNIVARIATE_CATEGORICAL).partitions[0]
+        strand = Cube(CR.UNIVARIATE_CATEGORICAL, population=1000).partitions[0]
 
         assert strand.bases == (15, 15)
         assert strand.counts == (10, 5)
@@ -749,30 +749,37 @@ class Describe_Strand(object):
         assert strand.inserted_row_idxs == ()
         assert strand.is_empty is False
         assert strand.means == (np.nan, np.nan)
-        np.testing.assert_equal(strand.min_base_size_mask, [False, False])
+        assert strand.min_base_size_mask.tolist() == [False, False]
         assert strand.name == "v7"
         assert strand.ndim == 1
-        assert strand.population_counts == (0.0, 0.0)
+        assert strand.population_counts == pytest.approx([666.6667, 333.3333])
+        assert strand.population_counts_moe == pytest.approx([238.5592, 238.5592])
         assert strand.row_count == 2
         assert strand.row_labels == ("C", "E")
-        np.testing.assert_equal(strand.rows_base, [10, 5])
+        assert strand.rows_base.tolist() == [10, 5]
         assert strand.rows_dimension_fills == (None, None)
         assert strand.rows_dimension_name == "v7"
         assert strand.rows_dimension_type == DT.CAT
-        np.testing.assert_equal(strand.rows_margin, [10, 5])
-        assert strand.scale_mean - 1.66667 < 0.0001
+        assert strand.rows_margin.tolist() == [10, 5]
+        assert strand.scale_mean == pytest.approx(1.666667)
+        assert strand.scale_median == pytest.approx(1.0)
+        assert strand.scale_std_dev == pytest.approx(0.9428090)
+        assert strand.scale_std_err == pytest.approx(0.2434322)
         assert strand.shape == (2,)
+        assert strand.standard_deviation == pytest.approx([0.4714045, 0.4714045])
+        assert strand.standard_error == pytest.approx([0.1217161, 0.1217161])
         assert strand.table_base == 15
         assert strand.table_base_unpruned == 15
         assert strand.table_margin == 15
         assert strand.table_margin_unpruned == 15
         assert strand.table_name == "v7: C"
-        assert pytest.approx(strand.table_percentages) == (66.66667, 33.33333)
-        assert pytest.approx(strand.table_proportions) == (0.666667, 0.333333)
+        assert strand.table_percentages == pytest.approx([66.66667, 33.33333])
+        assert strand.table_proportions == pytest.approx([0.6666667, 0.3333333])
+        assert strand.table_proportions_moe == pytest.approx([0.2385592, 0.2385592])
         assert strand.title == "Registered Voters"
         assert strand.unweighted_bases == (15, 15)
         assert strand.unweighted_counts == (10, 5)
-        assert pytest.approx(strand.var_scale_mean) == 0.8888888
+        assert strand.var_scale_mean == pytest.approx(0.8888888)
         assert strand.variable_name == "v7"
 
     def it_provides_values_for_cat_with_means_and_insertions(self):
@@ -888,16 +895,6 @@ class Test_Slice(object):
     probably redundancies to be eliminated.
     """
 
-    def test_crunch_cube_loads_data(self):
-        cube = Cube(CR.CAT_X_CAT)
-        cube_dict = cube._cube_dict
-        assert cube_dict == CR.CAT_X_CAT
-
-    def test_as_array_univariate_cat_exclude_missing(self):
-        strand = Cube(CR.UNIVARIATE_CATEGORICAL).partitions[0]
-        assert strand.counts == (10, 5)
-        assert strand.unweighted_counts == (10, 5)
-
     def test_as_array_numeric(self):
         strand = Cube(CR.VOTER_REGISTRATION).partitions[0]
         assert strand.counts == (885, 105, 10)
@@ -926,11 +923,6 @@ class Test_Slice(object):
             [[0, 0, 1, 0], [0, 0, 0, 1], [0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 0]]
         )
         np.testing.assert_array_equal(slice_.counts, expected)
-
-    def test_margin_univariate_cat_axis_none(self):
-        slice_ = Cube(CR.UNIVARIATE_CATEGORICAL).partitions[0]
-        expected = np.array([15])
-        np.testing.assert_array_equal(slice_.table_margin, expected)
 
     def test_margin_numeric(self):
         slice_ = Cube(CR.VOTER_REGISTRATION).partitions[0]
@@ -1003,10 +995,6 @@ class Test_Slice(object):
         expected = np.array([1, 1, 1, 1, 0])
         np.testing.assert_array_equal(slice_.rows_margin, expected)
 
-    def test_proportions_univariate_cat_axis_none(self):
-        strand = Cube(CR.UNIVARIATE_CATEGORICAL).partitions[0]
-        np.testing.assert_almost_equal(strand.table_proportions, (0.6666667, 0.3333333))
-
     def test_proportions_numeric(self):
         strand = Cube(CR.VOTER_REGISTRATION).partitions[0]
         table_proportions = strand.table_proportions
@@ -1024,25 +1012,6 @@ class Test_Slice(object):
             table_proportions,
             (0.1666667, 0.1666667, 0.1666667, 0.1666667, 0.1666667, 0.1666667),
         )
-
-    def test_std_dev_err_moe_univariate_cat_axis_none(self):
-        strand = Cube(CR.UNIVARIATE_CATEGORICAL, population=1000).partitions[0]
-        assert strand.standard_deviation.tolist() == [
-            0.4714045207910317,
-            0.4714045207910317,
-        ]
-        assert strand.standard_error.tolist() == [
-            0.12171612389003691,
-            0.12171612389003691,
-        ]
-        assert strand.table_proportions_moe.tolist() == [
-            0.2385592210440123,
-            0.2385592210440123,
-        ]
-        assert strand.population_counts_moe.tolist() == [
-            238.5592210440123,
-            238.5592210440123,
-        ]
 
     def test_std_dev_err_numeric(self):
         strand = Cube(CR.VOTER_REGISTRATION, population=1000).partitions[0]
@@ -1135,11 +1104,6 @@ class Test_Slice(object):
         )
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
-    def test_percentages_univariate_cat_axis_none(self):
-        strand = Cube(CR.UNIVARIATE_CATEGORICAL).partitions[0]
-        table_percentages = strand.table_percentages
-        np.testing.assert_almost_equal(table_percentages, (66.6666667, 33.3333333))
-
     def test_percentages_numeric(self):
         strand = Cube(CR.VOTER_REGISTRATION).partitions[0]
         table_percentages = strand.table_percentages
@@ -1172,11 +1136,6 @@ class Test_Slice(object):
         slice_ = Cube(CR.CAT_X_CAT).partitions[0]
         expected = np.array([[71.4285714, 28.5714286], [62.50000, 37.50000]])
         np.testing.assert_almost_equal(slice_.row_percentages, expected)
-
-    def test_population_counts_univariate_cat(self):
-        strand = Cube(CR.UNIVARIATE_CATEGORICAL, population=9001).partitions[0]
-        population_counts = strand.population_counts
-        np.testing.assert_almost_equal(population_counts, (6000.6666667, 3000.3333333))
 
     def test_population_counts_numeric(self):
         strand = Cube(CR.VOTER_REGISTRATION, population=9001).partitions[0]

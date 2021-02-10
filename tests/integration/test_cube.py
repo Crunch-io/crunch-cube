@@ -221,14 +221,6 @@ class DescribeIntegrated_Measures(object):
 
         assert type(weighted_counts).__name__ == expected_type_name
 
-    def it_provides_access_to_the_bases_measure(self):
-        slice_ = Cube(CR.UNIVARIATE_CATEGORICAL).partitions[0]
-        assert slice_.bases == (15, 15)
-
-    def it_provides_access_to_min_base_size_mask(self):
-        slice_ = Cube(CR.UNIVARIATE_CATEGORICAL).partitions[0]
-        np.testing.assert_array_equal(slice_.min_base_size_mask, [False, False])
-
     def it_provides_access_univariate_mr_min_base_size_mask(self):
         slice_ = Cube(CR.UNIV_MR_WITH_HS["slides"][0]["cube"]).partitions[0]
         np.testing.assert_array_equal(
