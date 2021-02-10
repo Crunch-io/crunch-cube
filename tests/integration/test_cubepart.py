@@ -792,6 +792,27 @@ class Describe_Strand(object):
         assert strand.title == "Untitled"
         assert strand.unweighted_counts == (409, 113, 139, 409, 252)
 
+    def it_provides_values_for_univariate_numeric(self):
+        strand = Cube(CR.NUM, population=9001).partitions[0]
+
+        assert strand.counts == (885, 105, 10)
+        assert strand.population_counts == pytest.approx([7965.885, 945.105, 90.01])
+        assert strand.population_counts_moe == pytest.approx(
+            [177.9752, 171.0193, 55.50811]
+        )
+        assert strand.table_margin == 1000
+        assert strand.table_percentages == pytest.approx([88.5, 10.5, 1.0])
+        assert strand.table_proportions_moe == pytest.approx(
+            [0.019772822, 0.019000029, 0.006166883]
+        )
+        assert strand.standard_deviation == pytest.approx(
+            [0.31902194, 0.30655342, 0.09949874]
+        )
+        assert strand.standard_error == pytest.approx(
+            [0.010088359, 0.009694070, 0.003146427]
+        )
+        assert strand.table_proportions == pytest.approx([0.885, 0.105, 0.010])
+
     def it_provides_std_dev_err_univ_mr_with_hs(self):
         strand = Cube(CR.UNIV_MR_WITH_HS["slides"][0]["cube"]).partitions[0]
 
@@ -895,10 +916,6 @@ class Test_Slice(object):
     probably redundancies to be eliminated.
     """
 
-    def test_as_array_numeric(self):
-        strand = Cube(CR.VOTER_REGISTRATION).partitions[0]
-        assert strand.counts == (885, 105, 10)
-
     def test_as_array_datetime(self):
         strand = Cube(CR.SIMPLE_DATETIME).partitions[0]
         assert strand.counts == (1, 1, 1, 1)
@@ -923,11 +940,6 @@ class Test_Slice(object):
             [[0, 0, 1, 0], [0, 0, 0, 1], [0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 0]]
         )
         np.testing.assert_array_equal(slice_.counts, expected)
-
-    def test_margin_numeric(self):
-        slice_ = Cube(CR.VOTER_REGISTRATION).partitions[0]
-        expected = np.array([1000])
-        np.testing.assert_array_equal(slice_.table_margin, expected)
 
     def test_margin_datetime(self):
         slice_ = Cube(CR.SIMPLE_DATETIME).partitions[0]
@@ -995,11 +1007,6 @@ class Test_Slice(object):
         expected = np.array([1, 1, 1, 1, 0])
         np.testing.assert_array_equal(slice_.rows_margin, expected)
 
-    def test_proportions_numeric(self):
-        strand = Cube(CR.VOTER_REGISTRATION).partitions[0]
-        table_proportions = strand.table_proportions
-        np.testing.assert_almost_equal(table_proportions, (0.885, 0.105, 0.010))
-
     def test_proportions_datetime(self):
         strand = Cube(CR.SIMPLE_DATETIME).partitions[0]
         table_proportions = strand.table_proportions
@@ -1012,29 +1019,6 @@ class Test_Slice(object):
             table_proportions,
             (0.1666667, 0.1666667, 0.1666667, 0.1666667, 0.1666667, 0.1666667),
         )
-
-    def test_std_dev_err_numeric(self):
-        strand = Cube(CR.VOTER_REGISTRATION, population=1000).partitions[0]
-        assert strand.standard_deviation.tolist() == [
-            0.3190219428189854,
-            0.30655342111938666,
-            0.099498743710662,
-        ]
-        assert strand.standard_error.tolist() == [
-            0.010088359628799917,
-            0.009694070352540258,
-            0.003146426544510455,
-        ]
-        assert strand.table_proportions_moe.tolist() == [
-            0.0197728216915012,
-            0.019000028904446215,
-            0.00616688275588489,
-        ]
-        assert strand.population_counts_moe.tolist() == [
-            19.7728216915012,
-            19.000028904446214,
-            6.166882755884889,
-        ]
 
     def test_std_dev_err_datetime(self):
         strand = Cube(CR.SIMPLE_DATETIME).partitions[0]
@@ -1104,11 +1088,6 @@ class Test_Slice(object):
         )
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
-    def test_percentages_numeric(self):
-        strand = Cube(CR.VOTER_REGISTRATION).partitions[0]
-        table_percentages = strand.table_percentages
-        np.testing.assert_almost_equal(table_percentages, (88.5, 10.5, 1.0))
-
     def test_percentages_datetime(self):
         strand = Cube(CR.SIMPLE_DATETIME).partitions[0]
         table_percentages = strand.table_percentages
@@ -1136,11 +1115,6 @@ class Test_Slice(object):
         slice_ = Cube(CR.CAT_X_CAT).partitions[0]
         expected = np.array([[71.4285714, 28.5714286], [62.50000, 37.50000]])
         np.testing.assert_almost_equal(slice_.row_percentages, expected)
-
-    def test_population_counts_numeric(self):
-        strand = Cube(CR.VOTER_REGISTRATION, population=9001).partitions[0]
-        population_counts = strand.population_counts
-        np.testing.assert_almost_equal(population_counts, (7965.885, 945.105, 90.01))
 
     def test_population_counts_datetime(self):
         strand = Cube(CR.SIMPLE_DATETIME, population=9001).partitions[0]
