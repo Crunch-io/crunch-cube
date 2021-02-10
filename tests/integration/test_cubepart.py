@@ -792,6 +792,22 @@ class Describe_Strand(object):
         assert strand.title == "Untitled"
         assert strand.unweighted_counts == (409, 113, 139, 409, 252)
 
+    def it_provides_values_for_univariate_datetime(self):
+        strand = Cube(CR.DATE, population=9001).partitions[0]
+        assert strand.counts == (1, 1, 1, 1)
+        assert strand.table_margin == 4
+        assert strand.table_proportions == pytest.approx([0.25, 0.25, 0.25, 0.25])
+        assert strand.standard_deviation == pytest.approx(
+            [0.4330127, 0.4330127, 0.4330127, 0.4330127]
+        )
+        assert strand.standard_error == pytest.approx(
+            [0.2165064, 0.2165064, 0.2165064, 0.2165064]
+        )
+        assert strand.table_percentages == pytest.approx([25.0, 25.0, 25.0, 25.0])
+        assert strand.population_counts == pytest.approx(
+            [2250.25, 2250.25, 2250.25, 2250.25]
+        )
+
     def it_provides_values_for_univariate_numeric(self):
         strand = Cube(CR.NUM, population=9001).partitions[0]
 
@@ -916,10 +932,6 @@ class Test_Slice(object):
     probably redundancies to be eliminated.
     """
 
-    def test_as_array_datetime(self):
-        strand = Cube(CR.SIMPLE_DATETIME).partitions[0]
-        assert strand.counts == (1, 1, 1, 1)
-
     def test_as_array_text(self):
         strand = Cube(CR.SIMPLE_TEXT).partitions[0]
         assert strand.counts == (1, 1, 1, 1, 1, 1)
@@ -940,11 +952,6 @@ class Test_Slice(object):
             [[0, 0, 1, 0], [0, 0, 0, 1], [0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 0]]
         )
         np.testing.assert_array_equal(slice_.counts, expected)
-
-    def test_margin_datetime(self):
-        slice_ = Cube(CR.SIMPLE_DATETIME).partitions[0]
-        expected = np.array([4])
-        np.testing.assert_array_equal(slice_.table_margin, expected)
 
     def test_margin_text(self):
         slice_ = Cube(CR.SIMPLE_TEXT).partitions[0]
@@ -1007,26 +1014,12 @@ class Test_Slice(object):
         expected = np.array([1, 1, 1, 1, 0])
         np.testing.assert_array_equal(slice_.rows_margin, expected)
 
-    def test_proportions_datetime(self):
-        strand = Cube(CR.SIMPLE_DATETIME).partitions[0]
-        table_proportions = strand.table_proportions
-        np.testing.assert_almost_equal(table_proportions, (0.25, 0.25, 0.25, 0.25))
-
     def test_proportions_text(self):
         strand = Cube(CR.SIMPLE_TEXT).partitions[0]
         table_proportions = strand.table_proportions
         np.testing.assert_almost_equal(
             table_proportions,
             (0.1666667, 0.1666667, 0.1666667, 0.1666667, 0.1666667, 0.1666667),
-        )
-
-    def test_std_dev_err_datetime(self):
-        strand = Cube(CR.SIMPLE_DATETIME).partitions[0]
-        np.testing.assert_almost_equal(
-            strand.standard_deviation, [0.4330127, 0.4330127, 0.4330127, 0.4330127]
-        )
-        np.testing.assert_almost_equal(
-            strand.standard_error, [0.2165064, 0.2165064, 0.2165064, 0.2165064]
         )
 
     def test_std_dev_err_text(self):
@@ -1088,11 +1081,6 @@ class Test_Slice(object):
         )
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
-    def test_percentages_datetime(self):
-        strand = Cube(CR.SIMPLE_DATETIME).partitions[0]
-        table_percentages = strand.table_percentages
-        np.testing.assert_almost_equal(table_percentages, (25.0, 25.0, 25.0, 25.0))
-
     def test_percentages_text(self):
         strand = Cube(CR.SIMPLE_TEXT).partitions[0]
         table_percentages = strand.table_percentages
@@ -1115,13 +1103,6 @@ class Test_Slice(object):
         slice_ = Cube(CR.CAT_X_CAT).partitions[0]
         expected = np.array([[71.4285714, 28.5714286], [62.50000, 37.50000]])
         np.testing.assert_almost_equal(slice_.row_percentages, expected)
-
-    def test_population_counts_datetime(self):
-        strand = Cube(CR.SIMPLE_DATETIME, population=9001).partitions[0]
-        population_counts = strand.population_counts
-        np.testing.assert_almost_equal(
-            population_counts, (2250.25, 2250.25, 2250.25, 2250.25)
-        )
 
     def test_population_counts_text(self):
         strand = Cube(CR.SIMPLE_TEXT, population=9001).partitions[0]
