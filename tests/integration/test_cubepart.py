@@ -242,6 +242,51 @@ class Describe_Slice(object):
             ],
         )
 
+    def it_provides_values_for_cat_x_datetime(self):
+        slice_ = Cube(CR.CAT_X_DATETIME).partitions[0]
+
+        assert slice_.column_labels.tolist() == [
+            "1776-07-04T00:00:00",
+            "1950-12-24T00:00:00",
+            "2000-01-01T00:00:00",
+            "2000-01-02T00:00:00",
+        ]
+        assert slice_.column_proportions.tolist() == [
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 0.0],
+        ]
+        assert slice_.columns_margin.tolist() == [1, 1, 1, 1]
+        assert slice_.counts.tolist() == [
+            [0, 0, 1, 0],
+            [0, 0, 0, 1],
+            [0, 1, 0, 0],
+            [1, 0, 0, 0],
+            [0, 0, 0, 0],
+        ]
+        assert slice_.row_labels.tolist() == ["red", "green", "blue", "4", "9"]
+        np.testing.assert_almost_equal(
+            slice_.row_proportions,
+            [
+                [0, 0, 1, 0],
+                [0, 0, 0, 1],
+                [0, 1, 0, 0],
+                [1, 0, 0, 0],
+                [np.nan, np.nan, np.nan, np.nan],
+            ],
+        )
+        assert slice_.rows_margin.tolist() == [1, 1, 1, 1, 0]
+        assert slice_.table_margin == 4
+        assert slice_.table_proportions.tolist() == [
+            [0.0, 0.0, 0.25, 0.0],
+            [0.0, 0.0, 0.0, 0.25],
+            [0.0, 0.25, 0.0, 0.0],
+            [0.25, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 0.0],
+        ]
+
     def it_provides_values_for_cat_hs_x_mr(self):
         slice_ = Cube(CR.CAT_HS_X_MR).partitions[0]
 
@@ -1115,13 +1160,6 @@ class Test_Slice(object):
     probably redundancies to be eliminated.
     """
 
-    def test_as_array_cat_x_datetime_exclude_missing(self):
-        slice_ = Cube(CR.CAT_X_DATETIME).partitions[0]
-        expected = np.array(
-            [[0, 0, 1, 0], [0, 0, 0, 1], [0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 0]]
-        )
-        np.testing.assert_array_equal(slice_.counts, expected)
-
     def test_mr_x_mr_table_base_and_margin(self):
         transforms = {
             "rows_dimension": {"prune": True},
@@ -1148,54 +1186,6 @@ class Test_Slice(object):
         expected = np.full((12, 12), 6456.761929)
         np.testing.assert_almost_equal(slice_.table_margin_unpruned, expected)
 
-    def test_margin_cat_x_datetime_axis_none(self):
-        slice_ = Cube(CR.CAT_X_DATETIME).partitions[0]
-        expected = np.array([4])
-        np.testing.assert_array_equal(slice_.table_margin, expected)
-
-    def test_margin_cat_x_datetime_axis_0(self):
-        slice_ = Cube(CR.CAT_X_DATETIME).partitions[0]
-        expected = np.array([1, 1, 1, 1])
-        np.testing.assert_array_equal(slice_.columns_margin, expected)
-
-    def test_margin_cat_x_datetime_axis_1(self):
-        slice_ = Cube(CR.CAT_X_DATETIME).partitions[0]
-        expected = np.array([1, 1, 1, 1, 0])
-        np.testing.assert_array_equal(slice_.rows_margin, expected)
-
-    def test_proportions_cat_x_datetime_axis_none(self):
-        slice_ = Cube(CR.CAT_X_DATETIME).partitions[0]
-        expected = np.array(
-            [
-                [0.0, 0.0, 0.25, 0.0],
-                [0.0, 0.0, 0.0, 0.25],
-                [0.0, 0.25, 0.0, 0.0],
-                [0.25, 0.0, 0.0, 0.0],
-                [0.0, 0.0, 0.0, 0.0],
-            ]
-        )
-        np.testing.assert_almost_equal(slice_.table_proportions, expected)
-
-    def test_proportions_cat_x_datetime_axis_0(self):
-        slice_ = Cube(CR.CAT_X_DATETIME).partitions[0]
-        expected = np.array(
-            [[0, 0, 1, 0], [0, 0, 0, 1], [0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 0]]
-        )
-        np.testing.assert_almost_equal(slice_.column_proportions, expected)
-
-    def test_proportions_cat_x_datetime_axis_1(self):
-        slice_ = Cube(CR.CAT_X_DATETIME).partitions[0]
-        expected = np.array(
-            [
-                [0, 0, 1, 0],
-                [0, 0, 0, 1],
-                [0, 1, 0, 0],
-                [1, 0, 0, 0],
-                [np.nan, np.nan, np.nan, np.nan],
-            ]
-        )
-        np.testing.assert_almost_equal(slice_.row_proportions, expected)
-
     def test_filtered_population_counts(self):
         transforms = {
             "columns_dimension": {"insertions": {}},
@@ -1214,16 +1204,6 @@ class Test_Slice(object):
             ]
         )
         np.testing.assert_almost_equal(slice_.population_counts, expected)
-
-    def test_labels_cat_x_datetime_exclude_missing(self):
-        slice_ = Cube(CR.CAT_X_DATETIME).partitions[0]
-        assert slice_.row_labels.tolist() == ["red", "green", "blue", "4", "9"]
-        assert slice_.column_labels.tolist() == [
-            "1776-07-04T00:00:00",
-            "1950-12-24T00:00:00",
-            "2000-01-01T00:00:00",
-            "2000-01-02T00:00:00",
-        ]
 
     def test_labels_simple_cat_array_exclude_missing(self):
         slice_ = Cube(CR.SIMPLE_CAT_ARRAY).partitions[0]
