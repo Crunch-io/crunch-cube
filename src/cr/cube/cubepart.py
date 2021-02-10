@@ -25,7 +25,7 @@ from cr.cube.matrix import Assembler
 from cr.cube.measures.pairwise_significance import PairwiseSignificance
 from cr.cube.noa.smoothing import SingleSidedMovingAvgSmoother
 from cr.cube.scalar import MeansScalar
-from cr.cube.stripe import TransformedStripe
+from cr.cube.old_stripe import TransformedStripe
 from cr.cube.util import lazyproperty
 
 # ---This is the quantile of the normal Cumulative Distribution Function (CDF) at

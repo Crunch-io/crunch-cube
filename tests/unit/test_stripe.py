@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-"""Unit test suite for `cr.cube.stripe` module."""
+"""Unit test suite for `cr.cube.stripe` subpackage."""
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
@@ -9,7 +9,7 @@ import pytest
 from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension, _Element, _Subtotal
 from cr.cube.enums import DIMENSION_TYPE as DT
-from cr.cube.stripe import (
+from cr.cube.old_stripe import (
     _BaseBaseStripe,
     _BaseStripeRow,
     _MeansStripeRow,
@@ -30,12 +30,12 @@ from ..unitutil import (
 
 
 class DescribeTransformedStripe(object):
-    """Unit test suite for `cr.cube.stripe.TransformedStripe` object."""
+    """Unit test suite for `cr.cube.old_stripe.TransformedStripe` object."""
 
     def it_provides_a_constructor_classmethod(
         self, request, cube_, dimension_, base_stripe_, stripe_
     ):
-        _BaseBaseStripe_ = class_mock(request, "cr.cube.stripe._BaseBaseStripe")
+        _BaseBaseStripe_ = class_mock(request, "cr.cube.old_stripe._BaseBaseStripe")
         _BaseBaseStripe_.factory.return_value = base_stripe_
         _init_ = initializer_mock(request, TransformedStripe)
 
@@ -74,7 +74,7 @@ class DescribeTransformedStripe(object):
         )
         property_mock(request, TransformedStripe, "_table_margin", return_value=42)
         _StripeInsertionHelper_ = class_mock(
-            request, "cr.cube.stripe._StripeInsertionHelper"
+            request, "cr.cube.old_stripe._StripeInsertionHelper"
         )
         _StripeInsertionHelper_.iter_interleaved_rows.return_value = iter(rows_)
         stripe = TransformedStripe(dimension_, None)
@@ -124,7 +124,7 @@ class DescribeTransformedStripe(object):
 
 
 class Describe_StripeInsertionHelper(object):
-    """Unit test suite for `cr.cube.stripe._StripeInsertionHelper` function-object."""
+    """Unit test suite for `cr.cube.old_stripe._StripeInsertionHelper` object."""
 
     def it_provides_an_interface_classmethod(self, request, dimension_):
         _init_ = initializer_mock(request, _StripeInsertionHelper)
@@ -188,7 +188,7 @@ class Describe_StripeInsertionHelper(object):
             instance_mock(request, _StripeInsertedRow, name="subtotal_2"),
         )
         _StripeInsertedRow_ = class_mock(
-            request, "cr.cube.stripe._StripeInsertedRow", side_effect=subtotal_rows_
+            request, "cr.cube.old_stripe._StripeInsertedRow", side_effect=subtotal_rows_
         )
         dimension_.dimension_type = dimension_type
         dimension_.subtotals = subtotal_rows_
@@ -209,7 +209,7 @@ class Describe_StripeInsertionHelper(object):
 
 
 class Describe_StripeInsertedRow(object):
-    """Unit test suite for `cr.cube.stripe._StripeInsertedRow` object."""
+    """Unit test suite for `cr.cube.old_stripe._StripeInsertedRow` object."""
 
     @pytest.mark.parametrize("anchor_value", ("top", "bottom", 1, 36))
     def it_knows_its_anchor_location(self, anchor_value, subtotal_):
@@ -259,7 +259,7 @@ class Describe_StripeInsertedRow(object):
 
 
 class Describe_BaseStripeRow(object):
-    """Unit test suite for `cr.cube.stripe._BaseStripeRow` object."""
+    """Unit test suite for `cr.cube.old_stripe._BaseStripeRow` object."""
 
     def it_knows_its_element_id(self, element_):
         element_.element_id = 42
@@ -280,7 +280,7 @@ class Describe_BaseStripeRow(object):
 
 
 class Describe_MeansStripeRow(object):
-    """Unit test suite for `cr.cube.stripe.Describe_MeansStripeRow` object."""
+    """Unit test suite for `cr.cube.old_stripe._MeansStripeRow` object."""
 
     def it_knows_its_unweighted_count(self):
         assert _MeansStripeRow(None, 42, None).unweighted_count == 42

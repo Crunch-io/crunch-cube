@@ -12,7 +12,7 @@ from cr.cube.cubepart import CubePartition, _Slice, _Strand, _Nub
 from cr.cube.dimension import Dimension
 from cr.cube.matrix import Assembler
 from cr.cube.noa.smoothing import SingleSidedMovingAvgSmoother
-from cr.cube.stripe import _BaseStripeRow, TransformedStripe
+from cr.cube.old_stripe import _BaseStripeRow, TransformedStripe
 
 from ..unitutil import class_mock, instance_mock, property_mock
 
