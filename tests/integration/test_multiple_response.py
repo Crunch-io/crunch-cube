@@ -3,6 +3,7 @@
 """Integration-test suite for multiple-response cube behaviors"""
 
 import numpy as np
+import pytest
 
 from cr.cube.cube import Cube
 
@@ -34,11 +35,8 @@ def test_proportions_simple_mr():
 
 def test_std_dev_err_simple_mr():
     strand = Cube(CR.SIMPLE_MR).partitions[0]
-
-    np.testing.assert_almost_equal(
-        strand.standard_deviation, [0.4898979, 0.4714045, 0.0]
-    )
-    np.testing.assert_almost_equal(strand.standard_error, [0.219089, 0.1924501, 0.0])
+    assert strand.table_proportion_stddevs == pytest.approx([0.4898979, 0.4714045, 0.0])
+    assert strand.table_proportion_stderrs == pytest.approx([0.219089, 0.1924501, 0.0])
 
 
 def test_1D_mr_with_means():

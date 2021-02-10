@@ -825,7 +825,6 @@ class Describe_Strand(object):
     def it_provides_values_for_univariate_cat(self):
         strand = Cube(CR.UNIVARIATE_CATEGORICAL, population=1000).partitions[0]
 
-        assert strand.bases == (15, 15)
         assert strand.counts == (10, 5)
         assert strand.cube_index == 0
         assert strand.dimension_types == (DT.CAT,)
@@ -850,22 +849,22 @@ class Describe_Strand(object):
         assert strand.scale_std_dev == pytest.approx(0.9428090)
         assert strand.scale_std_err == pytest.approx(0.2434322)
         assert strand.shape == (2,)
-        assert strand.standard_deviation == pytest.approx([0.4714045, 0.4714045])
-        assert strand.standard_error == pytest.approx([0.1217161, 0.1217161])
         assert strand.table_base == 15
         assert strand.table_base_unpruned == 15
         assert strand.table_margin == 15
         assert strand.table_margin_unpruned == 15
         assert strand.table_name == "v7: C"
         assert strand.table_percentages == pytest.approx([66.66667, 33.33333])
+        assert strand.table_proportion_moes == pytest.approx([0.2385592, 0.2385592])
+        assert strand.table_proportion_stddevs == pytest.approx([0.4714045, 0.4714045])
+        assert strand.table_proportion_stderrs == pytest.approx([0.1217161, 0.1217161])
         assert strand.table_proportions == pytest.approx([0.6666667, 0.3333333])
-        assert strand.table_proportions_moe == pytest.approx([0.2385592, 0.2385592])
         assert strand.title == "Registered Voters"
         assert strand.unweighted_bases == (15, 15)
         assert strand.unweighted_counts == (10, 5)
         assert strand.var_scale_mean == pytest.approx(0.8888888)
         assert strand.variable_name == "v7"
-        assert strand.bases == (15, 15)
+        assert strand.weighted_bases == (15, 15)
 
     def it_provides_values_for_univariate_cat_means_hs(self):
         strand = Cube(CR.CAT_MEANS_HS).partitions[0]
@@ -968,17 +967,17 @@ class Describe_Strand(object):
     def it_provides_values_for_univariate_datetime(self):
         strand = Cube(CR.DATE, population=9001).partitions[0]
         assert strand.counts == (1, 1, 1, 1)
-        assert strand.table_margin == 4
-        assert strand.table_proportions == pytest.approx([0.25, 0.25, 0.25, 0.25])
-        assert strand.standard_deviation == pytest.approx(
-            [0.4330127, 0.4330127, 0.4330127, 0.4330127]
-        )
-        assert strand.standard_error == pytest.approx(
-            [0.2165064, 0.2165064, 0.2165064, 0.2165064]
-        )
-        assert strand.table_percentages == pytest.approx([25.0, 25.0, 25.0, 25.0])
         assert strand.population_counts == pytest.approx(
             [2250.25, 2250.25, 2250.25, 2250.25]
+        )
+        assert strand.table_margin == 4
+        assert strand.table_percentages == pytest.approx([25.0, 25.0, 25.0, 25.0])
+        assert strand.table_proportions == pytest.approx([0.25, 0.25, 0.25, 0.25])
+        assert strand.table_proportion_stddevs == pytest.approx(
+            [0.4330127, 0.4330127, 0.4330127, 0.4330127]
+        )
+        assert strand.table_proportion_stderrs == pytest.approx(
+            [0.2165064, 0.2165064, 0.2165064, 0.2165064]
         )
 
     def it_provides_values_for_univariate_mr_hs(self):
@@ -1013,7 +1012,7 @@ class Describe_Strand(object):
         assert strand.name == "Paid for ne"
         assert strand.rows_dimension_type == DT.MR
         assert strand.scale_mean is None
-        assert strand.standard_deviation == pytest.approx(
+        assert strand.table_proportion_stddevs == pytest.approx(
             [
                 0.46426724,
                 0.3584419,
@@ -1026,7 +1025,7 @@ class Describe_Strand(object):
                 0.14466968,
             ]
         )
-        assert strand.standard_error == pytest.approx(
+        assert strand.table_proportion_stderrs == pytest.approx(
             [
                 0.002541725,
                 0.001962362,
@@ -1051,13 +1050,13 @@ class Describe_Strand(object):
         )
         assert strand.table_margin == 1000
         assert strand.table_percentages == pytest.approx([88.5, 10.5, 1.0])
-        assert strand.table_proportions_moe == pytest.approx(
+        assert strand.table_proportion_moes == pytest.approx(
             [0.019772822, 0.019000029, 0.006166883]
         )
-        assert strand.standard_deviation == pytest.approx(
+        assert strand.table_proportion_stddevs == pytest.approx(
             [0.31902194, 0.30655342, 0.09949874]
         )
-        assert strand.standard_error == pytest.approx(
+        assert strand.table_proportion_stderrs == pytest.approx(
             [0.010088359, 0.009694070, 0.003146427]
         )
         assert strand.table_proportions == pytest.approx([0.885, 0.105, 0.010])
@@ -1079,10 +1078,10 @@ class Describe_Strand(object):
         assert strand.population_counts == pytest.approx(
             [1500.167, 1500.167, 1500.167, 1500.167, 1500.167, 1500.167]
         )
-        assert strand.standard_deviation == pytest.approx(
+        assert strand.table_proportion_stddevs == pytest.approx(
             [0.372678, 0.372678, 0.372678, 0.372678, 0.372678, 0.372678],
         )
-        assert strand.standard_error == pytest.approx(
+        assert strand.table_proportion_stderrs == pytest.approx(
             [0.1521452, 0.1521452, 0.1521452, 0.1521452, 0.1521452, 0.1521452],
         )
         assert strand.table_proportions == pytest.approx(

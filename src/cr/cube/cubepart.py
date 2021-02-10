@@ -1229,11 +1229,6 @@ class _Strand(CubePartition):
         self._mask_size = mask_size
 
     @lazyproperty
-    def bases(self):
-        """Sequence of weighted base for each row."""
-        return tuple(np.broadcast_to(self.table_margin, self.shape))
-
-    @lazyproperty
     def counts(self):
         """tuple, 1D cube counts."""
         return tuple(row.count for row in self._stripe.rows)
@@ -1293,7 +1288,7 @@ class _Strand(CubePartition):
         table margin is 0.
         """
         total_filtered_population = self._population * self._cube.population_fraction
-        return Z_975 * total_filtered_population * self.standard_error
+        return Z_975 * total_filtered_population * self.table_proportion_stderrs
 
     @lazyproperty
     def row_count(self):
@@ -1406,29 +1401,6 @@ class _Strand(CubePartition):
         return self._rows_dimension._dimension_dict
 
     @lazyproperty
-    def standard_deviation(self):
-        """np.ndarray percentages standard deviation"""
-        return np.sqrt(self._variance)
-
-    @lazyproperty
-    def standard_error(self):
-        """np.ndarray percentages standard error"""
-        if self.dimension_types[0] == DT.MR:
-            return np.sqrt(self._variance / self.bases)
-        return np.sqrt(self._variance / np.sum(self.rows_margin))
-
-    @lazyproperty
-    def table_proportions_moe(self):
-        """1D np.float64 ndarray of margin-of-error (MoE) for table proportions.
-
-        The values are represented as fractions, analogue to the `table_proportions`
-        property. This means that the value of 3.5% will have the value 0.035. The
-        values can be np.nan when the corresponding proportion is also np.nan, which
-        happens when the respective columns margin is 0.
-        """
-        return Z_975 * self.standard_error
-
-    @lazyproperty
     def table_base(self):
         """1D, single-element ndarray (like [3770])."""
         # For MR strands, table base is also a strand, since subvars never collapse.
@@ -1475,6 +1447,29 @@ class _Strand(CubePartition):
         return tuple(self._table_proportions_as_array * 100)
 
     @lazyproperty
+    def table_proportion_moes(self):
+        """1D np.float64 ndarray of table-proportion margin-of-error (MoE) for each row.
+
+        The values are represented as fractions, analogue to the `table_proportions`
+        property. This means that the value of 3.5% will have the value 0.035. The
+        values can be np.nan when the corresponding proportion is also np.nan, which
+        happens when the respective columns margin is 0.
+        """
+        return Z_975 * self.table_proportion_stderrs
+
+    @lazyproperty
+    def table_proportion_stddevs(self):
+        """np.ndarray percentages standard deviation"""
+        return np.sqrt(self._variance)
+
+    @lazyproperty
+    def table_proportion_stderrs(self):
+        """np.ndarray percentages standard error"""
+        if self.dimension_types[0] == DT.MR:
+            return np.sqrt(self._variance / self.weighted_bases)
+        return np.sqrt(self._variance / np.sum(self.rows_margin))
+
+    @lazyproperty
     def table_proportions(self):
         return np.array([row.table_proportions for row in self._stripe.rows])
 
@@ -1514,6 +1509,11 @@ class _Strand(CubePartition):
         return np.nansum(counts * pow((numeric_values - self.scale_mean), 2)) / np.sum(
             counts
         )
+
+    @lazyproperty
+    def weighted_bases(self):
+        """Sequence of weighted base for each row."""
+        return tuple(np.broadcast_to(self.table_margin, self.shape))
 
     # ---implementation (helpers)-------------------------------------
 
