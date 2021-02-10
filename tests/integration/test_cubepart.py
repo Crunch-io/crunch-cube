@@ -763,6 +763,20 @@ class Describe_Slice(object):
 class Describe_Strand(object):
     """Integration-test suite for `cr.cube.cubepart._Strand` object."""
 
+    def it_provides_values_for_ca_as_0th(self):
+        transforms = {
+            "columns_dimension": {"insertions": {}},
+            "rows_dimension": {"insertions": {}},
+        }
+        strand = Cube(
+            CR.CA_AS_0TH, cube_idx=0, transforms=transforms, population=100000000
+        ).partitions[0]
+
+        assert strand.population_counts == pytest.approx(
+            [54523323.5, 24570078.1, 15710358.3, 5072107.3]
+        )
+        assert strand.table_name == "Level of in: ATP Men's T"
+
     def it_provides_values_for_univariate_cat(self):
         strand = Cube(CR.UNIVARIATE_CATEGORICAL, population=1000).partitions[0]
 
@@ -806,9 +820,10 @@ class Describe_Strand(object):
         assert strand.unweighted_counts == (10, 5)
         assert strand.var_scale_mean == pytest.approx(0.8888888)
         assert strand.variable_name == "v7"
+        assert strand.bases == (15, 15)
 
-    def it_provides_values_for_cat_with_means_and_insertions(self):
-        strand = Cube(CR.CAT_WITH_MEANS_AND_INSERTIONS).partitions[0]
+    def it_provides_values_for_univariate_cat_means_hs(self):
+        strand = Cube(CR.CAT_MEANS_HS).partitions[0]
 
         assert strand.is_empty is False
         np.testing.assert_almost_equal(
@@ -816,6 +831,94 @@ class Describe_Strand(object):
         )
         assert strand.title == "Untitled"
         assert strand.unweighted_counts == (409, 113, 139, 409, 252)
+
+    def it_provides_values_for_univariate_cat_means_and_counts(self):
+        """The cube_mean and cube_count measures can appear together."""
+        # --- prune to avoid NaNs in results and thereby simplify assertions ---
+        transforms = {"rows_dimension": {"prune": True}}
+        strand = Cube(CR.CAT_MEANS_AND_COUNTS, transforms=transforms).partitions[0]
+
+        assert strand.means == pytest.approx(
+            [
+                74.50346,
+                83.41506,
+                83.82950,
+                80.44270,
+                79.38796,
+                68.23024,
+                77.02289,
+                78.86550,
+                85.31353,
+                83.61415,
+                83.00000,
+                65.89693,
+                61.74549,
+                83.28117,
+                82.88105,
+                84.12529,
+                71.36927,
+                77.92066,
+                77.29306,
+                79.73237,
+                84.49054,
+                67.86767,
+                72.94684,
+                82.56470,
+                71.05087,
+                83.85587,
+                81.74092,
+                57.64860,
+                82.98627,
+                78.11554,
+                76.16142,
+                76.43885,
+                71.04146,
+                82.79688,
+                54.20534,
+            ]
+        )
+        assert strand.ndim == 1
+        assert strand.rows_base.tolist() == [
+            806,
+            14,
+            14,
+            28,
+            780,
+            42,
+            1114,
+            28,
+            24,
+            746,
+            2,
+            12,
+            6,
+            2178,
+            2026,
+            571,
+            136,
+            16,
+            14,
+            1334,
+            1950,
+            26,
+            128,
+            4,
+            28,
+            3520,
+            1082,
+            36,
+            56,
+            556,
+            38,
+            146,
+            114,
+            28,
+            12,
+        ]
+        assert strand.shape == (35,)
+        assert strand.table_base == 17615
+        # --- means cube that also has counts has a table-margin ---
+        assert strand.table_margin == 17615
 
     def it_provides_values_for_univariate_datetime(self):
         strand = Cube(CR.DATE, population=9001).partitions[0]
@@ -832,6 +935,66 @@ class Describe_Strand(object):
         assert strand.population_counts == pytest.approx(
             [2250.25, 2250.25, 2250.25, 2250.25]
         )
+
+    def it_provides_values_for_univariate_mr_hs(self):
+        # --- subtotals shouldn't be in the MR variable, but there are cases when they
+        # --- are present. H&S should be ignored for univariate MR.
+        strand = Cube(CR.UNIV_MR_WITH_HS).partitions[0]
+
+        assert strand.counts == pytest.approx(
+            [
+                10488.90,
+                5051.444,
+                1960.495,
+                3985.375,
+                3073.367,
+                2196.709,
+                779.4323,
+                14859.56,
+                713.5478,
+            ]
+        )
+        assert strand.min_base_size_mask.tolist() == [
+            False,
+            False,
+            False,
+            False,
+            False,
+            False,
+            False,
+            False,
+            False,
+        ]
+        assert strand.name == "Paid for ne"
+        assert strand.rows_dimension_type == DT.MR
+        assert strand.scale_mean is None
+        assert strand.standard_deviation == pytest.approx(
+            [
+                0.46426724,
+                0.3584419,
+                0.2351762,
+                0.32431855,
+                0.2891897,
+                0.24800318,
+                0.15104855,
+                0.49700725,
+                0.14466968,
+            ]
+        )
+        assert strand.standard_error == pytest.approx(
+            [
+                0.002541725,
+                0.001962362,
+                0.001287519,
+                0.001775547,
+                0.001583227,
+                0.001357743,
+                0.000826946,
+                0.002720966,
+                0.000792023,
+            ]
+        )
+        assert strand.unweighted_bases == (33358,) * 9
 
     def it_provides_values_for_univariate_numeric(self):
         strand = Cube(CR.NUM, population=9001).partitions[0]
@@ -854,6 +1017,12 @@ class Describe_Strand(object):
         )
         assert strand.table_proportions == pytest.approx([0.885, 0.105, 0.010])
 
+    def it_provides_values_for_univariate_numeric_binned(self):
+        strand = Cube(
+            CR.NUM_BINNED, transforms={"rows_dimension": {"prune": True}}
+        ).partitions[0]
+        assert strand.counts == pytest.approx([118504.4, 155261.3, 182924.0])
+
     def it_provides_values_for_univariate_text(self):
         strand = Cube(CR.TEXT, population=9001).partitions[0]
 
@@ -873,38 +1042,6 @@ class Describe_Strand(object):
         )
         assert strand.table_proportions == pytest.approx(
             [0.1666667, 0.1666667, 0.1666667, 0.1666667, 0.1666667, 0.1666667],
-        )
-
-    def it_provides_std_dev_err_univ_mr_with_hs(self):
-        strand = Cube(CR.UNIV_MR_WITH_HS["slides"][0]["cube"]).partitions[0]
-
-        np.testing.assert_almost_equal(
-            strand.standard_deviation,
-            [
-                0.46426724,
-                0.3584419,
-                0.2351762,
-                0.32431855,
-                0.2891897,
-                0.24800318,
-                0.15104855,
-                0.49700725,
-                0.14466968,
-            ],
-        )
-        np.testing.assert_almost_equal(
-            strand.standard_error,
-            [
-                0.0025417,
-                0.0019624,
-                0.0012875,
-                0.0017755,
-                0.0015832,
-                0.0013577,
-                0.0008269,
-                0.002721,
-                0.000792,
-            ],
         )
 
     def it_places_insertions_on_a_reordered_dimension_in_the_right_position(self):
@@ -1848,16 +1985,6 @@ class Test_Slice(object):
         )
         np.testing.assert_almost_equal(slice_.table_proportions, expected)
 
-    def test_prune_univariate_cat(self):
-        transforms = {"rows_dimension": {"prune": True}}
-        strand = Cube(CR.BINNED, transforms=transforms).partitions[0]
-
-        counts = strand.counts
-
-        np.testing.assert_almost_equal(
-            counts, (118504.40402204, 155261.2723631, 182923.95470245)
-        )
-
     def test_single_col_margin_not_iterable(self):
         slice_ = Cube(CR.SINGLE_COL_MARGIN_NOT_ITERABLE).partitions[0]
         assert slice_.columns_margin == 1634
@@ -1881,108 +2008,6 @@ class Test_Slice(object):
         ]
         slice_ = Cube(CR.GENDER_PARTY_RACE).partitions[1]
         np.testing.assert_almost_equal(slice_.table_proportions, expected)
-
-    def test_total_unweighted_margin_when_has_means(self):
-        strand = Cube(CR.CAT_MEAN_WGTD).partitions[0]
-
-        assert len(strand.means) == 6367
-        assert strand.ndim == 1
-        assert strand.shape == (6367,)
-        assert strand.table_base == 17615
-        assert strand.table_margin == 17615
-
-    def test_1D_means_pruned(self):
-        """Tests that total margin is Unweighted N, when cube has means."""
-        transforms = {"rows_dimension": {"prune": True}}
-        slice_ = Cube(CR.CAT_MEAN_WGTD, transforms=transforms).partitions[0]
-        np.testing.assert_almost_equal(
-            slice_.means,
-            [
-                74.50346622,
-                83.41506223,
-                83.82949734,
-                80.44269781,
-                79.38796217,
-                68.23023886,
-                77.02288763,
-                78.86549638,
-                85.31353177,
-                83.61415346,
-                83.0,
-                65.89693441,
-                61.7454857,
-                83.28116575,
-                82.88105494,
-                84.12529155,
-                71.36926833,
-                77.92065684,
-                77.29306375,
-                79.73236992,
-                84.49053524,
-                67.86766862,
-                72.94684356,
-                82.56469913,
-                71.05086738,
-                83.85586938,
-                81.74092388,
-                57.6486009,
-                82.98626745,
-                78.11554074,
-                76.16142377,
-                76.43885371,
-                71.04143565,
-                82.79687964,
-                54.20533614,
-            ],
-        )
-        assert slice_.table_base == 17615
-
-    def test_row_unweighted_margin_when_has_means(self):
-        # TODO: Fix after base is implemented for means partitions
-        """Tests that total margin is Unweighted N, when cube has means."""
-        transforms = {"rows_dimension": {"prune": True}}
-        strand = Cube(CR.CAT_MEAN_WGTD, transforms=transforms).partitions[0]
-        expected = np.array(
-            [
-                806,
-                14,
-                14,
-                28,
-                780,
-                42,
-                1114,
-                28,
-                24,
-                746,
-                2,
-                12,
-                6,
-                2178,
-                2026,
-                571,
-                136,
-                16,
-                14,
-                1334,
-                1950,
-                26,
-                128,
-                4,
-                28,
-                3520,
-                1082,
-                36,
-                56,
-                556,
-                38,
-                146,
-                114,
-                28,
-                12,
-            ]
-        )
-        np.testing.assert_array_equal(strand.rows_base, expected)
-        # --- not testing cube.prune_indices() because the margin has 6367 cells ---
 
     def test_ca_with_single_cat_pruning(self):
         transforms = {"rows_dimension": {"prune": True}}
@@ -2514,33 +2539,6 @@ class Test_Slice(object):
             ]
         )
         np.testing.assert_almost_equal(slice_.column_proportions, expected)
-
-    def test_univ_mr_with_hs_does_not_crash(self):
-        """Assert that MR with H&S doesn't crash."""
-        slice_ = Cube(CR.UNIV_MR_WITH_HS["slides"][0]["cube"]).partitions[0]
-        slice_.counts
-        # If it doesn't crash, the test passes, we don't actually care about
-        # the result. We only care that the H&S transform doesn't crash the MR
-        # variable (that it doesn't try to actually include the transform
-        # in the result). H&S shouldn't be in the MR variable, but there
-        # are cases when there are.
-        assert True
-
-    def test_pop_counts_ca_as_0th(self):
-        transforms = {
-            "columns_dimension": {"insertions": {}},
-            "rows_dimension": {"insertions": {}},
-        }
-        slice_ = Cube(
-            CR.CA_AS_0TH, cube_idx=0, transforms=transforms, population=100000000
-        ).partitions[0]
-
-        population_counts = slice_.population_counts
-
-        np.testing.assert_almost_equal(
-            population_counts,
-            (54523323.46453754, 24570078.10865863, 15710358.25446403, 5072107.27712256),
-        )
 
     def test_partitions(self):
         slice_ = Cube(CR.PETS_ARRAY_X_PETS, population=100000000).partitions[0]
