@@ -19,33 +19,58 @@ class Describe_Slice(object):
     """Integration-test suite for _Slice object."""
 
     def it_provides_values_for_cat_x_cat(self):
-        slice_ = Cube(CR.CAT_X_CAT).partitions[0]
+        slice_ = Cube(CR.CAT_X_CAT, population=9001).partitions[0]
 
         assert slice_.column_labels.tolist() == ["C", "E"]
+        assert slice_.column_percentages.tolist() == [[50, 40], [50, 60]]
+        assert pytest.approx(slice_.column_proportions) == [[0.5, 0.4], [0.5, 0.6]]
         assert slice_.columns_dimension_name == "v7"
         assert slice_.columns_dimension_type == DT.CAT
+        assert slice_.columns_margin.tolist() == [10, 5]
+        assert slice_.counts.tolist() == [[5, 2], [5, 3]]
         assert slice_.description == "Pet Owners"
-        np.testing.assert_almost_equal(
-            slice_.row_proportions, np.array([[0.71428571, 0.28571429], [0.625, 0.375]])
-        )
+        assert pytest.approx(slice_.row_proportions) == [
+            [0.7142857, 0.2857142],
+            [0.6250000, 0.3750000],
+        ]
         assert slice_.inserted_column_idxs == ()
         assert slice_.inserted_row_idxs == ()
         assert slice_.is_empty is False
         assert slice_.name == "v4"
-        np.testing.assert_array_almost_equal(
-            slice_.residual_test_stats,
-            [
-                [[0.71439304, 0.71439304], [0.71439304, 0.71439304]],
-                [[0.36596253, -0.36596253], [-0.36596253, 0.36596253]],
-            ],
-        )
+        assert pytest.approx(slice_.population_counts) == [
+            [3000.333, 1200.133],
+            [3000.333, 1800.200],
+        ]
+        assert pytest.approx(slice_.residual_test_stats) == [
+            [[0.7143930, 0.71439304], [0.71439304, 0.7143930]],
+            [[0.3659625, -0.3659625], [-0.3659625, 0.3659625]],
+        ]
         assert slice_.row_labels.tolist() == ["B", "C"]
+        assert pytest.approx(slice_.row_proportions) == [
+            [0.7142857, 0.2857143],
+            [0.6250000, 0.3750000],
+        ]
+        assert pytest.approx(slice_.row_percentages) == [
+            [71.42857, 28.57142],
+            [62.50000, 37.50000],
+        ]
         assert slice_.rows_dimension_description == "Pet Owners"
         assert slice_.rows_dimension_fills == (None, None)
         assert slice_.rows_dimension_name == "v4"
         assert slice_.rows_dimension_type == DT.CAT
+        assert slice_.rows_margin.tolist() == [7, 8]
         assert slice_.shape == (2, 2)
+        assert slice_.table_margin == 15
         assert slice_.table_name is None
+        assert pytest.approx(slice_.table_percentages) == [
+            [33.33333, 13.33333],
+            [33.33333, 20.00000],
+        ]
+        assert pytest.approx(slice_.table_proportions) == [
+            [0.3333333, 0.1333333],
+            [0.3333333, 0.2000000],
+        ]
+        assert slice_.unweighted_counts.tolist() == [[5, 2], [5, 3]]
         assert slice_.variable_name == "v7"
 
     def it_provides_values_for_cat_hs_mt_x_cat_hs_mt(self):
@@ -953,27 +978,12 @@ class Test_Slice(object):
     probably redundancies to be eliminated.
     """
 
-    def test_as_array_cat_x_cat_exclude_missing(self):
-        slice_ = Cube(CR.CAT_X_CAT).partitions[0]
-        expected = np.array([[5, 2], [5, 3]])
-        np.testing.assert_array_equal(slice_.counts, expected)
-
-    def test_as_array_cat_x_cat_unweighted(self):
-        slice_ = Cube(CR.CAT_X_CAT).partitions[0]
-        expected = np.array([[5, 2], [5, 3]])
-        np.testing.assert_array_equal(slice_.counts, expected)
-
     def test_as_array_cat_x_datetime_exclude_missing(self):
         slice_ = Cube(CR.CAT_X_DATETIME).partitions[0]
         expected = np.array(
             [[0, 0, 1, 0], [0, 0, 0, 1], [0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 0]]
         )
         np.testing.assert_array_equal(slice_.counts, expected)
-
-    def test_cat_x_cat_table_margin(self):
-        slice_ = Cube(CR.CAT_X_CAT).partitions[0]
-        expected = np.array([15])
-        np.testing.assert_array_equal(slice_.table_margin, expected)
 
     def test_mr_x_mr_table_base_and_margin(self):
         transforms = {
@@ -1006,30 +1016,15 @@ class Test_Slice(object):
         expected = np.array([4])
         np.testing.assert_array_equal(slice_.table_margin, expected)
 
-    def test_margin_cat_x_cat_axis_0(self):
-        slice_ = Cube(CR.CAT_X_CAT).partitions[0]
-        expected = np.array([10, 5])
-        np.testing.assert_array_equal(slice_.columns_margin, expected)
-
     def test_margin_cat_x_datetime_axis_0(self):
         slice_ = Cube(CR.CAT_X_DATETIME).partitions[0]
         expected = np.array([1, 1, 1, 1])
         np.testing.assert_array_equal(slice_.columns_margin, expected)
 
-    def test_margin_cat_x_cat_axis_1(self):
-        slice_ = Cube(CR.CAT_X_CAT).partitions[0]
-        expected = np.array([7, 8])
-        np.testing.assert_array_equal(slice_.rows_margin, expected)
-
     def test_margin_cat_x_datetime_axis_1(self):
         slice_ = Cube(CR.CAT_X_DATETIME).partitions[0]
         expected = np.array([1, 1, 1, 1, 0])
         np.testing.assert_array_equal(slice_.rows_margin, expected)
-
-    def test_proportions_cat_x_cat_axis_none(self):
-        slice_ = Cube(CR.CAT_X_CAT).partitions[0]
-        expected = np.array([[0.3333333, 0.1333333], [0.3333333, 0.2000000]])
-        np.testing.assert_almost_equal(slice_.table_proportions, expected)
 
     def test_proportions_cat_x_datetime_axis_none(self):
         slice_ = Cube(CR.CAT_X_DATETIME).partitions[0]
@@ -1044,22 +1039,12 @@ class Test_Slice(object):
         )
         np.testing.assert_almost_equal(slice_.table_proportions, expected)
 
-    def test_proportions_cat_x_cat_axis_0(self):
-        slice_ = Cube(CR.CAT_X_CAT).partitions[0]
-        expected = np.array([[0.5, 0.4], [0.5, 0.6]])
-        np.testing.assert_almost_equal(slice_.column_proportions, expected)
-
     def test_proportions_cat_x_datetime_axis_0(self):
         slice_ = Cube(CR.CAT_X_DATETIME).partitions[0]
         expected = np.array(
             [[0, 0, 1, 0], [0, 0, 0, 1], [0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 0]]
         )
         np.testing.assert_almost_equal(slice_.column_proportions, expected)
-
-    def test_proportions_cat_x_cat_axis_1(self):
-        slice_ = Cube(CR.CAT_X_CAT).partitions[0]
-        expected = np.array([[0.7142857, 0.2857143], [0.6250000, 0.3750000]])
-        np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
     def test_proportions_cat_x_datetime_axis_1(self):
         slice_ = Cube(CR.CAT_X_DATETIME).partitions[0]
@@ -1073,26 +1058,6 @@ class Test_Slice(object):
             ]
         )
         np.testing.assert_almost_equal(slice_.row_proportions, expected)
-
-    def test_percentages_cat_x_cat_axis_none(self):
-        slice_ = Cube(CR.CAT_X_CAT).partitions[0]
-        expected = np.array([[33.3333333, 13.3333333], [33.3333333, 20.0]])
-        np.testing.assert_almost_equal(slice_.table_percentages, expected)
-
-    def test_percentages_cat_x_cat_axis_0(self):
-        slice_ = Cube(CR.CAT_X_CAT).partitions[0]
-        expected = np.array([[50, 40], [50, 60]])
-        np.testing.assert_almost_equal(slice_.column_percentages, expected)
-
-    def test_percentages_cat_x_cat_axis_1(self):
-        slice_ = Cube(CR.CAT_X_CAT).partitions[0]
-        expected = np.array([[71.4285714, 28.5714286], [62.50000, 37.50000]])
-        np.testing.assert_almost_equal(slice_.row_percentages, expected)
-
-    def test_population_counts_cat_x_cat(self):
-        slice_ = Cube(CR.CAT_X_CAT, population=9001).partitions[0]
-        expected = np.array([[3000.3333333, 1200.1333333], [3000.3333333, 1800.2]])
-        np.testing.assert_almost_equal(slice_.population_counts, expected)
 
     def test_filtered_population_counts(self):
         transforms = {
@@ -1112,11 +1077,6 @@ class Test_Slice(object):
             ]
         )
         np.testing.assert_almost_equal(slice_.population_counts, expected)
-
-    def test_labels_cat_x_cat_exclude_missing(self):
-        slice_ = Cube(CR.CAT_X_CAT).partitions[0]
-        assert slice_.row_labels.tolist() == ["B", "C"]
-        assert slice_.column_labels.tolist() == ["C", "E"]
 
     def test_labels_cat_x_datetime_exclude_missing(self):
         slice_ = Cube(CR.CAT_X_DATETIME).partitions[0]
