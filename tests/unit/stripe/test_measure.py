@@ -93,6 +93,21 @@ class Describe_BaseSecondOrderMeasure(object):
 
         assert measure.blocks == ("A", "B")
 
+    def it_provides_access_to_the_unweighted_cube_counts_object_to_help(
+        self, request, cube_measures_
+    ):
+        unweighted_cube_counts_ = instance_mock(request, _BaseUnweightedCubeCounts)
+        cube_measures_.unweighted_cube_counts = unweighted_cube_counts_
+        measure = _BaseSecondOrderMeasure(None, None, cube_measures_)
+
+        assert measure._unweighted_cube_counts is unweighted_cube_counts_
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def cube_measures_(self, request):
+        return instance_mock(request, CubeMeasures)
+
 
 class Describe_UnweightedCounts(object):
     """Unit test suite for `cr.cube.stripe.measure._UnweightedCounts` object."""
