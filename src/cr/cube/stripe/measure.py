@@ -84,6 +84,20 @@ class _BaseSecondOrderMeasure(object):
             "`%s` must implement `.subtotal_values`" % type(self).__name__
         )
 
+    @lazyproperty
+    def _unweighted_cube_counts(self):
+        """_BaseUnweightedCubeCounts subclass instance for this measure.
+
+        Provides cube measures associated with unweighted counts, including
+        unweighted-counts and bases.
+        """
+        raise NotImplementedError
+
 
 class _UnweightedCounts(_BaseSecondOrderMeasure):
     """Provides the unweighted-counts measure for a stripe."""
+
+    @lazyproperty
+    def base_values(self):
+        """1D np.int64 ndarray of unweighted-count for each stripe base-row."""
+        return self._unweighted_cube_counts.unweighted_counts

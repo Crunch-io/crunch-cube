@@ -8,6 +8,8 @@ unweighted-counts, weighted-counts (aka. counts), means, and others.
 
 from __future__ import division
 
+from cr.cube.util import lazyproperty
+
 
 class CubeMeasures(object):
     """Provides access to all cube-measure objects for this stripe."""
@@ -17,3 +19,21 @@ class CubeMeasures(object):
         self._rows_dimension = rows_dimension
         self._ca_as_0th = ca_as_0th
         self._slice_idx = slice_idx
+
+
+class _BaseCubeMeasure(object):
+    """Base class for all cube-measure objects."""
+
+
+# === UNWEIGHTED COUNTS ===
+
+
+class _BaseUnweightedCubeCounts(_BaseCubeMeasure):
+    """Base class for unweighted-count cube-measure variants."""
+
+    @lazyproperty
+    def unweighted_counts(self):
+        """1D np.int64 ndarray of unweighted-count for each row of stripe."""
+        raise NotImplementedError(
+            "`%s` must implement `.unweighted_counts`" % type(self).__name__
+        )

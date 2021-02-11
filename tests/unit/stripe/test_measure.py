@@ -2,11 +2,12 @@
 
 """Unit test suite for `cr.cube.stripe.measure` module."""
 
+import numpy as np
 import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension
-from cr.cube.stripe.cubemeasure import CubeMeasures
+from cr.cube.stripe.cubemeasure import _BaseUnweightedCubeCounts, CubeMeasures
 from cr.cube.stripe.measure import (
     _BaseSecondOrderMeasure,
     StripeMeasures,
@@ -91,3 +92,26 @@ class Describe_BaseSecondOrderMeasure(object):
         measure = _BaseSecondOrderMeasure(None, None, None)
 
         assert measure.blocks == ("A", "B")
+
+
+class Describe_UnweightedCounts(object):
+    """Unit test suite for `cr.cube.stripe.measure._UnweightedCounts` object."""
+
+    def it_knows_its_base_values(
+        self, _unweighted_cube_counts_prop_, unweighted_cube_counts_
+    ):
+        _unweighted_cube_counts_prop_.return_value = unweighted_cube_counts_
+        unweighted_cube_counts_.unweighted_counts = np.array([1, 2, 3])
+        unweighted_counts = _UnweightedCounts(None, None, None)
+
+        assert unweighted_counts.base_values.tolist() == [1, 2, 3]
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def unweighted_cube_counts_(self, request):
+        return instance_mock(request, _BaseUnweightedCubeCounts)
+
+    @pytest.fixture
+    def _unweighted_cube_counts_prop_(self, request):
+        return property_mock(request, _UnweightedCounts, "_unweighted_cube_counts")
