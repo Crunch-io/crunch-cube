@@ -19,6 +19,12 @@ class StripeMeasures(object):
     requested measures consume resources.
     """
 
+    def __init__(self, cube, rows_dimension, ca_as_0th, slice_idx):
+        self._cube = cube
+        self._rows_dimension = rows_dimension
+        self._ca_as_0th = ca_as_0th
+        self._slice_idx = slice_idx
+
     @lazyproperty
     def unweighted_counts(self):
         """_UnweightedCounts measure object for this stripe."""

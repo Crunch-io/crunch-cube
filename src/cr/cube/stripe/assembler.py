@@ -10,6 +10,7 @@ hidden by the user or "pruned" because they contain no observations.
 
 from __future__ import division
 
+from cr.cube.stripe.measure import StripeMeasures
 from cr.cube.util import lazyproperty
 
 
@@ -50,4 +51,6 @@ class StripeAssembler(object):
     @lazyproperty
     def _measures(self):
         """StripeMeasures collection object for this stripe."""
-        raise NotImplementedError
+        return StripeMeasures(
+            self._cube, self._rows_dimension, self._ca_as_0th, self._slice_idx
+        )
