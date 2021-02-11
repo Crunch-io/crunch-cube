@@ -199,7 +199,8 @@ class _BaseBaseStripe(object):
             )
 
         if rows_dimension.dimension_type == DT.MR:
-            return _MrStripe(rows_dimension, counts, unweighted_counts)
+            overlaps = cube.overlaps
+            return _MrStripe(rows_dimension, counts, unweighted_counts, overlaps)
 
         return _CatStripe(rows_dimension, counts, unweighted_counts)
 
@@ -314,20 +315,27 @@ class _MeansWithNumArrayStripe(_MeansStripe):
 class _MrStripe(_BaseBaseStripe):
     """Special case of 1D MR slice (stripe)."""
 
-    def __init__(self, rows_dimension, counts, unweighted_counts):
+    def __init__(self, rows_dimension, counts, unweighted_counts, overlaps):
         super(_MrStripe, self).__init__(rows_dimension, unweighted_counts)
         self._counts = counts
+        self._overlaps = overlaps
 
     @lazyproperty
     def rows(self):
         """Sequence of _MrStripeRow for each valid element in rows-dimension."""
+        overlaps = (
+            self._overlaps
+            if self._overlaps is not None
+            else [None for _ in self._row_elements]
+        )
         return tuple(
-            _MrStripeRow(element, counts, unweighted_counts, table_margin)
-            for (element, counts, unweighted_counts, table_margin) in zip(
+            _MrStripeRow(element, counts, unweighted_counts, table_margin, overlaps)
+            for (element, counts, unweighted_counts, table_margin, overlaps) in zip(
                 self._row_elements,
                 self._counts,
                 self._unweighted_counts,
                 self.table_margin,
+                overlaps,
             )
         )
 
@@ -637,7 +645,7 @@ class _MeansMrStripeRow(_BaseStripeRow):
 class _MrStripeRow(_BaseStripeRow):
     """Stripe-row for use in MR stripe."""
 
-    def __init__(self, element, counts, unweighted_counts, table_margin):
+    def __init__(self, element, counts, unweighted_counts, table_margin, overlaps):
         super(_MrStripeRow, self).__init__(element)
         # --- counts is a float [selected, not-selected] array like [42.0 63.5] ---
         self._counts = counts
@@ -645,11 +653,16 @@ class _MrStripeRow(_BaseStripeRow):
         self._unweighted_counts = unweighted_counts
         # --- table_margin is a numpy numeric scalar ---
         self._table_margin = table_margin
+        self._overlaps = overlaps
 
     @lazyproperty
     def count(self):
         """np.float/int64 number of weighted respondents who selected this response."""
         return self._counts[0]
+
+    @lazyproperty
+    def overlaps(self):
+        return self._overlaps
 
     @lazyproperty
     def pruned(self):

@@ -1,0 +1,256 @@
+{
+    "element": "shoji:view",
+    "value": {
+        "query": {
+            "dimensions": [],
+            "measures": {
+                "overlap": {
+                    "function": "cube_overlap",
+                    "args": [
+                        {
+                            "function": "as_selected",
+                            "args": [
+                                {
+                                    "variable": "MR"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "weight": null
+        },
+        "query_environment": {
+            "filter": []
+        },
+        "result": {
+            "counts": [
+                3,
+                2,
+                3,
+                2,
+                5,
+                1,
+                3,
+                4,
+                1
+            ],
+            "measures": {
+                "count": {
+                    "data": [
+                        3,
+                        2,
+                        3,
+                        2,
+                        5,
+                        1,
+                        3,
+                        4,
+                        1
+                    ],
+                    "n_missing": 1,
+                    "metadata": {
+                        "derived": true,
+                        "references": {},
+                        "type": {
+                            "integer": true,
+                            "missing_rules": {},
+                            "class": "numeric",
+                            "missing_reasons": {
+                                "No Data": -1
+                            }
+                        }
+                    }
+                },
+                "overlap": {
+                    "data": [
+                        3,
+                        1,
+                        1,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        2,
+                        2,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        2,
+                        3,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                    ],
+                    "n_missing": 1,
+                    "metadata": {
+                        "derived": true,
+                        "references": {
+                            "alias": "multiple_response",
+                            "uniform_basis": false,
+                            "name": "MR",
+                            "subreferences": [
+                                {
+                                    "alias": "subvar_A",
+                                    "name": "name_A"
+                                },
+                                {
+                                    "alias": "subvar_B",
+                                    "name": "name_B"
+                                },
+                                {
+                                    "alias": "subvar_C",
+                                    "name": "name_C"
+                                }
+                            ]
+                        },
+                        "type": {
+                            "integer": true,
+                            "subvariables": [
+                                "A",
+                                "B",
+                                "C"
+                            ],
+                            "missing_rules": {},
+                            "class": "numeric",
+                            "missing_reasons": {
+                                "No Data": -1
+                            }
+                        }
+                    }
+                }
+            },
+            "dimensions": [
+                {
+                    "derived": true,
+                    "references": {
+                        "alias": "multiple_response",
+                        "uniform_basis": false,
+                        "name": "MR",
+                        "subreferences": [
+                            {
+                                "alias": "subvar_A",
+                                "name": "name_A"
+                            },
+                            {
+                                "alias": "subvar_B",
+                                "name": "name_B"
+                            },
+                            {
+                                "alias": "subvar_C",
+                                "name": "name_C"
+                            }
+                        ]
+                    },
+                    "type": {
+                        "subtype": {
+                            "class": "variable"
+                        },
+                        "elements": [
+                            {
+                                "id": 1,
+                                "value": {
+                                    "references": {
+                                        "alias": "subvar_A",
+                                        "name": "name_A"
+                                    },
+                                    "derived": false,
+                                    "id": "A"
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 2,
+                                "value": {
+                                    "references": {
+                                        "alias": "subvar_B",
+                                        "name": "name_B"
+                                    },
+                                    "derived": false,
+                                    "id": "B"
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 3,
+                                "value": {
+                                    "references": {
+                                        "alias": "subvar_C",
+                                        "name": "name_C"
+                                    },
+                                    "derived": false,
+                                    "id": "C"
+                                },
+                                "missing": false
+                            }
+                        ],
+                        "class": "enum"
+                    }
+                },
+                {
+                    "references": {
+                        "alias": "multiple_response",
+                        "uniform_basis": false,
+                        "name": "MR",
+                        "subreferences": [
+                            {
+                                "alias": "subvar_A",
+                                "name": "name_A"
+                            },
+                            {
+                                "alias": "subvar_B",
+                                "name": "name_B"
+                            },
+                            {
+                                "alias": "subvar_C",
+                                "name": "name_C"
+                            }
+                        ]
+                    },
+                    "derived": true,
+                    "type": {
+                        "ordinal": false,
+                        "subvariables": [
+                            "A",
+                            "B",
+                            "C"
+                        ],
+                        "class": "categorical",
+                        "categories": [
+                            {
+                                "id": 1,
+                                "numeric_value": 1,
+                                "selected": true,
+                                "name": "Selected",
+                                "missing": false
+                            },
+                            {
+                                "numeric_value": 0,
+                                "id": 0,
+                                "name": "Other",
+                                "missing": false
+                            },
+                            {
+                                "numeric_value": null,
+                                "id": -1,
+                                "name": "No Data",
+                                "missing": true
+                            }
+                        ]
+                    }
+                }
+            ],
+            "n": 8
+        }
+    }
+}

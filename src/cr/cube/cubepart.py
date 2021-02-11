@@ -1257,6 +1257,10 @@ class _Strand(CubePartition):
         return tuple(row.mean for row in self._stripe.rows)
 
     @lazyproperty
+    def overlaps(self):
+        return np.array(list(row.overlaps for row in self._stripe.rows))
+
+    @lazyproperty
     def min_base_size_mask(self):
         mask = self.table_base < self._mask_size
         shape = self.shape

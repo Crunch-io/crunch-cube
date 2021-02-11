@@ -10,7 +10,7 @@ import pytest
 from cr.cube.cube import Cube
 from cr.cube.cubepart import _Slice
 
-from ..fixtures import CR, SM
+from ..fixtures import CR, SM, OL
 from ..util import load_python_expression
 
 
@@ -324,3 +324,18 @@ class TestStandardizedResiduals(TestCase):
         np.testing.assert_array_almost_equal(
             actual.p_vals, load_python_expression("mr-x-mr-pw-pvals")
         )
+
+
+class TestOverlaps(TestCase):
+    def test_multiple_response_simple_overlap(self):
+        strand_ = Cube(OL.SIMPLE_OVERLAPS).partitions[0]
+
+        overlaps = strand_.overlaps
+
+        assert overlaps.tolist() == [
+            # Subvariables:
+            # A, B, C
+            [3, 1, 1],  # A
+            [1, 2, 2],  # B
+            [1, 2, 3],  # C
+        ]
