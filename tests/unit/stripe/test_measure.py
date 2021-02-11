@@ -8,6 +8,7 @@ from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension
 from cr.cube.stripe.cubemeasure import CubeMeasures
 from cr.cube.stripe.measure import (
+    _BaseSecondOrderMeasure,
     StripeMeasures,
     _UnweightedCounts,
 )
@@ -77,3 +78,16 @@ class DescribeStripeMeasures(object):
     @pytest.fixture
     def rows_dimension_(self, request):
         return instance_mock(request, Dimension)
+
+
+class Describe_BaseSecondOrderMeasure(object):
+    """Unit test suite for `cr.cube.stripe.measure._BaseSecondOrderMeasure` object."""
+
+    def it_gathers_the_blocks_for_the_measure(self, request):
+        property_mock(request, _BaseSecondOrderMeasure, "base_values", return_value="A")
+        property_mock(
+            request, _BaseSecondOrderMeasure, "subtotal_values", return_value="B"
+        )
+        measure = _BaseSecondOrderMeasure(None, None, None)
+
+        assert measure.blocks == ("A", "B")

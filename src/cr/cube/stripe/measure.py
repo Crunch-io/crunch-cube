@@ -56,6 +56,17 @@ class _BaseSecondOrderMeasure(object):
         self._cube_measures = cube_measures
 
     @lazyproperty
+    def base_values(self):
+        """1D ndarray of measure base-value for each row.
+
+        The base values are those that correspond 1-to-1 with the cube-result values.
+        The values appear in payload order.
+        """
+        raise NotImplementedError(
+            "`%s` must implement `.base_values`" % type(self).__name__
+        )
+
+    @lazyproperty
     def blocks(self):
         """(base_values, subtotal_values) pair comprising the "blocks" of this measure.
 
@@ -64,7 +75,14 @@ class _BaseSecondOrderMeasure(object):
         differently can override this `.blocks` property instead of implementing those
         two components.
         """
-        raise NotImplementedError
+        return (self.base_values, self.subtotal_values)
+
+    @lazyproperty
+    def subtotal_values(self):
+        """1D ndarray of subtotal value for each row-subtotal."""
+        raise NotImplementedError(
+            "`%s` must implement `.subtotal_values`" % type(self).__name__
+        )
 
 
 class _UnweightedCounts(_BaseSecondOrderMeasure):
