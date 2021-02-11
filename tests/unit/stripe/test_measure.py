@@ -45,6 +45,21 @@ class DescribeStripeMeasures(object):
         MeasureCls_.assert_called_once_with(rows_dimension_, measures, cube_measures_)
         assert measure is measure_
 
+    def it_provides_access_to_the_cube_measures_to_help(
+        self, request, cube_, rows_dimension_, cube_measures_
+    ):
+        CubeMeasures_ = class_mock(
+            request,
+            "cr.cube.stripe.measure.CubeMeasures",
+            return_value=cube_measures_,
+        )
+        measures = StripeMeasures(cube_, rows_dimension_, True, slice_idx=42)
+
+        cube_measures = measures._cube_measures
+
+        CubeMeasures_.assert_called_once_with(cube_, rows_dimension_, True, 42)
+        assert cube_measures is cube_measures_
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture

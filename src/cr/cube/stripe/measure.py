@@ -4,6 +4,7 @@
 
 from __future__ import division
 
+from cr.cube.stripe.cubemeasure import CubeMeasures
 from cr.cube.util import lazyproperty
 
 
@@ -38,7 +39,9 @@ class StripeMeasures(object):
         The collection is provided to each measure object so it can access the cube
         measures it is based on.
         """
-        raise NotImplementedError
+        return CubeMeasures(
+            self._cube, self._rows_dimension, self._ca_as_0th, self._slice_idx
+        )
 
 
 # === INDIVIDUAL MEASURES ===
