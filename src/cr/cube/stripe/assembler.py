@@ -36,4 +36,18 @@ class StripeAssembler(object):
     @lazyproperty
     def unweighted_counts(self):
         """1D np.int64 ndarray of unweighted count for each row of stripe."""
+        return self._assemble_vector(self._measures.unweighted_counts.blocks)
+
+    def _assemble_vector(self, blocks):
+        """Return 1D ndarray of base_vector with inserted subtotals, in order.
+
+        `blocks` is a pair of two 1D arrays, first the base-values and then the subtotal
+        values of the stripe vector. The returned array is sequenced in the computed
+        row order including possibly removing hidden or pruned values.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
+    def _measures(self):
+        """StripeMeasures collection object for this stripe."""
         raise NotImplementedError
