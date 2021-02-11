@@ -1,0 +1,217 @@
+{
+  "element": "shoji:view",
+  "value": {
+    "query": {
+      "measures": {
+        "valid_count_unweighted": {
+          "function": "cube_valid_count",
+          "args": [
+            {
+              "variable": "bcfba831c5d8480c815d4b08f70bbd4e"
+            }
+          ]
+        },
+        "sum": {
+          "function": "cube_sum",
+          "args": [
+            {
+              "variable": "bcfba831c5d8480c815d4b08f70bbd4e"
+            }
+          ]
+        }
+      },
+      "dimensions": [
+        {
+          "variable": "9a82ac0a10764b49be5f2bafefe7a0f9"
+        }
+      ],
+      "weight": null
+    },
+    "query_environment": {
+      "filter": []
+    },
+    "result": {
+      "dimensions": [
+        {
+          "derived": false,
+          "references": {
+            "alias": "Gender",
+            "name": "Gender"
+          },
+          "type": {
+            "ordinal": false,
+            "class": "categorical",
+            "categories": [
+              {
+                "numeric_value": null,
+                "id": 1,
+                "name": "Male",
+                "missing": false
+              },
+              {
+                "numeric_value": null,
+                "id": 2,
+                "name": "Female",
+                "missing": false
+              },
+              {
+                "numeric_value": null,
+                "id": -1,
+                "name": "No Data",
+                "missing": true
+              }
+            ]
+          }
+        }
+      ],
+      "missing": 0,
+      "measures": {
+        "valid_count_unweighted": {
+          "data": [
+            3,
+            3,
+            3,
+            2,
+            2,
+            2,
+            0,
+            0,
+            0
+          ],
+          "n_missing": 0,
+          "metadata": {
+            "derived": true,
+            "references": {
+              "alias": "Ticket sold",
+              "uniform_basis": false,
+              "subreferences": [
+                {
+                  "alias": "Dark Knight",
+                  "name": "Dark Knight"
+                },
+                {
+                  "alias": "Fight Club",
+                  "name": "Fight Club"
+                },
+                {
+                  "alias": "Meets the Par.",
+                  "name": "Meets the Par."
+                }
+              ],
+              "name": "Ticket",
+              "view": {
+                "summary_statistic": "sum"
+              }
+            },
+            "type": {
+              "integer": false,
+              "subvariables": [
+                "S1",
+                "S2",
+                "S3"
+              ],
+              "class": "numeric",
+              "missing_reasons": {
+                "No Data": -1
+              },
+              "missing_rules": {}
+            }
+          }
+        },
+        "sum": {
+          "data": [
+            4,
+            3,
+            2,
+            3,
+            0,
+            3,
+            0,
+            0,
+            0
+          ],
+          "n_missing": 0,
+          "metadata": {
+            "derived": true,
+            "references": {
+              "alias": "Ticket sold",
+              "uniform_basis": false,
+              "subreferences": [
+                {
+                  "alias": "Dark Knight",
+                  "name": "Dark Knight"
+                },
+                {
+                  "alias": "Fight Club",
+                  "name": "Fight Club"
+                },
+                {
+                  "alias": "Meets the Par.",
+                  "name": "Meets the Par."
+                }
+              ],
+              "name": "Ticket",
+              "view": {
+                "summary_statistic": "sum"
+              }
+            },
+            "type": {
+              "integer": null,
+              "subvariables": [
+                "S1",
+                "S2",
+                "S3"
+              ],
+              "class": "numeric",
+              "missing_reasons": {
+                "No Data": -1
+              },
+              "missing_rules": {}
+            }
+          }
+        }
+      },
+      "n": 5,
+      "filter_stats": {
+        "filtered_complete": {
+          "unweighted": {
+            "selected": 5,
+            "other": 0,
+            "missing": 0
+          },
+          "weighted": {
+            "selected": 5,
+            "other": 0,
+            "missing": 0
+          }
+        },
+        "filtered": {
+          "unweighted": {
+            "selected": 5,
+            "other": 0,
+            "missing": 0
+          },
+          "weighted": {
+            "selected": 5,
+            "other": 0,
+            "missing": 0
+          }
+        }
+      },
+      "unfiltered": {
+        "unweighted_n": 5,
+        "weighted_n": 5
+      },
+      "filtered": {
+        "unweighted_n": 5,
+        "weighted_n": 5
+      },
+      "counts": [
+        3,
+        2,
+        0
+      ],
+      "element": "crunch:cube"
+    }
+  }
+}

@@ -100,11 +100,6 @@ class CubePartition(object):
         return SingleSidedMovingAvgSmoother(self, measure_expr).values
 
     @lazyproperty
-    def has_means(self):
-        """True if cube-result includes means values."""
-        return self._cube.has_means
-
-    @lazyproperty
     def ndim(self):
         """int count of dimensions for this partition."""
         return len(self._dimensions)
@@ -924,6 +919,15 @@ class _Slice(CubePartition):
         return self._columns_dimension._dimension_dict
 
     @lazyproperty
+    def sum(self):
+        """2D optional np.float64 ndarray of sum value for each table cell.
+        Cell value is `np.nan` for each cell corresponding to an inserted subtotal
+        (sum of addend cells cannot simply be added to get the sum of the subtotal).
+        Raises `ValueError` if the cube-result does not include a sum cube-measure.
+        """
+        return self._assembler.sum
+
+    @lazyproperty
     def summary_pairwise_indices(self):
         return PairwiseSignificance(
             self, self._alpha, self._only_larger
@@ -1254,10 +1258,6 @@ class _Strand(CubePartition):
         Raises ValueError when accessed on a cube-result that does not contain a means
         cube-measure.
         """
-        if not self._cube.has_means:
-            raise ValueError(
-                "`.means` is undefined for a cube-result without a means measure"
-            )
         return self._assembler.means
 
     @lazyproperty
@@ -1407,6 +1407,14 @@ class _Strand(CubePartition):
     def smoothed_dimension_dict(self):
         """dict, row dimension definition"""
         return self._rows_dimension._dimension_dict
+
+    @lazyproperty
+    def sum(self):
+        """1D np.float64 ndarray of sum for each row of strand.
+        Raises ValueError when accessed on a cube-result that does not contain a sum
+        cube-measure.
+        """
+        return self._assembler.sum
 
     @lazyproperty
     def table_base_range(self):
@@ -1565,4 +1573,4 @@ class _Nub(CubePartition):
     @lazyproperty
     def _scalar(self):
         """The pre-transforms data-array for this slice."""
-        return MeansScalar(self._cube.counts, self._cube.unweighted_counts)
+        return MeansScalar(self._cube.means, self._cube.unweighted_counts)

@@ -135,6 +135,14 @@ class StripeAssembler(object):
         return self._measures.scaled_counts.scale_stderr
 
     @lazyproperty
+    def sum(self):
+        """1D np.float64 ndarray of sum for each row.
+        The array is filled with `np.nan` when the cube-result does not include a sum
+        cube-measure.
+        """
+        return self._assemble_vector(self._measures.sum.blocks)
+
+    @lazyproperty
     def table_base_range(self):
         """[min, max] np.float64 ndarray range of (total) unweighted-N for this stripe.
 

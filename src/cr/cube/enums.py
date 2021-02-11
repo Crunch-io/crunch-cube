@@ -75,7 +75,11 @@ class MEASURE(enum.Enum):
     COL_INDEX = "col_index"
     COL_PERCENT = "col_percent"
     MEAN = "mean"
+    SUM = "sum"
     TABLE_STDERR = "table_stderr"
     UNWEIGHTED_COUNT = "count_unweighted"
     WEIGHTED_COUNT = "count_weighted"
     Z_SCORE = "z_score"
+
+
+QUANTITY_OF_INTEREST_MEASURES = {MEASURE.SUM.value, MEASURE.MEAN.value}

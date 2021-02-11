@@ -166,8 +166,6 @@ class Assembler(object):
 
         Raises `ValueError` if the cube-result does not include a means cube-measure.
         """
-        if not self._cube.has_means:
-            raise ValueError("cube-result does not include a means cube-measure")
         return self._assemble_matrix(
             NanSubtotals.blocks(self._cube_result_matrix.means, self._dimensions)
         )
@@ -264,6 +262,15 @@ class Assembler(object):
         # --- otherwise rows-margin is a vector ---
         return self._assemble_vector(
             self._cube_result_matrix.rows_margin, self._row_subtotals, self._row_order
+        )
+
+    @lazyproperty
+    def sum(self):
+        """2D optional np.float64 ndarray of sum for each cell.
+        Raises `ValueError` if the cube-result does not include a sum cube-measure.
+        """
+        return self._assemble_matrix(
+            NanSubtotals.blocks(self._cube_result_matrix.sum, self._dimensions)
         )
 
     @lazyproperty

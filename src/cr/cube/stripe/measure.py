@@ -48,6 +48,11 @@ class StripeMeasures(object):
         return _ScaledCounts(self._rows_dimension, self, self._cube_measures)
 
     @lazyproperty
+    def sum(self):
+        """_Sum measure object for this stripe."""
+        return _Sum(self._rows_dimension, self, self._cube_measures)
+
+    @lazyproperty
     def table_proportion_stddevs(self):
         """_TableProportionStddevs measure object for this stripe."""
         return _TableProportionStddevs(self._rows_dimension, self, self._cube_measures)
@@ -303,6 +308,33 @@ class _ScaledCounts(_BaseSecondOrderMeasure):
         Otherwise, the values appear in payload order.
         """
         return self._weighted_cube_counts.weighted_counts[self._has_numeric_value]
+
+
+class _Sum(_BaseSecondOrderMeasure):
+    """Provides the means measure for a stripe.
+    Relies on the presence of a means cube-measure in the cube-result.
+    """
+
+    @lazyproperty
+    def base_values(self):
+        """1D np.float64 ndarray of sum for each row."""
+        return self._cube_sum.sum
+
+    @lazyproperty
+    def subtotal_values(self):
+        """1D ndarray of np.nan for each row-subtotal.
+        Sum values cannot be subtotaled and each subtotal value is unconditionally
+        np.nan.
+        """
+        return NanSubtotals.subtotal_values(self.base_values, self._rows_dimension)
+
+    @lazyproperty
+    def _cube_sum(self):
+        """_BaseCubeMeans subclass instance for this measure.
+        Provides the means measures from the cube-result, encapsulating variation based
+        on dimensionality.
+        """
+        return self._cube_measures.cube_sum
 
 
 class _TableProportionStddevs(_BaseSecondOrderMeasure):

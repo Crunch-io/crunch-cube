@@ -35,7 +35,6 @@ class DescribeIntegratedCube(object):
         assert cube.description == "Pet Owners"
         assert cube.dimension_types == (DT.CAT, DT.CAT)
         assert isinstance(cube.dimensions, _ApparentDimensions)
-        assert cube.has_means is False
         assert cube.has_weighted_counts is False
         assert cube.missing == 5
         assert cube.name == "v4"
@@ -261,7 +260,31 @@ class DescribeIntegrated_MeanMeasure(object):
 
     def it_knows_if_it_has_means(self):
         slice_ = Cube(CR.MEANS_CAT_HS_X_CAT_HS).partitions[0]
-        assert slice_.has_means
+        assert slice_.means.any()
+
+
+class DescribeIntegrated_SumMeasure(object):
+    def it_provides_sum_measure_for_CAT(self):
+        cube = Cube(CR.CAT_SUM)
+        partition = cube.partitions[0]
+
+        np.testing.assert_array_equal(partition.sum, [88.0, 77.0])
+        np.testing.assert_array_equal(partition.table_base_range, [5, 5])
+
+    def it_provides_sum_measure_for_MR(self):
+        cube = Cube(CR.MR_SUM)
+        partition = cube.partitions[0]
+
+        np.testing.assert_array_almost_equal(partition.sum, [3.0, 2.0, 2.0])
+        np.testing.assert_array_almost_equal(partition.table_base_range, [3, 3])
+
+    def it_provides_sum_and_mean_measure_for_CAT(self):
+        cube = Cube(CR.NUMERIC_MEASURES_X_CAT)
+        partition = cube.partitions[0]
+
+        np.testing.assert_array_almost_equal(partition.means, [2.66666667, 3.5])
+        np.testing.assert_array_almost_equal(partition.sum, [8, 7])
+        np.testing.assert_array_almost_equal(partition.counts, [3, 2])
 
 
 class DescribeIntegrated_UnweightedCountMeasure(object):

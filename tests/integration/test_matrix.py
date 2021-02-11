@@ -985,7 +985,7 @@ class DescribeAssembler(object):
     def it_computes_means_cat_x_cat_columns_margin(self):
         slice_ = Cube(CR.MEANS_CAT_HS_X_CAT_HS).partitions[0]
         np.testing.assert_almost_equal(
-            slice_.columns_margin, np.array([np.nan, np.nan, np.nan, np.nan, np.nan])
+            slice_.columns_margin, np.array([431, 494, 294, 1219, 433])
         )
 
     def it_computes_cat_x_mr_columns_margin(self):
@@ -1048,7 +1048,7 @@ class DescribeAssembler(object):
         slice_ = Cube(CR.MEANS_CAT_HS_X_CAT_HS).partitions[0]
         np.testing.assert_almost_equal(
             slice_.rows_margin,
-            np.array([np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan]),
+            np.array([55, 126, 613, 710, 310, 400, 148]),
         )
 
     def it_computes_cat_x_mr_rows_margin(self):
@@ -1485,6 +1485,14 @@ class DescribeAssembler(object):
         assembler = slice_._assembler
 
         assert assembler._row_order.tolist() == expected_value
+
+    def it_computes_sum_cat_x_mr(self):
+        slice_ = Cube(CR.SUM_CAT_X_MR).partitions[0]
+        np.testing.assert_almost_equal(slice_.sum, [[3.0, 2.0, 2.0], [0.0, 0.0, 0.0]])
+
+    def it_computes_sum_mr_x_cat(self):
+        slice_ = Cube(CR.SUM_MR_X_CAT).partitions[0]
+        np.testing.assert_almost_equal(slice_.sum, [[3.0, 0.0], [2.0, 0.0], [2.0, 0.0]])
 
 
 class Describe_BaseOrderHelper(object):

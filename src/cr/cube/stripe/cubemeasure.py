@@ -26,7 +26,20 @@ class CubeMeasures(object):
     @lazyproperty
     def cube_means(self):
         """_BaseCubeMeans subclass object for this stripe."""
+        if self._cube.means is None:
+            raise ValueError(
+                "`.means` is undefined for a cube-result without a means measure"
+            )
         return _BaseCubeMeans.factory(self._cube, self._rows_dimension)
+
+    @lazyproperty
+    def cube_sum(self):
+        """_BaseCubeMeans subclass object for this stripe."""
+        if self._cube.sum is None:
+            raise ValueError(
+                "`.sum` is undefined for a cube-result without a sum measure"
+            )
+        return _BaseCubeSum.factory(self._cube, self._rows_dimension)
 
     @lazyproperty
     def unweighted_cube_counts(self):
@@ -63,9 +76,7 @@ class _BaseCubeMeans(_BaseCubeMeasure):
     @classmethod
     def factory(cls, cube, rows_dimension):
         """Return _BaseCubeMeans subclass instance appropriate to `cube`."""
-        # --- TODO: note that `cube.counts` is improperly overloaded to return means
-        # --- when cube.has_means. This needs to be fixed.
-        means = cube.counts
+        means = cube.means
         MeansCls = (
             _MrCubeMeans if rows_dimension.dimension_type == DT.MR else _CatCubeMeans
         )
@@ -100,6 +111,56 @@ class _MrCubeMeans(_BaseCubeMeans):
         return self._means[:, 0]
 
 
+class _NumArrCubeMeans(_BaseCubeMeans):
+    """Means cube-measure for an MR stripe.
+
+    Its `.means` is a 2D ndarray with axes (rows, sel/not).
+    """
+
+    @lazyproperty
+    def means(self):
+        """1D np.float64 ndarray of mean for each stripe row."""
+        return self._means
+
+
+# === SUM ===
+
+
+class _BaseCubeSum(_BaseCubeMeasure):
+    """Base class for means cube-measure variants."""
+
+    def __init__(self, rows_dimension, sum):
+        super(_BaseCubeSum, self).__init__(rows_dimension)
+        self._sum = sum
+
+    @classmethod
+    def factory(cls, cube, rows_dimension):
+        """Return _BaseCubeSum subclass instance appropriate to `cube`."""
+        sum = cube.sum
+        SumCls = _MrCubeSum if rows_dimension.dimension_type == DT.MR else _CatCubeSum
+        return SumCls(rows_dimension, sum)
+
+
+class _CatCubeSum(_BaseCubeSum):
+    """Means cube-measure for a non-MR stripe."""
+
+    @lazyproperty
+    def sum(self):
+        """1D np.float64 ndarray of mean for each stripe row."""
+        return self._sum
+
+
+class _MrCubeSum(_BaseCubeSum):
+    """Means cube-measure for an MR stripe.
+    Its `.means` is a 2D ndarray with axes (rows, sel/not).
+    """
+
+    @lazyproperty
+    def sum(self):
+        """1D np.float64 ndarray of mean for each stripe row."""
+        return self._sum[:, 0]
+
+
 # === UNWEIGHTED COUNTS ===
 
 
@@ -117,6 +178,9 @@ class _BaseUnweightedCubeCounts(_BaseCubeMeasure):
             return _CatUnweightedCubeCounts(
                 rows_dimension, cube.unweighted_counts[slice_idx]
             )
+
+        if rows_dimension.dimension_type == DT.NUM_ARRAY:
+            return _NumArrUnweightedCubeCounts(rows_dimension, cube.unweighted_counts)
 
         if rows_dimension.dimension_type == DT.MR:
             return _MrUnweightedCubeCounts(rows_dimension, cube.unweighted_counts)
@@ -208,6 +272,32 @@ class _MrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
     def unweighted_counts(self):
         """1D np.float64 ndarray of unweighted-count for each row of stripe."""
         return self._unweighted_counts[:, 0]
+
+
+class _NumArrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
+    """Unweighted-counts cube-measure for a non-MR stripe."""
+
+    @lazyproperty
+    def bases(self):
+        """1D np.int64 ndarray of table-proportion denonimator (base) for each row.
+
+        Each row in a CAT stripe has the same base (the table-base).
+        """
+        return self._unweighted_counts
+
+    @lazyproperty
+    def pruning_base(self):
+        """1D np.int64 ndarray of unweighted-N for each matrix row.
+
+        Because this matrix has no MR dimension, this is simply the unweighted count for
+        each row.
+        """
+        return self._unweighted_counts
+
+    @lazyproperty
+    def unweighted_counts(self):
+        """1D np.int64 ndarray of unweighted-count for each row of stripe."""
+        return self._unweighted_counts
 
 
 # === WEIGHTED COUNTS ===
