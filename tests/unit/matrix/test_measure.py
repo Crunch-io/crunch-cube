@@ -55,7 +55,7 @@ class DescribeSecondOrderMeasures(object):
         measure_prop_name,
         MeasureCls,
     ):
-        measure_ = instance_mock(request, _ColumnUnweightedBases)
+        measure_ = instance_mock(request, MeasureCls)
         MeasureCls_ = class_mock(
             request,
             "cr.cube.matrix.measure.%s" % MeasureCls.__name__,

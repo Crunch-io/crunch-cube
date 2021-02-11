@@ -28,6 +28,16 @@ class StripeMeasures(object):
     @lazyproperty
     def unweighted_counts(self):
         """_UnweightedCounts measure object for this stripe."""
+        return _UnweightedCounts(self._rows_dimension, self, self._cube_measures)
+
+    @lazyproperty
+    def _cube_measures(self):
+        """CubeMeasures collection object for this cube-result.
+
+        This collection provides access to all cube-measure objects for the cube-result.
+        The collection is provided to each measure object so it can access the cube
+        measures it is based on.
+        """
         raise NotImplementedError
 
 
@@ -36,6 +46,11 @@ class StripeMeasures(object):
 
 class _BaseSecondOrderMeasure(object):
     """Base class for all second-order measure objects."""
+
+    def __init__(self, rows_dimension, measures, cube_measures):
+        self._rows_dimension = rows_dimension
+        self._measures = measures
+        self._cube_measures = cube_measures
 
     @lazyproperty
     def blocks(self):
