@@ -8,6 +8,7 @@ unweighted-counts, weighted-counts (aka. counts), means, and others.
 
 from __future__ import division
 
+from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.util import lazyproperty
 
 
@@ -31,6 +32,9 @@ class CubeMeasures(object):
 class _BaseCubeMeasure(object):
     """Base class for all cube-measure objects."""
 
+    def __init__(self, rows_dimension):
+        self._rows_dimension = rows_dimension
+
 
 # === UNWEIGHTED COUNTS ===
 
@@ -38,10 +42,22 @@ class _BaseCubeMeasure(object):
 class _BaseUnweightedCubeCounts(_BaseCubeMeasure):
     """Base class for unweighted-count cube-measure variants."""
 
+    def __init__(self, rows_dimension, unweighted_counts):
+        super(_BaseUnweightedCubeCounts, self).__init__(rows_dimension)
+        self._unweighted_counts = unweighted_counts
+
     @classmethod
     def factory(cls, cube, rows_dimension, ca_as_0th, slice_idx):
         """Return _BaseUnweightedCubeCounts subclass instance appropriate to `cube`."""
-        raise NotImplementedError
+        if ca_as_0th:
+            return _CatUnweightedCubeCounts(
+                rows_dimension, cube.unweighted_counts[slice_idx]
+            )
+
+        if rows_dimension.dimension_type == DT.MR:
+            return _MrUnweightedCubeCounts(rows_dimension, cube.unweighted_counts)
+
+        return _CatUnweightedCubeCounts(rows_dimension, cube.unweighted_counts)
 
     @lazyproperty
     def unweighted_counts(self):
@@ -49,3 +65,14 @@ class _BaseUnweightedCubeCounts(_BaseCubeMeasure):
         raise NotImplementedError(
             "`%s` must implement `.unweighted_counts`" % type(self).__name__
         )
+
+
+class _CatUnweightedCubeCounts(_BaseUnweightedCubeCounts):
+    """Unweighted-counts cube-measure for a non-MR stripe."""
+
+
+class _MrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
+    """Unweighted-counts cube-measure for an MR slice.
+
+    Its `._unweighted_counts` is a 2D ndarray with axes (rows, sel/not).
+    """
