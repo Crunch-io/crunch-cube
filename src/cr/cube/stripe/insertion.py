@@ -62,7 +62,7 @@ class SumSubtotals(_BaseSubtotals):
         Otherwise, an empty array can "pollute" the dtype of the measure array,
         generally changing int to float because the default dtype is float.
         """
-        raise NotImplementedError
+        return self._base_values.dtype
 
     def _subtotal_value(self, subtotal):
         """Return scalar value of `subtotal` row."""

@@ -79,3 +79,6 @@ class DescribeSumSubtotals(object):
 
         assert subtotal_values.tolist() == []
         assert subtotal_values.dtype == int
+
+    def it_provides_the_dtype_for_an_empty_subtotal_values_array_to_help(self):
+        assert SumSubtotals(np.array([3, 5]), None)._dtype == int
