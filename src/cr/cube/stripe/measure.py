@@ -5,6 +5,7 @@
 from __future__ import division
 
 from cr.cube.stripe.cubemeasure import CubeMeasures
+from cr.cube.stripe.insertion import SumSubtotals
 from cr.cube.util import lazyproperty
 
 
@@ -101,3 +102,11 @@ class _UnweightedCounts(_BaseSecondOrderMeasure):
     def base_values(self):
         """1D np.int64 ndarray of unweighted-count for each stripe base-row."""
         return self._unweighted_cube_counts.unweighted_counts
+
+    @lazyproperty
+    def subtotal_values(self):
+        """1D np.int64 ndarray of sum for each row-subtotal."""
+        # --- counts don't sum on an MR dimension, but an MR stripe can have no
+        # --- subtotals. This just returns an empty array in that case and we don't need
+        # --- to special-case MR.
+        return SumSubtotals.subtotal_values(self.base_values, self._rows_dimension)

@@ -121,6 +121,20 @@ class Describe_UnweightedCounts(object):
 
         assert unweighted_counts.base_values.tolist() == [1, 2, 3]
 
+    def it_knows_its_subtotal_values(self, request):
+        rows_dimension_ = instance_mock(request, Dimension)
+        property_mock(request, _UnweightedCounts, "base_values", return_value=[1, 2, 3])
+        SumSubtotals_ = class_mock(request, "cr.cube.stripe.measure.SumSubtotals")
+        SumSubtotals_.subtotal_values.return_value = np.array([3, 5])
+        unweighted_counts = _UnweightedCounts(rows_dimension_, None, None)
+
+        subtotal_values = unweighted_counts.subtotal_values
+
+        SumSubtotals_.subtotal_values.assert_called_once_with(
+            [1, 2, 3], rows_dimension_
+        )
+        assert subtotal_values.tolist() == [3, 5]
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
