@@ -12,6 +12,8 @@ primarily used by measure objects as a collaborator to handle this aspect.
 
 from __future__ import division
 
+import numpy as np
+
 from cr.cube.util import lazyproperty
 
 
@@ -34,6 +36,34 @@ class _BaseSubtotals(object):
             "`%s` must implement `._subtotal_values`" % type(self).__name__
         )
 
+    @lazyproperty
+    def _row_subtotals(self):
+        """Sequence of _Subtotal object for each subtotal in rows-dimension."""
+        raise NotImplementedError
+
 
 class SumSubtotals(_BaseSubtotals):
     """Subtotals created by np.sum() on addends, primarily counts."""
+
+    @lazyproperty
+    def _subtotal_values(self):
+        """(n_row_subtotals,) ndarray of subtotal values for stripe."""
+        subtotals = self._row_subtotals
+
+        if len(subtotals) == 0:
+            return np.array([], dtype=self._dtype)
+
+        return np.array([self._subtotal_value(subtotal) for subtotal in subtotals])
+
+    @lazyproperty
+    def _dtype(self):
+        """Numpy data-type for result arrays, used when array is empty.
+
+        Otherwise, an empty array can "pollute" the dtype of the measure array,
+        generally changing int to float because the default dtype is float.
+        """
+        raise NotImplementedError
+
+    def _subtotal_value(self, subtotal):
+        """Return scalar value of `subtotal` row."""
+        raise NotImplementedError
