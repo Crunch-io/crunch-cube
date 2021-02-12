@@ -48,6 +48,15 @@ class DescribeAssembler(object):
         _assemble_vector_.assert_called_once_with(assembler, ("A", "B"))
         assert value.tolist() == [1, 2, 3, 4, 5]
 
+    def it_can_assemble_a_vector_to_help(self, _row_order_prop_):
+        base_values = np.array([1, 2, 3, 4])
+        subtotal_values = (3, 5, 7)
+        blocks = (base_values, subtotal_values)
+        _row_order_prop_.return_value = np.array([-3, 1, 0, -2, 3, 2, -1])
+        assembler = StripeAssembler(None, None, None, None)
+
+        assert assembler._assemble_vector(blocks).tolist() == [3, 2, 1, 5, 4, 3, 7]
+
     def it_constructs_its_measures_collaborator_object_to_help(
         self, request, cube_, rows_dimension_, measures_
     ):
@@ -82,6 +91,10 @@ class DescribeAssembler(object):
     @pytest.fixture
     def _measures_prop_(self, request):
         return property_mock(request, StripeAssembler, "_measures")
+
+    @pytest.fixture
+    def _row_order_prop_(self, request):
+        return property_mock(request, StripeAssembler, "_row_order")
 
     @pytest.fixture
     def rows_dimension_(self, request):

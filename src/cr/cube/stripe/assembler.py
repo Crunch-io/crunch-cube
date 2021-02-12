@@ -10,6 +10,8 @@ hidden by the user or "pruned" because they contain no observations.
 
 from __future__ import division
 
+import numpy as np
+
 from cr.cube.stripe.measure import StripeMeasures
 from cr.cube.util import lazyproperty
 
@@ -46,7 +48,7 @@ class StripeAssembler(object):
         values of the stripe vector. The returned array is sequenced in the computed
         row order including possibly removing hidden or pruned values.
         """
-        raise NotImplementedError
+        return np.concatenate(blocks)[self._row_order]
 
     @lazyproperty
     def _measures(self):
@@ -54,3 +56,12 @@ class StripeAssembler(object):
         return StripeMeasures(
             self._cube, self._rows_dimension, self._ca_as_0th, self._slice_idx
         )
+
+    @lazyproperty
+    def _row_order(self):
+        """1D np.int64 ndarray of signed int idx for each assembled row of stripe.
+
+        Negative values represent inserted subtotal-row locations. Indices appear in the
+        order rows are to appear in the final result.
+        """
+        raise NotImplementedError
