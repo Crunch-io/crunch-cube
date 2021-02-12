@@ -33,6 +33,13 @@ class Describe_BaseSubtotals(object):
         _init_.assert_called_once_with(ANY, base_values, rows_dimension_)
         assert subtotal_values.tolist() == [3, 5]
 
+    def it_provides_access_to_the_row_subtotal_objects(self, request, rows_dimension_):
+        row_subtotals_ = tuple(instance_mock(request, _Subtotal) for _ in range(3))
+        rows_dimension_.subtotals = row_subtotals_
+        subtotals = _BaseSubtotals(None, rows_dimension_)
+
+        assert subtotals._row_subtotals is row_subtotals_
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture

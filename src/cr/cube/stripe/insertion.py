@@ -39,7 +39,7 @@ class _BaseSubtotals(object):
     @lazyproperty
     def _row_subtotals(self):
         """Sequence of _Subtotal object for each subtotal in rows-dimension."""
-        raise NotImplementedError
+        return self._rows_dimension.subtotals
 
 
 class SumSubtotals(_BaseSubtotals):
