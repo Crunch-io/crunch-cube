@@ -1,13 +1,17 @@
-# encoding: utf-8
-
-"""Unit test suite for `cr.cube.stripe.assembler` module."""
+# encoding: utf-8 """Unit test suite for `cr.cube.stripe.assembler` module."""
 
 import numpy as np
 import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension
-from cr.cube.stripe.assembler import StripeAssembler
+from cr.cube.enums import COLLATION_METHOD as CM
+from cr.cube.stripe.assembler import (
+    _BaseOrderHelper,
+    _OrderHelper,
+    _SortByValueHelper,
+    StripeAssembler,
+)
 from cr.cube.stripe.measure import StripeMeasures, _UnweightedCounts
 
 from ...unitutil import (
@@ -116,3 +120,42 @@ class DescribeAssembler(object):
     @pytest.fixture
     def rows_dimension_(self, request):
         return instance_mock(request, Dimension)
+
+
+class Describe_BaseOrderHelper(object):
+    """Unit-test suite for `cr.cube.stripe.assembler._BaseOrderHelper` object."""
+
+    @pytest.mark.parametrize(
+        "collation_method, HelperCls",
+        (
+            (CM.OPPOSING_ELEMENT, _SortByValueHelper),
+            (CM.EXPLICIT_ORDER, _OrderHelper),
+            (CM.PAYLOAD_ORDER, _OrderHelper),
+        ),
+    )
+    def it_dispatches_to_the_right_order_helper(
+        self, request, measures_, collation_method, HelperCls
+    ):
+        rows_dimension_ = instance_mock(
+            request, Dimension, collation_method=collation_method
+        )
+        order_helper_ = instance_mock(
+            request, HelperCls, _display_order=np.array([-2, 1, -1, 2])
+        )
+        HelperCls_ = class_mock(
+            request,
+            "cr.cube.stripe.assembler.%s" % HelperCls.__name__,
+            return_value=order_helper_,
+        )
+        print("HelperCls_ == %s" % HelperCls_)
+
+        display_order = _BaseOrderHelper.display_order(rows_dimension_, measures_)
+
+        HelperCls_.assert_called_once_with(rows_dimension_, measures_)
+        assert display_order.tolist() == [-2, 1, -1, 2]
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def measures_(self, request):
+        return instance_mock(request, StripeMeasures)

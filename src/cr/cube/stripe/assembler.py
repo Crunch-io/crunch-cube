@@ -12,6 +12,7 @@ from __future__ import division
 
 import numpy as np
 
+from cr.cube.enums import COLLATION_METHOD as CM
 from cr.cube.stripe.measure import StripeMeasures
 from cr.cube.util import lazyproperty
 
@@ -78,12 +79,41 @@ class StripeAssembler(object):
 class _BaseOrderHelper(object):
     """Base class for ordering helpers."""
 
+    def __init__(self, rows_dimension, measures):
+        self._rows_dimension = rows_dimension
+        self._measures = measures
+
     @classmethod
-    def display_order(cls, rows_dimension, second_order_measures):
+    def display_order(cls, rows_dimension, measures):
         """1D np.int64 ndarray of signed int idx for each row of stripe.
 
         Negative values represent inserted-vector locations. Returned sequence reflects
         insertion, hiding, pruning, and ordering transforms specified in the
         rows-dimension.
         """
-        raise NotImplementedError
+        HelperCls = (
+            _SortByValueHelper
+            if rows_dimension.collation_method == CM.OPPOSING_ELEMENT
+            else _OrderHelper
+        )
+        return HelperCls(rows_dimension, measures)._display_order
+
+    @lazyproperty
+    def _display_order(self):
+        """tuple of signed int idx for each row of stripe.
+
+        Negative values represent inserted-vector locations. Returned sequence reflects
+        insertion, hiding, pruning, and ordering transforms specified in the
+        rows-dimension.
+        """
+        raise NotImplementedError(
+            "`%s` must implement `._display_order`" % type(self).__name__
+        )
+
+
+class _OrderHelper(_BaseOrderHelper):
+    """Encapsulates the complexity of the various kinds of row ordering."""
+
+
+class _SortByValueHelper(_BaseOrderHelper):
+    """Orders rows by their values."""
