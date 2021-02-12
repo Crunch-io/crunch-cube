@@ -2,6 +2,7 @@
 
 """Unit test suite for `cr.cube.stripe.cubemeasure` module."""
 
+import numpy as np
 import pytest
 
 from cr.cube.cube import Cube
@@ -87,3 +88,18 @@ class Describe_BaseUnweightedCubeCounts(object):
 
         UnweightedCubeCountsCls_.assert_called_once_with(rows_dimension_, [1, 2, 3])
         assert unweighted_cube_counts is unweighted_cube_counts_
+
+
+class Describe_CatUnweightedCubeCounts(object):
+    """Unit-test suite for `cr.cube.stripe.cubemeasure._CatUnweightedCubeCounts`."""
+
+    def it_knows_its_unweighted_counts(self, raw_unweighted_counts):
+        unweighted_cube_counts = _CatUnweightedCubeCounts(None, raw_unweighted_counts)
+        assert unweighted_cube_counts.unweighted_counts.tolist() == [1, 2, 3]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_unweighted_counts(self, request):
+        """(3,) np.int ndarray of unweighted cube-counts as received from Cube."""
+        return np.array([1, 2, 3])

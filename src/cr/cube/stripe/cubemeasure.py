@@ -70,6 +70,11 @@ class _BaseUnweightedCubeCounts(_BaseCubeMeasure):
 class _CatUnweightedCubeCounts(_BaseUnweightedCubeCounts):
     """Unweighted-counts cube-measure for a non-MR stripe."""
 
+    @lazyproperty
+    def unweighted_counts(self):
+        """1D np.int64 ndarray of unweighted-count for each row of stripe."""
+        return self._unweighted_counts
+
 
 class _MrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
     """Unweighted-counts cube-measure for an MR slice.
