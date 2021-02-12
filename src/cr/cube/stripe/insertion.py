@@ -12,14 +12,27 @@ primarily used by measure objects as a collaborator to handle this aspect.
 
 from __future__ import division
 
+from cr.cube.util import lazyproperty
+
 
 class _BaseSubtotals(object):
     """Base class for Subtotals objects."""
 
+    def __init__(self, base_values, rows_dimension):
+        self._base_values = base_values
+        self._rows_dimension = rows_dimension
+
     @classmethod
     def subtotal_values(cls, base_values, rows_dimension):
         """Return (n_row_subtotals,) ndarray of subtotal values."""
-        raise NotImplementedError
+        return cls(base_values, rows_dimension)._subtotal_values
+
+    @lazyproperty
+    def _subtotal_values(self):
+        """(n_row_subtotals,) ndarray of subtotal values for stripe."""
+        raise NotImplementedError(
+            "`%s` must implement `._subtotal_values`" % type(self).__name__
+        )
 
 
 class SumSubtotals(_BaseSubtotals):
