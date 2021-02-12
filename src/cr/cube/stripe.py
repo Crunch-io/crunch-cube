@@ -200,7 +200,10 @@ class _BaseBaseStripe(object):
 
         if rows_dimension.dimension_type == DT.MR:
             overlaps = cube.overlaps
-            return _MrStripe(rows_dimension, counts, unweighted_counts, overlaps)
+            valid_overlaps = cube.valid_overlaps
+            return _MrStripe(
+                rows_dimension, counts, unweighted_counts, overlaps, valid_overlaps
+            )
 
         return _CatStripe(rows_dimension, counts, unweighted_counts)
 
@@ -315,10 +318,13 @@ class _MeansWithNumArrayStripe(_MeansStripe):
 class _MrStripe(_BaseBaseStripe):
     """Special case of 1D MR slice (stripe)."""
 
-    def __init__(self, rows_dimension, counts, unweighted_counts, overlaps):
+    def __init__(
+        self, rows_dimension, counts, unweighted_counts, overlaps, valid_overlaps
+    ):
         super(_MrStripe, self).__init__(rows_dimension, unweighted_counts)
         self._counts = counts
         self._overlaps = overlaps
+        self._valid_overlaps = valid_overlaps
 
     @lazyproperty
     def rows(self):
@@ -328,14 +334,34 @@ class _MrStripe(_BaseBaseStripe):
             if self._overlaps is not None
             else [None for _ in self._row_elements]
         )
+        valid_overlaps = (
+            self._valid_overlaps
+            if self._valid_overlaps is not None
+            else [None for _ in self._row_elements]
+        )
         return tuple(
-            _MrStripeRow(element, counts, unweighted_counts, table_margin, overlaps)
-            for (element, counts, unweighted_counts, table_margin, overlaps) in zip(
+            _MrStripeRow(
+                element,
+                counts,
+                unweighted_counts,
+                table_margin,
+                overlaps,
+                valid_overlaps,
+            )
+            for (
+                element,
+                counts,
+                unweighted_counts,
+                table_margin,
+                overlaps,
+                valid_overlaps,
+            ) in zip(
                 self._row_elements,
                 self._counts,
                 self._unweighted_counts,
                 self.table_margin,
                 overlaps,
+                valid_overlaps,
             )
         )
 
@@ -645,7 +671,9 @@ class _MeansMrStripeRow(_BaseStripeRow):
 class _MrStripeRow(_BaseStripeRow):
     """Stripe-row for use in MR stripe."""
 
-    def __init__(self, element, counts, unweighted_counts, table_margin, overlaps):
+    def __init__(
+        self, element, counts, unweighted_counts, table_margin, overlaps, valid_overlaps
+    ):
         super(_MrStripeRow, self).__init__(element)
         # --- counts is a float [selected, not-selected] array like [42.0 63.5] ---
         self._counts = counts
@@ -654,6 +682,7 @@ class _MrStripeRow(_BaseStripeRow):
         # --- table_margin is a numpy numeric scalar ---
         self._table_margin = table_margin
         self._overlaps = overlaps
+        self._valid_overlaps = valid_overlaps
 
     @lazyproperty
     def count(self):
@@ -663,6 +692,10 @@ class _MrStripeRow(_BaseStripeRow):
     @lazyproperty
     def overlaps(self):
         return self._overlaps
+
+    @lazyproperty
+    def valid_overlaps(self):
+        return self._valid_overlaps
 
     @lazyproperty
     def pruned(self):

@@ -243,6 +243,12 @@ class Cube(object):
         return None
 
     @lazyproperty
+    def valid_overlaps(self):
+        if self._measures.valid_overlaps is not None:
+            return self._measures.valid_overlaps.raw_cube_array
+        return None
+
+    @lazyproperty
     def counts_with_missings(self):
         return self._measure(self.is_weighted).raw_cube_array
 
@@ -629,6 +635,19 @@ class _Measures(object):
         )
 
     @lazyproperty
+    def valid_overlaps(self):
+        overlap_measure_dict = (
+            self._cube_dict.get("result", {}).get("measures", {}).get("valid_overlap")
+        )
+        return (
+            _ValidOverlapMeasure(
+                self._cube_dict, self._all_dimensions, self._cube_idx_arg
+            )
+            if overlap_measure_dict
+            else None
+        )
+
+    @lazyproperty
     def missing_count(self):
         """numeric representing count of missing rows in cube response."""
         if self.means:
@@ -794,9 +813,13 @@ class _MeanMeasure(_BaseMeasure):
 
 class _OverlapMeasure(_BaseMeasure):
     @lazyproperty
+    def _cube_measure(self):
+        return self._cube_dict["result"]["measures"]["overlap"]
+
+    @lazyproperty
     def missing_count(self):
         """numeric representing count of missing rows reflected in response."""
-        return self._cube_dict["result"]["measures"]["overlap"].get("n_missing", 0)
+        return self._cube_measure.get("n_missing", 0)
 
     @lazyproperty
     def _flat_values(self):
@@ -807,8 +830,7 @@ class _OverlapMeasure(_BaseMeasure):
         returned value.
         """
         return tuple(
-            np.nan if type(x) is dict else x
-            for x in self._cube_dict["result"]["measures"]["overlap"]["data"]
+            np.nan if type(x) is dict else x for x in self._cube_measure["data"]
         )
 
     @lazyproperty
@@ -822,11 +844,7 @@ class _OverlapMeasure(_BaseMeasure):
 
     @lazyproperty
     def _n_subvars(self):
-        return len(
-            self._cube_dict["result"]["measures"]["overlap"]["metadata"]["type"][
-                "subvariables"
-            ]
-        )
+        return len(self._cube_measure["metadata"]["type"]["subvariables"])
 
     @lazyproperty
     def _shape(self):
@@ -840,6 +858,29 @@ class _OverlapMeasure(_BaseMeasure):
         # ---must be read-only to avoid hard-to-find bugs---
         raw_cube_array.flags.writeable = False
         return raw_cube_array[tuple(self._selected_overlap_slice)]
+
+
+class _ValidOverlapMeasure(_OverlapMeasure):
+    @lazyproperty
+    def _cube_measure(self):
+        return self._cube_dict["result"]["measures"]["valid_overlap"]
+
+    @lazyproperty
+    def _valid_overlap_slice(self):
+        selected_overlap_slice = [slice(None) for _ in self._all_dimensions]
+        for i, d in enumerate(reversed(self._all_dimensions)):
+            if d.dimension_type == DT.MR_CAT:
+                selected_overlap_slice[-(i + 1)] = slice(0, 2)
+                break
+        return -(i + 1), selected_overlap_slice
+
+    @lazyproperty
+    def raw_cube_array(self):
+        raw_cube_array = np.array(self._flat_values).flatten().reshape(self._shape)
+        # --- We need the sum of Selected + Other (of the MR_CAT dimension)
+        raw_cube_array.flags.writeable = False
+        mr_cat_ind, valid_slice = self._valid_overlap_slice
+        return raw_cube_array[tuple(valid_slice)].sum(axis=mr_cat_ind - 1)
 
 
 class _UnweightedCountMeasure(_BaseMeasure):

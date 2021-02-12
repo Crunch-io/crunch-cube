@@ -22,7 +22,10 @@ import numpy as np
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.min_base_size_mask import MinBaseSizeMask
 from cr.cube.matrix import Assembler
-from cr.cube.measures.pairwise_significance import PairwiseSignificance
+from cr.cube.measures.pairwise_significance import (
+    PairwiseSignificance,
+    OverlapsSignificance,
+)
 from cr.cube.noa.smoothing import SingleSidedMovingAvgSmoother
 from cr.cube.scalar import MeansScalar
 from cr.cube.stripe import TransformedStripe
@@ -1229,6 +1232,14 @@ class _Strand(CubePartition):
         self._mask_size = mask_size
 
     @lazyproperty
+    def pairwise_significance_tests(self):
+        """tuple of _SubvarPairwiseSignificance tests."""
+        return tuple(
+            OverlapsSignificance(self).values[subvar_idx]
+            for subvar_idx in range(len(self.row_labels))  # row labels == subvar labels
+        )
+
+    @lazyproperty
     def bases(self):
         """Sequence of weighted base for each row."""
         return tuple(np.broadcast_to(self.table_margin, self.shape))
@@ -1259,6 +1270,10 @@ class _Strand(CubePartition):
     @lazyproperty
     def overlaps(self):
         return np.array(list(row.overlaps for row in self._stripe.rows))
+
+    @lazyproperty
+    def valid_overlaps(self):
+        return np.array(list(row.valid_overlaps for row in self._stripe.rows))
 
     @lazyproperty
     def min_base_size_mask(self):

@@ -10,6 +10,61 @@ from scipy.stats import t
 from cr.cube.util import lazyproperty
 
 
+class OverlapsSignificance(object):
+    def __init__(self, strand):
+        self._strand = strand
+
+    @lazyproperty
+    def n_subvars(self):
+        return self._strand.shape[0]
+
+    @lazyproperty
+    def values(self):
+        return [
+            _SubvarPairwiseSignificance(self._strand, subvar_idx)
+            for subvar_idx in range(self.n_subvars)
+        ]
+
+
+class _SubvarPairwiseSignificance(object):
+    def __init__(self, strand, subvar_idx):
+        self._strand = strand
+        self._subvar_idx = subvar_idx
+
+    @lazyproperty
+    def n_subvars(self):
+        return self._strand.shape[0]
+
+    @lazyproperty
+    def t_stats(self):
+        idx, vo, so = (
+            self._subvar_idx,
+            self._strand.valid_overlaps,
+            self._strand.overlaps,
+        )
+        Na = vo[idx, idx]
+        Sa = so[idx, idx]
+        pa = Sa / Na
+        z_scores = []
+        for i in range(self.n_subvars):
+            if i == idx:
+                z_scores.append(0)
+                continue
+            Nb = vo[i, i]
+            Nab = vo[i, idx]
+            Sb = so[i, i]
+            Sab = so[i, idx]
+
+            pb = Sb / Nb
+            pab = Sab / Nab
+            N = Na + Nb - Nab
+            zab = (pa - pb) / np.sqrt(
+                1 / N * (pa * (1 - pa) + pb * (1 - pb) + 2 * pa * pb - 2 * pab)
+            )
+            z_scores.append(zab)
+        return np.array(z_scores)
+
+
 class PairwiseSignificance(object):
     """Implementation of p-vals and t-tests for each column proportions comparison."""
 

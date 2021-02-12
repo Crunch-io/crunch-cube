@@ -339,3 +339,33 @@ class TestOverlaps(TestCase):
             [1, 2, 2],  # B
             [1, 2, 3],  # C
         ]
+
+        valid_overlaps = strand_.valid_overlaps
+
+        assert valid_overlaps.tolist() == [
+            # Subvariables:
+            # A, B, C
+            [5, 5, 5],  # A
+            [5, 7, 7],  # B
+            [5, 7, 7],  # C
+        ]
+
+        sig_tests = strand_.pairwise_significance_tests[0]
+
+        assert sig_tests.t_stats.tolist() == [0, 1.3367572072832183, 0.5859387772465644]
+
+        sig_tests = strand_.pairwise_significance_tests[1]
+
+        assert sig_tests.t_stats.tolist() == [
+            -1.3367572072832183,
+            0.0,
+            -1.0801234497346437,
+        ]
+
+        sig_tests = strand_.pairwise_significance_tests[2]
+
+        assert sig_tests.t_stats.tolist() == [
+            -0.5859387772465644,
+            1.0801234497346437,
+            0.0,
+        ]
