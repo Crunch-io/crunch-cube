@@ -74,6 +74,23 @@ class DescribeAssembler(object):
         StripeMeasures_.assert_called_once_with(cube_, rows_dimension_, False, 7)
         assert measures is measures_
 
+    def it_knows_the_row_order_to_help(
+        self, request, rows_dimension_, _measures_prop_, measures_
+    ):
+        _measures_prop_.return_value = measures_
+        _BaseOrderHelper_ = class_mock(
+            request, "cr.cube.stripe.assembler._BaseOrderHelper"
+        )
+        _BaseOrderHelper_.display_order.return_value = (-1, 1, -2, 2, -3, 3)
+        assembler = StripeAssembler(None, rows_dimension_, None, None)
+
+        row_order = assembler._row_order
+
+        _BaseOrderHelper_.display_order.assert_called_once_with(
+            rows_dimension_, measures_
+        )
+        assert row_order.tolist() == [-1, 1, -2, 2, -3, 3]
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture

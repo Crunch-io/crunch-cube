@@ -64,4 +64,26 @@ class StripeAssembler(object):
         Negative values represent inserted subtotal-row locations. Indices appear in the
         order rows are to appear in the final result.
         """
+        # --- specify dtype explicitly to prevent error when display-order is empty. The
+        # --- default dtype is float, which cannot be used to index an array.
+        return np.array(
+            _BaseOrderHelper.display_order(self._rows_dimension, self._measures),
+            dtype=int,
+        )
+
+
+# === ORDER HELPERS ===
+
+
+class _BaseOrderHelper(object):
+    """Base class for ordering helpers."""
+
+    @classmethod
+    def display_order(cls, rows_dimension, second_order_measures):
+        """1D np.int64 ndarray of signed int idx for each row of stripe.
+
+        Negative values represent inserted-vector locations. Returned sequence reflects
+        insertion, hiding, pruning, and ordering transforms specified in the
+        rows-dimension.
+        """
         raise NotImplementedError
