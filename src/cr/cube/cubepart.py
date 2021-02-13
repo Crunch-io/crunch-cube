@@ -24,8 +24,9 @@ from cr.cube.min_base_size_mask import MinBaseSizeMask
 from cr.cube.matrix import Assembler
 from cr.cube.measures.pairwise_significance import PairwiseSignificance
 from cr.cube.noa.smoothing import SingleSidedMovingAvgSmoother
-from cr.cube.scalar import MeansScalar
 from cr.cube.old_stripe import TransformedStripe
+from cr.cube.scalar import MeansScalar
+from cr.cube.stripe.assembler import StripeAssembler
 from cr.cube.util import lazyproperty
 
 # ---This is the quantile of the normal Cumulative Distribution Function (CDF) at
@@ -1300,7 +1301,11 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def rows_base(self):
-        return np.array([row.base for row in self._stripe.rows])
+        """1D np.int64 ndarray of unweighted-N for each row of slice."""
+        # --- for a strand, this is the same as unweighted-counts, but needs this
+        # --- alternate property so it can be accessed uniformly between a slice and a
+        # --- strand.
+        return self.unweighted_counts
 
     @lazyproperty
     def rows_dimension_fills(self):
@@ -1495,8 +1500,8 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def unweighted_counts(self):
-        """tuple of int unweighted count for each row of stripe."""
-        return tuple(row.unweighted_count for row in self._stripe.rows)
+        """1D np.int64 ndarray of unweighted count for each row of stripe."""
+        return self._assembler.unweighted_counts
 
     @lazyproperty
     def var_scale_mean(self):
@@ -1516,6 +1521,17 @@ class _Strand(CubePartition):
         return tuple(np.broadcast_to(self.table_margin, self.shape))
 
     # ---implementation (helpers)-------------------------------------
+
+    @lazyproperty
+    def _assembler(self):
+        """StripeAssembler collaborator object for this stripe.
+
+        Provides all measures, marginals, and totals, along with other items that are
+        sorted or subject to insertions, like labels.
+        """
+        return StripeAssembler(
+            self._cube, self._rows_dimension, self._ca_as_0th, self._slice_idx
+        )
 
     @lazyproperty
     def _counts_as_array(self):

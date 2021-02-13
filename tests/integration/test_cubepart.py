@@ -861,7 +861,7 @@ class Describe_Strand(object):
         assert strand.table_proportions == pytest.approx([0.6666667, 0.3333333])
         assert strand.title == "Registered Voters"
         assert strand.unweighted_bases == (15, 15)
-        assert strand.unweighted_counts == (10, 5)
+        assert strand.unweighted_counts.tolist() == [10, 5]
         assert strand.var_scale_mean == pytest.approx(0.8888888)
         assert strand.variable_name == "v7"
         assert strand.weighted_bases == (15, 15)
@@ -874,7 +874,7 @@ class Describe_Strand(object):
             strand.means, [19.85555556, 13.85416667, 52.78947368, np.nan, np.nan]
         )
         assert strand.title == "Untitled"
-        assert strand.unweighted_counts == (409, 113, 139, 409, 252)
+        assert strand.unweighted_counts.tolist() == [409, 113, 139, 409, 252]
 
     def it_provides_values_for_univariate_cat_means_and_counts(self):
         """The cube_mean and cube_count measures can appear together."""
