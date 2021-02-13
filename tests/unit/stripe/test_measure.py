@@ -47,6 +47,18 @@ class DescribeStripeMeasures(object):
         MeasureCls_.assert_called_once_with(rows_dimension_, measures, cube_measures_)
         assert measure is measure_
 
+    def it_provides_access_to_the_pruning_base(
+        self, request, _cube_measures_prop_, cube_measures_
+    ):
+        unweighted_cube_counts_ = instance_mock(
+            request, _BaseUnweightedCubeCounts, pruning_base=np.array([0, 2, 7])
+        )
+        cube_measures_.unweighted_cube_counts = unweighted_cube_counts_
+        _cube_measures_prop_.return_value = cube_measures_
+        measures = StripeMeasures(None, None, None, None)
+
+        assert measures.pruning_base.tolist() == [0, 2, 7]
+
     def it_provides_access_to_the_cube_measures_to_help(
         self, request, cube_, rows_dimension_, cube_measures_
     ):

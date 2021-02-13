@@ -30,7 +30,7 @@ class StripeMeasures(object):
     @lazyproperty
     def pruning_base(self):
         """1D np.int64 ndarray of unweighted-N for each stripe row."""
-        raise NotImplementedError
+        return self._cube_measures.unweighted_cube_counts.pruning_base
 
     @lazyproperty
     def unweighted_counts(self):
