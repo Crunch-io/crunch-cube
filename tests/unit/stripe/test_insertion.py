@@ -82,3 +82,10 @@ class DescribeSumSubtotals(object):
 
     def it_provides_the_dtype_for_an_empty_subtotal_values_array_to_help(self):
         assert SumSubtotals(np.array([3, 5]), None)._dtype == int
+
+    def it_can_compute_a_subtotal_value_to_help(self, request):
+        subtotal_ = instance_mock(request, _Subtotal, addend_idxs=np.array([1, 2]))
+        base_values = np.array([1, 2, 3])
+        subtotals = SumSubtotals(base_values, None)
+
+        assert subtotals._subtotal_value(subtotal_) == 5

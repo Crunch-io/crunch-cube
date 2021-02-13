@@ -66,4 +66,4 @@ class SumSubtotals(_BaseSubtotals):
 
     def _subtotal_value(self, subtotal):
         """Return scalar value of `subtotal` row."""
-        raise NotImplementedError
+        return np.sum(self._base_values[subtotal.addend_idxs])
