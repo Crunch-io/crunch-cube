@@ -2,8 +2,6 @@
 
 """Integration-test suite for `cr.cube.stripe` sub-package."""
 
-import pytest
-
 from cr.cube.cube import Cube
 from cr.cube.stripe.assembler import StripeAssembler
 
@@ -19,7 +17,6 @@ class DescribeStripeAssembler(object):
 
         assert assembler.unweighted_counts.tolist() == [10, 5]
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_provides_values_for_univariate_mr(self):
         cube = Cube(CR.MR_WGTD)
         assembler = StripeAssembler(cube, cube.dimensions[0], False, 0)

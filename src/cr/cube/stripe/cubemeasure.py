@@ -8,6 +8,8 @@ unweighted-counts, weighted-counts (aka. counts), means, and others.
 
 from __future__ import division
 
+import numpy as np
+
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.util import lazyproperty
 
@@ -97,6 +99,15 @@ class _MrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
 
     Its `._unweighted_counts` is a 2D ndarray with axes (rows, sel/not).
     """
+
+    @lazyproperty
+    def pruning_base(self):
+        """1D np.int64 ndarray of unweighted-N for each matrix row.
+
+        These values include both the selected and unselected counts of the MR rows
+        dimension.
+        """
+        return np.sum(self._unweighted_counts, axis=1)
 
     @lazyproperty
     def unweighted_counts(self):
