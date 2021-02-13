@@ -147,12 +147,23 @@ class Describe_BaseOrderHelper(object):
             "cr.cube.stripe.assembler.%s" % HelperCls.__name__,
             return_value=order_helper_,
         )
-        print("HelperCls_ == %s" % HelperCls_)
 
         display_order = _BaseOrderHelper.display_order(rows_dimension_, measures_)
 
         HelperCls_.assert_called_once_with(rows_dimension_, measures_)
         assert display_order.tolist() == [-2, 1, -1, 2]
+
+    @pytest.mark.parametrize(
+        "pruning_base, expected_value",
+        (([1, 1, 1], ()), ([1, 0, 1], (1,)), ([0, 0, 0], (0, 1, 2))),
+    )
+    def it_knows_the_empty_row_idxs_to_help(
+        self, measures_, pruning_base, expected_value
+    ):
+        measures_.pruning_base = np.array(pruning_base)
+        order_helper = _BaseOrderHelper(None, measures_)
+
+        assert order_helper._empty_row_idxs == expected_value
 
     # fixture components ---------------------------------------------
 

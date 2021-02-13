@@ -28,6 +28,11 @@ class StripeMeasures(object):
         self._slice_idx = slice_idx
 
     @lazyproperty
+    def pruning_base(self):
+        """1D np.int64 ndarray of unweighted-N for each stripe row."""
+        raise NotImplementedError
+
+    @lazyproperty
     def unweighted_counts(self):
         """_UnweightedCounts measure object for this stripe."""
         return _UnweightedCounts(self._rows_dimension, self, self._cube_measures)
