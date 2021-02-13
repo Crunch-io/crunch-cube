@@ -78,6 +78,15 @@ class _CatUnweightedCubeCounts(_BaseUnweightedCubeCounts):
     """Unweighted-counts cube-measure for a non-MR stripe."""
 
     @lazyproperty
+    def pruning_base(self):
+        """1D np.int64 ndarray of unweighted-N for each matrix row.
+
+        Because this matrix has no MR dimension, this is simply the unweighted count for
+        each row.
+        """
+        return self._unweighted_counts
+
+    @lazyproperty
     def unweighted_counts(self):
         """1D np.int64 ndarray of unweighted-count for each row of stripe."""
         return self._unweighted_counts
