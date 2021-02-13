@@ -12,6 +12,7 @@ from __future__ import division
 
 import numpy as np
 
+from cr.cube.collator import ExplicitOrderCollator, PayloadOrderCollator
 from cr.cube.enums import COLLATION_METHOD as CM
 from cr.cube.stripe.measure import StripeMeasures
 from cr.cube.util import lazyproperty
@@ -110,9 +111,32 @@ class _BaseOrderHelper(object):
             "`%s` must implement `._display_order`" % type(self).__name__
         )
 
+    @lazyproperty
+    def _empty_row_idxs(self):
+        """tuple of int index for each row with N = 0.
+
+        These rows are subject to pruning, depending on a user setting in the dimension.
+        """
+        raise NotImplementedError
+
 
 class _OrderHelper(_BaseOrderHelper):
     """Encapsulates the complexity of the various kinds of row ordering."""
+
+    @lazyproperty
+    def _display_order(self):
+        """tuple of signed int idx for each row of stripe.
+
+        Negative values represent inserted-vector locations. Returned sequence reflects
+        insertion, hiding, pruning, and ordering transforms specified in the
+        rows-dimension.
+        """
+        CollatorCls = (
+            ExplicitOrderCollator
+            if self._rows_dimension.collation_method == CM.EXPLICIT_ORDER
+            else PayloadOrderCollator
+        )
+        return CollatorCls.display_order(self._rows_dimension, self._empty_row_idxs)
 
 
 class _SortByValueHelper(_BaseOrderHelper):

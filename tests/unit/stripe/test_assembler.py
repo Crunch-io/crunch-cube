@@ -159,3 +159,32 @@ class Describe_BaseOrderHelper(object):
     @pytest.fixture
     def measures_(self, request):
         return instance_mock(request, StripeMeasures)
+
+
+class Describe_OrderHelper(object):
+    """Unit test suite for `cr.cube.stripe.assembler._OrderHelper` object."""
+
+    @pytest.mark.parametrize(
+        "collation_method, collator_class_name",
+        (
+            (CM.PAYLOAD_ORDER, "PayloadOrderCollator"),
+            (CM.EXPLICIT_ORDER, "ExplicitOrderCollator"),
+        ),
+    )
+    def it_computes_the_order_of_a_rows_dimension_to_help(
+        self, request, collation_method, collator_class_name
+    ):
+        rows_dimension_ = instance_mock(
+            request, Dimension, collation_method=collation_method
+        )
+        CollatorCls_ = class_mock(
+            request, "cr.cube.stripe.assembler.%s" % collator_class_name
+        )
+        CollatorCls_.display_order.return_value = (1, -2, 3, 5, -1)
+        property_mock(request, _OrderHelper, "_empty_row_idxs", return_value=(2, 4, 6))
+        order_helper = _OrderHelper(rows_dimension_, None)
+
+        display_order = order_helper._display_order
+
+        CollatorCls_.display_order.assert_called_once_with(rows_dimension_, (2, 4, 6))
+        assert display_order == (1, -2, 3, 5, -1)
