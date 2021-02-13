@@ -107,3 +107,18 @@ class Describe_CatUnweightedCubeCounts(object):
     def raw_unweighted_counts(self, request):
         """(3,) np.int ndarray of unweighted cube-counts as received from Cube."""
         return np.array([1, 2, 3])
+
+
+class Describe_MrUnweightedCubeCounts(object):
+    """Unit-test suite for `cr.cube.stripe.cubemeasure._MrUnweightedCubeCounts`."""
+
+    def it_knows_its_unweighted_counts(self, raw_unweighted_counts):
+        unweighted_cube_counts = _MrUnweightedCubeCounts(None, raw_unweighted_counts)
+        assert unweighted_cube_counts.unweighted_counts.tolist() == [1, 3, 5]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_unweighted_counts(self, request):
+        """(3, 2) np.int ndarray of unweighted cube-counts as received from Cube."""
+        return np.array([[1, 2], [3, 4], [5, 6]])

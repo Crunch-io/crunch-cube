@@ -97,3 +97,8 @@ class _MrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
 
     Its `._unweighted_counts` is a 2D ndarray with axes (rows, sel/not).
     """
+
+    @lazyproperty
+    def unweighted_counts(self):
+        """1D np.int64 ndarray of unweighted-count for each row of stripe."""
+        return self._unweighted_counts[:, 0]
