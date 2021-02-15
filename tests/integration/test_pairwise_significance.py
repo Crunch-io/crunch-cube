@@ -353,6 +353,11 @@ class TestOverlaps(TestCase):
         sig_tests = strand_.pairwise_significance_tests[0]
 
         assert sig_tests.t_stats.tolist() == [0, 1.3367572072832183, 0.5859387772465644]
+        assert sig_tests.p_vals.tolist() == [
+            0.0,
+            0.23889753532091706,
+            0.5833667356783647,
+        ]
 
         sig_tests = strand_.pairwise_significance_tests[1]
 
@@ -361,11 +366,21 @@ class TestOverlaps(TestCase):
             0.0,
             -1.0801234497346437,
         ]
+        assert sig_tests.p_vals.tolist() == [
+            0.23889753532091706,
+            0.0,
+            0.32941091674326217,
+        ]
 
         sig_tests = strand_.pairwise_significance_tests[2]
 
         assert sig_tests.t_stats.tolist() == [
             -0.5859387772465644,
             1.0801234497346437,
+            0.0,
+        ]
+        assert sig_tests.p_vals.tolist() == [
+            0.5833667356783647,
+            0.32941091674326217,
             0.0,
         ]

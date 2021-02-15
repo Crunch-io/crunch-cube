@@ -36,7 +36,7 @@ class _SubvarPairwiseSignificance(object):
         return self._strand.shape[0]
 
     @lazyproperty
-    def t_stats(self):
+    def t_stats_and_pvals(self):
         idx, vo, so = (
             self._subvar_idx,
             self._strand.valid_overlaps,
@@ -46,9 +46,11 @@ class _SubvarPairwiseSignificance(object):
         Sa = so[idx, idx]
         pa = Sa / Na
         z_scores = []
+        p_vals = []
         for i in range(self.n_subvars):
             if i == idx:
                 z_scores.append(0)
+                p_vals.append(0)
                 continue
             Nb = vo[i, i]
             Nab = vo[i, idx]
@@ -62,7 +64,17 @@ class _SubvarPairwiseSignificance(object):
                 1 / N * (pa * (1 - pa) + pb * (1 - pb) + 2 * pa * pb - 2 * pab)
             )
             z_scores.append(zab)
-        return np.array(z_scores)
+            pab = 2 * (1 - t.cdf(abs(zab), df=N - 2))
+            p_vals.append(pab)
+        return np.array(z_scores), np.array(p_vals)
+
+    @lazyproperty
+    def t_stats(self):
+        return self.t_stats_and_pvals[0]
+
+    @lazyproperty
+    def p_vals(self):
+        return self.t_stats_and_pvals[1]
 
 
 class PairwiseSignificance(object):
