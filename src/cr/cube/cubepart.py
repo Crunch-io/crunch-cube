@@ -24,7 +24,8 @@ from cr.cube.min_base_size_mask import MinBaseSizeMask
 from cr.cube.matrix import Assembler
 from cr.cube.measures.pairwise_significance import (
     PairwiseSignificance,
-    OverlapsSignificance,
+    RowOverlapsSignificance,
+    SliceOverlapsSignificance,
 )
 from cr.cube.noa.smoothing import SingleSidedMovingAvgSmoother
 from cr.cube.scalar import MeansScalar
@@ -105,6 +106,10 @@ class CubePartition(object):
     def has_means(self):
         """True if cube-result includes means values."""
         return self._cube.has_means
+
+    @lazyproperty
+    def has_overlaps(self):
+        return self._cube.has_overlaps
 
     @lazyproperty
     def ndim(self):
@@ -566,6 +571,14 @@ class _Slice(CubePartition):
         return self._assembler.means
 
     @lazyproperty
+    def overlaps(self):
+        return self._assembler.overlaps
+
+    @lazyproperty
+    def valid_overlaps(self):
+        return self._assembler.valid_overlaps
+
+    @lazyproperty
     def min_base_size_mask(self):
         return MinBaseSizeMask(self, self._mask_size)
 
@@ -619,10 +632,17 @@ class _Slice(CubePartition):
         significance test contains `p_vals` and `t_stats` (ndarrays that represent
         probability values and statistical scores).
         """
+        if self.has_overlaps:
+            return self._overlaps_significance_tests
+
         return tuple(
             PairwiseSignificance(self).values[column_idx]
             for column_idx in range(len(self.column_labels))
         )
+
+    @lazyproperty
+    def _overlaps_significance_tests(self):
+        return SliceOverlapsSignificance(self)
 
     @lazyproperty
     def population_counts(self):
@@ -1235,7 +1255,9 @@ class _Strand(CubePartition):
     def pairwise_significance_tests(self):
         """tuple of _SubvarPairwiseSignificance tests."""
         return tuple(
-            OverlapsSignificance(self).values[subvar_idx]
+            RowOverlapsSignificance(self.overlaps, self.valid_overlaps).values[
+                subvar_idx
+            ]
             for subvar_idx in range(len(self.row_labels))  # row labels == subvar labels
         )
 

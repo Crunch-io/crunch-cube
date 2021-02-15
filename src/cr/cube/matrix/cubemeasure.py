@@ -992,7 +992,13 @@ class BaseCubeResultMatrix(object):
         tabulation.
         """
         i = cls._regular_matrix_counts_slice(cube, slice_idx)
-        return (cube.counts[i], cube.unweighted_counts[i], cube.counts_with_missings[i])
+        return (
+            cube.counts[i],
+            cube.unweighted_counts[i],
+            cube.counts_with_missings[i],
+            cube.overlaps[i] if cube.overlaps is not None else None,
+            cube.valid_overlaps[i] if cube.overlaps is not None else None,
+        )
 
     @lazyproperty
     def _valid_row_idxs(self):
@@ -1014,12 +1020,20 @@ class _CatXCatMatrix(BaseCubeResultMatrix):
     """
 
     def __init__(
-        self, dimensions, weighted_counts, unweighted_counts, counts_with_missings=None
+        self,
+        dimensions,
+        weighted_counts,
+        unweighted_counts,
+        counts_with_missings=None,
+        overlaps=None,
+        valid_overlaps=None,
     ):
         super(_CatXCatMatrix, self).__init__(
             dimensions, weighted_counts, unweighted_counts
         )
         self._counts_with_missings = counts_with_missings
+        self._overlaps = overlaps
+        self._valid_overlaps = valid_overlaps
 
     @lazyproperty
     def column_index(self):
@@ -1218,6 +1232,14 @@ class _CatXMrMatrix(_CatXCatMatrix):
     Each value is np.float64 if the cube-result is weighted (as in this example), or
     np.int64 if unweighted.
     """
+
+    @lazyproperty
+    def overlaps(self):
+        return self._overlaps
+
+    @lazyproperty
+    def valid_overlaps(self):
+        return self._valid_overlaps
 
     @lazyproperty
     def columns_pruning_base(self):

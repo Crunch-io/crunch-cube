@@ -327,7 +327,7 @@ class TestStandardizedResiduals(TestCase):
 
 
 class TestOverlaps(TestCase):
-    def test_multiple_response_simple_overlap(self):
+    def test_mr_simple_overlaps(self):
         strand_ = Cube(OL.SIMPLE_OVERLAPS).partitions[0]
 
         overlaps = strand_.overlaps
@@ -384,3 +384,70 @@ class TestOverlaps(TestCase):
             0.32941091674326217,
             0.0,
         ]
+
+    def test_cat_x_mr_overlaps(self):
+        slice_ = Cube(OL.CAT_X_MR_OVERLAPS).partitions[0]
+
+        overlaps = slice_.overlaps
+
+        assert overlaps.tolist() == [
+            [
+                # A, B, C
+                [0, 0, 0],  # A
+                [0, 1, 1],  # B
+                [0, 1, 2],  # C
+            ],  # G[0] == 2
+            [
+                # A, B, C
+                [1, 0, 0],
+                [0, 0, 0],
+                [0, 0, 0],
+            ],  # G[1] == 1
+        ]
+
+        valid_overlaps = slice_.valid_overlaps
+
+        assert valid_overlaps.tolist() == [
+            [
+                # A, B, C
+                [1, 1, 1],
+                [1, 3, 3],
+                [1, 3, 3],
+            ],  # G[0] == 2
+            [
+                # A, B, C
+                [2, 2, 2],  # A
+                [2, 2, 2],  # B
+                [2, 2, 2],  # C
+            ],  # G[1] == 2
+        ]
+
+        sig_tests = slice_.pairwise_significance_tests
+
+        np.testing.assert_almost_equal(
+            sig_tests.t_stats.tolist(),
+            [
+                [
+                    [0.0, -1.22474487, -2.44948974],
+                    [1.22474487, 0.0, -1.22474487],
+                    [2.44948974, 1.22474487, 0.0],
+                ],
+                [
+                    [0.0, 1.41421356, 1.41421356],
+                    [-1.41421356, 0.0, np.nan],
+                    [-1.41421356, np.nan, 0.0],
+                ],
+            ],
+        )
+
+        np.testing.assert_almost_equal(
+            sig_tests.p_vals.tolist(),
+            [
+                [
+                    [0.0, 0.43590578, 0.24675171],
+                    [0.43590578, 0.0, 0.43590578],
+                    [0.24675171, 0.43590578, 0.0],
+                ],
+                [[0.0, np.nan, np.nan], [np.nan, 0.0, np.nan], [np.nan, np.nan, 0.0]],
+            ],
+        )

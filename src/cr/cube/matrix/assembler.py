@@ -171,6 +171,47 @@ class Assembler(object):
         )
 
     @lazyproperty
+    def overlaps(self):
+        if not self._cube.has_overlaps:
+            raise ValueError("cube-result does not include a overlaps cube-measure")
+        overlaps = self._cube_result_matrix.overlaps
+        shape = overlaps.shape
+        blocks = []
+        for i in range(shape[-1]):
+            overlap_slice = [slice(None) for _ in range(len(shape) - 1)] + [i]
+            block = self._assemble_matrix(
+                NanSubtotals.blocks(
+                    self._cube_result_matrix.overlaps[overlap_slice], self._dimensions
+                )
+            )
+            blocks.append(block)
+        arr = np.array(blocks)
+        transposition = [i for i in range(1, len(shape))] + [0]
+        return arr.transpose(*transposition)
+
+    @lazyproperty
+    def valid_overlaps(self):
+        if not self._cube.has_overlaps:
+            raise ValueError(
+                "cube-result does not include a valid_overlaps cube-measure"
+            )
+        valid_overlaps = self._cube_result_matrix.valid_overlaps
+        shape = valid_overlaps.shape
+        blocks = []
+        for i in range(shape[-1]):
+            overlap_slice = [slice(None) for _ in range(len(shape) - 1)] + [i]
+            block = self._assemble_matrix(
+                NanSubtotals.blocks(
+                    self._cube_result_matrix.valid_overlaps[overlap_slice],
+                    self._dimensions,
+                )
+            )
+            blocks.append(block)
+        arr = np.array(blocks)
+        transposition = [i for i in range(1, len(shape))] + [0]
+        return arr.transpose(*transposition)
+
+    @lazyproperty
     def pvalues(self):
         """2D np.float64/np.nan ndarray of p-value for each matrix cell."""
         return 2 * (1 - norm.cdf(np.abs(self.zscores)))

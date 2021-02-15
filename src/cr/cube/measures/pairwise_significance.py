@@ -10,38 +10,73 @@ from scipy.stats import t
 from cr.cube.util import lazyproperty
 
 
-class OverlapsSignificance(object):
-    def __init__(self, strand):
-        self._strand = strand
+class SliceOverlapsSignificance(object):
+    def __init__(self, slice_):
+        self._slice = slice_
+
+    @lazyproperty
+    def t_stats(self):
+        return np.array(
+            [
+                RowOverlapsSignificance(
+                    self._slice.overlaps[i], self._slice.valid_overlaps[i]
+                ).t_stats
+                for i, _ in enumerate(self._slice.row_labels)
+            ]
+        )
+
+    @lazyproperty
+    def p_vals(self):
+        return np.array(
+            [
+                RowOverlapsSignificance(
+                    self._slice.overlaps[i], self._slice.valid_overlaps[i]
+                ).p_vals
+                for i, _ in enumerate(self._slice.row_labels)
+            ]
+        )
+
+
+class RowOverlapsSignificance(object):
+    def __init__(self, overlaps, valid_overlaps):
+        self._overlaps = overlaps
+        self._valid_overlaps = valid_overlaps
 
     @lazyproperty
     def n_subvars(self):
-        return self._strand.shape[0]
+        return self._overlaps.shape[0]
 
     @lazyproperty
     def values(self):
         return [
-            _SubvarPairwiseSignificance(self._strand, subvar_idx)
+            _SubvarPairwiseSignificance(
+                self._overlaps, self._valid_overlaps, subvar_idx
+            )
             for subvar_idx in range(self.n_subvars)
         ]
 
+    @lazyproperty
+    def t_stats(self):
+        return np.array([svps.t_stats for svps in self.values])
+
+    @lazyproperty
+    def p_vals(self):
+        return np.array([svps.p_vals for svps in self.values])
+
 
 class _SubvarPairwiseSignificance(object):
-    def __init__(self, strand, subvar_idx):
-        self._strand = strand
+    def __init__(self, overlaps, valid_overlaps, subvar_idx):
+        self._overlaps = overlaps
+        self._valid_overlaps = valid_overlaps
         self._subvar_idx = subvar_idx
 
     @lazyproperty
     def n_subvars(self):
-        return self._strand.shape[0]
+        return self._overlaps.shape[0]
 
     @lazyproperty
     def t_stats_and_pvals(self):
-        idx, vo, so = (
-            self._subvar_idx,
-            self._strand.valid_overlaps,
-            self._strand.overlaps,
-        )
+        idx, vo, so = (self._subvar_idx, self._valid_overlaps, self._overlaps)
         Na = vo[idx, idx]
         Sa = so[idx, idx]
         pa = Sa / Na

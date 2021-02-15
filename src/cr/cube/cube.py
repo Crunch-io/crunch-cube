@@ -287,6 +287,16 @@ class Cube(object):
         """True if cube includes a means measure."""
         return self._measures.means is not None
 
+    @lazyproperty
+    def has_overlaps(self):
+        """True if cube includes a means measure."""
+        return self._measures.overlaps is not None
+
+    @lazyproperty
+    def has_valid_overlaps(self):
+        """True if cube includes a means measure."""
+        return self._measures.valid_overlaps is not None
+
     def inflate(self):
         """Return new Cube object with rows-dimension added.
 
