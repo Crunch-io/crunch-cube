@@ -1179,7 +1179,7 @@ class DescribeBaseCubeResultMatrix(object):
         sliced_counts = BaseCubeResultMatrix._sliced_counts(cube_, slice_idx=23)
 
         _regular_matrix_counts_slice.assert_called_once_with(cube_, 23)
-        counts, unweighted, with_missing = sliced_counts
+        counts, unweighted, with_missing, overlaps, valid_overlaps = sliced_counts
         assert counts.tolist() == expected
         assert unweighted.tolist() == expected
 

@@ -24,7 +24,7 @@ from cr.cube.min_base_size_mask import MinBaseSizeMask
 from cr.cube.matrix import Assembler
 from cr.cube.measures.pairwise_significance import (
     PairwiseSignificance,
-    RowOverlapsSignificance,
+    PerSubvariableOverlapsSignificance,
     SliceOverlapsSignificance,
 )
 from cr.cube.noa.smoothing import SingleSidedMovingAvgSmoother
@@ -1258,9 +1258,9 @@ class _Strand(CubePartition):
     def pairwise_significance_tests(self):
         """tuple of _SubvarPairwiseSignificance tests."""
         return tuple(
-            RowOverlapsSignificance(self.overlaps, self.valid_overlaps).values[
-                subvar_idx
-            ]
+            PerSubvariableOverlapsSignificance(
+                self.overlaps, self.valid_overlaps
+            ).values[subvar_idx]
             for subvar_idx in range(len(self.row_labels))  # row labels == subvar labels
         )
 

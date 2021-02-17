@@ -173,7 +173,9 @@ class Assembler(object):
     @lazyproperty
     def overlaps(self):
         if not self._cube.has_overlaps:
-            raise ValueError("cube-result does not include a overlaps cube-measure")
+            raise ValueError(
+                "cube-result does not include a overlaps cube-measure"
+            )  # pragma: no cover
         overlaps = self._cube_result_matrix.overlaps
         shape = overlaps.shape
         blocks = []
@@ -194,7 +196,7 @@ class Assembler(object):
         if not self._cube.has_overlaps:
             raise ValueError(
                 "cube-result does not include a valid_overlaps cube-measure"
-            )
+            )  # pragma: no cover
         valid_overlaps = self._cube_result_matrix.valid_overlaps
         shape = valid_overlaps.shape
         blocks = []
