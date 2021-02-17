@@ -422,32 +422,50 @@ class TestOverlaps(TestCase):
             ],  # G[1] == 2
         ]
 
-        sig_tests = slice_.pairwise_significance_tests
-
+        sig_tests = slice_.pairwise_significance_tests[0]
         np.testing.assert_almost_equal(
-            sig_tests.t_stats.tolist(),
+            sig_tests.t_stats,
             [
-                [
-                    [0.0, -1.22474487, -2.44948974],
-                    [1.22474487, 0.0, -1.22474487],
-                    [2.44948974, 1.22474487, 0.0],
-                ],
-                [
-                    [0.0, 1.41421356, 1.41421356],
-                    [-1.41421356, 0.0, np.nan],
-                    [-1.41421356, np.nan, 0.0],
-                ],
+                [0.0, -1.22474487, -2.44948974],
+                [0.0, 1.41421356, 1.41421356],
+            ],
+        )
+        np.testing.assert_almost_equal(
+            sig_tests.p_vals,
+            [
+                [0.0, 0.43590578, 0.24675171],
+                [0.0, np.nan, np.nan],
             ],
         )
 
+        sig_tests = slice_.pairwise_significance_tests[1]
         np.testing.assert_almost_equal(
-            sig_tests.p_vals.tolist(),
+            sig_tests.t_stats,
             [
-                [
-                    [0.0, 0.43590578, 0.24675171],
-                    [0.43590578, 0.0, 0.43590578],
-                    [0.24675171, 0.43590578, 0.0],
-                ],
-                [[0.0, np.nan, np.nan], [np.nan, 0.0, np.nan], [np.nan, np.nan, 0.0]],
+                [1.22474487, 0.0, -1.22474487],
+                [-1.41421356, 0.0, np.nan],
+            ],
+        )
+        np.testing.assert_almost_equal(
+            sig_tests.p_vals,
+            [
+                [0.43590578, 0.0, 0.43590578],
+                [np.nan, 0.0, np.nan],
+            ],
+        )
+
+        sig_tests = slice_.pairwise_significance_tests[2]
+        np.testing.assert_almost_equal(
+            sig_tests.t_stats,
+            [
+                [2.44948974, 1.22474487, 0.0],
+                [-1.41421356, np.nan, 0.0],
+            ],
+        )
+        np.testing.assert_almost_equal(
+            sig_tests.p_vals,
+            [
+                [0.24675171, 0.43590578, 0.0],
+                [np.nan, np.nan, 0.0],
             ],
         )

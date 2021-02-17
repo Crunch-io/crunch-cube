@@ -827,11 +827,6 @@ class _OverlapMeasure(_BaseMeasure):
         return self._cube_dict["result"]["measures"]["overlap"]
 
     @lazyproperty
-    def missing_count(self):
-        """numeric representing count of missing rows reflected in response."""
-        return self._cube_measure.get("n_missing", 0)
-
-    @lazyproperty
     def _flat_values(self):
         """Return tuple of mean values as found in cube response.
 

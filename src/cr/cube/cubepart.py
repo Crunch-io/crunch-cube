@@ -642,7 +642,10 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def _overlaps_significance_tests(self):
-        return SliceOverlapsSignificance(self)
+        return tuple(
+            SliceOverlapsSignificance(self).values[column_idx]
+            for column_idx in range(len(self.column_labels))
+        )
 
     @lazyproperty
     def population_counts(self):

@@ -4,10 +4,13 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from collections import namedtuple
 import numpy as np
 from scipy.stats import t
 
 from cr.cube.util import lazyproperty
+
+OverlapSignificance = namedtuple("OverlapSignificance", "t_stats p_vals")
 
 
 class SliceOverlapsSignificance(object):
@@ -15,29 +18,38 @@ class SliceOverlapsSignificance(object):
         self._slice = slice_
 
     @lazyproperty
-    def t_stats(self):
+    def values(self):
+        values = []
+        for i in range(len(self._slice.column_labels)):
+            t_stats = self._t_stats[:, i, :]
+            p_vals = self._p_vals[:, i, :]
+            values.append(OverlapSignificance(t_stats, p_vals))
+        return values
+
+    @lazyproperty
+    def _t_stats(self):
         return np.array(
             [
-                RowOverlapsSignificance(
+                PerSubvariableOverlapsSignificance(
                     self._slice.overlaps[i], self._slice.valid_overlaps[i]
                 ).t_stats
-                for i, _ in enumerate(self._slice.row_labels)
+                for i in range(len(self._slice.row_labels))
             ]
         )
 
     @lazyproperty
-    def p_vals(self):
+    def _p_vals(self):
         return np.array(
             [
-                RowOverlapsSignificance(
+                PerSubvariableOverlapsSignificance(
                     self._slice.overlaps[i], self._slice.valid_overlaps[i]
                 ).p_vals
-                for i, _ in enumerate(self._slice.row_labels)
+                for i in range(len(self._slice.row_labels))
             ]
         )
 
 
-class RowOverlapsSignificance(object):
+class PerSubvariableOverlapsSignificance(object):
     def __init__(self, overlaps, valid_overlaps):
         self._overlaps = overlaps
         self._valid_overlaps = valid_overlaps
