@@ -30,7 +30,7 @@ jobs:
         pip install tox tox-gh-actions
     - name: Test with tox
       run: tox
-    - name: Submit Coverage
+    - name: Submit Test Coverage
       run: tox -e coverage,coveralls
     - name: Linter
       run: tox -e lint
