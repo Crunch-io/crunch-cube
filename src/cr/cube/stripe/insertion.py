@@ -55,7 +55,11 @@ class NanSubtotals(_BaseSubtotals):
 
 
 class SumSubtotals(_BaseSubtotals):
-    """Subtotals created by np.sum() on addends, primarily counts."""
+    """Subtotals created by np.sum() on addends, primarily bases.
+
+    This sums together both addends AND subtrahends because some measures such as
+    bases are additive even across subtrahends of subtotals.
+    """
 
     @lazyproperty
     def _subtotal_values(self):
@@ -78,4 +82,9 @@ class SumSubtotals(_BaseSubtotals):
 
     def _subtotal_value(self, subtotal):
         """Return scalar value of `subtotal` row."""
-        return np.sum(self._base_values[subtotal.addend_idxs])
+        base_values = self._base_values
+
+        addend_sum = np.sum(base_values[subtotal.addend_idxs])
+        subtrahend_sum = np.sum(base_values[subtotal.subtrahend_idxs])
+
+        return addend_sum + subtrahend_sum

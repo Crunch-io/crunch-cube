@@ -100,9 +100,32 @@ class DescribeSumSubtotals(object):
     def it_provides_the_dtype_for_an_empty_subtotal_values_array_to_help(self):
         assert SumSubtotals(np.array([3, 5]), None)._dtype == int
 
-    def it_can_compute_a_subtotal_value_to_help(self, request):
-        subtotal_ = instance_mock(request, _Subtotal, addend_idxs=np.array([1, 2]))
-        base_values = np.array([1, 2, 3])
-        subtotals = SumSubtotals(base_values, None)
+    @pytest.mark.parametrize(
+        ("addend_idxs", "subtrahend_idxs", "expected"),
+        (
+            ([0, 1], [2, 3], 15),
+            ([1], [], 2),
+            ([], [1], 2),
+        ),
+    )
+    def it_can_compute_a_subtotal_value_to_help(
+        self, request, addend_idxs, subtrahend_idxs, expected
+    ):
+        property_mock(
+            request,
+            _Subtotal,
+            "addend_idxs",
+            return_value=np.array(addend_idxs, dtype=int),
+        )
+        subtrahend_idxs_ = property_mock(
+            request,
+            _Subtotal,
+            "subtrahend_idxs",
+            return_value=np.array(subtrahend_idxs, dtype=int),
+        )
 
-        assert subtotals._subtotal_value(subtotal_) == 5
+        subtotal_value = SumSubtotals(np.array([1, 2, 4, 8]), None)._subtotal_value(
+            _Subtotal(None, None, None)
+        )
+
+        np.testing.assert_equal(subtotal_value, expected)
