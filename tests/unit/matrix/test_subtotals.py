@@ -254,48 +254,84 @@ class DescribeSumSubtotals(object):
         assert subtotal_rows.tolist() == [[4, 3], [2, 1]]
 
     @pytest.mark.parametrize(
-        ("row_idxs", "col_idxs", "expected_value"),
         (
-            ([1, 2], [0, 1], 26),
-            ([0, 1], [0, 1], 10),
-            ([1, 2], [2, 3], 34),
+            "row_add_idxs",
+            "row_sub_idxs",
+            "col_add_idxs",
+            "col_sub_idxs",
+            "expected_value",
+        ),
+        (
+            ([1, 2], [], [0, 1], [], 26),
+            ([0, 1], [], [0, 1], [], 10),
+            ([1, 2], [], [2, 3], [], 34),
+            ([1, 2], [0], [0, 1], [], 27),
+            ([1, 2], [], [0, 1], [2, 3], 60),
+            ([0, 1], [2], [2, 3], [0, 1], 66),
+            ([], [1, 2], [], [0, 1], 26),
         ),
     )
     def it_can_compute_a_subtotal_intersection_value(
-        self, request, row_idxs, col_idxs, expected_value
+        self,
+        request,
+        row_add_idxs,
+        row_sub_idxs,
+        col_add_idxs,
+        col_sub_idxs,
+        expected_value,
     ):
-        col_subtotal_ = instance_mock(request, _Subtotal, addend_idxs=col_idxs)
-        row_subtotal_ = instance_mock(request, _Subtotal, addend_idxs=row_idxs)
+        col_subtotal_ = instance_mock(
+            request,
+            _Subtotal,
+            addend_idxs=col_add_idxs,
+            subtrahend_idxs=col_sub_idxs,
+        )
+        row_subtotal_ = instance_mock(
+            request,
+            _Subtotal,
+            addend_idxs=row_add_idxs,
+            subtrahend_idxs=row_sub_idxs,
+        )
         base_values = np.arange(12).reshape(3, 4)
         subtotals = SumSubtotals(base_values, None)
 
         assert subtotals._intersection(row_subtotal_, col_subtotal_) == expected_value
 
     @pytest.mark.parametrize(
-        ("addend_idxs", "expected_value"),
-        (([1, 2], [3, 11, 19]), ([1, 3], [4, 12, 20]), ([0, 3], [3, 11, 19])),
+        ("addend_idxs", "subtrahend_idxs", "expected_value"),
+        (
+            ([1, 2], [], [3, 11, 19]),
+            ([1, 3], [], [4, 12, 20]),
+            ([0, 3], [], [3, 11, 19]),
+            ([], [1, 2], [3, 11, 19]),
+            ([1], [3], [4, 12, 20]),
+        ),
     )
     def it_can_compute_a_subtotal_column_to_help(
-        self, subtotal_, addend_idxs, expected_value
+        self, subtotal_, addend_idxs, subtrahend_idxs, expected_value
     ):
         subtotal_.addend_idxs = addend_idxs
+        subtotal_.subtrahend_idxs = subtrahend_idxs
         base_values = np.arange(12).reshape(3, 4)
         subtotals = SumSubtotals(base_values, None)
 
         assert subtotals._subtotal_column(subtotal_).tolist() == expected_value
 
     @pytest.mark.parametrize(
-        ("addend_idxs", "expected_value"),
+        ("addend_idxs", "subtrahend_idxs", "expected_value"),
         (
-            ([1, 2], [12, 14, 16, 18]),
-            ([0, 1], [4, 6, 8, 10]),
-            ([0, 2], [8, 10, 12, 14]),
+            ([1, 2], [], [12, 14, 16, 18]),
+            ([0, 1], [], [4, 6, 8, 10]),
+            ([0, 2], [], [8, 10, 12, 14]),
+            ([], [1, 2], [12, 14, 16, 18]),
+            ([0], [2], [8, 10, 12, 14]),
         ),
     )
     def it_can_compute_a_subtotal_row_to_help(
-        self, subtotal_, addend_idxs, expected_value
+        self, subtotal_, addend_idxs, subtrahend_idxs, expected_value
     ):
         subtotal_.addend_idxs = addend_idxs
+        subtotal_.subtrahend_idxs = subtrahend_idxs
         base_values = np.arange(12).reshape(3, 4)
         subtotals = SumSubtotals(base_values, None)
 

@@ -183,15 +183,25 @@ class SumSubtotals(_BaseSubtotals):
 
     def _intersection(self, row_subtotal, column_subtotal):
         """Sum for this row/column subtotal intersection."""
-        return np.sum(self._subtotal_row(row_subtotal)[column_subtotal.addend_idxs])
+        addend_sum = np.sum(
+            self._subtotal_row(row_subtotal)[column_subtotal.addend_idxs]
+        )
+        subtrahend_sum = np.sum(
+            self._subtotal_row(row_subtotal)[column_subtotal.subtrahend_idxs]
+        )
+        return addend_sum + subtrahend_sum
 
     def _subtotal_column(self, subtotal):
         """Return (n_rows,) ndarray of values for `subtotal` column."""
-        return np.sum(self._base_values[:, subtotal.addend_idxs], axis=1)
+        addend_sum = np.sum(self._base_values[:, subtotal.addend_idxs], axis=1)
+        subtrahend_sum = np.sum(self._base_values[:, subtotal.subtrahend_idxs], axis=1)
+        return addend_sum + subtrahend_sum
 
     def _subtotal_row(self, subtotal):
         """Return (n_cols,) ndarray of values for `subtotal` row."""
-        return np.sum(self._base_values[subtotal.addend_idxs, :], axis=0)
+        addend_sum = np.sum(self._base_values[subtotal.addend_idxs, :], axis=0)
+        subtrahend_sum = np.sum(self._base_values[subtotal.subtrahend_idxs, :], axis=0)
+        return addend_sum + subtrahend_sum
 
 
 class TableStdErrSubtotals(_BaseSubtotals):
