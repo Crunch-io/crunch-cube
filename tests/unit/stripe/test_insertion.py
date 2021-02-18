@@ -6,7 +6,12 @@ import numpy as np
 import pytest
 
 from cr.cube.dimension import Dimension, _Subtotal
-from cr.cube.stripe.insertion import _BaseSubtotals, NanSubtotals, SumSubtotals
+from cr.cube.stripe.insertion import (
+    _BaseSubtotals,
+    NanSubtotals,
+    SumDiffSubtotals,
+    SumSubtotals,
+)
 
 from ...unitutil import (
     ANY,
@@ -129,3 +134,42 @@ class DescribeSumSubtotals(object):
         )
 
         np.testing.assert_equal(subtotal_value, expected)
+
+
+class Describe_SumDiffSubtotals(object):
+    """Unit test suite for `cr.cube.matrix.SumDiffSubtotals` object."""
+
+    @pytest.mark.parametrize(
+        ("addend_idxs", "subtrahend_idxs", "expected"),
+        (
+            ([0, 1], [2, 3], -9),
+            ([1], [], 2),
+            ([], [1], -2),
+        ),
+    )
+    def it_calculates_subtotal_value_correctly(
+        self, request, addend_idxs, subtrahend_idxs, expected
+    ):
+        property_mock(
+            request,
+            _Subtotal,
+            "addend_idxs",
+            return_value=np.array(addend_idxs, dtype=int),
+        )
+        subtrahend_idxs_ = property_mock(
+            request,
+            _Subtotal,
+            "subtrahend_idxs",
+            return_value=np.array(subtrahend_idxs, dtype=int),
+        )
+
+        subtotal_value = SumDiffSubtotals(np.array([1, 2, 4, 8]), None)._subtotal_value(
+            _Subtotal(None, None, None)
+        )
+
+        np.testing.assert_equal(subtotal_value, expected)
+
+    @pytest.mark.parametrize("dtype", (np.float64, np.int32))
+    def it_knows_the_dtype_of_base_values(self, request, dtype):
+        actual = SumSubtotals(np.array([1, 2, 4, 8], dtype=dtype), None)._dtype
+        assert actual == dtype
