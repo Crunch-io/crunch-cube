@@ -3923,7 +3923,6 @@ class DescribeIntegrated_SubtotalDifferences(object):
             slice_.row_proportions, slice_.counts / slice_.row_weighted_bases
         )
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     def test_cat_subdiff_x_cat_subdiff_pval(self, row_col_subdiff_insertions):
         slice_ = Cube(
             CR.CAT_SUBDIFF_X_CAT_SUBDIFF, transforms=row_col_subdiff_insertions
@@ -3934,7 +3933,6 @@ class DescribeIntegrated_SubtotalDifferences(object):
         )
         np.testing.assert_equal(slice_.pvals[:, 0], np.full(6, np.nan))
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     def test_cat_subdiff_x_cat_subdiff_zscore(self, row_col_subdiff_insertions):
         slice_ = Cube(
             CR.CAT_SUBDIFF_X_CAT_SUBDIFF, transforms=row_col_subdiff_insertions
@@ -4054,7 +4052,6 @@ class DescribeIntegrated_SubtotalDifferences(object):
             slice_.row_proportions, slice_.counts / slice_.row_weighted_bases
         )
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     def test_cat_subtot_subdiff_x_cat_subtot_subdiff_pval(
         self, row_col_subtot_subdiff_insertions
     ):
@@ -4067,7 +4064,6 @@ class DescribeIntegrated_SubtotalDifferences(object):
         )
         np.testing.assert_equal(slice_.pvals[:, 0], np.full(7, np.nan))
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     def test_cat_subtot_subdiff_x_cat_subtot_subdiff_zscore(
         self, row_col_subtot_subdiff_insertions
     ):

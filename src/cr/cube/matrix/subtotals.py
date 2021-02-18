@@ -311,6 +311,13 @@ class ZscoreSubtotals(_BaseSubtotals):
 
     def _intersection(self, row_subtotal, column_subtotal):
         """Return value for intersection of `row_subtotal` and `column_subtotal`."""
+        # --- Cannot calculate if there are any subtrahends ---
+        if (
+            len(row_subtotal.subtrahend_idxs) > 0
+            or len(column_subtotal.subtrahend_idxs) > 0
+        ):
+            return np.nan
+
         row_subtotal_counts = np.sum(
             self._base_counts[row_subtotal.addend_idxs, :], axis=0
         )
@@ -349,6 +356,10 @@ class ZscoreSubtotals(_BaseSubtotals):
 
     def _subtotal_column(self, subtotal):
         """Return (n_rows,) ndarray of zscore `subtotal` value."""
+        # --- Cannot calculate if there are any subtrahends ---
+        if len(subtotal.subtrahend_idxs) > 0:
+            return np.full(self._nrows, np.nan)
+
         # --- the weighted-counts version of this subtotal-column ---
         subtotal_counts = np.sum(self._base_counts[:, subtotal.addend_idxs], axis=1)
 
@@ -381,6 +392,10 @@ class ZscoreSubtotals(_BaseSubtotals):
 
     def _subtotal_row(self, subtotal):
         """Return (n_cols,) ndarray of z-score `subtotal` value."""
+        # --- Cannot calculate if there are any subtrahends ---
+        if len(subtotal.subtrahend_idxs) > 0:
+            return np.full(self._ncols, np.nan)
+
         # --- the weighted-counts version of this subtotal-row ---
         subtotal_counts = np.sum(self._base_counts[subtotal.addend_idxs, :], axis=0)
 
