@@ -10,6 +10,7 @@ from cr.cube.matrix.cubemeasure import BaseCubeResultMatrix
 from cr.cube.matrix.subtotals import (
     _BaseSubtotals,
     NanSubtotals,
+    SumDiffSubtotals,
     SumSubtotals,
     TableStdErrSubtotals,
     ZscoreSubtotals,
@@ -334,6 +335,108 @@ class DescribeSumSubtotals(object):
         subtotal_.subtrahend_idxs = subtrahend_idxs
         base_values = np.arange(12).reshape(3, 4)
         subtotals = SumSubtotals(base_values, None)
+
+        assert subtotals._subtotal_row(subtotal_).tolist() == expected_value
+
+    # --- fixture components -----------------------------------------
+
+    @pytest.fixture
+    def dimensions_(self, request):
+        return (instance_mock(request, Dimension), instance_mock(request, Dimension))
+
+    @pytest.fixture
+    def _init_(self, request):
+        return initializer_mock(request, SumSubtotals)
+
+    @pytest.fixture
+    def subtotal_(self, request):
+        return instance_mock(request, _Subtotal)
+
+
+class DescribeSumDiffSubtotals(object):
+    """Unit test suite for `cr.cube.matrix.SumDiffSubtotals` object."""
+
+    @pytest.mark.parametrize(
+        (
+            "row_add_idxs",
+            "row_sub_idxs",
+            "col_add_idxs",
+            "col_sub_idxs",
+            "expected_value",
+        ),
+        (
+            ([1, 2], [], [0, 1], [], 26),
+            ([0, 1], [], [0, 1], [], 10),
+            ([1, 2], [], [2, 3], [], 34),
+            ([1, 2], [0], [0, 1], [], 25),
+            ([1, 2], [], [0, 1], [2, 3], -8),
+            ([0, 1], [2], [2, 3], [0, 1], 4),
+            ([], [1, 2], [], [0, 1], 26),
+        ),
+    )
+    def it_can_compute_a_subtotal_intersection_value(
+        self,
+        request,
+        row_add_idxs,
+        row_sub_idxs,
+        col_add_idxs,
+        col_sub_idxs,
+        expected_value,
+    ):
+        col_subtotal_ = instance_mock(
+            request,
+            _Subtotal,
+            addend_idxs=col_add_idxs,
+            subtrahend_idxs=col_sub_idxs,
+        )
+        row_subtotal_ = instance_mock(
+            request,
+            _Subtotal,
+            addend_idxs=row_add_idxs,
+            subtrahend_idxs=row_sub_idxs,
+        )
+        base_values = np.arange(12).reshape(3, 4)
+        subtotals = SumDiffSubtotals(base_values, None)
+
+        assert subtotals._intersection(row_subtotal_, col_subtotal_) == expected_value
+
+    @pytest.mark.parametrize(
+        ("addend_idxs", "subtrahend_idxs", "expected_value"),
+        (
+            ([1, 2], [], [3, 11, 19]),
+            ([1, 3], [], [4, 12, 20]),
+            ([0, 3], [], [3, 11, 19]),
+            ([], [1, 2], [-3, -11, -19]),
+            ([1], [3], [-2, -2, -2]),
+        ),
+    )
+    def it_can_compute_a_subtotal_column_to_help(
+        self, subtotal_, addend_idxs, subtrahend_idxs, expected_value
+    ):
+        subtotal_.addend_idxs = addend_idxs
+        subtotal_.subtrahend_idxs = subtrahend_idxs
+        base_values = np.arange(12).reshape(3, 4)
+        subtotals = SumDiffSubtotals(base_values, None)
+
+        assert subtotals._subtotal_column(subtotal_).tolist() == expected_value
+
+    @pytest.mark.parametrize(
+        ("addend_idxs", "subtrahend_idxs", "expected_value"),
+        (
+            ([1, 2], [], [12, 14, 16, 18]),
+            ([0, 1], [], [4, 6, 8, 10]),
+            ([0, 2], [], [8, 10, 12, 14]),
+            ([], [1, 2], [-12, -14, -16, -18]),
+            ([0], [2], [-8, -8, -8, -8]),
+        ),
+    )
+    def it_can_compute_a_subtotal_row_to_help(
+        self, subtotal_, addend_idxs, subtrahend_idxs, expected_value
+    ):
+        subtotal_.addend_idxs = addend_idxs
+        subtotal_.subtrahend_idxs = subtrahend_idxs
+        base_values = np.arange(12).reshape(3, 4)
+        subtotals = SumDiffSubtotals(base_values, None)
 
         assert subtotals._subtotal_row(subtotal_).tolist() == expected_value
 

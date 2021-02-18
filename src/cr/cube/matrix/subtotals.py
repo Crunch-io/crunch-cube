@@ -156,7 +156,7 @@ class NanSubtotals(_BaseSubtotals):
 
 
 class SumSubtotals(_BaseSubtotals):
-    """Subtotal "blocks" created by np.sum() on addends, primarily counts."""
+    """Subtotal "blocks" created by np.sum() on addends and subtrahends, primarily bases."""
 
     @classmethod
     def intersections(cls, base_values, dimensions):
@@ -202,6 +202,32 @@ class SumSubtotals(_BaseSubtotals):
         addend_sum = np.sum(self._base_values[subtotal.addend_idxs, :], axis=0)
         subtrahend_sum = np.sum(self._base_values[subtotal.subtrahend_idxs, :], axis=0)
         return addend_sum + subtrahend_sum
+
+
+class SumDiffSubtotals(SumSubtotals):
+    """Subtotal "blocks" created by adding and subtrahends, primarily counts."""
+
+    def _intersection(self, row_subtotal, column_subtotal):
+        """Sum and Diff for this row/column subtotal intersection."""
+        addend_sum = np.sum(
+            self._subtotal_row(row_subtotal)[column_subtotal.addend_idxs]
+        )
+        subtrahend_sum = np.sum(
+            self._subtotal_row(row_subtotal)[column_subtotal.subtrahend_idxs]
+        )
+        return addend_sum - subtrahend_sum
+
+    def _subtotal_column(self, subtotal):
+        """Return (n_rows,) ndarray of values for `subtotal` column."""
+        addend_sum = np.sum(self._base_values[:, subtotal.addend_idxs], axis=1)
+        subtrahend_sum = np.sum(self._base_values[:, subtotal.subtrahend_idxs], axis=1)
+        return addend_sum - subtrahend_sum
+
+    def _subtotal_row(self, subtotal):
+        """Return (n_cols,) ndarray of values for `subtotal` row."""
+        addend_sum = np.sum(self._base_values[subtotal.addend_idxs, :], axis=0)
+        subtrahend_sum = np.sum(self._base_values[subtotal.subtrahend_idxs, :], axis=0)
+        return addend_sum - subtrahend_sum
 
 
 class TableStdErrSubtotals(_BaseSubtotals):
