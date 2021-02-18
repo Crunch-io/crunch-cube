@@ -367,6 +367,7 @@ class DescribeTableStdErrSubtotals(object):
         _table_margin_prop_,
     ):
         subtotal_.addend_idxs = np.array([0, 1])
+        subtotal_.subtrahend_idxs = np.array([])
         _base_counts_prop_.return_value = np.arange(12).reshape(3, 4)
         _table_margin_prop_.return_value = 67
         subtotals = TableStdErrSubtotals(None, None, None)
@@ -376,20 +377,107 @@ class DescribeTableStdErrSubtotals(object):
             np.array([0.0148136, 0.0416604, 0.0531615]),
         )
 
+    def it_handles_subtrahends_when_computing_subtotal_column(
+        self,
+        request,
+        subtotal_,
+    ):
+        subtotal_.subtrahend_idxs = np.array([1])
+        property_mock(request, TableStdErrSubtotals, "_nrows", return_value=3)
+
+        subtotals = TableStdErrSubtotals(None, None, None)
+
+        np.testing.assert_equal(
+            subtotals._subtotal_column(subtotal_),
+            np.array([np.nan, np.nan, np.nan]),
+        )
+
     def it_can_compute_a_subtotal_row_to_help(
+        self,
+        subtotal_,
+        _base_counts_prop_,
+        _table_margin_prop_,
+    ):
+        subtotal_.addend_idxs = np.array([0, 1])
+        subtotal_.subtrahend_idxs = np.array([])
+        _base_counts_prop_.return_value = np.arange(12).reshape(3, 4)
+        _table_margin_prop_.return_value = 67
+        subtotals = TableStdErrSubtotals(None, None, None)
+
+        np.testing.assert_almost_equal(
+            subtotals._subtotal_row(subtotal_),
+            np.array([0.0289460, 0.0348842, 0.0396149, 0.0435337]),
+        )
+
+    def it_handles_subtrahends_when_computing_subtotal_row(
+        self,
+        request,
+        subtotal_,
+    ):
+        subtotal_.subtrahend_idxs = np.array([1])
+        property_mock(request, TableStdErrSubtotals, "_ncols", return_value=4)
+
+        subtotals = TableStdErrSubtotals(None, None, None)
+
+        np.testing.assert_equal(
+            subtotals._subtotal_row(subtotal_),
+            np.array([np.nan, np.nan, np.nan, np.nan]),
+        )
+
+    def it_can_compute_a_subtotal_intersection_to_help(
         self,
         request,
         _base_counts_prop_,
         _table_margin_prop_,
     ):
-        row_subtotal_ = instance_mock(request, _Subtotal, addend_idxs=np.array([0, 1]))
-        col_subtotal_ = instance_mock(request, _Subtotal, addend_idxs=np.array([1, 2]))
+        row_subtotal_ = instance_mock(
+            request,
+            _Subtotal,
+            addend_idxs=np.array([0, 1]),
+            subtrahend_idxs=np.array([]),
+        )
+        col_subtotal_ = instance_mock(
+            request,
+            _Subtotal,
+            addend_idxs=np.array([1, 2]),
+            subtrahend_idxs=np.array([]),
+        )
         _base_counts_prop_.return_value = np.arange(12).reshape(3, 4)
         _table_margin_prop_.return_value = 67
         subtotals = TableStdErrSubtotals(None, None, None)
 
         np.testing.assert_almost_equal(
             subtotals._intersection(row_subtotal_, col_subtotal_), 0.0496694
+        )
+
+    @pytest.mark.parametrize(
+        ("row_subtrahend", "col_subtrahend"),
+        (
+            ([], [0]),
+            ([2], []),
+            ([2], [0]),
+        ),
+    )
+    def it_handles_subtrahends_when_computing_subtotal_intersection(
+        self, request, row_subtrahend, col_subtrahend
+    ):
+        row_subtotal_ = instance_mock(
+            request,
+            _Subtotal,
+            addend_idxs=np.array([0, 1]),
+            subtrahend_idxs=np.array(row_subtrahend),
+        )
+        col_subtotal_ = instance_mock(
+            request,
+            _Subtotal,
+            addend_idxs=np.array([1, 2]),
+            subtrahend_idxs=np.array(col_subtrahend),
+        )
+
+        subtotals = TableStdErrSubtotals(None, None, None)
+
+        np.testing.assert_equal(
+            subtotals._intersection(row_subtotal_, col_subtotal_), np.nan
         )
 
     def it_provides_access_to_the_table_margin_to_help(self, cube_result_matrix_):

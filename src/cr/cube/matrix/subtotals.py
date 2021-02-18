@@ -226,6 +226,13 @@ class TableStdErrSubtotals(_BaseSubtotals):
 
     def _intersection(self, row_subtotal, column_subtotal):
         """Return value for intersection of `row_subtotal` and `column_subtotal`."""
+        # --- Cannot calculate if there are any subtrahends ---
+        if (
+            len(row_subtotal.subtrahend_idxs) > 0
+            or len(column_subtotal.subtrahend_idxs) > 0
+        ):
+            return np.nan
+
         # --- column of base subtotal counts is 1D, like [44 148 283 72] ---
         # --- the inserted-row for counts measure, like: [159 172 107 272] ---
         row_subtotal_counts = np.sum(
@@ -241,6 +248,10 @@ class TableStdErrSubtotals(_BaseSubtotals):
 
     def _subtotal_column(self, subtotal):
         """Return (n_rows,) ndarray of table-stderr `subtotal` value."""
+        # --- Cannot calculate if there are any subtrahends ---
+        if len(subtotal.subtrahend_idxs) > 0:
+            return np.full(self._nrows, np.nan)
+
         # --- column of base subtotal counts is 1D, like [44 148 283 72] ---
         subtotal_counts = np.sum(
             self._base_counts[:, subtotal.addend_idxs],
@@ -255,6 +266,10 @@ class TableStdErrSubtotals(_BaseSubtotals):
 
     def _subtotal_row(self, subtotal):
         """Return (n_cols,) ndarray of table-stderr `subtotal` value."""
+        # --- Cannot calculate if there are any subtrahends ---
+        if len(subtotal.subtrahend_idxs) > 0:
+            return np.full(self._ncols, np.nan)
+
         # --- row of base subtotal counts is 1D, like [435 392 260 162] ---
         subtotal_counts = np.sum(self._base_counts[subtotal.addend_idxs, :], axis=0)
 
