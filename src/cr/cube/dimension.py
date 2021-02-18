@@ -958,3 +958,16 @@ class _Subtotal(object):
         """str display name for this subtotal, suitable for use as label."""
         name = self._subtotal_dict.get("name")
         return name if name else ""
+
+    @lazyproperty
+    def subtrahend_ids(self):
+        """tuple of int ids of elements of negative part of the subtotal.
+
+        Any element id not present in the dimension or present but
+        representing missing data is excluded.
+        """
+        return tuple(
+            arg
+            for arg in self._subtotal_dict.get("kwargs", {}).get("negative", [])
+            if arg in self._valid_elements.element_ids
+        )

@@ -1242,6 +1242,26 @@ class Describe_Subtotal(object):
     def it_knows_the_subtotal_label(self, subtotal_dict, expected_value):
         assert _Subtotal(subtotal_dict, None, None).label == expected_value
 
+    @pytest.mark.parametrize(
+        "subtotal_dict, element_ids, expected_value",
+        (
+            ({}, {}, ()),
+            ({"kwargs": {"negative": [1]}}, {1}, (1,)),
+            ({"kwargs": {"negative": [1, 2, 3]}}, {1, 2, 3}, (1, 2, 3)),
+            ({"kwargs": {"negative": [1, 2, 3]}}, {1, 3}, (1, 3)),
+            ({"kwargs": {"negative": [3, 2]}}, {1, 2, 3}, (3, 2)),
+            ({"kwargs": {"negative": []}}, {1, 2, 3}, ()),
+            ({"kwargs": {"negative": [1, 2, 3]}}, {}, ()),
+        ),
+    )
+    def it_provides_access_to_the_subtrahend_element_ids(
+        self, subtotal_dict, element_ids, expected_value, valid_elements_
+    ):
+        valid_elements_.element_ids = element_ids
+        subtotal = _Subtotal(subtotal_dict, valid_elements_, None)
+
+        assert subtotal.subtrahend_ids == expected_value
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
