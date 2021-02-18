@@ -7,7 +7,7 @@ from __future__ import division
 import numpy as np
 
 from cr.cube.matrix.cubemeasure import CubeMeasures
-from cr.cube.matrix.subtotals import SumSubtotals
+from cr.cube.matrix.subtotals import SumDiffSubtotals, SumSubtotals
 from cr.cube.util import lazyproperty
 
 
@@ -709,7 +709,7 @@ class _UnweightedCounts(_BaseSecondOrderMeasure):
         These are the base-values, the column-subtotals, the row-subtotals, and the
         subtotal intersection-cell values.
         """
-        return SumSubtotals.blocks(
+        return SumDiffSubtotals.blocks(
             self._unweighted_cube_counts.unweighted_counts, self._dimensions
         )
 
@@ -720,6 +720,6 @@ class _WeightedCounts(_BaseSecondOrderMeasure):
     @lazyproperty
     def blocks(self):
         """2D array of the four 2D "blocks" making up this measure."""
-        return SumSubtotals.blocks(
+        return SumDiffSubtotals.blocks(
             self._weighted_cube_counts.weighted_counts, self._dimensions
         )

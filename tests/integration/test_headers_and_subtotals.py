@@ -3833,7 +3833,6 @@ class DescribeIntegrated_SubtotalDifferences(object):
             table_proportions[1] - (table_proportions[4] + table_proportions[5]),
         )
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     def test_cat_subdiff_x_cat_subdiff_counts(self, row_col_subdiff_insertions):
         slice_ = Cube(
             CR.CAT_SUBDIFF_X_CAT_SUBDIFF, transforms=row_col_subdiff_insertions
@@ -3914,7 +3913,6 @@ class DescribeIntegrated_SubtotalDifferences(object):
             slice_.column_proportions, slice_.counts / slice_.column_weighted_bases
         )
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     def test_cat_subdiff_x_cat_subdiff_row_prop(self, row_col_subdiff_insertions):
         slice_ = Cube(
             CR.CAT_SUBDIFF_X_CAT_SUBDIFF, transforms=row_col_subdiff_insertions
@@ -3943,7 +3941,6 @@ class DescribeIntegrated_SubtotalDifferences(object):
         )
         np.testing.assert_equal(slice_.zscores[:, 0], np.full(6, np.nan))
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     def test_cat_subtot_subdiff_x_cat_subtot_subdiff_counts(
         self, row_col_subtot_subdiff_insertions
     ):
@@ -4041,7 +4038,6 @@ class DescribeIntegrated_SubtotalDifferences(object):
             slice_.column_proportions, slice_.counts / slice_.column_weighted_bases
         )
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     def test_cat_subtot_subdiff_x_cat_subtot_subdiff_row_prop(
         self, row_col_subtot_subdiff_insertions
     ):
@@ -4076,7 +4072,6 @@ class DescribeIntegrated_SubtotalDifferences(object):
         )
         np.testing.assert_equal(slice_.zscores[:, 0], np.full(7, np.nan))
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     def test_ca_subdiff_counts(self, col_subdiff_insertions):
         slice_ = Cube(CR.CA_SUBDIFF, transforms=col_subdiff_insertions).partitions[0]
         counts = slice_.counts
@@ -4119,7 +4114,6 @@ class DescribeIntegrated_SubtotalDifferences(object):
             slice_.table_proportions, slice_.counts / slice_.table_weighted_bases
         )
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     def test_cat_subdiff_x_mr_counts(self, row_subdiff_insertions):
         slice_ = Cube(
             CR.CAT_SUBDIFF_X_MR, transforms=row_subdiff_insertions

@@ -1064,7 +1064,7 @@ class Describe_UnweightedCounts(object):
             "_unweighted_cube_counts",
             return_value=unweighted_cube_counts_,
         )
-        SumSubtotals_ = class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
+        SumSubtotals_ = class_mock(request, "cr.cube.matrix.measure.SumDiffSubtotals")
         SumSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
         unweighted_counts = _UnweightedCounts(dimensions_, None, None)
 
@@ -1097,7 +1097,7 @@ class Describe_WeightedCounts(object):
             "_weighted_cube_counts",
             return_value=weighted_cube_counts_,
         )
-        SumSubtotals_ = class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
+        SumSubtotals_ = class_mock(request, "cr.cube.matrix.measure.SumDiffSubtotals")
         SumSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
         weighted_counts = _WeightedCounts(dimensions_, None, None)
 
