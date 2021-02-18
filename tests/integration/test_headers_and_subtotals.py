@@ -3818,14 +3818,12 @@ class TestHeadersAndSubtotals(object):
 class DescribeIntegrated_SubtotalDifferences(object):
     """TDD driver(s) for Subtotal Difference insertions."""
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     def test_cat_subdiff_count(self, row_subdiff_insertions):
         strand = Cube(CR.CAT_SUBDIFF, transforms=row_subdiff_insertions).partitions[0]
         counts = strand.counts
         # --- Subdiff in position 0 equals id=1 - (id=4 + id=5) ---
         np.testing.assert_almost_equal(counts[0], counts[1] - (counts[4] + counts[5]))
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     def test_cat_subdiff_prop(self, row_subdiff_insertions):
         strand = Cube(CR.CAT_SUBDIFF, transforms=row_subdiff_insertions).partitions[0]
         table_proportions = strand.table_proportions

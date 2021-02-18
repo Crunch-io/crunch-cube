@@ -7,7 +7,7 @@ from __future__ import division
 import numpy as np
 
 from cr.cube.stripe.cubemeasure import CubeMeasures
-from cr.cube.stripe.insertion import NanSubtotals, SumSubtotals
+from cr.cube.stripe.insertion import NanSubtotals, SumDiffSubtotals, SumSubtotals
 from cr.cube.util import lazyproperty
 
 
@@ -458,7 +458,7 @@ class _UnweightedCounts(_BaseSecondOrderMeasure):
         # --- counts don't sum on an MR dimension, but an MR stripe can have no
         # --- subtotals. This just returns an empty array in that case and we don't need
         # --- to special-case MR.
-        return SumSubtotals.subtotal_values(self.base_values, self._rows_dimension)
+        return SumDiffSubtotals.subtotal_values(self.base_values, self._rows_dimension)
 
 
 class _WeightedBases(_BaseSecondOrderMeasure):
@@ -525,4 +525,4 @@ class _WeightedCounts(_BaseSecondOrderMeasure):
         # --- counts don't sum on an MR dimension, but an MR stripe can have no
         # --- subtotals. This just returns an empty array in that case and we don't need
         # --- to special-case MR.
-        return SumSubtotals.subtotal_values(self.base_values, self._rows_dimension)
+        return SumDiffSubtotals.subtotal_values(self.base_values, self._rows_dimension)
