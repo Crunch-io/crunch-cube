@@ -971,3 +971,20 @@ class _Subtotal(object):
             for arg in self._subtotal_dict.get("kwargs", {}).get("negative", [])
             if arg in self._valid_elements.element_ids
         )
+
+    @lazyproperty
+    def subtrahend_idxs(self):
+        """ndarray of int base-element offsets contributing to the negative part of subtotal.
+
+        Suitable for directly indexing a numpy array object (such as base values or
+        margin) to extract the addend values for this subtotal.
+        """
+        subtrahend_ids = self.subtrahend_ids
+        return np.fromiter(
+            (
+                idx
+                for idx, vector in enumerate(self._valid_elements)
+                if vector.element_id in subtrahend_ids
+            ),
+            dtype=int,
+        )
