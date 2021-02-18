@@ -1,0 +1,426 @@
+{
+    "element": "shoji:view",
+    "self": "https://app.crunch.io/api/datasets/6c245c/cube/?query=%7B%22dimensions%22%3A%5B%7B%22variable%22%3A%22https%3A%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2F6c245c%2Fvariables%2F000001%2F%22%7D%2C%7B%22function%22%3A%22dimension%22%2C%22args%22%3A%5B%7B%22function%22%3A%22as_selected%22%2C%22args%22%3A%5B%7B%22variable%22%3A%22https%3A%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2F6c245c%2Fvariables%2Fa4260e%2F%22%7D%5D%7D%2C%7B%22value%22%3A%22subvariables%22%7D%5D%7D%2C%7B%22function%22%3A%22as_selected%22%2C%22args%22%3A%5B%7B%22variable%22%3A%22https%3A%2F%2Fapp.crunch.io%2Fapi%2Fdatasets%2F6c245c%2Fvariables%2Fa4260e%2F%22%7D%5D%7D%5D%2C%22measures%22%3A%7B%22count%22%3A%7B%22function%22%3A%22cube_count%22%2C%22args%22%3A%5B%5D%7D%7D%2C%22weight%22%3Anull%7D&filter=%7B%7D",
+    "value": {
+        "query": {
+            "measures": {
+                "count": {
+                    "function": "cube_count",
+                    "args": [
+
+                    ]
+                }
+            },
+            "dimensions": [
+                {
+                    "variable": "https://app.crunch.io/api/datasets/6c245c/variables/000001/"
+                },
+                {
+                    "function": "dimension",
+                    "args": [
+                        {
+                            "function": "as_selected",
+                            "args": [
+                                {
+                                    "variable": "https://app.crunch.io/api/datasets/6c245c/variables/a4260e/"
+                                }
+                            ]
+                        },
+                        {
+                            "value": "subvariables"
+                        }
+                    ]
+                },
+                {
+                    "function": "as_selected",
+                    "args": [
+                        {
+                            "variable": "https://app.crunch.io/api/datasets/6c245c/variables/a4260e/"
+                        }
+                    ]
+                }
+            ],
+            "weight": null
+        },
+        "query_environment": {
+            "filter": [
+
+            ]
+        },
+        "result": {
+            "dimensions": [
+                {
+                    "derived": false,
+                    "references": {
+                        "description": "",
+                        "format": {
+                            "summary": {
+                                "digits": 0
+                            }
+                        },
+                        "notes": "",
+                        "name": "Summer Favorability",
+                        "alias": "summer",
+                        "view": {
+                            "show_counts": false,
+                            "show_numeric_values": false,
+                            "include_missing": false,
+                            "column_width": null
+                        }
+                    },
+                    "type": {
+                        "ordinal": false,
+                        "class": "categorical",
+                        "categories": [
+                            {
+                                "numeric_value": 1,
+                                "id": 1,
+                                "name": "Love",
+                                "missing": false
+                            },
+                            {
+                                "numeric_value": 2,
+                                "id": 2,
+                                "name": "Like",
+                                "missing": false
+                            },
+                            {
+                                "numeric_value": 3,
+                                "id": 3,
+                                "name": "Neutral",
+                                "missing": false
+                            },
+                            {
+                                "numeric_value": 4,
+                                "id": 4,
+                                "name": "Dislike",
+                                "missing": false
+                            },
+                            {
+                                "numeric_value": 5,
+                                "id": 5,
+                                "name": "Hate",
+                                "missing": false
+                            },
+                            {
+                                "numeric_value": null,
+                                "id": -1,
+                                "name": "No Data",
+                                "missing": true
+                            }
+                        ]
+                    }
+                },
+                {
+                    "references": {
+                        "subreferences": [
+                            {
+                                "description": "",
+                                "format": {
+                                    "summary": {
+                                        "digits": 0
+                                    }
+                                },
+                                "notes": "",
+                                "name": "swim",
+                                "alias": "swim__1",
+                                "view": {
+                                    "show_counts": false,
+                                    "column_width": null,
+                                    "include_missing": false,
+                                    "show_numeric_values": false
+                                }
+                            },
+                            {
+                                "description": "",
+                                "format": {
+                                    "summary": {
+                                        "digits": 0
+                                    }
+                                },
+                                "notes": "",
+                                "name": "ski",
+                                "alias": "ski__1",
+                                "view": {
+                                    "show_counts": false,
+                                    "column_width": null,
+                                    "include_missing": false,
+                                    "show_numeric_values": false
+                                }
+                            }
+                        ],
+                        "uniform_basis": false,
+                        "name": "Enjoy sport?",
+                        "alias": "sport_mr"
+                    },
+                    "derived": true,
+                    "type": {
+                        "subtype": {
+                            "class": "variable"
+                        },
+                        "elements": [
+                            {
+                                "id": 1,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "description": "",
+                                        "format": {
+                                            "summary": {
+                                                "digits": 0
+                                            }
+                                        },
+                                        "notes": "",
+                                        "name": "swim",
+                                        "alias": "swim__1",
+                                        "view": {
+                                            "show_counts": false,
+                                            "column_width": null,
+                                            "include_missing": false,
+                                            "show_numeric_values": false
+                                        }
+                                    },
+                                    "id": "1"
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 2,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "description": "",
+                                        "format": {
+                                            "summary": {
+                                                "digits": 0
+                                            }
+                                        },
+                                        "notes": "",
+                                        "name": "ski",
+                                        "alias": "ski__1",
+                                        "view": {
+                                            "show_counts": false,
+                                            "column_width": null,
+                                            "include_missing": false,
+                                            "show_numeric_values": false
+                                        }
+                                    },
+                                    "id": "2"
+                                },
+                                "missing": false
+                            }
+                        ],
+                        "class": "enum"
+                    }
+                },
+                {
+                    "derived": true,
+                    "references": {
+                        "subreferences": [
+                            {
+                                "description": "",
+                                "format": {
+                                    "summary": {
+                                        "digits": 0
+                                    }
+                                },
+                                "notes": "",
+                                "name": "swim",
+                                "alias": "swim__1",
+                                "view": {
+                                    "show_counts": false,
+                                    "show_numeric_values": false,
+                                    "include_missing": false,
+                                    "column_width": null
+                                }
+                            },
+                            {
+                                "description": "",
+                                "format": {
+                                    "summary": {
+                                        "digits": 0
+                                    }
+                                },
+                                "notes": "",
+                                "name": "ski",
+                                "alias": "ski__1",
+                                "view": {
+                                    "show_counts": false,
+                                    "show_numeric_values": false,
+                                    "include_missing": false,
+                                    "column_width": null
+                                }
+                            }
+                        ],
+                        "uniform_basis": false,
+                        "name": "Enjoy sport?",
+                        "alias": "sport_mr"
+                    },
+                    "type": {
+                        "ordinal": false,
+                        "subvariables": [
+                            "1",
+                            "2"
+                        ],
+                        "class": "categorical",
+                        "categories": [
+                            {
+                                "numeric_value": 1,
+                                "selected": true,
+                                "id": 1,
+                                "missing": false,
+                                "name": "Selected"
+                            },
+                            {
+                                "numeric_value": 0,
+                                "missing": false,
+                                "id": 0,
+                                "name": "Other"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": true,
+                                "id": -1,
+                                "name": "No Data"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "missing": 46,
+            "measures": {
+                "count": {
+                    "data": [
+                        134,
+                        64,
+                        13,
+                        58,
+                        134,
+                        19,
+                        105,
+                        87,
+                        20,
+                        62,
+                        140,
+                        10,
+                        50,
+                        73,
+                        8,
+                        59,
+                        63,
+                        9,
+                        8,
+                        67,
+                        4,
+                        39,
+                        34,
+                        6,
+                        3,
+                        45,
+                        3,
+                        23,
+                        28,
+                        0,
+                        23,
+                        21,
+                        1,
+                        19,
+                        22,
+                        4
+                    ],
+                    "n_missing": 46,
+                    "metadata": {
+                        "references": {
+
+                        },
+                        "derived": true,
+                        "type": {
+                            "integer": true,
+                            "missing_rules": {
+
+                            },
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "class": "numeric"
+                        }
+                    }
+                }
+            },
+            "n": 729,
+            "filter_stats": {
+                "filtered_complete": {
+                    "unweighted": {
+                        "selected": 729,
+                        "other": 0,
+                        "missing": 0
+                    },
+                    "weighted": {
+                        "selected": 729,
+                        "other": 0,
+                        "missing": 0
+                    }
+                },
+                "filtered": {
+                    "unweighted": {
+                        "selected": 729,
+                        "other": 0,
+                        "missing": 0
+                    },
+                    "weighted": {
+                        "selected": 729,
+                        "other": 0,
+                        "missing": 0
+                    }
+                }
+            },
+            "unfiltered": {
+                "unweighted_n": 729,
+                "weighted_n": 729
+            },
+            "filtered": {
+                "unweighted_n": 729,
+                "weighted_n": 729
+            },
+            "counts": [
+                134,
+                64,
+                13,
+                58,
+                134,
+                19,
+                105,
+                87,
+                20,
+                62,
+                140,
+                10,
+                50,
+                73,
+                8,
+                59,
+                63,
+                9,
+                8,
+                67,
+                4,
+                39,
+                34,
+                6,
+                3,
+                45,
+                3,
+                23,
+                28,
+                0,
+                23,
+                21,
+                1,
+                19,
+                22,
+                4
+            ],
+            "element": "crunch:cube"
+        }
+    }
+}

@@ -2,7 +2,10 @@
 
 """Integrations tests for headings and subtotals behaviors."""
 
+from __future__ import division
+
 import numpy as np
+import pytest
 
 from cr.cube.cube import Cube
 
@@ -3810,3 +3813,474 @@ class TestHeadersAndSubtotals(object):
         np.testing.assert_array_equal(slice_.zscores, slice_.residual_test_stats[1])
 
         assert slice_.residual_test_stats.shape == (2, 6, 7)
+
+
+class DescribeIntegrated_SubtotalDifferences(object):
+    """TDD driver(s) for Subtotal Difference insertions."""
+
+    @pytest.mark.xfail(reason="WIP", strict=True)
+    def test_cat_subdiff_count(self, row_subdiff_insertions):
+        strand = Cube(CR.CAT_SUBDIFF, transforms=row_subdiff_insertions).partitions[0]
+        counts = strand.counts
+        # --- Subdiff in position 0 equals id=1 - (id=4 + id=5) ---
+        np.testing.assert_almost_equal(counts[0], counts[1] - (counts[4] + counts[5]))
+
+    @pytest.mark.xfail(reason="WIP", strict=True)
+    def test_cat_subdiff_prop(self, row_subdiff_insertions):
+        strand = Cube(CR.CAT_SUBDIFF, transforms=row_subdiff_insertions).partitions[0]
+        table_proportions = strand.table_proportions
+        # --- Subdiff in position 0 equals id=1 - (id=4 + id=5) ---
+        np.testing.assert_almost_equal(
+            table_proportions[0],
+            table_proportions[1] - (table_proportions[4] + table_proportions[5]),
+        )
+
+    @pytest.mark.xfail(reason="WIP", strict=True)
+    def test_cat_subdiff_x_cat_subdiff_counts(self, row_col_subdiff_insertions):
+        slice_ = Cube(
+            CR.CAT_SUBDIFF_X_CAT_SUBDIFF, transforms=row_col_subdiff_insertions
+        ).partitions[0]
+        # --- Subdiff in row 0 equals row=1 - (row=4 + row=5) ---
+        np.testing.assert_array_equal(
+            slice_.counts[0, :],
+            slice_.counts[1, :] - (slice_.counts[4, :] + slice_.counts[5, :]),
+        )
+        # --- Subdiff in col 0 equals (col=1 + col=2) - (col=5) ---
+        np.testing.assert_array_equal(
+            slice_.counts[:, 0],
+            (slice_.counts[:, 1] + slice_.counts[:, 2]) - (slice_.counts[:, 5]),
+        )
+
+    @pytest.mark.xfail(reason="WIP", strict=True)
+    def test_cat_subdiff_x_cat_subdiff_col_margin(self, row_col_subdiff_insertions):
+        slice_ = Cube(
+            CR.CAT_SUBDIFF_X_CAT_SUBDIFF, transforms=row_col_subdiff_insertions
+        ).partitions[0]
+        columns_margin = slice_.columns_margin
+        # --- Subdiff in col 0 equals (col=1 + col=2) - (col=5) ---
+        np.testing.assert_almost_equal(
+            columns_margin[0],
+            (columns_margin[1] + columns_margin[2]) - (columns_margin[5]),
+        )
+
+    @pytest.mark.xfail(reason="WIP", strict=True)
+    def test_cat_subdiff_x_cat_subdiff_row_margin(self, row_col_subdiff_insertions):
+        slice_ = Cube(
+            CR.CAT_SUBDIFF_X_CAT_SUBDIFF, transforms=row_col_subdiff_insertions
+        ).partitions[0]
+        rows_margin = slice_.rows_margin
+        # --- Subdiff in row 0 equals row=1 - (col=4 + col=5) ---
+        np.testing.assert_almost_equal(
+            rows_margin[0], rows_margin[1] - (rows_margin[4] + rows_margin[5])
+        )
+
+    @pytest.mark.xfail(reason="WIP", strict=True)
+    def test_cat_subdiff_x_cat_subdiff_col_bases(self, row_col_subdiff_insertions):
+        slice_ = Cube(
+            CR.CAT_SUBDIFF_X_CAT_SUBDIFF, transforms=row_col_subdiff_insertions
+        ).partitions[0]
+        column_bases = slice_.column_weighted_bases
+        # --- Bases are ALWAYS additive (even with differences) ---
+        # --- Subdiff in col 0 equals (col=1 + col=2) + (col=5) ---
+        np.testing.assert_almost_equal(
+            column_bases[:, 0],
+            column_bases[:, 1] + column_bases[:, 2] + column_bases[:, 5],
+        )
+
+    @pytest.mark.xfail(reason="WIP", strict=True)
+    def test_cat_subdiff_x_cat_subdiff_row_bases(self, row_col_subdiff_insertions):
+        slice_ = Cube(
+            CR.CAT_SUBDIFF_X_CAT_SUBDIFF, transforms=row_col_subdiff_insertions
+        ).partitions[0]
+        row_bases = slice_.row_weighted_bases
+        # --- Bases are ALWAYS additive (even with differences) ---
+        # --- Subdiff in row 0 equals row=1 + (row=4 + row=5) ---
+        np.testing.assert_almost_equal(
+            row_bases[0, :],
+            row_bases[1, :] + row_bases[4, :] + row_bases[5, :],
+        )
+
+    def test_cat_subdiff_x_cat_subdiff_table_prop(self, row_col_subdiff_insertions):
+        slice_ = Cube(
+            CR.CAT_SUBDIFF_X_CAT_SUBDIFF, transforms=row_col_subdiff_insertions
+        ).partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_.table_proportions, slice_.counts / slice_.table_base
+        )
+
+    def test_cat_subdiff_x_cat_subdiff_col_prop(self, row_col_subdiff_insertions):
+        slice_ = Cube(
+            CR.CAT_SUBDIFF_X_CAT_SUBDIFF, transforms=row_col_subdiff_insertions
+        ).partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_.column_proportions, slice_.counts / slice_.column_weighted_bases
+        )
+
+    def test_cat_subdiff_x_cat_subdiff_row_prop(self, row_col_subdiff_insertions):
+        slice_ = Cube(
+            CR.CAT_SUBDIFF_X_CAT_SUBDIFF, transforms=row_col_subdiff_insertions
+        ).partitions[0]
+        np.testing.assert_almost_equal(
+            slice_.row_proportions, slice_.counts / slice_.row_weighted_bases
+        )
+
+    @pytest.mark.xfail(reason="WIP", strict=True)
+    def test_cat_subdiff_x_cat_subdiff_pval(self, row_col_subdiff_insertions):
+        slice_ = Cube(
+            CR.CAT_SUBDIFF_X_CAT_SUBDIFF, transforms=row_col_subdiff_insertions
+        ).partitions[0]
+        np.testing.assert_equal(
+            slice_.pvals[0, :],
+            np.full(6, np.nan),
+        )
+        np.testing.assert_equal(slice_.pvals[:, 0], np.full(6, np.nan))
+
+    @pytest.mark.xfail(reason="WIP", strict=True)
+    def test_cat_subdiff_x_cat_subdiff_zscore(self, row_col_subdiff_insertions):
+        slice_ = Cube(
+            CR.CAT_SUBDIFF_X_CAT_SUBDIFF, transforms=row_col_subdiff_insertions
+        ).partitions[0]
+        np.testing.assert_equal(
+            slice_.zscores[0, :],
+            np.full(6, np.nan),
+        )
+        np.testing.assert_equal(slice_.zscores[:, 0], np.full(6, np.nan))
+
+    @pytest.mark.xfail(reason="WIP", strict=True)
+    def test_cat_subtot_subdiff_x_cat_subtot_subdiff_counts(
+        self, row_col_subtot_subdiff_insertions
+    ):
+        slice_ = Cube(
+            CR.CAT_SUBDIFF_X_CAT_SUBDIFF, transforms=row_col_subtot_subdiff_insertions
+        ).partitions[0]
+        # --- Subdiff in row 0 equals row=1 - (row=4 + row=5) ---
+        np.testing.assert_array_equal(
+            slice_.counts[0, :],
+            slice_.counts[1, :] - (slice_.counts[4, :] + slice_.counts[5, :]),
+        )
+        # --- Subdiff in col 0 equals (col=1 + col=2) - (col=6) ---
+        # --- (add insertion is at pos 3) ---
+        np.testing.assert_array_equal(
+            slice_.counts[:, 0],
+            (slice_.counts[:, 1] + slice_.counts[:, 2]) - (slice_.counts[:, 6]),
+        )
+
+    @pytest.mark.xfail(reason="WIP", strict=True)
+    def test_cat_subtot_subdiff_x_cat_subtot_subdiff_col_margin(
+        self, row_col_subtot_subdiff_insertions
+    ):
+        slice_ = Cube(
+            CR.CAT_SUBDIFF_X_CAT_SUBDIFF, transforms=row_col_subtot_subdiff_insertions
+        ).partitions[0]
+        columns_margin = slice_.columns_margin
+        # --- Subdiff in col 0 equals (col=1 + col=2) - (col=6) ---
+        # --- (add insertion is at pos 3) ---
+        np.testing.assert_almost_equal(
+            columns_margin[0],
+            (columns_margin[1] + columns_margin[2]) - (columns_margin[6]),
+        )
+
+    @pytest.mark.xfail(reason="WIP", strict=True)
+    def test_cat_subtot_subdiff_x_cat_subtot_subdiff_row_margin(
+        self, row_col_subtot_subdiff_insertions
+    ):
+        slice_ = Cube(
+            CR.CAT_SUBDIFF_X_CAT_SUBDIFF, transforms=row_col_subtot_subdiff_insertions
+        ).partitions[0]
+        rows_margin = slice_.rows_margin
+        # --- Subdiff in row 0 equals row=1 - (col=4 + col=5) ---
+        np.testing.assert_almost_equal(
+            rows_margin[0], rows_margin[1] - (rows_margin[4] + rows_margin[5])
+        )
+
+    @pytest.mark.xfail(reason="WIP", strict=True)
+    def test_cat_subtot_subdiff_x_cat_subtot_subdiff_col_bases(
+        self, row_col_subtot_subdiff_insertions
+    ):
+        slice_ = Cube(
+            CR.CAT_SUBDIFF_X_CAT_SUBDIFF, transforms=row_col_subtot_subdiff_insertions
+        ).partitions[0]
+        column_bases = slice_.column_weighted_bases
+        # --- Bases are ALWAYS additive (even with differences) ---
+        # --- Subdiff in col 0 equals (col=1 + col=2) + (col=6) ---
+        # --- (add insertion is at pos 3) ---
+        np.testing.assert_almost_equal(
+            column_bases[:, 0],
+            column_bases[:, 1] + column_bases[:, 2] + column_bases[:, 6],
+        )
+
+    @pytest.mark.xfail(reason="WIP", strict=True)
+    def test_cat_subtot_subdiff_x_cat_subtot_subdiff_row_bases(
+        self, row_col_subtot_subdiff_insertions
+    ):
+        slice_ = Cube(
+            CR.CAT_SUBDIFF_X_CAT_SUBDIFF, transforms=row_col_subtot_subdiff_insertions
+        ).partitions[0]
+        row_bases = slice_.row_weighted_bases
+        # --- Bases are ALWAYS additive (even with differences) ---
+        # --- Subdiff in row 0 equals row=1 + (row=4 + row=5) ---
+        np.testing.assert_almost_equal(
+            row_bases[0, :],
+            row_bases[1, :] + row_bases[4, :] + row_bases[5, :],
+        )
+
+    def test_cat_subtot_subdiff_x_cat_subtot_subdiff_table_prop(
+        self, row_col_subtot_subdiff_insertions
+    ):
+        slice_ = Cube(
+            CR.CAT_SUBDIFF_X_CAT_SUBDIFF, transforms=row_col_subtot_subdiff_insertions
+        ).partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_.table_proportions, slice_.counts / slice_.table_base
+        )
+
+    def test_cat_subtot_subdiff_x_cat_subtot_subdiff_col_prop(
+        self, row_col_subtot_subdiff_insertions
+    ):
+        slice_ = Cube(
+            CR.CAT_SUBDIFF_X_CAT_SUBDIFF, transforms=row_col_subtot_subdiff_insertions
+        ).partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_.column_proportions, slice_.counts / slice_.column_weighted_bases
+        )
+
+    def test_cat_subtot_subdiff_x_cat_subtot_subdiff_row_prop(
+        self, row_col_subtot_subdiff_insertions
+    ):
+        slice_ = Cube(
+            CR.CAT_SUBDIFF_X_CAT_SUBDIFF, transforms=row_col_subtot_subdiff_insertions
+        ).partitions[0]
+        np.testing.assert_almost_equal(
+            slice_.row_proportions, slice_.counts / slice_.row_weighted_bases
+        )
+
+    @pytest.mark.xfail(reason="WIP", strict=True)
+    def test_cat_subtot_subdiff_x_cat_subtot_subdiff_pval(
+        self, row_col_subtot_subdiff_insertions
+    ):
+        slice_ = Cube(
+            CR.CAT_SUBDIFF_X_CAT_SUBDIFF, transforms=row_col_subtot_subdiff_insertions
+        ).partitions[0]
+        np.testing.assert_equal(
+            slice_.pvals[0, :],
+            np.full(7, np.nan),
+        )
+        np.testing.assert_equal(slice_.pvals[:, 0], np.full(7, np.nan))
+
+    @pytest.mark.xfail(reason="WIP", strict=True)
+    def test_cat_subtot_subdiff_x_cat_subtot_subdiff_zscore(
+        self, row_col_subtot_subdiff_insertions
+    ):
+        slice_ = Cube(
+            CR.CAT_SUBDIFF_X_CAT_SUBDIFF, transforms=row_col_subtot_subdiff_insertions
+        ).partitions[0]
+        np.testing.assert_equal(
+            slice_.zscores[0, :],
+            np.full(7, np.nan),
+        )
+        np.testing.assert_equal(slice_.zscores[:, 0], np.full(7, np.nan))
+
+    @pytest.mark.xfail(reason="WIP", strict=True)
+    def test_ca_subdiff_counts(self, col_subdiff_insertions):
+        slice_ = Cube(CR.CA_SUBDIFF, transforms=col_subdiff_insertions).partitions[0]
+        counts = slice_.counts
+        # --- Subdiff in col 0 equals col=1 - (col=4 + col=5) ---
+        np.testing.assert_array_equal(
+            counts[:, 0], counts[:, 1] - (counts[:, 4] + counts[:, 5])
+        )
+
+    @pytest.mark.xfail(reason="WIP", strict=True)
+    def test_ca_subdiff_columns_margin(self, col_subdiff_insertions):
+        slice_ = Cube(CR.CA_SUBDIFF, transforms=col_subdiff_insertions).partitions[0]
+        columns_margin = slice_.columns_margin
+        # --- Subdiff in col 0 equals col=1 - (col=4 + col=5) ---
+        np.testing.assert_array_equal(
+            columns_margin[0],
+            columns_margin[1] - (columns_margin[4] + columns_margin[5]),
+        )
+
+    @pytest.mark.xfail(reason="WIP", strict=True)
+    def test_ca_subdiff_columns_bases(self, col_subdiff_insertions):
+        slice_ = Cube(CR.CA_SUBDIFF, transforms=col_subdiff_insertions).partitions[0]
+        columns_bases = slice_.column_weighted_bases
+        # --- bases are ALWAYS additive (even subtrahends)
+        # --- Subdiff in col 0 equals col=1 + (col=4 + col=5) ---
+        np.testing.assert_array_equal(
+            columns_bases[:, 0],
+            columns_bases[:, 1] + (columns_bases[:, 4] + columns_bases[:, 5]),
+        )
+
+    def test_ca_subdiff_props(self, col_subdiff_insertions):
+        slice_ = Cube(CR.CA_SUBDIFF, transforms=col_subdiff_insertions).partitions[0]
+        np.testing.assert_almost_equal(
+            slice_.column_proportions, slice_.counts / slice_.column_weighted_bases
+        )
+
+        np.testing.assert_almost_equal(
+            slice_.row_proportions, slice_.counts / slice_.row_weighted_bases
+        )
+
+        np.testing.assert_almost_equal(
+            slice_.table_proportions, slice_.counts / slice_.table_weighted_bases
+        )
+
+    @pytest.mark.xfail(reason="WIP", strict=True)
+    def test_cat_subdiff_x_mr_counts(self, row_subdiff_insertions):
+        slice_ = Cube(
+            CR.CAT_SUBDIFF_X_MR, transforms=row_subdiff_insertions
+        ).partitions[0]
+        counts = slice_.counts
+        # --- Subdiff in row 0 equals row=1 - (row=4 + row=5) ---
+        np.testing.assert_array_equal(
+            counts[0, :],
+            counts[1, :] - (counts[4, :] + counts[5, :]),
+        )
+
+    @pytest.mark.xfail(reason="WIP", strict=True)    
+    def test_cat_subdiff_x_mr_rows_margin(self, row_subdiff_insertions):
+        slice_ = Cube(
+            CR.CAT_SUBDIFF_X_MR, transforms=row_subdiff_insertions
+        ).partitions[0]
+        rows_margin = slice_.rows_margin
+        # --- Subdiff in row 0 equals row=1 - (row=4 + row=5) ---
+        np.testing.assert_array_equal(
+            rows_margin[0, :],
+            rows_margin[1, :] - (rows_margin[4, :] + rows_margin[5, :]),
+        )
+
+    @pytest.mark.xfail(reason="WIP", strict=True)
+    def test_cat_subdiff_x_mr_row_bases(self, row_subdiff_insertions):
+        slice_ = Cube(
+            CR.CAT_SUBDIFF_X_MR, transforms=row_subdiff_insertions
+        ).partitions[0]
+        row_bases = slice_.row_weighted_bases
+        # --- bases are ALWAYS additive (even subtrahends)
+        # --- Subdiff in row 0 equals row=1 + (row=4 + row=5) ---
+        np.testing.assert_array_equal(
+            row_bases[0, :],
+            row_bases[1, :] + (row_bases[4, :] + row_bases[5, :]),
+        )
+
+    def test_cat_subdiff_x_mr_proportions(self, row_subdiff_insertions):
+        slice_ = Cube(
+            CR.CAT_SUBDIFF_X_MR, transforms=row_subdiff_insertions
+        ).partitions[0]
+        np.testing.assert_almost_equal(
+            slice_.column_proportions, slice_.counts / slice_.column_weighted_bases
+        )
+
+        np.testing.assert_almost_equal(
+            slice_.row_proportions, slice_.counts / slice_.row_weighted_bases
+        )
+
+        np.testing.assert_almost_equal(
+            slice_.table_proportions, slice_.counts / slice_.table_weighted_bases
+        )
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def col_subdiff_insertions(self):
+        transform = {
+            "columns_dimension": {
+                "insertions": [
+                    {
+                        "function": "subtotal",
+                        "args": [1],
+                        "kwargs": {"negative": [4, 5]},
+                        "anchor": "top",
+                        "name": "S NPS",
+                    }
+                ]
+            }
+        }
+        return transform
+
+    @pytest.fixture
+    def row_subdiff_insertions(self):
+        transform = {
+            "rows_dimension": {
+                "insertions": [
+                    {
+                        "function": "subtotal",
+                        "args": [1],
+                        "kwargs": {"negative": [4, 5]},
+                        "anchor": "top",
+                        "name": "S NPS",
+                    }
+                ]
+            }
+        }
+        return transform
+
+    @pytest.fixture
+    def row_col_subdiff_insertions(self):
+        transform = {
+            "rows_dimension": {
+                "insertions": [
+                    {
+                        "function": "subtotal",
+                        "args": [1],
+                        "kwargs": {"negative": [4, 5]},
+                        "anchor": "top",
+                        "name": "S NPS",
+                    }
+                ]
+            },
+            "columns_dimension": {
+                "insertions": [
+                    {
+                        "function": "subtotal",
+                        "args": [1, 2],
+                        "kwargs": {"negative": [5]},
+                        "anchor": "top",
+                        "name": "N NPS",
+                    }
+                ]
+            },
+        }
+        return transform
+
+    @pytest.fixture
+    def row_col_subtot_subdiff_insertions(self):
+        transform = {
+            "rows_dimension": {
+                "insertions": [
+                    {
+                        "function": "subtotal",
+                        "args": [1],
+                        "kwargs": {"negative": [4, 5]},
+                        "anchor": "top",
+                        "name": "S NPS",
+                    },
+                    {
+                        "function": "subtotal",
+                        "args": [5, 4],
+                        "anchor": "bottom",
+                        "name": "Hate/Dislike",
+                    },
+                ]
+            },
+            "columns_dimension": {
+                "insertions": [
+                    {
+                        "function": "subtotal",
+                        "args": [1, 2],
+                        "kwargs": {"negative": [5]},
+                        "anchor": "top",
+                        "name": "N NPS",
+                    },
+                    {
+                        "function": "subtotal",
+                        "args": [1, 2],
+                        "anchor": 2,
+                        "name": "Love/Like",
+                    },
+                ]
+            },
+        }
+        return transform
