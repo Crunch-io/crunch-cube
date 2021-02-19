@@ -38,6 +38,10 @@ class _BaseCollator(object):
         return self._dimension.element_ids
 
     @lazyproperty
+    def _element_subvar_ids(self):
+        return self._dimension.element_subvar_ids
+
+    @lazyproperty
     def _hidden_idxs(self):
         """frozenset of int element-idx of each vector for which to suppress display."""
         empty_idxs = self._empty_idxs if self._dimension.prune else ()
@@ -237,22 +241,34 @@ class ExplicitOrderCollator(_BaseAnchoredCollator):
             remaining_element_idxs_by_id = collections.OrderedDict(
                 (id_, idx) for idx, id_ in enumerate(self._element_ids)
             )
+            remaining_element_idxs_by_subvar_id = collections.OrderedDict(
+                (subvar_id, idx)
+                for idx, subvar_id in enumerate(self._element_subvar_ids)
+            )
 
             # --- yield (idx, id) pair for each element mentioned by id in transform,
             # --- in the order mentioned. Remove each from remaining as we go to track
             # --- dups and leftovers.
+            visited = set()
             for element_id in self._order_dict.get("element_ids", []):
                 # --- An element-id appearing in transform but not in dimension is
                 # --- ignored. Also, an element-id that appears more than oncce in
                 # --- order-array is only used on first encounter.
-                if element_id not in remaining_element_idxs_by_id:
-                    continue
-                yield remaining_element_idxs_by_id.pop(element_id), element_id
+                if element_id in remaining_element_idxs_by_subvar_id:
+                    idx = remaining_element_idxs_by_subvar_id.pop(element_id)
+                    visited.add(idx)
+                    yield idx, element_id
+
+                if element_id in remaining_element_idxs_by_id:
+                    idx = remaining_element_idxs_by_id.pop(element_id)
+                    visited.add(idx)
+                    yield idx, element_id
 
             # --- any remaining elements are generated in the order they originally
             # --- appeared in the cube-result.
             for element_id, idx in remaining_element_idxs_by_id.items():
-                yield idx, element_id
+                if idx not in visited:
+                    yield idx, element_id
 
         return tuple(
             (position, idx, element_id)

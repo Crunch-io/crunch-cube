@@ -249,26 +249,32 @@ class DescribeExplicitOrderCollator(object):
     """Unit-test suite for `cr.cube.collator.ExplicitOrderCollator` object."""
 
     @pytest.mark.parametrize(
-        "element_ids, element_id_order, expected_value",
+        "element_ids, element_subvar_ids, element_id_order, expected_value",
         (
-            ((), [], ()),
-            ((1, 2, 3), [2, 3, 1], ((0, 1, 2), (1, 2, 3), (2, 0, 1))),
+            ((), [], [], ()),
+            ((1, 2, 3), [], [2, 3, 1], ((0, 1, 2), (1, 2, 3), (2, 0, 1))),
             # --- element not mentioned in transform appears at end in payload order ---
-            ((1, 2, 3), [], ((0, 0, 1), (1, 1, 2), (2, 2, 3))),
-            ((1, 2, 3), [2], ((0, 1, 2), (1, 0, 1), (2, 2, 3))),
+            ((1, 2, 3), [], [], ((0, 0, 1), (1, 1, 2), (2, 2, 3))),
+            ((1, 2, 3), [], [2], ((0, 1, 2), (1, 0, 1), (2, 2, 3))),
             # --- id appearing in transform but not dimension is ignored ---
-            ((), [3, 2, 1], ()),
-            ((1, 2, 3), [2, 4, 1], ((0, 1, 2), (1, 0, 1), (2, 2, 3))),
+            ((), [], [3, 2, 1], ()),
+            ((1, 2, 3), [], [2, 4, 1], ((0, 1, 2), (1, 0, 1), (2, 2, 3))),
             # --- id repeated in transform is only used on first encounter ---
-            ((1, 2, 3), [2, 2, 2], ((0, 1, 2), (1, 0, 1), (2, 2, 3))),
-            ((1, 2, 3), [3, 1, 3], ((0, 2, 3), (1, 0, 1), (2, 1, 2))),
+            ((1, 2, 3), [], [2, 2, 2], ((0, 1, 2), (1, 0, 1), (2, 2, 3))),
+            ((1, 2, 3), [], [3, 1, 3], ((0, 2, 3), (1, 0, 1), (2, 1, 2))),
         ),
     )
     def it_computes_the_element_order_descriptors_to_help(
-        self, request, element_ids, element_id_order, expected_value
+        self, request, element_ids, element_subvar_ids, element_id_order, expected_value
     ):
         property_mock(
             request, ExplicitOrderCollator, "_element_ids", return_value=element_ids
+        )
+        property_mock(
+            request,
+            ExplicitOrderCollator,
+            "_element_subvar_ids",
+            return_value=element_subvar_ids,
         )
         property_mock(
             request,
