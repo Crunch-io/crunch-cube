@@ -81,8 +81,9 @@ class Assembler(object):
         """2D np.float64 ndarray of column-proportion for each matrix cell.
 
         This is the proportion of the weighted-count for cell to the weighted-N of the
-        column the cell appears in (aka. column-margin). Always a number between 0.0 and
-        1.0 inclusive.
+        column the cell appears in (aka. column-margin). Generally a number between 0.0
+        and 1.0 inclusive, but subtotal differences can be between -1.0 and 1.0 
+        inclusive.
         """
         return self._assemble_matrix(self._measures.column_proportions.blocks)
 
@@ -187,6 +188,16 @@ class Assembler(object):
         return self._dimension_labels(self._rows_dimension, self._row_order)
 
     @lazyproperty
+    def row_proportions(self):
+        """2D np.float64 ndarray of row-proportion for each matrix cell.
+
+        This is the proportion of the weighted-count for cell to the weighted-N of the
+        row the cell appears in (aka. row-margin). Always a number between 0.0 and
+        1.0 inclusive, but subtotal differences can be between -1.0 and 1.0 inclusive.
+        """
+        return self._assemble_matrix(self._measures.row_proportions.blocks)
+
+    @lazyproperty
     def row_unweighted_bases(self):
         """2D np.int64 ndarray of unweighted row-proportions denominator per cell."""
         return self._assemble_matrix(self._measures.row_unweighted_bases.blocks)
@@ -245,7 +256,7 @@ class Assembler(object):
         # --- an X_MR slice produces a 2D rows-margin (each cell has its own N) ---
         if self._columns_dimension.dimension_type == DT.MR_SUBVAR:
             return self._assemble_matrix(
-                SumSubtotals.blocks(
+                SumDiffSubtotals.blocks(
                     self._cube_result_matrix.rows_margin, self._dimensions
                 )
             )
@@ -464,7 +475,7 @@ class Assembler(object):
         vector_subtotals = np.array(
             [
                 np.sum(base_vector[subtotal.addend_idxs])
-                + np.sum(base_vector[subtotal.subtrahend_idxs])
+                - np.sum(base_vector[subtotal.subtrahend_idxs])
                 for subtotal in subtotals
             ]
         )
