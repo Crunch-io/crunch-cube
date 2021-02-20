@@ -82,7 +82,7 @@ class Assembler(object):
 
         This is the proportion of the weighted-count for cell to the weighted-N of the
         column the cell appears in (aka. column-margin). Generally a number between 0.0
-        and 1.0 inclusive, but subtotal differences can be between -1.0 and 1.0 
+        and 1.0 inclusive, but subtotal differences can be between -1.0 and 1.0
         inclusive.
         """
         return self._assemble_matrix(self._measures.column_proportions.blocks)

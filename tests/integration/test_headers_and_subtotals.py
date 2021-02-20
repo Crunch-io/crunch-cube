@@ -3911,7 +3911,6 @@ class DescribeIntegrated_SubtotalDifferences(object):
             slice_.column_proportions, slice_.counts / slice_.column_weighted_bases
         )
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     def test_cat_subdiff_x_cat_subdiff_row_prop(self, row_col_subdiff_insertions):
         slice_ = Cube(
             CR.CAT_SUBDIFF_X_CAT_SUBDIFF, transforms=row_col_subdiff_insertions
@@ -4035,7 +4034,6 @@ class DescribeIntegrated_SubtotalDifferences(object):
             slice_.column_proportions, slice_.counts / slice_.column_weighted_bases
         )
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     def test_cat_subtot_subdiff_x_cat_subtot_subdiff_row_prop(
         self, row_col_subtot_subdiff_insertions
     ):
@@ -4145,7 +4143,6 @@ class DescribeIntegrated_SubtotalDifferences(object):
             row_bases[1, :] + (row_bases[4, :] + row_bases[5, :]),
         )
 
-    @pytest.mark.xfail(reason="WIP", strict=True)    
     def test_cat_subdiff_x_mr_proportions(self, row_subdiff_insertions):
         slice_ = Cube(
             CR.CAT_SUBDIFF_X_MR, transforms=row_subdiff_insertions

@@ -277,8 +277,9 @@ class _Slice(CubePartition):
     def column_proportions(self):
         """2D np.float64 ndarray of column-proportion for each matrix cell.
 
-        This is the proportion of the weighted-N (aka. margin) of its column that the
-        *weighted-count* in each cell represents, a number between 0.0 and 1.0.
+        This is the proportion of the weighted-N (aka. weighted base) of its row
+        that the*weighted-count* in each cell represents, a number between 0.0 and 1.0,
+        unless there are subtotal differences, in which case are between -1.0 and 1.0.
         """
         return self._assembler.column_proportions
 
@@ -674,18 +675,11 @@ class _Slice(CubePartition):
     def row_proportions(self):
         """2D np.float64 ndarray of row-proportion for each matrix cell.
 
-        Each row-proportion value is that cell's fraction of the weighted-N for the row
-        (aka. rows_margin), a number between 0.0 and 1.0.
+        This is the proportion of the weighted-N (aka. weighted base) of its row
+        that the*weighted-count* in each cell represents, a number between 0.0 and 1.0,
+        unless there are subtotal differences, in which case are between -1.0 and 1.0.
         """
-        rows_margin = self.rows_margin
-        with np.errstate(divide="ignore", invalid="ignore"):
-            # --- numpy broadcasting only works "vertically", so in the 1D margin case,
-            # --- we need to "rotate" (transpose) the counts such that rows are running
-            # --- "vertically", and then re-transpose the result to get back
-            # --- (rows, cols) orientation.
-            if rows_margin.ndim == 1:
-                return (self.counts.T / rows_margin).T
-            return self.counts / rows_margin
+        return self._assembler.row_proportions
 
     @lazyproperty
     def row_proportions_moe(self):
@@ -1499,7 +1493,7 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def unweighted_counts(self):
-        """1D np.int64 ndarray of unweighted count for each row of stripe."""
+        """tuple of int unweighted count for each row of stripe."""
         return self._assembler.unweighted_counts
 
     @lazyproperty
