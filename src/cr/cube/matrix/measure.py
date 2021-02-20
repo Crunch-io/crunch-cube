@@ -46,6 +46,11 @@ class SecondOrderMeasures(object):
         return self._cube_measures.unweighted_cube_counts.columns_pruning_base
 
     @lazyproperty
+    def row_proportions(self):
+        """_RowProportions measure object for this cube-result."""
+        return _RowProportions(self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
     def row_unweighted_bases(self):
         """_RowUnweightedBases measure object for this cube-result."""
         return _RowUnweightedBases(self._dimensions, self, self._cube_measures)
@@ -339,6 +344,42 @@ class _ColumnWeightedBases(_BaseSecondOrderMeasure):
         return np.broadcast_to(
             self._weighted_cube_counts.columns_margin, subtotal_rows.shape
         )
+
+
+class _RowProportions(_BaseSecondOrderMeasure):
+    """Provides the row-proportions measure for a matrix.
+
+    Row-proportions is a 2D np.float64 ndarray of the proportion of its row margin
+    contributed by the weighted count of each matrix cell.
+    """
+
+    @lazyproperty
+    def blocks(self):
+        """Nested list of the four 2D ndarray "blocks" making up this measure.
+
+        These are the base-values, the row-subtotals, the row-subtotals, and the
+        subtotal intersection-cell values. Row-proportions is derivative of two other
+        measures, so it overrides this method rather than providing separate blocks.
+        """
+        count_blocks = self._second_order_measures.weighted_counts.blocks
+        weighted_base_blocks = self._second_order_measures.row_weighted_bases.blocks
+
+        # --- do not propagate divide-by-zero warnings to stderr ---
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return [
+                [
+                    # --- base values ---
+                    count_blocks[0][0] / weighted_base_blocks[0][0],
+                    # --- inserted columns ---
+                    count_blocks[0][1] / weighted_base_blocks[0][1],
+                ],
+                [
+                    # --- inserted rows ---
+                    count_blocks[1][0] / weighted_base_blocks[1][0],
+                    # --- intersections ---
+                    count_blocks[1][1] / weighted_base_blocks[1][1],
+                ],
+            ]
 
 
 class _RowUnweightedBases(_BaseSecondOrderMeasure):

@@ -17,6 +17,7 @@ from cr.cube.matrix.measure import (
     _ColumnProportions,
     _ColumnUnweightedBases,
     _ColumnWeightedBases,
+    _RowProportions,
     _RowUnweightedBases,
     _RowWeightedBases,
     SecondOrderMeasures,
@@ -38,6 +39,7 @@ class DescribeSecondOrderMeasures(object):
             ("column_proportions", _ColumnProportions),
             ("column_unweighted_bases", _ColumnUnweightedBases),
             ("column_weighted_bases", _ColumnWeightedBases),
+            ("row_proportions", _RowProportions),
             ("row_unweighted_bases", _RowUnweightedBases),
             ("row_weighted_bases", _RowWeightedBases),
             ("table_unweighted_bases", _TableUnweightedBases),
@@ -413,6 +415,27 @@ class Describe_ColumnWeightedBases(object):
     @pytest.fixture
     def _weighted_cube_counts_prop_(self, request):
         return property_mock(request, _ColumnWeightedBases, "_weighted_cube_counts")
+
+
+class Describe_RowProportions(object):
+    """Unit test suite for `cr.cube.matrix.measure._RowProportions` object."""
+
+    def it_computes_its_blocks(self, request):
+        weighted_counts_ = instance_mock(
+            request, _WeightedCounts, blocks=[[5.0, 12.0], [21.0, 32.0]]
+        )
+        row_weighted_bases_ = instance_mock(
+            request, _RowWeightedBases, blocks=[[5.0, 6.0], [7.0, 8.0]]
+        )
+        second_order_measures_ = instance_mock(
+            request,
+            SecondOrderMeasures,
+            weighted_counts=weighted_counts_,
+            row_weighted_bases=row_weighted_bases_,
+        )
+        row_proportions = _RowProportions(None, second_order_measures_, None)
+
+        assert row_proportions.blocks == [[1.0, 2.0], [3.0, 4.0]]
 
 
 class Describe_RowUnweightedBases(object):
