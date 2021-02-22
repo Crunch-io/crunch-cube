@@ -3838,14 +3838,17 @@ class DescribeIntegrated_SubtotalDifferences(object):
             CR.CAT_SUBDIFF_X_CAT_SUBDIFF, transforms=row_col_subdiff_insertions
         ).partitions[0]
         # --- Subdiff in row 0 equals row=1 - (row=4 + row=5) ---
+        # --- Except for intersection of subdiffs, which is undefined ---
+        np.testing.assert_array_equal(slice_.counts[0, 0], np.nan)
         np.testing.assert_array_equal(
-            slice_.counts[0, :],
-            slice_.counts[1, :] - (slice_.counts[4, :] + slice_.counts[5, :]),
+            slice_.counts[0, 1:],
+            slice_.counts[1, 1:] - (slice_.counts[4, 1:] + slice_.counts[5, 1:]),
         )
         # --- Subdiff in col 0 equals (col=1 + col=2) - (col=5) ---
+        # --- Except for intersection of subdiffs, which is undefined ---
         np.testing.assert_array_equal(
-            slice_.counts[:, 0],
-            (slice_.counts[:, 1] + slice_.counts[:, 2]) - (slice_.counts[:, 5]),
+            slice_.counts[1:, 0],
+            (slice_.counts[1:, 1] + slice_.counts[1:, 2]) - (slice_.counts[1:, 5]),
         )
 
     def test_cat_subdiff_x_cat_subdiff_col_margin(self, row_col_subdiff_insertions):
@@ -3946,15 +3949,17 @@ class DescribeIntegrated_SubtotalDifferences(object):
             CR.CAT_SUBDIFF_X_CAT_SUBDIFF, transforms=row_col_subtot_subdiff_insertions
         ).partitions[0]
         # --- Subdiff in row 0 equals row=1 - (row=4 + row=5) ---
+        # --- Except for intersection of subdiffs, which is undefined ---
+        np.testing.assert_array_equal(slice_.counts[0, 0], np.nan)
         np.testing.assert_array_equal(
-            slice_.counts[0, :],
-            slice_.counts[1, :] - (slice_.counts[4, :] + slice_.counts[5, :]),
+            slice_.counts[0, 1:],
+            slice_.counts[1, 1:] - (slice_.counts[4, 1:] + slice_.counts[5, 1:]),
         )
         # --- Subdiff in col 0 equals (col=1 + col=2) - (col=6) ---
         # --- (add insertion is at pos 3) ---
         np.testing.assert_array_equal(
-            slice_.counts[:, 0],
-            (slice_.counts[:, 1] + slice_.counts[:, 2]) - (slice_.counts[:, 6]),
+            slice_.counts[1:, 0],
+            (slice_.counts[1:, 1] + slice_.counts[1:, 2]) - (slice_.counts[1:, 6]),
         )
 
     def test_cat_subtot_subdiff_x_cat_subtot_subdiff_col_margin(

@@ -209,6 +209,13 @@ class SumDiffSubtotals(SumSubtotals):
 
     def _intersection(self, row_subtotal, column_subtotal):
         """Sum and Diff for this row/column subtotal intersection."""
+        # --- Intersections of subtotal differences are undefined ---
+        if (
+            len(column_subtotal.subtrahend_idxs) > 0
+            and len(row_subtotal.subtrahend_idxs) > 0
+        ):
+            return np.nan
+
         addend_sum = np.sum(
             self._subtotal_row(row_subtotal)[column_subtotal.addend_idxs]
         )
