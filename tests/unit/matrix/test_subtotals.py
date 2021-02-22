@@ -370,8 +370,8 @@ class DescribeSumDiffSubtotals(object):
             ([1, 2], [], [2, 3], [], 34),
             ([1, 2], [0], [0, 1], [], 25),
             ([1, 2], [], [0, 1], [2, 3], -8),
-            ([0, 1], [2], [2, 3], [0, 1], 4),
-            ([], [1, 2], [], [0, 1], 26),
+            ([0, 1], [2], [2, 3], [0, 1], np.nan),
+            ([], [1, 2], [], [0, 1], np.nan),
         ),
     )
     def it_can_compute_a_subtotal_intersection_value(
@@ -398,7 +398,10 @@ class DescribeSumDiffSubtotals(object):
         base_values = np.arange(12).reshape(3, 4)
         subtotals = SumDiffSubtotals(base_values, None)
 
-        assert subtotals._intersection(row_subtotal_, col_subtotal_) == expected_value
+        np.testing.assert_equal(
+            subtotals._intersection(row_subtotal_, col_subtotal_),
+            expected_value
+        )
 
     @pytest.mark.parametrize(
         ("addend_idxs", "subtrahend_idxs", "expected_value"),

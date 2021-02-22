@@ -52,7 +52,11 @@ class _BaseSubtotals(object):
 
     @lazyproperty
     def _dtype(self):
-        """Numpy data-type for result matrices, used for empty arrays."""
+        """Numpy data-type for result matrices, used for empty arrays.
+        
+        Always return np.float64 because we may need concept of nan even
+        if we started with int (and nan isn't available in ints).
+        """
         return np.float64
 
     def _intersection(self, row_subtotal, column_subtotal):
@@ -175,11 +179,6 @@ class SumSubtotals(_BaseSubtotals):
     def subtotal_rows(cls, base_values, dimensions):
         """Return (n_row_subtotals, n_base_cols) ndarray of subtotal rows."""
         return cls(base_values, dimensions)._subtotal_rows
-
-    @lazyproperty
-    def _dtype(self):
-        """Numpy data-type for result matrices, used for empty arrays."""
-        return self._base_values.dtype
 
     def _intersection(self, row_subtotal, column_subtotal):
         """Sum for this row/column subtotal intersection."""
