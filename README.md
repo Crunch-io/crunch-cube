@@ -112,6 +112,10 @@ The detailed description can be found
 
 ## Changes
 
+
+### 2.1.5
+- Bug fix for shape calculation on numeric arrays.
+
 ### 2.1.4
 - Change `population_moe` -> `population_counts_moe` for `_Strand`
 
