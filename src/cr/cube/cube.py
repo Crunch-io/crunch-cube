@@ -558,7 +558,7 @@ class Cube(object):
                     # ---change the order of the valid idxs, from [0,1,2] to [1,2,0].
                     # ---This way to reshape the valid index will be changed when the
                     # ---dim_order option will be available within the cube dict.
-                    return valid_indices[1], valid_indices[-1], valid_indices[0]
+                    return valid_indices[1], valid_indices[2], valid_indices[0]
                 # ---NOTE FOR FUTURE: We'll need a way to tell to the cube which
                 # ---dimensions we want transposed and which not. So the ::-1 can be
                 # ---converted in something more robust.
@@ -746,11 +746,15 @@ class _BaseMeasure(object):
         """All dimensions shape (row, col)"""
         # NOTE: Inverting the shape cannot be enough in future when we'll have more than
         # 2 dimensions in the new dim_order option.
-        return (
-            self._all_dimensions.shape[::-1]
-            if self.requires_array_transposition
-            else self._all_dimensions.shape
-        )
+        # original_shape = self._all_dimensions.shape
+        shape = self._all_dimensions.shape
+        if self.requires_array_transposition:
+            return (
+                shape[-2:] + (shape[0],)
+                if len(self._all_dimensions) == 3
+                else shape[::-1]
+            )
+        return shape
 
 
 class _MeanMeasure(_BaseMeasure):

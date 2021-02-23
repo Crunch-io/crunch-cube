@@ -82,17 +82,16 @@ class TestNumericArrays:
         np.testing.assert_almost_equal(
             slice_.means,
             [
-                # -------MR-------
-                # S1    S2    S3
-                [62.5, 87.5, 87.5],  # S1 (num array)
-                [90.0, 81.0, 81.0],  # S2 (num array)
-                [42.5, 70.0, 80.0],  # S3 (num array)
+                # -------------------------MR--------------------------
+                #     S1         S2         S3         S4        S5
+                [4.5526316, 4.7857143, 4.3333333, 4.4444444, 4.5526316],  # S1 (num arr)
+                [3.7105263, 3.8571429, 3.8333333, 3.5555556, 3.7105263],  # S2 (num arr)
             ],
         )
         # ---The columns_base is 2D because a NUM_ARR_X_MR matrix has a distinct
         # ---column-base for each cell.
         np.testing.assert_almost_equal(
-            slice_.columns_base, [[4, 4, 4], [3, 5, 5], [4, 5, 5]]
+            slice_.columns_base, [[38, 14, 6, 18, 38], [38, 14, 6, 18, 38]]
         )
 
     def test_num_arr_means_no_grouping(self):

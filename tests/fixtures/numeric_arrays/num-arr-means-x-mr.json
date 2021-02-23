@@ -1,361 +1,446 @@
 {
-  "element": "shoji:view",
-  "value": {
-    "query": {
-      "measures": {
-        "valid_count_unweighted": {
-          "function": "cube_valid_count",
-          "args": [
-            {
-              "variable": "1fd5d91cbc554a67bc6d1a30ef87231f"
-            }
-          ]
-        },
-        "mean": {
-          "function": "cube_mean",
-          "args": [
-            {
-              "variable": "1fd5d91cbc554a67bc6d1a30ef87231f"
-            }
-          ]
-        }
+  "query": {
+    "measures": {
+      "count": {
+        "function": "cube_count",
+        "args": []
       },
-      "dimensions": [
-        {
-          "function": "dimension",
-          "args": [
-            {
-              "function": "as_selected",
-              "args": [
-                {
-                  "variable": "3QPnyW5KMYriuoG5PCewcD000000"
-                }
-              ]
-            },
-            {
-              "value": "subvariables"
-            }
-          ]
-        },
-        {
-          "function": "as_selected",
-          "args": [
-            {
-              "variable": "3QPnyW5KMYriuoG5PCewcD000000"
-            }
-          ]
-        }
-      ]
+      "valid_count_unweighted": {
+        "function": "cube_valid_count",
+        "args": [
+          {
+            "variable": "6d55567cee8c4a498f49cb38a95195ee"
+          }
+        ]
+      },
+      "mean": {
+        "function": "cube_mean",
+        "args": [
+          {
+            "variable": "6d55567cee8c4a498f49cb38a95195ee"
+          }
+        ]
+      }
     },
-    "result": {
-      "dimensions": [
-        {
-          "references": {
-            "alias": "allpets",
-            "uniform_basis": false,
-            "subreferences": [
+    "dimensions": [
+      {
+        "function": "dimension",
+        "args": [
+          {
+            "function": "as_selected",
+            "args": [
               {
-                "alias": "allpets_1",
-                "name": "Cat"
-              },
-              {
-                "alias": "allpets_2",
-                "name": "Dog"
-              },
-              {
-                "alias": "allpets_3",
-                "name": "Bird"
-              }
-            ],
-            "description": "Do you have any of these animals as pets? Please select all that apply.",
-            "name": "All pets owned"
-          },
-          "derived": true,
-          "type": {
-            "subtype": {
-              "class": "variable"
-            },
-            "elements": [
-              {
-                "id": 1,
-                "value": {
-                  "derived": false,
-                  "references": {
-                    "alias": "allpets_1",
-                    "name": "Cat"
-                  },
-                  "id": "0001"
-                },
-                "missing": false
-              },
-              {
-                "id": 2,
-                "value": {
-                  "derived": false,
-                  "references": {
-                    "alias": "allpets_2",
-                    "name": "Dog"
-                  },
-                  "id": "0002"
-                },
-                "missing": false
-              },
-              {
-                "id": 3,
-                "value": {
-                  "derived": false,
-                  "references": {
-                    "alias": "allpets_3",
-                    "name": "Bird"
-                  },
-                  "id": "0003"
-                },
-                "missing": false
-              }
-            ],
-            "class": "enum"
-          }
-        },
-        {
-          "derived": true,
-          "references": {
-            "alias": "allpets",
-            "uniform_basis": false,
-            "description": "Do you have any of these animals as pets? Please select all that apply.",
-            "name": "All pets owned",
-            "subreferences": [
-              {
-                "alias": "allpets_1",
-                "name": "Cat"
-              },
-              {
-                "alias": "allpets_2",
-                "name": "Dog"
-              },
-              {
-                "alias": "allpets_3",
-                "name": "Bird"
+                "variable": "5216108a83f845f092b39175cbbbc4b9"
               }
             ]
           },
+          {
+            "value": "subvariables"
+          }
+        ]
+      },
+      {
+        "function": "as_selected",
+        "args": [
+          {
+            "variable": "5216108a83f845f092b39175cbbbc4b9"
+          }
+        ]
+      }
+    ]
+  },
+  "result": {
+    "dimensions": [
+      {
+        "references": {
+          "subreferences": [
+            {
+              "alias": "Total sample",
+              "name": "Total sample"
+            },
+            {
+              "alias": "Product-paixao",
+              "name": "Product-paixao"
+            },
+            {
+              "alias": "Product-seve",
+              "name": "Product-seve"
+            },
+            {
+              "alias": "Prodcut tried",
+              "name": "Prodcut tried"
+            },
+            {
+              "alias": "S.Paulo - Recife",
+              "name": "S.Paulo - Recife"
+            }
+          ],
+          "uniform_basis": false,
+          "alias": "combined resp",
+          "description": "combined resp",
+          "name": "combined resp"
+        },
+        "derived": true,
+        "type": {
+          "subtype": {
+            "class": "variable"
+          },
+          "elements": [
+            {
+              "id": 1,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "Total sample",
+                  "name": "Total sample"
+                },
+                "id": "0001"
+              },
+              "missing": false
+            },
+            {
+              "id": 2,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "Product-paixao",
+                  "name": "Product-paixao"
+                },
+                "id": "0002"
+              },
+              "missing": false
+            },
+            {
+              "id": 3,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "Product- seve",
+                  "name": "Product- seve"
+                },
+                "id": "0003"
+              },
+              "missing": false
+            },
+            {
+              "id": 4,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "Prodcut tried",
+                  "name": "Prodcut tried"
+                },
+                "id": "0004"
+              },
+              "missing": false
+            },
+            {
+              "id": 5,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "S.Paulo - Recife",
+                  "name": "S.Paulo - Recife"
+                },
+                "id": "0005"
+              },
+              "missing": false
+            }
+          ],
+          "class": "enum"
+        }
+      },
+      {
+        "derived": true,
+        "references": {
+          "subreferences": [
+            {
+              "alias": "Total sample",
+              "name": "Total sample"
+            },
+            {
+              "alias": "Product-paixao",
+              "name": "Product-paixao"
+            },
+            {
+              "alias": "Product- seve",
+              "name": "Product- seve"
+            },
+            {
+              "alias": "Prodcut tried",
+              "name": "Prodcut tried"
+            },
+            {
+              "alias": "S.Paulo - Recife",
+              "name": "S.Paulo - Recife"
+            }
+          ],
+          "uniform_basis": false,
+          "description": "combined resp",
+          "name": "combined resp",
+          "alias": "combined resp"
+        },
+        "type": {
+          "ordinal": false,
+          "subvariables": [
+            "0001",
+            "0002",
+            "0003",
+            "0004",
+            "0005"
+          ],
+          "class": "categorical",
+          "categories": [
+            {
+              "numeric_value": 1,
+              "selected": true,
+              "id": 1,
+              "missing": false,
+              "name": "Selected"
+            },
+            {
+              "numeric_value": 0,
+              "missing": false,
+              "id": 0,
+              "name": "Other"
+            },
+            {
+              "numeric_value": null,
+              "missing": true,
+              "id": -1,
+              "name": "No Data"
+            }
+          ]
+        }
+      }
+    ],
+    "missing": 76,
+    "measures": {
+      "count": {
+        "data": [
+          38,
+          0,
+          76,
+          14,
+          24,
+          76,
+          6,
+          32,
+          76,
+          18,
+          20,
+          76,
+          38,
+          0,
+          76
+        ],
+        "n_missing": 76,
+        "metadata": {
+          "references": {},
+          "derived": true,
           "type": {
-            "ordinal": false,
+            "integer": true,
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "class": "numeric"
+          }
+        }
+      },
+      "valid_count_unweighted": {
+        "data": [
+          38,
+          38,
+          0,
+          0,
+          76,
+          76,
+          14,
+          14,
+          24,
+          24,
+          76,
+          76,
+          6,
+          6,
+          32,
+          32,
+          76,
+          76,
+          18,
+          18,
+          20,
+          20,
+          76,
+          76,
+          38,
+          38,
+          0,
+          0,
+          76,
+          76
+        ],
+        "n_missing": 76,
+        "metadata": {
+          "references": {
+            "subreferences": [
+              {
+                "alias": "N1__1",
+                "format": {
+                  "data": {
+                    "digits": 2
+                  },
+                  "summary": {
+                    "digits": 2
+                  }
+                },
+                "description": "(301301)",
+                "name": "q301301N__1"
+              },
+              {
+                "alias": "N2__1",
+                "format": {
+                  "data": {
+                    "digits": 2
+                  },
+                  "summary": {
+                    "digits": 2
+                  }
+                },
+                "description": "(301302)",
+                "name": "q301302N__1"
+              }
+            ],
+            "uniform_basis": false,
+            "name": "ARRAY12",
+            "alias": "ARRAY12"
+          },
+          "derived": true,
+          "type": {
+            "integer": false,
+            "class": "numeric",
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1
+            },
             "subvariables": [
-              "0001",
-              "0002",
-              "0003"
-            ],
-            "class": "categorical",
-            "categories": [
-              {
-                "numeric_value": 1,
-                "selected": true,
-                "id": 1,
-                "missing": false,
-                "name": "Selected"
-              },
-              {
-                "numeric_value": 0,
-                "missing": false,
-                "id": 0,
-                "name": "Other"
-              },
-              {
-                "numeric_value": null,
-                "missing": true,
-                "id": -1,
-                "name": "No Data"
-              }
+              "000001",
+              "000002"
             ]
           }
         }
-      ],
-      "missing": 3,
-      "measures": {
-        "valid_count_unweighted": {
-          "data": [
-            4,
-            3,
-            4,
-            4,
-            3,
-            4,
-            11,
-            12,
-            11,
-            4,
-            5,
-            5,
-            3,
-            3,
-            3,
-            12,
-            10,
-            11,
-            4,
-            5,
-            5,
-            6,
-            6,
-            6,
-            9,
-            7,
-            8
-          ],
-          "n_missing": 3,
-          "metadata": {
-            "references": {
-              "alias": "Num Array with 3 subvariables",
-              "uniform_basis": false,
-              "subreferences": [
-                {
-                  "alias": "First Mov",
-                  "name": "First Mov"
+      },
+      "mean": {
+        "data": [
+          4.5526315789,
+          3.7105263158,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          4.1973684211,
+          3.5657894737,
+          4.7857142857,
+          3.8571428571,
+          4.4166666667,
+          3.625,
+          4.1973684211,
+          3.5657894737,
+          4.3333333333,
+          3.8333333333,
+          4.59375,
+          3.6875,
+          4.1973684211,
+          3.5657894737,
+          4.4444444444,
+          3.5555555556,
+          4.65,
+          3.85,
+          4.1973684211,
+          3.5657894737,
+          4.5526315789,
+          3.7105263158,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          4.1973684211,
+          3.5657894737
+        ],
+        "n_missing": 76,
+        "metadata": {
+          "references": {
+            "subreferences": [
+              {
+                "alias": "N1__1",
+                "format": {
+                  "data": {
+                    "digits": 2
+                  },
+                  "summary": {
+                    "digits": 2
+                  }
                 },
-                {
-                  "alias": "Second Mov test4",
-                  "name": "Second Mov test4"
-                },
-                {
-                  "alias": "Third Mov",
-                  "name": "Third Mov"
-                }
-              ],
-              "description": "MJ modified description",
-              "name": "Num Array with 3 subvariables"
-            },
-            "derived": true,
-            "type": {
-              "integer": false,
-              "class": "numeric",
-              "missing_rules": {},
-              "missing_reasons": {
-                "No Data": -1
+                "description": "(301301)",
+                "name": "q301301N__1"
               },
-              "subvariables": [
-                "0001",
-                "0002",
-                "0003"
-              ]
-            }
-          }
-        },
-        "mean": {
-          "data": [
-            62.5,
-            90,
-            42.5,
-            75,
-            80,
-            67.5,
-            77.2727272727,
-            85,
-            70.9090909091,
-            87.5,
-            81,
-            70,
-            66.6666666667,
-            90,
-            63.3333333333,
-            70.8333333333,
-            85.5,
-            61.8181818182,
-            87.5,
-            81,
-            80,
-            83.3333333333,
-            85,
-            63.3333333333,
-            61.1111111111,
-            87.8571428571,
-            55
-          ],
-          "n_missing": 3,
-          "metadata": {
-            "references": {
-              "alias": "Num Array with 3 subvariables",
-              "uniform_basis": false,
-              "subreferences": [
-                {
-                  "alias": "First Mov",
-                  "name": "First Mov"
+              {
+                "alias": "N2__1",
+                "format": {
+                  "data": {
+                    "digits": 2
+                  },
+                  "summary": {
+                    "digits": 2
+                  }
                 },
-                {
-                  "alias": "Second Mov test4",
-                  "name": "Second Mov test4"
-                },
-                {
-                  "alias": "Third Mov",
-                  "name": "Third Mov"
-                }
-              ],
-              "description": "MJ modified description",
-              "name": "Num Array with 3 subvariables"
+                "description": "(301302)",
+                "name": "q301302N__1"
+              }
+            ],
+            "uniform_basis": false,
+            "name": "ARRAY12",
+            "alias": "ARRAY12"
+          },
+          "derived": true,
+          "type": {
+            "integer": true,
+            "class": "numeric",
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1,
+              "NaN": -8
             },
-            "derived": true,
-            "type": {
-              "integer": true,
-              "class": "numeric",
-              "missing_rules": {},
-              "missing_reasons": {
-                "No Data": -1
-              },
-              "subvariables": [
-                "0001",
-                "0002",
-                "0003"
-              ]
-            }
+            "subvariables": [
+              "000001",
+              "000002"
+            ]
           }
         }
-      },
-      "n": 20,
-      "filter_stats": {
-        "filtered_complete": {
-          "unweighted": {
-            "selected": 20,
-            "other": 0,
-            "missing": 0
-          },
-          "weighted": {
-            "selected": 20,
-            "other": 0,
-            "missing": 0
-          }
-        },
-        "filtered": {
-          "unweighted": {
-            "selected": 20,
-            "other": 0,
-            "missing": 0
-          },
-          "weighted": {
-            "selected": 20,
-            "other": 0,
-            "missing": 0
-          }
-        }
-      },
-      "unfiltered": {
-        "unweighted_n": 20,
-        "weighted_n": 20
-      },
-      "filtered": {
-        "unweighted_n": 20,
-        "weighted_n": 20
-      },
-      "counts": [
-        4,
-        4,
-        12,
-        5,
-        3,
-        12,
-        5,
-        6,
-        9
-      ],
-      "element": "crunch:cube"
-    }
+      }
+    },
+    "n": 114,
+    "counts": [
+      38,
+      0,
+      76,
+      14,
+      24,
+      76,
+      6,
+      32,
+      76,
+      18,
+      20,
+      76,
+      38,
+      0,
+      76
+    ]
   }
 }
