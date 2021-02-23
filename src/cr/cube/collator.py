@@ -239,36 +239,41 @@ class ExplicitOrderCollator(_BaseAnchoredCollator):
             # --- This gives us payload-idx lookup along with duplicate and leftover
             # --- tracking.
             remaining_element_idxs_by_id = collections.OrderedDict(
-                (id_, idx) for idx, id_ in enumerate(self._element_ids)
+                (id_, (idx, subvar_id))
+                for idx, (id_, subvar_id) in enumerate(
+                    zip(self._element_ids, self._element_subvar_ids)
+                )
             )
             remaining_element_idxs_by_subvar_id = collections.OrderedDict(
-                (subvar_id, idx)
-                for idx, subvar_id in enumerate(self._element_subvar_ids)
+                (subvar_id, (idx, id_))
+                for idx, (subvar_id, id_) in enumerate(
+                    zip(self._element_subvar_ids, self._element_ids)
+                )
             )
 
             # --- yield (idx, id) pair for each element mentioned by id in transform,
             # --- in the order mentioned. Remove each from remaining as we go to track
             # --- dups and leftovers.
-            visited = set()
             for element_id in self._order_dict.get("element_ids", []):
                 # --- An element-id appearing in transform but not in dimension is
                 # --- ignored. Also, an element-id that appears more than oncce in
                 # --- order-array is only used on first encounter.
                 if element_id in remaining_element_idxs_by_subvar_id:
-                    idx = remaining_element_idxs_by_subvar_id.pop(element_id)
-                    visited.add(idx)
-                    yield idx, element_id
+                    (idx, id_) = remaining_element_idxs_by_subvar_id.pop(element_id)
+                    if id_ in remaining_element_idxs_by_id:
+                        remaining_element_idxs_by_id.pop(id_)
+                    yield idx, id_
 
                 if element_id in remaining_element_idxs_by_id:
-                    idx = remaining_element_idxs_by_id.pop(element_id)
-                    visited.add(idx)
+                    (idx, subvar_id) = remaining_element_idxs_by_id.pop(element_id)
+                    if subvar_id in remaining_element_idxs_by_subvar_id:
+                        remaining_element_idxs_by_subvar_id.pop(subvar_id)
                     yield idx, element_id
 
             # --- any remaining elements are generated in the order they originally
             # --- appeared in the cube-result.
-            for element_id, idx in remaining_element_idxs_by_id.items():
-                if idx not in visited:
-                    yield idx, element_id
+            for element_id, (idx, _) in remaining_element_idxs_by_id.items():
+                yield idx, element_id
 
         return tuple(
             (position, idx, element_id)
