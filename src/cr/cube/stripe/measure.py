@@ -138,3 +138,11 @@ class _WeightedCounts(_BaseSecondOrderMeasure):
     def base_values(self):
         """1D np.float/int64 ndarray of weighted-count for each row."""
         return self._weighted_cube_counts.weighted_counts
+
+    @lazyproperty
+    def subtotal_values(self):
+        """1D np.float/int64 ndarray of sum for each row-subtotal."""
+        # --- counts don't sum on an MR dimension, but an MR stripe can have no
+        # --- subtotals. This just returns an empty array in that case and we don't need
+        # --- to special-case MR.
+        return SumSubtotals.subtotal_values(self.base_values, self._rows_dimension)

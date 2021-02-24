@@ -187,6 +187,22 @@ class Describe_WeightedCounts(object):
 
         assert weighted_counts.base_values.tolist() == [1, 2, 3]
 
+    def it_computes_its_subtotal_values_to_help(self, request):
+        rows_dimension_ = instance_mock(request, Dimension)
+        property_mock(
+            request, _WeightedCounts, "base_values", return_value=[1.1, 2.2, 3.3]
+        )
+        SumSubtotals_ = class_mock(request, "cr.cube.stripe.measure.SumSubtotals")
+        SumSubtotals_.subtotal_values.return_value = np.array([3.3, 5.5])
+        weighted_counts = _WeightedCounts(rows_dimension_, None, None)
+
+        subtotal_values = weighted_counts.subtotal_values
+
+        SumSubtotals_.subtotal_values.assert_called_once_with(
+            [1.1, 2.2, 3.3], rows_dimension_
+        )
+        assert subtotal_values.tolist() == [3.3, 5.5]
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
