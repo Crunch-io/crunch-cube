@@ -277,9 +277,10 @@ class _Slice(CubePartition):
     def column_proportions(self):
         """2D np.float64 ndarray of column-proportion for each matrix cell.
 
-        This is the proportion of the weighted-N (aka. weighted base) of its row
-        that the*weighted-count* in each cell represents, a number between 0.0 and 1.0,
-        unless there are subtotal differences, in which case are between -1.0 and 1.0.
+        This is the proportion of the weighted-N (aka. weighted base) of its column
+        that the *weighted-count* in each cell represents, generally a number between
+        0.0 and 1.0. Note that within an inserted subtotal vector involving differences,
+        the values can range between -1.0 and 1.0.
         """
         return self._assembler.column_proportions
 
@@ -676,8 +677,9 @@ class _Slice(CubePartition):
         """2D np.float64 ndarray of row-proportion for each matrix cell.
 
         This is the proportion of the weighted-N (aka. weighted base) of its row
-        that the*weighted-count* in each cell represents, a number between 0.0 and 1.0,
-        unless there are subtotal differences, in which case are between -1.0 and 1.0.
+        that the *weighted-count* in each cell represents, generally a number between
+        0.0 and 1.0. Note that within an inserted subtotal vector involving differences,
+        the values can range between -1.0 and 1.0.
         """
         return self._assembler.row_proportions
 
@@ -1493,7 +1495,7 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def unweighted_counts(self):
-        """tuple of int unweighted count for each row of stripe."""
+        """1D np.int64 ndarray of unweighted count for each row of stripe."""
         return self._assembler.unweighted_counts
 
     @lazyproperty
