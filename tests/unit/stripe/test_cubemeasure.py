@@ -10,6 +10,7 @@ from cr.cube.dimension import Dimension
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.stripe.cubemeasure import (
     _BaseUnweightedCubeCounts,
+    _BaseWeightedCubeCounts,
     _CatUnweightedCubeCounts,
     CubeMeasures,
     _MrUnweightedCubeCounts,
@@ -37,6 +38,23 @@ class DescribeCubeMeasures(object):
             cube_, rows_dimension_, False, 7
         )
         assert unweighted_cube_counts is unweighted_cube_counts_
+
+    def it_provides_access_to_the_weighted_cube_counts_object(
+        self, request, cube_, rows_dimension_
+    ):
+        weighted_cube_counts_ = instance_mock(request, _BaseWeightedCubeCounts)
+        _BaseWeightedCubeCounts_ = class_mock(
+            request, "cr.cube.stripe.cubemeasure._BaseWeightedCubeCounts"
+        )
+        _BaseWeightedCubeCounts_.factory.return_value = weighted_cube_counts_
+        cube_measures = CubeMeasures(cube_, rows_dimension_, False, slice_idx=7)
+
+        weighted_cube_counts = cube_measures.weighted_cube_counts
+
+        _BaseWeightedCubeCounts_.factory.assert_called_once_with(
+            cube_, rows_dimension_, False, 7
+        )
+        assert weighted_cube_counts is weighted_cube_counts_
 
     # fixture components ---------------------------------------------
 

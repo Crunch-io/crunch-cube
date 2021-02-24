@@ -33,7 +33,9 @@ class CubeMeasures(object):
     @lazyproperty
     def weighted_cube_counts(self):
         """_BaseWeightedCubeCounts subclass object for this stripe."""
-        raise NotImplementedError
+        return _BaseWeightedCubeCounts.factory(
+            self._cube, self._rows_dimension, self._ca_as_0th, self._slice_idx
+        )
 
 
 class _BaseCubeMeasure(object):
@@ -125,6 +127,11 @@ class _MrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
 
 class _BaseWeightedCubeCounts(_BaseCubeMeasure):
     """Base class for weighted-count cube-measure variants."""
+
+    @classmethod
+    def factory(cls, cube, rows_dimension, ca_as_0th, slice_idx):
+        """Return _BaseWeightedCubeCounts subclass instance appropriate to `cube`."""
+        raise NotImplementedError
 
     @lazyproperty
     def weighted_counts(self):
