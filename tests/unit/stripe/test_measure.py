@@ -15,6 +15,7 @@ from cr.cube.stripe.cubemeasure import (
 from cr.cube.stripe.measure import (
     _BaseSecondOrderMeasure,
     StripeMeasures,
+    _UnweightedBases,
     _UnweightedCounts,
     _WeightedCounts,
 )
@@ -28,6 +29,7 @@ class DescribeStripeMeasures(object):
     @pytest.mark.parametrize(
         "measure_prop_name, MeasureCls",
         (
+            ("unweighted_bases", _UnweightedBases),
             ("unweighted_counts", _UnweightedCounts),
             ("weighted_counts", _WeightedCounts),
         ),

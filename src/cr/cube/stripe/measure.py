@@ -35,7 +35,7 @@ class StripeMeasures(object):
     @lazyproperty
     def unweighted_bases(self):
         """_UnweightedBases measure object for this stripe."""
-        raise NotImplementedError
+        return _UnweightedBases(self._rows_dimension, self, self._cube_measures)
 
     @lazyproperty
     def unweighted_counts(self):
