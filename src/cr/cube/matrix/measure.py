@@ -188,10 +188,16 @@ class _ColumnProportions(_BaseSecondOrderMeasure):
         """Nested list of the four 2D ndarray "blocks" making up this measure.
 
         These are the base-values, the column-subtotals, the row-subtotals, and the
-        subtotal intersection-cell values. Column-proportions is derivative of two other
-        measures, so it overrides this method rather than providing separate blocks.
+        subtotal intersection-cell values.
+
+        Column-proportions are counts divided by the column base, except that they are
+        undefined for columns with subtotal differences.
         """
-        count_blocks = self._second_order_measures.weighted_counts.blocks
+        count_blocks = SumDiffSubtotals.blocks(
+            self._weighted_cube_counts.weighted_counts,
+            self._dimensions,
+            diff_cols_nan=True,
+        )
         weighted_base_blocks = self._second_order_measures.column_weighted_bases.blocks
 
         # --- do not propagate divide-by-zero warnings to stderr ---
@@ -357,11 +363,17 @@ class _RowProportions(_BaseSecondOrderMeasure):
     def blocks(self):
         """Nested list of the four 2D ndarray "blocks" making up this measure.
 
-        These are the base-values, the row-subtotals, the row-subtotals, and the
-        subtotal intersection-cell values. Row-proportions is derivative of two other
-        measures, so it overrides this method rather than providing separate blocks.
+        These are the base-values, the column-subtotals, the row-subtotals, and the
+        subtotal intersection-cell values.
+
+        Row-proportions are counts divided by the row base, except that they are
+        undefined for rows with subtotal differences.
         """
-        count_blocks = self._second_order_measures.weighted_counts.blocks
+        count_blocks = SumDiffSubtotals.blocks(
+            self._weighted_cube_counts.weighted_counts,
+            self._dimensions,
+            diff_rows_nan=True,
+        )
         weighted_base_blocks = self._second_order_measures.row_weighted_bases.blocks
 
         # --- do not propagate divide-by-zero warnings to stderr ---
