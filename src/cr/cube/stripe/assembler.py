@@ -39,6 +39,11 @@ class StripeAssembler(object):
         self._slice_idx = slice_idx
 
     @lazyproperty
+    def unweighted_bases(self):
+        """1D np.int64 ndarray of (unweighted) table-proportion denominator per row."""
+        raise NotImplementedError
+
+    @lazyproperty
     def unweighted_counts(self):
         """1D np.int64 ndarray of unweighted count for each row of stripe."""
         return self._assemble_vector(self._measures.unweighted_counts.blocks)
