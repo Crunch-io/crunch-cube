@@ -18,7 +18,7 @@ from cr.cube.stripe.cubemeasure import (
     _MrWeightedCubeCounts,
 )
 
-from ...unitutil import class_mock, instance_mock
+from ...unitutil import class_mock, instance_mock, property_mock
 
 
 class DescribeCubeMeasures(object):
@@ -112,6 +112,16 @@ class Describe_BaseUnweightedCubeCounts(object):
 
 class Describe_CatUnweightedCubeCounts(object):
     """Unit-test suite for `cr.cube.stripe.cubemeasure._CatUnweightedCubeCounts`."""
+
+    def it_knows_its_bases(self, request, raw_unweighted_counts):
+        property_mock(
+            request,
+            _CatUnweightedCubeCounts,
+            "table_base",
+            return_value=42,
+        )
+        unweighted_cube_counts = _CatUnweightedCubeCounts(None, raw_unweighted_counts)
+        assert unweighted_cube_counts.bases.tolist() == [42, 42, 42]
 
     def it_knows_its_pruning_base(self, raw_unweighted_counts):
         unweighted_cube_counts = _CatUnweightedCubeCounts(None, raw_unweighted_counts)

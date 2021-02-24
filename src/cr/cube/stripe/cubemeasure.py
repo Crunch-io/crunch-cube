@@ -92,6 +92,14 @@ class _CatUnweightedCubeCounts(_BaseUnweightedCubeCounts):
     """Unweighted-counts cube-measure for a non-MR stripe."""
 
     @lazyproperty
+    def bases(self):
+        """1D np.int64 ndarray of table-proportion denonimator (base) for each row.
+
+        Each row in a CAT stripe has the same base (the table-base).
+        """
+        return np.broadcast_to(self.table_base, self._unweighted_counts.shape)
+
+    @lazyproperty
     def pruning_base(self):
         """1D np.int64 ndarray of unweighted-N for each matrix row.
 
@@ -99,6 +107,15 @@ class _CatUnweightedCubeCounts(_BaseUnweightedCubeCounts):
         each row.
         """
         return self._unweighted_counts
+
+    @lazyproperty
+    def table_base(self):
+        """Scalar np.int64 unweighted-N for overall stripe.
+
+        This is the unweighted count of respondents who provided a valid response to
+        the question.
+        """
+        raise NotImplementedError
 
     @lazyproperty
     def unweighted_counts(self):
