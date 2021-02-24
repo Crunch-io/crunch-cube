@@ -825,7 +825,7 @@ class Describe_Strand(object):
     def it_provides_values_for_univariate_cat(self):
         strand = Cube(CR.UNIVARIATE_CATEGORICAL, population=1000).partitions[0]
 
-        assert strand.counts == (10, 5)
+        assert strand.counts.tolist() == [10, 5]
         assert strand.cube_index == 0
         assert strand.dimension_types == (DT.CAT,)
         assert strand.has_means is False
@@ -966,7 +966,8 @@ class Describe_Strand(object):
 
     def it_provides_values_for_univariate_datetime(self):
         strand = Cube(CR.DATE, population=9001).partitions[0]
-        assert strand.counts == (1, 1, 1, 1)
+
+        assert strand.counts.tolist() == [1, 1, 1, 1]
         assert strand.population_counts == pytest.approx(
             [2250.25, 2250.25, 2250.25, 2250.25]
         )
@@ -1043,7 +1044,7 @@ class Describe_Strand(object):
     def it_provides_values_for_univariate_numeric(self):
         strand = Cube(CR.NUM, population=9001).partitions[0]
 
-        assert strand.counts == (885, 105, 10)
+        assert strand.counts.tolist() == [885, 105, 10]
         assert strand.population_counts == pytest.approx([7965.885, 945.105, 90.01])
         assert strand.population_counts_moe == pytest.approx(
             [177.9752, 171.0193, 55.50811]
@@ -1070,7 +1071,7 @@ class Describe_Strand(object):
     def it_provides_values_for_univariate_text(self):
         strand = Cube(CR.TEXT, population=9001).partitions[0]
 
-        assert strand.counts == (1, 1, 1, 1, 1, 1)
+        assert strand.counts.tolist() == [1, 1, 1, 1, 1, 1]
         assert strand.table_margin == 6
         assert strand.table_percentages == pytest.approx(
             [16.66667, 16.66667, 16.66667, 16.66667, 16.66667, 16.66667],
@@ -1131,7 +1132,7 @@ class Describe_Strand(object):
             "AB",
             "Total D-E",
         )
-        assert strand.counts == (31506, 16275, 3480, 31506, 4262, 15231, 7742)
+        assert strand.counts.tolist() == [31506, 16275, 3480, 31506, 4262, 15231, 7742]
 
     def it_knows_when_it_is_empty(self):
         strand = Cube(CR.OM_SGP8334215_VN_2019_SEP_19_STRAND).partitions[0]

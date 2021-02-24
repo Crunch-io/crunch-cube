@@ -1231,8 +1231,11 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def counts(self):
-        """tuple, 1D cube counts."""
-        return tuple(row.count for row in self._stripe.rows)
+        """1D np.float/int64 ndarray of (weighted) count for each row of strand.
+
+        The values are int when the underlying cube-result has no weighting.
+        """
+        return self._assembler.weighted_counts
 
     @lazyproperty
     def inserted_row_idxs(self):
@@ -1332,7 +1335,10 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def rows_margin(self):
-        return np.array([row.count for row in self._stripe.rows])
+        """1D np.float/int64 ndarray of weighted-N for each row of slice."""
+        # --- for a strand, this is the same as (weighted) counts, but needs this
+        # --- alternate name so it can be accessed uniformly between a slice and strand.
+        return self.counts
 
     @lazyproperty
     def scale_mean(self):
