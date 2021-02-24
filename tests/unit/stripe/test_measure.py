@@ -12,6 +12,7 @@ from cr.cube.stripe.measure import (
     _BaseSecondOrderMeasure,
     StripeMeasures,
     _UnweightedCounts,
+    _WeightedCounts,
 )
 
 from ...unitutil import class_mock, instance_mock, property_mock
@@ -22,7 +23,10 @@ class DescribeStripeMeasures(object):
 
     @pytest.mark.parametrize(
         "measure_prop_name, MeasureCls",
-        (("unweighted_counts", _UnweightedCounts),),
+        (
+            ("unweighted_counts", _UnweightedCounts),
+            ("weighted_counts", _WeightedCounts),
+        ),
     )
     def it_provides_access_to_various_measure_objects(
         self,
