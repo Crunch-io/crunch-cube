@@ -112,6 +112,8 @@ The detailed description can be found
 
 ## Changes
 
+### 2.1.6
+- Enable explicit ordering by subvar IDs (strings)
 
 ### 2.1.5
 - Bug fix for shape calculation on numeric arrays.
