@@ -19,20 +19,27 @@ class DescribeExplicitOrderCollator(object):
     """Partial-integration test suite for `ExplicitOrderCollator` object."""
 
     @pytest.mark.parametrize(
-        "element_ids, order, anchors, expected_value",
+        "element_ids, element_subvar_ids, order, anchors, expected_value",
         (
-            ((1, 2, 3), [2, 3, 1], ("bottom", 3, 3, "top"), (-1, 1, 2, -3, -2, 0, -4)),
-            ((9, 3, 7), [7], (), (2, 0, 1)),
+            (
+                (1, 2, 3),
+                [None, None, None],
+                [2, 3, 1],
+                ("bottom", 3, 3, "top"),
+                (-1, 1, 2, -3, -2, 0, -4),
+            ),
+            ((9, 3, 7), [None, None, None], [7], (), (2, 0, 1)),
         ),
     )
     def it_knows_the_display_order_for_a_dimension(
-        self, request, element_ids, order, anchors, expected_value
+        self, request, element_ids, element_subvar_ids, order, anchors, expected_value
     ):
         subtotals_ = [instance_mock(request, _Subtotal, anchor=a) for a in anchors]
         dimension_ = instance_mock(
             request,
             Dimension,
             element_ids=element_ids,
+            element_subvar_ids=element_subvar_ids,
             subtotals=subtotals_,
             order_dict={"element_ids": order},
         )

@@ -353,6 +353,10 @@ class Dimension(object):
         return tuple(e.element_id for e in self.valid_elements)
 
     @lazyproperty
+    def element_subvar_ids(self):
+        return tuple(e.element_subvar_id for e in self.valid_elements)
+
+    @lazyproperty
     def hidden_idxs(self):
         """tuple of int element-idx for each hidden valid element in this dimension.
 
@@ -671,6 +675,14 @@ class _Element(object):
     def element_id(self):
         """int identifier for this category or subvariable."""
         return self._element_dict["id"]
+
+    @lazyproperty
+    def element_subvar_id(self):
+        """str identifier for the subvar ID (from ZZ9), or None if not a subvar."""
+        value = self._element_dict.get("value")
+        if value is None or not isinstance(value, dict):
+            return None
+        return value.get("id")
 
     @lazyproperty
     def fill(self):
