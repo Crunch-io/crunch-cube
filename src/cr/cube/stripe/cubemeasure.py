@@ -128,10 +128,20 @@ class _MrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
 class _BaseWeightedCubeCounts(_BaseCubeMeasure):
     """Base class for weighted-count cube-measure variants."""
 
+    def __init__(self, rows_dimension, weighted_counts):
+        super(_BaseWeightedCubeCounts, self).__init__(rows_dimension)
+        self._weighted_counts = weighted_counts
+
     @classmethod
     def factory(cls, cube, rows_dimension, ca_as_0th, slice_idx):
         """Return _BaseWeightedCubeCounts subclass instance appropriate to `cube`."""
-        raise NotImplementedError
+        if ca_as_0th:
+            return _CatWeightedCubeCounts(rows_dimension, cube.counts[slice_idx])
+
+        if rows_dimension.dimension_type == DT.MR:
+            return _MrWeightedCubeCounts(rows_dimension, cube.counts)
+
+        return _CatWeightedCubeCounts(rows_dimension, cube.counts)
 
     @lazyproperty
     def weighted_counts(self):
@@ -143,3 +153,17 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
         raise NotImplementedError(
             "`%s` must implement `.weighted_counts`" % type(self).__name__
         )
+
+
+class _CatWeightedCubeCounts(_BaseWeightedCubeCounts):
+    """Weighted-counts cube-measure for a non-MR stripe.
+
+    Its `._weighted_counts` is a 1D ndarray with axes (rows,).
+    """
+
+
+class _MrWeightedCubeCounts(_BaseWeightedCubeCounts):
+    """Weighted-counts cube-measure for an MR slice.
+
+    Its `._weighted_counts` is a 2D ndarray with axes (rows, sel/not).
+    """

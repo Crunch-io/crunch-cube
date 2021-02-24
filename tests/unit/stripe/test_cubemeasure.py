@@ -12,8 +12,10 @@ from cr.cube.stripe.cubemeasure import (
     _BaseUnweightedCubeCounts,
     _BaseWeightedCubeCounts,
     _CatUnweightedCubeCounts,
+    _CatWeightedCubeCounts,
     CubeMeasures,
     _MrUnweightedCubeCounts,
+    _MrWeightedCubeCounts,
 )
 
 from ...unitutil import class_mock, instance_mock
@@ -144,3 +146,49 @@ class Describe_MrUnweightedCubeCounts(object):
     def raw_unweighted_counts(self, request):
         """(3, 2) np.int ndarray of unweighted cube-counts as received from Cube."""
         return np.array([[1, 2], [3, 4], [5, 6]])
+
+
+# === WEIGHTED COUNTS ===
+
+
+class Describe_BaseWeightedCubeCounts(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._BaseWeightedCubeCounts`."""
+
+    @pytest.mark.parametrize(
+        "ca_as_0th, rows_dimension_type, WeightedCubeCountsCls, weighted_counts",
+        (
+            (
+                True,
+                DT.CA_CAT,
+                _CatWeightedCubeCounts,
+                [[4.4, 5.5, 6.6], [1.1, 2.2, 3.3]],
+            ),
+            (False, DT.MR, _MrWeightedCubeCounts, [1.1, 2.2, 3.3]),
+            (False, DT.CAT, _CatWeightedCubeCounts, [1.1, 2.2, 3.3]),
+        ),
+    )
+    def it_provides_a_factory_for_constructing_weighted_cube_count_objects(
+        self,
+        request,
+        ca_as_0th,
+        rows_dimension_type,
+        WeightedCubeCountsCls,
+        weighted_counts,
+    ):
+        cube_ = instance_mock(request, Cube, counts=weighted_counts)
+        rows_dimension_ = instance_mock(
+            request, Dimension, dimension_type=rows_dimension_type
+        )
+        weighted_cube_counts_ = instance_mock(request, WeightedCubeCountsCls)
+        WeightedCubeCountsCls_ = class_mock(
+            request,
+            "cr.cube.stripe.cubemeasure.%s" % WeightedCubeCountsCls.__name__,
+            return_value=weighted_cube_counts_,
+        )
+
+        weighted_cube_counts = _BaseWeightedCubeCounts.factory(
+            cube_, rows_dimension_, ca_as_0th, slice_idx=1
+        )
+
+        WeightedCubeCountsCls_.assert_called_once_with(rows_dimension_, [1.1, 2.2, 3.3])
+        assert weighted_cube_counts is weighted_cube_counts_
