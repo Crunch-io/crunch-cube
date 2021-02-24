@@ -7,7 +7,11 @@ import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension
-from cr.cube.stripe.cubemeasure import _BaseUnweightedCubeCounts, CubeMeasures
+from cr.cube.stripe.cubemeasure import (
+    _BaseUnweightedCubeCounts,
+    _BaseWeightedCubeCounts,
+    CubeMeasures,
+)
 from cr.cube.stripe.measure import (
     _BaseSecondOrderMeasure,
     StripeMeasures,
@@ -160,3 +164,26 @@ class Describe_UnweightedCounts(object):
     @pytest.fixture
     def _unweighted_cube_counts_prop_(self, request):
         return property_mock(request, _UnweightedCounts, "_unweighted_cube_counts")
+
+
+class Describe_WeightedCounts(object):
+    """Unit test suite for `cr.cube.stripe.measure._WeightedCounts` object."""
+
+    def it_computes_its_base_values_to_help(
+        self, _weighted_cube_counts_prop_, weighted_cube_counts_
+    ):
+        _weighted_cube_counts_prop_.return_value = weighted_cube_counts_
+        weighted_cube_counts_.weighted_counts = np.array([1, 2, 3])
+        weighted_counts = _WeightedCounts(None, None, None)
+
+        assert weighted_counts.base_values.tolist() == [1, 2, 3]
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def weighted_cube_counts_(self, request):
+        return instance_mock(request, _BaseWeightedCubeCounts)
+
+    @pytest.fixture
+    def _weighted_cube_counts_prop_(self, request):
+        return property_mock(request, _WeightedCounts, "_weighted_cube_counts")

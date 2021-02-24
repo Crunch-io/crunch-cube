@@ -113,3 +113,21 @@ class _MrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
     def unweighted_counts(self):
         """1D np.int64 ndarray of unweighted-count for each row of stripe."""
         return self._unweighted_counts[:, 0]
+
+
+# === WEIGHTED COUNTS ===
+
+
+class _BaseWeightedCubeCounts(_BaseCubeMeasure):
+    """Base class for weighted-count cube-measure variants."""
+
+    @lazyproperty
+    def weighted_counts(self):
+        """1D np.float/int64 ndarray of weighted-count for each row of stripe.
+
+        The cell values are np.int64 when the cube-result has no weight, in which case
+        these values are the same as the unweighted-counts.
+        """
+        raise NotImplementedError(
+            "`%s` must implement `.weighted_counts`" % type(self).__name__
+        )

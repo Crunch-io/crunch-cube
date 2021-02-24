@@ -104,6 +104,15 @@ class _BaseSecondOrderMeasure(object):
         """
         return self._cube_measures.unweighted_cube_counts
 
+    @lazyproperty
+    def _weighted_cube_counts(self):
+        """_BaseWeightedCubeCounts subclass instance for this measure.
+
+        Provides cube measures associated with weighted counts, including
+        weighted-counts and table-margin.
+        """
+        raise NotImplementedError
+
 
 class _UnweightedCounts(_BaseSecondOrderMeasure):
     """Provides the unweighted-counts measure for a stripe."""
@@ -124,3 +133,8 @@ class _UnweightedCounts(_BaseSecondOrderMeasure):
 
 class _WeightedCounts(_BaseSecondOrderMeasure):
     """Provides the weighted-counts measure for a stripe."""
+
+    @lazyproperty
+    def base_values(self):
+        """1D np.float/int64 ndarray of weighted-count for each row."""
+        return self._weighted_cube_counts.weighted_counts
