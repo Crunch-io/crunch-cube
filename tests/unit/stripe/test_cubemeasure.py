@@ -207,3 +207,18 @@ class Describe_CatWeightedCubeCounts(object):
     def raw_weighted_counts(self, request):
         """(3,) np.int ndarray of weighted cube-counts as received from Cube."""
         return np.array([1.1, 2.2, 3.3])
+
+
+class Describe_MrWeightedCubeCounts(object):
+    """Unit-test suite for `cr.cube.stripe.cubemeasure._MrWeightedCubeCounts`."""
+
+    def it_knows_its_weighted_counts(self, raw_weighted_counts):
+        weighted_cube_counts = _MrWeightedCubeCounts(None, raw_weighted_counts)
+        assert weighted_cube_counts.weighted_counts.tolist() == [1.1, 3.3, 5.5]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_weighted_counts(self, request):
+        """(3, 2) np.int ndarray of weighted cube-counts as received from Cube."""
+        return np.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]])
