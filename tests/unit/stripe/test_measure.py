@@ -122,6 +122,15 @@ class Describe_BaseSecondOrderMeasure(object):
 
         assert measure._unweighted_cube_counts is unweighted_cube_counts_
 
+    def it_provides_access_to_the_weighted_cube_counts_object_to_help(
+        self, request, cube_measures_
+    ):
+        weighted_cube_counts_ = instance_mock(request, _BaseWeightedCubeCounts)
+        cube_measures_.weighted_cube_counts = weighted_cube_counts_
+        measure = _BaseSecondOrderMeasure(None, None, cube_measures_)
+
+        assert measure._weighted_cube_counts is weighted_cube_counts_
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture

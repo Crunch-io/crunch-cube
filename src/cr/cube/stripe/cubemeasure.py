@@ -30,6 +30,11 @@ class CubeMeasures(object):
             self._cube, self._rows_dimension, self._ca_as_0th, self._slice_idx
         )
 
+    @lazyproperty
+    def weighted_cube_counts(self):
+        """_BaseWeightedCubeCounts subclass object for this stripe."""
+        raise NotImplementedError
+
 
 class _BaseCubeMeasure(object):
     """Base class for all cube-measure objects."""

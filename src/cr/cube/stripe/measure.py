@@ -111,7 +111,7 @@ class _BaseSecondOrderMeasure(object):
         Provides cube measures associated with weighted counts, including
         weighted-counts and table-margin.
         """
-        raise NotImplementedError
+        return self._cube_measures.weighted_cube_counts
 
 
 class _UnweightedCounts(_BaseSecondOrderMeasure):
