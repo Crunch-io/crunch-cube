@@ -12,7 +12,7 @@ from cr.cube.stripe.assembler import (
     _SortByValueHelper,
     StripeAssembler,
 )
-from cr.cube.stripe.measure import StripeMeasures, _UnweightedCounts
+from cr.cube.stripe.measure import StripeMeasures, _UnweightedCounts, _WeightedCounts
 
 from ...unitutil import (
     class_mock,
@@ -27,7 +27,10 @@ class DescribeAssembler(object):
 
     @pytest.mark.parametrize(
         "measure_prop_name, MeasureCls",
-        (("unweighted_counts", _UnweightedCounts),),
+        (
+            ("unweighted_counts", _UnweightedCounts),
+            ("weighted_counts", _WeightedCounts),
+        ),
     )
     def it_assembles_various_measures(
         self,
