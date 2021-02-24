@@ -192,3 +192,18 @@ class Describe_BaseWeightedCubeCounts(object):
 
         WeightedCubeCountsCls_.assert_called_once_with(rows_dimension_, [1.1, 2.2, 3.3])
         assert weighted_cube_counts is weighted_cube_counts_
+
+
+class Describe_CatWeightedCubeCounts(object):
+    """Unit-test suite for `cr.cube.stripe.cubemeasure._CatWeightedCubeCounts`."""
+
+    def it_knows_its_weighted_counts(self, raw_weighted_counts):
+        weighted_cube_counts = _CatWeightedCubeCounts(None, raw_weighted_counts)
+        assert weighted_cube_counts.weighted_counts.tolist() == [1.1, 2.2, 3.3]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_weighted_counts(self, request):
+        """(3,) np.int ndarray of weighted cube-counts as received from Cube."""
+        return np.array([1.1, 2.2, 3.3])

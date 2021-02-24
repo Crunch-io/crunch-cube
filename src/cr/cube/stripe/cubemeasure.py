@@ -161,6 +161,15 @@ class _CatWeightedCubeCounts(_BaseWeightedCubeCounts):
     Its `._weighted_counts` is a 1D ndarray with axes (rows,).
     """
 
+    @lazyproperty
+    def weighted_counts(self):
+        """1D np.float/int64 ndarray of weighted-count for each row of stripe.
+
+        The cell values are np.int64 when the cube-result has no weight, in which case
+        these values are the same as the unweighted-counts.
+        """
+        return self._weighted_counts
+
 
 class _MrWeightedCubeCounts(_BaseWeightedCubeCounts):
     """Weighted-counts cube-measure for an MR slice.
