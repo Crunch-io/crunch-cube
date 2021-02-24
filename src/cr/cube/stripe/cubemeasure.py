@@ -69,6 +69,11 @@ class _BaseUnweightedCubeCounts(_BaseCubeMeasure):
         return _CatUnweightedCubeCounts(rows_dimension, cube.unweighted_counts)
 
     @lazyproperty
+    def bases(self):
+        """1D np.int64 ndarray of unweighted table-proportion denonimator per row."""
+        raise NotImplementedError("`%s` must implement `.bases`" % type(self).__name__)
+
+    @lazyproperty
     def pruning_base(self):
         """1D np.int64 ndarray of unweighted-N for each matrix row."""
         raise NotImplementedError(

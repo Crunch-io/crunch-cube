@@ -126,6 +126,11 @@ class _UnweightedBases(_BaseSecondOrderMeasure):
     denominator (base) for each row. This object also provides the table-base totals.
     """
 
+    @lazyproperty
+    def base_values(self):
+        """1D np.int64 ndarray of unweighted table-proportion denominator per cell."""
+        return self._unweighted_cube_counts.bases
+
 
 class _UnweightedCounts(_BaseSecondOrderMeasure):
     """Provides the unweighted-counts measure for a stripe."""
