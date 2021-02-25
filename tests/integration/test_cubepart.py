@@ -860,7 +860,7 @@ class Describe_Strand(object):
         assert strand.table_proportion_stderrs == pytest.approx([0.1217161, 0.1217161])
         assert strand.table_proportions == pytest.approx([0.6666667, 0.3333333])
         assert strand.title == "Registered Voters"
-        assert strand.unweighted_bases == (15, 15)
+        assert strand.unweighted_bases.tolist() == [15, 15]
         assert strand.unweighted_counts.tolist() == [10, 5]
         assert strand.var_scale_mean == pytest.approx(0.8888888)
         assert strand.variable_name == "v7"
@@ -1039,7 +1039,7 @@ class Describe_Strand(object):
                 0.000792023,
             ]
         )
-        assert strand.unweighted_bases == (33358,) * 9
+        assert strand.unweighted_bases.tolist() == [33358] * 9
 
     def it_provides_values_for_univariate_numeric(self):
         strand = Cube(CR.NUM, population=9001).partitions[0]

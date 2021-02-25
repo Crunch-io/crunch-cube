@@ -1257,13 +1257,13 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def min_base_size_mask(self):
-        mask = self.table_base < self._mask_size
-        shape = self.shape
-        return (
-            mask
-            if self.table_base.shape == shape
-            else np.logical_or(np.zeros(shape, dtype=bool), mask)
-        )
+        """1D bool ndarray of True for each row that fails to meet min-base spec.
+
+        The "base" is the physical (unweighted) count of respondents to the question.
+        When this is lower than a specified threshold, the reliability of the value is
+        too low to be meaningful. The threshold is defined by the caller (user).
+        """
+        return self.unweighted_bases < self._mask_size
 
     @lazyproperty
     def name(self):
@@ -1496,13 +1496,13 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def unweighted_bases(self):
-        """Sequence of base count for each row, before weighting.
+        """1D np.int64 ndarray of base count for each row, before weighting.
 
-        When the rows dimension is multiple-response, each value is different,
+        When the rows dimension is multiple-response (MR), each value is different,
         reflecting the base for that individual subvariable. In all other cases, the
         table base is repeated for each row.
         """
-        return tuple(np.broadcast_to(self.table_base, self.shape))
+        return self._assembler.unweighted_bases
 
     @lazyproperty
     def unweighted_counts(self):
