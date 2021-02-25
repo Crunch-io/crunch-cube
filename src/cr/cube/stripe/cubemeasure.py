@@ -130,6 +130,15 @@ class _MrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
     """
 
     @lazyproperty
+    def bases(self):
+        """1D np.int64 ndarray of table-proportion denonimator (base) for each row.
+
+        Each row in an MR stripe has a distinct base. These values include both the
+        selected and unselected counts.
+        """
+        return np.sum(self._unweighted_counts, axis=1)
+
+    @lazyproperty
     def pruning_base(self):
         """1D np.int64 ndarray of unweighted-N for each matrix row.
 

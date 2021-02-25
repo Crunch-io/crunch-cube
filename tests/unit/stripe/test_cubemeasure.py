@@ -146,6 +146,10 @@ class Describe_CatUnweightedCubeCounts(object):
 class Describe_MrUnweightedCubeCounts(object):
     """Unit-test suite for `cr.cube.stripe.cubemeasure._MrUnweightedCubeCounts`."""
 
+    def it_knows_its_bases(self, raw_unweighted_counts):
+        unweighted_cube_counts = _MrUnweightedCubeCounts(None, raw_unweighted_counts)
+        assert unweighted_cube_counts.bases.tolist() == [3, 7, 11]
+
     def it_knows_its_pruning_base(self, raw_unweighted_counts):
         unweighted_cube_counts = _MrUnweightedCubeCounts(None, raw_unweighted_counts)
         assert unweighted_cube_counts.pruning_base.tolist() == [3, 7, 11]
