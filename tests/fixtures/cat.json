@@ -1,0 +1,163 @@
+{
+    "query": {
+        "measures": {
+            "count": {
+                "function": "cube_count",
+                "args": [
+
+                ]
+            }
+        },
+        "dimensions": [
+            {
+                "variable": "https://app.crunch.io/api/datasets/95ba1b/variables/000000/"
+            }
+        ],
+        "weight": null
+    },
+    "query_environment": {
+        "filter": [
+
+        ]
+    },
+    "result": {
+        "dimensions": [
+            {
+                "derived": false,
+                "references": {
+                    "description": "",
+                    "format": {
+                        "summary": {
+                            "digits": 0
+                        }
+                    },
+                    "notes": "",
+                    "name": "Summer Favorability",
+                    "alias": "summer",
+                    "view": {
+                        "show_counts": false,
+                        "show_numeric_values": false,
+                        "include_missing": false,
+                        "column_width": null
+                    }
+                },
+                "type": {
+                    "ordinal": false,
+                    "class": "categorical",
+                    "categories": [
+                        {
+                            "numeric_value": 1,
+                            "id": 1,
+                            "name": "Love",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 2,
+                            "id": 2,
+                            "name": "Like",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 3,
+                            "id": 3,
+                            "name": "Neutral",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 4,
+                            "id": 4,
+                            "name": "Dislike",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 5,
+                            "id": 5,
+                            "name": "Hate",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": null,
+                            "id": -1,
+                            "name": "No Data",
+                            "missing": true
+                        }
+                    ]
+                }
+            }
+        ],
+        "missing": 45,
+        "measures": {
+            "count": {
+                "data": [
+                    211,
+                    212,
+                    131,
+                    79,
+                    51,
+                    45
+                ],
+                "n_missing": 45,
+                "metadata": {
+                    "references": {
+
+                    },
+                    "derived": true,
+                    "type": {
+                        "integer": true,
+                        "missing_rules": {
+
+                        },
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "class": "numeric"
+                    }
+                }
+            }
+        },
+        "n": 729,
+        "filter_stats": {
+            "filtered_complete": {
+                "unweighted": {
+                    "selected": 729,
+                    "other": 0,
+                    "missing": 0
+                },
+                "weighted": {
+                    "selected": 729,
+                    "other": 0,
+                    "missing": 0
+                }
+            },
+            "filtered": {
+                "unweighted": {
+                    "selected": 729,
+                    "other": 0,
+                    "missing": 0
+                },
+                "weighted": {
+                    "selected": 729,
+                    "other": 0,
+                    "missing": 0
+                }
+            }
+        },
+        "unfiltered": {
+            "unweighted_n": 729,
+            "weighted_n": 729
+        },
+        "filtered": {
+            "unweighted_n": 729,
+            "weighted_n": 729
+        },
+        "counts": [
+            211,
+            212,
+            131,
+            79,
+            51,
+            45
+        ],
+        "element": "crunch:cube"
+    }
+}
