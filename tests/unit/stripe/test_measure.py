@@ -18,6 +18,7 @@ from cr.cube.stripe.measure import (
     StripeMeasures,
     _UnweightedBases,
     _UnweightedCounts,
+    _WeightedBases,
     _WeightedCounts,
 )
 
@@ -32,6 +33,7 @@ class DescribeStripeMeasures(object):
         (
             ("unweighted_bases", _UnweightedBases),
             ("unweighted_counts", _UnweightedCounts),
+            ("weighted_bases", _WeightedBases),
             ("weighted_counts", _WeightedCounts),
         ),
     )

@@ -47,7 +47,7 @@ class StripeMeasures(object):
     @lazyproperty
     def weighted_bases(self):
         """_WeightedBases measure object for this stripe."""
-        raise NotImplementedError
+        return _WeightedBases(self._rows_dimension, self, self._cube_measures)
 
     @lazyproperty
     def weighted_counts(self):
