@@ -1455,7 +1455,12 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def table_percentages(self):
-        return tuple(self._table_proportions_as_array * 100)
+        """1D np.float64 ndarray of table-percentage for each row.
+
+        Table-percentage is the fraction of the table weighted-N contributed by each
+        row, expressed as a percentage (float between 0.0 and 100.0 inclusive).
+        """
+        return tuple(self.table_proportions * 100)
 
     @lazyproperty
     def table_proportion_moes(self):
@@ -1482,7 +1487,11 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def table_proportions(self):
-        return np.array([row.table_proportions for row in self._stripe.rows])
+        """1D np.float64 ndarray of fraction of weighted-N contributed by each row.
+
+        The proportion is expressed as a float between 0.0 and 1.0 inclusive.
+        """
+        return self._assembler.table_proportions
 
     @lazyproperty
     def title(self):
@@ -1593,16 +1602,12 @@ class _Strand(CubePartition):
         )
 
     @lazyproperty
-    def _table_proportions_as_array(self):
-        return np.array([row.table_proportions for row in self._stripe.rows])
-
-    @lazyproperty
     def _variance(self):
         """variance for cell percentages
 
         `variance = p * (1-p)`
         """
-        p = self._table_proportions_as_array
+        p = self.table_proportions
         return p * (1 - p)
 
 

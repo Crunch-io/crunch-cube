@@ -974,13 +974,13 @@ class Describe_Strand(object):
         )
         assert strand.table_margin == 4
         assert strand.table_percentages == pytest.approx([25.0, 25.0, 25.0, 25.0])
-        assert strand.table_proportions == pytest.approx([0.25, 0.25, 0.25, 0.25])
         assert strand.table_proportion_stddevs == pytest.approx(
             [0.4330127, 0.4330127, 0.4330127, 0.4330127]
         )
         assert strand.table_proportion_stderrs == pytest.approx(
             [0.2165064, 0.2165064, 0.2165064, 0.2165064]
         )
+        assert strand.table_proportions == pytest.approx([0.25, 0.25, 0.25, 0.25])
 
     def it_provides_values_for_univariate_mr_hs(self):
         # --- subtotals shouldn't be in the MR variable, but there are cases when they
