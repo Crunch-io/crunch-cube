@@ -254,6 +254,10 @@ class Describe_MrWeightedCubeCounts(object):
         weighted_cube_counts = _MrWeightedCubeCounts(None, raw_weighted_counts)
         assert weighted_cube_counts.bases.tolist() == [1.2, 3.4, 5.6]
 
+    def it_knows_its_table_margin(self, raw_weighted_counts):
+        weighted_cube_counts = _MrWeightedCubeCounts(None, raw_weighted_counts)
+        assert weighted_cube_counts.table_margin == pytest.approx([3.3, 7.7, 12.1])
+
     def it_knows_its_weighted_counts(self, raw_weighted_counts):
         weighted_cube_counts = _MrWeightedCubeCounts(None, raw_weighted_counts)
         assert weighted_cube_counts.weighted_counts.tolist() == [1.1, 3.3, 5.5]

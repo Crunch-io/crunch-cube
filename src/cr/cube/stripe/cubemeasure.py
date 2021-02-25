@@ -242,7 +242,7 @@ class _MrWeightedCubeCounts(_BaseWeightedCubeCounts):
         responses, so this value includes both the selected and unselected counts. The
         value is np.int64 when source cube-result is not weighted.
         """
-        raise NotImplementedError
+        return np.sum(self._weighted_counts, axis=1)
 
     @lazyproperty
     def weighted_counts(self):
