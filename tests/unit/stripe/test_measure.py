@@ -226,6 +226,29 @@ class Describe_UnweightedCounts(object):
         return property_mock(request, _UnweightedCounts, "_unweighted_cube_counts")
 
 
+class Describe_WeightedBases(object):
+    """Unit test suite for `cr.cube.stripe.measure._WeightedBases` object."""
+
+    def it_knows_its_base_values(
+        self, _weighted_cube_counts_prop_, weighted_cube_counts_
+    ):
+        _weighted_cube_counts_prop_.return_value = weighted_cube_counts_
+        weighted_cube_counts_.bases = np.array([3.3, 4.4, 5.5])
+        weighted_bases = _WeightedBases(None, None, None)
+
+        assert weighted_bases.base_values.tolist() == [3.3, 4.4, 5.5]
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def weighted_cube_counts_(self, request):
+        return instance_mock(request, _BaseWeightedCubeCounts)
+
+    @pytest.fixture
+    def _weighted_cube_counts_prop_(self, request):
+        return property_mock(request, _WeightedBases, "_weighted_cube_counts")
+
+
 class Describe_WeightedCounts(object):
     """Unit test suite for `cr.cube.stripe.measure._WeightedCounts` object."""
 

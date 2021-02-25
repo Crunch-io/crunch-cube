@@ -175,6 +175,11 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
         return _CatWeightedCubeCounts(rows_dimension, cube.counts)
 
     @lazyproperty
+    def bases(self):
+        """1D np.float/int64 ndarray of table-proportion denominator for each cell."""
+        raise NotImplementedError("`%s` must implement `.bases`" % type(self).__name__)
+
+    @lazyproperty
     def weighted_counts(self):
         """1D np.float/int64 ndarray of weighted-count for each row of stripe.
 

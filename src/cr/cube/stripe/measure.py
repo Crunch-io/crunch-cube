@@ -186,6 +186,11 @@ class _WeightedBases(_BaseSecondOrderMeasure):
     denominator (base) for each row.
     """
 
+    @lazyproperty
+    def base_values(self):
+        """1D np.float64 ndarray of weighted table-proportion denominator per cell."""
+        return self._weighted_cube_counts.bases
+
 
 class _WeightedCounts(_BaseSecondOrderMeasure):
     """Provides the weighted-counts measure for a stripe."""
