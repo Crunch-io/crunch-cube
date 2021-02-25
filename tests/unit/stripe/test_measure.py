@@ -10,6 +10,7 @@ from cr.cube.dimension import Dimension
 from cr.cube.stripe.cubemeasure import (
     _BaseUnweightedCubeCounts,
     _BaseWeightedCubeCounts,
+    _CatUnweightedCubeCounts,
     CubeMeasures,
 )
 from cr.cube.stripe.measure import (
@@ -151,6 +152,29 @@ class Describe_UnweightedBases(object):
         unweighted_bases = _UnweightedBases(None, None, None)
 
         assert unweighted_bases.base_values.tolist() == [3, 4, 5]
+
+    @pytest.mark.parametrize(
+        "subtotal_values, expected_value",
+        ((np.array([]), []), (np.array([5, 3]), [42, 42])),
+    )
+    def it_knows_its_subtotal_values(
+        self, request, _unweighted_cube_counts_prop_, subtotal_values, expected_value
+    ):
+        rows_dimension_ = instance_mock(request, Dimension)
+        property_mock(request, _UnweightedBases, "base_values", return_value=[3, 2, 1])
+        SumSubtotals_ = class_mock(request, "cr.cube.stripe.measure.SumSubtotals")
+        SumSubtotals_.subtotal_values.return_value = subtotal_values
+        _unweighted_cube_counts_prop_.return_value = instance_mock(
+            request, _CatUnweightedCubeCounts, table_base=42
+        )
+        unweighted_bases = _UnweightedBases(rows_dimension_, None, None)
+
+        subtotal_values = unweighted_bases.subtotal_values
+
+        SumSubtotals_.subtotal_values.assert_called_once_with(
+            [3, 2, 1], rows_dimension_
+        )
+        assert subtotal_values.tolist() == expected_value
 
     # fixture components ---------------------------------------------
 

@@ -4,6 +4,8 @@
 
 from __future__ import division
 
+import numpy as np
+
 from cr.cube.stripe.cubemeasure import CubeMeasures
 from cr.cube.stripe.insertion import SumSubtotals
 from cr.cube.util import lazyproperty
@@ -130,6 +132,29 @@ class _UnweightedBases(_BaseSecondOrderMeasure):
     def base_values(self):
         """1D np.int64 ndarray of unweighted table-proportion denominator per cell."""
         return self._unweighted_cube_counts.bases
+
+    @lazyproperty
+    def subtotal_values(self):
+        """1D np.int64 ndarray of subtotal value for each row-subtotal."""
+        # --- Background:
+        # --- 1. The base is the same for all rows of a CAT stripe.
+        # --- 2. An MR stripe can have no subtotals.
+        # --- The strategy here is to broadcast the table-base to the size of the
+        # --- subtotals array for CAT, and return an empty array for MR.
+
+        # --- This initial subtotal-values array has the wrong values (unless it's
+        # --- empty), but has the right shape and type.
+        subtotal_values = SumSubtotals.subtotal_values(
+            self.base_values, self._rows_dimension
+        )
+        # --- in the "no-subtotals" case, return that value, since it is both the right
+        # --- value and the right dtype. Note this takes care of the MR stripe case.
+        if subtotal_values.shape == (0,):
+            return subtotal_values
+
+        return np.broadcast_to(
+            self._unweighted_cube_counts.table_base, subtotal_values.shape
+        )
 
 
 class _UnweightedCounts(_BaseSecondOrderMeasure):
