@@ -191,6 +191,29 @@ class _WeightedBases(_BaseSecondOrderMeasure):
         """1D np.float64 ndarray of weighted table-proportion denominator per cell."""
         return self._weighted_cube_counts.bases
 
+    @lazyproperty
+    def subtotal_values(self):
+        """1D np.float/int64 ndarray of sum for each row-subtotal."""
+        # --- Background:
+        # --- 1. weighted-base is the same for all rows, including subtotal rows.
+        # --- 2. Only a CAT stripe can have subtotals; an MR stripe can't.
+        # --- The strategy here is to broadcast the table-margin to the size of the
+        # --- subtotals array for CAT, and return an empty array for MR.
+
+        # --- This initial subtotal-values array has the wrong values (unless it's
+        # --- empty), but has the right shape and type.
+        subtotal_values = SumSubtotals.subtotal_values(
+            self.base_values, self._rows_dimension
+        )
+        # --- in the "no-subtotals" case, return that value, since it is both the right
+        # --- value and the right dtype. Note this takes care of the MR stripe case.
+        if subtotal_values.shape == (0,):
+            return subtotal_values
+
+        return np.broadcast_to(
+            self._weighted_cube_counts.table_margin, subtotal_values.shape
+        )
+
 
 class _WeightedCounts(_BaseSecondOrderMeasure):
     """Provides the weighted-counts measure for a stripe."""
