@@ -115,7 +115,7 @@ class _CatUnweightedCubeCounts(_BaseUnweightedCubeCounts):
         This is the unweighted count of respondents who provided a valid response to
         the question.
         """
-        raise NotImplementedError
+        return np.sum(self._unweighted_counts)
 
     @lazyproperty
     def unweighted_counts(self):
