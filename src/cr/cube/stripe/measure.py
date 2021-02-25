@@ -45,6 +45,11 @@ class StripeMeasures(object):
         return _UnweightedCounts(self._rows_dimension, self, self._cube_measures)
 
     @lazyproperty
+    def weighted_bases(self):
+        """_WeightedBases measure object for this stripe."""
+        raise NotImplementedError
+
+    @lazyproperty
     def weighted_counts(self):
         """_WeightedCounts measure object for this stripe."""
         return _WeightedCounts(self._rows_dimension, self, self._cube_measures)
@@ -172,6 +177,14 @@ class _UnweightedCounts(_BaseSecondOrderMeasure):
         # --- subtotals. This just returns an empty array in that case and we don't need
         # --- to special-case MR.
         return SumSubtotals.subtotal_values(self.base_values, self._rows_dimension)
+
+
+class _WeightedBases(_BaseSecondOrderMeasure):
+    """Provides the weighted-bases measure for a stripe.
+
+    weighted-bases is a 1D np.float/int64 ndarray of the (weighted) table-proportion
+    denominator (base) for each row.
+    """
 
 
 class _WeightedCounts(_BaseSecondOrderMeasure):

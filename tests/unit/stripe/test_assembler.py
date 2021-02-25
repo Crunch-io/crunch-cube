@@ -16,6 +16,7 @@ from cr.cube.stripe.measure import (
     StripeMeasures,
     _UnweightedBases,
     _UnweightedCounts,
+    _WeightedBases,
     _WeightedCounts,
 )
 
@@ -27,14 +28,15 @@ from ...unitutil import (
 )
 
 
-class DescribeAssembler(object):
-    """Unit test suite for `cr.cube.matrix.assembler.Assembler` object."""
+class DescribeStripeAssembler(object):
+    """Unit test suite for `cr.cube.stripe.assembler.StripeAssembler` object."""
 
     @pytest.mark.parametrize(
         "measure_prop_name, MeasureCls",
         (
             ("unweighted_bases", _UnweightedBases),
             ("unweighted_counts", _UnweightedCounts),
+            ("weighted_bases", _WeightedBases),
             ("weighted_counts", _WeightedCounts),
         ),
     )

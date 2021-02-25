@@ -51,7 +51,7 @@ class StripeAssembler(object):
     @lazyproperty
     def weighted_bases(self):
         """1D np.float64 ndarray of weighted table-proportion denominator per row."""
-        raise NotImplementedError
+        return self._assemble_vector(self._measures.weighted_bases.blocks)
 
     @lazyproperty
     def weighted_counts(self):
