@@ -209,7 +209,7 @@ class _CatWeightedCubeCounts(_BaseWeightedCubeCounts):
         This is the weighted count of respondents who provided a valid response to
         the question. The value is np.int64 when source cube-result is unweighted.
         """
-        raise NotImplementedError
+        return np.sum(self._weighted_counts)
 
     @lazyproperty
     def weighted_counts(self):

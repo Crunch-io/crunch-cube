@@ -225,6 +225,10 @@ class Describe_CatWeightedCubeCounts(object):
         weighted_cube_counts = _CatWeightedCubeCounts(None, raw_weighted_counts)
         assert weighted_cube_counts.bases.tolist() == [42.42, 42.42, 42.42]
 
+    def it_knows_its_table_margin(self, raw_weighted_counts):
+        weighted_cube_counts = _CatWeightedCubeCounts(None, raw_weighted_counts)
+        assert weighted_cube_counts.table_margin == 6.6
+
     def it_knows_its_weighted_counts(self, raw_weighted_counts):
         weighted_cube_counts = _CatWeightedCubeCounts(None, raw_weighted_counts)
         assert weighted_cube_counts.weighted_counts.tolist() == [1.1, 2.2, 3.3]
