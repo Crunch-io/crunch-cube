@@ -821,6 +821,7 @@ class Describe_Strand(object):
             [54523323.5, 24570078.1, 15710358.3, 5072107.3]
         )
         assert strand.table_name == "Level of in: ATP Men's T"
+        assert strand.weighted_bases == pytest.approx([27292.0] * 4)
 
     def it_provides_values_for_univariate_cat(self):
         strand = Cube(CR.UNIVARIATE_CATEGORICAL, population=1000).partitions[0]
@@ -864,7 +865,7 @@ class Describe_Strand(object):
         assert strand.unweighted_counts.tolist() == [10, 5]
         assert strand.var_scale_mean == pytest.approx(0.8888888)
         assert strand.variable_name == "v7"
-        assert strand.weighted_bases == (15, 15)
+        assert strand.weighted_bases == pytest.approx([15.0, 15.0])
 
     def it_provides_values_for_univariate_cat_means_hs(self):
         strand = Cube(CR.CAT_MEANS_HS).partitions[0]
@@ -1040,6 +1041,7 @@ class Describe_Strand(object):
             ]
         )
         assert strand.unweighted_bases.tolist() == [33358] * 9
+        assert strand.weighted_bases == pytest.approx([33364.08] * 9)
 
     def it_provides_values_for_univariate_numeric(self):
         strand = Cube(CR.NUM, population=9001).partitions[0]
@@ -1061,6 +1063,7 @@ class Describe_Strand(object):
             [0.010088359, 0.009694070, 0.003146427]
         )
         assert strand.table_proportions == pytest.approx([0.885, 0.105, 0.010])
+        assert strand.weighted_bases == pytest.approx([1000.0] * 3)
 
     def it_provides_values_for_univariate_numeric_binned(self):
         strand = Cube(

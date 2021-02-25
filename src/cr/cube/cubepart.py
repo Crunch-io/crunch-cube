@@ -1523,8 +1523,13 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def weighted_bases(self):
-        """Sequence of weighted base for each row."""
-        return tuple(np.broadcast_to(self.table_margin, self.shape))
+        """1D np.float/int64 ndarray of table-proportion denominator for each row.
+
+        For a non-MR strand, all values in the array are the same. For an MR strand,
+        each value may be different, reflecting the fact that not all response options
+        were necessarily presented to all respondents.
+        """
+        return self._assembler.weighted_bases
 
     # ---implementation (helpers)-------------------------------------
 
