@@ -67,18 +67,9 @@ class SumSubtotals(_BaseSubtotals):
         subtotals = self._row_subtotals
 
         if len(subtotals) == 0:
-            return np.array([], dtype=self._dtype)
+            return np.array([], dtype=np.float64)
 
         return np.array([self._subtotal_value(subtotal) for subtotal in subtotals])
-
-    @lazyproperty
-    def _dtype(self):
-        """Numpy data-type for result arrays, used when array is empty.
-
-        Otherwise, an empty array can "pollute" the dtype of the measure array,
-        generally changing int to float because the default dtype is float.
-        """
-        return self._base_values.dtype
 
     def _subtotal_value(self, subtotal):
         """Return scalar value of `subtotal` row."""

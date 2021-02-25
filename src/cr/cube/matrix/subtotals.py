@@ -50,15 +50,6 @@ class _BaseSubtotals(object):
         """Dimension object for matrix columns."""
         return self._dimensions[1]
 
-    @lazyproperty
-    def _dtype(self):
-        """Numpy data-type for result matrices, used for empty arrays.
-
-        Always return np.float64 because we may need concept of nan even
-        if we started with int (and nan isn't available in ints).
-        """
-        return np.float64
-
     def _intersection(self, row_subtotal, column_subtotal):
         """Value for this row/column subtotal intersection."""
         raise NotImplementedError(
@@ -77,7 +68,7 @@ class _BaseSubtotals(object):
                 for row_subtotal in self._row_subtotals
                 for column_subtotal in self._column_subtotals
             ],
-            dtype=self._dtype,
+            dtype=np.float64,
         ).reshape(len(self._row_subtotals), len(self._column_subtotals))
 
     @lazyproperty
@@ -112,7 +103,7 @@ class _BaseSubtotals(object):
         subtotals = self._column_subtotals
 
         if len(subtotals) == 0:
-            return np.empty((self._nrows, 0), dtype=self._dtype)
+            return np.empty((self._nrows, 0), dtype=np.float64)
 
         return np.hstack(
             [
@@ -133,7 +124,7 @@ class _BaseSubtotals(object):
         subtotals = self._row_subtotals
 
         if len(subtotals) == 0:
-            return np.empty((0, self._ncols), dtype=self._dtype)
+            return np.empty((0, self._ncols), dtype=np.float64)
 
         return np.vstack(
             [self._subtotal_row(subtotal) for subtotal in self._row_subtotals]

@@ -94,16 +94,12 @@ class DescribeSumSubtotals(object):
     def but_it_returns_an_empty_array_when_there_are_no_subtotals(self, request):
         """The dtype of the empty array is the same as that of the base-values."""
         property_mock(request, SumSubtotals, "_row_subtotals", return_value=())
-        property_mock(request, SumSubtotals, "_dtype", return_value=np.int64)
         sum_subtotals = SumSubtotals(None, None)
 
         subtotal_values = sum_subtotals._subtotal_values
 
         assert subtotal_values.tolist() == []
-        assert subtotal_values.dtype == int
-
-    def it_provides_the_dtype_for_an_empty_subtotal_values_array_to_help(self):
-        assert SumSubtotals(np.array([3, 5]), None)._dtype == int
+        assert subtotal_values.dtype == np.float64
 
     @pytest.mark.parametrize(
         ("addend_idxs", "subtrahend_idxs", "expected"),
@@ -168,8 +164,3 @@ class Describe_SumDiffSubtotals(object):
         )
 
         np.testing.assert_equal(subtotal_value, expected)
-
-    @pytest.mark.parametrize("dtype", (np.float64, np.int32))
-    def it_knows_the_dtype_of_base_values(self, request, dtype):
-        actual = SumSubtotals(np.array([1, 2, 4, 8], dtype=dtype), None)._dtype
-        assert actual == dtype
