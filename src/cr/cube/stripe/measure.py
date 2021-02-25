@@ -37,7 +37,7 @@ class StripeMeasures(object):
     @lazyproperty
     def table_proportions(self):
         """_TableProportions measure object for this stripe."""
-        raise NotImplementedError
+        return _TableProportions(self._rows_dimension, self, self._cube_measures)
 
     @lazyproperty
     def unweighted_bases(self):
