@@ -228,6 +228,23 @@ class _MrWeightedCubeCounts(_BaseWeightedCubeCounts):
     """
 
     @lazyproperty
+    def bases(self):
+        """1D np.float/int64 ndarray of table-proportion denominator for each cell."""
+        # --- (weighted) bases for an MR slice is the already 1D table-margin ---
+        return self.table_margin
+
+    @lazyproperty
+    def table_margin(self):
+        """1D np.float/int64 weighted-N for each row of stripe.
+
+        This is the weighted count of respondents who provided a valid response to the
+        question. Both selecting and not-selecting the subvar/option are valid
+        responses, so this value includes both the selected and unselected counts. The
+        value is np.int64 when source cube-result is not weighted.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
     def weighted_counts(self):
         """1D np.float/int64 ndarray of weighted-count for each row of stripe."""
         return self._weighted_counts[:, 0]

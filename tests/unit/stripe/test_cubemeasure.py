@@ -244,6 +244,16 @@ class Describe_CatWeightedCubeCounts(object):
 class Describe_MrWeightedCubeCounts(object):
     """Unit-test suite for `cr.cube.stripe.cubemeasure._MrWeightedCubeCounts`."""
 
+    def it_knows_its_bases(self, request, raw_weighted_counts):
+        property_mock(
+            request,
+            _MrWeightedCubeCounts,
+            "table_margin",
+            return_value=np.array([1.2, 3.4, 5.6]),
+        )
+        weighted_cube_counts = _MrWeightedCubeCounts(None, raw_weighted_counts)
+        assert weighted_cube_counts.bases.tolist() == [1.2, 3.4, 5.6]
+
     def it_knows_its_weighted_counts(self, raw_weighted_counts):
         weighted_cube_counts = _MrWeightedCubeCounts(None, raw_weighted_counts)
         assert weighted_cube_counts.weighted_counts.tolist() == [1.1, 3.3, 5.5]
