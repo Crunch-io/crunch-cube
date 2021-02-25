@@ -138,6 +138,20 @@ class _TableProportions(_BaseSecondOrderMeasure):
     count contributes to the weighted-N of the table.
     """
 
+    @lazyproperty
+    def base_values(self):
+        """1D np.float64 ndarray of table-proportion for each row of stripe."""
+        weighted_counts = self._measures.weighted_counts.base_values
+        table_margin = self._weighted_cube_counts.table_margin
+
+        # --- note that table-margin can be either scalar or 1D ndarray. When it is an
+        # --- array (stripe is MR), its shape is the same as the weighted_counts, so the
+        # --- division works either way.
+
+        # --- do not propagate divide-by-zero warnings to stderr ---
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return weighted_counts / table_margin
+
 
 class _UnweightedBases(_BaseSecondOrderMeasure):
     """Provides the unweighted-bases measure for a stripe.

@@ -180,6 +180,13 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
         raise NotImplementedError("`%s` must implement `.bases`" % type(self).__name__)
 
     @lazyproperty
+    def table_margin(self):
+        """Scalar or 1D np.float/int64 array of weighted-N for overall stripe."""
+        raise NotImplementedError(
+            "`%s` must implement `.table_margin`" % type(self).__name__
+        )
+
+    @lazyproperty
     def weighted_counts(self):
         """1D np.float/int64 ndarray of weighted-count for each row of stripe.
 

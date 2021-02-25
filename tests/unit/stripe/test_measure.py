@@ -146,6 +146,52 @@ class Describe_BaseSecondOrderMeasure(object):
         return instance_mock(request, CubeMeasures)
 
 
+class Describe_TableProportions(object):
+    """Unit test suite for `cr.cube.stripe.measure._TableProportions` object."""
+
+    @pytest.mark.parametrize(
+        "table_margin, expected_value",
+        (
+            (np.array([4.5, 6.7]), [0.7555556, 0.8358209]),
+            (42.42, [0.08015087, 0.1320132]),
+        ),
+    )
+    def it_computes_its_base_values_to_help(
+        self,
+        measures_,
+        weighted_counts_,
+        _weighted_cube_counts_prop_,
+        weighted_cube_counts_,
+        table_margin,
+        expected_value,
+    ):
+        weighted_counts_.base_values = np.array([3.4, 5.6])
+        measures_.weighted_counts = weighted_counts_
+        weighted_cube_counts_.table_margin = table_margin
+        _weighted_cube_counts_prop_.return_value = weighted_cube_counts_
+        table_proportions = _TableProportions(None, measures_, None)
+
+        assert table_proportions.base_values == pytest.approx(expected_value)
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def measures_(self, request):
+        return instance_mock(request, StripeMeasures)
+
+    @pytest.fixture
+    def weighted_counts_(self, request):
+        return instance_mock(request, _WeightedCounts)
+
+    @pytest.fixture
+    def weighted_cube_counts_(self, request):
+        return instance_mock(request, _BaseWeightedCubeCounts)
+
+    @pytest.fixture
+    def _weighted_cube_counts_prop_(self, request):
+        return property_mock(request, _TableProportions, "_weighted_cube_counts")
+
+
 class Describe_UnweightedBases(object):
     """Unit test suite for `cr.cube.stripe.measure._UnweightedBases` object."""
 
