@@ -198,6 +198,20 @@ class _CatWeightedCubeCounts(_BaseWeightedCubeCounts):
     """
 
     @lazyproperty
+    def bases(self):
+        """1D np.float/int64 ndarray of table-proportion denominator for each cell."""
+        return np.broadcast_to(self.table_margin, self._weighted_counts.shape)
+
+    @lazyproperty
+    def table_margin(self):
+        """Scalar np.float/int64 weighted-N for overall stripe.
+
+        This is the weighted count of respondents who provided a valid response to
+        the question. The value is np.int64 when source cube-result is unweighted.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
     def weighted_counts(self):
         """1D np.float/int64 ndarray of weighted-count for each row of stripe.
 
