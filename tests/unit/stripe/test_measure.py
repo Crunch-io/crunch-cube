@@ -173,6 +173,30 @@ class Describe_TableProportions(object):
 
         assert table_proportions.base_values == pytest.approx(expected_value)
 
+    @pytest.mark.parametrize(
+        "table_margin, expected_value",
+        (
+            (np.array([4.5, 6.7]), []),
+            (42.42, [0.2310231, 0.1791608]),
+        ),
+    )
+    def it_computes_its_subtotal_values_to_help(
+        self,
+        measures_,
+        weighted_counts_,
+        _weighted_cube_counts_prop_,
+        weighted_cube_counts_,
+        table_margin,
+        expected_value,
+    ):
+        weighted_counts_.subtotal_values = np.array([9.8, 7.6])
+        measures_.weighted_counts = weighted_counts_
+        weighted_cube_counts_.table_margin = table_margin
+        _weighted_cube_counts_prop_.return_value = weighted_cube_counts_
+        table_proportions = _TableProportions(None, measures_, None)
+
+        assert table_proportions.subtotal_values == pytest.approx(expected_value)
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture

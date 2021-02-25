@@ -152,6 +152,24 @@ class _TableProportions(_BaseSecondOrderMeasure):
         with np.errstate(divide="ignore", invalid="ignore"):
             return weighted_counts / table_margin
 
+    @lazyproperty
+    def subtotal_values(self):
+        """1D np.float/int64 ndarray of sum for each row-subtotal."""
+        subtotal_values = self._measures.weighted_counts.subtotal_values
+        table_margin = self._weighted_cube_counts.table_margin
+
+        # --- table-margin is an array when stripe is MR and the division below only
+        # --- works when table-margin is a scalar. An MR stripe can have no subtotals,
+        # --- so the right answer is always always np.array([]) in this case. Maintain
+        # --- the dtype so an int base-values array is not converted to float when the
+        # --- two are concatenated.
+        if isinstance(table_margin, np.ndarray):
+            return np.array([])
+
+        # --- do not propagate divide-by-zero warnings to stderr ---
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return subtotal_values / table_margin
+
 
 class _UnweightedBases(_BaseSecondOrderMeasure):
     """Provides the unweighted-bases measure for a stripe.
