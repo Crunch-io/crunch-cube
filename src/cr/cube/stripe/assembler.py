@@ -41,7 +41,7 @@ class StripeAssembler(object):
     @lazyproperty
     def table_proportions(self):
         """1D np.float64 ndarray of fraction of weighted-N contributed by each row."""
-        raise NotImplementedError
+        return self._assemble_vector(self._measures.table_proportions.blocks)
 
     @lazyproperty
     def unweighted_bases(self):

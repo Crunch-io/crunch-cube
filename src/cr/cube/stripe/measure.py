@@ -35,6 +35,11 @@ class StripeMeasures(object):
         return self._cube_measures.unweighted_cube_counts.pruning_base
 
     @lazyproperty
+    def table_proportions(self):
+        """_TableProportions measure object for this stripe."""
+        raise NotImplementedError
+
+    @lazyproperty
     def unweighted_bases(self):
         """_UnweightedBases measure object for this stripe."""
         return _UnweightedBases(self._rows_dimension, self, self._cube_measures)
@@ -124,6 +129,14 @@ class _BaseSecondOrderMeasure(object):
         weighted-counts and table-margin.
         """
         return self._cube_measures.weighted_cube_counts
+
+
+class _TableProportions(_BaseSecondOrderMeasure):
+    """Provides the table-proportions measure for a stripe.
+
+    Table-proportions is a 1D np.float64 ndarray of the proportion each row's weighted
+    count contributes to the weighted-N of the table.
+    """
 
 
 class _UnweightedBases(_BaseSecondOrderMeasure):
