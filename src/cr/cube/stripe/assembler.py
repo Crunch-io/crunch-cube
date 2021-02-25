@@ -39,6 +39,11 @@ class StripeAssembler(object):
         self._slice_idx = slice_idx
 
     @lazyproperty
+    def table_proportion_stddevs(self):
+        """1D np.float64 ndarray of table-proportion std-deviation for each row."""
+        raise NotImplementedError
+
+    @lazyproperty
     def table_proportions(self):
         """1D np.float64 ndarray of fraction of weighted-N contributed by each row."""
         return self._assemble_vector(self._measures.table_proportions.blocks)

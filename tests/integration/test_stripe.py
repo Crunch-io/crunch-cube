@@ -13,20 +13,38 @@ from ..fixtures import CR
 class DescribeStripeAssembler(object):
     """Integration-test suite for `cr.cube.stripe.assembler.StripeAssembler` object."""
 
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_provides_values_for_univariate_cat(self):
         cube = Cube(CR.UNIVARIATE_CATEGORICAL)
         assembler = StripeAssembler(cube, cube.dimensions[0], False, 0)
 
+        assert assembler.table_proportion_stddevs == pytest.approx(
+            [0.4714045, 0.4714045]
+        )
         assert assembler.table_proportions == pytest.approx([0.6666667, 0.3333333])
         assert assembler.unweighted_bases.tolist() == [15, 15]
         assert assembler.unweighted_counts.tolist() == [10, 5]
         assert assembler.weighted_bases.tolist() == [15, 15]
         assert assembler.weighted_counts.tolist() == [10, 5]
 
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_provides_values_for_univariate_mr(self):
         cube = Cube(CR.MR_WGTD)
         assembler = StripeAssembler(cube, cube.dimensions[0], False, 0)
 
+        assert assembler.table_proportion_stddevs == pytest.approx(
+            [
+                0.4986677,
+                0.4036694,
+                0.4486895,
+                0.3885031,
+                0.4918164,
+                0.3241297,
+                0.1177077,
+                0.1979895,
+                0.2601507,
+            ]
+        )
         assert assembler.table_proportions == pytest.approx(
             [
                 0.4635233,
