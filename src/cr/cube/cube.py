@@ -784,20 +784,24 @@ class _UnweightedCountMeasure(_BaseMeasure):
 
     @lazyproperty
     def _flat_values(self):
-        """tuple of int counts before weighting."""
-        if (
-            self._cube_dict["result"]["measures"]
-            .get("valid_count_unweighted", {})
-            .get("data")
-        ):
-            # ---If valid_count are expressed in the cube dict, returns its data.
-            # ---This condition can happen in case of numeric array cube response.
-            # ---Under this circumstances the numeric array measures will contain the
-            # ---mean measure and a valid count measure for the unweighted counts.
-            return tuple(
-                self._cube_dict["result"]["measures"]["valid_count_unweighted"]["data"]
-            )
-        return tuple(self._cube_dict["result"]["counts"])
+        """np.ndarray of np.float64 counts before weighting or None, if unavailable.
+
+        Use floats to avoid int overflow bugs and so we can use nan.
+        """
+        result = self._cube_dict["result"]
+
+        # ---If valid_count are expressed in the cube dict, returns its data.
+        # ---This condition can happen in case of numeric array cube response.
+        # ---Under this circumstances the numeric array measures will contain the
+        # ---mean measure and a valid count measure for the unweighted counts.
+        valid_counts = result["measures"].get("valid_count_unweighted", {}).get("data")
+        if valid_counts:
+            return np.array(valid_counts, dtype=np.float64)
+
+        if result["counts"] == [None]:
+            return None
+
+        return np.array(result["counts"], dtype=np.float64)
 
 
 class _WeightedCountMeasure(_BaseMeasure):
