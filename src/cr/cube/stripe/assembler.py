@@ -39,12 +39,51 @@ class StripeAssembler(object):
         self._slice_idx = slice_idx
 
     @lazyproperty
+    def inserted_row_idxs(self):
+        """tuple of int index of each inserted row in this stripe.
+
+        Provided index values correspond rows after any insertion of subtotals,
+        re-ordering, and hiding/pruning.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
     def means(self):
         """1D np.float64 ndarray of mean for each row.
 
         Raises ValueError when the cube-result does not include a means cube-measure.
         """
         return self._assemble_vector(self._measures.means.blocks)
+
+    @lazyproperty
+    def row_count(self):
+        """int count of rows in this stripe.
+
+        This count includes inserted rows but not rows that have been hidden/pruned.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
+    def row_labels(self):
+        """1D str ndarray of row name for each matrix row.
+
+        These are suitable for use as row headings; labels for subtotal rows appear in
+        the sequence and labels are ordered to correspond with their respective data
+        row.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
+    def rows_dimension_fills(self):
+        """tuple of optional RGB str like "#def032" fill color for each strand row.
+
+        Each value reflects the resolved element-fill transform cascade. The length and
+        ordering of the sequence correspond to the rows in the slice, including
+        accounting for insertions, ordering, and hidden rows. A fill value is `None`
+        when no explicit fill color is defined for that row, indicating the default fill
+        color for that row should be used, probably coming from a caller-defined theme.
+        """
+        raise NotImplementedError
 
     @lazyproperty
     def table_proportion_stddevs(self):
