@@ -42,7 +42,9 @@ class StripeMeasures(object):
     @lazyproperty
     def table_proportion_variances(self):
         """_TableProportionVariances measure object for this stripe."""
-        raise NotImplementedError
+        return _TableProportionVariances(
+            self._rows_dimension, self, self._cube_measures
+        )
 
     @lazyproperty
     def table_proportions(self):

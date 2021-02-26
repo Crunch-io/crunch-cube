@@ -36,6 +36,7 @@ class DescribeStripeMeasures(object):
         "measure_prop_name, MeasureCls",
         (
             ("table_proportion_stddevs", _TableProportionStddevs),
+            ("table_proportion_variances", _TableProportionVariances),
             ("table_proportions", _TableProportions),
             ("unweighted_bases", _UnweightedBases),
             ("unweighted_counts", _UnweightedCounts),
