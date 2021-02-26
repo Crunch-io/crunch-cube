@@ -77,6 +77,12 @@ class DescribeStripeAssembler(object):
 
         assert assembler.inserted_row_idxs == (0, 3)
 
+    def it_knows_the_row_count(self, _row_order_prop_):
+        _row_order_prop_.return_value = np.array([1, 2, 3, 4, 5])
+        assembler = StripeAssembler(None, None, None, None)
+
+        assert assembler.row_count == 5
+
     def it_can_assemble_a_vector_to_help(self, _row_order_prop_):
         base_values = np.array([1, 2, 3, 4])
         subtotal_values = (3, 5, 7)

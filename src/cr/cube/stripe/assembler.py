@@ -61,7 +61,7 @@ class StripeAssembler(object):
 
         This count includes inserted rows but not rows that have been hidden/pruned.
         """
-        raise NotImplementedError
+        return len(self._row_order)
 
     @lazyproperty
     def row_labels(self):
