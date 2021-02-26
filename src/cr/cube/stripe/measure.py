@@ -32,7 +32,7 @@ class StripeMeasures(object):
     @lazyproperty
     def means(self):
         """_Means measure object for this stripe."""
-        raise NotImplementedError
+        return _Means(self._rows_dimension, self, self._cube_measures)
 
     @lazyproperty
     def pruning_base(self):

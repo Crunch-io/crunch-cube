@@ -16,6 +16,7 @@ from cr.cube.stripe.cubemeasure import (
 )
 from cr.cube.stripe.measure import (
     _BaseSecondOrderMeasure,
+    _Means,
     StripeMeasures,
     _TableProportionStddevs,
     _TableProportionStderrs,
@@ -36,6 +37,7 @@ class DescribeStripeMeasures(object):
     @pytest.mark.parametrize(
         "measure_prop_name, MeasureCls",
         (
+            ("means", _Means),
             ("table_proportion_stddevs", _TableProportionStddevs),
             ("table_proportion_stderrs", _TableProportionStderrs),
             ("table_proportion_variances", _TableProportionVariances),
