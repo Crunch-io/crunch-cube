@@ -1061,7 +1061,7 @@ class Describe_Strand(object):
             [0.31902194, 0.30655342, 0.09949874]
         )
         assert strand.table_proportion_stderrs == pytest.approx(
-            [0.010088359, 0.009694070, 0.003146427]
+            [0.01008836, 0.00969407, 0.003146427]
         )
         assert strand.table_proportions == pytest.approx([0.885, 0.105, 0.010])
         assert strand.weighted_bases == pytest.approx([1000.0] * 3)

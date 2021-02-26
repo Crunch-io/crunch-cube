@@ -1480,10 +1480,8 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def table_proportion_stderrs(self):
-        """np.ndarray percentages standard error"""
-        if self.dimension_types[0] == DT.MR:
-            return np.sqrt(self._variance / self.weighted_bases)
-        return np.sqrt(self._variance / np.sum(self.rows_margin))
+        """1D np.float64 ndarray of table-proportion std-error for each row."""
+        return self._assembler.table_proportion_stderrs
 
     @lazyproperty
     def table_proportions(self):
@@ -1600,15 +1598,6 @@ class _Strand(CubePartition):
         return TransformedStripe.stripe(
             self._cube, self._rows_dimension, self._ca_as_0th, self._slice_idx
         )
-
-    @lazyproperty
-    def _variance(self):
-        """variance for cell percentages
-
-        `variance = p * (1-p)`
-        """
-        p = self.table_proportions
-        return p * (1 - p)
 
 
 class _Nub(CubePartition):
