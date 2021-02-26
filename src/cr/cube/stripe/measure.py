@@ -159,6 +159,11 @@ class _Means(_BaseSecondOrderMeasure):
     Relies on the presence of a means cube-measure in the cube-result.
     """
 
+    @lazyproperty
+    def base_values(self):
+        """1D np.float64 ndarray of mean for each row."""
+        return self._cube_measures.cube_means.means
+
 
 class _TableProportionStddevs(_BaseSecondOrderMeasure):
     """Provides the table-proportion standard-deviation measure for a stripe."""

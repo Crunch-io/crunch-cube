@@ -8,6 +8,7 @@ import pytest
 from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension
 from cr.cube.stripe.cubemeasure import (
+    _BaseCubeMeans,
     _BaseUnweightedCubeCounts,
     _BaseWeightedCubeCounts,
     _CatUnweightedCubeCounts,
@@ -152,6 +153,19 @@ class Describe_BaseSecondOrderMeasure(object):
     @pytest.fixture
     def cube_measures_(self, request):
         return instance_mock(request, CubeMeasures)
+
+
+class Describe_Means(object):
+    """Unit test suite for `cr.cube.stripe.measure._Means` object."""
+
+    def it_computes_its_base_values_to_help(self, request):
+        cube_means_ = instance_mock(
+            request, _BaseCubeMeans, means=np.array([1.1, 2.2, 3.3])
+        )
+        cube_measures_ = instance_mock(request, CubeMeasures, cube_means=cube_means_)
+        means = _Means(None, None, cube_measures_)
+
+        assert means.base_values == pytest.approx([1.1, 2.2, 3.3])
 
 
 class Describe_TableProportionStddevs(object):

@@ -24,6 +24,11 @@ class CubeMeasures(object):
         self._slice_idx = slice_idx
 
     @lazyproperty
+    def cube_means(self):
+        """_BaseCubeMeans subclass object for this stripe."""
+        raise NotImplementedError
+
+    @lazyproperty
     def unweighted_cube_counts(self):
         """_BaseUnweightedCubeCounts subclass object for this stripe."""
         return _BaseUnweightedCubeCounts.factory(
@@ -43,6 +48,18 @@ class _BaseCubeMeasure(object):
 
     def __init__(self, rows_dimension):
         self._rows_dimension = rows_dimension
+
+
+# === MEANS ===
+
+
+class _BaseCubeMeans(_BaseCubeMeasure):
+    """Base class for means cube-measure variants."""
+
+    @lazyproperty
+    def means(self):
+        """1D np.float64 ndarray of mean for each stripe row."""
+        raise NotImplementedError("`%s` must implement `.means`" % type(self).__name__)
 
 
 # === UNWEIGHTED COUNTS ===
