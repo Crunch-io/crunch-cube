@@ -162,6 +162,15 @@ class Describe_TableProportionStddevs(object):
 
         assert table_proportion_stddevs.base_values == pytest.approx([0.2, 0.3, 0.4])
 
+    def it_computes_its_subtotal_values_to_help(
+        self, measures_, table_proportion_variances_
+    ):
+        table_proportion_variances_.subtotal_values = np.array([0.25, 0.36])
+        measures_.table_proportion_variances = table_proportion_variances_
+        table_proportion_stddevs = _TableProportionStddevs(None, measures_, None)
+
+        assert table_proportion_stddevs.subtotal_values == pytest.approx([0.5, 0.6])
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture

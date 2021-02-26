@@ -151,6 +151,11 @@ class _TableProportionStddevs(_BaseSecondOrderMeasure):
         """1D np.float64 ndarray of table-prop stddev for each base row of stripe."""
         return np.sqrt(self._measures.table_proportion_variances.base_values)
 
+    @lazyproperty
+    def subtotal_values(self):
+        """1D np.float64 ndarray of table-prop stddev for each row subtotal."""
+        return np.sqrt(self._measures.table_proportion_variances.subtotal_values)
+
 
 class _TableProportionVariances(_BaseSecondOrderMeasure):
     """Provides the table-proportion-variances measure for a stripe."""
