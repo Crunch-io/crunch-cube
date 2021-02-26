@@ -26,7 +26,7 @@ class CubeMeasures(object):
     @lazyproperty
     def cube_means(self):
         """_BaseCubeMeans subclass object for this stripe."""
-        raise NotImplementedError
+        return _BaseCubeMeans.factory(self._cube, self._rows_dimension)
 
     @lazyproperty
     def unweighted_cube_counts(self):
@@ -55,6 +55,11 @@ class _BaseCubeMeasure(object):
 
 class _BaseCubeMeans(_BaseCubeMeasure):
     """Base class for means cube-measure variants."""
+
+    @classmethod
+    def factory(cls, cube, rows_dimension):
+        """Return _BaseCubeMeans subclass instance appropriate to `cube`."""
+        raise NotImplementedError
 
     @lazyproperty
     def means(self):

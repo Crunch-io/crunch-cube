@@ -9,6 +9,7 @@ from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.stripe.cubemeasure import (
+    _BaseCubeMeans,
     _BaseUnweightedCubeCounts,
     _BaseWeightedCubeCounts,
     _CatUnweightedCubeCounts,
@@ -23,6 +24,21 @@ from ...unitutil import class_mock, instance_mock, property_mock
 
 class DescribeCubeMeasures(object):
     """Unit-test suite for `cr.cube.stripe.cubemeasure.CubeMeasures` object."""
+
+    def it_provides_access_to_the_cube_means_object(
+        self, request, cube_, rows_dimension_
+    ):
+        cube_means_ = instance_mock(request, _BaseCubeMeans)
+        _BaseCubeMeans_ = class_mock(
+            request, "cr.cube.stripe.cubemeasure._BaseCubeMeans"
+        )
+        _BaseCubeMeans_.factory.return_value = cube_means_
+        cube_measures = CubeMeasures(cube_, rows_dimension_, None, None)
+
+        cube_means = cube_measures.cube_means
+
+        _BaseCubeMeans_.factory.assert_called_once_with(cube_, rows_dimension_)
+        assert cube_means is cube_means_
 
     def it_provides_access_to_the_unweighted_cube_counts_object(
         self, request, cube_, rows_dimension_
