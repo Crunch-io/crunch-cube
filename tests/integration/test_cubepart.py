@@ -832,7 +832,11 @@ class Describe_Strand(object):
         assert strand.has_means is False
         assert strand.inserted_row_idxs == ()
         assert strand.is_empty is False
-        assert strand.means == (np.nan, np.nan)
+        with pytest.raises(ValueError) as e:
+            strand.means
+        assert str(e.value) == (
+            "`.means` is undefined for a cube-result without a means measure"
+        )
         assert strand.min_base_size_mask.tolist() == [False, False]
         assert strand.name == "v7"
         assert strand.ndim == 1

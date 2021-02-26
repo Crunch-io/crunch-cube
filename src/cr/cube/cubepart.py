@@ -1253,7 +1253,16 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def means(self):
-        return tuple(row.mean for row in self._stripe.rows)
+        """1D np.float64 ndarray of mean for each row of strand.
+
+        Raises ValueError when accessed on a cube-result that does not contain a means
+        cube-measure.
+        """
+        if not self._cube.has_means:
+            raise ValueError(
+                "`.means` is undefined for a cube-result without a means measure"
+            )
+        return self._assembler.means
 
     @lazyproperty
     def min_base_size_mask(self):
