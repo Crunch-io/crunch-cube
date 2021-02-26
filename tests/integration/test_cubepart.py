@@ -1014,17 +1014,18 @@ class Describe_Strand(object):
         assert strand.name == "Paid for ne"
         assert strand.rows_dimension_type == DT.MR
         assert strand.scale_mean is None
+        assert strand.table_name == "Paid for ne: A newspaper"
         assert strand.table_proportion_stddevs == pytest.approx(
             [
-                0.46426724,
+                0.4642672,
                 0.3584419,
                 0.2351762,
-                0.32431855,
+                0.3243186,
                 0.2891897,
-                0.24800318,
-                0.15104855,
-                0.49700725,
-                0.14466968,
+                0.2480032,
+                0.1510486,
+                0.4970073,
+                0.1446697,
             ]
         )
         assert strand.table_proportion_stderrs == pytest.approx(
@@ -1075,12 +1076,12 @@ class Describe_Strand(object):
         strand = Cube(CR.TEXT, population=9001).partitions[0]
 
         assert strand.counts.tolist() == [1, 1, 1, 1, 1, 1]
+        assert strand.population_counts == pytest.approx(
+            [1500.167, 1500.167, 1500.167, 1500.167, 1500.167, 1500.167]
+        )
         assert strand.table_margin == 6
         assert strand.table_percentages == pytest.approx(
             [16.66667, 16.66667, 16.66667, 16.66667, 16.66667, 16.66667],
-        )
-        assert strand.population_counts == pytest.approx(
-            [1500.167, 1500.167, 1500.167, 1500.167, 1500.167, 1500.167]
         )
         assert strand.table_proportion_stddevs == pytest.approx(
             [0.372678, 0.372678, 0.372678, 0.372678, 0.372678, 0.372678],

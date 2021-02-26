@@ -1475,8 +1475,8 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def table_proportion_stddevs(self):
-        """np.ndarray percentages standard deviation"""
-        return np.sqrt(self._variance)
+        """1D np.float64 ndarray of table-proportion std-deviation for each row."""
+        return self._assembler.table_proportion_stddevs
 
     @lazyproperty
     def table_proportion_stderrs(self):
