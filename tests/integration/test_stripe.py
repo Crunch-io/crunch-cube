@@ -2,6 +2,7 @@
 
 """Integration-test suite for `cr.cube.stripe` sub-package."""
 
+import numpy as np
 import pytest
 
 from cr.cube.cube import Cube
@@ -28,6 +29,15 @@ class DescribeStripeAssembler(object):
         assert assembler.unweighted_counts.tolist() == [10, 5]
         assert assembler.weighted_bases.tolist() == [15, 15]
         assert assembler.weighted_counts.tolist() == [10, 5]
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_provides_values_for_univariate_cat_means(self):
+        cube = Cube(CR.CAT_MEANS_HS)
+        assembler = StripeAssembler(cube, cube.dimensions[0], False, 0)
+
+        assert assembler.means == pytest.approx(
+            [19.85556, 13.85417, 52.7894736842, np.nan, np.nan], nan_ok=True
+        )
 
     def it_provides_values_for_univariate_mr(self):
         cube = Cube(CR.MR_WGTD)
@@ -119,4 +129,13 @@ class DescribeStripeAssembler(object):
                 1757.811,
                 3140.070,
             ]
+        )
+
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
+    def it_provides_values_for_univariate_mr_means(self):
+        cube = Cube(CR.MR_MEAN_FILT_WGTD)
+        assembler = StripeAssembler(cube, cube.dimensions[0], False, 0)
+
+        assert assembler.means == pytest.approx(
+            [3.72405146, 2.57842929, 2.21859327, 1.86533494]
         )

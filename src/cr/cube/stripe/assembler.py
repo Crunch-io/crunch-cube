@@ -39,6 +39,14 @@ class StripeAssembler(object):
         self._slice_idx = slice_idx
 
     @lazyproperty
+    def means(self):
+        """1D np.float64 ndarray of mean for each row.
+
+        Raises ValueError when the cube-result does not include a means cube-measure.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
     def table_proportion_stddevs(self):
         """1D np.float64 ndarray of table-proportion std-deviation for each row."""
         return self._assemble_vector(self._measures.table_proportion_stddevs.blocks)
