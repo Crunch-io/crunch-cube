@@ -7,7 +7,7 @@ from __future__ import division
 import numpy as np
 
 from cr.cube.stripe.cubemeasure import CubeMeasures
-from cr.cube.stripe.insertion import SumSubtotals
+from cr.cube.stripe.insertion import NanSubtotals, SumSubtotals
 from cr.cube.util import lazyproperty
 
 
@@ -163,6 +163,15 @@ class _Means(_BaseSecondOrderMeasure):
     def base_values(self):
         """1D np.float64 ndarray of mean for each row."""
         return self._cube_measures.cube_means.means
+
+    @lazyproperty
+    def subtotal_values(self):
+        """1D ndarray of np.nan for each row-subtotal.
+
+        Mean values cannot be subtotaled and each subtotal value is unconditionally
+        np.nan.
+        """
+        return NanSubtotals.subtotal_values(self.base_values, self._rows_dimension)
 
 
 class _TableProportionStddevs(_BaseSecondOrderMeasure):

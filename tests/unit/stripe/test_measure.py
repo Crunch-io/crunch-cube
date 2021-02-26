@@ -167,6 +167,20 @@ class Describe_Means(object):
 
         assert means.base_values == pytest.approx([1.1, 2.2, 3.3])
 
+    def it_computes_its_subtotal_values_to_help(self, request):
+        property_mock(request, _Means, "base_values", return_value=[1.1, 2.2, 3.3])
+        rows_dimension_ = instance_mock(request, Dimension)
+        NanSubtotals_ = class_mock(request, "cr.cube.stripe.measure.NanSubtotals")
+        NanSubtotals_.subtotal_values.return_value = np.array([np.nan, np.nan])
+        means = _Means(rows_dimension_, None, None)
+
+        subtotal_values = means.subtotal_values
+
+        NanSubtotals_.subtotal_values.assert_called_once_with(
+            [1.1, 2.2, 3.3], rows_dimension_
+        )
+        assert subtotal_values == pytest.approx([np.nan, np.nan], nan_ok=True)
+
 
 class Describe_TableProportionStddevs(object):
     """Unit test suite for `cr.cube.stripe.measure._TableProportionStddevs` object."""

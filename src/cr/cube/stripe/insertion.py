@@ -42,6 +42,13 @@ class _BaseSubtotals(object):
         return self._rows_dimension.subtotals
 
 
+class NanSubtotals(_BaseSubtotals):
+    """Subtotal blocks for measures that cannot meaningfully be subtotaled.
+
+    Each subtotal value is `np.nan`.
+    """
+
+
 class SumSubtotals(_BaseSubtotals):
     """Subtotals created by np.sum() on addends, primarily counts."""
 
