@@ -30,7 +30,6 @@ class DescribeStripeAssembler(object):
         assert assembler.weighted_bases.tolist() == [15, 15]
         assert assembler.weighted_counts.tolist() == [10, 5]
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_provides_values_for_univariate_cat_means(self):
         cube = Cube(CR.CAT_MEANS_HS)
         assembler = StripeAssembler(cube, cube.dimensions[0], False, 0)

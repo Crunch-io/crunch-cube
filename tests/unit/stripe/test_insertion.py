@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from cr.cube.dimension import Dimension, _Subtotal
-from cr.cube.stripe.insertion import _BaseSubtotals, SumSubtotals
+from cr.cube.stripe.insertion import _BaseSubtotals, NanSubtotals, SumSubtotals
 
 from ...unitutil import (
     ANY,
@@ -45,6 +45,23 @@ class Describe_BaseSubtotals(object):
     @pytest.fixture
     def rows_dimension_(self, request):
         return instance_mock(request, Dimension)
+
+
+class DescribeNanSubtotals(object):
+    """Unit test suite for `cr.cube.stripe.NanSubtotals` object."""
+
+    def it_computes_the_subtotal_values(self, request):
+        property_mock(
+            request,
+            NanSubtotals,
+            "_row_subtotals",
+            return_value=tuple(instance_mock(request, _Subtotal) for _ in range(3)),
+        )
+        nan_subtotals = NanSubtotals(None, None)
+
+        assert nan_subtotals._subtotal_values == pytest.approx(
+            [np.nan, np.nan, np.nan], nan_ok=True
+        )
 
 
 class DescribeSumSubtotals(object):

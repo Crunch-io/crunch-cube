@@ -48,6 +48,11 @@ class NanSubtotals(_BaseSubtotals):
     Each subtotal value is `np.nan`.
     """
 
+    @lazyproperty
+    def _subtotal_values(self):
+        """Return (n_row_subtotals,) ndarray of np.nan values."""
+        return np.full(len(self._row_subtotals), np.nan)
+
 
 class SumSubtotals(_BaseSubtotals):
     """Subtotals created by np.sum() on addends, primarily counts."""
