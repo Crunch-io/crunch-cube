@@ -198,6 +198,17 @@ class Describe_TableProportionStderrs(object):
 
         assert table_proportion_stderrs.base_values == pytest.approx([0.2, 0.3, 0.4])
 
+    def it_computes_its_subtotal_values_to_help(
+        self, measures_, table_proportion_variances_, weighted_bases_
+    ):
+        table_proportion_variances_.subtotal_values = np.array([4.8, 12.5])
+        measures_.table_proportion_variances = table_proportion_variances_
+        weighted_bases_.subtotal_values = np.array([30, 50])
+        measures_.weighted_bases = weighted_bases_
+        table_proportion_stderrs = _TableProportionStderrs(None, measures_, None)
+
+        assert table_proportion_stderrs.subtotal_values == pytest.approx([0.4, 0.5])
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture

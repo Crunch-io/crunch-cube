@@ -172,6 +172,13 @@ class _TableProportionStderrs(_BaseSecondOrderMeasure):
         weighted_bases = self._measures.weighted_bases.base_values
         return np.sqrt(variances / weighted_bases)
 
+    @lazyproperty
+    def subtotal_values(self):
+        """1D np.float64 ndarray of table-prop stderr for each row subtotal."""
+        variances = self._measures.table_proportion_variances.subtotal_values
+        weighted_bases = self._measures.weighted_bases.subtotal_values
+        return np.sqrt(variances / weighted_bases)
+
 
 class _TableProportionVariances(_BaseSecondOrderMeasure):
     """Provides the table-proportion-variances measure for a stripe."""
