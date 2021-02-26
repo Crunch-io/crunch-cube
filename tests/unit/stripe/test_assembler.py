@@ -71,6 +71,12 @@ class DescribeStripeAssembler(object):
         _assemble_vector_.assert_called_once_with(assembler, ("A", "B"))
         assert value.tolist() == [1, 2, 3, 4, 5]
 
+    def it_knows_the_inserted_row_idxs(self, _row_order_prop_):
+        _row_order_prop_.return_value = np.array([-1, 0, 3, -2, 4, 1])
+        assembler = StripeAssembler(None, None, None, None)
+
+        assert assembler.inserted_row_idxs == (0, 3)
+
     def it_can_assemble_a_vector_to_help(self, _row_order_prop_):
         base_values = np.array([1, 2, 3, 4])
         subtotal_values = (3, 5, 7)

@@ -45,7 +45,7 @@ class StripeAssembler(object):
         Provided index values correspond rows after any insertion of subtotals,
         re-ordering, and hiding/pruning.
         """
-        raise NotImplementedError
+        return tuple(i for i, row_idx in enumerate(self._row_order) if row_idx < 0)
 
     @lazyproperty
     def means(self):
