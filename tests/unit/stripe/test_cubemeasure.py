@@ -128,6 +128,14 @@ class Describe_CatCubeMeans(object):
         assert cube_means.means == pytest.approx([1.1, 2.2, 3.3])
 
 
+class Describe_MrCubeMeans(object):
+    """Unit-test suite for `cr.cube.stripe.cubemeasure._MrCubeMeans`."""
+
+    def it_knows_its_means(self):
+        cube_means = _MrCubeMeans(None, np.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]))
+        assert cube_means.means == pytest.approx([1.1, 3.3, 5.5])
+
+
 # === UNWEIGHTED COUNTS ===
 
 

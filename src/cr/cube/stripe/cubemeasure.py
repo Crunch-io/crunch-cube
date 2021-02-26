@@ -92,6 +92,11 @@ class _MrCubeMeans(_BaseCubeMeans):
     Its `.means` is a 2D ndarray with axes (rows, sel/not).
     """
 
+    @lazyproperty
+    def means(self):
+        """1D np.float64 ndarray of mean for each stripe row."""
+        return self._means[:, 0]
+
 
 # === UNWEIGHTED COUNTS ===
 

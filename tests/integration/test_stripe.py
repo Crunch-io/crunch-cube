@@ -130,7 +130,6 @@ class DescribeStripeAssembler(object):
             ]
         )
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_provides_values_for_univariate_mr_means(self):
         cube = Cube(CR.MR_MEAN_FILT_WGTD)
         assembler = StripeAssembler(cube, cube.dimensions[0], False, 0)
