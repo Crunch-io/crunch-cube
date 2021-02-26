@@ -40,6 +40,11 @@ class StripeMeasures(object):
         return _TableProportionStddevs(self._rows_dimension, self, self._cube_measures)
 
     @lazyproperty
+    def table_proportion_stderrs(self):
+        """_TableProportionStderrs measure object for this stripe."""
+        raise NotImplementedError
+
+    @lazyproperty
     def table_proportion_variances(self):
         """_TableProportionVariances measure object for this stripe."""
         return _TableProportionVariances(
@@ -155,6 +160,10 @@ class _TableProportionStddevs(_BaseSecondOrderMeasure):
     def subtotal_values(self):
         """1D np.float64 ndarray of table-prop stddev for each row subtotal."""
         return np.sqrt(self._measures.table_proportion_variances.subtotal_values)
+
+
+class _TableProportionStderrs(_BaseSecondOrderMeasure):
+    """Provides the table-proportion standard-error measure for a stripe."""
 
 
 class _TableProportionVariances(_BaseSecondOrderMeasure):

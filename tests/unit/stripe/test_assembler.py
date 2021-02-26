@@ -15,6 +15,7 @@ from cr.cube.stripe.assembler import (
 from cr.cube.stripe.measure import (
     StripeMeasures,
     _TableProportionStddevs,
+    _TableProportionStderrs,
     _TableProportions,
     _UnweightedBases,
     _UnweightedCounts,
@@ -37,6 +38,7 @@ class DescribeStripeAssembler(object):
         "measure_prop_name, MeasureCls",
         (
             ("table_proportion_stddevs", _TableProportionStddevs),
+            ("table_proportion_stderrs", _TableProportionStderrs),
             ("table_proportions", _TableProportions),
             ("unweighted_bases", _UnweightedBases),
             ("unweighted_counts", _UnweightedCounts),
