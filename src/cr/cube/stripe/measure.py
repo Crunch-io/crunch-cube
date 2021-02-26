@@ -166,6 +166,12 @@ class _TableProportionVariances(_BaseSecondOrderMeasure):
         p = self._measures.table_proportions.base_values
         return p * (1 - p)
 
+    @lazyproperty
+    def subtotal_values(self):
+        """1D np.float64 ndarray of table-prop variance for each row subtotal."""
+        p = self._measures.table_proportions.subtotal_values
+        return p * (1 - p)
+
 
 class _TableProportions(_BaseSecondOrderMeasure):
     """Provides the table-proportions measure for a stripe.
