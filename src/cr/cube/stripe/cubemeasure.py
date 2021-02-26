@@ -80,6 +80,11 @@ class _BaseCubeMeans(_BaseCubeMeasure):
 class _CatCubeMeans(_BaseCubeMeans):
     """Means cube-measure for a non-MR stripe."""
 
+    @lazyproperty
+    def means(self):
+        """1D np.float64 ndarray of mean for each stripe row."""
+        return self._means
+
 
 class _MrCubeMeans(_BaseCubeMeans):
     """Means cube-measure for an MR stripe.

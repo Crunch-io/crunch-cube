@@ -120,6 +120,14 @@ class Describe_BaseCubeMeans(object):
         assert cube_means is cube_means_
 
 
+class Describe_CatCubeMeans(object):
+    """Unit-test suite for `cr.cube.stripe.cubemeasure._CatCubeMeans`."""
+
+    def it_knows_its_means(self):
+        cube_means = _CatCubeMeans(None, np.array([1.1, 2.2, 3.3]))
+        assert cube_means.means == pytest.approx([1.1, 2.2, 3.3])
+
+
 # === UNWEIGHTED COUNTS ===
 
 
