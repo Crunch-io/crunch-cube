@@ -155,6 +155,12 @@ class _TableProportionStddevs(_BaseSecondOrderMeasure):
 class _TableProportionVariances(_BaseSecondOrderMeasure):
     """Provides the table-proportion-variances measure for a stripe."""
 
+    @lazyproperty
+    def base_values(self):
+        """1D np.float64 ndarray of table-prop variance for each base row of stripe."""
+        p = self._measures.table_proportions.base_values
+        return p * (1 - p)
+
 
 class _TableProportions(_BaseSecondOrderMeasure):
     """Provides the table-proportions measure for a stripe.
