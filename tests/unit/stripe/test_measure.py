@@ -184,6 +184,35 @@ class Describe_TableProportionStddevs(object):
         return instance_mock(request, _TableProportionVariances)
 
 
+class Describe_TableProportionStderrs(object):
+    """Unit test suite for `cr.cube.stripe.measure._TableProportionStderrs` object."""
+
+    def it_computes_its_base_values_to_help(
+        self, measures_, table_proportion_variances_, weighted_bases_
+    ):
+        table_proportion_variances_.base_values = np.array([0.4, 1.8, 4.8])
+        measures_.table_proportion_variances = table_proportion_variances_
+        weighted_bases_.base_values = np.array([10, 20, 30])
+        measures_.weighted_bases = weighted_bases_
+        table_proportion_stderrs = _TableProportionStderrs(None, measures_, None)
+
+        assert table_proportion_stderrs.base_values == pytest.approx([0.2, 0.3, 0.4])
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def measures_(self, request):
+        return instance_mock(request, StripeMeasures)
+
+    @pytest.fixture
+    def table_proportion_variances_(self, request):
+        return instance_mock(request, _TableProportionVariances)
+
+    @pytest.fixture
+    def weighted_bases_(self, request):
+        return instance_mock(request, _WeightedBases)
+
+
 class Describe_TableProportionVariances(object):
     """Unit test suite for `cr.cube.stripe.measure._TableProportionVariances` object."""
 

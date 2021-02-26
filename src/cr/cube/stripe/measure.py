@@ -165,6 +165,13 @@ class _TableProportionStddevs(_BaseSecondOrderMeasure):
 class _TableProportionStderrs(_BaseSecondOrderMeasure):
     """Provides the table-proportion standard-error measure for a stripe."""
 
+    @lazyproperty
+    def base_values(self):
+        """1D np.float64 ndarray of table-prop stderr for each base row of stripe."""
+        variances = self._measures.table_proportion_variances.base_values
+        weighted_bases = self._measures.weighted_bases.base_values
+        return np.sqrt(variances / weighted_bases)
+
 
 class _TableProportionVariances(_BaseSecondOrderMeasure):
     """Provides the table-proportion-variances measure for a stripe."""
