@@ -18,6 +18,7 @@ from cr.cube.stripe.measure import (
     _BaseSecondOrderMeasure,
     StripeMeasures,
     _TableProportionStddevs,
+    _TableProportionStderrs,
     _TableProportionVariances,
     _TableProportions,
     _UnweightedBases,
@@ -36,6 +37,7 @@ class DescribeStripeMeasures(object):
         "measure_prop_name, MeasureCls",
         (
             ("table_proportion_stddevs", _TableProportionStddevs),
+            ("table_proportion_stderrs", _TableProportionStderrs),
             ("table_proportion_variances", _TableProportionVariances),
             ("table_proportions", _TableProportions),
             ("unweighted_bases", _UnweightedBases),
