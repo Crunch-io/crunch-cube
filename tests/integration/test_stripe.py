@@ -13,6 +13,7 @@ from ..fixtures import CR
 class DescribeStripeAssembler(object):
     """Integration-test suite for `cr.cube.stripe.assembler.StripeAssembler` object."""
 
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_provides_values_for_univariate_cat(self):
         cube = Cube(CR.UNIVARIATE_CATEGORICAL)
         assembler = StripeAssembler(cube, cube.dimensions[0], False, 0)
@@ -20,12 +21,16 @@ class DescribeStripeAssembler(object):
         assert assembler.table_proportion_stddevs == pytest.approx(
             [0.4714045, 0.4714045]
         )
+        assert assembler.table_proportion_stderrs == pytest.approx(
+            [0.1217161, 0.1217161]
+        )
         assert assembler.table_proportions == pytest.approx([0.6666667, 0.3333333])
         assert assembler.unweighted_bases.tolist() == [15, 15]
         assert assembler.unweighted_counts.tolist() == [10, 5]
         assert assembler.weighted_bases.tolist() == [15, 15]
         assert assembler.weighted_counts.tolist() == [10, 5]
 
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_provides_values_for_univariate_mr(self):
         cube = Cube(CR.MR_WGTD)
         assembler = StripeAssembler(cube, cube.dimensions[0], False, 0)
@@ -41,6 +46,19 @@ class DescribeStripeAssembler(object):
                 0.1177077,
                 0.1979895,
                 0.2601507,
+            ]
+        )
+        assert assembler.table_proportion_stderrs == pytest.approx(
+            [
+                0.0024045217,
+                0.0019464504,
+                0.0021635322,
+                0.0018733202,
+                0.0023714856,
+                0.0015629185,
+                0.0005675739,
+                0.0009546841,
+                0.0012544185,
             ]
         )
         assert assembler.table_proportions == pytest.approx(

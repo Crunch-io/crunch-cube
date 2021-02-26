@@ -44,6 +44,11 @@ class StripeAssembler(object):
         return self._assemble_vector(self._measures.table_proportion_stddevs.blocks)
 
     @lazyproperty
+    def table_proportion_stderrs(self):
+        """1D np.float64 ndarray of table-proportion std-error for each row."""
+        raise NotImplementedError
+
+    @lazyproperty
     def table_proportions(self):
         """1D np.float64 ndarray of fraction of weighted-N contributed by each row."""
         return self._assemble_vector(self._measures.table_proportions.blocks)
