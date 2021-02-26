@@ -40,6 +40,11 @@ class StripeMeasures(object):
         return _TableProportionStddevs(self._rows_dimension, self, self._cube_measures)
 
     @lazyproperty
+    def table_proportion_variances(self):
+        """_TableProportionVariances measure object for this stripe."""
+        raise NotImplementedError
+
+    @lazyproperty
     def table_proportions(self):
         """_TableProportions measure object for this stripe."""
         return _TableProportions(self._rows_dimension, self, self._cube_measures)
@@ -138,6 +143,15 @@ class _BaseSecondOrderMeasure(object):
 
 class _TableProportionStddevs(_BaseSecondOrderMeasure):
     """Provides the table-proportion standard-deviation measure for a stripe."""
+
+    @lazyproperty
+    def base_values(self):
+        """1D np.float64 ndarray of table-prop stddev for each base row of stripe."""
+        return np.sqrt(self._measures.table_proportion_variances.base_values)
+
+
+class _TableProportionVariances(_BaseSecondOrderMeasure):
+    """Provides the table-proportion-variances measure for a stripe."""
 
 
 class _TableProportions(_BaseSecondOrderMeasure):

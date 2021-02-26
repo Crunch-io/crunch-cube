@@ -18,6 +18,7 @@ from cr.cube.stripe.measure import (
     _BaseSecondOrderMeasure,
     StripeMeasures,
     _TableProportionStddevs,
+    _TableProportionVariances,
     _TableProportions,
     _UnweightedBases,
     _UnweightedCounts,
@@ -146,6 +147,29 @@ class Describe_BaseSecondOrderMeasure(object):
     @pytest.fixture
     def cube_measures_(self, request):
         return instance_mock(request, CubeMeasures)
+
+
+class Describe_TableProportionStddevs(object):
+    """Unit test suite for `cr.cube.stripe.measure._TableProportionStddevs` object."""
+
+    def it_computes_its_base_values_to_help(
+        self, measures_, table_proportion_variances_
+    ):
+        table_proportion_variances_.base_values = np.array([0.04, 0.09, 0.16])
+        measures_.table_proportion_variances = table_proportion_variances_
+        table_proportion_stddevs = _TableProportionStddevs(None, measures_, None)
+
+        assert table_proportion_stddevs.base_values == pytest.approx([0.2, 0.3, 0.4])
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def measures_(self, request):
+        return instance_mock(request, StripeMeasures)
+
+    @pytest.fixture
+    def table_proportion_variances_(self, request):
+        return instance_mock(request, _TableProportionVariances)
 
 
 class Describe_TableProportions(object):
