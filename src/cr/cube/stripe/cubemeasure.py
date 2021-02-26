@@ -56,15 +56,36 @@ class _BaseCubeMeasure(object):
 class _BaseCubeMeans(_BaseCubeMeasure):
     """Base class for means cube-measure variants."""
 
+    def __init__(self, rows_dimension, means):
+        super(_BaseCubeMeans, self).__init__(rows_dimension)
+        self._means = means
+
     @classmethod
     def factory(cls, cube, rows_dimension):
         """Return _BaseCubeMeans subclass instance appropriate to `cube`."""
-        raise NotImplementedError
+        # --- TODO: note that `cube.counts` is improperly overloaded to return means
+        # --- when cube.has_means. This needs to be fixed.
+        means = cube.counts
+        MeansCls = (
+            _MrCubeMeans if rows_dimension.dimension_type == DT.MR else _CatCubeMeans
+        )
+        return MeansCls(rows_dimension, means)
 
     @lazyproperty
     def means(self):
         """1D np.float64 ndarray of mean for each stripe row."""
         raise NotImplementedError("`%s` must implement `.means`" % type(self).__name__)
+
+
+class _CatCubeMeans(_BaseCubeMeans):
+    """Means cube-measure for a non-MR stripe."""
+
+
+class _MrCubeMeans(_BaseCubeMeans):
+    """Means cube-measure for an MR stripe.
+
+    Its `.means` is a 2D ndarray with axes (rows, sel/not).
+    """
 
 
 # === UNWEIGHTED COUNTS ===

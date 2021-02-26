@@ -12,9 +12,11 @@ from cr.cube.stripe.cubemeasure import (
     _BaseCubeMeans,
     _BaseUnweightedCubeCounts,
     _BaseWeightedCubeCounts,
+    _CatCubeMeans,
     _CatUnweightedCubeCounts,
     _CatWeightedCubeCounts,
     CubeMeasures,
+    _MrCubeMeans,
     _MrUnweightedCubeCounts,
     _MrWeightedCubeCounts,
 )
@@ -83,6 +85,39 @@ class DescribeCubeMeasures(object):
     @pytest.fixture
     def rows_dimension_(self, request):
         return instance_mock(request, Dimension)
+
+
+# === MEANS ===
+
+
+class Describe_BaseCubeMeans(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._BaseCubeMeans`."""
+
+    @pytest.mark.parametrize(
+        "rows_dimension_type, CubeMeansCls, means",
+        (
+            (DT.CAT, _CatCubeMeans, [1, 2, 3]),
+            (DT.MR, _MrCubeMeans, [[1, 6], [2, 5], [3, 4]]),
+        ),
+    )
+    def it_provides_a_factory_for_constructing_unweighted_cube_count_objects(
+        self, request, rows_dimension_type, CubeMeansCls, means
+    ):
+        cube_ = instance_mock(request, Cube, counts=means)
+        rows_dimension_ = instance_mock(
+            request, Dimension, dimension_type=rows_dimension_type
+        )
+        cube_means_ = instance_mock(request, CubeMeansCls)
+        CubeMeansCls_ = class_mock(
+            request,
+            "cr.cube.stripe.cubemeasure.%s" % CubeMeansCls.__name__,
+            return_value=cube_means_,
+        )
+
+        cube_means = _BaseCubeMeans.factory(cube_, rows_dimension_)
+
+        CubeMeansCls_.assert_called_once_with(rows_dimension_, means)
+        assert cube_means is cube_means_
 
 
 # === UNWEIGHTED COUNTS ===
