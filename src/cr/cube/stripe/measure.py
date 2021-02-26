@@ -30,6 +30,11 @@ class StripeMeasures(object):
         self._slice_idx = slice_idx
 
     @lazyproperty
+    def means(self):
+        """_Means measure object for this stripe."""
+        raise NotImplementedError
+
+    @lazyproperty
     def pruning_base(self):
         """1D np.int64 ndarray of unweighted-N for each stripe row."""
         return self._cube_measures.unweighted_cube_counts.pruning_base
@@ -146,6 +151,13 @@ class _BaseSecondOrderMeasure(object):
         weighted-counts and table-margin.
         """
         return self._cube_measures.weighted_cube_counts
+
+
+class _Means(_BaseSecondOrderMeasure):
+    """Provides the means measure for a stripe.
+
+    Relies on the presence of a means cube-measure in the cube-result.
+    """
 
 
 class _TableProportionStddevs(_BaseSecondOrderMeasure):

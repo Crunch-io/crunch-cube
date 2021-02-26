@@ -13,6 +13,7 @@ from cr.cube.stripe.assembler import (
     StripeAssembler,
 )
 from cr.cube.stripe.measure import (
+    _Means,
     StripeMeasures,
     _TableProportionStddevs,
     _TableProportionStderrs,
@@ -37,6 +38,7 @@ class DescribeStripeAssembler(object):
     @pytest.mark.parametrize(
         "measure_prop_name, MeasureCls",
         (
+            ("means", _Means),
             ("table_proportion_stddevs", _TableProportionStddevs),
             ("table_proportion_stderrs", _TableProportionStderrs),
             ("table_proportions", _TableProportions),

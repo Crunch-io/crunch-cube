@@ -44,7 +44,7 @@ class StripeAssembler(object):
 
         Raises ValueError when the cube-result does not include a means cube-measure.
         """
-        raise NotImplementedError
+        return self._assemble_vector(self._measures.means.blocks)
 
     @lazyproperty
     def table_proportion_stddevs(self):
