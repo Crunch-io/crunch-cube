@@ -71,7 +71,10 @@ class StripeAssembler(object):
         the sequence and labels are ordered to correspond with their respective data
         row.
         """
-        raise NotImplementedError
+        return np.array(
+            [e.label for e in self._rows_dimension.valid_elements]
+            + [s.label for s in self._rows_dimension.subtotals]
+        )[self._row_order]
 
     @lazyproperty
     def rows_dimension_fills(self):

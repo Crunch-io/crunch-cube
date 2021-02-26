@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from cr.cube.cube import Cube
-from cr.cube.dimension import Dimension
+from cr.cube.dimension import Dimension, _Element, _Subtotal
 from cr.cube.enums import COLLATION_METHOD as CM
 from cr.cube.stripe.assembler import (
     _BaseOrderHelper,
@@ -82,6 +82,19 @@ class DescribeStripeAssembler(object):
         assembler = StripeAssembler(None, None, None, None)
 
         assert assembler.row_count == 5
+
+    def it_knows_the_row_labels(self, request, rows_dimension_, _row_order_prop_):
+        rows_dimension_.valid_elements = tuple(
+            instance_mock(request, _Element, label=label)
+            for label in ("baz", "foo", "bar")
+        )
+        rows_dimension_.subtotals = tuple(
+            instance_mock(request, _Subtotal, label=label) for label in ("bing", "bada")
+        )
+        _row_order_prop_.return_value = np.array([1, 2, 0, -1, -2])
+        assembler = StripeAssembler(None, rows_dimension_, None, None)
+
+        assert assembler.row_labels.tolist() == ["foo", "bar", "baz", "bada", "bing"]
 
     def it_can_assemble_a_vector_to_help(self, _row_order_prop_):
         base_values = np.array([1, 2, 3, 4])
