@@ -1306,7 +1306,11 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def row_count(self):
-        return len(self._stripe.rows)
+        """int count of rows in a returned measure or marginal.
+
+        This count includes inserted rows but not rows that have been hidden/pruned.
+        """
+        return self._assembler.row_count
 
     @lazyproperty
     def row_labels(self):
