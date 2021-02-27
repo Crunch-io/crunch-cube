@@ -14,6 +14,7 @@ from cr.cube.stripe.assembler import (
 )
 from cr.cube.stripe.measure import (
     _Means,
+    _ScaledCounts,
     StripeMeasures,
     _TableProportionStddevs,
     _TableProportionStderrs,
@@ -115,6 +116,14 @@ class DescribeStripeAssembler(object):
             "cdef01",
         )
 
+    def it_knows_the_scale_mean(self, _measures_prop_, measures_, scaled_counts_):
+        scaled_counts_.scale_mean = 3
+        measures_.scaled_counts = scaled_counts_
+        _measures_prop_.return_value = measures_
+        assembler = StripeAssembler(None, None, None, None)
+
+        assert assembler.scale_mean == 3
+
     def it_can_assemble_a_vector_to_help(self, _row_order_prop_):
         base_values = np.array([1, 2, 3, 4])
         subtotal_values = (3, 5, 7)
@@ -183,6 +192,10 @@ class DescribeStripeAssembler(object):
     @pytest.fixture
     def rows_dimension_(self, request):
         return instance_mock(request, Dimension)
+
+    @pytest.fixture
+    def scaled_counts_(self, request):
+        return instance_mock(request, _ScaledCounts)
 
 
 class Describe_BaseOrderHelper(object):

@@ -40,6 +40,14 @@ class StripeMeasures(object):
         return self._cube_measures.unweighted_cube_counts.pruning_base
 
     @lazyproperty
+    def scaled_counts(self):
+        """_ScaledCounts measure object for this stripe.
+
+        Provides access to table-totals related to numeric-values/scaled-counts.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
     def table_proportion_stddevs(self):
         """_TableProportionStddevs measure object for this stripe."""
         return _TableProportionStddevs(self._rows_dimension, self, self._cube_measures)
@@ -172,6 +180,25 @@ class _Means(_BaseSecondOrderMeasure):
         np.nan.
         """
         return NanSubtotals.subtotal_values(self.base_values, self._rows_dimension)
+
+
+class _ScaledCounts(_BaseSecondOrderMeasure):
+    """Provides access to table-totals related to numeric-values/scaled-counts."""
+
+    @lazyproperty
+    def scale_mean(self):
+        """Optional float mean of scaled row-counts.
+
+        This value is `None` when no row-elements have numeric-value. The numeric value
+        (aka. "scaled-count") for a row is its count multiplied by the numeric-value of
+        its element. For example, if 100 women responded "Very Likely" and the
+        numeric-value of the "Very Likely" response (element) was 4, then the
+        scaled-count for that row would be 400. The scale mean is the average of those
+        scale values over the total count of responses. The count of a row lacking a
+        numeric value does not contribute to either the numerator or denominator of that
+        computation.
+        """
+        raise NotImplementedError
 
 
 class _TableProportionStddevs(_BaseSecondOrderMeasure):

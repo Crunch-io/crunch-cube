@@ -104,7 +104,7 @@ class StripeAssembler(object):
         numeric value does not contribute to either the numerator or denominator of that
         computation.
         """
-        raise NotImplementedError
+        return self._measures.scaled_counts.scale_mean
 
     @lazyproperty
     def scale_median(self):
