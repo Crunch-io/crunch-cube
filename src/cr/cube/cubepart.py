@@ -1323,13 +1323,15 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def rows_dimension_fills(self):
-        """sequence of RGB str like "#def032" fill colors for row elements.
+        """tuple of optional RGB str like "#def032" fill color for each strand row.
 
-        The values reflect the resolved element-fill transform cascade. The length and
+        Each value reflects the resolved element-fill transform cascade. The length and
         ordering of the sequence correspond to the rows in the slice, including
-        accounting for insertions and hidden rows.
+        accounting for insertions, ordering, and hidden rows. A fill value is `None`
+        when no explicit fill color is defined for that row, indicating the default fill
+        color for that row should be used, probably coming from a caller-defined theme.
         """
-        return tuple(row.fill for row in self._stripe.rows)
+        return self._assembler.rows_dimension_fills
 
     @lazyproperty
     def rows_dimension_name(self):
