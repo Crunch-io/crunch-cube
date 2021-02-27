@@ -245,7 +245,7 @@ class _ScaledCounts(_BaseSecondOrderMeasure):
         Counts for rows that have not been assigned a numeric value are skipped.
         Otherwise, the values appear in payload order.
         """
-        raise NotImplementedError
+        return self._weighted_cube_counts.weighted_counts[self._has_numeric_value]
 
 
 class _TableProportionStddevs(_BaseSecondOrderMeasure):

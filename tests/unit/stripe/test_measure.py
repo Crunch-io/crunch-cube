@@ -232,6 +232,23 @@ class Describe_ScaledCounts(object):
 
         assert scaled_counts._total_weighted_count == 100
 
+    def it_retrives_the_weighted_counts_to_help(
+        self, request, _has_numeric_value_prop_
+    ):
+        weighted_cube_counts_ = instance_mock(
+            request, _BaseWeightedCubeCounts, weighted_counts=np.array([1.1, 2.2, 3.3])
+        )
+        property_mock(
+            request,
+            _ScaledCounts,
+            "_weighted_cube_counts",
+            return_value=weighted_cube_counts_,
+        )
+        _has_numeric_value_prop_.return_value = np.array([True, False, True])
+        scaled_counts = _ScaledCounts(None, None, None)
+
+        assert scaled_counts._weighted_counts == pytest.approx([1.1, 3.3])
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
