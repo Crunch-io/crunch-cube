@@ -212,7 +212,7 @@ class _ScaledCounts(_BaseSecondOrderMeasure):
     @lazyproperty
     def _has_numeric_value(self):
         """1D bool ndarray (mask) of True for each row with a defined numeric-value."""
-        raise NotImplementedError
+        return ~np.isnan(np.array(self._rows_dimension.numeric_values))
 
     @lazyproperty
     def _numeric_values(self):

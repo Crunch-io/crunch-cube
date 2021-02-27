@@ -211,6 +211,12 @@ class Describe_ScaledCounts(object):
 
         assert scaled_counts.scale_mean == expected_value
 
+    def it_knows_which_elements_have_a_numeric_values_to_help(self, rows_dimension_):
+        rows_dimension_.numeric_values = (1, np.nan, 3)
+        scaled_counts = _ScaledCounts(rows_dimension_, None, None)
+
+        assert scaled_counts._has_numeric_value.tolist() == [True, False, True]
+
     def it_gathers_the_numeric_values_to_help(
         self, rows_dimension_, _has_numeric_value_prop_
     ):
