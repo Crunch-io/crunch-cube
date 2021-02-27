@@ -12,8 +12,8 @@ from ..util import load_python_expression
 
 
 def test_labels_simple_mr_exclude_missing():
-    slice_ = Cube(CR.SIMPLE_MR).partitions[0]
-    assert slice_.row_labels == ("Response #1", "Response #2", "Response #3")
+    strand = Cube(CR.SIMPLE_MR).partitions[0]
+    assert strand.row_labels.tolist() == ["Response #1", "Response #2", "Response #3"]
 
 
 def test_as_array_simple_mr_exclude_missing():

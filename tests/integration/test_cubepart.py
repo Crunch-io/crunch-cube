@@ -843,7 +843,7 @@ class Describe_Strand(object):
         assert strand.population_counts == pytest.approx([666.6667, 333.3333])
         assert strand.population_counts_moe == pytest.approx([238.5592, 238.5592])
         assert strand.row_count == 2
-        assert strand.row_labels == ("C", "E")
+        assert strand.row_labels.tolist() == ["C", "E"]
         assert strand.rows_base.tolist() == [10, 5]
         assert strand.rows_dimension_fills == (None, None)
         assert strand.rows_dimension_name == "v7"
@@ -1131,7 +1131,7 @@ class Describe_Strand(object):
         }
         strand = Cube(CR.CAT_SUBTOT_ORDER, transforms=transforms).partitions[0]
 
-        assert strand.row_labels == (
+        assert strand.row_labels.tolist() == [
             "Sum A-C",
             "C1 & C2",
             "D",
@@ -1139,7 +1139,7 @@ class Describe_Strand(object):
             "E",
             "AB",
             "Total D-E",
-        )
+        ]
         assert strand.counts.tolist() == [31506, 16275, 3480, 31506, 4262, 15231, 7742]
 
     def it_knows_when_it_is_empty(self):

@@ -1309,7 +1309,8 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def row_labels(self):
-        return tuple(row.label for row in self._stripe.rows)
+        """1D str ndarray of name for each row, suitable for use as row headings."""
+        return self._assembler.row_labels
 
     @lazyproperty
     def rows_base(self):
