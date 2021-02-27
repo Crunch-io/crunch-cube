@@ -14,6 +14,7 @@ from ..fixtures import CR
 class DescribeStripeAssembler(object):
     """Integration-test suite for `cr.cube.stripe.assembler.StripeAssembler` object."""
 
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_provides_values_for_univariate_cat(self):
         cube = Cube(CR.UNIVARIATE_CATEGORICAL)
         assembler = StripeAssembler(cube, cube.dimensions[0], False, 0)
@@ -22,6 +23,10 @@ class DescribeStripeAssembler(object):
         assert assembler.row_count == 2
         assert assembler.row_labels.tolist() == ["C", "E"]
         assert assembler.rows_dimension_fills == (None, None)
+        assert assembler.scale_mean == pytest.approx(1.666667)
+        assert assembler.scale_median == pytest.approx(1.0)
+        assert assembler.scale_stddev == pytest.approx(0.9428090)
+        assert assembler.scale_stderr == pytest.approx(0.2434322)
         assert assembler.table_proportion_stddevs == pytest.approx(
             [0.4714045, 0.4714045]
         )
@@ -34,6 +39,7 @@ class DescribeStripeAssembler(object):
         assert assembler.weighted_bases.tolist() == [15, 15]
         assert assembler.weighted_counts.tolist() == [10, 5]
 
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_provides_values_for_univariate_cat_means(self):
         cube = Cube(CR.CAT_MEANS_HS)
         assembler = StripeAssembler(cube, cube.dimensions[0], False, 0)
@@ -51,7 +57,12 @@ class DescribeStripeAssembler(object):
             "Not Seen th",
         ]
         assert assembler.rows_dimension_fills == (None, None, None, None, None)
+        assert assembler.scale_mean is None
+        assert assembler.scale_median is None
+        assert assembler.scale_stddev is None
+        assert assembler.scale_stderr is None
 
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_provides_values_for_univariate_mr(self):
         cube = Cube(CR.MR_WGTD)
         assembler = StripeAssembler(cube, cube.dimensions[0], False, 0)
@@ -80,6 +91,10 @@ class DescribeStripeAssembler(object):
             None,
             None,
         )
+        assert assembler.scale_mean is None
+        assert assembler.scale_median is None
+        assert assembler.scale_stddev is None
+        assert assembler.scale_stderr is None
         assert assembler.table_proportion_stddevs == pytest.approx(
             [
                 0.4986677,

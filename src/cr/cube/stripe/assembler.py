@@ -92,6 +92,49 @@ class StripeAssembler(object):
         )
 
     @lazyproperty
+    def scale_mean(self):
+        """Optional float mean of row numeric-values (scale).
+
+        This value is `None` when no row-elements have numeric-value. The numeric value
+        (aka. "scaled-count") for a row is its count multiplied by the numeric-value of
+        its element. For example, if 100 women responded "Very Likely" and the
+        numeric-value of the "Very Likely" response (element) was 4, then the
+        scaled-count for that row would be 400. The scale mean is the average of those
+        scale values over the total count of responses. The count of a row lacking a
+        numeric value does not contribute to either the numerator or denominator of that
+        computation.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
+    def scale_median(self):
+        """Optional float/int median of scaled weighted-counts.
+
+        This value is `None` when no rows have a numeric-value assigned. The median is
+        equal to a count of 1 multiplied by one of the row numeric-values, so the value
+        is equal to one of the assigned numeric-values (and retains its int/float type).
+        """
+        raise NotImplementedError
+
+    @lazyproperty
+    def scale_stddev(self):
+        """Optional np.float64 standard-deviation of scaled weighted-counts.
+
+        This value is `None` when no rows have a numeric-value assigned. The value has
+        the same units as the assigned numeric values and indicates the dispersion of
+        the scaled-count distribution from its mean (scale-mean).
+        """
+        raise NotImplementedError
+
+    @lazyproperty
+    def scale_stderr(self):
+        """Optional np.float64 standard-error of scaled weighted counts.
+
+        This value is `None` when no rows have a numeric-value assigned.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
     def table_proportion_stddevs(self):
         """1D np.float64 ndarray of table-proportion std-deviation for each row."""
         return self._assemble_vector(self._measures.table_proportion_stddevs.blocks)
