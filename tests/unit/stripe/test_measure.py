@@ -184,6 +184,48 @@ class Describe_Means(object):
         assert subtotal_values == pytest.approx([np.nan, np.nan], nan_ok=True)
 
 
+class Describe_ScaledCounts(object):
+    """Unit test suite for `cr.cube.stripe.measure._ScaledCounts` object."""
+
+    @pytest.mark.parametrize(
+        "numeric_values, total_weighted_count, expected_value",
+        (
+            (np.array([]), 0, None),
+            (np.array([1, 2, 3]), 0, None),
+            (np.array([1, 2, 3]), 100, 4),
+        ),
+    )
+    def it_knows_the_scale_mean(
+        self,
+        _numeric_values_prop_,
+        numeric_values,
+        _total_weighted_count_prop_,
+        total_weighted_count,
+        _total_scaled_count_prop_,
+        expected_value,
+    ):
+        _numeric_values_prop_.return_value = numeric_values
+        _total_weighted_count_prop_.return_value = total_weighted_count
+        _total_scaled_count_prop_.return_value = 400
+        scaled_counts = _ScaledCounts(None, None, None)
+
+        assert scaled_counts.scale_mean == expected_value
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _numeric_values_prop_(self, request):
+        return property_mock(request, _ScaledCounts, "_numeric_values")
+
+    @pytest.fixture
+    def _total_weighted_count_prop_(self, request):
+        return property_mock(request, _ScaledCounts, "_total_weighted_count")
+
+    @pytest.fixture
+    def _total_scaled_count_prop_(self, request):
+        return property_mock(request, _ScaledCounts, "_total_scaled_count")
+
+
 class Describe_TableProportionStddevs(object):
     """Unit test suite for `cr.cube.stripe.measure._TableProportionStddevs` object."""
 

@@ -198,6 +198,39 @@ class _ScaledCounts(_BaseSecondOrderMeasure):
         numeric value does not contribute to either the numerator or denominator of that
         computation.
         """
+        # --- value is None when no row-element has been assigned a numeric value ---
+        if not self._numeric_values.size:
+            return None
+
+        # --- Also when the total count is zero, unlikely but possible and would lead to
+        # --- a divide-by-zero error in this case.
+        if not self._total_weighted_count:
+            return None
+
+        return self._total_scaled_count / self._total_weighted_count
+
+    @lazyproperty
+    def _numeric_values(self):
+        """1D ndarray of numeric-value for each element in rows dimension that has one.
+
+        The items in the array can be float or int. Row elements that have not been
+        assigned a numeric value are skipped. Otherwise, the values appear in payload
+        order.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
+    def _total_scaled_count(self):
+        """float/int total of scaled-count for rows with a numeric-value.
+
+        The scaled-count for a row is its weighted-count multiplied by its numeric
+        value (scaling-factor).
+        """
+        raise NotImplementedError
+
+    @lazyproperty
+    def _total_weighted_count(self):
+        """float/int total of weighted counts for rows with a numeric-value."""
         raise NotImplementedError
 
 
