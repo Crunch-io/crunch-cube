@@ -226,6 +226,16 @@ class Describe_ScaledCounts(object):
 
         assert scaled_counts._numeric_values.tolist() == [1, 3]
 
+    def it_computes_the_total_scaled_count_to_help(
+        self, _weighted_counts_prop_, _numeric_values_prop_
+    ):
+        _weighted_counts_prop_.return_value = np.array([10, 20, 30, 40])
+        _numeric_values_prop_.return_value = np.array([1, 2, 3, 4])
+        scaled_counts = _ScaledCounts(None, None, None)
+
+        # --- 10 + 40 + 90 + 160 = 300 ---
+        assert scaled_counts._total_scaled_count == 300
+
     def it_computes_the_total_weighted_count_to_help(self, _weighted_counts_prop_):
         _weighted_counts_prop_.return_value = np.array([10, 20, 30, 40])
         scaled_counts = _ScaledCounts(None, None, None)

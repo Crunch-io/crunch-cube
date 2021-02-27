@@ -231,7 +231,7 @@ class _ScaledCounts(_BaseSecondOrderMeasure):
         The scaled-count for a row is its weighted-count multiplied by its numeric
         value (scaling-factor).
         """
-        raise NotImplementedError
+        return np.sum(self._weighted_counts * self._numeric_values)
 
     @lazyproperty
     def _total_weighted_count(self):
