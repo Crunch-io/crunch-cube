@@ -1243,9 +1243,10 @@ class _Strand(CubePartition):
 
         Suitable for use in applying different formatting (e.g. Bold) to inserted rows.
         Provided index values correspond to measure values as-delivered by this strand,
-        after any re-ordering specified in a transform.
+        after any insertion of subtotals, re-ordering, and hiding/pruning of rows
+        specified in a transform has been applied.
         """
-        return tuple(i for i, row in enumerate(self._stripe.rows) if row.is_inserted)
+        return self._assembler.inserted_row_idxs
 
     @lazyproperty
     def is_empty(self):
