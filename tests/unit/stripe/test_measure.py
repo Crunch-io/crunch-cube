@@ -211,11 +211,28 @@ class Describe_ScaledCounts(object):
 
         assert scaled_counts.scale_mean == expected_value
 
+    def it_gathers_the_numeric_values_to_help(
+        self, rows_dimension_, _has_numeric_value_prop_
+    ):
+        rows_dimension_.numeric_values = (1, np.nan, 3)
+        _has_numeric_value_prop_.return_value = np.array([True, False, True])
+        scaled_counts = _ScaledCounts(rows_dimension_, None, None)
+
+        assert scaled_counts._numeric_values.tolist() == [1, 3]
+
     # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _has_numeric_value_prop_(self, request):
+        return property_mock(request, _ScaledCounts, "_has_numeric_value")
 
     @pytest.fixture
     def _numeric_values_prop_(self, request):
         return property_mock(request, _ScaledCounts, "_numeric_values")
+
+    @pytest.fixture
+    def rows_dimension_(self, request):
+        return instance_mock(request, Dimension)
 
     @pytest.fixture
     def _total_weighted_count_prop_(self, request):

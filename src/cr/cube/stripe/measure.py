@@ -210,6 +210,11 @@ class _ScaledCounts(_BaseSecondOrderMeasure):
         return self._total_scaled_count / self._total_weighted_count
 
     @lazyproperty
+    def _has_numeric_value(self):
+        """1D bool ndarray (mask) of True for each row with a defined numeric-value."""
+        raise NotImplementedError
+
+    @lazyproperty
     def _numeric_values(self):
         """1D ndarray of numeric-value for each element in rows dimension that has one.
 
@@ -217,7 +222,7 @@ class _ScaledCounts(_BaseSecondOrderMeasure):
         assigned a numeric value are skipped. Otherwise, the values appear in payload
         order.
         """
-        raise NotImplementedError
+        return np.array(self._rows_dimension.numeric_values)[self._has_numeric_value]
 
     @lazyproperty
     def _total_scaled_count(self):
