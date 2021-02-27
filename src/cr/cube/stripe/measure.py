@@ -45,7 +45,7 @@ class StripeMeasures(object):
 
         Provides access to table-totals related to numeric-values/scaled-counts.
         """
-        raise NotImplementedError
+        return _ScaledCounts(self._rows_dimension, self, self._cube_measures)
 
     @lazyproperty
     def table_proportion_stddevs(self):
