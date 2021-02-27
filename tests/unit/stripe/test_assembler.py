@@ -96,6 +96,25 @@ class DescribeStripeAssembler(object):
 
         assert assembler.row_labels.tolist() == ["foo", "bar", "baz", "bada", "bing"]
 
+    def it_knows_the_rows_dimension_fills(
+        self, request, rows_dimension_, _row_order_prop_
+    ):
+        rows_dimension_.valid_elements = tuple(
+            instance_mock(request, _Element, fill=fill)
+            for fill in ("cdef01", "6789ab", "012345")
+        )
+        _row_order_prop_.return_value = np.array([2, -2, 1, -1, 0])
+        assembler = StripeAssembler(None, rows_dimension_, None, None)
+
+        print(assembler.rows_dimension_fills)
+        assert assembler.rows_dimension_fills == (
+            "012345",
+            None,
+            "6789ab",
+            None,
+            "cdef01",
+        )
+
     def it_can_assemble_a_vector_to_help(self, _row_order_prop_):
         base_values = np.array([1, 2, 3, 4])
         subtotal_values = (3, 5, 7)

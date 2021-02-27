@@ -86,7 +86,10 @@ class StripeAssembler(object):
         when no explicit fill color is defined for that row, indicating the default fill
         color for that row should be used, probably coming from a caller-defined theme.
         """
-        raise NotImplementedError
+        element_fills = tuple(e.fill for e in self._rows_dimension.valid_elements)
+        return tuple(
+            (element_fills[idx] if idx > -1 else None) for idx in self._row_order
+        )
 
     @lazyproperty
     def table_proportion_stddevs(self):

@@ -14,7 +14,6 @@ from ..fixtures import CR
 class DescribeStripeAssembler(object):
     """Integration-test suite for `cr.cube.stripe.assembler.StripeAssembler` object."""
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_provides_values_for_univariate_cat(self):
         cube = Cube(CR.UNIVARIATE_CATEGORICAL)
         assembler = StripeAssembler(cube, cube.dimensions[0], False, 0)
@@ -35,7 +34,6 @@ class DescribeStripeAssembler(object):
         assert assembler.weighted_bases.tolist() == [15, 15]
         assert assembler.weighted_counts.tolist() == [10, 5]
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_provides_values_for_univariate_cat_means(self):
         cube = Cube(CR.CAT_MEANS_HS)
         assembler = StripeAssembler(cube, cube.dimensions[0], False, 0)
@@ -54,7 +52,6 @@ class DescribeStripeAssembler(object):
         ]
         assert assembler.rows_dimension_fills == (None, None, None, None, None)
 
-    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_provides_values_for_univariate_mr(self):
         cube = Cube(CR.MR_WGTD)
         assembler = StripeAssembler(cube, cube.dimensions[0], False, 0)
