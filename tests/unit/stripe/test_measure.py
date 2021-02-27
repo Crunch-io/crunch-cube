@@ -226,6 +226,12 @@ class Describe_ScaledCounts(object):
 
         assert scaled_counts._numeric_values.tolist() == [1, 3]
 
+    def it_computes_the_total_weighted_count_to_help(self, _weighted_counts_prop_):
+        _weighted_counts_prop_.return_value = np.array([10, 20, 30, 40])
+        scaled_counts = _ScaledCounts(None, None, None)
+
+        assert scaled_counts._total_weighted_count == 100
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -247,6 +253,10 @@ class Describe_ScaledCounts(object):
     @pytest.fixture
     def _total_scaled_count_prop_(self, request):
         return property_mock(request, _ScaledCounts, "_total_scaled_count")
+
+    @pytest.fixture
+    def _weighted_counts_prop_(self, request):
+        return property_mock(request, _ScaledCounts, "_weighted_counts")
 
 
 class Describe_TableProportionStddevs(object):

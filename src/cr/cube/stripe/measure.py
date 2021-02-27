@@ -236,6 +236,15 @@ class _ScaledCounts(_BaseSecondOrderMeasure):
     @lazyproperty
     def _total_weighted_count(self):
         """float/int total of weighted counts for rows with a numeric-value."""
+        return np.sum(self._weighted_counts)
+
+    @lazyproperty
+    def _weighted_counts(self):
+        """1D float/int ndarray of weighted_count for elements with a numeric-value.
+
+        Counts for rows that have not been assigned a numeric value are skipped.
+        Otherwise, the values appear in payload order.
+        """
         raise NotImplementedError
 
 
