@@ -854,8 +854,7 @@ class Describe_Strand(object):
         assert strand.scale_std_dev == pytest.approx(0.9428090)
         assert strand.scale_std_err == pytest.approx(0.2434322)
         assert strand.shape == (2,)
-        assert strand.table_base == 15
-        assert strand.table_base_unpruned == 15
+        assert strand.table_base_range.tolist() == [15, 15]
         assert strand.table_margin == 15
         assert strand.table_margin_unpruned == 15
         assert strand.table_name == "v7: C"
@@ -964,7 +963,7 @@ class Describe_Strand(object):
             12,
         ]
         assert strand.shape == (35,)
-        assert strand.table_base == 17615
+        assert strand.table_base_range.tolist() == [17615, 17615]
         # --- means cube that also has counts has a table-margin ---
         assert strand.table_margin == 17615
 

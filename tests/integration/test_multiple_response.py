@@ -41,22 +41,21 @@ def test_std_dev_err_simple_mr():
 
 def test_1D_mr_with_means():
     strand = Cube(CR.MR_MEAN_FILT_WGTD).partitions[0]
-    np.testing.assert_almost_equal(
-        strand.means, [3.7240515, 2.5784293, 2.2185933, 1.8653349]
-    )
-    np.testing.assert_array_equal(strand.table_base, [336, 136, 248, 5216])
-    assert strand.table_base_unpruned == 23348
+
     assert strand.ndim == 1
+    assert strand.means == pytest.approx([3.7240515, 2.5784293, 2.2185933, 1.8653349])
+    assert strand.unweighted_counts.tolist() == [336, 136, 248, 5216]
+    assert strand.unweighted_bases.tolist() == [5837, 5837, 5837, 5837]
+    assert strand.table_base_range.tolist() == [5837, 5837]
 
 
 def test_deck_with_means():
-    slice_ = Cube(CR.DECK_WITH_MEAN).partitions[0]
-    np.testing.assert_array_equal(
-        slice_.table_base_unpruned, [588, 588, 588, 588, 588, 588, 588, 588]
-    )
-    np.testing.assert_almost_equal(
-        slice_.table_margin_unpruned,
-        [585.086, 585.086, 585.086, 585.086, 585.086, 585.086, 585.086, 585.086],
+    strand = Cube(CR.DECK_WITH_MEAN).partitions[0]
+
+    assert strand.ndim == 1
+    assert strand.table_base_range.tolist() == [588, 588]
+    assert strand.table_margin_unpruned == pytest.approx(
+        [585.086, 585.086, 585.086, 585.086, 585.086, 585.086, 585.086, 585.086]
     )
 
 

@@ -1414,24 +1414,14 @@ class _Strand(CubePartition):
         return self._rows_dimension._dimension_dict
 
     @lazyproperty
-    def table_base(self):
-        """1D, single-element ndarray (like [3770])."""
-        # For MR strands, table base is also a strand, since subvars never collapse.
-        # We need to keep the ordering and hiding as in rows dimension. All this
-        # information is already accessible in the underlying rows property
-        # of the `_stripe`.
-        if self.dimension_types[0] == DT.MR:
-            return np.array([row.table_base for row in self._stripe.rows])
+    def table_base_range(self):
+        """[min, max] np.int64 ndarray range of unweighted-N for this stripe.
 
-        # TODO: shouldn't this just be the regular value for a strand? Maybe change to
-        # that if exporter always knows when it's getting this from a strand. The
-        # ndarray "wrapper" seems like unnecessary baggage when we know it will always
-        # be a scalar.
-        return self._stripe.table_base_unpruned
-
-    @lazyproperty
-    def table_base_unpruned(self):
-        return self._stripe.table_base_unpruned
+        A non-MR stripe will have a single base, represented by min and max being the
+        same value. Each row of an MR stripe has a distinct base, which is reduced to a
+        range in that case.
+        """
+        return self._assembler.table_base_range
 
     @lazyproperty
     def table_margin(self):
