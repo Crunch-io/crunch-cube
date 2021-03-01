@@ -124,7 +124,7 @@ class StripeAssembler(object):
         the same units as the assigned numeric values and indicates the dispersion of
         the scaled-count distribution from its mean (scale-mean).
         """
-        raise NotImplementedError
+        return self._measures.scaled_counts.scale_stddev
 
     @lazyproperty
     def scale_stderr(self):

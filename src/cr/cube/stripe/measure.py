@@ -231,6 +231,16 @@ class _ScaledCounts(_BaseSecondOrderMeasure):
         return np.median(expanded_numeric_values)
 
     @lazyproperty
+    def scale_stddev(self):
+        """Optional np.float64 standard-deviation of scaled weighted-counts.
+
+        This value is `None` when no row-elements have a numeric-value. The value is in
+        units of scaled-counts and indicates the dispersion of the scaled-count
+        distribution from its mean (scale-mean).
+        """
+        raise NotImplementedError
+
+    @lazyproperty
     def _has_numeric_value(self):
         """1D bool ndarray (mask) of True for each row with a defined numeric-value."""
         return ~np.isnan(np.array(self._rows_dimension.numeric_values))
