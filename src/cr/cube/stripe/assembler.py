@@ -114,7 +114,7 @@ class StripeAssembler(object):
         equal to a count of 1 multiplied by one of the row numeric-values, so the value
         is equal to one of the assigned numeric-values (and retains its int/float type).
         """
-        raise NotImplementedError
+        return self._measures.scaled_counts.scale_median
 
     @lazyproperty
     def scale_stddev(self):

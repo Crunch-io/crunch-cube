@@ -210,6 +210,15 @@ class _ScaledCounts(_BaseSecondOrderMeasure):
         return self._total_scaled_count / self._total_weighted_count
 
     @lazyproperty
+    def scale_median(self):
+        """Optional np.float64 median of scaled weighted-counts.
+
+        This value is `None` when no rows have a numeric-value assigned. Responses
+        without a numeric value are not considered.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
     def _has_numeric_value(self):
         """1D bool ndarray (mask) of True for each row with a defined numeric-value."""
         return ~np.isnan(np.array(self._rows_dimension.numeric_values))

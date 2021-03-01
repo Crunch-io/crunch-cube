@@ -124,6 +124,14 @@ class DescribeStripeAssembler(object):
 
         assert assembler.scale_mean == 3
 
+    def it_knows_the_scale_median(self, _measures_prop_, measures_, scaled_counts_):
+        scaled_counts_.scale_median = 4
+        measures_.scaled_counts = scaled_counts_
+        _measures_prop_.return_value = measures_
+        assembler = StripeAssembler(None, None, None, None)
+
+        assert assembler.scale_median == 4
+
     def it_can_assemble_a_vector_to_help(self, _row_order_prop_):
         base_values = np.array([1, 2, 3, 4])
         subtotal_values = (3, 5, 7)
