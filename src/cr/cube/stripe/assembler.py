@@ -152,7 +152,7 @@ class StripeAssembler(object):
         same value. Each row of an MR stripe has a distinct margin, which is reduced to
         a min/max range in that case.
         """
-        raise NotImplementedError
+        return self._measures.weighted_bases.table_margin_range
 
     @lazyproperty
     def table_proportion_stddevs(self):

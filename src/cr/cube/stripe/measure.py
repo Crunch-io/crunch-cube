@@ -496,6 +496,19 @@ class _WeightedBases(_BaseSecondOrderMeasure):
             self._weighted_cube_counts.table_margin, subtotal_values.shape
         )
 
+    @lazyproperty
+    def table_margin_range(self):
+        """[min, max] np.float64 ndarray range of (total) unweighted-N for this stripe.
+
+        A non-MR stripe will have a single margin, represented by min and max being the
+        same value.
+
+        Each row of an MR stripe has a distinct margin, which is reduced to a range in
+        that case. An MR stripe can have no subtotals, so those don't enter into the
+        computation in the MR case.
+        """
+        raise NotImplementedError
+
 
 class _WeightedCounts(_BaseSecondOrderMeasure):
     """Provides the weighted-counts measure for a stripe."""
