@@ -678,6 +678,15 @@ class Describe_WeightedBases(object):
         )
         assert subtotal_values.tolist() == expected_value
 
+    def it_knows_its_table_margin_range(
+        self, _weighted_cube_counts_prop_, weighted_cube_counts_
+    ):
+        _weighted_cube_counts_prop_.return_value = weighted_cube_counts_
+        weighted_cube_counts_.bases = np.array([25.5, 20.2, 5.5, 15.2, 10.0])
+        weighted_bases = _WeightedBases(None, None, None)
+
+        assert weighted_bases.table_margin_range.tolist() == [5.5, 25.5]
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
