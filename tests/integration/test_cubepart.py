@@ -867,7 +867,6 @@ class Describe_Strand(object):
         assert strand.title == "Registered Voters"
         assert strand.unweighted_bases.tolist() == [15, 15]
         assert strand.unweighted_counts.tolist() == [10, 5]
-        assert strand.var_scale_mean == pytest.approx(0.8888888)
         assert strand.variable_name == "v7"
         assert strand.weighted_bases == pytest.approx([15.0, 15.0])
 

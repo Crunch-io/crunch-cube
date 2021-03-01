@@ -1359,57 +1359,42 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def scale_mean(self):
-        """float mean of numeric-value applied to elements, or None.
+        """Optional float mean of row numeric-values (scale).
 
-        This value is `None` when no row-elements have a numeric-value assigned.
+        This value is `None` when no row-elements have a numeric-value assigned. The
+        numeric value (aka. "scale") for a row is its count multiplied by the
+        numeric-value of its element. For example, if 100 women responded "Very Likely"
+        and the numeric-value of the "Very Likely" response (element) was 4, then the
+        scale for that row would be 400. The scale mean is the average of those scale
+        values over the total count of responses.
         """
-        # ---return None when no row-element has been assigned a numeric value. This
-        # ---avoids a division-by-zero error.
-        if np.all(np.isnan(self._numeric_values)):
-            return None
-
-        # ---produce operands with rows without numeric values removed. Notably, this
-        # ---excludes subtotal rows.
-        numeric_values = self._numeric_values[self._numeric_values_mask]
-        counts = self._counts_as_array[self._numeric_values_mask]
-
-        # ---calculate numerator and denominator---
-        total_numeric_value = np.sum(numeric_values * counts)
-        total_count = np.sum(counts)
-
-        # ---overall scale-mean is the quotient---
-        return total_numeric_value / total_count
+        return self._assembler.scale_mean
 
     @lazyproperty
     def scale_median(self):
-        """np.int64 the median of scales
+        """Optional int/float median of scaled weighted-counts.
 
-        The median is calculated using the standard algebra applied to the numeric
-        values repeated for each related counts value
+        This value is `None` when no rows have a numeric-value assigned.
         """
-        if np.all(np.isnan(self._numeric_values)):
-            return None
-        numeric_values = self._numeric_values[self._numeric_values_mask]
-        counts = np.nan_to_num(self._counts_as_array[self._numeric_values_mask]).astype(
-            "int64"
-        )
-        unwrapped_numeric_values = np.repeat(numeric_values, counts)
-        return np.median(unwrapped_numeric_values)
+        return self._assembler.scale_median
 
     @lazyproperty
     def scale_std_dev(self):
-        """np.float64, the standard deviation of scales"""
-        if np.all(np.isnan(self._numeric_values)):
-            return None
-        return np.sqrt(self.var_scale_mean)
+        """Optional np.float64 standard-deviation of scaled weighted counts.
+
+        This value is `None` when no rows have a numeric-value assigned.
+        """
+        return self._assembler.scale_stddev
 
     @lazyproperty
     def scale_std_err(self):
-        """np.float64, the standard error of scales"""
-        if np.all(np.isnan(self._numeric_values)):
-            return None
-        counts = self._counts_as_array[self._numeric_values_mask]
-        return np.sqrt(self.var_scale_mean / np.sum(counts))
+        """Optional np.float64 standard-error of scaled weighted counts.
+
+        This value is `None` when no rows have a numeric-value assigned. The value has
+        the same units as the assigned numeric values and indicates the dispersion of
+        the scaled-count distribution from its mean (scale-mean).
+        """
+        return self._assembler.scale_stderr
 
     @lazyproperty
     def shape(self):
@@ -1534,18 +1519,6 @@ class _Strand(CubePartition):
         return self._assembler.unweighted_counts
 
     @lazyproperty
-    def var_scale_mean(self):
-        if np.all(np.isnan(self._numeric_values)):
-            return None
-
-        numeric_values = self._numeric_values[self._numeric_values_mask]
-        counts = self._counts_as_array[self._numeric_values_mask]
-
-        return np.nansum(counts * pow((numeric_values - self.scale_mean), 2)) / np.sum(
-            counts
-        )
-
-    @lazyproperty
     def weighted_bases(self):
         """1D np.float/int64 ndarray of table-proportion denominator for each row.
 
@@ -1569,35 +1542,9 @@ class _Strand(CubePartition):
         )
 
     @lazyproperty
-    def _counts_as_array(self):
-        """1D ndarray of count for each row."""
-        return np.array([row.count for row in self._stripe.rows_including_hidden])
-
-    @lazyproperty
     def _dimensions(self):
         """tuple of (row,) Dimension object."""
         return (self._rows_dimension,)
-
-    @lazyproperty
-    def _numeric_values(self):
-        """Array of numeric-value for each element in rows dimension.
-
-        The items in the array can be numeric or np.nan, which appears for an inserted
-        row (subtotal) or where the row-element has been assigned no numeric value.
-        """
-        return np.array(
-            [row.numeric_value for row in self._stripe.rows_including_hidden]
-        )
-
-    @lazyproperty
-    def _numeric_values_mask(self):
-        """np.ndarray boolean elements for each element in rows dimension."
-
-        This array contains True or False according to the nan in the numeric_values
-        array
-        """
-        is_a_number_mask = ~np.isnan(self._numeric_values)
-        return is_a_number_mask
 
     @lazyproperty
     def _rows_dimension(self):
