@@ -270,6 +270,21 @@ class Describe_ScaledCounts(object):
 
         assert scaled_counts._numeric_values.tolist() == [1, 3]
 
+    def it_computes_the_scale_variance_to_help(
+        self,
+        request,
+        _weighted_counts_prop_,
+        _numeric_values_prop_,
+        _total_weighted_count_prop_,
+    ):
+        _weighted_counts_prop_.return_value = np.array([100, 200, 300])
+        _numeric_values_prop_.return_value = np.array([1, 2, 3])
+        property_mock(request, _ScaledCounts, "scale_mean", return_value=2.333333)
+        _total_weighted_count_prop_.return_value = 600
+        scaled_counts = _ScaledCounts(None, None, None)
+
+        assert scaled_counts._scale_variance == pytest.approx(0.5555556)
+
     def it_computes_the_total_scaled_count_to_help(
         self, _weighted_counts_prop_, _numeric_values_prop_
     ):

@@ -262,7 +262,12 @@ class _ScaledCounts(_BaseSecondOrderMeasure):
     @lazyproperty
     def _scale_variance(self):
         """np.float64 variance of scaled weighted-counts."""
-        raise NotImplementedError
+        return (
+            np.sum(
+                self._weighted_counts * pow((self._numeric_values - self.scale_mean), 2)
+            )
+            / self._total_weighted_count
+        )
 
     @lazyproperty
     def _total_scaled_count(self):
