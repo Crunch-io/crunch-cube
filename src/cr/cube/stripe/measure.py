@@ -250,7 +250,11 @@ class _ScaledCounts(_BaseSecondOrderMeasure):
 
         This value is `None` when no rows have a numeric-value assigned.
         """
-        raise NotImplementedError
+        # --- value is None when no row-element has been assigned a numeric value ---
+        if not self._numeric_values.size:
+            return None
+
+        return np.sqrt(self._scale_variance / self._total_weighted_count)
 
     @lazyproperty
     def _has_numeric_value(self):
