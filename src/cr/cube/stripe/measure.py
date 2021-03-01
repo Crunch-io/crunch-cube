@@ -440,7 +440,8 @@ class _UnweightedBases(_BaseSecondOrderMeasure):
         that case. An MR stripe can have no subtotals, so those don't come into it in
         the MR case.
         """
-        raise NotImplementedError
+        bases = self._unweighted_cube_counts.bases
+        return np.array([np.min(bases), np.max(bases)])
 
 
 class _UnweightedCounts(_BaseSecondOrderMeasure):

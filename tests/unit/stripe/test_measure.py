@@ -580,6 +580,15 @@ class Describe_UnweightedBases(object):
         )
         assert subtotal_values.tolist() == expected_value
 
+    def it_knows_its_table_base_range(
+        self, _unweighted_cube_counts_prop_, unweighted_cube_counts_
+    ):
+        _unweighted_cube_counts_prop_.return_value = unweighted_cube_counts_
+        unweighted_cube_counts_.bases = np.array([25, 20, 5, 15, 10])
+        unweighted_bases = _UnweightedBases(None, None, None)
+
+        assert unweighted_bases.table_base_range.tolist() == [5, 25]
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
