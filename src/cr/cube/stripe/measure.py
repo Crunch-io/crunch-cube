@@ -238,7 +238,11 @@ class _ScaledCounts(_BaseSecondOrderMeasure):
         units of scaled-counts and indicates the dispersion of the scaled-count
         distribution from its mean (scale-mean).
         """
-        raise NotImplementedError
+        # --- value is None when no row-element has been assigned a numeric value ---
+        if not self._numeric_values.size:
+            return None
+
+        return np.sqrt(self._scale_variance)
 
     @lazyproperty
     def _has_numeric_value(self):
@@ -254,6 +258,11 @@ class _ScaledCounts(_BaseSecondOrderMeasure):
         order.
         """
         return np.array(self._rows_dimension.numeric_values)[self._has_numeric_value]
+
+    @lazyproperty
+    def _scale_variance(self):
+        """np.float64 variance of scaled weighted-counts."""
+        raise NotImplementedError
 
     @lazyproperty
     def _total_scaled_count(self):

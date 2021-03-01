@@ -234,6 +234,27 @@ class Describe_ScaledCounts(object):
 
         assert scaled_counts.scale_median == expected_value
 
+    @pytest.mark.parametrize(
+        "numeric_values, scale_variance, expected_value",
+        (
+            (np.array([]), None, None),
+            (np.array([1, 2, 3]), 4.0, 2.0),
+        ),
+    )
+    def it_knows_the_scale_stddev(
+        self,
+        _numeric_values_prop_,
+        numeric_values,
+        _scale_variance_prop_,
+        scale_variance,
+        expected_value,
+    ):
+        _numeric_values_prop_.return_value = numeric_values
+        _scale_variance_prop_.return_value = scale_variance
+        scaled_counts = _ScaledCounts(None, None, None)
+
+        assert scaled_counts.scale_stddev == expected_value
+
     def it_knows_which_elements_have_a_numeric_values_to_help(self, rows_dimension_):
         rows_dimension_.numeric_values = (1, np.nan, 3)
         scaled_counts = _ScaledCounts(rows_dimension_, None, None)
@@ -295,6 +316,10 @@ class Describe_ScaledCounts(object):
     @pytest.fixture
     def rows_dimension_(self, request):
         return instance_mock(request, Dimension)
+
+    @pytest.fixture
+    def _scale_variance_prop_(self, request):
+        return property_mock(request, _ScaledCounts, "_scale_variance")
 
     @pytest.fixture
     def _total_weighted_count_prop_(self, request):
