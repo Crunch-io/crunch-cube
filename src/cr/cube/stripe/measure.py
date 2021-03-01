@@ -428,6 +428,20 @@ class _UnweightedBases(_BaseSecondOrderMeasure):
             self._unweighted_cube_counts.table_base, subtotal_values.shape
         )
 
+    @lazyproperty
+    def table_base_range(self):
+        """[min, max] np.int64 ndarray range of (total) unweighted-N for this stripe.
+
+        A non-MR stripe will have a single base, represented by min and max being the
+        same value. Any subtotals in a non-MR stripe have that same scalar table base,
+        so they do not affect the (single-valued) range.
+
+        Each row of an MR stripe has a distinct base, which is reduced to a range in
+        that case. An MR stripe can have no subtotals, so those don't come into it in
+        the MR case.
+        """
+        raise NotImplementedError
+
 
 class _UnweightedCounts(_BaseSecondOrderMeasure):
     """Provides the unweighted-counts measure for a stripe."""

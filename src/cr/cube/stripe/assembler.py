@@ -142,7 +142,7 @@ class StripeAssembler(object):
         same value. Each row of an MR stripe has a distinct base, which is reduced to a
         range in that case.
         """
-        raise NotImplementedError
+        return self._measures.unweighted_bases.table_base_range
 
     @lazyproperty
     def table_margin_range(self):

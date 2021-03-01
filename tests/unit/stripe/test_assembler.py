@@ -148,6 +148,15 @@ class DescribeStripeAssembler(object):
 
         assert assembler.scale_stderr == 6
 
+    def it_knows_the_table_base_range(self, request, _measures_prop_, measures_):
+        measures_.unweighted_bases = instance_mock(
+            request, _UnweightedBases, table_base_range=np.array([50, 100])
+        )
+        _measures_prop_.return_value = measures_
+        assembler = StripeAssembler(None, None, None, None)
+
+        assert assembler.table_base_range.tolist() == [50, 100]
+
     def it_can_assemble_a_vector_to_help(self, _row_order_prop_):
         base_values = np.array([1, 2, 3, 4])
         subtotal_values = (3, 5, 7)
