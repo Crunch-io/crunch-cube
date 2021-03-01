@@ -216,7 +216,19 @@ class _ScaledCounts(_BaseSecondOrderMeasure):
         This value is `None` when no rows have a numeric-value assigned. Responses
         without a numeric value are not considered.
         """
-        raise NotImplementedError
+        # --- value is None when no row-element has been assigned a numeric value ---
+        if not self._numeric_values.size:
+            return None
+
+        # --- convert float weighted-counts to int. I'm not sure why this needs to
+        # --- account for NaN values, if you know, explain it here.
+        weighted_counts = np.nan_to_num(self._weighted_counts).astype("int64")
+
+        # --- create an array with a numeric value for each individual count (response)
+        # --- that can be fed directly into np.median()
+        expanded_numeric_values = np.repeat(self._numeric_values, weighted_counts)
+
+        return np.median(expanded_numeric_values)
 
     @lazyproperty
     def _has_numeric_value(self):

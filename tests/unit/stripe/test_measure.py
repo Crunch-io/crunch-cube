@@ -211,6 +211,29 @@ class Describe_ScaledCounts(object):
 
         assert scaled_counts.scale_mean == expected_value
 
+    @pytest.mark.parametrize(
+        "numeric_values, weighted_counts, expected_value",
+        (
+            (np.array([]), np.array([]), None),
+            (np.array([3, 1, 2]), np.array([300, 100, 200]), 2.5),
+        ),
+    )
+    def it_knows_the_scale_median(
+        self,
+        _numeric_values_prop_,
+        numeric_values,
+        _weighted_counts_prop_,
+        weighted_counts,
+        _total_weighted_count_prop_,
+        expected_value,
+    ):
+        _numeric_values_prop_.return_value = numeric_values
+        _weighted_counts_prop_.return_value = weighted_counts
+        _total_weighted_count_prop_.return_value = np.sum(weighted_counts)
+        scaled_counts = _ScaledCounts(None, None, None)
+
+        assert scaled_counts.scale_median == expected_value
+
     def it_knows_which_elements_have_a_numeric_values_to_help(self, rows_dimension_):
         rows_dimension_.numeric_values = (1, np.nan, 3)
         scaled_counts = _ScaledCounts(rows_dimension_, None, None)
