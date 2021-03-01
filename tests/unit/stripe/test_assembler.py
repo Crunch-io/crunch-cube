@@ -140,6 +140,14 @@ class DescribeStripeAssembler(object):
 
         assert assembler.scale_stddev == 5
 
+    def it_knows_the_scale_stderr(self, _measures_prop_, measures_, scaled_counts_):
+        scaled_counts_.scale_stderr = 6
+        measures_.scaled_counts = scaled_counts_
+        _measures_prop_.return_value = measures_
+        assembler = StripeAssembler(None, None, None, None)
+
+        assert assembler.scale_stderr == 6
+
     def it_can_assemble_a_vector_to_help(self, _row_order_prop_):
         base_values = np.array([1, 2, 3, 4])
         subtotal_values = (3, 5, 7)

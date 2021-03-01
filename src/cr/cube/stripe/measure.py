@@ -245,6 +245,14 @@ class _ScaledCounts(_BaseSecondOrderMeasure):
         return np.sqrt(self._scale_variance)
 
     @lazyproperty
+    def scale_stderr(self):
+        """Optional np.float64 standard-error of scaled weighted counts.
+
+        This value is `None` when no rows have a numeric-value assigned.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
     def _has_numeric_value(self):
         """1D bool ndarray (mask) of True for each row with a defined numeric-value."""
         return ~np.isnan(np.array(self._rows_dimension.numeric_values))

@@ -132,7 +132,7 @@ class StripeAssembler(object):
 
         This value is `None` when no rows have a numeric-value assigned.
         """
-        raise NotImplementedError
+        return self._measures.scaled_counts.scale_stderr
 
     @lazyproperty
     def table_proportion_stddevs(self):
