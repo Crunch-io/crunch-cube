@@ -135,6 +135,26 @@ class StripeAssembler(object):
         return self._measures.scaled_counts.scale_stderr
 
     @lazyproperty
+    def table_base_range(self):
+        """[min, max] np.int64 ndarray range of (total) unweighted-N for this stripe.
+
+        A non-MR stripe will have a single base, represented by min and max being the
+        same value. Each row of an MR stripe has a distinct base, which is reduced to a
+        range in that case.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
+    def table_margin_range(self):
+        """[min, max] np.float64 ndarray range of (total) unweighted-N for this stripe.
+
+        A non-MR stripe will have a single margin, represented by min and max being the
+        same value. Each row of an MR stripe has a distinct margin, which is reduced to
+        a min/max range in that case.
+        """
+        raise NotImplementedError
+
+    @lazyproperty
     def table_proportion_stddevs(self):
         """1D np.float64 ndarray of table-proportion std-deviation for each row."""
         return self._assemble_vector(self._measures.table_proportion_stddevs.blocks)

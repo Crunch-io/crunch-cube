@@ -14,6 +14,7 @@ from ..fixtures import CR
 class DescribeStripeAssembler(object):
     """Integration-test suite for `cr.cube.stripe.assembler.StripeAssembler` object."""
 
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_provides_values_for_univariate_cat(self):
         cube = Cube(CR.UNIVARIATE_CATEGORICAL)
         assembler = StripeAssembler(cube, cube.dimensions[0], False, 0)
@@ -26,6 +27,8 @@ class DescribeStripeAssembler(object):
         assert assembler.scale_median == pytest.approx(1.0)
         assert assembler.scale_stddev == pytest.approx(0.9428090)
         assert assembler.scale_stderr == pytest.approx(0.2434322)
+        assert assembler.table_base_range == pytest.approx([15, 15])
+        assert assembler.table_margin_range == pytest.approx([15, 15])
         assert assembler.table_proportion_stddevs == pytest.approx(
             [0.4714045, 0.4714045]
         )
@@ -38,6 +41,7 @@ class DescribeStripeAssembler(object):
         assert assembler.weighted_bases.tolist() == [15, 15]
         assert assembler.weighted_counts.tolist() == [10, 5]
 
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_provides_values_for_univariate_cat_means(self):
         cube = Cube(CR.CAT_MEANS_HS)
         assembler = StripeAssembler(cube, cube.dimensions[0], False, 0)
@@ -59,7 +63,10 @@ class DescribeStripeAssembler(object):
         assert assembler.scale_median is None
         assert assembler.scale_stddev is None
         assert assembler.scale_stderr is None
+        assert assembler.table_base_range == pytest.approx([661, 661])
+        assert assembler.table_margin_range == pytest.approx([86.4992, 86.4992])
 
+    @pytest.mark.xfail(reason="WIP", raises=NotImplementedError, strict=True)
     def it_provides_values_for_univariate_mr(self):
         cube = Cube(CR.MR_WGTD)
         assembler = StripeAssembler(cube, cube.dimensions[0], False, 0)
@@ -92,6 +99,8 @@ class DescribeStripeAssembler(object):
         assert assembler.scale_median is None
         assert assembler.scale_stddev is None
         assert assembler.scale_stderr is None
+        assert assembler.table_base_range == pytest.approx([43504, 43504])
+        assert assembler.table_margin_range == pytest.approx([43009.56, 43009.56])
         assert assembler.table_proportion_stddevs == pytest.approx(
             [
                 0.4986677,
