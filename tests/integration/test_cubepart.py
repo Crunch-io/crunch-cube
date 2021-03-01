@@ -855,8 +855,7 @@ class Describe_Strand(object):
         assert strand.scale_std_err == pytest.approx(0.2434322)
         assert strand.shape == (2,)
         assert strand.table_base_range.tolist() == [15, 15]
-        assert strand.table_margin == 15
-        assert strand.table_margin_unpruned == 15
+        assert strand.table_margin_range.tolist() == [15, 15]
         assert strand.table_name == "v7: C"
         assert strand.table_percentages == pytest.approx([66.66667, 33.33333])
         assert strand.table_proportion_moes == pytest.approx([0.2385592, 0.2385592])
@@ -965,7 +964,23 @@ class Describe_Strand(object):
         assert strand.shape == (35,)
         assert strand.table_base_range.tolist() == [17615, 17615]
         # --- means cube that also has counts has a table-margin ---
-        assert strand.table_margin == 17615
+        # TODO: This should be something like [2685.782, 2685.782] because weighted
+        # cube_counts are present in the payload. It's NaN here because there's
+        # currently no way to get both means and counts from the same Cube object.
+        assert strand.table_margin_range == pytest.approx([np.nan, np.nan], nan_ok=True)
+
+    @pytest.mark.xfail(reason="NumArr", raises=AssertionError, strict=True)
+    # --- remove this stub test once this is fixed. This assertion will live in the test
+    # --- immediately above, once fixed there.
+    def it_provides_table_margin_range_for_univariate_cat_means_and_counts(self):
+        """The cube_mean and cube_count measures can appear together."""
+        strand = Cube(CR.CAT_MEANS_AND_COUNTS).partitions[0]
+
+        # --- means cube that also has counts has a table-margin-range ---
+        # TODO: This should be something like [2685.782, 2685.782] because weighted
+        # cube_counts are present in the payload. It's NaN here because there's
+        # currently no way to get both means and counts from the same Cube object.
+        assert strand.table_margin_range == pytest.approx([2685.782, 2685.782])
 
     def it_provides_values_for_univariate_datetime(self):
         strand = Cube(CR.DATE, population=9001).partitions[0]
@@ -974,7 +989,7 @@ class Describe_Strand(object):
         assert strand.population_counts == pytest.approx(
             [2250.25, 2250.25, 2250.25, 2250.25]
         )
-        assert strand.table_margin == 4
+        assert strand.table_margin_range.tolist() == [4, 4]
         assert strand.table_percentages == pytest.approx([25.0, 25.0, 25.0, 25.0])
         assert strand.table_proportion_stddevs == pytest.approx(
             [0.4330127, 0.4330127, 0.4330127, 0.4330127]
@@ -1054,7 +1069,7 @@ class Describe_Strand(object):
         assert strand.population_counts_moe == pytest.approx(
             [177.9752, 171.0193, 55.50811]
         )
-        assert strand.table_margin == 1000
+        assert strand.table_margin_range.tolist() == [1000, 1000]
         assert strand.table_percentages == pytest.approx([88.5, 10.5, 1.0])
         assert strand.table_proportion_moes == pytest.approx(
             [0.019772822, 0.019000029, 0.006166883]
@@ -1081,7 +1096,7 @@ class Describe_Strand(object):
         assert strand.population_counts == pytest.approx(
             [1500.167, 1500.167, 1500.167, 1500.167, 1500.167, 1500.167]
         )
-        assert strand.table_margin == 6
+        assert strand.table_margin_range.tolist() == [6, 6]
         assert strand.table_percentages == pytest.approx(
             [16.66667, 16.66667, 16.66667, 16.66667, 16.66667, 16.66667],
         )

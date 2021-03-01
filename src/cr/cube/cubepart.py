@@ -1424,19 +1424,14 @@ class _Strand(CubePartition):
         return self._assembler.table_base_range
 
     @lazyproperty
-    def table_margin(self):
-        # For MR strands, table base is also a strand, since subvars never collapse.
-        # We need to keep the ordering and hiding as in rows dimension. All this
-        # information is already accessible in the underlying rows property
-        # of the `_stripe`.
-        if self.dimension_types[0] == DT.MR:
-            return np.array([row.table_margin for row in self._stripe.rows])
+    def table_margin_range(self):
+        """[min, max] np.float64 ndarray range of (total) weighted-N for this stripe.
 
-        return self._stripe.table_margin_unpruned
-
-    @lazyproperty
-    def table_margin_unpruned(self):
-        return self._stripe.table_margin_unpruned
+        A non-MR stripe will have a single margin, represented by min and max being the
+        same value. Each row of an MR stripe has a distinct base, which is reduced to a
+        range in that case.
+        """
+        return self._assembler.table_margin_range
 
     @lazyproperty
     def table_name(self):

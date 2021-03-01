@@ -23,8 +23,8 @@ def test_as_array_simple_mr_exclude_missing():
 
 
 def test_margin_simple_mr_axis_none():
-    slice_ = Cube(CR.SIMPLE_MR).partitions[0]
-    np.testing.assert_array_equal(slice_.table_margin, [5, 6, 6])
+    strand = Cube(CR.SIMPLE_MR).partitions[0]
+    assert strand.table_margin_range.tolist() == [5, 6]
 
 
 def test_proportions_simple_mr():
@@ -54,9 +54,7 @@ def test_deck_with_means():
 
     assert strand.ndim == 1
     assert strand.table_base_range.tolist() == [588, 588]
-    assert strand.table_margin_unpruned == pytest.approx(
-        [585.086, 585.086, 585.086, 585.086, 585.086, 585.086, 585.086, 585.086]
-    )
+    assert strand.table_margin_range == pytest.approx([585.086, 585.086])
 
 
 def test_3D_with_means():
