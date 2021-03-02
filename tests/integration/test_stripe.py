@@ -62,7 +62,9 @@ class DescribeStripeAssembler(object):
         assert assembler.scale_stddev is None
         assert assembler.scale_stderr is None
         assert assembler.table_base_range == pytest.approx([661, 661])
-        assert assembler.table_margin_range == pytest.approx([86.4992, 86.4992])
+        # for a cube with numeric measure like mean, table margin and table base are the
+        # same because they are both calculated on the counts.
+        assert assembler.table_margin_range == pytest.approx([661, 661])
 
     def it_provides_values_for_univariate_mr(self):
         cube = Cube(CR.MR_WGTD)

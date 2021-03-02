@@ -340,16 +340,15 @@ class Describe_Slice(object):
             slice_.columns_margin, np.array([189, 395, 584, 606, 310])
         )
 
-    @pytest.mark.skip(reason="Needs change to Cube.counts (and add Cube.means)")
-    # --- this fails because `Cube.counts` returns the _means_ measure (and not the
-    # --- cube-count measure, as it should now). This needs to be fixed, including
-    # --- resolving whether we should continue to return NaNs or raise an exception (as
-    # --- would be the general behavior when requesting a measure on a cube that lacks
-    # --- cube-measure its computation is based on.
     def but_it_has_no_counts_because_there_is_no_cube_count_measure(self):
         slice_ = Cube(CR.MEANS_CAT_X_CAT_HS).partitions[0]
-        assert slice_.counts == pytest.approx(
-            np.array([[np.nan, np.nan, np.nan, np.nan, np.nan]]), nan_ok=True
+
+        # This fixture has both cube_counts and cube_means measure, for this reason
+        # both measures are available at cubepart level.
+        assert slice_.counts == pytest.approx(np.array([[189, 395, 584, 606, 310]]))
+        assert slice_.means == pytest.approx(
+            np.array([[24.43935757, 37.32122746, np.nan, 55.48571956, 73.02427659]]),
+            nan_ok=True,
         )
 
     def it_provides_values_for_mr_x_cat_hs(self):
@@ -913,18 +912,13 @@ class Describe_Strand(object):
             [16029.22309748, 16029.22309748]
         )
 
-    @pytest.mark.xfail(reason="NumArr", raises=AssertionError, strict=True)
-    # --- remove this stub test once this is fixed. This assertion will live in the test
-    # --- immediately above, once fixed there.
     def it_provides_table_margin_range_for_univariate_cat_means_and_counts(self):
         """The cube_mean and cube_count measures can appear together."""
         strand = Cube(CR.CAT_MEANS_AND_COUNTS).partitions[0]
 
-        # --- means cube that also has counts has a table-margin-range ---
-        # TODO: This should be something like [2685.782, 2685.782] because weighted
-        # cube_counts are present in the payload. It's NaN here because there's
-        # currently no way to get both means and counts from the same Cube object.
-        assert strand.table_margin_range == pytest.approx([2685.782, 2685.782])
+        # for a cube with numeric measure like mean, table margin are calculated on the
+        # counts and not on the means.
+        assert strand.table_margin_range == pytest.approx([16029.223097, 16029.223097])
 
     def it_provides_values_for_univariate_datetime(self):
         strand = Cube(CR.DATE, population=9001).partitions[0]
