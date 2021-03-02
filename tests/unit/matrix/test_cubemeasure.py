@@ -1298,6 +1298,22 @@ class Describe_CatXCatMatrix(object):
             == "`.means` is undefined for a cube-result without a means measure"
         )
 
+    def it_knows_its_sum(self):
+        cube_sum = np.array([[4, 3, 1], [5, 9, 4]])
+        matrix = _CatXCatMatrix(None, None, None, sum=cube_sum)
+
+        assert matrix.sum.tolist() == [[4, 3, 1], [5, 9, 4]]
+
+    def but_it_raises_value_error_when_the_cube_result_does_not_contain_sum(self):
+        matrix = _CatXCatMatrix(None, None, None, sum=None)
+        with pytest.raises(ValueError) as e:
+            matrix.sum
+
+        assert (
+            str(e.value)
+            == "`.sum` is undefined for a cube-result without a sum measure"
+        )
+
 
 class Describe_CatXMrMatrix(object):
     """Unit test suite for `cr.cube.matrix._CatXMrMatrix` object."""
@@ -1424,7 +1440,7 @@ class Describe_CatXMrMatrix(object):
             "_array_type_std_res",
             return_value=np.array([[1, 2], [3, 4]]),
         )
-        weighted_cube_counts = np.arange(24).reshape(3, 4, 2)
+        weighted_cube_counts = np.arange(24).reshape((3, 4, 2))
         matrix = _CatXMrMatrix(None, weighted_cube_counts, None)
 
         zscores = matrix.zscores
@@ -1451,7 +1467,7 @@ class Describe_CatXMrMatrix(object):
         )
 
     def it_knows_its_table_proportion_variances_to_help(self, request):
-        weighted_cube_counts = np.arange(12).reshape(2, 3, 2)
+        weighted_cube_counts = np.arange(12).reshape((2, 3, 2))
         np.testing.assert_almost_equal(
             _CatXMrMatrix(None, weighted_cube_counts, None)._table_proportion_variances,
             np.array([[0.0, 0.0826446, 0.1155556], [0.244898, 0.231405, 0.2222222]]),
@@ -1472,6 +1488,23 @@ class Describe_CatXMrMatrix(object):
         assert (
             str(e.value)
             == "`.means` is undefined for a cube-result without a means measure"
+        )
+
+    def it_knows_its_sum(self):
+        sum = np.array([[[4, 6], [2, 5], [1, 4]], [[5, 3], [9, 2], [7, 1]]])
+        np.testing.assert_equal(
+            _CatXMrMatrix(None, None, None, sum=sum).sum,
+            np.array([[4, 2, 1], [5, 9, 7]]),
+        )
+
+    def but_it_raises_value_error_when_the_cube_result_does_not_contain_sum(self):
+        matrix = _CatXMrMatrix(None, None, None, sum=None)
+        with pytest.raises(ValueError) as e:
+            matrix.sum
+
+        assert (
+            str(e.value)
+            == "`.sum` is undefined for a cube-result without a sum measure"
         )
 
 
@@ -1650,7 +1683,7 @@ class Describe_MrXCatMatrix(object):
         _array_type_std_res_ = method_mock(
             request, _MrXCatMatrix, "_array_type_std_res", return_value=[[1, 2], [3, 4]]
         )
-        weighted_counts = np.arange(24).reshape(3, 2, 4)
+        weighted_counts = np.arange(24).reshape((3, 2, 4))
         matrix = _MrXCatMatrix(None, weighted_counts, None)
 
         zscores = matrix.zscores
@@ -1681,14 +1714,14 @@ class Describe_MrXCatMatrix(object):
         )
 
     def it_knows_its_table_proportion_variances_to_help(self, request):
-        weighted_counts = np.arange(12).reshape(2, 2, 3)
+        weighted_counts = np.arange(12).reshape((2, 2, 3))
         np.testing.assert_almost_equal(
             _MrXCatMatrix(None, weighted_counts, None)._table_proportion_variances,
             np.array([[0.0, 0.0622222, 0.1155556], [0.1038062, 0.118416, 0.1322568]]),
         )
 
     def it_knows_its_means(self):
-        means = np.arange(24).reshape(3, 2, 4)
+        means = np.arange(24).reshape((3, 2, 4))
         np.testing.assert_equal(
             _MrXCatMatrix(None, None, None, means=means).means,
             np.array([[0, 1, 2, 3], [8, 9, 10, 11], [16, 17, 18, 19]]),
@@ -1702,6 +1735,23 @@ class Describe_MrXCatMatrix(object):
         assert (
             str(e.value)
             == "`.means` is undefined for a cube-result without a means measure"
+        )
+
+    def it_knows_its_sum(self):
+        sum = np.arange(24).reshape((3, 2, 4))
+        np.testing.assert_equal(
+            _MrXCatMatrix(None, None, None, sum=sum).sum,
+            np.array([[0, 1, 2, 3], [8, 9, 10, 11], [16, 17, 18, 19]]),
+        )
+
+    def but_it_raises_value_error_when_the_cube_result_does_not_contain_sum(self):
+        matrix = _MrXCatMatrix(None, None, None, sum=None)
+        with pytest.raises(ValueError) as e:
+            matrix.sum
+
+        assert (
+            str(e.value)
+            == "`.sum` is undefined for a cube-result without a sum measure"
         )
 
 
@@ -1940,7 +1990,7 @@ class Describe_MrXMrMatrix(object):
         _array_type_std_res_ = method_mock(
             request, _MrXMrMatrix, "_array_type_std_res", return_value=[[1, 2], [3, 4]]
         )
-        weighted_counts = np.arange(48).reshape(3, 2, 4, 2)
+        weighted_counts = np.arange(48).reshape((3, 2, 4, 2))
         matrix = _MrXMrMatrix(None, weighted_counts, None)
 
         zscores = matrix.zscores
@@ -1977,8 +2027,8 @@ class Describe_MrXMrMatrix(object):
             np.array([[0.5, 0.5], [0.5, 0.5]]),
         )
 
-    def it_knows_its_table_proportion_variances_to_help(self, request):
-        weighted_counts = np.arange(24).reshape(2, 2, 3, 2)
+    def it_knows_its_table_proportion_variances_to_help(self):
+        weighted_counts = np.arange(24).reshape((2, 2, 3, 2))
         np.testing.assert_almost_equal(
             _MrXMrMatrix(None, weighted_counts, None)._table_proportion_variances,
             np.array([[0.0, 0.0826446, 0.1155556], [0.1560874, 0.16, 0.1630506]]),
