@@ -18,7 +18,6 @@ from cr.cube.matrix.assembler import (
 from cr.cube.matrix.cubemeasure import (
     BaseCubeResultMatrix,
     _CatXCatMatrix,
-    _CatXCatMeansMatrix,
 )
 from cr.cube.matrix.measure import (
     _BaseSecondOrderMeasure,
@@ -258,9 +257,8 @@ class DescribeAssembler(object):
         NanSubtotals_,
         _assemble_matrix_,
     ):
-        cube_.has_means = True
         cube_result_matrix_ = instance_mock(
-            request, _CatXCatMeansMatrix, means=[[1, 2], [3, 4]]
+            request, _CatXCatMatrix, means=[[1, 2], [3, 4]]
         )
         _cube_result_matrix_prop_.return_value = cube_result_matrix_
         NanSubtotals_.blocks.return_value = [[[3], [2]], [[4], [1]]]
@@ -273,11 +271,28 @@ class DescribeAssembler(object):
         _assemble_matrix_.assert_called_once_with(assembler, [[[3], [2]], [[4], [1]]])
         assert means == [[1, 2, 3], [4, 5, 6]]
 
-    def but_it_raises_when_the_cube_result_does_not_contain_means_measure(self, cube_):
-        cube_.has_means = False
-        with pytest.raises(ValueError) as e:
-            Assembler(cube_, None, None).means
-        assert str(e.value) == "cube-result does not include a means cube-measure"
+    def it_knows_the_sum(
+        self,
+        request,
+        cube_,
+        _cube_result_matrix_prop_,
+        dimensions_,
+        NanSubtotals_,
+        _assemble_matrix_,
+    ):
+        cube_result_matrix_ = instance_mock(
+            request, _CatXCatMatrix, sum=[[1, 2], [3, 4]]
+        )
+        _cube_result_matrix_prop_.return_value = cube_result_matrix_
+        NanSubtotals_.blocks.return_value = [[[3], [2]], [[4], [1]]]
+        _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6]]
+        assembler = Assembler(cube_, dimensions_, None)
+
+        sum = assembler.sum
+
+        NanSubtotals_.blocks.assert_called_once_with([[1, 2], [3, 4]], dimensions_)
+        _assemble_matrix_.assert_called_once_with(assembler, [[[3], [2]], [[4], [1]]])
+        assert sum == [[1, 2, 3], [4, 5, 6]]
 
     def it_knows_the_pvalues(self, request):
         property_mock(
