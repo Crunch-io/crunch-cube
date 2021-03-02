@@ -15,14 +15,14 @@ class TestHeadersAndSubtotals(object):
 
     def test_headings_econ_blame_one_subtotal(self):
         strand = Cube(CR.ECON_BLAME_WITH_HS).partitions[0]
-        assert strand.row_labels == (
+        assert strand.row_labels.tolist() == [
             "President Obama",
             "Republicans in Congress",
             "Test New Heading (Obama and Republicans)",
             "Both",
             "Neither",
             "Not sure",
-        )
+        ]
 
     def test_headings_econ_blame_one_subtotal_do_not_fetch(self):
         transforms = {
@@ -31,41 +31,39 @@ class TestHeadersAndSubtotals(object):
         }
         strand = Cube(CR.ECON_BLAME_WITH_HS, transforms=transforms).partitions[0]
 
-        assert strand.row_labels == (
+        assert strand.row_labels.tolist() == [
             "President Obama",
             "Republicans in Congress",
             "Both",
             "Neither",
             "Not sure",
-        )
+        ]
 
     def test_headings_econ_blame_two_subtotal_without_missing(self):
-        strand = Cube(CR.ECON_BLAME_WITH_HS_MISSING).partitions[0]
-        assert strand.row_labels == (
-            "President Obama",
-            "Republicans in Congress",
-            "Test New Heading (Obama and Republicans)",
+        strand = Cube(CR.CAT_HS_MT).partitions[0]
+        assert strand.row_labels.tolist() == [
+            "President O",
+            "Republicans",
+            "Test New He",
             "Both",
             "Neither",
             "Not sure",
-            "Test Heading with Skipped",
-        )
+            "Test Headin",
+        ]
 
     def test_headings_two_subtotal_without_missing_do_not_fetch(self):
         transforms = {
             "columns_dimension": {"insertions": {}},
             "rows_dimension": {"insertions": {}},
         }
-        strand = Cube(CR.ECON_BLAME_WITH_HS_MISSING, transforms=transforms).partitions[
-            0
-        ]
-        assert strand.row_labels == (
-            "President Obama",
-            "Republicans in Congress",
+        strand = Cube(CR.CAT_HS_MT, transforms=transforms).partitions[0]
+        assert strand.row_labels.tolist() == [
+            "President O",
+            "Republicans",
             "Both",
             "Neither",
             "Not sure",
-        )
+        ]
 
     def test_1D_one_subtotal(self):
         strand = Cube(CR.ECON_BLAME_WITH_HS).partitions[0]
@@ -84,7 +82,7 @@ class TestHeadersAndSubtotals(object):
         np.testing.assert_array_equal(counts, (285, 396, 242, 6, 68))
 
     def test_1D_subtotals_counts_missing_excluded(self):
-        strand = Cube(CR.ECON_BLAME_WITH_HS_MISSING).partitions[0]
+        strand = Cube(CR.CAT_HS_MT).partitions[0]
         counts = strand.counts
         np.testing.assert_array_equal(counts, (285, 396, 681, 242, 6, 68, 74))
 
@@ -110,7 +108,7 @@ class TestHeadersAndSubtotals(object):
         )
 
     def test_1D_subtotals_proportions_missing_excluded(self):
-        strand = Cube(CR.ECON_BLAME_WITH_HS_MISSING).partitions[0]
+        strand = Cube(CR.CAT_HS_MT).partitions[0]
         table_proportions = strand.table_proportions
         np.testing.assert_almost_equal(
             table_proportions,
@@ -126,15 +124,15 @@ class TestHeadersAndSubtotals(object):
         )
 
     def test_1D_subtotals_row_base(self):
-        strand = Cube(CR.ECON_BLAME_WITH_HS_MISSING).partitions[0]
-        np.testing.assert_equal(strand.rows_base, [285, 396, 681, 242, 6, 68, 74])
+        strand = Cube(CR.CAT_HS_MT).partitions[0]
+        assert strand.rows_base.tolist() == [285, 396, 681, 242, 6, 68, 74]
 
     def test_1D_subtotals_rows_dimension_fills(self):
-        strand = Cube(CR.ECON_BLAME_WITH_HS_MISSING).partitions[0]
+        strand = Cube(CR.CAT_HS_MT).partitions[0]
         assert strand.rows_dimension_fills == (None,) * 7
 
     def test_1D_subtotals_inserted_row_idxs(self):
-        strand = Cube(CR.ECON_BLAME_WITH_HS_MISSING).partitions[0]
+        strand = Cube(CR.CAT_HS_MT).partitions[0]
         assert strand.inserted_row_idxs == (2, 6)
 
     def test_1D_means_mr_subtotals_hidden(self):
@@ -519,13 +517,13 @@ class TestHeadersAndSubtotals(object):
 
     def test_fruit_hs_top_bottom_labels(self):
         strand = Cube(CR.FRUIT_HS_TOP_BOTTOM).partitions[0]
-        assert strand.row_labels == (
+        assert strand.row_labels.tolist() == [
             "TOP",
             "rambutan",
             "MIDDLE",
             "satsuma",
             "BOTTOM",
-        )
+        ]
 
     def test_fruit_hs_top_bottom_counts(self):
         strand = Cube(CR.FRUIT_HS_TOP_BOTTOM).partitions[0]
@@ -606,7 +604,7 @@ class TestHeadersAndSubtotals(object):
 
     def test_missing_cat_hs_labels(self):
         strand = Cube(CR.MISSING_CAT_HS).partitions[0]
-        assert strand.row_labels == (
+        assert strand.row_labels.tolist() == [
             "Whites",
             "White college women voters",
             "White non-college women voters",
@@ -614,7 +612,7 @@ class TestHeadersAndSubtotals(object):
             "White non-college men voters",
             "Black voters",
             "Latino and other voters",
-        )
+        ]
 
     def test_ca_x_cat_counts_with_hs(self):
         # Assert counts without H&S

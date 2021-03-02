@@ -1,0 +1,115 @@
+{
+    "query": {
+        "dimensions": [
+            {"variable": "https://app.crunch.io/api/datasets/8f79134911f54bd3b137bca85af1334d/variables/ff24713ef1c340ef9015a9f6241a14b6/"}
+        ],
+        "measures": {
+            "count": {"args": [], "function": "cube_count"},
+            "mean": {
+                "args": [{"variable": "https://app.crunch.io/api/datasets/8f79134911f54bd3b137bca85af1334d/variables/000679/"}],
+                "function": "cube_mean"
+            }
+        },
+        "weight": "https://app.crunch.io/api/datasets/8f79134911f54bd3b137bca85af1334d/variables/f633c0384afe445f825988c67ce58095/"
+    },
+    "query_environment": {
+        "filter": [
+            {
+                "args": [
+                    {
+                        "args": [
+                            {"variable": "https://app.crunch.io/api/datasets/8f79134911f54bd3b137bca85af1334d/variables/6456101c79fa4f198ebccd8d32f6aac2/"},
+                            {
+                                "column": [7],
+                                "type": {
+                                    "args": [{"variable": "https://app.crunch.io/api/datasets/8f79134911f54bd3b137bca85af1334d/variables/6456101c79fa4f198ebccd8d32f6aac2/"}],
+                                    "function": "typeof"
+                                }
+                            }
+                        ],
+                        "function": "in"
+                    },
+                    {
+                        "args": [
+                            {"variable": "https://app.crunch.io/api/datasets/8f79134911f54bd3b137bca85af1334d/variables/6a5c244fb1b54af7b17635bfd452a50d/"},
+                            {
+                                "column": [22, 23, 24, 25, 26],
+                                "type": {
+                                    "args": [{"variable": "https://app.crunch.io/api/datasets/8f79134911f54bd3b137bca85af1334d/variables/6a5c244fb1b54af7b17635bfd452a50d/"}],
+                                    "function": "typeof"
+                                }
+                            }
+                        ],
+                        "function": "in"
+                    }
+                ],
+                "function": "and"
+            }
+        ]
+    },
+    "result": {
+        "counts": [806, 0, 14, 28, 780],
+        "dimensions": [
+            {
+                "derived": false,
+                "references": {"alias": "show", "name": "Programme Name"},
+                "type": {
+                    "categories": [
+                        {"id": 1, "name": "10 Puppies "},
+                        {"id": 2, "name": "... Sings B"},
+                        {"id": 3, "name": "... Sings E"},
+                        {"id": 4, "name": "... Sings M"},
+                        {"id": 5, "name": "... Sings t"}
+                    ],
+                    "class": "categorical",
+                    "ordinal": false
+                }
+            }
+        ],
+        "element": "crunch:cube",
+        "measures": {
+            "count": {
+                "data": [
+                    756.440523324351,
+                    0.0,
+                    13.2607043241033,
+                    21.8372083088966,
+                    709.42276459211
+                ],
+                "metadata": {
+                    "derived": true,
+                    "references": {},
+                    "type": {
+                        "class": "numeric",
+                        "integer": false,
+                        "missing_reasons": {"No Data": -1},
+                        "missing_rules": {}
+                    }
+                },
+                "n_missing": 0
+            },
+            "mean": {
+                "data": [
+                    74.5034662150996,
+                    {"?": -8},
+                    83.8294973408043,
+                    80,
+                    79.3879621679687
+                ],
+                "metadata": {
+                    "derived": true,
+                    "references": {},
+                    "type": {
+                        "class": "numeric",
+                        "integer": false,
+                        "missing_reasons": {"NaN": -8, "No Data": -1},
+                        "missing_rules": {}
+                    }
+                },
+                "n_missing": 0
+            }
+        },
+        "missing": 0,
+        "n": 17615
+    }
+}

@@ -1,0 +1,51 @@
+{
+    "result": {
+        "counts": [885, 105, 10],
+        "dimensions": [
+            {
+                "derived": true,
+                "references": {
+                    "alias": "VoterRegistration",
+                    "description": "Are you registered to vote?",
+                    "format": {
+                        "data": {"digits": 2},
+                        "summary": {"digits": 2}
+                    },
+                    "name": "VoterRegistration"
+                },
+                "type": {
+                    "class": "enum",
+                    "elements": [
+                        {"id": 0, "value": 1},
+                        {"id": 1, "value": 2},
+                        {"id": 2, "value": 3}
+                    ],
+                    "subtype": {
+                        "class": "numeric",
+                        "missing_reasons": {"No Data": -1},
+                        "missing_rules": {}
+                    }
+                }
+            }
+        ],
+        "element": "crunch:cube",
+        "measures": {
+            "count": {
+                "data": [885, 105, 10],
+                "metadata": {
+                    "derived": true,
+                    "references": {},
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {"No Data": -1},
+                        "missing_rules": {}
+                    }
+                },
+                "n_missing": 0
+            }
+        },
+        "missing": 0,
+        "n": 1000
+    }
+}

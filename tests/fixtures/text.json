@@ -1,0 +1,58 @@
+{
+    "query": {
+        "dimensions": [
+            {"variable": "https://alpha.crunch.io/api/datasets/75ff860fd8b643c3a4fcdea0300cc727/variables/000003/"}
+        ],
+        "measures": {
+            "count": {"args": [], "function": "cube_count"}
+        },
+        "weight": null
+    },
+    "query_environment": {
+        "filter": []
+    },
+    "result": {
+        "counts": [1, 1, 1, 1, 1, 1],
+        "dimensions": [
+            {
+                "derived": true,
+                "references": {"alias": "str", "description": "40 character string", "name": "str"},
+                "type": {
+                    "class": "enum",
+                    "elements": [
+                        {"id": 0, "value": ""},
+                        {"id": 1, "value": "MORE JUNK"},
+                        {"id": 2, "value": "NA"},
+                        {"id": 3, "value": "green"},
+                        {"id": 4, "value": "red"},
+                        {"id": 5, "value": "reg-green-blue-whatever"}
+                    ],
+                    "subtype": {
+                        "class": "text",
+                        "missing_reasons": {"No Data": -1},
+                        "missing_rules": {}
+                    }
+                }
+            }
+        ],
+        "element": "crunch:cube",
+        "measures": {
+            "count": {
+                "data": [1, 1, 1, 1, 1, 1],
+                "metadata": {
+                    "derived": true,
+                    "references": {},
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {"No Data": -1},
+                        "missing_rules": {}
+                    }
+                },
+                "n_missing": 0
+            }
+        },
+        "missing": 0,
+        "n": 6
+    }
+}

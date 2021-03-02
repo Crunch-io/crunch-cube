@@ -1,0 +1,87 @@
+{
+    "query": {
+        "dimensions": [
+            {"variable": "http://local.crunch.io:8080/api/datasets/53434aae61864813abb2a736e3e44ccb/variables/000000/"}
+        ],
+        "measures": {
+            "count": {
+                "args": [],
+                "function": "cube_count"
+            }
+        },
+        "weight": null
+    },
+    "query_environment": {
+        "filter": []
+    },
+    "result": {
+        "counts": [
+            285, 396, 242,   6,  68,   3,   0,   0
+        ],
+        "dimensions": [
+            {
+                "derived": false,
+                "references": {
+                    "alias": "ShutdownBlame",
+                    "description": "If Presiden",
+                    "name": "ShutdownBla",
+                    "view": {
+                        "transform": {
+                            "insertions": [
+                                {"anchor": 2, "args": [1, 2], "function": "subtotal", "name": "Test New He"},
+                                {"anchor": "bottom", "args": [4, 5, 8], "function": "subtotal", "name": "Test Headin"}
+                            ]
+                        },
+                        "transforms": {
+                            "insertions": [
+                                {
+                                    "anchor": 1,
+                                    "args": [
+                                        1,
+                                        2
+                                    ],
+                                    "function": "subtotal",
+                                    "name": "test new he"
+                                }
+                            ]
+                        }
+                    }
+                },
+                "type": {
+                    "categories": [
+                        {"id": 1, "name": "President O", "numeric_value": 1},
+                        {"id": 2, "name": "Republicans", "numeric_value": 2},
+                        {"id": 3, "name": "Both", "numeric_value": 3},
+                        {"id": 4, "name": "Neither", "numeric_value": 4},
+                        {"id": 5, "name": "Not sure", "numeric_value": 5},
+                        {"id": 8, "missing": true, "name": "Skipped", "numeric_value": 8},
+                        {"id": 9, "missing": true, "name": "Not Asked", "numeric_value": 9},
+                        {"id": -1, "missing": true, "name": "No Data"}
+                    ],
+                    "class": "categorical",
+                    "ordinal": false
+                }
+            }
+        ],
+        "measures": {
+            "count": {
+                "data": [
+                    285, 396, 242,   6,  68,   3,   0,   0
+                ],
+                "metadata": {
+                    "derived": true,
+                    "references": {},
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {"No Data": -1},
+                        "missing_rules": {}
+                    }
+                },
+                "n_missing": 3
+            }
+        },
+        "missing": 3,
+        "n": 1000
+    }
+}

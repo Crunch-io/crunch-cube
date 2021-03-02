@@ -732,12 +732,10 @@ class Describe_AllElements(object):
     def it_creates_its_Element_objects_in_a_local_factory_to_help(
         self,
         request,
-        _prune_prop_,
         _ElementTransforms_,
         _Element_,
         _iter_element_makings_,
     ):
-        _prune_prop_.return_value = True
         element_transforms_ = tuple(
             instance_mock(request, _ElementTransforms, name="element-xfrms-%s" % idx)
             for idx in range(3)
@@ -760,9 +758,9 @@ class Describe_AllElements(object):
         elements = all_elements._elements
 
         assert _ElementTransforms_.call_args_list == [
-            call({"xfrms": 0}, True),
-            call({"xfrms": 1}, True),
-            call({"xfrms": 2}, True),
+            call({"xfrms": 0}),
+            call({"xfrms": 1}),
+            call({"xfrms": 2}),
         ]
         assert _Element_.call_args_list == [
             call({"element": "dict-A"}, 0, element_transforms_[0]),
@@ -811,10 +809,6 @@ class Describe_AllElements(object):
     @pytest.fixture
     def _iter_element_makings_(self, request):
         return method_mock(request, _AllElements, "_iter_element_makings")
-
-    @pytest.fixture
-    def _prune_prop_(self, request):
-        return property_mock(request, _AllElements, "_prune")
 
     @pytest.fixture
     def _ValidElements_(self, request):
@@ -1012,7 +1006,7 @@ class DescribeElementTransforms(object):
         ),
     )
     def it_knows_its_fill_color_value(self, element_transforms_dict, expected_value):
-        element_transforms = _ElementTransforms(element_transforms_dict, None)
+        element_transforms = _ElementTransforms(element_transforms_dict)
 
         fill_color_value = element_transforms.fill
 
@@ -1030,7 +1024,7 @@ class DescribeElementTransforms(object):
     def it_knows_when_it_is_explicitly_hidden(
         self, element_transforms_dict, expected_value
     ):
-        element_transforms = _ElementTransforms(element_transforms_dict, None)
+        element_transforms = _ElementTransforms(element_transforms_dict)
 
         is_hidden = element_transforms.hide
 
@@ -1046,7 +1040,7 @@ class DescribeElementTransforms(object):
         ),
     )
     def it_knows_its_name(self, element_transforms_dict, expected_value):
-        element_transforms = _ElementTransforms(element_transforms_dict, None)
+        element_transforms = _ElementTransforms(element_transforms_dict)
 
         name = element_transforms.name
 

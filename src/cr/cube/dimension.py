@@ -413,10 +413,7 @@ class Dimension(object):
     @lazyproperty
     def prune(self):
         """True if empty elements should be automatically hidden on this dimension."""
-        prune = self._dimension_transforms_dict.get("prune")
-        if prune is True:
-            return True
-        return False
+        return self._dimension_transforms_dict.get("prune") is True
 
     @lazyproperty
     def selected_categories(self):
@@ -550,7 +547,7 @@ class _AllElements(_BaseElements):
             _Element(
                 element_dict,
                 idx,
-                _ElementTransforms(element_transforms_dict, self._prune),
+                _ElementTransforms(element_transforms_dict),
             )
             for (
                 idx,
@@ -577,11 +574,6 @@ class _AllElements(_BaseElements):
                 element_id, elements_transforms.get(str(element_id), {})
             )
             yield idx, element_dict, element_transforms_dict
-
-    @lazyproperty
-    def _prune(self):
-        """True if empty elements in this dimension should be automatically hidden."""
-        return True if self._dimension_transforms_dict.get("prune") is True else False
 
 
 class _ValidElements(_BaseElements):
@@ -771,18 +763,12 @@ class _Element(object):
         numeric_value = self._element_dict.get("numeric_value")
         return np.nan if numeric_value is None else numeric_value
 
-    @lazyproperty
-    def prune(self):
-        """True if this element should be hidden when empty, False otherwise."""
-        return self._element_transforms.prune
-
 
 class _ElementTransforms(object):
     """A value object providing convenient access to transforms for a single element."""
 
-    def __init__(self, element_transforms_dict, prune):
+    def __init__(self, element_transforms_dict):
         self._element_transforms_dict = element_transforms_dict
-        self._prune = prune
 
     @lazyproperty
     def fill(self):
@@ -824,11 +810,6 @@ class _ElementTransforms(object):
         # ---etc. becoming the empty string ("").
         name = self._element_transforms_dict["name"]
         return str(name) if name else ""
-
-    @lazyproperty
-    def prune(self):
-        """True if this element should be hidden when empty."""
-        return self._prune
 
 
 class _Subtotals(Sequence):

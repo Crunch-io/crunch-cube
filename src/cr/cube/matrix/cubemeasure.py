@@ -760,10 +760,13 @@ class _MrXMrWeightedCubeCounts(_BaseWeightedCubeCounts):
 class BaseCubeResultMatrix(object):
     """Base class for all cube-result matrix (2D second-order analyzer) objects."""
 
-    def __init__(self, dimensions, weighted_counts, unweighted_counts):
+    def __init__(
+        self, dimensions, weighted_counts, unweighted_counts, counts_with_missings=None
+    ):
         self._dimensions = dimensions
         self._weighted_counts = weighted_counts
         self._unweighted_counts = unweighted_counts
+        self._counts_with_missings = counts_with_missings
 
     @classmethod
     def factory(cls, cube, dimensions, slice_idx):
@@ -774,6 +777,20 @@ class BaseCubeResultMatrix(object):
 
         # --- everything else gets a more conventional matrix ---
         return cls._regular_matrix_factory(cube, dimensions, slice_idx)
+
+    @lazyproperty
+    def column_index(self):
+        """2D np.float64/np.nan ndarray of column-index value for each matrix cell.
+
+        Column-index answers the question "are respondents in this row-category more or
+        less likely than the overall table population to choose the answer represented
+        by this column?". For example, if the row is "Hispanic" and the column is
+        home-ownership, a value of 100 indicates hispanics are no less and no more
+        likely to own their home than the overall population. If that value was 150, it
+        would indicate hispanics are 50% more likely to own their home than the general
+        population (or the population surveyed anyway).
+        """
+        return self.column_proportions / self._baseline * 100
 
     @lazyproperty
     def column_proportions(self):
@@ -1013,14 +1030,6 @@ class _CatXCatMatrix(BaseCubeResultMatrix):
     column-index.
     """
 
-    def __init__(
-        self, dimensions, weighted_counts, unweighted_counts, counts_with_missings=None
-    ):
-        super(_CatXCatMatrix, self).__init__(
-            dimensions, weighted_counts, unweighted_counts
-        )
-        self._counts_with_missings = counts_with_missings
-
     @lazyproperty
     def column_index(self):
         """2D np.float64/np.nan ndarray of column-index value for each matrix cell.
@@ -1065,7 +1074,7 @@ class _CatXCatMatrix(BaseCubeResultMatrix):
 
         Values are `np.int64` when the source cube-result is not weighted.
         """
-        return np.sum(self.weighted_counts, axis=1)
+        return np.sum(self._weighted_counts, axis=1)
 
     @lazyproperty
     def rows_pruning_base(self):
@@ -1348,7 +1357,7 @@ class _CatXMrMatrix(_CatXCatMatrix):
         return p * (1 - p)
 
 
-class _MrXCatMatrix(_CatXCatMatrix):
+class _MrXCatMatrix(BaseCubeResultMatrix):
     """Represents an MR_X_CAT slice.
 
     Its `._counts` is a 3D ndarray with axes (rows, sel/not, cols), like:
@@ -1399,6 +1408,23 @@ class _MrXCatMatrix(_CatXCatMatrix):
         dimension.
         """
         return np.sum(self._unweighted_counts, axis=(0, 1))
+
+    @lazyproperty
+    def rows_base(self):
+        """1D ndarray of np.int64 unweighted-N for each matrix row.
+
+        Only selected values contribute to the rows-base.
+        """
+        return np.sum(self._unweighted_counts[:, 0, :], axis=1)
+
+    @lazyproperty
+    def rows_margin(self):
+        """1D np.float/int64 ndarray of weighted-N for each matrix row.
+
+        Values are `np.int64` when the source cube-result is not weighted. Only selected
+        values contribute to the rows-margin.
+        """
+        return np.sum(self._weighted_counts[:, 0, :], axis=1)
 
     @lazyproperty
     def rows_pruning_base(self):
@@ -1731,6 +1757,12 @@ class _CatXCatMeansMatrix(_CatXCatMatrix):
     def means(self):
         """2D np.float64 ndarray of mean for each valid matrix cell."""
         return self._means
+
+    @lazyproperty
+    def rows_margin(self):
+        """(nrows,) ndarray of np.nan. (A means matrix has no rows margin)."""
+        nrows = self._means.shape[0]
+        return np.full((nrows,), np.nan)
 
     @lazyproperty
     def weighted_counts(self):

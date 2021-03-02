@@ -25,7 +25,7 @@ from cr.cube.matrix import Assembler
 from cr.cube.measures.pairwise_significance import PairwiseSignificance
 from cr.cube.noa.smoothing import SingleSidedMovingAvgSmoother
 from cr.cube.scalar import MeansScalar
-from cr.cube.stripe import TransformedStripe
+from cr.cube.stripe.assembler import StripeAssembler
 from cr.cube.util import lazyproperty
 
 # ---This is the quantile of the normal Cumulative Distribution Function (CDF) at
@@ -1229,14 +1229,12 @@ class _Strand(CubePartition):
         self._mask_size = mask_size
 
     @lazyproperty
-    def bases(self):
-        """Sequence of weighted base for each row."""
-        return tuple(np.broadcast_to(self.table_margin, self.shape))
-
-    @lazyproperty
     def counts(self):
-        """tuple, 1D cube counts."""
-        return tuple(row.count for row in self._stripe.rows)
+        """1D np.float/int64 ndarray of (weighted) count for each row of strand.
+
+        The values are int when the underlying cube-result has no weighting.
+        """
+        return self._assembler.weighted_counts
 
     @lazyproperty
     def inserted_row_idxs(self):
@@ -1244,9 +1242,10 @@ class _Strand(CubePartition):
 
         Suitable for use in applying different formatting (e.g. Bold) to inserted rows.
         Provided index values correspond to measure values as-delivered by this strand,
-        after any re-ordering specified in a transform.
+        after any insertion of subtotals, re-ordering, and hiding/pruning of rows
+        specified in a transform has been applied.
         """
-        return tuple(i for i, row in enumerate(self._stripe.rows) if row.is_inserted)
+        return self._assembler.inserted_row_idxs
 
     @lazyproperty
     def is_empty(self):
@@ -1254,17 +1253,26 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def means(self):
-        return tuple(row.mean for row in self._stripe.rows)
+        """1D np.float64 ndarray of mean for each row of strand.
+
+        Raises ValueError when accessed on a cube-result that does not contain a means
+        cube-measure.
+        """
+        if not self._cube.has_means:
+            raise ValueError(
+                "`.means` is undefined for a cube-result without a means measure"
+            )
+        return self._assembler.means
 
     @lazyproperty
     def min_base_size_mask(self):
-        mask = self.table_base < self._mask_size
-        shape = self.shape
-        return (
-            mask
-            if self.table_base.shape == shape
-            else np.logical_or(np.zeros(shape, dtype=bool), mask)
-        )
+        """1D bool ndarray of True for each row that fails to meet min-base spec.
+
+        The "base" is the physical (unweighted) count of respondents to the question.
+        When this is lower than a specified threshold, the reliability of the value is
+        too low to be meaningful. The threshold is defined by the caller (user).
+        """
+        return self.unweighted_bases < self._mask_size
 
     @lazyproperty
     def name(self):
@@ -1272,10 +1280,14 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def population_counts(self):
-        return tuple(
-            self._table_proportions_as_array
-            * self._population
-            * self._cube.population_fraction
+        """1D np.float64 ndarray of population count for each row of strand.
+
+        The (estimated) population count is computed based on the `population` value
+        provided when the Strand is created. It is also adjusted to account for any
+        filters that were applied as part of the query.
+        """
+        return (
+            self.table_proportions * self._population * self._cube.population_fraction
         )
 
     @lazyproperty
@@ -1289,29 +1301,40 @@ class _Strand(CubePartition):
         table margin is 0.
         """
         total_filtered_population = self._population * self._cube.population_fraction
-        return Z_975 * total_filtered_population * self.standard_error
+        return Z_975 * total_filtered_population * self.table_proportion_stderrs
 
     @lazyproperty
     def row_count(self):
-        return len(self._stripe.rows)
+        """int count of rows in a returned measure or marginal.
+
+        This count includes inserted rows but not rows that have been hidden/pruned.
+        """
+        return self._assembler.row_count
 
     @lazyproperty
     def row_labels(self):
-        return tuple(row.label for row in self._stripe.rows)
+        """1D str ndarray of name for each row, suitable for use as row headings."""
+        return self._assembler.row_labels
 
     @lazyproperty
     def rows_base(self):
-        return np.array([row.base for row in self._stripe.rows])
+        """1D np.int64 ndarray of unweighted-N for each row of slice."""
+        # --- for a strand, this is the same as unweighted-counts, but needs this
+        # --- alternate property so it can be accessed uniformly between a slice and a
+        # --- strand.
+        return self.unweighted_counts
 
     @lazyproperty
     def rows_dimension_fills(self):
-        """sequence of RGB str like "#def032" fill colors for row elements.
+        """tuple of optional RGB str like "#def032" fill color for each strand row.
 
-        The values reflect the resolved element-fill transform cascade. The length and
+        Each value reflects the resolved element-fill transform cascade. The length and
         ordering of the sequence correspond to the rows in the slice, including
-        accounting for insertions and hidden rows.
+        accounting for insertions, ordering, and hidden rows. A fill value is `None`
+        when no explicit fill color is defined for that row, indicating the default fill
+        color for that row should be used, probably coming from a caller-defined theme.
         """
-        return tuple(row.fill for row in self._stripe.rows)
+        return self._assembler.rows_dimension_fills
 
     @lazyproperty
     def rows_dimension_name(self):
@@ -1328,61 +1351,49 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def rows_margin(self):
-        return np.array([row.count for row in self._stripe.rows])
+        """1D np.float/int64 ndarray of weighted-N for each row of slice."""
+        # --- for a strand, this is the same as (weighted) counts, but needs this
+        # --- alternate name so it can be accessed uniformly between a slice and strand.
+        return self.counts
 
     @lazyproperty
     def scale_mean(self):
-        """float mean of numeric-value applied to elements, or None.
+        """Optional float mean of row numeric-values (scale).
 
-        This value is `None` when no row-elements have a numeric-value assigned.
+        This value is `None` when no row-elements have a numeric-value assigned. The
+        numeric value (aka. "scale") for a row is its count multiplied by the
+        numeric-value of its element. For example, if 100 women responded "Very Likely"
+        and the numeric-value of the "Very Likely" response (element) was 4, then the
+        scale for that row would be 400. The scale mean is the average of those scale
+        values over the total count of responses.
         """
-        # ---return None when no row-element has been assigned a numeric value. This
-        # ---avoids a division-by-zero error.
-        if np.all(np.isnan(self._numeric_values)):
-            return None
-
-        # ---produce operands with rows without numeric values removed. Notably, this
-        # ---excludes subtotal rows.
-        numeric_values = self._numeric_values[self._numeric_values_mask]
-        counts = self._counts_as_array[self._numeric_values_mask]
-
-        # ---calculate numerator and denominator---
-        total_numeric_value = np.sum(numeric_values * counts)
-        total_count = np.sum(counts)
-
-        # ---overall scale-mean is the quotient---
-        return total_numeric_value / total_count
+        return self._assembler.scale_mean
 
     @lazyproperty
     def scale_median(self):
-        """np.int64 the median of scales
+        """Optional int/float median of scaled weighted-counts.
 
-        The median is calculated using the standard algebra applied to the numeric
-        values repeated for each related counts value
+        This value is `None` when no rows have a numeric-value assigned.
         """
-        if np.all(np.isnan(self._numeric_values)):
-            return None
-        numeric_values = self._numeric_values[self._numeric_values_mask]
-        counts = np.nan_to_num(self._counts_as_array[self._numeric_values_mask]).astype(
-            "int64"
-        )
-        unwrapped_numeric_values = np.repeat(numeric_values, counts)
-        return np.median(unwrapped_numeric_values)
+        return self._assembler.scale_median
 
     @lazyproperty
     def scale_std_dev(self):
-        """np.float64, the standard deviation of scales"""
-        if np.all(np.isnan(self._numeric_values)):
-            return None
-        return np.sqrt(self.var_scale_mean)
+        """Optional np.float64 standard-deviation of scaled weighted counts.
+
+        This value is `None` when no rows have a numeric-value assigned.
+        """
+        return self._assembler.scale_stddev
 
     @lazyproperty
     def scale_std_err(self):
-        """np.float64, the standard error of scales"""
-        if np.all(np.isnan(self._numeric_values)):
-            return None
-        counts = self._counts_as_array[self._numeric_values_mask]
-        return np.sqrt(self.var_scale_mean / np.sum(counts))
+        """Optional np.float64 standard-error of scaled weighted counts.
+
+        This value is `None` when no rows have a numeric-value assigned. The value has
+        the same units as the assigned numeric values and indicates the dispersion of
+        the scaled-count distribution from its mean (scale-mean).
+        """
+        return self._assembler.scale_stderr
 
     @lazyproperty
     def shape(self):
@@ -1402,62 +1413,24 @@ class _Strand(CubePartition):
         return self._rows_dimension._dimension_dict
 
     @lazyproperty
-    def standard_deviation(self):
-        """np.ndarray percentages standard deviation"""
-        return np.sqrt(self._variance)
+    def table_base_range(self):
+        """[min, max] np.int64 ndarray range of unweighted-N for this stripe.
 
-    @lazyproperty
-    def standard_error(self):
-        """np.ndarray percentages standard error"""
-        if self.dimension_types[0] == DT.MR:
-            return np.sqrt(self._variance / self.bases)
-        return np.sqrt(self._variance / np.sum(self.rows_margin))
-
-    @lazyproperty
-    def table_proportions_moe(self):
-        """1D np.float64 ndarray of margin-of-error (MoE) for table proportions.
-
-        The values are represented as fractions, analogue to the `table_proportions`
-        property. This means that the value of 3.5% will have the value 0.035. The
-        values can be np.nan when the corresponding proportion is also np.nan, which
-        happens when the respective columns margin is 0.
+        A non-MR stripe will have a single base, represented by min and max being the
+        same value. Each row of an MR stripe has a distinct base, which is reduced to a
+        range in that case.
         """
-        return Z_975 * self.standard_error
+        return self._assembler.table_base_range
 
     @lazyproperty
-    def table_base(self):
-        """1D, single-element ndarray (like [3770])."""
-        # For MR strands, table base is also a strand, since subvars never collapse.
-        # We need to keep the ordering and hiding as in rows dimension. All this
-        # information is already accessible in the underlying rows property
-        # of the `_stripe`.
-        if self.dimension_types[0] == DT.MR:
-            return np.array([row.table_base for row in self._stripe.rows])
+    def table_margin_range(self):
+        """[min, max] np.float64 ndarray range of (total) weighted-N for this stripe.
 
-        # TODO: shouldn't this just be the regular value for a strand? Maybe change to
-        # that if exporter always knows when it's getting this from a strand. The
-        # ndarray "wrapper" seems like unnecessary baggage when we know it will always
-        # be a scalar.
-        return self._stripe.table_base_unpruned
-
-    @lazyproperty
-    def table_base_unpruned(self):
-        return self._stripe.table_base_unpruned
-
-    @lazyproperty
-    def table_margin(self):
-        # For MR strands, table base is also a strand, since subvars never collapse.
-        # We need to keep the ordering and hiding as in rows dimension. All this
-        # information is already accessible in the underlying rows property
-        # of the `_stripe`.
-        if self.dimension_types[0] == DT.MR:
-            return np.array([row.table_margin for row in self._stripe.rows])
-
-        return self._stripe.table_margin_unpruned
-
-    @lazyproperty
-    def table_margin_unpruned(self):
-        return self._stripe.table_margin_unpruned
+        A non-MR stripe will have a single margin, represented by min and max being the
+        same value. Each row of an MR stripe has a distinct base, which is reduced to a
+        range in that case.
+        """
+        return self._assembler.table_margin_range
 
     @lazyproperty
     def table_name(self):
@@ -1468,11 +1441,41 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def table_percentages(self):
-        return tuple(self._table_proportions_as_array * 100)
+        """1D np.float64 ndarray of table-percentage for each row.
+
+        Table-percentage is the fraction of the table weighted-N contributed by each
+        row, expressed as a percentage (float between 0.0 and 100.0 inclusive).
+        """
+        return tuple(self.table_proportions * 100)
+
+    @lazyproperty
+    def table_proportion_moes(self):
+        """1D np.float64 ndarray of table-proportion margin-of-error (MoE) for each row.
+
+        The values are represented as fractions, analogue to the `table_proportions`
+        property. This means that the value of 3.5% will have the value 0.035. The
+        values can be np.nan when the corresponding proportion is also np.nan, which
+        happens when the respective columns margin is 0.
+        """
+        return Z_975 * self.table_proportion_stderrs
+
+    @lazyproperty
+    def table_proportion_stddevs(self):
+        """1D np.float64 ndarray of table-proportion std-deviation for each row."""
+        return self._assembler.table_proportion_stddevs
+
+    @lazyproperty
+    def table_proportion_stderrs(self):
+        """1D np.float64 ndarray of table-proportion std-error for each row."""
+        return self._assembler.table_proportion_stderrs
 
     @lazyproperty
     def table_proportions(self):
-        return tuple(row.table_proportions for row in self._stripe.rows)
+        """1D np.float64 ndarray of fraction of weighted-N contributed by each row.
+
+        The proportion is expressed as a float between 0.0 and 1.0 inclusive.
+        """
+        return self._assembler.table_proportions
 
     @lazyproperty
     def title(self):
@@ -1486,63 +1489,46 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def unweighted_bases(self):
-        """Sequence of base count for each row, before weighting.
+        """1D np.int64 ndarray of base count for each row, before weighting.
 
-        When the rows dimension is multiple-response, each value is different,
+        When the rows dimension is multiple-response (MR), each value is different,
         reflecting the base for that individual subvariable. In all other cases, the
         table base is repeated for each row.
         """
-        return tuple(np.broadcast_to(self.table_base, self.shape))
+        return self._assembler.unweighted_bases
 
     @lazyproperty
     def unweighted_counts(self):
-        """tuple of int unweighted count for each row of stripe."""
-        return tuple(row.unweighted_count for row in self._stripe.rows)
+        """1D np.int64 ndarray of unweighted count for each row of stripe."""
+        return self._assembler.unweighted_counts
 
     @lazyproperty
-    def var_scale_mean(self):
-        if np.all(np.isnan(self._numeric_values)):
-            return None
+    def weighted_bases(self):
+        """1D np.float/int64 ndarray of table-proportion denominator for each row.
 
-        numeric_values = self._numeric_values[self._numeric_values_mask]
-        counts = self._counts_as_array[self._numeric_values_mask]
-
-        return np.nansum(counts * pow((numeric_values - self.scale_mean), 2)) / np.sum(
-            counts
-        )
+        For a non-MR strand, all values in the array are the same. For an MR strand,
+        each value may be different, reflecting the fact that not all response options
+        were necessarily presented to all respondents.
+        """
+        return self._assembler.weighted_bases
 
     # ---implementation (helpers)-------------------------------------
 
     @lazyproperty
-    def _counts_as_array(self):
-        """1D ndarray of count for each row."""
-        return np.array([row.count for row in self._stripe.rows_including_hidden])
+    def _assembler(self):
+        """StripeAssembler collaborator object for this stripe.
+
+        Provides all measures, marginals, and totals, along with other items that are
+        sorted or subject to insertions, like labels.
+        """
+        return StripeAssembler(
+            self._cube, self._rows_dimension, self._ca_as_0th, self._slice_idx
+        )
 
     @lazyproperty
     def _dimensions(self):
         """tuple of (row,) Dimension object."""
         return (self._rows_dimension,)
-
-    @lazyproperty
-    def _numeric_values(self):
-        """Array of numeric-value for each element in rows dimension.
-
-        The items in the array can be numeric or np.nan, which appears for an inserted
-        row (subtotal) or where the row-element has been assigned no numeric value.
-        """
-        return np.array(
-            [row.numeric_value for row in self._stripe.rows_including_hidden]
-        )
-
-    @lazyproperty
-    def _numeric_values_mask(self):
-        """np.ndarray boolean elements for each element in rows dimension."
-
-        This array contains True or False according to the nan in the numeric_values
-        array
-        """
-        is_a_number_mask = ~np.isnan(self._numeric_values)
-        return is_a_number_mask
 
     @lazyproperty
     def _rows_dimension(self):
@@ -1553,26 +1539,6 @@ class _Strand(CubePartition):
     def _row_transforms_dict(self):
         """Transforms dict for the single (rows) dimension of this strand."""
         return self._transforms_dict.get("rows_dimension", {})
-
-    @lazyproperty
-    def _stripe(self):
-        """The post-transforms 1D data-partition for this strand."""
-        return TransformedStripe.stripe(
-            self._cube, self._rows_dimension, self._ca_as_0th, self._slice_idx
-        )
-
-    @lazyproperty
-    def _table_proportions_as_array(self):
-        return np.array([row.table_proportions for row in self._stripe.rows])
-
-    @lazyproperty
-    def _variance(self):
-        """variance for cell percentages
-
-        `variance = p * (1-p)`
-        """
-        p = self._table_proportions_as_array
-        return p * (1 - p)
 
 
 class _Nub(CubePartition):

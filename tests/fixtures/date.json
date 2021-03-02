@@ -1,0 +1,46 @@
+{
+    "result": {
+        "counts": [1, 1, 1, 1, 2],
+        "dimensions": [
+            {
+                "derived": true,
+                "references": {"alias": "y", "description": "Date variable", "name": "y"},
+                "type": {
+                    "class": "enum",
+                    "elements": [
+                        {"id": 0, "value": "1776-07-04T00:00:00"},
+                        {"id": 1, "value": "1950-12-24T00:00:00"},
+                        {"id": 2, "value": "2000-01-01T00:00:00"},
+                        {"id": 3, "value": "2000-01-02T00:00:00"},
+                        {"id": 4, "missing": true, "value": {"?": -1 }}
+                    ],
+                    "subtype": {
+                        "class": "datetime",
+                        "missing_reasons": {"No Data": -1},
+                        "missing_rules": {},
+                        "resolution": "s"
+                    }
+                }
+            }
+        ],
+        "element": "crunch:cube",
+        "measures": {
+            "count": {
+                "data": [1, 1, 1, 1, 2],
+                "metadata": {
+                    "derived": true,
+                    "references": {},
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {"No Data": -1},
+                        "missing_rules": {}
+                    }
+                },
+                "n_missing": 2
+            }
+        },
+        "missing": 2,
+        "n": 6
+    }
+}

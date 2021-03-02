@@ -55,7 +55,7 @@ class DescribeSecondOrderMeasures(object):
         measure_prop_name,
         MeasureCls,
     ):
-        measure_ = instance_mock(request, _ColumnUnweightedBases)
+        measure_ = instance_mock(request, MeasureCls)
         MeasureCls_ = class_mock(
             request,
             "cr.cube.matrix.measure.%s" % MeasureCls.__name__,
@@ -156,9 +156,7 @@ class Describe_BaseSecondOrderMeasure(object):
         cube_measures_.unweighted_cube_counts = unweighted_cube_counts_
         measure = _BaseSecondOrderMeasure(None, None, cube_measures_)
 
-        unweighted_cube_counts = measure._unweighted_cube_counts
-
-        assert unweighted_cube_counts is unweighted_cube_counts_
+        assert measure._unweighted_cube_counts is unweighted_cube_counts_
 
     def it_provides_access_to_the_weighted_cube_counts_object_to_help(
         self, request, cube_measures_

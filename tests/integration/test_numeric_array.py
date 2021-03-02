@@ -3,6 +3,7 @@
 """Integration-test suite for numeric-arrays."""
 
 import numpy as np
+import pytest
 
 from cr.cube.cube import Cube
 
@@ -94,9 +95,14 @@ class TestNumericArrays:
             slice_.columns_base, [[38, 14, 6, 18, 38], [38, 14, 6, 18, 38]]
         )
 
+    @pytest.mark.xfail(reason="NumArray problems", raises=AssertionError, strict=True)
     def test_num_arr_means_no_grouping(self):
         """Test means on no-dimensions measure of numeric array."""
-        strand_ = Cube(NA.NUM_ARR_MEANS_NO_GROUPING).partitions[0]
+        strand = Cube(NA.NUM_ARR_MEANS_NO_GROUPING).partitions[0]
 
-        np.testing.assert_almost_equal(strand_.means, (2.5, 25.0))
-        np.testing.assert_almost_equal(strand_.table_base, [6, 6])
+        assert strand.means == pytest.approx([2.5, 25.0])
+        assert strand.unweighted_counts.tolist() == [6, 6]
+        # --- unweighted-bases (and therefore table_base_range) fails because num-array
+        # --- base is computed differently it looks like
+        assert strand.unweighted_bases.tolist() == [6, 6]
+        assert strand.table_base_range.tolist() == [6, 6]

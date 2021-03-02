@@ -3,6 +3,7 @@
 """Integration tests for scale-mean measures and marginals."""
 
 import numpy as np
+import pytest
 
 from cr.cube.cube import Cube
 
@@ -469,32 +470,16 @@ def test_means_with_null_values():
 
 def test_mean_univariate_cat_var_scale_mean():
     # Test nonmissing with no null numeric values
-    strand_ = Cube(SM.UNIVARIATE_CAT).partitions[0]
-    is_a_number_mask = ~np.isnan(strand_._numeric_values)
-
-    np.testing.assert_almost_equal(strand_.var_scale_mean, 5.4322590719809645)
-    np.testing.assert_array_equal(
-        strand_._counts_as_array[is_a_number_mask], [54, 124, 610, 306, 396, 150]
-    )
+    strand = Cube(SM.UNIVARIATE_CAT).partitions[0]
+    assert strand.scale_mean == pytest.approx(2.686585)
 
     # Test nonmissing with null numeric value
-    strand_ = Cube(SM.UNIVARIATE_CAT_WITH_NULL_NUMERIC_VALUE).partitions[0]
-    is_a_number_mask = ~np.isnan(strand_._numeric_values)
-
-    np.testing.assert_almost_equal(strand_.var_scale_mean, 5.517066895232401)
-    np.testing.assert_array_equal(
-        strand_._counts_as_array[is_a_number_mask], [124, 610, 306, 396, 150]
-    )
+    strand = Cube(SM.UNIVARIATE_CAT_WITH_NULL_NUMERIC_VALUE).partitions[0]
+    assert strand.scale_mean == pytest.approx(2.744010)
 
     # Test with all null numeric value
-    strand_ = Cube(SM.UNIVARIATE_CAT_WITH_ALL_NULL_NUMERIC_VALUE).partitions[0]
-    is_a_number_mask = ~np.isnan(strand_._numeric_values)
-
-    assert strand_.var_scale_mean is None
-    np.testing.assert_array_equal(
-        is_a_number_mask, np.array([False] * len(strand_._numeric_values))
-    )
-    np.testing.assert_array_equal(strand_._counts_as_array[is_a_number_mask], [])
+    strand = Cube(SM.UNIVARIATE_CAT_WITH_ALL_NULL_NUMERIC_VALUE).partitions[0]
+    assert strand.scale_mean is None
 
 
 def test_mr_x_cat():
@@ -555,15 +540,15 @@ def test_univariate_with_hs():
     np.testing.assert_almost_equal(strand.scale_mean, [2.17352056])
 
 
-def test_univariate_with_hs_var_scale_means_row():
+def test_univariate_with_hs_scale_means_row():
     # Test without H&S
     transforms = {
         "columns_dimension": {"insertions": {}},
         "rows_dimension": {"insertions": {}},
     }
     strand = Cube(CR.ECON_BLAME_WITH_HS, transforms).partitions[0]
-    np.testing.assert_almost_equal(strand.var_scale_mean, [1.1363901131679894])
+    assert strand.scale_mean == pytest.approx(2.1735206)
 
     # Test with H&S
     strand = Cube(CR.ECON_BLAME_WITH_HS).partitions[0]
-    np.testing.assert_almost_equal(strand.var_scale_mean, [1.1363901131679894])
+    assert strand.scale_mean == pytest.approx(2.1735206)

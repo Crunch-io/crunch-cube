@@ -35,9 +35,7 @@ def test_mr_x_cat_slice_column_index():
 def test_mr_x_mr_slice_column_index():
     mr_x_mr = Cube(CR.FULL_CUBE).partitions[0]
     mr_alone = Cube(CR.MR_WGTD).partitions[0]
-    expected = (
-        mr_x_mr.column_proportions / mr_alone._table_proportions_as_array[:, None] * 100
-    )
+    expected = mr_x_mr.column_proportions / mr_alone.table_proportions[:, None] * 100
     np.testing.assert_almost_equal(mr_x_mr.column_index, expected)
 
 

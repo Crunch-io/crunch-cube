@@ -3,6 +3,7 @@
 """Integration-test suite for multiple-response cube behaviors"""
 
 import numpy as np
+import pytest
 
 from cr.cube.cube import Cube
 
@@ -11,8 +12,8 @@ from ..util import load_python_expression
 
 
 def test_labels_simple_mr_exclude_missing():
-    slice_ = Cube(CR.SIMPLE_MR).partitions[0]
-    assert slice_.row_labels == ("Response #1", "Response #2", "Response #3")
+    strand = Cube(CR.SIMPLE_MR).partitions[0]
+    assert strand.row_labels.tolist() == ["Response #1", "Response #2", "Response #3"]
 
 
 def test_as_array_simple_mr_exclude_missing():
@@ -22,8 +23,8 @@ def test_as_array_simple_mr_exclude_missing():
 
 
 def test_margin_simple_mr_axis_none():
-    slice_ = Cube(CR.SIMPLE_MR).partitions[0]
-    np.testing.assert_array_equal(slice_.table_margin, [5, 6, 6])
+    strand = Cube(CR.SIMPLE_MR).partitions[0]
+    assert strand.table_margin_range.tolist() == [5, 6]
 
 
 def test_proportions_simple_mr():
@@ -34,32 +35,26 @@ def test_proportions_simple_mr():
 
 def test_std_dev_err_simple_mr():
     strand = Cube(CR.SIMPLE_MR).partitions[0]
-
-    np.testing.assert_almost_equal(
-        strand.standard_deviation, [0.4898979, 0.4714045, 0.0]
-    )
-    np.testing.assert_almost_equal(strand.standard_error, [0.219089, 0.1924501, 0.0])
+    assert strand.table_proportion_stddevs == pytest.approx([0.4898979, 0.4714045, 0.0])
+    assert strand.table_proportion_stderrs == pytest.approx([0.219089, 0.1924501, 0.0])
 
 
 def test_1D_mr_with_means():
     strand = Cube(CR.MR_MEAN_FILT_WGTD).partitions[0]
-    np.testing.assert_almost_equal(
-        strand.means, [3.7240515, 2.5784293, 2.2185933, 1.8653349]
-    )
-    np.testing.assert_array_equal(strand.table_base, [336, 136, 248, 5216])
-    assert strand.table_base_unpruned == 23348
+
     assert strand.ndim == 1
+    assert strand.means == pytest.approx([3.7240515, 2.5784293, 2.2185933, 1.8653349])
+    assert strand.unweighted_counts.tolist() == [336, 136, 248, 5216]
+    assert strand.unweighted_bases.tolist() == [5837, 5837, 5837, 5837]
+    assert strand.table_base_range.tolist() == [5837, 5837]
 
 
 def test_deck_with_means():
-    slice_ = Cube(CR.DECK_WITH_MEAN).partitions[0]
-    np.testing.assert_array_equal(
-        slice_.table_base_unpruned, [588, 588, 588, 588, 588, 588, 588, 588]
-    )
-    np.testing.assert_almost_equal(
-        slice_.table_margin_unpruned,
-        [585.086, 585.086, 585.086, 585.086, 585.086, 585.086, 585.086, 585.086],
-    )
+    strand = Cube(CR.DECK_WITH_MEAN).partitions[0]
+
+    assert strand.ndim == 1
+    assert strand.table_base_range.tolist() == [588, 588]
+    assert strand.table_margin_range == pytest.approx([585.086, 585.086])
 
 
 def test_3D_with_means():
