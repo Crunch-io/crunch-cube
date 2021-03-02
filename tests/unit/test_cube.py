@@ -5,7 +5,14 @@
 import pytest
 import numpy as np
 
-from cr.cube.cube import Cube, CubeSet, _BaseMeasure, _Measures, _MeanMeasure
+from cr.cube.cube import (
+    Cube,
+    CubeSet,
+    _BaseMeasure,
+    _Measures,
+    _MeanMeasure,
+    _SumMeasure,
+)
 from cr.cube.cubepart import _Slice, _Strand, _Nub
 from cr.cube.dimension import AllDimensions, Dimension
 from cr.cube.enums import DIMENSION_TYPE as DT
@@ -56,20 +63,6 @@ class DescribeCubeSet(object):
         description = cube_set.description
 
         assert description == "Are you male or female?"
-
-    @pytest.mark.parametrize(
-        ("first_cube_has_means", "expected_value"), ((True, True), (False, False))
-    )
-    def it_knows_whether_it_has_means(
-        self, first_cube_has_means, expected_value, _cubes_prop_, cube_
-    ):
-        cube_.has_means = first_cube_has_means
-        _cubes_prop_.return_value = (cube_,)
-        cube_set = CubeSet(None, None, None, None)
-
-        has_means = cube_set.has_means
-
-        assert has_means == expected_value
 
     @pytest.mark.parametrize(
         ("first_cube_has_w_counts", "expected_value"), ((True, True), (False, False))
@@ -158,11 +151,11 @@ class DescribeCubeSet(object):
         np.testing.assert_almost_equal(cubeset_population_fraction, expected_value)
 
     def it_constructs_its_sequence_of_cube_objects_to_help(
-        self, request, Cube_, _is_numeric_mean_prop_
+        self, request, Cube_, _is_numeric_measure_prop_
     ):
         cubes_ = tuple(instance_mock(request, Cube) for _ in range(4))
         Cube_.side_effect = iter(cubes_)
-        _is_numeric_mean_prop_.return_value = False
+        _is_numeric_measure_prop_.return_value = False
         cube_set = CubeSet(
             cube_responses=[{"cube": "resp-1"}, {"cube": "resp-2"}, {"cube": "resp-3"}],
             transforms=[{"xfrms": 1}, {"xfrms": 2}, {"xfrms": 3}],
@@ -198,12 +191,12 @@ class DescribeCubeSet(object):
         assert cubes == cubes_[:3]
 
     def but_it_inflates_the_cubes_in_special_case_of_numeric_mean_payload(
-        self, request, Cube_, cube_, _is_numeric_mean_prop_
+        self, request, Cube_, cube_, _is_numeric_measure_prop_
     ):
         cubes_ = tuple(instance_mock(request, Cube) for _ in range(4))
         cube_.inflate.side_effect = iter(cubes_)
         Cube_.return_value = cube_
-        _is_numeric_mean_prop_.return_value = True
+        _is_numeric_measure_prop_.return_value = True
         cube_set = CubeSet(
             cube_responses=[{"cube": "resp-1"}, {"cube": "resp-2"}, {"cube": "resp-3"}],
             transforms=[{"xfrms": 1}, {"xfrms": 2}, {"xfrms": 3}],
@@ -243,7 +236,7 @@ class DescribeCubeSet(object):
         ("is_multi_cube", "cube_0_ndim", "expected_value"),
         ((False, 1, False), (False, 0, False), (True, 1, False), (True, 0, True)),
     )
-    def it_knows_whether_it_is_numeric_mean_to_help(
+    def it_knows_whether_it_is_numeric_measure_to_help(
         self,
         _is_multi_cube_prop_,
         is_multi_cube,
@@ -257,14 +250,13 @@ class DescribeCubeSet(object):
         Cube_.return_value = cube_
         cube_set = CubeSet(({"cube": 0}, {"cube": 1}), None, None, None)
 
-        is_numeric_mean = cube_set._is_numeric_mean
+        is_numeric_mean = cube_set._is_numeric_measure
 
         assert Cube_.call_args_list == ([call({"cube": 0})] if is_multi_cube else [])
         assert is_numeric_mean == expected_value
 
     def it_knows_its_valid_counts_summary_to_help(self, _cubes_prop_, cube_):
         cube_.valid_counts_summary = np.array([1, 2, 3])
-        cube_.has_means = True
         _cubes_prop_.return_value = (cube_,)
         cube_set = CubeSet(None, None, None, None)
 
@@ -300,8 +292,8 @@ class DescribeCubeSet(object):
         return property_mock(request, CubeSet, "_is_multi_cube")
 
     @pytest.fixture
-    def _is_numeric_mean_prop_(self, request):
-        return property_mock(request, CubeSet, "_is_numeric_mean")
+    def _is_numeric_measure_prop_(self, request):
+        return property_mock(request, CubeSet, "_is_numeric_measure")
 
 
 class DescribeCube(object):
@@ -319,7 +311,18 @@ class DescribeCube(object):
 
     def it_can_inflate_itself(self, request):
         cube = Cube(
-            {"result": {"dimensions": [{"other": "dim"}]}},
+            {
+                "result": {
+                    "dimensions": [{"other": "dim"}],
+                    "measures": {
+                        "mean": {
+                            "metadata": {
+                                "references": {"alias": "mean", "name": "Mean"}
+                            }
+                        }
+                    },
+                }
+            },
             cube_idx=1,
             transforms={"trans": "forms"},
             population=1000,
@@ -337,14 +340,21 @@ class DescribeCube(object):
                 "result": {
                     "dimensions": [
                         {
-                            "references": {"alias": "mean", "name": "mean"},
+                            "references": {"alias": "mean", "name": "Mean"},
                             "type": {
-                                "class": "categorical",
                                 "categories": [{"id": 1, "name": "Mean"}],
+                                "class": "categorical",
                             },
                         },
                         {"other": "dim"},
-                    ]
+                    ],
+                    "measures": {
+                        "mean": {
+                            "metadata": {
+                                "references": {"alias": "mean", "name": "Mean"}
+                            }
+                        }
+                    },
                 },
             },
             1,
@@ -455,7 +465,7 @@ class DescribeCube(object):
         assert str(e.value) == expected_value
 
     @pytest.mark.parametrize(
-        "mean_subvariables, mean_references, expected_value",
+        "numeric_subvariables, num_measure_references, expected_value",
         (
             (
                 ["001", "002"],
@@ -486,22 +496,24 @@ class DescribeCube(object):
     )
     def it_knows_its_num_array_dimensions(
         self,
-        _mean_references_prop_,
-        _mean_subvariables_prop_,
-        mean_subvariables,
-        mean_references,
+        _numeric_references_prop_,
+        _numeric_subvariables_prop_,
+        numeric_subvariables,
+        num_measure_references,
         expected_value,
     ):
-        _mean_references_prop_.return_value = mean_references
-        _mean_subvariables_prop_.return_value = mean_subvariables
+        _numeric_references_prop_.return_value = num_measure_references
+        _numeric_subvariables_prop_.return_value = numeric_subvariables
         cube = Cube(None)
 
         _num_array_dimensions = cube._numeric_array_dimension
 
         assert _num_array_dimensions["type"]["elements"] == expected_value
 
-    def but_it_returns_None_when_mean_subvars_is_empty(self, _mean_subvariables_prop_):
-        _mean_subvariables_prop_.return_value = []
+    def but_it_returns_None_when_numeric_subvars_is_empty(
+        self, _numeric_subvariables_prop_
+    ):
+        _numeric_subvariables_prop_.return_value = []
         cube = Cube(None)
 
         _num_array_dimensions = cube._numeric_array_dimension
@@ -525,15 +537,15 @@ class DescribeCube(object):
             ),
         ),
     )
-    def it_knows_its_mean_subvariables(
+    def it_knows_its_numeric_subvariables(
         self, _cube_response_prop_, cube_response, expected_value
     ):
         _cube_response_prop_.return_value = cube_response
         cube = Cube(None)
 
-        mean_subvariables = cube._mean_subvariables
+        numeric_measure_subvariables = cube._numeric_measure_subvariables
 
-        assert mean_subvariables == expected_value
+        assert numeric_measure_subvariables == expected_value
 
     @pytest.mark.parametrize(
         "cube_response, expected_value",
@@ -566,18 +578,18 @@ class DescribeCube(object):
             ),
         ),
     )
-    def it_knows_its_mean_references(
+    def it_knows_its_numeric_references(
         self, _cube_response_prop_, cube_response, expected_value
     ):
         _cube_response_prop_.return_value = cube_response
         cube = Cube(None)
 
-        mean_subreferences = cube._mean_references
+        numeric_references = cube._numeric_measure_references
 
-        assert mean_subreferences == expected_value
+        assert numeric_references == expected_value
 
     @pytest.mark.parametrize(
-        "cube_response, cube_idx_arg, mean_subvars, num_array_dim, expected_value",
+        "cube_response, cube_idx_arg, numeric_subvars, num_array_dim, expected_value",
         (
             ({}, None, [], {}, {}),
             ({"result": {"foo": "bar"}}, None, [], {}, {"result": {"foo": "bar"}}),
@@ -608,15 +620,15 @@ class DescribeCube(object):
         self,
         cube_response,
         cube_idx_arg,
-        mean_subvars,
+        numeric_subvars,
         num_array_dim,
         expected_value,
         _cube_response_prop_,
-        _mean_subvariables_prop_,
+        _numeric_subvariables_prop_,
         _numeric_array_dimension_prop_,
     ):
         _cube_response_prop_.return_value = cube_response
-        _mean_subvariables_prop_.return_value = mean_subvars
+        _numeric_subvariables_prop_.return_value = numeric_subvars
         _numeric_array_dimension_prop_.return_value = num_array_dim
         cube = Cube(None, cube_idx=cube_idx_arg)
 
@@ -633,12 +645,12 @@ class DescribeCube(object):
         return property_mock(request, Cube, "_cube_response")
 
     @pytest.fixture
-    def _mean_references_prop_(self, request):
-        return property_mock(request, Cube, "_mean_references")
+    def _numeric_references_prop_(self, request):
+        return property_mock(request, Cube, "_numeric_measure_references")
 
     @pytest.fixture
-    def _mean_subvariables_prop_(self, request):
-        return property_mock(request, Cube, "_mean_subvariables")
+    def _numeric_subvariables_prop_(self, request):
+        return property_mock(request, Cube, "_numeric_measure_subvariables")
 
     @pytest.fixture
     def _numeric_array_dimension_prop_(self, request):
@@ -705,26 +717,28 @@ class Describe_BaseMeasure(object):
             is expected_value
         )
 
-
-class Describe_MeanMeasure(object):
     @pytest.mark.parametrize(
-        "valid_counts_u, cube_idx_arg, expected_value",
+        "NumericMeasureCls, valid_counts_u, cube_idx_arg, expected_value",
         (
-            ([], None, []),
-            ([[3, 2, 1], [2, 2, 0]], None, [[3, 2, 1], [2, 2, 0]]),
-            ([[3, 2, 1], [2, 2, 0]], 1, [[3, 2, 1], [2, 2, 0]]),
+            (_MeanMeasure, [], None, []),
+            (_MeanMeasure, [[3, 2, 1], [2, 2, 0]], None, [[3, 2, 1], [2, 2, 0]]),
+            (_MeanMeasure, [[3, 2, 1], [2, 2, 0]], 1, [[3, 2, 1], [2, 2, 0]]),
+            (_SumMeasure, [], None, []),
+            (_SumMeasure, [[3, 2, 1], [2, 2, 0]], None, [[3, 2, 1], [2, 2, 0]]),
+            (_SumMeasure, [[3, 2, 1], [2, 2, 0]], 1, [[3, 2, 1], [2, 2, 0]]),
         ),
     )
     def it_knows_its_valid_counts_to_help(
         self,
         request,
+        NumericMeasureCls,
         valid_counts_u,
         cube_idx_arg,
         expected_value,
     ):
         _all_dimensions_ = instance_mock(request, AllDimensions)
         _all_dimensions_.shape = (2, 3)
-        _mean_measure = _MeanMeasure(
+        _numeric_measure = NumericMeasureCls(
             {
                 "result": {
                     "measures": {"valid_count_unweighted": {"data": valid_counts_u}}
@@ -734,4 +748,4 @@ class Describe_MeanMeasure(object):
             cube_idx_arg,
         )
 
-        np.testing.assert_array_equal(_mean_measure.valid_counts, expected_value)
+        np.testing.assert_array_equal(_numeric_measure.valid_counts, expected_value)
