@@ -273,6 +273,15 @@ class DescribeCubeSet(object):
 
         assert n_responses == 6
 
+    def it_is_subscriptable(self, _cubes_prop_, cube_):
+        cube_.description = "Hello"
+        _cubes_prop_.return_value = (cube_,)
+        cube_set = CubeSet(None, None, None, None)
+
+        first_cube = cube_set[0]
+
+        assert first_cube.description == "Hello"
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture

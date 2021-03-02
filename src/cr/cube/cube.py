@@ -629,6 +629,8 @@ class _Measures(object):
         """numeric representing count of missing rows in cube response."""
         if self.means is not None:
             return self.means.missing_count
+        if self.sum:
+            return self.sum.missing_count
         return self._cube_dict["result"].get("missing", 0)
 
     @lazyproperty

@@ -128,6 +128,13 @@ class _BaseCubeSum(_BaseCubeMeasure):
         SumCls = _MrCubeSum if rows_dimension.dimension_type == DT.MR else _CatCubeSum
         return SumCls(rows_dimension, sum)
 
+    @lazyproperty
+    def sum(self):
+        """1D np.float64 ndarray of sum for each stripe row."""
+        raise NotImplementedError(
+            "`%s` must implement `.sum`" % type(self).__name__
+        )  # pragma: no cover
+
 
 class _CatCubeSum(_BaseCubeSum):
     """Means cube-measure for a non-MR stripe."""
