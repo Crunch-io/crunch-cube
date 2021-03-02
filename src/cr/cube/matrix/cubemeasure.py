@@ -1223,6 +1223,10 @@ class _CatXMrMatrix(_CatXCatMatrix):
     @lazyproperty
     def means(self):
         """2D np.float64 ndarray of mean for each valid matrix cell."""
+        if self._means is None:
+            raise ValueError(
+                "`.means` is undefined for a cube-result without a means measure"
+            )
         return self._means[:, :, 0]
 
     @lazyproperty
@@ -1259,6 +1263,10 @@ class _CatXMrMatrix(_CatXCatMatrix):
     @lazyproperty
     def sum(self):
         """2D np.float64 ndarray of mean for each valid matrix cell."""
+        if self._sum is None:
+            raise ValueError(
+                "`.sum` is undefined for a cube-result without a sum measure"
+            )
         return self._sum[:, :, 0]
 
     @lazyproperty
@@ -1402,6 +1410,10 @@ class _MrXCatMatrix(BaseCubeResultMatrix):
     @lazyproperty
     def means(self):
         """2D np.float64 ndarray of mean for each valid matrix cell."""
+        if self._means is None:
+            raise ValueError(
+                "`.means` is undefined for a cube-result without a means measure"
+            )
         return self._means[:, 0, :]
 
     @lazyproperty
@@ -1432,6 +1444,10 @@ class _MrXCatMatrix(BaseCubeResultMatrix):
     @lazyproperty
     def sum(self):
         """2D np.float64 ndarray of sum for each valid matrix cell."""
+        if self._sum is None:
+            raise ValueError(
+                "`.sum` is undefined for a cube-result without a sum measure"
+            )
         return self._sum[:, 0, :]
 
     @lazyproperty

@@ -14,16 +14,13 @@ from cr.cube.matrix.cubemeasure import (
     _BaseUnweightedCubeCounts,
     _BaseWeightedCubeCounts,
     _CatXCatMatrix,
-    _CatXCatMeansMatrix,
     _CatXCatUnweightedCubeCounts,
     _CatXCatWeightedCubeCounts,
     _CatXMrMatrix,
-    _CatXMrMeansMatrix,
     _CatXMrUnweightedCubeCounts,
     _CatXMrWeightedCubeCounts,
     CubeMeasures,
     _MrXCatMatrix,
-    _MrXCatMeansMatrix,
     _MrXCatUnweightedCubeCounts,
     _MrXCatWeightedCubeCounts,
     _MrXMrMatrix,
@@ -926,29 +923,6 @@ class Describe_MrXMrWeightedCubeCounts(object):
 class DescribeBaseCubeResultMatrix(object):
     """Unit test suite for `cr.cube.matrix.cubemeasure.BaseCubeResultMatrix` object."""
 
-    @pytest.mark.parametrize(
-        "has_means, factory_method_name",
-        ((True, "_means_matrix_factory"), (False, "_regular_matrix_factory")),
-    )
-    def it_calls_the_correct_factory_method_for_appropriate_matrix_type(
-        self, request, cube_, dimension_, has_means, factory_method_name
-    ):
-        cube_.has_means = has_means
-        cube_result_matrix_ = instance_mock(request, BaseCubeResultMatrix)
-        factory_method = method_mock(
-            request,
-            BaseCubeResultMatrix,
-            factory_method_name,
-            return_value=cube_result_matrix_,
-        )
-
-        cube_result_matrix = BaseCubeResultMatrix.factory(
-            cube_, (dimension_, dimension_), slice_idx=71
-        )
-
-        factory_method.assert_called_once_with(cube_, (dimension_, dimension_), 71)
-        assert cube_result_matrix is cube_result_matrix_
-
     def it_knows_its_column_proportions(self, request):
         property_mock(
             request,
@@ -1006,70 +980,6 @@ class DescribeBaseCubeResultMatrix(object):
         assert residuals.tolist() == [[0, 0], [0, 0]]
 
     @pytest.mark.parametrize(
-        "dimension_types, matrix_class_name",
-        (
-            ((DT.MR, DT.CAT), "_MrXCatMeansMatrix"),
-            ((DT.CAT, DT.MR), "_CatXMrMeansMatrix"),
-            ((DT.CAT, DT.CAT), "_CatXCatMeansMatrix"),
-        ),
-    )
-    def it_can_construct_a_means_matrix_for_a_2D_slice_to_help(
-        self, request, cube_, dimension_types, dimension_, matrix_class_name
-    ):
-        cube_.dimension_types = dimension_types
-        cube_.ndim = 2
-        cube_.counts = [1, 2, 3, 4]
-        cube_.unweighted_counts = [5, 6, 7, 8]
-        MatrixCls_ = class_mock(
-            request, "cr.cube.matrix.cubemeasure.%s" % matrix_class_name
-        )
-
-        matrix = BaseCubeResultMatrix._means_matrix_factory(
-            cube_, (dimension_, dimension_), None
-        )
-
-        MatrixCls_.assert_called_once_with(
-            (dimension_, dimension_), [1, 2, 3, 4], [5, 6, 7, 8]
-        )
-        assert matrix is MatrixCls_.return_value
-
-    @pytest.mark.parametrize(
-        "dimension_types, matrix_class_name",
-        (
-            ((None, DT.MR, DT.CAT), "_MrXCatMeansMatrix"),
-            ((None, DT.CAT, DT.MR), "_CatXMrMeansMatrix"),
-            ((None, DT.CAT, DT.CAT), "_CatXCatMeansMatrix"),
-        ),
-    )
-    def and_it_can_construct_a_means_matrix_for_a_3D_slice_to_help(
-        self, request, cube_, dimension_types, dimension_, matrix_class_name
-    ):
-        cube_.dimension_types = dimension_types
-        cube_.ndim = 3
-        cube_.counts = [None, [1, 2, 3, 4], None]
-        cube_.unweighted_counts = [None, [5, 6, 7, 8], None]
-        MatrixCls_ = class_mock(
-            request, "cr.cube.matrix.cubemeasure.%s" % matrix_class_name
-        )
-
-        matrix = BaseCubeResultMatrix._means_matrix_factory(
-            cube_, (dimension_, dimension_), slice_idx=1
-        )
-
-        MatrixCls_.assert_called_once_with(
-            (dimension_, dimension_), [1, 2, 3, 4], [5, 6, 7, 8]
-        )
-        assert matrix is MatrixCls_.return_value
-
-    def but_it_raises_on_MEANS_MR_X_MR(self, cube_):
-        cube_.dimension_types = (DT.MR, DT.MR)
-
-        with pytest.raises(NotImplementedError) as e:
-            BaseCubeResultMatrix._means_matrix_factory(cube_, None, None)
-
-        assert str(e.value) == "MR x MR with means is not implemented"
-
-    @pytest.mark.parametrize(
         "dimension_types, expected_value",
         (
             ((DT.MR, DT.MR), _MrXMrMatrix),
@@ -1110,7 +1020,7 @@ class DescribeBaseCubeResultMatrix(object):
         cube_.dimension_types = dim_types
         cube_.ndim = len(dim_types)
 
-        s = BaseCubeResultMatrix._regular_matrix_counts_slice(cube_, slice_idx)
+        s = BaseCubeResultMatrix._regular_matrix_slice(cube_, slice_idx)
 
         assert s == expected
 
@@ -1123,7 +1033,7 @@ class DescribeBaseCubeResultMatrix(object):
             "_MrXMrMatrix",
         ),
     )
-    def it_can_construct_a_regular_matrix_to_help(
+    def it_can_construct_a_matrix_to_help(
         self, request, cube_, dimension_, matrix_class_name
     ):
         cube_.dimension_types = (DT.CAT, DT.MR, DT.CAT)
@@ -1143,7 +1053,7 @@ class DescribeBaseCubeResultMatrix(object):
             return_value=([[1], [2]], [[3], [4]]),
         )
 
-        matrix = BaseCubeResultMatrix._regular_matrix_factory(
+        matrix = BaseCubeResultMatrix.factory(
             cube_, (dimension_, dimension_), slice_idx=17
         )
 
@@ -1172,14 +1082,14 @@ class DescribeBaseCubeResultMatrix(object):
         _regular_matrix_counts_slice = method_mock(
             request,
             BaseCubeResultMatrix,
-            "_regular_matrix_counts_slice",
+            "_regular_matrix_slice",
             return_value=counts_slice,
         )
 
         sliced_counts = BaseCubeResultMatrix._sliced_counts(cube_, slice_idx=23)
 
         _regular_matrix_counts_slice.assert_called_once_with(cube_, 23)
-        counts, unweighted, with_missing = sliced_counts
+        counts, unweighted, with_missing, means, sum = sliced_counts
         assert counts.tolist() == expected
         assert unweighted.tolist() == expected
 
@@ -1372,6 +1282,22 @@ class Describe_CatXCatMatrix(object):
             np.array([[0.0, 0.0622222, 0.1155556], [0.16, 0.1955556, 0.2222222]]),
         )
 
+    def it_knows_its_means(self):
+        cube_means = np.array([[2, 3, 1], [5, 6, 4]])
+        matrix = _CatXCatMatrix(None, None, None, means=cube_means)
+
+        assert matrix.means.tolist() == [[2, 3, 1], [5, 6, 4]]
+
+    def but_it_raises_value_error_when_the_cube_result_does_not_contain_means(self):
+        matrix = _CatXCatMatrix(None, None, None, means=None)
+        with pytest.raises(ValueError) as e:
+            matrix.means
+
+        assert (
+            str(e.value)
+            == "`.means` is undefined for a cube-result without a means measure"
+        )
+
 
 class Describe_CatXMrMatrix(object):
     """Unit test suite for `cr.cube.matrix._CatXMrMatrix` object."""
@@ -1529,6 +1455,23 @@ class Describe_CatXMrMatrix(object):
         np.testing.assert_almost_equal(
             _CatXMrMatrix(None, weighted_cube_counts, None)._table_proportion_variances,
             np.array([[0.0, 0.0826446, 0.1155556], [0.244898, 0.231405, 0.2222222]]),
+        )
+
+    def it_knows_its_means(self):
+        means = np.array([[[1, 6], [2, 5], [3, 4]], [[5, 3], [6, 2], [7, 1]]])
+        np.testing.assert_equal(
+            _CatXMrMatrix(None, None, None, means=means).means,
+            np.array([[1, 2, 3], [5, 6, 7]]),
+        )
+
+    def but_it_raises_value_error_when_the_cube_result_does_not_contain_means(self):
+        matrix = _CatXMrMatrix(None, None, None, means=None)
+        with pytest.raises(ValueError) as e:
+            matrix.means
+
+        assert (
+            str(e.value)
+            == "`.means` is undefined for a cube-result without a means measure"
         )
 
 
@@ -1742,6 +1685,23 @@ class Describe_MrXCatMatrix(object):
         np.testing.assert_almost_equal(
             _MrXCatMatrix(None, weighted_counts, None)._table_proportion_variances,
             np.array([[0.0, 0.0622222, 0.1155556], [0.1038062, 0.118416, 0.1322568]]),
+        )
+
+    def it_knows_its_means(self):
+        means = np.arange(24).reshape(3, 2, 4)
+        np.testing.assert_equal(
+            _MrXCatMatrix(None, None, None, means=means).means,
+            np.array([[0, 1, 2, 3], [8, 9, 10, 11], [16, 17, 18, 19]]),
+        )
+
+    def but_it_raises_value_error_when_the_cube_result_does_not_contain_means(self):
+        matrix = _MrXCatMatrix(None, None, None, means=None)
+        with pytest.raises(ValueError) as e:
+            matrix.means
+
+        assert (
+            str(e.value)
+            == "`.means` is undefined for a cube-result without a means measure"
         )
 
 
@@ -2022,48 +1982,4 @@ class Describe_MrXMrMatrix(object):
         np.testing.assert_almost_equal(
             _MrXMrMatrix(None, weighted_counts, None)._table_proportion_variances,
             np.array([[0.0, 0.0826446, 0.1155556], [0.1560874, 0.16, 0.1630506]]),
-        )
-
-
-# === LEGACY MEANS MATRIX OBJECTS ===
-
-
-class Describe_CatXCatMeansMatrix(object):
-    """Unit test suite for `cr.cube.matrix._CatXCatMeansMatrix` object."""
-
-    def it_knows_its_means(self):
-        cube_means = np.array([[2, 3, 1], [5, 6, 4]])
-        matrix = _CatXCatMeansMatrix(None, cube_means, None)
-
-        assert matrix.means.tolist() == [[2, 3, 1], [5, 6, 4]]
-
-    def it_knows_its_weighted_counts(self):
-        cube_means = np.array([[3, 2, 1], [6, 5, 4]])
-        matrix = _CatXCatMeansMatrix(None, cube_means, None)
-
-        np.testing.assert_equal(
-            matrix.weighted_counts,
-            [[np.nan, np.nan, np.nan], [np.nan, np.nan, np.nan]],
-        )
-
-
-class Describe_CatXMrMeansMatrix(object):
-    """Unit test suite for `cr.cube.matrix._CatXMrMeansMatrix` object."""
-
-    def it_knows_its_means(self):
-        means = np.array([[[1, 6], [2, 5], [3, 4]], [[5, 3], [6, 2], [7, 1]]])
-        np.testing.assert_equal(
-            _CatXMrMeansMatrix(None, means, None).means,
-            np.array([[1, 2, 3], [5, 6, 7]]),
-        )
-
-
-class Describe_MrXCatMeansMatrix(object):
-    """Unit test suite for `cr.cube.matrix._MrXCatMeansMatrix` object."""
-
-    def it_knows_its_means(self):
-        means = np.arange(24).reshape(3, 2, 4)
-        np.testing.assert_equal(
-            _MrXCatMeansMatrix(None, means, None).means,
-            np.array([[0, 1, 2, 3], [8, 9, 10, 11], [16, 17, 18, 19]]),
         )
