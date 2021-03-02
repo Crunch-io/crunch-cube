@@ -886,77 +886,11 @@ class Describe_Strand(object):
         transforms = {"rows_dimension": {"prune": True}}
         strand = Cube(CR.CAT_MEANS_AND_COUNTS, transforms=transforms).partitions[0]
 
-        assert strand.means == pytest.approx(
-            [
-                74.50347,
-                83.82950,
-                80.44270,
-                79.38796,
-                68.23023,
-                77.02289,
-                78.86550,
-                85.31353,
-                83.61415,
-                83.00000,
-                65.89693,
-                61.74549,
-                83.28117,
-                82.88105,
-                84.12529,
-                71.36927,
-                77.92066,
-                77.29306,
-                79.73237,
-                84.49054,
-                67.86767,
-                72.94684,
-                82.56470,
-                71.05087,
-                83.85587,
-                81.74092,
-                57.64860,
-                82.98627,
-                78.11554,
-                76.16142,
-                76.43885,
-            ]
-        )
+        assert strand.means == pytest.approx([74.50347, 83.82950, 80, 79.38796])
         assert strand.ndim == 1
-        assert strand.rows_base.tolist() == [
-            806,
-            14,
-            28,
-            780,
-            24,
-            746,
-            2,
-            12,
-            6,
-            2178,
-            2026,
-            571,
-            136,
-            16,
-            14,
-            1334,
-            1950,
-            26,
-            128,
-            4,
-            28,
-            3520,
-            1082,
-            36,
-            56,
-            556,
-            38,
-            146,
-            114,
-            28,
-            12,
-        ]
-        assert strand.shape == (31,)
-        assert strand.table_base_range.tolist() == [16417, 16417]
+        assert strand.rows_base.tolist() == [806, 14, 28, 780]
+        assert strand.shape == (4,)
+        assert strand.table_base_range.tolist() == [1628, 1628]
         # --- means cube that also has counts has a table-margin ---
         # TODO: This should be something like [2685.782, 2685.782] because weighted
         # cube_counts are present in the payload. It's NaN here because there's

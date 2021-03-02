@@ -540,7 +540,7 @@ def test_univariate_with_hs():
     np.testing.assert_almost_equal(strand.scale_mean, [2.17352056])
 
 
-def test_univariate_with_hs_var_scale_means_row():
+def test_univariate_with_hs_scale_means_row():
     # Test without H&S
     transforms = {
         "columns_dimension": {"insertions": {}},

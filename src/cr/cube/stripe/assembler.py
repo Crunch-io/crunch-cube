@@ -255,7 +255,7 @@ class _BaseOrderHelper(object):
         """
         raise NotImplementedError(
             "`%s` must implement `._display_order`" % type(self).__name__
-        )
+        )  # pragma: no cover
 
     @lazyproperty
     def _empty_row_idxs(self):

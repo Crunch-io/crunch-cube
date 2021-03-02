@@ -74,7 +74,9 @@ class _BaseCubeMeans(_BaseCubeMeasure):
     @lazyproperty
     def means(self):
         """1D np.float64 ndarray of mean for each stripe row."""
-        raise NotImplementedError("`%s` must implement `.means`" % type(self).__name__)
+        raise NotImplementedError(
+            "`%s` must implement `.means`" % type(self).__name__
+        )  # pragma: no cover
 
 
 class _CatCubeMeans(_BaseCubeMeans):
@@ -124,21 +126,23 @@ class _BaseUnweightedCubeCounts(_BaseCubeMeasure):
     @lazyproperty
     def bases(self):
         """1D np.int64 ndarray of unweighted table-proportion denonimator per row."""
-        raise NotImplementedError("`%s` must implement `.bases`" % type(self).__name__)
+        raise NotImplementedError(
+            "`%s` must implement `.bases`" % type(self).__name__
+        )  # pragma: no cover
 
     @lazyproperty
     def pruning_base(self):
         """1D np.int64 ndarray of unweighted-N for each matrix row."""
         raise NotImplementedError(
             "`%s` must implement `.pruning_base`" % type(self).__name__
-        )
+        )  # pragma: no cover
 
     @lazyproperty
     def unweighted_counts(self):
         """1D np.int64 ndarray of unweighted-count for each row of stripe."""
         raise NotImplementedError(
             "`%s` must implement `.unweighted_counts`" % type(self).__name__
-        )
+        )  # pragma: no cover
 
 
 class _CatUnweightedCubeCounts(_BaseUnweightedCubeCounts):
@@ -230,14 +234,16 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
     @lazyproperty
     def bases(self):
         """1D np.float/int64 ndarray of table-proportion denominator for each cell."""
-        raise NotImplementedError("`%s` must implement `.bases`" % type(self).__name__)
+        raise NotImplementedError(
+            "`%s` must implement `.bases`" % type(self).__name__
+        )  # pragma: no cover
 
     @lazyproperty
     def table_margin(self):
         """Scalar or 1D np.float/int64 array of weighted-N for overall stripe."""
         raise NotImplementedError(
             "`%s` must implement `.table_margin`" % type(self).__name__
-        )
+        )  # pragma: no cover
 
     @lazyproperty
     def weighted_counts(self):
@@ -248,7 +254,7 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
         """
         raise NotImplementedError(
             "`%s` must implement `.weighted_counts`" % type(self).__name__
-        )
+        )  # pragma: no cover
 
 
 class _CatWeightedCubeCounts(_BaseWeightedCubeCounts):

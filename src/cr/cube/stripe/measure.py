@@ -122,7 +122,7 @@ class _BaseSecondOrderMeasure(object):
         """
         raise NotImplementedError(
             "`%s` must implement `.base_values`" % type(self).__name__
-        )
+        )  # pragma: no cover
 
     @lazyproperty
     def blocks(self):
@@ -140,7 +140,7 @@ class _BaseSecondOrderMeasure(object):
         """1D ndarray of subtotal value for each row-subtotal."""
         raise NotImplementedError(
             "`%s` must implement `.subtotal_values`" % type(self).__name__
-        )
+        )  # pragma: no cover
 
     @lazyproperty
     def _unweighted_cube_counts(self):
@@ -199,12 +199,12 @@ class _ScaledCounts(_BaseSecondOrderMeasure):
         computation.
         """
         # --- value is None when no row-element has been assigned a numeric value ---
-        if not self._numeric_values.size:
+        if self._numeric_values.size == 0:
             return None
 
         # --- Also when the total count is zero, unlikely but possible and would lead to
         # --- a divide-by-zero error in this case.
-        if not self._total_weighted_count:
+        if self._total_weighted_count == 0:
             return None
 
         return self._total_scaled_count / self._total_weighted_count
@@ -217,7 +217,7 @@ class _ScaledCounts(_BaseSecondOrderMeasure):
         without a numeric value are not considered.
         """
         # --- value is None when no row-element has been assigned a numeric value ---
-        if not self._numeric_values.size:
+        if self._numeric_values.size == 0:
             return None
 
         # --- convert float weighted-counts to int. I'm not sure why this needs to
@@ -239,7 +239,7 @@ class _ScaledCounts(_BaseSecondOrderMeasure):
         distribution from its mean (scale-mean).
         """
         # --- value is None when no row-element has been assigned a numeric value ---
-        if not self._numeric_values.size:
+        if self._numeric_values.size == 0:
             return None
 
         return np.sqrt(self._scale_variance)
@@ -251,7 +251,7 @@ class _ScaledCounts(_BaseSecondOrderMeasure):
         This value is `None` when no rows have a numeric-value assigned.
         """
         # --- value is None when no row-element has been assigned a numeric value ---
-        if not self._numeric_values.size:
+        if self._numeric_values.size == 0:
             return None
 
         return np.sqrt(self._scale_variance / self._total_weighted_count)
