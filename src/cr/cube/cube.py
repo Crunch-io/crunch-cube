@@ -769,7 +769,6 @@ class _BaseMeasure(object):
         """All dimensions shape (row, col)"""
         # NOTE: Inverting the shape cannot be enough in future when we'll have more than
         # 2 dimensions in the new dim_order option.
-        # original_shape = self._all_dimensions.shape
         shape = self._all_dimensions.shape
         if self.requires_array_transposition:
             return (

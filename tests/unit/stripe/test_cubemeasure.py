@@ -10,13 +10,16 @@ from cr.cube.dimension import Dimension
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.stripe.cubemeasure import (
     _BaseCubeMeans,
+    _BaseCubeSum,
     _BaseUnweightedCubeCounts,
     _BaseWeightedCubeCounts,
     _CatCubeMeans,
+    _CatCubeSum,
     _CatUnweightedCubeCounts,
     _CatWeightedCubeCounts,
     CubeMeasures,
     _MrCubeMeans,
+    _MrCubeSum,
     _MrUnweightedCubeCounts,
     _MrWeightedCubeCounts,
 )
@@ -41,6 +44,19 @@ class DescribeCubeMeasures(object):
 
         _BaseCubeMeans_.factory.assert_called_once_with(cube_, rows_dimension_)
         assert cube_means is cube_means_
+
+    def it_provides_access_to_the_cube_sum_object(
+        self, request, cube_, rows_dimension_
+    ):
+        cube_sum_ = instance_mock(request, _BaseCubeSum)
+        _BaseCubeSum_ = class_mock(request, "cr.cube.stripe.cubemeasure._BaseCubeSum")
+        _BaseCubeSum_.factory.return_value = cube_sum_
+        cube_measures = CubeMeasures(cube_, rows_dimension_, None, None)
+
+        cube_sum = cube_measures.cube_sum
+
+        _BaseCubeSum_.factory.assert_called_once_with(cube_, rows_dimension_)
+        assert cube_sum is cube_sum_
 
     def it_provides_access_to_the_unweighted_cube_counts_object(
         self, request, cube_, rows_dimension_
@@ -103,7 +119,7 @@ class Describe_BaseCubeMeans(object):
     def it_provides_a_factory_for_constructing_unweighted_cube_count_objects(
         self, request, rows_dimension_type, CubeMeansCls, means
     ):
-        cube_ = instance_mock(request, Cube, counts=means)
+        cube_ = instance_mock(request, Cube, means=means)
         rows_dimension_ = instance_mock(
             request, Dimension, dimension_type=rows_dimension_type
         )
@@ -127,6 +143,16 @@ class Describe_CatCubeMeans(object):
         cube_means = _CatCubeMeans(None, np.array([1.1, 2.2, 3.3]))
         assert cube_means.means == pytest.approx([1.1, 2.2, 3.3])
 
+    def but_it_raises_value_error_when_the_cube_result_does_not_contain_means(self):
+        cube_means = _CatCubeMeans(None, means=None)
+        with pytest.raises(ValueError) as e:
+            cube_means.means
+
+        assert (
+            str(e.value)
+            == "`.means` is undefined for a cube-result without a means measure"
+        )
+
 
 class Describe_MrCubeMeans(object):
     """Unit-test suite for `cr.cube.stripe.cubemeasure._MrCubeMeans`."""
@@ -134,6 +160,85 @@ class Describe_MrCubeMeans(object):
     def it_knows_its_means(self):
         cube_means = _MrCubeMeans(None, np.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]))
         assert cube_means.means == pytest.approx([1.1, 3.3, 5.5])
+
+    def but_it_raises_value_error_when_the_cube_result_does_not_contain_means(self):
+        cube_means = _MrCubeMeans(None, means=None)
+        with pytest.raises(ValueError) as e:
+            cube_means.means
+
+        assert (
+            str(e.value)
+            == "`.means` is undefined for a cube-result without a means measure"
+        )
+
+
+# === SUM ===
+
+
+class Describe_BaseCubeSum(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._BaseCubeSum`."""
+
+    @pytest.mark.parametrize(
+        "rows_dimension_type, CubeSumCls, sum",
+        (
+            (DT.CAT, _CatCubeSum, [1, 2, 3]),
+            (DT.MR, _MrCubeSum, [[1, 6], [2, 5], [3, 4]]),
+        ),
+    )
+    def it_provides_a_factory_for_constructing_unweighted_cube_count_objects(
+        self, request, rows_dimension_type, CubeSumCls, sum
+    ):
+        cube_ = instance_mock(request, Cube, sum=sum)
+        rows_dimension_ = instance_mock(
+            request, Dimension, dimension_type=rows_dimension_type
+        )
+        cube_sum_ = instance_mock(request, CubeSumCls)
+        CubeSumCls_ = class_mock(
+            request,
+            "cr.cube.stripe.cubemeasure.%s" % CubeSumCls.__name__,
+            return_value=cube_sum_,
+        )
+
+        cube_sum = _BaseCubeSum.factory(cube_, rows_dimension_)
+
+        CubeSumCls_.assert_called_once_with(rows_dimension_, sum)
+        assert cube_sum is cube_sum_
+
+
+class Describe_CatCubeSum(object):
+    """Unit-test suite for `cr.cube.stripe.cubemeasure._CatCubeSum`."""
+
+    def it_knows_its_sum(self):
+        cube_sum = _CatCubeSum(None, np.array([1, 2, 3]))
+        assert cube_sum.sum == pytest.approx([1, 2, 3])
+
+    def but_it_raises_value_error_when_the_cube_result_does_not_contain_sum(self):
+        cube_sum = _CatCubeSum(None, sum=None)
+        with pytest.raises(ValueError) as e:
+            cube_sum.sum
+
+        assert (
+            str(e.value)
+            == "`.sum` is undefined for a cube-result without a sum measure"
+        )
+
+
+class Describe_MrCubeSum(object):
+    """Unit-test suite for `cr.cube.stripe.cubemeasure._MrCubeSum`."""
+
+    def it_knows_its_sum(self):
+        cube_sum = _MrCubeSum(None, np.array([[1, 2], [3, 4], [5, 6]]))
+        assert cube_sum.sum == pytest.approx([1, 3, 5])
+
+    def but_it_raises_value_error_when_the_cube_result_does_not_contain_sum(self):
+        cube_sum = _MrCubeSum(None, sum=None)
+        with pytest.raises(ValueError) as e:
+            cube_sum.sum
+
+        assert (
+            str(e.value)
+            == "`.sum` is undefined for a cube-result without a sum measure"
+        )
 
 
 # === UNWEIGHTED COUNTS ===
