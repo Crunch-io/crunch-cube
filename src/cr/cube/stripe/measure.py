@@ -36,7 +36,7 @@ class StripeMeasures(object):
 
     @lazyproperty
     def pruning_base(self):
-        """1D np.int64 ndarray of unweighted-N for each stripe row."""
+        """1D np.float64 ndarray of unweighted-N for each stripe row."""
         return self._cube_measures.unweighted_cube_counts.pruning_base
 
     @lazyproperty
@@ -376,7 +376,7 @@ class _TableProportions(_BaseSecondOrderMeasure):
 
     @lazyproperty
     def subtotal_values(self):
-        """1D np.float/int64 ndarray of sum for each row-subtotal."""
+        """1D np.float64 ndarray of sum for each row-subtotal."""
         subtotal_values = self._measures.weighted_counts.subtotal_values
         table_margin = self._weighted_cube_counts.table_margin
 
@@ -396,18 +396,18 @@ class _TableProportions(_BaseSecondOrderMeasure):
 class _UnweightedBases(_BaseSecondOrderMeasure):
     """Provides the unweighted-bases measure for a stripe.
 
-    unweighted-bases is a 1D np.int64 ndarray of the unweighted table-proportion
+    unweighted-bases is a 1D np.float64 ndarray of the unweighted table-proportion
     denominator (base) for each row. This object also provides the table-base totals.
     """
 
     @lazyproperty
     def base_values(self):
-        """1D np.int64 ndarray of unweighted table-proportion denominator per cell."""
+        """1D np.float64 ndarray of unweighted table-proportion denominator per cell."""
         return self._unweighted_cube_counts.bases
 
     @lazyproperty
     def subtotal_values(self):
-        """1D np.int64 ndarray of subtotal value for each row-subtotal."""
+        """1D np.float64 ndarray of subtotal value for each row-subtotal."""
         # --- Background:
         # --- 1. The base is the same for all rows of a CAT stripe.
         # --- 2. An MR stripe can have no subtotals.
@@ -430,7 +430,7 @@ class _UnweightedBases(_BaseSecondOrderMeasure):
 
     @lazyproperty
     def table_base_range(self):
-        """[min, max] np.int64 ndarray range of (total) unweighted-N for this stripe.
+        """[min, max] np.float64 ndarray range of (total) unweighted-N for this stripe.
 
         A non-MR stripe will have a single base, represented by min and max being the
         same value. Any subtotals in a non-MR stripe have that same scalar table base,
@@ -449,12 +449,12 @@ class _UnweightedCounts(_BaseSecondOrderMeasure):
 
     @lazyproperty
     def base_values(self):
-        """1D np.int64 ndarray of unweighted-count for each stripe base-row."""
+        """1D np.float64 ndarray of unweighted-count for each stripe base-row."""
         return self._unweighted_cube_counts.unweighted_counts
 
     @lazyproperty
     def subtotal_values(self):
-        """1D np.int64 ndarray of sum for each row-subtotal."""
+        """1D np.float64 ndarray of sum for each row-subtotal."""
         # --- counts don't sum on an MR dimension, but an MR stripe can have no
         # --- subtotals. This just returns an empty array in that case and we don't need
         # --- to special-case MR.
@@ -464,7 +464,7 @@ class _UnweightedCounts(_BaseSecondOrderMeasure):
 class _WeightedBases(_BaseSecondOrderMeasure):
     """Provides the weighted-bases measure for a stripe.
 
-    weighted-bases is a 1D np.float/int64 ndarray of the (weighted) table-proportion
+    weighted-bases is a 1D np.float64 ndarray of the (weighted) table-proportion
     denominator (base) for each row.
     """
 
@@ -475,7 +475,7 @@ class _WeightedBases(_BaseSecondOrderMeasure):
 
     @lazyproperty
     def subtotal_values(self):
-        """1D np.float/int64 ndarray of sum for each row-subtotal."""
+        """1D np.float64 ndarray of sum for each row-subtotal."""
         # --- Background:
         # --- 1. weighted-base is the same for all rows, including subtotal rows.
         # --- 2. Only a CAT stripe can have subtotals; an MR stripe can't.
@@ -516,12 +516,12 @@ class _WeightedCounts(_BaseSecondOrderMeasure):
 
     @lazyproperty
     def base_values(self):
-        """1D np.float/int64 ndarray of weighted-count for each row."""
+        """1D np.float64 ndarray of weighted-count for each row."""
         return self._weighted_cube_counts.weighted_counts
 
     @lazyproperty
     def subtotal_values(self):
-        """1D np.float/int64 ndarray of sum for each row-subtotal."""
+        """1D np.float64 ndarray of sum for each row-subtotal."""
         # --- counts don't sum on an MR dimension, but an MR stripe can have no
         # --- subtotals. This just returns an empty array in that case and we don't need
         # --- to special-case MR.

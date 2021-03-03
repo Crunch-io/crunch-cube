@@ -314,7 +314,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def column_unweighted_bases(self):
-        """2D np.int64 ndarray of unweighted column-proportion denominator per cell."""
+        """2D np.float64 ndarray of unweighted column-proportion denominator per cell."""
         return self._assembler.column_unweighted_bases
 
     @lazyproperty
@@ -324,7 +324,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def columns_base(self):
-        """1D/2D np.int64 ndarray of unweighted-N for each column/cell of slice.
+        """1D/2D np.float64 ndarray of unweighted-N for each column/cell of slice.
 
         This array is 2D (a distinct base for each cell) when the rows dimension is MR,
         because each MR-subvariable has its own unweighted N. This is because not every
@@ -349,7 +349,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def columns_margin(self):
-        """1D or 2D np.float/int64 ndarray of weighted-N for each column of slice.
+        """1D or 2D np.float64 ndarray of weighted-N for each column of slice.
 
         This array is 2D (a distinct margin value for each cell) when the rows dimension
         is MR, because each MR-subvariable has its own weighted N. This is because not
@@ -474,7 +474,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def columns_scale_median(self):
-        """Optional 1D np.int/float64 ndarray of scale median for each column.
+        """Optional 1D np.float64 ndarray of scale median for each column.
 
         The returned vector is to be interpreted as a summary *row*. Also note that the
         underlying scale values are based on the numeric values of the opposing
@@ -494,7 +494,7 @@ class _Slice(CubePartition):
                 for i in range(counts.shape[1])
             ]
         )
-
+        assert scale_median.dtype == np.float64
         return scale_median
 
     @lazyproperty
@@ -712,7 +712,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def row_unweighted_bases(self):
-        """2D np.int64 ndarray of unweighted row-proportion denominator per cell."""
+        """2D np.float64 ndarray of unweighted row-proportion denominator per cell."""
         return self._assembler.row_unweighted_bases
 
     @lazyproperty
@@ -722,7 +722,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def rows_base(self):
-        """1D/2D np.int64 ndarray of unweighted-N for each row/cell of slice.
+        """1D/2D np.float64 ndarray of unweighted-N for each row/cell of slice.
 
         This array is 2D (a distinct base for each cell) when the columns dimension is
         MR, because each MR-subvariable has its own unweighted N. This is because not
@@ -766,7 +766,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def rows_margin(self):
-        """1D or 2D np.float/int64 ndarray of weighted-N for each column of slice.
+        """1D or 2D np.float64 ndarray of weighted-N for each column of slice.
 
         This array is 2D (a distinct margin value for each cell) when the columns
         dimension is MR, because each MR-subvariable has its own weighted N. This is
@@ -858,7 +858,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def rows_scale_median(self):
-        """Optional 1D np.int/float64 ndarray of scale median for each row.
+        """Optional 1D np.float64 ndarray of scale median for each row.
 
         The returned vector is to be interpreted as a summary *column*. Also note that
         the underlying scale values are based on the numeric values of the opposing
@@ -878,6 +878,7 @@ class _Slice(CubePartition):
                 for i in range(counts.shape[0])
             ]
         )
+        assert scale_median.dtype == np.float64
         return scale_median
 
     @lazyproperty
@@ -932,7 +933,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def table_base(self):
-        """Scalar or 1D/2D np.int64 ndarray of unweighted-N for table.
+        """Scalar or 1D/2D np.float64 ndarray of unweighted-N for table.
 
         This value is scalar when the slice has no MR dimensions, 1D when the slice has
         one MR dimension (either MR_X or X_MR), and 2D for an MR_X_MR slice.
@@ -944,7 +945,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def table_base_unpruned(self):
-        """np.int64 scalar or a 1D or 2D ndarray of np.int64 representing table base.
+        """np.float64 scalar or a 1D or 2D ndarray of np.float64 representing table base.
 
         This value includes hidden vectors, those with either a hide transform on
         their element or that have been pruned (because their base (N) is zero). This
@@ -961,7 +962,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def table_margin(self):
-        """Scalar or 1D/2D np.float/int64 ndarray of weighted-N table.
+        """Scalar or 1D/2D np.float64 ndarray of weighted-N table.
 
         This value is scalar when the slice has no MR dimensions, 1D when the slice has
         one MR dimension (either MR_X or X_MR), and 2D for an MR_X_MR slice.
@@ -973,7 +974,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def table_margin_unpruned(self):
-        """np.float/int64 scalar or a 1D or 2D ndarray of np.float/int64 table margin.
+        """np.float64 scalar or a 1D or 2D ndarray of np.float64 table margin.
 
         This value includes hidden vectors, those with either a hide transform on
         their element or that have been pruned (because their base (N) is zero). Also,
@@ -1043,7 +1044,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def table_unweighted_bases(self):
-        """2D np.int64 ndarray of unweighted table-proportion denominator per cell."""
+        """2D np.float64 ndarray of unweighted table-proportion denominator per cell."""
         return self._assembler.table_unweighted_bases
 
     @lazyproperty
@@ -1053,7 +1054,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def unweighted_counts(self):
-        """2D np.int64 ndarray of unweighted count for each slice matrix cell."""
+        """2D np.float64 ndarray of unweighted count for each slice matrix cell."""
         return self._assembler.unweighted_counts
 
     @lazyproperty
@@ -1227,7 +1228,7 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def counts(self):
-        """1D np.float/int64 ndarray of (weighted) count for each row of strand.
+        """1D np.float64 ndarray of (weighted) count for each row of strand.
 
         The values are int when the underlying cube-result has no weighting.
         """
@@ -1315,7 +1316,7 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def rows_base(self):
-        """1D np.int64 ndarray of unweighted-N for each row of slice."""
+        """1D np.float64 ndarray of unweighted-N for each row of slice."""
         # --- for a strand, this is the same as unweighted-counts, but needs this
         # --- alternate property so it can be accessed uniformly between a slice and a
         # --- strand.
@@ -1348,7 +1349,7 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def rows_margin(self):
-        """1D np.float/int64 ndarray of weighted-N for each row of slice."""
+        """1D np.float64 ndarray of weighted-N for each row of slice."""
         # --- for a strand, this is the same as (weighted) counts, but needs this
         # --- alternate name so it can be accessed uniformly between a slice and strand.
         return self.counts
@@ -1411,7 +1412,7 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def table_base_range(self):
-        """[min, max] np.int64 ndarray range of unweighted-N for this stripe.
+        """[min, max] np.float64 ndarray range of unweighted-N for this stripe.
 
         A non-MR stripe will have a single base, represented by min and max being the
         same value. Each row of an MR stripe has a distinct base, which is reduced to a
@@ -1486,7 +1487,7 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def unweighted_bases(self):
-        """1D np.int64 ndarray of base count for each row, before weighting.
+        """1D np.float64 ndarray of base count for each row, before weighting.
 
         When the rows dimension is multiple-response (MR), each value is different,
         reflecting the base for that individual subvariable. In all other cases, the
@@ -1496,12 +1497,12 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def unweighted_counts(self):
-        """1D np.int64 ndarray of unweighted count for each row of stripe."""
+        """1D np.float64 ndarray of unweighted count for each row of stripe."""
         return self._assembler.unweighted_counts
 
     @lazyproperty
     def weighted_bases(self):
-        """1D np.float/int64 ndarray of table-proportion denominator for each row.
+        """1D np.float64 ndarray of table-proportion denominator for each row.
 
         For a non-MR strand, all values in the array are the same. For an MR strand,
         each value may be different, reflecting the fact that not all response options

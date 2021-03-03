@@ -42,7 +42,7 @@ class SecondOrderMeasures(object):
 
     @lazyproperty
     def columns_pruning_base(self):
-        """1D np.int64 ndarray of unweighted-N for each matrix column."""
+        """1D np.float64 ndarray of unweighted-N for each matrix column."""
         return self._cube_measures.unweighted_cube_counts.columns_pruning_base
 
     @lazyproperty
@@ -62,7 +62,7 @@ class SecondOrderMeasures(object):
 
     @lazyproperty
     def rows_pruning_base(self):
-        """1D np.int64 ndarray of unweighted-N for each matrix row."""
+        """1D np.float64 ndarray of unweighted-N for each matrix row."""
         return self._cube_measures.unweighted_cube_counts.rows_pruning_base
 
     @lazyproperty
@@ -119,7 +119,7 @@ class _BaseSecondOrderMeasure(object):
 
     @lazyproperty
     def _base_values(self):
-        """2D np.int64 ndarray of column-wise proportions denominator for each cell.
+        """2D np.float64 ndarray of column-wise proportions denominator for each cell.
 
         This is the first "block" and has the shape of the cube-measure (no insertions).
         """
@@ -139,7 +139,7 @@ class _BaseSecondOrderMeasure(object):
 
     @lazyproperty
     def _subtotal_columns(self):
-        """2D np.int64 ndarray of inserted column proportions denominator value.
+        """2D np.float64 ndarray of inserted column proportions denominator value.
 
         This is the second "block" and has the shape (n_rows, n_col_subtotals).
         """
@@ -149,7 +149,7 @@ class _BaseSecondOrderMeasure(object):
 
     @lazyproperty
     def _subtotal_rows(self):
-        """2D np.int64 ndarray of column-proportions denominator for subtotal rows.
+        """2D np.float64 ndarray of column-proportions denominator for subtotal rows.
 
         This is the third "block" and has the shape (n_row_subtotals, n_cols).
         """
@@ -221,14 +221,14 @@ class _ColumnProportions(_BaseSecondOrderMeasure):
 class _ColumnUnweightedBases(_BaseSecondOrderMeasure):
     """Provides the column-bases measure for a matrix.
 
-    Column-bases is a 2D np.int64 ndarray of unweighted-N "basis" for each matrix cell.
+    Column-bases is a 2D np.float64 ndarray of unweighted-N "basis" for each matrix cell.
     Depending on the dimensionality of the underlying cube-result some or all of these
     values may be the same.
     """
 
     @lazyproperty
     def _base_values(self):
-        """2D np.int64 ndarray of column-wise proportions denominator for each cell.
+        """2D np.float64 ndarray of column-wise proportions denominator for each cell.
 
         This is the first "block" and has the shape of the cube-measure (no insertions).
         """
@@ -250,7 +250,7 @@ class _ColumnUnweightedBases(_BaseSecondOrderMeasure):
 
     @lazyproperty
     def _subtotal_columns(self):
-        """2D np.int64 ndarray of inserted column proportions denominator value.
+        """2D np.float64 ndarray of inserted column proportions denominator value.
 
         This is the second "block" and has the shape (n_rows, n_col_subtotals).
         """
@@ -264,7 +264,7 @@ class _ColumnUnweightedBases(_BaseSecondOrderMeasure):
 
     @lazyproperty
     def _subtotal_rows(self):
-        """2D np.int64 ndarray of column-proportions denominator for subtotal rows.
+        """2D np.float64 ndarray of column-proportions denominator for subtotal rows.
 
         This is the third "block" and has the shape (n_row_subtotals, n_cols).
         """
@@ -397,13 +397,13 @@ class _RowProportions(_BaseSecondOrderMeasure):
 class _RowUnweightedBases(_BaseSecondOrderMeasure):
     """Provides the row-unweighted-bases measure for a matrix.
 
-    row-unweighted-bases is a 2D np.int64 ndarray of the unweighted row-proportion
+    row-unweighted-bases is a 2D np.float64 ndarray of the unweighted row-proportion
     denominator (base) for each matrix cell.
     """
 
     @lazyproperty
     def _base_values(self):
-        """2D np.int64 ndarray of row-proportions denominator for each cell.
+        """2D np.float64 ndarray of row-proportions denominator for each cell.
 
         This is the first "block" and has the shape of the cube-measure (no insertions).
         """
@@ -426,7 +426,7 @@ class _RowUnweightedBases(_BaseSecondOrderMeasure):
 
     @lazyproperty
     def _subtotal_columns(self):
-        """2D np.int64 ndarray of column-subtotal row-proportions denominator values.
+        """2D np.float64 ndarray of column-subtotal row-proportions denominator values.
 
         This is the second "block" and has the shape (n_rows, n_col_subtotals).
         """
@@ -449,7 +449,7 @@ class _RowUnweightedBases(_BaseSecondOrderMeasure):
 
     @lazyproperty
     def _subtotal_rows(self):
-        """2D np.int64 ndarray of row-subtotal row-proportions denominator values.
+        """2D np.float64 ndarray of row-subtotal row-proportions denominator values.
 
         This is the third "block" and has the shape (n_row_subtotals, n_cols).
         """
@@ -527,13 +527,13 @@ class _RowWeightedBases(_BaseSecondOrderMeasure):
 class _TableUnweightedBases(_BaseSecondOrderMeasure):
     """Provides the table-unweighted-bases measure for a matrix.
 
-    table-unweighted-bases is a 2D np.int64 ndarray of the denominator, or "base" of the
+    table-unweighted-bases is a 2D np.float64 ndarray of the denominator, or "base" of the
     unweighted table-proportion for each matrix cell.
     """
 
     @lazyproperty
     def _base_values(self):
-        """2D np.int64 ndarray of unweighted table-proportion denominator for each cell.
+        """2D np.float64 ndarray of unweighted table-proportion denominator for each cell.
 
         This is the first "block" and has the shape of the cube-measure (no insertions).
         """
@@ -568,7 +568,7 @@ class _TableUnweightedBases(_BaseSecondOrderMeasure):
 
     @lazyproperty
     def _subtotal_columns(self):
-        """2D np.int64 ndarray of inserted-column table-proportions denominator value.
+        """2D np.float64 ndarray of inserted-column table-proportions denominator value.
 
         This is the second "block" and has the shape (n_rows, n_col_subtotals).
         """
@@ -611,7 +611,7 @@ class _TableUnweightedBases(_BaseSecondOrderMeasure):
 
     @lazyproperty
     def _subtotal_rows(self):
-        """2D np.int64 ndarray of inserted-row table-proportions denominator values.
+        """2D np.float64 ndarray of inserted-row table-proportions denominator values.
 
         This is the third "block" and has the shape (n_row_subtotals, n_cols).
         """

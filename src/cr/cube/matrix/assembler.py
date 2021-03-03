@@ -89,7 +89,7 @@ class Assembler(object):
 
     @lazyproperty
     def column_unweighted_bases(self):
-        """2D np.int64 ndarray of unweighted col-proportions denominator per cell."""
+        """2D np.float64 ndarray of unweighted col-proportions denominator per cell."""
         return self._assemble_matrix(self._measures.column_unweighted_bases.blocks)
 
     @lazyproperty
@@ -99,7 +99,7 @@ class Assembler(object):
 
     @lazyproperty
     def columns_base(self):
-        """1D/2D np.int64 ndarray of unweighted-N for each slice column/cell."""
+        """1D/2D np.float64 ndarray of unweighted-N for each slice column/cell."""
         # --- an MR_X slice produces a 2D column-base (each cell has its own N) ---
         columns_base = self._cube_result_matrix.columns_base
         rows_dim_type = self._rows_dimension.dimension_type
@@ -199,7 +199,7 @@ class Assembler(object):
 
     @lazyproperty
     def row_unweighted_bases(self):
-        """2D np.int64 ndarray of unweighted row-proportions denominator per cell."""
+        """2D np.float64 ndarray of unweighted row-proportions denominator per cell."""
         return self._assemble_matrix(self._measures.row_unweighted_bases.blocks)
 
     @lazyproperty
@@ -209,7 +209,7 @@ class Assembler(object):
 
     @lazyproperty
     def rows_base(self):
-        """1D/2D np.int64 ndarray of unweighted-N for each slice row/cell."""
+        """1D/2D np.float64 ndarray of unweighted-N for each slice row/cell."""
         # --- an X_MR slice produces a 2D row-base (each cell has its own N) ---
         if self._columns_dimension.dimension_type == DT.MR_SUBVAR:
             return self._assemble_matrix(
@@ -268,7 +268,7 @@ class Assembler(object):
 
     @lazyproperty
     def table_base(self):
-        """Scalar, 1D, or 2D ndarray of np.int64 unweighted-N for this slice.
+        """Scalar, 1D, or 2D ndarray of np.float64 unweighted-N for this slice.
 
         This value has four distinct forms, depending on the slice dimensions:
 
@@ -305,7 +305,7 @@ class Assembler(object):
 
     @lazyproperty
     def table_base_unpruned(self):
-        """np.int64 scalar or a 1D or 2D ndarray of np.int64 representing table base.
+        """np.float64 scalar or a 1D or 2D ndarray of np.float64 representing table base.
 
         This value includes hidden vectors, those with either a hide transform on
         their element or that have been pruned (because their base (N) is zero). Also,
@@ -371,7 +371,7 @@ class Assembler(object):
 
     @lazyproperty
     def table_margin_unpruned(self):
-        """np.float/int64 scalar or a 1D or 2D ndarray of np.float/int64 table margin.
+        """np.float64 scalar or a 1D or 2D ndarray of np.float64 table margin.
 
         This value includes hidden vectors, those with either a hide transform on
         their element or that have been pruned (because their base (N) is zero). Also,
@@ -401,7 +401,7 @@ class Assembler(object):
 
     @lazyproperty
     def table_unweighted_bases(self):
-        """2D np.int64 ndarray of unweighted table-proportion denominator per cell."""
+        """2D np.float64 ndarray of unweighted table-proportion denominator per cell."""
         return self._assemble_matrix(self._measures.table_unweighted_bases.blocks)
 
     @lazyproperty
@@ -411,12 +411,12 @@ class Assembler(object):
 
     @lazyproperty
     def unweighted_counts(self):
-        """2D np.int64 ndarray of unweighted-count for each cell."""
+        """2D np.float64 ndarray of unweighted-count for each cell."""
         return self._assemble_matrix(self._measures.unweighted_counts.blocks)
 
     @lazyproperty
     def weighted_counts(self):
-        """2D np.float/int64 ndarray of weighted-count for each cell."""
+        """2D np.float64 ndarray of weighted-count for each cell."""
         return self._assemble_matrix(self._measures.weighted_counts.blocks)
 
     @lazyproperty

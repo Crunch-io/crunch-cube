@@ -125,21 +125,21 @@ class _BaseUnweightedCubeCounts(_BaseCubeMeasure):
 
     @lazyproperty
     def bases(self):
-        """1D np.int64 ndarray of unweighted table-proportion denonimator per row."""
+        """1D np.float64 ndarray of unweighted table-proportion denonimator per row."""
         raise NotImplementedError(
             "`%s` must implement `.bases`" % type(self).__name__
         )  # pragma: no cover
 
     @lazyproperty
     def pruning_base(self):
-        """1D np.int64 ndarray of unweighted-N for each matrix row."""
+        """1D np.float64 ndarray of unweighted-N for each matrix row."""
         raise NotImplementedError(
             "`%s` must implement `.pruning_base`" % type(self).__name__
         )  # pragma: no cover
 
     @lazyproperty
     def unweighted_counts(self):
-        """1D np.int64 ndarray of unweighted-count for each row of stripe."""
+        """1D np.float64 ndarray of unweighted-count for each row of stripe."""
         raise NotImplementedError(
             "`%s` must implement `.unweighted_counts`" % type(self).__name__
         )  # pragma: no cover
@@ -150,7 +150,7 @@ class _CatUnweightedCubeCounts(_BaseUnweightedCubeCounts):
 
     @lazyproperty
     def bases(self):
-        """1D np.int64 ndarray of table-proportion denonimator (base) for each row.
+        """1D np.float64 ndarray of table-proportion denonimator (base) for each row.
 
         Each row in a CAT stripe has the same base (the table-base).
         """
@@ -158,7 +158,7 @@ class _CatUnweightedCubeCounts(_BaseUnweightedCubeCounts):
 
     @lazyproperty
     def pruning_base(self):
-        """1D np.int64 ndarray of unweighted-N for each matrix row.
+        """1D np.float64 ndarray of unweighted-N for each matrix row.
 
         Because this matrix has no MR dimension, this is simply the unweighted count for
         each row.
@@ -167,7 +167,7 @@ class _CatUnweightedCubeCounts(_BaseUnweightedCubeCounts):
 
     @lazyproperty
     def table_base(self):
-        """Scalar np.int64 unweighted-N for overall stripe.
+        """Scalar np.float64 unweighted-N for overall stripe.
 
         This is the unweighted count of respondents who provided a valid response to
         the question.
@@ -176,7 +176,7 @@ class _CatUnweightedCubeCounts(_BaseUnweightedCubeCounts):
 
     @lazyproperty
     def unweighted_counts(self):
-        """1D np.int64 ndarray of unweighted-count for each row of stripe."""
+        """1D np.float64 ndarray of unweighted-count for each row of stripe."""
         return self._unweighted_counts
 
 
@@ -188,7 +188,7 @@ class _MrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
 
     @lazyproperty
     def bases(self):
-        """1D np.int64 ndarray of table-proportion denonimator (base) for each row.
+        """1D np.float64 ndarray of table-proportion denonimator (base) for each row.
 
         Each row in an MR stripe has a distinct base. These values include both the
         selected and unselected counts.
@@ -197,7 +197,7 @@ class _MrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
 
     @lazyproperty
     def pruning_base(self):
-        """1D np.int64 ndarray of unweighted-N for each matrix row.
+        """1D np.float64 ndarray of unweighted-N for each matrix row.
 
         These values include both the selected and unselected counts of the MR rows
         dimension.
@@ -206,7 +206,7 @@ class _MrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
 
     @lazyproperty
     def unweighted_counts(self):
-        """1D np.int64 ndarray of unweighted-count for each row of stripe."""
+        """1D np.float64 ndarray of unweighted-count for each row of stripe."""
         return self._unweighted_counts[:, 0]
 
 
@@ -233,24 +233,24 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
 
     @lazyproperty
     def bases(self):
-        """1D np.float/int64 ndarray of table-proportion denominator for each cell."""
+        """1D np.float64 ndarray of table-proportion denominator for each cell."""
         raise NotImplementedError(
             "`%s` must implement `.bases`" % type(self).__name__
         )  # pragma: no cover
 
     @lazyproperty
     def table_margin(self):
-        """Scalar or 1D np.float/int64 array of weighted-N for overall stripe."""
+        """Scalar or 1D np.float64 array of weighted-N for overall stripe."""
         raise NotImplementedError(
             "`%s` must implement `.table_margin`" % type(self).__name__
         )  # pragma: no cover
 
     @lazyproperty
     def weighted_counts(self):
-        """1D np.float/int64 ndarray of weighted-count for each row of stripe.
+        """1D np.float64 ndarray of weighted-count for each row of stripe.
 
-        The cell values are np.int64 when the cube-result has no weight, in which case
-        these values are the same as the unweighted-counts.
+        When the cube-result has no weight these values are the same as the
+        unweighted-counts.
         """
         raise NotImplementedError(
             "`%s` must implement `.weighted_counts`" % type(self).__name__
@@ -265,24 +265,24 @@ class _CatWeightedCubeCounts(_BaseWeightedCubeCounts):
 
     @lazyproperty
     def bases(self):
-        """1D np.float/int64 ndarray of table-proportion denominator for each cell."""
+        """1D np.float64 ndarray of table-proportion denominator for each cell."""
         return np.broadcast_to(self.table_margin, self._weighted_counts.shape)
 
     @lazyproperty
     def table_margin(self):
-        """Scalar np.float/int64 weighted-N for overall stripe.
+        """Scalar np.float64 weighted-N for overall stripe.
 
         This is the weighted count of respondents who provided a valid response to
-        the question. The value is np.int64 when source cube-result is unweighted.
+        the question.
         """
         return np.sum(self._weighted_counts)
 
     @lazyproperty
     def weighted_counts(self):
-        """1D np.float/int64 ndarray of weighted-count for each row of stripe.
+        """1D np.float64 ndarray of weighted-count for each row of stripe.
 
-        The cell values are np.int64 when the cube-result has no weight, in which case
-        these values are the same as the unweighted-counts.
+        When the cube-result has no weight these values are the same as the
+        unweighted-counts.
         """
         return self._weighted_counts
 
@@ -295,22 +295,21 @@ class _MrWeightedCubeCounts(_BaseWeightedCubeCounts):
 
     @lazyproperty
     def bases(self):
-        """1D np.float/int64 ndarray of table-proportion denominator for each cell."""
+        """1D np.float64 ndarray of table-proportion denominator for each cell."""
         # --- (weighted) bases for an MR slice is the already 1D table-margin ---
         return self.table_margin
 
     @lazyproperty
     def table_margin(self):
-        """1D np.float/int64 weighted-N for each row of stripe.
+        """1D np.float64 weighted-N for each row of stripe.
 
         This is the weighted count of respondents who provided a valid response to the
         question. Both selecting and not-selecting the subvar/option are valid
-        responses, so this value includes both the selected and unselected counts. The
-        value is np.int64 when source cube-result is not weighted.
+        responses, so this value includes both the selected and unselected counts.
         """
         return np.sum(self._weighted_counts, axis=1)
 
     @lazyproperty
     def weighted_counts(self):
-        """1D np.float/int64 ndarray of weighted-count for each row of stripe."""
+        """1D np.float64 ndarray of weighted-count for each row of stripe."""
         return self._weighted_counts[:, 0]

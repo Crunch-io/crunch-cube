@@ -108,10 +108,10 @@ class Describe_BaseSubtotals(object):
         assert subtotal_columns.tolist() == expected_value.tolist()
 
     @pytest.mark.parametrize(
-        ("ncols", "row_subtotals", "dtype", "shape", "expected_value"),
+        ("ncols", "row_subtotals", "shape", "expected_value"),
         (
-            (3, [], np.float64, (0, 3), []),
-            (3, [1, 2], np.int64, (2, 3), [[1, 2, 3], [1, 2, 3]]),
+            (3, [], (0, 3), []),
+            (3, [1, 2], (2, 3), [[1, 2, 3], [1, 2, 3]]),
         ),
     )
     def it_assembles_its_subtotal_rows_to_help(
@@ -121,7 +121,6 @@ class Describe_BaseSubtotals(object):
         _subtotal_row_,
         ncols,
         row_subtotals,
-        dtype,
         shape,
         expected_value,
     ):
@@ -131,7 +130,6 @@ class Describe_BaseSubtotals(object):
 
         subtotal_rows = _BaseSubtotals(None, None)._subtotal_rows
 
-        assert subtotal_rows.dtype == dtype
         assert subtotal_rows.shape == shape
         assert subtotal_rows.tolist() == expected_value
 

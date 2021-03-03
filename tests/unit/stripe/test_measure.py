@@ -717,7 +717,9 @@ class Describe_WeightedCounts(object):
         property_mock(
             request, _WeightedCounts, "base_values", return_value=[1.1, 2.2, 3.3]
         )
-        SumDiffSubtotals_ = class_mock(request, "cr.cube.stripe.measure.SumDiffSubtotals")
+        SumDiffSubtotals_ = class_mock(
+            request, "cr.cube.stripe.measure.SumDiffSubtotals"
+        )
         SumDiffSubtotals_.subtotal_values.return_value = np.array([3.3, 5.5])
         weighted_counts = _WeightedCounts(rows_dimension_, None, None)
 
