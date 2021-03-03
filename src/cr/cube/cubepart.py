@@ -17,6 +17,7 @@ The three types of cube partition are the *slice*, *strand*, and *nub*, which ar
 
 from __future__ import division
 
+import math
 import numpy as np
 
 from cr.cube.enums import DIMENSION_TYPE as DT
@@ -1542,7 +1543,7 @@ class _Nub(CubePartition):
 
     @lazyproperty
     def is_empty(self):
-        return False if self.unweighted_count else True
+        return math.isnan(self.unweighted_count)
 
     @lazyproperty
     def means(self):

@@ -704,7 +704,7 @@ class _BaseMeasure(object):
         response. Specifically, it includes values for missing elements, any
         MR_CAT dimensions, and any prunable rows and columns.
         """
-        raw_cube_array = np.array(self._flat_values).flatten().reshape(self._shape)
+        raw_cube_array = self._flat_values.flatten().reshape(self._shape)
         # ---must be read-only to avoid hard-to-find bugs---
         raw_cube_array.flags.writeable = False
         return raw_cube_array
@@ -735,7 +735,7 @@ class _BaseMeasure(object):
 
     @lazyproperty
     def _flat_values(self):  # pragma: no cover
-        """Return tuple of mean values as found in cube response.
+        """Return ndarray of np.float64 values as found in cube response.
 
         This property must be implemented by each subclass.
         """
@@ -773,9 +773,21 @@ class _MeanMeasure(_BaseMeasure):
         {'?': -1} in the cube response. These are replaced by np.nan in the
         returned value.
         """
-        return tuple(
-            np.nan if type(x) is dict else x
-            for x in self._cube_dict["result"]["measures"]["mean"]["data"]
+
+        def dict_to_nan_recursive(x):
+            if type(x) is dict:
+                return np.nan
+            elif type(x) is list:
+                return [dict_to_nan_recursive(y) for y in x]
+            else:
+                return x
+
+        return np.array(
+            tuple(
+                dict_to_nan_recursive(x)
+                for x in self._cube_dict["result"]["measures"]["mean"]["data"]
+            ),
+            dtype=np.float64,
         )
 
 
@@ -798,9 +810,6 @@ class _UnweightedCountMeasure(_BaseMeasure):
         if valid_counts:
             return np.array(valid_counts, dtype=np.float64)
 
-        if result["counts"] == [None]:
-            return None
-
         return np.array(result["counts"], dtype=np.float64)
 
 
@@ -810,4 +819,6 @@ class _WeightedCountMeasure(_BaseMeasure):
     @lazyproperty
     def _flat_values(self):
         """tuple of numeric counts after weighting."""
-        return tuple(self._cube_dict["result"]["measures"]["count"]["data"])
+        return np.array(
+            self._cube_dict["result"]["measures"]["count"]["data"], dtype=np.float64
+        )
